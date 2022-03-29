@@ -1,0 +1,37 @@
+plugins {
+    id 'groovy'
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    // https://mvnrepository.com/artifact/com.miglayout/miglayout
+    implementation 'com.miglayout:miglayout:3.7.4'
+
+    // Logging :
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
+
+    // Testing :
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'    // mandatory dependencies for using Spock
+
+    testImplementation 'org.codehaus.groovy:groovy:3.0.10'
+    testImplementation platform("org.spockframework:spock-bom:2.0-groovy-3.0")
+    testImplementation 'org.spockframework:spock-core:2.0-groovy-3.0'
+    testImplementation 'com.athaydes:spock-reports:2.2.0-groovy-3.0'//, { transitive = false }
+
+    testRuntimeOnly group: 'net.bytebuddy', name: 'byte-buddy', version: '1.11.15' // allows mocking of classes (in addition to interfaces)
+    testRuntimeOnly group: 'org.objenesis', name: 'objenesis', version: '3.2'      // allows mocking of classes without default constructor (together with ByteBuddy or CGLIB)
+
+}
+
+test {
+    useJUnitPlatform()
+}
