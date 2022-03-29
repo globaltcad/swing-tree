@@ -44,6 +44,18 @@ class UI_Builder_Spec extends Specification
             panel.components.length == 3
     }
 
+    def 'We can easily define the cursor on a wrapped UI component'()
+    {
+        given : 'We creat a UI builder node containing a simple button.'
+            var node = UI.button()
+        expect : 'At the beginning the default cursor will be set.'
+            node.component.cursor.type == Cursor.DEFAULT_CURSOR
+
+        when : 'We set the cursor of the button to be something else...'
+            node.withCursor(UI.Cursor.RESIZE_SOUTH_EAST)
+        then : 'This will lead to the correct cursor being chosen.'
+            node.component.cursor.type == Cursor.SE_RESIZE_CURSOR
+    }
 
     def 'We can use the UIMaker to build a valid Swing GUI tree.'()
     {
