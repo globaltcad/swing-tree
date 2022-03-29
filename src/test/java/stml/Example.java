@@ -5,9 +5,6 @@ import java.awt.*;
 
 public class Example extends JPanel
 {
-	private static final Color MAIN = new Color(200, 255, 255); // WHITE!
-	private static final Color UNIMPORTANT = new Color(192, 192, 192); // Light gray!
-
 	// Use this to test the UI!
 	public static void main(String... args) {
 		new UI.TestWindow(JFrame::new,new Example()).getFrame().setSize(new Dimension(700, 300));
@@ -15,16 +12,14 @@ public class Example extends JPanel
 
 	public Example()
 	{
-		Color backColor = MAIN;
-		Color pathColor = UNIMPORTANT;
+		Color backColor = new Color(200, 255, 255); // WHITE!
+		Color pathColor = new Color(192, 192, 192); // Light gray!
 
 		ImageIcon pdfIcon  = new ImageIcon(getClass().getResource("/img/seed.png"));
 		ImageIcon pdfHover = new ImageIcon(getClass().getResource("/img/trees.png"));
 		ImageIcon cover    = new ImageIcon(getClass().getResource("/img/swing.png"));
+
 		String description = "All of this is less than a hundred lines of code!<br>The layout of this is powered by MigLayout.<br><br>";
-		String type        = "Built with STML";
-		String typeLength  = "GTS-OSS";
-		String dimension   = "29-March-2022";
 		String debug = "";
 
 		UI.of(this)
@@ -74,9 +69,9 @@ public class Example extends JPanel
 					.add("cell 0 2, grow",
 						UI.panelWithLayout(debug+"fill, insets 0 0 0 0","[grow][grow][grow]")
 							.withBackground(backColor)
-							.add("cell 1 0", UI.label(type      ))
-							.add("cell 2 0", UI.label(typeLength))
-							.add("cell 3 0", UI.label(dimension ))
+							.add("cell 1 0", UI.label("Built with STML"))
+							.add("cell 2 0", UI.label("GTS-OSS"))
+							.add("cell 3 0", UI.label("29-March-2022"))
 					)
 					.add("cell 0 3, span 2, grow", //  filepath
 						UI.label("...here the UI comes to an end...").withColor(pathColor)
