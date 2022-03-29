@@ -161,6 +161,12 @@ public class UI
         return buttonWithIcon(icon, onHover, onHover);
     }
 
+    public static ForButton<AbstractButton> buttonWithIcon(int width, int height, ImageIcon icon, ImageIcon onHover) {
+        onHover = new ImageIcon(onHover.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT));
+        icon = new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT));
+        return buttonWithIcon(icon, onHover, onHover);
+    }
+
     /**
      *  Use this to create a builder for the {@link JButton} UI component
      *  with a default, an on-hover and an on-press icon displayed on top.
@@ -245,6 +251,12 @@ public class UI
         return of(new JLabel()).make( it -> it.setIcon(icon) );
     }
 
+    public static ForLabel labelWithIcon(int width, int height, ImageIcon icon) {
+        return of(new JLabel())
+                .make(it -> it.setIcon(
+                    new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT))
+                ));
+    }
 
     public static ForCheckBox of(JCheckBox component) {
         return new ForCheckBox(component);
