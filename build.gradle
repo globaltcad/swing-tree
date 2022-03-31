@@ -3,8 +3,17 @@ plugins {
     id 'java'
 }
 
-group 'org.example'
-version '1.0-SNAPSHOT'
+
+String GROUP_ID = "com.globaltcad"
+String PROJECT  = "swingtree"
+String VERSION  = "0.0.0"
+
+group GROUP_ID
+archivesBaseName = PROJECT
+version VERSION
+
+sourceCompatibility = 8
+targetCompatibility = 8
 
 repositories {
     mavenCentral()

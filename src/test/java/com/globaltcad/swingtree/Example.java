@@ -1,4 +1,4 @@
-package stml;
+package com.globaltcad.swingtree;
 
 import javax.swing.*;
 import java.awt.*;

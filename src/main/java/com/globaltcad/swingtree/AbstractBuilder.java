@@ -1,4 +1,4 @@
-package stml;
+package com.globaltcad.swingtree;
 
 import java.util.function.Consumer;
 

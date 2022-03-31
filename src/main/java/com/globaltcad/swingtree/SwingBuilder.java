@@ -1,16 +1,14 @@
-package stml;
-
-import javax.swing.*;
+package com.globaltcad.swingtree;
 
 /**
  *  If you are using builders for your custom Swing components,
  *  implement this to allow the {@link UI} builder to call the {@link #build()}
  *  method for you!
  *
- * @param <M> The UI component type build by implementations of this.
+ * @param <C> The UI component type build by implementations of this.
  */
-public interface MenuBuilder<M extends JMenuItem> {
+public interface SwingBuilder<C> {
 
-	M build();
+    C build();
 
 }

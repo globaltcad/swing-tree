@@ -1,4 +1,4 @@
-package stml
+package com.globaltcad.swingtree
 
 import spock.lang.Ignore
 import spock.lang.Narrative

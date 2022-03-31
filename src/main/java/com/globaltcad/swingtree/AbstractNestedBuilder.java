@@ -1,4 +1,4 @@
-package stml;
+package com.globaltcad.swingtree;
 
 import java.util.ArrayList;
 import java.util.List;

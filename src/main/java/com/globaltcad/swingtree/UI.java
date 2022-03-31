@@ -1,4 +1,4 @@
-package stml;
+package com.globaltcad.swingtree;
 
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
