@@ -574,7 +574,7 @@ public class UI
          *  This method provides the same functionality as the other "containing" method.
          *  However, it bypasses the necessity to call the "build" method by
          *  calling it internally fo you. <br>
-         *  This help improve readability, especially when the degree of nesting is very low.
+         *  This helps to improve readability, especially when the degree of nesting is very low.
          *
          * @param builders An array of builder instances whose JComponents ought to be added to the one wrapped by this builder.
          * @return This very instance, which enables builder-style method chaining.
@@ -610,7 +610,13 @@ public class UI
             return (InstanceType) this.add(constraints, new ForSwing[]{builder});
         }
 
-        public final <T extends Component> InstanceType add(T component) {
+        /**
+         *  Use this to add any kind of AWT {@link Component} to the {@link JComponent} wrapped by this.
+         *
+         * @param component A generic AWT {@link Component} which ought to be added to the {@link JComponent} wrapped by this.
+         * @return This very instance, which enables builder-style method chaining.
+         */
+        public final InstanceType add(Component component) {
             this.component.add(component);
             return (InstanceType) this;
         }

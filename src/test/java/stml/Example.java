@@ -25,7 +25,7 @@ public class Example extends JPanel
 		UI.of(this)
 			.withLayout(debug+"fill", "[][grow]")
 			.withBackground(backColor)
-			.add(UI.labelWithIcon(200, 200, cover))
+			.add(UI.labelWithIcon(200, 200, cover).withTooltip("I am a picture of a swing on a tree!"))
 			.add("grow",
 				UI.panelWithLayout(debug+"fill, insets 0","[grow][shrink]")
 					.onMouseClick( e -> {/* does something */} )
