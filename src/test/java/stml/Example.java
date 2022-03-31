@@ -55,13 +55,7 @@ public class Example extends JPanel
 							.add("cell 1 0",
 								UI.buttonWithIcon(50, 50, pdfIcon, pdfHover)
 									.withCursor(UI.Cursor.HAND)
-									.make( it -> {
-										it.setBorderPainted(false);
-										it.setContentAreaFilled(false);
-										it.setOpaque(false);
-										it.setFocusPainted(false);
-										it.setMargin(new Insets(0,0,0,0));
-									})
+									.makePlain()
 									.onClick( e -> {/* does something */} )
 							)
 							.withBorder(BorderFactory.createMatteBorder(0,0,1,0,pathColor))

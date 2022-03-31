@@ -563,7 +563,7 @@ public class UI
          * @param component A {@link JComponent} instance which ought to be added to the wrapped component type.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public final InstanceType add(Object configuration, C component) {
+        public final InstanceType add(String configuration, C component) {
             LogUtil.nullArgCheck(configuration, "configuration", Object.class);
             LogUtil.nullArgCheck(component, "component", Object.class);
             this.add(configuration, UI.of(component));
@@ -610,24 +610,18 @@ public class UI
             return (InstanceType) this.add(constraints, new ForSwing[]{builder});
         }
 
-        public final <T extends JComponent, B extends ForSwing<?, T>> InstanceType add(B builder) {
-            return add((Object)null, builder);
-        }
-
-        public final <T extends JComponent, B extends ForSwing<?, T>> InstanceType add(B builder1, B builder2) {
-            return add((Object)null, builder1, builder2);
+        public final <T extends Component> InstanceType add(T component) {
+            this.component.add(component);
+            return (InstanceType) this;
         }
 
         @SafeVarargs
-        public final <T extends JComponent, B extends ForSwing<?, T>> InstanceType add(Object conf, B... builders) {
-            if ( conf instanceof Component ) this.component.add((Component)conf);
-            else if ( conf instanceof String ) {
-                LayoutManager layout = this.component.getLayout();
-                if ( isBorderLayout(conf) && !(layout instanceof BorderLayout) ) {
-                    if ( layout instanceof MigLayout )
-                        log.warn("Layout ambiguity detected! Border layout contraint cannot be added to 'MigLayout'.");
-                    this.component.setLayout(new BorderLayout()); // The UI Maker tries to fill in the blanks!
-                }
+        public final <T extends JComponent, B extends ForSwing<?, T>> InstanceType add(String conf, B... builders) {
+            LayoutManager layout = this.component.getLayout();
+            if ( isBorderLayout(conf) && !(layout instanceof BorderLayout) ) {
+                if ( layout instanceof MigLayout )
+                    log.warn("Layout ambiguity detected! Border layout constraint cannot be added to 'MigLayout'.");
+                this.component.setLayout(new BorderLayout()); // The UI Maker tries to fill in the blanks!
             }
             for( ForSwing<?, T> b : builders )
                 b.siblings.addAll(
@@ -727,6 +721,24 @@ public class UI
 
         public ForButton<B> saying(String text) {
             this.component.setText(text);
+            return this;
+        }
+
+        /**
+         *  Effectively removes the native style of this button.
+         *  Without an icon or text, one will not be able to recognize the button.
+         *  Use this for buttons with a custom icon or clickable text!
+         *
+         * @return This very instance, which enables builder-style method chaining.
+         */
+        public ForButton<B> makePlain() {
+            make( it -> {
+                it.setBorderPainted(false);
+                it.setContentAreaFilled(false);
+                it.setOpaque(false);
+                it.setFocusPainted(false);
+                it.setMargin(new Insets(0,0,0,0));
+            });
             return this;
         }
 
