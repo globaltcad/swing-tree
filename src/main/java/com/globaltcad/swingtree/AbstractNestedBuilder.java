@@ -9,10 +9,10 @@ import java.util.List;
  *  This is primarily expressed by the "add" method which takes an arbitrary number of
  *  builder instances to form this nested / tree like structure.
  *
- * @param <InstanceType> The concrete type of an implementation of this abstract class.
+ * @param <I> The concrete implementation type of this abstract class.
  * @param <C> The component type parameter which ought to be built in some way.
  */
-abstract class AbstractNestedBuilder<InstanceType, C> extends AbstractBuilder<InstanceType, C>
+abstract class AbstractNestedBuilder<I, C> extends AbstractBuilder<I, C>
 {
 
     /**
@@ -46,7 +46,19 @@ abstract class AbstractNestedBuilder<InstanceType, C> extends AbstractBuilder<In
      * @param components An array of component instances which ought to be added to the wrapped component type.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public abstract InstanceType add(C... components);
+    public abstract I add(C... components);
+
+
+    /**
+     *  This builder class expects its implementations to be builder types
+     *  for anything which can be built in a nested tree-like structure.
+     *  Implementations of this abstract method ought to enable support for nested building.
+     *  <br><br>
+     *
+     * @param component A component instance which ought to be added to the wrapped component type.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    protected abstract I _add(C component);
 
     /**
      *  This builder class expects its implementations to be builder types
@@ -57,10 +69,12 @@ abstract class AbstractNestedBuilder<InstanceType, C> extends AbstractBuilder<In
      * @param components A list of component instances which ought to be added to the wrapped component type.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final InstanceType add(List<C> components) {
+    public final I add(List<C> components) {
         final C[] array = (C[]) new Object[components.size()];
-        for ( int i = 0; i < array.length; i++ ) array[i] = components.get(i);
-        return add(array);
+        for ( int i = 0; i < array.length; i++ )
+            _add(components.get(i));
+
+        return (I) this;
     }
 
 }

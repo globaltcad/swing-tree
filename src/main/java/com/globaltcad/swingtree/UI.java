@@ -14,8 +14,6 @@ import java.awt.event.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -283,7 +281,6 @@ public class UI
         return new ForAnything<>(component);
     }
 
-
     public static class ForAnything<T> extends AbstractBuilder<ForAnything<T>, T>
     {
         /**
@@ -298,46 +295,16 @@ public class UI
     }
 
     /**
-     *  The following is a basic builder for classes implementing the "Collection" interface.
-     *  It enables nested building for said classes and
-     *  it also serves as a useful super class from which more specialized
-     *  builder types can inherit.
-     *  <br><br>
-     *
-     * @param <InstanceType> The concrete implementation of "{@link AbstractBuilder}".
-     * @param <C> The type parameter for the component wrapped by an instance of this class.
-     */
-    public static class ForCollection<InstanceType, C extends Collection<C>> extends AbstractNestedBuilder<InstanceType, C>
-    {
-        /**
-         * Instances of the RootBuilder as well as its sub types always wrap
-         * a single component for which they are responsible.
-         * This "ForCollection" class is responsible for building collections.
-         *
-         * @param component The component type which will be wrapped by this builder node.
-         */
-        public ForCollection(C component) {
-            super(component);
-        }
-
-        @Override
-        public final InstanceType add(C... components) {
-            this.component.addAll(Arrays.asList(components));
-            return (InstanceType) this;
-        }
-    }
-
-    /**
      *  The following is one of the most basic builder implementations inside this file.
      *  It enables nested building of anything extending the JComponent class (Swing components) and
      *  it also serves as a useful super class from which more specialized
      *  builder types can inherit.
      *  <br><br>
      *
-     * @param <InstanceType> The concrete implementation of "AbstractBuilder".
+     * @param <I> The concrete implementation of the {@link AbstractBuilder}.
      * @param <C> The type parameter for the component wrapped by an instance of this class.
      */
-    public static class ForSwing<InstanceType, C extends JComponent> extends AbstractNestedBuilder<InstanceType, C>
+    public static class ForSwing<I, C extends JComponent> extends AbstractNestedBuilder<I, C>
     {
         private boolean idAlreadySet = false;
         private boolean migAlreadySet = false;
@@ -362,12 +329,12 @@ public class UI
          *
          * @return The JComponent type which will be wrapped by this builder node.
          */
-        public final InstanceType id(String id) {
+        public final I id(String id) {
             if ( idAlreadySet )
                 throw new IllegalArgumentException("The id has already been specified for this component!");
             this.component.setName(id);
             idAlreadySet = true;
-            return (InstanceType) this;
+            return (I) this;
         }
 
         /**
@@ -376,9 +343,9 @@ public class UI
          * @param isVisible The truth value determining if the UI component should be visible or not.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public InstanceType isVisibleIf(boolean isVisible) {
+        public I isVisibleIf(boolean isVisible) {
             this.component.setVisible( isVisible );
-            return (InstanceType) this;
+            return (I) this;
         }
 
         /**
@@ -387,9 +354,9 @@ public class UI
          * @param isEnabled The truth value determining if the UI component should be enabled or not.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public InstanceType isEnabledIf(boolean isEnabled) {
+        public I isEnabledIf(boolean isEnabled) {
             this.component.setEnabled( isEnabled );
-            return (InstanceType) this;
+            return (I) this;
         }
 
         /**
@@ -398,9 +365,9 @@ public class UI
          * @param border The {@link Border} which should be set for the wrapped component.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public final InstanceType withBorder(Border border) {
+        public final I withBorder(Border border) {
             this.component.setBorder( border );
-            return (InstanceType) this;
+            return (I) this;
         }
 
         /**
@@ -410,9 +377,9 @@ public class UI
          * @param type The {@link Cursor} type defined by a simple enum exposed by this API.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public final InstanceType withCursor(Cursor type) {
+        public final I withCursor(Cursor type) {
             this.component.setCursor( new java.awt.Cursor( type.type ) );
-            return (InstanceType) this;
+            return (I) this;
         }
 
         /**
@@ -421,7 +388,7 @@ public class UI
          * @param constraints A string defining the mig layout.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public final InstanceType withLayout(String constraints) {
+        public final I withLayout(String constraints) {
             return withLayout(constraints, null);
         }
 
@@ -432,7 +399,7 @@ public class UI
          * @param colConstrains The column layout for the {@link MigLayout} instance.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public final InstanceType withLayout(String constraints, String colConstrains) {
+        public final I withLayout(String constraints, String colConstrains) {
             return withLayout(constraints, colConstrains, null);
         }
 
@@ -443,7 +410,7 @@ public class UI
          * @param colConstrains The column layout for the {@link MigLayout} instance.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public final InstanceType withLayout(String constraints, String colConstrains, String rowConstraints) {
+        public final I withLayout(String constraints, String colConstrains, String rowConstraints) {
             if ( migAlreadySet )
                 throw new IllegalArgumentException("The mig layout has already been specified for this component!");
 
@@ -456,7 +423,7 @@ public class UI
             MigLayout migLayout = new MigLayout(constraints, colConstrains, rowConstraints);
             this.component.setLayout(migLayout);
             migAlreadySet = true;
-            return (InstanceType) this;
+            return (I) this;
         }
 
         /**
@@ -467,9 +434,9 @@ public class UI
          * @param tooltip The tool tip text which should be set for the UI component.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public final InstanceType withTooltip(String tooltip) {
+        public final I withTooltip(String tooltip) {
             this.component.setToolTipText(tooltip);
-            return (InstanceType) this;
+            return (I) this;
         }
 
         /**
@@ -479,9 +446,9 @@ public class UI
          * @param color The background color which should be set for the UI component.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public final InstanceType withBackground(Color color) {
+        public final I withBackground(Color color) {
             this.component.setBackground(color);
-            return (InstanceType) this;
+            return (I) this;
         }
 
         /**
@@ -494,7 +461,7 @@ public class UI
          * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public final InstanceType onMouseClick(Consumer<MouseEvent> onClick) {
+        public final I onMouseClick(Consumer<MouseEvent> onClick) {
             LogUtil.nullArgCheck(onClick, "onClick", Consumer.class);
             return this.onMouseClick((c, e)->onClick.accept(e));
         }
@@ -509,32 +476,32 @@ public class UI
          * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public final InstanceType onMouseClick(BiConsumer<C, MouseEvent> onClick) {
+        public final I onMouseClick(BiConsumer<C, MouseEvent> onClick) {
             LogUtil.nullArgCheck(onClick, "onClick", BiConsumer.class);
             this.component.addMouseListener(new MouseAdapter() {
                 @Override public void mouseClicked(MouseEvent e) { onClick.accept(component, e); }
             });
-            return (InstanceType) this;
+            return (I) this;
         }
 
         /**
          * The provided lambda will be invoked when the component's size changes.
          */
-        public final InstanceType onResize(Consumer<ComponentEvent> action) {
+        public final I onResize(Consumer<ComponentEvent> action) {
             return this.onResize( (c, e) -> action.accept(e) );
         }
 
         /**
          * The provided lambda will be invoked when the component's size changes.
          */
-        public final InstanceType onResize(BiConsumer<C, ComponentEvent> action) {
+        public final I onResize(BiConsumer<C, ComponentEvent> action) {
             this.component.addComponentListener( new ComponentAdapter() {
                 @Override
                 public void componentResized(ComponentEvent e) {
                     action.accept(component, e);
                 }
             });
-            return (InstanceType) this;
+            return (I) this;
         }
 
         /**
@@ -547,10 +514,17 @@ public class UI
          */
         @SafeVarargs
         @Override
-        public final InstanceType add(C... components) {
+        public final I add(C... components) {
             LogUtil.nullArgCheck(components, "components", Object[].class);
             for( C c : components ) this.add(UI.of(c));
-            return (InstanceType) this;
+            return (I) this;
+        }
+
+        @Override
+        protected I _add(C component) {
+            LogUtil.nullArgCheck(component, "component", Object.class);
+            this.add(UI.of(component));
+            return (I) this;
         }
 
         /**
@@ -563,11 +537,11 @@ public class UI
          * @param component A {@link JComponent} instance which ought to be added to the wrapped component type.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public final InstanceType add(String configuration, C component) {
+        public final I add(String configuration, C component) {
             LogUtil.nullArgCheck(configuration, "configuration", Object.class);
             LogUtil.nullArgCheck(component, "component", Object.class);
             this.add(configuration, UI.of(component));
-            return (InstanceType) this;
+            return (I) this;
         }
 
         /**
@@ -581,7 +555,7 @@ public class UI
          */
         @SafeVarargs
         @SuppressWarnings("varargs")
-        public final <T extends JComponent> InstanceType add(ForSwing<?, T>... builders) {
+        public final <T extends JComponent> I add(ForSwing<?, T>... builders) {
             if ( builders == null )
                 throw new IllegalArgumentException("Swing builders may not be null!");
             for( ForSwing<?, T> b : builders )
@@ -593,7 +567,7 @@ public class UI
             for( ForSwing<?, T> b : builders )
                 this.component.add(b.getResulting(b.type));
 
-            return (InstanceType) this;
+            return (I) this;
         }
 
         /**
@@ -606,8 +580,8 @@ public class UI
          * @param builder A builder for another {@link JComponent} instance which ought to be added to the wrapped component type.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public final <T extends JComponent> InstanceType add(String constraints, ForSwing<?, T> builder) {
-            return (InstanceType) this.add(constraints, new ForSwing[]{builder});
+        public final <T extends JComponent> I add(String constraints, ForSwing<?, T> builder) {
+            return (I) this.add(constraints, new ForSwing[]{builder});
         }
 
         /**
@@ -616,13 +590,13 @@ public class UI
          * @param component A generic AWT {@link Component} which ought to be added to the {@link JComponent} wrapped by this.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public final InstanceType add(Component component) {
+        public final I add(Component component) {
             this.component.add(component);
-            return (InstanceType) this;
+            return (I) this;
         }
 
         @SafeVarargs
-        public final <T extends JComponent, B extends ForSwing<?, T>> InstanceType add(String conf, B... builders) {
+        public final <T extends JComponent, B extends ForSwing<?, T>> I add(String conf, B... builders) {
             LayoutManager layout = this.component.getLayout();
             if ( isBorderLayout(conf) && !(layout instanceof BorderLayout) ) {
                 if ( layout instanceof MigLayout )
@@ -636,7 +610,7 @@ public class UI
                                 .collect(Collectors.toList())
                 );
             for( ForSwing<?, T> b : builders ) this.component.add(b.getResulting(b.type), conf);
-            return (InstanceType) this;
+            return (I) this;
         }
 
         private static boolean isBorderLayout(Object o) {

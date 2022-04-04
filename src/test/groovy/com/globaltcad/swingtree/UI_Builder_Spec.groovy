@@ -16,6 +16,22 @@ import java.awt.*
 class UI_Builder_Spec extends Specification
 {
 
+    def 'We can add a list of components to the UI builder.'()
+    {
+        given : 'We have a simple JPanel UI node.'
+            var node = UI.panel()
+
+        expect : 'At the beginning the wrapped component will have no children.'
+            node.component.components.length == 0
+
+        when : 'We add a list of panels...'
+            node.add([new JPanel(), new JPanel(), new JPanel()])
+
+        then : 'The wrapped component will have the expected amount of child components.'
+            node.component.components.length == 3
+    }
+
+
     def 'The UI builder nests components'()
     {
         given : 'A regular swing object.'
@@ -46,7 +62,7 @@ class UI_Builder_Spec extends Specification
 
     def 'We can easily define the cursor on a wrapped UI component'()
     {
-        given : 'We creat a UI builder node containing a simple button.'
+        given : 'We create a UI builder node containing a simple button.'
             var node = UI.button()
         expect : 'At the beginning the default cursor will be set.'
             node.component.cursor.type == Cursor.DEFAULT_CURSOR

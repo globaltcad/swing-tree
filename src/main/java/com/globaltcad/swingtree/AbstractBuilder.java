@@ -4,12 +4,12 @@ import java.util.function.Consumer;
 
 /**
  *  This is the root builder for all specialized types of builder classes.
- *  It is a generic builder for anything which can be built in a nested tree structure!
+ *  It is a generic builder for anything which can be built in a tree like structure!
  *
- * @param <InstanceType>
- * @param <C>
+ * @param <I> The concrete implementation type of this builder.
+ * @param <C> The component type parameter.
  */
-abstract class AbstractBuilder<InstanceType, C>
+abstract class AbstractBuilder<I, C>
 {
     /**
      *  The component wrapped by this builder node.
@@ -57,9 +57,9 @@ abstract class AbstractBuilder<InstanceType, C>
      * @param action A Consumer lambda which simply returned the wrapped JComponent type for interacting it.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public InstanceType make( Consumer<C> action ) {
+    public I make(Consumer<C> action ) {
         action.accept(component);
-        return (InstanceType) this;
+        return (I) this;
     }
 
 
@@ -75,9 +75,9 @@ abstract class AbstractBuilder<InstanceType, C>
      * @param building A Consumer lambda which simply consumes this builder.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public InstanceType doIf(boolean condition, Consumer<InstanceType> building) {
+    public I doIf(boolean condition, Consumer<I> building) {
         LogUtil.nullArgCheck(building, "building", Consumer.class);
-        InstanceType builder = (InstanceType) this;
+        I builder = (I) this;
         if ( condition ) building.accept(builder);
         return builder;
     }
@@ -93,20 +93,20 @@ abstract class AbstractBuilder<InstanceType, C>
      * @param building A Consumer lambda which simply consumes this builder.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public InstanceType code( Consumer<InstanceType> building ) {
+    public I code(Consumer<I> building ) {
         return doIf(true, building);
     }
 
     /**
      *  This method completes the building process for the wrapped
-     *  JComponent type by returning it.
-     *  However, it also expects one to pass the concrete class of the JComponent
+     *  {@link javax.swing.JComponent} type by returning it.
+     *  However, it also expects the user to pass the class of the {@link javax.swing.JComponent}
      *  wrapped by this builder! This is not out of necessity but for better
      *  readability when using the builder in more extensive ways where
      *  the beginning and end of the method chaining and nesting of the builder does
      *  not fit on one screen. <br>
-     *  In that case the expression ".build(JMenu.class)" helps
-     *  to identify which type of JComponent is currently being build on a given
+     *  In that case the expression "{@code .getResulting(JMenu.class)}" helps
+     *  to identify which type of {@link javax.swing.JComponent} is currently being build on a given
      *  nesting layer... <br><br>
      *
      * @param type The type class of the component which this builder wraps.
