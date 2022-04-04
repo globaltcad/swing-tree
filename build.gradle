@@ -1,6 +1,12 @@
 plugins {
     id 'groovy'
     id 'java'
+    
+    // Public deployment :
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
+    id('io.github.gradle-nexus.publish-plugin') version '1.1.0'
 }
 
 
@@ -33,14 +39,116 @@ dependencies {
 
     testImplementation 'org.codehaus.groovy:groovy:3.0.10'
     testImplementation platform("org.spockframework:spock-bom:2.0-groovy-3.0")
-    testImplementation 'org.spockframework:spock-core:2.0-groovy-3.0'
-    testImplementation 'com.athaydes:spock-reports:2.2.0-groovy-3.0'//, { transitive = false }
+    testImplementation 'org.spockframework:spock-core:2.1-groovy-3.0'
+    testImplementation 'com.athaydes:spock-reports:2.3.0-groovy-3.0'//, { transitive = false }
 
     testRuntimeOnly group: 'net.bytebuddy', name: 'byte-buddy', version: '1.11.15' // allows mocking of classes (in addition to interfaces)
     testRuntimeOnly group: 'org.objenesis', name: 'objenesis', version: '3.2'      // allows mocking of classes without default constructor (together with ByteBuddy or CGLIB)
-
 }
 
 test {
     useJUnitPlatform()
+}
+
+// JAR CREATION :
+
+task sourcesJar(type: Jar) {
+    classifier "sources"
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar) {
+    classifier "javadoc"
+    from javadoc
+}
+
+// JDOC CREATION:
+
+task createJDocs(type: Javadoc){
+    destinationDir = new File("$projectDir/docs/jdocs")
+    if(JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+}
+
+// MAVEN DEPLOYMENT CONFIGURATION: 
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+ext.genOutputDir = file("$buildDir/generated-resources")
+
+task generateVersionTxt()  {
+    ext.outputFile = file("$genOutputDir/version.txt")
+    outputs.file(outputFile)
+    doLast {
+        outputFile.text = """GroupId: ${project.group}
+Name: ${project.name}
+Version: $version
+Build-time: ${java.time.LocalDateTime.now()}
+"""
+    }
+}
+
+sourceSets.main.output.dir genOutputDir, builtBy: generateVersionTxt
+
+
+signing {
+    sign configurations.archives
+    sign publishing.publications
+}
+
+nexusPublishing {
+    packageGroup = GROUP_ID
+    repositories { sonatype() }
+    transitionCheckOptions {
+        // closing checks take some time so increase the retries
+        // total time is maxRetries(180) * delayBetween(10s) = 30m
+        maxRetries.set(180)
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from(components.java)
+            pom {
+                name = PROJECT
+                description = 'A swing UI builder library.'
+                url = 'https://gts-oss.github.io/'+PROJECT+'/index.html'
+                organization {
+                    name = 'com.globaltcad'
+                    url = 'https://www.globaltcad.com/'
+                }
+                issueManagement {
+                    system = 'Github'
+                    url = 'https://github.com/gts-oss/'+PROJECT+'/issues'
+                }
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = "https://raw.githubusercontent.com/gts-oss/"+PROJECT+"/master/LICENSE"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "dnepp"
+                        name = "Daniel Nepp"
+                        email = "dnepp@globaltcad.com"
+                    }
+                }
+                scm {
+                    url = 'https://github.com/gts-oss/'+PROJECT+''
+                    connection = 'scm:git:git://github.com/gts-oss/'+PROJECT+'.git'
+                    developerConnection = 'scm:git:ssh://git@github.com:gts-oss/'+PROJECT+'.git'
+                }
+            }
+        }
+    }
 }
