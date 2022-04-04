@@ -100,6 +100,7 @@ sourceSets.main.output.dir genOutputDir, builtBy: generateVersionTxt
 
 
 signing {
+    required { !VERSION.startsWith("0.") && gradle.taskGraph.hasTask("publish") }
     sign configurations.archives
     sign publishing.publications
 }
