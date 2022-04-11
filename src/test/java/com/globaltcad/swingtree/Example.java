@@ -7,9 +7,6 @@ public class Example extends JPanel
 {
 	public Example()
 	{
-		Color backColor = new Color(255, 255, 255); // WHITE!
-		Color pathColor = new Color(192, 192, 192); // Light gray!
-
 		ImageIcon pdfIcon  = new ImageIcon(getClass().getResource("/img/seed.png"));
 		ImageIcon pdfHover = new ImageIcon(getClass().getResource("/img/trees.png"));
 		ImageIcon cover    = new ImageIcon(getClass().getResource("/img/swing.png"));
@@ -19,7 +16,7 @@ public class Example extends JPanel
 
 		UI.of(this)
 		.withLayout(debug+"fill", "[][grow]")
-		.withBackground(backColor)
+		.withBackground(Color.WHITE)
 		.add(UI.labelWithIcon(200, 200, cover).withTooltip("I am a picture of a swing on a tree!"))
 		.add("grow",
 			UI.panelWithLayout(debug+"fill, insets 0","[grow][shrink]")
@@ -31,7 +28,7 @@ public class Example extends JPanel
 			)
 			.add("cell 0 1, grow, pushy",
 				UI.panelWithLayout(debug+"fill, insets 0","[grow][shrink]")
-				.withBackground(backColor)
+				.withBackground(Color.WHITE)
 				.add("cell 0 0, aligny top, grow x",
 					UI.panelWithLayout(debug+"fill, insets 7","grow")
 					.withBackground(new Color(255, 138, 99))
@@ -53,19 +50,19 @@ public class Example extends JPanel
 					.makePlain()
 					.onClick( e -> {/* does something */} )
 				)
-				.withBorder(BorderFactory.createMatteBorder(0,0,1,0,pathColor))
+				.withBorder(BorderFactory.createMatteBorder(0,0,1,0,Color.LIGHT_GRAY))
 			)
 			.add("cell 0 2, grow",
 				UI.panelWithLayout(debug+"fill, insets 0 0 0 0","[grow][grow][grow]")
-				.withBackground(backColor)
+				.withBackground(Color.WHITE)
 				.add("cell 1 0", UI.label("Built with swingtree"))
 				.add("cell 2 0", UI.label("GTS-OSS"))
 				.add("cell 3 0", UI.label("29-March-2022"))
 			)
 			.add("cell 0 3, span 2, grow",
-				UI.label("...here the UI comes to an end...").withColor(pathColor)
+				UI.label("...here the UI comes to an end...").withColor(Color.LIGHT_GRAY)
 			)
-			.withBackground(backColor)
+			.withBackground(Color.WHITE)
 		);
 	}
 
