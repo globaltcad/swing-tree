@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
@@ -461,9 +462,9 @@ public class UI
          * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public final I onMouseClick(Consumer<MouseEvent> onClick) {
+        public final I onMouseClickEvent(Consumer<MouseEvent> onClick) {
             LogUtil.nullArgCheck(onClick, "onClick", Consumer.class);
-            return this.onMouseClick((c, e)->onClick.accept(e));
+            return this.onMouseClick( it -> onClick.accept(it.getEvent()) );
         }
 
         /**
@@ -476,10 +477,10 @@ public class UI
          * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public final I onMouseClick(BiConsumer<C, MouseEvent> onClick) {
+        public final I onMouseClick(Consumer<ActionContext<C, MouseEvent>> onClick) {
             LogUtil.nullArgCheck(onClick, "onClick", BiConsumer.class);
             this.component.addMouseListener(new MouseAdapter() {
-                @Override public void mouseClicked(MouseEvent e) { onClick.accept(component, e); }
+                @Override public void mouseClicked(MouseEvent e) { onClick.accept(new ActionContext<>(component, e)); }
             });
             return (I) this;
         }
@@ -487,18 +488,18 @@ public class UI
         /**
          * The provided lambda will be invoked when the component's size changes.
          */
-        public final I onResize(Consumer<ComponentEvent> action) {
-            return this.onResize( (c, e) -> action.accept(e) );
+        public final I onResizeEvent(Consumer<ComponentEvent> action) {
+            return this.onResize( it -> action.accept(it.getEvent()) );
         }
 
         /**
          * The provided lambda will be invoked when the component's size changes.
          */
-        public final I onResize(BiConsumer<C, ComponentEvent> action) {
+        public final I onResize(Consumer<ActionContext<C, ComponentEvent>> action) {
             this.component.addComponentListener( new ComponentAdapter() {
                 @Override
                 public void componentResized(ComponentEvent e) {
-                    action.accept(component, e);
+                    action.accept(new ActionContext<>(component, e));
                 }
             });
             return (I) this;
@@ -724,20 +725,6 @@ public class UI
 
         /**
          *  This method adds the provided
-         *  {@link ActionListener} instance to the wrapped
-         *  button component.
-         *  <br><br>
-         *
-         * @param actionListener The ActionListener instance which will be passed to the button component.
-         * @return This very instance, which enables builder-style method chaining.
-         */
-        public ForButton<B> onClick(ActionListener actionListener) {
-            this.component.addActionListener(actionListener);
-            return this;
-        }
-
-        /**
-         *  This method adds the provided
          *  {@link ItemListener} instance to the wrapped button component.
          *  <br><br>
          *
@@ -757,11 +744,11 @@ public class UI
          *  This is very useful for changing the state of the JComponent when the action is being triggered.
          *  <br><br>
          *
-         * @param action A {@link BiConsumer} instance which will be wrapped by an {@link ActionListener} and passed to the button component.
+         * @param action A {@link Consumer} instance which will be wrapped by an {@link ActionListener} and passed to the button component.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public ForButton<B> onClick(BiConsumer<B, ActionEvent> action) {
-            this.component.addActionListener( e -> action.accept(this.component, e) );
+        public ForButton<B> onClick(Consumer<ActionContext<B, ActionEvent>> action) {
+            this.component.addActionListener( e -> action.accept(new ActionContext<>(this.component, e)) );
             return this;
         }
 
@@ -776,8 +763,8 @@ public class UI
          * @param action A {@link BiConsumer} instance which will be wrapped by an {@link ActionListener} and passed to the button component.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public ForButton<B> onClickForSiblings(BiConsumer<List<B>, ActionEvent> action) {
-            this.component.addActionListener( e -> action.accept(this.siblings, e) );
+        public ForButton<B> onClickForSiblings(Consumer<ActionContext<List<B>, ActionEvent>> action) {
+            this.component.addActionListener( e -> action.accept(new ActionContext<>(this.siblings, e)) );
             return this;
         }
 
@@ -827,8 +814,8 @@ public class UI
             super(component);
         }
 
-        public ForSlider onChange(BiConsumer<JSlider, ChangeEvent> action) {
-            this.component.addChangeListener( e -> action.accept(this.component, e) );
+        public ForSlider onChange(Consumer<ActionContext<JSlider, ChangeEvent>> action) {
+            this.component.addChangeListener( e -> action.accept(new ActionContext<>(this.component, e)) );
             return this;
         }
     }
@@ -842,8 +829,8 @@ public class UI
             super(component);
         }
 
-        public ForCombo onChange(BiConsumer<JComboBox, ActionEvent> action) {
-            this.component.addActionListener( e -> action.accept(this.component, e) );
+        public ForCombo onChange(Consumer<ActionContext<JComboBox, ActionEvent>> action) {
+            this.component.addActionListener( e -> action.accept(new ActionContext<>(this.component, e)) );
             return this;
         }
 
@@ -854,9 +841,7 @@ public class UI
      */
     public static class ForLabel extends ForSwing<ForLabel, JLabel>
     {
-        public ForLabel(JLabel component) {
-            super(component);
-        }
+        public ForLabel(JLabel component) { super(component); }
 
         /**
          *  Makes the wrapped {@link JLabel} font bold (!plain).
@@ -884,10 +869,7 @@ public class UI
                         e1.printStackTrace();
                     }
                 }
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    component.setText(text.get());
-                }
+                @Override  public void mouseExited(MouseEvent e) { component.setText(text.get()); }
                 @Override
                 public void mouseEntered(MouseEvent e) {
                     component.setText("<html><a href=''>" + text.get() + "</a></html>");
@@ -1058,6 +1040,19 @@ public class UI
             ifFilterable( () -> this.replace = action );
             return this;
         }
+    }
+
+    public static class ActionContext<I,E> {
+
+        private final I item;
+        private final E event;
+
+        public ActionContext(I item, E event) { this.item = item; this.event = event; }
+
+        public I getItem() { return item; }
+
+        public E getEvent() { return event; }
+
     }
 
     /**
