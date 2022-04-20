@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
@@ -16,7 +15,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -448,23 +446,9 @@ public class UI
          * @return This very instance, which enables builder-style method chaining.
          */
         public final I withBackground(Color color) {
+            LogUtil.nullArgCheck(color, "color", Color.class);
             this.component.setBackground(color);
             return (I) this;
-        }
-
-        /**
-         *  Use this to register and catch generic {@link MouseListener} based mouse click events on this UI component.
-         *  This method adds the provided consumer lambda to
-         *  a {@link MouseListener} instance to the wrapped
-         *  button component.
-         *  <br><br>
-         *
-         * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
-         * @return This very instance, which enables builder-style method chaining.
-         */
-        public final I onMouseClickEvent(Consumer<MouseEvent> onClick) {
-            LogUtil.nullArgCheck(onClick, "onClick", Consumer.class);
-            return this.onMouseClick( it -> onClick.accept(it.getEvent()) );
         }
 
         /**
@@ -478,7 +462,7 @@ public class UI
          * @return This very instance, which enables builder-style method chaining.
          */
         public final I onMouseClick(Consumer<ActionContext<C, MouseEvent>> onClick) {
-            LogUtil.nullArgCheck(onClick, "onClick", BiConsumer.class);
+            LogUtil.nullArgCheck(onClick, "onClick", Consumer.class);
             this.component.addMouseListener(new MouseAdapter() {
                 @Override public void mouseClicked(MouseEvent e) { onClick.accept(new ActionContext<>(component, e)); }
             });
@@ -486,16 +470,41 @@ public class UI
         }
 
         /**
-         * The provided lambda will be invoked when the component's size changes.
+         *  Use this to register and catch generic {@link MouseListener} based mouse click events on this UI component.
+         *  This method adds the provided UI component consumer lambda to
+         *  a {@link MouseListener} instance to the wrapped
+         *  button component.
+         *  <br><br>
+         *
+         * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
+         * @return This very instance, which enables builder-style method chaining.
          */
-        public final I onResizeEvent(Consumer<ComponentEvent> action) {
-            return this.onResize( it -> action.accept(it.getEvent()) );
+        public final I onMouseClickComponent(Consumer<C> onClick) {
+            LogUtil.nullArgCheck(onClick, "onClick", Consumer.class);
+            return this.onMouseClick( it -> onClick.accept(it.component) );
         }
+
+        /**
+         *  Use this to register and catch generic {@link MouseListener} based mouse click events on this UI component.
+         *  This method adds the provided {@link MouseEvent} consumer lambda to
+         *  a {@link MouseListener} instance to the wrapped
+         *  button component.
+         *  <br><br>
+         *
+         * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
+         * @return This very instance, which enables builder-style method chaining.
+         */
+        public final I onMouseClickEvent(Consumer<MouseEvent> onClick) {
+            LogUtil.nullArgCheck(onClick, "onClick", Consumer.class);
+            return this.onMouseClick( it -> onClick.accept(it.event) );
+        }
+
 
         /**
          * The provided lambda will be invoked when the component's size changes.
          */
         public final I onResize(Consumer<ActionContext<C, ComponentEvent>> action) {
+            LogUtil.nullArgCheck(action, "onClick", Consumer.class);
             this.component.addComponentListener( new ComponentAdapter() {
                 @Override
                 public void componentResized(ComponentEvent e) {
@@ -503,6 +512,22 @@ public class UI
                 }
             });
             return (I) this;
+        }
+
+        /**
+         * The provided lambda will be invoked when the component's size changes.
+         */
+        public final I onResizeComponent(Consumer<C> action) {
+            LogUtil.nullArgCheck(action, "onClick", Consumer.class);
+            return this.onResize( it -> action.accept(it.component) );
+        }
+
+        /**
+         * The provided lambda will be invoked when the component's size changes.
+         */
+        public final I onResizeEvent(Consumer<ComponentEvent> action) {
+            LogUtil.nullArgCheck(action, "onClick", Consumer.class);
+            return this.onResize( it -> action.accept(it.event) );
         }
 
         /**
@@ -752,6 +777,16 @@ public class UI
             return this;
         }
 
+        public ForButton<B> onClickComponent(Consumer<B> action) {
+            LogUtil.nullArgCheck(action, "onClick", Consumer.class);
+            return this.onClick( it -> action.accept(it.component) );
+        }
+
+        public ForButton<B> onClickEvent(Consumer<ActionEvent> action) {
+            LogUtil.nullArgCheck(action, "onClick", Consumer.class);
+            return this.onClick( it -> action.accept(it.event) );
+        }
+
         /**
          *  This method enables a more readable way of adding
          *  {@link ActionListener} instances to button types.
@@ -760,7 +795,7 @@ public class UI
          *  This is very useful for changing the state of related {@link JComponent}s.
          *  <br><br>
          *
-         * @param action A {@link BiConsumer} instance which will be wrapped by an {@link ActionListener} and passed to the button component.
+         * @param action A {@link Consumer} instance which will be wrapped by an {@link ActionListener} and passed to the button component.
          * @return This very instance, which enables builder-style method chaining.
          */
         public ForButton<B> onClickForSiblings(Consumer<ActionContext<List<B>, ActionEvent>> action) {
@@ -818,6 +853,14 @@ public class UI
             this.component.addChangeListener( e -> action.accept(new ActionContext<>(this.component, e)) );
             return this;
         }
+
+        public ForSlider onChangeComponent(Consumer<JSlider> action) {
+            return this.onChange( it -> action.accept(it.component) );
+        }
+
+        public ForSlider onChangeEvent(Consumer<ChangeEvent> action) {
+            return this.onChange( it -> action.accept(it.event) );
+        }
     }
 
     /**
@@ -834,6 +877,13 @@ public class UI
             return this;
         }
 
+        public ForCombo onChangeEvent(Consumer<ActionEvent> action) {
+            return this.onChange( it -> action.accept(it.getEvent()) );
+        }
+
+        public ForCombo onChangeComponent(Consumer<JComboBox> action) {
+            return this.onChange( it -> action.accept(it.getComponent()) );
+        }
     }
 
     /**
@@ -987,13 +1037,21 @@ public class UI
          * @param action An action which will be executed when the text in the underlying {@link JTextComponent} changes.
          * @return This very builder to allow for method chaining.
          */
-        public ForTextComponent onTextChange(BiConsumer<JTextComponent, DocumentEvent> action) {
+        public ForTextComponent onTextChange(Consumer<ActionContext<JTextComponent, DocumentEvent>> action) {
             this.component.getDocument().addDocumentListener(new DocumentListener() {
-                @Override public void insertUpdate(DocumentEvent e) {action.accept(component, e);}
-                @Override public void removeUpdate(DocumentEvent e) {action.accept(component, e);}
-                @Override public void changedUpdate(DocumentEvent e) {action.accept(component, e);}
+                @Override public void insertUpdate(DocumentEvent e) {action.accept(new ActionContext<>(component, e));}
+                @Override public void removeUpdate(DocumentEvent e) {action.accept(new ActionContext<>(component, e));}
+                @Override public void changedUpdate(DocumentEvent e) {action.accept(new ActionContext<>(component, e));}
             });
             return this;
+        }
+
+        public ForTextComponent onTextChangeComponent(Consumer<JTextComponent> action) {
+            return this.onTextChange(it -> action.accept(it.component));
+        }
+
+        public ForTextComponent onTextChangeEvent(Consumer<DocumentEvent> action) {
+            return this.onTextChange(it -> action.accept(it.event));
         }
 
         /**
@@ -1042,14 +1100,21 @@ public class UI
         }
     }
 
-    public static class ActionContext<I,E> {
+    /**
+     *  Instances of this are passed to action lambdas for UI components
+     *  to give an action more context information.
+     *
+     * @param <C> The UI component type parameter stored by this.
+     * @param <E> The event type parameter of the event stored by this.
+     */
+    public static class ActionContext<C,E> {
 
-        private final I item;
+        private final C component;
         private final E event;
 
-        public ActionContext(I item, E event) { this.item = item; this.event = event; }
+        private ActionContext(C component, E event) { this.component = component; this.event = event; }
 
-        public I getItem() { return item; }
+        public C getComponent() { return component; }
 
         public E getEvent() { return event; }
 
