@@ -736,9 +736,7 @@ public class UI
     class ForButton<B extends AbstractButton>
             extends ForSwing<ForButton<B>, B>
     {
-        public ForButton(B component) {
-            super(component);
-        }
+        public ForButton(B component) { super(component); }
 
         public ForButton<B> saying(String text) {
             this.component.setText(text);
@@ -768,11 +766,11 @@ public class UI
          *  {@link ItemListener} instance to the wrapped button component.
          *  <br><br>
          *
-         * @param itemListener The ItemListener instance which will be passed to the button component.
+         * @param action The change action lambda which will be passed to the button component.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public ForButton<B> onChange(ItemListener itemListener) {
-            this.component.addItemListener(itemListener);
+        public ForButton<B> onChange(Consumer<ActionContext<B, ItemEvent>> action) {
+            this.component.addItemListener(e -> action.accept(new ActionContext<>(this.component, e)));
             return this;
         }
 
