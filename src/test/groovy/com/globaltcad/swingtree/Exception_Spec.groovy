@@ -2,12 +2,16 @@ package com.globaltcad.swingtree
 
 import spock.lang.Specification
 
+import javax.swing.JCheckBox
 import javax.swing.JComboBox
+import javax.swing.JComponent
 import javax.swing.JMenu
 import javax.swing.JMenuItem
 import javax.swing.JPanel
+import javax.swing.JRadioButton
 import javax.swing.JSeparator
 import javax.swing.JSlider
+import javax.swing.text.JTextComponent
 
 class Exception_Spec extends Specification
 {
@@ -27,7 +31,12 @@ class Exception_Spec extends Specification
                     {UI.labelWithIcon(null)},
                     {UI.labelWithIcon(300,200,null)},
                     {UI.buttonWithIcon(null, null,null)},
-                    {UI.of((SwingBuilder)null)}
+                    {UI.of((SwingBuilder)null)},
+                    {UI.of((MenuBuilder)null)},
+                    {UI.of((JCheckBox)null)},
+                    {UI.of((JRadioButton)null)},
+                    {UI.of((JTextComponent)null)},
+                    {UI.of((JComponent)null)}
             ]
     }
 

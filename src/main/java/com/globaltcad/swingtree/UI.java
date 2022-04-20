@@ -36,7 +36,8 @@ public class UI
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(UI.class);
 
-    public enum Cursor {
+    public enum Cursor
+    {
         HAND(java.awt.Cursor.HAND_CURSOR),
         MOVE(java.awt.Cursor.MOVE_CURSOR),
         CROSS(java.awt.Cursor.CROSSHAIR_CURSOR),
@@ -55,7 +56,6 @@ public class UI
         final int type;
 
         Cursor(int type) { this.type = type; }
-
     }
 
     /**
@@ -69,6 +69,7 @@ public class UI
      */
     public static <T extends JComponent> ForSwing<ForSwing, T> of(T component)
     {
+        LogUtil.nullArgCheck(component, "component", JComponent.class);
         return new ForSwing<>(component);
     }
 
@@ -80,6 +81,7 @@ public class UI
 
     public static <M extends JMenuItem> ForMenuItem of(MenuBuilder<M> builder)
     {
+        LogUtil.nullArgCheck(builder, "builder", MenuBuilder.class);
         return new ForMenuItem(builder.build());
     }
 
@@ -89,8 +91,13 @@ public class UI
         return new ForPopup(popup);
     }
 
+    /**
+     *  Use this to create a builder for the {@link JPopupMenu} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JPopupMenu())}.
+     *
+     * @return A builder instance for a {@link JPopupMenu}, which enables builder-style method chaining.
+     */
     public static ForPopup popupMenu() { return of(new JPopupMenu()); }
-
 
     /**
      *  The following static factory method returns an instance of a {@link ForSeparator} builder
@@ -269,14 +276,17 @@ public class UI
     }
 
     public static ForCheckBox of(JCheckBox component) {
+        LogUtil.nullArgCheck(component, "component", JCheckBox.class);
         return new ForCheckBox(component);
     }
 
     public static ForRadioButton of(JRadioButton component) {
+        LogUtil.nullArgCheck(component, "component", JRadioButton.class);
         return new ForRadioButton(component);
     }
 
     public static ForTextComponent of(JTextComponent component) {
+        LogUtil.nullArgCheck(component, "component", JTextComponent.class);
         return new ForTextComponent(component);
     }
 
@@ -394,9 +404,7 @@ public class UI
          * @param constraints A string defining the mig layout.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public final I withLayout(String constraints) {
-            return withLayout(constraints, null);
-        }
+        public final I withLayout(String constraints) { return withLayout(constraints, null); }
 
         /**
          *  This creates a {@link MigLayout} for the component wrapped by this UI builder.
