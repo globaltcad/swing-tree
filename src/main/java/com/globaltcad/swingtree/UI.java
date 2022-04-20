@@ -74,6 +74,7 @@ public class UI
 
     public static <T extends JComponent> ForSwing<ForSwing, T> of(SwingBuilder<T> builder)
     {
+        LogUtil.nullArgCheck(builder, "builder", SwingBuilder.class);
         return of(builder.build());
     }
 
@@ -84,6 +85,7 @@ public class UI
 
     public static ForPopup of(JPopupMenu popup)
     {
+        LogUtil.nullArgCheck(popup, "popup", JPopupMenu.class);
         return new ForPopup(popup);
     }
 
@@ -99,6 +101,7 @@ public class UI
      */
     public static ForSeparator of(JSeparator separator)
     {
+        LogUtil.nullArgCheck(separator, "separator", JSeparator.class);
         return new ForSeparator(separator);
     }
 
@@ -112,7 +115,9 @@ public class UI
      * @param component The new component instance which ought to be part of the Swing UI.
      * @return A basic UI builder instance.
      */
-    public static ForButton<AbstractButton> of(AbstractButton component) {
+    public static ForButton<AbstractButton> of(AbstractButton component)
+    {
+        LogUtil.nullArgCheck(component, "component", AbstractButton.class);
         return new ForButton<>(component);
     }
 
@@ -122,9 +127,7 @@ public class UI
      *
      * @return A builder instance for a {@link JButton}, which enables builder-style method chaining.
      */
-    public static ForButton<AbstractButton> button() {
-        return of(new JButton());
-    }
+    public static ForButton<AbstractButton> button() { return of(new JButton()); }
 
     /**
      *  Use this to create a builder for the {@link JButton} UI component with the provided text displayed on top.
@@ -132,9 +135,7 @@ public class UI
      *
      * @return A builder instance for a {@link JButton}, which enables builder-style method chaining.
      */
-    public static ForButton<AbstractButton> button(String text) {
-        return of(new JButton(text));
-    }
+    public static ForButton<AbstractButton> button(String text) { return of(new JButton(text)); }
 
     /**
      *  Use this to create a builder for the {@link JButton} UI component
@@ -144,6 +145,7 @@ public class UI
      * @return A builder instance for a {@link JButton}, which enables builder-style method chaining.
      */
     public static ForButton<AbstractButton> buttonWithIcon(Icon icon) {
+        LogUtil.nullArgCheck(icon, "icon", Icon.class);
         return button().make( it -> it.setIcon(icon) );
     }
 
@@ -155,6 +157,8 @@ public class UI
      * @return A builder instance for a {@link JButton}, which enables builder-style method chaining.
      */
     public static ForButton<AbstractButton> buttonWithIcon(Icon icon, Icon onHover) {
+        LogUtil.nullArgCheck(icon, "icon", Icon.class);
+        LogUtil.nullArgCheck(onHover, "onHover", Icon.class);
         return buttonWithIcon(icon, onHover, onHover);
     }
 
@@ -172,16 +176,21 @@ public class UI
      * @return A builder instance for a {@link JButton}, which enables builder-style method chaining.
      */
     public static ForButton<AbstractButton> buttonWithIcon(Icon icon, Icon onHover, Icon onPress) {
+        LogUtil.nullArgCheck(icon, "icon", Icon.class);
+        LogUtil.nullArgCheck(onHover, "onHover", Icon.class);
+        LogUtil.nullArgCheck(onPress, "onPress", Icon.class);
         return button().make( it -> it.setIcon(icon) )
                 .make( it -> it.setRolloverIcon(onHover) )
                 .make( it -> it.setPressedIcon(onPress) );
     }
 
     public static ForMenu of(JMenu component) {
+        LogUtil.nullArgCheck(component, "component", JMenu.class);
         return new ForMenu(component);
     }
 
     public static ForMenuItem of(JMenuItem component) {
+        LogUtil.nullArgCheck(component, "component", JMenuItem.class);
         return new ForMenuItem(component);
     }
 
@@ -190,6 +199,7 @@ public class UI
     }
 
     public static <P extends JPanel> ForPanel<P> of(P component) {
+        LogUtil.nullArgCheck(component, "component", JPanel.class);
         return new ForPanel<>(component);
     }
 
@@ -199,9 +209,7 @@ public class UI
      *
      * @return A builder instance for the panel, which enables builder-style method chaining.
      */
-    public static ForPanel<JPanel> panel() {
-        return of(new JPanel());
-    }
+    public static ForPanel<JPanel> panel() { return of(new JPanel()); }
 
     /**
      *  Use this to create a builder for the {@link JPanel} UI component.
@@ -216,14 +224,17 @@ public class UI
     }
 
     public static ForSlider of(JSlider component) {
+        LogUtil.nullArgCheck(component, "component", JSlider.class);
         return new ForSlider(component);
     }
 
     public static ForCombo of(JComboBox component) {
+        LogUtil.nullArgCheck(component, "component", JComboBox.class);
         return new ForCombo(component);
     }
 
     public static ForLabel of(JLabel component) {
+        LogUtil.nullArgCheck(component, "component", JLabel.class);
         return new ForLabel(component);
     }
 
@@ -245,10 +256,12 @@ public class UI
      * @return A builder instance for the label, which enables builder-style method chaining.
      */
     public static ForLabel labelWithIcon(Icon icon) {
+        LogUtil.nullArgCheck(icon, "icon", Icon.class);
         return of(new JLabel()).make( it -> it.setIcon(icon) );
     }
 
     public static ForLabel labelWithIcon(int width, int height, ImageIcon icon) {
+        LogUtil.nullArgCheck(icon, "icon", ImageIcon.class);
         return of(new JLabel())
                 .make(it -> it.setIcon(
                     new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT))
@@ -267,13 +280,9 @@ public class UI
         return new ForTextComponent(component);
     }
 
-    public static ForTextComponent input(String text) {
-        return of(new JTextField(text));
-    }
+    public static ForTextComponent input(String text) { return of(new JTextField(text)); }
 
-    public static ForTextComponent input() {
-        return of(new JTextField());
-    }
+    public static ForTextComponent input() { return of(new JTextField()); }
 
     public static <T> ForAnything<T> of(T component)
     {
@@ -288,9 +297,7 @@ public class UI
          *
          * @param component The component type which will be wrapped by this builder node.
          */
-        public ForAnything(T component) {
-            super(component);
-        }
+        public ForAnything(T component) { super(component); }
     }
 
     /**
@@ -835,9 +842,7 @@ public class UI
      */
     public static class ForPanel<P extends JPanel> extends ForSwing<ForPanel<P>, P>
     {
-        public ForPanel(P component) {
-            super(component);
-        }
+        public ForPanel(P component) { super(component); }
     }
 
     /**
@@ -845,20 +850,21 @@ public class UI
      */
     public static class ForSlider extends ForSwing<ForSlider, JSlider>
     {
-        public ForSlider(JSlider component) {
-            super(component);
-        }
+        public ForSlider(JSlider component) { super(component); }
 
         public ForSlider onChange(Consumer<ActionContext<JSlider, ChangeEvent>> action) {
+            LogUtil.nullArgCheck(action, "action", Consumer.class);
             this.component.addChangeListener( e -> action.accept(new ActionContext<>(this.component, e)) );
             return this;
         }
 
         public ForSlider onChangeComponent(Consumer<JSlider> action) {
+            LogUtil.nullArgCheck(action, "action", Consumer.class);
             return this.onChange( it -> action.accept(it.component) );
         }
 
         public ForSlider onChangeEvent(Consumer<ChangeEvent> action) {
+            LogUtil.nullArgCheck(action, "action", Consumer.class);
             return this.onChange( it -> action.accept(it.event) );
         }
     }
@@ -873,15 +879,18 @@ public class UI
         }
 
         public ForCombo onChange(Consumer<ActionContext<JComboBox, ActionEvent>> action) {
+            LogUtil.nullArgCheck(action, "action", Consumer.class);
             this.component.addActionListener( e -> action.accept(new ActionContext<>(this.component, e)) );
             return this;
         }
 
         public ForCombo onChangeEvent(Consumer<ActionEvent> action) {
+            LogUtil.nullArgCheck(action, "action", Consumer.class);
             return this.onChange( it -> action.accept(it.getEvent()) );
         }
 
         public ForCombo onChangeComponent(Consumer<JComboBox> action) {
+            LogUtil.nullArgCheck(action, "action", Consumer.class);
             return this.onChange( it -> action.accept(it.getComponent()) );
         }
     }
@@ -982,9 +991,7 @@ public class UI
      */
     public static class ForRadioButton extends ForButton<JRadioButton>
     {
-        public ForRadioButton(JRadioButton component) {
-            super(component);
-        }
+        public ForRadioButton(JRadioButton component) { super(component); }
     }
 
     public static class ForTextComponent extends ForSwing<ForTextComponent, JTextComponent>
