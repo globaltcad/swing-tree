@@ -35,7 +35,6 @@ import java.util.stream.Stream;
 public class UI
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(UI.class);
-
     public enum Cursor
     {
         HAND(java.awt.Cursor.HAND_CURSOR),
@@ -55,12 +54,12 @@ public class UI
 
         final int type;
 
-        Cursor(int type) { this.type = type; }
+        Cursor( int type ) { this.type = type; }
     }
 
     /**
-     *  The following static factory method returns an instance of a simple Swing builder.
-     *  It enables nested building of anything extending the JComponent class.
+     *  This static factory method returns an instance of a generic swing tree builder
+     *  for anything extending the {@link JComponent} class.
      *  <br><br>
      *
      * @param component The new component instance which ought to be part of the Swing UI.
@@ -122,7 +121,7 @@ public class UI
      * @param component The new component instance which ought to be part of the Swing UI.
      * @return A basic UI builder instance.
      */
-    public static ForButton<AbstractButton> of(AbstractButton component)
+    public static <T extends AbstractButton> ForButton<T> of(T component)
     {
         LogUtil.nullArgCheck(component, "component", AbstractButton.class);
         return new ForButton<>(component);
@@ -134,7 +133,7 @@ public class UI
      *
      * @return A builder instance for a {@link JButton}, which enables builder-style method chaining.
      */
-    public static ForButton<AbstractButton> button() { return of(new JButton()); }
+    public static ForButton<JButton> button() { return of(new JButton()); }
 
     /**
      *  Use this to create a builder for the {@link JButton} UI component with the provided text displayed on top.
@@ -142,7 +141,7 @@ public class UI
      *
      * @return A builder instance for a {@link JButton}, which enables builder-style method chaining.
      */
-    public static ForButton<AbstractButton> button(String text) { return of(new JButton(text)); }
+    public static ForButton<JButton> button(String text) { return of(new JButton(text)); }
 
     /**
      *  Use this to create a builder for the {@link JButton} UI component
@@ -151,7 +150,7 @@ public class UI
      *
      * @return A builder instance for a {@link JButton}, which enables builder-style method chaining.
      */
-    public static ForButton<AbstractButton> buttonWithIcon(Icon icon) {
+    public static ForButton<JButton> buttonWithIcon(Icon icon) {
         LogUtil.nullArgCheck(icon, "icon", Icon.class);
         return button().make( it -> it.setIcon(icon) );
     }
@@ -163,13 +162,13 @@ public class UI
      *
      * @return A builder instance for a {@link JButton}, which enables builder-style method chaining.
      */
-    public static ForButton<AbstractButton> buttonWithIcon(Icon icon, Icon onHover) {
+    public static ForButton<JButton> buttonWithIcon(Icon icon, Icon onHover) {
         LogUtil.nullArgCheck(icon, "icon", Icon.class);
         LogUtil.nullArgCheck(onHover, "onHover", Icon.class);
         return buttonWithIcon(icon, onHover, onHover);
     }
 
-    public static ForButton<AbstractButton> buttonWithIcon(int width, int height, ImageIcon icon, ImageIcon onHover) {
+    public static ForButton<JButton> buttonWithIcon(int width, int height, ImageIcon icon, ImageIcon onHover) {
         onHover = new ImageIcon(onHover.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT));
         icon = new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT));
         return buttonWithIcon(icon, onHover, onHover);
@@ -182,7 +181,7 @@ public class UI
      *
      * @return A builder instance for a {@link JButton}, which enables builder-style method chaining.
      */
-    public static ForButton<AbstractButton> buttonWithIcon(Icon icon, Icon onHover, Icon onPress) {
+    public static ForButton<JButton> buttonWithIcon(Icon icon, Icon onHover, Icon onPress) {
         LogUtil.nullArgCheck(icon, "icon", Icon.class);
         LogUtil.nullArgCheck(onHover, "onHover", Icon.class);
         LogUtil.nullArgCheck(onPress, "onPress", Icon.class);
@@ -598,7 +597,7 @@ public class UI
         @SuppressWarnings("varargs")
         public final <T extends JComponent> I add(ForSwing<?, T>... builders) {
             if ( builders == null )
-                throw new IllegalArgumentException("Swing builders may not be null!");
+                throw new IllegalArgumentException("Swing tree builders may not be null!");
             for( ForSwing<?, T> b : builders )
                 b.siblings.addAll(
                         Stream.of(builders).filter(builder -> builder != b )
