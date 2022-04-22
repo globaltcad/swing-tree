@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -37,7 +36,8 @@ public class UI
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(UI.class);
 
-    public enum Cursor {
+    public enum Cursor
+    {
         HAND(java.awt.Cursor.HAND_CURSOR),
         MOVE(java.awt.Cursor.MOVE_CURSOR),
         CROSS(java.awt.Cursor.CROSSHAIR_CURSOR),
@@ -56,7 +56,6 @@ public class UI
         final int type;
 
         Cursor(int type) { this.type = type; }
-
     }
 
     /**
@@ -70,26 +69,35 @@ public class UI
      */
     public static <T extends JComponent> ForSwing<ForSwing, T> of(T component)
     {
+        LogUtil.nullArgCheck(component, "component", JComponent.class);
         return new ForSwing<>(component);
     }
 
     public static <T extends JComponent> ForSwing<ForSwing, T> of(SwingBuilder<T> builder)
     {
+        LogUtil.nullArgCheck(builder, "builder", SwingBuilder.class);
         return of(builder.build());
     }
 
     public static <M extends JMenuItem> ForMenuItem of(MenuBuilder<M> builder)
     {
+        LogUtil.nullArgCheck(builder, "builder", MenuBuilder.class);
         return new ForMenuItem(builder.build());
     }
 
     public static ForPopup of(JPopupMenu popup)
     {
+        LogUtil.nullArgCheck(popup, "popup", JPopupMenu.class);
         return new ForPopup(popup);
     }
 
+    /**
+     *  Use this to create a builder for the {@link JPopupMenu} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JPopupMenu())}.
+     *
+     * @return A builder instance for a {@link JPopupMenu}, which enables builder-style method chaining.
+     */
     public static ForPopup popupMenu() { return of(new JPopupMenu()); }
-
 
     /**
      *  The following static factory method returns an instance of a {@link ForSeparator} builder
@@ -100,6 +108,7 @@ public class UI
      */
     public static ForSeparator of(JSeparator separator)
     {
+        LogUtil.nullArgCheck(separator, "separator", JSeparator.class);
         return new ForSeparator(separator);
     }
 
@@ -113,7 +122,9 @@ public class UI
      * @param component The new component instance which ought to be part of the Swing UI.
      * @return A basic UI builder instance.
      */
-    public static ForButton<AbstractButton> of(AbstractButton component) {
+    public static ForButton<AbstractButton> of(AbstractButton component)
+    {
+        LogUtil.nullArgCheck(component, "component", AbstractButton.class);
         return new ForButton<>(component);
     }
 
@@ -123,9 +134,7 @@ public class UI
      *
      * @return A builder instance for a {@link JButton}, which enables builder-style method chaining.
      */
-    public static ForButton<AbstractButton> button() {
-        return of(new JButton());
-    }
+    public static ForButton<AbstractButton> button() { return of(new JButton()); }
 
     /**
      *  Use this to create a builder for the {@link JButton} UI component with the provided text displayed on top.
@@ -133,9 +142,7 @@ public class UI
      *
      * @return A builder instance for a {@link JButton}, which enables builder-style method chaining.
      */
-    public static ForButton<AbstractButton> button(String text) {
-        return of(new JButton(text));
-    }
+    public static ForButton<AbstractButton> button(String text) { return of(new JButton(text)); }
 
     /**
      *  Use this to create a builder for the {@link JButton} UI component
@@ -145,6 +152,7 @@ public class UI
      * @return A builder instance for a {@link JButton}, which enables builder-style method chaining.
      */
     public static ForButton<AbstractButton> buttonWithIcon(Icon icon) {
+        LogUtil.nullArgCheck(icon, "icon", Icon.class);
         return button().make( it -> it.setIcon(icon) );
     }
 
@@ -156,6 +164,8 @@ public class UI
      * @return A builder instance for a {@link JButton}, which enables builder-style method chaining.
      */
     public static ForButton<AbstractButton> buttonWithIcon(Icon icon, Icon onHover) {
+        LogUtil.nullArgCheck(icon, "icon", Icon.class);
+        LogUtil.nullArgCheck(onHover, "onHover", Icon.class);
         return buttonWithIcon(icon, onHover, onHover);
     }
 
@@ -173,16 +183,21 @@ public class UI
      * @return A builder instance for a {@link JButton}, which enables builder-style method chaining.
      */
     public static ForButton<AbstractButton> buttonWithIcon(Icon icon, Icon onHover, Icon onPress) {
+        LogUtil.nullArgCheck(icon, "icon", Icon.class);
+        LogUtil.nullArgCheck(onHover, "onHover", Icon.class);
+        LogUtil.nullArgCheck(onPress, "onPress", Icon.class);
         return button().make( it -> it.setIcon(icon) )
                 .make( it -> it.setRolloverIcon(onHover) )
                 .make( it -> it.setPressedIcon(onPress) );
     }
 
     public static ForMenu of(JMenu component) {
+        LogUtil.nullArgCheck(component, "component", JMenu.class);
         return new ForMenu(component);
     }
 
     public static ForMenuItem of(JMenuItem component) {
+        LogUtil.nullArgCheck(component, "component", JMenuItem.class);
         return new ForMenuItem(component);
     }
 
@@ -191,6 +206,7 @@ public class UI
     }
 
     public static <P extends JPanel> ForPanel<P> of(P component) {
+        LogUtil.nullArgCheck(component, "component", JPanel.class);
         return new ForPanel<>(component);
     }
 
@@ -200,9 +216,7 @@ public class UI
      *
      * @return A builder instance for the panel, which enables builder-style method chaining.
      */
-    public static ForPanel<JPanel> panel() {
-        return of(new JPanel());
-    }
+    public static ForPanel<JPanel> panel() { return of(new JPanel()); }
 
     /**
      *  Use this to create a builder for the {@link JPanel} UI component.
@@ -217,14 +231,17 @@ public class UI
     }
 
     public static ForSlider of(JSlider component) {
+        LogUtil.nullArgCheck(component, "component", JSlider.class);
         return new ForSlider(component);
     }
 
     public static ForCombo of(JComboBox component) {
+        LogUtil.nullArgCheck(component, "component", JComboBox.class);
         return new ForCombo(component);
     }
 
     public static ForLabel of(JLabel component) {
+        LogUtil.nullArgCheck(component, "component", JLabel.class);
         return new ForLabel(component);
     }
 
@@ -246,10 +263,12 @@ public class UI
      * @return A builder instance for the label, which enables builder-style method chaining.
      */
     public static ForLabel labelWithIcon(Icon icon) {
+        LogUtil.nullArgCheck(icon, "icon", Icon.class);
         return of(new JLabel()).make( it -> it.setIcon(icon) );
     }
 
     public static ForLabel labelWithIcon(int width, int height, ImageIcon icon) {
+        LogUtil.nullArgCheck(icon, "icon", ImageIcon.class);
         return of(new JLabel())
                 .make(it -> it.setIcon(
                     new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT))
@@ -257,24 +276,23 @@ public class UI
     }
 
     public static ForCheckBox of(JCheckBox component) {
+        LogUtil.nullArgCheck(component, "component", JCheckBox.class);
         return new ForCheckBox(component);
     }
 
     public static ForRadioButton of(JRadioButton component) {
+        LogUtil.nullArgCheck(component, "component", JRadioButton.class);
         return new ForRadioButton(component);
     }
 
     public static ForTextComponent of(JTextComponent component) {
+        LogUtil.nullArgCheck(component, "component", JTextComponent.class);
         return new ForTextComponent(component);
     }
 
-    public static ForTextComponent input(String text) {
-        return of(new JTextField(text));
-    }
+    public static ForTextComponent input(String text) { return of(new JTextField(text)); }
 
-    public static ForTextComponent input() {
-        return of(new JTextField());
-    }
+    public static ForTextComponent input() { return of(new JTextField()); }
 
     public static <T> ForAnything<T> of(T component)
     {
@@ -289,9 +307,7 @@ public class UI
          *
          * @param component The component type which will be wrapped by this builder node.
          */
-        public ForAnything(T component) {
-            super(component);
-        }
+        public ForAnything(T component) { super(component); }
     }
 
     /**
@@ -388,9 +404,7 @@ public class UI
          * @param constraints A string defining the mig layout.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public final I withLayout(String constraints) {
-            return withLayout(constraints, null);
-        }
+        public final I withLayout(String constraints) { return withLayout(constraints, null); }
 
         /**
          *  This creates a {@link MigLayout} for the component wrapped by this UI builder.
@@ -447,23 +461,9 @@ public class UI
          * @return This very instance, which enables builder-style method chaining.
          */
         public final I withBackground(Color color) {
+            LogUtil.nullArgCheck(color, "color", Color.class);
             this.component.setBackground(color);
             return (I) this;
-        }
-
-        /**
-         *  Use this to register and catch generic {@link MouseListener} based mouse click events on this UI component.
-         *  This method adds the provided consumer lambda to
-         *  a {@link MouseListener} instance to the wrapped
-         *  button component.
-         *  <br><br>
-         *
-         * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
-         * @return This very instance, which enables builder-style method chaining.
-         */
-        public final I onMouseClick(Consumer<MouseEvent> onClick) {
-            LogUtil.nullArgCheck(onClick, "onClick", Consumer.class);
-            return this.onMouseClick((c, e)->onClick.accept(e));
         }
 
         /**
@@ -476,32 +476,73 @@ public class UI
          * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public final I onMouseClick(BiConsumer<C, MouseEvent> onClick) {
-            LogUtil.nullArgCheck(onClick, "onClick", BiConsumer.class);
+        public final I onMouseClick(Consumer<ActionContext<C, MouseEvent>> onClick) {
+            LogUtil.nullArgCheck(onClick, "onClick", Consumer.class);
             this.component.addMouseListener(new MouseAdapter() {
-                @Override public void mouseClicked(MouseEvent e) { onClick.accept(component, e); }
+                @Override public void mouseClicked(MouseEvent e) { onClick.accept(new ActionContext<>(component, e)); }
             });
             return (I) this;
         }
 
         /**
-         * The provided lambda will be invoked when the component's size changes.
+         *  Use this to register and catch generic {@link MouseListener} based mouse click events on this UI component.
+         *  This method adds the provided UI component consumer lambda to
+         *  a {@link MouseListener} instance to the wrapped
+         *  button component.
+         *  <br><br>
+         *
+         * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
+         * @return This very instance, which enables builder-style method chaining.
          */
-        public final I onResize(Consumer<ComponentEvent> action) {
-            return this.onResize( (c, e) -> action.accept(e) );
+        public final I onMouseClickComponent(Consumer<C> onClick) {
+            LogUtil.nullArgCheck(onClick, "onClick", Consumer.class);
+            return this.onMouseClick( it -> onClick.accept(it.component) );
         }
+
+        /**
+         *  Use this to register and catch generic {@link MouseListener} based mouse click events on this UI component.
+         *  This method adds the provided {@link MouseEvent} consumer lambda to
+         *  a {@link MouseListener} instance to the wrapped
+         *  button component.
+         *  <br><br>
+         *
+         * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
+         * @return This very instance, which enables builder-style method chaining.
+         */
+        public final I onMouseClickEvent(Consumer<MouseEvent> onClick) {
+            LogUtil.nullArgCheck(onClick, "onClick", Consumer.class);
+            return this.onMouseClick( it -> onClick.accept(it.event) );
+        }
+
 
         /**
          * The provided lambda will be invoked when the component's size changes.
          */
-        public final I onResize(BiConsumer<C, ComponentEvent> action) {
+        public final I onResize(Consumer<ActionContext<C, ComponentEvent>> action) {
+            LogUtil.nullArgCheck(action, "onClick", Consumer.class);
             this.component.addComponentListener( new ComponentAdapter() {
                 @Override
                 public void componentResized(ComponentEvent e) {
-                    action.accept(component, e);
+                    action.accept(new ActionContext<>(component, e));
                 }
             });
             return (I) this;
+        }
+
+        /**
+         * The provided lambda will be invoked when the component's size changes.
+         */
+        public final I onResizeComponent(Consumer<C> action) {
+            LogUtil.nullArgCheck(action, "onClick", Consumer.class);
+            return this.onResize( it -> action.accept(it.component) );
+        }
+
+        /**
+         * The provided lambda will be invoked when the component's size changes.
+         */
+        public final I onResizeEvent(Consumer<ComponentEvent> action) {
+            LogUtil.nullArgCheck(action, "onClick", Consumer.class);
+            return this.onResize( it -> action.accept(it.event) );
         }
 
         /**
@@ -695,9 +736,7 @@ public class UI
     class ForButton<B extends AbstractButton>
             extends ForSwing<ForButton<B>, B>
     {
-        public ForButton(B component) {
-            super(component);
-        }
+        public ForButton(B component) { super(component); }
 
         public ForButton<B> saying(String text) {
             this.component.setText(text);
@@ -724,28 +763,14 @@ public class UI
 
         /**
          *  This method adds the provided
-         *  {@link ActionListener} instance to the wrapped
-         *  button component.
-         *  <br><br>
-         *
-         * @param actionListener The ActionListener instance which will be passed to the button component.
-         * @return This very instance, which enables builder-style method chaining.
-         */
-        public ForButton<B> onClick(ActionListener actionListener) {
-            this.component.addActionListener(actionListener);
-            return this;
-        }
-
-        /**
-         *  This method adds the provided
          *  {@link ItemListener} instance to the wrapped button component.
          *  <br><br>
          *
-         * @param itemListener The ItemListener instance which will be passed to the button component.
+         * @param action The change action lambda which will be passed to the button component.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public ForButton<B> onChange(ItemListener itemListener) {
-            this.component.addItemListener(itemListener);
+        public ForButton<B> onChange(Consumer<ActionContext<B, ItemEvent>> action) {
+            this.component.addItemListener(e -> action.accept(new ActionContext<>(this.component, e)));
             return this;
         }
 
@@ -757,12 +782,22 @@ public class UI
          *  This is very useful for changing the state of the JComponent when the action is being triggered.
          *  <br><br>
          *
-         * @param action A {@link BiConsumer} instance which will be wrapped by an {@link ActionListener} and passed to the button component.
+         * @param action A {@link Consumer} instance which will be wrapped by an {@link ActionListener} and passed to the button component.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public ForButton<B> onClick(BiConsumer<B, ActionEvent> action) {
-            this.component.addActionListener( e -> action.accept(this.component, e) );
+        public ForButton<B> onClick(Consumer<ActionContext<B, ActionEvent>> action) {
+            this.component.addActionListener( e -> action.accept(new ActionContext<>(this.component, e)) );
             return this;
+        }
+
+        public ForButton<B> onClickComponent(Consumer<B> action) {
+            LogUtil.nullArgCheck(action, "onClick", Consumer.class);
+            return this.onClick( it -> action.accept(it.component) );
+        }
+
+        public ForButton<B> onClickEvent(Consumer<ActionEvent> action) {
+            LogUtil.nullArgCheck(action, "onClick", Consumer.class);
+            return this.onClick( it -> action.accept(it.event) );
         }
 
         /**
@@ -773,11 +808,11 @@ public class UI
          *  This is very useful for changing the state of related {@link JComponent}s.
          *  <br><br>
          *
-         * @param action A {@link BiConsumer} instance which will be wrapped by an {@link ActionListener} and passed to the button component.
+         * @param action A {@link Consumer} instance which will be wrapped by an {@link ActionListener} and passed to the button component.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public ForButton<B> onClickForSiblings(BiConsumer<List<B>, ActionEvent> action) {
-            this.component.addActionListener( e -> action.accept(this.siblings, e) );
+        public ForButton<B> onClickForSiblings(Consumer<ActionContext<List<B>, ActionEvent>> action) {
+            this.component.addActionListener( e -> action.accept(new ActionContext<>(this.siblings, e)) );
             return this;
         }
 
@@ -813,9 +848,7 @@ public class UI
      */
     public static class ForPanel<P extends JPanel> extends ForSwing<ForPanel<P>, P>
     {
-        public ForPanel(P component) {
-            super(component);
-        }
+        public ForPanel(P component) { super(component); }
     }
 
     /**
@@ -823,13 +856,22 @@ public class UI
      */
     public static class ForSlider extends ForSwing<ForSlider, JSlider>
     {
-        public ForSlider(JSlider component) {
-            super(component);
+        public ForSlider(JSlider component) { super(component); }
+
+        public ForSlider onChange(Consumer<ActionContext<JSlider, ChangeEvent>> action) {
+            LogUtil.nullArgCheck(action, "action", Consumer.class);
+            this.component.addChangeListener( e -> action.accept(new ActionContext<>(this.component, e)) );
+            return this;
         }
 
-        public ForSlider onChange(BiConsumer<JSlider, ChangeEvent> action) {
-            this.component.addChangeListener( e -> action.accept(this.component, e) );
-            return this;
+        public ForSlider onChangeComponent(Consumer<JSlider> action) {
+            LogUtil.nullArgCheck(action, "action", Consumer.class);
+            return this.onChange( it -> action.accept(it.component) );
+        }
+
+        public ForSlider onChangeEvent(Consumer<ChangeEvent> action) {
+            LogUtil.nullArgCheck(action, "action", Consumer.class);
+            return this.onChange( it -> action.accept(it.event) );
         }
     }
 
@@ -842,11 +884,21 @@ public class UI
             super(component);
         }
 
-        public ForCombo onChange(BiConsumer<JComboBox, ActionEvent> action) {
-            this.component.addActionListener( e -> action.accept(this.component, e) );
+        public ForCombo onChange(Consumer<ActionContext<JComboBox, ActionEvent>> action) {
+            LogUtil.nullArgCheck(action, "action", Consumer.class);
+            this.component.addActionListener( e -> action.accept(new ActionContext<>(this.component, e)) );
             return this;
         }
 
+        public ForCombo onChangeEvent(Consumer<ActionEvent> action) {
+            LogUtil.nullArgCheck(action, "action", Consumer.class);
+            return this.onChange( it -> action.accept(it.getEvent()) );
+        }
+
+        public ForCombo onChangeComponent(Consumer<JComboBox> action) {
+            LogUtil.nullArgCheck(action, "action", Consumer.class);
+            return this.onChange( it -> action.accept(it.getComponent()) );
+        }
     }
 
     /**
@@ -854,9 +906,7 @@ public class UI
      */
     public static class ForLabel extends ForSwing<ForLabel, JLabel>
     {
-        public ForLabel(JLabel component) {
-            super(component);
-        }
+        public ForLabel(JLabel component) { super(component); }
 
         /**
          *  Makes the wrapped {@link JLabel} font bold (!plain).
@@ -884,10 +934,7 @@ public class UI
                         e1.printStackTrace();
                     }
                 }
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    component.setText(text.get());
-                }
+                @Override  public void mouseExited(MouseEvent e) { component.setText(text.get()); }
                 @Override
                 public void mouseEntered(MouseEvent e) {
                     component.setText("<html><a href=''>" + text.get() + "</a></html>");
@@ -950,9 +997,7 @@ public class UI
      */
     public static class ForRadioButton extends ForButton<JRadioButton>
     {
-        public ForRadioButton(JRadioButton component) {
-            super(component);
-        }
+        public ForRadioButton(JRadioButton component) { super(component); }
     }
 
     public static class ForTextComponent extends ForSwing<ForTextComponent, JTextComponent>
@@ -1005,13 +1050,21 @@ public class UI
          * @param action An action which will be executed when the text in the underlying {@link JTextComponent} changes.
          * @return This very builder to allow for method chaining.
          */
-        public ForTextComponent onTextChange(BiConsumer<JTextComponent, DocumentEvent> action) {
+        public ForTextComponent onTextChange(Consumer<ActionContext<JTextComponent, DocumentEvent>> action) {
             this.component.getDocument().addDocumentListener(new DocumentListener() {
-                @Override public void insertUpdate(DocumentEvent e) {action.accept(component, e);}
-                @Override public void removeUpdate(DocumentEvent e) {action.accept(component, e);}
-                @Override public void changedUpdate(DocumentEvent e) {action.accept(component, e);}
+                @Override public void insertUpdate(DocumentEvent e) {action.accept(new ActionContext<>(component, e));}
+                @Override public void removeUpdate(DocumentEvent e) {action.accept(new ActionContext<>(component, e));}
+                @Override public void changedUpdate(DocumentEvent e) {action.accept(new ActionContext<>(component, e));}
             });
             return this;
+        }
+
+        public ForTextComponent onTextChangeComponent(Consumer<JTextComponent> action) {
+            return this.onTextChange(it -> action.accept(it.component));
+        }
+
+        public ForTextComponent onTextChangeEvent(Consumer<DocumentEvent> action) {
+            return this.onTextChange(it -> action.accept(it.event));
         }
 
         /**
@@ -1058,6 +1111,26 @@ public class UI
             ifFilterable( () -> this.replace = action );
             return this;
         }
+    }
+
+    /**
+     *  Instances of this are passed to action lambdas for UI components
+     *  to give an action more context information.
+     *
+     * @param <C> The UI component type parameter stored by this.
+     * @param <E> The event type parameter of the event stored by this.
+     */
+    public static class ActionContext<C,E> {
+
+        private final C component;
+        private final E event;
+
+        private ActionContext(C component, E event) { this.component = component; this.event = event; }
+
+        public C getComponent() { return component; }
+
+        public E getEvent() { return event; }
+
     }
 
     /**
