@@ -78,6 +78,11 @@ UI.panelWithLayout("fill, insets 10","[grow][shrink]")
 	
 ```
 
+Which produces the following UI when added to a JFrame:
+
+<img href="" title="example" src="docs/img/simple-example.png" style="width:60%"/>
+
+
 ## Getting started with [![](https://jitpack.io/v/globaltcad/swing-tree.svg)](https://jitpack.io/#globaltcad/swing-tree) ##
 **1. Add the JitPack url in your root `build.gradle` at the end of `repositories`**
 ```
