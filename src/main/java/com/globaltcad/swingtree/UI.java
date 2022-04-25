@@ -911,7 +911,7 @@ public class UI
     /**
      *  A UI make for {@link JMenu} instances.
      */
-    public static class ForMenu extends ForButton<JMenu>
+    public static class ForMenu extends ForAbstractButton<ForMenu, JMenu>
     {
         protected ForMenu(JMenu component) {
             super(component);
@@ -921,7 +921,7 @@ public class UI
     /**
      *  A UI make for {@link JMenuItem} instances.
      */
-    public static class ForMenuItem extends ForButton<JMenuItem>
+    public static class ForMenuItem extends ForAbstractButton<ForMenuItem, JMenuItem>
     {
         protected ForMenuItem(JMenuItem component) {
             super(component);
@@ -1075,7 +1075,7 @@ public class UI
     /**
      *  A UI maker for {@link JCheckBox} instances.
      */
-    public static class ForCheckBox extends ForButton<JCheckBox>
+    public static class ForCheckBox extends ForAbstractButton<ForCheckBox,JCheckBox>
     {
         protected ForCheckBox(JCheckBox component) {
             super(component);
@@ -1085,7 +1085,7 @@ public class UI
     /**
      *  A UI maker for {@link JRadioButton} instances.
      */
-    public static class ForRadioButton extends ForButton<JRadioButton>
+    public static class ForRadioButton extends ForAbstractButton<ForRadioButton,JRadioButton>
     {
         protected ForRadioButton(JRadioButton component) { super(component); }
     }
