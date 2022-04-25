@@ -886,14 +886,32 @@ public class UI
             return this;
         }
 
-        public ForSplitButton<B> addOption(String option, Runnable action) {
+        public WithAction addOption(String option) {
             LogUtil.nullArgCheck(option, "option", String.class);
-            LogUtil.nullArgCheck(action, "action", Runnable.class);
             JMenuItem item = new JMenuItem(option);
             popupMenu.add(item);
-            options.put(item, action);
             item.addActionListener( e -> component.setText(item.getText()) );
-            return this;
+            return (action) -> {
+                LogUtil.nullArgCheck(action, "action", Runnable.class);
+                options.put(item, action);
+                return ForSplitButton.this;
+            };
+        }
+
+        public WithAction<B> addOption(ForMenuItem option) {
+            LogUtil.nullArgCheck(option, "option", ForMenuItem.class);
+            JMenuItem item = option.component;
+            popupMenu.add(item);
+            item.addActionListener( e -> component.setText(item.getText()) );
+            return (action) -> {
+                LogUtil.nullArgCheck(action, "action", Runnable.class);
+                options.put(item, action);
+                return ForSplitButton.this;
+            };
+        }
+
+        interface WithAction<B extends JSplitButton> {
+            ForSplitButton<B> withAction(Runnable run);
         }
     }
 
