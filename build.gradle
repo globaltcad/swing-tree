@@ -27,8 +27,9 @@ repositories {
 
 dependencies {
 
-    // https://mvnrepository.com/artifact/com.miglayout/miglayout
-    implementation 'com.miglayout:miglayout:3.7.4'
+    // Main dependencies:
+    implementation 'com.miglayout:miglayout:3.7.4'// https://mvnrepository.com/artifact/com.miglayout/miglayout
+    implementation 'com.alexandriasoftware.swing:jsplitbutton:1.3.1' // JSplitButton
 
     // Logging :
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'

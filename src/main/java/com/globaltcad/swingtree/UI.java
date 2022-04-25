@@ -1,5 +1,6 @@
 package com.globaltcad.swingtree;
 
+import com.alexandriasoftware.swing.JSplitButton;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 
@@ -188,6 +189,16 @@ public class UI
         return button().make( it -> it.setIcon(icon) )
                 .make( it -> it.setRolloverIcon(onHover) )
                 .make( it -> it.setPressedIcon(onPress) );
+    }
+
+    public static <B extends JSplitButton> ForSplitButton<B> of(B splitButton) {
+        LogUtil.nullArgCheck(splitButton, "splitButton", JSplitButton.class);
+        return new ForSplitButton<>(splitButton);
+    }
+
+    public static ForSplitButton<JSplitButton> splitButton(String text) {
+        LogUtil.nullArgCheck(text, "text", String.class);
+        return new ForSplitButton<>(new JSplitButton(text));
     }
 
     public static ForMenu of(JMenu component) {
@@ -677,7 +688,7 @@ public class UI
          *
          * @param component The JComponent type which will be wrapped by this builder node.
          */
-        public ForPopup(JPopupMenu component) {
+        private ForPopup(JPopupMenu component) {
             super(component);
         }
 
@@ -704,7 +715,7 @@ public class UI
          *
          * @param component The JComponent type which will be wrapped by this builder node.
          */
-        public ForSeparator(JSeparator component) {
+        private ForSeparator(JSeparator component) {
             super(component);
         }
 
@@ -735,7 +746,7 @@ public class UI
     class ForButton<B extends AbstractButton>
             extends ForSwing<ForButton<B>, B>
     {
-        public ForButton(B component) { super(component); }
+        private ForButton(B component) { super(component); }
 
         public ForButton<B> saying(String text) {
             this.component.setText(text);
@@ -769,6 +780,7 @@ public class UI
          * @return This very instance, which enables builder-style method chaining.
          */
         public ForButton<B> onChange(Consumer<ActionContext<B, ItemEvent>> action) {
+            LogUtil.nullArgCheck(action, "action", Consumer.class);
             this.component.addItemListener(e -> action.accept(new ActionContext<>(this.component, e)));
             return this;
         }
@@ -785,6 +797,7 @@ public class UI
          * @return This very instance, which enables builder-style method chaining.
          */
         public ForButton<B> onClick(Consumer<ActionContext<B, ActionEvent>> action) {
+            LogUtil.nullArgCheck(action, "action", Consumer.class);
             this.component.addActionListener( e -> action.accept(new ActionContext<>(this.component, e)) );
             return this;
         }
@@ -817,12 +830,42 @@ public class UI
 
     }
 
+    public static class ForSplitButton<B extends JSplitButton> extends ForButton<B> {
+
+        private final JPopupMenu popupMenu = new JPopupMenu();
+
+        private ForSplitButton(B component) {
+            super(component);
+            this.component.setPopupMenu(popupMenu);
+        }
+
+        public ForSplitButton<B> onSplitClick( Consumer<ActionContext<B, ActionEvent>> action ) {
+            LogUtil.nullArgCheck(action, "action", Consumer.class);
+            this.component.addSplitButtonClickedActionListener(
+                    e -> action.accept(new ActionContext<>(this.component,e))
+            );
+            return this;
+        }
+
+        public ForSplitButton<B> withItem(ForMenuItem forItem) {
+            LogUtil.nullArgCheck(forItem, "forItem", ForMenuItem.class);
+            return withItem(forItem.component);
+        }
+
+        public ForSplitButton<B> withItem(JMenuItem item) {
+            LogUtil.nullArgCheck(item, "item", JMenuItem.class);
+            popupMenu.add(item);
+            return this;
+        }
+
+    }
+
     /**
      *  A UI make for {@link JMenu} instances.
      */
     public static class ForMenu extends ForButton<JMenu>
     {
-        public ForMenu(JMenu component) {
+        private ForMenu(JMenu component) {
             super(component);
         }
     }
@@ -832,7 +875,7 @@ public class UI
      */
     public static class ForMenuItem extends ForButton<JMenuItem>
     {
-        public ForMenuItem(JMenuItem component) {
+        private ForMenuItem(JMenuItem component) {
             super(component);
         }
 
@@ -847,7 +890,7 @@ public class UI
      */
     public static class ForPanel<P extends JPanel> extends ForSwing<ForPanel<P>, P>
     {
-        public ForPanel(P component) { super(component); }
+        private ForPanel(P component) { super(component); }
     }
 
     /**
@@ -855,7 +898,7 @@ public class UI
      */
     public static class ForSlider extends ForSwing<ForSlider, JSlider>
     {
-        public ForSlider(JSlider component) { super(component); }
+        private ForSlider(JSlider component) { super(component); }
 
         public ForSlider onChange(Consumer<ActionContext<JSlider, ChangeEvent>> action) {
             LogUtil.nullArgCheck(action, "action", Consumer.class);
@@ -879,7 +922,7 @@ public class UI
      */
     public static class ForCombo extends ForSwing<ForCombo, JComboBox>
     {
-        public ForCombo(JComboBox component) {
+        private ForCombo(JComboBox component) {
             super(component);
         }
 
@@ -905,7 +948,7 @@ public class UI
      */
     public static class ForLabel extends ForSwing<ForLabel, JLabel>
     {
-        public ForLabel(JLabel component) { super(component); }
+        private ForLabel(JLabel component) { super(component); }
 
         /**
          *  Makes the wrapped {@link JLabel} font bold (!plain).
@@ -986,7 +1029,7 @@ public class UI
      */
     public static class ForCheckBox extends ForButton<JCheckBox>
     {
-        public ForCheckBox(JCheckBox component) {
+        private ForCheckBox(JCheckBox component) {
             super(component);
         }
     }
@@ -996,7 +1039,7 @@ public class UI
      */
     public static class ForRadioButton extends ForButton<JRadioButton>
     {
-        public ForRadioButton(JRadioButton component) { super(component); }
+        private ForRadioButton(JRadioButton component) { super(component); }
     }
 
     public static class ForTextComponent extends ForSwing<ForTextComponent, JTextComponent>
@@ -1043,7 +1086,7 @@ public class UI
 
         };
 
-        public ForTextComponent(JTextComponent component) { super(component); }
+        private ForTextComponent(JTextComponent component) { super(component); }
 
         /**
          * @param action An action which will be executed when the text in the underlying {@link JTextComponent} changes.
@@ -1119,8 +1162,8 @@ public class UI
      * @param <C> The UI component type parameter stored by this.
      * @param <E> The event type parameter of the event stored by this.
      */
-    public static class ActionContext<C,E> {
-
+    public static class ActionContext<C,E>
+    {
         private final C component;
         private final E event;
 
