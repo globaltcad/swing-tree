@@ -1,5 +1,7 @@
 package com.globaltcad.swingtree;
 
+import com.formdev.flatlaf.FlatLightLaf;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -7,6 +9,7 @@ public class Example2 extends JPanel
 {
     public Example2()
     {
+        FlatLightLaf.setup();
         String description = "All of this is less than a hundred lines of code!<br>The layout of this is powered by MigLayout.<br><br>";
 
         UI.of(this)

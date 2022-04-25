@@ -1,5 +1,7 @@
 package com.globaltcad.swingtree;
 
+import com.formdev.flatlaf.FlatLightLaf;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -7,6 +9,7 @@ public class Example extends JPanel
 {
 	public Example()
 	{
+		FlatLightLaf.setup();
 		ImageIcon pdfIcon  = new ImageIcon(getClass().getResource("/img/seed.png"));
 		ImageIcon pdfHover = new ImageIcon(getClass().getResource("/img/trees.png"));
 		ImageIcon cover    = new ImageIcon(getClass().getResource("/img/swing.png"));

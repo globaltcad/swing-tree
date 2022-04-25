@@ -530,13 +530,10 @@ public class UI
         /**
          * The provided lambda will be invoked when the component's size changes.
          */
-        public final I onResize(Consumer<ActionContext<C, ComponentEvent>> action) {
-            LogUtil.nullArgCheck(action, "onClick", Consumer.class);
+        public final I onResize(Consumer<ActionContext<C, ComponentEvent>> onResize) {
+            LogUtil.nullArgCheck(onResize, "onResize", Consumer.class);
             this.component.addComponentListener( new ComponentAdapter() {
-                @Override
-                public void componentResized(ComponentEvent e) {
-                    action.accept(new ActionContext<>(component, e));
-                }
+                @Override public void componentResized(ComponentEvent e) { onResize.accept(new ActionContext<>(component, e)); }
             });
             return (I) this;
         }
@@ -545,7 +542,7 @@ public class UI
          * The provided lambda will be invoked when the component's size changes.
          */
         public final I onResizeComponent(Consumer<C> action) {
-            LogUtil.nullArgCheck(action, "onClick", Consumer.class);
+            LogUtil.nullArgCheck(action, "action", Consumer.class);
             return this.onResize( it -> action.accept(it.component) );
         }
 
@@ -553,8 +550,48 @@ public class UI
          * The provided lambda will be invoked when the component's size changes.
          */
         public final I onResizeEvent(Consumer<ComponentEvent> action) {
-            LogUtil.nullArgCheck(action, "onClick", Consumer.class);
+            LogUtil.nullArgCheck(action, "action", Consumer.class);
             return this.onResize( it -> action.accept(it.event) );
+        }
+
+        public final I onMoved(Consumer<ActionContext<C, ComponentEvent>> onMoved) {
+            LogUtil.nullArgCheck(onMoved, "onMoved", Consumer.class);
+            this.component.addComponentListener(new ComponentAdapter() {
+                @Override public void componentMoved(ComponentEvent e) { onMoved.accept(new ActionContext<>(component, e)); }
+            });
+            return (I) this;
+        }
+
+        public final I onShown(Consumer<ActionContext<C, ComponentEvent>> onShown) {
+            LogUtil.nullArgCheck(onShown, "onShown", Consumer.class);
+            this.component.addComponentListener(new ComponentAdapter() {
+                @Override public void componentShown(ComponentEvent e) { onShown.accept(new ActionContext<>(component, e)); }
+            });
+            return (I) this;
+        }
+
+        public final I onHidden(Consumer<ActionContext<C, ComponentEvent>> onHidden) {
+            LogUtil.nullArgCheck(onHidden, "onHidden", Consumer.class);
+            this.component.addComponentListener(new ComponentAdapter() {
+                @Override public void componentHidden(ComponentEvent e) { onHidden.accept(new ActionContext<>(component, e)); }
+            });
+            return (I) this;
+        }
+
+        public final I onFocusGained(Consumer<ActionContext<C, ComponentEvent>> onFocus) {
+            LogUtil.nullArgCheck(onFocus, "onFocus", Consumer.class);
+            this.component.addFocusListener(new FocusAdapter() {
+                @Override public void focusGained(FocusEvent e) { onFocus.accept(new ActionContext<>(component, e)); }
+            });
+            return (I) this;
+        }
+
+        public final I onFocusLost(Consumer<ActionContext<C, ComponentEvent>> onFocus) {
+            LogUtil.nullArgCheck(onFocus, "onFocus", Consumer.class);
+            this.component.addFocusListener(new FocusAdapter() {
+                @Override public void focusLost(FocusEvent e) { onFocus.accept(new ActionContext<>(component, e)); }
+            });
+            return (I) this;
         }
 
         /**
