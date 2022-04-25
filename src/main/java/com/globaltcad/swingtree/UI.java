@@ -688,7 +688,7 @@ public class UI
          *
          * @param component The JComponent type which will be wrapped by this builder node.
          */
-        private ForPopup(JPopupMenu component) {
+        protected ForPopup(JPopupMenu component) {
             super(component);
         }
 
@@ -715,7 +715,7 @@ public class UI
          *
          * @param component The JComponent type which will be wrapped by this builder node.
          */
-        private ForSeparator(JSeparator component) {
+        protected ForSeparator(JSeparator component) {
             super(component);
         }
 
@@ -732,6 +732,14 @@ public class UI
         }
     }
 
+    public static class ForButton<B extends AbstractButton>
+            extends ForAbstractButton<ForButton<B>, B>
+    {
+        protected ForButton(B component) {
+            super(component);
+        }
+    }
+
     /**
      *  The following is a more specialized type of builder which extends the "BasicBuilder" class
      *  and provides additional features associated with the more specialized
@@ -743,14 +751,14 @@ public class UI
      * @param <B> The type parameter for the component wrapped by an instance of this class.
      */
     public static
-    class ForButton<B extends AbstractButton>
-            extends ForSwing<ForButton<B>, B>
+    abstract class ForAbstractButton<I, B extends AbstractButton>
+    extends ForSwing<I, B>
     {
-        private ForButton(B component) { super(component); }
+        protected ForAbstractButton(B component) { super(component); }
 
-        public ForButton<B> saying(String text) {
+        public I saying(String text) {
             this.component.setText(text);
-            return this;
+            return (I) this;
         }
 
         /**
@@ -760,7 +768,7 @@ public class UI
          *
          * @return This very instance, which enables builder-style method chaining.
          */
-        public ForButton<B> makePlain() {
+        public I makePlain() {
             make( it -> {
                 it.setBorderPainted(false);
                 it.setContentAreaFilled(false);
@@ -768,7 +776,7 @@ public class UI
                 it.setFocusPainted(false);
                 it.setMargin(new Insets(0,0,0,0));
             });
-            return this;
+            return (I) this;
         }
 
         /**
@@ -779,10 +787,10 @@ public class UI
          * @param action The change action lambda which will be passed to the button component.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public ForButton<B> onChange(Consumer<ActionContext<B, ItemEvent>> action) {
+        public I onChange(Consumer<ActionContext<B, ItemEvent>> action) {
             LogUtil.nullArgCheck(action, "action", Consumer.class);
             this.component.addItemListener(e -> action.accept(new ActionContext<>(this.component, e)));
-            return this;
+            return (I) this;
         }
 
         /**
@@ -796,18 +804,18 @@ public class UI
          * @param action A {@link Consumer} instance which will be wrapped by an {@link ActionListener} and passed to the button component.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public ForButton<B> onClick(Consumer<ActionContext<B, ActionEvent>> action) {
+        public I onClick(Consumer<ActionContext<B, ActionEvent>> action) {
             LogUtil.nullArgCheck(action, "action", Consumer.class);
             this.component.addActionListener( e -> action.accept(new ActionContext<>(this.component, e)) );
-            return this;
+            return (I) this;
         }
 
-        public ForButton<B> onClickComponent(Consumer<B> action) {
+        public I onClickComponent(Consumer<B> action) {
             LogUtil.nullArgCheck(action, "onClick", Consumer.class);
             return this.onClick( it -> action.accept(it.component) );
         }
 
-        public ForButton<B> onClickEvent(Consumer<ActionEvent> action) {
+        public I onClickEvent(Consumer<ActionEvent> action) {
             LogUtil.nullArgCheck(action, "onClick", Consumer.class);
             return this.onClick( it -> action.accept(it.event) );
         }
@@ -823,18 +831,19 @@ public class UI
          * @param action A {@link Consumer} instance which will be wrapped by an {@link ActionListener} and passed to the button component.
          * @return This very instance, which enables builder-style method chaining.
          */
-        public ForButton<B> onClickForSiblings(Consumer<ActionContext<List<B>, ActionEvent>> action) {
+        public I onClickForSiblings(Consumer<ActionContext<List<B>, ActionEvent>> action) {
             this.component.addActionListener( e -> action.accept(new ActionContext<>(this.siblings, e)) );
-            return this;
+            return (I) this;
         }
 
     }
 
-    public static class ForSplitButton<B extends JSplitButton> extends ForButton<B> {
-
+    public static class ForSplitButton<B extends JSplitButton>
+    extends ForAbstractButton<ForSplitButton<B>, B>
+    {
         private final JPopupMenu popupMenu = new JPopupMenu();
 
-        private ForSplitButton(B component) {
+        protected ForSplitButton(B component) {
             super(component);
             this.component.setPopupMenu(popupMenu);
         }
@@ -865,7 +874,7 @@ public class UI
      */
     public static class ForMenu extends ForButton<JMenu>
     {
-        private ForMenu(JMenu component) {
+        protected ForMenu(JMenu component) {
             super(component);
         }
     }
@@ -875,7 +884,7 @@ public class UI
      */
     public static class ForMenuItem extends ForButton<JMenuItem>
     {
-        private ForMenuItem(JMenuItem component) {
+        protected ForMenuItem(JMenuItem component) {
             super(component);
         }
 
@@ -890,7 +899,7 @@ public class UI
      */
     public static class ForPanel<P extends JPanel> extends ForSwing<ForPanel<P>, P>
     {
-        private ForPanel(P component) { super(component); }
+        protected ForPanel(P component) { super(component); }
     }
 
     /**
@@ -898,7 +907,7 @@ public class UI
      */
     public static class ForSlider extends ForSwing<ForSlider, JSlider>
     {
-        private ForSlider(JSlider component) { super(component); }
+        protected ForSlider(JSlider component) { super(component); }
 
         public ForSlider onChange(Consumer<ActionContext<JSlider, ChangeEvent>> action) {
             LogUtil.nullArgCheck(action, "action", Consumer.class);
@@ -922,7 +931,7 @@ public class UI
      */
     public static class ForCombo extends ForSwing<ForCombo, JComboBox>
     {
-        private ForCombo(JComboBox component) {
+        protected ForCombo(JComboBox component) {
             super(component);
         }
 
@@ -948,7 +957,7 @@ public class UI
      */
     public static class ForLabel extends ForSwing<ForLabel, JLabel>
     {
-        private ForLabel(JLabel component) { super(component); }
+        protected ForLabel(JLabel component) { super(component); }
 
         /**
          *  Makes the wrapped {@link JLabel} font bold (!plain).
@@ -1029,7 +1038,7 @@ public class UI
      */
     public static class ForCheckBox extends ForButton<JCheckBox>
     {
-        private ForCheckBox(JCheckBox component) {
+        protected ForCheckBox(JCheckBox component) {
             super(component);
         }
     }
@@ -1039,7 +1048,7 @@ public class UI
      */
     public static class ForRadioButton extends ForButton<JRadioButton>
     {
-        private ForRadioButton(JRadioButton component) { super(component); }
+        protected ForRadioButton(JRadioButton component) { super(component); }
     }
 
     public static class ForTextComponent extends ForSwing<ForTextComponent, JTextComponent>
@@ -1086,7 +1095,7 @@ public class UI
 
         };
 
-        private ForTextComponent(JTextComponent component) { super(component); }
+        protected ForTextComponent(JTextComponent component) { super(component); }
 
         /**
          * @param action An action which will be executed when the text in the underlying {@link JTextComponent} changes.
@@ -1191,13 +1200,9 @@ public class UI
             frame.setVisible(true);
         }
 
-        public JFrame getFrame() {
-            return this.frame;
-        }
+        public JFrame getFrame() { return this.frame; }
 
-        public Component getComponent() {
-            return this.component;
-        }
+        public Component getComponent() { return this.component; }
     }
 
 }
