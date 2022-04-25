@@ -15,7 +15,9 @@ import java.awt.event.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -842,10 +844,20 @@ public class UI
     extends ForAbstractButton<ForSplitButton<B>, B>
     {
         private final JPopupMenu popupMenu = new JPopupMenu();
+        private final Map<JMenuItem, Runnable> options = new HashMap<>();
 
         protected ForSplitButton(B component) {
             super(component);
             this.component.setPopupMenu(popupMenu);
+            this.component.addButtonClickedActionListener( e -> {
+                for ( JMenuItem item : options.keySet() ) {
+                    if ( item.getText().equals(component.getText()) ) {
+                        Runnable action = options.get(item);
+                        if ( action != null ) action.run();
+                        break;
+                    }
+                }
+            });
         }
 
         public ForSplitButton<B> onSplitClick( Consumer<ActionContext<B, ActionEvent>> action ) {
@@ -874,6 +886,15 @@ public class UI
             return this;
         }
 
+        public ForSplitButton<B> addOption(String option, Runnable action) {
+            LogUtil.nullArgCheck(option, "option", String.class);
+            LogUtil.nullArgCheck(action, "action", Runnable.class);
+            JMenuItem item = new JMenuItem(option);
+            popupMenu.add(item);
+            options.put(item, action);
+            item.addActionListener( e -> component.setText(item.getText()) );
+            return this;
+        }
     }
 
     /**
