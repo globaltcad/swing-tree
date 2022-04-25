@@ -910,7 +910,7 @@ public class UI
             };
         }
 
-        interface WithAction<B extends JSplitButton> {
+        public interface WithAction<B extends JSplitButton> {
             ForSplitButton<B> withAction(Runnable run);
         }
     }
