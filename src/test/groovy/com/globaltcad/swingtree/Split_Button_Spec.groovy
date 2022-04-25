@@ -16,13 +16,13 @@ class Split_Button_Spec extends Specification
             node.component instanceof JSplitButton
 
         when :
-            node.withItem(new JMenuItem("First"))
+            node.add(new JMenuItem("First"))
         then :
             node.popupMenu.components.length == 1
 
 
         when :
-            node.withItem(UI.menuItemSaying("Second"))
+            node.add(UI.menuItemSaying("Second"))
         then :
             node.popupMenu.components.length == 2
     }

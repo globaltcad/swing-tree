@@ -756,7 +756,7 @@ public class UI
     {
         protected ForAbstractButton(B component) { super(component); }
 
-        public I saying(String text) {
+        public final I saying(String text) {
             this.component.setText(text);
             return (I) this;
         }
@@ -810,12 +810,12 @@ public class UI
             return (I) this;
         }
 
-        public I onClickComponent(Consumer<B> action) {
+        public final I onClickComponent(Consumer<B> action) {
             LogUtil.nullArgCheck(action, "onClick", Consumer.class);
             return this.onClick( it -> action.accept(it.component) );
         }
 
-        public I onClickEvent(Consumer<ActionEvent> action) {
+        public final I onClickEvent(Consumer<ActionEvent> action) {
             LogUtil.nullArgCheck(action, "onClick", Consumer.class);
             return this.onClick( it -> action.accept(it.event) );
         }
@@ -856,12 +856,19 @@ public class UI
             return this;
         }
 
-        public ForSplitButton<B> withItem(ForMenuItem forItem) {
-            LogUtil.nullArgCheck(forItem, "forItem", ForMenuItem.class);
-            return withItem(forItem.component);
+        @Override
+        public ForSplitButton<B> onClick(Consumer<ActionContext<B, ActionEvent>> action) {
+            LogUtil.nullArgCheck(action, "action", Consumer.class);
+            this.component.addButtonClickedActionListener( e -> action.accept(new ActionContext<>(this.component, e)) );
+            return this;
         }
 
-        public ForSplitButton<B> withItem(JMenuItem item) {
+        public ForSplitButton<B> add(ForMenuItem forItem) {
+            LogUtil.nullArgCheck(forItem, "forItem", ForMenuItem.class);
+            return this.add(forItem.component);
+        }
+
+        public ForSplitButton<B> add(JMenuItem item) {
             LogUtil.nullArgCheck(item, "item", JMenuItem.class);
             popupMenu.add(item);
             return this;
