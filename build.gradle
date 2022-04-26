@@ -44,6 +44,8 @@ dependencies {
     testImplementation 'com.athaydes:spock-reports:2.3.0-groovy-3.0'//, { transitive = false }
 
     testImplementation 'com.formdev:flatlaf:2.1' // Looks better than regular swing :)
+    testImplementation group: 'com.metsci.ext.com.kitfox.svg', name: 'svg-salamander', version: '0.1.19'
+
 
     testRuntimeOnly group: 'net.bytebuddy', name: 'byte-buddy', version: '1.11.15' // allows mocking of classes (in addition to interfaces)
     testRuntimeOnly group: 'org.objenesis', name: 'objenesis', version: '3.2'      // allows mocking of classes without default constructor (together with ByteBuddy or CGLIB)
