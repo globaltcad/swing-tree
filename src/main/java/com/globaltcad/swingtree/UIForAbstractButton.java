@@ -54,8 +54,8 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @param action The change action lambda which will be passed to the button component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public I onChange(Consumer<EventContext<B, ItemEvent>> action) {
-        LogUtil.nullArgCheck(action, "action", Consumer.class);
+    public I onChange(UIAction<B, ItemEvent> action) {
+        LogUtil.nullArgCheck(action, "action", UIAction.class);
         this.component.addItemListener(e -> action.accept(new EventContext<>(this.component, e)));
         return (I) this;
     }
@@ -71,8 +71,8 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @param action A {@link Consumer} instance which will be wrapped by an {@link ActionListener} and passed to the button component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public I onClick(Consumer<EventContext<B, ActionEvent>> action) {
-        LogUtil.nullArgCheck(action, "action", Consumer.class);
+    public I onClick(UIAction<B, ActionEvent> action) {
+        LogUtil.nullArgCheck(action, "action", UIAction.class);
         this.component.addActionListener( e -> action.accept(new EventContext<>(this.component, e)) );
         return (I) this;
     }
@@ -88,7 +88,8 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @param action A {@link Consumer} instance which will be wrapped by an {@link ActionListener} and passed to the button component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public I onClickForSiblings(Consumer<EventContext<List<B>, ActionEvent>> action) {
+    public I onClickForSiblings(UIAction<List<B>, ActionEvent> action) {
+        LogUtil.nullArgCheck(action, "action", UIAction.class);
         this.component.addActionListener( e -> action.accept(new EventContext<>(this.siblings, e)) );
         return (I) this;
     }

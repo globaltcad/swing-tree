@@ -180,8 +180,8 @@ public class UIForSwing<I, C extends JComponent> extends AbstractNestedBuilder<I
      * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseClick(Consumer<EventContext<C, MouseEvent>> onClick) {
-        LogUtil.nullArgCheck(onClick, "onClick", Consumer.class);
+    public final I onMouseClick(UIAction<C, MouseEvent> onClick) {
+        LogUtil.nullArgCheck(onClick, "onClick", UIAction.class);
         this.component.addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) { onClick.accept(new EventContext<>(component, e)); }
         });
@@ -191,48 +191,48 @@ public class UIForSwing<I, C extends JComponent> extends AbstractNestedBuilder<I
     /**
      * The provided lambda will be invoked when the component's size changes.
      */
-    public final I onResize(Consumer<EventContext<C, ComponentEvent>> onResize) {
-        LogUtil.nullArgCheck(onResize, "onResize", Consumer.class);
+    public final I onResize(UIAction<C, ComponentEvent> onResize) {
+        LogUtil.nullArgCheck(onResize, "onResize", UIAction.class);
         this.component.addComponentListener( new ComponentAdapter() {
             @Override public void componentResized(ComponentEvent e) { onResize.accept(new EventContext<>(component, e)); }
         });
         return (I) this;
     }
 
-    public final I onMoved(Consumer<EventContext<C, ComponentEvent>> onMoved) {
-        LogUtil.nullArgCheck(onMoved, "onMoved", Consumer.class);
+    public final I onMoved(UIAction<C, ComponentEvent> onMoved) {
+        LogUtil.nullArgCheck(onMoved, "onMoved", UIAction.class);
         this.component.addComponentListener(new ComponentAdapter() {
             @Override public void componentMoved(ComponentEvent e) { onMoved.accept(new EventContext<>(component, e)); }
         });
         return (I) this;
     }
 
-    public final I onShown(Consumer<EventContext<C, ComponentEvent>> onShown) {
-        LogUtil.nullArgCheck(onShown, "onShown", Consumer.class);
+    public final I onShown(UIAction<C, ComponentEvent> onShown) {
+        LogUtil.nullArgCheck(onShown, "onShown", UIAction.class);
         this.component.addComponentListener(new ComponentAdapter() {
             @Override public void componentShown(ComponentEvent e) { onShown.accept(new EventContext<>(component, e)); }
         });
         return (I) this;
     }
 
-    public final I onHidden(Consumer<EventContext<C, ComponentEvent>> onHidden) {
-        LogUtil.nullArgCheck(onHidden, "onHidden", Consumer.class);
+    public final I onHidden(UIAction<C, ComponentEvent> onHidden) {
+        LogUtil.nullArgCheck(onHidden, "onHidden", UIAction.class);
         this.component.addComponentListener(new ComponentAdapter() {
             @Override public void componentHidden(ComponentEvent e) { onHidden.accept(new EventContext<>(component, e)); }
         });
         return (I) this;
     }
 
-    public final I onFocusGained(Consumer<EventContext<C, ComponentEvent>> onFocus) {
-        LogUtil.nullArgCheck(onFocus, "onFocus", Consumer.class);
+    public final I onFocusGained(UIAction<C, ComponentEvent> onFocus) {
+        LogUtil.nullArgCheck(onFocus, "onFocus", UIAction.class);
         this.component.addFocusListener(new FocusAdapter() {
             @Override public void focusGained(FocusEvent e) { onFocus.accept(new EventContext<>(component, e)); }
         });
         return (I) this;
     }
 
-    public final I onFocusLost(Consumer<EventContext<C, ComponentEvent>> onFocus) {
-        LogUtil.nullArgCheck(onFocus, "onFocus", Consumer.class);
+    public final I onFocusLost(UIAction<C, ComponentEvent> onFocus) {
+        LogUtil.nullArgCheck(onFocus, "onFocus", UIAction.class);
         this.component.addFocusListener(new FocusAdapter() {
             @Override public void focusLost(FocusEvent e) { onFocus.accept(new EventContext<>(component, e)); }
         });

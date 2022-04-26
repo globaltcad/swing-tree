@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButton<UIForSplitButton<B>, B>
 {
     private final JPopupMenu popupMenu = new JPopupMenu();
-    private final Map<JMenuItem, Consumer<EventContext<JMenuItem, ActionEvent>>> options = new HashMap<>();
+    private final Map<JMenuItem, UIAction<JMenuItem, ActionEvent>> options = new HashMap<>();
 
     protected UIForSplitButton(B component) {
         super(component);
@@ -19,7 +19,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
         this.component.addButtonClickedActionListener( e -> {
             for ( JMenuItem item : options.keySet() ) {
                 if ( item.getText().equals(component.getText()) ) {
-                    Consumer<EventContext<JMenuItem, ActionEvent>> action = options.get(item);
+                    UIAction<JMenuItem, ActionEvent> action = options.get(item);
                     if ( action != null ) action.accept(new EventContext<>(item, e));
                     break;
                 }
@@ -27,8 +27,8 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
         });
     }
 
-    public UIForSplitButton<B> onSplitClick(Consumer<EventContext<B, ActionEvent>> action ) {
-        LogUtil.nullArgCheck(action, "action", Consumer.class);
+    public UIForSplitButton<B> onSplitClick(UIAction<B, ActionEvent> action ) {
+        LogUtil.nullArgCheck(action, "action", UIAction.class);
         this.component.addSplitButtonClickedActionListener(
                 e -> action.accept(new EventContext<>(this.component,e))
         );
@@ -36,8 +36,8 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
     }
 
     @Override
-    public UIForSplitButton<B> onClick(Consumer<EventContext<B, ActionEvent>> action) {
-        LogUtil.nullArgCheck(action, "action", Consumer.class);
+    public UIForSplitButton<B> onClick(UIAction<B, ActionEvent> action) {
+        LogUtil.nullArgCheck(action, "action", UIAction.class);
         this.component.addButtonClickedActionListener( e -> action.accept(new EventContext<>(this.component, e)) );
         return this;
     }
@@ -53,15 +53,15 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
         return this;
     }
 
-    public UIForSplitButton<B> addItem(String option, Consumer<EventContext<JMenuItem, ActionEvent>> action) {
+    public UIForSplitButton<B> addItem(String option, UIAction<JMenuItem, ActionEvent> action) {
         LogUtil.nullArgCheck(option, "option", String.class);
-        LogUtil.nullArgCheck(action, "action", Runnable.class);
+        LogUtil.nullArgCheck(action, "action", UIAction.class);
         return this.add(ButtonItem.saying(option).onClick(action));
     }
 
-    public UIForSplitButton<B> addItem(UIForMenuItem option, Consumer<EventContext<JMenuItem, ActionEvent>> action) {
+    public UIForSplitButton<B> addItem(UIForMenuItem option, UIAction<JMenuItem, ActionEvent> action) {
         LogUtil.nullArgCheck(option, "option", UIForMenuItem.class);
-        LogUtil.nullArgCheck(action, "action", Runnable.class);
+        LogUtil.nullArgCheck(action, "action", UIAction.class);
         return this.add(ButtonItem.of(option).onClick(action));
     }
 

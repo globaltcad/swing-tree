@@ -11,8 +11,8 @@ public class UIForSlider extends UIForSwing<UIForSlider, JSlider>
 {
     protected UIForSlider(JSlider component) { super(component); }
 
-    public UIForSlider onChange(Consumer<EventContext<JSlider, ChangeEvent>> action) {
-        LogUtil.nullArgCheck(action, "action", Consumer.class);
+    public UIForSlider onChange(UIAction<JSlider, ChangeEvent> action) {
+        LogUtil.nullArgCheck(action, "action", UIAction.class);
         this.component.addChangeListener( e -> action.accept(new EventContext<>(this.component, e)) );
         return this;
     }

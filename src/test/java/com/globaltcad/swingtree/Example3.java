@@ -40,6 +40,7 @@ public class Example3 extends JPanel
                         .add(ButtonItem.saying("first").onClick( it -> System.out.println("FIRST CLICKED")))
                         .add(ButtonItem.saying("second").onClick( it -> System.out.println("SECOND CLICKED")))
                         .add(ButtonItem.saying("third").onClick( it -> System.out.println("THIRD CLICKED")))
+                        .add(ButtonItem.of(new JRadioButtonMenuItem("Fourth")).onClick( it -> System.out.println("THIRD CLICKED")))
                     )
             )
             .add("cell 1 0, grow y",

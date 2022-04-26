@@ -33,19 +33,19 @@ public class ButtonItem<I extends JMenuItem>
     }
 
     private final I item;
-    private final Consumer<EventContext<I, ActionEvent>> onButtonClick;
+    private final UIAction<I, ActionEvent> onButtonClick;
     private final Consumer<Context<I>> onItemSelected;
 
     private ButtonItem(I item ) {
         this.item = item; this.onButtonClick = null; this.onItemSelected = null;
     }
-    private ButtonItem(I item, Consumer<EventContext<I, ActionEvent>> action, Consumer<Context<I>> onSelected ) {
+    private ButtonItem(I item, UIAction<I, ActionEvent> action, Consumer<Context<I>> onSelected ) {
         this.item = item; this.onButtonClick = action; this.onItemSelected = onSelected;
     }
 
     public I getItem() { return item; }
 
-    public ButtonItem<I> onClick(Consumer<EventContext<I, ActionEvent>> action) {
+    public ButtonItem<I> onClick(UIAction<I, ActionEvent> action) {
         if ( this.onButtonClick != null ) throw new IllegalArgumentException("Property already specified!");
         return new ButtonItem<>(item, action, onItemSelected);
     }
@@ -56,7 +56,7 @@ public class ButtonItem<I extends JMenuItem>
     }
 
 
-    Consumer<EventContext<I, ActionEvent>> getOnClick() { return onButtonClick == null ? it->{} : onButtonClick; }
+    UIAction<I, ActionEvent> getOnClick() { return onButtonClick == null ? it->{} : onButtonClick; }
 
     Consumer<Context<I>> getOnSelected() {
         return onItemSelected == null
