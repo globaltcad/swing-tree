@@ -15,7 +15,7 @@ public class UIForCombo extends UIForSwing<UIForCombo, JComboBox>
 
     public UIForCombo onChange(UIAction<JComboBox, ActionEvent> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        this.component.addActionListener( e -> action.accept(new EventContext<>(this.component, e)) );
+        this.component.addActionListener( e -> action.accept(this.component, e) );
         return this;
     }
 }

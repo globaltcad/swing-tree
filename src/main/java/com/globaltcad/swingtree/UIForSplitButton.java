@@ -6,7 +6,6 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 
 public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButton<UIForSplitButton<B>, B>
 {
@@ -38,7 +37,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
     @Override
     public UIForSplitButton<B> onClick(UIAction<B, ActionEvent> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        this.component.addButtonClickedActionListener( e -> action.accept(new EventContext<>(this.component, e)) );
+        this.component.addButtonClickedActionListener( e -> action.accept(this.component, e) );
         return this;
     }
 
