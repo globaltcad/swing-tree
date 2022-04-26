@@ -65,14 +65,6 @@ public class UIForTextComponent extends UIForSwing<UIForTextComponent, JTextComp
         return this;
     }
 
-    public UIForTextComponent onTextChangeComponent(Consumer<JTextComponent> action) {
-        return this.onTextChange(it -> action.accept(it.getComponent()));
-    }
-
-    public UIForTextComponent onTextChangeEvent(Consumer<DocumentEvent> action) {
-        return this.onTextChange(it -> action.accept(it.getEvent()));
-    }
-
     /**
      * @param action An action which will be executed in case the underlying
      *               component supports text filtering (The underlying document is an {@link AbstractDocument}).

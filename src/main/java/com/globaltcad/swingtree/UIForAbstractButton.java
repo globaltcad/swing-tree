@@ -77,16 +77,6 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
         return (I) this;
     }
 
-    public final I onClickComponent(Consumer<B> action) {
-        LogUtil.nullArgCheck(action, "onClick", Consumer.class);
-        return this.onClick( it -> action.accept(it.getComponent()) );
-    }
-
-    public final I onClickEvent(Consumer<ActionEvent> action) {
-        LogUtil.nullArgCheck(action, "onClick", Consumer.class);
-        return this.onClick( it -> action.accept(it.getEvent()) );
-    }
-
     /**
      *  This method enables a more readable way of adding
      *  {@link ActionListener} instances to button types.

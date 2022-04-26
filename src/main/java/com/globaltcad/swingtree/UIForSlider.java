@@ -17,13 +17,4 @@ public class UIForSlider extends UIForSwing<UIForSlider, JSlider>
         return this;
     }
 
-    public UIForSlider onChangeComponent(Consumer<JSlider> action) {
-        LogUtil.nullArgCheck(action, "action", Consumer.class);
-        return this.onChange( it -> action.accept(it.getComponent()) );
-    }
-
-    public UIForSlider onChangeEvent(Consumer<ChangeEvent> action) {
-        LogUtil.nullArgCheck(action, "action", Consumer.class);
-        return this.onChange( it -> action.accept(it.getEvent()) );
-    }
 }

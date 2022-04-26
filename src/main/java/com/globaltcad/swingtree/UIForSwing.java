@@ -189,37 +189,6 @@ public class UIForSwing<I, C extends JComponent> extends AbstractNestedBuilder<I
     }
 
     /**
-     *  Use this to register and catch generic {@link MouseListener} based mouse click events on this UI component.
-     *  This method adds the provided UI component consumer lambda to
-     *  a {@link MouseListener} instance to the wrapped
-     *  button component.
-     *  <br><br>
-     *
-     * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
-     * @return This very instance, which enables builder-style method chaining.
-     */
-    public final I onMouseClickComponent(Consumer<C> onClick) {
-        LogUtil.nullArgCheck(onClick, "onClick", Consumer.class);
-        return this.onMouseClick( it -> onClick.accept(it.getComponent()) );
-    }
-
-    /**
-     *  Use this to register and catch generic {@link MouseListener} based mouse click events on this UI component.
-     *  This method adds the provided {@link MouseEvent} consumer lambda to
-     *  a {@link MouseListener} instance to the wrapped
-     *  button component.
-     *  <br><br>
-     *
-     * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
-     * @return This very instance, which enables builder-style method chaining.
-     */
-    public final I onMouseClickEvent(Consumer<MouseEvent> onClick) {
-        LogUtil.nullArgCheck(onClick, "onClick", Consumer.class);
-        return this.onMouseClick( it -> onClick.accept(it.getEvent()) );
-    }
-
-
-    /**
      * The provided lambda will be invoked when the component's size changes.
      */
     public final I onResize(Consumer<EventContext<C, ComponentEvent>> onResize) {
@@ -228,22 +197,6 @@ public class UIForSwing<I, C extends JComponent> extends AbstractNestedBuilder<I
             @Override public void componentResized(ComponentEvent e) { onResize.accept(new EventContext<>(component, e)); }
         });
         return (I) this;
-    }
-
-    /**
-     * The provided lambda will be invoked when the component's size changes.
-     */
-    public final I onResizeComponent(Consumer<C> action) {
-        LogUtil.nullArgCheck(action, "action", Consumer.class);
-        return this.onResize( it -> action.accept(it.getComponent()) );
-    }
-
-    /**
-     * The provided lambda will be invoked when the component's size changes.
-     */
-    public final I onResizeEvent(Consumer<ComponentEvent> action) {
-        LogUtil.nullArgCheck(action, "action", Consumer.class);
-        return this.onResize( it -> action.accept(it.getEvent()) );
     }
 
     public final I onMoved(Consumer<EventContext<C, ComponentEvent>> onMoved) {

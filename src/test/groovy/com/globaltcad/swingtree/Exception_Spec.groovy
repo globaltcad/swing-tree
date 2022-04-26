@@ -51,56 +51,12 @@ class Exception_Spec extends Specification
             thrown(IllegalArgumentException)
     }
 
-    def 'On mouse click component action lambdas may not be null.'() {
-        given : 'We have a simple JPanel UI node.'
-            var node = UI.panel()
-
-        when : 'We try to pass null as an on click action...'
-            node.onMouseClickComponent(null)
-
-        then : 'An illegal argument exception will be thrown!'
-            thrown(IllegalArgumentException)
-    }
-
-    def 'On mouse click event action lambdas may not be null.'() {
-        given : 'We have a simple JPanel UI node.'
-            var node = UI.panel()
-
-        when : 'We try to pass null as an on click action...'
-            node.onMouseClickEvent(null)
-
-        then : 'An illegal argument exception will be thrown!'
-            thrown(IllegalArgumentException)
-    }
-
     def 'On JComboBox change action lambdas may not be null.'() {
         given : 'We have a simple JPanel UI node.'
             var node = UI.of(new JComboBox())
 
         when : 'We try to pass null as an on change action...'
             node.onChange(null)
-
-        then : 'An illegal argument exception will be thrown!'
-            thrown(IllegalArgumentException)
-    }
-
-    def 'On JComboBox change component action lambdas may not be null.'() {
-        given : 'We have a simple JPanel UI node.'
-            var node = UI.of(new JComboBox())
-
-        when : 'We try to pass null as an on change action...'
-            node.onChangeComponent(null)
-
-        then : 'An illegal argument exception will be thrown!'
-            thrown(IllegalArgumentException)
-    }
-
-    def 'On JComboBox change event action lambdas may not be null.'() {
-        given : 'We have a simple JPanel UI node.'
-            var node = UI.of(new JComboBox())
-
-        when : 'We try to pass null as an on change action...'
-            node.onChangeEvent(null)
 
         then : 'An illegal argument exception will be thrown!'
             thrown(IllegalArgumentException)
@@ -117,25 +73,4 @@ class Exception_Spec extends Specification
             thrown(IllegalArgumentException)
     }
 
-    def 'On JSlider change component action lambdas may not be null.'() {
-        given : 'We have a simple JPanel UI node.'
-            var node = UI.of(new JSlider())
-
-        when : 'We try to pass null as an on change action...'
-            node.onChangeComponent(null)
-
-        then : 'An illegal argument exception will be thrown!'
-            thrown(IllegalArgumentException)
-    }
-
-    def 'On JSlider change event action lambdas may not be null.'() {
-        given : 'We have a simple JPanel UI node.'
-            var node = UI.of(new JSlider())
-
-        when : 'We try to pass null as an on change action...'
-            node.onChangeEvent(null)
-
-        then : 'An illegal argument exception will be thrown!'
-            thrown(IllegalArgumentException)
-    }
 }
