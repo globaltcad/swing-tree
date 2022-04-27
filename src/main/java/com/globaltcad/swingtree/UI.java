@@ -294,14 +294,27 @@ public class UI
         return new UIForRadioButton(component);
     }
 
-    public static UIForTextComponent of(JTextComponent component) {
+    public static UIForTextField of(JTextField component) {
         LogUtil.nullArgCheck(component, "component", JTextComponent.class);
-        return new UIForTextComponent(component);
+        return new UIForTextField(component);
     }
 
-    public static UIForTextComponent input(String text) { return of(new JTextField(text)); }
+    public static UIForTextField textField(String text) { return of(new JTextField(text)); }
 
-    public static UIForTextComponent input() { return of(new JTextField()); }
+    public static UIForTextField textField() { return of(new JTextField()); }
+
+    public static UIForTextArea of(JTextArea area) {
+        LogUtil.nullArgCheck(area, "area", JTextArea.class);
+        return new UIForTextArea(area);
+    }
+
+    public static UIForTextArea textArea(String text) {
+        return of(new JTextArea(text));
+    }
+
+    public static UIForTextArea textArea() {
+        return of(new JTextArea());
+    }
 
     public static <T> UIForAnything<T> of(T component) { return new UIForAnything<>(component); }
 

@@ -6,7 +6,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
 import java.util.function.Consumer;
 
-public class UIForTextComponent extends UIForSwing<UIForTextComponent, JTextComponent>
+public abstract class UIForTextComponent<I, C extends JTextComponent> extends UIForSwing<I, C>
 {
     public interface Remove {void remove(JTextComponent textComp, DocumentFilter.FilterBypass fb, int offset, int length);}
     public interface Insert {void insert( JTextComponent textComp, DocumentFilter.FilterBypass fb, int offset, String string, AttributeSet attr);}
@@ -50,19 +50,24 @@ public class UIForTextComponent extends UIForSwing<UIForTextComponent, JTextComp
 
     };
 
-    protected UIForTextComponent(JTextComponent component) { super(component); }
+    protected UIForTextComponent(C component) { super(component); }
+
+    public final I isEditableIf(boolean isEditable) {
+        this.component.setEditable(isEditable);
+        return (I) this;
+    }
 
     /**
      * @param action An action which will be executed when the text in the underlying {@link JTextComponent} changes.
      * @return This very builder to allow for method chaining.
      */
-    public UIForTextComponent onTextChange(Consumer<EventContext<JTextComponent, DocumentEvent>> action) {
+    public final I onTextChange(Consumer<EventContext<JTextComponent, DocumentEvent>> action) {
         this.component.getDocument().addDocumentListener(new DocumentListener() {
             @Override public void insertUpdate(DocumentEvent e) {action.accept(new EventContext<>(component, e));}
             @Override public void removeUpdate(DocumentEvent e) {action.accept(new EventContext<>(component, e));}
             @Override public void changedUpdate(DocumentEvent e) {action.accept(new EventContext<>(component, e));}
         });
-        return this;
+        return (I) this;
     }
 
     /**
@@ -83,9 +88,9 @@ public class UIForTextComponent extends UIForSwing<UIForTextComponent, JTextComp
      *
      * @return This very builder to allow for method chaining.
      */
-    public UIForTextComponent onTextRemove(Remove action) {
+    public final I onTextRemove(Remove action) {
         ifFilterable( () -> this.remove = action );
-        return this;
+        return (I) this;
     }
 
     /**
@@ -94,9 +99,9 @@ public class UIForTextComponent extends UIForSwing<UIForTextComponent, JTextComp
      *
      * @return This very builder to allow for method chaining.
      */
-    public UIForTextComponent onTextInsert(Insert action) {
+    public final I onTextInsert(Insert action) {
         ifFilterable( () -> this.insert = action );
-        return this;
+        return (I) this;
     }
 
     /**
@@ -105,9 +110,9 @@ public class UIForTextComponent extends UIForSwing<UIForTextComponent, JTextComp
      *
      * @return This very builder to allow for method chaining.
      */
-    public UIForTextComponent onTextReplace(Replace action) {
+    public final I onTextReplace(Replace action) {
         ifFilterable( () -> this.replace = action );
-        return this;
+        return (I) this;
     }
 }
 
