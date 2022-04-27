@@ -5,13 +5,15 @@ import com.alexandriasoftware.swing.JSplitButton;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButton<UIForSplitButton<B>, B>
 {
     private final JPopupMenu popupMenu = new JPopupMenu();
-    private final Map<JMenuItem, UIAction<JMenuItem, ActionEvent>> options = new HashMap<>();
+    private final Map<JMenuItem, UIAction<JMenuItem, ActionEvent>> options = new LinkedHashMap<>(16);
     private final JMenuItem[] selected = {null};
 
     protected UIForSplitButton(B component) {
@@ -53,19 +55,6 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
         popupMenu.add(item);
         return this;
     }
-
-    public UIForSplitButton<B> addItem(String option, UIAction<JMenuItem, ActionEvent> action) {
-        LogUtil.nullArgCheck(option, "option", String.class);
-        LogUtil.nullArgCheck(action, "action", UIAction.class);
-        return this.add(ButtonItem.saying(option).onClick(action));
-    }
-
-    public UIForSplitButton<B> addItem(UIForMenuItem option, UIAction<JMenuItem, ActionEvent> action) {
-        LogUtil.nullArgCheck(option, "option", UIForMenuItem.class);
-        LogUtil.nullArgCheck(action, "action", UIAction.class);
-        return this.add(ButtonItem.of(option).onClick(action));
-    }
-
 
     public <I extends JMenuItem> UIForSplitButton<B> add(ButtonItem<I> buttonItem) {
         LogUtil.nullArgCheck(buttonItem, "buttonItem", ButtonItem.class);
