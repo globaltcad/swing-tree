@@ -60,27 +60,27 @@ public class ButtonItem<I extends JMenuItem>
 
     Consumer<Context<I>> getOnSelected() {
         return onItemSelected == null
-                ? c-> c.getEventContext().getComponent().setText(c.getCurrentItem().getText())
+                ? c-> c.getSplitButton().setText(c.getEventContext().getComponent().getText())
                 : onItemSelected;
     }
 
 
     public static class Context<I extends JMenuItem>
     {
-        private final EventContext<JSplitButton, ActionEvent> eventContext;
-        private final I currentItem;
+        private final EventContext<I, ActionEvent> eventContext;
+        private final JSplitButton splitButton;
 
-        Context(EventContext<JSplitButton, ActionEvent> eventContext, I currentItem) {
+        Context(EventContext<I, ActionEvent> eventContext, JSplitButton splitButton) {
             this.eventContext = eventContext;
-            this.currentItem = currentItem;
+            this.splitButton = splitButton;
         }
 
-        public EventContext<JSplitButton, ActionEvent> getEventContext() {
+        public EventContext<I, ActionEvent> getEventContext() {
             return eventContext;
         }
 
-        public I getCurrentItem() {
-            return currentItem;
+        public JSplitButton getSplitButton() {
+            return splitButton;
         }
     }
 

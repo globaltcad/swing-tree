@@ -11,13 +11,14 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
 {
     private final JPopupMenu popupMenu = new JPopupMenu();
     private final Map<JMenuItem, UIAction<JMenuItem, ActionEvent>> options = new HashMap<>();
+    private final JMenuItem[] selected = {null};
 
     protected UIForSplitButton(B component) {
         super(component);
         this.component.setPopupMenu(popupMenu);
         this.component.addButtonClickedActionListener( e -> {
             for ( JMenuItem item : options.keySet() ) {
-                if ( item.getText().equals(component.getText()) ) {
+                if ( item == selected[0] ) {
                     UIAction<JMenuItem, ActionEvent> action = options.get(item);
                     if ( action != null ) action.accept(new EventContext<>(item, e));
                     break;
@@ -71,9 +72,12 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
         popupMenu.add(item);
         options.put(item, ( (ButtonItem<JMenuItem>) buttonItem ).getOnClick());
         item.addActionListener(
-            e -> buttonItem.getOnSelected().accept(
-                new ButtonItem.Context<>(new EventContext<>(component, e), item)
-            )
+            e -> {
+                selected[0] = item;
+                buttonItem.getOnSelected().accept(
+                    new ButtonItem.Context<>(new EventContext<>(item, e), component)
+                );
+            }
         );
         return this;
     }
