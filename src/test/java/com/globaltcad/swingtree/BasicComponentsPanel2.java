@@ -30,11 +30,7 @@ class BasicComponentsPanel2 extends JPanel {
         JComboBox<String> comboBox3 = new JComboBox<>();
         JComboBox<String> comboBox4 = new JComboBox<>();
         JComboBox<String> comboBox5 = new JComboBox<>();
-        JLabel spinnerLabel = new JLabel();
         JSpinner spinner1 = new JSpinner();
-        JSpinner spinner2 = new JSpinner();
-        JComboBox<String> comboBox6 = new JComboBox<>();
-        JLabel textFieldLabel = new JLabel();
         JTextField textField1 = new JTextField();
         JTextField textField2 = new JTextField();
         JTextField textField3 = new JTextField();
@@ -197,38 +193,18 @@ class BasicComponentsPanel2 extends JPanel {
                 "a",
                 "bb",
                 "ccc"
-        })) ));
-
-        //---- comboBox5 ----
-        comboBox5.setModel(new DefaultComboBoxModel<>(new String[]{
+        })) ))
+        .add("cell 5 4, growx, wmax 100", UI.of(comboBox5).make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
                 "Wide popup if text is longer",
                 "aa",
                 "bbb",
                 "cccc"
-        }));
-        add(comboBox5, "cell 5 4,growx,wmax 100");
-
-        //---- spinnerLabel ----
-        spinnerLabel.setText("JSpinner:");
-        spinnerLabel.setLabelFor(spinner1);
-        spinnerLabel.setDisplayedMnemonic('S');
-        add(spinnerLabel, "cell 0 5");
-        add(spinner1, "cell 1 5,growx");
-
-        //---- spinner2 ----
-        spinner2.setEnabled(false);
-        add(spinner2, "cell 2 5,growx");
-
-        //---- comboBox6 ----
-        comboBox6.setEditable(true);
-        comboBox6.putClientProperty("JTextField.placeholderText", "Placeholder");
-        add(comboBox6, "cell 5 5,growx");
-
-        //---- textFieldLabel ----
-        textFieldLabel.setText("JTextField:");
-        textFieldLabel.setDisplayedMnemonic('T');
-        textFieldLabel.setLabelFor(textField1);
-        add(textFieldLabel, "cell 0 6");
+        })) ))
+        .add("cell 0 5", UI.label("JSpinner:").make( it -> {it.setLabelFor(spinner1);it.setDisplayedMnemonic('S');}))
+        .add("cell 1 5, growx", UI.of(spinner1))
+        .add("cell 2 5, growx", UI.spinner().isEnabledIf(false))
+        .add("cell 5 5, growx", UI.comboBox().isEditableIf(true).withProperty("JTextField.placeholderText", "Placeholder"))
+        .add("cell 0 6", UI.label("JTextField:").make( it -> {it.setLabelFor(textField1);it.setDisplayedMnemonic('T');} ));
 
         //---- textField1 ----
         textField1.setText("Editable");

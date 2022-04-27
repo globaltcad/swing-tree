@@ -231,10 +231,19 @@ public class UI
         return new UIForSlider(component);
     }
 
-    public static UIForCombo of(JComboBox component) {
+    public static <E> UIForCombo<E> of(JComboBox<E> component) {
         LogUtil.nullArgCheck(component, "component", JComboBox.class);
-        return new UIForCombo(component);
+        return new UIForCombo<>(component);
     }
+
+    public static UIForCombo<Object> comboBox() { return of(new JComboBox<>()); }
+
+    public static UIForSpinner of(JSpinner spinner) {
+        LogUtil.nullArgCheck(spinner, "spinner", JSpinner.class);
+        return new UIForSpinner(spinner);
+    }
+
+    public static UIForSpinner spinner() { return of(new JSpinner()); }
 
     public static UIForLabel of(JLabel component) {
         LogUtil.nullArgCheck(component, "component", JLabel.class);

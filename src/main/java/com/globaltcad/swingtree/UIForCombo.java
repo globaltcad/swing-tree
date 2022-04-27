@@ -7,13 +7,13 @@ import java.util.function.Consumer;
 /**
  *  A UI maker for {@link JComboBox} instances.
  */
-public class UIForCombo extends UIForSwing<UIForCombo, JComboBox>
+public class UIForCombo<E> extends UIForSwing<UIForCombo<E>, JComboBox<E>>
 {
-    protected UIForCombo(JComboBox component) {
+    protected UIForCombo(JComboBox<E> component) {
         super(component);
     }
 
-    public UIForCombo onChange(UIAction<JComboBox, ActionEvent> action) {
+    public UIForCombo<E> onChange(UIAction<JComboBox<E>, ActionEvent> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         this.component.addActionListener( e -> action.accept(this.component, e) );
         return this;
@@ -25,7 +25,7 @@ public class UIForCombo extends UIForSwing<UIForCombo, JComboBox>
      * @param isEditable The truth value determining if the UI component should be editable or not.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public UIForCombo isEditableIf(boolean isEditable) {
+    public UIForCombo<E> isEditableIf(boolean isEditable) {
         this.component.setEditable(isEditable);
         return this;
     }
