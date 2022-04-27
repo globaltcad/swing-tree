@@ -27,58 +27,7 @@ class BasicComponentsPanel extends JPanel
     {
         FlatLightLaf.setup();
         initComponents();
-
-        // show reveal button for password field
-        //   to enable this for all password fields use:
-        //   UIManager.put( "PasswordField.showRevealButton", true );
-        passwordField1.putClientProperty( FlatClientProperties.STYLE, "showRevealButton: true" );
-
-        // add leading/trailing icons to text fields
-        leadingIconTextField.putClientProperty( FlatClientProperties.PLACEHOLDER_TEXT, "Search" );
-        leadingIconTextField.putClientProperty( FlatClientProperties.TEXT_FIELD_LEADING_ICON, new FlatSearchIcon() );
-        trailingIconTextField.putClientProperty( FlatClientProperties.TEXT_FIELD_TRAILING_ICON, new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/DataTables.svg" ) );
-        iconsTextField.putClientProperty( FlatClientProperties.TEXT_FIELD_LEADING_ICON, new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/user.svg" ) );
-        iconsTextField.putClientProperty( FlatClientProperties.TEXT_FIELD_TRAILING_ICON, new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/bookmarkGroup.svg" ) );
-
-        // search history button
-        JButton searchHistoryButton = new JButton( new FlatSearchWithHistoryIcon( true ) );
-        searchHistoryButton.setToolTipText( "Search History" );
-        searchHistoryButton.addActionListener( e -> {
-            JPopupMenu popupMenu = new JPopupMenu();
-            popupMenu.add( "(empty)" );
-            popupMenu.show( searchHistoryButton, 0, searchHistoryButton.getHeight() );
-        } );
-        compsTextField.putClientProperty( FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, searchHistoryButton );
-
-        // match case button
-        JToggleButton matchCaseButton = new JToggleButton( new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/matchCase.svg" ) );
-        matchCaseButton.setRolloverIcon( new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/matchCaseHovered.svg" ) );
-        matchCaseButton.setSelectedIcon( new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/matchCaseSelected.svg" ) );
-        matchCaseButton.setToolTipText( "Match Case" );
-
-        // whole words button
-        JToggleButton wordsButton = new JToggleButton( new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/words.svg" ) );
-        wordsButton.setRolloverIcon( new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/wordsHovered.svg" ) );
-        wordsButton.setSelectedIcon( new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/wordsSelected.svg" ) );
-        wordsButton.setToolTipText( "Whole Words" );
-
-        // regex button
-        JToggleButton regexButton = new JToggleButton( new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/regex.svg" ) );
-        regexButton.setRolloverIcon( new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/regexHovered.svg" ) );
-        regexButton.setSelectedIcon( new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/regexSelected.svg" ) );
-        regexButton.setToolTipText( "Regular Expression" );
-
-        // search toolbar
-        JToolBar searchToolbar = new JToolBar();
-        searchToolbar.add( matchCaseButton );
-        searchToolbar.add( wordsButton );
-        searchToolbar.addSeparator();
-        searchToolbar.add( regexButton );
-        compsTextField.putClientProperty( FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchToolbar );
-
-        // show clear button (if text field is not empty)
-        compsTextField.putClientProperty( FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true );
-        clearTextField.putClientProperty( FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true );
+        confiugure();
     }
 
     private void initComponents()
@@ -847,6 +796,61 @@ class BasicComponentsPanel extends JPanel
         cutMenuItem.addActionListener( new DefaultEditorKit.CutAction() );
         copyMenuItem.addActionListener( new DefaultEditorKit.CopyAction() );
         pasteMenuItem.addActionListener( new DefaultEditorKit.PasteAction() );
+    }
+
+    private void confiugure() {
+
+        // show reveal button for password field
+        //   to enable this for all password fields use:
+        //   UIManager.put( "PasswordField.showRevealButton", true );
+        passwordField1.putClientProperty( FlatClientProperties.STYLE, "showRevealButton: true" );
+
+        // add leading/trailing icons to text fields
+        leadingIconTextField.putClientProperty( FlatClientProperties.PLACEHOLDER_TEXT, "Search" );
+        leadingIconTextField.putClientProperty( FlatClientProperties.TEXT_FIELD_LEADING_ICON, new FlatSearchIcon() );
+        trailingIconTextField.putClientProperty( FlatClientProperties.TEXT_FIELD_TRAILING_ICON, new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/DataTables.svg" ) );
+        iconsTextField.putClientProperty( FlatClientProperties.TEXT_FIELD_LEADING_ICON, new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/user.svg" ) );
+        iconsTextField.putClientProperty( FlatClientProperties.TEXT_FIELD_TRAILING_ICON, new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/bookmarkGroup.svg" ) );
+
+        // search history button
+        JButton searchHistoryButton = new JButton( new FlatSearchWithHistoryIcon( true ) );
+        searchHistoryButton.setToolTipText( "Search History" );
+        searchHistoryButton.addActionListener( e -> {
+            JPopupMenu popupMenu = new JPopupMenu();
+            popupMenu.add( "(empty)" );
+            popupMenu.show( searchHistoryButton, 0, searchHistoryButton.getHeight() );
+        } );
+        compsTextField.putClientProperty( FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, searchHistoryButton );
+
+        // match case button
+        JToggleButton matchCaseButton = new JToggleButton( new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/matchCase.svg" ) );
+        matchCaseButton.setRolloverIcon( new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/matchCaseHovered.svg" ) );
+        matchCaseButton.setSelectedIcon( new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/matchCaseSelected.svg" ) );
+        matchCaseButton.setToolTipText( "Match Case" );
+
+        // whole words button
+        JToggleButton wordsButton = new JToggleButton( new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/words.svg" ) );
+        wordsButton.setRolloverIcon( new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/wordsHovered.svg" ) );
+        wordsButton.setSelectedIcon( new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/wordsSelected.svg" ) );
+        wordsButton.setToolTipText( "Whole Words" );
+
+        // regex button
+        JToggleButton regexButton = new JToggleButton( new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/regex.svg" ) );
+        regexButton.setRolloverIcon( new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/regexHovered.svg" ) );
+        regexButton.setSelectedIcon( new FlatSVGIcon( "com/formdev/flatlaf/demo/icons/regexSelected.svg" ) );
+        regexButton.setToolTipText( "Regular Expression" );
+
+        // search toolbar
+        JToolBar searchToolbar = new JToolBar();
+        searchToolbar.add( matchCaseButton );
+        searchToolbar.add( wordsButton );
+        searchToolbar.addSeparator();
+        searchToolbar.add( regexButton );
+        compsTextField.putClientProperty( FlatClientProperties.TEXT_FIELD_TRAILING_COMPONENT, searchToolbar );
+
+        // show clear button (if text field is not empty)
+        compsTextField.putClientProperty( FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true );
+        clearTextField.putClientProperty( FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true );
     }
 
     // Use this to test the UI!
