@@ -25,13 +25,7 @@ class BasicComponentsPanel2 extends JPanel {
     }
 
     private void initComponents() {
-        JCheckBox checkBox4 = new JCheckBox();
-        JLabel radioButtonLabel = new JLabel();
-        JRadioButton radioButton1 = new JRadioButton();
-        JRadioButton radioButton2 = new JRadioButton();
-        JRadioButton radioButton3 = new JRadioButton();
-        JRadioButton radioButton4 = new JRadioButton();
-        JLabel comboBoxLabel = new JLabel();
+
         JComboBox<String> comboBox1 = new JComboBox<>();
         JComboBox<String> comboBox2 = new JComboBox<>();
         JComboBox<String> comboBox3 = new JComboBox<>();
@@ -162,10 +156,10 @@ class BasicComponentsPanel2 extends JPanel {
         .add("cell 0 1", UI.label("JButton:"))
         .add("cell 1 1", UI.button("Enabled").make( it -> it.setDisplayedMnemonicIndex(0) ))
         .add("cell 2 1", UI.button("Disabled").isEnabledIf(false).make( it -> it.setDisplayedMnemonicIndex(0) ))
-        .add("cell 3 1", UI.button("Square").make( it -> it.putClientProperty("JButton.buttonType", "square") ))
-        .add("cell 4 1", UI.button("Round").make( it -> it.putClientProperty("JButton.buttonType", "roundRect") ))
-        .add("cell 4 1", UI.button("Help").make( it -> it.putClientProperty("JButton.buttonType", "help") ))
-        .add("cell 4 1", UI.button("Help").isEnabledIf(false).make( it -> it.putClientProperty("JButton.buttonType", "help") ))
+        .add("cell 3 1", UI.button("Square").withProperty("JButton.buttonType", "square"))
+        .add("cell 4 1", UI.button("Round").withProperty("JButton.buttonType", "roundRect"))
+        .add("cell 4 1", UI.button("Help").withProperty("JButton.buttonType", "help"))
+        .add("cell 4 1", UI.button("Help").isEnabledIf(false).withProperty("JButton.buttonType", "help"))
         .add("cell 5 1", UI.buttonWithIcon(UIManager.getIcon("Tree.closedIcon")))
         .add("cell 5 1", UI.button("..."))
         .add("cell 5 1", UI.button("\u2026"))
@@ -173,55 +167,20 @@ class BasicComponentsPanel2 extends JPanel {
         .add("cell 0 2", UI.label("JCheckBox"))
         .add("cell 1 2", UI.checkBox("Enabled").make( it -> it.setMnemonic('A') ))
         .add("cell 2 2", UI.checkBox("Disabled").isEnabledIf(false).make( it -> it.setMnemonic('D') ))
-        .add("cell 3 2", UI.checkBox("Selected").isSelectedIf(true));
-
-        //---- checkBox4 ----
-        checkBox4.setText("Selected disabled");
-        checkBox4.setSelected(true);
-        checkBox4.setEnabled(false);
-        add(checkBox4, "cell 4 2");
-
-        //---- radioButtonLabel ----
-        radioButtonLabel.setText("JRadioButton:");
-        add(radioButtonLabel, "cell 0 3");
-
-        //---- radioButton1 ----
-        radioButton1.setText("Enabled");
-        radioButton1.setMnemonic('N');
-        add(radioButton1, "cell 1 3");
-
-        //---- radioButton2 ----
-        radioButton2.setText("Disabled");
-        radioButton2.setEnabled(false);
-        radioButton2.setMnemonic('S');
-        add(radioButton2, "cell 2 3");
-
-        //---- radioButton3 ----
-        radioButton3.setText("Selected");
-        radioButton3.setSelected(true);
-        add(radioButton3, "cell 3 3");
-
-        //---- radioButton4 ----
-        radioButton4.setText("Selected disabled");
-        radioButton4.setSelected(true);
-        radioButton4.setEnabled(false);
-        add(radioButton4, "cell 4 3");
-
-        //---- comboBoxLabel ----
-        comboBoxLabel.setText("JComboBox:");
-        comboBoxLabel.setDisplayedMnemonic('C');
-        comboBoxLabel.setLabelFor(comboBox1);
-        add(comboBoxLabel, "cell 0 4");
-
-        //---- comboBox1 ----
-        comboBox1.setEditable(true);
-        comboBox1.setModel(new DefaultComboBoxModel<>(new String[]{
+        .add("cell 3 2", UI.checkBox("Selected").isSelectedIf(true))
+        .add("cell 4 2", UI.checkBox("Selected disabled").isSelectedIf(true).isEnabledIf(false))
+        .add("cell 0 3", UI.label("JRadioButton:"))
+        .add("cell 1 3", UI.radioButton("Enabled").make( it -> it.setMnemonic('N') ))
+        .add("cell 2 3", UI.radioButton("Disabled").isEnabledIf(false).make( it -> it.setMnemonic('S') ))
+        .add("cell 3 3", UI.radioButton("Selected").isSelectedIf(true))
+        .add("cell 4 3", UI.radioButton("Selected disabled").isEnabledIf(false).isSelectedIf(true))
+        .add("cell 0 4", UI.label("JComboBox:").make( it -> {it.setDisplayedMnemonic('C');it.setLabelFor(comboBox1);}))
+        .add("cell 1 4, growx", UI.of(comboBox1).isEnabledIf(true).make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
                 "Editable",
                 "a",
                 "bb",
                 "ccc"
-        }));
-        add(comboBox1, "cell 1 4,growx");
+        })) ));
 
         //---- comboBox2 ----
         comboBox2.setEditable(true);

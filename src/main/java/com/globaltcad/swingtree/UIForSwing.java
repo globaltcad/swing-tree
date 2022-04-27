@@ -79,6 +79,25 @@ public class UIForSwing<I, C extends JComponent> extends AbstractNestedBuilder<I
         return (I) this;
     }
 
+
+    /**
+     * Adds {@link String} key/value "client property" pairs to the wrapped component.
+     * <p>
+     * The arguments will be passed to {@link JComponent#putClientProperty(Object, Object)}
+     * provide access to
+     * a small per-instance hashtable. Callers can use get/putClientProperty
+     * to annotate components that were created by another module.
+     * For example, a
+     * layout manager might store per child constraints this way.
+     *
+     * @param key the new client property key which may be used for styles or layout managers.
+     * @param value the new client property value.
+     */
+    public final I withProperty(String key, String value) {
+        this.component.putClientProperty(key, value);
+        return (I) this;
+    }
+
     /**
      *  Use this to attach a border to the wrapped component.
      *

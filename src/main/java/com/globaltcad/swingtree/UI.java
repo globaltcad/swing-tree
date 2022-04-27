@@ -278,6 +278,8 @@ public class UI
         return new UIForCheckBox(component);
     }
 
+    public static UIForRadioButton radioButton(String text) {return of(new JRadioButton(text));}
+
     public static UIForRadioButton of(JRadioButton component) {
         LogUtil.nullArgCheck(component, "component", JRadioButton.class);
         return new UIForRadioButton(component);
