@@ -25,10 +25,6 @@ class BasicComponentsPanel2 extends JPanel {
     }
 
     private void initComponents() {
-        JLabel checkBoxLabel = new JLabel();
-        JCheckBox checkBox1 = new JCheckBox();
-        JCheckBox checkBox2 = new JCheckBox();
-        JCheckBox checkBox3 = new JCheckBox();
         JCheckBox checkBox4 = new JCheckBox();
         JLabel radioButtonLabel = new JLabel();
         JRadioButton radioButton1 = new JRadioButton();
@@ -173,27 +169,11 @@ class BasicComponentsPanel2 extends JPanel {
         .add("cell 5 1", UI.buttonWithIcon(UIManager.getIcon("Tree.closedIcon")))
         .add("cell 5 1", UI.button("..."))
         .add("cell 5 1", UI.button("\u2026"))
-        .add("cell 5 1", UI.button("#"));
-
-        //---- checkBoxLabel ----
-        checkBoxLabel.setText("JCheckBox");
-        add(checkBoxLabel, "cell 0 2");
-
-        //---- checkBox1 ----
-        checkBox1.setText("Enabled");
-        checkBox1.setMnemonic('A');
-        add(checkBox1, "cell 1 2");
-
-        //---- checkBox2 ----
-        checkBox2.setText("Disabled");
-        checkBox2.setEnabled(false);
-        checkBox2.setMnemonic('D');
-        add(checkBox2, "cell 2 2");
-
-        //---- checkBox3 ----
-        checkBox3.setText("Selected");
-        checkBox3.setSelected(true);
-        add(checkBox3, "cell 3 2");
+        .add("cell 5 1", UI.button("#"))
+        .add("cell 0 2", UI.label("JCheckBox"))
+        .add("cell 1 2", UI.checkBox("Enabled").make( it -> it.setMnemonic('A') ))
+        .add("cell 2 2", UI.checkBox("Disabled").isEnabledIf(false).make( it -> it.setMnemonic('D') ))
+        .add("cell 3 2", UI.checkBox("Selected").isSelectedIf(true));
 
         //---- checkBox4 ----
         checkBox4.setText("Selected disabled");

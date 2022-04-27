@@ -271,6 +271,8 @@ public class UI
                 ));
     }
 
+    public static UIForCheckBox checkBox(String text) { return of(new JCheckBox(text)); }
+
     public static UIForCheckBox of(JCheckBox component) {
         LogUtil.nullArgCheck(component, "component", JCheckBox.class);
         return new UIForCheckBox(component);

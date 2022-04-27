@@ -23,8 +23,13 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
 {
     protected UIForAbstractButton(B component) { super(component); }
 
-    public final I saying(String text) {
+    public final I withText(String text) {
         this.component.setText(text);
+        return (I) this;
+    }
+
+    public final I isSelectedIf(boolean isSelected) {
+        this.component.setSelected(isSelected);
         return (I) this;
     }
 
