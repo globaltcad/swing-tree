@@ -4,7 +4,6 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.formdev.flatlaf.icons.FlatSearchWithHistoryIcon;
-import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.text.DefaultEditorKit;
@@ -192,17 +191,13 @@ class BasicComponentsPanel2 extends JPanel {
                 "a",
                 "bb",
                 "ccc"
-        })) ));
-
-        //---- comboBox4 ----
-        comboBox4.setModel(new DefaultComboBoxModel<>(new String[]{
+        })) ))
+        .add("cell 4 4, growx", UI.of(comboBox4).isEnabledIf(false).make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
                 "Not editable disabled",
                 "a",
                 "bb",
                 "ccc"
-        }));
-        comboBox4.setEnabled(false);
-        add(comboBox4, "cell 4 4,growx");
+        })) ));
 
         //---- comboBox5 ----
         comboBox5.setModel(new DefaultComboBoxModel<>(new String[]{
