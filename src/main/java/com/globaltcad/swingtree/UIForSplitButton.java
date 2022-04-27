@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButton<UIForSplitButton<B>, B>
 {
@@ -75,7 +76,11 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
             e -> {
                 selected[0] = item;
                 buttonItem.getOnSelected().accept(
-                    new ButtonItem.Context<>(new EventContext<>(item, e), component)
+                    new ButtonItem.Context<>(
+                            new EventContext<>(item, e),
+                            component,
+                            () -> options.keySet().stream().map( o -> (I) o ).collect(Collectors.toList())
+                    )
                 );
             }
         );

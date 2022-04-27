@@ -5,7 +5,9 @@ import com.alexandriasoftware.swing.JSplitButton;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  *  {@link ButtonItem}s represent button options for the {@link JSplitButton}
@@ -69,18 +71,20 @@ public class ButtonItem<I extends JMenuItem>
     {
         private final EventContext<I, ActionEvent> eventContext;
         private final JSplitButton splitButton;
+        private final Supplier<List<I>> siblingsSource;
 
-        Context(EventContext<I, ActionEvent> eventContext, JSplitButton splitButton) {
+        Context(EventContext<I, ActionEvent> eventContext, JSplitButton splitButton, Supplier<List<I>> siblingsSource) {
             this.eventContext = eventContext;
             this.splitButton = splitButton;
+            this.siblingsSource = siblingsSource;
         }
 
-        public EventContext<I, ActionEvent> getEventContext() {
-            return eventContext;
-        }
+        public EventContext<I, ActionEvent> getEventContext() { return eventContext; }
 
-        public JSplitButton getSplitButton() {
-            return splitButton;
+        public JSplitButton getSplitButton() { return splitButton; }
+
+        public List<I> getSiblings() {
+            return this.siblingsSource.get();
         }
     }
 
