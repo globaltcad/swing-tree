@@ -79,7 +79,6 @@ public class UIForSwing<I, C extends JComponent> extends AbstractNestedBuilder<I
         return (I) this;
     }
 
-
     /**
      * Adds {@link String} key/value "client property" pairs to the wrapped component.
      * <p>

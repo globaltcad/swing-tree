@@ -180,27 +180,19 @@ class BasicComponentsPanel2 extends JPanel {
                 "a",
                 "bb",
                 "ccc"
-        })) ));
-
-        //---- comboBox2 ----
-        comboBox2.setEditable(true);
-        comboBox2.setEnabled(false);
-        comboBox2.setModel(new DefaultComboBoxModel<>(new String[]{
+        }))))
+        .add("cell 2 4, growx", UI.of(comboBox2).isEditableIf(true).isEnabledIf(false).make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
                 "Disabled",
                 "a",
                 "bb",
                 "ccc"
-        }));
-        add(comboBox2, "cell 2 4,growx");
-
-        //---- comboBox3 ----
-        comboBox3.setModel(new DefaultComboBoxModel<>(new String[]{
+        }))))
+        .add("cell 3 4, growx", UI.of(comboBox3).make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
                 "Not editable",
                 "a",
                 "bb",
                 "ccc"
-        }));
-        add(comboBox3, "cell 3 4,growx");
+        })) ));
 
         //---- comboBox4 ----
         comboBox4.setModel(new DefaultComboBoxModel<>(new String[]{

@@ -18,4 +18,15 @@ public class UIForCombo extends UIForSwing<UIForCombo, JComboBox>
         this.component.addActionListener( e -> action.accept(this.component, e) );
         return this;
     }
+
+    /**
+     *  Use this to enable or disable editing for the wrapped UI component.
+     *
+     * @param isEditable The truth value determining if the UI component should be editable or not.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public UIForCombo isEditableIf(boolean isEditable) {
+        this.component.setEditable(isEditable);
+        return this;
+    }
 }
