@@ -22,6 +22,11 @@ import java.util.function.Supplier;
  */
 public class UI
 {
+    /**
+     *  An enum set of all the available swing cursors which
+     *  map to the cursor type id.
+     *  This exists simply because swing was created before enums were added to Java.
+     */
     public enum Cursor
     {
         HAND(java.awt.Cursor.HAND_CURSOR),
@@ -45,7 +50,7 @@ public class UI
     }
 
     /**
-     *  This static factory method returns an instance of a generic swing tree builder
+     *  This returns an instance of a generic swing tree builder
      *  for anything extending the {@link JComponent} class.
      *  <br><br>
      *
@@ -71,6 +76,11 @@ public class UI
         return new UIForMenuItem(builder.build());
     }
 
+    /**
+     *  Use this to create a swing tree builder for the {@link JPopupMenu} UI component.
+     *
+     * @return A builder instance for a {@link JPopupMenu}, which enables builder-style method chaining.
+     */
     public static UIForPopup of(JPopupMenu popup)
     {
         LogUtil.nullArgCheck(popup, "popup", JPopupMenu.class);
@@ -78,7 +88,7 @@ public class UI
     }
 
     /**
-     *  Use this to create a builder for the {@link JPopupMenu} UI component.
+     *  Use this to create a swing tree builder for the {@link JPopupMenu} UI component.
      *  This is in essence a convenience method for {@code UI.of(new JPopupMenu())}.
      *
      * @return A builder instance for a {@link JPopupMenu}, which enables builder-style method chaining.
@@ -86,7 +96,7 @@ public class UI
     public static UIForPopup popupMenu() { return of(new JPopupMenu()); }
 
     /**
-     *  The following static factory method returns an instance of a {@link UIForSeparator} builder
+     *  This returns an instance of a {@link UIForSeparator} builder
      *  responsible for building a {@link JSeparator} by exposing helpful utility methods for it.
      *
      * @param separator The new {@link JSeparator} instance which ought to be part of the Swing UI.
@@ -99,14 +109,10 @@ public class UI
     }
 
     /**
-     *  The following static factory method returns an instance of a more specialized builder.
-     *  Namely, a "ForButton" instance, which extends the "AbstractBuilder" class and provides additional
-     *  builder features associated with the more specialized "AbstractButton" component type
-     *  wrapped by "ForButton".
-     *  <br><br>
+     *  This returns a {@link JButton} swing tree builder.
      *
-     * @param component The new component instance which ought to be part of the Swing UI.
-     * @return A basic UI builder instance.
+     * @param component The button component which ought to be wrapped by the swing tree UI builder.
+     * @return A basic UI {@link JButton} builder instance.
      */
     public static <T extends AbstractButton> UIForButton<T> of(T component)
     {
@@ -144,8 +150,7 @@ public class UI
 
     /**
      *  Use this to create a builder for the {@link JButton} UI component
-     *  with a default and on-hover icon displayed on top.
-     *  This is in essence a convenience method for {@code UI.of(new JButton()).make( it -> it.setIcon(icon) )}.
+     *  with a default icon as well as a hover icon displayed on top.
      *
      * @return A builder instance for a {@link JButton}, which enables builder-style method chaining.
      */
@@ -155,6 +160,13 @@ public class UI
         return buttonWithIcon(icon, onHover, onHover);
     }
 
+    /**
+     *  Use this to create a builder for the {@link JButton} UI component
+     *  with a default icon as well as a hover icon displayed on top
+     *  which should both be scaled to the provided dimensions.
+     *
+     * @return A builder instance for a {@link JButton}, which enables builder-style method chaining.
+     */
     public static UIForButton<JButton> buttonWithIcon(int width, int height, ImageIcon icon, ImageIcon onHover) {
         onHover = new ImageIcon(onHover.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT));
         icon = new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT));
@@ -164,7 +176,14 @@ public class UI
     /**
      *  Use this to create a builder for the {@link JButton} UI component
      *  with a default, an on-hover and an on-press icon displayed on top.
-     *  This is in essence a convenience method for {@code UI.of(new JButton()).make( it -> it.setIcon(icon) )}.
+     *  This is in essence a convenience method for:
+     *  <pre>{@code 
+     *      UI.of(new JButton()).make( it -> {
+     *          it.setIcon(icon);
+     *          it.setRolloverIcon(onHover);
+     *          it.setPressedIcon(onPress);
+     *      })
+     *  }</pre>
      *
      * @return A builder instance for a {@link JButton}, which enables builder-style method chaining.
      */
