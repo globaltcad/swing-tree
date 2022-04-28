@@ -61,7 +61,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public I onChange(UIAction<B, ItemEvent> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        this.component.addItemListener(e -> action.accept(this.component, e));
+        this.component.addItemListener(e -> action.accept(new EventContext<>(this.component, e)));
         return (I) this;
     }
 
@@ -78,7 +78,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public I onClick(UIAction<B, ActionEvent> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        this.component.addActionListener( e -> action.accept(this.component, e) );
+        this.component.addActionListener( e -> action.accept(new EventContext<>(this.component, e)) );
         return (I) this;
     }
 

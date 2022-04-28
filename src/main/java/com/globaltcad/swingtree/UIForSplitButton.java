@@ -26,12 +26,14 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
                     UIAction<SplitItem.Delegate<JMenuItem>, ActionEvent> action = options.get(item);
                     if ( action != null ) 
                         action.accept(
-                            new SplitItem.Delegate<>(
+                            new EventContext<>(
+                                new SplitItem.Delegate<>(
                                     component,
                                     ()-> new ArrayList<>(options.keySet()),
                                     item
-                            ),
-                            e
+                                ),
+                                e
+                            )
                         );
                     break;
                 }
@@ -57,12 +59,14 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         this.component.addSplitButtonClickedActionListener(
                 e -> action.accept(
-                        new SplitItem.Delegate<>(
-                                component,
-                                () -> new ArrayList<>(options.keySet()),
-                                selected[0]
-                        ),
-                        e
+                        new EventContext<>(
+                            new SplitItem.Delegate<>(
+                                    component,
+                                    () -> new ArrayList<>(options.keySet()),
+                                    selected[0]
+                            ),
+                            e
+                        )
                 )
         );
         return this;
@@ -93,12 +97,14 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         this.component.addButtonClickedActionListener(
             e -> action.accept(
-                    new SplitItem.Delegate<>(
-                       component,
-                       () -> new ArrayList<>(options.keySet()),
-                       selected[0]
-                    ),
-                    e
+                    new EventContext<>(
+                        new SplitItem.Delegate<>(
+                           component,
+                           () -> new ArrayList<>(options.keySet()),
+                           selected[0]
+                        ),
+                        e
+                    )
                 )
         );
         return this;
@@ -116,7 +122,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
     @Override
     public UIForSplitButton<B> onClick(UIAction<B, ActionEvent> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        this.component.addButtonClickedActionListener( e -> action.accept(this.component, e) );
+        this.component.addButtonClickedActionListener( e -> action.accept(new EventContext<>(this.component, e)) );
         return this;
     }
 
@@ -144,8 +150,14 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
                                 () -> options.keySet().stream().map( o -> (I) o ).collect(Collectors.toList()),
                                 item
                             );
-                onSelections.forEach(action -> action.accept((SplitItem.Delegate<JMenuItem>) delegate, e));
-                splitItem.getOnSelected().accept(delegate, e);
+                onSelections.forEach(action -> {
+                    try {
+                        action.accept(new EventContext<>((SplitItem.Delegate<JMenuItem>) delegate, e));
+                    } catch (Exception exception) {
+                        exception.printStackTrace();
+                    }
+                });
+                splitItem.getOnSelected().accept(new EventContext<>(delegate, e));
             }
         );
         return this;

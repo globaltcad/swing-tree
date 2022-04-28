@@ -13,7 +13,7 @@ public class UIForSlider extends UIForSwing<UIForSlider, JSlider>
 
     public UIForSlider onChange(UIAction<JSlider, ChangeEvent> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        this.component.addChangeListener( e -> action.accept(this.component, e) );
+        this.component.addChangeListener( e -> action.accept(new EventContext<>(this.component, e)) );
         return this;
     }
 
