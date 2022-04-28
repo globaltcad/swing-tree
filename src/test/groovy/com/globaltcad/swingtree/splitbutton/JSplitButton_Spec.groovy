@@ -1,11 +1,12 @@
-package com.globaltcad.swingtree
+package com.globaltcad.swingtree.splitbutton
 
 import com.alexandriasoftware.swing.JSplitButton
+import com.globaltcad.swingtree.UI
 import spock.lang.Specification
 
 import javax.swing.*
 
-class Split_Button_Spec extends Specification
+class JSplitButton_Spec extends Specification
 {
 
     def 'We can build a JSplitButton.'()
@@ -37,45 +38,6 @@ class Split_Button_Spec extends Specification
         and :
             node.popupMenu.components.findAll({it instanceof JRadioButtonMenuItem}).size() == 1
             node.popupMenu.components.findAll({it instanceof JMenuItem}).size() == 4
-    }
-
-
-    def 'A JSplitButton does not accept null actions.'()
-    {
-        given : 'We create a UI builder node containing a simple split button.'
-            var node = UI.splitButton("")
-        expect : 'It wraps a JSplitButton.'
-            node.component instanceof JSplitButton
-
-        when :
-            node.onSplitClick(null)
-        then :
-            thrown(IllegalArgumentException)
-
-        when :
-            node.onClick(null)
-        then :
-            thrown(IllegalArgumentException)
-
-        when :
-            node.onChange(null)
-        then :
-            thrown(IllegalArgumentException)
-
-        when :
-            node.onButtonClick(null)
-        then :
-            thrown(IllegalArgumentException)
-
-        when :
-            node.onSelection(null)
-        then :
-            thrown(IllegalArgumentException)
-
-        when :
-            node.onSplitClick(null)
-        then :
-            thrown(IllegalArgumentException)
     }
 
 }

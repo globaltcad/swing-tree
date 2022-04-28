@@ -1,5 +1,6 @@
-package com.globaltcad.swingtree
+package com.globaltcad.swingtree.common
 
+import com.globaltcad.swingtree.UI
 import spock.lang.Ignore
 import spock.lang.Narrative
 import spock.lang.Specification
@@ -8,15 +9,15 @@ import spock.lang.Title
 import javax.swing.*
 import java.awt.*
 
-@Title("The UI builder makes UI building fun again!")
+@Title("Swing tree makes UI building fun again!")
 @Narrative('''
 
 
 ''')
-class UI_Builder_Spec extends Specification
+class Basic_UI_Builder_Examples_Spec extends Specification
 {
 
-    def 'We can add a list of components to the UI builder.'()
+    def 'We can add a list of components to the swing tree API.'()
     {
         given : 'We have a simple JPanel UI node.'
             var node = UI.panel()
@@ -32,7 +33,7 @@ class UI_Builder_Spec extends Specification
     }
 
 
-    def 'The UI builder nests components'()
+    def 'Swing tree nests components'()
     {
         given : 'A regular swing object.'
             var panel = new JPanel()
@@ -73,7 +74,7 @@ class UI_Builder_Spec extends Specification
             node.component.cursor.type == Cursor.SE_RESIZE_CURSOR
     }
 
-    def 'We can use the UIMaker to build a valid Swing GUI tree.'()
+    def 'We can use the swing tree to build a valid Swing GUI tree.'()
     {
         when :
              def tree =
@@ -130,7 +131,7 @@ class UI_Builder_Spec extends Specification
      *  Use this to take a look at what the UIMake produces...
      */
     @Ignore
-    def 'UI Make makes us a viewable window!'() {
+    def 'Swing tree makes us a viewable window!'() {
 
         expect :
             UI.of(new JFrame("Test"))

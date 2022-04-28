@@ -11,9 +11,12 @@ public class Utility {
         return ui.getComponent().getText();
     }
 
-
     public static <B extends JSplitButton> JPopupMenu getSplitButtonPopup(UIForSplitButton<B> ui) {
         return ui.getComponent().getPopupMenu();
+    }
+
+    public static <B extends JSplitButton> void click(UIForSplitButton<B> ui) {
+        ui.getComponent().doClick();
     }
 
 }

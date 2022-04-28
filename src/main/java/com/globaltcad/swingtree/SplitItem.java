@@ -83,7 +83,9 @@ public final class SplitItem<I extends JMenuItem>
      * @return An immutable copy of this with the provided lambda set.
      */
     public SplitItem<I> onButtonClick(UIAction<Delegate<I>, ActionEvent> action) {
-        if ( this.onButtonClick != null ) throw new IllegalArgumentException("Property already specified!");
+        LogUtil.nullArgCheck(action, "action", UIAction.class);
+        if ( this.onButtonClick != null )
+            throw new IllegalArgumentException("Property already specified!");
         return new SplitItem<>(item, action, onItemSelected);
     }
 
@@ -105,6 +107,7 @@ public final class SplitItem<I extends JMenuItem>
      * @return An immutable copy of this with the provided lambda set.
      */
     public SplitItem<I> onSelection(UIAction<Delegate<I>, ActionEvent> action) {
+        LogUtil.nullArgCheck(action, "action", UIAction.class);
         if ( this.onItemSelected != null ) throw new IllegalArgumentException("Property already specified!");
         return new SplitItem<>(item, onButtonClick, action);
     }
@@ -207,6 +210,16 @@ public final class SplitItem<I extends JMenuItem>
         public Delegate<I> displayCurrentItemText() {
             if ( getCurrentItem() != null )
                 getSplitButton().setText(getCurrentItem().getText());
+            return this;
+        }
+
+        /**
+         * @param text The text which should be displayed on the {@link JSplitButton}.
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate<I> displayButtonText( String text ) {
+            LogUtil.nullArgCheck(text, "text", String.class);
+            this.splitButton.setText(text);
             return this;
         }
 
