@@ -22,7 +22,7 @@ class JSplitButton_Spec extends Specification
             node.popupMenu.components.length == 1
 
         when :
-            node.add(UI.menuItemSaying("Second"))
+            node.add(UI.menuItem("Second"))
         then :
             node.popupMenu.components.length == 2
 

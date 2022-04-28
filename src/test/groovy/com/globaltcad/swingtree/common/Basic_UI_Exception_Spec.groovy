@@ -9,6 +9,7 @@ import spock.lang.Specification
 import javax.swing.JCheckBox
 import javax.swing.JComboBox
 import javax.swing.JComponent
+import javax.swing.JLabel
 import javax.swing.JMenu
 import javax.swing.JMenuItem
 import javax.swing.JPanel
@@ -16,6 +17,7 @@ import javax.swing.JPopupMenu
 import javax.swing.JRadioButton
 import javax.swing.JSeparator
 import javax.swing.JSlider
+import javax.swing.JTextArea
 import javax.swing.text.JTextComponent
 
 class Basic_UI_Exception_Spec extends Specification
@@ -29,28 +31,40 @@ class Basic_UI_Exception_Spec extends Specification
             thrown(IllegalArgumentException)
         where :
             illegalAction << [
-               {UI.of((JMenu)null)},
-               {UI.of((JSeparator)null)},
-               {UI.of((JMenuItem)null)},
-               {UI.of((JPanel)null)},
-               {UI.labelWithIcon(null)},
-               {UI.labelWithIcon(300,200,null)},
-               {UI.buttonWithIcon(null, null,null)},
-               {UI.of((SwingBuilder)null)},
-               {UI.of((MenuBuilder)null)},
-               {UI.of((JCheckBox)null)},
-               {UI.of((JRadioButton)null)},
-               {UI.of((JTextComponent)null)},
-               {UI.of((JComponent)null)},
-               {UI.of((JSplitButton)null)},
-               {UI.of((JPopupMenu)null)},
-               {UI.of((JSeparator)null)},
-               {UI.panel().onMouseClick(null)},
-               {UI.of(new JComboBox<>()).onMouseClick(null)},
-               {UI.of(new JComboBox<>()).onChange(null)},
-               {UI.of(new JSlider()).onChange(null)},
-               {UI.button().onClick(null)},
-               {UI.button().onChange(null)}
+                    {UI.of((JMenu)null)},
+                    {UI.of((JSeparator)null)},
+                    {UI.of((JMenuItem)null)},
+                    {UI.of((JPanel)null)},
+                    {UI.labelWithIcon(null)},
+                    {UI.labelWithIcon(300,200,null)},
+                    {UI.buttonWithIcon(null, null,null)},
+                    {UI.of((SwingBuilder)null)},
+                    {UI.of((MenuBuilder)null)},
+                    {UI.of((JCheckBox)null)},
+                    {UI.of((JRadioButton)null)},
+                    {UI.of((JTextComponent)null)},
+                    {UI.of((JComponent)null)},
+                    {UI.of((JSplitButton)null)},
+                    {UI.of((JPopupMenu)null)},
+                    {UI.of((JSeparator)null)},
+                    {UI.of((JTextArea)null)},
+                    {UI.of((JLabel)null)},
+                    {UI.of((Object)null)},
+                    {UI.splitItem(null)},
+                    {UI.splitButton(null)},
+                    {UI.checkBox(null)},
+                    {UI.radioButton(null)},
+                    {UI.menuItem(null)},
+                    {UI.splitItem(null)},
+                    {UI.splitRadioItem(null)},
+                    {UI.textField(null)},
+                    {UI.textArea(null)},
+                    {UI.panel().onMouseClick(null)},
+                    {UI.of(new JComboBox<>()).onMouseClick(null)},
+                    {UI.of(new JComboBox<>()).onChange(null)},
+                    {UI.of(new JSlider()).onChange(null)},
+                    {UI.button().onClick(null)},
+                    {UI.button().onChange(null)}
             ]
     }
 

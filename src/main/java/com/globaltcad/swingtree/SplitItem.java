@@ -12,7 +12,6 @@ import java.util.function.Supplier;
  *  {@link SplitItem}s represent button options for the {@link JSplitButton}
  *  which can be supplied to a split button through the API exposed by {@link UIForSplitButton}.
  *  <pre>{@code
- *
  *      UI.splitButton("Hey!")
  *      .add(UI.splitItem("first"))
  *      .add(UI.splitItem("second").onClick( it -> ... ))
@@ -24,21 +23,21 @@ import java.util.function.Supplier;
 public final class SplitItem<I extends JMenuItem>
 {
     /**
-     *
      * @param text The text which should be displayed on the {@link SplitItem} (and its underlying {@link JMenuItem}).
      * @return A {@link SplitItem} wrapping a simple {@link JMenuItem} displaying the provided text.
      */
-    public static SplitItem<JMenuItem> saying(String text) {
+    public static SplitItem<JMenuItem> of(String text) {
+        LogUtil.nullArgCheck(text, "text", String.class);
         return new SplitItem<>(new JMenuItem(text));
     }
 
     /**
-     *
      * @param item The {@link JMenuItem} subtype for which a {@link SplitItem} (for {@link JSplitButton}) should be created.
      * @return A {@link SplitItem} wrapping the provided {@link JMenuItem} type.
      * @param <I> The type parameter for the provided item type.
      */
     public static <I extends JMenuItem> SplitItem<I> of(I item) {
+        LogUtil.nullArgCheck(item, "item", JMenuItem.class);
         return new SplitItem<>(item);
     }
 
@@ -47,6 +46,7 @@ public final class SplitItem<I extends JMenuItem>
      * @return A {@link SplitItem} wrapping {@link JMenuItem} represented by the provided UI builder.
      */
     public static SplitItem<JMenuItem> of(UIForMenuItem item) {
+        LogUtil.nullArgCheck(item, "item", UIForMenuItem.class);
         return new SplitItem<>(item.component);
     }
 
@@ -112,11 +112,9 @@ public final class SplitItem<I extends JMenuItem>
         return new SplitItem<>(item, onButtonClick, action);
     }
 
-    UIAction<Delegate<I>, ActionEvent> getOnClick() { return onButtonClick == null ? it->{} : onButtonClick; }
+    UIAction<Delegate<I>, ActionEvent> getOnClick() { return onButtonClick == null ? it -> {} : onButtonClick; }
 
-    UIAction<Delegate<I>, ActionEvent> getOnSelected() {
-        return onItemSelected == null ? c-> {} : onItemSelected;
-    }
+    UIAction<Delegate<I>, ActionEvent> getOnSelected() { return onItemSelected == null ? c -> {} : onItemSelected; }
 
     /**
      *  Instances of this are exposed as delegates through the {@link EventContext} passed

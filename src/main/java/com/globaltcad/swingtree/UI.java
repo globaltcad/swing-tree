@@ -203,7 +203,8 @@ public class UI
      * @return A new {@link SplitItem} wrapping a simple {@link JMenuItem}.
      */
     public static SplitItem<JMenuItem> splitItem(String text) {
-        return SplitItem.saying(text);
+        LogUtil.nullArgCheck(text, "text", String.class);
+        return SplitItem.of(text);
     }
 
     /**
@@ -222,6 +223,7 @@ public class UI
      * @return A new {@link SplitItem} wrapping a simple {@link JRadioButtonMenuItem}.
      */
     public static SplitItem<JRadioButtonMenuItem> splitRadioItem(String text) {
+        LogUtil.nullArgCheck(text, "text", String.class);
         return SplitItem.of(new JRadioButtonMenuItem(text));
     }
 
@@ -235,7 +237,8 @@ public class UI
         return new UIForMenuItem(component);
     }
 
-    public static UIForMenuItem menuItemSaying(String text) {
+    public static UIForMenuItem menuItem(String text) {
+        LogUtil.nullArgCheck(text, "text", String.class);
         return new UIForMenuItem(new JMenuItem(text));
     }
 
@@ -296,6 +299,7 @@ public class UI
      * @return A builder instance for the label, which enables builder-style method chaining.
      */
     public static UIForLabel label(String text) {
+        LogUtil.nullArgCheck(text, "text", String.class);
         return of(new JLabel(text));
     }
 
@@ -310,6 +314,14 @@ public class UI
         return of(new JLabel()).make( it -> it.setIcon(icon) );
     }
 
+    /**
+     *  Use this to create a UI builder for a text-less label containing and displaying an icon.
+     *
+     * @param width The width of the icon when displayed on the label.
+     * @param height The height of the icon when displayed on the label.
+     * @param icon The icon which should be placed into a {@link JLabel}.
+     * @return A builder instance for the label, which enables builder-style method chaining.
+     */
     public static UIForLabel labelWithIcon(int width, int height, ImageIcon icon) {
         LogUtil.nullArgCheck(icon, "icon", ImageIcon.class);
         return of(new JLabel())
@@ -318,14 +330,20 @@ public class UI
                 ));
     }
 
-    public static UIForCheckBox checkBox(String text) { return of(new JCheckBox(text)); }
+    public static UIForCheckBox checkBox(String text) {
+        LogUtil.nullArgCheck(text, "text", String.class);
+        return of(new JCheckBox(text));
+    }
 
     public static UIForCheckBox of(JCheckBox component) {
         LogUtil.nullArgCheck(component, "component", JCheckBox.class);
         return new UIForCheckBox(component);
     }
 
-    public static UIForRadioButton radioButton(String text) {return of(new JRadioButton(text));}
+    public static UIForRadioButton radioButton(String text) {
+        LogUtil.nullArgCheck(text, "text", String.class);
+        return of(new JRadioButton(text));
+    }
 
     public static UIForRadioButton of(JRadioButton component) {
         LogUtil.nullArgCheck(component, "component", JRadioButton.class);
@@ -337,7 +355,10 @@ public class UI
         return new UIForTextField(component);
     }
 
-    public static UIForTextField textField(String text) { return of(new JTextField(text)); }
+    public static UIForTextField textField(String text) {
+        LogUtil.nullArgCheck(text, "text", String.class);
+        return of(new JTextField(text));
+    }
 
     public static UIForTextField textField() { return of(new JTextField()); }
 
@@ -347,6 +368,7 @@ public class UI
     }
 
     public static UIForTextArea textArea(String text) {
+        LogUtil.nullArgCheck(text, "text", String.class);
         return of(new JTextArea(text));
     }
 
@@ -354,7 +376,10 @@ public class UI
         return of(new JTextArea());
     }
 
-    public static <T> UIForAnything<T> of(T component) { return new UIForAnything<>(component); }
+    public static <T> UIForAnything<T> of(T component) {
+        LogUtil.nullArgCheck(component, "component", Object.class);
+        return new UIForAnything<>(component);
+    }
 
     /**
      *  Use this to quickly create and inspect a tes window for a UI component.

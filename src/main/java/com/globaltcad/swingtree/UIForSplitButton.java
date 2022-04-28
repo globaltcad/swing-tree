@@ -144,7 +144,6 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
         item.addActionListener(
             e -> {
                 selected[0] = item;
-                System.out.println("Clicked item "+item.getText());
                 SplitItem.Delegate<I> delegate =
                         new SplitItem.Delegate<>(
                                 component,
