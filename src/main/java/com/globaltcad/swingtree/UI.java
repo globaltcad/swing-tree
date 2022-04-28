@@ -187,6 +187,44 @@ public class UI
         return new UIForSplitButton<>(new JSplitButton(text));
     }
 
+    /**
+     *  Use this to add entries to the {@link JSplitButton} by
+     *  passing {@link SplitItem} instances to {@link UIForSplitButton} builder like so: <br>
+     *  <pre>{@code
+     *      UI.splitButton("Button")
+     *      .add(UI.splitItem("first"))
+     *      .add(UI.splitItem("second"))
+     *      .add(UI.splitItem("third"))
+     *  }</pre>
+     *  You can also use the {@link SplitItem} wrapper class to wrap
+     *  useful action lambdas for the split item.
+     *
+     * @param text The text displayed on the {@link JMenuItem} exposed by the {@link JSplitButton}s {@link JPopupMenu}.
+     * @return A new {@link SplitItem} wrapping a simple {@link JMenuItem}.
+     */
+    public static SplitItem<JMenuItem> splitItem(String text) {
+        return SplitItem.saying(text);
+    }
+
+    /**
+     *  Use this to add radio item entries to the {@link JSplitButton} by
+     *  passing {@link SplitItem} instances to {@link UIForSplitButton} builder like so: <br>
+     *  <pre>{@code
+     *      UI.splitButton("Button")
+     *      .add(UI.splitRadioItem("first"))
+     *      .add(UI.splitRadioItem("second"))
+     *      .add(UI.splitRadioItem("third"))
+     *  }</pre>
+     *  You can also use the {@link SplitItem} wrapper class to wrap
+     *  useful action lambdas for the split item.
+     *
+     * @param text The text displayed on the {@link JRadioButtonMenuItem} exposed by the {@link JSplitButton}s {@link JPopupMenu}.
+     * @return A new {@link SplitItem} wrapping a simple {@link JRadioButtonMenuItem}.
+     */
+    public static SplitItem<JRadioButtonMenuItem> splitRadioItem(String text) {
+        return SplitItem.of(new JRadioButtonMenuItem(text));
+    }
+
     public static UIForMenu of(JMenu component) {
         LogUtil.nullArgCheck(component, "component", JMenu.class);
         return new UIForMenu(component);

@@ -73,7 +73,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  This is very useful for changing the state of the JComponent when the action is being triggered.
      *  <br><br>
      *
-     * @param action A {@link Consumer} instance which will be wrapped by an {@link ActionListener} and passed to the button component.
+     * @param action an {@link UIAction} instance which will receive an {@link EventContext} containing important context information.
      * @return This very instance, which enables builder-style method chaining.
      */
     public I onClick(UIAction<B, ActionEvent> action) {
@@ -90,7 +90,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  This is very useful for changing the state of related {@link JComponent}s.
      *  <br><br>
      *
-     * @param action A {@link Consumer} instance which will be wrapped by an {@link ActionListener} and passed to the button component.
+     * @param action an {@link UIAction} instance which will receive an {@link EventContext} containing important context information.
      * @return This very instance, which enables builder-style method chaining.
      */
     public I onClickForSiblings(UIAction<List<B>, ActionEvent> action) {

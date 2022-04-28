@@ -20,11 +20,23 @@ class Split_Button_Spec extends Specification
         then :
             node.popupMenu.components.length == 1
 
-
         when :
             node.add(UI.menuItemSaying("Second"))
         then :
             node.popupMenu.components.length == 2
+
+        when :
+            node.add(UI.splitItem("Third"))
+        then :
+            node.popupMenu.components.length == 3
+
+        when :
+            node.add(UI.splitRadioItem("Fourth"))
+        then :
+            node.popupMenu.components.length == 4
+        and :
+            node.popupMenu.components.findAll({it instanceof JRadioButtonMenuItem}).size() == 1
+            node.popupMenu.components.findAll({it instanceof JMenuItem}).size() == 4
     }
 
 
@@ -47,6 +59,21 @@ class Split_Button_Spec extends Specification
 
         when :
             node.onChange(null)
+        then :
+            thrown(IllegalArgumentException)
+
+        when :
+            node.onButtonClick(null)
+        then :
+            thrown(IllegalArgumentException)
+
+        when :
+            node.onSelection(null)
+        then :
+            thrown(IllegalArgumentException)
+
+        when :
+            node.onSplitClick(null)
         then :
             thrown(IllegalArgumentException)
     }
