@@ -469,6 +469,23 @@ public final class UI
     public static UIForTextField textField() { return of(new JTextField()); }
 
     /**
+     *  Use this to create a builder for the provided {@link JFormattedTextField} instance.
+     *
+     * @return A builder instance for the provided {@link JFormattedTextField}, which enables fluent method chaining.
+     */
+    public static UIForFormattedTextField of(JFormattedTextField component) {
+        LogUtil.nullArgCheck(component, "component", JFormattedTextField.class);
+        return new UIForFormattedTextField(component);
+    }
+
+    public static UIForFormattedTextField formattedTextField(String text) {
+        LogUtil.nullArgCheck(text, "text", String.class);
+        return of(new JFormattedTextField(text));
+    }
+
+    public static UIForFormattedTextField formattedTextField() { return of(new JFormattedTextField()); }
+
+    /**
      *  Use this to create a builder for the provided {@link JTextArea} instance.
      *
      * @return A builder instance for the provided {@link JTextArea}, which enables fluent method chaining.

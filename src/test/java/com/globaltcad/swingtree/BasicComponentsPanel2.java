@@ -33,12 +33,7 @@ class BasicComponentsPanel2 extends JPanel
         JComboBox<String> comboBox5 = new JComboBox<>();
         JSpinner spinner1 = new JSpinner();
         JTextField textField1 = new JTextField();
-        JLabel formattedTextFieldLabel = new JLabel();
         JFormattedTextField formattedTextField1 = new JFormattedTextField();
-        JFormattedTextField formattedTextField2 = new JFormattedTextField();
-        JFormattedTextField formattedTextField3 = new JFormattedTextField();
-        JFormattedTextField formattedTextField4 = new JFormattedTextField();
-        JFormattedTextField formattedTextField5 = new JFormattedTextField();
         JLabel passwordFieldLabel = new JLabel();
         passwordField1 = new JPasswordField();
         JPasswordField passwordField2 = new JPasswordField();
@@ -207,32 +202,12 @@ class BasicComponentsPanel2 extends JPanel
         .add("cell 3 6, growx", UI.textField("Not editable").isEditableIf(false))
         .add("cell 4 6, growx", UI.textField("Not editable disabled").isEnabledIf(false).isEditableIf(false))
         .add("cell 5 6, growx", UI.textField().withProperty("JTextField.placeholderText", "Placeholder"))
-        .add("cell 0 7", UI.label("JFormattedTextField:").make( it -> {it.setLabelFor(formattedTextField1); it.setDisplayedMnemonic('O');} ));
-
-        //---- formattedTextField1 ----
-        formattedTextField1.setText("Editable");
-        formattedTextField1.setComponentPopupMenu(popupMenu1);
-        add(formattedTextField1, "cell 1 7,growx");
-
-        //---- formattedTextField2 ----
-        formattedTextField2.setText("Disabled");
-        formattedTextField2.setEnabled(false);
-        add(formattedTextField2, "cell 2 7,growx");
-
-        //---- formattedTextField3 ----
-        formattedTextField3.setText("Not editable");
-        formattedTextField3.setEditable(false);
-        add(formattedTextField3, "cell 3 7,growx");
-
-        //---- formattedTextField4 ----
-        formattedTextField4.setText("Not editable disabled");
-        formattedTextField4.setEnabled(false);
-        formattedTextField4.setEditable(false);
-        add(formattedTextField4, "cell 4 7,growx");
-
-        //---- formattedTextField5 ----
-        formattedTextField5.putClientProperty("JTextField.placeholderText", "Placeholder");
-        add(formattedTextField5, "cell 5 7,growx");
+        .add("cell 0 7", UI.label("JFormattedTextField:").make( it -> {it.setLabelFor(formattedTextField1); it.setDisplayedMnemonic('O');} ))
+        .add("cell 1 7, growx", UI.formattedTextField("Editable").make( it -> it.setComponentPopupMenu(popupMenu1) ))
+        .add("cell 2 7, growx", UI.formattedTextField("Disabled").isEnabledIf(false))
+        .add("cell 3 7, growx", UI.formattedTextField("Not editable").isEditableIf(false))
+        .add("cell 4 7, growx", UI.formattedTextField("Not editable disabled").isEnabledIf(false).isEditableIf(false))
+        .add("cell 5 7", UI.formattedTextField().withProperty("JTextField.placeholderText", "Placeholder"));
 
         //---- passwordFieldLabel ----
         passwordFieldLabel.setText("JPasswordField:");
