@@ -5,10 +5,12 @@ import com.globaltcad.swingtree.UI
 import com.globaltcad.swingtree.utility.Utility
 import groovy.transform.CompileDynamic
 import spock.lang.Specification
+Import spock.lang.Title
 
 import javax.swing.*
 
 @CompileDynamic
+@Title("A Button of Buttons")
 class JSplitButton_Examples_Spec extends Specification
 {
     def 'The most simple kind of split button can be built like so:'()
@@ -80,11 +82,11 @@ class JSplitButton_Examples_Spec extends Specification
     {
         given : 'We create split button with 2 different kinds of button click events.'
             var ui =
-                    UI.splitButton("I may be replaced!")
-                    .onSelection( it -> it.delegate.displayButtonText("default text")  )
-                    .add(UI.splitItem("first"))
-                    .add(UI.splitItem("second").onButtonClick( it -> it.delegate.displayButtonText("text by second item") ))
-                    .add(UI.splitItem("third"))
+                UI.splitButton("I may be replaced!")
+                .onSelection( it -> it.delegate.displayButtonText("default text")  )
+                .add(UI.splitItem("first"))
+                .add(UI.splitItem("second").onButtonClick( it -> it.delegate.displayButtonText("text by second item") ))
+                .add(UI.splitItem("third"))
         expect : 'The split button has the correct text displayed'
             Utility.getSplitButtonText(ui) == "I may be replaced!"
 
