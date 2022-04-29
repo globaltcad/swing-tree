@@ -25,9 +25,9 @@ class JSplitButton_Examples_Spec extends Specification
         and : 'This button should have a popup menu with 3 components.'
             ui.popupMenu.components.length == 3
         and : 'They have the expected names:'
-            ((JMenuItem)ui.popupMenu.components[0]).getText() == "I am the first drop down item."
-            ((JMenuItem)ui.popupMenu.components[1]).getText() == "I am the second item."
-            ((JMenuItem)ui.popupMenu.components[2]).getText() == "And I am the third."
+            ((JMenuItem)ui.popupMenu.getComponent(0)).getText() == "I am the first drop down item."
+            ((JMenuItem)ui.popupMenu.getComponent(1)).getText() == "I am the second item."
+            ((JMenuItem)ui.popupMenu.getComponent(2)).getText() == "And I am the third."
     }
 
     def 'We can easily build a split button whose text becomes the current user selection:'()
@@ -39,11 +39,11 @@ class JSplitButton_Examples_Spec extends Specification
                 .add(UI.splitItem("first"))
                 .add(UI.splitItem("second"))
                 .add(UI.splitItem("third"))
-        expect :
+        expect : 'The split button has the correct text displayed'
             Utility.getSplitButtonText(ui) == "I will be replaced!"
 
         when :
-            ((JMenuItem)ui.popupMenu.getComponents()[1]).doClick()
+            ((JMenuItem)ui.popupMenu.getComponent(1)).doClick()
         then :
             Utility.getSplitButtonText(ui) == "second"
     }
@@ -52,26 +52,26 @@ class JSplitButton_Examples_Spec extends Specification
     {
         given : 'We create split button displaying only selection "second".'
             var ui =
-                    UI.splitButton("I may be replaced!")
-                            .add(UI.splitItem("first"))
-                            .add(UI.splitItem("second").onSelection( it -> it.delegate.displayCurrentItemText() ))
-                            .add(UI.splitItem("third"))
-        expect :
+                UI.splitButton("I may be replaced!")
+                .add(UI.splitItem("first"))
+                .add(UI.splitItem("second").onSelection( it -> it.delegate.displayCurrentItemText() ))
+                .add(UI.splitItem("third"))
+        expect : 'The split button has the correct text displayed'
             Utility.getSplitButtonText(ui) == "I may be replaced!"
 
-        when :
-            ((JMenuItem)ui.popupMenu.getComponents()[0]).doClick()
-        then :
+        when : 'We simulate a user selecting the first button item'
+            ((JMenuItem)ui.popupMenu.getComponent(0)).doClick()
+        then : 'The displayed button should still be as it was previously.'
             Utility.getSplitButtonText(ui) == "I may be replaced!"
 
-        when :
-            ((JMenuItem)ui.popupMenu.getComponents()[2]).doClick()
-        then :
+        when : 'We now select the third button item'
+            ((JMenuItem)ui.popupMenu.getComponent(2)).doClick()
+        then : 'Again the button text is still the same.'
             Utility.getSplitButtonText(ui) == "I may be replaced!"
 
-        when :
-            ((JMenuItem)ui.popupMenu.getComponents()[1]).doClick()
-        then :
+        when : 'We now simulate a selection on the second item (for which we registered an action).'
+            ((JMenuItem)ui.popupMenu.getComponent(1)).doClick()
+        then : 'The displayed button text will have changed because of our selection lambda'
             Utility.getSplitButtonText(ui) == "second"
     }
 
@@ -85,25 +85,25 @@ class JSplitButton_Examples_Spec extends Specification
                     .add(UI.splitItem("first"))
                     .add(UI.splitItem("second").onButtonClick( it -> it.delegate.displayButtonText("text by second item") ))
                     .add(UI.splitItem("third"))
-        expect :
+        expect : 'The split button has the correct text displayed'
             Utility.getSplitButtonText(ui) == "I may be replaced!"
 
-        when :
+        when : 'We select the first item and click the button.'
             ((JMenuItem)ui.popupMenu.getComponent(0)).doClick()
             Utility.click(ui)
-        then :
+        then : 'We expect that the button has the default text displayed according to the first action'
             Utility.getSplitButtonText(ui) == "default text"
 
-        when :
+        when : 'We select and click the third button.'
             ((JMenuItem)ui.popupMenu.getComponent(2)).doClick()
             Utility.click(ui)
-        then :
+        then : 'This should have the same effect as previously.'
             Utility.getSplitButtonText(ui) == "default text"
 
-        when :
+        when : 'We now select and click the second button item.'
             ((JMenuItem)ui.popupMenu.getComponent(1)).doClick()
             Utility.click(ui)
-        then :
+        then : 'The split button text will be different because the button item action fired last.'
             Utility.getSplitButtonText(ui) == "text by second item"
     }
 
