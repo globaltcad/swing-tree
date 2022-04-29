@@ -58,7 +58,7 @@ public class Example2 extends JPanel
             .add("cell 3 0", UI.label("29-March-2022"))
         )
         .add("cell 0 3, span 2, grow",
-            UI.label("...here the UI comes to an end...").withColor(Color.LIGHT_GRAY)
+            UI.label("...here the UI comes to an end...").withForeground(Color.LIGHT_GRAY)
         )
         .withBackground(Color.WHITE);
     }

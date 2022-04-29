@@ -189,6 +189,17 @@ public class UIForSwing<I, C extends JComponent> extends AbstractNestedBuilder<I
     }
 
     /**
+     *  Set the color of this {@link JComponent}. (This is usually the font color for components displaying text)
+     *
+     * @param color The color of the foreground (usually text).
+     * @return This very builder to allow for method chaining.
+     */
+    public I withForeground(Color color) {
+        this.component.setForeground(color);
+        return (I) this;
+    }
+
+    /**
      *  Use this to register and catch generic {@link MouseListener} based mouse click events on this UI component.
      *  This method adds the provided consumer lambda to
      *  an an{@link MouseListener} instance to the wrapped

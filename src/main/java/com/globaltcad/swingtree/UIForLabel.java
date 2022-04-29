@@ -51,17 +51,6 @@ public class UIForLabel extends UIForSwing<UIForLabel, JLabel>
     }
 
     /**
-     *  Set the color of the labelText
-     *
-     * @param fontColor The color of the label text.
-     * @return This very builder to allow for method chaining.
-     */
-    public UIForLabel withColor(Color fontColor) {
-        this.component.setForeground(fontColor);
-        return this;
-    }
-
-    /**
      *  Makes the wrapped {@link JLabel} font plain (!bold).
      *
      * @return This very builder to allow for method chaining.
