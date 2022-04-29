@@ -12,15 +12,15 @@ import java.awt.event.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+
 /**
- *  The following is one of the most basic builder implementations inside this file.
- *  It enables nested building of anything extending the JComponent class (Swing components) and
- *  it also serves as a useful super class from which more specialized
- *  builder types can inherit.
+ *  A swing tree builder for any kind {@link JComponent} instance.
+ *  This is the most basic builder type and therefore super-type for almost all other builders.
+ *  This builder defines nested building of anything extending the {@link JComponent} class.
  *  <br><br>
  *
- * @param <I> The concrete implementation of the {@link AbstractBuilder}.
- * @param <C> The type parameter for the component wrapped by an instance of this class.
+ * @param <I> The most basic concrete implementation of the {@link AbstractNestedBuilder}.
+ * @param <C> The type parameter for the component type wrapped by an instance of this class.
  */
 public class UIForSwing<I, C extends JComponent> extends AbstractNestedBuilder<I, C>
 {

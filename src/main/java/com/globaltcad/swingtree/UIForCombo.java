@@ -4,16 +4,25 @@ import com.globaltcad.swingtree.api.UIAction;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
- *  A UI maker for {@link JComboBox} instances.
+ *  A swing tree builder for {@link JComboBox} instances.
  */
 public class UIForCombo<E> extends UIForSwing<UIForCombo<E>, JComboBox<E>>
 {
-    protected UIForCombo(JComboBox<E> component) {
-        super(component);
-    }
+    protected UIForCombo(JComboBox<E> component) { super(component); }
 
+    /**
+     * Adds an {@link UIAction} to the underlying {@link JComboBox}
+     * through an {@link java.awt.event.ActionListener},
+     * which will be called when a selection has been made. If the combo box is editable, then
+     * an {@link ActionEvent} will be fired when editing has stopped.
+     * For more information see {@link JComboBox#addActionListener(ActionListener)}.
+     *
+     * @param action The {@link UIAction} that will be notified.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public UIForCombo<E> onChange(UIAction<JComboBox<E>, ActionEvent> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         this.component.addActionListener( e -> action.accept(new EventContext<>(this.component, e)) );

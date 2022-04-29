@@ -2,10 +2,11 @@ package com.globaltcad.swingtree;
 
 import javax.swing.*;
 
-public class UIForButton<B extends AbstractButton>
-        extends UIForAbstractButton<UIForButton<B>, B>
+/**
+ * A swing tree builder for {@link AbstractButton} sub-type instances,
+ * usually the {@link JButton} type.
+ */
+public class UIForButton<B extends AbstractButton> extends UIForAbstractButton<UIForButton<B>, B>
 {
-    protected UIForButton(B component) {
-        super(component);
-    }
+    protected UIForButton(B component) { super(component); }
 }

@@ -6,6 +6,9 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
 import java.util.function.Consumer;
 
+/**
+ *  A swing tree builder for {@link JTextComponent} instances.
+ */
 public abstract class UIForTextComponent<I, C extends JTextComponent> extends UIForSwing<I, C>
 {
     public interface Remove {void remove(JTextComponent textComp, DocumentFilter.FilterBypass fb, int offset, int length);}
@@ -31,7 +34,6 @@ public abstract class UIForTextComponent<I, C extends JTextComponent> extends UI
             if ( remove != null ) remove.remove( component, fb, offset, length );
             else fb.remove(offset, length);
         }
-
         /**
          * See documentation in {@link DocumentFilter}!
          */
@@ -39,7 +41,6 @@ public abstract class UIForTextComponent<I, C extends JTextComponent> extends UI
             if ( insert != null ) insert.insert( component, fb, offset, string, attr );
             else fb.insertString(offset, string, attr);
         }
-
         /**
          * See documentation in {@link DocumentFilter}!
          */
@@ -47,10 +48,10 @@ public abstract class UIForTextComponent<I, C extends JTextComponent> extends UI
             if ( replace != null ) replace.replace( component, fb, offset, length, text, attrs );
             else fb.replace(offset, length, text, attrs);
         }
-
     };
 
     protected UIForTextComponent(C component) { super(component); }
+
 
     public final I isEditableIf(boolean isEditable) {
         this.component.setEditable(isEditable);

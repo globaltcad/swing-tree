@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- *  The following is a specialized builder implementations for {@link JSeparator} swing components.
+ *  A swing tree builder for {@link JSeparator} instances.
  */
 public class UIForSeparator extends UIForSwing<UIForSeparator, JSeparator>
 {
@@ -14,9 +14,7 @@ public class UIForSeparator extends UIForSwing<UIForSeparator, JSeparator>
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    protected UIForSeparator(JSeparator component) {
-        super(component);
-    }
+    protected UIForSeparator(JSeparator component) { super(component); }
 
     /**
      * @param separatorLength The length of the separation line.

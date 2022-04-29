@@ -9,18 +9,14 @@ import java.util.function.Supplier;
  *
  * @param <V> The value type parameter of the thing wrapped by this.
  */
-class LazyRef<V> {
+final class LazyRef<V> {
 
-	public static <V> LazyRef<V> of(Supplier<V> source) {
-		return new LazyRef<>(source);
-	}
+	public static <V> LazyRef<V> of(Supplier<V> source) { return new LazyRef<>(source); }
 
 	private Supplier<V> source;
 	private V variable = null;
 
-	private LazyRef(Supplier<V> source) {
-		this.source = source;
-	}
+	private LazyRef(Supplier<V> source) { this.source = source; }
 
 	public V get() {
 		if ( this.source == null ) return this.variable;
@@ -32,8 +28,6 @@ class LazyRef<V> {
 	}
 
 	@Override
-	public String toString() {
-		return String.valueOf(this.get());
-	}
+	public String toString() { return String.valueOf(this.get()); }
 
 }

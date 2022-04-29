@@ -7,7 +7,7 @@ package com.globaltcad.swingtree;
  * @param <D> The delegate (in most cases origin UI component) type parameter stored by this.
  * @param <E> The event type parameter of the event stored by this.
  */
-public class EventContext<D,E>
+public final class EventContext<D,E>
 {
     private final D delegate;
     private final E event;

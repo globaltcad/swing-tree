@@ -24,7 +24,7 @@ import java.util.function.Supplier;
  */
 public final class UI
 {
-    private UI() {} // This is a static API
+    private UI(){} // This is a static API
 
     /**
      *  An enum set of all the available swing cursors which

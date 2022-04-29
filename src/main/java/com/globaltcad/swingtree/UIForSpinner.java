@@ -2,6 +2,9 @@ package com.globaltcad.swingtree;
 
 import javax.swing.*;
 
+/**
+ *  A swing tree builder for {@link JSpinner} instances.
+ */
 public class UIForSpinner extends UIForSwing<UIForSpinner, JSpinner>
 {
     /**
@@ -10,7 +13,5 @@ public class UIForSpinner extends UIForSwing<UIForSpinner, JSpinner>
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    public UIForSpinner(JSpinner component) {
-        super(component);
-    }
+    protected UIForSpinner(JSpinner component) { super(component); }
 }
