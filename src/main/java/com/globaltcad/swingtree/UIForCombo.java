@@ -1,8 +1,9 @@
 package com.globaltcad.swingtree;
 
+import com.globaltcad.swingtree.api.UIAction;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
-import java.util.function.Consumer;
 
 /**
  *  A UI maker for {@link JComboBox} instances.

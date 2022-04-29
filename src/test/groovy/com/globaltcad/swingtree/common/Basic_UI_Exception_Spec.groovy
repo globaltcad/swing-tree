@@ -1,8 +1,8 @@
 package com.globaltcad.swingtree.common
 
 import com.alexandriasoftware.swing.JSplitButton
-import com.globaltcad.swingtree.MenuBuilder
-import com.globaltcad.swingtree.SwingBuilder
+import com.globaltcad.swingtree.api.MenuBuilder
+import com.globaltcad.swingtree.api.SwingBuilder
 import com.globaltcad.swingtree.UI
 import spock.lang.Specification
 

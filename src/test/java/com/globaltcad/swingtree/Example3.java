@@ -17,9 +17,9 @@ public class Example3 extends JPanel
         .withLayout("fill, insets 10","[grow][shrink]")
         .withBackground(Color.WHITE)
         .add("cell 0 0",
-                UI.label("Hello and welcome to this UI! (Click me I'm a link)")
-                        .makeBold()
-                        .makeLinkTo("https://github.com/gts-oss")
+            UI.label("Hello and welcome to this UI! (Click me I'm a link)")
+            .makeBold()
+            .makeLinkTo("https://github.com/gts-oss")
         )
         .add("cell 0 1, grow, shrinky",
             UI.panelWithLayout("fill, insets 0","[grow][shrink]")

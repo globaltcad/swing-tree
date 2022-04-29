@@ -9,7 +9,8 @@ import javax.swing.*;
 import javax.swing.text.DefaultEditorKit;
 import java.awt.*;
 
-class BasicComponentsPanel2 extends JPanel {
+class BasicComponentsPanel2 extends JPanel
+{
     private JPasswordField passwordField1;
     private JTextField leadingIconTextField;
     private JTextField trailingIconTextField;

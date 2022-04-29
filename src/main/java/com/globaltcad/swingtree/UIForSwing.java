@@ -1,6 +1,7 @@
 package com.globaltcad.swingtree;
 
 
+import com.globaltcad.swingtree.api.UIAction;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 
@@ -8,7 +9,6 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 

@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
  */
 final class LogUtil
 {
+    private LogUtil() {} // This is a utility class!
+
     /**
      * @param withPlaceholders The {@link String} which may or may not contain placeholder in the for of "{}".
      * @param toBePutAtPlaceholders Arbitrary {@link Object}s which will be turned into

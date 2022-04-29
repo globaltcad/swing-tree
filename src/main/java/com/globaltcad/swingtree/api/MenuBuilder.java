@@ -1,4 +1,6 @@
-package com.globaltcad.swingtree;
+package com.globaltcad.swingtree.api;
+
+import com.globaltcad.swingtree.UI;
 
 import javax.swing.*;
 

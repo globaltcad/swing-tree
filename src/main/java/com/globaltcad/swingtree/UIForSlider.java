@@ -1,8 +1,9 @@
 package com.globaltcad.swingtree;
 
+import com.globaltcad.swingtree.api.UIAction;
+
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
-import java.util.function.Consumer;
 
 /**
  *  A UI make for {@link JSlider} instances.
