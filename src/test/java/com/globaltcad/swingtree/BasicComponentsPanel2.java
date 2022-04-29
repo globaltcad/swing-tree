@@ -35,8 +35,6 @@ class BasicComponentsPanel2 extends JPanel
         JTextField textField1 = new JTextField();
         JFormattedTextField formattedTextField1 = new JFormattedTextField();
         passwordField1 = new JPasswordField();
-        JTextArea textArea5 = new JTextArea();
-        JLabel editorPaneLabel = new JLabel();
         JScrollPane scrollPane5 = new JScrollPane();
         JEditorPane editorPane1 = new JEditorPane();
         JScrollPane scrollPane6 = new JScrollPane();
@@ -228,16 +226,9 @@ class BasicComponentsPanel2 extends JPanel
             it.setViewportView(
                 UI.textArea("Not editable").isEditableIf(false).isEditableIf(false).make( area -> area.setRows(2) ).getResulting(JTextArea.class)
             );
-        }));
-
-        //---- textArea5 ----
-        textArea5.setRows(2);
-        textArea5.setText("No scroll pane");
-        add(textArea5, "cell 5 9,growx");
-
-        //---- editorPaneLabel ----
-        editorPaneLabel.setText("JEditorPane");
-        add(editorPaneLabel, "cell 0 10");
+        }))
+        .add("cell 5 9, growx", UI.textArea("No scroll pane").make( it -> it.setRows(2) ))
+        .add("cell 0 10", UI.label("JEditorPane"));
 
         //======== scrollPane5 ========
         {
