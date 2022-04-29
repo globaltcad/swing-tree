@@ -1,6 +1,8 @@
 package com.globaltcad.swingtree;
 
 
+import com.globaltcad.swingtree.api.TextFilter;
+
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
@@ -11,13 +13,9 @@ import java.util.function.Consumer;
  */
 public abstract class UIForTextComponent<I, C extends JTextComponent> extends UIForSwing<I, C>
 {
-    public interface Remove {void remove(JTextComponent textComp, DocumentFilter.FilterBypass fb, int offset, int length);}
-    public interface Insert {void insert( JTextComponent textComp, DocumentFilter.FilterBypass fb, int offset, String string, AttributeSet attr);}
-    public interface Replace{void replace(JTextComponent textComp, DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs);}
-
-    private Remove remove;
-    private Insert insert;
-    private Replace replace;
+    private TextFilter<RemoveDelegate> remove;
+    private TextFilter<InsertDelegate> insert;
+    private TextFilter<ReplaceDelegate> replace;
 
     /**
      *  A custom document filter which is simply a lambda-rization wrapper which ought to make
@@ -31,21 +29,21 @@ public abstract class UIForTextComponent<I, C extends JTextComponent> extends UI
          * See documentation in {@link DocumentFilter}!
          */
         public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
-            if ( remove != null ) remove.remove( component, fb, offset, length );
+            if ( remove != null ) remove.accept( new RemoveDelegate(component, fb, offset, length) );
             else fb.remove(offset, length);
         }
         /**
          * See documentation in {@link DocumentFilter}!
          */
         public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-            if ( insert != null ) insert.insert( component, fb, offset, string, attr );
+            if ( insert != null ) insert.accept( new InsertDelegate(component, fb, offset, string.length(), string, attr) );
             else fb.insertString(offset, string, attr);
         }
         /**
          * See documentation in {@link DocumentFilter}!
          */
         public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-            if ( replace != null ) replace.replace( component, fb, offset, length, text, attrs );
+            if ( replace != null ) replace.accept(new ReplaceDelegate(component, fb, offset, length, text, attrs));
             else fb.replace(offset, length, text, attrs);
         }
     };
@@ -58,15 +56,35 @@ public abstract class UIForTextComponent<I, C extends JTextComponent> extends UI
         return (I) this;
     }
 
+
     /**
-     * @param action An action which will be executed when the text in the underlying {@link JTextComponent} changes.
+     *  Use this to register any change in the contents of the text component including both
+     *  the displayed text and its attributes.
+     *
+     * @param action An action which will be executed when the text or its attributes in the underlying {@link JTextComponent} changes.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I onContentChange(Consumer<EventContext<JTextComponent, DocumentEvent>> action) {
+        this.component.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e) {action.accept(new EventContext<>(component, e));}
+            @Override public void removeUpdate(DocumentEvent e) {action.accept(new EventContext<>(component, e));}
+            @Override public void changedUpdate(DocumentEvent e) {action.accept(new EventContext<>(component, e));}
+        });
+        return (I) this;
+    }
+
+    /**
+     *  Use this to register if the text in this text component changes.
+     *  This does not include style attributes like font size.
+     *
+     * @param action An action which will be executed when the text string in the underlying {@link JTextComponent} changes.
      * @return This very builder to allow for method chaining.
      */
     public final I onTextChange(Consumer<EventContext<JTextComponent, DocumentEvent>> action) {
         this.component.getDocument().addDocumentListener(new DocumentListener() {
             @Override public void insertUpdate(DocumentEvent e) {action.accept(new EventContext<>(component, e));}
             @Override public void removeUpdate(DocumentEvent e) {action.accept(new EventContext<>(component, e));}
-            @Override public void changedUpdate(DocumentEvent e) {action.accept(new EventContext<>(component, e));}
+            @Override public void changedUpdate(DocumentEvent e) {}
         });
         return (I) this;
     }
@@ -84,36 +102,93 @@ public abstract class UIForTextComponent<I, C extends JTextComponent> extends UI
     }
 
     /**
-     * @param action A {@link Remove} lambda which will be called when parts (or all) of the text in
+     * @param action A {@link TextFilter} lambda which will be called when parts (or all) of the text in
      *               the underlying text component gets removed.
      *
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextRemove(Remove action) {
+    public final I onTextRemove(TextFilter<RemoveDelegate> action) {
         ifFilterable( () -> this.remove = action );
         return (I) this;
     }
 
     /**
-     * @param action A {@link Insert} lambda which will be called when new text gets inserted
+     * @param action A {@link TextFilter} lambda which will be called when new text gets inserted
      *               into the underlying text component.
      *
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextInsert(Insert action) {
+    public final I onTextInsert(TextFilter<InsertDelegate> action) {
         ifFilterable( () -> this.insert = action );
         return (I) this;
     }
 
     /**
-     * @param action A {@link Replace} lambda which will be called when the text in
+     * @param action A {@link TextFilter} lambda which will be called when the text in
      *               the underlying text component gets replaced.
      *
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextReplace(Replace action) {
+    public final I onTextReplace(TextFilter<ReplaceDelegate> action) {
         ifFilterable( () -> this.replace = action );
         return (I) this;
     }
+
+
+    public static abstract class AbstractDelegate
+    {
+        private final JTextComponent textComponent;
+        private final DocumentFilter.FilterBypass filterBypass;
+        private final int offset;
+        private final int length;
+
+        protected AbstractDelegate(JTextComponent textComponent, DocumentFilter.FilterBypass filterBypass, int offset, int length) {
+            this.textComponent = textComponent;
+            this.filterBypass = filterBypass;
+            this.offset = offset;
+            this.length = length;
+        }
+
+        public JTextComponent getTextComponent() { return textComponent; }
+        public DocumentFilter.FilterBypass getFilterBypass() { return filterBypass; }
+        public int getOffset() { return offset; }
+        public int getLength() { return length; }
+    }
+
+    public static final class RemoveDelegate extends AbstractDelegate
+    {
+        private RemoveDelegate(JTextComponent textComponent, DocumentFilter.FilterBypass filterBypass, int offset, int length) {
+            super(textComponent, filterBypass, offset, length);
+        }
+    }
+
+    public static final class InsertDelegate extends AbstractDelegate
+    {
+        private final String text;
+        private final AttributeSet attributeSet;
+
+        private InsertDelegate(JTextComponent textComponent, DocumentFilter.FilterBypass filterBypass, int offset, int length, String text, AttributeSet attributeSet) {
+            super(textComponent, filterBypass, offset, length);
+            this.text = text;
+            this.attributeSet = attributeSet;
+        }
+        public String text() { return text; }
+        public AttributeSet attributeSet() { return attributeSet; }
+    }
+
+    public static final class ReplaceDelegate extends AbstractDelegate
+    {
+        private final String text;
+        private final AttributeSet attributeSet;
+
+        private ReplaceDelegate(JTextComponent textComponent, DocumentFilter.FilterBypass filterBypass, int offset, int length, String text, AttributeSet attributeSet) {
+            super(textComponent, filterBypass, offset, length);
+            this.text = text;
+            this.attributeSet = attributeSet;
+        }
+        public String getText() { return text; }
+        public AttributeSet getAttributeSet() { return attributeSet; }
+    }
+
 }
 
