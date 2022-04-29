@@ -34,13 +34,7 @@ class BasicComponentsPanel2 extends JPanel
         JSpinner spinner1 = new JSpinner();
         JTextField textField1 = new JTextField();
         JFormattedTextField formattedTextField1 = new JFormattedTextField();
-        JLabel passwordFieldLabel = new JLabel();
         passwordField1 = new JPasswordField();
-        JPasswordField passwordField2 = new JPasswordField();
-        JPasswordField passwordField3 = new JPasswordField();
-        JPasswordField passwordField4 = new JPasswordField();
-        JPasswordField passwordField5 = new JPasswordField();
-        JLabel textAreaLabel = new JLabel();
         JScrollPane scrollPane1 = new JScrollPane();
         JTextArea textArea1 = new JTextArea();
         JScrollPane scrollPane2 = new JScrollPane();
@@ -207,51 +201,21 @@ class BasicComponentsPanel2 extends JPanel
         .add("cell 2 7, growx", UI.formattedTextField("Disabled").isEnabledIf(false))
         .add("cell 3 7, growx", UI.formattedTextField("Not editable").isEditableIf(false))
         .add("cell 4 7, growx", UI.formattedTextField("Not editable disabled").isEnabledIf(false).isEditableIf(false))
-        .add("cell 5 7", UI.formattedTextField().withProperty("JTextField.placeholderText", "Placeholder"));
-
-        //---- passwordFieldLabel ----
-        passwordFieldLabel.setText("JPasswordField:");
-        add(passwordFieldLabel, "cell 0 8");
-
-        //---- passwordField1 ----
-        passwordField1.setText("Editable");
-        add(passwordField1, "cell 1 8,growx");
-
-        //---- passwordField2 ----
-        passwordField2.setText("Disabled");
-        passwordField2.setEnabled(false);
-        add(passwordField2, "cell 2 8,growx");
-
-        //---- passwordField3 ----
-        passwordField3.setText("Not editable");
-        passwordField3.setEditable(false);
-        add(passwordField3, "cell 3 8,growx");
-
-        //---- passwordField4 ----
-        passwordField4.setText("Not editable disabled");
-        passwordField4.setEnabled(false);
-        passwordField4.setEditable(false);
-        add(passwordField4, "cell 4 8,growx");
-
-        //---- passwordField5 ----
-        passwordField5.putClientProperty("JTextField.placeholderText", "Placeholder");
-        add(passwordField5, "cell 5 8,growx");
-
-        //---- textAreaLabel ----
-        textAreaLabel.setText("JTextArea:");
-        add(textAreaLabel, "cell 0 9");
-
-        //======== scrollPane1 ========
-        {
-            scrollPane1.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-            scrollPane1.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
-            //---- textArea1 ----
-            textArea1.setText("Editable");
-            textArea1.setRows(2);
-            scrollPane1.setViewportView(textArea1);
-        }
-        add(scrollPane1, "cell 1 9,growx");
+        .add("cell 5 7", UI.formattedTextField().withProperty("JTextField.placeholderText", "Placeholder"))
+        .add("cell 0 8", UI.label("JPasswordField:"))
+        .add("cell 1 8, growx", UI.passwordField("Editable"))
+        .add("cell 2 8, growx", UI.passwordField("Disabled").isEnabledIf(false))
+        .add("cell 3 8, growx", UI.passwordField("Not editable").isEditableIf(false))
+        .add("cell 4 8, growx", UI.passwordField("Not editable disabled").isEnabledIf(false).isEditableIf(false))
+        .add("cell 5 8, growx", UI.passwordField().withProperty("JTextField.placeholderText", "Placeholder"))
+        .add("cell 0 9", UI.label("JTextArea:"))
+        .add("cell 1 9, growx", UI.of(new JScrollPane()).make( it -> {
+            it.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+            it.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            it.setViewportView(
+                UI.textArea("Editable").make( area -> area.setRows(2) ).getResulting(JTextArea.class)
+            );
+        }));
 
         //======== scrollPane2 ========
         {

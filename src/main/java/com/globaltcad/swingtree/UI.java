@@ -62,7 +62,7 @@ public final class UI
      * @param <T> The concrete type of this new component.
      * @return A basic UI builder instance wrapping any {@link JComponent}.
      */
-    public static <T extends JComponent> UIForSwing<UIForSwing, T> of(T component)
+    public static <T extends JComponent> UIForSwing<UIForSwing<?, T>, T> of(T component)
     {
         LogUtil.nullArgCheck(component, "component", JComponent.class);
         return new UIForSwing<>(component);
@@ -78,7 +78,7 @@ public final class UI
      * @param <T> The UI component type built by implementations of the provided builder.
      * @return A basic UI builder instance wrapping any {@link JComponent}.
      */
-    public static <T extends JComponent> UIForSwing<UIForSwing, T> of(SwingBuilder<T> builder)
+    public static <T extends JComponent> UIForSwing<UIForSwing<?, T>, T> of(SwingBuilder<T> builder)
     {
         LogUtil.nullArgCheck(builder, "builder", SwingBuilder.class);
         return of(builder.build());
@@ -484,6 +484,23 @@ public final class UI
     }
 
     public static UIForFormattedTextField formattedTextField() { return of(new JFormattedTextField()); }
+
+    /**
+     *  Use this to create a builder for the provided {@link JPasswordField} instance.
+     *
+     * @return A builder instance for the provided {@link JPasswordField}, which enables fluent method chaining.
+     */
+    public static UIForPasswordField of(JPasswordField component) {
+        LogUtil.nullArgCheck(component, "component", JPasswordField.class);
+        return new UIForPasswordField(component);
+    }
+
+    public static UIForPasswordField passwordField(String text) {
+        LogUtil.nullArgCheck(text, "text", String.class);
+        return of(new JPasswordField(text));
+    }
+
+    public static UIForPasswordField passwordField() { return of(new JPasswordField()); }
 
     /**
      *  Use this to create a builder for the provided {@link JTextArea} instance.

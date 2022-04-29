@@ -5,7 +5,7 @@ import com.globaltcad.swingtree.UI
 import com.globaltcad.swingtree.utility.Utility
 import groovy.transform.CompileDynamic
 import spock.lang.Specification
-Import spock.lang.Title
+import spock.lang.Title
 
 import javax.swing.*
 
