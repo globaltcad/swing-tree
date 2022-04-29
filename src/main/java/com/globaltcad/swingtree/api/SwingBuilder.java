@@ -2,6 +2,8 @@ package com.globaltcad.swingtree.api;
 
 import com.globaltcad.swingtree.UI;
 
+import javax.swing.*;
+
 /**
  *  If you are using builders for your custom Swing components,
  *  implement this to allow the {@link UI} builder to call the {@link #build()}
@@ -9,7 +11,7 @@ import com.globaltcad.swingtree.UI;
  *
  * @param <C> The UI component type built by implementations of this.
  */
-public interface SwingBuilder<C> {
+public interface SwingBuilder<C extends JComponent> {
 
     C build();
 

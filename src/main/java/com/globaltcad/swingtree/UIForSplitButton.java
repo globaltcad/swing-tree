@@ -130,16 +130,30 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
         return this;
     }
 
+    /**
+     * @param forItem The builder whose wrapped {@link JMenuItem} will be added to and exposed
+     *                by the {@link JSplitButton} once the split part was pressed.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public UIForSplitButton<B> add(UIForMenuItem forItem) {
         LogUtil.nullArgCheck(forItem, "forItem", UIForMenuItem.class);
         return this.add(forItem.component);
     }
 
+    /**
+     * @param item A {@link JMenuItem} which will be exposed by this {@link JSplitButton} once the split part was pressed.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public UIForSplitButton<B> add(JMenuItem item) {
         LogUtil.nullArgCheck(item, "item", JMenuItem.class);
         return this.add(SplitItem.of(item));
     }
 
+    /**
+     * @param splitItem The {@link SplitItem} instance wrapping a {@link JMenuItem} as well as some associated {@link UIAction}s.
+     * @param <I> The {@link JMenuItem} type which should be added to this {@link JSplitButton} builder.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public <I extends JMenuItem> UIForSplitButton<B> add(SplitItem<I> splitItem) {
         LogUtil.nullArgCheck(splitItem, "buttonItem", SplitItem.class);
         I item = splitItem.getItem();
