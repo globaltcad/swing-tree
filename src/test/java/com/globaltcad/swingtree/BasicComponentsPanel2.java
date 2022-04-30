@@ -35,15 +35,6 @@ class BasicComponentsPanel2 extends JPanel
         JTextField textField1 = new JTextField();
         JFormattedTextField formattedTextField1 = new JFormattedTextField();
         passwordField1 = new JPasswordField();
-        JScrollPane scrollPane5 = new JScrollPane();
-        JEditorPane editorPane1 = new JEditorPane();
-        JScrollPane scrollPane6 = new JScrollPane();
-        JEditorPane editorPane2 = new JEditorPane();
-        JScrollPane scrollPane7 = new JScrollPane();
-        JEditorPane editorPane3 = new JEditorPane();
-        JScrollPane scrollPane8 = new JScrollPane();
-        JEditorPane editorPane4 = new JEditorPane();
-        JEditorPane editorPane5 = new JEditorPane();
         JLabel textPaneLabel = new JLabel();
         JScrollPane scrollPane9 = new JScrollPane();
         JTextPane textPane1 = new JTextPane();
@@ -199,28 +190,28 @@ class BasicComponentsPanel2 extends JPanel
         .add("cell 4 8, growx", UI.passwordField("Not editable disabled").isEnabledIf(false).isEditableIf(false))
         .add("cell 5 8, growx", UI.passwordField().withProperty("JTextField.placeholderText", "Placeholder"))
         .add("cell 0 9", UI.label("JTextArea:"))
-        .add("cell 1 9, growx", UI.of(new JScrollPane()).make( it -> {
+        .add("cell 1 9, growx", UI.scrollPane().make( it -> {
             it.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
             it.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
             it.setViewportView(
                 UI.textArea("Editable").make( area -> area.setRows(2) ).getResulting(JTextArea.class)
             );
         }))
-        .add("cell 2 9, growx", UI.of(new JScrollPane()).make( it -> {
+        .add("cell 2 9, growx", UI.scrollPane().make( it -> {
             it.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
             it.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
             it.setViewportView(
                 UI.textArea("Disabled").isEnabledIf(false).make( area -> area.setRows(2) ).getResulting(JTextArea.class)
             );
         }))
-        .add("cell 3 9, growx", UI.of(new JScrollPane()).make( it -> {
+        .add("cell 3 9, growx", UI.scrollPane().make( it -> {
             it.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
             it.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
             it.setViewportView(
                 UI.textArea("Not editable").isEditableIf(false).make( area -> area.setRows(2) ).getResulting(JTextArea.class)
             );
         }))
-        .add("cell 4 9, growx", UI.of(new JScrollPane()).make( it -> {
+        .add("cell 4 9, growx", UI.scrollPane().make( it -> {
             it.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
             it.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
             it.setViewportView(
@@ -228,59 +219,29 @@ class BasicComponentsPanel2 extends JPanel
             );
         }))
         .add("cell 5 9, growx", UI.textArea("No scroll pane").make( it -> it.setRows(2) ))
-        .add("cell 0 10", UI.label("JEditorPane"));
-
-        //======== scrollPane5 ========
-        {
-            scrollPane5.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-            scrollPane5.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
-            //---- editorPane1 ----
-            editorPane1.setText("Editable");
-            scrollPane5.setViewportView(editorPane1);
-        }
-        add(scrollPane5, "cell 1 10,growx");
-
-        //======== scrollPane6 ========
-        {
-            scrollPane6.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-            scrollPane6.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
-            //---- editorPane2 ----
-            editorPane2.setText("Disabled");
-            editorPane2.setEnabled(false);
-            scrollPane6.setViewportView(editorPane2);
-        }
-        add(scrollPane6, "cell 2 10,growx");
-
-        //======== scrollPane7 ========
-        {
-            scrollPane7.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-            scrollPane7.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
-            //---- editorPane3 ----
-            editorPane3.setText("Not editable");
-            editorPane3.setEditable(false);
-            scrollPane7.setViewportView(editorPane3);
-        }
-        add(scrollPane7, "cell 3 10,growx");
-
-        //======== scrollPane8 ========
-        {
-            scrollPane8.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-            scrollPane8.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
-            //---- editorPane4 ----
-            editorPane4.setText("Not editable disabled");
-            editorPane4.setEditable(false);
-            editorPane4.setEnabled(false);
-            scrollPane8.setViewportView(editorPane4);
-        }
-        add(scrollPane8, "cell 4 10,growx");
-
-        //---- editorPane5 ----
-        editorPane5.setText("No scroll pane");
-        add(editorPane5, "cell 5 10,growx");
+        .add("cell 0 10", UI.label("JEditorPane"))
+        .add("cell 1 10, growx", UI.scrollPane().make( it -> {
+            it.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+            it.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            it.setViewportView(UI.editorPane().withText("Editable").getResulting(JEditorPane.class
+            ));
+        }))
+        .add("cell 2 10, growx", UI.scrollPane().make( it -> {
+            it.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+            it.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            it.setViewportView(UI.editorPane().withText("Disabled").isEnabledIf(false).getResulting(JEditorPane.class));
+        }))
+        .add("cell 3 10, growx", UI.scrollPane().make( it -> {
+            it.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+            it.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            it.setViewportView(UI.editorPane().withText("Not Editable").isEditableIf(false).getResulting(JEditorPane.class));
+        }))
+        .add("cell 4 10, growx", UI.scrollPane().make( it -> {
+            it.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+            it.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            it.setViewportView(UI.editorPane().withText("Not Editable disabled").isEditableIf(false).isEnabledIf(false).getResulting(JEditorPane.class));
+        }))
+        .add("cell 5 10, growx", UI.editorPane().withText("No scroll pane"));
 
         //---- textPaneLabel ----
         textPaneLabel.setText("JTextPane:");

@@ -338,6 +338,20 @@ public final class UI
         return of(new JPanel()).withLayout(attr, layout);
     }
 
+    public static UIForScrollPane of(JScrollPane component) {
+        LogUtil.nullArgCheck(component, "component", JScrollPane.class);
+        return new UIForScrollPane(component);
+    }
+
+    public static UIForScrollPane scrollPane() { return of(new JScrollPane()); }
+
+    public static UIForEditorPane of(JEditorPane component) {
+        LogUtil.nullArgCheck(component, "component", JEditorPane.class);
+        return new UIForEditorPane(component);
+    }
+
+    public static UIForEditorPane editorPane() { return of(new JEditorPane()); }
+
     /**
      *  Use this to create a builder for the provided {@link JSlider} instance.
      *

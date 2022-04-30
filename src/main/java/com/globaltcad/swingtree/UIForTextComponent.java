@@ -51,6 +51,11 @@ public abstract class UIForTextComponent<I, C extends JTextComponent> extends UI
     protected UIForTextComponent(C component) { super(component); }
 
 
+    public final I withText(String text) {
+        this.component.setText(text);
+        return (I) this;
+    }
+
     public final I isEditableIf(boolean isEditable) {
         this.component.setEditable(isEditable);
         return (I) this;
