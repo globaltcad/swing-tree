@@ -56,7 +56,6 @@ public abstract class UIForTextComponent<I, C extends JTextComponent> extends UI
         return (I) this;
     }
 
-
     /**
      *  Use this to register any change in the contents of the text component including both
      *  the displayed text and its attributes.
@@ -74,6 +73,22 @@ public abstract class UIForTextComponent<I, C extends JTextComponent> extends UI
     }
 
     /**
+     *  Use this to register any change in the contents attributes of the {@link JTextComponent}.
+     *  See {@link DocumentListener#changedUpdate(DocumentEvent)}!
+     *
+     * @param action An action which will be executed when the attributes in the underlying {@link JTextComponent} changes.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I onAttributesChange(Consumer<EventContext<JTextComponent, DocumentEvent>> action) {
+        this.component.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e) {}
+            @Override public void removeUpdate(DocumentEvent e) {}
+            @Override public void changedUpdate(DocumentEvent e) {action.accept(new EventContext<>(component, e));}
+        });
+        return (I) this;
+    }
+
+    /**
      *  Use this to register if the text in this text component changes.
      *  This does not include style attributes like font size.
      *
@@ -83,6 +98,36 @@ public abstract class UIForTextComponent<I, C extends JTextComponent> extends UI
     public final I onTextChange(Consumer<EventContext<JTextComponent, DocumentEvent>> action) {
         this.component.getDocument().addDocumentListener(new DocumentListener() {
             @Override public void insertUpdate(DocumentEvent e) {action.accept(new EventContext<>(component, e));}
+            @Override public void removeUpdate(DocumentEvent e) {action.accept(new EventContext<>(component, e));}
+            @Override public void changedUpdate(DocumentEvent e) {}
+        });
+        return (I) this;
+    }
+
+    /**
+     * Use this to register if text was inserted into the {@link JTextComponent}.
+     *
+     * @param action An action which will be executed when text was inserted into the underlying {@link JTextComponent}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I onTextInsert(Consumer<EventContext<JTextComponent, DocumentEvent>> action) {
+        this.component.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e) {action.accept(new EventContext<>(component, e));}
+            @Override public void removeUpdate(DocumentEvent e) {}
+            @Override public void changedUpdate(DocumentEvent e) {}
+        });
+        return (I) this;
+    }
+
+    /**
+     * Use this to register if text was removed from the {@link JTextComponent}.
+     *
+     * @param action An action which will be executed when text was removed from the underlying {@link JTextComponent}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I onTextRemove(Consumer<EventContext<JTextComponent, DocumentEvent>> action) {
+        this.component.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e) {}
             @Override public void removeUpdate(DocumentEvent e) {action.accept(new EventContext<>(component, e));}
             @Override public void changedUpdate(DocumentEvent e) {}
         });
@@ -107,7 +152,7 @@ public abstract class UIForTextComponent<I, C extends JTextComponent> extends UI
      *
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextRemove(TextFilter<RemoveDelegate> action) {
+    public final I onTextRemoveFilter(TextFilter<RemoveDelegate> action) {
         ifFilterable( () -> this.remove = action );
         return (I) this;
     }
@@ -118,7 +163,7 @@ public abstract class UIForTextComponent<I, C extends JTextComponent> extends UI
      *
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextInsert(TextFilter<InsertDelegate> action) {
+    public final I onTextInsertFilter(TextFilter<InsertDelegate> action) {
         ifFilterable( () -> this.insert = action );
         return (I) this;
     }
@@ -129,12 +174,14 @@ public abstract class UIForTextComponent<I, C extends JTextComponent> extends UI
      *
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextReplace(TextFilter<ReplaceDelegate> action) {
+    public final I onTextReplaceFilter(TextFilter<ReplaceDelegate> action) {
         ifFilterable( () -> this.replace = action );
         return (I) this;
     }
 
-
+    /**
+     *  A super type for the delegate types passed to the {@link TextFilter}.
+     */
     public static abstract class AbstractDelegate
     {
         private final JTextComponent textComponent;
