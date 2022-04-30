@@ -27,7 +27,7 @@ public class Example extends JPanel
 			.add("cell 0 0",
 				UI.label("Hello and welcome to this UI! (Click me I'm a link)")
 				.makeBold()
-				.makeLinkTo("https://github.com/gts-oss")
+				.makeLinkTo("https://github.com/globaltcad")
 			)
 			.add("cell 0 1, grow, pushy",
 				UI.panelWithLayout(debug+"fill, insets 0","[grow][shrink]")
