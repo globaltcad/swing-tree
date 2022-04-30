@@ -35,16 +35,6 @@ class BasicComponentsPanel2 extends JPanel
         JTextField textField1 = new JTextField();
         JFormattedTextField formattedTextField1 = new JFormattedTextField();
         passwordField1 = new JPasswordField();
-        JLabel textPaneLabel = new JLabel();
-        JScrollPane scrollPane9 = new JScrollPane();
-        JTextPane textPane1 = new JTextPane();
-        JScrollPane scrollPane10 = new JScrollPane();
-        JTextPane textPane2 = new JTextPane();
-        JScrollPane scrollPane11 = new JScrollPane();
-        JTextPane textPane3 = new JTextPane();
-        JScrollPane scrollPane12 = new JScrollPane();
-        JTextPane textPane4 = new JTextPane();
-        JTextPane textPane5 = new JTextPane();
         JLabel errorHintsLabel = new JLabel();
         JTextField errorHintsTextField = new JTextField();
         JComboBox<String> errorHintsComboBox = new JComboBox<>();
@@ -139,33 +129,23 @@ class BasicComponentsPanel2 extends JPanel
         .add("cell 0 4", UI.label("JComboBox:").make( it -> {it.setDisplayedMnemonic('C');it.setLabelFor(comboBox1);}))
         .add("cell 1 4, growx", UI.of(comboBox1).isEnabledIf(true).make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
                 "Editable",
-                "a",
-                "bb",
-                "ccc"
+                "a", "bb", "ccc"
         }))))
         .add("cell 2 4, growx", UI.of(comboBox2).isEditableIf(true).isEnabledIf(false).make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
                 "Disabled",
-                "a",
-                "bb",
-                "ccc"
+                "a", "bb", "ccc"
         }))))
         .add("cell 3 4, growx", UI.of(comboBox3).make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
                 "Not editable",
-                "a",
-                "bb",
-                "ccc"
+                "a", "bb", "ccc"
         })) ))
         .add("cell 4 4, growx", UI.of(comboBox4).isEnabledIf(false).make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
                 "Not editable disabled",
-                "a",
-                "bb",
-                "ccc"
+                "a", "bb", "ccc"
         })) ))
         .add("cell 5 4, growx, wmax 100", UI.of(comboBox5).make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
                 "Wide popup if text is longer",
-                "aa",
-                "bbb",
-                "cccc"
+                "aa", "bbb", "cccc"
         })) ))
         .add("cell 0 5", UI.label("JSpinner:").make( it -> {it.setLabelFor(spinner1);it.setDisplayedMnemonic('S');}))
         .add("cell 1 5, growx", UI.of(spinner1))
@@ -247,48 +227,23 @@ class BasicComponentsPanel2 extends JPanel
             it.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
             it.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
             it.setViewportView(UI.textPane().withText("Editable").getResulting(JTextPane.class));
-        }));
-
-        //======== scrollPane10 ========
-        {
-            scrollPane10.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-            scrollPane10.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
-            //---- textPane2 ----
-            textPane2.setText("Disabled");
-            textPane2.setEnabled(false);
-            scrollPane10.setViewportView(textPane2);
-        }
-        add(scrollPane10, "cell 2 11,growx");
-
-        //======== scrollPane11 ========
-        {
-            scrollPane11.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-            scrollPane11.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
-            //---- textPane3 ----
-            textPane3.setText("Not editable");
-            textPane3.setEditable(false);
-            scrollPane11.setViewportView(textPane3);
-        }
-        add(scrollPane11, "cell 3 11,growx");
-
-        //======== scrollPane12 ========
-        {
-            scrollPane12.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-            scrollPane12.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
-            //---- textPane4 ----
-            textPane4.setText("Not editable disabled");
-            textPane4.setEditable(false);
-            textPane4.setEnabled(false);
-            scrollPane12.setViewportView(textPane4);
-        }
-        add(scrollPane12, "cell 4 11,growx");
-
-        //---- textPane5 ----
-        textPane5.setText("No scroll pane");
-        add(textPane5, "cell 5 11,growx");
+        }))
+        .add("cell 2 11, growx", UI.scrollPane().make( it ->{
+            it.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+            it.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            it.setViewportView(UI.textPane().withText("Disabled").isEnabledIf(false).getResulting(JTextPane.class));
+        }))
+        .add("cell 3 11, growx", UI.scrollPane().make( it ->{
+            it.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+            it.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            it.setViewportView(UI.textPane().withText("Not editable").isEditableIf(false).getResulting(JTextPane.class));
+        }))
+        .add("cell 4 11, growx", UI.scrollPane().make( it ->{
+            it.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+            it.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            it.setViewportView(UI.textPane().withText("Not editable disabled").isEditableIf(false).isEnabledIf(false).getResulting(JTextPane.class));
+        }))
+        .add("cell 5 11, growx", UI.textPane().withText("No scroll pane"));
 
         //---- errorHintsLabel ----
         errorHintsLabel.setText("Error hints:");
