@@ -2,7 +2,7 @@ package com.globaltcad.swingtree;
 
 import javax.swing.*;
 
-public class UIForEditorPane extends UIForAbstractEditorPane<UIForEditorPane, JEditorPane>
+public class UIForAbstractEditorPane<I, C extends JEditorPane> extends UIForTextComponent<I, C>
 {
     /**
      * Instances of the BasicBuilder as well as its sub types always wrap
@@ -10,7 +10,7 @@ public class UIForEditorPane extends UIForAbstractEditorPane<UIForEditorPane, JE
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    public UIForEditorPane(JEditorPane component) {
-        super(component);
-    }
+    public UIForAbstractEditorPane(C component) { super(component); }
+
+
 }

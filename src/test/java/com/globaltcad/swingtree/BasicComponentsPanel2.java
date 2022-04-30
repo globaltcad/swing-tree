@@ -241,22 +241,13 @@ class BasicComponentsPanel2 extends JPanel
             it.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
             it.setViewportView(UI.editorPane().withText("Not Editable disabled").isEditableIf(false).isEnabledIf(false).getResulting(JEditorPane.class));
         }))
-        .add("cell 5 10, growx", UI.editorPane().withText("No scroll pane"));
-
-        //---- textPaneLabel ----
-        textPaneLabel.setText("JTextPane:");
-        add(textPaneLabel, "cell 0 11");
-
-        //======== scrollPane9 ========
-        {
-            scrollPane9.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-            scrollPane9.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
-            //---- textPane1 ----
-            textPane1.setText("Editable");
-            scrollPane9.setViewportView(textPane1);
-        }
-        add(scrollPane9, "cell 1 11,growx");
+        .add("cell 5 10, growx", UI.editorPane().withText("No scroll pane"))
+        .add("cell 0 11", UI.label("JTextPane:"))
+        .add("cell 1 11, growx", UI.scrollPane().make( it ->{
+            it.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+            it.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            it.setViewportView(UI.textPane().withText("Editable").getResulting(JTextPane.class));
+        }));
 
         //======== scrollPane10 ========
         {

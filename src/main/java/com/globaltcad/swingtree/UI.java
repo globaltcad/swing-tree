@@ -350,7 +350,18 @@ public final class UI
         return new UIForEditorPane(component);
     }
 
-    public static UIForEditorPane editorPane() { return of(new JEditorPane()); }
+    public static UIForEditorPane editorPane() { 
+        return of(new JEditorPane()); 
+    }
+
+    public static UIForTextPane of(JTextPane component) {
+        LogUtil.nullArgCheck(component, "component", JTextPane.class);
+        return new UIForTextPane(component);
+    }
+
+    public static UIForTextPane textPane() {
+        return of(new JTextPane());
+    }
 
     /**
      *  Use this to create a builder for the provided {@link JSlider} instance.
