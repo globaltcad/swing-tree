@@ -50,12 +50,17 @@ public abstract class UIForTextComponent<I, C extends JTextComponent> extends UI
 
     protected UIForTextComponent(C component) { super(component); }
 
-
     public final I withText(String text) {
         this.component.setText(text);
         return (I) this;
     }
 
+    /**
+     *  Use this to modify the components' modifiability.
+     *
+     * @param isEditable The flag determining if the underlying {@link JTextComponent} should be editable or not.
+     * @return This very builder to allow for method chaining.
+     */
     public final I isEditableIf(boolean isEditable) {
         this.component.setEditable(isEditable);
         return (I) this;
