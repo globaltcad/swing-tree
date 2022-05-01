@@ -28,7 +28,6 @@ Fluent and boilerplate free Swing UI building!
 
 
 ```java
-	
 UI.panelWithLayout("fill, insets 10","[grow][shrink]")
 .withBackground(Color.WHITE)
 .add("cell 0 0",
@@ -44,11 +43,11 @@ UI.panelWithLayout("fill, insets 10","[grow][shrink]")
         .withBackground(Color.LIGHT_GRAY)
         .add("span", UI.label("...some text..."))
         .add("shrink", UI.label("First Name"))
-        .add("grow", UI.of(new JTextField("John")))
+        .add("grow", UI.textField("John"))
         .add("gap unrelated, shrink", UI.label("Last Name"))
-        .add("wrap, grow", UI.of(new JTextField("Smith")))
+        .add("wrap, grow", UI.textField("Smith"))
         .add("shrink", UI.label("Address"))
-        .add("span, grow", UI.of(new JTextField("Somewhere")))
+        .add("span, grow", UI.textField("Somewhere"))
     )
     .add("cell 1 0, grow y",
         UI.panelWithLayout("fill", "[grow]")
@@ -61,7 +60,7 @@ UI.panelWithLayout("fill, insets 10","[grow][shrink]")
         )
         .withBorder(BorderFactory.createMatteBorder(0,0,1,0,Color.LIGHT_GRAY))
         .add( "cell 0 2, aligny bottom, span, shrink", UI.label("Here is a text area:"))
-        .add("cell 0 3, aligny bottom, span, grow", UI.of(new JTextArea("Anything...")))
+        .add("cell 0 3, aligny bottom, span, grow", UI.textArea("Anything..."))
     )
 )
 .add("cell 0 2, grow",
@@ -75,7 +74,6 @@ UI.panelWithLayout("fill, insets 10","[grow][shrink]")
     UI.label("...here the UI comes to an end...").withForeground(Color.LIGHT_GRAY)
 )
 .withBackground(Color.WHITE);
-	
 ```
 
 Which produces the following UI when added to a JFrame:
