@@ -1,5 +1,7 @@
 package com.globaltcad.swingtree;
 
+import com.globaltcad.swingtree.api.Maker;
+
 import java.util.function.Consumer;
 
 /**
@@ -57,8 +59,8 @@ abstract class AbstractBuilder<I, C>
      * @param action A Consumer lambda which simply returned the wrapped JComponent type for interacting it.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public I make(Consumer<C> action ) {
-        action.accept(component);
+    public I make( Maker<C> action ) {
+        action.make(component);
         return (I) this;
     }
 

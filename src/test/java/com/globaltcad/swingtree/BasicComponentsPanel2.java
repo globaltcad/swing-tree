@@ -24,33 +24,18 @@ class BasicComponentsPanel2 extends JPanel
         configure();
     }
 
-    private void initComponents() {
-
+    private void initComponents()
+    {
         JComboBox<String> comboBox1 = new JComboBox<>();
-        JComboBox<String> comboBox2 = new JComboBox<>();
-        JComboBox<String> comboBox3 = new JComboBox<>();
-        JComboBox<String> comboBox4 = new JComboBox<>();
-        JComboBox<String> comboBox5 = new JComboBox<>();
         JSpinner spinner1 = new JSpinner();
         JTextField textField1 = new JTextField();
         JFormattedTextField formattedTextField1 = new JFormattedTextField();
         passwordField1 = new JPasswordField();
-        JLabel errorHintsLabel = new JLabel();
-        JTextField errorHintsTextField = new JTextField();
-        JComboBox<String> errorHintsComboBox = new JComboBox<>();
-        JSpinner errorHintsSpinner = new JSpinner();
-        JLabel warningHintsLabel = new JLabel();
-        JTextField warningHintsTextField = new JTextField();
-        JComboBox<String> warningHintsComboBox = new JComboBox<>();
-        JSpinner warningHintsSpinner = new JSpinner();
-        JLabel iconsLabel = new JLabel();
         leadingIconTextField = new JTextField();
         trailingIconTextField = new JTextField();
         iconsTextField = new JTextField();
-        JLabel compsLabel = new JLabel();
         compsTextField = new JTextField();
         clearTextField = new JTextField();
-        JLabel fontsLabel = new JLabel();
         JLabel h00Label = new JLabel();
         JLabel h0Label = new JLabel();
         JLabel h1Label = new JLabel();
@@ -130,16 +115,16 @@ class BasicComponentsPanel2 extends JPanel
         .add("cell 1 4, growx", UI.of(comboBox1).isEnabledIf(true).make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
                 "Editable", "a", "bb", "ccc"
         }))))
-        .add("cell 2 4, growx", UI.of(comboBox2).isEditableIf(true).isEnabledIf(false).make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
+        .add("cell 2 4, growx", UI.comboBox().isEditableIf(true).isEnabledIf(false).make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
                 "Disabled", "a", "bb", "ccc"
         }))))
-        .add("cell 3 4, growx", UI.of(comboBox3).make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
+        .add("cell 3 4, growx", UI.comboBox().make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
                 "Not editable", "a", "bb", "ccc"
         })) ))
-        .add("cell 4 4, growx", UI.of(comboBox4).isEnabledIf(false).make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
+        .add("cell 4 4, growx", UI.comboBox().isEnabledIf(false).make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
                 "Not editable disabled", "a", "bb", "ccc"
         })) ))
-        .add("cell 5 4, growx, wmax 100", UI.of(comboBox5).make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
+        .add("cell 5 4, growx, wmax 100", UI.comboBox().make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
                 "Wide popup if text is longer", "aa", "bbb", "cccc"
         })) ))
         .add("cell 0 5", UI.label("JSpinner:").make( it -> {it.setLabelFor(spinner1);it.setDisplayedMnemonic('S');}))
@@ -147,13 +132,13 @@ class BasicComponentsPanel2 extends JPanel
         .add("cell 2 5, growx", UI.spinner().isEnabledIf(false))
         .add("cell 5 5, growx", UI.comboBox().isEditableIf(true).withProperty("JTextField.placeholderText", "Placeholder"))
         .add("cell 0 6", UI.label("JTextField:").make( it -> {it.setLabelFor(textField1);it.setDisplayedMnemonic('T');} ))
-        .add("cell 1 6, growx", UI.textField("Editable").make( it -> it.setComponentPopupMenu(popupMenu1) ))
+        .add("cell 1 6, growx", UI.of(textField1).withText("Editable").make( it -> it.setComponentPopupMenu(popupMenu1) ))
         .add("cell 2 6, growx", UI.textField("Disabled").isEnabledIf(false))
         .add("cell 3 6, growx", UI.textField("Not editable").isEditableIf(false))
         .add("cell 4 6, growx", UI.textField("Not editable disabled").isEnabledIf(false).isEditableIf(false))
         .add("cell 5 6, growx", UI.textField().withProperty("JTextField.placeholderText", "Placeholder"))
         .add("cell 0 7", UI.label("JFormattedTextField:").make( it -> {it.setLabelFor(formattedTextField1); it.setDisplayedMnemonic('O');} ))
-        .add("cell 1 7, growx", UI.formattedTextField("Editable").make( it -> it.setComponentPopupMenu(popupMenu1) ))
+        .add("cell 1 7, growx", UI.of(formattedTextField1).withText("Editable").make( it -> it.setComponentPopupMenu(popupMenu1) ))
         .add("cell 2 7, growx", UI.formattedTextField("Disabled").isEnabledIf(false))
         .add("cell 3 7, growx", UI.formattedTextField("Not editable").isEditableIf(false))
         .add("cell 4 7, growx", UI.formattedTextField("Not editable disabled").isEnabledIf(false).isEditableIf(false))
@@ -254,20 +239,11 @@ class BasicComponentsPanel2 extends JPanel
         .add("cell 0 14", UI.label("Leading/trailing icons:"))
         .add("cell 1 14, growx", UI.of(leadingIconTextField))
         .add("cell 2 14, growx", UI.of(trailingIconTextField).withText("text"))
-        .add("cell 3 14, growx", UI.of(iconsTextField).withText("text"));
-
-        //---- compsLabel ----
-        compsLabel.setText("Leading/trailing comp.:");
-        add(compsLabel, "cell 0 15");
-        add(compsTextField, "cell 1 15 2 1,growx");
-
-        //---- clearTextField ----
-        clearTextField.setText("clear me");
-        add(clearTextField, "cell 3 15,growx");
-
-        //---- fontsLabel ----
-        fontsLabel.setText("Typography / Fonts:");
-        add(fontsLabel, "cell 0 16");
+        .add("cell 3 14, growx", UI.of(iconsTextField).withText("text"))
+        .add("cell 0 15, growx", UI.label("Leading/trailing comp.:"))
+        .add("cell 1 15 2 1, growx", UI.of(compsTextField))
+        .add("cell 3 15, growx", UI.of(clearTextField).withText("clear me"))
+        .add("cell 0 16", UI.label("Typography / Fonts:"));
 
         //---- h00Label ----
         h00Label.setText("H00");
