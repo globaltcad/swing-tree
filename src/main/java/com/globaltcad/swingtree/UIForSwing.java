@@ -329,7 +329,7 @@ public class UIForSwing<I, C extends JComponent> extends AbstractNestedBuilder<I
                             .collect(Collectors.toList())
             );
         for( UIForSwing<?, T> b : builders )
-            this.component.add(b.getResulting(b.type));
+            this.component.add(b.get(b.type));
 
         return (I) this;
     }
@@ -373,7 +373,7 @@ public class UIForSwing<I, C extends JComponent> extends AbstractNestedBuilder<I
                             .map( builder -> builder.component )
                             .collect(Collectors.toList())
             );
-        for( UIForSwing<?, T> b : builders ) this.component.add(b.getResulting(b.type), conf);
+        for( UIForSwing<?, T> b : builders ) this.component.add(b.get(b.type), conf);
         return (I) this;
     }
 

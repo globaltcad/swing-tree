@@ -95,7 +95,8 @@ abstract class AbstractBuilder<I, C>
      * @param building A Consumer lambda which simply consumes this builder.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public I code(Consumer<I> building ) {
+    public I code(Consumer<I> building) {
+        LogUtil.nullArgCheck(building, "building", Consumer.class);
         return doIf(true, building);
     }
 
@@ -115,7 +116,7 @@ abstract class AbstractBuilder<I, C>
      * @param <T> The type parameter of the component which this builder wraps.
      * @return The result of the building process, namely: a type of JComponent.
      */
-    public <T extends C> T getResulting(Class<T> type) {
+    public <T extends C> T get(Class<T> type) {
         assert type == this.type || type.isAssignableFrom(this.type);
         return (T)component;
     }

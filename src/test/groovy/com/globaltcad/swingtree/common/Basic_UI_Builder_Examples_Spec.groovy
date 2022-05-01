@@ -104,7 +104,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
                                  BorderLayout.LINE_END,
                                  UI.of(new JButton("5 (LINE_END)")).id("B5")
                              )
-                             .getResulting(JPanel)
+                             .get(JPanel)
                      )
         and : 'We do this little trick to remove hash code...'
             tree.entrySet().each {
@@ -149,7 +149,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
                                 .add(BorderLayout.LINE_START, new JButton("Button 3 (LINE_START)"))
                                 .add(BorderLayout.PAGE_END, new JButton("Long-Named Button 4 (PAGE_END)"))
                                 .add(BorderLayout.LINE_END, new JButton("5 (LINE_END)"))
-                                .getResulting(JPanel)
+                                .get(JPanel)
                 ))
                 .make(
                     frame -> {
