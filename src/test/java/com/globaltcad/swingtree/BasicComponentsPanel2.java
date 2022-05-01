@@ -21,7 +21,7 @@ class BasicComponentsPanel2 extends JPanel
     BasicComponentsPanel2() {
         FlatLightLaf.setup();
         initComponents();
-        confiugure();
+        configure();
     }
 
     private void initComponents() {
@@ -128,24 +128,19 @@ class BasicComponentsPanel2 extends JPanel
         .add("cell 4 3", UI.radioButton("Selected disabled").isEnabledIf(false).isSelectedIf(true))
         .add("cell 0 4", UI.label("JComboBox:").make( it -> {it.setDisplayedMnemonic('C');it.setLabelFor(comboBox1);}))
         .add("cell 1 4, growx", UI.of(comboBox1).isEnabledIf(true).make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
-                "Editable",
-                "a", "bb", "ccc"
+                "Editable", "a", "bb", "ccc"
         }))))
         .add("cell 2 4, growx", UI.of(comboBox2).isEditableIf(true).isEnabledIf(false).make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
-                "Disabled",
-                "a", "bb", "ccc"
+                "Disabled", "a", "bb", "ccc"
         }))))
         .add("cell 3 4, growx", UI.of(comboBox3).make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
-                "Not editable",
-                "a", "bb", "ccc"
+                "Not editable", "a", "bb", "ccc"
         })) ))
         .add("cell 4 4, growx", UI.of(comboBox4).isEnabledIf(false).make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
-                "Not editable disabled",
-                "a", "bb", "ccc"
+                "Not editable disabled", "a", "bb", "ccc"
         })) ))
         .add("cell 5 4, growx, wmax 100", UI.of(comboBox5).make( it -> it.setModel(new DefaultComboBoxModel<>(new String[]{
-                "Wide popup if text is longer",
-                "aa", "bbb", "cccc"
+                "Wide popup if text is longer", "aa", "bbb", "cccc"
         })) ))
         .add("cell 0 5", UI.label("JSpinner:").make( it -> {it.setLabelFor(spinner1);it.setDisplayedMnemonic('S');}))
         .add("cell 1 5, growx", UI.of(spinner1))
@@ -223,79 +218,43 @@ class BasicComponentsPanel2 extends JPanel
         }))
         .add("cell 5 10, growx", UI.editorPane().withText("No scroll pane"))
         .add("cell 0 11", UI.label("JTextPane:"))
-        .add("cell 1 11, growx", UI.scrollPane().make( it ->{
+        .add("cell 1 11, growx", UI.scrollPane().make( it -> {
             it.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
             it.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
             it.setViewportView(UI.textPane().withText("Editable").getResulting(JTextPane.class));
         }))
-        .add("cell 2 11, growx", UI.scrollPane().make( it ->{
+        .add("cell 2 11, growx", UI.scrollPane().make( it -> {
             it.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
             it.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
             it.setViewportView(UI.textPane().withText("Disabled").isEnabledIf(false).getResulting(JTextPane.class));
         }))
-        .add("cell 3 11, growx", UI.scrollPane().make( it ->{
+        .add("cell 3 11, growx", UI.scrollPane().make( it -> {
             it.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
             it.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
             it.setViewportView(UI.textPane().withText("Not editable").isEditableIf(false).getResulting(JTextPane.class));
         }))
-        .add("cell 4 11, growx", UI.scrollPane().make( it ->{
+        .add("cell 4 11, growx", UI.scrollPane().make( it -> {
             it.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
             it.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
             it.setViewportView(UI.textPane().withText("Not editable disabled").isEditableIf(false).isEnabledIf(false).getResulting(JTextPane.class));
         }))
-        .add("cell 5 11, growx", UI.textPane().withText("No scroll pane"));
-
-        //---- errorHintsLabel ----
-        errorHintsLabel.setText("Error hints:");
-        add(errorHintsLabel, "cell 0 12");
-
-        //---- errorHintsTextField ----
-        errorHintsTextField.putClientProperty("JComponent.outline", "error");
-        add(errorHintsTextField, "cell 1 12,growx");
-
-        //---- errorHintsComboBox ----
-        errorHintsComboBox.putClientProperty("JComponent.outline", "error");
-        errorHintsComboBox.setModel(new DefaultComboBoxModel<>(new String[]{
-                "Editable"
-        }));
-        errorHintsComboBox.setEditable(true);
-        add(errorHintsComboBox, "cell 2 12,growx");
-
-        //---- errorHintsSpinner ----
-        errorHintsSpinner.putClientProperty("JComponent.outline", "error");
-        add(errorHintsSpinner, "cell 3 12,growx");
-
-        //---- warningHintsLabel ----
-        warningHintsLabel.setText("Warning hints:");
-        add(warningHintsLabel, "cell 0 13");
-
-        //---- warningHintsTextField ----
-        warningHintsTextField.putClientProperty("JComponent.outline", "warning");
-        add(warningHintsTextField, "cell 1 13,growx");
-
-        //---- warningHintsComboBox ----
-        warningHintsComboBox.putClientProperty("JComponent.outline", "warning");
-        warningHintsComboBox.setModel(new DefaultComboBoxModel<>(new String[]{
-                "Not editable"
-        }));
-        add(warningHintsComboBox, "cell 2 13,growx");
-
-        //---- warningHintsSpinner ----
-        warningHintsSpinner.putClientProperty("JComponent.outline", "warning");
-        add(warningHintsSpinner, "cell 3 13,growx");
-
-        //---- iconsLabel ----
-        iconsLabel.setText("Leading/trailing icons:");
-        add(iconsLabel, "cell 0 14");
-        add(leadingIconTextField, "cell 1 14,growx");
-
-        //---- trailingIconTextField ----
-        trailingIconTextField.setText("text");
-        add(trailingIconTextField, "cell 2 14,growx");
-
-        //---- iconsTextField ----
-        iconsTextField.setText("text");
-        add(iconsTextField, "cell 3 14,growx");
+        .add("cell 5 11, growx", UI.textPane().withText("No scroll pane"))
+        .add("cell 0 12", UI.label("Error hints:"))
+        .add("cell 1 12, growx", UI.textField().withProperty("JComponent.outline", "error"))
+        .add("cell 2 12", UI.comboBox().withProperty("JComponent.outline", "error").isEditableIf(false).make( it -> {
+            it.setModel(new DefaultComboBoxModel<>(new String[]{"Editable"}));
+        }))
+        .add("cell 3 12, growx", UI.spinner().withProperty("JComponent.outline", "error"))
+        .add("cell 0 13", UI.label("Warning hints:"))
+        .add("cell 1 13, growx", UI.textField().withProperty("JComponent.outline", "warning"))
+        .add("cell 2 13, growx", UI.comboBox().withProperty("JComponent.outline", "warning").make(
+                it -> it.setModel(new DefaultComboBoxModel<>(new String[]{"Not editable"}))
+        ))
+        .add("cell 3 13, growx", UI.spinner().withProperty("JComponent.outline", "warning"))
+        .add("cell 0 14", UI.label("Leading/trailing icons:"))
+        .add("cell 1 14, growx", UI.of(leadingIconTextField))
+        .add("cell 2 14, growx", UI.of(trailingIconTextField).withText("text"))
+        .add("cell 3 14, growx", UI.of(iconsTextField).withText("text"));
 
         //---- compsLabel ----
         compsLabel.setText("Leading/trailing comp.:");
@@ -410,7 +369,7 @@ class BasicComponentsPanel2 extends JPanel
         pasteMenuItem.addActionListener(new DefaultEditorKit.PasteAction());
     }
 
-    private void confiugure() {
+    private void configure() {
 
         // show reveal button for password field
         //   to enable this for all password fields use:

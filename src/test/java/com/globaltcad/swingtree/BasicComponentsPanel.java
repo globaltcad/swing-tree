@@ -27,7 +27,7 @@ class BasicComponentsPanel extends JPanel
     {
         FlatLightLaf.setup();
         initComponents();
-        confiugure();
+        configure();
     }
 
     private void initComponents()
@@ -798,7 +798,7 @@ class BasicComponentsPanel extends JPanel
         pasteMenuItem.addActionListener( new DefaultEditorKit.PasteAction() );
     }
 
-    private void confiugure() {
+    private void configure() {
 
         // show reveal button for password field
         //   to enable this for all password fields use:
