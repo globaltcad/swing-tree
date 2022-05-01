@@ -94,7 +94,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @param action an {@link UIAction} instance which will receive an {@link EventContext} containing important context information.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public I onClickForSiblings(UIAction<List<B>, ActionEvent> action) {
+    public I onClickForSiblings(UIAction<List<JComponent>, ActionEvent> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         this.component.addActionListener( e -> action.accept(new EventContext<>(this.siblings, e)) );
         return (I) this;

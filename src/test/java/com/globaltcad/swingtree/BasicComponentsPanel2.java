@@ -180,12 +180,13 @@ class BasicComponentsPanel2 extends JPanel
         }))
         .add("cell 5 9, growx", UI.textArea("No scroll pane").make( it -> it.setRows(2) ))
         .add("cell 0 10", UI.label("JEditorPane"))
-        .add("cell 1 10, growx", UI.scrollPane().make( it -> {
-            it.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-            it.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-            it.setViewportView(UI.editorPane().withText("Editable").get(JEditorPane.class
-            ));
-        }))
+        .add("cell 1 10, growx",
+            UI.scrollPane().make( it -> {
+                it.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+                it.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            })
+            .add(UI.editorPane().withText("Editable"))
+        )
         .add("cell 2 10, growx", UI.scrollPane().make( it -> {
             it.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
             it.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);

@@ -1,6 +1,5 @@
 package com.globaltcad.swingtree;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,13 +12,13 @@ import java.util.List;
  * @param <I> The concrete implementation type of this abstract class.
  * @param <C> The component type parameter which ought to be built in some way.
  */
-abstract class AbstractNestedBuilder<I, C> extends AbstractBuilder<I, C>
+abstract class AbstractNestedBuilder<I, C extends E, E> extends AbstractBuilder<I, C>
 {
 
     /**
      *  A list of all the siblings of the component wrapped by this builder.
      */
-    protected final List<C> siblings = new ArrayList<>();
+    protected final List<E> siblings = new ArrayList<>();
 
 
     /**
@@ -36,7 +35,7 @@ abstract class AbstractNestedBuilder<I, C> extends AbstractBuilder<I, C>
     /**
      *  A list of all the siblings of the component wrapped by this builder.
      */
-    public final List<C> getSiblings() { return this.siblings; }
+    public final List<E> getSiblings() { return this.siblings; }
 
     /**
      *  This builder class expects its implementations to be builder types
@@ -48,9 +47,9 @@ abstract class AbstractNestedBuilder<I, C> extends AbstractBuilder<I, C>
      * @return This very instance, which enables builder-style method chaining.
      */
     @SafeVarargs
-    public final I add(C... components) {
+    public final I add(E... components) {
         LogUtil.nullArgCheck(components, "components", Object[].class);
-        for( C c : components ) _add(c);
+        for( E c : components ) _add(c);
         return (I) this;
     }
 
@@ -64,7 +63,7 @@ abstract class AbstractNestedBuilder<I, C> extends AbstractBuilder<I, C>
      * @param component A component instance which ought to be added to the wrapped component type.
      * @return This very instance, which enables builder-style method chaining.
      */
-    protected abstract I _add(C component);
+    protected abstract I _add(E component);
 
     /**
      *  This builder class expects its implementations to be builder types
@@ -75,7 +74,7 @@ abstract class AbstractNestedBuilder<I, C> extends AbstractBuilder<I, C>
      * @param components A list of component instances which ought to be added to the wrapped component type.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I add(List<C> components) {
+    public final I add(List<E> components) {
         final C[] array = (C[]) new Object[components.size()];
         for ( int i = 0; i < array.length; i++ )
             _add(components.get(i));

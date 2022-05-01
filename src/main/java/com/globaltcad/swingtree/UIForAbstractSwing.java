@@ -22,7 +22,7 @@ import java.util.stream.Stream;
  * @param <I> The most basic concrete implementation of the {@link AbstractNestedBuilder}.
  * @param <C> The type parameter for the component type wrapped by an instance of this class.
  */
-public abstract class UIForAbstractSwing<I, C extends JComponent> extends AbstractNestedBuilder<I, C>
+public abstract class UIForAbstractSwing<I, C extends JComponent> extends AbstractNestedBuilder<I, C, JComponent>
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(UI.class);
 
@@ -269,7 +269,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     @Override
-    protected final I _add(C component) {
+    protected final I _add(JComponent component) {
         LogUtil.nullArgCheck(component, "component", Object.class);
         this.add(UI.of(component));
         return (I) this;
