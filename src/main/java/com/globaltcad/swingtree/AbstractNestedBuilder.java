@@ -1,5 +1,6 @@
 package com.globaltcad.swingtree;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +47,12 @@ abstract class AbstractNestedBuilder<I, C> extends AbstractBuilder<I, C>
      * @param components An array of component instances which ought to be added to the wrapped component type.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public abstract I add(C... components);
+    @SafeVarargs
+    public final I add(C... components) {
+        LogUtil.nullArgCheck(components, "components", Object[].class);
+        for( C c : components ) _add(c);
+        return (I) this;
+    }
 
 
     /**

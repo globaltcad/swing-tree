@@ -268,27 +268,19 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         return (I) this;
     }
 
-    /**
-     *  Swing UIs are made up of nested {@link JComponent} instances.
-     *  This method enables support for nested building.
-     *  <br><br>
-     *
-     * @param components An array of {@link JComponent} instances which ought to be added to the wrapped component type.
-     * @return This very instance, which enables builder-style method chaining.
-     */
-    @SafeVarargs
     @Override
-    public final I add(C... components) {
-        LogUtil.nullArgCheck(components, "components", Object[].class);
-        for( C c : components ) this.add(UI.of(c));
-        return (I) this;
-    }
-
-    @Override
-    protected I _add(C component) {
+    protected final I _add(C component) {
         LogUtil.nullArgCheck(component, "component", Object.class);
         this.add(UI.of(component));
         return (I) this;
+    }
+
+    protected <T extends JComponent> void _addSwing(T component, Object conf) {
+        LogUtil.nullArgCheck(component, "component", JComponent.class);
+        if ( conf == null )
+            this.component.add(component);
+        else
+            this.component.add(component, conf);
     }
 
     /**
@@ -322,14 +314,14 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final <T extends JComponent> I add(UIForAbstractSwing<?, T>... builders) {
         if ( builders == null )
             throw new IllegalArgumentException("Swing tree builders may not be null!");
-        for( UIForAbstractSwing<?, T> b : builders )
+        for ( UIForAbstractSwing<?, T> b : builders )
             b.siblings.addAll(
-                    Stream.of(builders).filter(builder -> builder != b )
+                    Stream.of(builders).filter( builder -> builder != b )
                             .map( builder -> builder.component )
                             .collect(Collectors.toList())
             );
-        for( UIForAbstractSwing<?, T> b : builders )
-            this.component.add(b.get(b.type));
+        for ( UIForAbstractSwing<?, T> b : builders )
+            _addSwing(b.get(b.type), null);
 
         return (I) this;
     }
@@ -348,17 +340,6 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         return (I) this.add(constraints, new UIForAbstractSwing[]{builder});
     }
 
-    /**
-     *  Use this to add any kind of AWT {@link Component} to the {@link JComponent} wrapped by this.
-     *
-     * @param component A generic AWT {@link Component} which ought to be added to the {@link JComponent} wrapped by this.
-     * @return This very instance, which enables builder-style method chaining.
-     */
-    public final I add(Component component) {
-        this.component.add(component);
-        return (I) this;
-    }
-
     @SafeVarargs
     public final <T extends JComponent, B extends UIForAbstractSwing<?, T>> I add(String conf, B... builders) {
         LayoutManager layout = this.component.getLayout();
@@ -373,7 +354,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
                             .map( builder -> builder.component )
                             .collect(Collectors.toList())
             );
-        for( UIForAbstractSwing<?, T> b : builders ) this.component.add(b.get(b.type), conf);
+        for( UIForAbstractSwing<?, T> b : builders )
+            _addSwing(b.get(b.type), conf);
         return (I) this;
     }
 

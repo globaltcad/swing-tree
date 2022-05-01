@@ -10,7 +10,13 @@ public class UIForScrollPane extends UIForAbstractSwing<UIForScrollPane, JScroll
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    public UIForScrollPane(JScrollPane component) {
-        super(component);
+    public UIForScrollPane(JScrollPane component) { super(component); }
+
+    @Override
+    protected <T extends JComponent> void _addSwing(T component, Object conf) {
+        if ( conf != null )
+            throw new IllegalArgumentException("Unknown constraint '"+conf+"'! (scroll pane does not support any constraint)");
+        this.component.setViewportView(component);
     }
+
 }
