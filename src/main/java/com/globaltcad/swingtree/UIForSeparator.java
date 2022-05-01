@@ -6,7 +6,7 @@ import java.awt.*;
 /**
  *  A swing tree builder for {@link JSeparator} instances.
  */
-public class UIForSeparator extends UIForSwing<UIForSeparator, JSeparator>
+public class UIForSeparator extends UIForAbstractSwing<UIForSeparator, JSeparator>
 {
     /**
      * Instances of ths {@link UIForSeparator} always wrap

@@ -20,7 +20,7 @@ import java.util.List;
  *
  * @param <B> The type parameter for the component wrapped by an instance of this class.
  */
-public abstract class UIForAbstractButton<I, B extends AbstractButton> extends UIForSwing<I, B>
+public abstract class UIForAbstractButton<I, B extends AbstractButton> extends UIForAbstractSwing<I, B>
 {
     protected UIForAbstractButton(B component) { super(component); }
 

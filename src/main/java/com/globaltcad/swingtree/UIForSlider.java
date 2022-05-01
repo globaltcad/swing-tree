@@ -8,7 +8,7 @@ import javax.swing.event.ChangeEvent;
 /**
  *  A swing tree builder for {@link JSlider} instances.
  */
-public class UIForSlider extends UIForSwing<UIForSlider, JSlider>
+public class UIForSlider extends UIForAbstractSwing<UIForSlider, JSlider>
 {
     protected UIForSlider(JSlider component) { super(component); }
 

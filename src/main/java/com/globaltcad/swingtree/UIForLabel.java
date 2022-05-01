@@ -11,7 +11,7 @@ import java.net.URISyntaxException;
 /**
  *  A swing tree builder for {@link JLabel} instances.
  */
-public class UIForLabel extends UIForSwing<UIForLabel, JLabel>
+public class UIForLabel extends UIForAbstractSwing<UIForLabel, JLabel>
 {
     protected UIForLabel(JLabel component) { super(component); }
 

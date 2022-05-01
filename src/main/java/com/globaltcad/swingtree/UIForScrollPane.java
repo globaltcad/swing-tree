@@ -2,7 +2,7 @@ package com.globaltcad.swingtree;
 
 import javax.swing.*;
 
-public class UIForScrollPane extends UIForSwing<UIForScrollPane, JScrollPane>
+public class UIForScrollPane extends UIForAbstractSwing<UIForScrollPane, JScrollPane>
 {
     /**
      * Instances of the BasicBuilder as well as its sub types always wrap

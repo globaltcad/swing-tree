@@ -5,7 +5,7 @@ import javax.swing.*;
 /**
  *  A swing tree builder for {@link JSpinner} instances.
  */
-public class UIForSpinner extends UIForSwing<UIForSpinner, JSpinner>
+public class UIForSpinner extends UIForAbstractSwing<UIForSpinner, JSpinner>
 {
     /**
      * Instances of the BasicBuilder as well as its sub types always wrap

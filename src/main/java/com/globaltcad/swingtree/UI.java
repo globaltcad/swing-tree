@@ -18,8 +18,8 @@ import java.util.function.Supplier;
  *  action and settings to new components via lambdas.
  *  Swing tree works especially well alongside {@link MigLayout}s,
  *  which is why this general purpose {@link LayoutManager} is integrated into this library.
- *  Simply pass {@link String} constraints to the {@link UIForSwing#withLayout(String, String)}
- *  and any given {@link UIForSwing#add(String, UIForSwing[])} method
+ *  Simply pass {@link String} constraints to the {@link UIForAbstractSwing#withLayout(String, String)}
+ *  and any given {@link UIForAbstractSwing#add(String, UIForAbstractSwing[])} method
  *  or variant of, to make use of mig layouts.
  */
 public final class UI
@@ -62,7 +62,7 @@ public final class UI
      * @param <T> The concrete type of this new component.
      * @return A basic UI builder instance wrapping any {@link JComponent}.
      */
-    public static <T extends JComponent> UIForSwing<UIForSwing<?, T>, T> of(T component)
+    public static <T extends JComponent> UIForSwing<T> of(T component)
     {
         LogUtil.nullArgCheck(component, "component", JComponent.class);
         return new UIForSwing<>(component);
@@ -78,7 +78,7 @@ public final class UI
      * @param <T> The UI component type built by implementations of the provided builder.
      * @return A basic UI builder instance wrapping any {@link JComponent}.
      */
-    public static <T extends JComponent> UIForSwing<UIForSwing<?, T>, T> of(SwingBuilder<T> builder)
+    public static <T extends JComponent> UIForSwing<T> of(SwingBuilder<T> builder)
     {
         LogUtil.nullArgCheck(builder, "builder", SwingBuilder.class);
         return of(builder.build());

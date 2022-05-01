@@ -5,7 +5,7 @@ import javax.swing.*;
 /**
  *  A swing tree builder for {@link JPopupMenu} instances.
  */
-public class UIForPopup extends UIForSwing<UIForPopup, JPopupMenu>
+public class UIForPopup extends UIForAbstractSwing<UIForPopup, JPopupMenu>
 {
     protected UIForPopup(JPopupMenu component) { super(component); }
 
