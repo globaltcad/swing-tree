@@ -93,13 +93,12 @@ abstract class AbstractNestedBuilder<I, C extends E, E> extends AbstractBuilder<
      * @param builders An array of builder instances whose JComponents ought to be added to the one wrapped by this builder.
      * @return This very instance, which enables builder-style method chaining.
      */
-    @SafeVarargs
     @SuppressWarnings("varargs")
-    public final I add(AbstractNestedBuilder<?, ?, E>... builders) {
+    public final I add(AbstractNestedBuilder<?, ?, ?>... builders) {
         if ( builders == null )
             throw new IllegalArgumentException("Swing tree builders may not be null!");
 
-        for ( AbstractNestedBuilder<?, ?, E> b : builders )
+        for ( AbstractNestedBuilder<?, ?, ?> b : builders )
             _doAdd(b, null);
 
         return (I) this;
