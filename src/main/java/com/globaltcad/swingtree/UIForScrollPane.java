@@ -19,4 +19,30 @@ public class UIForScrollPane extends UIForAbstractSwing<UIForScrollPane, JScroll
         this.component.setViewportView(component);
     }
 
+    public final UIForScrollPane withScrollBarPolicy(UI.Scroll scrollPolicy) {
+        this.withVerticalScrollBarPolicy(scrollPolicy);
+        this.withHorizontalScrollBarPolicy(scrollPolicy);
+        return this;
+    }
+
+    public final UIForScrollPane withVerticalScrollBarPolicy(UI.Scroll scrollBarPolicy) {
+        switch ( scrollBarPolicy )
+        {
+            case NEVER: this.component.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER); break;
+            case ALWAYS: this.component.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS); break;
+            case AS_NEEDED: this.component.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED); break;
+        }
+        return this;
+    }
+
+    public final UIForScrollPane withHorizontalScrollBarPolicy(UI.Scroll scrollBarPolicy) {
+        switch ( scrollBarPolicy )
+        {
+            case NEVER: this.component.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); break;
+            case ALWAYS: this.component.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS); break;
+            case AS_NEEDED: this.component.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED); break;
+        }
+        return this;
+    }
+
 }

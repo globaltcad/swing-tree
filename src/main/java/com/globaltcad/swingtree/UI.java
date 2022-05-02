@@ -53,6 +53,12 @@ public final class UI
         Cursor( int type ) { this.type = type; }
     }
 
+    public enum Scroll {
+        NEVER,
+        AS_NEEDED,
+        ALWAYS
+    }
+
     /**
      *  This returns an instance of a generic swing tree builder
      *  for anything extending the {@link JComponent} class.
