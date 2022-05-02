@@ -1,7 +1,7 @@
 package com.globaltcad.swingtree;
 
 
-import com.globaltcad.swingtree.api.TextFilter;
+import com.globaltcad.swingtree.api.UIAction;
 import com.globaltcad.swingtree.delegates.SimpleDelegate;
 
 import javax.swing.event.DocumentEvent;
@@ -14,9 +14,9 @@ import java.util.function.Consumer;
  */
 public abstract class UIForTextComponent<I, C extends JTextComponent> extends UIForAbstractSwing<I, C>
 {
-    private TextFilter<RemoveDelegate> remove;
-    private TextFilter<InsertDelegate> insert;
-    private TextFilter<ReplaceDelegate> replace;
+    private UIAction<RemoveDelegate> remove;
+    private UIAction<InsertDelegate> insert;
+    private UIAction<ReplaceDelegate> replace;
 
     /**
      *  A custom document filter which is simply a lambda-rization wrapper which ought to make
@@ -113,34 +113,34 @@ public abstract class UIForTextComponent<I, C extends JTextComponent> extends UI
     }
 
     /**
-     * @param action A {@link TextFilter} lambda which will be called when parts (or all) of the text in
+     * @param action A {@link UIAction} lambda which will be called when parts (or all) of the text in
      *               the underlying text component gets removed.
      *
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextRemove(TextFilter<RemoveDelegate> action) {
+    public final I onTextRemove(UIAction<RemoveDelegate> action) {
         ifFilterable( () -> this.remove = action );
         return (I) this;
     }
 
     /**
-     * @param action A {@link TextFilter} lambda which will be called when new text gets inserted
+     * @param action A {@link UIAction} lambda which will be called when new text gets inserted
      *               into the underlying text component.
      *
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextInsert(TextFilter<InsertDelegate> action) {
+    public final I onTextInsert(UIAction<InsertDelegate> action) {
         ifFilterable( () -> this.insert = action );
         return (I) this;
     }
 
     /**
-     * @param action A {@link TextFilter} lambda which will be called when the text in
+     * @param action A {@link UIAction} lambda which will be called when the text in
      *               the underlying text component gets replaced.
      *
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextReplace(TextFilter<ReplaceDelegate> action) {
+    public final I onTextReplace(UIAction<ReplaceDelegate> action) {
         ifFilterable( () -> this.replace = action );
         return (I) this;
     }

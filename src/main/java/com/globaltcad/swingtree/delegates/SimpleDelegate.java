@@ -1,8 +1,10 @@
 package com.globaltcad.swingtree.delegates;
 
 import javax.swing.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  *  Instances of this are passed to action lambdas for UI components
@@ -25,11 +27,26 @@ public final class SimpleDelegate<C extends JComponent,E>
         this.siblingSource = siblingSource;
     }
 
+    /**
+     * @return The component for which the current {@link com.globaltcad.swingtree.api.UIAction} originated.
+     */
     public C getComponent() { return component; }
 
     public E getEvent() { return event; }
 
-    public List<JComponent> getSiblings() { return siblingSource.get(); }
+    /**
+     * @return A list of all siblings excluding the component from which this instance originated.
+     */
+    public List<JComponent> getSiblings() {
+        return siblingSource.get().stream().filter( s -> component != s ).collect(Collectors.toList());
+    }
+
+    /**
+     * @return A list of all siblings including the component from which this instance originated.
+     */
+    public List<JComponent> getSiblinghood() {
+        return new ArrayList<>(siblingSource.get());
+    }
 
 }
 
