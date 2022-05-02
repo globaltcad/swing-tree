@@ -16,7 +16,6 @@ import java.awt.*
 ''')
 class Basic_UI_Builder_Examples_Spec extends Specification
 {
-
     def 'We can add a list of components to the swing tree API.'()
     {
         given : 'We have a simple JPanel UI node.'

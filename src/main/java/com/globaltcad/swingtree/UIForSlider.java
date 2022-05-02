@@ -16,7 +16,7 @@ public class UIForSlider extends UIForAbstractSwing<UIForSlider, JSlider>
 
     public final UIForSlider onChange(UIAction<SimpleDelegate<JSlider, ChangeEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        this.component.addChangeListener( e -> action.accept(new SimpleDelegate<>(this.component, e, ()->siblings)) );
+        this.component.addChangeListener( e -> action.accept(new SimpleDelegate<>(this.component, e, ()->getSiblinghood())) );
         return this;
     }
 

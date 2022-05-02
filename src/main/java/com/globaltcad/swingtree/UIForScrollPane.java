@@ -13,7 +13,7 @@ public class UIForScrollPane extends UIForAbstractSwing<UIForScrollPane, JScroll
     public UIForScrollPane(JScrollPane component) { super(component); }
 
     @Override
-    protected <T extends JComponent> void _addSwing(T component, Object conf) {
+    protected void _add(JComponent component, Object conf) {
         if ( conf != null )
             throw new IllegalArgumentException("Unknown constraint '"+conf+"'! (scroll pane does not support any constraint)");
         this.component.setViewportView(component);

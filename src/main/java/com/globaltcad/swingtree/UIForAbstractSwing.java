@@ -213,7 +213,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I onMouseClick(UIAction<SimpleDelegate<C, MouseEvent>> onClick) {
         LogUtil.nullArgCheck(onClick, "onClick", UIAction.class);
         this.component.addMouseListener(new MouseAdapter() {
-            @Override public void mouseClicked(MouseEvent e) { onClick.accept(new SimpleDelegate<>(component, e, ()->siblings)); }
+            @Override public void mouseClicked(MouseEvent e) { onClick.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())); }
         });
         return (I) this;
     }
@@ -224,7 +224,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I onResize(UIAction<SimpleDelegate<C, ComponentEvent>> onResize) {
         LogUtil.nullArgCheck(onResize, "onResize", UIAction.class);
         this.component.addComponentListener( new ComponentAdapter() {
-            @Override public void componentResized(ComponentEvent e) { onResize.accept(new SimpleDelegate<>(component, e, ()->siblings)); }
+            @Override public void componentResized(ComponentEvent e) { onResize.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())); }
         });
         return (I) this;
     }
@@ -232,7 +232,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I onMoved(UIAction<SimpleDelegate<C, ComponentEvent>> onMoved) {
         LogUtil.nullArgCheck(onMoved, "onMoved", UIAction.class);
         this.component.addComponentListener(new ComponentAdapter() {
-            @Override public void componentMoved(ComponentEvent e) { onMoved.accept(new SimpleDelegate<>(component, e, ()->siblings)); }
+            @Override public void componentMoved(ComponentEvent e) { onMoved.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())); }
         });
         return (I) this;
     }
@@ -240,7 +240,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I onShown(UIAction<SimpleDelegate<C, ComponentEvent>> onShown) {
         LogUtil.nullArgCheck(onShown, "onShown", UIAction.class);
         this.component.addComponentListener(new ComponentAdapter() {
-            @Override public void componentShown(ComponentEvent e) { onShown.accept(new SimpleDelegate<>(component, e, ()->siblings)); }
+            @Override public void componentShown(ComponentEvent e) { onShown.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())); }
         });
         return (I) this;
     }
@@ -248,7 +248,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I onHidden(UIAction<SimpleDelegate<C, ComponentEvent>> onHidden) {
         LogUtil.nullArgCheck(onHidden, "onHidden", UIAction.class);
         this.component.addComponentListener(new ComponentAdapter() {
-            @Override public void componentHidden(ComponentEvent e) { onHidden.accept(new SimpleDelegate<>(component, e, ()->siblings)); }
+            @Override public void componentHidden(ComponentEvent e) { onHidden.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())); }
         });
         return (I) this;
     }
@@ -256,7 +256,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I onFocusGained(UIAction<SimpleDelegate<C, ComponentEvent>> onFocus) {
         LogUtil.nullArgCheck(onFocus, "onFocus", UIAction.class);
         this.component.addFocusListener(new FocusAdapter() {
-            @Override public void focusGained(FocusEvent e) { onFocus.accept(new SimpleDelegate<>(component, e, ()->siblings)); }
+            @Override public void focusGained(FocusEvent e) { onFocus.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())); }
         });
         return (I) this;
     }
@@ -264,19 +264,13 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I onFocusLost(UIAction<SimpleDelegate<C, ComponentEvent>> onFocus) {
         LogUtil.nullArgCheck(onFocus, "onFocus", UIAction.class);
         this.component.addFocusListener(new FocusAdapter() {
-            @Override public void focusLost(FocusEvent e) { onFocus.accept(new SimpleDelegate<>(component, e, ()->siblings)); }
+            @Override public void focusLost(FocusEvent e) { onFocus.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())); }
         });
         return (I) this;
     }
 
     @Override
-    protected final I _add(JComponent component) {
-        LogUtil.nullArgCheck(component, "component", Object.class);
-        this.add(UI.of(component));
-        return (I) this;
-    }
-
-    protected <T extends JComponent> void _addSwing(T component, Object conf) {
+    protected void _add(JComponent component, Object conf) {
         LogUtil.nullArgCheck(component, "component", JComponent.class);
         if ( conf == null )
             this.component.add(component);
@@ -302,32 +296,6 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     *  This method provides the same functionality as the other "containing" method.
-     *  However, it bypasses the necessity to call the "build" method by
-     *  calling it internally fo you. <br>
-     *  This helps to improve readability, especially when the degree of nesting is very low.
-     *
-     * @param builders An array of builder instances whose JComponents ought to be added to the one wrapped by this builder.
-     * @return This very instance, which enables builder-style method chaining.
-     */
-    @SafeVarargs
-    @SuppressWarnings("varargs")
-    public final <T extends JComponent> I add(UIForAbstractSwing<?, T>... builders) {
-        if ( builders == null )
-            throw new IllegalArgumentException("Swing tree builders may not be null!");
-        for ( UIForAbstractSwing<?, T> b : builders )
-            b.siblings.addAll(
-                    Stream.of(builders).filter( builder -> builder != b )
-                            .map( builder -> builder.component )
-                            .collect(Collectors.toList())
-            );
-        for ( UIForAbstractSwing<?, T> b : builders )
-            _addSwing(b.get(b.type), null);
-
-        return (I) this;
-    }
-
-    /**
      *  Swing UIs are made up of nested {@link JComponent} instances.
      *  This method enables support for nested building as well as the ability to
      *  pass additional layout information the added UI component.
@@ -342,21 +310,15 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     @SafeVarargs
-    public final <T extends JComponent, B extends UIForAbstractSwing<?, T>> I add(String conf, B... builders) {
+    public final <B extends UIForAbstractSwing<?, ?>> I add(String conf, B... builders) {
         LayoutManager layout = this.component.getLayout();
         if ( isBorderLayout(conf) && !(layout instanceof BorderLayout) ) {
             if ( layout instanceof MigLayout )
                 log.warn("Layout ambiguity detected! Border layout constraint cannot be added to 'MigLayout'.");
             this.component.setLayout(new BorderLayout()); // The UI Maker tries to fill in the blanks!
         }
-        for( UIForAbstractSwing<?, T> b : builders )
-            b.siblings.addAll(
-                    Stream.of(builders).filter(builder -> builder != b )
-                            .map( builder -> builder.component )
-                            .collect(Collectors.toList())
-            );
-        for( UIForAbstractSwing<?, T> b : builders )
-            _addSwing(b.get(b.type), conf);
+        for( UIForAbstractSwing<?, ?> b : builders )
+            _doAdd(b, conf);
         return (I) this;
     }
 

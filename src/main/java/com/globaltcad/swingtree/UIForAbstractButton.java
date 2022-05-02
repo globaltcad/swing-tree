@@ -62,7 +62,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public I onChange(UIAction<SimpleDelegate<B, ItemEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        this.component.addItemListener(e -> action.accept(new SimpleDelegate<>(this.component, e, ()->siblings)));
+        this.component.addItemListener(e -> action.accept(new SimpleDelegate<>(this.component, e, ()->getSiblinghood())));
         return (I) this;
     }
 
@@ -81,7 +81,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         this.component.addActionListener(
            e -> action.accept(
-               new SimpleDelegate<>(this.component, e, ()->this.siblings)
+               new SimpleDelegate<>(this.component, e, ()->this.getSiblinghood())
            )
         );
         return (I) this;

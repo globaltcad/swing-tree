@@ -77,9 +77,9 @@ public abstract class UIForTextComponent<I, C extends JTextComponent> extends UI
      */
     public final I onContentChange(Consumer<SimpleDelegate<JTextComponent, DocumentEvent>> action) {
         this.component.getDocument().addDocumentListener(new DocumentListener() {
-            @Override public void insertUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(component, e, ()->siblings));}
-            @Override public void removeUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(component, e, ()->siblings));}
-            @Override public void changedUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(component, e, ()->siblings));}
+            @Override public void insertUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood()));}
+            @Override public void removeUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood()));}
+            @Override public void changedUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood()));}
         });
         return (I) this;
     }
@@ -93,8 +93,8 @@ public abstract class UIForTextComponent<I, C extends JTextComponent> extends UI
      */
     public final I onTextChange(Consumer<SimpleDelegate<JTextComponent, DocumentEvent>> action) {
         this.component.getDocument().addDocumentListener(new DocumentListener() {
-            @Override public void insertUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(component, e, ()->siblings));}
-            @Override public void removeUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(component, e, ()->siblings));}
+            @Override public void insertUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood()));}
+            @Override public void removeUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood()));}
             @Override public void changedUpdate(DocumentEvent e) {}
         });
         return (I) this;

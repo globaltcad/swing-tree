@@ -123,7 +123,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         this.component.addButtonClickedActionListener(
             e -> action.accept(
-                 new SimpleDelegate<>(this.component, e, ()->this.siblings)
+                 new SimpleDelegate<>(this.component, e, ()->this.getSiblinghood())
             )
         );
         return this;
