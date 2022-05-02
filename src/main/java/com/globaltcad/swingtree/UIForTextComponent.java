@@ -2,6 +2,7 @@ package com.globaltcad.swingtree;
 
 
 import com.globaltcad.swingtree.api.TextFilter;
+import com.globaltcad.swingtree.delegates.SimpleDelegate;
 
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -74,11 +75,11 @@ public abstract class UIForTextComponent<I, C extends JTextComponent> extends UI
      * @param action An action which will be executed when the text or its attributes in the underlying {@link JTextComponent} changes.
      * @return This very builder to allow for method chaining.
      */
-    public final I onContentChange(Consumer<EventContext<JTextComponent, DocumentEvent>> action) {
+    public final I onContentChange(Consumer<SimpleDelegate<JTextComponent, DocumentEvent>> action) {
         this.component.getDocument().addDocumentListener(new DocumentListener() {
-            @Override public void insertUpdate(DocumentEvent e) {action.accept(new EventContext<>(component, e));}
-            @Override public void removeUpdate(DocumentEvent e) {action.accept(new EventContext<>(component, e));}
-            @Override public void changedUpdate(DocumentEvent e) {action.accept(new EventContext<>(component, e));}
+            @Override public void insertUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(component, e, ()->siblings));}
+            @Override public void removeUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(component, e, ()->siblings));}
+            @Override public void changedUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(component, e, ()->siblings));}
         });
         return (I) this;
     }
@@ -90,10 +91,10 @@ public abstract class UIForTextComponent<I, C extends JTextComponent> extends UI
      * @param action An action which will be executed when the text string in the underlying {@link JTextComponent} changes.
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextChange(Consumer<EventContext<JTextComponent, DocumentEvent>> action) {
+    public final I onTextChange(Consumer<SimpleDelegate<JTextComponent, DocumentEvent>> action) {
         this.component.getDocument().addDocumentListener(new DocumentListener() {
-            @Override public void insertUpdate(DocumentEvent e) {action.accept(new EventContext<>(component, e));}
-            @Override public void removeUpdate(DocumentEvent e) {action.accept(new EventContext<>(component, e));}
+            @Override public void insertUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(component, e, ()->siblings));}
+            @Override public void removeUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(component, e, ()->siblings));}
             @Override public void changedUpdate(DocumentEvent e) {}
         });
         return (I) this;

@@ -37,7 +37,7 @@ class JSplitButton_Examples_Spec extends Specification
         given : 'We create split button displaying the current selection.'
             var ui =
                 UI.splitButton("I will be replaced!")
-                .onSelection( it -> it.delegate.displayCurrentItemText() )
+                .onSelection( it -> it.displayCurrentItemText() )
                 .add(UI.splitItem("first"))
                 .add(UI.splitItem("second"))
                 .add(UI.splitItem("third"))
@@ -56,7 +56,7 @@ class JSplitButton_Examples_Spec extends Specification
             var ui =
                 UI.splitButton("I may be replaced!")
                 .add(UI.splitItem("first"))
-                .add(UI.splitItem("second").onSelection( it -> it.delegate.displayCurrentItemText() ))
+                .add(UI.splitItem("second").onSelection( it -> it.displayCurrentItemText() ))
                 .add(UI.splitItem("third"))
         expect : 'The split button has the correct text displayed'
             Utility.getSplitButtonText(ui) == "I may be replaced!"
@@ -83,9 +83,9 @@ class JSplitButton_Examples_Spec extends Specification
         given : 'We create split button with 2 different kinds of button click events.'
             var ui =
                 UI.splitButton("I may be replaced!")
-                .onSelection( it -> it.delegate.displayButtonText("default text")  )
+                .onSelection( it -> it.displayButtonText("default text")  )
                 .add(UI.splitItem("first"))
-                .add(UI.splitItem("second").onButtonClick( it -> it.delegate.displayButtonText("text by second item") ))
+                .add(UI.splitItem("second").onButtonClick( it -> it.displayButtonText("text by second item") ))
                 .add(UI.splitItem("third"))
         expect : 'The split button has the correct text displayed'
             Utility.getSplitButtonText(ui) == "I may be replaced!"

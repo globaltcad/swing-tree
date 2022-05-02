@@ -3,6 +3,7 @@ package com.globaltcad.swingtree;
 
 import com.alexandriasoftware.swing.JSplitButton;
 import com.globaltcad.swingtree.api.UIAction;
+import com.globaltcad.swingtree.delegates.SimpleDelegate;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -52,8 +53,8 @@ public final class SplitItem<I extends JMenuItem>
     }
 
     private final I item;
-    private final UIAction<Delegate<I>, ActionEvent> onButtonClick;
-    private final UIAction<Delegate<I>, ActionEvent> onItemSelected;
+    private final UIAction<Delegate<I>> onButtonClick;
+    private final UIAction<Delegate<I>> onItemSelected;
 
     private SplitItem(I item ) {
         this.item = item; this.onButtonClick = null; this.onItemSelected = null;
@@ -61,8 +62,8 @@ public final class SplitItem<I extends JMenuItem>
 
     private SplitItem(
             I item,
-            UIAction<Delegate<I>, ActionEvent> onClick,
-            UIAction<Delegate<I>, ActionEvent> onSelected
+            UIAction<Delegate<I>> onClick,
+            UIAction<Delegate<I>> onSelected
     ) {
         this.item = item; this.onButtonClick = onClick; this.onItemSelected = onSelected;
     }
@@ -83,7 +84,7 @@ public final class SplitItem<I extends JMenuItem>
      *               and this {@link SplitItem} was selected.
      * @return An immutable copy of this with the provided lambda set.
      */
-    public SplitItem<I> onButtonClick(UIAction<Delegate<I>, ActionEvent> action) {
+    public SplitItem<I> onButtonClick(UIAction<Delegate<I>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         if ( this.onButtonClick != null )
             throw new IllegalArgumentException("Property already specified!");
@@ -107,18 +108,18 @@ public final class SplitItem<I extends JMenuItem>
      *               receive some context information in the form of a {@link Delegate} instance.
      * @return An immutable copy of this with the provided lambda set.
      */
-    public SplitItem<I> onSelection(UIAction<Delegate<I>, ActionEvent> action) {
+    public SplitItem<I> onSelection(UIAction<Delegate<I>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         if ( this.onItemSelected != null ) throw new IllegalArgumentException("Property already specified!");
         return new SplitItem<>(item, onButtonClick, action);
     }
 
-    UIAction<Delegate<I>, ActionEvent> getOnClick() { return onButtonClick == null ? it -> {} : onButtonClick; }
+    UIAction<Delegate<I>> getOnClick() { return onButtonClick == null ? it -> {} : onButtonClick; }
 
-    UIAction<Delegate<I>, ActionEvent> getOnSelected() { return onItemSelected == null ? c -> {} : onItemSelected; }
+    UIAction<Delegate<I>> getOnSelected() { return onItemSelected == null ? c -> {} : onItemSelected; }
 
     /**
-     *  Instances of this are exposed as delegates through the {@link EventContext} passed
+     *  Instances of this are exposed as delegates through the {@link SimpleDelegate} passed
      *  to the actions supplied to {@link #onSelection(UIAction)} in order
      *  to give said actions all the necessary context they need to perform whatever action they so desire.
      *
@@ -126,18 +127,25 @@ public final class SplitItem<I extends JMenuItem>
      */
     public final static class Delegate<I extends JMenuItem>
     {
+        private final ActionEvent event;
         private final JSplitButton splitButton;
         private final Supplier<List<I>> siblingsSource;
         private final I currentItem;
 
         Delegate(
+                ActionEvent event,
                 JSplitButton splitButton, 
                 Supplier<List<I>> siblingsSource,
                 I currentItem
         ) {
+            this.event = event;
             this.splitButton = splitButton;
             this.siblingsSource = siblingsSource;
             this.currentItem = currentItem;
+        }
+
+        public ActionEvent getEvent() {
+            return event;
         }
 
         /**

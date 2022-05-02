@@ -2,6 +2,7 @@ package com.globaltcad.swingtree;
 
 
 import com.globaltcad.swingtree.api.UIAction;
+import com.globaltcad.swingtree.delegates.SimpleDelegate;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 
@@ -209,10 +210,10 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseClick(UIAction<C, MouseEvent> onClick) {
+    public final I onMouseClick(UIAction<SimpleDelegate<C, MouseEvent>> onClick) {
         LogUtil.nullArgCheck(onClick, "onClick", UIAction.class);
         this.component.addMouseListener(new MouseAdapter() {
-            @Override public void mouseClicked(MouseEvent e) { onClick.accept(new EventContext<>(component, e)); }
+            @Override public void mouseClicked(MouseEvent e) { onClick.accept(new SimpleDelegate<>(component, e, ()->siblings)); }
         });
         return (I) this;
     }
@@ -220,50 +221,50 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     /**
      * The provided lambda will be invoked when the component's size changes.
      */
-    public final I onResize(UIAction<C, ComponentEvent> onResize) {
+    public final I onResize(UIAction<SimpleDelegate<C, ComponentEvent>> onResize) {
         LogUtil.nullArgCheck(onResize, "onResize", UIAction.class);
         this.component.addComponentListener( new ComponentAdapter() {
-            @Override public void componentResized(ComponentEvent e) { onResize.accept(new EventContext<>(component, e)); }
+            @Override public void componentResized(ComponentEvent e) { onResize.accept(new SimpleDelegate<>(component, e, ()->siblings)); }
         });
         return (I) this;
     }
 
-    public final I onMoved(UIAction<C, ComponentEvent> onMoved) {
+    public final I onMoved(UIAction<SimpleDelegate<C, ComponentEvent>> onMoved) {
         LogUtil.nullArgCheck(onMoved, "onMoved", UIAction.class);
         this.component.addComponentListener(new ComponentAdapter() {
-            @Override public void componentMoved(ComponentEvent e) { onMoved.accept(new EventContext<>(component, e)); }
+            @Override public void componentMoved(ComponentEvent e) { onMoved.accept(new SimpleDelegate<>(component, e, ()->siblings)); }
         });
         return (I) this;
     }
 
-    public final I onShown(UIAction<C, ComponentEvent> onShown) {
+    public final I onShown(UIAction<SimpleDelegate<C, ComponentEvent>> onShown) {
         LogUtil.nullArgCheck(onShown, "onShown", UIAction.class);
         this.component.addComponentListener(new ComponentAdapter() {
-            @Override public void componentShown(ComponentEvent e) { onShown.accept(new EventContext<>(component, e)); }
+            @Override public void componentShown(ComponentEvent e) { onShown.accept(new SimpleDelegate<>(component, e, ()->siblings)); }
         });
         return (I) this;
     }
 
-    public final I onHidden(UIAction<C, ComponentEvent> onHidden) {
+    public final I onHidden(UIAction<SimpleDelegate<C, ComponentEvent>> onHidden) {
         LogUtil.nullArgCheck(onHidden, "onHidden", UIAction.class);
         this.component.addComponentListener(new ComponentAdapter() {
-            @Override public void componentHidden(ComponentEvent e) { onHidden.accept(new EventContext<>(component, e)); }
+            @Override public void componentHidden(ComponentEvent e) { onHidden.accept(new SimpleDelegate<>(component, e, ()->siblings)); }
         });
         return (I) this;
     }
 
-    public final I onFocusGained(UIAction<C, ComponentEvent> onFocus) {
+    public final I onFocusGained(UIAction<SimpleDelegate<C, ComponentEvent>> onFocus) {
         LogUtil.nullArgCheck(onFocus, "onFocus", UIAction.class);
         this.component.addFocusListener(new FocusAdapter() {
-            @Override public void focusGained(FocusEvent e) { onFocus.accept(new EventContext<>(component, e)); }
+            @Override public void focusGained(FocusEvent e) { onFocus.accept(new SimpleDelegate<>(component, e, ()->siblings)); }
         });
         return (I) this;
     }
 
-    public final I onFocusLost(UIAction<C, ComponentEvent> onFocus) {
+    public final I onFocusLost(UIAction<SimpleDelegate<C, ComponentEvent>> onFocus) {
         LogUtil.nullArgCheck(onFocus, "onFocus", UIAction.class);
         this.component.addFocusListener(new FocusAdapter() {
-            @Override public void focusLost(FocusEvent e) { onFocus.accept(new EventContext<>(component, e)); }
+            @Override public void focusLost(FocusEvent e) { onFocus.accept(new SimpleDelegate<>(component, e, ()->siblings)); }
         });
         return (I) this;
     }

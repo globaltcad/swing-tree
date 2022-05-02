@@ -1,6 +1,7 @@
 package com.globaltcad.swingtree;
 
 import com.globaltcad.swingtree.api.UIAction;
+import com.globaltcad.swingtree.delegates.SimpleDelegate;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -23,9 +24,9 @@ public class UIForCombo<E> extends UIForAbstractSwing<UIForCombo<E>, JComboBox<E
      * @param action The {@link UIAction} that will be notified.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public UIForCombo<E> onChange(UIAction<JComboBox<E>, ActionEvent> action) {
+    public UIForCombo<E> onChange(UIAction<SimpleDelegate<JComboBox<E>, ActionEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        this.component.addActionListener( e -> action.accept(new EventContext<>(this.component, e)) );
+        this.component.addActionListener( e -> action.accept(new SimpleDelegate<>(this.component, e, ()->siblings)) );
         return this;
     }
 

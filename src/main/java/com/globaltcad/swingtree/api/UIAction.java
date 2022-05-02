@@ -1,9 +1,7 @@
 package com.globaltcad.swingtree.api;
 
-import com.globaltcad.swingtree.EventContext;
-
 @FunctionalInterface
-public interface UIAction<C, E>
+public interface UIAction<D>
 {
-    void accept(EventContext<C, E> context);
+    void accept(D context);
 }

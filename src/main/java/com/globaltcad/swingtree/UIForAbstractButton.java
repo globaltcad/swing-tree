@@ -1,6 +1,7 @@
 package com.globaltcad.swingtree;
 
 import com.globaltcad.swingtree.api.UIAction;
+import com.globaltcad.swingtree.delegates.SimpleDelegate;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.List;
 
 /**
  *  The following is a more specialized type of builder which extends the "BasicBuilder" class
@@ -60,9 +60,9 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @param action The change action lambda which will be passed to the button component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public I onChange(UIAction<B, ItemEvent> action) {
+    public I onChange(UIAction<SimpleDelegate<B, ItemEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        this.component.addItemListener(e -> action.accept(new EventContext<>(this.component, e)));
+        this.component.addItemListener(e -> action.accept(new SimpleDelegate<>(this.component, e, ()->siblings)));
         return (I) this;
     }
 
@@ -74,29 +74,16 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  This is very useful for changing the state of the JComponent when the action is being triggered.
      *  <br><br>
      *
-     * @param action an {@link UIAction} instance which will receive an {@link EventContext} containing important context information.
+     * @param action an {@link UIAction} instance which will receive an {@link SimpleDelegate} containing important context information.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public I onClick(UIAction<B, ActionEvent> action) {
+    public I onClick(UIAction<SimpleDelegate<B, ActionEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        this.component.addActionListener( e -> action.accept(new EventContext<>(this.component, e)) );
-        return (I) this;
-    }
-
-    /**
-     *  This method enables a more readable way of adding
-     *  {@link ActionListener} instances to button types.
-     *  Additionally, to the other "onClick" method this method enables the involvement of the
-     *  sibling components of this {@link JComponent} in the supplied lambda action.
-     *  This is very useful for changing the state of related {@link JComponent}s.
-     *  <br><br>
-     *
-     * @param action an {@link UIAction} instance which will receive an {@link EventContext} containing important context information.
-     * @return This very instance, which enables builder-style method chaining.
-     */
-    public I onClickForSiblings(UIAction<List<JComponent>, ActionEvent> action) {
-        LogUtil.nullArgCheck(action, "action", UIAction.class);
-        this.component.addActionListener( e -> action.accept(new EventContext<>(this.siblings, e)) );
+        this.component.addActionListener(
+           e -> action.accept(
+               new SimpleDelegate<>(this.component, e, ()->this.siblings)
+           )
+        );
         return (I) this;
     }
 
