@@ -28,7 +28,7 @@ repositories {
 dependencies {
 
     // Main dependencies:
-    api 'com.miglayout:miglayout:3.7.4'// https://mvnrepository.com/artifact/com.miglayout/miglayout
+    api group: 'com.miglayout', name: 'miglayout-swing', version: '11.0' // https://mvnrepository.com/artifact/com.miglayout/miglayout-swing
     api 'com.alexandriasoftware.swing:jsplitbutton:1.3.1' // JSplitButton
 
     // Logging :
