@@ -294,6 +294,14 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
+     * @param builder A builder for another {@link JComponent} instance which ought to be added to the wrapped component type.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final <T extends JComponent> I add(UIForAbstractSwing<?, T> builder) {
+        return (I) this.add(new AbstractNestedBuilder[]{builder});
+    }
+
+    /**
      *  Swing UIs are made up of nested {@link JComponent} instances.
      *  This method enables support for nested building as well as the ability to
      *  pass additional layout information the added UI component.
