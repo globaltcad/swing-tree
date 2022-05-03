@@ -43,7 +43,7 @@ dependencies {
     testImplementation 'org.spockframework:spock-core:2.1-groovy-3.0'
     testImplementation 'com.athaydes:spock-reports:2.3.0-groovy-3.0'//, { transitive = false }
 
-    testImplementation 'com.formdev:flatlaf:2.1' // Looks better than regular swing :)
+    testImplementation 'com.formdev:flatlaf:2.2' // Looks better than regular swing :)
     testImplementation group: 'com.metsci.ext.com.kitfox.svg', name: 'svg-salamander', version: '0.1.19'
 
 
