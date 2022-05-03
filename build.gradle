@@ -35,8 +35,8 @@ dependencies {
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
 
     // Testing :
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'    // mandatory dependencies for using Spock
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'    // mandatory dependencies for using Spock
 
     testImplementation 'org.codehaus.groovy:groovy:3.0.10'
     testImplementation platform("org.spockframework:spock-bom:2.0-groovy-3.0")
