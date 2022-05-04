@@ -109,5 +109,21 @@ class JSplitButton_Examples_Spec extends Specification
             Utility.getSplitButtonText(ui) == "text by second item"
     }
 
+    def 'We can specify which item should be initially selected.'()
+    {
+        given : 'We create split button with 2 different kinds of button click events.'
+            var ui =
+                UI.splitButton("I may be replaced!")
+                .add(UI.splitItem("first")).onButtonClick( it -> it.displayButtonText("1") )
+                .add(UI.splitItem("second").makeSelected().onButtonClick( it -> it.displayButtonText("2") ))
+                .add(UI.splitItem("third")).onButtonClick( it -> it.displayButtonText("2") )
+
+        when : 'We click the button.'
+            Utility.click(ui)
+        then : 'The button has now "2" displayed on it, because of the second split item action.'
+            Utility.getSplitButtonText(ui) == "2"
+    }
+
+
 
 }

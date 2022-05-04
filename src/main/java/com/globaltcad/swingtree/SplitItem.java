@@ -68,7 +68,10 @@ public final class SplitItem<I extends JMenuItem>
         this.item = item; this.onButtonClick = onClick; this.onItemSelected = onSelected;
     }
 
-    public I getItem() { return item; }
+    public SplitItem<I> makeSelected() {
+        this.item.setSelected(true);
+        return this;
+    }
 
     /**
      *  Use this to register an action which will be called when the {@link JSplitButton}
@@ -113,6 +116,8 @@ public final class SplitItem<I extends JMenuItem>
         if ( this.onItemSelected != null ) throw new IllegalArgumentException("Property already specified!");
         return new SplitItem<>(item, onButtonClick, action);
     }
+
+    I getItem() { return item; }
 
     UIAction<Delegate<I>> getOnClick() { return onButtonClick == null ? it -> {} : onButtonClick; }
 

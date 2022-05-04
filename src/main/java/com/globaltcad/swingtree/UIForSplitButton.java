@@ -156,6 +156,11 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
     public <I extends JMenuItem> UIForSplitButton<B> add(SplitItem<I> splitItem) {
         LogUtil.nullArgCheck(splitItem, "buttonItem", SplitItem.class);
         I item = splitItem.getItem();
+        if ( item.isSelected() ) {
+            if ( selected[0] != null )
+                throw new IllegalArgumentException("Another item is already selected! Split button can not have multiple selections.");
+            selected[0] = item;
+        }
         popupMenu.add(item);
         options.put(item, ( (SplitItem<JMenuItem>) splitItem).getOnClick());
         item.addActionListener(
