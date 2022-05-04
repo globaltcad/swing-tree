@@ -286,6 +286,39 @@ public final class SplitItem<I extends JMenuItem>
             return this;
         }
 
+        /**
+         *  Selects the targeted split item ({@link JMenuItem}).
+         *
+         * @param i The item index of the {@link JMenuItem} which should be selected.
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate<I> selectItem( int i ) {
+            getSiblinghood().get(i).setSelected(true);
+            return this;
+        }
+
+        /**
+         *  Selects the targeted split item ({@link JMenuItem}) and unselects all other items.
+         *
+         * @param i The item index of the {@link JMenuItem} which should be selected exclusively.
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate<I> selectOnlyItem( int i ) {
+            unselectAllItems().getSiblinghood().get(i).setSelected(true);
+            return this;
+        }
+
+        /**
+         *  Unselects the targeted split item ({@link JMenuItem}).
+         *
+         * @param i The item index of the {@link JMenuItem} which should be unselected.
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate<I> unselectItem( int i ) {
+            getSiblinghood().get(i).setSelected(false);
+            return this;
+        }
+
     }
 
 }
