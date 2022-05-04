@@ -86,9 +86,9 @@ class JSplitButton_Examples_Spec extends Specification
         given : 'We create split button with 2 different kinds of events.'
             var ui =
                 UI.splitButton("I may be replaced!")
-                .onSelection( it -> it.displayButtonText("default text")  )
+                .onSelection( it -> it.setButtonText("default text")  )
                 .add(UI.splitItem("first"))
-                .add(UI.splitItem("second").onButtonClick( it -> it.displayButtonText("text by second item") ))
+                .add(UI.splitItem("second").onButtonClick( it -> it.setButtonText("text by second item") ))
                 .add(UI.splitItem("third"))
         expect : 'The split button has the correct text displayed'
             Utility.getSplitButtonText(ui) == "I may be replaced!"
@@ -118,9 +118,9 @@ class JSplitButton_Examples_Spec extends Specification
         given : 'We create split button with 3 button click events.'
             var ui =
                 UI.splitButton("I may be replaced!")
-                .add(UI.splitItem("first").onButtonClick( it -> it.displayButtonText("1")) )
-                .add(UI.splitItem("second").makeSelected().onButtonClick( it -> it.displayButtonText("2") ))
-                .add(UI.splitItem("third").onButtonClick( it -> it.displayButtonText("3")) )
+                .add(UI.splitItem("first").onButtonClick( it -> it.setButtonText("1")) )
+                .add(UI.splitItem("second").makeSelected().onButtonClick( it -> it.setButtonText("2") ))
+                .add(UI.splitItem("third").onButtonClick( it -> it.setButtonText("3")) )
 
         when : 'We click the button.'
             Utility.click(ui)
@@ -134,9 +134,9 @@ class JSplitButton_Examples_Spec extends Specification
         given : 'We create split button with 3 button click events.'
             var ui =
                 UI.splitButton("triggered:")
-                .add(UI.splitItem("first").onButtonClick( it -> it.displayButtonText(it.buttonText+" 1") ))
-                .add(UI.splitItem("second").makeSelected().onButtonClick( it -> it.displayButtonText(it.buttonText+" 2") ))
-                .add(UI.splitItem("third").makeSelected().onButtonClick( it -> it.displayButtonText(it.buttonText+" 3") ))
+                .add(UI.splitItem("first").onButtonClick( it -> it.appendToButtonText(" 1") ))
+                .add(UI.splitItem("second").makeSelected().onButtonClick( it -> it.appendToButtonText(" 2") ))
+                .add(UI.splitItem("third").makeSelected().onButtonClick( it -> it.appendToButtonText(" 3") ))
 
         when : 'We click the button.'
             Utility.click(ui)
@@ -150,13 +150,13 @@ class JSplitButton_Examples_Spec extends Specification
         given : 'We create split button with 3 button click events and a selection action.'
             var ui =
                 UI.splitButton("triggered:")
-                .add(UI.splitItem("first").makeSelected().onButtonClick( it -> it.displayButtonText(it.buttonText+" 1") ))
+                .add(UI.splitItem("first").makeSelected().onButtonClick( it -> it.appendToButtonText(" 1") ))
                 .add(
                     UI.splitItem("second")
-                    .onButtonClick( it -> it.displayButtonText(it.buttonText+" 2") )
+                    .onButtonClick( it -> it.setButtonText(it.buttonText+" 2") )
                     .onSelection( it -> it.selectOnlyCurrentItem() )
                 )
-                .add(UI.splitItem("third").makeSelected().onButtonClick( it -> it.displayButtonText(it.buttonText+" 3") ))
+                .add(UI.splitItem("third").makeSelected().onButtonClick( it -> it.appendToButtonText(" 3") ))
 
         when : 'We click the button.'
             Utility.click(ui)

@@ -242,7 +242,7 @@ public final class SplitItem<I extends JMenuItem>
          * @param text The text which should be displayed on the {@link JSplitButton}.
          * @return This {@link Delegate} instance to allow for method chaining.
          */
-        public Delegate<I> displayButtonText( String text ) {
+        public Delegate<I> setButtonText(String text ) {
             LogUtil.nullArgCheck(text, "text", String.class);
             this.splitButton.setText(text);
             return this;
@@ -253,6 +253,26 @@ public final class SplitItem<I extends JMenuItem>
          */
         public String getButtonText() {
             return this.splitButton.getText();
+        }
+
+        /**
+         * @param postfix The text which should be appended to the text displayed on the {@link JSplitButton}.
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate<I> appendToButtonText( String postfix ) {
+            LogUtil.nullArgCheck(postfix, "postfix", String.class);
+            this.splitButton.setText(this.getButtonText()+postfix);
+            return this;
+        }
+
+        /**
+         * @param prefix The text which should be prepended to the text displayed on the {@link JSplitButton}.
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate<I> prependToButtonText( String prefix ) {
+            LogUtil.nullArgCheck(prefix, "postfix", String.class);
+            this.splitButton.setText(prefix+this.getButtonText());
+            return this;
         }
 
     }
