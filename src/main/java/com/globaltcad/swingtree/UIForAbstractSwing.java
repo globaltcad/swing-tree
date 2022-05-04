@@ -312,7 +312,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final <T extends JComponent> I add(String constraints, UIForAbstractSwing<?, T> builder) {
-        return (I) this.add(constraints, new UIForAbstractSwing[]{builder});
+        return this.add(constraints, new UIForAbstractSwing[]{builder});
     }
 
     @SafeVarargs
@@ -325,6 +325,12 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         }
         for( UIForAbstractSwing<?, ?> b : builders )
             _doAdd(b, conf);
+        return (I) this;
+    }
+
+    @SafeVarargs
+    public final <E extends JComponent> I add(String conf, E... components) {
+        for( E component : components ) this.add(conf, UI.of(component));
         return (I) this;
     }
 
