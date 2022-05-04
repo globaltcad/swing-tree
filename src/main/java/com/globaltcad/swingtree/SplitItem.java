@@ -181,6 +181,19 @@ public final class SplitItem<I extends JMenuItem>
         }
 
         /**
+         *  Selects only the current {@link JMenuItem} by passing {@code true}
+         *  to the {@link JMenuItem#setSelected(boolean)} method.
+         *  All other {@link JMenuItem}s will be unselected.
+         *
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate<I> selectOnlyCurrentItem() {
+            this.unselectAllItems();
+            this.getCurrentItem().setSelected(true);
+            return this;
+        }
+
+        /**
          *  Unselects the current {@link JMenuItem} by passing {@code false}
          *  to the {@link JMenuItem#setSelected(boolean)} method.
          *
@@ -233,6 +246,13 @@ public final class SplitItem<I extends JMenuItem>
             LogUtil.nullArgCheck(text, "text", String.class);
             this.splitButton.setText(text);
             return this;
+        }
+
+        /**
+         * @return The text displayed on the {@link JSplitButton}.
+         */
+        public String getButtonText() {
+            return this.splitButton.getText();
         }
 
     }
