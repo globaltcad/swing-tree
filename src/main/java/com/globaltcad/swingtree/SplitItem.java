@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  *  {@link SplitItem}s represent button options for the {@link JSplitButton}
@@ -149,9 +150,7 @@ public final class SplitItem<I extends JMenuItem>
             this.currentItem = currentItem;
         }
 
-        public ActionEvent getEvent() {
-            return event;
-        }
+        public ActionEvent getEvent() { return event; }
 
         /**
          * @return The {@link JSplitButton} to which this {@link SplitItem} (and its {@link JMenuItem}) belongs.
@@ -167,7 +166,19 @@ public final class SplitItem<I extends JMenuItem>
          *
          * @return A list of all the {@link JMenuItem} which constitute the options exposed by the {@link JSplitButton}.
          */
-        public List<I> getSiblings() { return this.siblingsSource.get(); }
+        public List<I> getSiblinghood() { return this.siblingsSource.get(); }
+
+        /**
+         *
+         * @return A list of all the {@link JMenuItem} which constitute the options exposed by the {@link JSplitButton}
+         *          except the current {@link JMenuItem} exposed by {@link #getCurrentItem()}.
+         */
+        public List<I> getSiblings() {
+            return this.siblingsSource.get()
+                    .stream()
+                    .filter( s -> s != getCurrentItem() )
+                    .collect(Collectors.toList());
+        }
 
         /**
          *  Selects the current {@link JMenuItem} by passing {@code true}
@@ -211,7 +222,7 @@ public final class SplitItem<I extends JMenuItem>
          * @return This {@link Delegate} instance to allow for method chaining.
          */
         public Delegate<I> unselectAllItems() {
-            getSiblings().forEach( it -> it.setSelected(false) );
+            getSiblinghood().forEach(it -> it.setSelected(false) );
             return this;
         }
 
@@ -222,7 +233,7 @@ public final class SplitItem<I extends JMenuItem>
          * @return This {@link Delegate} instance to allow for method chaining.
          */
         public Delegate<I> selectAllItems() {
-            getSiblings().forEach( it -> it.setSelected(true) );
+            getSiblinghood().forEach(it -> it.setSelected(true) );
             return this;
         }
 
