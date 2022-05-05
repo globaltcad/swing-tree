@@ -20,7 +20,7 @@ public class Example extends JPanel
 		UI.of(this)
 		.withLayout(debug+"fill", "[][grow]")
 		.withBackground(Color.WHITE)
-		.add(UI.labelWithIcon(200, 200, cover).withTooltip("I am a picture of a swing on a tree!"))
+		.add(UI.label(200, 200, cover).withTooltip("I am a picture of a swing on a tree!"))
 		.add("grow",
 			UI.panel(debug+"fill, insets 0","[grow][shrink]")
 			.onMouseClick( e -> {/* does something */} )
@@ -48,7 +48,7 @@ public class Example extends JPanel
 					.add("span, grow", UI.textField())
 				)
 				.add("cell 1 0",
-					UI.buttonWithIcon(50, 50, pdfIcon, pdfHover)
+					UI.button(50, 50, pdfIcon, pdfHover)
 					.withCursor(UI.Cursor.HAND)
 					.makePlain()
 					.onClick( e -> {/* does something */} )

@@ -8,10 +8,10 @@ import javax.swing.*;
 public class UIForSpinner extends UIForAbstractSwing<UIForSpinner, JSpinner>
 {
     /**
-     * Instances of the BasicBuilder as well as its sub types always wrap
+     * {@link UIForAbstractSwing} types always wrap
      * a single component for which they are responsible.
      *
-     * @param component The JComponent type which will be wrapped by this builder node.
+     * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
     protected UIForSpinner(JSpinner component) { super(component); }
 }

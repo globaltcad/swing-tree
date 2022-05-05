@@ -5,10 +5,10 @@ import javax.swing.*;
 public class UIForTabbedPane extends UIForAbstractSwing<UIForTabbedPane, JTabbedPane>
 {
     /**
-     * Instances of the BasicBuilder as well as its sub types always wrap
+     * {@link UIForAbstractSwing} types always wrap
      * a single component for which they are responsible.
      *
-     * @param component The JComponent type which will be wrapped by this builder node.
+     * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
     public UIForTabbedPane(JTabbedPane component) {
         super(component);

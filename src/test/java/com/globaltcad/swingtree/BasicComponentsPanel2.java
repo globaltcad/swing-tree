@@ -97,7 +97,7 @@ class BasicComponentsPanel2 extends JPanel
         .add("cell 4 1", UI.button("Round").withProperty("JButton.buttonType", "roundRect"))
         .add("cell 4 1", UI.button("Help").withProperty("JButton.buttonType", "help"))
         .add("cell 4 1", UI.button("Help").isEnabledIf(false).withProperty("JButton.buttonType", "help"))
-        .add("cell 5 1", UI.buttonWithIcon(UIManager.getIcon("Tree.closedIcon")))
+        .add("cell 5 1", UI.button(UIManager.getIcon("Tree.closedIcon")))
         .add("cell 5 1", UI.button("..."))
         .add("cell 5 1", UI.button("\u2026"))
         .add("cell 5 1", UI.button("#"))

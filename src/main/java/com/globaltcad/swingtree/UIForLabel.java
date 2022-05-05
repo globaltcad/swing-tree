@@ -96,5 +96,11 @@ public class UIForLabel extends UIForAbstractSwing<UIForLabel, JLabel>
         this.component.setVerticalTextPosition(horizontalAlign.forSwing());
         return this;
     }
+
+    public UIForLabel withIcon(Icon icon) {
+        LogUtil.nullArgCheck(icon,"icon",Icon.class);
+        this.component.setIcon(icon);
+        return this;
+    }
 }
 

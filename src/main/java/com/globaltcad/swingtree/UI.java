@@ -235,7 +235,7 @@ public final class UI
      *
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
-    public static UIForButton<JButton> buttonWithIcon(Icon icon) {
+    public static UIForButton<JButton> button(Icon icon) {
         LogUtil.nullArgCheck(icon, "icon", Icon.class);
         return button().make( it -> it.setIcon(icon) );
     }
@@ -246,10 +246,10 @@ public final class UI
      *
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
-    public static UIForButton<JButton> buttonWithIcon(Icon icon, Icon onHover) {
+    public static UIForButton<JButton> button(Icon icon, Icon onHover) {
         LogUtil.nullArgCheck(icon, "icon", Icon.class);
         LogUtil.nullArgCheck(onHover, "onHover", Icon.class);
-        return buttonWithIcon(icon, onHover, onHover);
+        return button(icon, onHover, onHover);
     }
 
     /**
@@ -259,10 +259,10 @@ public final class UI
      *
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
-    public static UIForButton<JButton> buttonWithIcon(int width, int height, ImageIcon icon, ImageIcon onHover) {
+    public static UIForButton<JButton> button(int width, int height, ImageIcon icon, ImageIcon onHover) {
         onHover = new ImageIcon(onHover.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT));
         icon = new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT));
-        return buttonWithIcon(icon, onHover, onHover);
+        return button(icon, onHover, onHover);
     }
 
     /**
@@ -279,7 +279,7 @@ public final class UI
      *
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
-    public static UIForButton<JButton> buttonWithIcon(Icon icon, Icon onHover, Icon onPress) {
+    public static UIForButton<JButton> button(Icon icon, Icon onHover, Icon onPress) {
         LogUtil.nullArgCheck(icon, "icon", Icon.class);
         LogUtil.nullArgCheck(onHover, "onHover", Icon.class);
         LogUtil.nullArgCheck(onPress, "onPress", Icon.class);
@@ -356,9 +356,13 @@ public final class UI
         return new UIForTabbedPane(pane);
     }
 
-    public static UIForTabbedPane tabbedPane() {
-        return of(new JTabbedPane());
-    }
+    /**
+     *  Use this to create a builder for a new {@link JTabbedPane} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JTabbedPane())}.
+     *
+     * @return A builder instance for a new {@link JTabbedPane}, which enables fluent method chaining.
+     */
+    public static UIForTabbedPane tabbedPane() { return of(new JTabbedPane()); }
 
     public static UIForTabbedPane tabbedPane(Position position) {
         return of(new JTabbedPane(position.forTabbedPane()));
@@ -372,6 +376,19 @@ public final class UI
         return of(new JTabbedPane(Position.TOP.forTabbedPane(), policy.forTabbedPane()));
     }
 
+    /**
+     *  Use this to add tabs to a {@link JTabbedPane} by
+     *  passing {@link Tab} instances to {@link UIForTabbedPane} builder like so: <br>
+     *  <pre>{@code
+     *      UI.tabbedPane()
+     *      .add(UI.tab("First").add(UI.panel().add(..)))
+     *      .add(UI.tab("second").withTip("I give info!").add(UI.label("read me")))
+     *      .add(UI.tab("third").withIcon(..).add(UI.button("click me")))
+     *  }</pre>
+     *
+     * @param title The text displayed on the tab button.
+     * @return A {@link Tab} instance containing everything needed to be added to a {@link JTabbedPane}.
+     */
     public static Tab tab(String title) {
         return new Tab(null, title, null, null);
     }
@@ -412,10 +429,10 @@ public final class UI
     }
 
     /**
-     *  Use this to create a builder for the {@link JPanel} UI component.
+     *  Use this to create a builder for a new {@link JPanel} UI component.
      *  This is in essence a convenience method for {@code UI.of(new JPanel())}.
      *
-     * @return A builder instance for the panel, which enables fluent method chaining.
+     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      */
     public static UIForPanel<JPanel> panel() { return of(new JPanel()); }
 
@@ -438,43 +455,76 @@ public final class UI
      * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      */
-    public static UIForPanel<JPanel> panel(String attr) {
-        return of(new JPanel()).withLayout(attr);
-    }
+    public static UIForPanel<JPanel> panel(String attr) { return of(new JPanel()).withLayout(attr); }
 
     public static UIForScrollPane of(JScrollPane component) {
         LogUtil.nullArgCheck(component, "component", JScrollPane.class);
         return new UIForScrollPane(component);
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JScrollPane} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JScrollPane())}.
+     *
+     * @return A builder instance for a new {@link JScrollPane}, which enables fluent method chaining.
+     */
     public static UIForScrollPane scrollPane() { return of(new JScrollPane()); }
 
-
+    /**
+     *  Use this to create a builder for the provided {@link JSplitPane} instance.
+     *
+     * @return A builder instance for the provided {@link JSplitPane}, which enables fluent method chaining.
+     */
     public static UIForSplitPane of(JSplitPane component) {
         LogUtil.nullArgCheck(component, "component", JSplitPane.class);
         return new UIForSplitPane(component);
     }
 
+
+    /**
+     *  Use this to create a builder for a new {@link JSplitPane} instance
+     *  based on tbe provided split alignment.
+     *
+     * @param align The alignment determining if the {@link JSplitPane} splits vertically or horizontally.
+     * @return A builder instance for the provided {@link JSplitPane}, which enables fluent method chaining.
+     */
     public static UIForSplitPane splitPane(Align align) { return of(new JSplitPane(align.forSplitPane())); }
 
-
+    /**
+     *  Use this to create a builder for the provided {@link JEditorPane} instance.
+     *
+     * @return A builder instance for the provided {@link JEditorPane}, which enables fluent method chaining.
+     */
     public static UIForEditorPane of(JEditorPane component) {
         LogUtil.nullArgCheck(component, "component", JEditorPane.class);
         return new UIForEditorPane(component);
     }
 
-    public static UIForEditorPane editorPane() {
-        return of(new JEditorPane()); 
-    }
+    /**
+     *  Use this to create a builder for a new {@link JEditorPane} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JEditorPane())}.
+     *
+     * @return A builder instance for a new {@link JEditorPane}, which enables fluent method chaining.
+     */
+    public static UIForEditorPane editorPane() { return of(new JEditorPane()); }
 
+    /**
+     *  Use this to create a builder for the provided {@link JTextPane} instance.
+     *
+     * @return A builder instance for the provided {@link JTextPane}, which enables fluent method chaining.
+     */
     public static UIForTextPane of(JTextPane component) {
         LogUtil.nullArgCheck(component, "component", JTextPane.class);
         return new UIForTextPane(component);
     }
 
-    public static UIForTextPane textPane() {
-        return of(new JTextPane());
-    }
+    /**
+     *  Use this to create a builder for a new {@link JTextPane} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JTextPane())}.
+     *
+     * @return A builder instance for a new {@link JTextPane}, which enables fluent method chaining.
+     */
+    public static UIForTextPane textPane() { return of(new JTextPane()); }
 
     /**
      *  Use this to create a builder for the provided {@link JSlider} instance.
@@ -496,6 +546,12 @@ public final class UI
         return new UIForCombo<>(component);
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JComboBox} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JComboBox())}.
+     *
+     * @return A builder instance for a new {@link JComboBox}, which enables fluent method chaining.
+     */
     public static UIForCombo<Object> comboBox() { return of(new JComboBox<>()); }
 
     /**
@@ -508,6 +564,12 @@ public final class UI
         return new UIForSpinner(spinner);
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JSpinner} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JSpinner())}.
+     *
+     * @return A builder instance for a new {@link JSpinner}, which enables fluent method chaining.
+     */
     public static UIForSpinner spinner() { return of(new JSpinner()); }
 
     /**
@@ -538,9 +600,9 @@ public final class UI
      * @param icon The icon which should be placed into a {@link JLabel}.
      * @return A builder instance for the label, which enables fluent method chaining.
      */
-    public static UIForLabel labelWithIcon(Icon icon) {
+    public static UIForLabel label(Icon icon) {
         LogUtil.nullArgCheck(icon, "icon", Icon.class);
-        return of(new JLabel()).make( it -> it.setIcon(icon) );
+        return of(new JLabel()).withIcon(icon);
     }
 
     /**
@@ -551,12 +613,12 @@ public final class UI
      * @param icon The icon which should be placed into a {@link JLabel}.
      * @return A builder instance for the label, which enables fluent method chaining.
      */
-    public static UIForLabel labelWithIcon(int width, int height, ImageIcon icon) {
+    public static UIForLabel label(int width, int height, ImageIcon icon) {
         LogUtil.nullArgCheck(icon, "icon", ImageIcon.class);
         return of(new JLabel())
-                .make(it -> it.setIcon(
+                .withIcon(
                     new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT))
-                ));
+                );
     }
 
     public static UIForCheckBox checkBox(String text) {
@@ -604,6 +666,12 @@ public final class UI
         return of(new JTextField(text));
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JTextField} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JTextField())}.
+     *
+     * @return A builder instance for a new {@link JTextField}, which enables fluent method chaining.
+     */
     public static UIForTextField textField() { return of(new JTextField()); }
 
     /**
@@ -621,6 +689,12 @@ public final class UI
         return of(new JFormattedTextField(text));
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JFormattedTextField} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JFormattedTextField())}.
+     *
+     * @return A builder instance for a new {@link JFormattedTextField}, which enables fluent method chaining.
+     */
     public static UIForFormattedTextField formattedTextField() { return of(new JFormattedTextField()); }
 
     /**
@@ -638,6 +712,12 @@ public final class UI
         return of(new JPasswordField(text));
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JPasswordField} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JPasswordField())}.
+     *
+     * @return A builder instance for a new {@link JPasswordField}, which enables fluent method chaining.
+     */
     public static UIForPasswordField passwordField() { return of(new JPasswordField()); }
 
     /**
@@ -655,9 +735,13 @@ public final class UI
         return of(new JTextArea(text));
     }
 
-    public static UIForTextArea textArea() {
-        return of(new JTextArea());
-    }
+    /**
+     *  Use this to create a builder for a new {@link JTextArea} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JTextArea())}.
+     *
+     * @return A builder instance for a new {@link JTextArea}, which enables fluent method chaining.
+     */
+    public static UIForTextArea textArea() { return of(new JTextArea()); }
 
     /**
      *  Use this to create a builder for anything.
