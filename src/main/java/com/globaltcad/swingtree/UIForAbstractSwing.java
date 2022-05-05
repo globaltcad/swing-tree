@@ -276,23 +276,6 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     *  Swing UIs are made up of nested {@link JComponent} instances.
-     *  This method enables support for nested building as well as the ability to
-     *  pass additional layout information the added UI component.
-     *  <br><br>
-     *
-     * @param configuration The additional layout information which should be passed to the UI tree.
-     * @param component A {@link JComponent} instance which ought to be added to the wrapped component type.
-     * @return This very instance, which enables builder-style method chaining.
-     */
-    public final I add(String configuration, C component) {
-        LogUtil.nullArgCheck(configuration, "configuration", Object.class);
-        LogUtil.nullArgCheck(component, "component", Object.class);
-        this.add(configuration, UI.of(component));
-        return (I) this;
-    }
-
-    /**
      * @param builder A builder for another {@link JComponent} instance which ought to be added to the wrapped component type.
      * @return This very instance, which enables builder-style method chaining.
      */
@@ -311,7 +294,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final <T extends JComponent> I add(String constraints, UIForAbstractSwing<?, T> builder) {
-        return (I) this.add(constraints, new UIForAbstractSwing[]{builder});
+        return this.add(constraints, new UIForAbstractSwing[]{builder});
     }
 
     @SafeVarargs
@@ -324,6 +307,27 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         }
         for( UIForAbstractSwing<?, ?> b : builders )
             _doAdd(b, conf);
+        return (I) this;
+    }
+
+    /**
+     *  Swing UIs are made up of nested {@link JComponent} instances.
+     *  This method enables support for nested building as well as the ability to
+     *  pass additional layout information the added UI component.
+     *  <br><br>
+     *
+     * @param conf The additional layout information which should be passed to the UI tree.
+     * @param components A {@link JComponent}s array which ought to be added to the wrapped component type.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    @SafeVarargs
+    public final <E extends JComponent> I add(String conf, E... components) {
+        LogUtil.nullArgCheck(conf, "conf", Object.class);
+        LogUtil.nullArgCheck(components, "components", Object[].class);
+        for( E component : components ) {
+            LogUtil.nullArgCheck(component, "component", JComponent.class);
+            this.add(conf, UI.of(component));
+        }
         return (I) this;
     }
 

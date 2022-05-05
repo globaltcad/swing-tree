@@ -8,6 +8,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  *  {@link SplitItem}s represent button options for the {@link JSplitButton}
@@ -67,7 +68,10 @@ public final class SplitItem<I extends JMenuItem>
         this.item = item; this.onButtonClick = onClick; this.onItemSelected = onSelected;
     }
 
-    public I getItem() { return item; }
+    public SplitItem<I> makeSelected() {
+        this.item.setSelected(true);
+        return this;
+    }
 
     /**
      *  Use this to register an action which will be called when the {@link JSplitButton}
@@ -113,6 +117,8 @@ public final class SplitItem<I extends JMenuItem>
         return new SplitItem<>(item, onButtonClick, action);
     }
 
+    I getItem() { return item; }
+
     UIAction<Delegate<I>> getOnClick() { return onButtonClick == null ? it -> {} : onButtonClick; }
 
     UIAction<Delegate<I>> getOnSelected() { return onItemSelected == null ? c -> {} : onItemSelected; }
@@ -144,9 +150,7 @@ public final class SplitItem<I extends JMenuItem>
             this.currentItem = currentItem;
         }
 
-        public ActionEvent getEvent() {
-            return event;
-        }
+        public ActionEvent getEvent() { return event; }
 
         /**
          * @return The {@link JSplitButton} to which this {@link SplitItem} (and its {@link JMenuItem}) belongs.
@@ -162,7 +166,19 @@ public final class SplitItem<I extends JMenuItem>
          *
          * @return A list of all the {@link JMenuItem} which constitute the options exposed by the {@link JSplitButton}.
          */
-        public List<I> getSiblings() { return this.siblingsSource.get(); }
+        public List<I> getSiblinghood() { return this.siblingsSource.get(); }
+
+        /**
+         *
+         * @return A list of all the {@link JMenuItem} which constitute the options exposed by the {@link JSplitButton}
+         *          except the current {@link JMenuItem} exposed by {@link #getCurrentItem()}.
+         */
+        public List<I> getSiblings() {
+            return this.siblingsSource.get()
+                    .stream()
+                    .filter( s -> s != getCurrentItem() )
+                    .collect(Collectors.toList());
+        }
 
         /**
          *  Selects the current {@link JMenuItem} by passing {@code true}
@@ -171,6 +187,19 @@ public final class SplitItem<I extends JMenuItem>
          * @return This {@link Delegate} instance to allow for method chaining.
          */
         public Delegate<I> selectCurrentItem() {
+            this.getCurrentItem().setSelected(true);
+            return this;
+        }
+
+        /**
+         *  Selects only the current {@link JMenuItem} by passing {@code true}
+         *  to the {@link JMenuItem#setSelected(boolean)} method.
+         *  All other {@link JMenuItem}s will be unselected.
+         *
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate<I> selectOnlyCurrentItem() {
+            this.unselectAllItems();
             this.getCurrentItem().setSelected(true);
             return this;
         }
@@ -193,7 +222,7 @@ public final class SplitItem<I extends JMenuItem>
          * @return This {@link Delegate} instance to allow for method chaining.
          */
         public Delegate<I> unselectAllItems() {
-            getSiblings().forEach( it -> it.setSelected(false) );
+            getSiblinghood().forEach(it -> it.setSelected(false) );
             return this;
         }
 
@@ -204,7 +233,7 @@ public final class SplitItem<I extends JMenuItem>
          * @return This {@link Delegate} instance to allow for method chaining.
          */
         public Delegate<I> selectAllItems() {
-            getSiblings().forEach( it -> it.setSelected(true) );
+            getSiblinghood().forEach(it -> it.setSelected(true) );
             return this;
         }
 
@@ -224,9 +253,69 @@ public final class SplitItem<I extends JMenuItem>
          * @param text The text which should be displayed on the {@link JSplitButton}.
          * @return This {@link Delegate} instance to allow for method chaining.
          */
-        public Delegate<I> displayButtonText( String text ) {
+        public Delegate<I> setButtonText(String text ) {
             LogUtil.nullArgCheck(text, "text", String.class);
             this.splitButton.setText(text);
+            return this;
+        }
+
+        /**
+         * @return The text displayed on the {@link JSplitButton}.
+         */
+        public String getButtonText() {
+            return this.splitButton.getText();
+        }
+
+        /**
+         * @param postfix The text which should be appended to the text displayed on the {@link JSplitButton}.
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate<I> appendToButtonText( String postfix ) {
+            LogUtil.nullArgCheck(postfix, "postfix", String.class);
+            this.splitButton.setText(this.getButtonText()+postfix);
+            return this;
+        }
+
+        /**
+         * @param prefix The text which should be prepended to the text displayed on the {@link JSplitButton}.
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate<I> prependToButtonText( String prefix ) {
+            LogUtil.nullArgCheck(prefix, "postfix", String.class);
+            this.splitButton.setText(prefix+this.getButtonText());
+            return this;
+        }
+
+        /**
+         *  Selects the targeted split item ({@link JMenuItem}).
+         *
+         * @param i The item index of the {@link JMenuItem} which should be selected.
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate<I> selectItem( int i ) {
+            getSiblinghood().get(i).setSelected(true);
+            return this;
+        }
+
+        /**
+         *  Selects the targeted split item ({@link JMenuItem}) and unselects all other items.
+         *
+         * @param i The item index of the {@link JMenuItem} which should be selected exclusively.
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate<I> selectOnlyItem( int i ) {
+            unselectAllItems().getSiblinghood().get(i).setSelected(true);
+            return this;
+        }
+
+        /**
+         *  Unselects the targeted split item ({@link JMenuItem}).
+         *
+         * @param i The item index of the {@link JMenuItem} which should be unselected.
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate<I> unselectItem( int i ) {
+            getSiblinghood().get(i).setSelected(false);
             return this;
         }
 

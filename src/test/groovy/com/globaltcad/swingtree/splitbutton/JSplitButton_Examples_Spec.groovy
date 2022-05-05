@@ -13,6 +13,7 @@ import javax.swing.*
 @Title("A Button of Buttons")
 class JSplitButton_Examples_Spec extends Specification
 {
+
     def 'The most simple kind of split button can be built like so:'()
     {
         given : 'We create a basic split button which will not have any behaviour.'
@@ -32,6 +33,7 @@ class JSplitButton_Examples_Spec extends Specification
             ((JMenuItem)ui.popupMenu.getComponent(2)).getText() == "And I am the third."
     }
 
+
     def 'We can easily build a split button whose text becomes the current user selection:'()
     {
         given : 'We create split button displaying the current selection.'
@@ -49,6 +51,7 @@ class JSplitButton_Examples_Spec extends Specification
         then :
             Utility.getSplitButtonText(ui) == "second"
     }
+
 
     def 'We can easily build a split button where only one item text will have its text displayed:'()
     {
@@ -80,12 +83,12 @@ class JSplitButton_Examples_Spec extends Specification
 
     def 'We can register button click events for button items as well as the split button as a whole.'()
     {
-        given : 'We create split button with 2 different kinds of button click events.'
+        given : 'We create split button with 2 different kinds of events.'
             var ui =
                 UI.splitButton("I may be replaced!")
-                .onSelection( it -> it.displayButtonText("default text")  )
+                .onSelection( it -> it.setButtonText("default text")  )
                 .add(UI.splitItem("first"))
-                .add(UI.splitItem("second").onButtonClick( it -> it.displayButtonText("text by second item") ))
+                .add(UI.splitItem("second").onButtonClick( it -> it.setButtonText("text by second item") ))
                 .add(UI.splitItem("third"))
         expect : 'The split button has the correct text displayed'
             Utility.getSplitButtonText(ui) == "I may be replaced!"
@@ -107,6 +110,68 @@ class JSplitButton_Examples_Spec extends Specification
             Utility.click(ui)
         then : 'The split button text will be different because the button item action fired last.'
             Utility.getSplitButtonText(ui) == "text by second item"
+    }
+
+
+    def 'We can specify which item should be initially selected.'()
+    {
+        given : 'We create split button with 3 button click events.'
+            var ui =
+                UI.splitButton("I may be replaced!")
+                .add(UI.splitItem("first").onButtonClick( it -> it.setButtonText("1")) )
+                .add(UI.splitItem("second").makeSelected().onButtonClick( it -> it.setButtonText("2") ))
+                .add(UI.splitItem("third").onButtonClick( it -> it.setButtonText("3")) )
+
+        when : 'We click the button.'
+            Utility.click(ui)
+        then : 'The button has now "2" displayed on it, because of the second split item action.'
+            Utility.getSplitButtonText(ui) == "2"
+    }
+
+
+    def 'It is possible to select more than 1 item.'()
+    {
+        given : 'We create split button with 3 button click events.'
+            var ui =
+                UI.splitButton("triggered:")
+                .add(UI.splitItem("first").onButtonClick( it -> it.appendToButtonText(" 1") ))
+                .add(UI.splitItem("second").makeSelected().onButtonClick( it -> it.appendToButtonText(" 2") ))
+                .add(UI.splitItem("third").makeSelected().onButtonClick( it -> it.appendToButtonText(" 3") ))
+
+        when : 'We click the button.'
+            Utility.click(ui)
+        then : 'The button text now indicates which items were selected and triggered!'
+            Utility.getSplitButtonText(ui) == "triggered: 2 3"
+    }
+
+
+    def 'A button item can undo any multi-selection.'()
+    {
+        given : 'We create split button with 3 button click events and a selection action.'
+            var ui =
+                UI.splitButton("triggered:")
+                .add(UI.splitItem("first").makeSelected().onButtonClick( it -> it.appendToButtonText(" 1") ))
+                .add(
+                    UI.splitItem("second")
+                    .onButtonClick( it -> it.setButtonText(it.buttonText+" 2") )
+                    .onSelection( it -> it.selectOnlyCurrentItem() )
+                )
+                .add(UI.splitItem("third").makeSelected().onButtonClick( it -> it.appendToButtonText(" 3") ))
+
+        when : 'We click the button.'
+            Utility.click(ui)
+        then : 'The button text now indicates which items were selected and triggered!'
+            Utility.getSplitButtonText(ui) == "triggered: 1 3"
+
+        when : 'We now select the second button item.'
+            ((JMenuItem)ui.popupMenu.getComponent(1)).doClick()
+        then : 'The split button text will not have changed (internally the selection should be different however).'
+            Utility.getSplitButtonText(ui) == "triggered: 1 3"
+
+        when : 'We now click the second button item.'
+            Utility.click(ui)
+        then : 'The split button text will indicate that now only the second split item button action was triggered!'
+            Utility.getSplitButtonText(ui) == "triggered: 1 3 2"
     }
 
 
