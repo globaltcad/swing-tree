@@ -54,9 +54,58 @@ public final class UI
     }
 
     public enum Scroll {
-        NEVER,
-        AS_NEEDED,
-        ALWAYS
+        NEVER, AS_NEEDED, ALWAYS
+    }
+
+    public enum Align {
+        TOP, LEFT, BOTTOM, RIGHT;
+        private int forTabbedPane() {
+            switch ( this ) {
+                case TOP  : return JTabbedPane.TOP  ;
+                case LEFT : return JTabbedPane.LEFT ;
+                case BOTTOM: return JTabbedPane.BOTTOM;
+                case RIGHT: return JTabbedPane.RIGHT;
+            }
+            throw new RuntimeException();
+        }
+    }
+
+    public enum OverflowPolicy {
+        WRAP, SCROLL;
+
+        private int forTabbedPane() {
+            switch ( this ) {
+                case WRAP:   return JTabbedPane.WRAP_TAB_LAYOUT  ;
+                case SCROLL: return JTabbedPane.SCROLL_TAB_LAYOUT ;
+            }
+            throw new RuntimeException();
+        }
+    }
+
+    public enum VerticalAlign {
+        TOP, CENTER, BOTTOM;
+
+        int forSwing() {
+            switch ( this ) {
+                case TOP:    return SwingConstants.TOP  ;
+                case CENTER: return SwingConstants.CENTER ;
+                case BOTTOM: return SwingConstants.BOTTOM ;
+            }
+            throw new RuntimeException();
+        }
+    }
+
+    public enum HorizontalAlign {
+        LEFT, CENTER, RIGHT;
+
+        public final int forSwing() {
+            switch ( this ) {
+                case LEFT:   return SwingConstants.LEFT   ;
+                case CENTER: return SwingConstants.CENTER ;
+                case RIGHT:  return SwingConstants.RIGHT  ;
+            }
+            throw new RuntimeException();
+        }
     }
 
     /**
@@ -289,6 +338,22 @@ public final class UI
         return SplitItem.of(new JRadioButtonMenuItem(text));
     }
 
+    public static UIForTabbedPane of(JTabbedPane pane) {
+        return new UIForTabbedPane(pane);
+    }
+
+    public static UIForTabbedPane tabbedPane(Align align) {
+        return of(new JTabbedPane(align.forTabbedPane()));
+    }
+
+    public static UIForTabbedPane tabbedPane(Align align, OverflowPolicy policy) {
+        return of(new JTabbedPane(align.forTabbedPane(), policy.forTabbedPane()));
+    }
+
+    public static UIForTabbedPane tabbedPane(OverflowPolicy policy) {
+        return of(new JTabbedPane(Align.TOP.forTabbedPane(), policy.forTabbedPane()));
+    }
+
     /**
      *  Use this to create a builder for the provided {@link JMenu} instance.
      *
@@ -356,7 +421,7 @@ public final class UI
         return new UIForEditorPane(component);
     }
 
-    public static UIForEditorPane editorPane() { 
+    public static UIForEditorPane editorPane() {
         return of(new JEditorPane()); 
     }
 

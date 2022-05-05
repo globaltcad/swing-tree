@@ -76,5 +76,25 @@ public class UIForLabel extends UIForAbstractSwing<UIForLabel, JLabel>
         });
         return this;
     }
+
+    public UIForLabel withPosition(UI.HorizontalAlign horizontalAlign) {
+        this.component.setHorizontalAlignment(horizontalAlign.forSwing());
+        return this;
+    }
+
+    public UIForLabel withTextPosition(UI.HorizontalAlign horizontalAlign) {
+        this.component.setHorizontalTextPosition(horizontalAlign.forSwing());
+        return this;
+    }
+
+    public UIForLabel withPosition(UI.VerticalAlign horizontalAlign) {
+        this.component.setVerticalAlignment(horizontalAlign.forSwing());
+        return this;
+    }
+
+    public UIForLabel withTextPosition(UI.VerticalAlign horizontalAlign) {
+        this.component.setVerticalTextPosition(horizontalAlign.forSwing());
+        return this;
+    }
 }
 

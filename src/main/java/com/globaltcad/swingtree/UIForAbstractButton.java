@@ -86,4 +86,25 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
         return (I) this;
     }
 
+
+    public I withPosition(UI.HorizontalAlign horizontalAlign) {
+        this.component.setHorizontalAlignment(horizontalAlign.forSwing());
+        return (I) this;
+    }
+
+    public I withTextPosition(UI.HorizontalAlign horizontalAlign) {
+        this.component.setHorizontalTextPosition(horizontalAlign.forSwing());
+        return (I) this;
+    }
+
+    public I withPosition(UI.VerticalAlign horizontalAlign) {
+        this.component.setVerticalAlignment(horizontalAlign.forSwing());
+        return (I) this;
+    }
+
+    public I withTextPosition(UI.VerticalAlign horizontalAlign) {
+        this.component.setVerticalTextPosition(horizontalAlign.forSwing());
+        return (I) this;
+    }
+
 }
