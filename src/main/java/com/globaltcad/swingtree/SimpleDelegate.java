@@ -1,4 +1,4 @@
-package com.globaltcad.swingtree.delegates;
+package com.globaltcad.swingtree;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
  * @param <C> The delegate (in most cases origin UI component) type parameter stored by this.
  * @param <E> The event type parameter of the event stored by this.
  */
-public final class SimpleDelegate<C extends JComponent,E>
+public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelegate
 {
     private final C component;
     private final E event;
@@ -22,6 +22,7 @@ public final class SimpleDelegate<C extends JComponent,E>
     public SimpleDelegate(
         C component, E event, Supplier<List<JComponent>> siblingSource
     ) {
+        super(component);
         this.component = component;
         this.event = event;
         this.siblingSource = siblingSource;

@@ -2,7 +2,6 @@ package com.globaltcad.swingtree;
 
 
 import com.globaltcad.swingtree.api.UIAction;
-import com.globaltcad.swingtree.delegates.SimpleDelegate;
 
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;

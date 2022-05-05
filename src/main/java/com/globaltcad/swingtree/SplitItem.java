@@ -3,7 +3,6 @@ package com.globaltcad.swingtree;
 
 import com.alexandriasoftware.swing.JSplitButton;
 import com.globaltcad.swingtree.api.UIAction;
-import com.globaltcad.swingtree.delegates.SimpleDelegate;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -125,7 +124,7 @@ public final class SplitItem<I extends JMenuItem>
      *
      * @param <I> The {@link JMenuItem} subtype for which this context was created.
      */
-    public final static class Delegate<I extends JMenuItem>
+    public final static class Delegate<I extends JMenuItem> extends AbstractDelegate
     {
         private final ActionEvent event;
         private final JSplitButton splitButton;
@@ -134,10 +133,11 @@ public final class SplitItem<I extends JMenuItem>
 
         Delegate(
                 ActionEvent event,
-                JSplitButton splitButton, 
+                JSplitButton splitButton,
                 Supplier<List<I>> siblingsSource,
                 I currentItem
         ) {
+            super(currentItem);
             this.event = event;
             this.splitButton = splitButton;
             this.siblingsSource = siblingsSource;
