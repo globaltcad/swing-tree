@@ -22,7 +22,7 @@ public class Example extends JPanel
 		.withBackground(Color.WHITE)
 		.add(UI.labelWithIcon(200, 200, cover).withTooltip("I am a picture of a swing on a tree!"))
 		.add("grow",
-			UI.panelWithLayout(debug+"fill, insets 0","[grow][shrink]")
+			UI.panel(debug+"fill, insets 0","[grow][shrink]")
 			.onMouseClick( e -> {/* does something */} )
 			.add("cell 0 0",
 				UI.label("Hello and welcome to this UI! (Click me I'm a link)")
@@ -30,10 +30,10 @@ public class Example extends JPanel
 				.makeLinkTo("https://github.com/globaltcad")
 			)
 			.add("cell 0 1, grow, pushy",
-				UI.panelWithLayout(debug+"fill, insets 0","[grow][shrink]")
+				UI.panel(debug+"fill, insets 0","[grow][shrink]")
 				.withBackground(Color.WHITE)
 				.add("cell 0 0, aligny top, grow x",
-					UI.panelWithLayout(debug+"fill, insets 7","grow")
+					UI.panel(debug+"fill, insets 7","grow")
 					.withBackground(new Color(255, 138, 99))
 					.add( "span",
 						UI.label("<html><div style=\"width:275px;\">"+ description +"</div></html>")
@@ -56,7 +56,7 @@ public class Example extends JPanel
 				.withBorder(BorderFactory.createMatteBorder(0,0,1,0,Color.LIGHT_GRAY))
 			)
 			.add("cell 0 2, grow",
-				UI.panelWithLayout(debug+"fill, insets 0 0 0 0","[grow][grow][grow]")
+				UI.panel(debug+"fill, insets 0 0 0 0","[grow][grow][grow]")
 				.withBackground(Color.WHITE)
 				.add("cell 1 0", UI.label("Built with swingtree"))
 				.add("cell 2 0", UI.label("GTS-OSS"))

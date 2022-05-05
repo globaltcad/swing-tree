@@ -22,10 +22,10 @@ public class Example3 extends JPanel
             .makeLinkTo("https://github.com/globaltcad")
         )
         .add("cell 0 1, grow, shrinky",
-            UI.panelWithLayout("fill, insets 0","[grow][shrink]")
+            UI.panel("fill, insets 0","[grow][shrink]")
             .withBackground(Color.WHITE)
             .add("cell 0 0, aligny top, grow x, grow y",
-                UI.panelWithLayout("fill, insets 7","grow")
+                UI.panel("fill, insets 7","grow")
                     .withBackground(Color.LIGHT_GRAY)
                     .add( "span",
                             UI.label("<html><div style=\"width:275px;\">"+ description +"</div></html>")
@@ -58,7 +58,7 @@ public class Example3 extends JPanel
                     )
             )
             .add("cell 1 0, grow y",
-                UI.panelWithLayout("fill", "[grow]")
+                UI.panel("fill", "[grow]")
                 .add("cell 0 0, aligny top", UI.button("I am a normal button"))
                 .add("cell 0 1, aligny top",
                     UI.button("<html><i>I am a naked button</i><html>")
@@ -72,7 +72,7 @@ public class Example3 extends JPanel
             )
         )
         .add("cell 0 2, grow",
-            UI.panelWithLayout("fill, insets 0 0 0 0","[grow][grow][grow]")
+            UI.panel("fill, insets 0 0 0 0","[grow][grow][grow]")
             .withBackground(Color.WHITE)
             .add("cell 1 0", UI.label("Built with swingtree"))
             .add("cell 2 0", UI.label("GTS-OSS"))

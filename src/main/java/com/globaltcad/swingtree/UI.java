@@ -57,7 +57,7 @@ public final class UI
         NEVER, AS_NEEDED, ALWAYS
     }
 
-    public enum Align {
+    public enum Position {
         TOP, LEFT, BOTTOM, RIGHT;
         private int forTabbedPane() {
             switch ( this ) {
@@ -80,6 +80,20 @@ public final class UI
             }
             throw new RuntimeException();
         }
+    }
+
+    public enum Align {
+        HORIZONTAL, VERTICAL;
+
+        private int forSplitPane() {
+            switch ( this )
+            {
+                case HORIZONTAL: return JSplitPane.HORIZONTAL_SPLIT;
+                case VERTICAL: return JSplitPane.VERTICAL_SPLIT;
+            }
+            throw new RuntimeException();
+        }
+
     }
 
     public enum VerticalAlign {
@@ -342,16 +356,24 @@ public final class UI
         return new UIForTabbedPane(pane);
     }
 
-    public static UIForTabbedPane tabbedPane(Align align) {
-        return of(new JTabbedPane(align.forTabbedPane()));
+    public static UIForTabbedPane tabbedPane() {
+        return of(new JTabbedPane());
     }
 
-    public static UIForTabbedPane tabbedPane(Align align, OverflowPolicy policy) {
-        return of(new JTabbedPane(align.forTabbedPane(), policy.forTabbedPane()));
+    public static UIForTabbedPane tabbedPane(Position position) {
+        return of(new JTabbedPane(position.forTabbedPane()));
+    }
+
+    public static UIForTabbedPane tabbedPane(Position position, OverflowPolicy policy) {
+        return of(new JTabbedPane(position.forTabbedPane(), policy.forTabbedPane()));
     }
 
     public static UIForTabbedPane tabbedPane(OverflowPolicy policy) {
-        return of(new JTabbedPane(Align.TOP.forTabbedPane(), policy.forTabbedPane()));
+        return of(new JTabbedPane(Position.TOP.forTabbedPane(), policy.forTabbedPane()));
+    }
+
+    public static Tab tab(String title) {
+        return new Tab(null, title, null, null);
     }
 
     /**
@@ -402,11 +424,22 @@ public final class UI
      *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr, layout)}.
      *
      * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
-     * @param layout The layout which will be passed to the {@link MigLayout} constructor as second argument.
+     * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      */
-    public static UIForPanel<JPanel> panelWithLayout(String attr, String layout) {
-        return of(new JPanel()).withLayout(attr, layout);
+    public static UIForPanel<JPanel> panel(String attr, String colConstraints) {
+        return of(new JPanel()).withLayout(attr, colConstraints);
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JPanel} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr, layout)}.
+     *
+     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
+     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     */
+    public static UIForPanel<JPanel> panel(String attr) {
+        return of(new JPanel()).withLayout(attr);
     }
 
     public static UIForScrollPane of(JScrollPane component) {
@@ -415,6 +448,15 @@ public final class UI
     }
 
     public static UIForScrollPane scrollPane() { return of(new JScrollPane()); }
+
+
+    public static UIForSplitPane of(JSplitPane component) {
+        LogUtil.nullArgCheck(component, "component", JSplitPane.class);
+        return new UIForSplitPane(component);
+    }
+
+    public static UIForSplitPane splitPane(Align align) { return of(new JSplitPane(align.forSplitPane())); }
+
 
     public static UIForEditorPane of(JEditorPane component) {
         LogUtil.nullArgCheck(component, "component", JEditorPane.class);
