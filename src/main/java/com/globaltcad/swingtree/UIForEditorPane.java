@@ -2,6 +2,9 @@ package com.globaltcad.swingtree;
 
 import javax.swing.*;
 
+/**
+ *  A swing tree builder for {@link JEditorPane} instances.
+ */
 public class UIForEditorPane extends UIForAbstractEditorPane<UIForEditorPane, JEditorPane>
 {
     /**

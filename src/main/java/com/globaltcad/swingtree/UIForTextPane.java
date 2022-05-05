@@ -2,6 +2,9 @@ package com.globaltcad.swingtree;
 
 import javax.swing.*;
 
+/**
+ *  A swing tree builder for {@link UIForTextPane} instances.
+ */
 public class UIForTextPane extends UIForAbstractEditorPane<UIForTextPane, JTextPane>
 {
     /**

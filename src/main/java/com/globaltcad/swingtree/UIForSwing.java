@@ -2,6 +2,9 @@ package com.globaltcad.swingtree;
 
 import javax.swing.*;
 
+/**
+ *  A swing tree builder for {@link JComponent} types.
+ */
 public class UIForSwing<C extends JComponent> extends UIForAbstractSwing<UIForSwing<C>, C>
 {
     /**

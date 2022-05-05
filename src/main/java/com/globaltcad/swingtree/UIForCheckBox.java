@@ -7,7 +7,5 @@ import javax.swing.*;
  */
 public class UIForCheckBox extends UIForAbstractButton<UIForCheckBox,JCheckBox>
 {
-    protected UIForCheckBox(JCheckBox component) {
-        super(component);
-    }
+    protected UIForCheckBox(JCheckBox component) { super(component); }
 }

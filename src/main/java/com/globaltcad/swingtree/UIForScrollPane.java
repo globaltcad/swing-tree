@@ -2,6 +2,9 @@ package com.globaltcad.swingtree;
 
 import javax.swing.*;
 
+/**
+ *  A swing tree builder for {@link JScrollPane} instances.
+ */
 public class UIForScrollPane extends UIForAbstractSwing<UIForScrollPane, JScrollPane>
 {
     /**
