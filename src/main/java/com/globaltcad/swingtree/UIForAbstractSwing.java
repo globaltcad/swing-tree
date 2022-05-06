@@ -9,6 +9,8 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 
 /**
@@ -23,6 +25,8 @@ import java.awt.event.*;
 public abstract class UIForAbstractSwing<I, C extends JComponent> extends AbstractNestedBuilder<I, C, JComponent>
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(UI.class);
+
+    private final static Map<JComponent, Timer> timers = new WeakHashMap<>();
 
     private boolean idAlreadySet = false;
     private boolean migAlreadySet = false;
@@ -270,6 +274,14 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         this.component.addFocusListener(new FocusAdapter() {
             @Override public void focusLost(FocusEvent e) { onFocus.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())); }
         });
+        return (I) this;
+    }
+
+    public final I doUpdates(int delay, UIAction<SimpleDelegate<C, ActionEvent>> onUpdate) {
+        LogUtil.nullArgCheck(onUpdate, "onUpdate", UIAction.class);
+        Timer timer = new Timer(delay, e -> onUpdate.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+        synchronized (timers) { timers.put(this.component, timer); }
+        timer.start();
         return (I) this;
     }
 
