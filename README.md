@@ -39,7 +39,7 @@ UI.panel("fill, insets 10","[grow][shrink]")
     UI.panel("fill, insets 0","[grow][shrink]")
     .withBackground(Color.WHITE)
     .add("cell 0 0, aligny top, grow x, grow y",
-        UI.panelWithLayout("fill, insets 7","grow")
+        UI.panel("fill, insets 7","grow")
         .withBackground(Color.LIGHT_GRAY)
         .add("span", UI.label("...some text..."))
         .add("shrink", UI.label("First Name"))
