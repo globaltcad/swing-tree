@@ -277,6 +277,14 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         return (I) this;
     }
 
+    /**
+     *  Use this to register periodic update actions which should be called
+     *  based on the provided {@code delay}!
+     *
+     * @param delay The delay between calling the provided {@link UIAction}.
+     * @param onUpdate The {@link UIAction} which should be called periodically.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public final I doUpdates(int delay, UIAction<SimpleDelegate<C, ActionEvent>> onUpdate) {
         LogUtil.nullArgCheck(onUpdate, "onUpdate", UIAction.class);
         Timer timer = new Timer(delay, e -> onUpdate.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
