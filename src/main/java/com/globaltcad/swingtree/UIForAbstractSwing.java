@@ -118,6 +118,13 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         return (I) this;
     }
 
+    public final I withLayout(LayoutManager layout) {
+        if ( migAlreadySet )
+            throw new IllegalArgumentException("The mig layout has already been specified for this component!");
+        this.component.setLayout(layout);
+        return (I) this;
+    }
+
     /**
      *  This creates a {@link MigLayout} for the component wrapped by this UI builder.
      *
