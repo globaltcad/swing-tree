@@ -28,7 +28,7 @@ Fluent and boilerplate free Swing UI building!
 
 
 ```java
-UI.panelWithLayout("fill, insets 10","[grow][shrink]")
+UI.panel("fill, insets 10","[grow][shrink]")
 .withBackground(Color.WHITE)
 .add("cell 0 0",
     UI.label("Hello and welcome to this UI! (Click me I'm a link)")
@@ -36,7 +36,7 @@ UI.panelWithLayout("fill, insets 10","[grow][shrink]")
     .makeLinkTo("https://github.com/globaltcad")
 )
 .add("cell 0 1, grow, shrinky",
-    UI.panelWithLayout("fill, insets 0","[grow][shrink]")
+    UI.panel("fill, insets 0","[grow][shrink]")
     .withBackground(Color.WHITE)
     .add("cell 0 0, aligny top, grow x, grow y",
         UI.panelWithLayout("fill, insets 7","grow")
@@ -50,7 +50,7 @@ UI.panelWithLayout("fill, insets 10","[grow][shrink]")
         .add("span, grow", UI.textField("Somewhere"))
     )
     .add("cell 1 0, grow y",
-        UI.panelWithLayout("fill", "[grow]")
+        UI.panel("fill", "[grow]")
         .add("cell 0 0, aligny top", UI.button("I am a normal button"))
         .add("cell 0 1, aligny top",
             UI.button("<html><i>I am a naked button</i><html>")
@@ -64,7 +64,7 @@ UI.panelWithLayout("fill, insets 10","[grow][shrink]")
     )
 )
 .add("cell 0 2, grow",
-    UI.panelWithLayout("fill, insets 0 0 0 0","[grow][grow][grow]")
+    UI.panel("fill, insets 0 0 0 0","[grow][grow][grow]")
     .withBackground(Color.WHITE)
     .add("cell 1 0", UI.label("Built with swingtree"))
     .add("cell 2 0", UI.label("by GTS"))
