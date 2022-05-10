@@ -5,7 +5,7 @@ import javax.swing.*;
 /**
  *  A swing tree builder for {@link JEditorPane} instances.
  */
-public class UIForEditorPane extends UIForAbstractEditorPane<UIForEditorPane, JEditorPane>
+public class UIForEditorPane<P extends JEditorPane> extends UIForAbstractEditorPane<UIForEditorPane<P>, P>
 {
     /**
      * {@link UIForAbstractSwing} types always wrap
@@ -13,7 +13,5 @@ public class UIForEditorPane extends UIForAbstractEditorPane<UIForEditorPane, JE
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    public UIForEditorPane(JEditorPane component) {
-        super(component);
-    }
+    public UIForEditorPane(P component) { super(component); }
 }

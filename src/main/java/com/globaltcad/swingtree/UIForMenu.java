@@ -5,7 +5,7 @@ import javax.swing.*;
 /**
  *  A swing tree builder for {@link JMenu} instances.
  */
-public class UIForMenu extends UIForAbstractButton<UIForMenu, JMenu>
+public class UIForMenu<M extends JMenu> extends UIForAbstractButton<UIForMenu<M>, M>
 {
-    protected UIForMenu(JMenu component) { super(component); }
+    protected UIForMenu(M component) { super(component); }
 }

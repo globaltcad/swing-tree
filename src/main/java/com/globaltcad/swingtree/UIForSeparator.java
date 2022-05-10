@@ -6,7 +6,7 @@ import java.awt.*;
 /**
  *  A swing tree builder for {@link JSeparator} instances.
  */
-public class UIForSeparator extends UIForAbstractSwing<UIForSeparator, JSeparator>
+public class UIForSeparator<S extends JSeparator> extends UIForAbstractSwing<UIForSeparator<S>, S>
 {
     /**
      * Instances of ths {@link UIForSeparator} always wrap
@@ -14,13 +14,13 @@ public class UIForSeparator extends UIForAbstractSwing<UIForSeparator, JSeparato
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    protected UIForSeparator(JSeparator component) { super(component); }
+    protected UIForSeparator(S component) { super(component); }
 
     /**
      * @param separatorLength The length of the separation line.
      * @return This very builder to allow for method chaining.
      */
-    public UIForSeparator withLength(int separatorLength) {
+    public UIForSeparator<S> withLength(int separatorLength) {
         Dimension d = component.getPreferredSize();
         if ( component.getOrientation() == JSeparator.VERTICAL ) d.height = separatorLength;
         else if ( component.getOrientation() == JSeparator.HORIZONTAL ) d.width = separatorLength;

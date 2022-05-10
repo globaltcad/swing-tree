@@ -11,16 +11,16 @@ import java.net.URISyntaxException;
 /**
  *  A swing tree builder for {@link JLabel} instances.
  */
-public class UIForLabel extends UIForAbstractSwing<UIForLabel, JLabel>
+public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<L>, L>
 {
-    protected UIForLabel(JLabel component) { super(component); }
+    protected UIForLabel(L component) { super(component); }
 
     /**
      *  Makes the wrapped {@link JLabel} font bold (!plain).
      *
      * @return This very builder to allow for method chaining.
      */
-    public UIForLabel makeBold() {
+    public UIForLabel<L> makeBold() {
         this.make( label -> {
             Font f = label.getFont();
             label.setFont(f.deriveFont(f.getStyle() | Font.BOLD));
@@ -28,7 +28,7 @@ public class UIForLabel extends UIForAbstractSwing<UIForLabel, JLabel>
         return this;
     }
 
-    public UIForLabel makeLinkTo(String href) {
+    public UIForLabel<L> makeLinkTo(String href) {
         LazyRef<String> text = LazyRef.of(component::getText);
         if ( !href.startsWith("http") ) href = "https://" + href;
         String finalHref = href;
@@ -55,7 +55,7 @@ public class UIForLabel extends UIForAbstractSwing<UIForLabel, JLabel>
      *
      * @return This very builder to allow for method chaining.
      */
-    public UIForLabel makePlain() {
+    public UIForLabel<L> makePlain() {
         this.make( label -> {
             Font f = label.getFont();
             label.setFont(f.deriveFont(f.getStyle() & ~Font.BOLD));
@@ -69,7 +69,7 @@ public class UIForLabel extends UIForAbstractSwing<UIForLabel, JLabel>
      *
      * @return This very builder to allow for method chaining.
      */
-    public UIForLabel toggleBold() {
+    public UIForLabel<L> toggleBold() {
         this.make( label -> {
             Font f = label.getFont();
             label.setFont(f.deriveFont(f.getStyle() ^ Font.BOLD));
@@ -77,27 +77,27 @@ public class UIForLabel extends UIForAbstractSwing<UIForLabel, JLabel>
         return this;
     }
 
-    public UIForLabel withPosition(UI.HorizontalAlign horizontalAlign) {
+    public UIForLabel<L> withPosition(UI.HorizontalAlign horizontalAlign) {
         this.component.setHorizontalAlignment(horizontalAlign.forSwing());
         return this;
     }
 
-    public UIForLabel withTextPosition(UI.HorizontalAlign horizontalAlign) {
+    public UIForLabel<L> withTextPosition(UI.HorizontalAlign horizontalAlign) {
         this.component.setHorizontalTextPosition(horizontalAlign.forSwing());
         return this;
     }
 
-    public UIForLabel withPosition(UI.VerticalAlign horizontalAlign) {
+    public UIForLabel<L> withPosition(UI.VerticalAlign horizontalAlign) {
         this.component.setVerticalAlignment(horizontalAlign.forSwing());
         return this;
     }
 
-    public UIForLabel withTextPosition(UI.VerticalAlign horizontalAlign) {
+    public UIForLabel<L> withTextPosition(UI.VerticalAlign horizontalAlign) {
         this.component.setVerticalTextPosition(horizontalAlign.forSwing());
         return this;
     }
 
-    public UIForLabel withIcon(Icon icon) {
+    public UIForLabel<L> withIcon(Icon icon) {
         LogUtil.nullArgCheck(icon,"icon",Icon.class);
         this.component.setIcon(icon);
         return this;

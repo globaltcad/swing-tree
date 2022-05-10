@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 /**
  *  A swing tree builder for {@link JTextComponent} instances.
  */
-public abstract class UIForTextComponent<I, C extends JTextComponent> extends UIForAbstractSwing<I, C>
+public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> extends UIForAbstractSwing<I, C>
 {
     private UIAction<RemoveDelegate> remove;
     private UIAction<InsertDelegate> insert;
@@ -48,7 +48,7 @@ public abstract class UIForTextComponent<I, C extends JTextComponent> extends UI
         }
     };
 
-    protected UIForTextComponent(C component) { super(component); }
+    protected UIForAbstractTextComponent(C component) { super(component); }
 
     public final I withText(String text) {
         this.component.setText(text);

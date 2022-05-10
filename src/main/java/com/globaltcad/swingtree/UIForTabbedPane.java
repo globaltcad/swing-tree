@@ -5,7 +5,7 @@ import javax.swing.*;
 /**
  *  A swing tree builder for {@link JTabbedPane} instances.
  */
-public class UIForTabbedPane extends UIForAbstractSwing<UIForTabbedPane, JTabbedPane>
+public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<UIForTabbedPane<P>, P>
 {
     /**
      * {@link UIForAbstractSwing} types always wrap
@@ -13,11 +13,11 @@ public class UIForTabbedPane extends UIForAbstractSwing<UIForTabbedPane, JTabbed
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    public UIForTabbedPane(JTabbedPane component) {
+    public UIForTabbedPane(P component) {
         super(component);
     }
 
-    public final UIForTabbedPane add(Tab tab) {
+    public final UIForTabbedPane<P> add(Tab tab) {
         this.component.addTab(tab.title(), tab.icon(), tab.contents(), tab.tip());
         return this;
     }

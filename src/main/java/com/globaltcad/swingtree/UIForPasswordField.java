@@ -5,9 +5,9 @@ import javax.swing.*;
 /**
  *  A swing tree builder for {@link JPasswordField} instances.
  */
-public class UIForPasswordField extends UIForTextComponent<UIForPasswordField, JPasswordField>
+public class UIForPasswordField<F extends JPasswordField> extends UIForAbstractTextComponent<UIForPasswordField<F>, F>
 {
-    protected UIForPasswordField(JPasswordField component) { super(component); }
+    protected UIForPasswordField(F component) { super(component); }
 
     /**
      * Sets the echo character for this <code>JPasswordField</code>.
@@ -20,7 +20,7 @@ public class UIForPasswordField extends UIForTextComponent<UIForPasswordField, J
      * @param echoChar The echo character to display.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForPasswordField withEchoChar(char echoChar) {
+    public final UIForPasswordField<F> withEchoChar(char echoChar) {
         this.component.setEchoChar(echoChar);
         return this;
     }

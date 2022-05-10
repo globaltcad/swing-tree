@@ -5,7 +5,7 @@ import javax.swing.*;
 /**
  *  A swing tree builder for {@link JRadioButton} instances.
  */
-public class UIForRadioButton extends UIForAbstractButton<UIForRadioButton,JRadioButton>
+public class UIForRadioButton<R extends JRadioButton> extends UIForAbstractButton<UIForRadioButton<R>, R>
 {
-    protected UIForRadioButton(JRadioButton component) { super(component); }
+    protected UIForRadioButton(R component) { super(component); }
 }

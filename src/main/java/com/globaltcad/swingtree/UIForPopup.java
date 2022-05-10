@@ -5,20 +5,20 @@ import javax.swing.*;
 /**
  *  A swing tree builder for {@link JPopupMenu} instances.
  */
-public class UIForPopup extends UIForAbstractSwing<UIForPopup, JPopupMenu>
+public class UIForPopup<P extends JPopupMenu> extends UIForAbstractSwing<UIForPopup<P>, P>
 {
-    protected UIForPopup(JPopupMenu component) { super(component); }
+    protected UIForPopup(P component) { super(component); }
 
 
-    public UIForPopup isBorderPaintedIf(boolean borderPainted) {
+    public UIForPopup<P> isBorderPaintedIf(boolean borderPainted) {
         this.component.setBorderPainted(borderPainted);
         return this;
     }
 
-    public UIForPopup add(JMenuItem item) { return this.add(UI.of(item)); }
+    public UIForPopup<P> add(JMenuItem item) { return this.add(UI.of(item)); }
 
-    public UIForPopup add(JSeparator separator) { return this.add(UI.of(separator)); }
+    public UIForPopup<P> add(JSeparator separator) { return this.add(UI.of(separator)); }
 
-    public UIForPopup add(JPanel panel) { return this.add(UI.of(panel)); }
+    public UIForPopup<P> add(JPanel panel) { return this.add(UI.of(panel)); }
 }
 

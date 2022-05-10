@@ -8,12 +8,12 @@ import javax.swing.event.ChangeEvent;
 /**
  *  A swing tree builder for {@link JSlider} instances.
  */
-public class UIForSlider extends UIForAbstractSwing<UIForSlider, JSlider>
+public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlider<S>, S>
 {
-    protected UIForSlider(JSlider component) { super(component); }
+    protected UIForSlider(S component) { super(component); }
 
 
-    public final UIForSlider onChange(UIAction<SimpleDelegate<JSlider, ChangeEvent>> action) {
+    public final UIForSlider<S> onChange(UIAction<SimpleDelegate<JSlider, ChangeEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         this.component.addChangeListener( e -> action.accept(new SimpleDelegate<>(this.component, e, ()->getSiblinghood())) );
         return this;

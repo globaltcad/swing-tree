@@ -136,7 +136,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
      *                by the {@link JSplitButton} once the split part was pressed.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public UIForSplitButton<B> add(UIForMenuItem forItem) {
+    public <M extends JMenuItem> UIForSplitButton<B> add(UIForMenuItem<M> forItem) {
         LogUtil.nullArgCheck(forItem, "forItem", UIForMenuItem.class);
         return this.add(forItem.component);
     }
