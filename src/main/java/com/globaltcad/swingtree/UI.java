@@ -506,6 +506,10 @@ public final class UI
      */
     public static UIForPanel<JPanel> panel() { return of(new JPanel()); }
 
+    public static UIForPanel<JPanel> panel(String attr, String colConstraints, String rowConstraints) {
+        return of(new JPanel()).withLayout(attr, colConstraints, rowConstraints);
+    }
+
     /**
      *  Use this to create a builder for the {@link JPanel} UI component.
      *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr, layout)}.

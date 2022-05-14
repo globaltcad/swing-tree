@@ -7,7 +7,6 @@ import java.awt.*;
 
 public class Example3 extends JPanel
 {
-    
     public Example3()
     {
         FlatLightLaf.setup();

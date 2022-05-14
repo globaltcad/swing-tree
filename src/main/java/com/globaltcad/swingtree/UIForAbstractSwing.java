@@ -316,24 +316,24 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  pass additional layout information the added UI component.
      *  <br><br>
      *
-     * @param constraints The additional mig-layout information which should be passed to the UI tree.
+     * @param attr The additional mig-layout information which should be passed to the UI tree.
      * @param builder A builder for another {@link JComponent} instance which ought to be added to the wrapped component type.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final <T extends JComponent> I add(String constraints, UIForAbstractSwing<?, T> builder) {
-        return this.add(constraints, new UIForAbstractSwing[]{builder});
+    public final <T extends JComponent> I add(String attr, UIForAbstractSwing<?, T> builder) {
+        return this.add(attr, new UIForAbstractSwing[]{builder});
     }
 
     @SafeVarargs
-    public final <B extends UIForAbstractSwing<?, ?>> I add(String conf, B... builders) {
+    public final <B extends UIForAbstractSwing<?, ?>> I add(String attr, B... builders) {
         LayoutManager layout = this.component.getLayout();
-        if ( isBorderLayout(conf) && !(layout instanceof BorderLayout) ) {
+        if ( isBorderLayout(attr) && !(layout instanceof BorderLayout) ) {
             if ( layout instanceof MigLayout )
                 log.warn("Layout ambiguity detected! Border layout constraint cannot be added to 'MigLayout'.");
             this.component.setLayout(new BorderLayout()); // The UI Maker tries to fill in the blanks!
         }
         for( UIForAbstractSwing<?, ?> b : builders )
-            _doAdd(b, conf);
+            _doAdd(b, attr);
         return (I) this;
     }
 
@@ -343,17 +343,17 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  pass additional layout information the added UI component.
      *  <br><br>
      *
-     * @param conf The additional layout information which should be passed to the UI tree.
+     * @param attr The additional layout information which should be passed to the UI tree.
      * @param components A {@link JComponent}s array which ought to be added to the wrapped component type.
      * @return This very instance, which enables builder-style method chaining.
      */
     @SafeVarargs
-    public final <E extends JComponent> I add(String conf, E... components) {
-        LogUtil.nullArgCheck(conf, "conf", Object.class);
+    public final <E extends JComponent> I add(String attr, E... components) {
+        LogUtil.nullArgCheck(attr, "conf", Object.class);
         LogUtil.nullArgCheck(components, "components", Object[].class);
         for( E component : components ) {
             LogUtil.nullArgCheck(component, "component", JComponent.class);
-            this.add(conf, UI.of(component));
+            this.add(attr, UI.of(component));
         }
         return (I) this;
     }
