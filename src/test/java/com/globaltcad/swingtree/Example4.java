@@ -17,9 +17,9 @@ public class Example4 extends JPanel
     {
         FlatLightLaf.setup();
 
-        UI.of(this).withLayout("fill, insets 0")
-        .add("growx, span, wrap",
-            UI.panel("fill", "[shrink][grow][shrink][grow]", "[]"+S+"[]"+M+"[]"+L+"[]"+L)
+        UI.of(this).withLayout("fillx, gap rel 0")
+        .add("aligny top, growx, span, wrap",
+            UI.panel("insets 0, fillx", "[shrink][grow][shrink][grow]", "[]"+S+"[]"+M+"[]"+L+"[]"+L+"[]0")
             .add(UI.label("Label 1"))
             .add("growx, pushy", UI.textField("aligned on text baseline"))
             .add("growx", UI.label("left: big space"))
@@ -33,8 +33,8 @@ public class Example4 extends JPanel
             .add("w 230!, span, wrap", UI.textField("big space above"))
             .add("span, wrap", UI.label("label after another big space"))
         )
-        .add("growx, span, wrap",
-            UI.panel("fill")
+        .add("aligny top, growx, span, wrap",
+            UI.panel("insets 0, fill")
             .add("span, wrap", UI.radioButton("radio button 1")
                 .onClick( it -> {
                     it.getComponent().setSelected(true);
