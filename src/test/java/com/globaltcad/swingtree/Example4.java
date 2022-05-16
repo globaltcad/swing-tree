@@ -9,17 +9,18 @@ import java.awt.*;
 public class Example4 extends JPanel
 {
     private final static String S = "6";
+    private final static String SM = "2";
     private final static String M = "12";
-    private final static String L = "16";
+    private final static String L = "18";
     private final static String INDENT = "22";
 
     public Example4()
     {
         FlatLightLaf.setup();
 
-        UI.of(this).withLayout("fillx, gap rel 0")
+        UI.of(this).withLayout("fillx, gap rel 0, insets "+M+"")
         .add("aligny top, growx, span, wrap",
-            UI.panel("insets 0, fillx", "[shrink][grow][shrink][grow]", "[]"+S+"[]"+M+"[]"+L+"[]"+L+"[]0")
+            UI.panel("insets 0, fillx", "[shrink]"+M+"[grow]"+L+"[shrink][grow]", "[]"+S+"[]"+M+"[]"+L+"[]"+L+"[]0")
             .add(UI.label("Label 1"))
             .add("growx, pushy", UI.textField("aligned on text baseline"))
             .add("growx", UI.label("left: big space"))
@@ -28,13 +29,13 @@ public class Example4 extends JPanel
             .add("growx, pushy", UI.textField("aligned on text baseline"))
             .add("growx, span 2, wrap", UI.label("fields resize horizontally with the panel!"))
             .add(UI.label("Label 3"))
-            .add("w 230!, span, wrap", UI.textField("medium space above"))
+            .add("growx, gapx 0 235, span, wrap", UI.textField("medium space above"))
             .add(UI.label("Label 4"))
-            .add("w 230!, span, wrap", UI.textField("big space above"))
-            .add("span, wrap", UI.label("label after another big space"))
+            .add("growx, gapx 0 235, span, wrap", UI.textField("big space above"))
+            .add("span, wrap", UI.label("Label after another big space"))
         )
         .add("aligny top, growx, span, wrap",
-            UI.panel("insets 0, fill")
+            UI.panel("insets 0, fill, gap rel 2")
             .add("span, wrap", UI.radioButton("radio button 1")
                 .onClick( it -> {
                     it.getComponent().setSelected(true);
@@ -46,7 +47,7 @@ public class Example4 extends JPanel
                 })
             )
             .add("gapx "+INDENT+" 0, span, wrap", UI.label("indented one step (because depends on radio button, inactive if rb not selected))").id("indent-label-1"))
-            .add("gapx "+INDENT+" 0, span, wrap", UI.checkBox("indented checkbox").id("indent-checkbox-1"))
+            .add("gapx "+INDENT+" 0, gapy 0 "+SM+", span, wrap", UI.checkBox("indented checkbox").id("indent-checkbox-1"))
             .add("span, wrap", UI.radioButton("radio button 2 (medium space above)")
                .onClick( it -> {
                    it.getComponent().setSelected(true);
@@ -56,7 +57,7 @@ public class Example4 extends JPanel
                   it.find(JTextField.class, "indent-field-2").ifPresent(f -> f.setEnabled(it.getComponent().isSelected()) )
                )
             )
-            .add("gapx "+INDENT+" 0, span, wrap", UI.textField("jTextField6 (indented)").id("indent-field-2"))
+            .add("growx, gapx "+INDENT+" 260, gapy 0 "+S+", span, wrap", UI.textField("jTextField6 (indented)").id("indent-field-2"))
             .add("span, wrap", UI.radioButton("radio button 3 (medium space above)")
                 .onClick( it -> {
                     it.getComponent().setSelected(true);
@@ -66,16 +67,22 @@ public class Example4 extends JPanel
                     it.find(JTextField.class, "indent-field-3").ifPresent(f -> f.setEnabled(it.getComponent().isSelected()) )
                 )
             )
-            .add("span, wrap",
-                UI.panel("fill, insets 0 "+INDENT+" 0 0")
-                .add("span", UI.textField("jTextField7 (indented)").id("indent-field-3"))
-                .add("span", UI.checkBox("indent, because this depends on JRadioButton3"))
-                .add("gapx "+INDENT+" 0, span, wrap", UI.textField("indent 2 levels (depends on checkbox)"))
-            )
             .add("growx, span, wrap",
-               UI.panel("", "[]"+S+"[]"+M+"[]")
-               .add(UI.button("jButton1"), UI.button("jButton2"), UI.button("jButton3"))
+                UI.panel("fill, insets 0 "+INDENT+" 0 0, gap rel 0")
+                .add("span, growx, gapx 0 260", UI.textField("jTextField7 (indented)").id("indent-field-3"))
+                .add("span", UI.checkBox("indented, because this depends on JRadioButton3"))
+                .add("gapx "+INDENT+" 0, gapy 0 "+SM+", span, wrap", UI.textField("indent 2 levels (depends on checkbox)"))
             )
+            .add("growx, gapy "+M+" 0, span, wrap",
+               UI.panel("insets 0", "[]"+S+"[]"+M+"[]")
+               .add("width 142!",
+                    UI.button("jButton1"),
+                    UI.button("jButton2"),
+                    UI.button("jButton3 long")
+               )
+            )
+            .add("gapy "+S+" 0, span, wrap", UI.label("Different distance (small / medium) between the buttons."))
+            .add("gapy "+S+" 0, span, wrap", UI.label("Buttons have same size despite different text length"))
         );
     }
 
