@@ -1,9 +1,10 @@
-package com.globaltcad.swingtree;
+package com.globaltcad.swingtree.examples.comparison2;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.formdev.flatlaf.icons.FlatSearchWithHistoryIcon;
+import com.globaltcad.swingtree.UI;
+import com.globaltcad.swingtree.utility.Utility;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -25,7 +26,7 @@ class BasicComponentsPanel extends JPanel
 
     BasicComponentsPanel()
     {
-        FlatLightLaf.setup();
+        Utility.setLaF(Utility.LaF.FLAT_BRIGHT);
         initComponents();
         configure();
     }

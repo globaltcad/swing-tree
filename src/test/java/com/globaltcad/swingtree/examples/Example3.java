@@ -1,6 +1,7 @@
-package com.globaltcad.swingtree;
+package com.globaltcad.swingtree.examples;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import com.globaltcad.swingtree.UI;
 
 import javax.swing.*;
 import java.awt.*;
