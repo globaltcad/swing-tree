@@ -47,7 +47,7 @@ public final class SplitItem<I extends JMenuItem>
      * @param item The {@link UIForMenuItem} which wraps a {@link  JMenuItem} for which a {@link SplitItem} should be created.
      * @return A {@link SplitItem} wrapping {@link JMenuItem} represented by the provided UI builder.
      */
-    public static SplitItem<JMenuItem> of(UIForMenuItem item) {
+    public static <M extends JMenuItem> SplitItem<M> of(UIForMenuItem<M> item) {
         LogUtil.nullArgCheck(item, "item", UIForMenuItem.class);
         return new SplitItem<>(item.component);
     }
@@ -56,7 +56,7 @@ public final class SplitItem<I extends JMenuItem>
     private final UIAction<Delegate<I>> onButtonClick;
     private final UIAction<Delegate<I>> onItemSelected;
 
-    private SplitItem(I item ) {
+    private SplitItem( I item ) {
         this.item = item; this.onButtonClick = null; this.onItemSelected = null;
     }
 

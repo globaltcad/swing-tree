@@ -5,7 +5,7 @@ import javax.swing.*;
 /**
  *  A swing tree builder for {@link JTextField} instances.
  */
-public class UIForTextField extends UIForTextComponent<UIForTextField, JTextField>
+public class UIForTextField<F extends JTextField> extends UIForAbstractTextComponent<UIForTextField<F>, F>
 {
-    protected UIForTextField(JTextField component) { super(component); }
+    protected UIForTextField(F component) { super(component); }
 }

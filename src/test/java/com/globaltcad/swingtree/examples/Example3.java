@@ -1,13 +1,13 @@
-package com.globaltcad.swingtree;
+package com.globaltcad.swingtree.examples;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import com.globaltcad.swingtree.UI;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class Example3 extends JPanel
 {
-    
     public Example3()
     {
         FlatLightLaf.setup();

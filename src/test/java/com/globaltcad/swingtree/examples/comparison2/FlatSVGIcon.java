@@ -1,4 +1,4 @@
-package com.globaltcad.swingtree;
+package com.globaltcad.swingtree.examples.comparison2;
 
 
 import java.awt.Color;

@@ -5,7 +5,7 @@ import javax.swing.*;
 /**
  *  A swing tree builder for {@link JSplitPane} instances.
  */
-public class UIForSplitPane extends UIForAbstractSwing<UIForSplitPane, JSplitPane>
+public class UIForSplitPane<P extends JSplitPane> extends UIForAbstractSwing<UIForSplitPane<P>, P>
 {
     /**
      * {@link UIForAbstractSwing} types always wrap
@@ -13,7 +13,7 @@ public class UIForSplitPane extends UIForAbstractSwing<UIForSplitPane, JSplitPan
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    public UIForSplitPane(JSplitPane component) { super(component); }
+    public UIForSplitPane(P component) { super(component); }
 
     /**
      * Sets the location of the divider. This is passed off to the
@@ -27,7 +27,7 @@ public class UIForSplitPane extends UIForAbstractSwing<UIForSplitPane, JSplitPan
      *        pixel count)
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForSplitPane withDividerAt(int location) {
+    public final UIForSplitPane<P> withDividerAt(int location) {
         this.component.setDividerLocation(location);
         return this;
     }
@@ -38,7 +38,7 @@ public class UIForSplitPane extends UIForAbstractSwing<UIForSplitPane, JSplitPan
      * @param size An integer giving the size of the divider in pixels
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForSplitPane withDividerSize(int size) {
+    public final UIForSplitPane<P> withDividerSize(int size) {
         this.component.setDividerSize(size);
         return this;
     }

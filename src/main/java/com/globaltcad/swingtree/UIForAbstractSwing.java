@@ -9,6 +9,7 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -26,7 +27,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(UI.class);
 
-    private final static Map<JComponent, Timer> timers = new WeakHashMap<>();
+    private final static Map<JComponent, java.util.List<Timer>> timers = new WeakHashMap<>(); // We attach garbage collectable timers to components this way!
 
     private boolean idAlreadySet = false;
     private boolean migAlreadySet = false;
@@ -85,7 +86,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * Adds {@link String} key/value "client property" pairs to the wrapped component.
      * <p>
      * The arguments will be passed to {@link JComponent#putClientProperty(Object, Object)}
-     * provide access to
+     * which accesses
      * a small per-instance hashtable. Callers can use get/putClientProperty
      * to annotate components that were created by another module.
      * For example, a
@@ -227,7 +228,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     * The provided lambda will be invoked when the component's size changes.
+     *  The provided lambda will be invoked when the component's size changes.
+     *  This will internally translate to a {@link ComponentListener} implementation.
+     *
+     * @param onResize The resize action which will be called when the underlying component changes size.
+     * @return This very instance, which enables builder-style method chaining.
      */
     public final I onResize(UIAction<SimpleDelegate<C, ComponentEvent>> onResize) {
         LogUtil.nullArgCheck(onResize, "onResize", UIAction.class);
@@ -237,6 +242,13 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         return (I) this;
     }
 
+    /**
+     *  The provided lambda will be invoked when the component was moved.
+     *  This will internally translate to a {@link ComponentListener} implementation.
+     *
+     * @param onMoved The action lambda which will be executed once the component was moved / its position canged.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public final I onMoved(UIAction<SimpleDelegate<C, ComponentEvent>> onMoved) {
         LogUtil.nullArgCheck(onMoved, "onMoved", UIAction.class);
         this.component.addComponentListener(new ComponentAdapter() {
@@ -288,7 +300,9 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I doUpdates(int delay, UIAction<SimpleDelegate<C, ActionEvent>> onUpdate) {
         LogUtil.nullArgCheck(onUpdate, "onUpdate", UIAction.class);
         Timer timer = new Timer(delay, e -> onUpdate.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
-        synchronized (timers) { timers.put(this.component, timer); }
+        synchronized (timers) {
+            timers.getOrDefault(this.component, new ArrayList<>()).add(timer);
+        }
         timer.start();
         return (I) this;
     }
@@ -311,49 +325,62 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     *  Swing UIs are made up of nested {@link JComponent} instances.
+     *  Use this to nest builder types into this builder to effectively plug the wrapped {@link JComponent}s 
+     *  into the {@link JComponent} type wrapped by this builder instance.
      *  This method enables support for nested building as well as the ability to
      *  pass additional layout information the added UI component.
      *  <br><br>
      *
-     * @param constraints The additional mig-layout information which should be passed to the UI tree.
+     * @param attr The additional mig-layout information which should be passed to the UI tree.
      * @param builder A builder for another {@link JComponent} instance which ought to be added to the wrapped component type.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final <T extends JComponent> I add(String constraints, UIForAbstractSwing<?, T> builder) {
-        return this.add(constraints, new UIForAbstractSwing[]{builder});
+    public final <T extends JComponent> I add(String attr, UIForAbstractSwing<?, T> builder) {
+        return this.add(attr, new UIForAbstractSwing[]{builder});
     }
 
+    /**
+     *  Use this to nest builder types into this builder to effectively plug the wrapped {@link JComponent}s 
+     *  into the {@link JComponent} type wrapped by this builder instance.
+     *  The first argument represents layout attributes/constraints which will
+     *  be applied to the {@link JComponent}s of the subsequently provided builder types.
+     *  <br><br>
+     *
+     * @param attr The additional mig-layout information which should be passed to the UI tree.
+     * @param builders An array of builders for a corresponding number of {@link JComponent} 
+     *                  type which ought to be added to the wrapped component type of this builder.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     @SafeVarargs
-    public final <B extends UIForAbstractSwing<?, ?>> I add(String conf, B... builders) {
+    public final <B extends UIForAbstractSwing<?, ?>> I add(String attr, B... builders) {
         LayoutManager layout = this.component.getLayout();
-        if ( isBorderLayout(conf) && !(layout instanceof BorderLayout) ) {
+        if ( isBorderLayout(attr) && !(layout instanceof BorderLayout) ) {
             if ( layout instanceof MigLayout )
                 log.warn("Layout ambiguity detected! Border layout constraint cannot be added to 'MigLayout'.");
             this.component.setLayout(new BorderLayout()); // The UI Maker tries to fill in the blanks!
         }
-        for( UIForAbstractSwing<?, ?> b : builders )
-            _doAdd(b, conf);
+        for ( UIForAbstractSwing<?, ?> b : builders ) _doAdd(b, attr);
         return (I) this;
     }
 
     /**
-     *  Swing UIs are made up of nested {@link JComponent} instances.
-     *  This method enables support for nested building as well as the ability to
-     *  pass additional layout information the added UI component.
+     *  Use this to nest {@link JComponent} types into this builder to effectively plug the provided {@link JComponent}s
+     *  into the {@link JComponent} type wrapped by this builder instance.
+     *  The first argument represents layout attributes/constraints which will
+     *  be applied to the subsequently provided {@link JComponent} types.
      *  <br><br>
      *
-     * @param conf The additional layout information which should be passed to the UI tree.
+     * @param attr The additional layout information which should be passed to the UI tree.
      * @param components A {@link JComponent}s array which ought to be added to the wrapped component type.
      * @return This very instance, which enables builder-style method chaining.
      */
     @SafeVarargs
-    public final <E extends JComponent> I add(String conf, E... components) {
-        LogUtil.nullArgCheck(conf, "conf", Object.class);
+    public final <E extends JComponent> I add(String attr, E... components) {
+        LogUtil.nullArgCheck(attr, "conf", Object.class);
         LogUtil.nullArgCheck(components, "components", Object[].class);
         for( E component : components ) {
             LogUtil.nullArgCheck(component, "component", JComponent.class);
-            this.add(conf, UI.of(component));
+            this.add(attr, UI.of(component));
         }
         return (I) this;
     }

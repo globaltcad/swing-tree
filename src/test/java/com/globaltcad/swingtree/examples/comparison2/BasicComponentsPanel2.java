@@ -1,9 +1,10 @@
-package com.globaltcad.swingtree;
+package com.globaltcad.swingtree.examples.comparison2;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.icons.FlatSearchIcon;
 import com.formdev.flatlaf.icons.FlatSearchWithHistoryIcon;
+import com.globaltcad.swingtree.UI;
 
 import javax.swing.*;
 import javax.swing.text.DefaultEditorKit;

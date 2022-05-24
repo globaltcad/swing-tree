@@ -1,6 +1,7 @@
 package com.globaltcad.swingtree.utility;
 
 import com.alexandriasoftware.swing.JSplitButton;
+import com.formdev.flatlaf.FlatLightLaf;
 import com.globaltcad.swingtree.UIForSplitButton;
 
 import javax.swing.*;
@@ -12,6 +13,10 @@ import java.util.Map;
 import java.util.Optional;
 
 public class Utility {
+
+    public enum LaF {
+        DEFAULT, NIMBUS, FLAT_BRIGHT
+    }
 
     public static <B extends JSplitButton> String getSplitButtonText(UIForSplitButton<B> ui) {
         return ui.getComponent().getText();
@@ -25,6 +30,25 @@ public class Utility {
         ui.getComponent().doClick();
     }
 
+    public static void setLaF(LaF lookAndFeel) {
+        switch ( lookAndFeel ) {
+            case DEFAULT: break;
+            case FLAT_BRIGHT:
+                FlatLightLaf.setup();
+            default:
+                try {
+                    for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                        if (lookAndFeel.name().equalsIgnoreCase(info.getName())) {
+                            UIManager.setLookAndFeel(info.getClassName());
+                            break;
+                        }
+                    }
+                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+                    e.printStackTrace();
+                }
+        }
+
+    }
 
     public static class Query
     {

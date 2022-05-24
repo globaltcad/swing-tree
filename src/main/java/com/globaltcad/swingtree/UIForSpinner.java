@@ -5,7 +5,7 @@ import javax.swing.*;
 /**
  *  A swing tree builder for {@link JSpinner} instances.
  */
-public class UIForSpinner extends UIForAbstractSwing<UIForSpinner, JSpinner>
+public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSpinner<S>, S>
 {
     /**
      * {@link UIForAbstractSwing} types always wrap
@@ -13,5 +13,5 @@ public class UIForSpinner extends UIForAbstractSwing<UIForSpinner, JSpinner>
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    protected UIForSpinner(JSpinner component) { super(component); }
+    protected UIForSpinner(S component) { super(component); }
 }

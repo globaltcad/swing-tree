@@ -2,7 +2,7 @@ package com.globaltcad.swingtree;
 
 import javax.swing.*;
 
-public class UIForAbstractEditorPane<I, C extends JEditorPane> extends UIForTextComponent<I, C>
+public class UIForAbstractEditorPane<I, C extends JEditorPane> extends UIForAbstractTextComponent<I, C>
 {
     /**
      * {@link UIForAbstractSwing} types always wrap

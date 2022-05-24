@@ -42,11 +42,27 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
         return siblingSource.get().stream().filter( s -> component != s ).collect(Collectors.toList());
     }
 
+    public <T extends JComponent> List<T> getSiblingsOfType(Class<T> type) {
+        return getSiblings()
+                .stream()
+                .filter( s -> type.isAssignableFrom(s.getClass()) )
+                .map( s -> (T) s )
+                .collect(Collectors.toList());
+    }
+
     /**
      * @return A list of all siblings including the component from which this instance originated.
      */
     public List<JComponent> getSiblinghood() {
         return new ArrayList<>(siblingSource.get());
+    }
+
+    public <T extends JComponent> List<T> getSiblinghoodOfType(Class<T> type) {
+        return new ArrayList<>(siblingSource.get())
+                .stream()
+                .filter( s -> type.isAssignableFrom(s.getClass()) )
+                .map( s -> (T) s )
+                .collect(Collectors.toList());
     }
 
 }
