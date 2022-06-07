@@ -8,7 +8,7 @@ import javax.swing.*;
 public class UIForSplitPane<P extends JSplitPane> extends UIForAbstractSwing<UIForSplitPane<P>, P>
 {
     /**
-     * {@link UIForAbstractSwing} types always wrap
+     * {@link UIForAbstractSwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
@@ -28,7 +28,7 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAbstractSwing<UIF
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSplitPane<P> withDividerAt(int location) {
-        this.component.setDividerLocation(location);
+        _component.setDividerLocation(location);
         return this;
     }
 
@@ -39,7 +39,7 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAbstractSwing<UIF
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSplitPane<P> withDividerSize(int size) {
-        this.component.setDividerSize(size);
+        _component.setDividerSize(size);
         return this;
     }
 

@@ -21,7 +21,7 @@ public class UIForPasswordField<F extends JPasswordField> extends UIForAbstractT
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForPasswordField<F> withEchoChar(char echoChar) {
-        this.component.setEchoChar(echoChar);
+        _component.setEchoChar(echoChar);
         return this;
     }
 }

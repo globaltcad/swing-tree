@@ -8,7 +8,7 @@ import javax.swing.*;
 public class UIForScrollPane<P extends JScrollPane> extends UIForAbstractSwing<UIForScrollPane<P>, P>
 {
     /**
-     * {@link UIForAbstractSwing} types always wrap
+     * {@link UIForAbstractSwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
@@ -19,7 +19,7 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAbstractSwing<U
     protected void _add(JComponent component, Object conf) {
         if ( conf != null )
             throw new IllegalArgumentException("Unknown constraint '"+conf+"'! (scroll pane does not support any constraint)");
-        this.component.setViewportView(component);
+        _component.setViewportView(component);
     }
 
     public final UIForScrollPane<P> withScrollBarPolicy(UI.Scroll scrollPolicy) {
@@ -31,9 +31,9 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAbstractSwing<U
     public final UIForScrollPane<P> withVerticalScrollBarPolicy(UI.Scroll scrollBarPolicy) {
         switch ( scrollBarPolicy )
         {
-            case NEVER: this.component.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER); break;
-            case ALWAYS: this.component.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS); break;
-            case AS_NEEDED: this.component.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED); break;
+            case NEVER: _component.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER); break;
+            case ALWAYS: _component.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS); break;
+            case AS_NEEDED: _component.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED); break;
         }
         return this;
     }
@@ -41,9 +41,9 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAbstractSwing<U
     public final UIForScrollPane<P> withHorizontalScrollBarPolicy(UI.Scroll scrollBarPolicy) {
         switch ( scrollBarPolicy )
         {
-            case NEVER: this.component.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); break;
-            case ALWAYS: this.component.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS); break;
-            case AS_NEEDED: this.component.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED); break;
+            case NEVER: _component.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); break;
+            case ALWAYS: _component.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS); break;
+            case AS_NEEDED: _component.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED); break;
         }
         return this;
     }

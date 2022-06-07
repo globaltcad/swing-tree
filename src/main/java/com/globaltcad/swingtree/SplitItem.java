@@ -11,8 +11,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- *  {@link SplitItem}s represent button options for the {@link JSplitButton}
- *  which can be supplied to a split button through the API exposed by {@link UIForSplitButton}.
+ *  An immutable data carrier exposing everything needed to configure an item of a {@link JSplitButton}.
+ *  {@link SplitItem}s will be turned into button options for the {@link JSplitButton}
+ *  which can be supplied to a split button through the API exposed by {@link UIForSplitButton} like so:
  *  <pre>{@code
  *      UI.splitButton("Hey!")
  *      .add(UI.splitItem("first"))
@@ -28,7 +29,7 @@ public final class SplitItem<I extends JMenuItem>
      * @param text The text which should be displayed on the {@link SplitItem} (and its underlying {@link JMenuItem}).
      * @return A {@link SplitItem} wrapping a simple {@link JMenuItem} displaying the provided text.
      */
-    public static SplitItem<JMenuItem> of(String text) {
+    public static SplitItem<JMenuItem> of( String text ) {
         LogUtil.nullArgCheck(text, "text", String.class);
         return new SplitItem<>(new JMenuItem(text));
     }
@@ -38,7 +39,7 @@ public final class SplitItem<I extends JMenuItem>
      * @return A {@link SplitItem} wrapping the provided {@link JMenuItem} type.
      * @param <I> The type parameter for the provided item type.
      */
-    public static <I extends JMenuItem> SplitItem<I> of(I item) {
+    public static <I extends JMenuItem> SplitItem<I> of( I item ) {
         LogUtil.nullArgCheck(item, "item", JMenuItem.class);
         return new SplitItem<>(item);
     }
@@ -49,7 +50,7 @@ public final class SplitItem<I extends JMenuItem>
      */
     public static <M extends JMenuItem> SplitItem<M> of(UIForMenuItem<M> item) {
         LogUtil.nullArgCheck(item, "item", UIForMenuItem.class);
-        return new SplitItem<>(item.component);
+        return new SplitItem<>(item._component);
     }
 
     private final I item;

@@ -29,10 +29,10 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
     }
 
     public UIForLabel<L> makeLinkTo(String href) {
-        LazyRef<String> text = LazyRef.of(component::getText);
+        LazyRef<String> text = LazyRef.of(_component::getText);
         if ( !href.startsWith("http") ) href = "https://" + href;
         String finalHref = href;
-        component.addMouseListener(new MouseAdapter() {
+        _component.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 try {
@@ -41,10 +41,10 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
                     e1.printStackTrace();
                 }
             }
-            @Override  public void mouseExited(MouseEvent e) { component.setText(text.get()); }
+            @Override  public void mouseExited(MouseEvent e) { _component.setText(text.get()); }
             @Override
             public void mouseEntered(MouseEvent e) {
-                component.setText("<html><a href=''>" + text.get() + "</a></html>");
+                _component.setText("<html><a href=''>" + text.get() + "</a></html>");
             }
         });
         return this;
@@ -78,28 +78,28 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
     }
 
     public UIForLabel<L> withPosition(UI.HorizontalAlign horizontalAlign) {
-        this.component.setHorizontalAlignment(horizontalAlign.forSwing());
+        _component.setHorizontalAlignment(horizontalAlign.forSwing());
         return this;
     }
 
     public UIForLabel<L> withTextPosition(UI.HorizontalAlign horizontalAlign) {
-        this.component.setHorizontalTextPosition(horizontalAlign.forSwing());
+        _component.setHorizontalTextPosition(horizontalAlign.forSwing());
         return this;
     }
 
     public UIForLabel<L> withPosition(UI.VerticalAlign horizontalAlign) {
-        this.component.setVerticalAlignment(horizontalAlign.forSwing());
+        _component.setVerticalAlignment(horizontalAlign.forSwing());
         return this;
     }
 
     public UIForLabel<L> withTextPosition(UI.VerticalAlign horizontalAlign) {
-        this.component.setVerticalTextPosition(horizontalAlign.forSwing());
+        _component.setVerticalTextPosition(horizontalAlign.forSwing());
         return this;
     }
 
     public UIForLabel<L> withIcon(Icon icon) {
         LogUtil.nullArgCheck(icon,"icon",Icon.class);
-        this.component.setIcon(icon);
+        _component.setIcon(icon);
         return this;
     }
 }

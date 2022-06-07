@@ -26,13 +26,11 @@ public class Keyboard
         SEMICOLON,
         EQUALS;
 
-        public boolean isPressed() {
-            return Keyboard.get().isPressed(this);
-        }
+        public boolean isPressed() { return Keyboard.get().isPressed(this); }
 
     }
 
-    private final List<Key> pressed = new ArrayList<>();
+    private final List<Key> _pressed = new ArrayList<>();
 
     /**
      *  This method checks if the supplied {@link Key} is currently pressed on the keyboard.
@@ -40,7 +38,7 @@ public class Keyboard
      * @param key An instance of the {@link Key} enum representing a keyboard key.
      * @return The truth value determining if the specified {@link Key} type is currently pressed by the user.
      */
-    public boolean isPressed(Key key) { synchronized (this) { return pressed.contains(key); } }
+    public boolean isPressed(Key key) { synchronized (this) { return _pressed.contains(key); } }
 
 
     public Keyboard() {
@@ -48,13 +46,13 @@ public class Keyboard
             @Override
             public boolean dispatchKeyEvent(KeyEvent ke) {
                 synchronized (this) {
-                    switch (ke.getID()) {
+                    switch ( ke.getID() ) {
                         case KeyEvent.KEY_PRESSED:
-                            pressed.add(fromKeyEvent(ke));
+                            _pressed.add(_fromKeyEvent(ke));
                             break;
 
                         case KeyEvent.KEY_RELEASED:
-                            pressed.remove(fromKeyEvent(ke));
+                            _pressed.remove(_fromKeyEvent(ke));
                             break;
                     }
                     return false;
@@ -64,7 +62,7 @@ public class Keyboard
     }
 
 
-    private static Key fromKeyEvent( KeyEvent keyEvent ) {
+    private static Key _fromKeyEvent( KeyEvent keyEvent ) {
         switch (keyEvent.getKeyCode()) {
             case KeyEvent.VK_SHIFT    : return Key.SHIFT;
             case KeyEvent.VK_CONTROL  : return Key.CTRL;

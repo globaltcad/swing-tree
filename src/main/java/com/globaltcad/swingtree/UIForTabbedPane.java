@@ -8,7 +8,7 @@ import javax.swing.*;
 public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<UIForTabbedPane<P>, P>
 {
     /**
-     * {@link UIForAbstractSwing} types always wrap
+     * {@link UIForAbstractSwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
@@ -18,7 +18,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
     }
 
     public final UIForTabbedPane<P> add(Tab tab) {
-        this.component.addTab(tab.title(), tab.icon(), tab.contents(), tab.tip());
+        _component.addTab(tab.title(), tab.icon(), tab.contents(), tab.tip());
         return this;
     }
 

@@ -5,8 +5,8 @@ import com.globaltcad.swingtree.api.Maker;
 import java.util.function.Consumer;
 
 /**
- *  This is the root builder for all specialized types of builder classes.
- *  It is a generic builder for anything which can be built in a tree like structure!
+ *  This is the root builder type for all other builder subtypes.
+ *  It is a generic builder which may wrap anything to allow for method chaining based building!
  *
  * @param <I> The concrete implementation type of this builder.
  * @param <C> The component type parameter.
@@ -16,13 +16,13 @@ abstract class AbstractBuilder<I, C>
     /**
      *  The component wrapped by this builder node.
      */
-    protected final C component;
+    protected final C _component;
 
     /**
      *  The type class of the component wrapped by this builder node.
      *  See documentation for method "build" for more information.
      */
-    protected final Class<C> type;
+    protected final Class<C> _type;
 
     /**
      *  Instances of the {@link AbstractBuilder} as well as its sub types always wrap
@@ -30,21 +30,21 @@ abstract class AbstractBuilder<I, C>
      *
      * @param component The component type which will be wrapped by this builder node.
      */
-    public AbstractBuilder(C component) {
-        this.type = (Class<C>) component.getClass();
-        this.component = component;
+    public AbstractBuilder( C component ) {
+        _type = (Class<C>) component.getClass();
+        _component = component;
     }
 
     /**
      *  The component wrapped by this builder node.
      */
-    public final C getComponent() { return this.component; }
+    public final C getComponent() { return _component; }
 
     /**
      *  The type class of the component wrapped by this builder node.
      *  See documentation for method "build" for more information.
      */
-    public final Class<C> getType() { return this.type; }
+    public final Class<C> getType() { return _type; }
 
     /**
      *  After having passed a new component type to the constructor of a builder type
@@ -60,7 +60,7 @@ abstract class AbstractBuilder<I, C>
      * @return This very instance, which enables builder-style method chaining.
      */
     public I make( Maker<C> action ) {
-        action.make(component);
+        action.make(_component);
         return (I) this;
     }
 
@@ -117,7 +117,7 @@ abstract class AbstractBuilder<I, C>
      * @return The result of the building process, namely: a type of JComponent.
      */
     public <T extends C> T get(Class<T> type) {
-        assert type == this.type || type.isAssignableFrom(this.type);
-        return (T)component;
+        assert type == _type || type.isAssignableFrom(_type);
+        return (T) _component;
     }
 }

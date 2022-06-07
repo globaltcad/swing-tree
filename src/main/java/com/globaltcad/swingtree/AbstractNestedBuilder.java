@@ -16,12 +16,11 @@ import java.util.stream.Collectors;
  */
 abstract class AbstractNestedBuilder<I, C extends E, E> extends AbstractBuilder<I, C>
 {
-
     /**
      *  A list of all the child builders.
      */
-    private final List<AbstractNestedBuilder<?,?,?>> children = new ArrayList<>();
-    private AbstractNestedBuilder<?,?,?> parent;
+    private final List<AbstractNestedBuilder<?,?,?>> _children = new ArrayList<>();
+    private AbstractNestedBuilder<?,?,?> _parent; // The parent builder (This may be null if no parent present or provided)
 
     /**
      * Instances of the AbstractNestedBuilder as well as its sub types always wrap
@@ -30,14 +29,14 @@ abstract class AbstractNestedBuilder<I, C extends E, E> extends AbstractBuilder<
      *
      * @param component The component type which will be wrapped by this builder node.
      */
-    public AbstractNestedBuilder(C component) { super(component); }
+    public AbstractNestedBuilder( C component ) { super(component); }
 
     /**
      *  A list of all the siblings of the component wrapped by this builder.
      */
     protected final List<E> getSiblinghood() {
-        if ( this.parent == null ) return new ArrayList<>();
-        return this.parent.children.stream().map( c -> (E) c.component ).collect(Collectors.toList());
+        if ( _parent == null ) return new ArrayList<>();
+        return _parent._children.stream().map(c -> (E) c._component).collect(Collectors.toList());
     }
 
     /**
@@ -50,9 +49,9 @@ abstract class AbstractNestedBuilder<I, C extends E, E> extends AbstractBuilder<
      * @return This very instance, which enables builder-style method chaining.
      */
     @SafeVarargs
-    public final I add(E... components) {
+    public final I add( E... components ) {
         LogUtil.nullArgCheck(components, "components", Object[].class);
-        for( E c : components ) _doAdd(UI.of((JComponent) c), null);
+        for ( E c : components ) _doAdd(UI.of((JComponent) c), null);
         return (I) this;
     }
 
@@ -65,23 +64,23 @@ abstract class AbstractNestedBuilder<I, C extends E, E> extends AbstractBuilder<
      * @param component A component instance which ought to be added to the wrapped component type.
      * @return This very instance, which enables builder-style method chaining.
      */
-    protected abstract void _add(E component, Object conf);
+    protected abstract void _add( E component, Object conf );
 
     protected final void _doAdd( AbstractNestedBuilder<?, ?, ?> builder, Object conf)
     {
         LogUtil.nullArgCheck(builder, "builder", AbstractNestedBuilder.class);
 
-        if ( this.children.contains(builder) )
+        if ( _children.contains(builder) )
             throw new IllegalArgumentException("Builder already used!");
 
-        this.children.add(builder);
+        _children.add(builder);
 
-        if ( builder.parent != null )
+        if ( builder._parent != null )
             throw new IllegalArgumentException("Builder already used!");
 
-        builder.parent = this;
+        builder._parent = this;
 
-        _add((E) builder.component, conf);
+        _add((E) builder._component, conf);
     }
 
     /**
@@ -95,12 +94,12 @@ abstract class AbstractNestedBuilder<I, C extends E, E> extends AbstractBuilder<
      */
     @SafeVarargs
     @SuppressWarnings("varargs")
-    public final <X, Y extends E, B extends AbstractNestedBuilder<X, Y, E>> I add(B... builders) {
+    public final <X, Y extends E, B extends AbstractNestedBuilder<X, Y, E>> I add( B... builders ) {
         if ( builders == null )
             throw new IllegalArgumentException("Swing tree builders may not be null!");
 
         for ( AbstractNestedBuilder<?, ?, ?> b : builders )
-            _doAdd(b, null);
+            _doAdd( b, null );
 
         return (I) this;
     }
@@ -115,7 +114,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E> extends AbstractBuilder<
      * @param components A list of component instances which ought to be added to the wrapped component type.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I add(List<E> components) {
+    public final I add( List<E> components ) {
         final C[] array = (C[]) new Object[components.size()];
         for ( int i = 0; i < array.length; i++ )
             _doAdd(UI.of((JComponent) components.get(i)), null);

@@ -2,6 +2,18 @@ package com.globaltcad.swingtree;
 
 import javax.swing.*;
 
+/**
+ *  An immutable data carrier exposing everything needed to configure a tab of a {@link JTabbedPane}.
+ *  One can create instances of this through the {@link UI#tab(String)} factory method
+ *  and then add them to instances of a {@link UIForTabbedPane} builder like so: <br>
+ *  <pre>{@code
+ *      UI.tabbedPane()
+ *      .add(UI.tab("one").add(UI.panel().add(..)))
+ *      .add(UI.tab("two").withTip("I give info!").add(UI.label("read me")))
+ *      .add(UI.tab("three").withIcon(..).add(UI.button("click me")))
+ *  }</pre>
+ *
+ */
 public class Tab
 {
     private final JComponent _contents;

@@ -8,7 +8,7 @@ import javax.swing.*;
 public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSpinner<S>, S>
 {
     /**
-     * {@link UIForAbstractSwing} types always wrap
+     * {@link UIForAbstractSwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.

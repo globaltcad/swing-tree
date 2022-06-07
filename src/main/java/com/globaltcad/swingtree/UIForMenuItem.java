@@ -11,7 +11,7 @@ public class UIForMenuItem<M extends JMenuItem> extends UIForAbstractButton<UIFo
     protected UIForMenuItem(M component) { super(component); }
 
     public UIForMenuItem<M> withKeyStroke(KeyStroke keyStroke) {
-        this.component.setAccelerator(keyStroke);
+        _component.setAccelerator(keyStroke);
         return this;
     }
 }

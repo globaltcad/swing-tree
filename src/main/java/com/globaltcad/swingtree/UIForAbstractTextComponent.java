@@ -29,21 +29,21 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
          * See documentation in {@link DocumentFilter}!
          */
         public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
-            if ( remove != null ) remove.accept( new RemoveDelegate(component, fb, offset, length) );
+            if ( remove != null ) remove.accept( new RemoveDelegate(_component, fb, offset, length) );
             else fb.remove(offset, length);
         }
         /**
          * See documentation in {@link DocumentFilter}!
          */
         public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-            if ( insert != null ) insert.accept( new InsertDelegate(component, fb, offset, string.length(), string, attr) );
+            if ( insert != null ) insert.accept( new InsertDelegate(_component, fb, offset, string.length(), string, attr) );
             else fb.insertString(offset, string, attr);
         }
         /**
          * See documentation in {@link DocumentFilter}!
          */
         public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-            if ( replace != null ) replace.accept(new ReplaceDelegate(component, fb, offset, length, text, attrs));
+            if ( replace != null ) replace.accept(new ReplaceDelegate(_component, fb, offset, length, text, attrs));
             else fb.replace(offset, length, text, attrs);
         }
     };
@@ -51,7 +51,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
     protected UIForAbstractTextComponent(C component) { super(component); }
 
     public final I withText(String text) {
-        this.component.setText(text);
+        _component.setText(text);
         return (I) this;
     }
 
@@ -62,7 +62,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      * @return This very builder to allow for method chaining.
      */
     public final I isEditableIf(boolean isEditable) {
-        this.component.setEditable(isEditable);
+        _component.setEditable(isEditable);
         return (I) this;
     }
 
@@ -75,10 +75,10 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      * @return This very builder to allow for method chaining.
      */
     public final I onContentChange(Consumer<SimpleDelegate<JTextComponent, DocumentEvent>> action) {
-        this.component.getDocument().addDocumentListener(new DocumentListener() {
-            @Override public void insertUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood()));}
-            @Override public void removeUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood()));}
-            @Override public void changedUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood()));}
+        _component.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));}
+            @Override public void removeUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));}
+            @Override public void changedUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));}
         });
         return (I) this;
     }
@@ -91,9 +91,9 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      * @return This very builder to allow for method chaining.
      */
     public final I onTextChange(Consumer<SimpleDelegate<JTextComponent, DocumentEvent>> action) {
-        this.component.getDocument().addDocumentListener(new DocumentListener() {
-            @Override public void insertUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood()));}
-            @Override public void removeUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood()));}
+        _component.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));}
+            @Override public void removeUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));}
             @Override public void changedUpdate(DocumentEvent e) {}
         });
         return (I) this;
@@ -104,9 +104,9 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      *               component supports text filtering (The underlying document is an {@link AbstractDocument}).
      */
     private void ifFilterable(Runnable action) {
-        if ( this.component.getDocument() instanceof AbstractDocument ) {
+        if ( _component.getDocument() instanceof AbstractDocument ) {
             action.run();
-            AbstractDocument doc = (AbstractDocument)this.component.getDocument();
+            AbstractDocument doc = (AbstractDocument)_component.getDocument();
             doc.setDocumentFilter(filter);
         }
     }

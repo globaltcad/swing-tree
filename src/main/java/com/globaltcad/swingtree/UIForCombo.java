@@ -25,7 +25,7 @@ public class UIForCombo<E> extends UIForAbstractSwing<UIForCombo<E>, JComboBox<E
      */
     public UIForCombo<E> onChange(UIAction<SimpleDelegate<JComboBox<E>, ActionEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        this.component.addActionListener( e -> action.accept(new SimpleDelegate<>(this.component, e, ()->getSiblinghood())) );
+        _component.addActionListener(e -> action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())) );
         return this;
     }
 
@@ -36,7 +36,7 @@ public class UIForCombo<E> extends UIForAbstractSwing<UIForCombo<E>, JComboBox<E
      * @return This very instance, which enables builder-style method chaining.
      */
     public UIForCombo<E> isEditableIf(boolean isEditable) {
-        this.component.setEditable(isEditable);
+        _component.setEditable(isEditable);
         return this;
     }
 }

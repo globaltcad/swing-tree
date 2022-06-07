@@ -8,12 +8,10 @@ import javax.swing.*;
 public class UIForTextPane<P extends JTextPane> extends UIForAbstractEditorPane<UIForTextPane<P>, P>
 {
     /**
-     * {@link UIForAbstractSwing} types always wrap
+     * {@link UIForAbstractSwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    public UIForTextPane(P component) {
-        super(component);
-    }
+    public UIForTextPane(P component) { super(component); }
 }

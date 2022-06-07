@@ -24,12 +24,12 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     protected UIForAbstractButton(B component) { super(component); }
 
     public final I withText(String text) {
-        this.component.setText(text);
+        _component.setText(text);
         return (I) this;
     }
 
     public final I isSelectedIf(boolean isSelected) {
-        this.component.setSelected(isSelected);
+        _component.setSelected(isSelected);
         return (I) this;
     }
 
@@ -61,7 +61,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public I onChange(UIAction<SimpleDelegate<B, ItemEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        this.component.addItemListener(e -> action.accept(new SimpleDelegate<>(this.component, e, ()->getSiblinghood())));
+        _component.addItemListener(e -> action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));
         return (I) this;
     }
 
@@ -78,9 +78,9 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public I onClick(UIAction<SimpleDelegate<B, ActionEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        this.component.addActionListener(
+        _component.addActionListener(
            e -> action.accept(
-               new SimpleDelegate<>(this.component, e, ()->this.getSiblinghood())
+               new SimpleDelegate<>(_component, e, ()->this.getSiblinghood())
            )
         );
         return (I) this;
@@ -88,22 +88,22 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
 
 
     public I withPosition(UI.HorizontalAlign horizontalAlign) {
-        this.component.setHorizontalAlignment(horizontalAlign.forSwing());
+        _component.setHorizontalAlignment(horizontalAlign.forSwing());
         return (I) this;
     }
 
     public I withTextPosition(UI.HorizontalAlign horizontalAlign) {
-        this.component.setHorizontalTextPosition(horizontalAlign.forSwing());
+        _component.setHorizontalTextPosition(horizontalAlign.forSwing());
         return (I) this;
     }
 
     public I withPosition(UI.VerticalAlign horizontalAlign) {
-        this.component.setVerticalAlignment(horizontalAlign.forSwing());
+        _component.setVerticalAlignment(horizontalAlign.forSwing());
         return (I) this;
     }
 
     public I withTextPosition(UI.VerticalAlign horizontalAlign) {
-        this.component.setVerticalTextPosition(horizontalAlign.forSwing());
+        _component.setVerticalTextPosition(horizontalAlign.forSwing());
         return (I) this;
     }
 
