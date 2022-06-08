@@ -10,12 +10,12 @@ public class UIForPasswordField<F extends JPasswordField> extends UIForAbstractT
     protected UIForPasswordField(F component) { super(component); }
 
     /**
-     * Sets the echo character for this <code>JPasswordField</code>.
+     * Sets the echo character for this {@link JPasswordField}.
      * Note that this is largely a suggestion, since the
      * view that gets installed can use whatever graphic techniques
      * it desires to represent the field.  Setting a value of 0 indicates
      * that you wish to see the text as it is typed, similar to
-     * the behavior of a standard <code>JTextField</code>.
+     * the behavior of a standard {@link JTextField}.
      *
      * @param echoChar The echo character to display.
      * @return This very instance, which enables builder-style method chaining.

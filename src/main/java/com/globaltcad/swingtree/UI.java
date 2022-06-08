@@ -11,11 +11,12 @@ import java.awt.*;
 import java.util.function.Supplier;
 
 /**
- *  This class is a static API for exposing swing tree builder types wrapping different {@link JComponent} types.
+ *  This class is a static API for exposing swing tree builder types for wrapping
+ *  and assembling various {@link JComponent} types to form a UI tree.
  *  Instances of these builder type expose an API based on chained methods
  *  designed around functional interfaces to enable building UI tree structures for Swing
- *  in an HTML-like nested fashion while also enabling the possibility to inject additional
- *  action and settings to new components via lambdas.
+ *  in an HTML-like nested fashion while also keeping a high degree of control and transparency
+ *  by peeking into the underlying swing components or registering user actions through lambdas.
  *  Swing tree works especially well alongside {@link MigLayout}s,
  *  which is why this general purpose {@link LayoutManager} is integrated into this library.
  *  Simply pass {@link String} constraints to the {@link UIForAbstractSwing#withLayout(String, String)}
@@ -53,10 +54,16 @@ public final class UI
         Cursor( int type ) { this.type = type; }
     }
 
+    /**
+     *  The scroll policy for UI components with scroll behaviour.
+     */
     public enum Scroll {
         NEVER, AS_NEEDED, ALWAYS
     }
 
+    /**
+     *  The position of a UI component in terms of directions.
+     */
     public enum Position {
         TOP, LEFT, BOTTOM, RIGHT;
         private int forTabbedPane() {
@@ -70,6 +77,9 @@ public final class UI
         }
     }
 
+    /**
+     *  Overflow policy of UI components.
+     */
     public enum OverflowPolicy {
         WRAP, SCROLL;
 
@@ -82,6 +92,9 @@ public final class UI
         }
     }
 
+    /**
+     *  Vertical or horizontal alignment.
+     */
     public enum Align {
         HORIZONTAL, VERTICAL;
 
@@ -105,6 +118,9 @@ public final class UI
 
     }
 
+    /**
+     *  Different positions along a vertically aligned UI component.
+     */
     public enum VerticalAlign {
         TOP, CENTER, BOTTOM;
 
@@ -118,6 +134,9 @@ public final class UI
         }
     }
 
+    /**
+     *  Different positions along a horizontally aligned UI component.
+     */
     public enum HorizontalAlign {
         LEFT, CENTER, RIGHT;
 
@@ -368,6 +387,16 @@ public final class UI
     /**
      *  Use this to create a builder for a new {@link JTabbedPane} UI component.
      *  This is in essence a convenience method for {@code UI.of(new JTabbedPane())}.
+     *  In order to add tabs to this builder use the tab object returned by {@link #tab(String)}
+     *  like so:
+     *
+     *  <pre>{@code
+     *      UI.tabbedPane()
+     *      .add(UI.tab("one").add(UI.panel().add(..)))
+     *      .add(UI.tab("two").withTip("I give info!").add(UI.label("read me")))
+     *      .add(UI.tab("three").withIcon(..).add(UI.button("click me")))
+     *  }</pre>
+     *
      *
      * @return A builder instance for a new {@link JTabbedPane}, which enables fluent method chaining.
      */
@@ -377,10 +406,12 @@ public final class UI
      *  Use this to create a builder for a new {@link JTabbedPane} UI component
      *  with the provided {@link Position} applied to the tab buttons
      *  (see {@link JTabbedPane#setTabLayoutPolicy(int)}).
+     *  In order to add tabs to this builder use the tab object returned by {@link #tab(String)}
+     *  like so:
      *
      *  <pre>{@code
      *      UI.tabbedPane(Position.RIGHT)
-     *      .add(UI.tab("First").add(UI.panel().add(..)))
+     *      .add(UI.tab("first").add(UI.panel().add(..)))
      *      .add(UI.tab("second").withTip("I give info!").add(UI.label("read me")))
      *      .add(UI.tab("third").withIcon(..).add(UI.button("click me")))
      *  }</pre>
@@ -398,7 +429,8 @@ public final class UI
      *  Use this to create a builder for a new {@link JTabbedPane} UI component
      *  with the provided {@link OverflowPolicy} and {@link Position} applied to the tab buttons 
      *  (see {@link JTabbedPane#setTabLayoutPolicy(int)} and {@link JTabbedPane#setTabPlacement(int)}).
-     *
+     *  In order to add tabs to this builder use the tab object returned by {@link #tab(String)}
+     *  like so:
      *  <pre>{@code
      *      UI.tabbedPane(Position.LEFT, OverflowPolicy.WRAP)
      *      .add(UI.tab("First").add(UI.panel().add(..)))
@@ -420,7 +452,8 @@ public final class UI
     /**
      *  Use this to create a builder for a new {@link JTabbedPane} UI component
      *  with the provided {@link OverflowPolicy} applied to the tab buttons (see {@link JTabbedPane#setTabLayoutPolicy(int)}).
-     *
+     *  In order to add tabs to this builder use the tab object returned by {@link #tab(String)}
+     *  like so:
      *  <pre>{@code
      *      UI.tabbedPane(OverflowPolicy.SCROLL)
      *      .add(UI.tab("First").add(UI.panel().add(..)))
@@ -549,7 +582,13 @@ public final class UI
 
     /**
      *  Use this to create a builder for a new {@link JScrollPane} UI component.
-     *  This is in essence a convenience method for {@code UI.of(new JScrollPane())}.
+     *  This is in essence a convenience method for {@code UI.of(new JScrollPane())}. <br>
+     *  Her is an example of a simple scroll panel with a text area inside:
+     *  <pre>{@code
+     *      UI.scrollPane()
+     *      .withScrollBarPolicy(UI.Scroll.NEVER)
+     *      .add(UI.textArea("I am a text area with this text inside."))
+     *  }</pre>
      *
      * @return A builder instance for a new {@link JScrollPane}, which enables fluent method chaining.
      */
@@ -569,7 +608,14 @@ public final class UI
 
     /**
      *  Use this to create a builder for a new {@link JSplitPane} instance
-     *  based on tbe provided split alignment.
+     *  based on the provided split alignment. <br>
+     *  You can create a simple split pane based UI like so: <br>
+     *  <pre>{@code
+     *      UI.splitPane(UI.Align.HORIZONTAL)
+     *      .withDividerAt(50)
+     *      .add(UI.panel().add(...)) // top
+     *      .add(UI.scrollPane().add(...)) // bottom
+     *  }</pre>
      *
      * @param align The alignment determining if the {@link JSplitPane} splits vertically or horizontally.
      * @return A builder instance for the provided {@link JSplitPane}, which enables fluent method chaining.
