@@ -86,7 +86,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
                              .add(
                                  BorderLayout.CENTER,
                                  UI.of(new JRadioButton("Button 2 (CENTER)")).id("B2")
-                                         .make(
+                                         .peek(
                                              button ->
                                                          button.setPreferredSize(new Dimension(200, 100))
                                          )
@@ -134,13 +134,13 @@ class Basic_UI_Builder_Examples_Spec extends Specification
 
         expect :
             UI.of(new JFrame("Test"))
-                .make( frame -> frame.add(
+                .peek(frame -> frame.add(
                         UI.of(new JPanel())
                                 .add(BorderLayout.PAGE_START, new JButton("Button 1 (PAGE_START)"))
                                 .add(
                                         BorderLayout.CENTER,
                                         UI.of(new JRadioButton("Button 2 (CENTER)"))
-                                                .make(
+                                                .peek(
                                                         button ->
                                                                 button.setPreferredSize(new Dimension(200, 100))
                                                 )
@@ -150,7 +150,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
                                 .add(BorderLayout.LINE_END, new JButton("5 (LINE_END)"))
                                 .get(JPanel)
                 ))
-                .make(
+                .peek(
                     frame -> {
                         frame.setSize(300, 300)
                         frame.show()

@@ -259,13 +259,13 @@ public final class UI
     /**
      *  Use this to create a builder for the {@link JButton} UI component
      *  with an icon displayed on top.
-     *  This is in essence a convenience method for {@code UI.of(new JButton()).make( it -> it.setIcon(icon) )}.
+     *  This is in essence a convenience method for {@code UI.of(new JButton()).peek( it -> it.setIcon(icon) )}.
      *
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
     public static UIForButton<JButton> button(Icon icon) {
         LogUtil.nullArgCheck(icon, "icon", Icon.class);
-        return button().make( it -> it.setIcon(icon) );
+        return button().peek(it -> it.setIcon(icon) );
     }
 
     /**
@@ -298,7 +298,7 @@ public final class UI
      *  with a default, an on-hover and an on-press icon displayed on top.
      *  This is in essence a convenience method for:
      *  <pre>{@code 
-     *      UI.of(new JButton()).make( it -> {
+     *      UI.of(new JButton()).peek( it -> {
      *          it.setIcon(icon);
      *          it.setRolloverIcon(onHover);
      *          it.setPressedIcon(onPress);
@@ -311,9 +311,9 @@ public final class UI
         LogUtil.nullArgCheck(icon, "icon", Icon.class);
         LogUtil.nullArgCheck(onHover, "onHover", Icon.class);
         LogUtil.nullArgCheck(onPress, "onPress", Icon.class);
-        return button().make( it -> it.setIcon(icon) )
-                .make( it -> it.setRolloverIcon(onHover) )
-                .make( it -> it.setPressedIcon(onPress) );
+        return button().peek(it -> it.setIcon(icon) )
+                .peek(it -> it.setRolloverIcon(onHover) )
+                .peek(it -> it.setPressedIcon(onPress) );
     }
 
     public static <B extends JSplitButton> UIForSplitButton<B> of(B splitButton) {

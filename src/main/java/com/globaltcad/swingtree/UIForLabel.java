@@ -21,7 +21,7 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> makeBold() {
-        this.make( label -> {
+        this.peek(label -> {
             Font f = label.getFont();
             label.setFont(f.deriveFont(f.getStyle() | Font.BOLD));
         });
@@ -56,7 +56,7 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> makePlain() {
-        this.make( label -> {
+        this.peek(label -> {
             Font f = label.getFont();
             label.setFont(f.deriveFont(f.getStyle() & ~Font.BOLD));
         });
@@ -70,7 +70,7 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> toggleBold() {
-        this.make( label -> {
+        this.peek(label -> {
             Font f = label.getFont();
             label.setFont(f.deriveFont(f.getStyle() ^ Font.BOLD));
         });

@@ -1,6 +1,6 @@
 package com.globaltcad.swingtree;
 
-import com.globaltcad.swingtree.api.Maker;
+import com.globaltcad.swingtree.api.Peeker;
 
 import java.util.function.Consumer;
 
@@ -58,15 +58,15 @@ abstract class AbstractBuilder<I, C>
      *  The below example shows how this method allows for more fine-grained control over the wrapped component:
      *  <pre>{@code
      *      UI.panel()
-     *          make( panel -> panel.setDebugGraphicsOptions(true) );
+     *          peek( panel -> panel.setDebugGraphicsOptions(true) );
      *  }</pre>
      *  <br><br>
      *
      * @param action A Consumer lambda which simply returned the wrapped JComponent type for interacting it.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public I make( Maker<C> action ) {
-        action.make(_component);
+    public I peek( Peeker<C> action ) {
+        action.accept(_component);
         return (I) this;
     }
 
@@ -93,7 +93,7 @@ abstract class AbstractBuilder<I, C>
     /**
      *  Use this to continue building UI inside a provided lambda.
      *  This is especially useful for when you need to build UI based on loops.
-     *  This builder will simply be supplied to the provided consumer lambda.
+     *  This builder instance will simply be supplied to the provided consumer lambda.
      *  Inside this lambda, you can then continue building the UI while also not
      *  breaking the benefits of nesting and method chaining provided by this class...
      *  <br><br>
@@ -101,7 +101,7 @@ abstract class AbstractBuilder<I, C>
      * @param building A Consumer lambda which simply consumes this builder.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public I code(Consumer<I> building) {
+    public I apply(Consumer<I> building) {
         LogUtil.nullArgCheck(building, "building", Consumer.class);
         return doIf(true, building);
     }

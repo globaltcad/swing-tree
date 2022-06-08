@@ -5,7 +5,7 @@ package com.globaltcad.swingtree.api;
  *
  * @param <C> The component type which should be modified.
  */
-public interface Maker<C>
+public interface Peeker<C>
 {
-    void make(C component);
+    void accept(C component);
 }

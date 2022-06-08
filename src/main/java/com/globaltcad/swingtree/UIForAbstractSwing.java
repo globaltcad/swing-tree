@@ -1,7 +1,7 @@
 package com.globaltcad.swingtree;
 
 
-import com.globaltcad.swingtree.api.Maker;
+import com.globaltcad.swingtree.api.Peeker;
 import com.globaltcad.swingtree.api.UIAction;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
@@ -127,10 +127,10 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     /**
      *  Use this to set the {@link LayoutManager} of the component wrapped by this builder. <br>
      *  This is in essence a more convenient way than the alternative usage pattern involving
-     *  the {@link #make(Maker)} method to peek into the builder's component like so: <br>
+     *  the {@link #peek(Peeker)} method to peek into the builder's component like so: <br>
      *  <pre>{@code
      *      UI.panel()
-     *          make( panel -> panel.setLayout(new FavouriteLayoutManager()) );
+     *          peek( panel -> panel.setLayout(new FavouriteLayoutManager()) );
      *  }</pre>
      *
      * @param layout The {@link LayoutManager} which should be supplied to the wrapped component.

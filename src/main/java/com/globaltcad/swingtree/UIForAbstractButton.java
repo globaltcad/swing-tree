@@ -41,7 +41,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @return This very instance, which enables builder-style method chaining.
      */
     public I makePlain() {
-        make( it -> {
+        peek(it -> {
             it.setBorderPainted(false);
             it.setContentAreaFilled(false);
             it.setOpaque(false);
