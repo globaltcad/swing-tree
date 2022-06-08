@@ -12,11 +12,14 @@ import java.awt.*
 @Title("Swing tree makes UI building fun again!")
 @Narrative('''
 
+    The swing tree library is in essence a more dynamic type of HTML for swing,
+    which allows for very readable UI design.
+    In this specification we cover the utter most basic properties of swing tree.
 
 ''')
 class Basic_UI_Builder_Examples_Spec extends Specification
 {
-    def 'We can add a list of components to the swing tree API.'()
+    def 'We can add a list of components to the swing tree API and get a builder node in return.'()
     {
         given : 'We have a simple JPanel UI node.'
             var node = UI.panel()
@@ -32,7 +35,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
     }
 
 
-    def 'Swing tree nests components'()
+    def 'Swing tree nests components (trough builder nodes).'()
     {
         given : 'A regular swing object.'
             var panel = new JPanel()
