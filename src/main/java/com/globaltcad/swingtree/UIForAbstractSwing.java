@@ -1,6 +1,7 @@
 package com.globaltcad.swingtree;
 
 
+import com.globaltcad.swingtree.api.Maker;
 import com.globaltcad.swingtree.api.UIAction;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
@@ -123,6 +124,18 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         return (I) this;
     }
 
+    /**
+     *  Use this to set the {@link LayoutManager} of the component wrapped by this builder. <br>
+     *  This is in essence a more convenient way than the alternative usage pattern involving
+     *  the {@link #make(Maker)} method to peek into the builder's component like so: <br>
+     *  <pre>{@code
+     *      UI.panel()
+     *          make( panel -> panel.setLayout(new FavouriteLayoutManager()) );
+     *  }</pre>
+     *
+     * @param layout The {@link LayoutManager} which should be supplied to the wrapped component.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public final I withLayout(LayoutManager layout) {
         if ( migAlreadySet )
             throw new IllegalArgumentException("The mig layout has already been specified for this component!");
@@ -257,6 +270,13 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         return (I) this;
     }
 
+    /**
+     *  Adds the supplied {@link UIAction} wrapped in a {@link ComponentListener}
+     *  to the component, to receive those component events where the wrapped component becomes visible.
+     *
+     * @param onShown The {@link UIAction} which gets invoked when the component has been made visible.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public final I onShown(UIAction<SimpleDelegate<C, ComponentEvent>> onShown) {
         LogUtil.nullArgCheck(onShown, "onShown", UIAction.class);
         _component.addComponentListener(new ComponentAdapter() {
@@ -265,6 +285,13 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         return (I) this;
     }
 
+    /**
+     *  Adds the supplied {@link UIAction} wrapped in a {@link ComponentListener}
+     *  to the component, to receive those component events where the wrapped component becomes invisible.
+     *
+     * @param onHidden The {@link UIAction} which gets invoked when the component has been made invisible.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public final I onHidden(UIAction<SimpleDelegate<C, ComponentEvent>> onHidden) {
         LogUtil.nullArgCheck(onHidden, "onHidden", UIAction.class);
         _component.addComponentListener(new ComponentAdapter() {
@@ -273,6 +300,13 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         return (I) this;
     }
 
+    /**
+     * Adds the supplied {@link UIAction} wrapped in a {@link FocusListener}
+     * to the component, to receive those focus events where the wrapped component gains input focus.
+     *
+     * @param onFocus The {@link UIAction} which should be executed once the input focus was gained on the wrapped component.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public final I onFocusGained(UIAction<SimpleDelegate<C, ComponentEvent>> onFocus) {
         LogUtil.nullArgCheck(onFocus, "onFocus", UIAction.class);
         _component.addFocusListener(new FocusAdapter() {
@@ -281,6 +315,13 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         return (I) this;
     }
 
+    /**
+     * Adds the supplied {@link UIAction} wrapped in a focus listener
+     * to receive those focus events where the wrapped component loses input focus.
+     *
+     * @param onFocus The {@link UIAction} which should be executed once the input focus was lost on the wrapped component.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public final I onFocusLost(UIAction<SimpleDelegate<C, ComponentEvent>> onFocus) {
         LogUtil.nullArgCheck(onFocus, "onFocus", UIAction.class);
         _component.addFocusListener(new FocusAdapter() {
@@ -291,7 +332,12 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
 
     /**
      *  Use this to register periodic update actions which should be called
-     *  based on the provided {@code delay}!
+     *  based on the provided {@code delay}! <br>
+     *  The following example produces a label which will display the current date.
+     *  <pre>{@code
+     *      UI.label("")
+     *          .doUpdates( 100, it -> it.getComponent().setText(new Date().toString()) )
+     *  }</pre>
      *
      * @param delay The delay between calling the provided {@link UIAction}.
      * @param onUpdate The {@link UIAction} which should be called periodically.

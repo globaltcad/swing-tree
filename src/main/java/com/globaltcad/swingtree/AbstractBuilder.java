@@ -47,13 +47,19 @@ abstract class AbstractBuilder<I, C>
     public final Class<C> getType() { return _type; }
 
     /**
-     *  After having passed a new component type to the constructor of a builder type
-     *  one might still wish to modify this component in some way by calling
-     *  certain methods in it like "setName", "setTitle", and so on... <br>
+     *  Use this if you wish to access the component wrapped by this builder directly.
+     *  This is useful for more fine-grained control, like for example calling
+     *  methods like "setName", "setTitle", and so on... <br>
      *  This method accepts a lambda to which the component wrapped by this builder will be supplied.
      *  The lambda can then call said methods or perform other tasks which
      *  might be relevant to the component while also not
      *  breaking the benefits of nesting and method chaining provided by this class...
+     *  <br>
+     *  The below example shows how this method allows for more fine-grained control over the wrapped component:
+     *  <pre>{@code
+     *      UI.panel()
+     *          make( panel -> panel.setDebugGraphicsOptions(true) );
+     *  }</pre>
      *  <br><br>
      *
      * @param action A Consumer lambda which simply returned the wrapped JComponent type for interacting it.
