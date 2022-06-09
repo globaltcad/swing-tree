@@ -17,11 +17,11 @@ import java.util.WeakHashMap;
 
 /**
  *  A swing tree builder for any kind {@link JComponent} instance.
- *  This is the most basic builder type and therefore super-type for almost all other builders.
- *  This builder defines nested building of anything extending the {@link JComponent} class.
+ *  This is the most generic builder type and therefore abstract super-type for almost all other builders.
+ *  This builder defines nested building for anything extending the {@link JComponent} class.
  *  <br><br>
  *
- * @param <I> The most basic concrete implementation of the {@link AbstractNestedBuilder}.
+ * @param <I> The concrete extension of the {@link AbstractNestedBuilder}.
  * @param <C> The type parameter for the component type wrapped by an instance of this class.
  */
 public abstract class UIForAbstractSwing<I, C extends JComponent> extends AbstractNestedBuilder<I, C, JComponent>
@@ -30,11 +30,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
 
     private final static Map<JComponent, java.util.List<Timer>> timers = new WeakHashMap<>(); // We attach garbage collectable timers to components this way!
 
-    private boolean idAlreadySet = false;
+    private boolean idAlreadySet = false; // The id translates to the 'name' property of swing components.
     private boolean migAlreadySet = false;
 
     /**
-     *  Instances of the BasicBuilder as well as its sub types always wrap
+     *  Extensions of the {@link  UIForAbstractSwing} always wrap
      *  a single component for which they are responsible.
      *
      * @param component The JComponent type which will be wrapped by this builder node.
@@ -91,8 +91,15 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * a small per-instance hashtable. Callers can use get/putClientProperty
      * to annotate components that were created by another module.
      * For example, a
-     * layout manager might store per child constraints this way.
+     * layout manager might store per child constraints this way. <br>
+     * This is in essence a more convenient way than the alternative usage pattern involving
+     * the {@link #peek(Peeker)} method to peek into the builder's component like so: <br>
+     * <pre>{@code
+     *     UI.button()
+     *         .peek( button -> button.withProperty("key", "value") );
+     * }</pre>
      *
+
      * @param key the new client property key which may be used for styles or layout managers.
      * @param value the new client property value.
      */
@@ -130,7 +137,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  the {@link #peek(Peeker)} method to peek into the builder's component like so: <br>
      *  <pre>{@code
      *      UI.panel()
-     *          peek( panel -> panel.setLayout(new FavouriteLayoutManager()) );
+     *          .peek( panel -> panel.setLayout(new FavouriteLayoutManager()) );
      *  }</pre>
      *
      * @param layout The {@link LayoutManager} which should be supplied to the wrapped component.
@@ -188,7 +195,13 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     /**
      *  Use this to set a helpful tool tip text for this UI component.
      *  The tool tip text will be displayed when the mouse hovers on the
-     *  UI component for some time.
+     *  UI component for some time. <br>
+     *  This is in essence a convenience method, which avoid having to expose the underlying component
+     *  through the {@link #peek(Peeker)} method like so: <br>
+     *  <pre>{@code
+     *      UI.button("Click Me")
+     *          .peek( button -> button.setToolTipText("Can be clicked!") );
+     *  }</pre>
      *
      * @param tooltip The tool tip text which should be set for the UI component.
      * @return This very instance, which enables builder-style method chaining.
@@ -200,7 +213,14 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
 
     /**
      *  Use this to set the background color of the UI component
-     *  wrapped by this builder.
+     *  wrapped by this builder.<br>
+     *  This is in essence a convenience method, which avoid having to expose the underlying component
+     *  through the {@link #peek(Peeker)} method like so: <br>
+     *  <pre>{@code
+     *      UI.label("Something")
+     *          .peek( label -> label.setBackground(Color.CYAN) );
+     *  }</pre>
+     *
      *
      * @param color The background color which should be set for the UI component.
      * @return This very instance, which enables builder-style method chaining.
@@ -212,7 +232,13 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     *  Set the color of this {@link JComponent}. (This is usually the font color for components displaying text)
+     *  Set the color of this {@link JComponent}. (This is usually the font color for components displaying text) <br>
+     *  This is in essence a convenience method, which avoid having to expose the underlying component
+     *  through the {@link #peek(Peeker)} method like so: <br>
+     *  <pre>{@code
+     *      UI.label("Something")
+     *          .peek( label -> label.setForeground(Color.GRAY) );
+     *  }</pre>
      *
      * @param color The color of the foreground (usually text).
      * @return This very builder to allow for method chaining.
@@ -354,7 +380,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     @Override
-    protected void _add(JComponent component, Object conf) {
+    protected void _add( JComponent component, Object conf ) {
         LogUtil.nullArgCheck(component, "component", JComponent.class);
         if ( conf == null )
             _component.add(component);
@@ -374,7 +400,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  Use this to nest builder types into this builder to effectively plug the wrapped {@link JComponent}s 
      *  into the {@link JComponent} type wrapped by this builder instance.
      *  This method enables support for nested building as well as the ability to
-     *  pass additional layout information the added UI component.
+     *  pass additional layout information to the layout manager of the wrapped {@link JComponent}, through
+     *  the {@link JComponent#add(Component, Object)} method.
      *  <br><br>
      *
      * @param attr The additional mig-layout information which should be passed to the UI tree.
@@ -390,6 +417,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  into the {@link JComponent} type wrapped by this builder instance.
      *  The first argument represents layout attributes/constraints which will
      *  be applied to the {@link JComponent}s of the subsequently provided builder types.
+     *  This additional layout information will be passed to the layout manager of the wrapped {@link JComponent},
+     *  through the {@link JComponent#add(Component, Object)} method.
      *  <br><br>
      *
      * @param attr The additional mig-layout information which should be passed to the UI tree.
@@ -400,7 +429,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     @SafeVarargs
     public final <B extends UIForAbstractSwing<?, ?>> I add(String attr, B... builders) {
         LayoutManager layout = _component.getLayout();
-        if ( isBorderLayout(attr) && !(layout instanceof BorderLayout) ) {
+        if ( _isBorderLayout(attr) && !(layout instanceof BorderLayout) ) {
             if ( layout instanceof MigLayout )
                 log.warn("Layout ambiguity detected! Border layout constraint cannot be added to 'MigLayout'.");
             _component.setLayout(new BorderLayout()); // The UI Maker tries to fill in the blanks!
@@ -421,7 +450,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     @SafeVarargs
-    public final <E extends JComponent> I add(String attr, E... components) {
+    public final <E extends JComponent> I add( String attr, E... components ) {
         LogUtil.nullArgCheck(attr, "conf", Object.class);
         LogUtil.nullArgCheck(components, "components", Object[].class);
         for( E component : components ) {
@@ -431,7 +460,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         return (I) this;
     }
 
-    private static boolean isBorderLayout(Object o) {
+    private static boolean _isBorderLayout( Object o ) {
         return BorderLayout.CENTER.equals(o) ||
                 BorderLayout.PAGE_START.equals(o) ||
                 BorderLayout.PAGE_END.equals(o) ||
