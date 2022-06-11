@@ -23,6 +23,13 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
 {
     protected UIForAbstractButton(B component) { super(component); }
 
+    /**
+     * Defines the single line of text the wrapped button type will display.
+     * If the value of text is null or empty string, nothing is displayed.
+     *
+     * @param text The new text to be set for the wrapped button type.
+     * @return This very builder to allow for method chaining.
+     */
     public final I withText(String text) {
         _component.setText(text);
         return (I) this;
@@ -61,7 +68,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public I onChange(UIAction<SimpleDelegate<B, ItemEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        _component.addItemListener(e -> action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));
+        _component.addItemListener(e -> action.accept(new SimpleDelegate<>(_component, e, this::getSiblinghood)));
         return (I) this;
     }
 
@@ -80,30 +87,77 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         _component.addActionListener(
            e -> action.accept(
-               new SimpleDelegate<>(_component, e, ()->this.getSiblinghood())
+               new SimpleDelegate<>(_component, e, this::getSiblinghood)
            )
         );
         return (I) this;
     }
 
-
-    public I withPosition(UI.HorizontalAlign horizontalAlign) {
+    /**
+     *  A convenience method to avoid peeking into this builder like so:
+     *  <pre>{@code
+     *     UI.button("Clickable!")
+     *         .peek( button -> button.setHorizontalAlignment(...) );
+     *  }</pre>
+     * This sets the horizontal alignment of the icon and text.
+     *
+     * @param horizontalAlign The horizontal alignment which should be applied to the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I with(UI.HorizontalAlignment horizontalAlign) {
+        LogUtil.nullArgCheck(horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class);
         _component.setHorizontalAlignment(horizontalAlign.forSwing());
         return (I) this;
     }
 
-    public I withTextPosition(UI.HorizontalAlign horizontalAlign) {
+    /**
+     *  A convenience method to avoid peeking into this builder like so:
+     *  <pre>{@code
+     *     UI.button("Clickable!")
+     *         .peek( button -> button.setVerticalAlignment(...) );
+     *  }</pre>
+     * This sets the vertical alignment of the icon and text.
+     *
+     * @param verticalAlign The vertical alignment which should be applied to the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I with(UI.VerticalAlignment verticalAlign) {
+        LogUtil.nullArgCheck(verticalAlign, "verticalAlign", UI.VerticalAlignment.class);
+        _component.setVerticalAlignment(verticalAlign.forSwing());
+        return (I) this;
+    }
+
+    /**
+     *  A convenience method to avoid peeking into this builder like so:
+     *  <pre>{@code
+     *     UI.button("Clickable!")
+     *         .peek( button -> button.setHorizontalTextPosition(...) );
+     *  }</pre>
+     * This sets the horizontal position of the text relative to the icon.
+     *
+     * @param horizontalAlign The horizontal text alignment relative to the icon which should be applied to the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withImageRelative(UI.HorizontalAlignment horizontalAlign) {
+        LogUtil.nullArgCheck(horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class);
         _component.setHorizontalTextPosition(horizontalAlign.forSwing());
         return (I) this;
     }
 
-    public I withPosition(UI.VerticalAlign horizontalAlign) {
-        _component.setVerticalAlignment(horizontalAlign.forSwing());
-        return (I) this;
-    }
-
-    public I withTextPosition(UI.VerticalAlign horizontalAlign) {
-        _component.setVerticalTextPosition(horizontalAlign.forSwing());
+    /**
+     *  A convenience method to avoid peeking into this builder like so:
+     *  <pre>{@code
+     *     UI.button("Clickable!")
+     *         .peek( button -> button.setVerticalTextPosition(...) );
+     *  }</pre>
+     * This sets the vertical position of the text relative to the icon.
+     *
+     * @param verticalAlign The vertical text alignment relative to the icon which should be applied to the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withImageRelative(UI.VerticalAlignment verticalAlign) {
+        LogUtil.nullArgCheck(verticalAlign, "verticalAlign", UI.VerticalAlignment.class);
+        _component.setVerticalTextPosition(verticalAlign.forSwing());
         return (I) this;
     }
 

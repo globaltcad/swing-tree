@@ -6,6 +6,7 @@ import com.globaltcad.swingtree.api.UIAction;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
+import java.awt.*;
 import java.util.function.Consumer;
 
 /**
@@ -50,8 +51,44 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
 
     protected UIForAbstractTextComponent(C component) { super(component); }
 
+    /**
+     * Sets the text of the wrapped <code>{@link TextComponent}</code>
+     * to the specified text. If the text is <code>null</code>
+     * or empty, has the effect of simply deleting the old text.
+     * When text has been inserted, the resulting caret location
+     * is determined by the implementation of the caret class.
+     *
+     * <p>
+     * Note that text is not a bound property, so no {@link java.beans.PropertyChangeEvent}
+     * is fired when it changes. To listen for changes to the text,
+     * register action lambdas through {@link #onTextChange(Consumer)} or
+     * use {@link DocumentListener} directly.
+     * </p>
+     *
+     * @param text The new text to be set for the wrapped text component type.
+     * @return This very builder to allow for method chaining.
+     */
     public final I withText(String text) {
         _component.setText(text);
+        return (I) this;
+    }
+
+    /**
+     * The provided {@link UI.HorizontalDirection} translates to {@link ComponentOrientation}
+     * instances which are used to align the elements or text within the wrapped {@link JTextComponent}.
+     * {@link LayoutManager} and {@link Component}
+     * subclasses will use this property to
+     * determine how to lay out and draw components.
+     * <p>
+     * Note: This method indirectly changes layout-related information, and therefore,
+     * invalidates the component hierarchy.
+     *
+     * @param direction The text orientation type which should be used.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withTextOrientation(UI.HorizontalDirection direction) {
+        LogUtil.nullArgCheck(direction, "direction", UI.HorizontalDirection.class);
+        _component.setComponentOrientation(direction.forTextOrientation());
         return (I) this;
     }
 

@@ -71,7 +71,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             node.component.cursor.type == Cursor.DEFAULT_CURSOR
 
         when : 'We set the cursor of the button to be something else...'
-            node.withCursor(UI.Cursor.RESIZE_SOUTH_EAST)
+            node.with(UI.Cursor.RESIZE_SOUTH_EAST)
         then : 'This will lead to the correct cursor being chosen.'
             node.component.cursor.type == Cursor.SE_RESIZE_CURSOR
     }

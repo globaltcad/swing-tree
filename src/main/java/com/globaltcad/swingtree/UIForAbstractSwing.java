@@ -114,7 +114,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param border The {@link Border} which should be set for the wrapped component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withBorder(Border border) {
+    public final I with(Border border) {
         _component.setBorder( border );
         return (I) this;
     }
@@ -126,7 +126,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param type The {@link UI.Cursor} type defined by a simple enum exposed by this API.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withCursor(UI.Cursor type) {
+    public final I with(UI.Cursor type) {
         _component.setCursor( new java.awt.Cursor( type.type ) );
         return (I) this;
     }
@@ -143,7 +143,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param layout The {@link LayoutManager} which should be supplied to the wrapped component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withLayout(LayoutManager layout) {
+    public final I with(LayoutManager layout) {
         if ( migAlreadySet )
             throw new IllegalArgumentException("The mig layout has already been specified for this component!");
         _component.setLayout(layout);

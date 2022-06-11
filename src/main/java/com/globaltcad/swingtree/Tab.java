@@ -10,7 +10,7 @@ import javax.swing.*;
  *      UI.tabbedPane()
  *      .add(UI.tab("one").add(UI.panel().add(..)))
  *      .add(UI.tab("two").withTip("I give info!").add(UI.label("read me")))
- *      .add(UI.tab("three").withIcon(..).add(UI.button("click me")))
+ *      .add(UI.tab("three").with(someIcon).add(UI.button("click me")))
  *  }</pre>
  *
  */

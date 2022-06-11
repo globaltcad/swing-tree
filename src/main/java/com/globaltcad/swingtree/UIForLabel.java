@@ -84,21 +84,51 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
     }
 
     /**
+     * Defines the single line of text this component will display.  If
+     * the value of text is null or empty string, nothing is displayed.
+     * <p>
+     * The default value of this property is null.
+     * <p>
+     *
+     * @param text The new text to be set for the wrapped label.
+     * @return This very builder to allow for method chaining.
+     */
+    public final UIForLabel<L> withText(String text) { _component.setText(text); return this; }
+
+    /**
      *  A convenience method to avoid peeking into this builder like so:
      *  <pre>{@code
      *     UI.label("Something")
      *         .peek( label -> label.setHorizontalAlignment(...) );
      *  }</pre>
+     * This sets the horizontal alignment of the label's content (icon and text).
      *
      * @param horizontalAlign The horizontal alignment which should be applied to the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public UIForLabel<L> withPosition(UI.HorizontalAlign horizontalAlign) {
+    public UIForLabel<L> with(UI.HorizontalAlignment horizontalAlign) {
         _component.setHorizontalAlignment(horizontalAlign.forSwing());
         return this;
     }
 
     /**
+     *  Use this to set the vertical alignment of the label's content (icon and text).
+     *  This is a convenience method to avoid peeking into this builder like so:
+     *  <pre>{@code
+     *     UI.label("Something")
+     *         .peek( label -> label.setVerticalAlignment(...) );
+     *  }</pre>
+     *
+     * @param verticalAlign The vertical alignment which should be applied to the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public UIForLabel<L> with(UI.VerticalAlignment verticalAlign) {
+        _component.setVerticalAlignment(verticalAlign.forSwing());
+        return this;
+    }
+
+    /**
+     *  Use this to set the horizontal position of the label's text, relative to its image.
      *  A convenience method to avoid peeking into this builder like so:
      *  <pre>{@code
      *     UI.label("Something")
@@ -108,28 +138,14 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @param horizontalAlign The horizontal alignment which should be applied to the text of the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public UIForLabel<L> withTextPosition(UI.HorizontalAlign horizontalAlign) {
+    public UIForLabel<L> withImageRelative(UI.HorizontalAlignment horizontalAlign) {
         _component.setHorizontalTextPosition(horizontalAlign.forSwing());
         return this;
     }
 
     /**
-     *  A convenience method to avoid peeking into this builder like so:
-     *  <pre>{@code
-     *     UI.label("Something")
-     *         .peek( label -> label.setVerticalAlignment(...) );
-     *  }</pre>
-     *
-     * @param verticalAlign The vertical alignment which should be applied to the underlying component.
-     * @return This very builder to allow for method chaining.
-     */
-    public UIForLabel<L> withPosition(UI.VerticalAlign verticalAlign) {
-        _component.setVerticalAlignment(verticalAlign.forSwing());
-        return this;
-    }
-
-    /**
-     *  A convenience method to avoid peeking into this builder like so:
+     *  Use this to set the horizontal position of the label's text, relative to its image. <br>
+     *  This is a convenience method to avoid peeking into this builder like so:
      *  <pre>{@code
      *     UI.label("Something")
      *         .peek( label -> label.setVerticalTextPosition(...) );
@@ -138,13 +154,14 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @param verticalAlign The vertical alignment which should be applied to the text of the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public UIForLabel<L> withTextPosition(UI.VerticalAlign verticalAlign) {
+    public UIForLabel<L> withImageRelative(UI.VerticalAlignment verticalAlign) {
         _component.setVerticalTextPosition(verticalAlign.forSwing());
         return this;
     }
 
     /**
-     *  A convenience method to avoid peeking into this builder like so:
+     *  Use this to set the icon for the wrapped {@link JLabel}. 
+     *  This is in essence a convenience method to avoid peeking into this builder like so:
      *  <pre>{@code
      *     UI.label("Something")
      *         .peek( label -> label.setIcon(...) );
@@ -154,7 +171,7 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @param icon The {@link Icon} which should be displayed on the label.
      * @return This very builder to allow for method chaining.
      */
-    public UIForLabel<L> withIcon(Icon icon) {
+    public UIForLabel<L> with(Icon icon) {
         LogUtil.nullArgCheck(icon,"icon",Icon.class);
         _component.setIcon(icon);
         return this;

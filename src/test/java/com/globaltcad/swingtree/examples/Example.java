@@ -50,11 +50,11 @@ public class Example extends JPanel
 				)
 				.add("cell 1 0",
 					UI.button(50, 50, pdfIcon, pdfHover)
-					.withCursor(UI.Cursor.HAND)
+					.with(UI.Cursor.HAND)
 					.makePlain()
 					.onClick( e -> {/* does something */} )
 				)
-				.withBorder(BorderFactory.createMatteBorder(0,0,1,0,Color.LIGHT_GRAY))
+				.with(BorderFactory.createMatteBorder(0,0,1,0,Color.LIGHT_GRAY))
 			)
 			.add("cell 0 2, grow",
 				UI.panel(debug+"fill, insets 0 0 0 0","[grow][grow][grow]")

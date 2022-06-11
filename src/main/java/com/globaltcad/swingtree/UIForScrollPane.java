@@ -22,13 +22,13 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAbstractSwing<U
         _component.setViewportView(component);
     }
 
-    public final UIForScrollPane<P> withScrollBarPolicy(UI.Scroll scrollPolicy) {
-        this.withVerticalScrollBarPolicy(scrollPolicy);
-        this.withHorizontalScrollBarPolicy(scrollPolicy);
+    public final UIForScrollPane<P> with(UI.ScrollBarPolicy scrollPolicy) {
+        this.withVertical(scrollPolicy);
+        this.withHorizontal(scrollPolicy);
         return this;
     }
 
-    public final UIForScrollPane<P> withVerticalScrollBarPolicy(UI.Scroll scrollBarPolicy) {
+    public final UIForScrollPane<P> withVertical(UI.ScrollBarPolicy scrollBarPolicy) {
         switch ( scrollBarPolicy )
         {
             case NEVER: _component.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER); break;
@@ -38,7 +38,7 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAbstractSwing<U
         return this;
     }
 
-    public final UIForScrollPane<P> withHorizontalScrollBarPolicy(UI.Scroll scrollBarPolicy) {
+    public final UIForScrollPane<P> withHorizontal(UI.ScrollBarPolicy scrollBarPolicy) {
         switch ( scrollBarPolicy )
         {
             case NEVER: _component.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); break;

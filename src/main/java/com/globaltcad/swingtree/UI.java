@@ -6,7 +6,7 @@ import com.globaltcad.swingtree.api.SwingBuilder;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
-import javax.swing.text.*;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.function.Supplier;
 
@@ -57,7 +57,7 @@ public final class UI
     /**
      *  The scroll policy for UI components with scroll behaviour.
      */
-    public enum Scroll {
+    public enum ScrollBarPolicy {
         NEVER, AS_NEEDED, ALWAYS
     }
 
@@ -121,7 +121,7 @@ public final class UI
     /**
      *  Different positions along a vertically aligned UI component.
      */
-    public enum VerticalAlign {
+    public enum VerticalAlignment {
         TOP, CENTER, BOTTOM;
 
         int forSwing() {
@@ -137,7 +137,7 @@ public final class UI
     /**
      *  Different positions along a horizontally aligned UI component.
      */
-    public enum HorizontalAlign {
+    public enum HorizontalAlignment {
         LEFT, CENTER, RIGHT;
 
         public final int forSwing() {
@@ -145,6 +145,18 @@ public final class UI
                 case LEFT:   return SwingConstants.LEFT   ;
                 case CENTER: return SwingConstants.CENTER ;
                 case RIGHT:  return SwingConstants.RIGHT  ;
+            }
+            throw new RuntimeException();
+        }
+    }
+
+    public enum HorizontalDirection {
+        LEFT_TO_RIGHT, RIGHT_TO_LEFT;
+
+        public final ComponentOrientation forTextOrientation() {
+            switch ( this ) {
+                case LEFT_TO_RIGHT: return ComponentOrientation.LEFT_TO_RIGHT;
+                case RIGHT_TO_LEFT: return ComponentOrientation.RIGHT_TO_LEFT;
             }
             throw new RuntimeException();
         }
@@ -394,7 +406,7 @@ public final class UI
      *      UI.tabbedPane()
      *      .add(UI.tab("one").add(UI.panel().add(..)))
      *      .add(UI.tab("two").withTip("I give info!").add(UI.label("read me")))
-     *      .add(UI.tab("three").withIcon(..).add(UI.button("click me")))
+     *      .add(UI.tab("three").with(someIcon).add(UI.button("click me")))
      *  }</pre>
      *
      *
@@ -413,7 +425,7 @@ public final class UI
      *      UI.tabbedPane(Position.RIGHT)
      *      .add(UI.tab("first").add(UI.panel().add(..)))
      *      .add(UI.tab("second").withTip("I give info!").add(UI.label("read me")))
-     *      .add(UI.tab("third").withIcon(..).add(UI.button("click me")))
+     *      .add(UI.tab("third").with(someIcon).add(UI.button("click me")))
      *  }</pre>
      *
      * @param tabsPosition The position of the tab buttons which may be {@link Position#TOP}, {@link Position#RIGHT}, {@link Position#BOTTOM}, {@link Position#LEFT}.
@@ -435,7 +447,7 @@ public final class UI
      *      UI.tabbedPane(Position.LEFT, OverflowPolicy.WRAP)
      *      .add(UI.tab("First").add(UI.panel().add(..)))
      *      .add(UI.tab("second").withTip("I give info!").add(UI.label("read me")))
-     *      .add(UI.tab("third").withIcon(..).add(UI.button("click me")))
+     *      .add(UI.tab("third").with(someIcon).add(UI.button("click me")))
      *  }</pre>
      *
      * @param tabsPosition The position of the tab buttons which may be {@link Position#TOP}, {@link Position#RIGHT}, {@link Position#BOTTOM}, {@link Position#LEFT}.
@@ -458,7 +470,7 @@ public final class UI
      *      UI.tabbedPane(OverflowPolicy.SCROLL)
      *      .add(UI.tab("First").add(UI.panel().add(..)))
      *      .add(UI.tab("second").withTip("I give info!").add(UI.label("read me")))
-     *      .add(UI.tab("third").withIcon(..).add(UI.button("click me")))
+     *      .add(UI.tab("third").with(someIcon).add(UI.button("click me")))
      *  }</pre>
      *  
      * @param tabsPolicy The overflow policy of the tab button which can either be {@link OverflowPolicy#SCROLL} or {@link OverflowPolicy#WRAP}.
@@ -477,7 +489,7 @@ public final class UI
      *      UI.tabbedPane()
      *      .add(UI.tab("First").add(UI.panel().add(..)))
      *      .add(UI.tab("second").withTip("I give info!").add(UI.label("read me")))
-     *      .add(UI.tab("third").withIcon(..).add(UI.button("click me")))
+     *      .add(UI.tab("third").with(someIcon).add(UI.button("click me")))
      *  }</pre>
      *
      * @param title The text displayed on the tab button.
@@ -798,7 +810,7 @@ public final class UI
      */
     public static UIForLabel<JLabel> label(Icon icon) {
         LogUtil.nullArgCheck(icon, "icon", Icon.class);
-        return of(new JLabel()).withIcon(icon);
+        return of(new JLabel()).with(icon);
     }
 
     /**
@@ -812,7 +824,7 @@ public final class UI
     public static UIForLabel<JLabel> label(int width, int height, ImageIcon icon) {
         LogUtil.nullArgCheck(icon, "icon", ImageIcon.class);
         return of(new JLabel())
-                .withIcon(
+                .with(
                     new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT))
                 );
     }
@@ -932,12 +944,48 @@ public final class UI
     }
 
     /**
-     *  Use this to create a builder for a new {@link JTextArea} UI component.
-     *  This is in essence a convenience method for {@code UI.of(new JTextArea())}.
+     *  A convenience method for creating a builder for a {@link JTextArea} with a certain text alignment.
+     *  This is a shortcut version for the following code:
+     *  <pre>{@code
+     *      UI.textArea()
+     *          .withTextOrientation(UI.HorizontalDirection.RIGHT_TO_LEFT);
+     *  }</pre>
+     * The provided {@link UI.HorizontalDirection} translates to {@link ComponentOrientation}
+     * instances which are used to align the elements or text within the wrapped {@link JTextComponent}.
+     * {@link LayoutManager} and {@link Component}
+     * subclasses will use this property to
+     * determine how to lay out and draw components.
      *
+     * @param direction The text orientation type which should be used.
      * @return A builder instance for a new {@link JTextArea}, which enables fluent method chaining.
      */
-    public static UIForTextArea<JTextArea> textArea() { return of(new JTextArea()); }
+    public static UIForTextArea<JTextArea> textArea(UI.HorizontalDirection direction) {
+        LogUtil.nullArgCheck(direction, "direction", HorizontalDirection.class);
+        return of(new JTextArea()).withTextOrientation(direction);
+    }
+
+    /**
+     *  A convenience method for creating a builder for a {@link JTextArea} with a certain text and text alignment.
+     *  This is a shortcut version for the following code:
+     *  <pre>{@code
+     *      UI.textArea()
+     *          .withTextOrientation(UI.HorizontalDirection.RIGHT_TO_LEFT)
+     *          .withText(text);
+     *  }</pre>
+     * The provided {@link UI.HorizontalDirection} translates to {@link ComponentOrientation}
+     * instances which are used to align the elements or text within the wrapped {@link JTextComponent}.
+     * {@link LayoutManager} and {@link Component}
+     * subclasses will use this property to
+     * determine how to lay out and draw components.
+     *
+     * @param direction The text orientation type which should be used.
+     * @param text The new text to be set for the wrapped text component type.
+     * @return A builder instance for a new {@link JTextArea}, which enables fluent method chaining.
+     */
+    public static UIForTextArea<JTextArea> textArea(UI.HorizontalDirection direction, String text) {
+        LogUtil.nullArgCheck(direction, "direction", HorizontalDirection.class);
+        return of(new JTextArea()).withTextOrientation(direction).withText(text);
+    }
 
     /**
      *  Use this to create a builder for anything.

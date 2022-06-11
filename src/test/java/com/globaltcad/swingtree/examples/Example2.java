@@ -42,11 +42,11 @@ public class Example2 extends JPanel
                 .add("cell 0 0, aligny top", UI.button("I am a normal button"))
                 .add("cell 0 1, aligny top",
                     UI.button("<html><i>I am a naked button</i><html>")
-                    .withCursor(UI.Cursor.HAND)
+                    .with(UI.Cursor.HAND)
                     .makePlain()
                     .onClick( e -> {/* does something */} )
                 )
-                .withBorder(BorderFactory.createMatteBorder(0,0,1,0,Color.LIGHT_GRAY))
+                .with(BorderFactory.createMatteBorder(0,0,1,0,Color.LIGHT_GRAY))
                 .add( "cell 0 2, aligny bottom, span, shrink", UI.label("Here is a text area:"))
                 .add("cell 0 3, aligny bottom, span, grow", UI.textArea("Anything..."))
             )

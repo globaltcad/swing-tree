@@ -13,9 +13,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    public UIForTabbedPane(P component) {
-        super(component);
-    }
+    public UIForTabbedPane(P component) { super(component); }
 
     public final UIForTabbedPane<P> add(Tab tab) {
         _component.addTab(tab.title(), tab.icon(), tab.contents(), tab.tip());
