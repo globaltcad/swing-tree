@@ -39,6 +39,7 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'    // mandatory dependencies for using Spock
 
     testImplementation 'org.codehaus.groovy:groovy:3.0.10'
+    testImplementation 'com.formdev:flatlaf-intellij-themes:2.2'
     testImplementation platform("org.spockframework:spock-bom:2.0-groovy-3.0")
     testImplementation 'org.spockframework:spock-core:2.1-groovy-3.0'
     testImplementation 'com.athaydes:spock-reports:2.3.0-groovy-3.0'//, { transitive = false }
