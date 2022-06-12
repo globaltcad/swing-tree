@@ -1,4 +1,4 @@
-package com.globaltcad.swingtree.examples;
+package com.globaltcad.swingtree.examples.simple;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import com.globaltcad.swingtree.UI;
@@ -6,9 +6,9 @@ import com.globaltcad.swingtree.UI;
 import javax.swing.*;
 import java.awt.*;
 
-public class Example extends JPanel
+public class Example1 extends JPanel
 {
-	public Example()
+	public Example1()
 	{
 		FlatLightLaf.setup();
 		ImageIcon pdfIcon  = new ImageIcon(getClass().getResource("/img/seed.png"));
@@ -72,6 +72,6 @@ public class Example extends JPanel
 
 	// Use this to test the UI!
 	public static void main(String... args) {
-		new UI.TestWindow(JFrame::new,new Example()).getFrame().setSize(new Dimension(700, 300));
+		new UI.TestWindow(JFrame::new,new Example1()).getFrame().setSize(new Dimension(700, 300));
 	}
 }

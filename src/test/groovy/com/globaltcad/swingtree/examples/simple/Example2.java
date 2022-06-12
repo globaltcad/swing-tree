@@ -1,4 +1,4 @@
-package com.globaltcad.swingtree.examples;
+package com.globaltcad.swingtree.examples.simple;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import com.globaltcad.swingtree.UI;
@@ -6,9 +6,9 @@ import com.globaltcad.swingtree.UI;
 import javax.swing.*;
 import java.awt.*;
 
-public class Example3 extends JPanel
+public class Example2 extends JPanel
 {
-    public Example3()
+    public Example2()
     {
         FlatLightLaf.setup();
         String description = "All of this is less than a hundred lines of code!<br>The layout of this is powered by MigLayout.<br><br>";
@@ -26,36 +26,16 @@ public class Example3 extends JPanel
             .withBackground(Color.WHITE)
             .add("cell 0 0, aligny top, grow x, grow y",
                 UI.panel("fill, insets 7","grow")
-                    .withBackground(Color.LIGHT_GRAY)
-                    .add( "span",
-                            UI.label("<html><div style=\"width:275px;\">"+ description +"</div></html>")
-                    )
-                    .add("shrink", UI.label("First Name"))
-                    .add("grow", UI.textField("John"))
-                    .add("gap unrelated, shrink", UI.label("Last Name"))
-                    .add("wrap, grow", UI.textField("Smith"))
-                    .add("shrink", UI.label("Address"))
-                    .add("grow",
-                        UI.splitButton("Hey!")
-                        .onButtonClick( it -> it.displayCurrentItemText() )
-                        .onSplitClick( it -> it.displayCurrentItemText() )
-                        .onSelection(
-                            it -> it.displayCurrentItemText()
-                                    .unselectAllItems().selectCurrentItem()
-                        )
-                        .add(UI.splitRadioItem("first")
-                            .onButtonClick(it -> it.getCurrentItem().setText(":P") )
-                        )
-                        .add(UI.splitRadioItem("second")
-                            .onButtonClick(it -> System.out.println("SECOND CLICKED"))
-                        )
-                        .add(UI.splitRadioItem("third")
-                            .onButtonClick(it -> System.out.println("THIRD CLICKED"))
-                        )
-                        .add(UI.splitRadioItem("Fourth")
-                            .onButtonClick(it -> System.out.println("THIRD CLICKED"))
-                        )
-                    )
+                .withBackground(Color.LIGHT_GRAY)
+                .add( "span",
+                    UI.label("<html><div style=\"width:275px;\">"+ description +"</div></html>")
+                )
+                .add("shrink", UI.label("First Name"))
+                .add("grow", UI.textField("John"))
+                .add("gap unrelated, shrink", UI.label("Last Name"))
+                .add("wrap, grow", UI.textField("Smith"))
+                .add("shrink", UI.label("Address"))
+                .add("span, grow", UI.textField("Somewhere"))
             )
             .add("cell 1 0, grow y",
                 UI.panel("fill", "[grow]")
@@ -86,7 +66,7 @@ public class Example3 extends JPanel
 
     // Use this to test the UI!
     public static void main(String... args) {
-        new UI.TestWindow(JFrame::new,new Example3()).getFrame().setSize(new Dimension(700, 300));
+        new UI.TestWindow(JFrame::new,new Example2()).getFrame().setSize(new Dimension(700, 300));
     }
 
 }

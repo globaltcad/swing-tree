@@ -26,6 +26,10 @@ public class Utility {
         return ui.getComponent().getPopupMenu();
     }
 
+    public static <B extends JSplitButton> JPopupMenu getSplitButtonPopup(JSplitButton ui) {
+        return ui.getPopupMenu();
+    }
+
     public static <B extends JSplitButton> void click(UIForSplitButton<B> ui) {
         ui.getComponent().doClick();
     }

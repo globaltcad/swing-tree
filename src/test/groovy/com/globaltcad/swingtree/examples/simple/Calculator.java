@@ -1,4 +1,4 @@
-package com.globaltcad.swingtree.examples;
+package com.globaltcad.swingtree.examples.simple;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import com.globaltcad.swingtree.UI;
@@ -6,9 +6,9 @@ import com.globaltcad.swingtree.UI;
 import javax.swing.*;
 import java.awt.*;
 
-public class Example4 extends JPanel
+public class Calculator extends JPanel
 {
-    public Example4()
+    public Calculator()
     {
         FlatLightLaf.setup();
 
@@ -67,7 +67,7 @@ public class Example4 extends JPanel
 
     // Use this to test the UI!
     public static void main(String... args) {
-        new UI.TestWindow(JFrame::new,new Example4()).getFrame().setSize(new Dimension(240, 325));
+        new UI.TestWindow(JFrame::new,new Calculator()).getFrame().setSize(new Dimension(240, 325));
     }
 
 }
