@@ -44,7 +44,8 @@ UI.of(this/*JPanel subtype*/).withLayout("fill, insets 10")
     UI.panel("fill, ins 0")
     .add("shrink", UI.label("Result:"))
     .add("grow, wrap",
-        UI.label("42.0").with(UI.HorizontalAlignment.RIGHT).withProperty("FlatLaf.styleClass", "large")
+        UI.label("42.0")
+	.with(UI.HorizontalAlignment.RIGHT).withProperty("FlatLaf.styleClass", "large")
     )
     .add("grow, span, wrap",
         UI.textArea(UI.HorizontalDirection.RIGHT_TO_LEFT, "13 - 73").id("result-text-area")
@@ -94,22 +95,28 @@ UI.of(this/*JPanel subtype*/).withLayout("fill, insets 10")
 
 </td>
 <td style="vertical-align:top">
-<br>
 <img href="" title="example" src="docs/img/simple-example.png" style="width:100%"/>
 
+---
+	
 As you can see, swing tree has a very simple API, which only requires a
 single class to be imported, the `UI` class which can even be imported 
 statically to remove any `UI.` prefixes.
 
+---
+	
 Also, note that the are usually 2 arguments 
 added to a tree node: a `String` and then UI nodes.
 This first argument simply translates 
 to the layout constraints which should be applied
 to the UI element(s) added. <br>
+	
 In this example, strings will be passed to a `MigLayout`
 simply because it is a general purpose layout and no other
 layout was specified.
 
+---
+	
 </td>
 </tr>
 </table>
