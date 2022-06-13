@@ -1,5 +1,5 @@
 
-# Swing Tree - A UI builder #
+# Swing Tree - A UI builder [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) ![Java Version](https://img.shields.io/static/v1.svg?label=Java&message=8%2B&color=blue) #
 
 Fluent and boilerplate free Swing UI building!
 
