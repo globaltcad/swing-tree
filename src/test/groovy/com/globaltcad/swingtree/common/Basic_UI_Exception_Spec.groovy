@@ -1,23 +1,12 @@
 package com.globaltcad.swingtree.common
 
 import com.alexandriasoftware.swing.JSplitButton
+import com.globaltcad.swingtree.UI
 import com.globaltcad.swingtree.api.MenuBuilder
 import com.globaltcad.swingtree.api.SwingBuilder
-import com.globaltcad.swingtree.UI
 import spock.lang.Specification
 
-import javax.swing.JCheckBox
-import javax.swing.JComboBox
-import javax.swing.JComponent
-import javax.swing.JLabel
-import javax.swing.JMenu
-import javax.swing.JMenuItem
-import javax.swing.JPanel
-import javax.swing.JPopupMenu
-import javax.swing.JRadioButton
-import javax.swing.JSeparator
-import javax.swing.JSlider
-import javax.swing.JTextArea
+import javax.swing.*
 import javax.swing.text.JTextComponent
 
 class Basic_UI_Exception_Spec extends Specification
@@ -50,6 +39,7 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.of((JTextArea)null)},
                     {UI.of((JLabel)null)},
                     {UI.of((Object)null)},
+                    {UI.of((JSplitButton)null)},
                     {UI.splitItem(null)},
                     {UI.splitButton(null)},
                     {UI.checkBox(null)},
@@ -64,7 +54,13 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.of(new JComboBox<>()).onChange(null)},
                     {UI.of(new JSlider()).onChange(null)},
                     {UI.button().onClick(null)},
-                    {UI.button().onChange(null)}
+                    {UI.button().onChange(null)},
+                    {UI.button((Icon)null)},
+                    {UI.button((Icon)null,(Icon)null)},
+                    {UI.tabbedPane((UI.Position)null)},
+                    {UI.tabbedPane((UI.OverflowPolicy)null)},
+                    {UI.tabbedPane((UI.Position)null,(UI.OverflowPolicy)null)},
+                    {UI.slider((UI.Align)null)}
             ]
     }
 

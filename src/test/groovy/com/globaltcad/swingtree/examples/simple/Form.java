@@ -6,9 +6,9 @@ import com.globaltcad.swingtree.UI;
 import javax.swing.*;
 import java.awt.*;
 
-public class Example1 extends JPanel
+public class Form extends JPanel
 {
-	public Example1()
+	public Form()
 	{
 		FlatLightLaf.setup();
 		ImageIcon pdfIcon  = new ImageIcon(getClass().getResource("/img/seed.png"));
@@ -49,7 +49,7 @@ public class Example1 extends JPanel
 					.add("span, grow", UI.textField())
 				)
 				.add("cell 1 0",
-					UI.button(50, 50, pdfIcon, pdfHover)
+					UI.button(50, 50, pdfIcon, pdfHover).id("hover-icon-button")
 					.with(UI.Cursor.HAND)
 					.makePlain()
 					.onClick( e -> {/* does something */} )
@@ -72,6 +72,6 @@ public class Example1 extends JPanel
 
 	// Use this to test the UI!
 	public static void main(String... args) {
-		new UI.TestWindow(JFrame::new,new Example1()).getFrame().setSize(new Dimension(700, 300));
+		new UI.TestWindow(JFrame::new,new Form()).getFrame().setSize(new Dimension(700, 300));
 	}
 }

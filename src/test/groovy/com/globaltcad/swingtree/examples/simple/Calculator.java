@@ -20,7 +20,7 @@ public class Calculator extends JPanel
                 UI.label("42.0").with(UI.HorizontalAlignment.RIGHT).withProperty("FlatLaf.styleClass", "large")
             )
             .add("grow, span, wrap",
-                UI.textArea(UI.HorizontalDirection.RIGHT_TO_LEFT, "73 - 31")
+                UI.textArea(UI.HorizontalDirection.RIGHT_TO_LEFT, "73 - 31").id("result-text-area")
             )
         )
         .add("growx", UI.radioButton("DEG"), UI.radioButton("RAD"))
