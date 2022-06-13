@@ -6,11 +6,22 @@ import com.globaltcad.swingtree.examples.simple.Calculator
 import com.globaltcad.swingtree.examples.simple.Form
 import com.globaltcad.swingtree.utility.Utility
 import spock.lang.Specification
+import spock.lang.Title
+import spock.lang.Narrative
 
 import javax.swing.*
 import java.awt.ComponentOrientation
 import java.awt.Cursor
 
+@Title("Execution and Validation of Example Code")
+@Narrative('''
+
+    This specification ensures that the
+    various UI examples in the test suite, 
+    run successfully and also produce
+    UIs with expected states.
+
+''')
 class Examples_Spec extends Specification
 {
 
