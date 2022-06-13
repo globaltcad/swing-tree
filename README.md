@@ -3,6 +3,8 @@
 
 Fluent and boilerplate free Swing UI building!
 
+- [Motivation: Declatative vs Imperative UIs](docs/markdown/Motivation.md)
+
 <table>
 <tr>
 <th></th>
