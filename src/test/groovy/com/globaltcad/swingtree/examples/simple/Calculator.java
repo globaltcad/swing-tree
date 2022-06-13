@@ -11,7 +11,6 @@ public class Calculator extends JPanel
     public Calculator()
     {
         FlatLightLaf.setup();
-
         UI.of(this).withLayout("fill, insets 10")
         .add("grow, span, wrap",
             UI.panel("fill, ins 0")
@@ -20,7 +19,7 @@ public class Calculator extends JPanel
                 UI.label("42.0").with(UI.HorizontalAlignment.RIGHT).withProperty("FlatLaf.styleClass", "large")
             )
             .add("grow, span, wrap",
-                UI.textArea(UI.HorizontalDirection.RIGHT_TO_LEFT, "73 - 31").id("result-text-area")
+                UI.textArea(UI.HorizontalDirection.RIGHT_TO_LEFT, "13 - 73").id("result-text-area")
             )
         )
         .add("growx", UI.radioButton("DEG"), UI.radioButton("RAD"))
@@ -71,3 +70,16 @@ public class Calculator extends JPanel
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

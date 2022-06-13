@@ -176,5 +176,6 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
         _component.setIcon(icon);
         return this;
     }
+
 }
 

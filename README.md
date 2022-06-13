@@ -29,59 +29,90 @@ Fluent and boilerplate free Swing UI building!
 </table>
 
 
+<table>
+<tr>
+<th>Here an example of some swing tree code...</th>
+<th>...producing this UI.</th>
+</tr>
+<tr>
+<td> 
+
 ```java
-UI.panel("fill, insets 10","[grow][shrink]")
-.withBackground(Color.WHITE)
-.add("cell 0 0",
-    UI.label("Hello and welcome to this UI! (Click me I'm a link)")
-    .makeBold()
-    .makeLinkTo("https://github.com/globaltcad")
-)
-.add("cell 0 1, grow, shrinky",
-    UI.panel("fill, insets 0","[grow][shrink]")
-    .withBackground(Color.WHITE)
-    .add("cell 0 0, aligny top, grow x, grow y",
-        UI.panel("fill, insets 7","grow")
-        .withBackground(Color.LIGHT_GRAY)
-        .add("span", UI.label("...some text..."))
-        .add("shrink", UI.label("First Name"))
-        .add("grow", UI.textField("John"))
-        .add("gap unrelated, shrink", UI.label("Last Name"))
-        .add("wrap, grow", UI.textField("Smith"))
-        .add("shrink", UI.label("Address"))
-        .add("span, grow", UI.textField("Somewhere"))
+FlatLightLaf.setup();
+UI.of(this/*JPanel subtype*/).withLayout("fill, insets 10")
+.add("grow, span, wrap",
+    UI.panel("fill, ins 0")
+    .add("shrink", UI.label("Result:"))
+    .add("grow, wrap",
+        UI.label("42.0").with(UI.HorizontalAlignment.RIGHT).withProperty("FlatLaf.styleClass", "large")
     )
-    .add("cell 1 0, grow y",
-        UI.panel("fill", "[grow]")
-        .add("cell 0 0, aligny top", UI.button("I am a normal button"))
-        .add("cell 0 1, aligny top",
-            UI.button("<html><i>I am a naked button</i><html>")
-            .withCursor(UI.Cursor.HAND)
-            .makePlain()
-            .onClick( e -> {/* does something */} )
+    .add("grow, span, wrap",
+        UI.textArea(UI.HorizontalDirection.RIGHT_TO_LEFT, "13 - 73").id("result-text-area")
+    )
+)
+.add("growx", UI.radioButton("DEG"), UI.radioButton("RAD"))
+.add("shrinkx", UI.splitButton("sin"))
+.add("growx, wrap", UI.button("Help").withProperty("JButton.buttonType", "help"))
+.add("growx, span, wrap",
+    UI.panel("fill")
+    .add("span, grow, wrap",
+        UI.panel("fill, ins 0")
+        .add("grow",
+            UI.button("(").withProperty("JButton.buttonType", "roundRect"),
+            UI.button(")").withProperty("JButton.buttonType", "roundRect")
         )
-        .withBorder(BorderFactory.createMatteBorder(0,0,1,0,Color.LIGHT_GRAY))
-        .add( "cell 0 2, aligny bottom, span, shrink", UI.label("Here is a text area:"))
-        .add("cell 0 3, aligny bottom, span, grow", UI.textArea("Anything..."))
     )
-)
-.add("cell 0 2, grow",
-    UI.panel("fill, insets 0 0 0 0","[grow][grow][grow]")
-    .withBackground(Color.WHITE)
-    .add("cell 1 0", UI.label("Built with swingtree"))
-    .add("cell 2 0", UI.label("by GTS"))
-    .add("cell 3 0", UI.label("29-March-2022"))
-)
-.add("cell 0 3, span 2, grow",
-    UI.label("...here the UI comes to an end...").withForeground(Color.LIGHT_GRAY)
-)
-.withBackground(Color.WHITE);
+    .add("grow",
+        UI.panel("fill, ins 0")
+        .apply( it -> {
+            String[] labels = {"7", "8", "9", "4", "5", "6", "1", "2", "3", "0", ".", "C"};
+            for ( int i = 0; i < labels.length; i++ )
+                it.add("grow" + ( i % 3 == 2 ? ",wrap" : "" ), UI.button(labels[i]));
+        })
+    )
+    .add("grow",
+        UI.panel("fill, ins 0")
+        .add("grow", UI.button("-").withProperty("JButton.buttonType", "roundRect"))
+        .add("grow, wrap", UI.button("/").withProperty("JButton.buttonType", "roundRect"))
+        .add("span, grow, wrap",
+            UI.panel("fill, ins 0")
+            .add("grow", UI.button("+").withProperty("JButton.buttonType", "roundRect"))
+            .add("grow",
+                UI.panel("fill, ins 0")
+                .add("grow, wrap",
+                    UI.button("*").withProperty("JButton.buttonType", "roundRect"),
+                    UI.button("%").withProperty("JButton.buttonType", "roundRect")
+                )
+            ),
+            UI.button("=")
+            .withBackground(new Color(103, 255, 190))
+            .withProperty("JButton.buttonType", "roundRect")
+        )
+    )
+);
 ```
 
-Which produces the following UI when added to a JFrame:
+</td>
+<td style="vertical-align:top">
+<br>
+<img href="" title="example" src="docs/img/simple-example.png" style="width:100%"/>
 
-<img href="" title="example" src="docs/img/simple-example.png" style="width:60%"/>
+As you can see, swing tree has a very simple API, which only requires a
+single class to be imported, the `UI` class which can even be imported 
+statically to remove any `UI.` prefixes.
 
+Also, note that the are usually 2 arguments 
+added to a tree node: a `String` and then UI nodes.
+This first argument simply translates 
+to the layout constraints which should be applied
+to the UI element(s) added. <br>
+In this example, strings will be passed to a `MigLayout`
+simply because it is a general purpose layout and no other
+layout was specified.
+
+</td>
+</tr>
+</table>
 
 ## Getting started with [![](https://jitpack.io/v/globaltcad/swing-tree.svg)](https://jitpack.io/#globaltcad/swing-tree) ##
 **1. Add the JitPack url in your root `build.gradle` at the end of `repositories`**
