@@ -62,8 +62,8 @@ class Examples_Spec extends Specification
         given : 'We get the UI.'
             var ui = new Calculator()
         expect :
-            new Utility.Query(ui).find(JTextArea, "result-text-area").isPresent()
-            new Utility.Query(ui).find(JTextArea, "result-text-area").get().componentOrientation == ComponentOrientation.RIGHT_TO_LEFT
+            new Utility.Query(ui).find(JTextArea, "input-text-area").isPresent()
+            new Utility.Query(ui).find(JTextArea, "input-text-area").get().componentOrientation == ComponentOrientation.RIGHT_TO_LEFT
     }
 
 }

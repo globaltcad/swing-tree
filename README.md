@@ -3,7 +3,7 @@
 
 Fluent and boilerplate free Swing UI building!
 
-- [Motivation: Declatative vs Imperative UIs](docs/markdown/Motivation.md)
+- [Motivation](docs/markdown/Motivation.md)
 
 <table>
 <tr>
@@ -44,11 +44,11 @@ UI.of(this/*JPanel subtype*/).withLayout("fill, insets 10")
     UI.panel("fill, ins 0")
     .add("shrink", UI.label("Result:"))
     .add("grow, wrap",
-        UI.label("42.0")
-	.with(UI.HorizontalAlignment.RIGHT).withProperty("FlatLaf.styleClass", "large")
+        UI.label("42.0").with(UI.HorizontalAlignment.RIGHT
+        .withProperty("FlatLaf.styleClass", "large")
     )
     .add("grow, span, wrap",
-        UI.textArea(UI.HorizontalDirection.RIGHT_TO_LEFT, "13 - 73").id("result-text-area")
+        UI.textArea(UI.HorizontalDirection.RIGHT_TO_LEFT, "13 - 73").id("input-text-area")
     )
 )
 .add("growx", UI.radioButton("DEG"), UI.radioButton("RAD"))

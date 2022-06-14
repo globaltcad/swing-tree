@@ -19,7 +19,7 @@ public class Calculator extends JPanel
                 UI.label("42.0").with(UI.HorizontalAlignment.RIGHT).withProperty("FlatLaf.styleClass", "large")
             )
             .add("grow, span, wrap",
-                UI.textArea(UI.HorizontalDirection.RIGHT_TO_LEFT, "13 - 73").id("result-text-area")
+                UI.textArea(UI.HorizontalDirection.RIGHT_TO_LEFT, "13 - 73").id("input-text-area")
             )
         )
         .add("growx", UI.radioButton("DEG"), UI.radioButton("RAD"))
@@ -40,16 +40,14 @@ public class Calculator extends JPanel
                     String[] labels = {"7", "8", "9", "4", "5", "6", "1", "2", "3", "0", ".", "C"};
                     for ( int i = 0; i < labels.length; i++ )
                         it.add("grow" + ( i % 3 == 2 ? ",wrap" : "" ), UI.button(labels[i]));
-                })
-            )
-            .add("grow",
+                }),
                 UI.panel("fill, ins 0")
                 .add("grow", UI.button("-").withProperty("JButton.buttonType", "roundRect"))
                 .add("grow, wrap", UI.button("/").withProperty("JButton.buttonType", "roundRect"))
                 .add("span, grow, wrap",
                     UI.panel("fill, ins 0")
-                    .add("grow", UI.button("+").withProperty("JButton.buttonType", "roundRect"))
                     .add("grow",
+                        UI.button("+").withProperty("JButton.buttonType", "roundRect"),
                         UI.panel("fill, ins 0")
                         .add("grow, wrap",
                             UI.button("*").withProperty("JButton.buttonType", "roundRect"),

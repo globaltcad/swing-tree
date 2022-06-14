@@ -1,4 +1,4 @@
-## The Problem: Building UIs ##
+# The Problem: Building UIs #
 
 Graphical user interfaces, are like many
 concepts in the field of computer science
@@ -29,12 +29,14 @@ Desktop application frameworks on the other hand, don't need to send anything
 over the internet, so why use xml formats?
 
 
-## Declarative instead of Imperative UI #
+## Making Imperative UIs Declarative #
 
-You might say that XML-like formats are superior 
-because of their inherent support for nesting.
+You might say that XML-like formats are superior to building UI
+imperatively 
+because of their declarative nature and inherent support for nesting.
 However, your favourite programming language also supports nesting 
-when the right design patterns are applied.
+and the ability to assemble things
+in a declarative manner when the right design patterns are applied.
 
 Why not program the UIs state using a nested builder pattern? 
 All it takes is some method chaining.
