@@ -3,7 +3,7 @@ package com.globaltcad.swingtree;
 import javax.swing.*;
 
 /**
- *  A swing tree builder for {@link JPasswordField} instances.
+ *  A swing tree builder node for {@link JPasswordField} instances.
  */
 public class UIForPasswordField<F extends JPasswordField> extends UIForAbstractTextComponent<UIForPasswordField<F>, F>
 {

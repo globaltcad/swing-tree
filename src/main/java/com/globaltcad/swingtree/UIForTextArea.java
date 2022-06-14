@@ -3,7 +3,7 @@ package com.globaltcad.swingtree;
 import javax.swing.*;
 
 /**
- *  A swing tree builder for {@link JTextArea} instances.
+ *  A swing tree builder node for {@link JTextArea} instances.
  */
 public class UIForTextArea<A extends JTextArea> extends UIForAbstractTextComponent<UIForTextArea<A>, A>
 {

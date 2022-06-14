@@ -3,7 +3,7 @@ package com.globaltcad.swingtree;
 import javax.swing.*;
 
 /**
- *  A swing tree builder for {@link JSplitPane} instances.
+ *  A swing tree builder node for {@link JSplitPane} instances.
  */
 public class UIForSplitPane<P extends JSplitPane> extends UIForAbstractSwing<UIForSplitPane<P>, P>
 {

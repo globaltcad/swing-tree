@@ -9,7 +9,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 /**
- *  A swing tree builder for {@link JLabel} instances.
+ *  A swing tree builder node for {@link JLabel} instances.
  */
 public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<L>, L>
 {

@@ -6,7 +6,7 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 
 /**
- *  A swing tree builder for {@link JSlider} instances.
+ *  A swing tree builder node for {@link JSlider} instances.
  */
 public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlider<S>, S>
 {

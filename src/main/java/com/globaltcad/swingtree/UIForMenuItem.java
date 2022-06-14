@@ -4,7 +4,7 @@ package com.globaltcad.swingtree;
 import javax.swing.*;
 
 /**
- *  A swing tree builder for {@link JMenuItem} instances.
+ *  A swing tree builder node for {@link JMenuItem} instances.
  */
 public class UIForMenuItem<M extends JMenuItem> extends UIForAbstractButton<UIForMenuItem<M>, M>
 {

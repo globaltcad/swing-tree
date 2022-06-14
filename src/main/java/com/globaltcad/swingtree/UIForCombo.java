@@ -7,7 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- *  A swing tree builder for {@link JComboBox} instances.
+ *  A swing tree builder node for {@link JComboBox} instances.
  */
 public class UIForCombo<E> extends UIForAbstractSwing<UIForCombo<E>, JComboBox<E>>
 {

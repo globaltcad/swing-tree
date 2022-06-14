@@ -3,7 +3,7 @@ package com.globaltcad.swingtree;
 import javax.swing.*;
 
 /**
- *  A swing tree builder for {@link JTextField} instances.
+ *  A swing tree builder node for {@link JTextField} instances.
  */
 public class UIForTextField<F extends JTextField> extends UIForAbstractTextComponent<UIForTextField<F>, F>
 {

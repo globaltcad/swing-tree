@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- *  A swing tree builder for {@link JSplitButton} instances.
+ *  A swing tree builder node for {@link JSplitButton} instances.
  */
 public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButton<UIForSplitButton<B>, B>
 {

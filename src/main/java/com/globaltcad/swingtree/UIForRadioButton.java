@@ -3,7 +3,7 @@ package com.globaltcad.swingtree;
 import javax.swing.*;
 
 /**
- *  A swing tree builder for {@link JRadioButton} instances.
+ *  A swing tree builder node for {@link JRadioButton} instances.
  */
 public class UIForRadioButton<R extends JRadioButton> extends UIForAbstractButton<UIForRadioButton<R>, R>
 {

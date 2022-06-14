@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- *  A swing tree builder for {@link JSeparator} instances.
+ *  A swing tree builder node for {@link JSeparator} instances.
  */
 public class UIForSeparator<S extends JSeparator> extends UIForAbstractSwing<UIForSeparator<S>, S>
 {

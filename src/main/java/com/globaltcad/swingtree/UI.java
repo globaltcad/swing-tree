@@ -209,7 +209,7 @@ public final class UI
     }
 
     /**
-     *  Use this to create a swing tree builder for the {@link JPopupMenu} UI component.
+     *  Use this to create a swing tree builder node for the {@link JPopupMenu} UI component.
      *
      * @return A builder instance for a {@link JPopupMenu}, which enables fluent method chaining.
      */
@@ -220,7 +220,7 @@ public final class UI
     }
 
     /**
-     *  Use this to create a swing tree builder for the {@link JPopupMenu} UI component.
+     *  Use this to create a swing tree builder node for the {@link JPopupMenu} UI component.
      *  This is in essence a convenience method for {@code UI.of(new JPopupMenu())}.
      *
      * @return A builder instance for a {@link JPopupMenu}, which enables fluent method chaining.

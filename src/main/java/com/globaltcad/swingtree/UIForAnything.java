@@ -1,7 +1,7 @@
 package com.globaltcad.swingtree;
 
 /**
- *  A swing tree builder for anything.
+ *  A swing tree builder node for anything.
  *  Note: This does not support nesting.
  */
 public class UIForAnything<T> extends AbstractBuilder<UIForAnything<T>, T>

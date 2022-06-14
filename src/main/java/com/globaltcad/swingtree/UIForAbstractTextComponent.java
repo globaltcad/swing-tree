@@ -10,7 +10,7 @@ import java.awt.*;
 import java.util.function.Consumer;
 
 /**
- *  A swing tree builder for {@link JTextComponent} instances.
+ *  A swing tree builder node for {@link JTextComponent} instances.
  */
 public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> extends UIForAbstractSwing<I, C>
 {

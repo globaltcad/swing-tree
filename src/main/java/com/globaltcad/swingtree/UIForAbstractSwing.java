@@ -16,7 +16,7 @@ import java.util.WeakHashMap;
 
 
 /**
- *  A swing tree builder for any kind {@link JComponent} instance.
+ *  A swing tree builder node for any kind {@link JComponent} instance.
  *  This is the most generic builder type and therefore abstract super-type for almost all other builders.
  *  This builder defines nested building for anything extending the {@link JComponent} class.
  *  <br><br>
@@ -99,7 +99,6 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *         .peek( button -> button.withProperty("key", "value") );
      * }</pre>
      *
-
      * @param key the new client property key which may be used for styles or layout managers.
      * @param value the new client property value.
      */
