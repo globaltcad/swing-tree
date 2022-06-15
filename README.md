@@ -62,8 +62,10 @@ UI.of(this/*JPanel subtype*/).withLayout("fill, insets 10")
    .add("span, grow, wrap",
        UI.panel("fill, ins 0")
        .add("grow",
-           UI.button("(").withProperty("JButton.buttonType", "roundRect"),
-           UI.button(")").withProperty("JButton.buttonType", "roundRect")
+           UI.button("(")
+	   .withProperty("JButton.buttonType", "roundRect"),
+           UI.button(")")
+	   .withProperty("JButton.buttonType", "roundRect")
        )
    )
    .add("grow",
@@ -87,11 +89,14 @@ UI.of(this/*JPanel subtype*/).withLayout("fill, insets 10")
       .add("span, grow, wrap",
          UI.panel("fill, ins 0")
             .add("grow", 
-            UI.button("+").withProperty("JButton.buttonType", "roundRect"),
+            UI.button("+")
+	    .withProperty("JButton.buttonType", "roundRect"),
             UI.panel("fill, ins 0")
             .add("grow, wrap",
-               UI.button("*").withProperty("JButton.buttonType", "roundRect"),
-               UI.button("%").withProperty("JButton.buttonType", "roundRect")
+               UI.button("*")
+	       .withProperty("JButton.buttonType", "roundRect"),
+               UI.button("%")
+	       .withProperty("JButton.buttonType", "roundRect")
             )
          ),
          UI.button("=")
