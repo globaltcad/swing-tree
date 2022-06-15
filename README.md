@@ -28,11 +28,12 @@ Fluent and boilerplate free Swing UI building!
 </tr>
 </table>
 
+---
 
 <table>
 <tr>
-<th>Here an example of some swing tree code...</th>
-<th>...producing this UI.</th>
+<th></th>
+<th></th>
 </tr>
 <tr>
 <td> 
@@ -109,6 +110,12 @@ UI.of(this/*JPanel subtype*/).withLayout("fill, insets 10")
 
 </td>
 <td style="vertical-align:top">
+	
+Here an example of some swing tree code which defines a simple calculator UI based on the `FlatLaF` look-and-feel. <br>
+This code will produce the following UI when added to a `JFrame`.
+	
+---
+	
 <img href="" title="example" src="docs/img/simple-example.png" style="width:100%"/>
 
 ---
@@ -130,6 +137,8 @@ simply because it is a general purpose layout and no other
 layout was specified.
 
 ---
+	
+For more examples take a look at the [examples folder](src/test/groovy/com/globaltcad/swingtree/examples) inside the test suite. 
 	
 </td>
 </tr>
