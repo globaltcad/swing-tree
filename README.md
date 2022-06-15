@@ -74,7 +74,9 @@ UI.of(this/*JPanel subtype*/).withLayout("fill, insets 10")
         }),
         UI.panel("fill, ins 0")
         .add("grow", UI.button("-").withProperty("JButton.buttonType", "roundRect"))
-        .add("grow, wrap", UI.button("/").withProperty("JButton.buttonType", "roundRect"))
+        .add("grow, wrap", 
+	    UI.button("/").withProperty("JButton.buttonType", "roundRect")
+	)
         .add("span, grow, wrap",
             UI.panel("fill, ins 0")
             .add("grow", 
