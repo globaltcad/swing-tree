@@ -126,7 +126,7 @@ statically to remove any `UI.` prefixes.
 
 ---
 	
-Also, note that the are usually 2 arguments 
+Also, note that there are usually 2 arguments 
 added to a tree node: a `String` and then UI nodes.
 This first argument simply translates 
 to the layout constraints which should be applied
