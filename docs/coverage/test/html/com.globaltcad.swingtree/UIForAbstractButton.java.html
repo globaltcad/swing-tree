@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForAbstractButton.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stml</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree</a> &gt; <span class="el_source">UIForAbstractButton.java</span></div><h1>UIForAbstractButton.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree;
+
+import com.globaltcad.swingtree.api.UIAction;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+
+/**
+ *  The following is a more specialized type of builder which extends the &quot;BasicBuilder&quot; class
+ *  and provides additional features associated with the more specialized
+ *  &quot;AbstractButton&quot; Swing component type.
+ *  One of which is the &quot;onClick&quot; method allowing for a more readable way of adding
+ *  ActionListener instances to buttons types...
+ *  &lt;br&gt;&lt;br&gt;
+ *
+ * @param &lt;B&gt; The type parameter for the component wrapped by an instance of this class.
+ */
+public abstract class UIForAbstractButton&lt;I, B extends AbstractButton&gt; extends UIForAbstractSwing&lt;I, B&gt;
+{
+<span class="fc" id="L24">    protected UIForAbstractButton(B component) { super(component); }</span>
+
+    /**
+     * Defines the single line of text the wrapped button type will display.
+     * If the value of text is null or empty string, nothing is displayed.
+     *
+     * @param text The new text to be set for the wrapped button type.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withText(String text) {
+<span class="nc" id="L34">        _component.setText(text);</span>
+<span class="nc" id="L35">        return (I) this;</span>
+    }
+
+    public final I isSelectedIf(boolean isSelected) {
+<span class="nc" id="L39">        _component.setSelected(isSelected);</span>
+<span class="nc" id="L40">        return (I) this;</span>
+    }
+
+    /**
+     *  Effectively removes the native style of this button.
+     *  Without an icon or text, one will not be able to recognize the button.
+     *  Use this for buttons with a custom icon or clickable text!
+     *
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public I makePlain() {
+<span class="fc" id="L51">        peek(it -&gt; {</span>
+<span class="fc" id="L52">            it.setBorderPainted(false);</span>
+<span class="fc" id="L53">            it.setContentAreaFilled(false);</span>
+<span class="fc" id="L54">            it.setOpaque(false);</span>
+<span class="fc" id="L55">            it.setFocusPainted(false);</span>
+<span class="fc" id="L56">            it.setMargin(new Insets(0,0,0,0));</span>
+<span class="fc" id="L57">        });</span>
+<span class="fc" id="L58">        return (I) this;</span>
+    }
+
+    /**
+     *  This method adds the provided
+     *  {@link ItemListener} instance to the wrapped button component.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param action The change action lambda which will be passed to the button component.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public I onChange(UIAction&lt;SimpleDelegate&lt;B, ItemEvent&gt;&gt; action) {
+<span class="nc" id="L70">        LogUtil.nullArgCheck(action, &quot;action&quot;, UIAction.class);</span>
+<span class="nc" id="L71">        _component.addItemListener(e -&gt; action.accept(new SimpleDelegate&lt;&gt;(_component, e, this::getSiblinghood)));</span>
+<span class="nc" id="L72">        return (I) this;</span>
+    }
+
+    /**
+     *  This method enables a more readable way of adding
+     *  {@link ActionListener} instances to button types.
+     *  Additionally, to the other &quot;onClick&quot; method this method enables the involvement of the
+     *  {@link JComponent} itself into the action supplied to it.
+     *  This is very useful for changing the state of the JComponent when the action is being triggered.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param action an {@link UIAction} instance which will receive an {@link SimpleDelegate} containing important context information.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public I onClick(UIAction&lt;SimpleDelegate&lt;B, ActionEvent&gt;&gt; action) {
+<span class="fc" id="L87">        LogUtil.nullArgCheck(action, &quot;action&quot;, UIAction.class);</span>
+<span class="fc" id="L88">        _component.addActionListener(</span>
+<span class="fc" id="L89">           e -&gt; action.accept(</span>
+               new SimpleDelegate&lt;&gt;(_component, e, this::getSiblinghood)
+           )
+        );
+<span class="fc" id="L93">        return (I) this;</span>
+    }
+
+    /**
+     *  A convenience method to avoid peeking into this builder like so:
+     *  &lt;pre&gt;{@code
+     *     UI.button(&quot;Clickable!&quot;)
+     *         .peek( button -&gt; button.setHorizontalAlignment(...) );
+     *  }&lt;/pre&gt;
+     * This sets the horizontal alignment of the icon and text.
+     *
+     * @param horizontalAlign The horizontal alignment which should be applied to the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I with(UI.HorizontalAlignment horizontalAlign) {
+<span class="nc" id="L108">        LogUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class);</span>
+<span class="nc" id="L109">        _component.setHorizontalAlignment(horizontalAlign.forSwing());</span>
+<span class="nc" id="L110">        return (I) this;</span>
+    }
+
+    /**
+     *  A convenience method to avoid peeking into this builder like so:
+     *  &lt;pre&gt;{@code
+     *     UI.button(&quot;Clickable!&quot;)
+     *         .peek( button -&gt; button.setVerticalAlignment(...) );
+     *  }&lt;/pre&gt;
+     * This sets the vertical alignment of the icon and text.
+     *
+     * @param verticalAlign The vertical alignment which should be applied to the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I with(UI.VerticalAlignment verticalAlign) {
+<span class="nc" id="L125">        LogUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class);</span>
+<span class="nc" id="L126">        _component.setVerticalAlignment(verticalAlign.forSwing());</span>
+<span class="nc" id="L127">        return (I) this;</span>
+    }
+
+    /**
+     *  A convenience method to avoid peeking into this builder like so:
+     *  &lt;pre&gt;{@code
+     *     UI.button(&quot;Clickable!&quot;)
+     *         .peek( button -&gt; button.setHorizontalTextPosition(...) );
+     *  }&lt;/pre&gt;
+     * This sets the horizontal position of the text relative to the icon.
+     *
+     * @param horizontalAlign The horizontal text alignment relative to the icon which should be applied to the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withImageRelative(UI.HorizontalAlignment horizontalAlign) {
+<span class="nc" id="L142">        LogUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class);</span>
+<span class="nc" id="L143">        _component.setHorizontalTextPosition(horizontalAlign.forSwing());</span>
+<span class="nc" id="L144">        return (I) this;</span>
+    }
+
+    /**
+     *  A convenience method to avoid peeking into this builder like so:
+     *  &lt;pre&gt;{@code
+     *     UI.button(&quot;Clickable!&quot;)
+     *         .peek( button -&gt; button.setVerticalTextPosition(...) );
+     *  }&lt;/pre&gt;
+     * This sets the vertical position of the text relative to the icon.
+     *
+     * @param verticalAlign The vertical text alignment relative to the icon which should be applied to the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withImageRelative(UI.VerticalAlignment verticalAlign) {
+<span class="nc" id="L159">        LogUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class);</span>
+<span class="nc" id="L160">        _component.setVerticalTextPosition(verticalAlign.forSwing());</span>
+<span class="nc" id="L161">        return (I) this;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

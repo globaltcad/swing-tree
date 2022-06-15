@@ -112,20 +112,6 @@ task releaseSpockReports(type: Copy) {
     into "$rootDir/docs/spock/reports"
 }
 
-task injectSpockStyles(type: Task){
-    ant.replaceregexp(match:"<style>[\\s\\S]*</style>", replace:'<style>###</style>', flags:'g', byline:false) {
-        fileset(dir: "$rootDir/docs/spock/reports")
-    }
-    ant.replaceregexp(
-            match:'<style>###</style>',
-            replace:'<style>' + new File("$rootDir/docs/spock/css/custom.css").text + '</style>',
-            flags:'g',
-            byline:false
-    ) {
-        fileset(dir: "$rootDir/docs/spock/reports")
-    }
-}
-
 // JAR CREATION :
 
 task sourcesJar(type: Jar) {

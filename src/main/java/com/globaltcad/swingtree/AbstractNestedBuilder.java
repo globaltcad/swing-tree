@@ -62,7 +62,6 @@ abstract class AbstractNestedBuilder<I, C extends E, E> extends AbstractBuilder<
      *  <br><br>
      *
      * @param component A component instance which ought to be added to the wrapped component type.
-     * @return This very instance, which enables builder-style method chaining.
      */
     protected abstract void _add( E component, Object conf );
 

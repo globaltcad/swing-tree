@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LazyRef.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stml</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree</a> &gt; <span class="el_source">LazyRef.java</span></div><h1>LazyRef.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree;
+
+import java.util.function.Supplier;
+
+/**
+ * 	This will simply fetch a variable from a lambda once and then continuously
+ * 	return this one value.
+ * 	In a sense it is a lazy pass by value!
+ *
+ * @param &lt;V&gt; The value type parameter of the thing wrapped by this.
+ */
+final class LazyRef&lt;V&gt; {
+
+<span class="fc" id="L14">	public static &lt;V&gt; LazyRef&lt;V&gt; of(Supplier&lt;V&gt; source) { return new LazyRef&lt;&gt;(source); }</span>
+
+	private Supplier&lt;V&gt; source;
+<span class="fc" id="L17">	private V variable = null;</span>
+
+<span class="fc" id="L19">	private LazyRef(Supplier&lt;V&gt; source) { this.source = source; }</span>
+
+	public V get() {
+<span class="nc bnc" id="L22" title="All 2 branches missed.">		if ( this.source == null ) return this.variable;</span>
+		else {
+<span class="nc" id="L24">			this.variable = this.source.get();</span>
+<span class="nc" id="L25">			this.source = null;</span>
+		}
+<span class="nc" id="L27">		return this.variable;</span>
+	}
+
+	@Override
+<span class="nc" id="L31">	public String toString() { return String.valueOf(this.get()); }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

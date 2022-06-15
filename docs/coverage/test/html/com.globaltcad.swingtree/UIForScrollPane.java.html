@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForScrollPane.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stml</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree</a> &gt; <span class="el_source">UIForScrollPane.java</span></div><h1>UIForScrollPane.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree;
+
+import javax.swing.*;
+
+/**
+ *  A swing tree builder node for {@link JScrollPane} instances.
+ */
+public class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAbstractSwing&lt;UIForScrollPane&lt;P&gt;, P&gt;
+{
+    /**
+     * {@link UIForAbstractSwing} (sub)types always wrap
+     * a single component for which they are responsible.
+     *
+     * @param component The {@link JComponent} type which will be wrapped by this builder node.
+     */
+<span class="fc" id="L16">    public UIForScrollPane(P component) { super(component); }</span>
+
+    @Override
+    protected void _add(JComponent component, Object conf) {
+<span class="pc bpc" id="L20" title="1 of 2 branches missed.">        if ( conf != null )</span>
+<span class="nc" id="L21">            throw new IllegalArgumentException(&quot;Unknown constraint '&quot;+conf+&quot;'! (scroll pane does not support any constraint)&quot;);</span>
+<span class="fc" id="L22">        _component.setViewportView(component);</span>
+<span class="fc" id="L23">    }</span>
+
+    public final UIForScrollPane&lt;P&gt; with(UI.ScrollBarPolicy scrollPolicy) {
+<span class="fc" id="L26">        this.withVertical(scrollPolicy);</span>
+<span class="fc" id="L27">        this.withHorizontal(scrollPolicy);</span>
+<span class="fc" id="L28">        return this;</span>
+    }
+
+    public final UIForScrollPane&lt;P&gt; withVertical(UI.ScrollBarPolicy scrollBarPolicy) {
+<span class="pc bpc" id="L32" title="2 of 4 branches missed.">        switch ( scrollBarPolicy )</span>
+        {
+<span class="fc" id="L34">            case NEVER: _component.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER); break;</span>
+<span class="nc" id="L35">            case ALWAYS: _component.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS); break;</span>
+<span class="fc" id="L36">            case AS_NEEDED: _component.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED); break;</span>
+        }
+<span class="fc" id="L38">        return this;</span>
+    }
+
+    public final UIForScrollPane&lt;P&gt; withHorizontal(UI.ScrollBarPolicy scrollBarPolicy) {
+<span class="pc bpc" id="L42" title="2 of 4 branches missed.">        switch ( scrollBarPolicy )</span>
+        {
+<span class="fc" id="L44">            case NEVER: _component.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); break;</span>
+<span class="nc" id="L45">            case ALWAYS: _component.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS); break;</span>
+<span class="fc" id="L46">            case AS_NEEDED: _component.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED); break;</span>
+        }
+<span class="fc" id="L48">        return this;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

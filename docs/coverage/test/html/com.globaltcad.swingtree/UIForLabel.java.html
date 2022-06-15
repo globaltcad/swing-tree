@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForLabel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stml</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree</a> &gt; <span class="el_source">UIForLabel.java</span></div><h1>UIForLabel.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+/**
+ *  A swing tree builder node for {@link JLabel} instances.
+ */
+public class UIForLabel&lt;L extends JLabel&gt; extends UIForAbstractSwing&lt;UIForLabel&lt;L&gt;, L&gt;
+{
+<span class="fc" id="L16">    protected UIForLabel(L component) { super(component); }</span>
+
+    /**
+     *  Makes the wrapped {@link JLabel} font bold (!plain).
+     *
+     * @return This very builder to allow for method chaining.
+     */
+    public UIForLabel&lt;L&gt; makeBold() {
+<span class="fc" id="L24">        this.peek(label -&gt; {</span>
+<span class="fc" id="L25">            Font f = label.getFont();</span>
+<span class="fc" id="L26">            label.setFont(f.deriveFont(f.getStyle() | Font.BOLD));</span>
+<span class="fc" id="L27">        });</span>
+<span class="fc" id="L28">        return this;</span>
+    }
+
+    /**
+     *  Use this to transform the underlying {@link JLabel} into a clickable link.
+     *
+     * @param href A string containing a valid URL used as link hyper reference.
+     * @return This very builder to allow for method chaining.
+     */
+    public UIForLabel&lt;L&gt; makeLinkTo(String href) {
+<span class="fc" id="L38">        LazyRef&lt;String&gt; text = LazyRef.of(_component::getText);</span>
+<span class="pc bpc" id="L39" title="1 of 2 branches missed.">        if ( !href.startsWith(&quot;http&quot;) ) href = &quot;https://&quot; + href;</span>
+<span class="fc" id="L40">        String finalHref = href;</span>
+<span class="fc" id="L41">        _component.addMouseListener(new MouseAdapter() {</span>
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                try {
+<span class="nc" id="L45">                    Desktop.getDesktop().browse(new URI(finalHref));</span>
+<span class="nc" id="L46">                } catch (IOException | URISyntaxException e1) {</span>
+<span class="nc" id="L47">                    e1.printStackTrace();</span>
+<span class="nc" id="L48">                }</span>
+<span class="nc" id="L49">            }</span>
+<span class="nc" id="L50">            @Override  public void mouseExited(MouseEvent e) { _component.setText(text.get()); }</span>
+            @Override
+            public void mouseEntered(MouseEvent e) {
+<span class="nc" id="L53">                _component.setText(&quot;&lt;html&gt;&lt;a href=''&gt;&quot; + text.get() + &quot;&lt;/a&gt;&lt;/html&gt;&quot;);</span>
+<span class="nc" id="L54">            }</span>
+        });
+<span class="fc" id="L56">        return this;</span>
+    }
+
+    /**
+     *  Makes the wrapped {@link JLabel} font plain (!bold).
+     *
+     * @return This very builder to allow for method chaining.
+     */
+    public UIForLabel&lt;L&gt; makePlain() {
+<span class="nc" id="L65">        this.peek(label -&gt; {</span>
+<span class="nc" id="L66">            Font f = label.getFont();</span>
+<span class="nc" id="L67">            label.setFont(f.deriveFont(f.getStyle() &amp; ~Font.BOLD));</span>
+<span class="nc" id="L68">        });</span>
+<span class="nc" id="L69">        return this;</span>
+    }
+
+    /**
+     *  Makes the wrapped {@link JLabel} font bold if it is plain
+     *  and plain if it is bold...
+     *
+     * @return This very builder to allow for method chaining.
+     */
+    public UIForLabel&lt;L&gt; toggleBold() {
+<span class="nc" id="L79">        this.peek(label -&gt; {</span>
+<span class="nc" id="L80">            Font f = label.getFont();</span>
+<span class="nc" id="L81">            label.setFont(f.deriveFont(f.getStyle() ^ Font.BOLD));</span>
+<span class="nc" id="L82">        });</span>
+<span class="nc" id="L83">        return this;</span>
+    }
+
+    /**
+     * Defines the single line of text this component will display.  If
+     * the value of text is null or empty string, nothing is displayed.
+     * &lt;p&gt;
+     * The default value of this property is null.
+     * &lt;p&gt;
+     *
+     * @param text The new text to be set for the wrapped label.
+     * @return This very builder to allow for method chaining.
+     */
+<span class="nc" id="L96">    public final UIForLabel&lt;L&gt; withText(String text) { _component.setText(text); return this; }</span>
+
+    /**
+     *  A convenience method to avoid peeking into this builder like so:
+     *  &lt;pre&gt;{@code
+     *     UI.label(&quot;Something&quot;)
+     *         .peek( label -&gt; label.setHorizontalAlignment(...) );
+     *  }&lt;/pre&gt;
+     * This sets the horizontal alignment of the label's content (icon and text).
+     *
+     * @param horizontalAlign The horizontal alignment which should be applied to the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public UIForLabel&lt;L&gt; with(UI.HorizontalAlignment horizontalAlign) {
+<span class="fc" id="L110">        _component.setHorizontalAlignment(horizontalAlign.forSwing());</span>
+<span class="fc" id="L111">        return this;</span>
+    }
+
+    /**
+     *  Use this to set the vertical alignment of the label's content (icon and text).
+     *  This is a convenience method to avoid peeking into this builder like so:
+     *  &lt;pre&gt;{@code
+     *     UI.label(&quot;Something&quot;)
+     *         .peek( label -&gt; label.setVerticalAlignment(...) );
+     *  }&lt;/pre&gt;
+     *
+     * @param verticalAlign The vertical alignment which should be applied to the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public UIForLabel&lt;L&gt; with(UI.VerticalAlignment verticalAlign) {
+<span class="nc" id="L126">        _component.setVerticalAlignment(verticalAlign.forSwing());</span>
+<span class="nc" id="L127">        return this;</span>
+    }
+
+    /**
+     *  Use this to set the horizontal position of the label's text, relative to its image.
+     *  A convenience method to avoid peeking into this builder like so:
+     *  &lt;pre&gt;{@code
+     *     UI.label(&quot;Something&quot;)
+     *         .peek( label -&gt; label.setHorizontalTextPosition(...) );
+     *  }&lt;/pre&gt;
+     *
+     * @param horizontalAlign The horizontal alignment which should be applied to the text of the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public UIForLabel&lt;L&gt; withImageRelative(UI.HorizontalAlignment horizontalAlign) {
+<span class="nc" id="L142">        _component.setHorizontalTextPosition(horizontalAlign.forSwing());</span>
+<span class="nc" id="L143">        return this;</span>
+    }
+
+    /**
+     *  Use this to set the horizontal position of the label's text, relative to its image. &lt;br&gt;
+     *  This is a convenience method to avoid peeking into this builder like so:
+     *  &lt;pre&gt;{@code
+     *     UI.label(&quot;Something&quot;)
+     *         .peek( label -&gt; label.setVerticalTextPosition(...) );
+     *  }&lt;/pre&gt;
+     *
+     * @param verticalAlign The vertical alignment which should be applied to the text of the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public UIForLabel&lt;L&gt; withImageRelative(UI.VerticalAlignment verticalAlign) {
+<span class="nc" id="L158">        _component.setVerticalTextPosition(verticalAlign.forSwing());</span>
+<span class="nc" id="L159">        return this;</span>
+    }
+
+    /**
+     *  Use this to set the icon for the wrapped {@link JLabel}. 
+     *  This is in essence a convenience method to avoid peeking into this builder like so:
+     *  &lt;pre&gt;{@code
+     *     UI.label(&quot;Something&quot;)
+     *         .peek( label -&gt; label.setIcon(...) );
+     *  }&lt;/pre&gt;
+     *
+     *
+     * @param icon The {@link Icon} which should be displayed on the label.
+     * @return This very builder to allow for method chaining.
+     */
+    public UIForLabel&lt;L&gt; with(Icon icon) {
+<span class="fc" id="L175">        LogUtil.nullArgCheck(icon,&quot;icon&quot;,Icon.class);</span>
+<span class="fc" id="L176">        _component.setIcon(icon);</span>
+<span class="fc" id="L177">        return this;</span>
+    }
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
