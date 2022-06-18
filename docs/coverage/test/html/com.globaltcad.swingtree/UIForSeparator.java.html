@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForSeparator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stml</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree</a> &gt; <span class="el_source">UIForSeparator.java</span></div><h1>UIForSeparator.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree;
+
+import javax.swing.*;
+import java.awt.*;
+
+/**
+ *  A swing tree builder node for {@link JSeparator} instances.
+ */
+public class UIForSeparator&lt;S extends JSeparator&gt; extends UIForAbstractSwing&lt;UIForSeparator&lt;S&gt;, S&gt;
+{
+    /**
+     * Instances of ths {@link UIForSeparator} always wrap
+     * a single {@link JSeparator} for which they are responsible and expose helpful utility methods.
+     *
+     * @param component The JComponent type which will be wrapped by this builder node.
+     */
+<span class="fc" id="L17">    protected UIForSeparator(S component) { super(component); }</span>
+
+    /**
+     * @param separatorLength The length of the separation line.
+     * @return This very builder to allow for method chaining.
+     */
+    public UIForSeparator&lt;S&gt; withLength(int separatorLength) {
+<span class="nc" id="L24">        Dimension d = _component.getPreferredSize();</span>
+<span class="nc bnc" id="L25" title="All 2 branches missed.">        if ( _component.getOrientation() == JSeparator.VERTICAL ) d.height = separatorLength;</span>
+<span class="nc bnc" id="L26" title="All 2 branches missed.">        else if ( _component.getOrientation() == JSeparator.HORIZONTAL ) d.width = separatorLength;</span>
+<span class="nc" id="L27">        _component.setPreferredSize(d);</span>
+<span class="nc" id="L28">        return this;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

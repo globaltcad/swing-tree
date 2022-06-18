@@ -76,10 +76,16 @@ check.dependsOn jacocoTestReport
 
 // CUSTOM DEPLOYMENT TASKS :
 
+def deleteFilesIn(String path) {
+    var file = new File(path)
+    if ( file.exists() && file.listFiles() != null && file.listFiles().length > 0 )
+        delete file
+}
+
 task cleanForDeployment(type: Delete) {
     delete "$rootDir/build"
-    delete new File("$rootDir/docs/jdocs").listFiles()
-    delete new File("$rootDir/docs/spock/reports").listFiles()
+    deleteFilesIn("$rootDir/docs/jdocs")
+    deleteFilesIn("$rootDir/docs/spock/reports" )
 }
 
 task deploy() {
@@ -104,20 +110,6 @@ task releaseJDocs(type: Copy) {
 task releaseSpockReports(type: Copy) {
     from "$rootDir/build/spock-reports"
     into "$rootDir/docs/spock/reports"
-}
-
-task injectSpockStyles(type: Task){
-    ant.replaceregexp(match:"<style>[\\s\\S]*</style>", replace:'<style>###</style>', flags:'g', byline:false) {
-        fileset(dir: "$rootDir/docs/spock/reports")
-    }
-    ant.replaceregexp(
-            match:'<style>###</style>',
-            replace:'<style>' + new File("$rootDir/docs/spock/css/custom.css").text + '</style>',
-            flags:'g',
-            byline:false
-    ) {
-        fileset(dir: "$rootDir/docs/spock/reports")
-    }
 }
 
 // JAR CREATION :

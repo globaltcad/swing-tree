@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SplitItem.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stml</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree</a> &gt; <span class="el_source">SplitItem.java</span></div><h1>SplitItem.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree;
+
+
+import com.alexandriasoftware.swing.JSplitButton;
+import com.globaltcad.swingtree.api.UIAction;
+
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+/**
+ *  An immutable data carrier exposing everything needed to configure an item of a {@link JSplitButton}.
+ *  {@link SplitItem}s will be turned into button options for the {@link JSplitButton}
+ *  which can be supplied to a split button through the API exposed by {@link UIForSplitButton} like so:
+ *  &lt;pre&gt;{@code
+ *      UI.splitButton(&quot;Hey!&quot;)
+ *      .add(UI.splitItem(&quot;first&quot;))
+ *      .add(UI.splitItem(&quot;second&quot;).onClick( it -&gt; ... ))
+ *      .add(UI.splitItem(&quot;third&quot;).onClick( it -&gt; ... ).onSelected( it -&gt; ... ))
+ *  }&lt;/pre&gt;
+ *
+ * @param &lt;I&gt;
+ */
+public final class SplitItem&lt;I extends JMenuItem&gt;
+{
+    /**
+     * @param text The text which should be displayed on the {@link SplitItem} (and its underlying {@link JMenuItem}).
+     * @return A {@link SplitItem} wrapping a simple {@link JMenuItem} displaying the provided text.
+     */
+    public static SplitItem&lt;JMenuItem&gt; of( String text ) {
+<span class="fc" id="L33">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L34">        return new SplitItem&lt;&gt;(new JMenuItem(text));</span>
+    }
+
+    /**
+     * @param item The {@link JMenuItem} subtype for which a {@link SplitItem} (for {@link JSplitButton}) should be created.
+     * @return A {@link SplitItem} wrapping the provided {@link JMenuItem} type.
+     * @param &lt;I&gt; The type parameter for the provided item type.
+     */
+    public static &lt;I extends JMenuItem&gt; SplitItem&lt;I&gt; of( I item ) {
+<span class="fc" id="L43">        LogUtil.nullArgCheck(item, &quot;item&quot;, JMenuItem.class);</span>
+<span class="fc" id="L44">        return new SplitItem&lt;&gt;(item);</span>
+    }
+
+    /**
+     * @param item The {@link UIForMenuItem} which wraps a {@link  JMenuItem} for which a {@link SplitItem} should be created.
+     * @return A {@link SplitItem} wrapping {@link JMenuItem} represented by the provided UI builder.
+     */
+    public static &lt;M extends JMenuItem&gt; SplitItem&lt;M&gt; of(UIForMenuItem&lt;M&gt; item) {
+<span class="nc" id="L52">        LogUtil.nullArgCheck(item, &quot;item&quot;, UIForMenuItem.class);</span>
+<span class="nc" id="L53">        return new SplitItem&lt;&gt;(item._component);</span>
+    }
+
+    private final I item;
+    private final UIAction&lt;Delegate&lt;I&gt;&gt; onButtonClick;
+    private final UIAction&lt;Delegate&lt;I&gt;&gt; onItemSelected;
+
+<span class="fc" id="L60">    private SplitItem( I item ) {</span>
+<span class="fc" id="L61">        this.item = item; this.onButtonClick = null; this.onItemSelected = null;</span>
+<span class="fc" id="L62">    }</span>
+
+    private SplitItem(
+            I item,
+            UIAction&lt;Delegate&lt;I&gt;&gt; onClick,
+            UIAction&lt;Delegate&lt;I&gt;&gt; onSelected
+<span class="fc" id="L68">    ) {</span>
+<span class="fc" id="L69">        this.item = item; this.onButtonClick = onClick; this.onItemSelected = onSelected;</span>
+<span class="fc" id="L70">    }</span>
+
+    public SplitItem&lt;I&gt; makeSelected() {
+<span class="fc" id="L73">        this.item.setSelected(true);</span>
+<span class="fc" id="L74">        return this;</span>
+    }
+
+    /**
+     *  Use this to register an action which will be called when the {@link JSplitButton}
+     *  is being pressed and this {@link SplitItem} was selected to be the primary button.
+     *  &lt;pre&gt;{@code
+     *      UI.splitButton(&quot;Hey!&quot;)
+     *      .add(UI.splitItem(&quot;load&quot;))
+     *      .add(UI.splitItem(&quot;save&quot;).onClick( it -&gt; doSaving() ))
+     *      .add(UI.splitItem(&quot;delete&quot;))
+     *  }&lt;/pre&gt;
+     *
+     * @param action The action lambda which will be called when the {@link JSplitButton} is being pressed
+     *               and this {@link SplitItem} was selected.
+     * @return An immutable copy of this with the provided lambda set.
+     */
+    public SplitItem&lt;I&gt; onButtonClick(UIAction&lt;Delegate&lt;I&gt;&gt; action) {
+<span class="fc" id="L92">        LogUtil.nullArgCheck(action, &quot;action&quot;, UIAction.class);</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        if ( this.onButtonClick != null )</span>
+<span class="nc" id="L94">            throw new IllegalArgumentException(&quot;Property already specified!&quot;);</span>
+<span class="fc" id="L95">        return new SplitItem&lt;&gt;(item, action, onItemSelected);</span>
+    }
+
+    /**
+     *  Use this to perform some action when the user selects a {@link SplitItem} among all other
+     *  split button items.
+     *  A common usecase would be to set the text of the {@link JSplitButton} by calling
+     *  the {@link Delegate#getSplitButton()} method on the context object supplied to the
+     *  provided action lambda like so:
+     *  &lt;pre&gt;{@code
+     *      UI.splitButton(&quot;Hey!&quot;)
+     *      .add(UI.splitItem(&quot;first&quot;))
+     *      .add(UI.splitItem(&quot;second&quot;).onSelected( it -&gt; it.getSplitButton().setText(&quot;Hey hey!&quot;) ))
+     *      .add(UI.splitItem(&quot;third&quot;))
+     *  }&lt;/pre&gt;
+     *
+     * @param action The action which will be called when the button was selected and which will
+     *               receive some context information in the form of a {@link Delegate} instance.
+     * @return An immutable copy of this with the provided lambda set.
+     */
+    public SplitItem&lt;I&gt; onSelection(UIAction&lt;Delegate&lt;I&gt;&gt; action) {
+<span class="fc" id="L116">        LogUtil.nullArgCheck(action, &quot;action&quot;, UIAction.class);</span>
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">        if ( this.onItemSelected != null ) throw new IllegalArgumentException(&quot;Property already specified!&quot;);</span>
+<span class="fc" id="L118">        return new SplitItem&lt;&gt;(item, onButtonClick, action);</span>
+    }
+
+<span class="fc" id="L121">    I getItem() { return item; }</span>
+
+<span class="fc bfc" id="L123" title="All 2 branches covered.">    UIAction&lt;Delegate&lt;I&gt;&gt; getOnClick() { return onButtonClick == null ? it -&gt; {} : onButtonClick; }</span>
+
+<span class="fc bfc" id="L125" title="All 2 branches covered.">    UIAction&lt;Delegate&lt;I&gt;&gt; getOnSelected() { return onItemSelected == null ? c -&gt; {} : onItemSelected; }</span>
+
+    /**
+     *  Instances of this are exposed as delegates through the {@link SimpleDelegate} passed
+     *  to the actions supplied to {@link #onSelection(UIAction)} in order
+     *  to give said actions all the necessary context they need to perform whatever action they so desire.
+     *
+     * @param &lt;I&gt; The {@link JMenuItem} subtype for which this context was created.
+     */
+    public final static class Delegate&lt;I extends JMenuItem&gt; extends AbstractDelegate
+    {
+        private final ActionEvent event;
+        private final JSplitButton splitButton;
+        private final Supplier&lt;List&lt;I&gt;&gt; siblingsSource;
+        private final I currentItem;
+
+        Delegate(
+                ActionEvent event,
+                JSplitButton splitButton,
+                Supplier&lt;List&lt;I&gt;&gt; siblingsSource,
+                I currentItem
+        ) {
+<span class="fc" id="L147">            super(currentItem);</span>
+<span class="fc" id="L148">            this.event = event;</span>
+<span class="fc" id="L149">            this.splitButton = splitButton;</span>
+<span class="fc" id="L150">            this.siblingsSource = siblingsSource;</span>
+<span class="fc" id="L151">            this.currentItem = currentItem;</span>
+<span class="fc" id="L152">        }</span>
+
+<span class="nc" id="L154">        public ActionEvent getEvent() { return event; }</span>
+
+        /**
+         * @return The {@link JSplitButton} to which this {@link SplitItem} (and its {@link JMenuItem}) belongs.
+         */
+<span class="fc" id="L159">        public JSplitButton getSplitButton() { return splitButton; }</span>
+
+        /**
+         * @return The {@link JMenuItem} which caused this action to be executed.
+         */
+<span class="fc" id="L164">        public I getCurrentItem() { return this.currentItem; }</span>
+
+        /**
+         *
+         * @return A list of all the {@link JMenuItem} which constitute the options exposed by the {@link JSplitButton}.
+         */
+<span class="fc" id="L170">        public List&lt;I&gt; getSiblinghood() { return this.siblingsSource.get(); }</span>
+
+        /**
+         *
+         * @return A list of all the {@link JMenuItem} which constitute the options exposed by the {@link JSplitButton}
+         *          except the current {@link JMenuItem} exposed by {@link #getCurrentItem()}.
+         */
+        public List&lt;I&gt; getSiblings() {
+<span class="nc" id="L178">            return this.siblingsSource.get()</span>
+<span class="nc" id="L179">                    .stream()</span>
+<span class="nc bnc" id="L180" title="All 2 branches missed.">                    .filter( s -&gt; s != getCurrentItem() )</span>
+<span class="nc" id="L181">                    .collect(Collectors.toList());</span>
+        }
+
+        /**
+         *  Selects the current {@link JMenuItem} by passing {@code true}
+         *  to the {@link JMenuItem#setSelected(boolean)} method.
+         *
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate&lt;I&gt; selectCurrentItem() {
+<span class="nc" id="L191">            this.getCurrentItem().setSelected(true);</span>
+<span class="nc" id="L192">            return this;</span>
+        }
+
+        /**
+         *  Selects only the current {@link JMenuItem} by passing {@code true}
+         *  to the {@link JMenuItem#setSelected(boolean)} method.
+         *  All other {@link JMenuItem}s will be unselected.
+         *
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate&lt;I&gt; selectOnlyCurrentItem() {
+<span class="fc" id="L203">            this.unselectAllItems();</span>
+<span class="fc" id="L204">            this.getCurrentItem().setSelected(true);</span>
+<span class="fc" id="L205">            return this;</span>
+        }
+
+        /**
+         *  Unselects the current {@link JMenuItem} by passing {@code false}
+         *  to the {@link JMenuItem#setSelected(boolean)} method.
+         *
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate&lt;I&gt; unselectCurrentItem() {
+<span class="nc" id="L215">            this.getCurrentItem().setSelected(false);</span>
+<span class="nc" id="L216">            return this;</span>
+        }
+
+        /**
+         *  Unselects all {@link JMenuItem}s by passing {@code false}
+         *  to their {@link JMenuItem#setSelected(boolean)} methods.
+         *
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate&lt;I&gt; unselectAllItems() {
+<span class="fc" id="L226">            getSiblinghood().forEach(it -&gt; it.setSelected(false) );</span>
+<span class="fc" id="L227">            return this;</span>
+        }
+
+        /**
+         *  Selects all {@link JMenuItem}s by passing {@code true}
+         *  to their {@link JMenuItem#setSelected(boolean)} methods.
+         *
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate&lt;I&gt; selectAllItems() {
+<span class="nc" id="L237">            getSiblinghood().forEach(it -&gt; it.setSelected(true) );</span>
+<span class="nc" id="L238">            return this;</span>
+        }
+
+        /**
+         *  Use this to conveniently make the {@link JSplitButton} display the text
+         *  of the currently selected {@link JMenuItem} (button item).
+         *
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate&lt;I&gt; displayCurrentItemText() {
+<span class="pc bpc" id="L248" title="1 of 2 branches missed.">            if ( getCurrentItem() != null )</span>
+<span class="fc" id="L249">                getSplitButton().setText(getCurrentItem().getText());</span>
+<span class="fc" id="L250">            return this;</span>
+        }
+
+        /**
+         * @param text The text which should be displayed on the {@link JSplitButton}.
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate&lt;I&gt; setButtonText(String text ) {
+<span class="fc" id="L258">            LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L259">            this.splitButton.setText(text);</span>
+<span class="fc" id="L260">            return this;</span>
+        }
+
+        /**
+         * @return The text displayed on the {@link JSplitButton}.
+         */
+        public String getButtonText() {
+<span class="fc" id="L267">            return this.splitButton.getText();</span>
+        }
+
+        /**
+         * @param postfix The text which should be appended to the text displayed on the {@link JSplitButton}.
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate&lt;I&gt; appendToButtonText( String postfix ) {
+<span class="fc" id="L275">            LogUtil.nullArgCheck(postfix, &quot;postfix&quot;, String.class);</span>
+<span class="fc" id="L276">            this.splitButton.setText(this.getButtonText()+postfix);</span>
+<span class="fc" id="L277">            return this;</span>
+        }
+
+        /**
+         * @param prefix The text which should be prepended to the text displayed on the {@link JSplitButton}.
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate&lt;I&gt; prependToButtonText( String prefix ) {
+<span class="nc" id="L285">            LogUtil.nullArgCheck(prefix, &quot;postfix&quot;, String.class);</span>
+<span class="nc" id="L286">            this.splitButton.setText(prefix+this.getButtonText());</span>
+<span class="nc" id="L287">            return this;</span>
+        }
+
+        /**
+         *  Selects the targeted split item ({@link JMenuItem}).
+         *
+         * @param i The item index of the {@link JMenuItem} which should be selected.
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate&lt;I&gt; selectItem( int i ) {
+<span class="nc" id="L297">            getSiblinghood().get(i).setSelected(true);</span>
+<span class="nc" id="L298">            return this;</span>
+        }
+
+        /**
+         *  Selects the targeted split item ({@link JMenuItem}) and unselects all other items.
+         *
+         * @param i The item index of the {@link JMenuItem} which should be selected exclusively.
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate&lt;I&gt; selectOnlyItem( int i ) {
+<span class="nc" id="L308">            unselectAllItems().getSiblinghood().get(i).setSelected(true);</span>
+<span class="nc" id="L309">            return this;</span>
+        }
+
+        /**
+         *  Unselects the targeted split item ({@link JMenuItem}).
+         *
+         * @param i The item index of the {@link JMenuItem} which should be unselected.
+         * @return This {@link Delegate} instance to allow for method chaining.
+         */
+        public Delegate&lt;I&gt; unselectItem( int i ) {
+<span class="nc" id="L319">            getSiblinghood().get(i).setSelected(false);</span>
+<span class="nc" id="L320">            return this;</span>
+        }
+
+    }
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

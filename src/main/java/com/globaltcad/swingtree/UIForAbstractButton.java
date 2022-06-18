@@ -10,11 +10,11 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 /**
- *  The following is a more specialized type of builder which extends the "BasicBuilder" class
+ *  The following is a more specialized type of builder node based on the {@link UIForAbstractSwing} builder type,
  *  and provides additional features associated with the more specialized
- *  "AbstractButton" Swing component type.
- *  One of which is the "onClick" method allowing for a more readable way of adding
- *  ActionListener instances to buttons types...
+ *  {@link AbstractButton}" Swing component type.
+ *  One of such features is the {@link #onClick(UIAction)} method allowing for a more readable way of adding
+ *  {@link ActionListener} instances to button types...
  *  <br><br>
  *
  * @param <B> The type parameter for the component wrapped by an instance of this class.

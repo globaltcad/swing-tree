@@ -1,0 +1,1022 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UI.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stml</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree</a> &gt; <span class="el_source">UI.java</span></div><h1>UI.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree;
+
+import com.alexandriasoftware.swing.JSplitButton;
+import com.globaltcad.swingtree.api.MenuBuilder;
+import com.globaltcad.swingtree.api.SwingBuilder;
+import net.miginfocom.swing.MigLayout;
+
+import javax.swing.*;
+import javax.swing.text.JTextComponent;
+import java.awt.*;
+import java.util.function.Supplier;
+
+/**
+ *  This class is a static API for exposing swing tree builder types for wrapping
+ *  and assembling various {@link JComponent} types to form a UI tree.
+ *  Instances of these builder type expose an API based on chained methods
+ *  designed around functional interfaces to enable building UI tree structures for Swing
+ *  in an HTML-like nested fashion while also keeping a high degree of control and transparency
+ *  by peeking into the underlying swing components or registering user actions through lambdas.
+ *  Swing tree works especially well alongside {@link MigLayout}s,
+ *  which is why this general purpose {@link LayoutManager} is integrated into this library.
+ *  Simply pass {@link String} constraints to the {@link UIForAbstractSwing#withLayout(String, String)}
+ *  and any given {@link UIForAbstractSwing#add(String, UIForAbstractSwing[])} method
+ *  or variant of, to make use of mig layouts.
+ */
+public final class UI
+{
+    private UI(){} // This is a static API
+
+    /**
+     *  An enum set of all the available swing cursors which
+     *  map to the cursor type id.
+     *  This exists simply because swing was created before enums were added to Java.
+     */
+<span class="fc" id="L35">    public enum Cursor</span>
+    {
+<span class="fc" id="L37">        HAND(java.awt.Cursor.HAND_CURSOR),</span>
+<span class="fc" id="L38">        MOVE(java.awt.Cursor.MOVE_CURSOR),</span>
+<span class="fc" id="L39">        CROSS(java.awt.Cursor.CROSSHAIR_CURSOR),</span>
+<span class="fc" id="L40">        DEFAULT(java.awt.Cursor.DEFAULT_CURSOR),</span>
+<span class="fc" id="L41">        WAIT(java.awt.Cursor.WAIT_CURSOR),</span>
+<span class="fc" id="L42">        TEXT(java.awt.Cursor.TEXT_CURSOR),</span>
+<span class="fc" id="L43">        RESIZE_EAST(java.awt.Cursor.E_RESIZE_CURSOR),</span>
+<span class="fc" id="L44">        RESIZE_WEST(java.awt.Cursor.W_RESIZE_CURSOR),</span>
+<span class="fc" id="L45">        RESIZE_SOUTH(java.awt.Cursor.S_RESIZE_CURSOR),</span>
+<span class="fc" id="L46">        RESIZE_NORTH(java.awt.Cursor.N_RESIZE_CURSOR),</span>
+<span class="fc" id="L47">        RESIZE_NORTH_WEST(java.awt.Cursor.NW_RESIZE_CURSOR),</span>
+<span class="fc" id="L48">        RESIZE_NORTH_EAST(java.awt.Cursor.NE_RESIZE_CURSOR),</span>
+<span class="fc" id="L49">        RESIZE_SOUTH_WEST(java.awt.Cursor.SE_RESIZE_CURSOR),</span>
+<span class="fc" id="L50">        RESIZE_SOUTH_EAST(java.awt.Cursor.SE_RESIZE_CURSOR);</span>
+
+        final int type;
+
+<span class="fc" id="L54">        Cursor( int type ) { this.type = type; }</span>
+    }
+
+    /**
+     *  The scroll policy for UI components with scroll behaviour.
+     */
+<span class="fc" id="L60">    public enum ScrollBarPolicy {</span>
+<span class="fc" id="L61">        NEVER, AS_NEEDED, ALWAYS</span>
+    }
+
+    /**
+     *  The position of a UI component in terms of directions.
+     */
+<span class="fc" id="L67">    public enum Position {</span>
+<span class="fc" id="L68">        TOP, LEFT, BOTTOM, RIGHT;</span>
+        private int forTabbedPane() {
+<span class="nc bnc" id="L70" title="All 5 branches missed.">            switch ( this ) {</span>
+<span class="nc" id="L71">                case TOP  : return JTabbedPane.TOP  ;</span>
+<span class="nc" id="L72">                case LEFT : return JTabbedPane.LEFT ;</span>
+<span class="nc" id="L73">                case BOTTOM: return JTabbedPane.BOTTOM;</span>
+<span class="nc" id="L74">                case RIGHT: return JTabbedPane.RIGHT;</span>
+            }
+<span class="nc" id="L76">            throw new RuntimeException();</span>
+        }
+    }
+
+    /**
+     *  Overflow policy of UI components.
+     */
+<span class="fc" id="L83">    public enum OverflowPolicy {</span>
+<span class="fc" id="L84">        WRAP, SCROLL;</span>
+
+        private int forTabbedPane() {
+<span class="nc bnc" id="L87" title="All 3 branches missed.">            switch ( this ) {</span>
+<span class="nc" id="L88">                case WRAP:   return JTabbedPane.WRAP_TAB_LAYOUT  ;</span>
+<span class="nc" id="L89">                case SCROLL: return JTabbedPane.SCROLL_TAB_LAYOUT ;</span>
+            }
+<span class="nc" id="L91">            throw new RuntimeException();</span>
+        }
+    }
+
+    /**
+     *  Vertical or horizontal alignment.
+     */
+<span class="fc" id="L98">    public enum Align {</span>
+<span class="fc" id="L99">        HORIZONTAL, VERTICAL;</span>
+
+        private int forSplitPane() {
+<span class="pc bpc" id="L102" title="2 of 3 branches missed.">            switch ( this )</span>
+            {
+<span class="fc" id="L104">                case HORIZONTAL: return JSplitPane.HORIZONTAL_SPLIT;</span>
+<span class="nc" id="L105">                case VERTICAL: return JSplitPane.VERTICAL_SPLIT;</span>
+            }
+<span class="nc" id="L107">            throw new RuntimeException();</span>
+        }
+
+        private int forSlider () {
+<span class="nc bnc" id="L111" title="All 3 branches missed.">            switch ( this )</span>
+            {
+<span class="nc" id="L113">                case HORIZONTAL: return JSlider.HORIZONTAL;</span>
+<span class="nc" id="L114">                case VERTICAL: return JSlider.VERTICAL;</span>
+            }
+<span class="nc" id="L116">            throw new RuntimeException();</span>
+        }
+
+    }
+
+    /**
+     *  Different positions along a vertically aligned UI component.
+     */
+<span class="fc" id="L124">    public enum VerticalAlignment {</span>
+<span class="fc" id="L125">        TOP, CENTER, BOTTOM;</span>
+
+        int forSwing() {
+<span class="nc bnc" id="L128" title="All 4 branches missed.">            switch ( this ) {</span>
+<span class="nc" id="L129">                case TOP:    return SwingConstants.TOP  ;</span>
+<span class="nc" id="L130">                case CENTER: return SwingConstants.CENTER ;</span>
+<span class="nc" id="L131">                case BOTTOM: return SwingConstants.BOTTOM ;</span>
+            }
+<span class="nc" id="L133">            throw new RuntimeException();</span>
+        }
+    }
+
+    /**
+     *  Different positions along a horizontally aligned UI component.
+     */
+<span class="fc" id="L140">    public enum HorizontalAlignment {</span>
+<span class="fc" id="L141">        LEFT, CENTER, RIGHT;</span>
+
+        public final int forSwing() {
+<span class="pc bpc" id="L144" title="3 of 4 branches missed.">            switch ( this ) {</span>
+<span class="nc" id="L145">                case LEFT:   return SwingConstants.LEFT   ;</span>
+<span class="nc" id="L146">                case CENTER: return SwingConstants.CENTER ;</span>
+<span class="fc" id="L147">                case RIGHT:  return SwingConstants.RIGHT  ;</span>
+            }
+<span class="nc" id="L149">            throw new RuntimeException();</span>
+        }
+    }
+
+<span class="fc" id="L153">    public enum HorizontalDirection {</span>
+<span class="fc" id="L154">        LEFT_TO_RIGHT, RIGHT_TO_LEFT;</span>
+
+        public final ComponentOrientation forTextOrientation() {
+<span class="pc bpc" id="L157" title="2 of 3 branches missed.">            switch ( this ) {</span>
+<span class="nc" id="L158">                case LEFT_TO_RIGHT: return ComponentOrientation.LEFT_TO_RIGHT;</span>
+<span class="fc" id="L159">                case RIGHT_TO_LEFT: return ComponentOrientation.RIGHT_TO_LEFT;</span>
+            }
+<span class="nc" id="L161">            throw new RuntimeException();</span>
+        }
+    }
+
+    /**
+     *  This returns an instance of a generic swing tree builder
+     *  for anything extending the {@link JComponent} class.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param component The new component instance which ought to be part of the Swing UI.
+     * @param &lt;T&gt; The concrete type of this new component.
+     * @return A basic UI builder instance wrapping any {@link JComponent}.
+     */
+    public static &lt;T extends JComponent&gt; UIForSwing&lt;T&gt; of(T component)
+    {
+<span class="fc" id="L176">        LogUtil.nullArgCheck(component, &quot;component&quot;, JComponent.class);</span>
+<span class="fc" id="L177">        return new UIForSwing&lt;&gt;(component);</span>
+    }
+
+
+    /**
+     *  If you are using builders for your custom {@link JComponent},
+     *  implement this to allow the {@link UI} API to call the {@link SwingBuilder#build()}
+     *  method for you.
+     *
+     * @param builder A builder for custom {@link JComponent} types.
+     * @param &lt;T&gt; The UI component type built by implementations of the provided builder.
+     * @return A basic UI builder instance wrapping any {@link JComponent}.
+     */
+    public static &lt;T extends JComponent&gt; UIForSwing&lt;T&gt; of(SwingBuilder&lt;T&gt; builder)
+    {
+<span class="nc" id="L192">        LogUtil.nullArgCheck(builder, &quot;builder&quot;, SwingBuilder.class);</span>
+<span class="nc" id="L193">        return of(builder.build());</span>
+    }
+
+    /**
+     *  If you are using builders for custom {@link JMenuItem} components,
+     *  implement this to allow the {@link UI} API to call the {@link SwingBuilder#build()}
+     *  method for you.
+     *
+     * @param builder A builder for custom {@link JMenuItem} types.
+     * @param &lt;M&gt; The {@link JMenuItem} type built by implementations of the provided builder.
+     * @return A builder instance for a {@link JMenuItem}, which enables fluent method chaining.
+     */
+    public static &lt;M extends JMenuItem&gt; UIForMenuItem&lt;M&gt; of(MenuBuilder&lt;M&gt; builder)
+    {
+<span class="nc" id="L207">        LogUtil.nullArgCheck(builder, &quot;builder&quot;, MenuBuilder.class);</span>
+<span class="nc" id="L208">        return new UIForMenuItem&lt;&gt;(builder.build());</span>
+    }
+
+    /**
+     *  Use this to create a swing tree builder node for the {@link JPopupMenu} UI component.
+     *
+     * @return A builder instance for a {@link JPopupMenu}, which enables fluent method chaining.
+     */
+    public static &lt;P extends JPopupMenu&gt; UIForPopup&lt;P&gt; of(P popup)
+    {
+<span class="nc" id="L218">        LogUtil.nullArgCheck(popup, &quot;popup&quot;, JPopupMenu.class);</span>
+<span class="nc" id="L219">        return new UIForPopup&lt;&gt;(popup);</span>
+    }
+
+    /**
+     *  Use this to create a swing tree builder node for the {@link JPopupMenu} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JPopupMenu())}.
+     *
+     * @return A builder instance for a {@link JPopupMenu}, which enables fluent method chaining.
+     */
+<span class="nc" id="L228">    public static UIForPopup&lt;JPopupMenu&gt; popupMenu() { return of(new JPopupMenu()); }</span>
+
+    /**
+     *  This returns an instance of a {@link UIForSeparator} builder
+     *  responsible for building a {@link JSeparator} by exposing helpful utility methods for it.
+     *
+     * @param separator The new {@link JSeparator} instance which ought to be part of the Swing UI.
+     * @return A {@link UIForSeparator} UI builder instance which wraps the {@link JSeparator} and exposes helpful methods.
+     */
+    public static &lt;S extends JSeparator&gt; UIForSeparator&lt;S&gt; of(S separator)
+    {
+<span class="fc" id="L239">        LogUtil.nullArgCheck(separator, &quot;separator&quot;, JSeparator.class);</span>
+<span class="fc" id="L240">        return new UIForSeparator&lt;&gt;(separator);</span>
+    }
+
+    /**
+     *  This returns a {@link JButton} swing tree builder.
+     *
+     * @param component The button component which ought to be wrapped by the swing tree UI builder.
+     * @return A basic UI {@link JButton} builder instance.
+     */
+    public static &lt;T extends AbstractButton&gt; UIForButton&lt;T&gt; of(T component)
+    {
+<span class="fc" id="L251">        LogUtil.nullArgCheck(component, &quot;component&quot;, AbstractButton.class);</span>
+<span class="fc" id="L252">        return new UIForButton&lt;&gt;(component);</span>
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JButton} UI component without any text displayed on top.
+     *  This is in essence a convenience method for {@code UI.of(new JButton())}.
+     *
+     * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
+     */
+<span class="fc" id="L261">    public static UIForButton&lt;JButton&gt; button() { return of(new JButton()); }</span>
+
+    /**
+     *  Use this to create a builder for the {@link JButton} UI component with the provided text displayed on top.
+     *  This is in essence a convenience method for {@code UI.of(new JButton(String text))}.
+     *
+     * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
+     */
+<span class="fc" id="L269">    public static UIForButton&lt;JButton&gt; button(String text) { return of(new JButton(text)); }</span>
+
+    /**
+     *  Use this to create a builder for the {@link JButton} UI component
+     *  with an icon displayed on top.
+     *  This is in essence a convenience method for {@code UI.of(new JButton()).peek( it -&gt; it.setIcon(icon) )}.
+     *
+     * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
+     */
+    public static UIForButton&lt;JButton&gt; button(Icon icon) {
+<span class="nc" id="L279">        LogUtil.nullArgCheck(icon, &quot;icon&quot;, Icon.class);</span>
+<span class="nc" id="L280">        return button().peek(it -&gt; it.setIcon(icon) );</span>
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JButton} UI component
+     *  with a default icon as well as a hover icon displayed on top.
+     *
+     * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
+     */
+    public static UIForButton&lt;JButton&gt; button(Icon icon, Icon onHover) {
+<span class="nc" id="L290">        LogUtil.nullArgCheck(icon, &quot;icon&quot;, Icon.class);</span>
+<span class="nc" id="L291">        LogUtil.nullArgCheck(onHover, &quot;onHover&quot;, Icon.class);</span>
+<span class="nc" id="L292">        return button(icon, onHover, onHover);</span>
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JButton} UI component
+     *  with a default icon as well as a hover icon displayed on top
+     *  which should both be scaled to the provided dimensions.
+     *
+     * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
+     */
+    public static UIForButton&lt;JButton&gt; button(int width, int height, ImageIcon icon, ImageIcon onHover) {
+<span class="fc" id="L303">        onHover = new ImageIcon(onHover.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT));</span>
+<span class="fc" id="L304">        icon = new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT));</span>
+<span class="fc" id="L305">        return button(icon, onHover, onHover);</span>
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JButton} UI component
+     *  with a default, an on-hover and an on-press icon displayed on top.
+     *  This is in essence a convenience method for:
+     *  &lt;pre&gt;{@code 
+     *      UI.of(new JButton()).peek( it -&gt; {
+     *          it.setIcon(icon);
+     *          it.setRolloverIcon(onHover);
+     *          it.setPressedIcon(onPress);
+     *      })
+     *  }&lt;/pre&gt;
+     *
+     * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
+     */
+    public static UIForButton&lt;JButton&gt; button(Icon icon, Icon onHover, Icon onPress) {
+<span class="fc" id="L323">        LogUtil.nullArgCheck(icon, &quot;icon&quot;, Icon.class);</span>
+<span class="fc" id="L324">        LogUtil.nullArgCheck(onHover, &quot;onHover&quot;, Icon.class);</span>
+<span class="fc" id="L325">        LogUtil.nullArgCheck(onPress, &quot;onPress&quot;, Icon.class);</span>
+<span class="fc" id="L326">        return button().peek(it -&gt; it.setIcon(icon) )</span>
+<span class="fc" id="L327">                .peek(it -&gt; it.setRolloverIcon(onHover) )</span>
+<span class="fc" id="L328">                .peek(it -&gt; it.setPressedIcon(onPress) );</span>
+    }
+
+    public static &lt;B extends JSplitButton&gt; UIForSplitButton&lt;B&gt; of(B splitButton) {
+<span class="nc" id="L332">        LogUtil.nullArgCheck(splitButton, &quot;splitButton&quot;, JSplitButton.class);</span>
+<span class="nc" id="L333">        return new UIForSplitButton&lt;&gt;(splitButton);</span>
+    }
+
+    /**
+     *  Use this to build {@link JSplitButton}s with custom text displayed ont top.
+     *  The {@link JSplitButton} wrapped by the returned builder can be populated
+     *  with {@link JMenuItem}s like so: &lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *      UI.splitButton(&quot;Displayed on button!&quot;)
+     *      .add(UI.splitItem(&quot;first&quot;))
+     *      .add(UI.splitItem(&quot;second&quot;).onButtonClick( it -&gt; ... ))
+     *      .add(UI.splitItem(&quot;third&quot;))
+     *  }&lt;/pre&gt;
+     *
+     * @param text The text which should be displayed on the wrapped {@link JSplitButton}
+     * @return A UI builder instance wrapping a {@link JSplitButton}.
+     */
+    public static UIForSplitButton&lt;JSplitButton&gt; splitButton(String text) {
+<span class="fc" id="L351">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L352">        return new UIForSplitButton&lt;&gt;(new JSplitButton(text));</span>
+    }
+
+    /**
+     *  Use this to add entries to the {@link JSplitButton} by
+     *  passing {@link SplitItem} instances to {@link UIForSplitButton} builder like so: &lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *      UI.splitButton(&quot;Button&quot;)
+     *      .add(UI.splitItem(&quot;first&quot;))
+     *      .add(UI.splitItem(&quot;second&quot;))
+     *      .add(UI.splitItem(&quot;third&quot;))
+     *  }&lt;/pre&gt;
+     *  You can also use the {@link SplitItem} wrapper class to wrap
+     *  useful action lambdas for the split item.
+     *
+     * @param text The text displayed on the {@link JMenuItem} exposed by the {@link JSplitButton}s {@link JPopupMenu}.
+     * @return A new {@link SplitItem} wrapping a simple {@link JMenuItem}.
+     */
+    public static SplitItem&lt;JMenuItem&gt; splitItem(String text) {
+<span class="fc" id="L371">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L372">        return SplitItem.of(text);</span>
+    }
+
+    /**
+     *  Use this to add radio item entries to the {@link JSplitButton} by
+     *  passing {@link SplitItem} instances to {@link UIForSplitButton} builder like so: &lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *      UI.splitButton(&quot;Button&quot;)
+     *      .add(UI.splitRadioItem(&quot;first&quot;))
+     *      .add(UI.splitRadioItem(&quot;second&quot;))
+     *      .add(UI.splitRadioItem(&quot;third&quot;))
+     *  }&lt;/pre&gt;
+     *  You can also use the {@link SplitItem} wrapper class to wrap
+     *  useful action lambdas for the split item.
+     *
+     * @param text The text displayed on the {@link JRadioButtonMenuItem} exposed by the {@link JSplitButton}s {@link JPopupMenu}.
+     * @return A new {@link SplitItem} wrapping a simple {@link JRadioButtonMenuItem}.
+     */
+    public static SplitItem&lt;JRadioButtonMenuItem&gt; splitRadioItem(String text) {
+<span class="fc" id="L391">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L392">        return SplitItem.of(new JRadioButtonMenuItem(text));</span>
+    }
+
+    public static &lt;P extends JTabbedPane&gt; UIForTabbedPane&lt;P&gt; of(P pane) {
+<span class="fc" id="L396">        return new UIForTabbedPane&lt;&gt;(pane);</span>
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JTabbedPane} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JTabbedPane())}.
+     *  In order to add tabs to this builder use the tab object returned by {@link #tab(String)}
+     *  like so:
+     *
+     *  &lt;pre&gt;{@code
+     *      UI.tabbedPane()
+     *      .add(UI.tab(&quot;one&quot;).add(UI.panel().add(..)))
+     *      .add(UI.tab(&quot;two&quot;).withTip(&quot;I give info!&quot;).add(UI.label(&quot;read me&quot;)))
+     *      .add(UI.tab(&quot;three&quot;).with(someIcon).add(UI.button(&quot;click me&quot;)))
+     *  }&lt;/pre&gt;
+     *
+     *
+     * @return A builder instance for a new {@link JTabbedPane}, which enables fluent method chaining.
+     */
+<span class="fc" id="L415">    public static UIForTabbedPane&lt;JTabbedPane&gt; tabbedPane() { return of(new JTabbedPane()); }</span>
+
+    /**
+     *  Use this to create a builder for a new {@link JTabbedPane} UI component
+     *  with the provided {@link Position} applied to the tab buttons
+     *  (see {@link JTabbedPane#setTabLayoutPolicy(int)}).
+     *  In order to add tabs to this builder use the tab object returned by {@link #tab(String)}
+     *  like so:
+     *
+     *  &lt;pre&gt;{@code
+     *      UI.tabbedPane(Position.RIGHT)
+     *      .add(UI.tab(&quot;first&quot;).add(UI.panel().add(..)))
+     *      .add(UI.tab(&quot;second&quot;).withTip(&quot;I give info!&quot;).add(UI.label(&quot;read me&quot;)))
+     *      .add(UI.tab(&quot;third&quot;).with(someIcon).add(UI.button(&quot;click me&quot;)))
+     *  }&lt;/pre&gt;
+     *
+     * @param tabsPosition The position of the tab buttons which may be {@link Position#TOP}, {@link Position#RIGHT}, {@link Position#BOTTOM}, {@link Position#LEFT}.
+     * @return A builder instance wrapping a new {@link JTabbedPane}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code tabsPosition} is {@code null}.
+     */
+    public static UIForTabbedPane&lt;JTabbedPane&gt; tabbedPane(Position tabsPosition) {
+<span class="nc" id="L436">        LogUtil.nullArgCheck(tabsPosition, &quot;tabsPosition&quot;, Position.class);</span>
+<span class="nc" id="L437">        return of(new JTabbedPane(tabsPosition.forTabbedPane()));</span>
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JTabbedPane} UI component
+     *  with the provided {@link OverflowPolicy} and {@link Position} applied to the tab buttons 
+     *  (see {@link JTabbedPane#setTabLayoutPolicy(int)} and {@link JTabbedPane#setTabPlacement(int)}).
+     *  In order to add tabs to this builder use the tab object returned by {@link #tab(String)}
+     *  like so:
+     *  &lt;pre&gt;{@code
+     *      UI.tabbedPane(Position.LEFT, OverflowPolicy.WRAP)
+     *      .add(UI.tab(&quot;First&quot;).add(UI.panel().add(..)))
+     *      .add(UI.tab(&quot;second&quot;).withTip(&quot;I give info!&quot;).add(UI.label(&quot;read me&quot;)))
+     *      .add(UI.tab(&quot;third&quot;).with(someIcon).add(UI.button(&quot;click me&quot;)))
+     *  }&lt;/pre&gt;
+     *
+     * @param tabsPosition The position of the tab buttons which may be {@link Position#TOP}, {@link Position#RIGHT}, {@link Position#BOTTOM}, {@link Position#LEFT}.
+     * @param tabsPolicy The overflow policy of the tab buttons which can either be {@link OverflowPolicy#SCROLL} or {@link OverflowPolicy#WRAP}.
+     * @return A builder instance wrapping a new {@link JTabbedPane}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code tabsPosition} or {@code tabsPolicy} are {@code null}.
+     */
+    public static UIForTabbedPane&lt;JTabbedPane&gt; tabbedPane(Position tabsPosition, OverflowPolicy tabsPolicy) {
+<span class="nc" id="L459">        LogUtil.nullArgCheck(tabsPosition, &quot;tabsPosition&quot;, Position.class);</span>
+<span class="nc" id="L460">        LogUtil.nullArgCheck(tabsPolicy, &quot;tabsPolicy&quot;, OverflowPolicy.class);</span>
+<span class="nc" id="L461">        return of(new JTabbedPane(tabsPosition.forTabbedPane(), tabsPolicy.forTabbedPane()));</span>
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JTabbedPane} UI component
+     *  with the provided {@link OverflowPolicy} applied to the tab buttons (see {@link JTabbedPane#setTabLayoutPolicy(int)}).
+     *  In order to add tabs to this builder use the tab object returned by {@link #tab(String)}
+     *  like so:
+     *  &lt;pre&gt;{@code
+     *      UI.tabbedPane(OverflowPolicy.SCROLL)
+     *      .add(UI.tab(&quot;First&quot;).add(UI.panel().add(..)))
+     *      .add(UI.tab(&quot;second&quot;).withTip(&quot;I give info!&quot;).add(UI.label(&quot;read me&quot;)))
+     *      .add(UI.tab(&quot;third&quot;).with(someIcon).add(UI.button(&quot;click me&quot;)))
+     *  }&lt;/pre&gt;
+     *  
+     * @param tabsPolicy The overflow policy of the tab button which can either be {@link OverflowPolicy#SCROLL} or {@link OverflowPolicy#WRAP}.
+     * @return A builder instance wrapping a new {@link JTabbedPane}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code tabsPolicy} is {@code null}.
+     */
+    public static UIForTabbedPane&lt;JTabbedPane&gt; tabbedPane(OverflowPolicy tabsPolicy) {
+<span class="nc" id="L481">        LogUtil.nullArgCheck(tabsPolicy, &quot;tabsPolicy&quot;, OverflowPolicy.class);</span>
+<span class="nc" id="L482">        return of(new JTabbedPane(Position.TOP.forTabbedPane(), tabsPolicy.forTabbedPane()));</span>
+    }
+
+    /**
+     *  Use this to add tabs to a {@link JTabbedPane} by
+     *  passing {@link Tab} instances to {@link UIForTabbedPane} builder like so: &lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *      UI.tabbedPane()
+     *      .add(UI.tab(&quot;First&quot;).add(UI.panel().add(..)))
+     *      .add(UI.tab(&quot;second&quot;).withTip(&quot;I give info!&quot;).add(UI.label(&quot;read me&quot;)))
+     *      .add(UI.tab(&quot;third&quot;).with(someIcon).add(UI.button(&quot;click me&quot;)))
+     *  }&lt;/pre&gt;
+     *
+     * @param title The text displayed on the tab button.
+     * @return A {@link Tab} instance containing everything needed to be added to a {@link JTabbedPane}.
+     * @throws IllegalArgumentException if {@code title} is {@code null}.
+     */
+    public static Tab tab(String title) {
+<span class="fc" id="L500">        LogUtil.nullArgCheck(title, &quot;title&quot;, String.class);</span>
+<span class="fc" id="L501">        return new Tab(null, title, null, null);</span>
+    }
+
+    /**
+     *  Use this to create a builder for the provided {@link JMenu} instance.
+     *
+     * @return A builder instance for the provided {@link JMenu}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
+     */
+    public static &lt;M extends JMenu&gt; UIForMenu&lt;M&gt; of(M component) {
+<span class="nc" id="L511">        LogUtil.nullArgCheck(component, &quot;component&quot;, JMenu.class);</span>
+<span class="nc" id="L512">        return new UIForMenu&lt;&gt;(component);</span>
+    }
+
+    /**
+     *  Use this to create a builder for the provided {@link JMenuItem} instance.
+     *
+     * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
+     */
+    public static &lt;M extends JMenuItem&gt; UIForMenuItem&lt;M&gt; of(M component) {
+<span class="nc" id="L522">        LogUtil.nullArgCheck(component, &quot;component&quot;, JMenuItem.class);</span>
+<span class="nc" id="L523">        return new UIForMenuItem&lt;&gt;(component);</span>
+    }
+
+    /**
+     * @param text The text which should be displayed on the wrapped {@link JMenuItem}.
+     * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
+     */
+    public static UIForMenuItem&lt;JMenuItem&gt; menuItem(String text) {
+<span class="fc" id="L531">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L532">        return new UIForMenuItem&lt;&gt;(new JMenuItem(text));</span>
+    }
+
+    /**
+     *  Use this to create a builder for the provided {@link JPanel} instance.
+     *
+     * @return A builder instance for the provided {@link JPanel}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
+     */
+    public static &lt;P extends JPanel&gt; UIForPanel&lt;P&gt; of(P component) {
+<span class="fc" id="L542">        LogUtil.nullArgCheck(component, &quot;component&quot;, JPanel.class);</span>
+<span class="fc" id="L543">        return new UIForPanel&lt;&gt;(component);</span>
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JPanel} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JPanel())}.
+     *
+     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     */
+<span class="fc" id="L552">    public static UIForPanel&lt;JPanel&gt; panel() { return of(new JPanel()); }</span>
+
+    public static UIForPanel&lt;JPanel&gt; panel(String attr, String colConstraints, String rowConstraints) {
+<span class="nc" id="L555">        return of(new JPanel()).withLayout(attr, colConstraints, rowConstraints);</span>
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JPanel} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr, layout)}.
+     *
+     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
+     * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
+     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     */
+    public static UIForPanel&lt;JPanel&gt; panel(String attr, String colConstraints) {
+<span class="fc" id="L567">        return of(new JPanel()).withLayout(attr, colConstraints);</span>
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JPanel} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr, layout)}.
+     *
+     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
+     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code attr} is {@code null}.
+     */
+    public static UIForPanel&lt;JPanel&gt; panel(String attr) {
+<span class="fc" id="L579">        LogUtil.nullArgCheck(attr, &quot;attr&quot;, String.class);</span>
+<span class="fc" id="L580">        return of(new JPanel()).withLayout(attr);</span>
+    }
+
+    /**
+     *  Use this to create a builder for the provided {@link JScrollPane} component.
+     *
+     * @param component The {@link JScrollPane} component which should be represented by the returned builder.
+     * @return A {@link UIForScrollPane} builder representing the provided component.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
+     */
+    public static &lt;P extends JScrollPane&gt; UIForScrollPane&lt;P&gt; of(P component) {
+<span class="fc" id="L591">        LogUtil.nullArgCheck(component, &quot;component&quot;, JScrollPane.class);</span>
+<span class="fc" id="L592">        return new UIForScrollPane&lt;&gt;(component);</span>
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JScrollPane} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JScrollPane())}. &lt;br&gt;
+     *  Her is an example of a simple scroll panel with a text area inside:
+     *  &lt;pre&gt;{@code
+     *      UI.scrollPane()
+     *      .withScrollBarPolicy(UI.Scroll.NEVER)
+     *      .add(UI.textArea(&quot;I am a text area with this text inside.&quot;))
+     *  }&lt;/pre&gt;
+     *
+     * @return A builder instance for a new {@link JScrollPane}, which enables fluent method chaining.
+     */
+<span class="fc" id="L607">    public static UIForScrollPane&lt;JScrollPane&gt; scrollPane() { return of(new JScrollPane()); }</span>
+
+    /**
+     *  Use this to create a builder for the provided {@link JSplitPane} instance.
+     *
+     * @return A builder instance for the provided {@link JSplitPane}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
+     */
+    public static &lt;P extends JSplitPane&gt; UIForSplitPane&lt;P&gt; of(P component) {
+<span class="fc" id="L616">        LogUtil.nullArgCheck(component, &quot;component&quot;, JSplitPane.class);</span>
+<span class="fc" id="L617">        return new UIForSplitPane&lt;&gt;(component);</span>
+    }
+
+
+    /**
+     *  Use this to create a builder for a new {@link JSplitPane} instance
+     *  based on the provided split alignment. &lt;br&gt;
+     *  You can create a simple split pane based UI like so: &lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *      UI.splitPane(UI.Align.HORIZONTAL)
+     *      .withDividerAt(50)
+     *      .add(UI.panel().add(...)) // top
+     *      .add(UI.scrollPane().add(...)) // bottom
+     *  }&lt;/pre&gt;
+     *
+     * @param align The alignment determining if the {@link JSplitPane} splits vertically or horizontally.
+     * @return A builder instance for the provided {@link JSplitPane}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     */
+    public static UIForSplitPane&lt;JSplitPane&gt; splitPane(Align align) {
+<span class="fc" id="L637">        LogUtil.nullArgCheck(align, &quot;align&quot;, Align.class);</span>
+<span class="fc" id="L638">        return of(new JSplitPane(align.forSplitPane()));</span>
+    }
+
+    /**
+     *  Use this to create a builder for the provided {@link JEditorPane} instance.
+     *
+     * @return A builder instance for the provided {@link JEditorPane}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
+     */
+    public static &lt;P extends JEditorPane&gt; UIForEditorPane&lt;P&gt; of(P component) {
+<span class="fc" id="L648">        LogUtil.nullArgCheck(component, &quot;component&quot;, JEditorPane.class);</span>
+<span class="fc" id="L649">        return new UIForEditorPane&lt;&gt;(component);</span>
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JEditorPane} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JEditorPane())}.
+     *
+     * @return A builder instance for a new {@link JEditorPane}, which enables fluent method chaining.
+     */
+<span class="fc" id="L658">    public static UIForEditorPane&lt;JEditorPane&gt; editorPane() { return of(new JEditorPane()); }</span>
+
+    /**
+     *  Use this to create a builder for the provided {@link JTextPane} instance.
+     *
+     * @return A builder instance for the provided {@link JTextPane}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
+     */
+    public static &lt;P extends JTextPane&gt; UIForTextPane&lt;P&gt; of(P component) {
+<span class="nc" id="L667">        LogUtil.nullArgCheck(component, &quot;component&quot;, JTextPane.class);</span>
+<span class="nc" id="L668">        return new UIForTextPane&lt;&gt;(component);</span>
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JTextPane} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JTextPane())}.
+     *
+     * @return A builder instance for a new {@link JTextPane}, which enables fluent method chaining.
+     */
+<span class="nc" id="L677">    public static UIForTextPane&lt;JTextPane&gt; textPane() { return of(new JTextPane()); }</span>
+
+    /**
+     *  Use this to create a builder for the provided {@link JSlider} instance.
+     *
+     * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
+     */
+    public static &lt;S extends JSlider&gt; UIForSlider&lt;S&gt; of(S component) {
+<span class="fc" id="L686">        LogUtil.nullArgCheck(component, &quot;component&quot;, JSlider.class);</span>
+<span class="fc" id="L687">        return new UIForSlider&lt;&gt;(component);</span>
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JSlider} instance
+     *  based on tbe provided alignment type determining if
+     *  the slider will be aligned vertically or horizontally.
+     *
+     * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
+     * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     *
+     * @see JSlider#setOrientation
+     */
+    public static UIForSlider&lt;JSlider&gt; slider(Align align) {
+<span class="nc" id="L702">        LogUtil.nullArgCheck(align, &quot;align&quot;, Align.class);</span>
+<span class="nc" id="L703">        return of(new JSlider(align.forSlider()));</span>
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JSlider} instance
+     *  based on tbe provided alignment type, min slider value and max slider value.
+     *
+     * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
+     * @param min The minimum possible value of the slider.
+     * @param max The maximum possible value of the slider.
+     * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
+     *
+     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     *
+     * @see JSlider#setOrientation
+     * @see JSlider#setMinimum
+     * @see JSlider#setMaximum
+     */
+    public static UIForSlider&lt;JSlider&gt; slider(Align align, int min, int max) {
+<span class="nc" id="L722">        LogUtil.nullArgCheck(align, &quot;align&quot;, Align.class);</span>
+<span class="nc" id="L723">        return of(new JSlider(align.forSlider(), min, max, (min + max) / 2));</span>
+    }
+
+    /**
+     * Creates a slider with the specified alignment and the
+     * specified minimum, maximum, and initial values.
+     *
+     * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
+     * @param min The minimum possible value of the slider.
+     * @param max The maximum possible value of the slider.
+     * @param value  the initial value of the slider
+     *
+     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     *
+     * @see JSlider#setOrientation
+     * @see JSlider#setMinimum
+     * @see JSlider#setMaximum
+     * @see JSlider#setValue
+     */
+    public static UIForSlider&lt;JSlider&gt; slider(Align align, int min, int max, int value) {
+<span class="nc" id="L743">        LogUtil.nullArgCheck(align, &quot;align&quot;, Align.class);</span>
+<span class="nc" id="L744">        return of(new JSlider(align.forSlider(), min, max, value));</span>
+    }
+
+    /**
+     *  Use this to create a builder for the provided {@link JComboBox} instance.
+     *
+     * @return A builder instance for the provided {@link JComboBox}, which enables fluent method chaining.
+     */
+    public static &lt;E&gt; UIForCombo&lt;E&gt; of(JComboBox&lt;E&gt; component) {
+<span class="fc" id="L753">        LogUtil.nullArgCheck(component, &quot;component&quot;, JComboBox.class);</span>
+<span class="fc" id="L754">        return new UIForCombo&lt;&gt;(component);</span>
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JComboBox} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JComboBox())}.
+     *
+     * @return A builder instance for a new {@link JComboBox}, which enables fluent method chaining.
+     */
+<span class="nc" id="L763">    public static UIForCombo&lt;Object&gt; comboBox() { return of(new JComboBox&lt;&gt;()); }</span>
+
+    /**
+     *  Use this to create a builder for the provided {@link JSpinner} instance.
+     *
+     * @return A builder instance for the provided {@link JSpinner}, which enables fluent method chaining.
+     */
+    public static &lt;S extends JSpinner&gt; UIForSpinner&lt;S&gt; of(S spinner) {
+<span class="fc" id="L771">        LogUtil.nullArgCheck(spinner, &quot;spinner&quot;, JSpinner.class);</span>
+<span class="fc" id="L772">        return new UIForSpinner&lt;&gt;(spinner);</span>
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JSpinner} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JSpinner())}.
+     *
+     * @return A builder instance for a new {@link JSpinner}, which enables fluent method chaining.
+     */
+<span class="fc" id="L781">    public static UIForSpinner&lt;JSpinner&gt; spinner() { return of(new JSpinner()); }</span>
+
+    /**
+     *  Use this to create a builder for the provided {@link JLabel} instance.
+     *
+     * @return A builder instance for the provided {@link JLabel}, which enables fluent method chaining.
+     */
+    public static &lt;L extends JLabel&gt; UIForLabel&lt;L&gt; of(L component) {
+<span class="fc" id="L789">        LogUtil.nullArgCheck(component, &quot;component&quot;, JLabel.class);</span>
+<span class="fc" id="L790">        return new UIForLabel&lt;&gt;(component);</span>
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JLabel} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JLabel(String text)}.
+     *
+     * @param text The text which should be displayed on the label.
+     * @return A builder instance for the label, which enables fluent method chaining.
+     */
+    public static UIForLabel&lt;JLabel&gt; label(String text) {
+<span class="fc" id="L801">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L802">        return of(new JLabel(text));</span>
+    }
+
+    /**
+     *  Use this to create a UI builder for a text-less label containing and displaying an icon.
+     *
+     * @param icon The icon which should be placed into a {@link JLabel}.
+     * @return A builder instance for the label, which enables fluent method chaining.
+     */
+    public static UIForLabel&lt;JLabel&gt; label(Icon icon) {
+<span class="nc" id="L812">        LogUtil.nullArgCheck(icon, &quot;icon&quot;, Icon.class);</span>
+<span class="nc" id="L813">        return of(new JLabel()).with(icon);</span>
+    }
+
+    /**
+     *  Use this to create a UI builder for a text-less label containing and displaying an icon.
+     *
+     * @param width The width of the icon when displayed on the label.
+     * @param height The height of the icon when displayed on the label.
+     * @param icon The icon which should be placed into a {@link JLabel}.
+     * @return A builder instance for the label, which enables fluent method chaining.
+     */
+    public static UIForLabel&lt;JLabel&gt; label(int width, int height, ImageIcon icon) {
+<span class="fc" id="L825">        LogUtil.nullArgCheck(icon, &quot;icon&quot;, ImageIcon.class);</span>
+<span class="fc" id="L826">        return of(new JLabel())</span>
+<span class="fc" id="L827">                .with(</span>
+<span class="fc" id="L828">                    new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT))</span>
+                );
+    }
+
+    public static UIForCheckBox&lt;JCheckBox&gt; checkBox(String text) {
+<span class="nc" id="L833">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="nc" id="L834">        return of(new JCheckBox(text));</span>
+    }
+
+    /**
+     *  Use this to create a builder for the provided {@link JCheckBox} instance.
+     *
+     * @return A builder instance for the provided {@link JCheckBox}, which enables fluent method chaining.
+     */
+    public static &lt;B extends JCheckBox&gt; UIForCheckBox&lt;B&gt; of(B component) {
+<span class="nc" id="L843">        LogUtil.nullArgCheck(component, &quot;component&quot;, JCheckBox.class);</span>
+<span class="nc" id="L844">        return new UIForCheckBox&lt;&gt;(component);</span>
+    }
+
+    public static UIForRadioButton&lt;JRadioButton&gt; radioButton(String text) {
+<span class="fc" id="L848">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L849">        return of(new JRadioButton(text));</span>
+    }
+
+    /**
+     *  Use this to create a builder for the provided {@link JRadioButton} instance.
+     *
+     * @return A builder instance for the provided {@link JRadioButton}, which enables fluent method chaining.
+     */
+    public static &lt;R extends JRadioButton&gt; UIForRadioButton&lt;R&gt; of(R component) {
+<span class="fc" id="L858">        LogUtil.nullArgCheck(component, &quot;component&quot;, JRadioButton.class);</span>
+<span class="fc" id="L859">        return new UIForRadioButton&lt;&gt;(component);</span>
+    }
+
+    /**
+     *  Use this to create a builder for the provided {@link JTextField} instance.
+     *
+     * @return A builder instance for the provided {@link JTextField}, which enables fluent method chaining.
+     */
+    public static &lt;F extends JTextField&gt; UIForTextField&lt;F&gt; of(F component) {
+<span class="fc" id="L868">        LogUtil.nullArgCheck(component, &quot;component&quot;, JTextComponent.class);</span>
+<span class="fc" id="L869">        return new UIForTextField&lt;&gt;(component);</span>
+    }
+
+    public static UIForTextField&lt;JTextField&gt; textField(String text) {
+<span class="fc" id="L873">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L874">        return of(new JTextField(text));</span>
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JTextField} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JTextField())}.
+     *
+     * @return A builder instance for a new {@link JTextField}, which enables fluent method chaining.
+     */
+<span class="fc" id="L883">    public static UIForTextField&lt;JTextField&gt; textField() { return of(new JTextField()); }</span>
+
+    /**
+     *  Use this to create a builder for the provided {@link JFormattedTextField} instance.
+     *
+     * @return A builder instance for the provided {@link JFormattedTextField}, which enables fluent method chaining.
+     */
+    public static UIForFormattedTextField of(JFormattedTextField component) {
+<span class="nc" id="L891">        LogUtil.nullArgCheck(component, &quot;component&quot;, JFormattedTextField.class);</span>
+<span class="nc" id="L892">        return new UIForFormattedTextField(component);</span>
+    }
+
+    public static UIForFormattedTextField formattedTextField(String text) {
+<span class="nc" id="L896">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="nc" id="L897">        return of(new JFormattedTextField(text));</span>
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JFormattedTextField} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JFormattedTextField())}.
+     *
+     * @return A builder instance for a new {@link JFormattedTextField}, which enables fluent method chaining.
+     */
+<span class="nc" id="L906">    public static UIForFormattedTextField formattedTextField() { return of(new JFormattedTextField()); }</span>
+
+    /**
+     *  Use this to create a builder for the provided {@link JPasswordField} instance.
+     *
+     * @return A builder instance for the provided {@link JPasswordField}, which enables fluent method chaining.
+     */
+    public static &lt;F extends JPasswordField&gt; UIForPasswordField&lt;F&gt; of(F component) {
+<span class="fc" id="L914">        LogUtil.nullArgCheck(component, &quot;component&quot;, JPasswordField.class);</span>
+<span class="fc" id="L915">        return new UIForPasswordField&lt;&gt;(component);</span>
+    }
+
+    public static UIForPasswordField&lt;JPasswordField&gt; passwordField(String text) {
+<span class="fc" id="L919">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L920">        return of(new JPasswordField(text));</span>
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JPasswordField} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JPasswordField())}.
+     *
+     * @return A builder instance for a new {@link JPasswordField}, which enables fluent method chaining.
+     */
+<span class="nc" id="L929">    public static UIForPasswordField&lt;JPasswordField&gt; passwordField() { return of(new JPasswordField()); }</span>
+
+    /**
+     *  Use this to create a builder for the provided {@link JTextArea} instance.
+     *
+     * @return A builder instance for the provided {@link JTextArea}, which enables fluent method chaining.
+     */
+    public static &lt;A extends JTextArea&gt; UIForTextArea&lt;A&gt; of(A area) {
+<span class="fc" id="L937">        LogUtil.nullArgCheck(area, &quot;area&quot;, JTextArea.class);</span>
+<span class="fc" id="L938">        return new UIForTextArea&lt;&gt;(area);</span>
+    }
+
+    public static UIForTextArea&lt;JTextArea&gt; textArea(String text) {
+<span class="fc" id="L942">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L943">        return of(new JTextArea(text));</span>
+    }
+
+    /**
+     *  A convenience method for creating a builder for a {@link JTextArea} with a certain text alignment.
+     *  This is a shortcut version for the following code:
+     *  &lt;pre&gt;{@code
+     *      UI.textArea()
+     *          .withTextOrientation(UI.HorizontalDirection.RIGHT_TO_LEFT);
+     *  }&lt;/pre&gt;
+     * The provided {@link UI.HorizontalDirection} translates to {@link ComponentOrientation}
+     * instances which are used to align the elements or text within the wrapped {@link JTextComponent}.
+     * {@link LayoutManager} and {@link Component}
+     * subclasses will use this property to
+     * determine how to lay out and draw components.
+     *
+     * @param direction The text orientation type which should be used.
+     * @return A builder instance for a new {@link JTextArea}, which enables fluent method chaining.
+     */
+    public static UIForTextArea&lt;JTextArea&gt; textArea(UI.HorizontalDirection direction) {
+<span class="nc" id="L963">        LogUtil.nullArgCheck(direction, &quot;direction&quot;, HorizontalDirection.class);</span>
+<span class="nc" id="L964">        return of(new JTextArea()).withTextOrientation(direction);</span>
+    }
+
+    /**
+     *  A convenience method for creating a builder for a {@link JTextArea} with a certain text and text alignment.
+     *  This is a shortcut version for the following code:
+     *  &lt;pre&gt;{@code
+     *      UI.textArea()
+     *          .withTextOrientation(UI.HorizontalDirection.RIGHT_TO_LEFT)
+     *          .withText(text);
+     *  }&lt;/pre&gt;
+     * The provided {@link UI.HorizontalDirection} translates to {@link ComponentOrientation}
+     * instances which are used to align the elements or text within the wrapped {@link JTextComponent}.
+     * {@link LayoutManager} and {@link Component}
+     * subclasses will use this property to
+     * determine how to lay out and draw components.
+     *
+     * @param direction The text orientation type which should be used.
+     * @param text The new text to be set for the wrapped text component type.
+     * @return A builder instance for a new {@link JTextArea}, which enables fluent method chaining.
+     */
+    public static UIForTextArea&lt;JTextArea&gt; textArea(UI.HorizontalDirection direction, String text) {
+<span class="fc" id="L986">        LogUtil.nullArgCheck(direction, &quot;direction&quot;, HorizontalDirection.class);</span>
+<span class="fc" id="L987">        return of(new JTextArea()).withTextOrientation(direction).withText(text);</span>
+    }
+
+    /**
+     *  Use this to create a builder for anything.
+     *
+     * @return A builder instance for the provided object, which enables fluent method chaining.
+     */
+    public static &lt;T&gt; UIForAnything&lt;T&gt; of(T component) {
+<span class="nc" id="L996">        LogUtil.nullArgCheck(component, &quot;component&quot;, Object.class);</span>
+<span class="nc" id="L997">        return new UIForAnything&lt;&gt;(component);</span>
+    }
+
+    /**
+     *  Use this to quickly create and inspect a tes window for a UI component.
+     */
+    public static class TestWindow
+    {
+        private final JFrame frame;
+        private final Component component;
+
+<span class="nc" id="L1008">        public TestWindow(Supplier&lt;JFrame&gt; frameSupplier,Component component) {</span>
+<span class="nc" id="L1009">            this.frame = frameSupplier.get();</span>
+<span class="nc" id="L1010">            this.component = component;</span>
+<span class="nc" id="L1011">            frame.add(component);</span>
+<span class="nc" id="L1012">            frame.setSize(1000, 1000);</span>
+<span class="nc" id="L1013">            frame.setVisible(true);</span>
+<span class="nc" id="L1014">        }</span>
+
+<span class="nc" id="L1016">        public JFrame getFrame() { return this.frame; }</span>
+
+<span class="nc" id="L1018">        public Component getComponent() { return this.component; }</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
