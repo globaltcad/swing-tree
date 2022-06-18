@@ -93,9 +93,9 @@ public final class UI
     }
 
     /**
-     *  Vertical or horizontal alignment.
+     *  Vertical or horizontal split.
      */
-    public enum Align {
+    public enum Split {
         HORIZONTAL, VERTICAL;
 
         private int forSplitPane() {
@@ -106,6 +106,13 @@ public final class UI
             }
             throw new RuntimeException();
         }
+    }
+
+    /**
+     *  Vertical or horizontal alignment.
+     */
+    public enum Align {
+        HORIZONTAL, VERTICAL;
 
         private int forSlider () {
             switch ( this )
@@ -115,7 +122,6 @@ public final class UI
             }
             throw new RuntimeException();
         }
-
     }
 
     /**
@@ -623,7 +629,7 @@ public final class UI
      *  based on the provided split alignment. <br>
      *  You can create a simple split pane based UI like so: <br>
      *  <pre>{@code
-     *      UI.splitPane(UI.Align.HORIZONTAL)
+     *      UI.splitPane(UI.Split.HORIZONTAL)
      *      .withDividerAt(50)
      *      .add(UI.panel().add(...)) // top
      *      .add(UI.scrollPane().add(...)) // bottom
@@ -633,8 +639,8 @@ public final class UI
      * @return A builder instance for the provided {@link JSplitPane}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code align} is {@code null}.
      */
-    public static UIForSplitPane<JSplitPane> splitPane(Align align) {
-        LogUtil.nullArgCheck(align, "align", Align.class);
+    public static UIForSplitPane<JSplitPane> splitPane(Split align) {
+        LogUtil.nullArgCheck(align, "align", Split.class);
         return of(new JSplitPane(align.forSplitPane()));
     }
 
