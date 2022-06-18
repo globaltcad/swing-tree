@@ -10,7 +10,7 @@ class AdvancedUI extends JPanel {
         UIManager.setLookAndFeel(new FlatMaterialDesignDarkIJTheme())
         UI.panel("fill, insets 0")
         .add("grow",
-            UI.splitPane(UI.Align.HORIZONTAL).withDividerAt(565)
+            UI.splitPane(UI.Split.HORIZONTAL).withDividerAt(565)
             .add(
                 UI.panel("fill, insets 0")
                 .add("push, grow, span, wrap",
