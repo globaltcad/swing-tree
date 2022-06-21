@@ -1,6 +1,7 @@
 package com.globaltcad.swingtree.common
 
 import com.globaltcad.swingtree.UI
+import com.globaltcad.swingtree.input.Keyboard
 import spock.lang.Ignore
 import spock.lang.Narrative
 import spock.lang.Specification
@@ -8,6 +9,9 @@ import spock.lang.Title
 
 import javax.swing.*
 import java.awt.*
+import java.awt.event.FocusEvent
+import java.awt.event.FocusListener
+import java.awt.event.KeyListener
 
 @Title("Swing tree makes UI building fun again!")
 @Narrative('''
@@ -129,12 +133,41 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             tree['B5'  ] == 'javax.swing.JButton[B5,0,0,0x0,invalid,alignmentX=0.0,alignmentY=0.5,border=javax.swing.plaf.BorderUIResource$CompoundBorderUIResource,flags=296,maximumSize=,minimumSize=,preferredSize=,defaultIcon=,disabledIcon=,disabledSelectedIcon=,margin=javax.swing.plaf.InsetsUIResource[top=2,left=14,bottom=2,right=14],paintBorder=true,paintFocus=true,pressedIcon=,rolloverEnabled=true,rolloverIcon=,rolloverSelectedIcon=,selectedIcon=,text=5 (LINE_END),defaultCapable=true]'
     }
 
+    def 'We can register various keyboard events in swing tree nodes.'()
+    {
+        when :
+            def panel =
+                    UI.of(new JPanel()).id("Root")
+                    .onKeyPressed(it -> {/*something*/})
+                    .onPressed(Keyboard.Key.H, it -> {/*something*/})
+                    .onKeyReleased(it -> {/*something*/})
+                    .onReleased(Keyboard.Key.X, it -> {/*something*/})
+                    .onKeyTyped(it -> {/*something*/})
+                    .onTyped(Keyboard.Key.X, it -> {/*something*/})
+                    .get(JPanel)
+
+        then :
+            panel.getListeners(KeyListener.class).size() == 6
+    }
+
+    def 'We can register various UI focus events in swing tree nodes.'()
+    {
+        when :
+            def panel =
+                    UI.of(new JPanel()).id("Root")
+                    .onFocusGained(it -> {/*something*/})
+                    .onFocusLost(it -> {/*something*/})
+                    .get(JPanel)
+        then :
+            panel.getListeners(FocusListener.class).size() == 2
+    }
+
     /**
      *  Use this to take a look at what the UIMake produces...
      */
     @Ignore
-    def 'Swing tree makes us a viewable window!'() {
-
+    def 'Swing tree makes us a viewable window!'()
+    {
         expect :
             UI.of(new JFrame("Test"))
                 .peek(frame -> frame.add(
