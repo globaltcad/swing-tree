@@ -42,17 +42,18 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'    // mandatory dependencies for using Spock
 
     testImplementation 'org.codehaus.groovy:groovy:3.0.10'
-    testImplementation 'com.formdev:flatlaf-intellij-themes:2.2'
     testImplementation platform("org.spockframework:spock-bom:2.0-groovy-3.0")
     testImplementation 'org.spockframework:spock-core:2.1-groovy-3.0'
     testImplementation 'com.athaydes:spock-reports:2.3.0-groovy-3.0'//, { transitive = false }
 
+    testRuntimeOnly group: 'net.bytebuddy', name: 'byte-buddy', version: '1.11.15' // allows mocking of classes (in addition to interfaces)
+    testRuntimeOnly group: 'org.objenesis', name: 'objenesis', version: '3.2'      // allows mocking of classes without default constructor (together with ByteBuddy or CGLIB)
+
+
+    testImplementation 'com.formdev:flatlaf-intellij-themes:2.2'
     testImplementation 'com.formdev:flatlaf:2.2' // Looks better than regular swing :)
     testImplementation group: 'com.metsci.ext.com.kitfox.svg', name: 'svg-salamander', version: '0.1.19'
 
-
-    testRuntimeOnly group: 'net.bytebuddy', name: 'byte-buddy', version: '1.11.15' // allows mocking of classes (in addition to interfaces)
-    testRuntimeOnly group: 'org.objenesis', name: 'objenesis', version: '3.2'      // allows mocking of classes without default constructor (together with ByteBuddy or CGLIB)
 }
 
 test {
@@ -207,7 +208,7 @@ publishing {
                     }
                 }
                 scm {
-                    url = 'https://github.com/gts-oss/'+PROJECT+''
+                    url = 'https://github.com/globaltcad/'+PROJECT+''
                     connection = 'scm:git:git://github.com/globaltcad/'+PROJECT+'.git'
                     developerConnection = 'scm:git:ssh://git@github.com:globaltcad/'+PROJECT+'.git'
                 }

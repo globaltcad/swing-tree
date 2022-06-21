@@ -20,11 +20,17 @@ public class Keyboard
 
     public enum Key
     {
-        A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
-        SHIFT, CTRL, ALT, SPACE,
-        ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE,
-        SEMICOLON,
-        EQUALS;
+        A(KeyEvent.VK_A), B(KeyEvent.VK_B), C(KeyEvent.VK_C), D(KeyEvent.VK_D), E(KeyEvent.VK_E), F(KeyEvent.VK_F), G(KeyEvent.VK_G), H(KeyEvent.VK_H), I(KeyEvent.VK_I), J(KeyEvent.VK_J), K(KeyEvent.VK_K), L(KeyEvent.VK_L), M(KeyEvent.VK_M), N(KeyEvent.VK_N), O(KeyEvent.VK_O), P(KeyEvent.VK_P), Q(KeyEvent.VK_Q), R(KeyEvent.VK_R), S(KeyEvent.VK_S), T(KeyEvent.VK_T), U(KeyEvent.VK_U), V(KeyEvent.VK_V), W(KeyEvent.VK_W), X(KeyEvent.VK_X), Y(KeyEvent.VK_Y), Z(KeyEvent.VK_Z),
+        SHIFT(KeyEvent.VK_SHIFT), CTRL(KeyEvent.VK_CONTROL), ALT(KeyEvent.VK_ALT), SPACE(KeyEvent.VK_SPACE),
+        ZERO(KeyEvent.VK_0), ONE(KeyEvent.VK_1), TWO(KeyEvent.VK_2), THREE(KeyEvent.VK_3), FOUR(KeyEvent.VK_4), FIVE(KeyEvent.VK_5), SIX(KeyEvent.VK_6), SEVEN(KeyEvent.VK_7), EIGHT(KeyEvent.VK_8), NINE(KeyEvent.VK_9),
+        SEMICOLON(KeyEvent.VK_SEMICOLON),
+        EQUALS(KeyEvent.VK_EQUALS);
+
+        public final int code;
+
+        Key(int keyCode) {
+            this.code = keyCode;
+        }
 
         public boolean isPressed() { return Keyboard.get().isPressed(this); }
 
@@ -61,54 +67,13 @@ public class Keyboard
         });
     }
 
-
     private static Key _fromKeyEvent( KeyEvent keyEvent ) {
-        switch (keyEvent.getKeyCode()) {
-            case KeyEvent.VK_SHIFT    : return Key.SHIFT;
-            case KeyEvent.VK_CONTROL  : return Key.CTRL;
-            case KeyEvent.VK_ALT      : return Key.ALT;
-            case KeyEvent.VK_SPACE    : return Key.SPACE;
-            case KeyEvent.VK_0        : return Key.ZERO;
-            case KeyEvent.VK_1        : return Key.ONE;
-            case KeyEvent.VK_2        : return Key.TWO;
-            case KeyEvent.VK_3        : return Key.THREE;
-            case KeyEvent.VK_4        : return Key.FOUR;
-            case KeyEvent.VK_5        : return Key.FIVE;
-            case KeyEvent.VK_6        : return Key.SIX;
-            case KeyEvent.VK_7        : return Key.SEVEN;
-            case KeyEvent.VK_8        : return Key.EIGHT;
-            case KeyEvent.VK_9        : return Key.NINE;
-            case KeyEvent.VK_SEMICOLON: return Key.SEMICOLON;
-            case KeyEvent.VK_EQUALS   : return Key.EQUALS   ;
-            case KeyEvent.VK_A        : return Key.A        ;
-            case KeyEvent.VK_B        : return Key.B        ;
-            case KeyEvent.VK_C        : return Key.C        ;
-            case KeyEvent.VK_D        : return Key.D        ;
-            case KeyEvent.VK_E        : return Key.E        ;
-            case KeyEvent.VK_F        : return Key.F        ;
-            case KeyEvent.VK_G        : return Key.G        ;
-            case KeyEvent.VK_H        : return Key.H        ;
-            case KeyEvent.VK_I        : return Key.I        ;
-            case KeyEvent.VK_J        : return Key.J        ;
-            case KeyEvent.VK_K        : return Key.K        ;
-            case KeyEvent.VK_L        : return Key.L        ;
-            case KeyEvent.VK_M        : return Key.M        ;
-            case KeyEvent.VK_N        : return Key.N        ;
-            case KeyEvent.VK_O        : return Key.O        ;
-            case KeyEvent.VK_P        : return Key.P        ;
-            case KeyEvent.VK_Q        : return Key.Q        ;
-            case KeyEvent.VK_R        : return Key.R        ;
-            case KeyEvent.VK_S        : return Key.S        ;
-            case KeyEvent.VK_T        : return Key.T        ;
-            case KeyEvent.VK_U        : return Key.U        ;
-            case KeyEvent.VK_V        : return Key.V        ;
-            case KeyEvent.VK_W        : return Key.W        ;
-            case KeyEvent.VK_X        : return Key.X        ;
-            case KeyEvent.VK_Y        : return Key.Y        ;
-            case KeyEvent.VK_Z        : return Key.Z        ;
-            default:
-                return Key.SHIFT;
+        for ( Key key : Key.values() ) {
+            if (key.code == keyEvent.getKeyCode()) {
+                return key;
+            }
         }
+        return Key.SHIFT;
     }
 
 }

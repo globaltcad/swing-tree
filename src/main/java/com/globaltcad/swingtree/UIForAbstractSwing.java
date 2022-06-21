@@ -3,6 +3,7 @@ package com.globaltcad.swingtree;
 
 import com.globaltcad.swingtree.api.Peeker;
 import com.globaltcad.swingtree.api.UIAction;
+import com.globaltcad.swingtree.input.Keyboard;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 
@@ -351,6 +352,122 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         LogUtil.nullArgCheck(onFocus, "onFocus", UIAction.class);
         _component.addFocusListener(new FocusAdapter() {
             @Override public void focusLost(FocusEvent e) { onFocus.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())); }
+        });
+        return (I) this;
+    }
+
+    /**
+     * Adds the supplied {@link UIAction} wrapped in a {@link KeyListener}
+     * to the component, to receive key events triggered when the wrapped component receives keyboard input.
+     * <br><br>
+     * @param onKeyPressed The {@link UIAction} which will be executed once the wrapped component received a key press.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onKeyPressed(UIAction<SimpleDelegate<C, KeyEvent>> onKeyPressed) {
+        LogUtil.nullArgCheck(onKeyPressed, "onKeyPressed", UIAction.class);
+        _component.addKeyListener(new KeyAdapter() {
+            @Override public void keyPressed(KeyEvent e) { onKeyPressed.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())); }
+        });
+        return (I) this;
+    }
+
+    /**
+     * Adds the supplied {@link UIAction} wrapped in a {@link KeyListener} to the component,
+     * to receive key events triggered when the wrapped component receives a particular
+     * keyboard input matching the provided {@link com.globaltcad.swingtree.input.Keyboard.Key}.
+     * <br><br>
+     * @param key The {@link com.globaltcad.swingtree.input.Keyboard.Key} which should be matched to the key event.
+     * @param onKeyPressed The {@link UIAction} which will be executed once the wrapped component received the targeted key press.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onPressed(Keyboard.Key key, UIAction<SimpleDelegate<C, KeyEvent>> onKeyPressed) {
+        LogUtil.nullArgCheck(key, "key", Keyboard.Key.class);
+        LogUtil.nullArgCheck(onKeyPressed, "onKeyPressed", UIAction.class);
+        _component.addKeyListener(new KeyAdapter() {
+            @Override public void keyPressed( KeyEvent e ) {
+                if ( e.getKeyCode() == key.code )
+                    onKeyPressed.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));
+            }
+        });
+        return (I) this;
+    }
+
+                             /**
+     * Adds the supplied {@link UIAction} wrapped in a {@link KeyListener}
+     * to the component, to receive key events triggered when the wrapped component receives keyboard input.
+     * <br><br>
+     * @param onKeyReleased The {@link UIAction} which will be executed once the wrapped component received a key release.
+     * @return This very instance, which enables builder-style method chaining.
+     * @see #onKeyPressed(UIAction)
+     */
+    public final I onKeyReleased(UIAction<SimpleDelegate<C, KeyEvent>> onKeyReleased) {
+        LogUtil.nullArgCheck(onKeyReleased, "onKeyReleased", UIAction.class);
+        _component.addKeyListener(new KeyAdapter() {
+            @Override public void keyReleased(KeyEvent e) { onKeyReleased.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())); }
+        });
+        return (I) this;
+    }
+
+    /**
+     * Adds the supplied {@link UIAction} wrapped in a {@link KeyListener} to the component,
+     * to receive key events triggered when the wrapped component receives a particular
+     * keyboard input matching the provided {@link com.globaltcad.swingtree.input.Keyboard.Key}.
+     * <br><br>
+     * @param key The {@link com.globaltcad.swingtree.input.Keyboard.Key} which should be matched to the key event.
+     * @param onKeyReleased The {@link UIAction} which will be executed once the wrapped component received the targeted key release.
+     * @return This very instance, which enables builder-style method chaining.
+     * @see #onKeyPressed(UIAction)
+     * @see #onKeyReleased(UIAction)
+     */
+    public I onReleased(Keyboard.Key key, UIAction<SimpleDelegate<C, KeyEvent>> onKeyReleased) {
+        LogUtil.nullArgCheck(key, "key", Keyboard.Key.class);
+        LogUtil.nullArgCheck(onKeyReleased, "onKeyReleased", UIAction.class);
+        _component.addKeyListener(new KeyAdapter() {
+            @Override public void keyReleased( KeyEvent e ) {
+                if ( e.getKeyCode() == key.code )
+                    onKeyReleased.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));
+            }
+        });
+        return (I) this;
+    }
+
+    /**
+     * Adds the supplied {@link UIAction} wrapped in a {@link KeyListener}
+     * to the component, to receive key events triggered when the wrapped component receives keyboard input.
+     * <br><br>
+     * @param onKeyTyped The {@link UIAction} which will be executed once the wrapped component received a key typed.
+     * @return This very instance, which enables builder-style method chaining.
+     * @see #onKeyPressed(UIAction)
+     * @see #onKeyReleased(UIAction)
+     */
+    public I onKeyTyped(UIAction<SimpleDelegate<C, KeyEvent>> onKeyTyped) {
+        LogUtil.nullArgCheck(onKeyTyped, "onKeyTyped", UIAction.class);
+        _component.addKeyListener(new KeyAdapter() {
+            @Override public void keyTyped(KeyEvent e) { onKeyTyped.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())); }
+        });
+        return (I) this;
+    }
+
+    /**
+     * Adds the supplied {@link UIAction} wrapped in a {@link KeyListener} to the component,
+     * to receive key events triggered when the wrapped component receives a particular
+     * keyboard input matching the provided {@link com.globaltcad.swingtree.input.Keyboard.Key}.
+     * <br><br>
+     * @param key The {@link com.globaltcad.swingtree.input.Keyboard.Key} which should be matched to the key event.
+     * @param onKeyTyped The {@link UIAction} which will be executed once the wrapped component received the targeted key typed.
+     * @return This very instance, which enables builder-style method chaining.
+     * @see #onKeyPressed(UIAction)
+     * @see #onKeyReleased(UIAction)
+     * @see #onKeyTyped(UIAction)
+     */
+    public I onTyped(Keyboard.Key key, UIAction<SimpleDelegate<C, KeyEvent>> onKeyTyped) {
+        LogUtil.nullArgCheck(key, "key", Keyboard.Key.class);
+        LogUtil.nullArgCheck(onKeyTyped, "onKeyTyped", UIAction.class);
+        _component.addKeyListener(new KeyAdapter() {
+            @Override public void keyTyped( KeyEvent e ) {
+                if ( e.getKeyCode() == key.code )
+                    onKeyTyped.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));
+            }
         });
         return (I) this;
     }
