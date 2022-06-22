@@ -8,6 +8,7 @@ import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.function.Supplier;
 
 /**
@@ -1001,6 +1002,83 @@ public final class UI
     public static <T> UIForAnything<T> of(T component) {
         LogUtil.nullArgCheck(component, "component", Object.class);
         return new UIForAnything<>(component);
+    }
+
+    /**
+     * A convenience method for {@link SwingUtilities#invokeLater(Runnable)},
+     * which causes <i>doRun.run()</i> to be executed asynchronously on the
+     * AWT event dispatching thread.  This will happen after all
+     * pending AWT events have been processed.  This method should
+     * be used when an application thread needs to update the GUI.
+     * In the following example the <code>invokeLater</code> call queues
+     * the <code>Runnable</code> object <code>doHelloWorld</code>
+     * on the event dispatching thread and
+     * then prints a message.
+     * <pre>
+     * UI.invokeLater( () -> System.out.println("Hello World on " + Thread.currentThread()) );
+     * System.out.println("This might well be displayed before the other message.");
+     * </pre>
+     * If invokeLater is called from the event dispatching thread --
+     * for example, from a JButton's ActionListener -- the <i>doRun.run()</i> will
+     * still be deferred until all pending events have been processed.
+     * Note that if the <i>doRun.run()</i> throws an uncaught exception
+     * the event dispatching thread will unwind (not the current thread).
+     *
+     * @param runnable the instance of {@code Runnable}
+     * @see #invokeAndWait
+     */
+    public static void invokeLater( Runnable runnable ) {
+        LogUtil.nullArgCheck(runnable, "runnable", Runnable.class);
+        SwingUtilities.invokeLater(runnable);
+    }
+
+    /**
+     * A convenience method for {@link SwingUtilities#invokeAndWait(Runnable)},
+     * causes <code>doRun.run()</code> to be executed synchronously on the
+     * AWT event dispatching thread.  This call blocks until
+     * all pending AWT events have been processed and (then)
+     * <code>doRun.run()</code> returns. This method should
+     * be used when an application thread needs to update the GUI.
+     * It shouldn't be called from the event dispatching thread.
+     * Here's an example that creates a new application thread
+     * that uses <code>invokeAndWait</code> to print a string from the event
+     * dispatching thread and then, when that's finished, print
+     * a string from the application thread.
+     * <pre>
+     * final Runnable doHelloWorld = () -> {
+     *         System.out.println("Hello World on " + Thread.currentThread());
+     *      };
+     *
+     * Thread appThread = new Thread() {
+     *     public void run() {
+     *         try {
+     *             UI.invokeAndWait(doHelloWorld);
+     *         }
+     *         catch (Exception e) {
+     *             e.printStackTrace();
+     *         }
+     *         System.out.println("Finished on " + Thread.currentThread());
+     *     }
+     * };
+     * appThread.start();
+     * </pre>
+     * Note that if the <code>Runnable.run</code> method throws an
+     * uncaught exception
+     * (on the event dispatching thread) it's caught and rethrown, as
+     * an <code>InvocationTargetException</code>, on the caller's thread.
+     *
+     * @param runnable the instance of {@code Runnable}
+     * @exception  InterruptedException if we're interrupted while waiting for
+     *             the event dispatching thread to finish executing
+     *             <code>doRun.run()</code>
+     * @exception  InvocationTargetException  if an exception is thrown
+     *             while running <code>doRun</code>
+     *
+     * @see #invokeLater
+     */
+    public static void invokeAndWait( Runnable runnable ) throws InterruptedException, InvocationTargetException {
+        LogUtil.nullArgCheck(runnable, "runnable", Runnable.class);
+        SwingUtilities.invokeAndWait(runnable);
     }
 
     /**
