@@ -111,7 +111,7 @@ UI.of(this/*JPanel subtype*/).withLayout("fill, insets 10")
 </td>
 <td style="vertical-align:top">
 	
-Here an example of some swing tree code which defines a simple calculator UI based on the `FlatLaF` look-and-feel. <br>
+Here is an example of some swing tree code which defines a simple calculator UI based on the `FlatLaF` look-and-feel. <br>
 This code will produce the following UI when added to a `JFrame`.
 	
 ---
