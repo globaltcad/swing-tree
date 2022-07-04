@@ -8,6 +8,7 @@ import spock.lang.Specification
 import spock.lang.Title
 
 import javax.swing.*
+import javax.swing.event.ListSelectionListener
 import java.awt.*
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
@@ -160,6 +161,19 @@ class Basic_UI_Builder_Examples_Spec extends Specification
                     .get(JPanel)
         then :
             panel.getListeners(FocusListener.class).size() == 2
+    }
+
+    def 'We can register list selection events on a JList based swing tree node.'()
+    {
+        when :
+            def list =
+                    UI.of(new JList<>())
+                    .onSelection(it -> {/*something*/})
+                    .onSelection(it -> {/*something*/})
+                    .onSelection(it -> {/*something*/})
+                    .get(JList)
+        then :
+            list.getListeners(ListSelectionListener.class).size() == 3
     }
 
     /**

@@ -995,6 +995,22 @@ public final class UI
     }
 
     /**
+     * @return A builder instance for the provided {@link JList}.
+     */
+    public static <E> UIForList<E, JList<E>> of(JList<E> list) {
+        LogUtil.nullArgCheck(list, "list", JList.class);
+        return new UIForList<>(list);
+    }
+
+    /**
+     * @return A builder instance for a new {@link JList}.
+     */
+    public static <E> UIForList<E, JList<E>> list(ListModel<E> model) {
+        LogUtil.nullArgCheck(model, "model", ListModel.class);
+        return of(new JList<>(model));
+    }
+
+    /**
      *  Use this to create a builder for anything.
      *
      * @return A builder instance for the provided object, which enables fluent method chaining.
