@@ -33,16 +33,17 @@ class Query
     }
 
     private void traverseDownwards(Component cmp) {
+        if( cmp == null ) return; // Not a container, return
         // Add this component
-        if ( cmp != null ) {
-            List<Component> found = _tree.computeIfAbsent(cmp.getName(), k -> new ArrayList<>());
-            if ( !found.contains(cmp) )
-                found.add(cmp);
+        List<Component> found = _tree.computeIfAbsent(cmp.getName(), k -> new ArrayList<>());
+        if ( !found.contains(cmp) )
+            found.add(cmp);
+
+        if ( cmp instanceof Container ) { // A container, let's traverse it.
+            Container container = (Container) cmp;
+            // Go visit and add all children
+            for ( Component subComponent : container.getComponents() )
+                traverseDownwards(subComponent);
         }
-        Container container = (Container) cmp;
-        if( container == null ) return; // Not a container, return
-        // Go visit and add all children
-        for ( Component subComponent : container.getComponents() )
-            traverseDownwards(subComponent);
     }
 }
