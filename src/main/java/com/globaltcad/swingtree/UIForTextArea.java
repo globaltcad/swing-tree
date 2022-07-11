@@ -7,5 +7,5 @@ import javax.swing.*;
  */
 public class UIForTextArea<A extends JTextArea> extends UIForAbstractTextComponent<UIForTextArea<A>, A>
 {
-    protected UIForTextArea(A component) { super(component); }
+    protected UIForTextArea( A component ) { super(component); }
 }
