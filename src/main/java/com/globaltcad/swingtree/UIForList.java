@@ -1,9 +1,13 @@
 package com.globaltcad.swingtree;
 
+import com.globaltcad.swingtree.api.ListEntryDelegate;
+import com.globaltcad.swingtree.api.ListEntryRenderer;
 import com.globaltcad.swingtree.api.UIAction;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
+import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForList<E, L>, L>
@@ -36,6 +40,17 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
      */
     public final UIForList<E, L> withEntries(E... entries) {
         _component.setListData(entries.clone());
+        return this;
+    }
+
+    public final UIForList<E, L> withRenderer(ListEntryRenderer<E, L> renderer) {
+        _component.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> renderer.render(new ListEntryDelegate<E, L>() {
+            @Override public L list() { return (L) list; }
+            @Override public E entry() { return value; }
+            @Override public int index() { return index; }
+            @Override public boolean isSelected() { return isSelected; }
+            @Override public boolean hasFocus() { return cellHasFocus; }
+        }));
         return this;
     }
 
