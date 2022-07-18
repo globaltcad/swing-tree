@@ -4,6 +4,7 @@ import com.globaltcad.swingtree.api.UIAction;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
+import java.util.List;
 
 public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForList<E, L>, L>
 {
@@ -15,6 +16,28 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
      * @param component The JComponent type which will be wrapped by this builder node.
      */
     UIForList(L component) { super(component); }
+
+    /**
+     *  Takes the provided list of entry objects and sets them as {@link JList} data.
+     *
+     * @param entries The list of entries to set as data.
+     * @return This instance of the builder node.
+     */
+    public final UIForList<E, L> withEntries(List<E> entries) {
+        _component.setListData((E[]) entries.toArray(new Object[0]));
+        return this;
+    }
+
+    /**
+     *  Takes the provided array of entry objects and sets them as {@link JList} data.
+     *
+     * @param entries The array of entries to set as data.
+     * @return This instance of the builder node.
+     */
+    public final UIForList<E, L> withEntries(E... entries) {
+        _component.setListData(entries.clone());
+        return this;
+    }
 
     /**
      * Adds an {@link UIAction} to the underlying {@link JList}
