@@ -14,8 +14,8 @@ class Query
     <C extends Component> Optional<C> find(Class<C> type, String id) {
         if ( !_tree.containsKey(id) ) {
             _tree.clear();
-            Component root = traverseUpwards(_current);
-            traverseDownwards(root);
+            List<Component> roots = traverseUpwards(_current, new ArrayList<>());
+            roots.stream().forEach(this::_traverseDownwardsAndFillTree);
         }
         return _tree.getOrDefault(id, new ArrayList<>())
                     .stream()
@@ -24,15 +24,37 @@ class Query
                     .findFirst();
     }
 
-    private Component traverseUpwards(Component component) {
+    private List<Component> traverseUpwards(Component component, List<Component> roots)
+    {
+        Component parent = _findRootParentOf(component);
+        roots.add(parent);
+        if ( parent.getParent() != null ) {
+            return traverseUpwards(parent.getParent(), roots);
+        }
+        else
+            return roots;
+    }
+
+    private Component _findRootParentOf( Component component ) {
         Container parent = component.getParent();
-        if ( parent != null )
-            return traverseUpwards(parent);
+        if ( _acknowledgesParenthood( parent, component ) )
+            return _findRootParentOf( parent );
         else
             return component;
     }
 
-    private void traverseDownwards(Component cmp) {
+    private boolean _acknowledgesParenthood( Component parent, Component child ) {
+        if ( parent instanceof Container ) {
+            Container container = (Container) parent;
+            for ( Component component : container.getComponents() )
+                if ( component == child )
+                    return true;
+        }
+        return false;
+    }
+
+    private void _traverseDownwardsAndFillTree( Component cmp )
+    {
         if( cmp == null ) return; // Not a container, return
         // Add this component
         List<Component> found = _tree.computeIfAbsent(cmp.getName(), k -> new ArrayList<>());
@@ -43,7 +65,7 @@ class Query
             Container container = (Container) cmp;
             // Go visit and add all children
             for ( Component subComponent : container.getComponents() )
-                traverseDownwards(subComponent);
+                _traverseDownwardsAndFillTree(subComponent);
         }
     }
 }
