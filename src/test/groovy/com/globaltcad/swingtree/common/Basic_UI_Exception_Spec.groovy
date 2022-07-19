@@ -51,7 +51,7 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.textArea(null)},
                     {UI.panel().onMouseClick(null)},
                     {UI.of(new JComboBox<>()).onMouseClick(null)},
-                    {UI.of(new JComboBox<>()).onChange(null)},
+                    {UI.of(new JComboBox<>()).onSelection(null)},
                     {UI.of(new JSlider()).onChange(null)},
                     {UI.button().onClick(null)},
                     {UI.button().onChange(null)},
@@ -60,7 +60,12 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.tabbedPane((UI.Position)null)},
                     {UI.tabbedPane((UI.OverflowPolicy)null)},
                     {UI.tabbedPane((UI.Position)null,(UI.OverflowPolicy)null)},
-                    {UI.slider((UI.Align)null)}
+                    {UI.slider((UI.Align)null)},
+                    {UI.slider((UI.Align)null, 1, 10, 3)},
+                    {UI.slider(UI.Align.HORIZONTAL).onChange(null)},
+                    {UI.comboBox((List)null)},
+                    {UI.comboBox((Object[])null)},
+                    {UI.comboBox().onSelection(null)}
             ]
     }
 

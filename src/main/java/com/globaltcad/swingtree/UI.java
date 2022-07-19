@@ -770,6 +770,33 @@ public final class UI
     public static UIForCombo<Object> comboBox() { return of(new JComboBox<>()); }
 
     /**
+     *  Use this to create a builder for the provided {@link JList} instance
+     *  with the provided array of elements as selectable items.
+     *
+     * @param items The array of elements to be selectable in the {@link JList}.
+     * @return A builder instance for the provided {@link JList}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
+     */
+    @SafeVarargs
+    public static <E> UIForCombo<E> comboBox(E... items) {
+        LogUtil.nullArgCheck(items, "items", Object[].class);
+        return of(new JComboBox<>(items));
+    }
+
+    /**
+     *  Use this to create a builder for the provided {@link JList} instance
+     *  with the provided list of elements as selectable items.
+     *
+     * @param items The list of elements to be selectable in the {@link JList}.
+     * @return A builder instance for the provided {@link JList}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
+     */
+    public static <E> UIForCombo<E> comboBox(java.util.List<E> items) {
+        LogUtil.nullArgCheck(items, "items", List.class);
+        return of(new JComboBox<>((E[]) items.toArray()));
+    }
+
+    /**
      *  Use this to create a builder for the provided {@link JSpinner} instance.
      *
      * @return A builder instance for the provided {@link JSpinner}, which enables fluent method chaining.

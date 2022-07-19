@@ -23,7 +23,7 @@ public class UIForCombo<E> extends UIForAbstractSwing<UIForCombo<E>, JComboBox<E
      * @param action The {@link UIAction} that will be notified.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public UIForCombo<E> onChange(UIAction<SimpleDelegate<JComboBox<E>, ActionEvent>> action) {
+    public UIForCombo<E> onSelection(UIAction<SimpleDelegate<JComboBox<E>, ActionEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         _component.addActionListener(e -> action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())) );
         return this;
