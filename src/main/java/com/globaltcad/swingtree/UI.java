@@ -3,6 +3,7 @@ package com.globaltcad.swingtree;
 import com.alexandriasoftware.swing.JSplitButton;
 import com.globaltcad.swingtree.api.MenuBuilder;
 import com.globaltcad.swingtree.api.SwingBuilder;
+import com.globaltcad.swingtree.api.model.TableListDataSource;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -123,6 +124,14 @@ public final class UI
             }
             throw new RuntimeException();
         }
+        private int forSeparator() {
+            switch ( this )
+            {
+                case HORIZONTAL: return JSeparator.HORIZONTAL;
+                case VERTICAL: return JSeparator.VERTICAL;
+            }
+            throw new RuntimeException();
+        }
     }
 
     /**
@@ -164,6 +173,35 @@ public final class UI
             switch ( this ) {
                 case LEFT_TO_RIGHT: return ComponentOrientation.LEFT_TO_RIGHT;
                 case RIGHT_TO_LEFT: return ComponentOrientation.RIGHT_TO_LEFT;
+            }
+            throw new RuntimeException();
+        }
+    }
+
+    public enum TableData {
+        COLUMN_MAJOR, ROW_MAJOR,
+        COLUMN_MAJOR_EDITABLE, ROW_MAJOR_EDITABLE;
+
+        final boolean isEditable() {
+            switch ( this ) {
+                case COLUMN_MAJOR:
+                case ROW_MAJOR:
+                    return false;
+                case COLUMN_MAJOR_EDITABLE:
+                case ROW_MAJOR_EDITABLE:
+                    return true;
+            }
+            throw new RuntimeException();
+        }
+
+        final boolean isRowMajor() {
+            switch ( this ) {
+                case COLUMN_MAJOR:
+                case COLUMN_MAJOR_EDITABLE:
+                    return false;
+                case ROW_MAJOR:
+                case ROW_MAJOR_EDITABLE:
+                    return true;
             }
             throw new RuntimeException();
         }
@@ -245,6 +283,28 @@ public final class UI
     {
         LogUtil.nullArgCheck(separator, "separator", JSeparator.class);
         return new UIForSeparator<>(separator);
+    }
+
+    /**
+     *  This returns an instance of a {@link UIForSeparator} builder
+     *  responsible for building a {@link JSeparator} by exposing helpful utility methods for it.
+     *  This is in essence a convenience method for {@code UI.of(new JSeparator())}.
+     *
+     * @return A {@link UIForSeparator} UI builder instance which wraps the {@link JSeparator} and exposes helpful methods.
+     */
+    public static UIForSeparator<JSeparator> separator() { return of(new JSeparator()); }
+
+    /**
+     *  This returns an instance of a {@link UIForSeparator} builder
+     *  responsible for building a {@link JSeparator} by exposing helpful utility methods for it.
+     *  This is in essence a convenience method for {@code UI.of(new JSeparator(JSeparator.VERTICAL))}.
+     *
+     * @param align The alignment of the separator which may either be horizontal or vertical.
+     * @return A {@link UIForSeparator} UI builder instance which wraps the {@link JSeparator} and exposes helpful methods.
+     */
+    public static UIForSeparator<JSeparator> separator(Align align) {
+        LogUtil.nullArgCheck(align, "align", Align.class);
+        return of(new JSeparator(align.forSeparator()));
     }
 
     /**
@@ -1035,6 +1095,22 @@ public final class UI
     public static <E> UIForList<E, JList<E>> list(ListModel<E> model) {
         LogUtil.nullArgCheck(model, "model", ListModel.class);
         return of(new JList<>(model));
+    }
+
+    /**
+     * @return A builder instance for a new {@link JTable}.
+     */
+    public static <T extends JTable> UIForTable<T> of(T table) {
+        LogUtil.nullArgCheck(table, "table", JTable.class);
+        return new UIForTable<>(table);
+    }
+
+    public static UIForTable<JTable> table() { return of(new JTable()); }
+
+    public static <E> UIForTable<JTable> table(TableData dataFormat, TableListDataSource<E> dataSource) {
+        LogUtil.nullArgCheck(dataFormat, "dataFormat", TableData.class);
+        LogUtil.nullArgCheck(dataSource, "dataSource", TableListDataSource.class);
+        return of(new JTable()).with(dataFormat, dataSource);
     }
 
     /**

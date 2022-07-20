@@ -4,6 +4,7 @@ import com.alexandriasoftware.swing.JSplitButton
 import com.globaltcad.swingtree.examples.advanced.AdvancedUI
 import com.globaltcad.swingtree.examples.simple.Calculator
 import com.globaltcad.swingtree.examples.simple.Form
+import com.globaltcad.swingtree.examples.simple.TableUI
 import com.globaltcad.swingtree.utility.Utility
 import spock.lang.Specification
 import spock.lang.Title
@@ -64,6 +65,33 @@ class Examples_Spec extends Specification
         expect :
             new Utility.Query(ui).find(JTextArea, "input-text-area").isPresent()
             new Utility.Query(ui).find(JTextArea, "input-text-area").get().componentOrientation == ComponentOrientation.RIGHT_TO_LEFT
+    }
+
+    def 'The simple Table-UI example has the expected state.'()
+    {
+        given : 'We get the UI.'
+            var ui = TableUI.create()
+        expect : 'The UI contains 2 different JTables.'
+            new Utility.Query(ui).find(JTable, "RM").isPresent()
+            new Utility.Query(ui).find(JTable, "CM").isPresent()
+        and :
+            new Utility.Query(ui).find(JTable, "RM").get().getRowCount() == 2
+            new Utility.Query(ui).find(JTable, "RM").get().getColumnCount() == 3
+            new Utility.Query(ui).find(JTable, "RM").get().getValueAt(0, 0) == "A"
+            new Utility.Query(ui).find(JTable, "RM").get().getValueAt(0, 1) == "B"
+            new Utility.Query(ui).find(JTable, "RM").get().getValueAt(0, 2) == "C"
+            new Utility.Query(ui).find(JTable, "RM").get().getValueAt(1, 0) == "a"
+            new Utility.Query(ui).find(JTable, "RM").get().getValueAt(1, 1) == "b"
+            new Utility.Query(ui).find(JTable, "RM").get().getValueAt(1, 2) == "c"
+        and :
+            new Utility.Query(ui).find(JTable, "CM").get().getRowCount() == 3
+            new Utility.Query(ui).find(JTable, "CM").get().getColumnCount() == 2
+            new Utility.Query(ui).find(JTable, "CM").get().getValueAt(0, 0) == "A"
+            new Utility.Query(ui).find(JTable, "CM").get().getValueAt(1, 0) == "B"
+            new Utility.Query(ui).find(JTable, "CM").get().getValueAt(2, 0) == "C"
+            new Utility.Query(ui).find(JTable, "CM").get().getValueAt(0, 1) == "a"
+            new Utility.Query(ui).find(JTable, "CM").get().getValueAt(1, 1) == "b"
+            new Utility.Query(ui).find(JTable, "CM").get().getValueAt(2, 1) == "c"
     }
 
 }

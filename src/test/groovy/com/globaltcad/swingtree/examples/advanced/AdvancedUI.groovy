@@ -5,7 +5,7 @@ import com.globaltcad.swingtree.UI
 import javax.swing.*
 import java.awt.*
 
-class AdvancedUI extends JPanel {
+class AdvancedUI {
     static JPanel of(JFrame frame) {
         UIManager.setLookAndFeel(new FlatMaterialDesignDarkIJTheme())
         UI.panel("fill, insets 0")

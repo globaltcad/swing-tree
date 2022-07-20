@@ -36,6 +36,7 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.of((JSplitButton)null)},
                     {UI.of((JPopupMenu)null)},
                     {UI.of((JSeparator)null)},
+                    {UI.separator((UI.Align)null)},
                     {UI.of((JTextArea)null)},
                     {UI.of((JLabel)null)},
                     {UI.of((Object)null)},
