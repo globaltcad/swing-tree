@@ -7,6 +7,7 @@ import com.globaltcad.swingtree.api.model.TableListDataSource;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,9 +58,9 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param columnName The name of the column for which the cell renderer will be registered.
      * @param renderer The cell renderer to be registered.
      */
-    public final UIForTable<T> withRenderer(String columnName, DefaultTableCellRenderer renderer) {
+    public final UIForTable<T> withRenderer(String columnName, TableCellRenderer renderer) {
         LogUtil.nullArgCheck(columnName, "columnName", String.class);
-        LogUtil.nullArgCheck(renderer, "renderer", DefaultTableCellRenderer.class);
+        LogUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
         _component.getColumn(columnName).setCellRenderer(renderer);
         return this;
     }
@@ -69,8 +70,8 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param columnIndex The index of the column for which the cell renderer will be registered.
      * @param renderer The cell renderer to be registered.
      */
-    public final UIForTable<T> withRenderer(int columnIndex, DefaultTableCellRenderer renderer) {
-        LogUtil.nullArgCheck(renderer, "renderer", DefaultTableCellRenderer.class);
+    public final UIForTable<T> withRenderer(int columnIndex, TableCellRenderer renderer) {
+        LogUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
         _component.getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);
         return this;
     }
