@@ -3,6 +3,7 @@ package com.globaltcad.swingtree.api.model;
 import com.globaltcad.swingtree.api.Buildable;
 
 import javax.swing.event.TableModelListener;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 
 public interface BasicTableModel extends TableModel
@@ -143,17 +144,18 @@ public interface BasicTableModel extends TableModel
          *  Use this to build the {@link BasicTableModel} instance.
          * @return The {@link BasicTableModel} instance.
          */
-        @Override public BasicTableModel build() {
-            return new BasicTableModel() {
-                @Override public int getRowCount() { return rowCount == null ? 0 : rowCount.get(); }
-                @Override public int getColumnCount() { return colCount == null ? 0 : colCount.get(); }
-                @Override public Object getValueAt(int rowIndex, int colIndex) { return valueAt == null ? null : valueAt.get(rowIndex, colIndex); }
-                @Override public void setValueAt(Object value, int rowIndex, int colIndex) { if ( setValueAt != null ) setValueAt.set(rowIndex, colIndex, value); }
-                @Override public Class<?> getColumnClass(int colIndex) { return columnClass == null ? Object.class : columnClass.get(colIndex); }
-                @Override public boolean isCellEditable(int rowIndex, int colIndex) { return cellEditable != null && cellEditable.is(rowIndex, colIndex); }
-                @Override public String getColumnName(int colIndex) { return columnName == null ? null : columnName.get(colIndex); }
-            };
-        }
+        @Override public BasicTableModel build() { return new FunTableModel(); }
+
+         private class FunTableModel extends AbstractTableModel implements BasicTableModel {
+             @Override public int getRowCount() { return rowCount == null ? 0 : rowCount.get(); }
+             @Override public int getColumnCount() { return colCount == null ? 0 : colCount.get(); }
+             @Override public Object getValueAt(int rowIndex, int colIndex) { return valueAt == null ? null : valueAt.get(rowIndex, colIndex); }
+             @Override public void setValueAt(Object value, int rowIndex, int colIndex) { if ( setValueAt != null ) setValueAt.set(rowIndex, colIndex, value); }
+             @Override public Class<?> getColumnClass(int colIndex) { return columnClass == null ? super.getColumnClass(colIndex) : columnClass.get(colIndex); }
+             @Override public boolean isCellEditable(int rowIndex, int colIndex) { return cellEditable != null && cellEditable.is(rowIndex, colIndex); }
+             @Override public String getColumnName(int colIndex) { return columnName == null ? super.getColumnName(colIndex) : columnName.get(colIndex); }
+         }
 
      }
+
 }
