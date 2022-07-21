@@ -92,6 +92,27 @@ class Examples_Spec extends Specification
             new Utility.Query(ui).find(JTable, "CM").get().getValueAt(0, 1) == "a"
             new Utility.Query(ui).find(JTable, "CM").get().getValueAt(1, 1) == "b"
             new Utility.Query(ui).find(JTable, "CM").get().getValueAt(2, 1) == "c"
+        and :
+            new Utility.Query(ui).find(JTable, "RM2").isPresent()
+            new Utility.Query(ui).find(JTable, "CM2").isPresent()
+        and :
+            new Utility.Query(ui).find(JTable, "RM2").get().getRowCount() == 3
+            new Utility.Query(ui).find(JTable, "RM2").get().getColumnCount() == 2
+            new Utility.Query(ui).find(JTable, "RM2").get().getValueAt(0, 0) == "X"
+            new Utility.Query(ui).find(JTable, "RM2").get().getValueAt(1, 0) == "1"
+            new Utility.Query(ui).find(JTable, "RM2").get().getValueAt(2, 0) == "3"
+            new Utility.Query(ui).find(JTable, "RM2").get().getValueAt(0, 1) == "Y"
+            new Utility.Query(ui).find(JTable, "RM2").get().getValueAt(1, 1) == "2"
+            new Utility.Query(ui).find(JTable, "RM2").get().getValueAt(2, 1) == "4"
+        and :
+            new Utility.Query(ui).find(JTable, "CM2").get().getRowCount() == 2
+            new Utility.Query(ui).find(JTable, "CM2").get().getColumnCount() == 3
+            new Utility.Query(ui).find(JTable, "CM2").get().getValueAt(0,0) == "X"
+            new Utility.Query(ui).find(JTable, "CM2").get().getValueAt(0,1) == "1"
+            new Utility.Query(ui).find(JTable, "CM2").get().getValueAt(0,2) == "3"
+            new Utility.Query(ui).find(JTable, "CM2").get().getValueAt(1,0) == "Y"
+            new Utility.Query(ui).find(JTable, "CM2").get().getValueAt(1,1) == "2"
+            new Utility.Query(ui).find(JTable, "CM2").get().getValueAt(1,2) == "4"
     }
 
 }

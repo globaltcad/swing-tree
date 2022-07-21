@@ -1,8 +1,10 @@
 package com.globaltcad.swingtree;
 
 import com.alexandriasoftware.swing.JSplitButton;
+import com.globaltcad.swingtree.api.Buildable;
 import com.globaltcad.swingtree.api.MenuBuilder;
 import com.globaltcad.swingtree.api.SwingBuilder;
+import com.globaltcad.swingtree.api.model.BasicTableModel;
 import com.globaltcad.swingtree.api.model.TableListDataSource;
 import net.miginfocom.swing.MigLayout;
 
@@ -1112,6 +1114,12 @@ public final class UI
         LogUtil.nullArgCheck(dataSource, "dataSource", TableListDataSource.class);
         return of(new JTable()).with(dataFormat, dataSource);
     }
+
+    public static UIForTable<JTable> table(Buildable<BasicTableModel> tableModelBuildable) {
+        return of(new JTable()).withModel(tableModelBuildable);
+    }
+
+    public static BasicTableModel.Builder tableModel() { return new BasicTableModel.Builder(); }
 
     /**
      *  Use this to create a builder for anything.

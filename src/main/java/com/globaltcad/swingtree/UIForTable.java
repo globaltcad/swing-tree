@@ -1,6 +1,7 @@
 package com.globaltcad.swingtree;
 
-import com.globaltcad.swingtree.api.model.TableDataSource;
+import com.globaltcad.swingtree.api.Buildable;
+import com.globaltcad.swingtree.api.model.BasicTableModel;
 import com.globaltcad.swingtree.api.model.TableListDataSource;
 
 import javax.swing.*;
@@ -21,13 +22,18 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
         super(component);
     }
 
-    public final <E> UIForTable<T> withData(TableDataSource<E> dataSource) {
+    public final UIForTable<T> withModel(Buildable<BasicTableModel> dataModelBuilder) {
+        return this.withModel(dataModelBuilder.build());
+    }
+
+    public final UIForTable<T> withModel(BasicTableModel dataSource) {
+        LogUtil.nullArgCheck(dataSource, "dataSource", BasicTableModel.class);
         _component.setModel(new AbstractTableModel() {
-            @Override public int getRowCount() { return dataSource.rowCount(); }
-            @Override public int getColumnCount() { return dataSource.colCount(); }
-            @Override public Object getValueAt(int rowIndex, int columnIndex) { return dataSource.getAt(rowIndex, columnIndex); }
-            @Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) { dataSource.setAt((E)aValue, rowIndex, columnIndex); }
-            @Override public boolean isCellEditable(int rowIndex, int columnIndex) { return dataSource.isEditableAt(rowIndex, columnIndex); }
+            @Override public int getRowCount() { return dataSource.getRowCount(); }
+            @Override public int getColumnCount() { return dataSource.getColumnCount(); }
+            @Override public Object getValueAt(int rowIndex, int columnIndex) { return dataSource.getValueAt(rowIndex, columnIndex); }
+            @Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) { dataSource.setValueAt(aValue, rowIndex, columnIndex); }
+            @Override public boolean isCellEditable(int rowIndex, int columnIndex) { return dataSource.isCellEditable(rowIndex, columnIndex); }
         });
         return this;
     }
