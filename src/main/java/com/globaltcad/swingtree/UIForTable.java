@@ -6,7 +6,7 @@ import com.globaltcad.swingtree.api.model.TableListDataSource;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import java.util.ArrayList;
@@ -32,11 +32,11 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param columnName The name of the column for which the cell renderer will be built.
      * @param builder The consumer lambda which will receive a builder API for a cell renderer.
      */
-    public final UIForTable<T> onRender(String columnName, Consumer<Render.Builder> builder) {
+    public final UIForTable<T> onRenderColumn(String columnName, Consumer<Render.Builder> builder) {
         LogUtil.nullArgCheck(builder, "builder", Consumer.class);
         Render.Builder renderBuilder = Render.when(Object.class).as(cell -> {});
         builder.accept(renderBuilder);
-        return withRenderer(columnName, renderBuilder.get());
+        return withRendererForColumn(columnName, renderBuilder.get());
     }
 
     /**
@@ -46,11 +46,11 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param columnIndex The index of the column for which the cell renderer will be built.
      * @param builder The consumer lambda which will receive a builder API for a cell renderer.
      */
-    public final UIForTable<T> onRender(int columnIndex, Consumer<Render.Builder> builder) {
+    public final UIForTable<T> onRenderColumn(int columnIndex, Consumer<Render.Builder> builder) {
         LogUtil.nullArgCheck(builder, "builder", Consumer.class);
         Render.Builder renderBuilder = Render.when(Object.class).as(cell -> {});
         builder.accept(renderBuilder);
-        return withRenderer(columnIndex, renderBuilder.get());
+        return withRendererForColumn(columnIndex, renderBuilder.get());
     }
 
     /**
@@ -58,7 +58,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param columnName The name of the column for which the cell renderer will be registered.
      * @param renderer The cell renderer to be registered.
      */
-    public final UIForTable<T> withRenderer(String columnName, TableCellRenderer renderer) {
+    public final UIForTable<T> withRendererForColumn(String columnName, TableCellRenderer renderer) {
         LogUtil.nullArgCheck(columnName, "columnName", String.class);
         LogUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
         _component.getColumn(columnName).setCellRenderer(renderer);
@@ -70,9 +70,32 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param columnIndex The index of the column for which the cell renderer will be registered.
      * @param renderer The cell renderer to be registered.
      */
-    public final UIForTable<T> withRenderer(int columnIndex, TableCellRenderer renderer) {
+    public final UIForTable<T> withRendererForColumn(int columnIndex, TableCellRenderer renderer) {
         LogUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
         _component.getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);
+        return this;
+    }
+
+    /**
+     * Use this to register a table cell editor for a particular column.
+     * @param columnName The name of the column for which the cell editor will be registered.
+     * @param editor The cell editor to be registered.
+     */
+    public final UIForTable<T> withCellEditorForColumn(String columnName, TableCellEditor editor) {
+        LogUtil.nullArgCheck(columnName, "columnName", String.class);
+        LogUtil.nullArgCheck(editor, "editor", TableCellEditor.class);
+        _component.getColumn(columnName).setCellEditor(editor);
+        return this;
+    }
+
+    /**
+     * Use this to register a table cell editor for a particular column.
+     * @param columnIndex The index of the column for which the cell editor will be registered.
+     * @param editor The cell editor to be registered.
+     */
+    public final UIForTable<T> withCellEditorForColumn(int columnIndex, TableCellEditor editor) {
+        LogUtil.nullArgCheck(editor, "editor", TableCellEditor.class);
+        _component.getColumnModel().getColumn(columnIndex).setCellEditor(editor);
         return this;
     }
 
