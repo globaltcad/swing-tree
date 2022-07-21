@@ -32,6 +32,7 @@ public interface BasicTableModel extends TableModel
     @FunctionalInterface interface SetValueAt { void set(int rowIndex, int colIndexx, Object aValue); }
     @FunctionalInterface interface ColumnClass { Class<?> get(int colIndex); }
     @FunctionalInterface interface CellEditable { boolean is(int rowIndex, int colIndex); }
+    @FunctionalInterface interface ColumnName { String get(int colIndex); }
 
     /**
      *  The class below is a functional builder for creating a lambda based implementation of the {@link BasicTableModel}.
@@ -45,6 +46,7 @@ public interface BasicTableModel extends TableModel
         private SetValueAt setValueAt;
         private ColumnClass columnClass;
         private CellEditable cellEditable;
+        private ColumnName columnName;
 
          /**
           *  Use this to define the lambda which dynamically determines the row count of the table model.
@@ -106,18 +108,31 @@ public interface BasicTableModel extends TableModel
             this.cellEditable = cellEditable;
             return this;
         }
+         /**
+          *  Use this to define the lambda which allows the {@link javax.swing.JTable} to determine the name of the column at a given index.
+          * @param columnName The lambda which will be used to determine the name of the column at a given index.
+          * @return This builder instance.
+          */
+        public Builder onColName(ColumnName columnName) {
+            if (this.columnName != null)
+                throw new IllegalStateException(ColumnName.class.getSimpleName() + " already set");
+            this.columnName = columnName;
+            return this;
+        }
+
         /**
          *  Use this to build the {@link BasicTableModel} instance.
          * @return The {@link BasicTableModel} instance.
          */
         @Override public BasicTableModel build() {
             return new BasicTableModel() {
-                @Override public int getRowCount() { return rowCount.get(); }
-                @Override public int getColumnCount() { return colCount.get(); }
-                @Override public Object getValueAt(int rowIndex, int colIndex) { return valueAt.get(rowIndex, colIndex); }
-                @Override public void setValueAt(Object value, int rowIndex, int colIndex) { setValueAt.set(rowIndex, colIndex, value); }
-                @Override public Class<?> getColumnClass(int colIndex) { return columnClass.get(colIndex); }
-                @Override public boolean isCellEditable(int rowIndex, int colIndex) { return cellEditable.is(rowIndex, colIndex); }
+                @Override public int getRowCount() { return rowCount == null ? 0 : rowCount.get(); }
+                @Override public int getColumnCount() { return colCount == null ? 0 : colCount.get(); }
+                @Override public Object getValueAt(int rowIndex, int colIndex) { return valueAt == null ? null : valueAt.get(rowIndex, colIndex); }
+                @Override public void setValueAt(Object value, int rowIndex, int colIndex) { if ( setValueAt != null ) setValueAt.set(rowIndex, colIndex, value); }
+                @Override public Class<?> getColumnClass(int colIndex) { return columnClass == null ? Object.class : columnClass.get(colIndex); }
+                @Override public boolean isCellEditable(int rowIndex, int colIndex) { return cellEditable != null && cellEditable.is(rowIndex, colIndex); }
+                @Override public String getColumnName(int colIndex) { return columnName == null ? null : columnName.get(colIndex); }
             };
         }
 
