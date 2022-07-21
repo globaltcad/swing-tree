@@ -6,9 +6,11 @@ import com.globaltcad.swingtree.api.model.TableListDataSource;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<T>, T>
 {
@@ -21,6 +23,18 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
     public UIForTable(T component) {
         super(component);
     }
+
+    public final UIForTable<T> onRender(String columnName, Consumer<Render.Builder> builder) {
+        Render.Builder renderBuilder = Render.when(Object.class).as(cell -> {});
+        builder.accept(renderBuilder);
+        return withRenderer(columnName, renderBuilder.get());
+    }
+
+    public final UIForTable<T> withRenderer(String columnName, DefaultTableCellRenderer renderer) {
+        _component.getColumn(columnName).setCellRenderer(renderer);
+        return this;
+    }
+
 
     public final UIForTable<T> withModel(Buildable<BasicTableModel> dataModelBuilder) {
         return this.withModel(dataModelBuilder.build());
