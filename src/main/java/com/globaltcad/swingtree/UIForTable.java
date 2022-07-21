@@ -28,13 +28,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
 
     public final UIForTable<T> withModel(BasicTableModel dataSource) {
         LogUtil.nullArgCheck(dataSource, "dataSource", BasicTableModel.class);
-        _component.setModel(new AbstractTableModel() {
-            @Override public int getRowCount() { return dataSource.getRowCount(); }
-            @Override public int getColumnCount() { return dataSource.getColumnCount(); }
-            @Override public Object getValueAt(int rowIndex, int columnIndex) { return dataSource.getValueAt(rowIndex, columnIndex); }
-            @Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) { dataSource.setValueAt(aValue, rowIndex, columnIndex); }
-            @Override public boolean isCellEditable(int rowIndex, int columnIndex) { return dataSource.isCellEditable(rowIndex, columnIndex); }
-        });
+        _component.setModel(dataSource);
         return this;
     }
 
