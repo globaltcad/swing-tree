@@ -24,25 +24,76 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
         super(component);
     }
 
+    /**
+     *  Use this to build a table cell renderer for a particular column.
+     *  The second argument is a consumer lambda which will receive a builder API for a cell renderer.
+     *
+     * @param columnName The name of the column for which the cell renderer will be built.
+     * @param builder The consumer lambda which will receive a builder API for a cell renderer.
+     */
     public final UIForTable<T> onRender(String columnName, Consumer<Render.Builder> builder) {
+        LogUtil.nullArgCheck(builder, "builder", Consumer.class);
         Render.Builder renderBuilder = Render.when(Object.class).as(cell -> {});
         builder.accept(renderBuilder);
         return withRenderer(columnName, renderBuilder.get());
     }
 
+    /**
+     *  Use this to build a table cell renderer for a particular column.
+     *  The second argument is a consumer lambda which will receive a builder API for a cell renderer.
+     *
+     * @param columnIndex The index of the column for which the cell renderer will be built.
+     * @param builder The consumer lambda which will receive a builder API for a cell renderer.
+     */
+    public final UIForTable<T> onRender(int columnIndex, Consumer<Render.Builder> builder) {
+        LogUtil.nullArgCheck(builder, "builder", Consumer.class);
+        Render.Builder renderBuilder = Render.when(Object.class).as(cell -> {});
+        builder.accept(renderBuilder);
+        return withRenderer(columnIndex, renderBuilder.get());
+    }
+
+    /**
+     * Use this to register a table cell renderer for a particular column.
+     * @param columnName The name of the column for which the cell renderer will be registered.
+     * @param renderer The cell renderer to be registered.
+     */
     public final UIForTable<T> withRenderer(String columnName, DefaultTableCellRenderer renderer) {
+        LogUtil.nullArgCheck(columnName, "columnName", String.class);
+        LogUtil.nullArgCheck(renderer, "renderer", DefaultTableCellRenderer.class);
         _component.getColumn(columnName).setCellRenderer(renderer);
         return this;
     }
 
+    /**
+     * Use this to register a table cell renderer for a particular column.
+     * @param columnIndex The index of the column for which the cell renderer will be registered.
+     * @param renderer The cell renderer to be registered.
+     */
+    public final UIForTable<T> withRenderer(int columnIndex, DefaultTableCellRenderer renderer) {
+        LogUtil.nullArgCheck(renderer, "renderer", DefaultTableCellRenderer.class);
+        _component.getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);
+        return this;
+    }
 
+    /**
+     *  Use this to set a table model.
+     *  The provided argument is a builder object whose build method will be called
+     *  for you instead of having to call the build method on the builder object yourself.
+     * @param dataModelBuilder The builder object which will be used to build and then set the table model.
+     * @return This builder object.
+     */
     public final UIForTable<T> withModel(Buildable<BasicTableModel> dataModelBuilder) {
         return this.withModel(dataModelBuilder.build());
     }
 
-    public final UIForTable<T> withModel(BasicTableModel dataSource) {
-        LogUtil.nullArgCheck(dataSource, "dataSource", BasicTableModel.class);
-        _component.setModel(dataSource);
+    /**
+     * Use this to set a table model.
+     * @param model The model for the table model.
+     * @return This builder object.
+     */
+    public final UIForTable<T> withModel(BasicTableModel model) {
+        LogUtil.nullArgCheck(model, "model", BasicTableModel.class);
+        _component.setModel(model);
         return this;
     }
 
