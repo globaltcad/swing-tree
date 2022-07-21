@@ -54,6 +54,7 @@ public interface BasicTableModel extends TableModel
           * @return This builder instance.
           */
         public Builder onRowCount(RowCount rowCount) {
+            if ( rowCount == null ) throw new IllegalArgumentException("rowCount cannot be null");
             if ( this.rowCount != null ) throw new IllegalStateException(RowCount.class.getSimpleName()+" already set");
             this.rowCount = rowCount;
             return this;
@@ -64,6 +65,7 @@ public interface BasicTableModel extends TableModel
          * @return This builder instance.
          */
         public Builder onColCount(ColumnCount columnCount) {
+            if ( columnCount == null ) throw new IllegalArgumentException("columnCount cannot be null");
             if ( this.colCount != null ) throw new IllegalStateException(ColumnCount.class.getSimpleName()+" already set");
             this.colCount = columnCount;
             return this;
@@ -74,6 +76,7 @@ public interface BasicTableModel extends TableModel
          * @return This builder instance.
          */
         public Builder onGet(ValueAt valueAt) {
+            if ( valueAt == null ) throw new IllegalArgumentException("valueAt cannot be null");
             if ( this.valueAt != null ) throw new IllegalStateException(ValueAt.class.getSimpleName()+" already set");
             this.valueAt = valueAt;
             return this;
@@ -84,6 +87,7 @@ public interface BasicTableModel extends TableModel
          * @return This builder instance.
          */
         public Builder onSet(SetValueAt setValueAt) {
+            if ( setValueAt == null ) throw new IllegalArgumentException("setValueAt cannot be null");
             if ( this.setValueAt != null ) throw new IllegalStateException(SetValueAt.class.getSimpleName()+" already set");
             this.setValueAt = setValueAt;
             return this;
@@ -94,11 +98,18 @@ public interface BasicTableModel extends TableModel
          * @return This builder instance.
          */
         public Builder onColClass(ColumnClass columnClass) {
+            if ( columnClass == null ) throw new IllegalArgumentException("columnClass cannot be null");
             if ( this.columnClass != null ) throw new IllegalStateException(ColumnClass.class.getSimpleName()+" already set");
             this.columnClass = columnClass;
             return this;
         }
-        public Builder colClasses(Class<?>[] classes) {
+        /**
+         *  Use this to define a fixed array of column classes.
+         * @param classes An array of column classes.
+         * @return This builder instance.
+         */
+        public Builder colClasses(Class<?>... classes) {
+            if ( classes == null ) throw new IllegalArgumentException("classes cannot be null");
             return onColClass((colIndex) -> classes[colIndex]);
         }
         /**
@@ -107,6 +118,7 @@ public interface BasicTableModel extends TableModel
          * @return This builder instance.
          */
         public Builder onIsEditable(CellEditable cellEditable) {
+            if ( cellEditable == null ) throw new IllegalArgumentException("cellEditable cannot be null");
             if ( this.cellEditable != null ) throw new IllegalStateException(CellEditable.class.getSimpleName()+" already set");
             this.cellEditable = cellEditable;
             return this;
@@ -117,12 +129,14 @@ public interface BasicTableModel extends TableModel
           * @return This builder instance.
           */
         public Builder onColName(ColumnName columnName) {
+            if ( columnName == null ) throw new IllegalArgumentException("columnName cannot be null");
             if (this.columnName != null)
                 throw new IllegalStateException(ColumnName.class.getSimpleName() + " already set");
             this.columnName = columnName;
             return this;
         }
-        public Builder colNames(String[] names) {
+        public Builder colNames(String... names) {
+            if ( names == null ) throw new IllegalArgumentException("names cannot be null");
             return onColName((colIndex) -> names[colIndex]);
         }
         /**
