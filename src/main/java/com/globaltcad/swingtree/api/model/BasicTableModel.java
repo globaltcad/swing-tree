@@ -98,6 +98,9 @@ public interface BasicTableModel extends TableModel
             this.columnClass = columnClass;
             return this;
         }
+        public Builder colClasses(Class<?>[] classes) {
+            return onColClass((colIndex) -> classes[colIndex]);
+        }
         /**
          *  Use this to define the lambda which allows the {@link javax.swing.JTable} to determine if the cell at a given row and column is editable.
          * @param cellEditable The lambda which will be used to determine if the cell at a given row and column is editable.
@@ -119,7 +122,9 @@ public interface BasicTableModel extends TableModel
             this.columnName = columnName;
             return this;
         }
-
+        public Builder colNames(String[] names) {
+            return onColName((colIndex) -> names[colIndex]);
+        }
         /**
          *  Use this to build the {@link BasicTableModel} instance.
          * @return The {@link BasicTableModel} instance.
