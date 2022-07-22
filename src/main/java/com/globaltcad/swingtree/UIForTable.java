@@ -54,6 +54,30 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
     }
 
     /**
+     *  Use this to build a table cell renderer for a particular column.
+     *  The second argument accepts the builder API for a cell renderer.
+     *
+     * @param columnName The name of the column for which the cell renderer will be built.
+     * @param renderBuilder The builder API for a cell renderer.
+     */
+    public final UIForTable<T> onRenderColumn(String columnName, Render.Builder renderBuilder) {
+        LogUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
+        return withRendererForColumn(columnName, renderBuilder.get());
+    }
+
+    /**
+     *  Use this to build a table cell renderer for a particular column.
+     *  The second argument accepts the builder API for a cell renderer.
+     *
+     * @param columnIndex The index of the column for which the cell renderer will be built.
+     * @param renderBuilder The builder API for a cell renderer.
+     */
+    public final UIForTable<T> onRenderColumn(int columnIndex, Render.Builder renderBuilder) {
+        LogUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
+        return withRendererForColumn(columnIndex, renderBuilder.get());
+    }
+
+    /**
      * Use this to register a table cell renderer for a particular column.
      * @param columnName The name of the column for which the cell renderer will be registered.
      * @param renderer The cell renderer to be registered.
