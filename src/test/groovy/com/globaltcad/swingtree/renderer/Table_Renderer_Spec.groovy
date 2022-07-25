@@ -2,7 +2,6 @@ package com.globaltcad.swingtree.renderer
 
 import com.globaltcad.swingtree.Render
 import com.globaltcad.swingtree.UI
-import com.globaltcad.swingtree.UIForTable
 import spock.lang.Specification
 
 import javax.swing.JTable
@@ -22,7 +21,7 @@ class Table_Renderer_Spec extends Specification
             var render = Mock(Render.Cell.Interpreter)
 
         when :
-            node.onRenderColumn("A", UI.renderCell().when(String).as(render) )
+            node.withRendererForColumn("A", UI.renderCell().when(String).as(render) )
         and :
             var found = node.get(JTable).getColumn("A").cellRenderer
         and :
@@ -41,7 +40,7 @@ class Table_Renderer_Spec extends Specification
             var render = Mock(Render.Cell.Interpreter)
 
         when :
-            node.onRenderColumn(1, UI.renderCell().when(String).as(render) )
+            node.withRendererForColumn(1, UI.renderCell().when(String).as(render) )
         and :
             var found = node.get(JTable)
                     .columnModel
