@@ -183,7 +183,8 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> withFontSize(int size) {
-        _component.setFont(_component.getFont().deriveFont(size));
+        Font old = _component.getFont();
+        _component.setFont(new Font(old.getName(), old.getStyle(), size));
         return this;
     }
 
