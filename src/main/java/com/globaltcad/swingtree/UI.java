@@ -925,6 +925,16 @@ public final class UI
                 );
     }
 
+    /**
+     *  Use this to create a UI builder for a {@link JLabel} with bold font.
+     *  This is in essence a convenience method for {@code UI.label(String text).makeBold()}.
+     *  @param text The text which should be displayed on the label.
+     *  @return A builder instance for the label, which enables fluent method chaining.
+     */
+    public static UIForLabel<JLabel> boldLabel(String text) {
+        return of(new JLabel(text)).makeBold();
+    }
+
     public static UIForCheckBox<JCheckBox> checkBox(String text) {
         LogUtil.nullArgCheck(text, "text", String.class);
         return of(new JCheckBox(text));

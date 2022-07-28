@@ -139,8 +139,7 @@ class AdvancedUI {
                         UI.panel("fill, insets 10","[grow][shrink]")
                         .withBackground(new Color(100,100,100,100))
                         .add("cell 0 0",
-                            UI.label("Usus AF-8c3ae")
-                            .makeBold()
+                            UI.boldLabel("Usus AF-8c3ae")
                             .makeLinkTo("https://github.com")
                         )
                         .add("cell 0 1, grow, shrinky",

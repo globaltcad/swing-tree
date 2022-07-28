@@ -26,8 +26,7 @@ public class Form extends JPanel
 			UI.panel(debug+"fill, insets 0","[grow][shrink]")
 			.onMouseClick( e -> {/* does something */} )
 			.add("cell 0 0",
-				UI.label("Hello and welcome to this UI! (Click me I'm a link)")
-				.makeBold()
+				UI.boldLabel("Hello and welcome to this UI! (Click me I'm a link)")
 				.makeLinkTo("https://github.com/globaltcad")
 			)
 			.add("cell 0 1, grow, pushy",

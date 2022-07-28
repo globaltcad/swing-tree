@@ -177,5 +177,15 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
         return this;
     }
 
+    /**
+     *  Use this to set the size of the font of the wrapped {@link JLabel}.
+     * @param size The size of the font which should be displayed on the label.
+     * @return This very builder to allow for method chaining.
+     */
+    public UIForLabel<L> withFontSize(int size) {
+        _component.setFont(_component.getFont().deriveFont(size));
+        return this;
+    }
+
 }
 
