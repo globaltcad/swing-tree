@@ -1131,7 +1131,14 @@ public final class UI
 
     public static BasicTableModel.Builder tableModel() { return new BasicTableModel.Builder(); }
 
-    public static Render.Builder<JTable, Object> renderCell() { return new Render(JTable.class, Object.class).when(Object.class).as(cell->{}); }
+    public static Render.Builder<JTable, Object> renderTable() {
+        return new Render<>(JTable.class, Object.class).when(Object.class).as(cell->{});
+    }
+
+    public static Render.Builder<JList, Object> renderList() {
+        return new Render<>(JList.class, Object.class).when(Object.class).as(cell->{});
+    }
+
 
     /**
      *  Use this to create a builder for anything.

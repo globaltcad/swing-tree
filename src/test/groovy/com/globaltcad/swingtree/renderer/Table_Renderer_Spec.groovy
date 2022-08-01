@@ -21,7 +21,7 @@ class Table_Renderer_Spec extends Specification
             var render = Mock(Render.Cell.Interpreter)
 
         when :
-            node.withRendererForColumn("A", UI.renderCell().when(String).as(render) )
+            node.withRendererForColumn("A", UI.renderTable().when(String).as(render) )
         and :
             var found = node.get(JTable).getColumn("A").cellRenderer
         and :
@@ -40,7 +40,7 @@ class Table_Renderer_Spec extends Specification
             var render = Mock(Render.Cell.Interpreter)
 
         when :
-            node.withRendererForColumn(1, UI.renderCell().when(String).as(render) )
+            node.withRendererForColumn(1, UI.renderTable().when(String).as(render) )
         and :
             var found = node.get(JTable)
                     .columnModel
