@@ -31,9 +31,9 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param columnName The name of the column for which the cell renderer will be built.
      * @param renderBuilder The builder API for a cell renderer.
      */
-    public final UIForTable<T> withRendererForColumn(String columnName, Render.Builder renderBuilder) {
+    public final UIForTable<T> withRendererForColumn(String columnName, Render.Builder<JTable, T> renderBuilder) {
         LogUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
-        return withRendererForColumn(columnName, renderBuilder.get());
+        return withRendererForColumn(columnName, renderBuilder.getForTable());
     }
 
     /**
@@ -43,9 +43,9 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param columnIndex The index of the column for which the cell renderer will be built.
      * @param renderBuilder The builder API for a cell renderer.
      */
-    public final UIForTable<T> withRendererForColumn(int columnIndex, Render.Builder renderBuilder) {
+    public final UIForTable<T> withRendererForColumn(int columnIndex, Render.Builder<JTable, T> renderBuilder) {
         LogUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
-        return withRendererForColumn(columnIndex, renderBuilder.get());
+        return withRendererForColumn(columnIndex, renderBuilder.getForTable());
     }
 
     /**

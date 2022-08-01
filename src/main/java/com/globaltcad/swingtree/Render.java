@@ -8,30 +8,36 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 /**
  * 	An API for building extensions of the {@link DefaultTableCellRenderer} in a functional style.
  */
-public final class Render extends DefaultTableCellRenderer {
+public final class Render<C extends JComponent,E> {
+
+	private final Class<C> componentType;
+	private final Class<E> elementType;
+
+	Render(Class<C> componentType, Class<E> elementType) {
+		this.componentType = componentType;
+		this.elementType = elementType;
+	}
+
 
 	/**
 	 * @param borderSupplier A lambda which provides a border for rendered cells.
 	 * @return The builder API allowing method chaining.
 	 */
-	public static Builder withBorder(Supplier<Border> borderSupplier) {
-		return new Builder(borderSupplier);
+	public Builder<C,E> withBorder(Supplier<Border> borderSupplier) {
+		return new Builder<>(componentType,borderSupplier);
 	}
 
 	/**
 	 * @param border A border for rendered cells.
 	 * @return The builder API allowing method chaining.
 	 */
-	public static Builder withBorder(Border border) {
-		return new Builder(()->border);
+	public Builder<C,E> withBorder(Border border) {
+		return new Builder<>(componentType,()->border);
 	}
 
 	/**
@@ -41,7 +47,7 @@ public final class Render extends DefaultTableCellRenderer {
 	 * @param <T> The type parameter of the cell value, for which you want custom rendering.
 	 * @return The {@link As} builder API step which expects you to provide a lambda for customizing how a cell is rendered.
 	 */
-	public static <T> As<T> when(Class<T> valueType) {
+	public <T> As<C,T> when(Class<T> valueType) {
 		LogUtil.nullArgCheck(valueType, "valueType", Class.class);
 		return when( valueType, cell -> true );
 	}
@@ -54,78 +60,19 @@ public final class Render extends DefaultTableCellRenderer {
 	 * @param <T> The type parameter of the cell value, for which you want custom rendering.
 	 * @return The {@link As} builder API step which expects you to provide a lambda for customizing how a cell is rendered.
 	 */
-	public static <T> As<T> when(
+	public <T> As<C,T> when(
 			Class<T> valueType,
-			Predicate<Cell<T>> valueValidator
+			Predicate<Cell<C,T>> valueValidator
 	) {
 		LogUtil.nullArgCheck(valueType, "valueType", Class.class);
 		LogUtil.nullArgCheck(valueValidator, "valueValidator", Predicate.class);
-		return new As<T>() {
+		return new As<C,T>() {
 			@Override
-			public Builder as(Cell.Interpreter<T> valueInterpreter) {
+			public Builder as(Cell.Interpreter<C,T> valueInterpreter) {
 				LogUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
-				return new Builder(valueType, valueValidator, valueInterpreter);
+				return new Builder(componentType,valueType, valueValidator, valueInterpreter);
 			}
 		};
-	}
-
-	private final Supplier<Border> border;
-	private final Map<Class<?>, List<BiConsumer<Class<?>, Cell<?>>>> interpreterLambdas;
-
-	private Render(Supplier<Border> border, Map<Class<?>, List<BiConsumer<Class<?>, Cell<?>>>> interpreter) {
-		this.border = border;
-		this.interpreterLambdas = interpreter;
-	}
-
-	@Override
-	public Component getTableCellRendererComponent(
-			JTable table,
-			Object value,
-			boolean isSelected,
-			boolean hasFocus,
-			final int row,
-			int column
-	) {
-		Class<?> type = ( value == null ? Object.class : value.getClass() );
-
-		List<BiConsumer<Class<?>, Cell<?>>> interpreter = interpreterLambdas.get(type);
-		if ( interpreter == null ) {
-			Class<?> finalType1 = type;
-			type = interpreterLambdas.keySet().stream().filter(i -> i.isAssignableFrom(finalType1) ).findFirst().orElse(Object.class);
-			interpreter = interpreterLambdas.get(type);
-		}
-		if ( interpreter == null )
-			return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-		else {
-			Component[] componentRef = new Component[1];
-			Object[] defaultValueRef = new Object[1];
-			Cell<Object> cell = new Cell<Object>() {
-				@Override public JTable getTable() {return table;}
-				@Override public Object getValue() {return value;}
-				@Override public boolean isSelected() {return isSelected;}
-				@Override public boolean hasFocus() {return hasFocus;}
-				@Override public int getRow() {return row;}
-				@Override public int getColumn() {return column;}
-				@Override public Component getRenderer() {return Render.super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);}
-				@Override public void setRenderer(Component component) {componentRef[0] = component;}
-				@Override public void setDefaultRenderValue(Object newValue) {defaultValueRef[0] = newValue;}
-			};
-			Class<?> finalType = type;
-			interpreter.forEach(consumer -> consumer.accept(finalType, cell) );
-			if ( componentRef[0] != null )
-				return componentRef[0];
-			else if ( defaultValueRef[0] != null )
-				return super.getTableCellRendererComponent(table, defaultValueRef[0], isSelected, hasFocus, row, column);
-			else
-				return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-		}
-	}
-
-	@Override
-	public Border getBorder() {
-		if ( this.border != null ) return border.get();
-		else
-			return super.getBorder();
 	}
 
 	/**
@@ -137,9 +84,9 @@ public final class Render extends DefaultTableCellRenderer {
 	 *
 	 * @param <V> The value type of the entry of this {@link Cell}.
 	 */
-	public interface Cell<V>
+	public interface Cell<C extends JComponent, V>
 	{
-		JTable  	getTable();
+		C           getComponent();
 		V	    	getValue();
 		boolean 	isSelected();
 		boolean 	hasFocus();
@@ -159,15 +106,15 @@ public final class Render extends DefaultTableCellRenderer {
 		}
 
 		@FunctionalInterface
-		interface Interpreter<V> {
+		interface Interpreter<C extends JComponent, V> {
 
-			void interpret(Cell<V> cell);
+			void interpret(Cell<C, V> cell);
 
 		}
 	}
 
 
-	public interface As<T> {
+	public interface As<C extends JComponent,T> {
 		/**
 		 * 	Specify a lambda which receives a {@link Cell} instance
 		 * 	for you to customize its renderer.
@@ -175,49 +122,54 @@ public final class Render extends DefaultTableCellRenderer {
 		 * @param valueInterpreter A lambda which customizes the provided cell.
 		 * @return The builder API allowing method chaining.
 		 */
-		Builder as( Cell.Interpreter<T> valueInterpreter );
+		Builder<C, T> as( Cell.Interpreter<C,T> valueInterpreter );
 	}
 
 	/**
 	 * 	A builder for building simple customized {@link javax.swing.table.TableCellRenderer}!
 	 */
-	public static class Builder {
+	public static class Builder<C extends JComponent, E> {
 
+		private final Class<C> componentType;
 		private final Supplier<Border> border;
-		private final Map<Class<?>, java.util.List<BiConsumer<Class<?>, Cell<?>>>> interpreters = new HashMap<>(16);
+		private final Map<Class<?>, java.util.List<BiConsumer<Class<?>, Cell<C,?>>>> interpreters = new HashMap<>(16);
 
 		public Builder(
+				Class<C> componentType,
 				Supplier<Border> border
 		) {
+			this.componentType = componentType;
 			this.border = border;
 		}
 
 		public Builder(
-				Class valueType,
-				Predicate valueValidator,
-				Cell.Interpreter valueInterpreter
+				Class<C> componentType,
+				Class<E> valueType,
+				Predicate<Cell<C,E>> valueValidator,
+				Cell.Interpreter<C, E> valueInterpreter
 		) {
 			LogUtil.nullArgCheck(valueType, "valueType", Class.class);
 			LogUtil.nullArgCheck(valueValidator, "valueValidator", Predicate.class);
 			LogUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
+			this.componentType = componentType;
 			this.border = null;
 			when(valueType, valueValidator).as(valueInterpreter);
 		}
 
-		public <T> As<T> when(Class<T> valueType) {
+		public <T extends E> As<C,T> when(Class<T> valueType) {
 			LogUtil.nullArgCheck(valueType, "valueType", Class.class);
 			return when( valueType, cell -> true );
 		}
 
-		public <T> As<T> when(
+		public <T extends E> As<C,T> when(
 				Class<T> valueType,
-				Predicate<Cell<T>> valueValidator
+				Predicate<Cell<C,T>> valueValidator
 		) {
 			LogUtil.nullArgCheck(valueType, "valueType", Class.class);
 			LogUtil.nullArgCheck(valueValidator, "valueValidator", Predicate.class);
-			return new As<T>() {
+			return new As<C,T>() {
 				@Override
-				public Builder as(Cell.Interpreter<T> valueInterpreter) {
+				public Builder as(Cell.Interpreter<C,T> valueInterpreter) {
 					LogUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
 					store(valueType, valueValidator, valueInterpreter);
 					return Builder.this;
@@ -233,15 +185,130 @@ public final class Render extends DefaultTableCellRenderer {
 			LogUtil.nullArgCheck(valueType, "valueType", Class.class);
 			LogUtil.nullArgCheck(predicate, "predicate", Predicate.class);
 			LogUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
-			List<BiConsumer<Class<?>, Cell<?>>> found = interpreters.computeIfAbsent(valueType, k -> new ArrayList<>());
+			List<BiConsumer<Class<?>, Cell<C,?>>> found = interpreters.computeIfAbsent(valueType, k -> new ArrayList<>());
 			found.add( (type, cell) -> {
 				if ( predicate.test(cell) )
-					valueInterpreter.interpret((Cell) cell);
+					valueInterpreter.interpret(cell);
 			} );
 		}
 
-		public DefaultTableCellRenderer get() {
-			return new Render(border, interpreters);
+		private class SimpleTableCellRenderer extends DefaultTableCellRenderer
+		{
+			@Override
+			public Component getTableCellRendererComponent(
+					JTable table,
+					Object value,
+					boolean isSelected,
+					boolean hasFocus,
+					final int row,
+					int column
+			) {
+				Class<?> type = ( value == null ? Object.class : value.getClass() );
+
+				List<BiConsumer<Class<?>, Cell<C,?>>> interpreter = interpreters.get(type);
+				if ( interpreter == null ) {
+					Class<?> finalType1 = type;
+					type = interpreters.keySet().stream().filter(i -> i.isAssignableFrom(finalType1) ).findFirst().orElse(Object.class);
+					interpreter = interpreters.get(type);
+				}
+				if ( interpreter == null )
+					return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+				else {
+					Component[] componentRef = new Component[1];
+					Object[] defaultValueRef = new Object[1];
+					Cell<JTable,Object> cell = new Cell<JTable,Object>() {
+						@Override public JTable getComponent() {return table;}
+						@Override public Object getValue() {return value;}
+						@Override public boolean isSelected() {return isSelected;}
+						@Override public boolean hasFocus() {return hasFocus;}
+						@Override public int getRow() {return row;}
+						@Override public int getColumn() {return column;}
+						@Override public Component getRenderer() {return SimpleTableCellRenderer.super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);}
+						@Override public void setRenderer(Component component) {componentRef[0] = component;}
+						@Override public void setDefaultRenderValue(Object newValue) {defaultValueRef[0] = newValue;}
+					};
+					Class<?> finalType = type;
+					interpreter.forEach(consumer -> consumer.accept(finalType, (Cell<C,?>)cell) );
+					if ( componentRef[0] != null )
+						return componentRef[0];
+					else if ( defaultValueRef[0] != null )
+						return super.getTableCellRendererComponent(table, defaultValueRef[0], isSelected, hasFocus, row, column);
+					else
+						return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+				}
+			}
+
+			@Override
+			public Border getBorder() {
+				if ( border != null ) return border.get();
+				else
+					return super.getBorder();
+			}
+		}
+
+		private class SimpleListCellRenderer<T> extends DefaultListCellRenderer {
+			@Override
+			public Component getListCellRendererComponent(
+					JList list,
+					Object value,
+					final int row,
+					boolean isSelected,
+					boolean hasFocus
+			) {
+				Class<?> type = ( value == null ? Object.class : value.getClass() );
+
+				List<BiConsumer<Class<?>, Cell<C,?>>> interpreter = interpreters.get(type);
+				if ( interpreter == null ) {
+					Class<?> finalType1 = type;
+					type = interpreters.keySet().stream().filter(i -> i.isAssignableFrom(finalType1) ).findFirst().orElse(Object.class);
+					interpreter = interpreters.get(type);
+				}
+				if ( interpreter == null )
+					return super.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
+				else {
+					Component[] componentRef = new Component[1];
+					Object[] defaultValueRef = new Object[1];
+					Cell<JList<T>,Object> cell = new Cell<JList<T>, Object>() {
+						@Override public JList<T> getComponent() {return list;}
+						@Override public Object getValue() {return value;}
+						@Override public boolean isSelected() {return isSelected;}
+						@Override public boolean hasFocus() {return hasFocus;}
+						@Override public int getRow() {return row;}
+						@Override public int getColumn() {return 0;}
+						@Override public Component getRenderer() {return SimpleListCellRenderer.super.getListCellRendererComponent(list, value, row, isSelected, hasFocus);}
+						@Override public void setRenderer(Component component) {componentRef[0] = component;}
+						@Override public void setDefaultRenderValue(Object newValue) {defaultValueRef[0] = newValue;}
+					};
+					Class<?> finalType = type;
+					interpreter.forEach(consumer -> consumer.accept(finalType, (Cell<C,?>)cell) );
+					if ( componentRef[0] != null )
+						return componentRef[0];
+					else if ( defaultValueRef[0] != null )
+						return super.getListCellRendererComponent(list, defaultValueRef[0], row, isSelected, hasFocus);
+					else
+						return super.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
+				}
+			}
+			@Override
+			public Border getBorder() {
+				if ( border != null ) return border.get();
+				else
+					return super.getBorder();
+			}
+		}
+
+		DefaultTableCellRenderer getForTable() {
+			if ( JTable.class.isAssignableFrom(componentType) )
+				return new SimpleTableCellRenderer();
+			else
+				throw new IllegalArgumentException("Renderer was set up to be used for a JTable!");
+		}
+
+		ListCellRenderer<E> getForList() {
+			if ( JList.class.isAssignableFrom(componentType) )
+				return (ListCellRenderer<E>) new SimpleListCellRenderer<Object>();
+			else
+				throw new IllegalArgumentException("Renderer was set up to be used for a JList!");
 		}
 
 	}
