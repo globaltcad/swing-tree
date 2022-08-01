@@ -70,9 +70,9 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
         return this;
     }
 
-    public final UIForList<E, L> withRenderer( Render.Builder<L,E> renderBuilder ) {
+    public final <V extends E> UIForList<E, L> withRenderer( Render.Builder<L,V> renderBuilder ) {
         LogUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
-        return withRenderer( renderBuilder.getForList() );
+        return withRenderer((ListEntryRenderer<E, L>) renderBuilder.getForList());
     }
 
     public final UIForList<E, L> withRenderer( ListCellRenderer<E> renderer ) {
