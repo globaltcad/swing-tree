@@ -296,10 +296,10 @@ public final class Render<C extends JComponent,E> {
 		}
 
 		ListCellRenderer<E> getForList() {
-			if ( JList.class.isAssignableFrom(componentType) )
+			if ( JList.class.isAssignableFrom(componentType) || JComboBox.class.isAssignableFrom(componentType) )
 				return (ListCellRenderer<E>) new SimpleListCellRenderer<Object>();
 			else
-				throw new IllegalArgumentException("Renderer was set up to be used for a JList!");
+				throw new IllegalArgumentException("Renderer was set up to be used for a JList or JComboBox! (not "+componentType.getSimpleName()+")");
 		}
 
 	}
