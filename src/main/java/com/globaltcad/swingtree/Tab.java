@@ -64,7 +64,7 @@ public class Tab
         return new Tab(contents, _title, _icon, _tip, _onSelected);
     }
 
-    public final Tab on(UIAction<SimpleDelegate<JTabbedPane, ChangeEvent>> onSelected) {
+    public final Tab onSelection(UIAction<SimpleDelegate<JTabbedPane, ChangeEvent>> onSelected) {
         if ( _onSelected != null ) throw new IllegalArgumentException("Selection event already specified!");
         return new Tab(_contents, _title, _icon, _tip, onSelected);
     }
