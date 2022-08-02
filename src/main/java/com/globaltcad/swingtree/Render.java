@@ -17,27 +17,12 @@ public final class Render<C extends JComponent,E> {
 
 	private final Class<C> componentType;
 	private final Class<E> elementType;
+	private final Supplier<Border> borderSupplier;
 
-	Render(Class<C> componentType, Class<E> elementType) {
+	Render(Class<C> componentType, Class<E> elementType, Supplier<Border> borderSupplier) {
 		this.componentType = componentType;
 		this.elementType = elementType;
-	}
-
-
-	/**
-	 * @param borderSupplier A lambda which provides a border for rendered cells.
-	 * @return The builder API allowing method chaining.
-	 */
-	public Builder<C,E> withBorder(Supplier<Border> borderSupplier) {
-		return new Builder<>(componentType,borderSupplier);
-	}
-
-	/**
-	 * @param border A border for rendered cells.
-	 * @return The builder API allowing method chaining.
-	 */
-	public Builder<C,E> withBorder(Border border) {
-		return new Builder<>(componentType,()->border);
+		this.borderSupplier = borderSupplier;
 	}
 
 	/**

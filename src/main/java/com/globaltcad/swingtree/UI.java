@@ -9,6 +9,7 @@ import com.globaltcad.swingtree.api.model.TableListDataSource;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
@@ -1132,13 +1133,44 @@ public final class UI
     public static BasicTableModel.Builder tableModel() { return new BasicTableModel.Builder(); }
 
     public static Render.Builder<JTable, Object> renderTable() {
-        return new Render<>(JTable.class, Object.class).when(Object.class).as(cell->{});
+        return new Render<>(JTable.class, Object.class, null).when(Object.class).as(cell->{});
     }
 
     public static Render.Builder<JList, Object> renderList() {
-        return new Render<>(JList.class, Object.class).when(Object.class).as(cell->{});
+        return new Render<>(JList.class, Object.class, null).when(Object.class).as(cell->{});
     }
 
+    /**
+     * @param borderSupplier A lambda which provides a border for rendered cells.
+     * @return The builder API allowing method chaining.
+     */
+    public static Render.Builder<JTable, Object> renderTableWithBorder(Supplier<Border> borderSupplier) {
+        return new Render<>(JTable.class, Object.class, borderSupplier).when(Object.class).as(cell->{});
+    }
+
+    /**
+     * @param borderSupplier A lambda which provides a border for rendered cells.
+     * @return The builder API allowing method chaining.
+     */
+    public static Render.Builder<JList, Object> renderListWithBorder(Supplier<Border> borderSupplier) {
+        return new Render<>(JList.class, Object.class, borderSupplier).when(Object.class).as(cell->{});
+    }
+
+    /**
+     * @param border A border for rendered cells.
+     * @return The builder API allowing method chaining.
+     */
+    public static Render.Builder<JTable, Object> renderTableWithBorder(Border border) {
+        return renderTableWithBorder(()->border);
+    }
+
+    /**
+     * @param border A border for rendered cells.
+     * @return The builder API allowing method chaining.
+     */
+    public static Render.Builder<JList, Object> renderListWithBorder(Border border) {
+        return renderListWithBorder(()->border);
+    }
 
     /**
      *  Use this to create a builder for anything.
