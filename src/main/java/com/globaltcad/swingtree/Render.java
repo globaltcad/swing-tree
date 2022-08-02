@@ -4,10 +4,8 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.function.*;
 
 /**
@@ -138,7 +136,7 @@ public final class Render<C extends JComponent,E> {
 
 		private final Class<C> componentType;
 		private final Supplier<Border> border;
-		private final Map<Class<?>, java.util.List<BiConsumer<Class<?>, Cell<C,?>>>> interpreters = new HashMap<>(16);
+		private final Map<Class<?>, java.util.List<Consumer<Cell<C,?>>>> rendererLoopup = new LinkedHashMap<>(16);
 
 		public Builder(
 				Class<C> componentType,
@@ -184,8 +182,8 @@ public final class Render<C extends JComponent,E> {
 			LogUtil.nullArgCheck(valueType, "valueType", Class.class);
 			LogUtil.nullArgCheck(predicate, "predicate", Predicate.class);
 			LogUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
-			List<BiConsumer<Class<?>, Cell<C,?>>> found = interpreters.computeIfAbsent(valueType, k -> new ArrayList<>());
-			found.add( (type, cell) -> {
+			List<Consumer<Cell<C,?>>> found = rendererLoopup.computeIfAbsent(valueType, k -> new ArrayList<>());
+			found.add( cell -> {
 				if ( predicate.test(cell) )
 					valueInterpreter.interpret(cell);
 			} );
@@ -202,15 +200,8 @@ public final class Render<C extends JComponent,E> {
 					final int row,
 					int column
 			) {
-				Class<?> type = ( value == null ? Object.class : value.getClass() );
-
-				List<BiConsumer<Class<?>, Cell<C,?>>> interpreter = interpreters.get(type);
-				if ( interpreter == null ) {
-					Class<?> finalType1 = type;
-					type = interpreters.keySet().stream().filter(i -> i.isAssignableFrom(finalType1) ).findFirst().orElse(Object.class);
-					interpreter = interpreters.get(type);
-				}
-				if ( interpreter == null )
+				List<Consumer<Cell<C,?>>> interpreter = find(value, rendererLoopup);
+				if ( interpreter.isEmpty() )
 					return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 				else {
 					Component[] componentRef = new Component[1];
@@ -226,8 +217,7 @@ public final class Render<C extends JComponent,E> {
 						@Override public void setRenderer(Component component) {componentRef[0] = component;}
 						@Override public void setDefaultRenderValue(Object newValue) {defaultValueRef[0] = newValue;}
 					};
-					Class<?> finalType = type;
-					interpreter.forEach(consumer -> consumer.accept(finalType, (Cell<C,?>)cell) );
+					interpreter.forEach(consumer -> consumer.accept((Cell<C,?>)cell) );
 					if ( componentRef[0] != null )
 						return componentRef[0];
 					else if ( defaultValueRef[0] != null )
@@ -254,15 +244,8 @@ public final class Render<C extends JComponent,E> {
 					boolean isSelected,
 					boolean hasFocus
 			) {
-				Class<?> type = ( value == null ? Object.class : value.getClass() );
-
-				List<BiConsumer<Class<?>, Cell<C,?>>> interpreter = interpreters.get(type);
-				if ( interpreter == null ) {
-					Class<?> finalType1 = type;
-					type = interpreters.keySet().stream().filter(i -> i.isAssignableFrom(finalType1) ).findFirst().orElse(Object.class);
-					interpreter = interpreters.get(type);
-				}
-				if ( interpreter == null )
+				List<Consumer<Cell<C,?>>> interpreter = find(value, rendererLoopup);
+				if ( interpreter.isEmpty() )
 					return super.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
 				else {
 					Component[] componentRef = new Component[1];
@@ -278,8 +261,7 @@ public final class Render<C extends JComponent,E> {
 						@Override public void setRenderer(Component component) {componentRef[0] = component;}
 						@Override public void setDefaultRenderValue(Object newValue) {defaultValueRef[0] = newValue;}
 					};
-					Class<?> finalType = type;
-					interpreter.forEach(consumer -> consumer.accept(finalType, (Cell<C,?>)cell) );
+					interpreter.forEach(consumer -> consumer.accept((Cell<C,?>)cell) );
 					if ( componentRef[0] != null )
 						return componentRef[0];
 					else if ( defaultValueRef[0] != null )
@@ -294,6 +276,18 @@ public final class Render<C extends JComponent,E> {
 				else
 					return super.getBorder();
 			}
+		}
+
+		private static <C extends JComponent> List<Consumer<Cell<C,?>>> find(
+				Object value, Map<Class<?>, java.util.List<Consumer<Cell<C,?>>>> rendererLookup
+		) {
+			Class<?> type = ( value == null ? Object.class : value.getClass() );
+			List<Consumer<Cell<C,?>>> cellRenderer = new ArrayList<>();
+			for (Map.Entry<Class<?>, List<Consumer<Cell<C,?>>>> e : rendererLookup.entrySet()) {
+				if ( e.getKey().isAssignableFrom(type) )
+					cellRenderer.addAll(e.getValue());
+			}
+			return cellRenderer;
 		}
 
 		DefaultTableCellRenderer getForTable() {
