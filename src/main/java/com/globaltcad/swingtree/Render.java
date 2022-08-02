@@ -121,6 +121,14 @@ public final class Render<C extends JComponent,E> {
 		 * @return The builder API allowing method chaining.
 		 */
 		Builder<C, E> as( Cell.Interpreter<C,T> valueInterpreter );
+
+		default Builder<C, E> asComponent(Function<E, Component> renderer) {
+			return this.as( cell -> cell.setRenderer(renderer.apply(cell.getValue())) );
+		}
+
+		default Builder<C, E> asText(Function<E, String> renderer) {
+			return this.as( cell -> cell.setRenderer(new JLabel(renderer.apply(cell.getValue()))) );
+		}
 	}
 
 	/**
