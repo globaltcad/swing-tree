@@ -122,12 +122,12 @@ public final class Render<C extends JComponent,E> {
 		 */
 		Builder<C, E> as( Cell.Interpreter<C,T> valueInterpreter );
 
-		default Builder<C, E> asComponent(Function<E, Component> renderer) {
-			return this.as( cell -> cell.setRenderer(renderer.apply(cell.getValue())) );
+		default Builder<C, E> asComponent(Function<Cell<C,T>, Component> renderer) {
+			return this.as( cell -> cell.setRenderer(renderer.apply(cell)) );
 		}
 
-		default Builder<C, E> asText(Function<E, String> renderer) {
-			return this.as( cell -> cell.setRenderer(new JLabel(renderer.apply(cell.getValue()))) );
+		default Builder<C, E> asText(Function<Cell<C,T>, String> renderer) {
+			return this.as( cell -> cell.setRenderer(new JLabel(renderer.apply(cell))) );
 		}
 	}
 
