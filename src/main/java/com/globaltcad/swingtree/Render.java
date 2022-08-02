@@ -19,7 +19,20 @@ public final class Render<C extends JComponent,E> {
 	private final Class<E> elementType;
 	private final Supplier<Border> borderSupplier;
 
-	Render(Class<C> componentType, Class<E> elementType, Supplier<Border> borderSupplier) {
+	static <E> Render<JList<E>,E> forList(Class<E> elementType, Supplier<Border> borderSupplier) {
+		Render r = new Render<>(JComboBox.class, elementType, borderSupplier);
+		return (Render<JList<E>,E>) r;
+	}
+	static <E> Render<JComboBox<E>,E> forCombo(Class<E> elementType, Supplier<Border> borderSupplier) {
+		Render r = new Render<>(JComboBox.class, elementType, borderSupplier);
+		return (Render<JComboBox<E>,E>) r;
+	}
+	static <E> Render<JTable,E> forTable(Class<E> elementType, Supplier<Border> borderSupplier) {
+		Render r = new Render<>(JTable.class, elementType, borderSupplier);
+		return (Render<JTable,E>) r;
+	}
+
+	private Render(Class<C> componentType, Class<E> elementType, Supplier<Border> borderSupplier) {
 		this.componentType = componentType;
 		this.elementType = elementType;
 		this.borderSupplier = borderSupplier;
@@ -55,7 +68,7 @@ public final class Render<C extends JComponent,E> {
 			@Override
 			public Builder<C,E> as(Cell.Interpreter<C,T> valueInterpreter) {
 				LogUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
-				return new Builder(componentType,valueType, valueValidator, valueInterpreter);
+				return new Builder(componentType,valueType, valueValidator, valueInterpreter, borderSupplier);
 			}
 		};
 	}
@@ -121,23 +134,16 @@ public final class Render<C extends JComponent,E> {
 
 		public Builder(
 				Class<C> componentType,
-				Supplier<Border> border
-		) {
-			this.componentType = componentType;
-			this.border = border;
-		}
-
-		public Builder(
-				Class<C> componentType,
 				Class<E> valueType,
 				Predicate<Cell<C,E>> valueValidator,
-				Cell.Interpreter<C, E> valueInterpreter
+				Cell.Interpreter<C, E> valueInterpreter,
+				Supplier<Border> border
 		) {
 			LogUtil.nullArgCheck(valueType, "valueType", Class.class);
 			LogUtil.nullArgCheck(valueValidator, "valueValidator", Predicate.class);
 			LogUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
 			this.componentType = componentType;
-			this.border = null;
+			this.border = border;
 			when(valueType, valueValidator).as(valueInterpreter);
 		}
 
