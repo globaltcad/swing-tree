@@ -568,7 +568,7 @@ public final class UI
      */
     public static Tab tab(String title) {
         LogUtil.nullArgCheck(title, "title", String.class);
-        return new Tab(null, title, null, null);
+        return new Tab(null, title, null, null, null);
     }
 
     /**

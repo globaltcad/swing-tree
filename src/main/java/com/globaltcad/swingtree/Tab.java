@@ -69,15 +69,15 @@ public class Tab
         return new Tab(_contents, _title, _icon, _tip, onSelected);
     }
 
-    public JComponent contents() { return _contents; }
+    public final JComponent contents() { return _contents; }
 
-    public String title() { return _title; }
+    public final String title() { return _title; }
 
-    public Icon icon() { return _icon; }
+    public final Icon icon() { return _icon; }
 
-    public String tip() { return _tip; }
+    public final String tip() { return _tip; }
 
-    public UIAction<SimpleDelegate<JTabbedPane, ChangeEvent>> onSelection() {
+    public final UIAction<SimpleDelegate<JTabbedPane, ChangeEvent>> onSelection() {
         return _onSelected;
     }
 }
