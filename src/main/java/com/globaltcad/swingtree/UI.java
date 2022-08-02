@@ -819,7 +819,7 @@ public final class UI
      *
      * @return A builder instance for the provided {@link JComboBox}, which enables fluent method chaining.
      */
-    public static <E> UIForCombo<E> of(JComboBox<E> component) {
+    public static <E, C extends JComboBox<E>> UIForCombo<E,C> of(C component) {
         LogUtil.nullArgCheck(component, "component", JComboBox.class);
         return new UIForCombo<>(component);
     }
@@ -830,7 +830,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JComboBox}, which enables fluent method chaining.
      */
-    public static UIForCombo<Object> comboBox() { return of(new JComboBox<>()); }
+    public static UIForCombo<Object,JComboBox<Object>> comboBox() { return of(new JComboBox<>()); }
 
     /**
      *  Use this to create a builder for the provided {@link JList} instance
@@ -841,7 +841,7 @@ public final class UI
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     @SafeVarargs
-    public static <E> UIForCombo<E> comboBox(E... items) {
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox(E... items) {
         LogUtil.nullArgCheck(items, "items", Object[].class);
         return of(new JComboBox<>(items));
     }
@@ -854,7 +854,7 @@ public final class UI
      * @return A builder instance for the provided {@link JList}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
-    public static <E> UIForCombo<E> comboBox(java.util.List<E> items) {
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox(java.util.List<E> items) {
         LogUtil.nullArgCheck(items, "items", List.class);
         return of(new JComboBox<>((E[]) items.toArray()));
     }

@@ -6,9 +6,6 @@ import com.globaltcad.swingtree.api.UIAction;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.table.TableCellRenderer;
-import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForList<E, L>, L>
@@ -72,7 +69,7 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
 
     public final <V extends E> UIForList<E, L> withRenderer( Render.Builder<L,V> renderBuilder ) {
         LogUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
-        return withRenderer((ListEntryRenderer<E, L>) renderBuilder.getForList());
+        return withRenderer((ListCellRenderer<E>) renderBuilder.getForList());
     }
 
     public final UIForList<E, L> withRenderer( ListCellRenderer<E> renderer ) {

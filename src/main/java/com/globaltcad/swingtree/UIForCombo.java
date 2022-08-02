@@ -9,7 +9,7 @@ import java.awt.event.ActionListener;
 /**
  *  A swing tree builder node for {@link JComboBox} instances.
  */
-public class UIForCombo<E> extends UIForAbstractSwing<UIForCombo<E>, JComboBox<E>>
+public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIForCombo<E,C>, JComboBox<E>>
 {
     protected UIForCombo(JComboBox<E> component) { super(component); }
 
@@ -23,7 +23,7 @@ public class UIForCombo<E> extends UIForAbstractSwing<UIForCombo<E>, JComboBox<E
      * @param action The {@link UIAction} that will be notified.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public UIForCombo<E> onSelection(UIAction<SimpleDelegate<JComboBox<E>, ActionEvent>> action) {
+    public UIForCombo<E,C> onSelection(UIAction<SimpleDelegate<JComboBox<E>, ActionEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         _component.addActionListener(e -> action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())) );
         return this;
@@ -35,8 +35,19 @@ public class UIForCombo<E> extends UIForAbstractSwing<UIForCombo<E>, JComboBox<E
      * @param isEditable The truth value determining if the UI component should be editable or not.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public UIForCombo<E> isEditableIf(boolean isEditable) {
+    public UIForCombo<E,C> isEditableIf(boolean isEditable) {
         _component.setEditable(isEditable);
         return this;
     }
+
+    public final <V extends E> UIForCombo<E,C> withRenderer( Render.Builder<C,V> renderBuilder ) {
+        LogUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
+        return withRenderer((ListCellRenderer<E>) renderBuilder.getForList());
+    }
+
+    public final UIForCombo<E,C> withRenderer( ListCellRenderer<E> renderer ) {
+        _component.setRenderer(renderer);
+        return this;
+    }
+
 }
