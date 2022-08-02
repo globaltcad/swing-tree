@@ -47,7 +47,7 @@ public final class Render<C extends JComponent,E> {
 	 * @param <T> The type parameter of the cell value, for which you want custom rendering.
 	 * @return The {@link As} builder API step which expects you to provide a lambda for customizing how a cell is rendered.
 	 */
-	public <T> As<C,T> when(Class<T> valueType) {
+	public <T extends E> As<C,E,T> when(Class<T> valueType) {
 		LogUtil.nullArgCheck(valueType, "valueType", Class.class);
 		return when( valueType, cell -> true );
 	}
@@ -60,15 +60,15 @@ public final class Render<C extends JComponent,E> {
 	 * @param <T> The type parameter of the cell value, for which you want custom rendering.
 	 * @return The {@link As} builder API step which expects you to provide a lambda for customizing how a cell is rendered.
 	 */
-	public <T> As<C,T> when(
+	public <T extends E> As<C,E,T> when(
 			Class<T> valueType,
 			Predicate<Cell<C,T>> valueValidator
 	) {
 		LogUtil.nullArgCheck(valueType, "valueType", Class.class);
 		LogUtil.nullArgCheck(valueValidator, "valueValidator", Predicate.class);
-		return new As<C,T>() {
+		return new As<C,E,T>() {
 			@Override
-			public Builder as(Cell.Interpreter<C,T> valueInterpreter) {
+			public Builder<C,E> as(Cell.Interpreter<C,T> valueInterpreter) {
 				LogUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
 				return new Builder(componentType,valueType, valueValidator, valueInterpreter);
 			}
@@ -114,7 +114,7 @@ public final class Render<C extends JComponent,E> {
 	}
 
 
-	public interface As<C extends JComponent,T> {
+	public interface As<C extends JComponent, E, T extends E> {
 		/**
 		 * 	Specify a lambda which receives a {@link Cell} instance
 		 * 	for you to customize its renderer.
@@ -122,7 +122,7 @@ public final class Render<C extends JComponent,E> {
 		 * @param valueInterpreter A lambda which customizes the provided cell.
 		 * @return The builder API allowing method chaining.
 		 */
-		Builder<C, T> as( Cell.Interpreter<C,T> valueInterpreter );
+		Builder<C, E> as( Cell.Interpreter<C,T> valueInterpreter );
 	}
 
 	/**
@@ -156,23 +156,23 @@ public final class Render<C extends JComponent,E> {
 			when(valueType, valueValidator).as(valueInterpreter);
 		}
 
-		public <T extends E> As<C,T> when(Class<T> valueType) {
+		public <T extends E> As<C,E,T> when(Class<T> valueType) {
 			LogUtil.nullArgCheck(valueType, "valueType", Class.class);
 			return when( valueType, cell -> true );
 		}
 
-		public <T extends E> As<C,T> when(
+		public <T extends E> As<C,E,T> when(
 				Class<T> valueType,
 				Predicate<Cell<C,T>> valueValidator
 		) {
 			LogUtil.nullArgCheck(valueType, "valueType", Class.class);
 			LogUtil.nullArgCheck(valueValidator, "valueValidator", Predicate.class);
-			return new As<C,T>() {
+			return new As<C,E,T>() {
 				@Override
-				public Builder as(Cell.Interpreter<C,T> valueInterpreter) {
+				public Builder<C,E> as(Cell.Interpreter<C,T> valueInterpreter) {
 					LogUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
 					store(valueType, valueValidator, valueInterpreter);
-					return Builder.this;
+					return (Builder<C, E>) Builder.this;
 				}
 			};
 		}
