@@ -1140,6 +1140,10 @@ public final class UI
         return new Render<>(JList.class, Object.class, null).when(Object.class).as(cell->{});
     }
 
+    public static Render.Builder<JComboBox, Object> renderCombo() {
+        return new Render<>(JComboBox.class, Object.class, null).when(Object.class).as(cell->{});
+    }
+
     /**
      * @param borderSupplier A lambda which provides a border for rendered cells.
      * @return The builder API allowing method chaining.
@@ -1157,6 +1161,14 @@ public final class UI
     }
 
     /**
+     * @param borderSupplier A lambda which provides a border for rendered cells.
+     * @return The builder API allowing method chaining.
+     */
+    public static Render.Builder<JComboBox, Object> renderComboWithBorder(Supplier<Border> borderSupplier) {
+        return new Render<>(JComboBox.class, Object.class, borderSupplier).when(Object.class).as(cell->{});
+    }
+
+    /**
      * @param border A border for rendered cells.
      * @return The builder API allowing method chaining.
      */
@@ -1170,6 +1182,14 @@ public final class UI
      */
     public static Render.Builder<JList, Object> renderListWithBorder(Border border) {
         return renderListWithBorder(()->border);
+    }
+
+    /**
+     * @param border A border for rendered cells.
+     * @return The builder API allowing method chaining.
+     */
+    public static Render.Builder<JComboBox, Object> renderComboWithBorder(Border border) {
+        return renderComboWithBorder(()->border);
     }
 
     /**
