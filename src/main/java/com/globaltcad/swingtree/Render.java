@@ -4,8 +4,10 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.*;
 
 /**
@@ -90,6 +92,7 @@ public final class Render<C extends JComponent,E> {
 		int     	getColumn();
 		Component   getRenderer();
 		void        setRenderer(Component component);
+		void        setToolTip(String toolTip);
 		void        setDefaultRenderValue(Object newValue);
 		default void setRenderer(Consumer<Graphics2D> painter) {
 			setRenderer(new Component() {
@@ -127,6 +130,20 @@ public final class Render<C extends JComponent,E> {
 		default Builder<C, E> asText(Function<Cell<C,T>, String> renderer) {
 			return this.as( cell -> cell.setRenderer(new JLabel(renderer.apply(cell))) );
 		}
+
+		default Builder<C, E> render(BiConsumer<Cell<C,T>, Graphics2D> renderer) {
+			return this.as( cell -> cell.setRenderer(new JComponent(){
+				@Override public void paintComponent(Graphics g) {
+					try {
+						renderer.accept(cell, (Graphics2D) g);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}) );
+		}
+
+
 	}
 
 	/**
@@ -206,6 +223,7 @@ public final class Render<C extends JComponent,E> {
 				else {
 					Component[] componentRef = new Component[1];
 					Object[] defaultValueRef = new Object[1];
+					List<String> toolTips = new ArrayList<>();
 					Cell<JTable,Object> cell = new Cell<JTable,Object>() {
 						@Override public JTable getComponent() {return table;}
 						@Override public Object getValue() {return value;}
@@ -215,15 +233,23 @@ public final class Render<C extends JComponent,E> {
 						@Override public int getColumn() {return column;}
 						@Override public Component getRenderer() {return SimpleTableCellRenderer.super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);}
 						@Override public void setRenderer(Component component) {componentRef[0] = component;}
+						@Override public void setToolTip(String toolTip) { toolTips.add(toolTip);}
+
 						@Override public void setDefaultRenderValue(Object newValue) {defaultValueRef[0] = newValue;}
 					};
 					interpreter.forEach(consumer -> consumer.accept((Cell<C,?>)cell) );
+					Component choice;
 					if ( componentRef[0] != null )
-						return componentRef[0];
+						choice = componentRef[0];
 					else if ( defaultValueRef[0] != null )
-						return super.getTableCellRendererComponent(table, defaultValueRef[0], isSelected, hasFocus, row, column);
+						choice = super.getTableCellRendererComponent(table, defaultValueRef[0], isSelected, hasFocus, row, column);
 					else
-						return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+						choice = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+					if ( !toolTips.isEmpty() && choice instanceof JComponent )
+						((JComponent)choice).setToolTipText(String.join("; ", toolTips));
+
+					return choice;
 				}
 			}
 
@@ -250,6 +276,7 @@ public final class Render<C extends JComponent,E> {
 				else {
 					Component[] componentRef = new Component[1];
 					Object[] defaultValueRef = new Object[1];
+					List<String> toolTips = new ArrayList<>();
 					Cell<JList<T>,Object> cell = new Cell<JList<T>, Object>() {
 						@Override public JList<T> getComponent() {return list;}
 						@Override public Object getValue() {return value;}
@@ -259,15 +286,22 @@ public final class Render<C extends JComponent,E> {
 						@Override public int getColumn() {return 0;}
 						@Override public Component getRenderer() {return SimpleListCellRenderer.super.getListCellRendererComponent(list, value, row, isSelected, hasFocus);}
 						@Override public void setRenderer(Component component) {componentRef[0] = component;}
+						@Override public void setToolTip(String toolTip) { toolTips.add(toolTip);}
 						@Override public void setDefaultRenderValue(Object newValue) {defaultValueRef[0] = newValue;}
 					};
 					interpreter.forEach(consumer -> consumer.accept((Cell<C,?>)cell) );
+					Component choice;
 					if ( componentRef[0] != null )
-						return componentRef[0];
+						choice = componentRef[0];
 					else if ( defaultValueRef[0] != null )
-						return super.getListCellRendererComponent(list, defaultValueRef[0], row, isSelected, hasFocus);
+						choice = super.getListCellRendererComponent(list, defaultValueRef[0], row, isSelected, hasFocus);
 					else
-						return super.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
+						choice = super.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
+
+					if ( !toolTips.isEmpty() && choice instanceof JComponent )
+						((JComponent)choice).setToolTipText(String.join("; ", toolTips));
+
+					return choice;
 				}
 			}
 			@Override
