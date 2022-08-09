@@ -249,6 +249,141 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
+     *  Set the minimum {@link Dimension} of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component. <br>
+     * @param size The minimum {@link Dimension} of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withMinimumSize(Dimension size) {
+        _component.setMinimumSize(size);
+        return (I) this;
+    }
+
+    /**
+     *  Set the minimum width and heigh ({@link Dimension}) of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component. <br>
+     * @param width The minimum width of the component.
+     * @param height The minimum height of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withMinimumSize(int width, int height) {
+        _component.setMinimumSize(new Dimension(width, height));
+        return (I) this;
+    }
+
+    /**
+     *  Use this to only set the minimum width of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component for you. <br>
+     * @param width The minimum width which should be set for the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withMinimumWidth(int width) {
+        _component.setMinimumSize(new Dimension(width, _component.getMinimumSize().height));
+        return (I) this;
+    }
+
+    /**
+     *  Use this to only set the minimum height of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component for you. <br>
+     * @param height The minimum height which should be set for the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withMinimumHeight(int height) {
+        _component.setMinimumSize(new Dimension(_component.getMinimumSize().width, height));
+        return (I) this;
+    }
+
+    /**
+     *  Set the maximum {@link Dimension} of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component. <br>
+     * @param size The maximum {@link Dimension} of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withMaximumSize(Dimension size) {
+        _component.setMaximumSize(size);
+        return (I) this;
+    }
+
+    /**
+     *  Set the maximum width and height ({@link Dimension}) of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component. <br>
+     * @param width The maximum width of the component.
+     * @param height The maximum height of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withMaximumSize(int width, int height) {
+        _component.setMaximumSize(new Dimension(width, height));
+        return (I) this;
+    }
+
+    /**
+     *  Use this to only set the maximum width of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component for you. <br>
+     * @param width The maximum width which should be set for the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withMaximumWidth(int width) {
+        _component.setMaximumSize(new Dimension(width, _component.getMaximumSize().height));
+        return (I) this;
+    }
+
+    /**
+     *  Use this to only set the maximum height of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component for you. <br>
+     * @param height The maximum height which should be set for the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withMaximumHeight(int height) {
+        _component.setMaximumSize(new Dimension(_component.getMaximumSize().width, height));
+        return (I) this;
+    }
+
+    /**
+     *  Set the preferred {@link Dimension} of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component. <br>
+     * @param size The preferred {@link Dimension} of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withPreferredSize(Dimension size) {
+        _component.setPreferredSize(size);
+        return (I) this;
+    }
+
+    /**
+     *  Set the preferred width and height ({@link Dimension}) of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component. <br>
+     * @param width The preferred width of the component.
+     * @param height The preferred height of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withPreferredSize(int width, int height) {
+        _component.setPreferredSize(new Dimension(width, height));
+        return (I) this;
+    }
+
+    /**
+     *  Use this to only set the preferred width of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component for you. <br>
+     * @param width The preferred width which should be set for the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withPreferredWidth(int width) {
+        _component.setPreferredSize(new Dimension(width, _component.getPreferredSize().height));
+        return (I) this;
+    }
+
+    /**
+     *  Use this to only set the preferred height of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component for you. <br>
+     * @param height The preferred height which should be set for the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withPreferredHeight(int height) {
+        _component.setPreferredSize(new Dimension(_component.getPreferredSize().width, height));
+        return (I) this;
+    }
+
+    /**
      *  Use this to register and catch generic {@link MouseListener} based mouse click events on this UI component.
      *  This method adds the provided consumer lambda to
      *  an an{@link MouseListener} instance to the wrapped
