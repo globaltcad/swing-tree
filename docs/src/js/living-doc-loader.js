@@ -392,7 +392,7 @@ function filterTableEntryNoise(entry) {
     if ( entry.startsWith("import ") ) entry = entry.substring(7);
     if ( entry.startsWith("java.lang.") ) entry = entry.substring(10);
     if ( entry.startsWith("java.util.") ) entry = entry.substring(10);
-    if ( entry.startsWith("neureka.") ) entry = entry.substring(8);
+    if ( entry.startsWith("com.globaltcad.swingtree.") ) entry = entry.substring(25);
     return entry;
 }
 
