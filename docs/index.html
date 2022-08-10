@@ -119,7 +119,7 @@
 
                     <div class="TabWrapper">
                         <div class="TabHead FancyLivingDocHeader">
-                            <button onclick="switchTab(event, '.introDocTab')" class="selected">Introductions</button>
+                            <button onclick="switchTab(event, '.introDocTab')" class="selected">Introduction</button>
                             <button onclick="switchTab(event, '.specDocTab')">Living Documentation</button>
                         </div>
                         <div class="TabBody">
@@ -130,7 +130,9 @@
                                         <!--------------------------------------------------------------------->
                                         <div id="DynamicContent" class="ContentBox row g-2">
 <div class="MarkdownMe">
-# The Problem: Building UIs #
+# Why? #
+
+## The Problem of Building UIs ##
 
 Graphical user interfaces, are like many
 concepts in the field of computer science
@@ -186,11 +188,11 @@ are overwhelming:
 
 - Irrespective of the language used, the result is not more verbose than XML like formats.
 - Binding can be done through simple lambda expressions.
-- The result UI is extremely debuggable.
+- The resulting UI is extremely debuggable.
 - It is easier to do fast prototyping.
 - Lambda based event registration (instead binding magic) makes MVVM, MVC, MVP and other design patterns extremely simple and transparent!
 - And finally: It is possible to use functional design patterns where UI is regenerated on the fly based on immutable data!
-This would open the door to designing UIs which are both extremely dynamic and still easily maintainable.
+This opens the door to designing UIs which are both extremely dynamic and still easily maintainable.
 (Although this is only performant when rebuilding smaller chunks of the UI at a time...)
 
 So here you have it, **this is why swing-tree exists**!
@@ -327,7 +329,7 @@ For more examples take a look at the [examples folder](src/test/groovy/com/globa
                                             Use the search bar below to query the test suite of Swing-Tree.
                                         </p>
                                         <br>
-                                        <input id="spec_search" style="width:16em;" placeholder="how to instantiate a tensor?">
+                                        <input id="spec_search" style="width:16em;" placeholder="how to use sliders">
                                         <button onclick="clearLivingDocs('#TARGET')">clear</button>
                                         <div class="ContentBox" id="TARGET"></div>
                             <script>
