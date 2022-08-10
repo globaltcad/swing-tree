@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="theme-color" content="#000000">
+    <meta charset="utf-8">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title> Swing-Tree </title>
+    <link rel="icon" href="/src/favicon/favicon.ico">
+    <meta name="description" content="a UI builder library">
+    <meta name="author" content="Daniel Nepp">
+    <meta name="keywords" content="Java, Swing, UI, GUI, GTS, globaltcad">
+    <!-----------------------------------ROBOTS---------------------------------------------->
+    <meta name="robots" content="all">
+    <meta name="revisit-after" content="30 days">
+    <!-----------------------------------JQUERY---------------------------------------------->
+    <script src="src/js/jquery.min.js"></script>
+    <!-----------------------------------BOOTSTRAP------------------------------------------>
+    <link rel="stylesheet" href="src/css/bootstrap.min.css">
+    <script src="src/js/bootstrap.min.js"></script>
+    <script src="src/js/popper.min.js"></script>
+    <!-----------------------------------CUSTOM CSS------------------------------------------>
+    <link rel="stylesheet" href="src/css/style.css">
+    <!-----------------------------------HIGHLIGHT CSS------------------------------------------>
+    <link rel="stylesheet" href="src/css/lang-styles/intellij-light.min.css">
+    <script src="src/js/highlight.min.js"></script>
+    <script src="src/js/custom.js"></script>
+    <script src="src/js/living-doc-loader.js"></script>
+    <link rel="stylesheet" href="src/css/living-docs.css">
+</head>
+<body>
+<div id="header">
+    <div id="BackgroundBox" style="" class="MainFrame">
+        <img style="z-index: -10; position: absolute;" src="https://www.globaltcad.com/wp-content/uploads/2021/05/gts-framework-design-of-experiment-doe-screen-4-mitteicons-rendering-ausschnitt4-ac.jpg" alt="">
+        <nav class="FloatsUp">
+            <div id="top_most_nav_bar">
+                <div id="navigation_container" class="">
+                    <div style="" class="TopBarGradient DynamicSideMargin">
+                        <h1 id="swing-tree_title">Swing-Tree</h1>
+                    </div>
+                    <div class="pull-right NightBox" id="navbar_menu">
+                        <ul class="nav navbar-right" id="navbar_list">
+                            <li>
+                                <a href="https://github.com/globaltcad/swing-tree">
+                                    <span title="Github Repository">
+                                        <img src="src/img/icons/github-logo.png">
+                                    </span>
+                                    <span class="LinkLabel">Github</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="jdocs/index.html">
+                                    <span title="Java Documentation">
+                                        <img src="src/img/icons/cogwheel.png">
+                                    </span>
+                                    <span class="LinkLabel">Java Docs</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div id="navi" class="DynamicPillarWidth">
+                <input type="checkbox" name="mobile-nav" id="mobile-nav" class="gaadiexp-check" onchange="this.blur()">
+                <label for="mobile-nav" class="gaadiexp white" tabindex="0" style="margin-left: 0;"><span></span></label>
+                <div role="navigation" class="header-nav">
+                    <div class="fixed-nav">
+                        <div class="menu">
+                            <ul class="side-nav">
+                                <li></li>
+                                <li></li>
+                                <li>
+                                    <a target="_blank" href="https://www.globaltcad.com/">
+                                        <img src="src/img/icons/house.png">
+                                        Global TCAD Solutions
+                                    </a>
+                                </li>
+                                <li>
+                                    <a target="_blank" href="jdocs/index.html">
+                                        <img src="src/img/icons/cogwheel.png">
+                                        Documentation
+                                    </a>
+                                </li>
+                                <li>
+                                    <a target="_blank" href="https://github.com/globaltcad/swing-tree">
+                                        <img src="src/img/icons/github-logo.png">
+                                        Github
+                                    </a>
+                                </li>
+                                <li>
+                                    <a target="" href="coverage/test/html/index.html">Code Coverage</a>
+                                <li>
+                                <li>
+                                    <a target="" href="coverage/test/html/jacoco-sessions.html">Last Test Session</a>
+                                </li>
+                                <li>
+                                    <a target="" href="spock/reports/index.html">Spock Report</a>
+                                </li>
+                                <li></li>
+                                <li></li>
+                                <li></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!----------------------------------LAYOUT------------------------------------------------->
+        <main>
+            <div class="">
+                <div id="main_content_tile" class="BrightCardBox DynamicSideMargin">
+                    <div class="MainContentWrapper">
+                        <div class=container-fluid>
+                            <h1 id="ContentTitle">Library Documentation</h1>
+                        </div>
+                    </div>
+
+                    <div class="TabWrapper">
+                        <div class="TabHead FancyLivingDocHeader">
+                            <button onclick="switchTab(event, '.introDocTab')" class="selected">Introductions</button>
+                            <button onclick="switchTab(event, '.specDocTab')">Living Documentation</button>
+                        </div>
+                        <div class="TabBody">
+                            <div class="introDocTab">
+                                <div class="MainContentWrapper">
+                                    <div class=container-fluid>
+                                        <script src="src/js/marked.min.js"></script>
+                                        <!--------------------------------------------------------------------->
+                                        <div id="DynamicContent" class="ContentBox row g-2">
+<div class="MarkdownMe">
+# The Problem: Building UIs #
+
+Graphical user interfaces, are like many
+concepts in the field of computer science
+just tree structures based on simple UI
+components as tree nodes.
+This is a very well proven concept, and it shows:
+**HTML dominates the UI world nowadays**.
+
+This success story was so impactful that it even lead to the **creation of
+custom xml like file formats** introduced by desktop application frameworks
+emerging after the success of HTML, think of **`FXML` in JavaFX, `XAML` in WPF**.
+However, this was a bad move, as it **missed the point as to why HTML succeeded**.
+
+I believe it is safe to say that
+HTML may have failed in gathering traction, if it was not for combining a turing complete scripting
+language in a nesting based markup format, **JavaScript embedded into HTML**.
+
+This is where desktop app frameworks miss the point.
+They are built around the idea to define the UI structure **in one static xml like file**,
+and then use some fancy binding mechanism (a xml parser and some tree traversal +maybe reflection magic)
+to attach the UI to a view model.<br>
+Don't get me wrong, that's great! <br>
+It is best practice to decouple UI from the UIs logic...
+However, this approach makes the UI inherently static and hard to interface with.
+In the world of web development the UIs are dynamically assembled HTML texts which gets sent to
+the users' browser where then JS takes over, meaning there is an inherent divide.
+Desktop application frameworks on the other hand, don't need to send anything
+over the internet, so why use xml formats?
+
+
+## Making Imperative UIs Declarative #
+
+You might say that XML-like formats are superior to building UI
+imperatively
+because of their declarative nature and inherent support for nesting.
+However, your favourite programming language also supports nesting
+and the ability to assemble things
+in a declarative manner when the right design patterns are applied.
+
+Why not program the UIs state using a nested builder pattern?
+All it takes is some method chaining.
+
+This is not some wild theory proposed by a fringe minority
+of bold programmers, no! This is a very popular approach
+which is embraced by modern UI frameworks like
+[Flutter](https://flutter.dev/),
+[React native](https://reactnative.dev/),
+[SwiftUI](https://developer.apple.com/tutorials/swiftui/)
+and [Jetpack compose](https://developer.android.com/jetpack/compose).
+
+The benefits this approach of UI design brings
+are overwhelming:
+
+- Irrespective of the language used, the result is not more verbose than XML like formats.
+- Binding can be done through simple lambda expressions.
+- The result UI is extremely debuggable.
+- It is easier to do fast prototyping.
+- Lambda based event registration (instead binding magic) makes MVVM, MVC, MVP and other design patterns extremely simple and transparent!
+- And finally: It is possible to use functional design patterns where UI is regenerated on the fly based on immutable data!
+This would open the door to designing UIs which are both extremely dynamic and still easily maintainable.
+(Although this is only performant when rebuilding smaller chunks of the UI at a time...)
+
+So here you have it, **this is why swing-tree exists**!
+
+---
+
+<table>
+<tr>
+<th></th>
+<th></th>
+</tr>
+<tr>
+<td>
+
+```java
+FlatLightLaf.setup();
+UI.of(this/*JPanel subtype*/).withLayout("fill, insets 10")
+.add("grow, span, wrap",
+   UI.panel("fill, ins 0")
+   .add("shrink", UI.label("Result:"))
+   .add("grow, wrap",
+      UI.label("42.0").with(UI.HorizontalAlignment.RIGHT
+      .withProperty("FlatLaf.styleClass", "large")
+   )
+   .add("grow, span, wrap",
+      UI.textArea(UI.HorizontalDirection.RIGHT_TO_LEFT, "13 - 73")
+      .id("input-text-area")
+   )
+)
+.add("growx", UI.radioButton("DEG"), UI.radioButton("RAD"))
+.add("shrinkx", UI.splitButton("sin"))
+.add("growx, wrap",
+   UI.button("Help").withProperty("JButton.buttonType", "help")
+)
+.add("growx, span, wrap",
+   UI.panel("fill")
+   .add("span, grow, wrap",
+       UI.panel("fill, ins 0")
+       .add("grow",
+           UI.button("(")
+	   .withProperty("JButton.buttonType", "roundRect"),
+           UI.button(")")
+	   .withProperty("JButton.buttonType", "roundRect")
+       )
+   )
+   .add("grow",
+      UI.panel("fill, ins 0")
+      .apply( it -> {
+         String[] labels = {
+            "7", "8", "9", "4", "5", "6", "1", "2", "3", "0", ".", "C"
+         };
+         for ( int i = 0; i < labels.length; i++ )
+            it.add("grow" + ( i % 3 == 2 ? ", wrap" : "" ),
+               UI.button(labels[i])
+            );
+      }),
+      UI.panel("fill, ins 0")
+      .add("grow",
+         UI.button("-").withProperty("JButton.buttonType", "roundRect")
+      )
+      .add("grow, wrap",
+         UI.button("/").withProperty("JButton.buttonType", "roundRect")
+      )
+      .add("span, grow, wrap",
+         UI.panel("fill, ins 0")
+            .add("grow",
+            UI.button("+")
+	    .withProperty("JButton.buttonType", "roundRect"),
+            UI.panel("fill, ins 0")
+            .add("grow, wrap",
+               UI.button("*")
+	       .withProperty("JButton.buttonType", "roundRect"),
+               UI.button("%")
+	       .withProperty("JButton.buttonType", "roundRect")
+            )
+         ),
+         UI.button("=")
+         .withBackground(new Color(103, 255, 190))
+         .withProperty("JButton.buttonType", "roundRect")
+      )
+   )
+);
+```
+
+</td>
+<td style="vertical-align:top">
+
+Here is an example of some swing tree code which defines a simple calculator UI based on the `FlatLaF` look-and-feel. <br>
+This code will produce the following UI when added to a `JFrame`.
+
+---
+
+<img href="" title="example" src="img/simple-example.png" style="width:100%"/>
+
+---
+
+As you can see, swing tree has a very simple API, which only requires a
+single class to be imported, the `UI` class which can even be imported
+statically to remove any `UI.` prefixes.
+
+---
+
+Also, note that there are usually 2 arguments
+added to a tree node: a `String` and then UI nodes.
+This first argument simply translates
+to the layout constraints which should be applied
+to the UI element(s) added. <br>
+
+In this example, strings will be passed to a `MigLayout`
+simply because it is a general purpose layout and no other
+layout was specified.
+
+---
+
+For more examples take a look at the [examples folder](src/test/groovy/com/globaltcad/swingtree/examples) inside the test suite.
+
+</td>
+</tr>
+</table>
+
+
+
+</div>
+                                        </div>
+                                        <!--------------------------------------------------------------------->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="specDocTab" style="display:none">
+
+                                <div class="MainContentWrapper">
+                                    <div class=container-fluid>
+                                        <p>
+                                            Use the search bar below to query the test suite of Swing-Tree.
+                                        </p>
+                                        <br>
+                                        <input id="spec_search" style="width:16em;" placeholder="how to instantiate a tensor?">
+                                        <button onclick="clearLivingDocs('#TARGET')">clear</button>
+                                        <div class="ContentBox" id="TARGET"></div>
+                            <script>
+                                $(document).ready(()=>{ loadReportUI("#TARGET", "#spec_search"); });
+                            </script>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+<!-----------------------------------CORRECT VIEWPORT FOR MOBILE------------------------------------------>
+<script>
+</script>
+</body>
+</html>

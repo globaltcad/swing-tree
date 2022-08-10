@@ -26,6 +26,7 @@ targetCompatibility = 8
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -41,10 +42,15 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'    // mandatory dependencies for using Spock
 
-    testImplementation 'org.codehaus.groovy:groovy:3.0.10'
-    testImplementation platform("org.spockframework:spock-bom:2.0-groovy-3.0")
+    testImplementation 'org.codehaus.groovy:groovy:3.0.12'
+    testImplementation platform('org.spockframework:spock-bom:2.1-groovy-3.0')
     testImplementation 'org.spockframework:spock-core:2.1-groovy-3.0'
-    testImplementation 'com.athaydes:spock-reports:2.3.0-groovy-3.0'//, { transitive = false }
+
+    testImplementation 'com.github.gleethos:spock-reports:6f6933b'// A forked and fixed version
+
+    // if you don't already have slf4j-api and an implementation of it in the classpath, add this! (needed for reports)
+    testImplementation 'org.slf4j:slf4j-api:1.7.30'
+    testRuntimeClasspath 'org.slf4j:slf4j-simple:1.7.30'
 
     testRuntimeOnly group: 'net.bytebuddy', name: 'byte-buddy', version: '1.11.15' // allows mocking of classes (in addition to interfaces)
     testRuntimeOnly group: 'org.objenesis', name: 'objenesis', version: '3.2'      // allows mocking of classes without default constructor (together with ByteBuddy or CGLIB)

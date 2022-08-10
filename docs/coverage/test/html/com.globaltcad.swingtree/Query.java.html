@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Query.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stml</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree</a> &gt; <span class="el_source">Query.java</span></div><h1>Query.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Query.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree</a> &gt; <span class="el_source">Query.java</span></div><h1>Query.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree;
 
 import java.awt.*;
 import java.util.*;
@@ -14,8 +14,8 @@ class Query
     &lt;C extends Component&gt; Optional&lt;C&gt; find(Class&lt;C&gt; type, String id) {
 <span class="fc bfc" id="L15" title="All 2 branches covered.">        if ( !_tree.containsKey(id) ) {</span>
 <span class="fc" id="L16">            _tree.clear();</span>
-<span class="fc" id="L17">            Component root = traverseUpwards(_current);</span>
-<span class="fc" id="L18">            traverseDownwards(root);</span>
+<span class="fc" id="L17">            List&lt;Component&gt; roots = traverseUpwards(_current, new ArrayList&lt;&gt;());</span>
+<span class="fc" id="L18">            roots.stream().forEach(this::_traverseDownwardsAndFillTree);</span>
         }
 <span class="fc" id="L20">        return _tree.getOrDefault(id, new ArrayList&lt;&gt;())</span>
 <span class="fc" id="L21">                    .stream()</span>
@@ -24,26 +24,49 @@ class Query
 <span class="fc" id="L24">                    .findFirst();</span>
     }
 
-    private Component traverseUpwards(Component component) {
-<span class="fc" id="L28">        Container parent = component.getParent();</span>
-<span class="fc bfc" id="L29" title="All 2 branches covered.">        if ( parent != null )</span>
-<span class="fc" id="L30">            return traverseUpwards(parent);</span>
+    private List&lt;Component&gt; traverseUpwards(Component component, List&lt;Component&gt; roots)
+    {
+<span class="fc" id="L29">        Component parent = _findRootParentOf(component);</span>
+<span class="fc" id="L30">        roots.add(parent);</span>
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">        if ( parent.getParent() != null ) {</span>
+<span class="nc" id="L32">            return traverseUpwards(parent.getParent(), roots);</span>
+        }
         else
-<span class="fc" id="L32">            return component;</span>
+<span class="fc" id="L35">            return roots;</span>
     }
 
-    private void traverseDownwards(Component cmp) {
-        // Add this component
-<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if ( cmp != null ) {</span>
-<span class="fc" id="L38">            List&lt;Component&gt; found = _tree.computeIfAbsent(cmp.getName(), k -&gt; new ArrayList&lt;&gt;());</span>
-<span class="pc bpc" id="L39" title="1 of 2 branches missed.">            if ( !found.contains(cmp) )</span>
-<span class="fc" id="L40">                found.add(cmp);</span>
+    private Component _findRootParentOf( Component component ) {
+<span class="fc" id="L39">        Container parent = component.getParent();</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        if ( _acknowledgesParenthood( parent, component ) )</span>
+<span class="fc" id="L41">            return _findRootParentOf( parent );</span>
+        else
+<span class="fc" id="L43">            return component;</span>
+    }
+
+    private boolean _acknowledgesParenthood( Component parent, Component child ) {
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if ( parent instanceof Container ) {</span>
+<span class="fc" id="L48">            Container container = (Container) parent;</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">            for ( Component component : container.getComponents() )</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">                if ( component == child )</span>
+<span class="fc" id="L51">                    return true;</span>
         }
-<span class="fc" id="L42">        Container container = (Container) cmp;</span>
-<span class="pc bpc" id="L43" title="1 of 2 branches missed.">        if( container == null ) return; // Not a container, return</span>
-        // Go visit and add all children
-<span class="fc bfc" id="L45" title="All 2 branches covered.">        for ( Component subComponent : container.getComponents() )</span>
-<span class="fc" id="L46">            traverseDownwards(subComponent);</span>
-<span class="fc" id="L47">    }</span>
+<span class="fc" id="L53">        return false;</span>
+    }
+
+    private void _traverseDownwardsAndFillTree( Component cmp )
+    {
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">        if( cmp == null ) return; // Not a container, return</span>
+        // Add this component
+<span class="fc" id="L60">        List&lt;Component&gt; found = _tree.computeIfAbsent(cmp.getName(), k -&gt; new ArrayList&lt;&gt;());</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if ( !found.contains(cmp) )</span>
+<span class="fc" id="L62">            found.add(cmp);</span>
+
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if ( cmp instanceof Container ) { // A container, let's traverse it.</span>
+<span class="fc" id="L65">            Container container = (Container) cmp;</span>
+            // Go visit and add all children
+<span class="fc bfc" id="L67" title="All 2 branches covered.">            for ( Component subComponent : container.getComponents() )</span>
+<span class="fc" id="L68">                _traverseDownwardsAndFillTree(subComponent);</span>
+        }
+<span class="fc" id="L70">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

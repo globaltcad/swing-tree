@@ -1,13 +1,18 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UI.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stml</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree</a> &gt; <span class="el_source">UI.java</span></div><h1>UI.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UI.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree</a> &gt; <span class="el_source">UI.java</span></div><h1>UI.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree;
 
 import com.alexandriasoftware.swing.JSplitButton;
+import com.globaltcad.swingtree.api.Buildable;
 import com.globaltcad.swingtree.api.MenuBuilder;
 import com.globaltcad.swingtree.api.SwingBuilder;
+import com.globaltcad.swingtree.api.model.BasicTableModel;
+import com.globaltcad.swingtree.api.model.TableListDataSource;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.function.Supplier;
 
 /**
@@ -32,133 +37,176 @@ public final class UI
      *  map to the cursor type id.
      *  This exists simply because swing was created before enums were added to Java.
      */
-<span class="fc" id="L35">    public enum Cursor</span>
+<span class="fc" id="L40">    public enum Cursor</span>
     {
-<span class="fc" id="L37">        HAND(java.awt.Cursor.HAND_CURSOR),</span>
-<span class="fc" id="L38">        MOVE(java.awt.Cursor.MOVE_CURSOR),</span>
-<span class="fc" id="L39">        CROSS(java.awt.Cursor.CROSSHAIR_CURSOR),</span>
-<span class="fc" id="L40">        DEFAULT(java.awt.Cursor.DEFAULT_CURSOR),</span>
-<span class="fc" id="L41">        WAIT(java.awt.Cursor.WAIT_CURSOR),</span>
-<span class="fc" id="L42">        TEXT(java.awt.Cursor.TEXT_CURSOR),</span>
-<span class="fc" id="L43">        RESIZE_EAST(java.awt.Cursor.E_RESIZE_CURSOR),</span>
-<span class="fc" id="L44">        RESIZE_WEST(java.awt.Cursor.W_RESIZE_CURSOR),</span>
-<span class="fc" id="L45">        RESIZE_SOUTH(java.awt.Cursor.S_RESIZE_CURSOR),</span>
-<span class="fc" id="L46">        RESIZE_NORTH(java.awt.Cursor.N_RESIZE_CURSOR),</span>
-<span class="fc" id="L47">        RESIZE_NORTH_WEST(java.awt.Cursor.NW_RESIZE_CURSOR),</span>
-<span class="fc" id="L48">        RESIZE_NORTH_EAST(java.awt.Cursor.NE_RESIZE_CURSOR),</span>
-<span class="fc" id="L49">        RESIZE_SOUTH_WEST(java.awt.Cursor.SE_RESIZE_CURSOR),</span>
-<span class="fc" id="L50">        RESIZE_SOUTH_EAST(java.awt.Cursor.SE_RESIZE_CURSOR);</span>
+<span class="fc" id="L42">        HAND(java.awt.Cursor.HAND_CURSOR),</span>
+<span class="fc" id="L43">        MOVE(java.awt.Cursor.MOVE_CURSOR),</span>
+<span class="fc" id="L44">        CROSS(java.awt.Cursor.CROSSHAIR_CURSOR),</span>
+<span class="fc" id="L45">        DEFAULT(java.awt.Cursor.DEFAULT_CURSOR),</span>
+<span class="fc" id="L46">        WAIT(java.awt.Cursor.WAIT_CURSOR),</span>
+<span class="fc" id="L47">        TEXT(java.awt.Cursor.TEXT_CURSOR),</span>
+<span class="fc" id="L48">        RESIZE_EAST(java.awt.Cursor.E_RESIZE_CURSOR),</span>
+<span class="fc" id="L49">        RESIZE_WEST(java.awt.Cursor.W_RESIZE_CURSOR),</span>
+<span class="fc" id="L50">        RESIZE_SOUTH(java.awt.Cursor.S_RESIZE_CURSOR),</span>
+<span class="fc" id="L51">        RESIZE_NORTH(java.awt.Cursor.N_RESIZE_CURSOR),</span>
+<span class="fc" id="L52">        RESIZE_NORTH_WEST(java.awt.Cursor.NW_RESIZE_CURSOR),</span>
+<span class="fc" id="L53">        RESIZE_NORTH_EAST(java.awt.Cursor.NE_RESIZE_CURSOR),</span>
+<span class="fc" id="L54">        RESIZE_SOUTH_WEST(java.awt.Cursor.SE_RESIZE_CURSOR),</span>
+<span class="fc" id="L55">        RESIZE_SOUTH_EAST(java.awt.Cursor.SE_RESIZE_CURSOR);</span>
 
         final int type;
 
-<span class="fc" id="L54">        Cursor( int type ) { this.type = type; }</span>
+<span class="fc" id="L59">        Cursor( int type ) { this.type = type; }</span>
     }
 
     /**
      *  The scroll policy for UI components with scroll behaviour.
      */
-<span class="fc" id="L60">    public enum ScrollBarPolicy {</span>
-<span class="fc" id="L61">        NEVER, AS_NEEDED, ALWAYS</span>
+<span class="fc" id="L65">    public enum ScrollBarPolicy {</span>
+<span class="fc" id="L66">        NEVER, AS_NEEDED, ALWAYS</span>
     }
 
     /**
      *  The position of a UI component in terms of directions.
      */
-<span class="fc" id="L67">    public enum Position {</span>
-<span class="fc" id="L68">        TOP, LEFT, BOTTOM, RIGHT;</span>
+<span class="fc" id="L72">    public enum Position {</span>
+<span class="fc" id="L73">        TOP, LEFT, BOTTOM, RIGHT;</span>
         private int forTabbedPane() {
-<span class="nc bnc" id="L70" title="All 5 branches missed.">            switch ( this ) {</span>
-<span class="nc" id="L71">                case TOP  : return JTabbedPane.TOP  ;</span>
-<span class="nc" id="L72">                case LEFT : return JTabbedPane.LEFT ;</span>
-<span class="nc" id="L73">                case BOTTOM: return JTabbedPane.BOTTOM;</span>
-<span class="nc" id="L74">                case RIGHT: return JTabbedPane.RIGHT;</span>
+<span class="nc bnc" id="L75" title="All 5 branches missed.">            switch ( this ) {</span>
+<span class="nc" id="L76">                case TOP  : return JTabbedPane.TOP  ;</span>
+<span class="nc" id="L77">                case LEFT : return JTabbedPane.LEFT ;</span>
+<span class="nc" id="L78">                case BOTTOM: return JTabbedPane.BOTTOM;</span>
+<span class="nc" id="L79">                case RIGHT: return JTabbedPane.RIGHT;</span>
             }
-<span class="nc" id="L76">            throw new RuntimeException();</span>
+<span class="nc" id="L81">            throw new RuntimeException();</span>
         }
     }
 
     /**
      *  Overflow policy of UI components.
      */
-<span class="fc" id="L83">    public enum OverflowPolicy {</span>
-<span class="fc" id="L84">        WRAP, SCROLL;</span>
+<span class="fc" id="L88">    public enum OverflowPolicy {</span>
+<span class="fc" id="L89">        WRAP, SCROLL;</span>
 
         private int forTabbedPane() {
-<span class="nc bnc" id="L87" title="All 3 branches missed.">            switch ( this ) {</span>
-<span class="nc" id="L88">                case WRAP:   return JTabbedPane.WRAP_TAB_LAYOUT  ;</span>
-<span class="nc" id="L89">                case SCROLL: return JTabbedPane.SCROLL_TAB_LAYOUT ;</span>
+<span class="nc bnc" id="L92" title="All 3 branches missed.">            switch ( this ) {</span>
+<span class="nc" id="L93">                case WRAP:   return JTabbedPane.WRAP_TAB_LAYOUT  ;</span>
+<span class="nc" id="L94">                case SCROLL: return JTabbedPane.SCROLL_TAB_LAYOUT ;</span>
             }
-<span class="nc" id="L91">            throw new RuntimeException();</span>
+<span class="nc" id="L96">            throw new RuntimeException();</span>
+        }
+    }
+
+    /**
+     *  Vertical or horizontal split.
+     */
+<span class="fc" id="L103">    public enum Split {</span>
+<span class="fc" id="L104">        HORIZONTAL, VERTICAL;</span>
+
+        private int forSplitPane() {
+<span class="pc bpc" id="L107" title="2 of 3 branches missed.">            switch ( this )</span>
+            {
+<span class="fc" id="L109">                case HORIZONTAL: return JSplitPane.HORIZONTAL_SPLIT;</span>
+<span class="nc" id="L110">                case VERTICAL: return JSplitPane.VERTICAL_SPLIT;</span>
+            }
+<span class="nc" id="L112">            throw new RuntimeException();</span>
         }
     }
 
     /**
      *  Vertical or horizontal alignment.
      */
-<span class="fc" id="L98">    public enum Align {</span>
-<span class="fc" id="L99">        HORIZONTAL, VERTICAL;</span>
-
-        private int forSplitPane() {
-<span class="pc bpc" id="L102" title="2 of 3 branches missed.">            switch ( this )</span>
-            {
-<span class="fc" id="L104">                case HORIZONTAL: return JSplitPane.HORIZONTAL_SPLIT;</span>
-<span class="nc" id="L105">                case VERTICAL: return JSplitPane.VERTICAL_SPLIT;</span>
-            }
-<span class="nc" id="L107">            throw new RuntimeException();</span>
-        }
+<span class="fc" id="L119">    public enum Align {</span>
+<span class="fc" id="L120">        HORIZONTAL, VERTICAL;</span>
 
         private int forSlider () {
-<span class="nc bnc" id="L111" title="All 3 branches missed.">            switch ( this )</span>
+<span class="pc bpc" id="L123" title="2 of 3 branches missed.">            switch ( this )</span>
             {
-<span class="nc" id="L113">                case HORIZONTAL: return JSlider.HORIZONTAL;</span>
-<span class="nc" id="L114">                case VERTICAL: return JSlider.VERTICAL;</span>
+<span class="fc" id="L125">                case HORIZONTAL: return JSlider.HORIZONTAL;</span>
+<span class="nc" id="L126">                case VERTICAL: return JSlider.VERTICAL;</span>
             }
-<span class="nc" id="L116">            throw new RuntimeException();</span>
+<span class="nc" id="L128">            throw new RuntimeException();</span>
         }
-
+        private int forSeparator() {
+<span class="pc bpc" id="L131" title="2 of 3 branches missed.">            switch ( this )</span>
+            {
+<span class="nc" id="L133">                case HORIZONTAL: return JSeparator.HORIZONTAL;</span>
+<span class="fc" id="L134">                case VERTICAL: return JSeparator.VERTICAL;</span>
+            }
+<span class="nc" id="L136">            throw new RuntimeException();</span>
+        }
     }
 
     /**
      *  Different positions along a vertically aligned UI component.
      */
-<span class="fc" id="L124">    public enum VerticalAlignment {</span>
-<span class="fc" id="L125">        TOP, CENTER, BOTTOM;</span>
+<span class="fc" id="L143">    public enum VerticalAlignment {</span>
+<span class="fc" id="L144">        TOP, CENTER, BOTTOM;</span>
 
         int forSwing() {
-<span class="nc bnc" id="L128" title="All 4 branches missed.">            switch ( this ) {</span>
-<span class="nc" id="L129">                case TOP:    return SwingConstants.TOP  ;</span>
-<span class="nc" id="L130">                case CENTER: return SwingConstants.CENTER ;</span>
-<span class="nc" id="L131">                case BOTTOM: return SwingConstants.BOTTOM ;</span>
+<span class="nc bnc" id="L147" title="All 4 branches missed.">            switch ( this ) {</span>
+<span class="nc" id="L148">                case TOP:    return SwingConstants.TOP  ;</span>
+<span class="nc" id="L149">                case CENTER: return SwingConstants.CENTER ;</span>
+<span class="nc" id="L150">                case BOTTOM: return SwingConstants.BOTTOM ;</span>
             }
-<span class="nc" id="L133">            throw new RuntimeException();</span>
+<span class="nc" id="L152">            throw new RuntimeException();</span>
         }
     }
 
     /**
      *  Different positions along a horizontally aligned UI component.
      */
-<span class="fc" id="L140">    public enum HorizontalAlignment {</span>
-<span class="fc" id="L141">        LEFT, CENTER, RIGHT;</span>
+<span class="fc" id="L159">    public enum HorizontalAlignment {</span>
+<span class="fc" id="L160">        LEFT, CENTER, RIGHT;</span>
 
         public final int forSwing() {
-<span class="pc bpc" id="L144" title="3 of 4 branches missed.">            switch ( this ) {</span>
-<span class="nc" id="L145">                case LEFT:   return SwingConstants.LEFT   ;</span>
-<span class="nc" id="L146">                case CENTER: return SwingConstants.CENTER ;</span>
-<span class="fc" id="L147">                case RIGHT:  return SwingConstants.RIGHT  ;</span>
+<span class="pc bpc" id="L163" title="3 of 4 branches missed.">            switch ( this ) {</span>
+<span class="nc" id="L164">                case LEFT:   return SwingConstants.LEFT   ;</span>
+<span class="nc" id="L165">                case CENTER: return SwingConstants.CENTER ;</span>
+<span class="fc" id="L166">                case RIGHT:  return SwingConstants.RIGHT  ;</span>
             }
-<span class="nc" id="L149">            throw new RuntimeException();</span>
+<span class="nc" id="L168">            throw new RuntimeException();</span>
         }
     }
 
-<span class="fc" id="L153">    public enum HorizontalDirection {</span>
-<span class="fc" id="L154">        LEFT_TO_RIGHT, RIGHT_TO_LEFT;</span>
+<span class="fc" id="L172">    public enum HorizontalDirection {</span>
+<span class="fc" id="L173">        LEFT_TO_RIGHT, RIGHT_TO_LEFT;</span>
 
         public final ComponentOrientation forTextOrientation() {
-<span class="pc bpc" id="L157" title="2 of 3 branches missed.">            switch ( this ) {</span>
-<span class="nc" id="L158">                case LEFT_TO_RIGHT: return ComponentOrientation.LEFT_TO_RIGHT;</span>
-<span class="fc" id="L159">                case RIGHT_TO_LEFT: return ComponentOrientation.RIGHT_TO_LEFT;</span>
+<span class="pc bpc" id="L176" title="2 of 3 branches missed.">            switch ( this ) {</span>
+<span class="nc" id="L177">                case LEFT_TO_RIGHT: return ComponentOrientation.LEFT_TO_RIGHT;</span>
+<span class="fc" id="L178">                case RIGHT_TO_LEFT: return ComponentOrientation.RIGHT_TO_LEFT;</span>
             }
-<span class="nc" id="L161">            throw new RuntimeException();</span>
+<span class="nc" id="L180">            throw new RuntimeException();</span>
+        }
+    }
+
+<span class="fc" id="L184">    public enum TableData {</span>
+<span class="fc" id="L185">        COLUMN_MAJOR, ROW_MAJOR,</span>
+<span class="fc" id="L186">        COLUMN_MAJOR_EDITABLE, ROW_MAJOR_EDITABLE;</span>
+
+        final boolean isEditable() {
+<span class="pc bpc" id="L189" title="1 of 3 branches missed.">            switch ( this ) {</span>
+                case COLUMN_MAJOR:
+                case ROW_MAJOR:
+<span class="fc" id="L192">                    return false;</span>
+                case COLUMN_MAJOR_EDITABLE:
+                case ROW_MAJOR_EDITABLE:
+<span class="fc" id="L195">                    return true;</span>
+            }
+<span class="nc" id="L197">            throw new RuntimeException();</span>
+        }
+
+        final boolean isRowMajor() {
+<span class="pc bpc" id="L201" title="1 of 3 branches missed.">            switch ( this ) {</span>
+                case COLUMN_MAJOR:
+                case COLUMN_MAJOR_EDITABLE:
+<span class="fc" id="L204">                    return false;</span>
+                case ROW_MAJOR:
+                case ROW_MAJOR_EDITABLE:
+<span class="fc" id="L207">                    return true;</span>
+            }
+<span class="nc" id="L209">            throw new RuntimeException();</span>
         }
     }
 
@@ -173,8 +221,8 @@ public final class UI
      */
     public static &lt;T extends JComponent&gt; UIForSwing&lt;T&gt; of(T component)
     {
-<span class="fc" id="L176">        LogUtil.nullArgCheck(component, &quot;component&quot;, JComponent.class);</span>
-<span class="fc" id="L177">        return new UIForSwing&lt;&gt;(component);</span>
+<span class="fc" id="L224">        LogUtil.nullArgCheck(component, &quot;component&quot;, JComponent.class);</span>
+<span class="fc" id="L225">        return new UIForSwing&lt;&gt;(component);</span>
     }
 
 
@@ -189,8 +237,8 @@ public final class UI
      */
     public static &lt;T extends JComponent&gt; UIForSwing&lt;T&gt; of(SwingBuilder&lt;T&gt; builder)
     {
-<span class="nc" id="L192">        LogUtil.nullArgCheck(builder, &quot;builder&quot;, SwingBuilder.class);</span>
-<span class="nc" id="L193">        return of(builder.build());</span>
+<span class="nc" id="L240">        LogUtil.nullArgCheck(builder, &quot;builder&quot;, SwingBuilder.class);</span>
+<span class="nc" id="L241">        return of(builder.build());</span>
     }
 
     /**
@@ -204,8 +252,8 @@ public final class UI
      */
     public static &lt;M extends JMenuItem&gt; UIForMenuItem&lt;M&gt; of(MenuBuilder&lt;M&gt; builder)
     {
-<span class="nc" id="L207">        LogUtil.nullArgCheck(builder, &quot;builder&quot;, MenuBuilder.class);</span>
-<span class="nc" id="L208">        return new UIForMenuItem&lt;&gt;(builder.build());</span>
+<span class="nc" id="L255">        LogUtil.nullArgCheck(builder, &quot;builder&quot;, MenuBuilder.class);</span>
+<span class="nc" id="L256">        return new UIForMenuItem&lt;&gt;(builder.build());</span>
     }
 
     /**
@@ -215,8 +263,8 @@ public final class UI
      */
     public static &lt;P extends JPopupMenu&gt; UIForPopup&lt;P&gt; of(P popup)
     {
-<span class="nc" id="L218">        LogUtil.nullArgCheck(popup, &quot;popup&quot;, JPopupMenu.class);</span>
-<span class="nc" id="L219">        return new UIForPopup&lt;&gt;(popup);</span>
+<span class="nc" id="L266">        LogUtil.nullArgCheck(popup, &quot;popup&quot;, JPopupMenu.class);</span>
+<span class="nc" id="L267">        return new UIForPopup&lt;&gt;(popup);</span>
     }
 
     /**
@@ -225,7 +273,7 @@ public final class UI
      *
      * @return A builder instance for a {@link JPopupMenu}, which enables fluent method chaining.
      */
-<span class="nc" id="L228">    public static UIForPopup&lt;JPopupMenu&gt; popupMenu() { return of(new JPopupMenu()); }</span>
+<span class="nc" id="L276">    public static UIForPopup&lt;JPopupMenu&gt; popupMenu() { return of(new JPopupMenu()); }</span>
 
     /**
      *  This returns an instance of a {@link UIForSeparator} builder
@@ -236,8 +284,30 @@ public final class UI
      */
     public static &lt;S extends JSeparator&gt; UIForSeparator&lt;S&gt; of(S separator)
     {
-<span class="fc" id="L239">        LogUtil.nullArgCheck(separator, &quot;separator&quot;, JSeparator.class);</span>
-<span class="fc" id="L240">        return new UIForSeparator&lt;&gt;(separator);</span>
+<span class="fc" id="L287">        LogUtil.nullArgCheck(separator, &quot;separator&quot;, JSeparator.class);</span>
+<span class="fc" id="L288">        return new UIForSeparator&lt;&gt;(separator);</span>
+    }
+
+    /**
+     *  This returns an instance of a {@link UIForSeparator} builder
+     *  responsible for building a {@link JSeparator} by exposing helpful utility methods for it.
+     *  This is in essence a convenience method for {@code UI.of(new JSeparator())}.
+     *
+     * @return A {@link UIForSeparator} UI builder instance which wraps the {@link JSeparator} and exposes helpful methods.
+     */
+<span class="fc" id="L298">    public static UIForSeparator&lt;JSeparator&gt; separator() { return of(new JSeparator()); }</span>
+
+    /**
+     *  This returns an instance of a {@link UIForSeparator} builder
+     *  responsible for building a {@link JSeparator} by exposing helpful utility methods for it.
+     *  This is in essence a convenience method for {@code UI.of(new JSeparator(JSeparator.VERTICAL))}.
+     *
+     * @param align The alignment of the separator which may either be horizontal or vertical.
+     * @return A {@link UIForSeparator} UI builder instance which wraps the {@link JSeparator} and exposes helpful methods.
+     */
+    public static UIForSeparator&lt;JSeparator&gt; separator(Align align) {
+<span class="fc" id="L309">        LogUtil.nullArgCheck(align, &quot;align&quot;, Align.class);</span>
+<span class="fc" id="L310">        return of(new JSeparator(align.forSeparator()));</span>
     }
 
     /**
@@ -248,8 +318,8 @@ public final class UI
      */
     public static &lt;T extends AbstractButton&gt; UIForButton&lt;T&gt; of(T component)
     {
-<span class="fc" id="L251">        LogUtil.nullArgCheck(component, &quot;component&quot;, AbstractButton.class);</span>
-<span class="fc" id="L252">        return new UIForButton&lt;&gt;(component);</span>
+<span class="fc" id="L321">        LogUtil.nullArgCheck(component, &quot;component&quot;, AbstractButton.class);</span>
+<span class="fc" id="L322">        return new UIForButton&lt;&gt;(component);</span>
     }
 
     /**
@@ -258,7 +328,7 @@ public final class UI
      *
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
-<span class="fc" id="L261">    public static UIForButton&lt;JButton&gt; button() { return of(new JButton()); }</span>
+<span class="fc" id="L331">    public static UIForButton&lt;JButton&gt; button() { return of(new JButton()); }</span>
 
     /**
      *  Use this to create a builder for the {@link JButton} UI component with the provided text displayed on top.
@@ -266,7 +336,7 @@ public final class UI
      *
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
-<span class="fc" id="L269">    public static UIForButton&lt;JButton&gt; button(String text) { return of(new JButton(text)); }</span>
+<span class="fc" id="L339">    public static UIForButton&lt;JButton&gt; button(String text) { return of(new JButton(text)); }</span>
 
     /**
      *  Use this to create a builder for the {@link JButton} UI component
@@ -276,8 +346,8 @@ public final class UI
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
     public static UIForButton&lt;JButton&gt; button(Icon icon) {
-<span class="nc" id="L279">        LogUtil.nullArgCheck(icon, &quot;icon&quot;, Icon.class);</span>
-<span class="nc" id="L280">        return button().peek(it -&gt; it.setIcon(icon) );</span>
+<span class="nc" id="L349">        LogUtil.nullArgCheck(icon, &quot;icon&quot;, Icon.class);</span>
+<span class="nc" id="L350">        return button().peek(it -&gt; it.setIcon(icon) );</span>
     }
 
     /**
@@ -287,9 +357,9 @@ public final class UI
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
     public static UIForButton&lt;JButton&gt; button(Icon icon, Icon onHover) {
-<span class="nc" id="L290">        LogUtil.nullArgCheck(icon, &quot;icon&quot;, Icon.class);</span>
-<span class="nc" id="L291">        LogUtil.nullArgCheck(onHover, &quot;onHover&quot;, Icon.class);</span>
-<span class="nc" id="L292">        return button(icon, onHover, onHover);</span>
+<span class="nc" id="L360">        LogUtil.nullArgCheck(icon, &quot;icon&quot;, Icon.class);</span>
+<span class="nc" id="L361">        LogUtil.nullArgCheck(onHover, &quot;onHover&quot;, Icon.class);</span>
+<span class="nc" id="L362">        return button(icon, onHover, onHover);</span>
     }
 
     /**
@@ -300,9 +370,9 @@ public final class UI
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
     public static UIForButton&lt;JButton&gt; button(int width, int height, ImageIcon icon, ImageIcon onHover) {
-<span class="fc" id="L303">        onHover = new ImageIcon(onHover.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT));</span>
-<span class="fc" id="L304">        icon = new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT));</span>
-<span class="fc" id="L305">        return button(icon, onHover, onHover);</span>
+<span class="fc" id="L373">        onHover = new ImageIcon(onHover.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT));</span>
+<span class="fc" id="L374">        icon = new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT));</span>
+<span class="fc" id="L375">        return button(icon, onHover, onHover);</span>
     }
 
     /**
@@ -320,17 +390,17 @@ public final class UI
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
     public static UIForButton&lt;JButton&gt; button(Icon icon, Icon onHover, Icon onPress) {
-<span class="fc" id="L323">        LogUtil.nullArgCheck(icon, &quot;icon&quot;, Icon.class);</span>
-<span class="fc" id="L324">        LogUtil.nullArgCheck(onHover, &quot;onHover&quot;, Icon.class);</span>
-<span class="fc" id="L325">        LogUtil.nullArgCheck(onPress, &quot;onPress&quot;, Icon.class);</span>
-<span class="fc" id="L326">        return button().peek(it -&gt; it.setIcon(icon) )</span>
-<span class="fc" id="L327">                .peek(it -&gt; it.setRolloverIcon(onHover) )</span>
-<span class="fc" id="L328">                .peek(it -&gt; it.setPressedIcon(onPress) );</span>
+<span class="fc" id="L393">        LogUtil.nullArgCheck(icon, &quot;icon&quot;, Icon.class);</span>
+<span class="fc" id="L394">        LogUtil.nullArgCheck(onHover, &quot;onHover&quot;, Icon.class);</span>
+<span class="fc" id="L395">        LogUtil.nullArgCheck(onPress, &quot;onPress&quot;, Icon.class);</span>
+<span class="fc" id="L396">        return button().peek(it -&gt; it.setIcon(icon) )</span>
+<span class="fc" id="L397">                .peek(it -&gt; it.setRolloverIcon(onHover) )</span>
+<span class="fc" id="L398">                .peek(it -&gt; it.setPressedIcon(onPress) );</span>
     }
 
     public static &lt;B extends JSplitButton&gt; UIForSplitButton&lt;B&gt; of(B splitButton) {
-<span class="nc" id="L332">        LogUtil.nullArgCheck(splitButton, &quot;splitButton&quot;, JSplitButton.class);</span>
-<span class="nc" id="L333">        return new UIForSplitButton&lt;&gt;(splitButton);</span>
+<span class="nc" id="L402">        LogUtil.nullArgCheck(splitButton, &quot;splitButton&quot;, JSplitButton.class);</span>
+<span class="nc" id="L403">        return new UIForSplitButton&lt;&gt;(splitButton);</span>
     }
 
     /**
@@ -348,8 +418,8 @@ public final class UI
      * @return A UI builder instance wrapping a {@link JSplitButton}.
      */
     public static UIForSplitButton&lt;JSplitButton&gt; splitButton(String text) {
-<span class="fc" id="L351">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
-<span class="fc" id="L352">        return new UIForSplitButton&lt;&gt;(new JSplitButton(text));</span>
+<span class="fc" id="L421">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L422">        return new UIForSplitButton&lt;&gt;(new JSplitButton(text));</span>
     }
 
     /**
@@ -368,8 +438,8 @@ public final class UI
      * @return A new {@link SplitItem} wrapping a simple {@link JMenuItem}.
      */
     public static SplitItem&lt;JMenuItem&gt; splitItem(String text) {
-<span class="fc" id="L371">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
-<span class="fc" id="L372">        return SplitItem.of(text);</span>
+<span class="fc" id="L441">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L442">        return SplitItem.of(text);</span>
     }
 
     /**
@@ -388,12 +458,12 @@ public final class UI
      * @return A new {@link SplitItem} wrapping a simple {@link JRadioButtonMenuItem}.
      */
     public static SplitItem&lt;JRadioButtonMenuItem&gt; splitRadioItem(String text) {
-<span class="fc" id="L391">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
-<span class="fc" id="L392">        return SplitItem.of(new JRadioButtonMenuItem(text));</span>
+<span class="fc" id="L461">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L462">        return SplitItem.of(new JRadioButtonMenuItem(text));</span>
     }
 
     public static &lt;P extends JTabbedPane&gt; UIForTabbedPane&lt;P&gt; of(P pane) {
-<span class="fc" id="L396">        return new UIForTabbedPane&lt;&gt;(pane);</span>
+<span class="fc" id="L466">        return new UIForTabbedPane&lt;&gt;(pane);</span>
     }
 
     /**
@@ -412,7 +482,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JTabbedPane}, which enables fluent method chaining.
      */
-<span class="fc" id="L415">    public static UIForTabbedPane&lt;JTabbedPane&gt; tabbedPane() { return of(new JTabbedPane()); }</span>
+<span class="fc" id="L485">    public static UIForTabbedPane&lt;JTabbedPane&gt; tabbedPane() { return of(new JTabbedPane()); }</span>
 
     /**
      *  Use this to create a builder for a new {@link JTabbedPane} UI component
@@ -433,8 +503,8 @@ public final class UI
      * @throws IllegalArgumentException if {@code tabsPosition} is {@code null}.
      */
     public static UIForTabbedPane&lt;JTabbedPane&gt; tabbedPane(Position tabsPosition) {
-<span class="nc" id="L436">        LogUtil.nullArgCheck(tabsPosition, &quot;tabsPosition&quot;, Position.class);</span>
-<span class="nc" id="L437">        return of(new JTabbedPane(tabsPosition.forTabbedPane()));</span>
+<span class="nc" id="L506">        LogUtil.nullArgCheck(tabsPosition, &quot;tabsPosition&quot;, Position.class);</span>
+<span class="nc" id="L507">        return of(new JTabbedPane(tabsPosition.forTabbedPane()));</span>
     }
 
     /**
@@ -456,9 +526,9 @@ public final class UI
      * @throws IllegalArgumentException if {@code tabsPosition} or {@code tabsPolicy} are {@code null}.
      */
     public static UIForTabbedPane&lt;JTabbedPane&gt; tabbedPane(Position tabsPosition, OverflowPolicy tabsPolicy) {
-<span class="nc" id="L459">        LogUtil.nullArgCheck(tabsPosition, &quot;tabsPosition&quot;, Position.class);</span>
-<span class="nc" id="L460">        LogUtil.nullArgCheck(tabsPolicy, &quot;tabsPolicy&quot;, OverflowPolicy.class);</span>
-<span class="nc" id="L461">        return of(new JTabbedPane(tabsPosition.forTabbedPane(), tabsPolicy.forTabbedPane()));</span>
+<span class="nc" id="L529">        LogUtil.nullArgCheck(tabsPosition, &quot;tabsPosition&quot;, Position.class);</span>
+<span class="nc" id="L530">        LogUtil.nullArgCheck(tabsPolicy, &quot;tabsPolicy&quot;, OverflowPolicy.class);</span>
+<span class="nc" id="L531">        return of(new JTabbedPane(tabsPosition.forTabbedPane(), tabsPolicy.forTabbedPane()));</span>
     }
 
     /**
@@ -478,8 +548,8 @@ public final class UI
      * @throws IllegalArgumentException if {@code tabsPolicy} is {@code null}.
      */
     public static UIForTabbedPane&lt;JTabbedPane&gt; tabbedPane(OverflowPolicy tabsPolicy) {
-<span class="nc" id="L481">        LogUtil.nullArgCheck(tabsPolicy, &quot;tabsPolicy&quot;, OverflowPolicy.class);</span>
-<span class="nc" id="L482">        return of(new JTabbedPane(Position.TOP.forTabbedPane(), tabsPolicy.forTabbedPane()));</span>
+<span class="nc" id="L551">        LogUtil.nullArgCheck(tabsPolicy, &quot;tabsPolicy&quot;, OverflowPolicy.class);</span>
+<span class="nc" id="L552">        return of(new JTabbedPane(Position.TOP.forTabbedPane(), tabsPolicy.forTabbedPane()));</span>
     }
 
     /**
@@ -497,8 +567,8 @@ public final class UI
      * @throws IllegalArgumentException if {@code title} is {@code null}.
      */
     public static Tab tab(String title) {
-<span class="fc" id="L500">        LogUtil.nullArgCheck(title, &quot;title&quot;, String.class);</span>
-<span class="fc" id="L501">        return new Tab(null, title, null, null);</span>
+<span class="fc" id="L570">        LogUtil.nullArgCheck(title, &quot;title&quot;, String.class);</span>
+<span class="fc" id="L571">        return new Tab(null, title, null, null, null);</span>
     }
 
     /**
@@ -508,8 +578,8 @@ public final class UI
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static &lt;M extends JMenu&gt; UIForMenu&lt;M&gt; of(M component) {
-<span class="nc" id="L511">        LogUtil.nullArgCheck(component, &quot;component&quot;, JMenu.class);</span>
-<span class="nc" id="L512">        return new UIForMenu&lt;&gt;(component);</span>
+<span class="nc" id="L581">        LogUtil.nullArgCheck(component, &quot;component&quot;, JMenu.class);</span>
+<span class="nc" id="L582">        return new UIForMenu&lt;&gt;(component);</span>
     }
 
     /**
@@ -519,8 +589,8 @@ public final class UI
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static &lt;M extends JMenuItem&gt; UIForMenuItem&lt;M&gt; of(M component) {
-<span class="nc" id="L522">        LogUtil.nullArgCheck(component, &quot;component&quot;, JMenuItem.class);</span>
-<span class="nc" id="L523">        return new UIForMenuItem&lt;&gt;(component);</span>
+<span class="nc" id="L592">        LogUtil.nullArgCheck(component, &quot;component&quot;, JMenuItem.class);</span>
+<span class="nc" id="L593">        return new UIForMenuItem&lt;&gt;(component);</span>
     }
 
     /**
@@ -528,8 +598,8 @@ public final class UI
      * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
      */
     public static UIForMenuItem&lt;JMenuItem&gt; menuItem(String text) {
-<span class="fc" id="L531">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
-<span class="fc" id="L532">        return new UIForMenuItem&lt;&gt;(new JMenuItem(text));</span>
+<span class="fc" id="L601">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L602">        return new UIForMenuItem&lt;&gt;(new JMenuItem(text));</span>
     }
 
     /**
@@ -539,8 +609,8 @@ public final class UI
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static &lt;P extends JPanel&gt; UIForPanel&lt;P&gt; of(P component) {
-<span class="fc" id="L542">        LogUtil.nullArgCheck(component, &quot;component&quot;, JPanel.class);</span>
-<span class="fc" id="L543">        return new UIForPanel&lt;&gt;(component);</span>
+<span class="fc" id="L612">        LogUtil.nullArgCheck(component, &quot;component&quot;, JPanel.class);</span>
+<span class="fc" id="L613">        return new UIForPanel&lt;&gt;(component);</span>
     }
 
     /**
@@ -549,10 +619,10 @@ public final class UI
      *
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      */
-<span class="fc" id="L552">    public static UIForPanel&lt;JPanel&gt; panel() { return of(new JPanel()); }</span>
+<span class="fc" id="L622">    public static UIForPanel&lt;JPanel&gt; panel() { return of(new JPanel()); }</span>
 
     public static UIForPanel&lt;JPanel&gt; panel(String attr, String colConstraints, String rowConstraints) {
-<span class="nc" id="L555">        return of(new JPanel()).withLayout(attr, colConstraints, rowConstraints);</span>
+<span class="nc" id="L625">        return of(new JPanel()).withLayout(attr, colConstraints, rowConstraints);</span>
     }
 
     /**
@@ -564,7 +634,7 @@ public final class UI
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      */
     public static UIForPanel&lt;JPanel&gt; panel(String attr, String colConstraints) {
-<span class="fc" id="L567">        return of(new JPanel()).withLayout(attr, colConstraints);</span>
+<span class="fc" id="L637">        return of(new JPanel()).withLayout(attr, colConstraints);</span>
     }
 
     /**
@@ -576,8 +646,8 @@ public final class UI
      * @throws IllegalArgumentException if {@code attr} is {@code null}.
      */
     public static UIForPanel&lt;JPanel&gt; panel(String attr) {
-<span class="fc" id="L579">        LogUtil.nullArgCheck(attr, &quot;attr&quot;, String.class);</span>
-<span class="fc" id="L580">        return of(new JPanel()).withLayout(attr);</span>
+<span class="fc" id="L649">        LogUtil.nullArgCheck(attr, &quot;attr&quot;, String.class);</span>
+<span class="fc" id="L650">        return of(new JPanel()).withLayout(attr);</span>
     }
 
     /**
@@ -588,8 +658,8 @@ public final class UI
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static &lt;P extends JScrollPane&gt; UIForScrollPane&lt;P&gt; of(P component) {
-<span class="fc" id="L591">        LogUtil.nullArgCheck(component, &quot;component&quot;, JScrollPane.class);</span>
-<span class="fc" id="L592">        return new UIForScrollPane&lt;&gt;(component);</span>
+<span class="fc" id="L661">        LogUtil.nullArgCheck(component, &quot;component&quot;, JScrollPane.class);</span>
+<span class="fc" id="L662">        return new UIForScrollPane&lt;&gt;(component);</span>
     }
 
     /**
@@ -604,7 +674,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JScrollPane}, which enables fluent method chaining.
      */
-<span class="fc" id="L607">    public static UIForScrollPane&lt;JScrollPane&gt; scrollPane() { return of(new JScrollPane()); }</span>
+<span class="fc" id="L677">    public static UIForScrollPane&lt;JScrollPane&gt; scrollPane() { return of(new JScrollPane()); }</span>
 
     /**
      *  Use this to create a builder for the provided {@link JSplitPane} instance.
@@ -613,8 +683,8 @@ public final class UI
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static &lt;P extends JSplitPane&gt; UIForSplitPane&lt;P&gt; of(P component) {
-<span class="fc" id="L616">        LogUtil.nullArgCheck(component, &quot;component&quot;, JSplitPane.class);</span>
-<span class="fc" id="L617">        return new UIForSplitPane&lt;&gt;(component);</span>
+<span class="fc" id="L686">        LogUtil.nullArgCheck(component, &quot;component&quot;, JSplitPane.class);</span>
+<span class="fc" id="L687">        return new UIForSplitPane&lt;&gt;(component);</span>
     }
 
 
@@ -623,7 +693,7 @@ public final class UI
      *  based on the provided split alignment. &lt;br&gt;
      *  You can create a simple split pane based UI like so: &lt;br&gt;
      *  &lt;pre&gt;{@code
-     *      UI.splitPane(UI.Align.HORIZONTAL)
+     *      UI.splitPane(UI.Split.HORIZONTAL)
      *      .withDividerAt(50)
      *      .add(UI.panel().add(...)) // top
      *      .add(UI.scrollPane().add(...)) // bottom
@@ -633,9 +703,9 @@ public final class UI
      * @return A builder instance for the provided {@link JSplitPane}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code align} is {@code null}.
      */
-    public static UIForSplitPane&lt;JSplitPane&gt; splitPane(Align align) {
-<span class="fc" id="L637">        LogUtil.nullArgCheck(align, &quot;align&quot;, Align.class);</span>
-<span class="fc" id="L638">        return of(new JSplitPane(align.forSplitPane()));</span>
+    public static UIForSplitPane&lt;JSplitPane&gt; splitPane(Split align) {
+<span class="fc" id="L707">        LogUtil.nullArgCheck(align, &quot;align&quot;, Split.class);</span>
+<span class="fc" id="L708">        return of(new JSplitPane(align.forSplitPane()));</span>
     }
 
     /**
@@ -645,8 +715,8 @@ public final class UI
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static &lt;P extends JEditorPane&gt; UIForEditorPane&lt;P&gt; of(P component) {
-<span class="fc" id="L648">        LogUtil.nullArgCheck(component, &quot;component&quot;, JEditorPane.class);</span>
-<span class="fc" id="L649">        return new UIForEditorPane&lt;&gt;(component);</span>
+<span class="fc" id="L718">        LogUtil.nullArgCheck(component, &quot;component&quot;, JEditorPane.class);</span>
+<span class="fc" id="L719">        return new UIForEditorPane&lt;&gt;(component);</span>
     }
 
     /**
@@ -655,7 +725,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JEditorPane}, which enables fluent method chaining.
      */
-<span class="fc" id="L658">    public static UIForEditorPane&lt;JEditorPane&gt; editorPane() { return of(new JEditorPane()); }</span>
+<span class="fc" id="L728">    public static UIForEditorPane&lt;JEditorPane&gt; editorPane() { return of(new JEditorPane()); }</span>
 
     /**
      *  Use this to create a builder for the provided {@link JTextPane} instance.
@@ -664,8 +734,8 @@ public final class UI
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static &lt;P extends JTextPane&gt; UIForTextPane&lt;P&gt; of(P component) {
-<span class="nc" id="L667">        LogUtil.nullArgCheck(component, &quot;component&quot;, JTextPane.class);</span>
-<span class="nc" id="L668">        return new UIForTextPane&lt;&gt;(component);</span>
+<span class="nc" id="L737">        LogUtil.nullArgCheck(component, &quot;component&quot;, JTextPane.class);</span>
+<span class="nc" id="L738">        return new UIForTextPane&lt;&gt;(component);</span>
     }
 
     /**
@@ -674,7 +744,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JTextPane}, which enables fluent method chaining.
      */
-<span class="nc" id="L677">    public static UIForTextPane&lt;JTextPane&gt; textPane() { return of(new JTextPane()); }</span>
+<span class="nc" id="L747">    public static UIForTextPane&lt;JTextPane&gt; textPane() { return of(new JTextPane()); }</span>
 
     /**
      *  Use this to create a builder for the provided {@link JSlider} instance.
@@ -683,8 +753,8 @@ public final class UI
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static &lt;S extends JSlider&gt; UIForSlider&lt;S&gt; of(S component) {
-<span class="fc" id="L686">        LogUtil.nullArgCheck(component, &quot;component&quot;, JSlider.class);</span>
-<span class="fc" id="L687">        return new UIForSlider&lt;&gt;(component);</span>
+<span class="fc" id="L756">        LogUtil.nullArgCheck(component, &quot;component&quot;, JSlider.class);</span>
+<span class="fc" id="L757">        return new UIForSlider&lt;&gt;(component);</span>
     }
 
     /**
@@ -699,8 +769,8 @@ public final class UI
      * @see JSlider#setOrientation
      */
     public static UIForSlider&lt;JSlider&gt; slider(Align align) {
-<span class="nc" id="L702">        LogUtil.nullArgCheck(align, &quot;align&quot;, Align.class);</span>
-<span class="nc" id="L703">        return of(new JSlider(align.forSlider()));</span>
+<span class="fc" id="L772">        LogUtil.nullArgCheck(align, &quot;align&quot;, Align.class);</span>
+<span class="fc" id="L773">        return of(new JSlider(align.forSlider()));</span>
     }
 
     /**
@@ -719,8 +789,8 @@ public final class UI
      * @see JSlider#setMaximum
      */
     public static UIForSlider&lt;JSlider&gt; slider(Align align, int min, int max) {
-<span class="nc" id="L722">        LogUtil.nullArgCheck(align, &quot;align&quot;, Align.class);</span>
-<span class="nc" id="L723">        return of(new JSlider(align.forSlider(), min, max, (min + max) / 2));</span>
+<span class="nc" id="L792">        LogUtil.nullArgCheck(align, &quot;align&quot;, Align.class);</span>
+<span class="nc" id="L793">        return of(new JSlider(align.forSlider(), min, max, (min + max) / 2));</span>
     }
 
     /**
@@ -740,8 +810,8 @@ public final class UI
      * @see JSlider#setValue
      */
     public static UIForSlider&lt;JSlider&gt; slider(Align align, int min, int max, int value) {
-<span class="nc" id="L743">        LogUtil.nullArgCheck(align, &quot;align&quot;, Align.class);</span>
-<span class="nc" id="L744">        return of(new JSlider(align.forSlider(), min, max, value));</span>
+<span class="nc" id="L813">        LogUtil.nullArgCheck(align, &quot;align&quot;, Align.class);</span>
+<span class="nc" id="L814">        return of(new JSlider(align.forSlider(), min, max, value));</span>
     }
 
     /**
@@ -749,9 +819,9 @@ public final class UI
      *
      * @return A builder instance for the provided {@link JComboBox}, which enables fluent method chaining.
      */
-    public static &lt;E&gt; UIForCombo&lt;E&gt; of(JComboBox&lt;E&gt; component) {
-<span class="fc" id="L753">        LogUtil.nullArgCheck(component, &quot;component&quot;, JComboBox.class);</span>
-<span class="fc" id="L754">        return new UIForCombo&lt;&gt;(component);</span>
+    public static &lt;E, C extends JComboBox&lt;E&gt;&gt; UIForCombo&lt;E,C&gt; of(C component) {
+<span class="fc" id="L823">        LogUtil.nullArgCheck(component, &quot;component&quot;, JComboBox.class);</span>
+<span class="fc" id="L824">        return new UIForCombo&lt;&gt;(component);</span>
     }
 
     /**
@@ -760,7 +830,34 @@ public final class UI
      *
      * @return A builder instance for a new {@link JComboBox}, which enables fluent method chaining.
      */
-<span class="nc" id="L763">    public static UIForCombo&lt;Object&gt; comboBox() { return of(new JComboBox&lt;&gt;()); }</span>
+<span class="fc" id="L833">    public static UIForCombo&lt;Object,JComboBox&lt;Object&gt;&gt; comboBox() { return of(new JComboBox&lt;&gt;()); }</span>
+
+    /**
+     *  Use this to create a builder for the provided {@link JList} instance
+     *  with the provided array of elements as selectable items.
+     *
+     * @param items The array of elements to be selectable in the {@link JList}.
+     * @return A builder instance for the provided {@link JList}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
+     */
+    @SafeVarargs
+    public static &lt;E&gt; UIForCombo&lt;E,JComboBox&lt;E&gt;&gt; comboBox(E... items) {
+<span class="nc" id="L845">        LogUtil.nullArgCheck(items, &quot;items&quot;, Object[].class);</span>
+<span class="nc" id="L846">        return of(new JComboBox&lt;&gt;(items));</span>
+    }
+
+    /**
+     *  Use this to create a builder for the provided {@link JList} instance
+     *  with the provided list of elements as selectable items.
+     *
+     * @param items The list of elements to be selectable in the {@link JList}.
+     * @return A builder instance for the provided {@link JList}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
+     */
+    public static &lt;E&gt; UIForCombo&lt;E,JComboBox&lt;E&gt;&gt; comboBox(java.util.List&lt;E&gt; items) {
+<span class="nc" id="L858">        LogUtil.nullArgCheck(items, &quot;items&quot;, List.class);</span>
+<span class="nc" id="L859">        return of(new JComboBox&lt;&gt;((E[]) items.toArray()));</span>
+    }
 
     /**
      *  Use this to create a builder for the provided {@link JSpinner} instance.
@@ -768,8 +865,8 @@ public final class UI
      * @return A builder instance for the provided {@link JSpinner}, which enables fluent method chaining.
      */
     public static &lt;S extends JSpinner&gt; UIForSpinner&lt;S&gt; of(S spinner) {
-<span class="fc" id="L771">        LogUtil.nullArgCheck(spinner, &quot;spinner&quot;, JSpinner.class);</span>
-<span class="fc" id="L772">        return new UIForSpinner&lt;&gt;(spinner);</span>
+<span class="fc" id="L868">        LogUtil.nullArgCheck(spinner, &quot;spinner&quot;, JSpinner.class);</span>
+<span class="fc" id="L869">        return new UIForSpinner&lt;&gt;(spinner);</span>
     }
 
     /**
@@ -778,7 +875,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JSpinner}, which enables fluent method chaining.
      */
-<span class="fc" id="L781">    public static UIForSpinner&lt;JSpinner&gt; spinner() { return of(new JSpinner()); }</span>
+<span class="fc" id="L878">    public static UIForSpinner&lt;JSpinner&gt; spinner() { return of(new JSpinner()); }</span>
 
     /**
      *  Use this to create a builder for the provided {@link JLabel} instance.
@@ -786,8 +883,8 @@ public final class UI
      * @return A builder instance for the provided {@link JLabel}, which enables fluent method chaining.
      */
     public static &lt;L extends JLabel&gt; UIForLabel&lt;L&gt; of(L component) {
-<span class="fc" id="L789">        LogUtil.nullArgCheck(component, &quot;component&quot;, JLabel.class);</span>
-<span class="fc" id="L790">        return new UIForLabel&lt;&gt;(component);</span>
+<span class="fc" id="L886">        LogUtil.nullArgCheck(component, &quot;component&quot;, JLabel.class);</span>
+<span class="fc" id="L887">        return new UIForLabel&lt;&gt;(component);</span>
     }
 
     /**
@@ -798,8 +895,8 @@ public final class UI
      * @return A builder instance for the label, which enables fluent method chaining.
      */
     public static UIForLabel&lt;JLabel&gt; label(String text) {
-<span class="fc" id="L801">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
-<span class="fc" id="L802">        return of(new JLabel(text));</span>
+<span class="fc" id="L898">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L899">        return of(new JLabel(text));</span>
     }
 
     /**
@@ -809,8 +906,8 @@ public final class UI
      * @return A builder instance for the label, which enables fluent method chaining.
      */
     public static UIForLabel&lt;JLabel&gt; label(Icon icon) {
-<span class="nc" id="L812">        LogUtil.nullArgCheck(icon, &quot;icon&quot;, Icon.class);</span>
-<span class="nc" id="L813">        return of(new JLabel()).with(icon);</span>
+<span class="nc" id="L909">        LogUtil.nullArgCheck(icon, &quot;icon&quot;, Icon.class);</span>
+<span class="nc" id="L910">        return of(new JLabel()).with(icon);</span>
     }
 
     /**
@@ -822,16 +919,26 @@ public final class UI
      * @return A builder instance for the label, which enables fluent method chaining.
      */
     public static UIForLabel&lt;JLabel&gt; label(int width, int height, ImageIcon icon) {
-<span class="fc" id="L825">        LogUtil.nullArgCheck(icon, &quot;icon&quot;, ImageIcon.class);</span>
-<span class="fc" id="L826">        return of(new JLabel())</span>
-<span class="fc" id="L827">                .with(</span>
-<span class="fc" id="L828">                    new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT))</span>
+<span class="fc" id="L922">        LogUtil.nullArgCheck(icon, &quot;icon&quot;, ImageIcon.class);</span>
+<span class="fc" id="L923">        return of(new JLabel())</span>
+<span class="fc" id="L924">                .with(</span>
+<span class="fc" id="L925">                    new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT))</span>
                 );
     }
 
+    /**
+     *  Use this to create a UI builder for a {@link JLabel} with bold font.
+     *  This is in essence a convenience method for {@code UI.label(String text).makeBold()}.
+     *  @param text The text which should be displayed on the label.
+     *  @return A builder instance for the label, which enables fluent method chaining.
+     */
+    public static UIForLabel&lt;JLabel&gt; boldLabel(String text) {
+<span class="fc" id="L936">        return of(new JLabel(text)).makeBold();</span>
+    }
+
     public static UIForCheckBox&lt;JCheckBox&gt; checkBox(String text) {
-<span class="nc" id="L833">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
-<span class="nc" id="L834">        return of(new JCheckBox(text));</span>
+<span class="nc" id="L940">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="nc" id="L941">        return of(new JCheckBox(text));</span>
     }
 
     /**
@@ -840,13 +947,13 @@ public final class UI
      * @return A builder instance for the provided {@link JCheckBox}, which enables fluent method chaining.
      */
     public static &lt;B extends JCheckBox&gt; UIForCheckBox&lt;B&gt; of(B component) {
-<span class="nc" id="L843">        LogUtil.nullArgCheck(component, &quot;component&quot;, JCheckBox.class);</span>
-<span class="nc" id="L844">        return new UIForCheckBox&lt;&gt;(component);</span>
+<span class="nc" id="L950">        LogUtil.nullArgCheck(component, &quot;component&quot;, JCheckBox.class);</span>
+<span class="nc" id="L951">        return new UIForCheckBox&lt;&gt;(component);</span>
     }
 
     public static UIForRadioButton&lt;JRadioButton&gt; radioButton(String text) {
-<span class="fc" id="L848">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
-<span class="fc" id="L849">        return of(new JRadioButton(text));</span>
+<span class="fc" id="L955">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L956">        return of(new JRadioButton(text));</span>
     }
 
     /**
@@ -855,8 +962,8 @@ public final class UI
      * @return A builder instance for the provided {@link JRadioButton}, which enables fluent method chaining.
      */
     public static &lt;R extends JRadioButton&gt; UIForRadioButton&lt;R&gt; of(R component) {
-<span class="fc" id="L858">        LogUtil.nullArgCheck(component, &quot;component&quot;, JRadioButton.class);</span>
-<span class="fc" id="L859">        return new UIForRadioButton&lt;&gt;(component);</span>
+<span class="fc" id="L965">        LogUtil.nullArgCheck(component, &quot;component&quot;, JRadioButton.class);</span>
+<span class="fc" id="L966">        return new UIForRadioButton&lt;&gt;(component);</span>
     }
 
     /**
@@ -865,13 +972,13 @@ public final class UI
      * @return A builder instance for the provided {@link JTextField}, which enables fluent method chaining.
      */
     public static &lt;F extends JTextField&gt; UIForTextField&lt;F&gt; of(F component) {
-<span class="fc" id="L868">        LogUtil.nullArgCheck(component, &quot;component&quot;, JTextComponent.class);</span>
-<span class="fc" id="L869">        return new UIForTextField&lt;&gt;(component);</span>
+<span class="fc" id="L975">        LogUtil.nullArgCheck(component, &quot;component&quot;, JTextComponent.class);</span>
+<span class="fc" id="L976">        return new UIForTextField&lt;&gt;(component);</span>
     }
 
     public static UIForTextField&lt;JTextField&gt; textField(String text) {
-<span class="fc" id="L873">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
-<span class="fc" id="L874">        return of(new JTextField(text));</span>
+<span class="fc" id="L980">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L981">        return of(new JTextField(text));</span>
     }
 
     /**
@@ -880,7 +987,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JTextField}, which enables fluent method chaining.
      */
-<span class="fc" id="L883">    public static UIForTextField&lt;JTextField&gt; textField() { return of(new JTextField()); }</span>
+<span class="fc" id="L990">    public static UIForTextField&lt;JTextField&gt; textField() { return of(new JTextField()); }</span>
 
     /**
      *  Use this to create a builder for the provided {@link JFormattedTextField} instance.
@@ -888,13 +995,13 @@ public final class UI
      * @return A builder instance for the provided {@link JFormattedTextField}, which enables fluent method chaining.
      */
     public static UIForFormattedTextField of(JFormattedTextField component) {
-<span class="nc" id="L891">        LogUtil.nullArgCheck(component, &quot;component&quot;, JFormattedTextField.class);</span>
-<span class="nc" id="L892">        return new UIForFormattedTextField(component);</span>
+<span class="nc" id="L998">        LogUtil.nullArgCheck(component, &quot;component&quot;, JFormattedTextField.class);</span>
+<span class="nc" id="L999">        return new UIForFormattedTextField(component);</span>
     }
 
     public static UIForFormattedTextField formattedTextField(String text) {
-<span class="nc" id="L896">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
-<span class="nc" id="L897">        return of(new JFormattedTextField(text));</span>
+<span class="nc" id="L1003">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="nc" id="L1004">        return of(new JFormattedTextField(text));</span>
     }
 
     /**
@@ -903,7 +1010,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JFormattedTextField}, which enables fluent method chaining.
      */
-<span class="nc" id="L906">    public static UIForFormattedTextField formattedTextField() { return of(new JFormattedTextField()); }</span>
+<span class="nc" id="L1013">    public static UIForFormattedTextField formattedTextField() { return of(new JFormattedTextField()); }</span>
 
     /**
      *  Use this to create a builder for the provided {@link JPasswordField} instance.
@@ -911,13 +1018,13 @@ public final class UI
      * @return A builder instance for the provided {@link JPasswordField}, which enables fluent method chaining.
      */
     public static &lt;F extends JPasswordField&gt; UIForPasswordField&lt;F&gt; of(F component) {
-<span class="fc" id="L914">        LogUtil.nullArgCheck(component, &quot;component&quot;, JPasswordField.class);</span>
-<span class="fc" id="L915">        return new UIForPasswordField&lt;&gt;(component);</span>
+<span class="fc" id="L1021">        LogUtil.nullArgCheck(component, &quot;component&quot;, JPasswordField.class);</span>
+<span class="fc" id="L1022">        return new UIForPasswordField&lt;&gt;(component);</span>
     }
 
     public static UIForPasswordField&lt;JPasswordField&gt; passwordField(String text) {
-<span class="fc" id="L919">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
-<span class="fc" id="L920">        return of(new JPasswordField(text));</span>
+<span class="fc" id="L1026">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L1027">        return of(new JPasswordField(text));</span>
     }
 
     /**
@@ -926,7 +1033,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JPasswordField}, which enables fluent method chaining.
      */
-<span class="nc" id="L929">    public static UIForPasswordField&lt;JPasswordField&gt; passwordField() { return of(new JPasswordField()); }</span>
+<span class="nc" id="L1036">    public static UIForPasswordField&lt;JPasswordField&gt; passwordField() { return of(new JPasswordField()); }</span>
 
     /**
      *  Use this to create a builder for the provided {@link JTextArea} instance.
@@ -934,13 +1041,13 @@ public final class UI
      * @return A builder instance for the provided {@link JTextArea}, which enables fluent method chaining.
      */
     public static &lt;A extends JTextArea&gt; UIForTextArea&lt;A&gt; of(A area) {
-<span class="fc" id="L937">        LogUtil.nullArgCheck(area, &quot;area&quot;, JTextArea.class);</span>
-<span class="fc" id="L938">        return new UIForTextArea&lt;&gt;(area);</span>
+<span class="fc" id="L1044">        LogUtil.nullArgCheck(area, &quot;area&quot;, JTextArea.class);</span>
+<span class="fc" id="L1045">        return new UIForTextArea&lt;&gt;(area);</span>
     }
 
     public static UIForTextArea&lt;JTextArea&gt; textArea(String text) {
-<span class="fc" id="L942">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
-<span class="fc" id="L943">        return of(new JTextArea(text));</span>
+<span class="fc" id="L1049">        LogUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L1050">        return of(new JTextArea(text));</span>
     }
 
     /**
@@ -960,8 +1067,8 @@ public final class UI
      * @return A builder instance for a new {@link JTextArea}, which enables fluent method chaining.
      */
     public static UIForTextArea&lt;JTextArea&gt; textArea(UI.HorizontalDirection direction) {
-<span class="nc" id="L963">        LogUtil.nullArgCheck(direction, &quot;direction&quot;, HorizontalDirection.class);</span>
-<span class="nc" id="L964">        return of(new JTextArea()).withTextOrientation(direction);</span>
+<span class="nc" id="L1070">        LogUtil.nullArgCheck(direction, &quot;direction&quot;, HorizontalDirection.class);</span>
+<span class="nc" id="L1071">        return of(new JTextArea()).withTextOrientation(direction);</span>
     }
 
     /**
@@ -983,8 +1090,106 @@ public final class UI
      * @return A builder instance for a new {@link JTextArea}, which enables fluent method chaining.
      */
     public static UIForTextArea&lt;JTextArea&gt; textArea(UI.HorizontalDirection direction, String text) {
-<span class="fc" id="L986">        LogUtil.nullArgCheck(direction, &quot;direction&quot;, HorizontalDirection.class);</span>
-<span class="fc" id="L987">        return of(new JTextArea()).withTextOrientation(direction).withText(text);</span>
+<span class="fc" id="L1093">        LogUtil.nullArgCheck(direction, &quot;direction&quot;, HorizontalDirection.class);</span>
+<span class="fc" id="L1094">        return of(new JTextArea()).withTextOrientation(direction).withText(text);</span>
+    }
+
+    /**
+     * @return A builder instance for the provided {@link JList}.
+     */
+    public static &lt;E&gt; UIForList&lt;E, JList&lt;E&gt;&gt; of(JList&lt;E&gt; list) {
+<span class="fc" id="L1101">        LogUtil.nullArgCheck(list, &quot;list&quot;, JList.class);</span>
+<span class="fc" id="L1102">        return new UIForList&lt;&gt;(list);</span>
+    }
+
+    /**
+     * @return A builder instance for a new {@link JList}.
+     */
+    public static &lt;E&gt; UIForList&lt;E, JList&lt;E&gt;&gt; list(ListModel&lt;E&gt; model) {
+<span class="nc" id="L1109">        LogUtil.nullArgCheck(model, &quot;model&quot;, ListModel.class);</span>
+<span class="nc" id="L1110">        return of(new JList&lt;&gt;(model));</span>
+    }
+
+    /**
+     * @return A builder instance for a new {@link JTable}.
+     */
+    public static &lt;T extends JTable&gt; UIForTable&lt;T&gt; of(T table) {
+<span class="fc" id="L1117">        LogUtil.nullArgCheck(table, &quot;table&quot;, JTable.class);</span>
+<span class="fc" id="L1118">        return new UIForTable&lt;&gt;(table);</span>
+    }
+
+<span class="fc" id="L1121">    public static UIForTable&lt;JTable&gt; table() { return of(new JTable()); }</span>
+
+    public static &lt;E&gt; UIForTable&lt;JTable&gt; table(TableData dataFormat, TableListDataSource&lt;E&gt; dataSource) {
+<span class="fc" id="L1124">        LogUtil.nullArgCheck(dataFormat, &quot;dataFormat&quot;, TableData.class);</span>
+<span class="fc" id="L1125">        LogUtil.nullArgCheck(dataSource, &quot;dataSource&quot;, TableListDataSource.class);</span>
+<span class="fc" id="L1126">        return of(new JTable()).with(dataFormat, dataSource);</span>
+    }
+
+    public static UIForTable&lt;JTable&gt; table(Buildable&lt;BasicTableModel&gt; tableModelBuildable) {
+<span class="fc" id="L1130">        return of(new JTable()).withModel(tableModelBuildable);</span>
+    }
+
+<span class="fc" id="L1133">    public static BasicTableModel.Builder tableModel() { return new BasicTableModel.Builder(); }</span>
+
+    public static Render.Builder&lt;JTable, Object&gt; renderTable() {
+<span class="fc" id="L1136">        return Render.forTable(Object.class, null).when(Object.class).as(cell-&gt;{});</span>
+    }
+
+    public static Render.Builder&lt;JList&lt;Object&gt;, Object&gt; renderList() {
+<span class="nc" id="L1140">        return Render.forList(Object.class, null).when(Object.class).as(cell-&gt;{});</span>
+    }
+
+    public static Render.Builder&lt;JComboBox&lt;Object&gt;, Object&gt; renderCombo() {
+<span class="nc" id="L1144">        return Render.forCombo(Object.class, null).when(Object.class).as(cell-&gt;{});</span>
+    }
+
+    /**
+     * @param borderSupplier A lambda which provides a border for rendered cells.
+     * @return The builder API allowing method chaining.
+     */
+    public static Render.Builder&lt;JTable, Object&gt; renderTableWithBorder(Supplier&lt;Border&gt; borderSupplier) {
+<span class="nc" id="L1152">        return Render.forTable(Object.class, borderSupplier).when(Object.class).as(cell-&gt;{});</span>
+    }
+
+    /**
+     * @param borderSupplier A lambda which provides a border for rendered cells.
+     * @return The builder API allowing method chaining.
+     */
+    public static Render.Builder&lt;JList&lt;Object&gt;, Object&gt; renderListWithBorder(Supplier&lt;Border&gt; borderSupplier) {
+<span class="nc" id="L1160">        return Render.forList(Object.class, borderSupplier).when(Object.class).as(cell-&gt;{});</span>
+    }
+
+    /**
+     * @param borderSupplier A lambda which provides a border for rendered cells.
+     * @return The builder API allowing method chaining.
+     */
+    public static Render.Builder&lt;JComboBox&lt;Object&gt;, Object&gt; renderComboWithBorder(Supplier&lt;Border&gt; borderSupplier) {
+<span class="nc" id="L1168">        return Render.forCombo(Object.class, borderSupplier).when(Object.class).as(cell-&gt;{});</span>
+    }
+
+    /**
+     * @param border A border for rendered cells.
+     * @return The builder API allowing method chaining.
+     */
+    public static Render.Builder&lt;JTable, Object&gt; renderTableWithBorder(Border border) {
+<span class="nc" id="L1176">        return renderTableWithBorder(()-&gt;border);</span>
+    }
+
+    /**
+     * @param border A border for rendered cells.
+     * @return The builder API allowing method chaining.
+     */
+    public static Render.Builder&lt;JList&lt;Object&gt;, Object&gt; renderListWithBorder(Border border) {
+<span class="nc" id="L1184">        return renderListWithBorder(()-&gt;border);</span>
+    }
+
+    /**
+     * @param border A border for rendered cells.
+     * @return The builder API allowing method chaining.
+     */
+    public static Render.Builder&lt;JComboBox&lt;Object&gt;, Object&gt; renderComboWithBorder(Border border) {
+<span class="nc" id="L1192">        return renderComboWithBorder(()-&gt;border);</span>
     }
 
     /**
@@ -993,9 +1198,86 @@ public final class UI
      * @return A builder instance for the provided object, which enables fluent method chaining.
      */
     public static &lt;T&gt; UIForAnything&lt;T&gt; of(T component) {
-<span class="nc" id="L996">        LogUtil.nullArgCheck(component, &quot;component&quot;, Object.class);</span>
-<span class="nc" id="L997">        return new UIForAnything&lt;&gt;(component);</span>
+<span class="nc" id="L1201">        LogUtil.nullArgCheck(component, &quot;component&quot;, Object.class);</span>
+<span class="nc" id="L1202">        return new UIForAnything&lt;&gt;(component);</span>
     }
+
+    /**
+     * A convenience method for {@link SwingUtilities#invokeLater(Runnable)},
+     * which causes &lt;i&gt;doRun.run()&lt;/i&gt; to be executed asynchronously on the
+     * AWT event dispatching thread.  This will happen after all
+     * pending AWT events have been processed.  This method should
+     * be used when an application thread needs to update the GUI.
+     * In the following example the &lt;code&gt;invokeLater&lt;/code&gt; call queues
+     * the &lt;code&gt;Runnable&lt;/code&gt; object &lt;code&gt;doHelloWorld&lt;/code&gt;
+     * on the event dispatching thread and
+     * then prints a message.
+     * &lt;pre&gt;
+     * UI.runLater( () -&gt; System.out.println(&quot;Hello World on &quot; + Thread.currentThread()) );
+     * System.out.println(&quot;This might well be displayed before the other message.&quot;);
+     * &lt;/pre&gt;
+     * If invokeLater is called from the event dispatching thread --
+     * for example, from a JButton's ActionListener -- the &lt;i&gt;doRun.run()&lt;/i&gt; will
+     * still be deferred until all pending events have been processed.
+     * Note that if the &lt;i&gt;doRun.run()&lt;/i&gt; throws an uncaught exception
+     * the event dispatching thread will unwind (not the current thread).
+     *
+     * @param runnable the instance of {@code Runnable}
+     * @see #runAndWait
+     */
+    public static void runLater( Runnable runnable ) {
+<span class="nc" id="L1229">        LogUtil.nullArgCheck(runnable, &quot;runnable&quot;, Runnable.class);</span>
+<span class="nc" id="L1230">        SwingUtilities.invokeLater(runnable);</span>
+<span class="nc" id="L1231">    }</span>
+
+    /**
+     * A convenience method for {@link SwingUtilities#invokeAndWait(Runnable)},
+     * causes &lt;code&gt;doRun.run()&lt;/code&gt; to be executed synchronously on the
+     * AWT event dispatching thread.  This call blocks until
+     * all pending AWT events have been processed and (then)
+     * &lt;code&gt;doRun.run()&lt;/code&gt; returns. This method should
+     * be used when an application thread needs to update the GUI.
+     * It shouldn't be called from the event dispatching thread.
+     * Here's an example that creates a new application thread
+     * that uses &lt;code&gt;invokeAndWait&lt;/code&gt; to print a string from the event
+     * dispatching thread and then, when that's finished, print
+     * a string from the application thread.
+     * &lt;pre&gt;
+     * final Runnable doHelloWorld = () -&gt; {
+     *         System.out.println(&quot;Hello World on &quot; + Thread.currentThread());
+     *      };
+     *
+     * Thread appThread = new Thread() {
+     *     public void run() {
+     *         try {
+     *             UI.runAndWait(doHelloWorld);
+     *         }
+     *         catch (Exception e) {
+     *             e.printStackTrace();
+     *         }
+     *         System.out.println(&quot;Finished on &quot; + Thread.currentThread());
+     *     }
+     * };
+     * appThread.start();
+     * &lt;/pre&gt;
+     * Note that if the &lt;code&gt;Runnable.run&lt;/code&gt; method throws an
+     * uncaught exception
+     * (on the event dispatching thread) it's caught and rethrown, as
+     * an &lt;code&gt;InvocationTargetException&lt;/code&gt;, on the caller's thread.
+     *
+     * @param runnable the instance of {@code Runnable}
+     * @exception  InterruptedException if we're interrupted while waiting for
+     *             the event dispatching thread to finish executing
+     *             &lt;code&gt;doRun.run()&lt;/code&gt;
+     * @exception  InvocationTargetException  if an exception is thrown
+     *             while running &lt;code&gt;doRun&lt;/code&gt;
+     *
+     * @see #runLater
+     */
+    public static void runAndWait( Runnable runnable ) throws InterruptedException, InvocationTargetException {
+<span class="nc" id="L1278">        LogUtil.nullArgCheck(runnable, &quot;runnable&quot;, Runnable.class);</span>
+<span class="nc" id="L1279">        SwingUtilities.invokeAndWait(runnable);</span>
+<span class="nc" id="L1280">    }</span>
 
     /**
      *  Use this to quickly create and inspect a tes window for a UI component.
@@ -1005,17 +1287,17 @@ public final class UI
         private final JFrame frame;
         private final Component component;
 
-<span class="nc" id="L1008">        public TestWindow(Supplier&lt;JFrame&gt; frameSupplier,Component component) {</span>
-<span class="nc" id="L1009">            this.frame = frameSupplier.get();</span>
-<span class="nc" id="L1010">            this.component = component;</span>
-<span class="nc" id="L1011">            frame.add(component);</span>
-<span class="nc" id="L1012">            frame.setSize(1000, 1000);</span>
-<span class="nc" id="L1013">            frame.setVisible(true);</span>
-<span class="nc" id="L1014">        }</span>
+<span class="nc" id="L1290">        public TestWindow(Supplier&lt;JFrame&gt; frameSupplier,Component component) {</span>
+<span class="nc" id="L1291">            this.frame = frameSupplier.get();</span>
+<span class="nc" id="L1292">            this.component = component;</span>
+<span class="nc" id="L1293">            frame.add(component);</span>
+<span class="nc" id="L1294">            frame.setSize(1000, 1000);</span>
+<span class="nc" id="L1295">            frame.setVisible(true);</span>
+<span class="nc" id="L1296">        }</span>
 
-<span class="nc" id="L1016">        public JFrame getFrame() { return this.frame; }</span>
+<span class="nc" id="L1298">        public JFrame getFrame() { return this.frame; }</span>
 
-<span class="nc" id="L1018">        public Component getComponent() { return this.component; }</span>
+<span class="nc" id="L1300">        public Component getComponent() { return this.component; }</span>
     }
 
 }

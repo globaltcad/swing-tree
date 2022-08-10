@@ -1,0 +1,779 @@
+/*Media Querys:*/
+@media (min-width: 0px) {
+    .InverseDynamicWidth {
+        width : 300%;
+    }
+}
+@media (min-width: 420px) {
+    .InverseDynamicWidth {
+        width : 280%;
+    }
+}
+@media (min-width: 600px) {
+    .InverseDynamicWidth {
+        width : 230%;
+    }
+}
+/*---*/
+@media (min-width: 840px) {
+    .InverseDynamicWidth {
+        width : 200%;
+    }
+}
+@media (max-width: 840px) {
+    main {
+        margin: 0px;
+        padding-top: 2em;
+        padding-right: 1%;
+        padding-left: 1%;
+        padding-bottom: 5em;
+    }
+
+    #main_content_tile {
+        padding-left: 1%;
+        padding-right: 1%;
+    }
+
+    .DynamicSideMargin {
+        margin-right: 0%;
+        margin-left: 0%;
+    }
+
+    .DynamicWidth {
+        width: 100%
+    }
+
+    .DynamicPillarWidth {
+        width:100%;
+        height: 0%;
+        text-align: center;
+    }
+
+    .DynamicPillarWidth li{
+        background: #7eb35e;
+        font-size: 25px;
+    }
+
+    .LinkLabel {
+        display: none;
+    }
+}
+
+/*---*/
+@media (min-width: 840px) {
+    main {
+        margin: 0px;
+        padding-top: 2em;
+        padding-right: 5%;
+        padding-left: 5%;
+        padding-bottom: 5em;
+    }
+
+    #main_content_tile {
+        padding-left: 3%;
+        padding-right: 3%;
+    }
+
+    .DynamicSideMargin {
+        margin-right: 5%;
+        margin-left: 5%;
+    }
+
+    .DynamicWidth {
+        width: 90%
+    }
+
+    .DynamicPillarWidth {
+        width:25%;
+    }
+
+    .InverseDynamicWidth {
+        width : 155%;
+    }
+
+}
+
+/*---*/
+@media (min-width: 1041px) {
+    main {
+        margin: 0px;
+        padding-top: 2em;
+        padding-right: 10%;
+        padding-left: 10%;
+        padding-bottom: 5em;
+    }
+
+    #main_content_tile {
+        padding-left: 4%;
+        padding-right: 4%;
+    }
+
+    .DynamicSideMargin {
+        margin-right: 15%;
+        margin-left: 15%;
+    }
+
+    .DynamicWidth {
+        width: 80%
+    }
+
+    .DynamicPillarWidth {
+        width:20%;
+    }
+
+    .InverseDynamicWidth {
+        width : 130%;
+    }
+}
+
+/*---*/
+@media (min-width: 1440px) {
+    main {
+        margin: 0px;
+        padding-top: 2em;
+        padding-right: 15%;
+        padding-left: 15%;
+        padding-bottom: 5em;
+    }
+
+    #main_content_tile {
+        padding-left: 5%;
+        padding-right: 5%;
+    }
+
+    .DynamicSideMargin {
+        margin-right: 23%;
+        margin-left: 23%;
+    }
+
+    .DynamicWidth {
+        width: 66%
+    }
+
+    .DynamicPillarWidth {
+        width:15%;
+    }
+
+    .InverseDynamicWidth {
+        width : 110%;
+    }
+}
+
+/*---*/
+@media (min-width: 2000px) {
+    .DynamicSideMargin {
+        margin-right: 25%;
+        margin-left: 25%;
+    }
+
+    .DynamicWidth {
+        width: 50%
+    }
+
+    .InverseDynamicWidth {
+        width : 100%;
+    }
+}
+
+/*---*/
+
+.FloatsUp {
+    z-index : 100;
+}
+
+/*Main css Formating:*/
+body {
+    background-color: #7eb35e;
+}
+
+.FlashyPresentation pre code {
+    box-shadow: inset 0 0 3px 1px black;
+}
+
+input{
+    height:30px;
+    padding-left:5px;
+}
+
+button:hover {
+  box-shadow: rgba(126, 179, 94, 0.22) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.13) 0px 18px 36px -18px inset;
+  transition: 0.35s;
+}
+
+main {
+    margin: 0px;
+    padding-top: 2em;
+    padding-right: 0%;
+    padding-left: 0%;
+    padding-bottom: 5em;
+}
+
+hr {
+    border: 0;
+    clear: both;
+    display: block;
+    width: 100%;
+    background-color: #00B4D2;
+    height: 0.25em;
+}
+
+.MainFrame {
+    margin: 0px;
+    padding-left: 0%;
+    padding-right: 0%;
+    margin-top: 0%;
+    background-repeat: no-repeat, repeat;
+    background-size: cover;
+}
+
+* {
+    margin: 0;
+    /*padding: 0;*/
+    box-sizing: border-box;
+    font-family: "Roboto",sans-serif;
+}
+
+/* ================== */
+
+#top_most_nav_bar {
+    background-color: white;
+    width: 100%;
+    height: 3.25em;
+    position: fixed;
+    top: 0px;
+    margin: 0;
+    padding: 0;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#1e5799', endColorstr='#7db9e8', GradientType=0); /* IE6-9 */
+}
+
+#navigation_container {
+    float: left;
+    width: 100%;
+}
+
+
+#navbar_menu {
+    position: absolute;
+    right: -1em;
+    padding-right: 1.25em;
+    padding-bottom: 0.25em;
+    padding-top: 0.25em;
+    width: auto;
+    max-width: 26em;
+}
+
+#navbar_list {
+    width: 100%;
+}
+
+#navbar_list img {
+    width: 1.5em;
+}
+
+#navbar_list a
+{
+    height: 2em;
+    box-shadow: 3px 0px 4px 0px black;
+    display: block;
+    text-align: center;
+    padding: 0.1em 0.325em 0.0em 0.32em;
+    text-decoration: none;
+    background: white;
+    color: black;
+}
+
+#navbar_list a:hover:not(.active) {
+    color: #f18915;
+}
+
+#navi {
+    float: left;
+    position: fixed;
+    margin-left: 0;
+    left: 0;
+    top: 0;
+}
+
+#navi img {
+    width: 1.25em;
+    margin: -1.45em 0em -1em 0em;
+}
+
+header img {
+    display: block;
+    margin: auto;
+    width: 60%;
+}
+
+header {
+    padding-right: 4em;
+    padding-left: 4em;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+header p {
+    font-family: "Roboto",sans-serif;
+    font-size: 40px;
+    border-bottom: 2px solid black;
+}
+
+#main_content_tile {
+    margin-top: 6em;
+    margin-bottom: 2em;
+    padding-bottom: 1em;
+    padding-top: 1em;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/*--Tab-classes--*/
+
+.TabWrapper {
+}
+
+.BasicTabHeader {
+    margin: 0.44em 0.33em 0em 0.33em;
+    font-size: 80%;
+}
+
+.TabWrapper .TabHead{
+    overflow: hidden;
+    border-bottom: 0.2em solid #ffffff;
+}
+
+.TabWrapper .TabHead button{
+    background-color: rgba(0, 255, 255, 0.2);
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 0.3em 0.25em 0.3em 0.25em;
+    margin: 0.35em 0.25em 0.35em 0.25em;
+    transition: 0.3s;
+    border-radius: 0.5555em;
+}
+
+.TabWrapper .TabHead .selected{
+    background-color: #ffffff;
+    transition: 0.3s;
+    border-radius: 0.33em 0.33em 0 0;
+    padding: 0.35em 0.55em 0.7em 0.55em;
+    margin: 0.35em 0.15em 0 0.15em;
+}
+
+
+.TabWrapper .TabHead button:hover{
+    background-color: #befa9e;
+}
+
+.TabWrapper .TabBody div{
+}
+
+.TabBody {
+    padding: 0 0.22em 0 0.22em;
+}
+
+/*---*/
+
+/*Bootstrap correction:*/
+
+.container {
+    width: 100%;
+}
+
+/*Main classes:*/
+.BrightCardBox {
+    box-shadow: 0 0 40px 3px #2e505f;
+    background-color: white;
+}
+
+.MainContentWrapper {
+    background-color: rgba(255, 255, 255, 0.55);
+    margin-top: 2em;
+    margin-bottom: 2em;
+    padding-bottom: 2.25em;
+    padding-top: 2.25em;
+    height: 100%;
+    text-align: center;
+    --font-family-monospace: "Roboto",sans-serif;
+    font-family: "Roboto",sans-serif;
+}
+
+.MainContentWrapper code {
+    text-align: left;
+}
+
+.MainContentWrapper h1 {
+    text-align: center;
+    font-family: "Roboto",sans-serif;
+    color: #f18915;
+}
+
+.MainContentWrapper h2 {
+    text-align: center;
+    font-family: "Roboto",sans-serif;
+    color: #f18915;
+}
+
+.MainContentWrapper a {
+    text-align: center;
+    font-family: "Roboto",sans-serif;
+    color: #f18915;
+}
+
+.MainContentWrapper img {
+    padding: 0.5em;
+    margin: 0.175em;
+    border: 0.05em solid black;
+    box-shadow: inset 0 0 3px 1px black;
+    border-radius: 0.2em;
+    color: black;
+}
+
+.MainContentWrapper section {
+    margin-top: 0em;
+    margin-bottom: 0em;
+}
+
+.MainContentWrapper img {
+    margin-top: 0.33em;
+    margin-bottom: 0.33em;
+}
+
+.MainContentWrapper code {
+    margin-top: 0.34em;
+    margin-bottom: 0.33em;
+    border-radius: 0.2em;
+}
+
+
+.ContentBox {
+    background-color: white;
+    font-size: 1em;
+    padding: 0.757575em;
+    margin: 0.33em 0 0.33em 0;
+    box-shadow: inset 0 0 3px 1px rgba(0, 0, 0, 0.53);
+    color: black;
+    display: inline-block;
+    width: 100%;
+    min-height: 100%;
+    text-align:left;
+}
+
+
+.ContentBox img {
+    border: 0 solid white;
+    margin: 0.1em;
+    box-shadow: 0 0 0 0 white;
+    max-width: 100%;
+    float: right;
+}
+
+
+.ContentBox h3 {
+    border-bottom: 0.1em solid #f18915;
+    margin-bottom: 0.0em;
+    padding: 0.2em 0.1em 0em 0.1em;
+    color: #f18915;
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+.NightBox {
+    top:0px;
+    background-color: white;
+    box-shadow: 0 0 40px 3px black;
+    border-radius: 0.1em;
+    border-left: 0.095em solid cyan;
+    border-bottom: 0.075em solid cyan;
+    border-top: 0px;
+    padding-left: 0.2em;
+}
+
+video {
+    width: 100%;
+    height: auto;
+}
+
+.TopBarGradient {
+    box-shadow: 0px 0px 10px -4px black;
+    background-color: #f18915;
+    z-index: 0;
+    position: relative;
+    padding-left: 0.0em;
+    text-align: center;
+}
+
+.TopBarGradient h1 {
+    color: white;
+    font-size: calc(1rem + 0.95vw);
+}
+
+/*Page bottom:*/
+
+.content-box {
+    margin-top: 20px;
+}
+
+.gaadiexp,
+.gaadiexp:after,
+.gaadiexp *,
+.gaadiexp *:before,
+.gaadiexp *:after,
+.header-nav *,
+.header-nav *:before,
+.header-nav *:after {
+    -webkit-transition: all 0.5s;
+    transition: all 0.5s;
+}
+
+.gaadiexp {
+    position:relative;
+    cursor: pointer;
+    height: 4.25em;
+    margin-bottom: 0;
+    margin-left: 0;
+    width: 4.25em;
+    padding-right: 20px;
+    float: left;
+    overflow: hidden;
+    background: #7eb35e; /* Old browsers */
+}
+
+.gaadiexp span {
+    left: 13px;
+}
+
+.gaadiexp:after {
+    bottom: 7px;
+    color: white;
+    content: ''; /*'Menu'*/
+    font-size: 13px;
+    font-weight: 300;
+    position: absolute;
+    text-align: center;
+    width: 100%;
+}
+
+/*--------------------------------------
+ Creates the look of the gaadiexp icon
+ using the inner span and pseudo-elements
+--------------------------------------*/
+
+.gaadiexp span,
+.gaadiexp span:before,
+.gaadiexp span:after {
+    background: #FFFFFF;
+    border-radius: 0.2em;
+    height: 4px;
+    position: absolute;
+    top: 32px;
+    -webkit-transition: all 0.4s;
+    transition: all 0.4s;
+    width: 40px;
+}
+
+/* Reset the left and create the pseudo-element */
+.gaadiexp span:before,
+.gaadiexp span:after {
+    content: '';
+    left: 0;
+}
+
+/* Top bar position */
+.gaadiexp span:before {
+    top: -8px;
+}
+
+/* Bottom bar position */
+
+.gaadiexp span:after {
+    top: 8px;
+}
+
+/* Get rid of more on action (IE9 or higher) */
+.gaadiexp-check:checked + .gaadiexp:after {
+    content: '';
+}
+
+/* Get rid of the middle bar on action (IE9 or higher) */
+.gaadiexp-check:checked + .gaadiexp span {
+    height: 0;
+    width: 0;
+    left: 40%;
+}
+
+/* Moves the top and bottom bars to the middle on action (IE9 or higher) */
+.gaadiexp-check:checked + .gaadiexp span:before,
+.gaadiexp-check:checked + .gaadiexp span:after {
+    top: 6px;
+}
+
+/* Rotates the top bar on action with full browser support (IE9 or higher) */
+.gaadiexp-check:checked + .gaadiexp span:before {
+    -webkit-transform: rotate(225deg);
+    -ms-transform: rotate(225deg);
+    transform: rotate(225deg);
+}
+
+/* Rotates the bottom bar on action with full browser support (IE9 or higher) */
+.gaadiexp-check:checked + .gaadiexp span:after {
+    -webkit-transform: rotate(-225deg);
+    -ms-transform: rotate(225deg);
+    transform: rotate(-225deg);
+}
+
+.gaadiexp-check:checked + .gaadiexp {
+    width: 100%;
+}
+
+.gaadiexp-check:checked + .gaadiexp:after {
+    top: 19px;
+    bottom: 18px;
+    content: '';/* Her you can add text to the X */
+    font-size: 25px;
+    padding-left: 0px;
+    left:0px;
+    font-weight: bold;
+}
+
+
+#mobile-nav {
+    left: -9999px;
+    position: fixed;
+}
+
+#mobile-nav:focus + .gaadiexp,
+.gaadiexp:focus,
+.gaadiexp:hover {
+    background: rgba(0, 136, 204, 0.9);
+}
+
+
+.header-nav ul li a:active,
+.header-nav ul li a:focus,
+.header-nav ul li a:hover,
+#mobile-nav:focus + .gaadiexp,
+.gaadiexp:focus,
+.gaadiexp:hover {
+    color: #f18915;
+    outline: none;
+    font-weight: 600;
+    border-bottom: 0.3333em solid #fff;
+    text-shadow: 1px 1px #000000;
+}
+
+
+
+.header-nav {
+    float: left;
+    width: 100%;
+    left: 0px;
+    font-size:18px;
+}
+
+.header-nav ul {
+    top:0;
+    height: calc(100vh - 0px);
+    list-style: none;
+    margin: 0;
+    overflow-y: auto;
+    padding: 5.75em 0 0 0;
+    position: absolute;
+    -webkit-transform: translateX(-110%);
+    transform: translateX(-110%);
+    -webkit-transition-timing-function: cubic-bezier(0.250, 0.460, 0.450, 0.940);
+    -moz-transition-timing-function: cubic-bezier(0.250, 0.460, 0.450, 0.940);
+    -o-transition-timing-function: cubic-bezier(0.250, 0.460, 0.450, 0.940);
+    transition-timing-function: cubic-bezier(0.250, 0.460, 0.450, 0.940);
+    width: 100%;
+    box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.075);
+    left: -1px;
+    z-index: -1;
+    background-color: #7eb35e;
+    backdrop-filter: blur(5px);
+}
+
+
+.gaadiexp-check:checked ~ .header-nav ul {
+    background-color: rgba(255, 255, 255, 0.26);
+    -webkit-transform: translateX(0);
+    transform: translateX(0);
+    left: -1px;
+}
+
+.header-nav ul li {
+    margin-top: 0.05em;
+    margin-bottom: 0.05em;
+    float: left;
+    position: relative;
+    width: 100%;
+    text-align: center;
+}
+
+.header-nav ul li a {
+    color: black;
+    display: block;
+    float: left;
+    font-weight: 400;
+    letter-spacing: 0.75px;
+    line-height: 24px;
+
+    overflow: hidden;
+    padding: 1em 0.5em 0.25em 0em;
+    margin: 0 0 0 0;
+    position: relative;
+    text-decoration: none;
+    width: 100%;
+    border-bottom: 0.1em solid grey;
+}
+
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+
+/* Add Animation */
+@-webkit-keyframes slideIn {
+    from {
+        bottom: -300px;
+        opacity: 0
+    }
+    to {
+        bottom: 47.5%;
+        opacity: 1
+    }
+}
+
+@keyframes slideIn {
+    from {
+        bottom: -300px;
+        opacity: 0
+    }
+    to {
+        bottom: 47.5%;
+        opacity: 1
+    }
+}
+
+@-webkit-keyframes fadeIn {
+    from {
+        opacity: 0
+    }
+    to {
+        opacity: 1
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0
+    }
+    to {
+        opacity: 1
+    }
+}

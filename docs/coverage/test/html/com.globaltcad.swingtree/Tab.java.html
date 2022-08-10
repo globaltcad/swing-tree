@@ -1,6 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Tab.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stml</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree</a> &gt; <span class="el_source">Tab.java</span></div><h1>Tab.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Tab.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree</a> &gt; <span class="el_source">Tab.java</span></div><h1>Tab.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree;
+
+import com.globaltcad.swingtree.api.UIAction;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
 
 /**
  *  An immutable data carrier exposing everything needed to configure a tab of a {@link JTabbedPane}.
@@ -20,45 +23,62 @@ public class Tab
     private final String _title;
     private final Icon _icon;
     private final String _tip;
+    private final UIAction&lt;SimpleDelegate&lt;JTabbedPane, ChangeEvent&gt;&gt; _onSelected;
 
-<span class="fc" id="L24">    Tab(JComponent contents, String title, Icon icon, String tip) {</span>
-<span class="fc" id="L25">        LogUtil.nullArgCheck(title,&quot;title&quot;,String.class);</span>
-<span class="fc" id="L26">        _contents = contents;</span>
-<span class="fc" id="L27">        _title = title;</span>
-<span class="fc" id="L28">        _icon = icon;</span>
-<span class="fc" id="L29">        _tip = tip;</span>
-<span class="fc" id="L30">    }</span>
+    Tab(
+            JComponent contents,
+            String title,
+            Icon icon,
+            String tip,
+            UIAction&lt;SimpleDelegate&lt;JTabbedPane, ChangeEvent&gt;&gt; onSelected
+<span class="fc" id="L34">    ) {</span>
+<span class="fc" id="L35">        LogUtil.nullArgCheck(title,&quot;title&quot;,String.class);</span>
+<span class="fc" id="L36">        _contents = contents;</span>
+<span class="fc" id="L37">        _title = title;</span>
+<span class="fc" id="L38">        _icon = icon;</span>
+<span class="fc" id="L39">        _tip = tip;</span>
+<span class="fc" id="L40">        _onSelected = onSelected;</span>
+<span class="fc" id="L41">    }</span>
 
     public final Tab withIcon(Icon icon) {
-<span class="nc" id="L33">        LogUtil.nullArgCheck(icon,&quot;icon&quot;,Icon.class);</span>
-<span class="nc bnc" id="L34" title="All 2 branches missed.">        if ( _contents != null ) throw new IllegalArgumentException(&quot;Tab object may not be called anymore after the contents were specified!&quot;);</span>
-<span class="nc bnc" id="L35" title="All 2 branches missed.">        if ( _icon != null ) throw new IllegalArgumentException(&quot;Icon already specified!&quot;);</span>
-<span class="nc" id="L36">        return new Tab(_contents, _title, icon, _tip);</span>
+<span class="nc" id="L44">        LogUtil.nullArgCheck(icon,&quot;icon&quot;,Icon.class);</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        if ( _contents != null ) throw new IllegalArgumentException(&quot;Tab object may not be called anymore after the contents were specified!&quot;);</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">        if ( _icon != null ) throw new IllegalArgumentException(&quot;Icon already specified!&quot;);</span>
+<span class="nc" id="L47">        return new Tab(_contents, _title, icon, _tip, _onSelected);</span>
     }
 
     public final Tab withTip(String tip) {
-<span class="nc" id="L40">        LogUtil.nullArgCheck(tip,&quot;tip&quot;,String.class);</span>
-<span class="nc bnc" id="L41" title="All 2 branches missed.">        if ( _contents != null ) throw new IllegalArgumentException(&quot;Tab object may not be called anymore after the contents were specified!&quot;);</span>
-<span class="nc bnc" id="L42" title="All 2 branches missed.">        if ( _tip != null ) throw new IllegalArgumentException(&quot;Tip already specified!&quot;);</span>
-<span class="nc" id="L43">        return new Tab(_contents, _title, _icon, tip);</span>
+<span class="nc" id="L51">        LogUtil.nullArgCheck(tip,&quot;tip&quot;,String.class);</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">        if ( _contents != null ) throw new IllegalArgumentException(&quot;Tab object may not be called anymore after the contents were specified!&quot;);</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">        if ( _tip != null ) throw new IllegalArgumentException(&quot;Tip already specified!&quot;);</span>
+<span class="nc" id="L54">        return new Tab(_contents, _title, _icon, tip, _onSelected);</span>
     }
 
     public final Tab add(UIForAbstractSwing&lt;?,?&gt; contents) {
-<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        if ( _contents != null ) throw new IllegalArgumentException(&quot;Contents already specified!&quot;);</span>
-<span class="fc" id="L48">        return new Tab(contents.getComponent(), _title, _icon, _tip);</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">        if ( _contents != null ) throw new IllegalArgumentException(&quot;Contents already specified!&quot;);</span>
+<span class="fc" id="L59">        return new Tab(contents.getComponent(), _title, _icon, _tip, _onSelected);</span>
     }
 
     public final Tab add(JComponent contents) {
-<span class="nc bnc" id="L52" title="All 2 branches missed.">        if ( _contents != null ) throw new IllegalArgumentException(&quot;Contents already specified!&quot;);</span>
-<span class="nc" id="L53">        return new Tab(contents, _title, _icon, _tip);</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        if ( _contents != null ) throw new IllegalArgumentException(&quot;Contents already specified!&quot;);</span>
+<span class="nc" id="L64">        return new Tab(contents, _title, _icon, _tip, _onSelected);</span>
     }
 
-<span class="fc" id="L56">    public JComponent contents() { return _contents; }</span>
+    public final Tab onSelection(UIAction&lt;SimpleDelegate&lt;JTabbedPane, ChangeEvent&gt;&gt; onSelected) {
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        if ( _onSelected != null ) throw new IllegalArgumentException(&quot;Selection event already specified!&quot;);</span>
+<span class="nc" id="L69">        return new Tab(_contents, _title, _icon, _tip, onSelected);</span>
+    }
 
-<span class="fc" id="L58">    public String title() { return _title; }</span>
+<span class="fc" id="L72">    public final JComponent contents() { return _contents; }</span>
 
-<span class="fc" id="L60">    public Icon icon() { return _icon; }</span>
+<span class="fc" id="L74">    public final String title() { return _title; }</span>
 
-<span class="fc" id="L62">    public String tip() { return _tip; }</span>
+<span class="fc" id="L76">    public final Icon icon() { return _icon; }</span>
+
+<span class="fc" id="L78">    public final String tip() { return _tip; }</span>
+
+    public final UIAction&lt;SimpleDelegate&lt;JTabbedPane, ChangeEvent&gt;&gt; onSelection() {
+<span class="fc" id="L81">        return _onSelected;</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

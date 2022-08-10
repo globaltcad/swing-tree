@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Keyboard.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stml</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree.input</a> &gt; <span class="el_source">Keyboard.java</span></div><h1>Keyboard.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree.input;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Keyboard.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree.input</a> &gt; <span class="el_source">Keyboard.java</span></div><h1>Keyboard.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree.input;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -18,19 +18,32 @@ public class Keyboard
 
 <span class="nc" id="L19">    public static Keyboard get() { return INSTANCE; }</span>
 
-<span class="nc" id="L21">    public enum Key</span>
+<span class="fc" id="L21">    public enum Key</span>
     {
-<span class="nc" id="L23">        A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,</span>
-<span class="nc" id="L24">        SHIFT, CTRL, ALT, SPACE,</span>
-<span class="nc" id="L25">        ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE,</span>
-<span class="nc" id="L26">        SEMICOLON,</span>
-<span class="nc" id="L27">        EQUALS;</span>
+<span class="fc" id="L23">        A(KeyEvent.VK_A), B(KeyEvent.VK_B), C(KeyEvent.VK_C), D(KeyEvent.VK_D), E(KeyEvent.VK_E), F(KeyEvent.VK_F),</span>
+<span class="fc" id="L24">        G(KeyEvent.VK_G), H(KeyEvent.VK_H), I(KeyEvent.VK_I), J(KeyEvent.VK_J), K(KeyEvent.VK_K), L(KeyEvent.VK_L),</span>
+<span class="fc" id="L25">        M(KeyEvent.VK_M), N(KeyEvent.VK_N), O(KeyEvent.VK_O), P(KeyEvent.VK_P), Q(KeyEvent.VK_Q), R(KeyEvent.VK_R),</span>
+<span class="fc" id="L26">        S(KeyEvent.VK_S), T(KeyEvent.VK_T), U(KeyEvent.VK_U), V(KeyEvent.VK_V), W(KeyEvent.VK_W), X(KeyEvent.VK_X),</span>
+<span class="fc" id="L27">        Y(KeyEvent.VK_Y), Z(KeyEvent.VK_Z),</span>
 
-<span class="nc" id="L29">        public boolean isPressed() { return Keyboard.get().isPressed(this); }</span>
+<span class="fc" id="L29">        SHIFT(KeyEvent.VK_SHIFT), CTRL(KeyEvent.VK_CONTROL), ALT(KeyEvent.VK_ALT), SPACE(KeyEvent.VK_SPACE),</span>
+<span class="fc" id="L30">        ESCAPE(KeyEvent.VK_ESCAPE), ENTER(KeyEvent.VK_ENTER), BACKSPACE(KeyEvent.VK_BACK_SPACE), TAB(KeyEvent.VK_TAB),</span>
+
+<span class="fc" id="L32">        ZERO(KeyEvent.VK_0), ONE(KeyEvent.VK_1), TWO(KeyEvent.VK_2), THREE(KeyEvent.VK_3), FOUR(KeyEvent.VK_4),</span>
+<span class="fc" id="L33">        FIVE(KeyEvent.VK_5), SIX(KeyEvent.VK_6), SEVEN(KeyEvent.VK_7), EIGHT(KeyEvent.VK_8), NINE(KeyEvent.VK_9),</span>
+<span class="fc" id="L34">        SEMICOLON(KeyEvent.VK_SEMICOLON),</span>
+<span class="fc" id="L35">        EQUALS(KeyEvent.VK_EQUALS), COMMA(KeyEvent.VK_COMMA), MINUS(KeyEvent.VK_MINUS), PERIOD(KeyEvent.VK_PERIOD),</span>
+<span class="fc" id="L36">        SLASH(KeyEvent.VK_SLASH), BACK_SLASH(KeyEvent.VK_BACK_SLASH);</span>
+
+        public final int code;
+
+<span class="fc" id="L40">        Key( int keyCode ) { this.code = keyCode; }</span>
+
+<span class="nc" id="L42">        public boolean isPressed() { return Keyboard.get().isPressed(this); }</span>
 
     }
 
-<span class="nc" id="L33">    private final List&lt;Key&gt; _pressed = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L46">    private final List&lt;Key&gt; _pressed = new ArrayList&lt;&gt;();</span>
 
     /**
      *  This method checks if the supplied {@link Key} is currently pressed on the keyboard.
@@ -38,77 +51,36 @@ public class Keyboard
      * @param key An instance of the {@link Key} enum representing a keyboard key.
      * @return The truth value determining if the specified {@link Key} type is currently pressed by the user.
      */
-<span class="nc" id="L41">    public boolean isPressed(Key key) { synchronized (this) { return _pressed.contains(key); } }</span>
+<span class="nc" id="L54">    public boolean isPressed(Key key) { synchronized (this) { return _pressed.contains(key); } }</span>
 
 
-<span class="nc" id="L44">    public Keyboard() {</span>
-<span class="nc" id="L45">        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {</span>
+<span class="nc" id="L57">    public Keyboard() {</span>
+<span class="nc" id="L58">        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {</span>
             @Override
             public boolean dispatchKeyEvent(KeyEvent ke) {
-<span class="nc" id="L48">                synchronized (this) {</span>
-<span class="nc bnc" id="L49" title="All 3 branches missed.">                    switch ( ke.getID() ) {</span>
+<span class="nc" id="L61">                synchronized (this) {</span>
+<span class="nc bnc" id="L62" title="All 3 branches missed.">                    switch ( ke.getID() ) {</span>
                         case KeyEvent.KEY_PRESSED:
-<span class="nc" id="L51">                            _pressed.add(_fromKeyEvent(ke));</span>
-<span class="nc" id="L52">                            break;</span>
+<span class="nc" id="L64">                            _pressed.add(_fromKeyEvent(ke));</span>
+<span class="nc" id="L65">                            break;</span>
 
                         case KeyEvent.KEY_RELEASED:
-<span class="nc" id="L55">                            _pressed.remove(_fromKeyEvent(ke));</span>
+<span class="nc" id="L68">                            _pressed.remove(_fromKeyEvent(ke));</span>
                             break;
                     }
-<span class="nc" id="L58">                    return false;</span>
+<span class="nc" id="L71">                    return false;</span>
                 }
             }
         });
-<span class="nc" id="L62">    }</span>
-
+<span class="nc" id="L75">    }</span>
 
     private static Key _fromKeyEvent( KeyEvent keyEvent ) {
-<span class="nc bnc" id="L66" title="All 43 branches missed.">        switch (keyEvent.getKeyCode()) {</span>
-<span class="nc" id="L67">            case KeyEvent.VK_SHIFT    : return Key.SHIFT;</span>
-<span class="nc" id="L68">            case KeyEvent.VK_CONTROL  : return Key.CTRL;</span>
-<span class="nc" id="L69">            case KeyEvent.VK_ALT      : return Key.ALT;</span>
-<span class="nc" id="L70">            case KeyEvent.VK_SPACE    : return Key.SPACE;</span>
-<span class="nc" id="L71">            case KeyEvent.VK_0        : return Key.ZERO;</span>
-<span class="nc" id="L72">            case KeyEvent.VK_1        : return Key.ONE;</span>
-<span class="nc" id="L73">            case KeyEvent.VK_2        : return Key.TWO;</span>
-<span class="nc" id="L74">            case KeyEvent.VK_3        : return Key.THREE;</span>
-<span class="nc" id="L75">            case KeyEvent.VK_4        : return Key.FOUR;</span>
-<span class="nc" id="L76">            case KeyEvent.VK_5        : return Key.FIVE;</span>
-<span class="nc" id="L77">            case KeyEvent.VK_6        : return Key.SIX;</span>
-<span class="nc" id="L78">            case KeyEvent.VK_7        : return Key.SEVEN;</span>
-<span class="nc" id="L79">            case KeyEvent.VK_8        : return Key.EIGHT;</span>
-<span class="nc" id="L80">            case KeyEvent.VK_9        : return Key.NINE;</span>
-<span class="nc" id="L81">            case KeyEvent.VK_SEMICOLON: return Key.SEMICOLON;</span>
-<span class="nc" id="L82">            case KeyEvent.VK_EQUALS   : return Key.EQUALS   ;</span>
-<span class="nc" id="L83">            case KeyEvent.VK_A        : return Key.A        ;</span>
-<span class="nc" id="L84">            case KeyEvent.VK_B        : return Key.B        ;</span>
-<span class="nc" id="L85">            case KeyEvent.VK_C        : return Key.C        ;</span>
-<span class="nc" id="L86">            case KeyEvent.VK_D        : return Key.D        ;</span>
-<span class="nc" id="L87">            case KeyEvent.VK_E        : return Key.E        ;</span>
-<span class="nc" id="L88">            case KeyEvent.VK_F        : return Key.F        ;</span>
-<span class="nc" id="L89">            case KeyEvent.VK_G        : return Key.G        ;</span>
-<span class="nc" id="L90">            case KeyEvent.VK_H        : return Key.H        ;</span>
-<span class="nc" id="L91">            case KeyEvent.VK_I        : return Key.I        ;</span>
-<span class="nc" id="L92">            case KeyEvent.VK_J        : return Key.J        ;</span>
-<span class="nc" id="L93">            case KeyEvent.VK_K        : return Key.K        ;</span>
-<span class="nc" id="L94">            case KeyEvent.VK_L        : return Key.L        ;</span>
-<span class="nc" id="L95">            case KeyEvent.VK_M        : return Key.M        ;</span>
-<span class="nc" id="L96">            case KeyEvent.VK_N        : return Key.N        ;</span>
-<span class="nc" id="L97">            case KeyEvent.VK_O        : return Key.O        ;</span>
-<span class="nc" id="L98">            case KeyEvent.VK_P        : return Key.P        ;</span>
-<span class="nc" id="L99">            case KeyEvent.VK_Q        : return Key.Q        ;</span>
-<span class="nc" id="L100">            case KeyEvent.VK_R        : return Key.R        ;</span>
-<span class="nc" id="L101">            case KeyEvent.VK_S        : return Key.S        ;</span>
-<span class="nc" id="L102">            case KeyEvent.VK_T        : return Key.T        ;</span>
-<span class="nc" id="L103">            case KeyEvent.VK_U        : return Key.U        ;</span>
-<span class="nc" id="L104">            case KeyEvent.VK_V        : return Key.V        ;</span>
-<span class="nc" id="L105">            case KeyEvent.VK_W        : return Key.W        ;</span>
-<span class="nc" id="L106">            case KeyEvent.VK_X        : return Key.X        ;</span>
-<span class="nc" id="L107">            case KeyEvent.VK_Y        : return Key.Y        ;</span>
-<span class="nc" id="L108">            case KeyEvent.VK_Z        : return Key.Z        ;</span>
-            default:
-<span class="nc" id="L110">                return Key.SHIFT;</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        for ( Key key : Key.values() ) {</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">            if (key.code == keyEvent.getKeyCode()) {</span>
+<span class="nc" id="L80">                return key;</span>
+            }
         }
+<span class="nc" id="L83">        return Key.SHIFT;</span>
     }
 
 }

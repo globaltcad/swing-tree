@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForList.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree</a> &gt; <span class="el_source">UIForList.java</span></div><h1>UIForList.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree;
+
+import com.globaltcad.swingtree.api.ListEntryDelegate;
+import com.globaltcad.swingtree.api.ListEntryRenderer;
+import com.globaltcad.swingtree.api.UIAction;
+
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import java.util.List;
+
+public class UIForList&lt;E, L extends JList&lt;E&gt;&gt; extends UIForAbstractSwing&lt;UIForList&lt;E, L&gt;, L&gt;
+{
+
+    /**
+     * Extensions of the {@link  UIForAbstractSwing} always wrap
+     * a single component for which they are responsible.
+     *
+     * @param component The JComponent type which will be wrapped by this builder node.
+     */
+<span class="fc" id="L20">    UIForList(L component) { super(component); }</span>
+
+    /**
+     *  Takes the provided list of entry objects and sets them as {@link JList} data.
+     *
+     * @param entries The list of entries to set as data.
+     * @return This instance of the builder node.
+     */
+    public final UIForList&lt;E, L&gt; withEntries(List&lt;E&gt; entries) {
+<span class="nc" id="L29">        _component.setListData((E[]) entries.toArray(new Object[0]));</span>
+<span class="nc" id="L30">        return this;</span>
+    }
+
+    /**
+     *  Takes the provided array of entry objects and sets them as {@link JList} data.
+     *
+     * @param entries The array of entries to set as data.
+     * @return This instance of the builder node.
+     */
+    public final UIForList&lt;E, L&gt; withEntries(E... entries) {
+<span class="nc" id="L40">        _component.setListData(entries.clone());</span>
+<span class="nc" id="L41">        return this;</span>
+    }
+
+    public final UIForList&lt;E, L&gt; withRenderer(ListEntryRenderer&lt;E, L&gt; renderer) {
+<span class="nc" id="L45">        _component.setCellRenderer((list, value, index, isSelected, cellHasFocus) -&gt; renderer.render(new ListEntryDelegate&lt;E, L&gt;() {</span>
+<span class="nc" id="L46">            @Override public L list() { return (L) list; }</span>
+<span class="nc" id="L47">            @Override public E entry() { return value; }</span>
+<span class="nc" id="L48">            @Override public int index() { return index; }</span>
+<span class="nc" id="L49">            @Override public boolean isSelected() { return isSelected; }</span>
+<span class="nc" id="L50">            @Override public boolean hasFocus() { return cellHasFocus; }</span>
+        }));
+<span class="nc" id="L52">        return this;</span>
+    }
+
+    /**
+     * Adds an {@link UIAction} to the underlying {@link JList}
+     * through an {@link javax.swing.event.ListSelectionListener},
+     * which will be called when a list selection has been made.
+     * {@see JList#addListSelectionListener(ListSelectionListener)}.
+     *
+     * @param action The {@link UIAction} that will be notified.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForList&lt;E, L&gt; onSelection(UIAction&lt;SimpleDelegate&lt;JList&lt;E&gt;, ListSelectionEvent&gt;&gt; action) {
+<span class="fc" id="L65">        LogUtil.nullArgCheck(action, &quot;action&quot;, UIAction.class);</span>
+<span class="pc" id="L66">        _component.addListSelectionListener(e -&gt; action.accept(new SimpleDelegate&lt;&gt;(_component, e, ()-&gt;getSiblinghood())) );</span>
+<span class="fc" id="L67">        return this;</span>
+    }
+
+    public final &lt;V extends E&gt; UIForList&lt;E, L&gt; withRenderer( Render.Builder&lt;L,V&gt; renderBuilder ) {
+<span class="nc" id="L71">        LogUtil.nullArgCheck(renderBuilder, &quot;renderBuilder&quot;, Render.Builder.class);</span>
+<span class="nc" id="L72">        return withRenderer((ListCellRenderer&lt;E&gt;) renderBuilder.getForList());</span>
+    }
+
+    public final UIForList&lt;E, L&gt; withRenderer( ListCellRenderer&lt;E&gt; renderer ) {
+<span class="nc" id="L76">        _component.setCellRenderer(renderer);</span>
+<span class="nc" id="L77">        return this;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

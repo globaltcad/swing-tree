@@ -1,0 +1,147 @@
+<%
+
+def noSingleBreaks = { String s ->
+    return s.replaceAll("\\n+\\s+\\n+", "\n\n").replaceAll("(\\n\\n)\\n*", "\n\n")
+}
+def simpleEsc = { text ->
+    text = text.toString();
+    if ( text == null )  return ""
+    final StringWriter writer = new StringWriter()
+    ( 0 ..< text.length() ).each { i ->
+        final char c = text.charAt(i)
+        switch (c) {
+            case '"':  writer.write("\\\""); break;
+            case '\\': writer.write("\\\\"); break;
+            case '\n': writer.write("\\n"); break;
+            case '\r': writer.write("\\r"); break;
+            case '\t': writer.write("\\t"); break;
+            case '\b': writer.write("\\b"); break;
+            default:
+                if ( c > 0x1f || c == '`' ) writer.write(c);
+                else {
+                    writer.write("\\u");
+                    final String hex = "000" + Integer.toHexString(c as int);
+                    writer.write(hex.substring(hex.length() - 4));
+                }
+        }
+    }
+    return writer.toString();
+}
+def esc = { simpleEsc(noSingleBreaks(it)) }
+def strCode = { it == null || it.isEmpty() ? "" : (it.size() == 1 ? ('"'+simpleEsc(it[0])+'"') : ('"'+it.collect({simpleEsc(it)}).join('","'))+'"')}
+
+//----
+
+println("Generating json for '"+utils.getSpecClassName( data )+"' now!")
+
+def stats = utils.stats( data )
+def subjects = utils.specAnnotation( data, spock.lang.Subject )?.value()
+if ( subjects == null ) subjects = []
+def specTitle = utils.specAnnotation( data, spock.lang.Title )?.value()
+%>{
+  "className":"${utils.getSpecClassName( data )}",
+  "title":"<% if ( specTitle ) { out << esc(specTitle) } %>",
+  "narrative":"<% if ( data.info.narrative ) { out << esc(data.info.narrative.stripIndent()) } %>",
+  "subjects":[<% out << subjects.collect({'"'+it.getName()+'"'}).join(',') %>],
+  "statistics":{
+    "runs":"${stats.totalRuns}",
+    "successRate":"${fmt.toPercentage(stats.successRate)}",
+    "failures":"${stats.failures}",
+    "errors":"${stats.errors}",
+    "skipped":"${stats.skipped}",
+    "duration":"${fmt.toTimeDuration(stats.time)}"
+  },
+<%
+  def writeTagOrAttachment = {feature ->
+    def tagsByKey = feature.tags.groupBy({ t -> t.key })
+    out << '"tags":{'
+    tagsByKey.each {key, values ->
+      out << '"' << key.capitalize() << '"['
+      out << values.collect({tag->esc(tag.url)}).collect({'"'+it+'"'}).join(",")
+      out << '],'
+    }
+    out << '},'
+    out << '"see":['
+    if ( feature.attachments.size > 0 ) out << feature.attachments.collect({v->esc(v.url)}).collect({'"'+it+'"'}).join(",")
+    out << '],'
+  }
+  def writeHeaders = { headers ->
+    out << '  "headers":['
+    if ( headers ) out << headers.collect({v->esc(v)}).collect({'"'+it+'"'}).join(",")
+    out << '],'
+  }
+  def writeExtraInfo = { extraInfo ->
+    out << '"extraInfo":['
+    if ( extraInfo ) out << extraInfo.collect({v->esc(v)}).collect({'"'+it+'"'}).join(",")
+    out << ']'
+  }
+  writeHeaders( utils.specHeaders( data ) )
+  writeTagOrAttachment data.info
+%>
+  "features":[ <%
+    def i = 0
+    def size = 0
+    features.eachFeature { name, result, blocks, iterations, params -> size++ }
+    features.eachFeature { name, result, blocks, iterations, params ->
+      var dataTable = [:]
+      (0 ..< params.size()).each({ columIndex ->
+        var column = []
+        iterations.each { iteration ->
+          column << iteration.dataValues[columIndex]
+        }
+        dataTable[params[columIndex]] = column
+      })
+      def feature = delegate
+      def iterationTimes = iterations.collect { it.time ?: 0L }
+      def totalTime = fmt.toTimeDuration( iterationTimes.sum() )
+  %>
+    {
+      "id":"${esc(name)}",
+      "result":"$result",
+      "duration":"$totalTime",
+      "iterations":{
+      <%
+      writeTagOrAttachment( feature )
+      if (result != "IGNORED") {
+        if ( utils.isUnrolled( feature ) )
+          iterations.each { iter ->
+            writeExtraInfo( utils.nextSpecExtraInfo( data, feature, iter.info ) )
+          }
+        else
+            writeExtraInfo( utils.nextSpecExtraInfo( data, feature ) )
+      }
+      else writeExtraInfo( null )
+      %>
+      },
+      "blocks":[<%
+        out << blocks.collect({ b ->
+            var kind = esc(b.kind.replace(':', '').toLowerCase())
+            var code = '['+strCode(b.sourceCode)+']'
+            if ( kind == 'where' ) {
+                // We turn the data table into a json object:
+                code = '{'+dataTable.collect({ k, v -> '"'+k+'":['+strCode(v)+']' }).join(",")+'}'
+            }
+            return '\n        {' +
+                  '"kind":"'  +  kind  + '",' +
+                  '"text":"'  + esc(b.text)                                  + '",' +
+                  '"code":' + code + '' + '}'
+        }).join(",\n")
+        %>
+      ],<%
+      def executedIterations = iterations.findAll {it.dataValues || it.errors}
+      def problems = executedIterations.findAll {it.errors}
+      def probValue;
+      if ( problems == [] ) probValue = '{"dataValues":[], "errors":[]}'
+      else probValue = '{"dataValues":['+strCode(problems.dataValues)+'], "errors":['+strCode(problems.errors)+']}';
+%>
+      "problems":$probValue
+    }<%
+    i++
+    if( i < size ){ out << "," }
+    %>
+  <%
+  } // FEATURE LOOP END
+  %>
+  ],
+  "generator":"<%out << com.athaydes.spockframework.report.SpockReportExtension.PROJECT_URL%>"
+}

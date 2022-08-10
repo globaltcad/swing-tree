@@ -1,0 +1,75 @@
+<%
+println("Generating summary json now!")
+
+def noSingleBreaks = { String s ->
+  return s.replaceAll("\\n+\\s+\\n+", "\n\n").replaceAll("(\\n\\n)\\n*", "\n\n")
+}
+def simpleEsc = { text ->
+    text = text.toString();
+    if ( text == null )  return ""
+    final StringWriter writer = new StringWriter()
+    ( 0 ..< text.length() ).each { i ->
+        final char c = text.charAt(i)
+        switch (c) {
+            case '"':  writer.write("\\\""); break;
+            case '\\': writer.write("\\\\"); break;
+            case '\n': writer.write("\\n"); break;
+            case '\r': writer.write("\\r"); break;
+            case '\t': writer.write("\\t"); break;
+            case '\b': writer.write("\\b"); break;
+            default:
+                if ( c > 0x1f || c == '`' ) writer.write(c);
+                else {
+                    writer.write("\\u");
+                    final String hex = "000" + Integer.toHexString(c as int);
+                    writer.write(hex.substring(hex.length() - 4));
+                }
+        }
+    }
+    return writer.toString();
+}
+def esc = { simpleEsc(noSingleBreaks(it)) }
+def strFeatures = { features ->
+    features = features.collect({ feature -> '{"id":"'+esc(feature)+'","extraInfo":[]}' })
+    if ( features.size() == 0 ) out << ""
+    if ( features.size() == 1 ) out << features[0]
+    if ( features.size() > 1 ) out << features.collect({ it }).join(",")
+}
+// ---
+def stats = utils.aggregateStats( data )
+%>{
+  "project": "${projectName}",
+  "version": "${projectVersion}",
+  "created": "${new Date()}",
+  "statistics":{
+    "runs":"${stats.total}",
+    "passed":"${stats.passed}",
+    "failed":"${stats.failed}",
+    "featureFailures":"${stats.fFails}",
+    "successRate":"${stats.successRate}",
+    "duration":"${stats.time}"
+  },
+  "specifications": [<%
+    def i = 0
+    data.each { name, map ->
+      def s = map.stats
+    %>{
+      "className":"$name",
+      "title":"${esc(map.title)}",
+      "narrative":"${esc(map.narrative.stripIndent())}",
+      "featureCount":"${s.totalFeatures}",
+      "failures":"${s.failures}",
+      "errors":"${s.errors}",
+      "skipped":"${s.skipped}" ,
+      "successRate":"${s.successRate}",
+      "duration":"${s.time}",
+      "executedFeatures":[<% strFeatures(map.executedFeatures) %>],
+      "ignoredFeatures":[<% strFeatures(map.ignoredFeatures) %>]
+    }<%
+      i++
+      if ( i < data.size() ) out << ","
+    }
+    %>
+  ],
+  "generator":"<%out << com.athaydes.spockframework.report.SpockReportExtension.PROJECT_URL%>"
+}

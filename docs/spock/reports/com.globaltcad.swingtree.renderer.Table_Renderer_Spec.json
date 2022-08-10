@@ -1,0 +1,64 @@
+{
+  "className":"com.globaltcad.swingtree.renderer.Table_Renderer_Spec",
+  "title":"",
+  "narrative":"",
+  "subjects":[],
+  "statistics":{
+    "runs":"2",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"0.029 seconds"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"We can attach a simple table cell renderer to a JTable in just a few lines of code.",
+      "result":"PASS",
+      "duration":"0.025 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var node =","UI.table().withModel(","    UI.tableModel()","    .colNames(\"A\", \"B\").onColCount({2}).onGet({\"O\"})",")"]},
+
+        {"kind":"and","text":"","code":["var render = Mock(Render.Cell.Interpreter)"]},
+
+        {"kind":"when","text":"","code":["node.withRendererForColumn(\"A\", UI.renderTable().when(String).as(render) )"]},
+
+        {"kind":"and","text":"","code":["var found = node.get(JTable).getColumn(\"A\").cellRenderer"]},
+
+        {"kind":"and","text":"","code":["found.getTableCellRendererComponent(null, \"1\", false, false, 0, 0)"]},
+
+        {"kind":"then","text":"","code":["1 * render.interpret(_)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can create a simple table cell renderer through a UI factory method.",
+      "result":"PASS",
+      "duration":"0.002 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var node = UI.table(UI.TableData.ROW_MAJOR_EDITABLE, { [[\"a\", \"b\", \"c\"], [\"1\", \"2\", \"3\"]] })"]},
+
+        {"kind":"and","text":"","code":["var render = Mock(Render.Cell.Interpreter)"]},
+
+        {"kind":"when","text":"","code":["node.withRendererForColumn(1, UI.renderTable().when(String).as(render) )"]},
+
+        {"kind":"and","text":"","code":["var found = node.get(JTable)",".columnModel",".getColumn(1)",".cellRenderer"]},
+
+        {"kind":"and","text":"","code":["found.getTableCellRendererComponent(null, \"1\", false, false, 0, 0)"]},
+
+        {"kind":"then","text":"","code":["1 * render.interpret(_)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}
