@@ -4,9 +4,6 @@ import com.globaltcad.swingtree.api.UIAction;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 /**
  *  A swing tree builder node for {@link JTabbedPane} instances.
@@ -33,6 +30,15 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
         return this;
     }
 
+    /**
+     * Adds an {@link UIAction} to the underlying {@link JTabbedPane}
+     * through an {@link javax.swing.event.ChangeListener},
+     * which will be called when the state of the tabbed pane changes.
+     * For more information see {@link JTabbedPane#addChangeListener(javax.swing.event.ChangeListener)}.
+     *
+     * @param onChange The {@link UIAction} that will be called through the underlying change event.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public final UIForTabbedPane<P> onChange(UIAction<SimpleDelegate<P, ChangeEvent>> onChange) {
         LogUtil.nullArgCheck(onChange, "onChange", UIAction.class);
         _component.addChangeListener(e -> onChange.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));
