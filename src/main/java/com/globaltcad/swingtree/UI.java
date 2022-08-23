@@ -878,6 +878,45 @@ public final class UI
     public static UIForSpinner<JSpinner> spinner() { return of(new JSpinner()); }
 
     /**
+     * Use this to create a builder for the provided {@link JSpinner} instance
+     * with the provided {@link SpinnerModel} as the model.
+     *
+     * @param model The {@link SpinnerModel} to be used by the {@link JSpinner}.
+     * @return A builder instance for the provided {@link JSpinner}, which enables fluent method chaining.
+     */
+    public static UIForSpinner<javax.swing.JSpinner> spinner(SpinnerModel model) {
+        LogUtil.nullArgCheck(model, "model", SpinnerModel.class);
+        return of(new JSpinner(model));
+    }
+
+    /**
+     * Use this to create a builder for the provided {@link JSpinner} instance
+     * with the provided {@code min}, {@code max}, default {@code value} and {@code step} as the model.
+     *
+     * @param value The default value of the {@link JSpinner}.
+     * @param min The minimum possible value of the {@link JSpinner}.
+     * @param max The maximum possible value of the {@link JSpinner}.
+     * @param step The step size of the {@link JSpinner}.
+     * @return A builder instance for the provided {@link JSpinner}, which enables fluent method chaining.
+     */
+    public static UIForSpinner<javax.swing.JSpinner> spinner(int value, int min, int max, int step) {
+        return of(new JSpinner(new SpinnerNumberModel(value, min, max, step)));
+    }
+
+    /**
+     * Use this to create a builder for the provided {@link JSpinner} instance
+     * with the provided {@code min}, {@code max} and default {@code value} as the model.
+     *
+     * @param value The default value of the {@link JSpinner}.
+     * @param min The minimum possible value of the {@link JSpinner}.
+     * @param max The maximum possible value of the {@link JSpinner}.
+     * @return A builder instance for the provided {@link JSpinner}, which enables fluent method chaining.
+     */
+    public static UIForSpinner<javax.swing.JSpinner> spinner(int value, int min, int max) {
+        return of(new JSpinner(new SpinnerNumberModel(value, min, max, 1)));
+    }
+
+    /**
      *  Use this to create a builder for the provided {@link JLabel} instance.
      *
      * @return A builder instance for the provided {@link JLabel}, which enables fluent method chaining.
