@@ -30,6 +30,27 @@ import java.util.function.Supplier;
  */
 public final class UI
 {
+    // Mig layout constants:
+    public static Attr FILL     = Attr.of("fill");
+    public static Attr WRAP     = Attr.of("wrap");
+    public static Attr SPAN     = Attr.of("SPAN");
+    public static Attr GROW     = Attr.of("grow");
+    public static Attr GROW_X   = Attr.of("growx");
+    public static Attr GROW_Y   = Attr.of("growy");
+    public static Attr SHRINK   = Attr.of("shrink");
+    public static Attr SHRINK_X = Attr.of("shrinkx");
+    public static Attr SHRINK_Y = Attr.of("shrinky");
+    public static Attr CENTER   = Attr.of("center");
+    public static Attr PUSH     = Attr.of("push");
+    public static Attr PUSH_X   = Attr.of("pushx");
+    public static Attr PUSH_Y   = Attr.of("pushy");
+    public static Attr LEFT     = Attr.of("left");
+    public static Attr RIGHT    = Attr.of("right");
+    public static Attr TOP      = Attr.of("top");
+    public static Attr BOTTOM   = Attr.of("bottom");
+    public static Attr FLOW_X   = Attr.of("flowx");
+    public static Attr FLOW_Y   = Attr.of("flowy");
+
     private UI(){} // This is a static API
 
     /**
@@ -619,7 +640,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      */
-    public static UIForPanel<JPanel> panel() { return of(new JPanel()); }
+    public static UIForPanel<JPanel> panel() { return of(new JPanel()).with(new MigLayout()); }
 
     public static UIForPanel<JPanel> panel(String attr, String colConstraints, String rowConstraints) {
         return of(new JPanel()).withLayout(attr, colConstraints, rowConstraints);
@@ -639,7 +660,7 @@ public final class UI
 
     /**
      *  Use this to create a builder for the {@link JPanel} UI component.
-     *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr, layout)}.
+     *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr)}.
      *
      * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
@@ -648,6 +669,19 @@ public final class UI
     public static UIForPanel<JPanel> panel(String attr) {
         LogUtil.nullArgCheck(attr, "attr", String.class);
         return of(new JPanel()).withLayout(attr);
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JPanel} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr)}.
+     *
+     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
+     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code attr} is {@code null}.
+     */
+    public static UIForPanel<JPanel> panel(Attr attr) {
+        LogUtil.nullArgCheck(attr, "attr", String.class);
+        return panel(attr.toString());
     }
 
     /**

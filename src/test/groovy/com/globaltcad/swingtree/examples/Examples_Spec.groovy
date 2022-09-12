@@ -5,14 +5,14 @@ import com.globaltcad.swingtree.examples.advanced.AdvancedUI
 import com.globaltcad.swingtree.examples.simple.Calculator
 import com.globaltcad.swingtree.examples.simple.Form
 import com.globaltcad.swingtree.examples.simple.TableUI
+import com.globaltcad.swingtree.examples.slim.TodoApp
 import com.globaltcad.swingtree.utility.Utility
+import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
-import spock.lang.Narrative
 
 import javax.swing.*
-import java.awt.ComponentOrientation
-import java.awt.Cursor
+import java.awt.*
 
 @Title("Execution and Validation of Example Code")
 @Narrative('''
@@ -58,7 +58,7 @@ class Examples_Spec extends Specification
             new Utility.Query(ui).find(JButton, "hover-icon-button").get().cursor.type == Cursor.HAND_CURSOR
     }
 
-    def 'The calculator UI define in the examples has the expected state.'()
+    def 'The calculator UI defined in the examples has the expected state.'()
     {
         given : 'We get the UI.'
             var ui = new Calculator()
@@ -114,5 +114,17 @@ class Examples_Spec extends Specification
             new Utility.Query(ui).find(JTable, "CM2").get().getValueAt(1,1) == "2"
             new Utility.Query(ui).find(JTable, "CM2").get().getValueAt(1,2) == "4"
     }
+
+
+    def 'The todo app UI defined in the examples has the expected state.'()
+    {
+        given : 'We get the UI.'
+            var ui = new TodoApp()
+        expect :
+            new Utility.Query(ui).find(JPanel, "task-1").isPresent()
+            new Utility.Query(ui).find(JPanel, "task-2").isPresent()
+            new Utility.Query(ui).find(JPanel, "task-3").isPresent()
+    }
+
 
 }

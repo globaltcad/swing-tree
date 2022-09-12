@@ -648,11 +648,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     *  Use this to nest builder types into this builder to effectively plug the wrapped {@link JComponent}s 
+     *  Use this to nest builder nodes into this builder to effectively plug the wrapped {@link JComponent}s
      *  into the {@link JComponent} type wrapped by this builder instance.
-     *  This method enables support for nested building as well as the ability to
-     *  pass additional layout information to the layout manager of the wrapped {@link JComponent}, through
-     *  the {@link JComponent#add(Component, Object)} method.
+     *  The first argument is expected to contain layout information for the layout manager of the wrapped {@link JComponent},
+     *  through the {@link JComponent#add(Component, Object)} method.
+     *  By default, the {@link MigLayout} is used.
      *  <br><br>
      *
      * @param attr The additional mig-layout information which should be passed to the UI tree.
@@ -664,11 +664,26 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
+     *  Use this to nest builder nodes into this builder to effectively plug the wrapped {@link JComponent}s
+     *  into the {@link JComponent} type wrapped by this builder instance.
+     *  The first argument will be passed to the layout manager of the wrapped {@link JComponent},
+     *  through the {@link JComponent#add(Component, Object)} method.
+     *  By default, the {@link MigLayout} is used.
+     *  <br><br>
+     *
+     * @param attr The mig-layout attribute.
+     * @param builder A builder for another {@link JComponent} instance which ought to be added to the wrapped component type.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final <T extends JComponent> I add(Attr attr, UIForAbstractSwing<?, T> builder) {
+        return this.add(attr.toString(), new UIForAbstractSwing[]{builder});
+    }
+
+    /**
      *  Use this to nest builder types into this builder to effectively plug the wrapped {@link JComponent}s 
      *  into the {@link JComponent} type wrapped by this builder instance.
      *  The first argument represents layout attributes/constraints which will
-     *  be applied to the {@link JComponent}s of the subsequently provided builder types.
-     *  This additional layout information will be passed to the layout manager of the wrapped {@link JComponent},
+     *  be passed to the {@link LayoutManager} of the underlying {@link JComponent}.
      *  through the {@link JComponent#add(Component, Object)} method.
      *  <br><br>
      *
@@ -687,6 +702,24 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         }
         for ( UIForAbstractSwing<?, ?> b : builders ) _doAdd(b, attr);
         return (I) this;
+    }
+
+    /**
+     *  Use this to nest builder types into this builder to effectively plug the wrapped {@link JComponent}s
+     *  into the {@link JComponent} type wrapped by this builder instance.
+     *  The first argument will be passed to the {@link LayoutManager}
+     *  of the underlying {@link JComponent} to serve as layout constraints.
+     *  through the {@link JComponent#add(Component, Object)} method.
+     *  <br><br>
+     *
+     * @param attr The first mig-layout information which should be passed to the UI tree.
+     * @param builders An array of builders for a corresponding number of {@link JComponent}
+     *                  type which ought to be added to the wrapped component type of this builder.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    @SafeVarargs
+    public final <B extends UIForAbstractSwing<?, ?>> I add(Attr attr, B... builders) {
+        return this.add(attr.toString(), builders);
     }
 
     /**
@@ -709,6 +742,22 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
             this.add(attr, UI.of(component));
         }
         return (I) this;
+    }
+
+    /**
+     *  Use this to nest {@link JComponent} types into this builder to effectively plug the provided {@link JComponent}s
+     *  into the {@link JComponent} type wrapped by this builder instance.
+     *  The first 2 arguments will be joined by a comma and passed to the {@link LayoutManager}
+     *  of the underlying {@link JComponent} to serve as layout constraints.
+     *  <br><br>
+     *
+     * @param attr The first layout information which should be passed to the UI tree.
+     * @param components A {@link JComponent}s array which ought to be added to the wrapped component type.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    @SafeVarargs
+    public final <E extends JComponent> I add( Attr attr, E... components ) {
+        return this.add(attr.toString(), components);
     }
 
     private static boolean _isBorderLayout( Object o ) {
