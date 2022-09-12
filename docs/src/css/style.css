@@ -230,8 +230,13 @@ hr {
     margin: 0;
     /*padding: 0;*/
     box-sizing: border-box;
-    font-family: "Roboto",sans-serif;
 }
+
+p                  { font-family: "Roboto",sans-serif; }
+h1, h2, h3, h4, h5 { font-family: "Roboto",sans-serif; }
+button             { font-family: "Roboto",sans-serif; }
+input              { font-family: "Roboto",sans-serif; }
+
 
 /* ================== */
 
@@ -385,6 +390,7 @@ header p {
 .BrightCardBox {
     box-shadow: 0 0 40px 3px #2e505f;
     background-color: white;
+    backdrop-filter: blur(3px);
 }
 
 .MainContentWrapper {
