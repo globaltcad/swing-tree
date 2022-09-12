@@ -5,18 +5,18 @@
   "subjects":[],
   "statistics":{
     "runs":"7",
-    "successRate":"85.71%",
-    "failures":"1",
+    "successRate":"100.0%",
+    "failures":"0",
     "errors":"0",
     "skipped":"1",
-    "duration":"0.082 seconds"
+    "duration":"0.259 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can add a list of components to the swing tree API and get a builder node in return.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -35,7 +35,7 @@
     {
       "id":"Swing tree nests components (trough builder nodes).",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.009 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -64,7 +64,7 @@
     {
       "id":"We can easily define the cursor on a wrapped UI component",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.008 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -82,8 +82,8 @@
   
     {
       "id":"We can use the swing tree to build a valid Swing GUI tree.",
-      "result":"FAIL",
-      "duration":"0.048 seconds",
+      "result":"PASS",
+      "duration":"0.160 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -96,13 +96,13 @@
 
         {"kind":"and","text":"","code":["tree['Root'] == 'javax.swing.JPanel[Root,0,0,0x0,invalid,layout=java.awt.BorderLayout,alignmentX=0.0,alignmentY=0.0,border=,flags=9,maximumSize=,minimumSize=,preferredSize=]'","tree['B1'  ] == 'javax.swing.JButton[B1,0,0,0x0,invalid,alignmentX=0.0,alignmentY=0.5,border=javax.swing.plaf.BorderUIResource$CompoundBorderUIResource,flags=296,maximumSize=,minimumSize=,preferredSize=,defaultIcon=,disabledIcon=,disabledSelectedIcon=,margin=javax.swing.plaf.InsetsUIResource[top=2,left=14,bottom=2,right=14],paintBorder=true,paintFocus=true,pressedIcon=,rolloverEnabled=true,rolloverIcon=,rolloverSelectedIcon=,selectedIcon=,text=Button 1 (PAGE_START),defaultCapable=true]'","tree['B2'  ] == 'javax.swing.JRadioButton[B2,0,0,0x0,invalid,alignmentX=0.0,alignmentY=0.5,border=javax.swing.plaf.BorderUIResource$CompoundBorderUIResource,flags=360,maximumSize=,minimumSize=,preferredSize=java.awt.Dimension[width=200,height=100],defaultIcon=,disabledIcon=,disabledSelectedIcon=,margin=javax.swing.plaf.InsetsUIResource[top=2,left=2,bottom=2,right=2],paintBorder=false,paintFocus=true,pressedIcon=,rolloverEnabled=true,rolloverIcon=,rolloverSelectedIcon=,selectedIcon=,text=Button 2 (CENTER)]'","tree['B3'  ] == 'javax.swing.JButton[B3,0,0,0x0,invalid,alignmentX=0.0,alignmentY=0.5,border=javax.swing.plaf.BorderUIResource$CompoundBorderUIResource,flags=296,maximumSize=,minimumSize=,preferredSize=,defaultIcon=,disabledIcon=,disabledSelectedIcon=,margin=javax.swing.plaf.InsetsUIResource[top=2,left=14,bottom=2,right=14],paintBorder=true,paintFocus=true,pressedIcon=,rolloverEnabled=true,rolloverIcon=,rolloverSelectedIcon=,selectedIcon=,text=Button 3 (LINE_START),defaultCapable=true]'","tree['B4'  ] == 'javax.swing.JButton[B4,0,0,0x0,invalid,alignmentX=0.0,alignmentY=0.5,border=javax.swing.plaf.BorderUIResource$CompoundBorderUIResource,flags=296,maximumSize=,minimumSize=,preferredSize=,defaultIcon=,disabledIcon=,disabledSelectedIcon=,margin=javax.swing.plaf.InsetsUIResource[top=2,left=14,bottom=2,right=14],paintBorder=true,paintFocus=true,pressedIcon=,rolloverEnabled=true,rolloverIcon=,rolloverSelectedIcon=,selectedIcon=,text=Long-Named Button 4 (PAGE_END),defaultCapable=true]'","tree['B5'  ] == 'javax.swing.JButton[B5,0,0,0x0,invalid,alignmentX=0.0,alignmentY=0.5,border=javax.swing.plaf.BorderUIResource$CompoundBorderUIResource,flags=296,maximumSize=,minimumSize=,preferredSize=,defaultIcon=,disabledIcon=,disabledSelectedIcon=,margin=javax.swing.plaf.InsetsUIResource[top=2,left=14,bottom=2,right=14],paintBorder=true,paintFocus=true,pressedIcon=,rolloverEnabled=true,rolloverIcon=,rolloverSelectedIcon=,selectedIcon=,text=5 (LINE_END),defaultCapable=true]'"]}
       ],
-      "problems":{"dataValues":["[]"], "errors":["[Condition not satisfied:\n\ntree['B1'  ] == 'javax.swing.JButton[B1,0,0,0x0,invalid,alignmentX=0.0,alignmentY=0.5,border=javax.swing.plaf.BorderUIResource$CompoundBorderUIResource,flags=296,maximumSize=,minimumSize=,preferredSize=,defaultIcon=,disabledIcon=,disabledSelectedIcon=,margin=javax.swing.plaf.InsetsUIResource[top=2,left=14,bottom=2,right=14],paintBorder=true,paintFocus=true,pressedIcon=,rolloverEnabled=true,rolloverIcon=,rolloverSelectedIcon=,selectedIcon=,text=Button 1 (PAGE_START),defaultCapable=true]'\n|   |        |\n|   |        false\n|   |        48 differences (46% similarity) (comparing subset start: 65, end1: 135, end2: 154)\n|   |        0.5,border=(com.formdev).(f)la(tlaf.ui.FlatB-)u(tt---)o(----)n(-)Border(----------),flags=2(88),maximumSi\n|   |        0.5,border=(javax.swing).(p)la(f.BorderUIReso)u(rce$C)o(mpou)n(d)Border(UIResource),flags=2(96),maximumSi\n|   javax.swing.JButton[B1,0,0,0x0,invalid,alignmentX=0.0,alignmentY=0.5,border=com.formdev.flatlaf.ui.FlatButtonBorder,flags=288,maximumSize=,minimumSize=,preferredSize=,defaultIcon=,disabledIcon=,disabledSelectedIcon=,margin=javax.swing.plaf.InsetsUIResource[top=2,left=14,bottom=2,right=14],paintBorder=true,paintFocus=true,pressedIcon=,rolloverEnabled=true,rolloverIcon=,rolloverSelectedIcon=,selectedIcon=,text=Button 1 (PAGE_START),defaultCapable=true]\n[Root:javax.swing.JPanel[Root,0,0,0x0,invalid,layout=java.awt.BorderLayout,alignmentX=0.0,alignmentY=0.0,border=,flags=9,maximumSize=,minimumSize=,preferredSize=], B1:javax.swing.JButton[B1,0,0,0x0,invalid,alignmentX=0.0,alignmentY=0.5,border=com.formdev.flatlaf.ui.FlatButtonBorder,flags=288,maximumSize=,minimumSize=,preferredSize=,defaultIcon=,disabledIcon=,disabledSelectedIcon=,margin=javax.swing.plaf.InsetsUIResource[top=2,left=14,bottom=2,right=14],paintBorder=true,paintFocus=true,pressedIcon=,rolloverEnabled=true,rolloverIcon=,rolloverSelectedIcon=,selectedIcon=,text=Button 1 (PAGE_START),defaultCapable=true], B2:javax.swing.JRadioButton[B2,0,0,0x0,invalid,alignmentX=0.0,alignmentY=0.5,border=com.formdev.flatlaf.ui.FlatMarginBorder,flags=352,maximumSize=,minimumSize=,preferredSize=java.awt.Dimension[width=200,height=100],defaultIcon=,disabledIcon=,disabledSelectedIcon=,margin=javax.swing.plaf.InsetsUIResource[top=2,left=2,bottom=2,right=2],paintBorder=false,paintFocus=true,pressedIcon=,rolloverEnabled=true,rolloverIcon=,rolloverSelectedIcon=,selectedIcon=,text=Button 2 (CENTER)], B3:javax.swing.JButton[B3,0,0,0x0,invalid,alignmentX=0.0,alignmentY=0.5,border=com.formdev.flatlaf.ui.FlatButtonBorder,flags=288,maximumSize=,minimumSize=,preferredSize=,defaultIcon=,disabledIcon=,disabledSelectedIcon=,margin=javax.swing.plaf.InsetsUIResource[top=2,left=14,bottom=2,right=14],paintBorder=true,paintFocus=true,pressedIcon=,rolloverEnabled=true,rolloverIcon=,rolloverSelectedIcon=,selectedIcon=,text=Button 3 (LINE_START),defaultCapable=true], B4:javax.swing.JButton[B4,0,0,0x0,invalid,alignmentX=0.0,alignmentY=0.5,border=com.formdev.flatlaf.ui.FlatButtonBorder,flags=288,maximumSize=,minimumSize=,preferredSize=,defaultIcon=,disabledIcon=,disabledSelectedIcon=,margin=javax.swing.plaf.InsetsUIResource[top=2,left=14,bottom=2,right=14],paintBorder=true,paintFocus=true,pressedIcon=,rolloverEnabled=true,rolloverIcon=,rolloverSelectedIcon=,selectedIcon=,text=Long-Named Button 4 (PAGE_END),defaultCapable=true], B5:javax.swing.JButton[B5,0,0,0x0,invalid,alignmentX=0.0,alignmentY=0.5,border=com.formdev.flatlaf.ui.FlatButtonBorder,flags=288,maximumSize=,minimumSize=,preferredSize=,defaultIcon=,disabledIcon=,disabledSelectedIcon=,margin=javax.swing.plaf.InsetsUIResource[top=2,left=14,bottom=2,right=14],paintBorder=true,paintFocus=true,pressedIcon=,rolloverEnabled=true,rolloverIcon=,rolloverSelectedIcon=,selectedIcon=,text=5 (LINE_END),defaultCapable=true]]\n]"]}
+      "problems":{"dataValues":[], "errors":[]}
     },
   
     {
       "id":"We can register various keyboard events in swing tree nodes.",
       "result":"PASS",
-      "duration":"0.010 seconds",
+      "duration":"0.017 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -117,7 +117,7 @@
     {
       "id":"We can register various UI focus events in swing tree nodes.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.006 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -132,7 +132,7 @@
     {
       "id":"We can register list selection events on a JList based swing tree node.",
       "result":"PASS",
-      "duration":"0.009 seconds",
+      "duration":"0.035 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

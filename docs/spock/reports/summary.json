@@ -1,38 +1,38 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Thu Aug 18 14:48:25 CEST 2022",
+  "created": "Mon Sep 12 19:29:10 CEST 2022",
   "statistics":{
     "runs":"10",
-    "passed":"9",
-    "failed":"1",
-    "featureFailures":"1",
-    "successRate":"0.9",
-    "duration":"2710.0"
+    "passed":"10",
+    "failed":"0",
+    "featureFailures":"0",
+    "successRate":"1.0",
+    "duration":"4792.0"
   },
   "specifications": [{
       "className":"com.globaltcad.swingtree.common.Basic_UI_Builder_Examples_Spec",
       "title":"Swing tree makes UI building fun again!",
       "narrative":"The swing tree library is in essence a more dynamic type of HTML for swing,\n    which allows for very readable UI design.\n    In this specification we cover the utter most basic properties of swing tree.",
       "featureCount":"8",
-      "failures":"1",
+      "failures":"0",
       "errors":"0",
       "skipped":"1" ,
-      "successRate":"0.8571428571428571",
-      "duration":"82",
+      "successRate":"1.0",
+      "duration":"259",
       "executedFeatures":[{"id":"Swing tree nests components (trough builder nodes).","extraInfo":[]},{"id":"We can add a list of components to the swing tree API and get a builder node in return.","extraInfo":[]},{"id":"We can easily define the cursor on a wrapped UI component","extraInfo":[]},{"id":"We can register list selection events on a JList based swing tree node.","extraInfo":[]},{"id":"We can register various UI focus events in swing tree nodes.","extraInfo":[]},{"id":"We can register various keyboard events in swing tree nodes.","extraInfo":[]},{"id":"We can use the swing tree to build a valid Swing GUI tree.","extraInfo":[]}],
       "ignoredFeatures":[{"id":"Swing tree makes us a viewable window!","extraInfo":[]}]
     },{
       "className":"com.globaltcad.swingtree.examples.Examples_Spec",
       "title":"Execution and Validation of Example Code",
       "narrative":"This specification ensures that the\n    various UI examples in the test suite, \n    run successfully and also produce\n    UIs with expected states.",
-      "featureCount":"4",
+      "featureCount":"5",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"959",
-      "executedFeatures":[{"id":"The advanced UI define in the examples has the expected state.","extraInfo":[]},{"id":"The calculator UI define in the examples has the expected state.","extraInfo":[]},{"id":"The form UI define in the examples has the expected state.","extraInfo":[]},{"id":"The simple Table-UI example has the expected state.","extraInfo":[]}],
+      "duration":"1546",
+      "executedFeatures":[{"id":"The advanced UI define in the examples has the expected state.","extraInfo":[]},{"id":"The calculator UI define in the examples has the expected state.","extraInfo":[]},{"id":"The form UI define in the examples has the expected state.","extraInfo":[]},{"id":"The simple Table-UI example has the expected state.","extraInfo":[]},{"id":"The todo app UI defined in the examples has the expected state.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"com.globaltcad.swingtree.common.Basic_UI_Exception_Spec",
@@ -43,7 +43,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"76",
+      "duration":"392",
       "executedFeatures":[{"id":"The given factory methods do not accept null arguments.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -55,7 +55,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"81",
+      "duration":"250",
       "executedFeatures":[{"id":"We can query the swing tree within an action lambda.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -67,7 +67,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"204",
+      "duration":"219",
       "executedFeatures":[{"id":"We can register periodically called UI updates!","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -79,7 +79,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"213",
+      "duration":"824",
       "executedFeatures":[{"id":"A button will delegate its siblings within actions:","extraInfo":[]},{"id":"We can easily create a button with an associated action:","extraInfo":[]},{"id":"We can go through the entire siblinghood, including the current button!","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -91,7 +91,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"35",
+      "duration":"111",
       "executedFeatures":[{"id":"We can attach a simple table cell renderer to a JTable in just a few lines of code.","extraInfo":[]},{"id":"We can create a simple table cell renderer through a UI factory method.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -103,7 +103,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"1051",
+      "duration":"1169",
       "executedFeatures":[{"id":"A button item can undo any multi-selection.","extraInfo":[]},{"id":"It is possible to select more than 1 item.","extraInfo":[]},{"id":"The most simple kind of split button can be built like so:","extraInfo":[]},{"id":"We can easily build a split button where only one item text will have its text displayed:","extraInfo":[]},{"id":"We can easily build a split button whose text becomes the current user selection:","extraInfo":[]},{"id":"We can register button click events for button items as well as the split button as a whole.","extraInfo":[]},{"id":"We can specify which item should be initially selected.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -115,7 +115,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"5",
+      "duration":"12",
       "executedFeatures":[{"id":"A JSplitButton does not accept null actions.","extraInfo":[]},{"id":"Split button items do not take null as an answer.","extraInfo":[]},{"id":"Split buttons do not take null as an answer.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -127,7 +127,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"4",
+      "duration":"10",
       "executedFeatures":[{"id":"We can build a JSplitButton.","extraInfo":[]}],
       "ignoredFeatures":[]
     }

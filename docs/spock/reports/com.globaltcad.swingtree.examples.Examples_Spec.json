@@ -4,19 +4,19 @@
   "narrative":"This specification ensures that the\n    various UI examples in the test suite, \n    run successfully and also produce\n    UIs with expected states.",
   "subjects":[],
   "statistics":{
-    "runs":"4",
+    "runs":"5",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.959 seconds"
+    "duration":"1.546 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"The advanced UI define in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.743 seconds",
+      "duration":"1.150 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -37,7 +37,7 @@
     {
       "id":"The form UI define in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.115 seconds",
+      "duration":"0.191 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -54,7 +54,7 @@
     {
       "id":"The calculator UI define in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.044 seconds",
+      "duration":"0.081 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -69,7 +69,7 @@
     {
       "id":"The simple Table-UI example has the expected state.",
       "result":"PASS",
-      "duration":"0.034 seconds",
+      "duration":"0.089 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -87,6 +87,21 @@
         {"kind":"and","text":"","code":["new Utility.Query(ui).find(JTable, \"RM2\").get().getRowCount() == 3","new Utility.Query(ui).find(JTable, \"RM2\").get().getColumnCount() == 2","new Utility.Query(ui).find(JTable, \"RM2\").get().getValueAt(0, 0) == \"X\"","new Utility.Query(ui).find(JTable, \"RM2\").get().getValueAt(1, 0) == \"1\"","new Utility.Query(ui).find(JTable, \"RM2\").get().getValueAt(2, 0) == \"3\"","new Utility.Query(ui).find(JTable, \"RM2\").get().getValueAt(0, 1) == \"Y\"","new Utility.Query(ui).find(JTable, \"RM2\").get().getValueAt(1, 1) == \"2\"","new Utility.Query(ui).find(JTable, \"RM2\").get().getValueAt(2, 1) == \"4\""]},
 
         {"kind":"and","text":"","code":["new Utility.Query(ui).find(JTable, \"CM2\").get().getRowCount() == 2","new Utility.Query(ui).find(JTable, \"CM2\").get().getColumnCount() == 3","new Utility.Query(ui).find(JTable, \"CM2\").get().getValueAt(0,0) == \"X\"","new Utility.Query(ui).find(JTable, \"CM2\").get().getValueAt(0,1) == \"1\"","new Utility.Query(ui).find(JTable, \"CM2\").get().getValueAt(0,2) == \"3\"","new Utility.Query(ui).find(JTable, \"CM2\").get().getValueAt(1,0) == \"Y\"","new Utility.Query(ui).find(JTable, \"CM2\").get().getValueAt(1,1) == \"2\"","new Utility.Query(ui).find(JTable, \"CM2\").get().getValueAt(1,2) == \"4\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The todo app UI defined in the examples has the expected state.",
+      "result":"PASS",
+      "duration":"0.022 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We get the UI.","code":["var ui = new TodoApp()"]},
+
+        {"kind":"expect","text":"","code":["new Utility.Query(ui).find(JPanel, \"task-1\").isPresent()","new Utility.Query(ui).find(JPanel, \"task-2\").isPresent()","new Utility.Query(ui).find(JPanel, \"task-3\").isPresent()"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }
