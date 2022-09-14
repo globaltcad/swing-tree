@@ -151,22 +151,40 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     *  This creates a {@link MigLayout} for the component wrapped by this UI builder.
+     *  Passes the provided string to the layout manager of the wrapped component.
+     *  By default, a {@link MigLayout} is used for the component wrapped by this UI builder.
      *
-     * @param constraints A string defining the mig layout.
+     * @param attr A string defining the layout (usually mig layout).
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withLayout(String constraints) { return withLayout(constraints, null); }
+    public final I withLayout(String attr) { return withLayout(attr, null); }
+
+    /**
+     *  Passes the provided string to the {@link MigLayout} manager of the wrapped component.
+     *
+     * @param attr A string defining the mig layout.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLayout(Attr attr) { return withLayout(attr.toString(), null); }
 
     /**
      *  This creates a {@link MigLayout} for the component wrapped by this UI builder.
      *
-     * @param constraints The constraints for the layout.
+     * @param attr The constraints for the layout.
      * @param colConstrains The column layout for the {@link MigLayout} instance.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withLayout(String constraints, String colConstrains) {
-        return withLayout(constraints, colConstrains, null);
+    public final I withLayout(String attr, String colConstrains) {
+        return withLayout(attr, colConstrains, null);
+    }
+
+    /**
+     * @param attr The constraints for the layout.
+     * @param colConstrains The column layout for the {@link MigLayout} instance.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLayout(Attr attr, String colConstrains) {
+        return withLayout(attr.toString(), colConstrains, null);
     }
 
     /**
