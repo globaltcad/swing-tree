@@ -1222,6 +1222,14 @@ public final class UI
         return Render.forList(Object.class, null).when(Object.class).as(cell->{});
     }
 
+    public static <T> Render.Builder<JList<T>, T> renderList(Class<T> itemType) {
+        return Render.forList(itemType, null).when(itemType).as(cell->{});
+    }
+
+    public static <T> Render.As<JList<T>, T, T> renderListItem(Class<T> itemType) {
+        return Render.forList(itemType, null).when(itemType);
+    }
+
     public static Render.Builder<JComboBox<Object>, Object> renderCombo() {
         return Render.forCombo(Object.class, null).when(Object.class).as(cell->{});
     }
@@ -1362,7 +1370,7 @@ public final class UI
     }
 
     /**
-     *  Use this to quickly create and inspect a tes window for a UI component.
+     *  Use this to quickly create and inspect a test window for a UI component.
      */
     public static class TestWindow
     {
@@ -1380,6 +1388,17 @@ public final class UI
         public JFrame getFrame() { return this.frame; }
 
         public Component getComponent() { return this.component; }
+    }
+
+    /**
+     *  Use this to quickly create and inspect a test window for a UI component.
+     */
+    public static void showInNewFrame(Component component) {
+        JFrame frame = new JFrame();
+        new UI.TestWindow(()->frame,component);
+        // We set the size to fit the component:
+        frame.setSize(component.getPreferredSize());
+        frame.setVisible(true);
     }
 
 }
