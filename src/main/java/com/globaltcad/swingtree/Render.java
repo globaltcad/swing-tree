@@ -1,5 +1,7 @@
 package com.globaltcad.swingtree;
 
+import sun.swing.DefaultLookup;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -128,7 +130,49 @@ public final class Render<C extends JComponent,E> {
 		}
 
 		default Builder<C, E> asText(Function<Cell<C,T>, String> renderer) {
-			return this.as( cell -> cell.setRenderer(new JLabel(renderer.apply(cell))) );
+			return this.as( cell -> {
+				JLabel l = new JLabel(renderer.apply(cell));
+				l.setOpaque(true);
+				Color bg = DefaultLookup.getColor(l, l.getUI(), "List.dropCellBackground");
+				Color fg = DefaultLookup.getColor(l, l.getUI(), "List.dropCellForeground");
+
+				if ( bg == null )
+					bg = UIManager.getColor( "ComboBox.selectionBackground" );
+				if ( fg == null )
+					fg = UIManager.getColor( "ComboBox.selectionForeground" );
+
+				if ( bg == null )
+					bg = DefaultLookup.getColor(l, l.getUI(), "ComboBox.selectionBackground", null);
+				if ( fg == null )
+					fg = DefaultLookup.getColor(l, l.getUI(), "ComboBox.selectionForeground", null);
+
+				if (cell.isSelected()) {
+					if ( bg != null ) l.setBackground( bg );
+					if ( fg != null ) l.setForeground( fg );
+				}
+
+				// TODO:
+				//l.setEnabled(cell.getComponent().isEnabled());
+				//l.setFont(cell.getComponent().getFont());
+
+				Border border = null;
+				if ( cell.hasFocus() ) {
+					if ( cell.isSelected() )
+						border = DefaultLookup.getBorder(l, l.getUI(), "List.focusSelectedCellHighlightBorder");
+
+					if ( border == null )
+						border = DefaultLookup.getBorder(l, l.getUI(), "List.focusCellHighlightBorder");
+
+				}
+				else
+					border = DefaultLookup.getBorder(l, l.getUI(), "List.cellNoFocusBorder");
+
+				if ( border != null ) l.setBorder(border);
+
+				if ( cell.isSelected() ) l.setBackground(bg);
+				l.setForeground(fg);
+				cell.setRenderer(l);
+			} );
 		}
 
 		default Builder<C, E> render(BiConsumer<Cell<C,T>, Graphics2D> renderer) {
