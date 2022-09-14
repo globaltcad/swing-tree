@@ -32,6 +32,8 @@ public final class UI
 {
     // Mig layout constants:
     public static Attr FILL     = Attr.of("fill");
+    public static Attr FILL_X     = Attr.of("fillx");
+    public static Attr FILL_Y     = Attr.of("filly");
     public static Attr WRAP     = Attr.of("wrap");
     public static Attr SPAN     = Attr.of("SPAN");
     public static Attr GROW     = Attr.of("grow");
@@ -50,6 +52,13 @@ public final class UI
     public static Attr BOTTOM   = Attr.of("bottom");
     public static Attr FLOW_X   = Attr.of("flowx");
     public static Attr FLOW_Y   = Attr.of("flowy");
+    public static Attr ALIGN_X  = Attr.of("alignx");
+    public static Attr ALIGN_Y  = Attr.of("aligny");
+    public static Attr INS(int insets) { return Attr.of("ins " + insets); }
+    public static Attr INSETS(int insets) { return Attr.of("insets " + insets); }
+    public static Attr INS(int top, int left, int bottom, int right) { return Attr.of("insets " + top + " " + left + " " + bottom + " " + right); }
+    public static Attr INSETS(int top, int left, int bottom, int right) { return Attr.of("insets " + top + " " + left + " " + bottom + " " + right); }
+
 
     private UI(){} // This is a static API
 
