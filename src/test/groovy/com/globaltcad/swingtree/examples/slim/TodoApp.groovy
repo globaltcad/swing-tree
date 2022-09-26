@@ -1,20 +1,19 @@
 package com.globaltcad.swingtree.examples.slim
 
-import com.globaltcad.swingtree.UI
-import com.globaltcad.swingtree.examples.simple.Calculator
 
-import javax.swing.JFrame
-import javax.swing.JPanel
-import java.awt.Dimension
+import javax.swing.*
+import java.awt.*
+
+import static com.globaltcad.swingtree.UI.*
 
 // We import the "UI" class from the "swingtree" package statically:
-import static com.globaltcad.swingtree.UI.*
+
 // This allows us to ommit the "UI." prefix when using the methods of the "UI" class.
 
 class TodoApp extends JPanel
 {
     TodoApp() {
-        of(this).withLayout("fill")
+        of(this).withLayout(FILL)
         .add(GROW & SPAN & WRAP, label("Todo List"))
         .add(GROW & SPAN & WRAP,
             panel(FILL).add(SHRINK, button("Add"), button("Remove"))

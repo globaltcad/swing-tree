@@ -4,6 +4,8 @@ package com.globaltcad.swingtree;
 import com.globaltcad.swingtree.api.Peeker;
 import com.globaltcad.swingtree.api.UIAction;
 import com.globaltcad.swingtree.input.Keyboard;
+import com.globaltcad.swingtree.layout.CompAttr;
+import com.globaltcad.swingtree.layout.LayoutAttr;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 
@@ -162,10 +164,10 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     /**
      *  Passes the provided string to the {@link MigLayout} manager of the wrapped component.
      *
-     * @param attr A string defining the mig layout.
+     * @param attr Essentially an immutable string wrapper defining the mig layout.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withLayout(Attr attr) { return withLayout(attr.toString(), null); }
+    public final I withLayout(LayoutAttr attr) { return withLayout(attr.toString(), null); }
 
     /**
      *  This creates a {@link MigLayout} for the component wrapped by this UI builder.
@@ -183,7 +185,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param colConstrains The column layout for the {@link MigLayout} instance.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withLayout(Attr attr, String colConstrains) {
+    public final I withLayout(LayoutAttr attr, String colConstrains) {
         return withLayout(attr.toString(), colConstrains, null);
     }
 
@@ -693,7 +695,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param builder A builder for another {@link JComponent} instance which ought to be added to the wrapped component type.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final <T extends JComponent> I add(Attr attr, UIForAbstractSwing<?, T> builder) {
+    public final <T extends JComponent> I add(CompAttr attr, UIForAbstractSwing<?, T> builder ) {
         return this.add(attr.toString(), new UIForAbstractSwing[]{builder});
     }
 
@@ -711,7 +713,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     @SafeVarargs
-    public final <B extends UIForAbstractSwing<?, ?>> I add(String attr, B... builders) {
+    public final <B extends UIForAbstractSwing<?, ?>> I add( String attr, B... builders ) {
         LayoutManager layout = _component.getLayout();
         if ( _isBorderLayout(attr) && !(layout instanceof BorderLayout) ) {
             if ( layout instanceof MigLayout )
@@ -736,7 +738,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     @SafeVarargs
-    public final <B extends UIForAbstractSwing<?, ?>> I add(Attr attr, B... builders) {
+    public final <B extends UIForAbstractSwing<?, ?>> I add( CompAttr attr, B... builders ) {
         return this.add(attr.toString(), builders);
     }
 
@@ -774,7 +776,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     @SafeVarargs
-    public final <E extends JComponent> I add( Attr attr, E... components ) {
+    public final <E extends JComponent> I add( CompAttr attr, E... components ) {
         return this.add(attr.toString(), components);
     }
 

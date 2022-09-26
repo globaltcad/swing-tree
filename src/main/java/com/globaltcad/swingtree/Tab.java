@@ -17,7 +17,7 @@ import javax.swing.event.ChangeEvent;
  *  }</pre>
  *
  */
-public class Tab
+public final class Tab
 {
     private final JComponent _contents;
     private final String _title;
@@ -26,11 +26,11 @@ public class Tab
     private final UIAction<SimpleDelegate<JTabbedPane, ChangeEvent>> _onSelected;
 
     Tab(
-            JComponent contents,
-            String title,
-            Icon icon,
-            String tip,
-            UIAction<SimpleDelegate<JTabbedPane, ChangeEvent>> onSelected
+        JComponent contents,
+        String title,
+        Icon icon,
+        String tip,
+        UIAction<SimpleDelegate<JTabbedPane, ChangeEvent>> onSelected
     ) {
         LogUtil.nullArgCheck(title,"title",String.class);
         _contents = contents;

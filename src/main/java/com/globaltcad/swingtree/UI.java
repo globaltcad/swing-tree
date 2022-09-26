@@ -6,6 +6,8 @@ import com.globaltcad.swingtree.api.MenuBuilder;
 import com.globaltcad.swingtree.api.SwingBuilder;
 import com.globaltcad.swingtree.api.model.BasicTableModel;
 import com.globaltcad.swingtree.api.model.TableListDataSource;
+import com.globaltcad.swingtree.layout.CompAttr;
+import com.globaltcad.swingtree.layout.LayoutAttr;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -30,34 +32,37 @@ import java.util.function.Supplier;
  */
 public final class UI
 {
-    // Mig layout constants:
-    public static Attr FILL     = Attr.of("fill");
-    public static Attr FILL_X     = Attr.of("fillx");
-    public static Attr FILL_Y     = Attr.of("filly");
-    public static Attr WRAP     = Attr.of("wrap");
-    public static Attr SPAN     = Attr.of("SPAN");
-    public static Attr GROW     = Attr.of("grow");
-    public static Attr GROW_X   = Attr.of("growx");
-    public static Attr GROW_Y   = Attr.of("growy");
-    public static Attr SHRINK   = Attr.of("shrink");
-    public static Attr SHRINK_X = Attr.of("shrinkx");
-    public static Attr SHRINK_Y = Attr.of("shrinky");
-    public static Attr CENTER   = Attr.of("center");
-    public static Attr PUSH     = Attr.of("push");
-    public static Attr PUSH_X   = Attr.of("pushx");
-    public static Attr PUSH_Y   = Attr.of("pushy");
-    public static Attr LEFT     = Attr.of("left");
-    public static Attr RIGHT    = Attr.of("right");
-    public static Attr TOP      = Attr.of("top");
-    public static Attr BOTTOM   = Attr.of("bottom");
-    public static Attr FLOW_X   = Attr.of("flowx");
-    public static Attr FLOW_Y   = Attr.of("flowy");
-    public static Attr ALIGN_X  = Attr.of("alignx");
-    public static Attr ALIGN_Y  = Attr.of("aligny");
-    public static Attr INS(int insets) { return Attr.of("ins " + insets); }
-    public static Attr INSETS(int insets) { return Attr.of("insets " + insets); }
-    public static Attr INS(int top, int left, int bottom, int right) { return Attr.of("insets " + top + " " + left + " " + bottom + " " + right); }
-    public static Attr INSETS(int top, int left, int bottom, int right) { return Attr.of("insets " + top + " " + left + " " + bottom + " " + right); }
+    // Common Mig layout constants:
+    public static LayoutAttr FILL     = LayoutAttr.of("fill");
+    public static LayoutAttr FILL_X     = LayoutAttr.of("fillx");
+    public static LayoutAttr FILL_Y     = LayoutAttr.of("filly");
+    public static LayoutAttr INS(int insets) { return LayoutAttr.of("ins " + insets); }
+    public static LayoutAttr INSETS(int insets) { return LayoutAttr.of("insets " + insets); }
+    public static LayoutAttr INS(int top, int left, int bottom, int right) { return LayoutAttr.of("insets " + top + " " + left + " " + bottom + " " + right); }
+    public static LayoutAttr INSETS(int top, int left, int bottom, int right) { return LayoutAttr.of("insets " + top + " " + left + " " + bottom + " " + right); }
+    public static LayoutAttr WRAP(int times) { return LayoutAttr.of( "wrap " + times ); }
+    public static LayoutAttr FLOW_X   = LayoutAttr.of("flowx");
+    public static LayoutAttr FLOW_Y   = LayoutAttr.of("flowy");
+
+    public static CompAttr WRAP     = CompAttr.of("wrap");
+    public static CompAttr SPAN     = CompAttr.of("SPAN");
+    public static CompAttr SPAN(int times) { return CompAttr.of( "span " + times ); }
+    public static CompAttr GROW     = CompAttr.of("grow");
+    public static CompAttr GROW_X   = CompAttr.of("growx");
+    public static CompAttr GROW_Y   = CompAttr.of("growy");
+    public static CompAttr SHRINK   = CompAttr.of("shrink");
+    public static CompAttr SHRINK_X = CompAttr.of("shrinkx");
+    public static CompAttr SHRINK_Y = CompAttr.of("shrinky");
+    public static CompAttr SHRINK(int weight)  { return CompAttr.of("shrink "+weight); }
+    public static CompAttr SHRINK_X(int weight)  { return CompAttr.of("shrinkx "+weight); }
+    public static CompAttr SHRINK_Y(int weight)  { return CompAttr.of("shrinky "+weight); }
+    public static CompAttr PUSH     = CompAttr.of("push");
+    public static CompAttr PUSH_X   = CompAttr.of("pushx");
+    public static CompAttr PUSH_Y   = CompAttr.of("pushy");
+    public static CompAttr PUSH(int weight)  { return CompAttr.of("push "+weight); }
+    public static CompAttr PUSH_X(int weight) { return CompAttr.of("pushx "+weight); }
+    public static CompAttr PUSH_Y(int weight) { return CompAttr.of("pushy "+weight); }
+    public static CompAttr SKIP(int cells) { return CompAttr.of("skip "+cells); }
 
 
     private UI(){} // This is a static API
@@ -688,7 +693,7 @@ public final class UI
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code attr} is {@code null}.
      */
-    public static UIForPanel<JPanel> panel(Attr attr) {
+    public static UIForPanel<JPanel> panel(LayoutAttr attr) {
         LogUtil.nullArgCheck(attr, "attr", String.class);
         return panel(attr.toString());
     }

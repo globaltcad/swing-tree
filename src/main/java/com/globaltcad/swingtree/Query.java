@@ -4,7 +4,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
-class Query
+final class Query
 {
     private final Component _current;
     private final Map<String, List<Component>> _tree = new LinkedHashMap<>();
