@@ -47,15 +47,22 @@ public final class UI
     public static CompAttr WRAP     = CompAttr.of("wrap");
     public static CompAttr SPAN     = CompAttr.of("SPAN");
     public static CompAttr SPAN(int times) { return CompAttr.of( "span " + times ); }
+    public static CompAttr SPAN(int xTimes, int yTimes) { return CompAttr.of( "span " + xTimes + " " + yTimes ); }
+    public static CompAttr SPAN_X(int times) { return CompAttr.of( "spanx " + times ); }
+    public static CompAttr SPAN_Y(int times) { return CompAttr.of( "spany " + times ); }
     public static CompAttr GROW     = CompAttr.of("grow");
     public static CompAttr GROW_X   = CompAttr.of("growx");
     public static CompAttr GROW_Y   = CompAttr.of("growy");
+    public static CompAttr GROW(int weight) { return CompAttr.of( "grow " + weight ); }
+    public static CompAttr GROW_X(int weight) { return CompAttr.of( "growx " + weight ); }
+    public static CompAttr GROW_Y(int weight) { return CompAttr.of( "growy " + weight ); }
     public static CompAttr SHRINK   = CompAttr.of("shrink");
     public static CompAttr SHRINK_X = CompAttr.of("shrinkx");
     public static CompAttr SHRINK_Y = CompAttr.of("shrinky");
     public static CompAttr SHRINK(int weight)  { return CompAttr.of("shrink "+weight); }
     public static CompAttr SHRINK_X(int weight)  { return CompAttr.of("shrinkx "+weight); }
     public static CompAttr SHRINK_Y(int weight)  { return CompAttr.of("shrinky "+weight); }
+    public static CompAttr SHRINK_PRIO(int priority)  { return CompAttr.of("shrinkprio "+priority); }
     public static CompAttr PUSH     = CompAttr.of("push");
     public static CompAttr PUSH_X   = CompAttr.of("pushx");
     public static CompAttr PUSH_Y   = CompAttr.of("pushy");
@@ -63,6 +70,11 @@ public final class UI
     public static CompAttr PUSH_X(int weight) { return CompAttr.of("pushx "+weight); }
     public static CompAttr PUSH_Y(int weight) { return CompAttr.of("pushy "+weight); }
     public static CompAttr SKIP(int cells) { return CompAttr.of("skip "+cells); }
+    public static CompAttr SPLIT(int cells) { return CompAttr.of("split "+cells); }
+    public static CompAttr WIDTH(int min, int pref, int max) { return CompAttr.of("width "+min+":"+pref+":"+max); }
+    public static CompAttr HEIGHT(int min, int pref, int max) { return CompAttr.of("height "+min+":"+pref+":"+max); }
+    public static CompAttr PAD(int size) { return PAD(size, size, size, size); }
+    public static CompAttr PAD(int top, int left, int bottom, int right) { return CompAttr.of("pad "+top+" "+left+" "+bottom+" "+right); }
 
 
     private UI(){} // This is a static API
