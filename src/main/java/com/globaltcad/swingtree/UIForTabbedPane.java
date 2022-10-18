@@ -4,6 +4,7 @@ import com.globaltcad.swingtree.api.UIAction;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
+import java.awt.event.MouseEvent;
 
 /**
  *  A swing tree builder node for {@link JTabbedPane} instances.
@@ -19,11 +20,20 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
     public UIForTabbedPane(P component) { super(component); }
 
     public final UIForTabbedPane<P> add(Tab tab) {
+        final int index = _component.getTabCount();
         if ( tab.onSelection() != null ) {
-            int index = _component.getTabCount();
             _component.addChangeListener(e -> {
                 if ( index == _component.getSelectedIndex() )
                     tab.onSelection().accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));
+            });
+        }
+        if ( tab.onMouseClick() != null ) {
+            _component.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if ( index == _component.getSelectedIndex() )
+                        tab.onMouseClick().accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));
+                }
             });
         }
         _component.addTab(tab.title(), tab.icon(), tab.contents(), tab.tip());
