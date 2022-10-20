@@ -666,7 +666,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      */
-    public static UIForPanel<JPanel> panel() { return of(new JPanel()).with(new MigLayout()); }
+    public static UIForPanel<JPanel> panel() { return of(new JPanel()).withLayout(new MigLayout()); }
 
     public static UIForPanel<JPanel> panel(String attr, String colConstraints, String rowConstraints) {
         return of(new JPanel()).withLayout(attr, colConstraints, rowConstraints);
@@ -1399,6 +1399,7 @@ public final class UI
             this.component = component;
             frame.add(component);
             frame.setSize(1000, 1000);
+            frame.pack(); // Otherwise some components resize strangely or are not shown at all...
             frame.setVisible(true);
         }
 

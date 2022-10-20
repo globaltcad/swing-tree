@@ -105,7 +105,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param key the new client property key which may be used for styles or layout managers.
      * @param value the new client property value.
      */
-    public final I withProperty(String key, String value) {
+    public final I withProperty( String key, String value ) {
         _component.putClientProperty(key, value);
         return (I) this;
     }
@@ -116,8 +116,349 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param border The {@link Border} which should be set for the wrapped component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I with(Border border) {
+    public final I withBorder( Border border ) {
         _component.setBorder( border );
+        return (I) this;
+    }
+
+    /**
+     *  Use this to define an empty {@link Border} with the provided insets.
+     *
+     * @param top The top inset.
+     * @param left The left inset.
+     * @param bottom The bottom inset.
+     * @param right The right inset.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorder( int top, int left, int bottom, int right ) {
+        _component.setBorder(BorderFactory.createEmptyBorder(top, left, bottom, right));
+        return (I) this;
+    }
+
+    /**
+     *  Use this to define a titled empty {@link Border} with the provided insets.
+     *
+     * @param title The title of the border.
+     * @param top The top inset.
+     * @param left The left inset.
+     * @param bottom The bottom inset.
+     * @param right The right inset.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorderTitled(String title, int top, int left, int bottom, int right ) {
+        LogUtil.nullArgCheck( title, "title", String.class );
+    	_component.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(top, left, bottom, right), title));
+    	return (I) this;
+    }
+
+    /**
+     *  Use this to define an empty {@link Border} with the provided insets.
+     *
+     * @param topBottom The top and bottom insets.
+     * @param leftRight The left and right insets.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorder( int topBottom, int leftRight ) {
+        return withEmptyBorder(topBottom, leftRight, topBottom, leftRight);
+    }
+
+    /**
+     *  Use this to define a titled empty {@link Border} with the provided insets.
+     *
+     * @param title The title of the border.
+     * @param topBottom The top and bottom insets.
+     * @param leftRight The left and right insets.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorderTitled(String title, int topBottom, int leftRight ) {
+        LogUtil.nullArgCheck( title, "title", String.class );
+        return withEmptyBorderTitled( title, topBottom, leftRight, topBottom, leftRight );
+    }
+
+    /**
+     *  Use this to define an empty {@link Border} with the provided insets.
+     *
+     * @param all The insets for all sides.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorder( int all ) {
+        return withEmptyBorder(all, all, all, all);
+    }
+
+    /**
+     *  Use this to define a titled empty {@link Border} with the provided insets.
+     *
+     * @param title The title of the border.
+     * @param all The insets for all sides.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorderTitled(String title, int all ) {
+        LogUtil.nullArgCheck( title, "title", String.class );
+        return withEmptyBorderTitled(title, all, all, all, all);
+    }
+
+    /**
+     *  Use this to define a line {@link Border} with the provided color and insets.
+     *
+     * @param color The color of the line border.
+     * @param thickness The thickness of the line border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLineBorder( Color color, int thickness ) {
+        LogUtil.nullArgCheck( color, "color", Color.class );
+        _component.setBorder(BorderFactory.createLineBorder(color, thickness));
+        return (I) this;
+    }
+
+    /**
+     *  Use this to define a titled line {@link Border} with the provided color and insets.
+     *
+     * @param title The title of the border.
+     * @param color The color of the line border.
+     * @param thickness The thickness of the line border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLineBorderTitled( String title, Color color, int thickness ) {
+        LogUtil.nullArgCheck( title, "title", String.class );
+        LogUtil.nullArgCheck( color, "color", Color.class );
+        _component.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color, thickness), title));
+        return (I) this;
+    }
+
+    /**
+     *  Use this to define a line {@link Border} with the provided color and a default thickness of {@code 1}.
+     *
+     * @param color The color of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLineBorder( Color color ) {
+        LogUtil.nullArgCheck( color, "color", Color.class );
+        return withLineBorder(color, 1);
+    }
+
+    /**
+     *  Use this to define a titled line {@link Border} with the provided color and a default thickness of {@code 1}.
+     *
+     * @param title The title of the border.
+     * @param color The color of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLineBorderTitled( String title, Color color ) {
+        LogUtil.nullArgCheck( title, "title", String.class );
+        LogUtil.nullArgCheck( color, "color", Color.class );
+        return withLineBorderTitled( title, color, 1 );
+    }
+
+    /**
+     *  Use this to attach a rounded line {@link Border} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param color The color of the border.
+     * @param thickness The thickness of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorder( Color color, int thickness ) {
+        LogUtil.nullArgCheck( color, "color", Color.class );
+        _component.setBorder(BorderFactory.createLineBorder(color, thickness, true));
+        return (I) this;
+    }
+
+    /**
+     *  Use this to attach a titled rounded line {@link Border} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param title The title of the border.
+     * @param color The color of the border.
+     * @param thickness The thickness of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorderTitled( String title, Color color, int thickness ) {
+        LogUtil.nullArgCheck( title, "title", String.class );
+        LogUtil.nullArgCheck( color, "color", Color.class );
+        _component.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color, thickness, true), title));
+        return (I) this;
+    }
+
+    /**
+     *  Use this to attach a rounded line {@link Border} with the provided
+     *  color and a default thickness of {@code 1} to the {@link JComponent}.
+     *
+     * @param color The color of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorder( Color color ) {
+        LogUtil.nullArgCheck( color, "color", Color.class );
+        return withRoundedLineBorder(color, 1);
+    }
+
+    /**
+     *  Use this to attach a titled rounded line {@link Border} with the provided
+     *  color and a default thickness of {@code 1} to the {@link JComponent}.
+     *
+     * @param title The title of the border.
+     * @param color The color of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorderTitled( String title, Color color ) {
+        LogUtil.nullArgCheck( title, "title", String.class );
+        LogUtil.nullArgCheck( color, "color", Color.class );
+        return withRoundedLineBorderTitled( title, color, 1 );
+    }
+
+    /**
+     *  Use this to attach a rounded black line {@link Border} with
+     *  a thickness of {@code 1} to the {@link JComponent}.
+     *
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorder() {
+        return withRoundedLineBorder(Color.BLACK, 1);
+    }
+
+    /**
+     *  Use this to attach a titled rounded black line {@link Border} with
+     *  a thickness of {@code 1} to the {@link JComponent}.
+     *
+     * @param title The title of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorderTitled( String title ) {
+        LogUtil.nullArgCheck( title, "title", String.class );
+        return withRoundedLineBorderTitled( title, Color.BLACK, 1 );
+    }
+
+    /**
+     *  Use this to attach a {@link javax.swing.border.MatteBorder} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param color The color of the border.
+     * @param top The top inset.
+     * @param left The left inset.
+     * @param bottom The bottom inset.
+     * @param right The right inset.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withMatteBorder( Color color, int top, int left, int bottom, int right ) {
+        LogUtil.nullArgCheck( color, "color", Color.class );
+        _component.setBorder(BorderFactory.createMatteBorder(top, left, bottom, right, color));
+        return (I) this;
+    }
+
+    /**
+     *  Use this to attach a titled {@link javax.swing.border.MatteBorder} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param title The title of the border.
+     * @param color The color of the border.
+     * @param top The top inset.
+     * @param left The left inset.
+     * @param bottom The bottom inset.
+     * @param right The right inset.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withMatteBorderTitled( String title, Color color, int top, int left, int bottom, int right ) {
+        LogUtil.nullArgCheck( title, "title", String.class );
+        LogUtil.nullArgCheck( color, "color", Color.class );
+        _component.setBorder(BorderFactory.createTitledBorder(BorderFactory.createMatteBorder(top, left, bottom, right, color), title));
+        return (I) this;
+    }
+
+    /**
+     *  Use this to attach a {@link javax.swing.border.MatteBorder} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param color The color of the border.
+     * @param topBottom The top and bottom insets.
+     * @param leftRight The left and right insets.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withMatteBorder( Color color, int topBottom, int leftRight ) {
+        LogUtil.nullArgCheck( color, "color", Color.class );
+        return withMatteBorder(color, topBottom, leftRight, topBottom, leftRight);
+    }
+
+    /**
+     *  Use this to attach a titled {@link javax.swing.border.MatteBorder} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param title The title of the border.
+     * @param color The color of the border.
+     * @param topBottom The top and bottom insets.
+     * @param leftRight The left and right insets.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withMatteBorderTitled( String title, Color color, int topBottom, int leftRight ) {
+        LogUtil.nullArgCheck( title, "title", String.class );
+        LogUtil.nullArgCheck( color, "color", Color.class );
+        return withMatteBorderTitled(title, color, topBottom, leftRight, topBottom, leftRight);
+    }
+
+    /**
+     *  Use this to attach a {@link javax.swing.border.MatteBorder} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param color The color of the border.
+     * @param all The insets for all sides.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withMatteBorder( Color color, int all ) {
+        LogUtil.nullArgCheck( color, "color", Color.class );
+        return withMatteBorder(color, all, all, all, all);
+    }
+
+    /**
+     *  Use this to attach a titled {@link javax.swing.border.MatteBorder} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param title The title of the border.
+     * @param color The color of the border.
+     * @param all The insets for all sides.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withMatteBorderTitled( String title, Color color, int all ) {
+        LogUtil.nullArgCheck( title, "title", String.class );
+        LogUtil.nullArgCheck( color, "color", Color.class );
+        return withMatteBorderTitled(title, color, all, all, all, all);
+    }
+
+    /**
+     *  Use this to attach a {@link javax.swing.border.CompoundBorder} with the provided
+     *  borders to the {@link JComponent}.
+     *
+     * @param first The first border.
+     * @param second The second border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withCompoundBorder( Border first, Border second ) {
+        LogUtil.nullArgCheck( first, "first", Border.class );
+        LogUtil.nullArgCheck( second, "second", Border.class );
+        _component.setBorder(BorderFactory.createCompoundBorder(first, second));
+        return (I) this;
+    }
+
+    /**
+     *  Use this to attach a titled {@link javax.swing.border.CompoundBorder} with the
+     *  provided borders to the {@link JComponent}.
+     *
+     * @param title The title of the border.
+     * @param first The first border.
+     * @param second The second border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withCompoundBorderTitled( String title, Border first, Border second ) {
+        _component.setBorder(BorderFactory.createTitledBorder(BorderFactory.createCompoundBorder(first, second), title));
+        return (I) this;
+    }
+
+    /**
+     *  Use this to attach a {@link javax.swing.border.TitledBorder} with the provided title.
+     *
+     * @param title The title of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBorderTitled( String title ) {
+        LogUtil.nullArgCheck(title, "title", String.class);
+        _component.setBorder(BorderFactory.createTitledBorder(title));
         return (I) this;
     }
 
@@ -145,11 +486,41 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param layout The {@link LayoutManager} which should be supplied to the wrapped component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I with(LayoutManager layout) {
+    public final I withLayout(LayoutManager layout) {
         if ( migAlreadySet )
             throw new IllegalArgumentException("The mig layout has already been specified for this component!");
         _component.setLayout(layout);
         return (I) this;
+    }
+
+    /**
+     *  Use this to set a {@link FlowLayout} for the component wrapped by this builder. <br>
+     *  This is in essence a more convenient way than the alternative usage pattern involving
+     *  the {@link #peek(Peeker)} method to peek into the builder's component like so: <br>
+     *  <pre>{@code
+     *      UI.panel()
+     *          .peek( panel -> panel.setLayout(new FlowLayout()) );
+     *  }</pre>
+     *
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withFlowLayout() {
+        return this.withLayout(new FlowLayout());
+    }
+
+    /**
+     *  Use this to set a {@link GridLayout} for the component wrapped by this builder. <br>
+     *  This is in essence a more convenient way than the alternative usage pattern involving
+     *  the {@link #peek(Peeker)} method to peek into the builder's component like so: <br>
+     *  <pre>{@code
+     *      UI.panel()
+     *          .peek( panel -> panel.setLayout(new GridLayout()) );
+     *  }</pre>
+     *
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withGridLayout() {
+        return this.withLayout(new GridLayout());
     }
 
     /**

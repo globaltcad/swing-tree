@@ -168,7 +168,7 @@ class AdvancedUI {
                             )
                             .add("cell 1 0, growy",
                                 UI.panel("fill", "[grow]")
-                                .with(BorderFactory.createMatteBorder(0,0,1,0,Color.LIGHT_GRAY))
+                                .withBorder(BorderFactory.createMatteBorder(0,0,1,0,Color.LIGHT_GRAY))
                                 .add("cell 0 0, aligny top, growx", UI.button("REFRIDE"))
                                 .add("cell 0 1, aligny top, alignx center",
                                     UI.button("<html><i>...</i><html>")
@@ -193,18 +193,22 @@ class AdvancedUI {
                         )
                     )
                     .add("grow, span",
-                        UI.panel().with(new FlowLayout())
-                        .add(UI.button("1")).add(UI.button("2")).add(UI.button("3")).add(UI.button("4"))
-                        .add(UI.button("5")).add(UI.button("6")).add(UI.button("7")).add(UI.button("8"))
-                        .add(UI.button("9")).add(UI.button("0")).add(UI.button("#")).add(UI.button("@"))
+                        UI.panel("fill, ins 5").withBorderTitled("Kennros 104")
+                        .add("grow, span",
+                            UI.panel().withFlowLayout()
+                            .add(UI.button("1")).add(UI.button("2")).add(UI.button("3")).add(UI.button("4"))
+                            .add(UI.button("5")).add(UI.button("6")).add(UI.button("7")).add(UI.button("8"))
+                            .add(UI.button("9")).add(UI.button("0")).add(UI.button("#")).add(UI.button("@"))
+                        )
+                        .add("width 200:400:500, grow, push, span, alignx center",
+                           UI.panel().withFlowLayout().withEmptyBorderTitled("Perri:", 1)
+                           .withMinimumSize(200, 100)
+                           .apply( p -> {
+                               ('A'..'Z').each {l ->  p.add(UI.button(l)) }
+                           })
+                        )
                     )
-                    .add("width 200:400:500, grow, push, span, alignx center",
-                       UI.panel().with(new FlowLayout())
-                       .apply( p -> {
-                            26.times {i -> p.add(UI.button(String.valueOf((('A' as char) as int + i) as char)))}
-                       })
-                    )
-                    .add("push, span", UI.of(new JSeparator()))
+                    .add("push, span", UI.separator())
                     .add("aligny bottom, height 10:100%:100, growx, growy, span, wrap",
                         UI.scrollPane().add(
                             UI.textArea("...iuncte...").isEditableIf(false)

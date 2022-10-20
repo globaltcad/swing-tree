@@ -94,10 +94,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
                              .add(
                                  BorderLayout.CENTER,
                                  UI.of(new JRadioButton("Button 2 (CENTER)")).id("B2")
-                                         .peek(
-                                             button ->
-                                                         button.setPreferredSize(new Dimension(200, 100))
-                                         )
+                                 .peek(button -> button.setPreferredSize(new Dimension(200, 100)) )
                              )
                              .add(
                                  BorderLayout.LINE_START,

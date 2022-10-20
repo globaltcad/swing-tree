@@ -53,7 +53,7 @@ public class Form extends JPanel
 					.makePlain()
 					.onClick( e -> {/* does something */} )
 				)
-				.with(BorderFactory.createMatteBorder(0,0,1,0,Color.LIGHT_GRAY))
+				.withBorder(BorderFactory.createMatteBorder(0,0,1,0,Color.LIGHT_GRAY))
 			)
 			.add("cell 0 2, grow",
 				UI.panel(debug+"fill, insets 0 0 0 0","[grow][grow][grow]")
