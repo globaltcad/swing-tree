@@ -35,11 +35,10 @@ public class Calculator extends JPanel
                 )
             )
             .add("grow",
-                UI.panel("fill, ins 0")
+                UI.panel("fill, ins 0, wrap 3")
                 .apply( it -> {
-                    String[] labels = {"7", "8", "9", "4", "5", "6", "1", "2", "3", "0", ".", "C"};
-                    for ( int i = 0; i < labels.length; i++ )
-                        it.add("grow" + ( i % 3 == 2 ? ",wrap" : "" ), UI.button(labels[i]));
+                    String[] labels = new String[]{"7", "8", "9", "4", "5", "6", "1", "2", "3", "0", ".", "C"};
+                    for ( String label : labels ) it.add("grow", UI.button(label));
                 }),
                 UI.panel("fill, ins 0")
                 .add("grow", UI.button("-").withProperty("JButton.buttonType", "roundRect"))
