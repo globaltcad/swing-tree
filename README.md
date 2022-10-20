@@ -70,15 +70,12 @@ UI.of(this/*JPanel subtype*/).withLayout("fill, insets 10")
        )
    )
    .add("grow",
-      UI.panel("fill, ins 0")
+      UI.panel("fill, ins 0, wrap 3")
       .apply( it -> {
          String[] labels = {
-            "7", "8", "9", "4", "5", "6", "1", "2", "3", "0", ".", "C"
+            "7","8","9","4","5","6","1","2","3","0",".","C"
          };
-         for ( int i = 0; i < labels.length; i++ )
-            it.add("grow" + ( i % 3 == 2 ? ", wrap" : "" ), 
-               UI.button(labels[i])
-            );
+         for ( var l : labels ) it.add("grow", UI.button(l));
       }),
       UI.panel("fill, ins 0")
       .add("grow", 
