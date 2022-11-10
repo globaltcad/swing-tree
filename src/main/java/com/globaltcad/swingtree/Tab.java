@@ -22,6 +22,7 @@ import java.awt.event.MouseListener;
 public final class Tab
 {
     private final JComponent _contents;
+    private final JComponent _headerComponent;
     private final String _title;
     private final Icon _icon;
     private final String _tip;
@@ -31,14 +32,19 @@ public final class Tab
 
     Tab(
         JComponent contents,
+        JComponent headerComponent,
         String title,
         Icon icon,
         String tip,
         UIAction<SimpleDelegate<JTabbedPane, ChangeEvent>> onSelected,
         UIAction<SimpleDelegate<JTabbedPane, MouseEvent>> onMouseClick
     ) {
-        LogUtil.nullArgCheck(title,"title",String.class);
+        if ( headerComponent == null )
+            LogUtil.nullArgCheck(title,"title",String.class);
+        if ( title == null )
+            LogUtil.nullArgCheck(headerComponent,"headerComponent",JComponent.class);
         _contents = contents;
+        _headerComponent = headerComponent;
         _title = title;
         _icon = icon;
         _tip = tip;
@@ -54,7 +60,7 @@ public final class Tab
         LogUtil.nullArgCheck(icon,"icon",Icon.class);
         if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
         if ( _icon != null ) throw new IllegalArgumentException("Icon already specified!");
-        return new Tab(_contents, _title, icon, _tip, _onSelected, _onMouseClick);
+        return new Tab(_contents, _headerComponent, _title, icon, _tip, _onSelected, _onMouseClick);
     }
 
     /**
@@ -65,17 +71,29 @@ public final class Tab
         LogUtil.nullArgCheck(tip,"tip",String.class);
         if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
         if ( _tip != null ) throw new IllegalArgumentException("Tip already specified!");
-        return new Tab(_contents, _title, _icon, tip, _onSelected, _onMouseClick);
+        return new Tab(_contents, _headerComponent, _title, _icon, tip, _onSelected, _onMouseClick);
+    }
+
+    public final Tab withHeader( JComponent headerComponent ) {
+        LogUtil.nullArgCheck(headerComponent,"headerComponent",JComponent.class);
+        if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
+        if ( _headerComponent != null ) throw new IllegalArgumentException("Header component already specified!");
+        return new Tab(_contents, headerComponent, _title, _icon, _tip, _onSelected, _onMouseClick);
+    }
+
+    public final Tab withHeader( UIForAbstractSwing<?,?> headerComponent ) {
+        LogUtil.nullArgCheck(headerComponent,"headerComponent",UIForAbstractSwing.class);
+        return this.withHeader( headerComponent.getComponent() );
     }
 
     public final Tab add(UIForAbstractSwing<?,?> contents) {
         if ( _contents != null ) throw new IllegalArgumentException("Contents already specified!");
-        return new Tab(contents.getComponent(), _title, _icon, _tip, _onSelected, _onMouseClick);
+        return new Tab(contents.getComponent(), _headerComponent, _title, _icon, _tip, _onSelected, _onMouseClick);
     }
 
     public final Tab add(JComponent contents) {
         if ( _contents != null ) throw new IllegalArgumentException("Contents already specified!");
-        return new Tab(contents, _title, _icon, _tip, _onSelected, _onMouseClick);
+        return new Tab(contents, _headerComponent, _title, _icon, _tip, _onSelected, _onMouseClick);
     }
 
     /**
@@ -84,7 +102,7 @@ public final class Tab
      */
     public final Tab onSelection( UIAction<SimpleDelegate<JTabbedPane, ChangeEvent>> onSelected ) {
         if ( _onSelected != null ) throw new IllegalArgumentException("Selection event already specified!");
-        return new Tab(_contents, _title, _icon, _tip, onSelected, _onMouseClick);
+        return new Tab(_contents, _headerComponent, _title, _icon, _tip, onSelected, _onMouseClick);
     }
 
     /**
@@ -96,7 +114,7 @@ public final class Tab
      */
     public final Tab onMouseClick( UIAction<SimpleDelegate<JTabbedPane, MouseEvent>> onClick ) {
         if ( _onMouseClick != null ) throw new IllegalArgumentException("Mouse click event already specified!");
-        return new Tab(_contents, _title, _icon, _tip, _onSelected, onClick);
+        return new Tab(_contents, _headerComponent, _title, _icon, _tip, _onSelected, onClick);
     }
 
     final JComponent contents() { return _contents; }
@@ -106,6 +124,8 @@ public final class Tab
     final Icon icon() { return _icon; }
 
     final String tip() { return _tip; }
+
+    final JComponent headerContents() { return _headerComponent; }
 
     final UIAction<SimpleDelegate<JTabbedPane, ChangeEvent>> onSelection() {
         return _onSelected;

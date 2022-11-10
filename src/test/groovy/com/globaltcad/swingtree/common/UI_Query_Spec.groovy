@@ -69,5 +69,4 @@ class UI_Query_Spec extends Specification
 
 
 
-
 }

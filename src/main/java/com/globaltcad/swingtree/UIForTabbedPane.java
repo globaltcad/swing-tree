@@ -37,6 +37,8 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
             });
         }
         _component.addTab(tab.title(), tab.icon(), tab.contents(), tab.tip());
+        if ( tab.headerContents() != null )
+            _component.setTabComponentAt(index, tab.headerContents());
         return this;
     }
 

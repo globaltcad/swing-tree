@@ -87,28 +87,28 @@ class Basic_UI_Builder_Examples_Spec extends Specification
              def tree =
                      Tree.of(
                          UI.of(new JPanel()).id("Root")
-                             .add(
-                                 BorderLayout.PAGE_START,
-                                 UI.of(new JButton("Button 1 (PAGE_START)")).id("B1")
-                             )
-                             .add(
-                                 BorderLayout.CENTER,
-                                 UI.of(new JRadioButton("Button 2 (CENTER)")).id("B2")
-                                 .peek(button -> button.setPreferredSize(new Dimension(200, 100)) )
-                             )
-                             .add(
-                                 BorderLayout.LINE_START,
-                                 UI.of(new JButton("Button 3 (LINE_START)")).id("B3")
-                             )
-                             .add(
-                                 BorderLayout.PAGE_END,
-                                 UI.of(new JButton("Long-Named Button 4 (PAGE_END)")).id("B4")
-                             )
-                             .add(
-                                 BorderLayout.LINE_END,
-                                 UI.of(new JButton("5 (LINE_END)")).id("B5")
-                             )
-                             .get(JPanel)
+                         .add(
+                             BorderLayout.PAGE_START,
+                             UI.of(new JButton("Button 1 (PAGE_START)")).id("B1")
+                         )
+                         .add(
+                             BorderLayout.CENTER,
+                             UI.of(new JRadioButton("Button 2 (CENTER)")).id("B2")
+                             .peek(button -> button.setPreferredSize(new Dimension(200, 100)) )
+                         )
+                         .add(
+                             BorderLayout.LINE_START,
+                             UI.of(new JButton("Button 3 (LINE_START)")).id("B3")
+                         )
+                         .add(
+                             BorderLayout.PAGE_END,
+                             UI.of(new JButton("Long-Named Button 4 (PAGE_END)")).id("B4")
+                         )
+                         .add(
+                             BorderLayout.LINE_END,
+                             UI.of(new JButton("5 (LINE_END)")).id("B5")
+                         )
+                         .get(JPanel)
                      )
         and : 'We do this little trick to remove hash code...'
             tree.entrySet().each {
@@ -173,6 +173,93 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             list.getListeners(ListSelectionListener.class).size() == 3
     }
 
+    def 'A tabbed pane can be created and populated in a declarative way.'()
+    {
+        when :
+            def tabbedPane =
+                UI.tabbedPane(UI.Position.LEFT).id("Tabs")
+                .add(
+                    UI.tab("Tab 1")
+                    .onSelection(it -> {/*something*/})
+                    .add(UI.label("Tab 1 content"))
+                )
+                .add(
+                    UI.tab("Tab 2")
+                    .withTip("Tab 2 tip")
+                    .add(UI.label("Tab 2 content")))
+                .add(
+                    UI.tab("Tab 3")
+                    .onMouseClick(it -> {/*something*/})
+                    .add(UI.label("Tab 3 content")))
+                .get(JTabbedPane)
+        then :
+            tabbedPane.getTabCount() == 3
+            tabbedPane.getTitleAt(0) == "Tab 1"
+            tabbedPane.getTitleAt(1) == "Tab 2"
+            tabbedPane.getTitleAt(2) == "Tab 3"
+        and : 'The tabbed pane has only titles but no header components:'
+            tabbedPane.getTabComponentAt(0) == null
+            tabbedPane.getTabComponentAt(1) == null
+            tabbedPane.getTabComponentAt(2) == null
+    }
+
+    def 'The tab buttons of a tabbed pane can have custom components.'()
+    {
+        when :
+            def tabbedPane =
+                UI.tabbedPane(UI.Position.RIGHT).id("Tabs")
+                .add(
+                    UI.tab("Tab 1")
+                    .withHeader(UI.label("Tab 1 header"))
+                    .add(UI.label("Tab 1 content"))
+                )
+                .add(
+                    UI.tab("Tab 2")
+                    .withHeader(UI.label("Tab 2 header"))
+                    .add(UI.label("Tab 2 content")))
+                .add(
+                    UI.tab("Tab 3")
+                    .withHeader(UI.label("Tab 3 header"))
+                    .add(UI.label("Tab 3 content")))
+                .get(JTabbedPane)
+        then :
+            tabbedPane.getTabCount() == 3
+            tabbedPane.getTitleAt(0) == "Tab 1"
+            tabbedPane.getTitleAt(1) == "Tab 2"
+            tabbedPane.getTitleAt(2) == "Tab 3"
+        and : 'The tabbed pane has header components:'
+            tabbedPane.getTabComponentAt(0) instanceof JLabel
+            tabbedPane.getTabComponentAt(1) instanceof JLabel
+            tabbedPane.getTabComponentAt(2) instanceof JLabel
+    }
+
+    def 'Tab header components can be passed to the "tab" factory method instead of the title.'()
+    {
+        when :
+            def tabbedPane =
+                UI.tabbedPane(UI.Position.BOTTOM).id("Tabs")
+                .add(
+                    UI.tab(UI.label("Tab 1 header"))
+                    .add(UI.label("Tab 1 content"))
+                )
+                .add(
+                    UI.tab(UI.label("Tab 2 header"))
+                    .add(UI.label("Tab 2 content")))
+                .add(
+                    UI.tab(UI.label("Tab 3 header"))
+                    .add(UI.label("Tab 3 content")))
+                .get(JTabbedPane)
+        then :
+            tabbedPane.getTabCount() == 3
+            tabbedPane.getTitleAt(0) == ""
+            tabbedPane.getTitleAt(1) == ""
+            tabbedPane.getTitleAt(2) == ""
+        and : 'The tabbed pane has header components:'
+            tabbedPane.getTabComponentAt(0) instanceof JLabel
+            tabbedPane.getTabComponentAt(1) instanceof JLabel
+            tabbedPane.getTabComponentAt(2) instanceof JLabel
+    }
+
     /**
      *  Use this to take a look at what the UIMake produces...
      */
@@ -181,29 +268,29 @@ class Basic_UI_Builder_Examples_Spec extends Specification
     {
         expect :
             UI.of(new JFrame("Test"))
-                .peek(frame -> frame.add(
-                        UI.of(new JPanel())
-                                .add(BorderLayout.PAGE_START, new JButton("Button 1 (PAGE_START)"))
-                                .add(
-                                        BorderLayout.CENTER,
-                                        UI.of(new JRadioButton("Button 2 (CENTER)"))
-                                                .peek(
-                                                        button ->
-                                                                button.setPreferredSize(new Dimension(200, 100))
-                                                )
-                                )
-                                .add(BorderLayout.LINE_START, new JButton("Button 3 (LINE_START)"))
-                                .add(BorderLayout.PAGE_END, new JButton("Long-Named Button 4 (PAGE_END)"))
-                                .add(BorderLayout.LINE_END, new JButton("5 (LINE_END)"))
-                                .get(JPanel)
-                ))
-                .peek(
-                    frame -> {
-                        frame.setSize(300, 300)
-                        frame.show()
-                    }
+            .peek(frame -> frame.add(
+                UI.of(new JPanel())
+                .add(BorderLayout.PAGE_START, new JButton("Button 1 (PAGE_START)"))
+                .add(
+                    BorderLayout.CENTER,
+                    UI.of(new JRadioButton("Button 2 (CENTER)"))
+                    .peek(
+                        button ->
+                                button.setPreferredSize(new Dimension(200, 100))
+                    )
                 )
-                != null
+                .add(BorderLayout.LINE_START, new JButton("Button 3 (LINE_START)"))
+                .add(BorderLayout.PAGE_END, new JButton("Long-Named Button 4 (PAGE_END)"))
+                .add(BorderLayout.LINE_END, new JButton("5 (LINE_END)"))
+                .get(JPanel)
+            ))
+            .peek(
+                frame -> {
+                    frame.setSize(300, 300)
+                    frame.show()
+                }
+            )
+            != null
     }
 
     /**

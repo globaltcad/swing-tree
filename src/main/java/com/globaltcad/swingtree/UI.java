@@ -613,9 +613,47 @@ public final class UI
      * @return A {@link Tab} instance containing everything needed to be added to a {@link JTabbedPane}.
      * @throws IllegalArgumentException if {@code title} is {@code null}.
      */
-    public static Tab tab(String title) {
+    public static Tab tab( String title ) {
         LogUtil.nullArgCheck(title, "title", String.class);
-        return new Tab(null, title, null, null, null, null);
+        return new Tab(null, null, title, null, null, null, null);
+    }
+
+    /**
+     *  Use this to add tabs to a {@link JTabbedPane} by
+     *  passing {@link Tab} instances to {@link UIForTabbedPane} builder like so: <br>
+     *  <pre>{@code
+     *      UI.tabbedPane()
+     *      .add(UI.tab(new JButton("X")).add(UI.panel().add(..)))
+     *      .add(UI.tab(new JLabel("Hi!")).withTip("I give info!").add(UI.label("read me")))
+     *      .add(UI.tab(new JPanel()).add(UI.button("click me")))
+     *  }</pre>
+     *
+     * @param component The component displayed on the tab button.
+     * @return A {@link Tab} instance containing everything needed to be added to a {@link JTabbedPane}.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
+     */
+    public static Tab tab( JComponent component ) {
+        LogUtil.nullArgCheck(component, "component", Component.class);
+        return new Tab(null, component, null, null, null, null, null);
+    }
+
+    /**
+     *  Use this to add tabs to a {@link JTabbedPane} by
+     *  passing {@link Tab} instances to {@link UIForTabbedPane} builder like so: <br>
+     *  <pre>{@code
+     *      UI.tabbedPane()
+     *      .add(UI.tab(UI.button("X")).add(UI.panel().add(..)))
+     *      .add(UI.tab(UI.label("Hi!")).withTip("I give info!").add(UI.label("read me")))
+     *      .add(UI.tab(UI.of(...)).with(someIcon).add(UI.button("click me")))
+     *  }</pre>
+     *
+     * @param builder The builder wrapping the component displayed on the tab button.
+     * @return A {@link Tab} instance containing everything needed to be added to a {@link JTabbedPane}.
+     * @throws IllegalArgumentException if {@code builder} is {@code null}.
+     */
+    public static Tab tab( UIForAbstractSwing<?, ?> builder ) {
+        LogUtil.nullArgCheck(builder, "builder", UIForAbstractSwing.class);
+        return new Tab(null, builder.getComponent(), null, null, null, null, null);
     }
 
     /**
@@ -624,7 +662,7 @@ public final class UI
      * @return A builder instance for the provided {@link JMenu}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
-    public static <M extends JMenu> UIForMenu<M> of(M component) {
+    public static <M extends JMenu> UIForMenu<M> of( M component ) {
         LogUtil.nullArgCheck(component, "component", JMenu.class);
         return new UIForMenu<>(component);
     }
