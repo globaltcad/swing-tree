@@ -6,6 +6,7 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 /**
  *  A swing tree builder node for {@link JTabbedPane} instances.
@@ -28,15 +29,18 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
                     tab.onSelection().accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));
             });
         }
-        if ( tab.onMouseClick() != null ) {
-            _component.addMouseListener(new java.awt.event.MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    if ( index == _component.getSelectedIndex() )
-                        tab.onMouseClick().accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));
-                }
-            });
-        }
+        MouseListener mouseListener =
+                new java.awt.event.MouseAdapter() {
+                    @Override
+                    public void mouseClicked( MouseEvent e ) {
+                        if ( index == _component.getSelectedIndex() )
+                            tab.onMouseClick().accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));
+                    }
+                };
+
+        if ( tab.onMouseClick() != null )
+            _component.addMouseListener( mouseListener );
+
         _component.addTab(tab.title(), tab.icon(), tab.contents(), tab.tip());
         if ( tab.headerContents() != null ) {
             JComponent header = tab.headerContents();
@@ -44,10 +48,12 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
                 // We want both title and user component in the header!
                 header =
                     UI.panel("fill, ins 0").withBackground(new Color(0,0,0,0))
-                    .doIf( tab.tip()!=null, it->it.withTooltip(tab.tip()) )
+                    .doIf( tab.tip() != null, it->it.withTooltip(tab.tip()) )
+                    .doIf( tab.onMouseClick() != null, it->it.getComponent().addMouseListener(mouseListener) )
                     .add("shrink",
                         UI.label(tab.title()).withBackground(new Color(0,0,0,0))
                         .doIf( tab.tip()!=null, it->it.withTooltip(tab.tip()) )
+                        .doIf( tab.onMouseClick() != null, it->it.getComponent().addMouseListener(mouseListener) )
                     )
                     .add("grow", tab.headerContents())
                     .getComponent();
