@@ -227,10 +227,13 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             tabbedPane.getTitleAt(0) == "Tab 1"
             tabbedPane.getTitleAt(1) == "Tab 2"
             tabbedPane.getTitleAt(2) == "Tab 3"
-        and : 'The tabbed pane has header components:'
-            tabbedPane.getTabComponentAt(0) instanceof JLabel
-            tabbedPane.getTabComponentAt(1) instanceof JLabel
-            tabbedPane.getTabComponentAt(2) instanceof JLabel
+        and : 'The tabbed pane has both title labels and header components:'
+            tabbedPane.getTabComponentAt(0) instanceof JPanel // wrapping both the title and the header
+            tabbedPane.getTabComponentAt(1) instanceof JPanel
+            tabbedPane.getTabComponentAt(2) instanceof JPanel
+            ((JPanel)tabbedPane.getTabComponentAt(0)).getComponentCount() == 2
+            ((JPanel)tabbedPane.getTabComponentAt(1)).getComponentCount() == 2
+            ((JPanel)tabbedPane.getTabComponentAt(2)).getComponentCount() == 2
     }
 
     def 'Tab header components can be passed to the "tab" factory method instead of the title.'()

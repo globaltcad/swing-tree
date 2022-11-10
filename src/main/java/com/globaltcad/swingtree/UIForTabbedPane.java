@@ -4,6 +4,7 @@ import com.globaltcad.swingtree.api.UIAction;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 
 /**
@@ -37,8 +38,22 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
             });
         }
         _component.addTab(tab.title(), tab.icon(), tab.contents(), tab.tip());
-        if ( tab.headerContents() != null )
-            _component.setTabComponentAt(index, tab.headerContents());
+        if ( tab.headerContents() != null ) {
+            JComponent header = tab.headerContents();
+            if ( tab.title() != null ) {
+                // We want both title and user component in the header!
+                header =
+                    UI.panel("fill, ins 0").withBackground(new Color(0,0,0,0))
+                    .doIf( tab.tip()!=null, it->it.withTooltip(tab.tip()) )
+                    .add("shrink",
+                        UI.label(tab.title()).withBackground(new Color(0,0,0,0))
+                        .doIf( tab.tip()!=null, it->it.withTooltip(tab.tip()) )
+                    )
+                    .add("grow", tab.headerContents())
+                    .getComponent();
+            }
+            _component.setTabComponentAt(index, header);
+        }
         return this;
     }
 

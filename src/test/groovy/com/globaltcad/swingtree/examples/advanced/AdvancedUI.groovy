@@ -70,7 +70,7 @@ class AdvancedUI {
                         UI.tabbedPane().id("APIC-Tabs")
                         .apply( p -> {
                             Data.pic.size().times {
-                                i -> p.add(UI.tab("APIC$i").add(
+                                i -> p.add(UI.tab("APIC$i").withHeader(new JButton("x")).add(
                                     UI.panel("fill")
                                     .apply(inner -> {
                                         Data.descr.keySet().each {label -> {
