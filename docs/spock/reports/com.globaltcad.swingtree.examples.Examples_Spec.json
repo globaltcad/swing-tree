@@ -1,7 +1,7 @@
 {
   "className":"com.globaltcad.swingtree.examples.Examples_Spec",
   "title":"Execution and Validation of Example Code",
-  "narrative":"This specification ensures that the\n    various UI examples in the test suite, \n    run successfully and also produce\n    UIs with expected states.",
+  "narrative":"This specification ensures that the\n    various UI examples in the test suite,\n    run successfully and also produce\n    UIs with expected states.",
   "subjects":[],
   "statistics":{
     "runs":"5",
@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.718 seconds"
+    "duration":"0.434 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"The advanced UI define in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.529 seconds",
+      "duration":"0.308 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -37,7 +37,7 @@
     {
       "id":"The form UI define in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.096 seconds",
+      "duration":"0.076 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -54,7 +54,7 @@
     {
       "id":"The calculator UI defined in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.043 seconds",
+      "duration":"0.027 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -69,7 +69,7 @@
     {
       "id":"The simple Table-UI example has the expected state.",
       "result":"PASS",
-      "duration":"0.031 seconds",
+      "duration":"0.011 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -94,7 +94,7 @@
     {
       "id":"The todo app UI defined in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.011 seconds",
+      "duration":"0.006 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

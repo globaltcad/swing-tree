@@ -3,14 +3,14 @@ package com.globaltcad.swingtree;
 import com.globaltcad.swingtree.api.Buildable;
 import com.globaltcad.swingtree.api.model.BasicTableModel;
 import com.globaltcad.swingtree.api.model.TableListDataSource;
+import com.globaltcad.swingtree.api.model.TableMapDataSource;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<T>, T>
 {
@@ -127,7 +127,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @return This builder node.
      * @param <E> The type of the table entry {@link Object}s.
      */
-    public final <E> UIForTable<T> with(UI.TableData model, TableListDataSource<E> dataSource) {
+    public final <E> UIForTable<T> with(UI.ListData model, TableListDataSource<E> dataSource ) {
         boolean isRowMajor = model.isRowMajor();
         boolean isEditable = model.isEditable();
         if ( isRowMajor ) {
@@ -172,11 +172,25 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
         return this;
     }
 
-    private static abstract class ListBasedTableModel<E> extends AbstractTableModel {
+    /**
+     *  Use this instead of {@link JTable#setModel(TableModel)} if your table data can be represented based
+     *  on a map of column names to lists of table entries (basically a column major matrix).  <br>
+     *  This method will automatically create a {@link AbstractTableModel} instance for you.
+     *
+     * @param model An enum which configures the modifiability of the table in a readable fashion.
+     * @param dataSource The {@link TableMapDataSource} returning a column major map based matrix which will be used to populate the table.
+     * @return This builder node.
+     * @param <E> The type of the table entry {@link Object}s.
+     */
+    public final <E> UIForTable<T> with(UI.MapData model, TableMapDataSource<E> dataSource ) {
+        _component.setModel(new MapBasedColumnMajorTableModel<>(model.isEditable(), dataSource));
+        return this;
+    }
 
+    private static abstract class ListBasedTableModel<E> extends AbstractTableModel
+    {
         private final TableListDataSource<E> dataSource;
         private final boolean isEditable;
-
 
         ListBasedTableModel(boolean isEditable, TableListDataSource<E> dataSource) {
             this.isEditable = isEditable;
@@ -194,6 +208,71 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
             if ( rowIndex < 0 || rowIndex >= getRowCount()     ) return true;
             if ( colIndex < 0 || colIndex >= getColumnCount()  ) return true;
             return false;
+        }
+    }
+
+
+    private abstract static class MapBasedTableModel<E> extends AbstractTableModel
+    {
+        private final TableMapDataSource<E> dataSource;
+        private final boolean isEditable;
+
+        MapBasedTableModel(boolean isEditable, TableMapDataSource<E> dataSource) {
+            this.isEditable = isEditable;
+            this.dataSource = dataSource;
+        }
+
+        protected Map<String, List<E>> getData() {
+            Map<String, List<E>> data = dataSource.get();
+            if ( data == null ) return Collections.emptyMap(); // We really don't want null pointer in UIs.
+            return data;
+        }
+
+        @Override
+        public String getColumnName(int column) {
+            List<String> columnNames = new ArrayList<>(getData().keySet());
+            if ( column < 0 || column >= columnNames.size() ) return null;
+            return columnNames.get(column);
+        }
+
+        @Override public boolean isCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }
+
+
+        protected boolean isNotWithinBounds(int rowIndex, int colIndex) {
+            if ( rowIndex < 0 || rowIndex >= getRowCount()     ) return true;
+            if ( colIndex < 0 || colIndex >= getColumnCount()  ) return true;
+            return false;
+        }
+
+    }
+
+    private static class MapBasedColumnMajorTableModel<E> extends MapBasedTableModel<E>
+    {
+        MapBasedColumnMajorTableModel(boolean isEditable, TableMapDataSource<E> dataSource) {
+            super(isEditable, dataSource);
+        }
+
+        @Override
+        public int getRowCount() {
+            Map<String, List<E>> data = getData();
+            return data.values()
+                        .stream()
+                        .filter(Objects::nonNull) // Again, we don't want null pointer exceptions in UIs.
+                        .mapToInt(List::size)
+                        .max()
+                        .orElse(0);
+        }
+
+        @Override
+        public int getColumnCount() { return getData().size(); }
+
+        @Override
+        public Object getValueAt( int rowIndex, int columnIndex ) {
+            if ( isNotWithinBounds(rowIndex, columnIndex) ) return null;
+            List<E> column = getData().values().stream().skip(columnIndex).findFirst().orElse(null);
+            if ( column == null ) return null;
+            if ( rowIndex < 0 || rowIndex >= column.size() ) return null;
+            return column.get(rowIndex);
         }
     }
 

@@ -6,6 +6,7 @@ import com.globaltcad.swingtree.api.MenuBuilder;
 import com.globaltcad.swingtree.api.SwingBuilder;
 import com.globaltcad.swingtree.api.model.BasicTableModel;
 import com.globaltcad.swingtree.api.model.TableListDataSource;
+import com.globaltcad.swingtree.api.model.TableMapDataSource;
 import com.globaltcad.swingtree.layout.CompAttr;
 import com.globaltcad.swingtree.layout.LayoutAttr;
 import net.miginfocom.swing.MigLayout;
@@ -228,9 +229,24 @@ public final class UI
         }
     }
 
-    public enum TableData {
-        COLUMN_MAJOR, ROW_MAJOR,
-        COLUMN_MAJOR_EDITABLE, ROW_MAJOR_EDITABLE;
+    public enum Data {
+        EDITABLE, READ_ONLY;
+
+        final boolean isEditable() {
+            switch ( this ) {
+                case EDITABLE: return true;
+                case READ_ONLY: return false;
+            }
+            throw new RuntimeException();
+        }
+
+    }
+
+    public enum ListData {
+        COLUMN_MAJOR,
+        ROW_MAJOR,
+        COLUMN_MAJOR_EDITABLE,
+        ROW_MAJOR_EDITABLE;
 
         final boolean isEditable() {
             switch ( this ) {
@@ -256,6 +272,22 @@ public final class UI
             throw new RuntimeException();
         }
     }
+
+    public enum MapData {
+
+        EDITABLE,
+        READ_ONLY;
+
+        final boolean isEditable() {
+            switch ( this ) {
+                case EDITABLE: return true;
+                case READ_ONLY: return false;
+            }
+            throw new RuntimeException();
+        }
+
+    }
+
 
     /**
      *  This returns an instance of a generic swing tree builder
@@ -1257,9 +1289,15 @@ public final class UI
 
     public static UIForTable<JTable> table() { return of(new JTable()); }
 
-    public static <E> UIForTable<JTable> table(TableData dataFormat, TableListDataSource<E> dataSource) {
-        LogUtil.nullArgCheck(dataFormat, "dataFormat", TableData.class);
+    public static <E> UIForTable<JTable> table(ListData dataFormat, TableListDataSource<E> dataSource) {
+        LogUtil.nullArgCheck(dataFormat, "dataFormat", ListData.class);
         LogUtil.nullArgCheck(dataSource, "dataSource", TableListDataSource.class);
+        return of(new JTable()).with(dataFormat, dataSource);
+    }
+
+    public static <E> UIForTable<JTable> table(MapData dataFormat, TableMapDataSource<E> dataSource) {
+        LogUtil.nullArgCheck(dataFormat, "dataFormat", ListData.class);
+        LogUtil.nullArgCheck(dataSource, "dataSource", TableMapDataSource.class);
         return of(new JTable()).with(dataFormat, dataSource);
     }
 

@@ -15,10 +15,10 @@ class TableUI
         .add("grow",
             UI.panel("fill")
             .add("grow, span", UI.label("Row Major"))
-            .add("grow, span", UI.table(UI.TableData.ROW_MAJOR, {[["A", "B", "C"],["a", "b", "c"]]}).id("RM"))
+            .add("grow, span", UI.table(UI.ListData.ROW_MAJOR, {[["A", "B", "C"], ["a", "b", "c"]]}).id("RM"))
             .add("grow, span", UI.separator())
             .add("grow, span", UI.label("Column Major"))
-            .add("grow, span", UI.table(UI.TableData.COLUMN_MAJOR, {[["A", "B", "C"],["a", "b", "c"]]}).id("CM"))
+            .add("grow, span", UI.table(UI.ListData.COLUMN_MAJOR, {[["A", "B", "C"], ["a", "b", "c"]]}).id("CM"))
         )
         .add("grow", UI.separator(UI.Align.VERTICAL))
         .add("grow",

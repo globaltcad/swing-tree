@@ -16,7 +16,7 @@
     {
       "id":"We can build a JSplitButton.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
