@@ -9,19 +9,19 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.048 seconds"
+    "duration":"0.074 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can attach a simple table cell renderer to a JTable in just a few lines of code.",
       "result":"PASS",
-      "duration":"0.034 seconds",
+      "duration":"0.050 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["var node =","UI.table().withModel(","    UI.tableModel()","    .colNames(\"A\", \"B\").onColCount({2}).onGet({\"O\"})",")"]},
+        {"kind":"given","text":"","code":["var node =","        UI.table().withModel(","            UI.tableModel()","            .colNames(\"A\", \"B\").onColCount({2}).onGet({\"O\"})","        )"]},
 
         {"kind":"and","text":"","code":["var render = Mock(Render.Cell.Interpreter)"]},
 
@@ -39,7 +39,7 @@
     {
       "id":"We can create a simple table cell renderer through a UI factory method.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -48,11 +48,11 @@
 
         {"kind":"and","text":"","code":["var render = Mock(Render.Cell.Interpreter)"]},
 
-        {"kind":"expect","text":"","code":["node.component.getColumnName(0) == \"A\"","node.component.getColumnName(1) == \"B\"","node.component.getRowCount() == 2","node.component.getValueAt(0, 0) == \"a\"","node.component.getValueAt(0, 1) == \"b\""]},
+        {"kind":"expect","text":"","code":["node.component.getColumnName(0) == \"A\" // default column names","node.component.getColumnName(1) == \"B\"","node.component.getRowCount() == 2","node.component.getValueAt(0, 0) == \"a\"","node.component.getValueAt(0, 1) == \"b\""]},
 
         {"kind":"when","text":"","code":["node.withRendererForColumn(1, UI.renderTable().when(String).as(render) )"]},
 
-        {"kind":"and","text":"","code":["var found = node.get(JTable)",".columnModel",".getColumn(1)",".cellRenderer"]},
+        {"kind":"and","text":"","code":["var found = node.get(JTable)","        .columnModel","        .getColumn(1)","        .cellRenderer"]},
 
         {"kind":"and","text":"","code":["found.getTableCellRendererComponent(null, \"1\", false, false, 0, 0)"]},
 
@@ -64,7 +64,7 @@
     {
       "id":"We can create a simple column major table cell renderer through a UI factory method.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -73,11 +73,11 @@
 
         {"kind":"and","text":"","code":["var render = Mock(Render.Cell.Interpreter)"]},
 
-        {"kind":"expect","text":"","code":["node.component.getColumnName(0) == \"A\"","node.component.getColumnName(1) == \"B\"","node.component.getRowCount() == 3","node.component.getColumnCount() == 2","node.component.getValueAt(0, 0) == \"a\"","node.component.getValueAt(0, 1) == \"1\""]},
+        {"kind":"expect","text":"","code":["node.component.getColumnName(0) == \"A\" // default column names","node.component.getColumnName(1) == \"B\"","node.component.getRowCount() == 3","node.component.getColumnCount() == 2","node.component.getValueAt(0, 0) == \"a\"","node.component.getValueAt(0, 1) == \"1\""]},
 
         {"kind":"when","text":"","code":["node.withRendererForColumn(1, UI.renderTable().when(String).as(render) )"]},
 
-        {"kind":"and","text":"","code":["var found = node.get(JTable)",".columnModel",".getColumn(1)",".cellRenderer"]},
+        {"kind":"and","text":"","code":["var found = node.get(JTable)","        .columnModel","        .getColumn(1)","        .cellRenderer"]},
 
         {"kind":"and","text":"","code":["found.getTableCellRendererComponent(null, \"1\", false, false, 0, 0)"]},
 
@@ -89,12 +89,12 @@
     {
       "id":"A map can be used as a data source for tables.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.012 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["var node =","UI.table(UI.MapData.EDITABLE, { [\"X\":[\"a\", \"b\", \"c\"], \"Y\":[\"1\", \"2\", \"3\"]] })"]},
+        {"kind":"given","text":"","code":["var node =","        UI.table(UI.MapData.EDITABLE, { [\"X\":[\"a\", \"b\", \"c\"], \"Y\":[\"1\", \"2\", \"3\"]] })"]},
 
         {"kind":"and","text":"","code":["var render = Mock(Render.Cell.Interpreter)"]},
 
@@ -102,7 +102,7 @@
 
         {"kind":"when","text":"","code":["node.withRendererForColumn(1, UI.renderTable().when(String).as(render) )"]},
 
-        {"kind":"and","text":"","code":["var found = node.get(JTable)",".columnModel",".getColumn(1)",".cellRenderer"]},
+        {"kind":"and","text":"","code":["var found = node.get(JTable)","            .columnModel","            .getColumn(1)","            .cellRenderer"]},
 
         {"kind":"and","text":"","code":["found.getTableCellRendererComponent(null, \"1\", false, false, 0, 0)"]},
 

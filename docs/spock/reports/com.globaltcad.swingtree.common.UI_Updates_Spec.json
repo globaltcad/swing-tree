@@ -9,19 +9,19 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.203 seconds"
+    "duration":"0.214 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can register periodically called UI updates!",
       "result":"PASS",
-      "duration":"0.201 seconds",
+      "duration":"0.209 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["var node ="," UI.panel()",".add(","    UI.label(\"Label 1\").id(\"L1\")","    .doUpdates(20,it -> {","        it.component.text = LocalDateTime.now().toString()","    })",")"]},
+        {"kind":"given","text":"","code":["var node =","     UI.panel()","    .add(","        UI.label(\"Label 1\").id(\"L1\")","        .doUpdates(20,it -> {","            it.component.text = LocalDateTime.now().toString()","        })","    )"]},
 
         {"kind":"when","text":"","code":["Thread.sleep(200)"]},
 

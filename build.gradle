@@ -45,8 +45,7 @@ dependencies {
     testImplementation 'org.codehaus.groovy:groovy:3.0.12'
     testImplementation platform('org.spockframework:spock-bom:2.1-groovy-3.0')
     testImplementation 'org.spockframework:spock-core:2.1-groovy-3.0'
-
-    testImplementation 'com.github.gleethos:spock-reports:6f6933b'// A forked and fixed version
+    testImplementation 'com.athaydes:spock-reports:2.3.2-groovy-3.0'
 
     // if you don't already have slf4j-api and an implementation of it in the classpath, add this! (needed for reports)
     testImplementation 'org.slf4j:slf4j-api:1.7.30'

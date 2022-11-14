@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"1",
-    "duration":"0.215 seconds"
+    "duration":"0.225 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can add a list of components to the swing tree API and get a builder node in return.",
       "result":"PASS",
-      "duration":"0.102 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -35,7 +35,7 @@
     {
       "id":"Swing tree nests components (trough builder nodes).",
       "result":"PASS",
-      "duration":"0.009 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -64,7 +64,7 @@
     {
       "id":"We can easily define the cursor on a wrapped UI component",
       "result":"PASS",
-      "duration":"0.007 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -83,12 +83,12 @@
     {
       "id":"We can use the swing tree to build a valid Swing GUI tree.",
       "result":"PASS",
-      "duration":"0.036 seconds",
+      "duration":"0.093 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"when","text":"","code":["def tree =","Tree.of(","    UI.of(new JPanel()).id(\"Root\")","    .add(","        BorderLayout.PAGE_START,","        UI.of(new JButton(\"Button 1 (PAGE_START)\")).id(\"B1\")","    )","    .add(","        BorderLayout.CENTER,","        UI.of(new JRadioButton(\"Button 2 (CENTER)\")).id(\"B2\")","        .peek(button -> button.setPreferredSize(new Dimension(200, 100)) )","    )","    .add(","        BorderLayout.LINE_START,","        UI.of(new JButton(\"Button 3 (LINE_START)\")).id(\"B3\")","    )","    .add(","        BorderLayout.PAGE_END,","        UI.of(new JButton(\"Long-Named Button 4 (PAGE_END)\")).id(\"B4\")","    )","    .add(","        BorderLayout.LINE_END,","        UI.of(new JButton(\"5 (LINE_END)\")).id(\"B5\")","    )","    .get(JPanel)",")"]},
+        {"kind":"when","text":"","code":["def tree =","        Tree.of(","            UI.of(new JPanel()).id(\"Root\")","            .add(","                BorderLayout.PAGE_START,","                UI.of(new JButton(\"Button 1 (PAGE_START)\")).id(\"B1\")","            )","            .add(","                BorderLayout.CENTER,","                UI.of(new JRadioButton(\"Button 2 (CENTER)\")).id(\"B2\")","                .peek(button -> button.setPreferredSize(new Dimension(200, 100)) )","            )","            .add(","                BorderLayout.LINE_START,","                UI.of(new JButton(\"Button 3 (LINE_START)\")).id(\"B3\")","            )","            .add(","                BorderLayout.PAGE_END,","                UI.of(new JButton(\"Long-Named Button 4 (PAGE_END)\")).id(\"B4\")","            )","            .add(","                BorderLayout.LINE_END,","                UI.of(new JButton(\"5 (LINE_END)\")).id(\"B5\")","            )","            .get(JPanel)","        )"]},
 
         {"kind":"and","text":"We do this little trick to remove hash code...","code":["tree.entrySet().each {","    entry -> tree[entry.key] = entry.value.replaceAll(\"(\\\\@([0-9]?[abcdef]?)+)\", \"\")","}"]},
 
@@ -102,12 +102,12 @@
     {
       "id":"We can register various keyboard events in swing tree nodes.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"0.020 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"when","text":"","code":["def panel =","UI.of(new JPanel()).id(\"Root\")",".onKeyPressed(it -> {/*something*/})",".onPressed(Keyboard.Key.H, it -> {/*something*/})",".onKeyReleased(it -> {/*something*/})",".onReleased(Keyboard.Key.X, it -> {/*something*/})",".onKeyTyped(it -> {/*something*/})",".onTyped(Keyboard.Key.X, it -> {/*something*/})",".get(JPanel)"]},
+        {"kind":"when","text":"","code":["def panel =","        UI.of(new JPanel()).id(\"Root\")","        .onKeyPressed(it -> {/*something*/})","        .onPressed(Keyboard.Key.H, it -> {/*something*/})","        .onKeyReleased(it -> {/*something*/})","        .onReleased(Keyboard.Key.X, it -> {/*something*/})","        .onKeyTyped(it -> {/*something*/})","        .onTyped(Keyboard.Key.X, it -> {/*something*/})","        .get(JPanel)"]},
 
         {"kind":"then","text":"","code":["panel.getListeners(KeyListener.class).size() == 6"]}
       ],
@@ -117,12 +117,12 @@
     {
       "id":"We can register various UI focus events in swing tree nodes.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.007 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"when","text":"","code":["def panel =","UI.of(new JPanel()).id(\"Root\")",".onFocusGained(it -> {/*something*/})",".onFocusLost(it -> {/*something*/})",".get(JPanel)"]},
+        {"kind":"when","text":"","code":["def panel =","        UI.of(new JPanel()).id(\"Root\")","        .onFocusGained(it -> {/*something*/})","        .onFocusLost(it -> {/*something*/})","        .get(JPanel)"]},
 
         {"kind":"then","text":"","code":["panel.getListeners(FocusListener.class).size() == 2"]}
       ],
@@ -132,12 +132,12 @@
     {
       "id":"We can register list selection events on a JList based swing tree node.",
       "result":"PASS",
-      "duration":"0.011 seconds",
+      "duration":"0.021 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"when","text":"","code":["def list =","UI.of(new JList<>())",".onSelection(it -> {/*something*/})",".onSelection(it -> {/*something*/})",".onSelection(it -> {/*something*/})",".get(JList)"]},
+        {"kind":"when","text":"","code":["def list =","        UI.of(new JList<>())","        .onSelection(it -> {/*something*/})","        .onSelection(it -> {/*something*/})","        .onSelection(it -> {/*something*/})","        .get(JList)"]},
 
         {"kind":"then","text":"","code":["list.getListeners(ListSelectionListener.class).size() == 3"]}
       ],
@@ -147,12 +147,12 @@
     {
       "id":"A tabbed pane can be created and populated in a declarative way.",
       "result":"PASS",
-      "duration":"0.011 seconds",
+      "duration":"0.031 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"when","text":"","code":["def tabbedPane =","UI.tabbedPane(UI.Position.LEFT).id(\"Tabs\")",".add(","    UI.tab(\"Tab 1\")","    .onSelection(it -> {/*something*/})","    .add(UI.label(\"Tab 1 content\"))",")",".add(","    UI.tab(\"Tab 2\")","    .withTip(\"Tab 2 tip\")","    .add(UI.label(\"Tab 2 content\")))",".add(","    UI.tab(\"Tab 3\")","    .onMouseClick(it -> {/*something*/})","    .add(UI.label(\"Tab 3 content\")))",".get(JTabbedPane)"]},
+        {"kind":"when","text":"","code":["def tabbedPane =","    UI.tabbedPane(UI.Position.LEFT).id(\"Tabs\")","    .add(","        UI.tab(\"Tab 1\")","        .onSelection(it -> {/*something*/})","        .add(UI.label(\"Tab 1 content\"))","    )","    .add(","        UI.tab(\"Tab 2\")","        .withTip(\"Tab 2 tip\")","        .add(UI.label(\"Tab 2 content\")))","    .add(","        UI.tab(\"Tab 3\")","        .onMouseClick(it -> {/*something*/})","        .add(UI.label(\"Tab 3 content\")))","    .get(JTabbedPane)"]},
 
         {"kind":"then","text":"","code":["tabbedPane.getTabCount() == 3","tabbedPane.getTitleAt(0) == \"Tab 1\"","tabbedPane.getTitleAt(1) == \"Tab 2\"","tabbedPane.getTitleAt(2) == \"Tab 3\""]},
 
@@ -164,16 +164,16 @@
     {
       "id":"The tab buttons of a tabbed pane can have custom components.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.012 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"when","text":"","code":["def tabbedPane =","UI.tabbedPane(UI.Position.RIGHT).id(\"Tabs\")",".add(","    UI.tab(\"Tab 1\")","    .withHeader(UI.label(\"Tab 1 header\"))","    .add(UI.label(\"Tab 1 content\"))",")",".add(","    UI.tab(\"Tab 2\")","    .withHeader(UI.label(\"Tab 2 header\"))","    .add(UI.label(\"Tab 2 content\")))",".add(","    UI.tab(\"Tab 3\")","    .withHeader(UI.label(\"Tab 3 header\"))","    .add(UI.label(\"Tab 3 content\")))",".get(JTabbedPane)"]},
+        {"kind":"when","text":"","code":["def tabbedPane =","    UI.tabbedPane(UI.Position.RIGHT).id(\"Tabs\")","    .add(","        UI.tab(\"Tab 1\")","        .withHeader(UI.label(\"Tab 1 header\"))","        .add(UI.label(\"Tab 1 content\"))","    )","    .add(","        UI.tab(\"Tab 2\")","        .withHeader(UI.label(\"Tab 2 header\"))","        .add(UI.label(\"Tab 2 content\")))","    .add(","        UI.tab(\"Tab 3\")","        .withHeader(UI.label(\"Tab 3 header\"))","        .add(UI.label(\"Tab 3 content\")))","    .get(JTabbedPane)"]},
 
         {"kind":"then","text":"","code":["tabbedPane.getTabCount() == 3","tabbedPane.getTitleAt(0) == \"Tab 1\"","tabbedPane.getTitleAt(1) == \"Tab 2\"","tabbedPane.getTitleAt(2) == \"Tab 3\""]},
 
-        {"kind":"and","text":"The tabbed pane has both title labels and header components:","code":["tabbedPane.getTabComponentAt(0) instanceof JPanel","tabbedPane.getTabComponentAt(1) instanceof JPanel","tabbedPane.getTabComponentAt(2) instanceof JPanel","((JPanel)tabbedPane.getTabComponentAt(0)).getComponentCount() == 2","((JPanel)tabbedPane.getTabComponentAt(1)).getComponentCount() == 2","((JPanel)tabbedPane.getTabComponentAt(2)).getComponentCount() == 2"]}
+        {"kind":"and","text":"The tabbed pane has both title labels and header components:","code":["tabbedPane.getTabComponentAt(0) instanceof JPanel // wrapping both the title and the header","tabbedPane.getTabComponentAt(1) instanceof JPanel","tabbedPane.getTabComponentAt(2) instanceof JPanel","((JPanel)tabbedPane.getTabComponentAt(0)).getComponentCount() == 2","((JPanel)tabbedPane.getTabComponentAt(1)).getComponentCount() == 2","((JPanel)tabbedPane.getTabComponentAt(2)).getComponentCount() == 2"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -181,12 +181,12 @@
     {
       "id":"Tab header components can be passed to the \"tab\" factory method instead of the title.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"when","text":"","code":["def tabbedPane =","UI.tabbedPane(UI.Position.BOTTOM).id(\"Tabs\")",".add(","    UI.tab(UI.label(\"Tab 1 header\"))","    .add(UI.label(\"Tab 1 content\"))",")",".add(","    UI.tab(UI.label(\"Tab 2 header\"))","    .add(UI.label(\"Tab 2 content\")))",".add(","    UI.tab(UI.label(\"Tab 3 header\"))","    .add(UI.label(\"Tab 3 content\")))",".get(JTabbedPane)"]},
+        {"kind":"when","text":"","code":["def tabbedPane =","    UI.tabbedPane(UI.Position.BOTTOM).id(\"Tabs\")","    .add(","        UI.tab(UI.label(\"Tab 1 header\"))","        .add(UI.label(\"Tab 1 content\"))","    )","    .add(","        UI.tab(UI.label(\"Tab 2 header\"))","        .add(UI.label(\"Tab 2 content\")))","    .add(","        UI.tab(UI.label(\"Tab 3 header\"))","        .add(UI.label(\"Tab 3 content\")))","    .get(JTabbedPane)"]},
 
         {"kind":"then","text":"","code":["tabbedPane.getTabCount() == 3","tabbedPane.getTitleAt(0) == \"\"","tabbedPane.getTitleAt(1) == \"\"","tabbedPane.getTitleAt(2) == \"\""]},
 

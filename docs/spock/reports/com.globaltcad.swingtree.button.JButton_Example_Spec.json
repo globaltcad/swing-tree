@@ -9,19 +9,19 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.255 seconds"
+    "duration":"0.730 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can easily create a button with an associated action:",
       "result":"PASS",
-      "duration":"0.072 seconds",
+      "duration":"0.344 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We create a basic button which will a simple \"onClick\".","code":["var ui =","UI.button(\"I am displayed on the button!\")",".onClick( it -> it.component.setEnabled(false) )"]},
+        {"kind":"given","text":"We create a basic button which will a simple \"onClick\".","code":["var ui =","    UI.button(\"I am displayed on the button!\")","    .onClick( it -> it.component.setEnabled(false) )"]},
 
         {"kind":"expect","text":"The component wrapped by the UI builder is in fact a simple button:","code":["ui.component instanceof JButton"]},
 
@@ -37,12 +37,12 @@
     {
       "id":"A button will delegate its siblings within actions:",
       "result":"PASS",
-      "duration":"0.070 seconds",
+      "duration":"0.142 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We create a panel with a label and a button!","code":["var ui =","UI.panel()","    .add(UI.label(\"Button:\"))","    .add(","        UI.button(\"Click me!\")","        .onClick( it -> it.siblings.each {s -> s.setEnabled(false)} )","    )"]},
+        {"kind":"given","text":"We create a panel with a label and a button!","code":["var ui =","    UI.panel()","        .add(UI.label(\"Button:\"))","        .add(","            UI.button(\"Click me!\")","            .onClick( it -> it.siblings.each {s -> s.setEnabled(false)} )","        )"]},
 
         {"kind":"expect","text":"The components wrapped by the UI builder are as expected:","code":["ui.component.getComponent(0) instanceof JLabel","ui.component.getComponent(1) instanceof JButton"]},
 
@@ -58,12 +58,12 @@
     {
       "id":"We can go through the entire siblinghood, including the current button!",
       "result":"PASS",
-      "duration":"0.108 seconds",
+      "duration":"0.208 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We create a panel with some random components and a fancy click action","code":["var ui =","UI.panel()",".add(UI.textField(\"text field\"))",".add(UI.label(\"innocent label\"))",".add(","    UI.button(\"Click me!\")","    .onClick(it ->","        it.siblinghood.each {s -> { if ( s instanceof JLabel ) s.setText(\"I got hacked!\") }}","    )",")",".add(UI.spinner())"]},
+        {"kind":"given","text":"We create a panel with some random components and a fancy click action","code":["var ui =","    UI.panel()","    .add(UI.textField(\"text field\"))","    .add(UI.label(\"innocent label\"))","    .add(","        UI.button(\"Click me!\")","        .onClick(it ->","            it.siblinghood.each {s -> { if ( s instanceof JLabel ) s.setText(\"I got hacked!\") }}","        )","    )","    .add(UI.spinner())"]},
 
         {"kind":"when","text":"We simulate a user click...","code":["ui.component.getComponent(2).doClick()"]},
 
