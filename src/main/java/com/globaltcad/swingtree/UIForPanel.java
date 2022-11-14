@@ -7,5 +7,5 @@ import javax.swing.*;
  */
 public class UIForPanel<P extends JPanel> extends UIForAbstractSwing<UIForPanel<P>, P>
 {
-    protected UIForPanel(P component) { super(component); }
+    protected UIForPanel( P component ) { super(component); }
 }

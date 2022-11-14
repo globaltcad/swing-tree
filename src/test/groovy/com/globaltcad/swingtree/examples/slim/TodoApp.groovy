@@ -8,7 +8,7 @@ import static com.globaltcad.swingtree.UI.*
 
 // We import the "UI" class from the "swingtree" package statically:
 
-// This allows us to ommit the "UI." prefix when using the methods of the "UI" class.
+// This allows us to omit the "UI." prefix when using the methods of the "UI" class.
 
 class TodoApp extends JPanel
 {

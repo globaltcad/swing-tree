@@ -6,6 +6,7 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.Optional;
 
 /**
  *  An immutable data carrier exposing everything needed to configure a tab of a {@link JTabbedPane}.
@@ -117,19 +118,19 @@ public final class Tab
         return new Tab(_contents, _headerComponent, _title, _icon, _tip, _onSelected, onClick);
     }
 
-    final JComponent contents() { return _contents; }
+    final Optional<JComponent> contents() { return Optional.ofNullable(_contents); }
 
-    final String title() { return _title; }
+    final Optional<String> title() { return Optional.ofNullable(_title); }
 
-    final Icon icon() { return _icon; }
+    final Optional<Icon> icon() { return Optional.ofNullable(_icon); }
 
-    final String tip() { return _tip; }
+    final Optional<String> tip() { return Optional.ofNullable(_tip); }
 
-    final JComponent headerContents() { return _headerComponent; }
+    final Optional<JComponent> headerContents() { return Optional.ofNullable(_headerComponent); }
 
-    final UIAction<SimpleDelegate<JTabbedPane, ChangeEvent>> onSelection() {
-        return _onSelected;
+    final Optional<UIAction<SimpleDelegate<JTabbedPane, ChangeEvent>>> onSelection() {
+        return Optional.ofNullable(_onSelected);
     }
 
-    final UIAction<SimpleDelegate<JTabbedPane, MouseEvent>> onMouseClick() { return _onMouseClick; }
+    final Optional<UIAction<SimpleDelegate<JTabbedPane, MouseEvent>>> onMouseClick() { return Optional.ofNullable(_onMouseClick); }
 }

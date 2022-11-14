@@ -2,6 +2,8 @@ package com.globaltcad.swingtree;
 
 import com.globaltcad.swingtree.api.Peeker;
 
+import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -70,23 +72,46 @@ abstract class AbstractBuilder<I, C>
         return (I) this;
     }
 
-
     /**
-     *  Use this to build or not build UI based on a boolean condition value and a consumer
+     *  Use this to build or not build UI, based on a boolean condition value and a consumer
      *  lambda which continues the building process if the previous boolean is true.
      *  This builder will simply be supplied to the provided consumer lambda.
      *  Inside the second lambda, one can then continue building the UI while also not
      *  breaking the benefits of nesting and method chaining provided by this class...
-     *  <br><br>
+     *  <p>
+     *  This isin essence a more advanced version of {@link #apply(Consumer)}.
+     *  <br>
      *
      * @param condition The truth value which determines if the second consumer lambda will be executed.
      * @param building A Consumer lambda which simply consumes this builder.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public I doIf(boolean condition, Consumer<I> building) {
+    public I applyIf( boolean condition, Consumer<I> building ) {
         LogUtil.nullArgCheck(building, "building", Consumer.class);
         I builder = (I) this;
         if ( condition ) building.accept(builder);
+        return builder;
+    }
+
+
+    /**
+     *  Use this to build or not build UI, based on a provided {@link Optional} representing a consumer
+     *  lambda which continues the building process if is is present within the optional.
+     *  This builder will simply be supplied to the provided consumer lambda.
+     *  Inside the second lambda, one can then continue building the UI while also not
+     *  breaking the benefits of nesting and method chaining provided by this class...
+     *  <p>
+     *  This is in essence a more advanced version of {@link #applyIf(boolean, Consumer)}
+     *  and {@link #apply(Consumer)}.
+     *  <br>
+     *
+     * @param building An optional consumer lambda which simply consumes this builder node.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public I applyIfPresent( Optional<Consumer<I>> building ) {
+        LogUtil.nullArgCheck(building, "building", Optional.class);
+        I builder = (I) this;
+        building.ifPresent( buildingLambda -> buildingLambda.accept(builder) );
         return builder;
     }
 
@@ -101,9 +126,9 @@ abstract class AbstractBuilder<I, C>
      * @param building A Consumer lambda which simply consumes this builder.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public I apply(Consumer<I> building) {
+    public I apply( Consumer<I> building ) {
         LogUtil.nullArgCheck(building, "building", Consumer.class);
-        return doIf(true, building);
+        return applyIf(true, building);
     }
 
     /**
