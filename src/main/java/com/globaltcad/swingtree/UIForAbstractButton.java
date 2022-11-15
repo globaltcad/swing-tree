@@ -1,6 +1,7 @@
 package com.globaltcad.swingtree;
 
 import com.globaltcad.swingtree.api.UIAction;
+import com.globaltcad.swingtree.api.mvvm.Val;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,14 +31,29 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @param text The new text to be set for the wrapped button type.
      * @return This very builder to allow for method chaining.
      */
-    public final I withText(String text) {
+    public final I withText( String text ) {
         _component.setText(text);
         return (I) this;
+    }
+
+    public final I withText( Val<String> val ) {
+        val.onView(_component::setText);
+        return withText( val.get() );
     }
 
     public final I isSelectedIf(boolean isSelected) {
         _component.setSelected(isSelected);
         return (I) this;
+    }
+
+    /**
+     *  Use this to dynamically bind to a {@link com.globaltcad.swingtree.api.mvvm.Var}
+     *  instance which will be used to dynamically model the selection state of the
+     *  wrapped {@link AbstractButton} type.
+     */
+    public final I isSelectedIf( Val<Boolean> val ) {
+        val.onView(_component::setSelected);
+        return isSelectedIf( val.get() );
     }
 
     /**

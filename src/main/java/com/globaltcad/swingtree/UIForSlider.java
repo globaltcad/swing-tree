@@ -1,6 +1,7 @@
 package com.globaltcad.swingtree;
 
 import com.globaltcad.swingtree.api.UIAction;
+import com.globaltcad.swingtree.api.mvvm.Val;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -24,6 +25,36 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
     public final UIForSlider<S> onChange(UIAction<SimpleDelegate<JSlider, ChangeEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         _component.addChangeListener(e -> action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())) );
+        return this;
+    }
+
+    public final UIForSlider<S> withValue( Val<Integer> val ) {
+        val.onView(_component::setValue);
+        return this;
+    }
+
+    public final UIForSlider<S> withMin( Val<Integer> val ) {
+        val.onView(_component::setMinimum);
+        return this;
+    }
+
+    public final UIForSlider<S> withMax( Val<Integer> val ) {
+        val.onView(_component::setMaximum);
+        return this;
+    }
+
+    public final UIForSlider<S> withMin( int min ) {
+        _component.setMinimum( min );
+        return this;
+    }
+
+    public final UIForSlider<S> withMax( int max ) {
+        _component.setMaximum( max );
+        return this;
+    }
+
+    public final UIForSlider<S> withValue( int value ) {
+        _component.setValue( value );
         return this;
     }
 

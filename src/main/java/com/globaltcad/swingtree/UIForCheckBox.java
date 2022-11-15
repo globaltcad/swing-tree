@@ -8,4 +8,5 @@ import javax.swing.*;
 public class UIForCheckBox<B extends JCheckBox> extends UIForAbstractButton<UIForCheckBox<B>, B>
 {
     protected UIForCheckBox(B component) { super(component); }
+
 }

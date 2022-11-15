@@ -3,6 +3,7 @@ package com.globaltcad.swingtree;
 
 import com.globaltcad.swingtree.api.Peeker;
 import com.globaltcad.swingtree.api.UIAction;
+import com.globaltcad.swingtree.api.mvvm.Val;
 import com.globaltcad.swingtree.input.Keyboard;
 import com.globaltcad.swingtree.layout.CompAttr;
 import com.globaltcad.swingtree.layout.LayoutAttr;
@@ -42,7 +43,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    public UIForAbstractSwing(C component) { super(component); }
+    public UIForAbstractSwing( C component ) { super(component); }
 
     /**
      *  This method exposes a concise way to set an identifier for the component
@@ -56,7 +57,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *
      * @return The JComponent type which will be wrapped by this builder node.
      */
-    public final I id(String id) {
+    public final I id( String id ) {
         if ( idAlreadySet )
             throw new IllegalArgumentException("The id has already been specified for this component!");
         _component.setName(id);
@@ -70,10 +71,22 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param isVisible The truth value determining if the UI component should be visible or not.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public I isVisibleIf(boolean isVisible) {
+    public I isVisibleIf( boolean isVisible ) {
         _component.setVisible( isVisible );
         return (I) this;
     }
+
+    /**
+     *  Use this to make the wrapped UI component dynamically visible or invisible.
+     *
+     * @param isVisible The truth value determining if the UI component should be visible or not wrapped in a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public I isVisibleIf( Val<Boolean> isVisible ) {
+        isVisible.onView(_component::setVisible);
+        return isVisibleIf( isVisible.get() );
+    }
+
 
     /**
      *  Use this to enable or disable the wrapped UI component.
@@ -81,9 +94,20 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param isEnabled The truth value determining if the UI component should be enabled or not.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public I isEnabledIf(boolean isEnabled) {
+    public I isEnabledIf( boolean isEnabled ) {
         _component.setEnabled( isEnabled );
         return (I) this;
+    }
+
+    /**
+     *  Use this to dynamically enable or disable the wrapped UI component.
+     *
+     * @param isEnabled The truth value determining if the UI component should be enabled or not wrapped in a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public I isEnabledIf( Val<Boolean> isEnabled ) {
+        isEnabled.onView(_component::setEnabled);
+        return isEnabledIf( isEnabled.get() );
     }
 
     /**
@@ -122,6 +146,18 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
+     *  Use this to dynamically attach a border to the wrapped component.
+     *
+     * @param border The {@link Border} which should be set for the wrapped component wrapped in a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBorder( Val<Border> border ) {
+        border.onView(_component::setBorder);
+        return this.withBorder( border.get() );
+    }
+
+
+    /**
      *  Use this to define an empty {@link Border} with the provided insets.
      *
      * @param top The top inset.
@@ -145,7 +181,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param right The right inset.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withEmptyBorderTitled(String title, int top, int left, int bottom, int right ) {
+    public final I withEmptyBorderTitled( String title, int top, int left, int bottom, int right ) {
         LogUtil.nullArgCheck( title, "title", String.class );
     	_component.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(top, left, bottom, right), title));
     	return (I) this;
@@ -170,7 +206,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param leftRight The left and right insets.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withEmptyBorderTitled(String title, int topBottom, int leftRight ) {
+    public final I withEmptyBorderTitled( String title, int topBottom, int leftRight ) {
         LogUtil.nullArgCheck( title, "title", String.class );
         return withEmptyBorderTitled( title, topBottom, leftRight, topBottom, leftRight );
     }
@@ -192,7 +228,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param all The insets for all sides.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withEmptyBorderTitled(String title, int all ) {
+    public final I withEmptyBorderTitled( String title, int all ) {
         LogUtil.nullArgCheck( title, "title", String.class );
         return withEmptyBorderTitled(title, all, all, all, all);
     }
@@ -469,9 +505,21 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param type The {@link UI.Cursor} type defined by a simple enum exposed by this API.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I with(UI.Cursor type) {
+    public final I with( UI.Cursor type ) {
         _component.setCursor( new java.awt.Cursor( type.type ) );
         return (I) this;
+    }
+
+    /**
+     *  Use this to dynamically set the cursor type which should be displayed
+     *  when hovering over the UI component wrapped by this builder.
+     *
+     * @param type The {@link UI.Cursor} type defined by a simple enum exposed by this API wrapped in a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I with( Val<UI.Cursor> type ) {
+        type.onView(t -> _component.setCursor( new java.awt.Cursor( t.type ) ) );
+        return with( type.get() );
     }
 
     /**
@@ -486,7 +534,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param layout The {@link LayoutManager} which should be supplied to the wrapped component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withLayout(LayoutManager layout) {
+    public final I withLayout( LayoutManager layout ) {
         if ( migAlreadySet )
             throw new IllegalArgumentException("The mig layout has already been specified for this component!");
         _component.setLayout(layout);
@@ -603,6 +651,24 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
+     *  Use this to bind to a {@link com.globaltcad.swingtree.api.mvvm.Val}
+     *  containing a tooltip string.
+     *  This is a convenience method, which would
+     *  be equivalent to:
+     *  <pre>{@code
+     *      UI.button("Click Me")
+     *          .peek( button -> tip.onView(JButton::setToolTipText) );
+     *  }</pre>
+     *
+     * @param tip The tooltip which should be displayed when hovering over the tab header.
+     * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
+     */
+    public final I withTooltip( Val<String> tip ) {
+        tip.onView(_component::setToolTipText);
+        return this.withTooltip( tip.get() );
+    }
+
+    /**
      *  Use this to set the background color of the UI component
      *  wrapped by this builder.<br>
      *  This is in essence a convenience method, which avoid having to expose the underlying component
@@ -616,10 +682,28 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param color The background color which should be set for the UI component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withBackground(Color color) {
+    public final I withBackground( Color color ) {
         LogUtil.nullArgCheck(color, "color", Color.class);
         _component.setBackground(color);
         return (I) this;
+    }
+
+    /**
+     *  Use this to bind to a {@link com.globaltcad.swingtree.api.mvvm.Val}
+     *  containing a background color.
+     *  This is a convenience method, which would
+     *  be equivalent to:
+     *  <pre>{@code
+     *      UI.button("Click Me")
+     *          .peek( button -> bg.onView(JButton::setBackground) );
+     *  }</pre>
+     *
+     * @param bg The background color which should be set for the UI component wrapped by a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBackground( Val<Color> bg ) {
+        bg.onView(_component::setBackground);
+        return this.withBackground( bg.get() );
     }
 
     /**
@@ -634,9 +718,27 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param color The color of the foreground (usually text).
      * @return This very builder to allow for method chaining.
      */
-    public I withForeground(Color color) {
+    public I withForeground( Color color ) {
         _component.setForeground(color);
         return (I) this;
+    }
+
+    /**
+     *  Use this to bind to a {@link com.globaltcad.swingtree.api.mvvm.Val}
+     *  containing a foreground color.
+     *  This is a convenience method, which would
+     *  be equivalent to:
+     *  <pre>{@code
+     *      UI.button("Click Me")
+     *          .peek( button -> fg.onView(JButton::setForeground) );
+     *  }</pre>
+     *
+     * @param fg The foreground color which should be set for the UI component wrapped by a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withForeground( Val<Color> fg ) {
+        fg.onView(_component::setForeground);
+        return this.withForeground( fg.get() );
     }
 
     /**
@@ -645,9 +747,28 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param size The minimum {@link Dimension} of the component.
      * @return This very builder to allow for method chaining.
      */
-    public I withMinimumSize(Dimension size) {
+    public I withMinimumSize( Dimension size ) {
         _component.setMinimumSize(size);
         return (I) this;
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the maximum {@link Dimension} of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setMinimumSize(Dimension)} (Dimension)} on the underlying component. <br>
+     *  This is a convenience method, which would
+     *  be equivalent to:
+     *  <pre>{@code
+     *    UI.button("Click Me")
+     *    .peek( button -> size.onView(JButton::setMinimumSize) );
+     *    }</pre>
+     *
+     * @param size The minimum {@link Dimension} of the component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withMinimumSize( Val<Dimension> size ) {
+        size.onView(_component::setMinimumSize);
+        return this.withMinimumSize( size.get() );
     }
 
     /**
@@ -657,9 +778,23 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param height The minimum height of the component.
      * @return This very builder to allow for method chaining.
      */
-    public I withMinimumSize(int width, int height) {
+    public I withMinimumSize( int width, int height ) {
         _component.setMinimumSize(new Dimension(width, height));
         return (I) this;
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the minimum {@link Dimension} of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component. <br>
+     * @param width The minimum width of the component.
+     * @param height The minimum height of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withMinimumSize( Val<Integer> width, Val<Integer> height ) {
+        width.onView(w -> _component.setMinimumSize(new Dimension(w, _component.getMinimumSize().height)) );
+        height.onView(h -> _component.setMinimumSize(new Dimension(_component.getMinimumSize().width, h)) );
+        return this.withMinimumSize( width.get(), height.get() );
     }
 
     /**
@@ -668,10 +803,22 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param width The minimum width which should be set for the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public I withMinimumWidth(int width) {
+    public I withMinimumWidth( int width ) {
         _component.setMinimumSize(new Dimension(width, _component.getMinimumSize().height));
         return (I) this;
     }
+
+    /**
+     *  Use this to dynamically set only the minimum width of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component for you. <br>
+     * @param width The minimum width which should be set for the underlying component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withMinimumWidth( Val<Integer> width ) {
+        width.onView(w -> _component.setMinimumSize(new Dimension(w, _component.getMinimumSize().height)) );
+        return this.withMinimumWidth( width.get() );
+    }
+
 
     /**
      *  Use this to only set the minimum height of this {@link JComponent}. <br>
@@ -679,9 +826,20 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param height The minimum height which should be set for the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public I withMinimumHeight(int height) {
+    public I withMinimumHeight( int height ) {
         _component.setMinimumSize(new Dimension(_component.getMinimumSize().width, height));
         return (I) this;
+    }
+
+    /**
+     *  Use this to dynamically set only the minimum height of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component for you. <br>
+     * @param height The minimum height which should be set for the underlying component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withMinimumHeight( Val<Integer> height ) {
+        height.onView(h -> _component.setMinimumSize(new Dimension(_component.getMinimumSize().width, h)) );
+        return this.withMinimumHeight( height.get() );
     }
 
     /**
@@ -690,9 +848,21 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param size The maximum {@link Dimension} of the component.
      * @return This very builder to allow for method chaining.
      */
-    public I withMaximumSize(Dimension size) {
+    public I withMaximumSize( Dimension size ) {
         _component.setMaximumSize(size);
         return (I) this;
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the maximum {@link Dimension} of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component. <br>
+     * @param size The maximum {@link Dimension} of the component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withMaximumSize( Val<Dimension> size ) {
+        size.onView(_component::setMaximumSize);
+        return this.withMaximumSize( size.get() );
     }
 
     /**
@@ -702,9 +872,23 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param height The maximum height of the component.
      * @return This very builder to allow for method chaining.
      */
-    public I withMaximumSize(int width, int height) {
+    public I withMaximumSize( int width, int height ) {
         _component.setMaximumSize(new Dimension(width, height));
         return (I) this;
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the maximum {@link Dimension} of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component. <br>
+     * @param width The maximum width of the component.
+     * @param height The maximum height of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withMaximumSize( Val<Integer> width, Val<Integer> height ) {
+        width.onView(w -> _component.setMaximumSize(new Dimension(w, _component.getMaximumSize().height)) );
+        height.onView(h -> _component.setMaximumSize(new Dimension(_component.getMaximumSize().width, h)) );
+        return this.withMaximumSize( width.get(), height.get() );
     }
 
     /**
@@ -713,9 +897,20 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param width The maximum width which should be set for the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public I withMaximumWidth(int width) {
+    public I withMaximumWidth( int width ) {
         _component.setMaximumSize(new Dimension(width, _component.getMaximumSize().height));
         return (I) this;
+    }
+
+    /**
+     *  Use this to dynamically set only the maximum width of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component for you. <br>
+     * @param width The maximum width which should be set for the underlying component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withMaximumWidth( Val<Integer> width ) {
+        width.onView(w -> _component.setMaximumSize(new Dimension(w, _component.getMaximumSize().height)) );
+        return this.withMaximumWidth( width.get() );
     }
 
     /**
@@ -724,9 +919,20 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param height The maximum height which should be set for the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public I withMaximumHeight(int height) {
+    public I withMaximumHeight( int height ) {
         _component.setMaximumSize(new Dimension(_component.getMaximumSize().width, height));
         return (I) this;
+    }
+
+    /**
+     *  Use this to dynamically set only the maximum height of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component for you. <br>
+     * @param height The maximum height which should be set for the underlying component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withMaximumHeight( Val<Integer> height ) {
+        height.onView(h -> _component.setMaximumSize(new Dimension(_component.getMaximumSize().width, h)) );
+        return this.withMaximumHeight( height.get() );
     }
 
     /**
@@ -735,9 +941,21 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param size The preferred {@link Dimension} of the component.
      * @return This very builder to allow for method chaining.
      */
-    public I withPreferredSize(Dimension size) {
+    public I withPreferredSize( Dimension size ) {
         _component.setPreferredSize(size);
         return (I) this;
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the preferred {@link Dimension} of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component. <br>
+     * @param size The preferred {@link Dimension} of the component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withPreferredSize( Val<Dimension> size ) {
+        size.onView(v -> _component.setPreferredSize(v) );
+        return this.withPreferredSize( size.get() );
     }
 
     /**
@@ -747,9 +965,23 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param height The preferred height of the component.
      * @return This very builder to allow for method chaining.
      */
-    public I withPreferredSize(int width, int height) {
+    public I withPreferredSize( int width, int height ) {
         _component.setPreferredSize(new Dimension(width, height));
         return (I) this;
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the preferred {@link Dimension} of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component. <br>
+     * @param width The preferred width of the component.
+     * @param height The preferred height of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withPreferredSize( Val<Integer> width, Val<Integer> height ) {
+        width.onView(w -> _component.setPreferredSize(new Dimension(w, _component.getPreferredSize().height)) );
+        height.onView(h -> _component.setPreferredSize(new Dimension(_component.getPreferredSize().width, h)) );
+        return this.withPreferredSize( width.get(), height.get() );
     }
 
     /**
@@ -758,9 +990,20 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param width The preferred width which should be set for the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public I withPreferredWidth(int width) {
+    public I withPreferredWidth( int width ) {
         _component.setPreferredSize(new Dimension(width, _component.getPreferredSize().height));
         return (I) this;
+    }
+
+    /**
+     *  Use this to dynamically set only the preferred width of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component for you. <br>
+     * @param width The preferred width which should be set for the underlying component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withPreferredWidth( Val<Integer> width ) {
+        width.onView(w -> _component.setPreferredSize(new Dimension(w, _component.getPreferredSize().height)) );
+        return this.withPreferredWidth( width.get() );
     }
 
     /**
@@ -769,9 +1012,20 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param height The preferred height which should be set for the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public I withPreferredHeight(int height) {
+    public I withPreferredHeight( int height ) {
         _component.setPreferredSize(new Dimension(_component.getPreferredSize().width, height));
         return (I) this;
+    }
+
+    /**
+     *  Use this to dynamically set only the preferred height of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component for you. <br>
+     * @param height The preferred height which should be set for the underlying component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withPreferredHeight( Val<Integer> height ) {
+        height.onView(h -> _component.setPreferredSize(new Dimension(_component.getPreferredSize().width, h)) );
+        return this.withPreferredHeight( height.get() );
     }
 
     /**
@@ -784,7 +1038,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseClick(UIAction<SimpleDelegate<C, MouseEvent>> onClick) {
+    public final I onMouseClick( UIAction<SimpleDelegate<C, MouseEvent>> onClick ) {
         LogUtil.nullArgCheck(onClick, "onClick", UIAction.class);
         _component.addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) { onClick.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())); }
@@ -799,7 +1053,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onResize The resize action which will be called when the underlying component changes size.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onResize(UIAction<SimpleDelegate<C, ComponentEvent>> onResize) {
+    public final I onResize( UIAction<SimpleDelegate<C, ComponentEvent>> onResize ) {
         LogUtil.nullArgCheck(onResize, "onResize", UIAction.class);
         _component.addComponentListener(new ComponentAdapter() {
             @Override public void componentResized(ComponentEvent e) { onResize.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())); }
@@ -814,7 +1068,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onMoved The action lambda which will be executed once the component was moved / its position canged.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMoved(UIAction<SimpleDelegate<C, ComponentEvent>> onMoved) {
+    public final I onMoved( UIAction<SimpleDelegate<C, ComponentEvent>> onMoved ) {
         LogUtil.nullArgCheck(onMoved, "onMoved", UIAction.class);
         _component.addComponentListener(new ComponentAdapter() {
             @Override public void componentMoved(ComponentEvent e) { onMoved.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())); }
@@ -829,7 +1083,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onShown The {@link UIAction} which gets invoked when the component has been made visible.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onShown(UIAction<SimpleDelegate<C, ComponentEvent>> onShown) {
+    public final I onShown( UIAction<SimpleDelegate<C, ComponentEvent>> onShown ) {
         LogUtil.nullArgCheck(onShown, "onShown", UIAction.class);
         _component.addComponentListener(new ComponentAdapter() {
             @Override public void componentShown(ComponentEvent e) { onShown.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())); }
@@ -844,7 +1098,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onHidden The {@link UIAction} which gets invoked when the component has been made invisible.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onHidden(UIAction<SimpleDelegate<C, ComponentEvent>> onHidden) {
+    public final I onHidden( UIAction<SimpleDelegate<C, ComponentEvent>> onHidden ) {
         LogUtil.nullArgCheck(onHidden, "onHidden", UIAction.class);
         _component.addComponentListener(new ComponentAdapter() {
             @Override public void componentHidden(ComponentEvent e) { onHidden.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())); }

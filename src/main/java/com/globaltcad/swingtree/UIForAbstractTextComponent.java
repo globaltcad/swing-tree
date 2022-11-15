@@ -2,6 +2,7 @@ package com.globaltcad.swingtree;
 
 
 import com.globaltcad.swingtree.api.UIAction;
+import com.globaltcad.swingtree.api.mvvm.Val;
 
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -71,6 +72,11 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
     public final I withText(String text) {
         _component.setText(text);
         return (I) this;
+    }
+
+    public final I withText( Val<String> val ) {
+        val.onView(_component::setText);
+        return withText( val.get() );
     }
 
     /**

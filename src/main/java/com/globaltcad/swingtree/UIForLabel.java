@@ -1,5 +1,7 @@
 package com.globaltcad.swingtree;
 
+import com.globaltcad.swingtree.api.mvvm.Val;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -94,6 +96,11 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @return This very builder to allow for method chaining.
      */
     public final UIForLabel<L> withText(String text) { _component.setText(text); return this; }
+
+    public final UIForLabel<L> withText( Val<String> val ) {
+        val.onView(_component::setText);
+        return withText( val.get() );
+    }
 
     /**
      *  A convenience method to avoid peeking into this builder like so:

@@ -3,7 +3,6 @@ package com.globaltcad.swingtree;
 import com.globaltcad.swingtree.api.Peeker;
 
 import java.util.Optional;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**

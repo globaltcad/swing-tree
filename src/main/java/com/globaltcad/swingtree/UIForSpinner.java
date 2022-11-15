@@ -1,6 +1,7 @@
 package com.globaltcad.swingtree;
 
 import com.globaltcad.swingtree.api.UIAction;
+import com.globaltcad.swingtree.api.mvvm.Val;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -29,6 +30,28 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
     public final UIForSpinner<S> onChange(UIAction<SimpleDelegate<JSpinner, ChangeEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         _component.addChangeListener(e -> action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())) );
+        return this;
+    }
+
+    /**
+     * Sets the value of the spinner.
+     *
+     * @param value The value to set.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSpinner<S> withValue( Object value ) {
+        _component.setValue(value);
+        return this;
+    }
+
+    /**
+     * Sets the value of the spinner and also binds to said value.
+     *
+     * @param val The {@link com.globaltcad.swingtree.api.mvvm.Val} wrapper whose value should be set.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSpinner<S> withValue( Val<Object> val ) {
+        val.onView(_component::setValue);
         return this;
     }
 
