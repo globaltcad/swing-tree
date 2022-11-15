@@ -23,7 +23,7 @@ public interface Var<T> extends Val<T>
 	 */
 	static <T> Var<T> of( T iniValue ) {
 		Objects.requireNonNull(iniValue);
-		return Var.of( (Class<T>) iniValue.getClass(), iniValue, null );
+		return Var.of( (Class<T>) iniValue.getClass(), iniValue, UNNAMED );
 	}
 
 	
