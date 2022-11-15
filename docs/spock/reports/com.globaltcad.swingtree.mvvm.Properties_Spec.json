@@ -1,0 +1,100 @@
+{
+  "className":"com.globaltcad.swingtree.mvvm.Properties_Spec",
+  "title":"Properties",
+  "narrative":"Properties are a powerful tool to model the state \n    as well as business logic of your UI without actually depending on it.\n    This is especially useful for testing your UIs logic.\n    Therefore properties are a root concept in the Swing-Tree library.\n    The decoupling between your UI and the UIs state and logic \n    is achieved by binding properties to UI components.\n    This specification shows you how to use model UI state \n    and business logic with properties \n    and how to bind them to UI components.",
+  "subjects":[],
+  "statistics":{
+    "runs":"4",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"0.007 seconds"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"Properties are simple wrappers around a value",
+      "result":"PASS",
+      "duration":"0",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property using the \"of\" factory method.","code":["Var<String> property = Var.of(\"Hello World\")"]},
+
+        {"kind":"expect","text":"The property has the same value as the value we passed to the factory method.","code":["property.get() == \"Hello World\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"There are 2 types of properties, an immutable property, and its mutable sub-type.",
+      "result":"PASS",
+      "duration":"0",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Mutable properties are called \"Var\" and immutable properties are called \"Val\".\n            This distinction exists so that you can better encapsulating the mutable parts\n            of you business logic and UI state.\n            So if you want your UI to only display but not change a\n            property expose Val, if on the other hand it should\n            be able to change the state of the property, use Var!\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a mutable property...","code":["Var<Integer> mutable = Var.of(42)"]},
+
+        {"kind":"expect","text":"The property stores the value 42.","code":["mutable.get() == 42"]},
+
+        {"kind":"and","text":"It has the expected type.","code":["mutable.type() == Integer.class"]},
+
+        {"kind":"when","text":"We change the value of the mutable property.","code":["mutable.set(69)"]},
+
+        {"kind":"then","text":"The property stores the new value.","code":["mutable.get() == 69"]},
+
+        {"kind":"when","text":"We now downcast the mutable property to an immutable property.","code":["Val<Integer> immutable = mutable"]},
+
+        {"kind":"then","text":"The immutable property will only expose the \"get()\" method, but not \"set(..)\".","code":["immutable.get() == 69"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Properties can be bound by subscribing to them using the \"onView(..)\" method.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that bound Swing-Tree properties only have side effects\n            when they are deliberately triggered to execute their side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a mutable property...","code":["Var<String> mutable = Var.of(\"Tempeh\")"]},
+
+        {"kind":"and","text":"Something we want to have a side effect on:","code":["var list = []"]},
+
+        {"kind":"when","text":"We subscribe to the property using the \"onView(..)\" method.","code":["mutable.onView { list.add(it) }"]},
+
+        {"kind":"and","text":"We change the value of the property.","code":["mutable.set(\"Tofu\")"]},
+
+        {"kind":"then","text":"Nothing happens initially...","code":["list == []"]},
+
+        {"kind":"when","text":"We call the \"view()\" method on the property however...","code":["mutable.view()"]},
+
+        {"kind":"then","text":"The side effect is executed.","code":["list == [\"Tofu\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Properties not only have a value but also a type and id!",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a named property...","code":["Val<String> property = Var.of(String, \"Hello World\", \"name\")"]},
+
+        {"kind":"expect","text":"The property has the expected name.","code":["property.id() == \"name\""]},
+
+        {"kind":"and","text":"The property has the expected type.","code":["property.type() == String.class"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

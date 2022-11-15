@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"1.055 seconds"
+    "duration":"1.067 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"The most simple kind of split button can be built like so:",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.008 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -35,7 +35,7 @@
     {
       "id":"We can easily build a split button whose text becomes the current user selection:",
       "result":"PASS",
-      "duration":"0.071 seconds",
+      "duration":"0.073 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -54,7 +54,7 @@
     {
       "id":"We can easily build a split button where only one item text will have its text displayed:",
       "result":"PASS",
-      "duration":"0.206 seconds",
+      "duration":"0.208 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -81,7 +81,7 @@
     {
       "id":"We can register button click events for button items as well as the split button as a whole.",
       "result":"PASS",
-      "duration":"0.413 seconds",
+      "duration":"0.414 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -125,7 +125,7 @@
     {
       "id":"It is possible to select more than 1 item.",
       "result":"PASS",
-      "duration":"0.071 seconds",
+      "duration":"0.072 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
