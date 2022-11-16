@@ -1,9 +1,11 @@
 
-# Swing Tree - A UI builder [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) ![Java Version](https://img.shields.io/static/v1.svg?label=Java&message=8%2B&color=blue) #
+# Swing Tree - Declarative UI Design for Swing [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) ![Java Version](https://img.shields.io/static/v1.svg?label=Java&message=8%2B&color=blue) #
 
-Fluent and boilerplate free Swing UI building!
+Fluent and boilerplate free composition based Swing UI design!
+(Think [Jetpack Compose](https://developer.android.com/jetpack/compose) or [Flutter](https://flutter.dev) but for Swing)
 
 - [Motivation](docs/markdown/Motivation.md)
+- [Documentation](https://globaltcad.github.io/swing-tree/)
 
 <table>
 <tr>
@@ -19,6 +21,7 @@ Fluent and boilerplate free Swing UI building!
 - lambda friendly API for peeking into the underlying UI tree and manipulating swing components directly
 - boilerplate free event registration through `onClick`, `onChange` methods...
 - compatible with custom swing components
+- built-in properties for dynamic UI design decoupled from business logic 
 	
 </td>
 <td>
