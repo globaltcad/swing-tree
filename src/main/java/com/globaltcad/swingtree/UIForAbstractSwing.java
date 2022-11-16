@@ -153,7 +153,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I withBorder( Val<Border> border ) {
         border.onView(_component::setBorder);
-        return this.withBorder( border.get() );
+        return this.withBorder( border.orElseNull() );
     }
 
 
@@ -703,7 +703,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I withBackground( Val<Color> bg ) {
         bg.onView(_component::setBackground);
-        return this.withBackground( bg.get() );
+        return this.withBackground( bg.orElseNull() );
     }
 
     /**
@@ -738,7 +738,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I withForeground( Val<Color> fg ) {
         fg.onView(_component::setForeground);
-        return this.withForeground( fg.get() );
+        return this.withForeground( fg.orElseNull() );
     }
 
     /**
@@ -955,7 +955,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public I withPreferredSize( Val<Dimension> size ) {
         size.onView(v -> _component.setPreferredSize(v) );
-        return this.withPreferredSize( size.get() );
+        return this.withPreferredSize( size.orElseNull() );
     }
 
     /**

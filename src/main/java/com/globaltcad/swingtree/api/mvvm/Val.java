@@ -1,43 +1,167 @@
 package com.globaltcad.swingtree.api.mvvm;
 
 import java.util.Arrays;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public interface Val<T>
 {
+	String UNNAMED = "UNNAMED"; // This is the default name for properties
 
-	static <T> Val<T> of( Class<T> type, T value, String id ) {
-		return Var.of( type, value, id );
-	}
+	static <T> Val<T> of( Class<T> type, T value ) { return Var.of( type, value ); }
 
 	/**
 	 *  This factory method will expose a builder which will create a very simple type of Property,
 	 *  namely: {@link AbstractVariable}!
 	 *  It has a simple implementation for everything defined in the {@link Var} interface.
-	 *  So it can be touched, untouched, validated, initialized and applied.
-	 *  One may or may not use these features depending on the use case, however in most cases
-	 *  {@link Var} implementation are simple view properties which will need these functionalities.
+	 *  It is similar to an {@link Optional} with the additional feature of being mutable
+	 *  as well as being able to be observed for changes.
 	 *
 	 * @param iniValue The initial value set to the instance built by this builder. Note: An initialization will overwrite this.
 	 * @param <T> The type of the value held by the {@link Var}!
 	 * @return The builder for a {@link AbstractVariable}.
 	 */
-	static <T> Val<T> of( T iniValue ) {
-		return Var.of( iniValue );
-	}
-
-
-	String UNNAMED = "UNNAMED"; // This is the default name for properties
+	static <T> Val<T> of( T iniValue ) { return Var.of( iniValue ); }
 
 	/**
-	 *  This method simply returns the wrapped value.
-	 *  Calling it should not have any side effects.
+	 * If a value is present, returns the value, otherwise throws
+	 * {@code NoSuchElementException}.
 	 *
-	 * @return The value wrapped by an implementation of this interface.
+	 * @apiNote
+	 * The preferred alternative to this method is {@link #orElseThrow()}.
+	 *
+	 * @return the non-{@code null} value described by this {@code Val}
+	 * @throws NoSuchElementException if no value is present
 	 */
 	T get();
+
+	/**
+	 * If a value is present, returns the value, otherwise returns
+	 * {@code other}.
+	 *
+	 * @param other the value to be returned, if no value is present.
+	 *        May be {@code null}.
+	 * @return the value, if present, otherwise {@code other}
+	 */
+	T orElseNullable(T other);
+
+	/**
+	 * If a value is present, returns the value, otherwise returns
+	 * {@code other}.
+	 *
+	 * @param other the value to be returned, if no value is present.
+	 *        May not be {@code null}.
+	 * @return the value, if present, otherwise {@code other}
+	 */
+	default T orElse( T other ) { return orElseNullable( Objects.requireNonNull(other) ); }
+
+	/**
+	 * If a value is present, returns the value, otherwise returns the result
+	 * produced by the supplying function.
+	 *
+	 * @param supplier the supplying function that produces a value to be returned
+	 * @return the value, if present, otherwise the result produced by the
+	 *         supplying function
+	 * @throws NullPointerException if no value is present and the supplying
+	 *         function is {@code null}
+	 */
+	default T orElseGet( Supplier<? extends T> supplier ) {
+		return this.isPresent() ? orElseThrow() : supplier.get();
+	}
+
+	/**
+	 * If a value is present, returns the value, otherwise returns
+	 * {@code null}.
+	 *
+	 * @return the value, if present, otherwise {@code null}
+	 */
+	default T orElseNull() { return orElseNullable(null); }
+
+	/**
+	 * If a value is present, returns the value, otherwise throws
+	 * {@code NoSuchElementException}.
+	 *
+	 * @return the non-{@code null} value described by this {@code Val}
+	 * @throws NoSuchElementException if no value is present
+	 */
+	T orElseThrow();
+
+	/**
+	 * If a value is present, returns {@code true}, otherwise {@code false}.
+	 *
+	 * @return {@code true} if a value is present, otherwise {@code false}
+	 */
+	boolean isPresent();
+
+	/**
+	 * If a value is  not present, returns {@code true}, otherwise
+	 * {@code false}.
+	 *
+	 * @return  {@code true} if a value is not present, otherwise {@code false}
+	 */
+	default boolean isEmpty() { return !isPresent(); }
+
+	/**
+	 * If a value is present, performs the given action with the value,
+	 * otherwise does nothing.
+	 *
+	 * @param action the action to be performed, if a value is present
+	 * @throws NullPointerException if value is present and the given action is
+	 *         {@code null}
+	 */
+	default void ifPresent( Consumer<T> action ) {
+		if ( this.isPresent() )
+			action.accept( get() );
+	}
+
+	/**
+	 * If a value is present, performs the given action with the value,
+	 * otherwise performs the given empty-based action.
+	 *
+	 * @param action the action to be performed, if a value is present
+	 * @param emptyAction the empty-based action to be performed, if no value is
+	 *        present
+	 * @throws NullPointerException if a value is present and the given action
+	 *         is {@code null}, or no value is present and the given empty-based
+	 *         action is {@code null}.
+	 */
+	default void ifPresentOrElse( Consumer<? super T> action, Runnable emptyAction ) {
+		if ( isPresent() )
+			action.accept(orElseThrow());
+		else
+			emptyAction.run();
+	}
+
+	/**
+	 * If a value is present, returns a {@code Val} describing the value,
+	 * otherwise returns a {@code Val} produced by the supplying function.
+	 *
+	 * @param supplier the supplying function that produces a {@code Val}
+	 *        to be returned
+	 * @return returns a {@code Val} describing the value of this
+	 *         {@code Val}, if a value is present, otherwise a
+	 *         {@code Val} produced by the supplying function.
+	 * @throws NullPointerException if the supplying function is {@code null} or
+	 *         produces a {@code null} result
+	 */
+	default Val<T> or(Supplier<? extends Val<? extends T>> supplier) {
+		Objects.requireNonNull(supplier);
+		if ( isPresent() ) return this;
+		else {
+			@SuppressWarnings("unchecked")
+			Val<T> r = (Val<T>) supplier.get();
+			return Objects.requireNonNull(r);
+		}
+	}
+
+	default <V> Val<V> map( java.util.function.Function<T, V> mapper ) {
+		if ( !isPresent() )
+			return Val.of( (Class<V>) Void.class, null );
+		return Val.of( mapper.apply( orElseNull() ) );
+	}
 
 	/**
 	 *  This method simply returns a {@link String} representation of the wrapped value
@@ -46,7 +170,7 @@ public interface Val<T>
 	 *
 	 * @return The {@link String} representation of the value wrapped by an implementation of this interface.
 	 */
-	default String valueAsString() { return String.valueOf(this.get()); }
+	default String valueAsString() { return this.map(String::valueOf).orElseNullable("EMPTY"); }
 
 	/**
 	 *  This method returns a {@link String} representation of the type of the wrapped value.
@@ -63,17 +187,19 @@ public interface Val<T>
 	 * @return The truth value determining if the provided value is equal to the wrapped value.
 	 */
 	default boolean is( T otherValue ) {
-		T current = this.get();
+		T current = this.orElseNullable(null);
 		return equals(current, otherValue);
 	}
 
 	/**
-	 *  This returns the name of the {@link Var} which is useful for debugging as well as
-	 *  persisting their state by using the names as keys for whatever storage medium one chooses.
+	 *  This returns the name/id of the {@link Var} which is useful for debugging as well as
+	 *  persisting their state by using them as keys for whatever storage data structure one chooses.
 	 *
-	 * @return The name which is assigned to this {@link Var}.
+	 * @return The id which is assigned to this {@link Var}.
 	 */
 	String id();
+
+	Val<T> withID( String id );
 
 	default boolean isUnnamed() { return UNNAMED.equals(id()); }
 
@@ -85,14 +211,12 @@ public interface Val<T>
 	 */
 	Class<T> type();
 
-	default Optional<T> toOptional() {
-		return Optional.of(this.get());
-	}
+	default Optional<T> toOptional() { return Optional.ofNullable(this.orElseNull()); }
 
 	Val<T> onViewThis( Consumer<Val<T>> displayAction );
 
 	default Val<T> onView( Consumer<T> displayAction ) {
-		return onViewThis( v -> displayAction.accept(v.get()) );
+		return onViewThis( v -> displayAction.accept(v.orElseNullable(null)) );
 	}
 
 	Val<T> view();

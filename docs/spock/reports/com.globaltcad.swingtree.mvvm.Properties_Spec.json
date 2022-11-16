@@ -1,22 +1,22 @@
 {
   "className":"com.globaltcad.swingtree.mvvm.Properties_Spec",
   "title":"Properties",
-  "narrative":"Properties are a powerful tool to model the state \n    as well as business logic of your UI without actually depending on it.\n    This is especially useful for testing your UIs logic.\n    Therefore properties are a root concept in the Swing-Tree library.\n    The decoupling between your UI and the UIs state and logic \n    is achieved by binding properties to UI components.\n    This specification shows you how to use model UI state \n    and business logic with properties \n    and how to bind them to UI components.",
+  "narrative":"Properties are a powerful tool to model the state\n    as well as business logic of your UI without actually depending on it.\n    This is especially useful for testing your UIs logic.\n    Therefore properties are a root concept in the Swing-Tree library.\n    The decoupling between your UI and the UIs state and logic\n    is achieved by binding properties to UI components.\n    This specification shows you how to use model UI state\n    and business logic with properties\n    and how to bind them to UI components.",
   "subjects":[],
   "statistics":{
-    "runs":"4",
+    "runs":"10",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.010 seconds"
+    "duration":"0.012 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"Properties are simple wrappers around a value",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -56,7 +56,7 @@
     {
       "id":"Properties can be bound by subscribing to them using the \"onView(..)\" method.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that bound Swing-Tree properties only have side effects\n            when they are deliberately triggered to execute their side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
       },
@@ -81,16 +81,138 @@
     {
       "id":"Properties not only have a value but also a type and id!",
       "result":"PASS",
+      "duration":"0",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a named property...","code":["Val<String> property = Var.of(String, \"Hello World\").withID(\"XY\")"]},
+
+        {"kind":"expect","text":"The property has the expected name.","code":["property.id() == \"XY\""]},
+
+        {"kind":"and","text":"The property has the expected type.","code":["property.type() == String.class"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A property can only wrap null if we specify a type class.",
+      "result":"PASS",
+      "duration":"0",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property with a type class...","code":["Val<String> property = Var.of(String, null)"]},
+
+        {"kind":"expect","text":"The property has the expected type.","code":["property.type() == String.class"]},
+
+        {"kind":"and","text":"The property is empty.","code":["property.isEmpty()"]},
+
+        {"kind":"when","text":"We create a property without a type class...","code":["Val<?> property2 = Var.of(null)"]},
+
+        {"kind":"then","text":"The factory method will throw an exception.","code":["thrown(NullPointerException)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"withID(..)\" method produces a new property with all bindings inherited.",
+      "result":"PASS",
+      "duration":"0",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The wither methods on properties are used to create new property instances\n            with the same value and bindings as the original property\n            but without side effects of the original property.\n            So if you add bindings to a withered property they will not affect the original property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property...","code":["Var<String> property = Var.of(\"Hello World\")"]},
+
+        {"kind":"and","text":"we bind 1 subscriber to the property.","code":["var list1 = []","property.onView { list1.add(it) }"]},
+
+        {"kind":"and","text":"We create a new property with a different id.","code":["Val<String> property2 = property.withID(\"XY\")"]},
+
+        {"kind":"and","text":"Another subscriber to the new property.","code":["var list2 = []","property2.onView { list2.add(it) }"]},
+
+        {"kind":"when","text":"We change and \"view\" the value of the original property.","code":["property.set(\"Tofu\").view()"]},
+
+        {"kind":"then","text":"The subscriber of the original property is triggered but not the subscriber of the new property.","code":["list1 == [\"Tofu\"]","list2 == []"]},
+
+        {"kind":"when","text":"We change and \"view\" the value of the new property.","code":["property2.set(\"Tempeh\").view()"]},
+
+        {"kind":"then","text":"Both subscribers are receive the effect.","code":["list1 == [\"Tofu\", \"Tempeh\"]","list2 == [\"Tempeh\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Properties are similar to the \"Optional\" class, you can map them and see if their are empty or not.",
+      "result":"PASS",
       "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We create a named property...","code":["Val<String> property = Var.of(String, \"Hello World\", \"name\")"]},
+        {"kind":"given","text":"We create a property...","code":["Val<String> property = Val.of(\"Hello World\")"]},
 
-        {"kind":"expect","text":"The property has the expected name.","code":["property.id() == \"name\""]},
+        {"kind":"expect","text":"We can map the property to another property.","code":["property.map { it.length() } == Val.of(11)"]},
 
-        {"kind":"and","text":"The property has the expected type.","code":["property.type() == String.class"]}
+        {"kind":"and","text":"We can check if the property is empty.","code":["property.isEmpty() == false"]},
+
+        {"kind":"when","text":"We create a property that is empty...","code":["Val<String> empty = Val.of(String, null)"]},
+
+        {"kind":"then","text":"The property is empty, regardless of how we map it.","code":["empty.map( it -> it.length() ) == Val.of(Void, null)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"ifPresent\" method allows us to see if a property has a value or not.",
+      "result":"PASS",
+      "duration":"0",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property...","code":["Val<String> property = Val.of(\"Hello World\")"]},
+
+        {"kind":"and","text":"We create a consumer that will be called if the property has a value.","code":["var list = []","Consumer<String> consumer = { list.add(it) }"]},
+
+        {"kind":"when","text":"We call the \"ifPresent(..)\" method on the property.","code":["property.ifPresent( consumer )"]},
+
+        {"kind":"then","text":"The consumer is called.","code":["list == [\"Hello World\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An empty property will throw an exception if you try to access its value.",
+      "result":"PASS",
+      "duration":"0",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property...","code":["Val<Long> property = Val.of(Long, null)"]},
+
+        {"kind":"when","text":"We try to access the value of the property.","code":["property.get()"]},
+
+        {"kind":"then","text":"The property will throw an exception.","code":["thrown(NoSuchElementException)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"orElseThrow\" method should be used instead of \"get\".",
+      "result":"PASS",
+      "duration":"0",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that accessing the value of an empty property using the \"get\" method\n            will throw an exception.\n            Use this method instead to make the intend of your code more clear.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property...","code":["Val<Long> property = Val.of(Long, null)"]},
+
+        {"kind":"when","text":"We try to access the value of the property.","code":["property.orElseThrow()"]},
+
+        {"kind":"then","text":"The property will throw an exception.","code":["thrown(NoSuchElementException)"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

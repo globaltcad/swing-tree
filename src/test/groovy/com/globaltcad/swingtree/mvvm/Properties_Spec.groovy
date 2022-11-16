@@ -6,6 +6,8 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 
+import java.util.function.Consumer
+
 @Title("Properties")
 @Narrative('''
 
@@ -89,11 +91,112 @@ class Properties_Spec extends Specification
     def 'Properties not only have a value but also a type and id!'()
     {
         given : 'We create a named property...'
-            Val<String> property = Var.of(String, "Hello World", "name")
+            Val<String> property = Var.of(String, "Hello World").withID("XY")
         expect : 'The property has the expected name.'
-            property.id() == "name"
+            property.id() == "XY"
         and : 'The property has the expected type.'
             property.type() == String.class
+    }
+
+    def 'A property can only wrap null if we specify a type class.'()
+    {
+        given : 'We create a property with a type class...'
+            Val<String> property = Var.of(String, null)
+        expect : 'The property has the expected type.'
+            property.type() == String.class
+        and : 'The property is empty.'
+            property.isEmpty()
+
+        when : 'We create a property without a type class...'
+            Val<?> property2 = Var.of(null)
+        then : 'The factory method will throw an exception.'
+            thrown(NullPointerException)
+    }
+
+    def 'The "withID(..)" method produces a new property with all bindings inherited.'()
+    {
+        reportInfo """
+            The wither methods on properties are used to create new property instances
+            with the same value and bindings as the original property
+            but without side effects of the original property.
+            So if you add bindings to a withered property they will not affect the original property.
+        """
+
+        given : 'We create a property...'
+            Var<String> property = Var.of("Hello World")
+        and : 'we bind 1 subscriber to the property.'
+            var list1 = []
+            property.onView { list1.add(it) }
+        and : 'We create a new property with a different id.'
+            Val<String> property2 = property.withID("XY")
+        and : 'Another subscriber to the new property.'
+            var list2 = []
+            property2.onView { list2.add(it) }
+
+        when : 'We change and "view" the value of the original property.'
+            property.set("Tofu").view()
+        then : 'The subscriber of the original property is triggered but not the subscriber of the new property.'
+            list1 == ["Tofu"]
+            list2 == []
+
+        when : 'We change and "view" the value of the new property.'
+            property2.set("Tempeh").view()
+        then : 'Both subscribers are receive the effect.'
+            list1 == ["Tofu", "Tempeh"]
+            list2 == ["Tempeh"]
+    }
+
+    def 'Properties are similar to the "Optional" class, you can map them and see if their are empty or not.'()
+    {
+        given : 'We create a property...'
+            Val<String> property = Val.of("Hello World")
+        expect : 'We can map the property to another property.'
+            property.map { it.length() } == Val.of(11)
+        and : 'We can check if the property is empty.'
+            property.isEmpty() == false
+
+        when : 'We create a property that is empty...'
+            Val<String> empty = Val.of(String, null)
+        then : 'The property is empty, regardless of how we map it.'
+            empty.map( it -> it.length() ) == Val.of(Void, null)
+    }
+
+    def 'The "ifPresent" method allows us to see if a property has a value or not.'()
+    {
+        given : 'We create a property...'
+            Val<String> property = Val.of("Hello World")
+        and : 'We create a consumer that will be called if the property has a value.'
+            var list = []
+            Consumer<String> consumer = { list.add(it) }
+        when : 'We call the "ifPresent(..)" method on the property.'
+            property.ifPresent( consumer )
+        then : 'The consumer is called.'
+            list == ["Hello World"]
+    }
+
+    def 'An empty property will throw an exception if you try to access its value.'()
+    {
+        given : 'We create a property...'
+            Val<Long> property = Val.of(Long, null)
+        when : 'We try to access the value of the property.'
+            property.get()
+        then : 'The property will throw an exception.'
+            thrown(NoSuchElementException)
+    }
+
+    def 'The "orElseThrow" method should be used instead of "get".'()
+    {
+        reportInfo """
+            Note that accessing the value of an empty property using the "get" method
+            will throw an exception.
+            Use this method instead to make the intend of your code more clear.
+        """
+        given : 'We create a property...'
+            Val<Long> property = Val.of(Long, null)
+        when : 'We try to access the value of the property.'
+            property.orElseThrow()
+        then : 'The property will throw an exception.'
+            thrown(NoSuchElementException)
     }
 
 }

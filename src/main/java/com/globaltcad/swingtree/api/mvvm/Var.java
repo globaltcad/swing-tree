@@ -4,9 +4,8 @@ import java.util.Objects;
 
 public interface Var<T> extends Val<T>
 {
-
-	static <T> Var<T> of( Class<T> type, T value, String id ) {
-		return new AbstractVariable<T>(type, value, id){};
+	static <T> Var<T> of( Class<T> type, T value ) {
+		return new AbstractVariable<T>(type, value, UNNAMED){};
 	}
 
 	/**
@@ -23,7 +22,7 @@ public interface Var<T> extends Val<T>
 	 */
 	static <T> Var<T> of( T iniValue ) {
 		Objects.requireNonNull(iniValue);
-		return Var.of( (Class<T>) iniValue.getClass(), iniValue, UNNAMED );
+		return Var.of( (Class<T>) iniValue.getClass(), iniValue );
 	}
 
 	
@@ -36,4 +35,5 @@ public interface Var<T> extends Val<T>
 	 */
 	Var<T> set(T newValue );
 
+	@Override Var<T> withID( String id );
 }

@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.090 seconds"
+    "duration":"0.042 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can attach a simple table cell renderer to a JTable in just a few lines of code.",
       "result":"PASS",
-      "duration":"0.065 seconds",
+      "duration":"0.030 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -39,7 +39,7 @@
     {
       "id":"We can create a simple table cell renderer through a UI factory method.",
       "result":"PASS",
-      "duration":"0.006 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -64,7 +64,7 @@
     {
       "id":"We can create a simple column major table cell renderer through a UI factory method.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -89,7 +89,7 @@
     {
       "id":"A map can be used as a data source for tables.",
       "result":"PASS",
-      "duration":"0.011 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
