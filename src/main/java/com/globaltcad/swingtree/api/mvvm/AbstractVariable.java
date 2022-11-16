@@ -130,13 +130,17 @@ public abstract class AbstractVariable<T> implements Var<T>
 			Val<?> other = (Val<?>) obj;
 			if ( other.type() != this.type ) return false;
 			if ( other.orElseNull() == null ) return this.value == null;
-			return other.get().equals(this.value);
+			return Val.equals( other.get(), this.value ); // Arrays are compared with Arrays.equals
 		}
 		return false;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash( this.orElseNull() );
+		int hash = 7;
+		hash = 31 * hash + ( this.value == null ? 0 : Val.hashCode(this.value) );
+		hash = 31 * hash + ( this.type  == null ? 0 : this.type.hashCode() );
+		hash = 31 * hash + ( this.name  == null ? 0 : this.name.hashCode() );
+		return hash;
 	}
 }

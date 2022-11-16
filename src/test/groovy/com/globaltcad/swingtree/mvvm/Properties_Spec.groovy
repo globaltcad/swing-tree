@@ -199,4 +199,32 @@ class Properties_Spec extends Specification
             thrown(NoSuchElementException)
     }
 
+    def 'The equality and hash code of a property are based on its value, type and id!'()
+    {
+        given : 'We create various kinds of properties...'
+            Var<Integer> num = Var.of(1)
+            Var<Long>    num2 = Var.of(1L)
+            Var<String>  str = Var.of("Hello World")
+            Var<String>  str2 = Var.of(String, null)
+            Var<String>  str3 = Var.of(String, null)
+            Var<Boolean> bool = Var.of(Boolean, null)
+            Var<int[]> arr1 = Var.of(new int[]{1,2,3})
+            Var<int[]> arr2 = Var.of(new int[]{1,2,3})
+        expect : 'The properties are equal if they have the same value, type and id.'
+            num.equals(num2) == false
+            num.equals(str)  == false
+            num.equals(str2) == false
+        and : 'If they are empty they are equal if they have the same type and id.'
+            str2.equals(str3) == true
+            str2.equals(bool) == false
+        and : 'Properties are value oriented so arrays are equal if they have the same values.'
+            arr1.equals(arr2) == true
+        and : 'All of this is also true for their hash codes:'
+            num.hashCode() != num2.hashCode()
+            num.hashCode() != str.hashCode()
+            num.hashCode() != str2.hashCode()
+            str2.hashCode() == str3.hashCode()
+            str2.hashCode() != bool.hashCode()
+            arr1.hashCode() == arr2.hashCode()
+    }
 }

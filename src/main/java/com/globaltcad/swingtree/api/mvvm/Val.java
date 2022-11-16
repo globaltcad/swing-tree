@@ -235,16 +235,30 @@ public interface Val<T>
 	 * @param o2 The second object which ought to be compared to the first one.
 	 * @return The truth value determining if the objects are equal in terms of their state!
 	 */
-	static boolean equals(Object o1, Object o2) {
-		if ( o1 instanceof float[]  ) return Arrays.equals( (float[] ) o1, (float[] ) o2 );
-		if ( o1 instanceof int[]    ) return Arrays.equals( (int[]   ) o1, (int[]   ) o2 );
-		if ( o1 instanceof char[]   ) return Arrays.equals( (char[]  ) o1, (char[]  ) o2 );
-		if ( o1 instanceof double[] ) return Arrays.equals( (double[]) o1, (double[]) o2 );
-		if ( o1 instanceof long[]   ) return Arrays.equals( (long[]  ) o1, (long[]  ) o2 );
-		if ( o1 instanceof byte[]   ) return Arrays.equals( (byte[]  ) o1, (byte[]  ) o2 );
-		if ( o1 instanceof short[]  ) return Arrays.equals( (short[] ) o1, (short[] ) o2 );
-		if ( o1 instanceof Object[] ) return Arrays.equals( (Object[]) o1, (Object[]) o2 );
-		return Objects.equals(o1, o2);
+	static boolean equals( Object o1, Object o2 ) {
+		if ( o1 instanceof float[]   ) return Arrays.equals( (float[] )  o1, (float[] )  o2 );
+		if ( o1 instanceof int[]     ) return Arrays.equals( (int[]   )  o1, (int[]   )  o2 );
+		if ( o1 instanceof char[]    ) return Arrays.equals( (char[]  )  o1, (char[]  )  o2 );
+		if ( o1 instanceof double[]  ) return Arrays.equals( (double[])  o1, (double[])  o2 );
+		if ( o1 instanceof long[]    ) return Arrays.equals( (long[]  )  o1, (long[]  )  o2 );
+		if ( o1 instanceof byte[]    ) return Arrays.equals( (byte[]  )  o1, (byte[]  )  o2 );
+		if ( o1 instanceof short[]   ) return Arrays.equals( (short[] )  o1, (short[] )  o2 );
+		if ( o1 instanceof boolean[] ) return Arrays.equals( (boolean[]) o1, (boolean[]) o2 );
+		if ( o1 instanceof Object[]  ) return Arrays.equals( (Object[])  o1, (Object[])  o2 );
+		return Objects.equals( o1, o2 );
+	}
+
+	static int hashCode( Object o ) {
+		if ( o instanceof float[]   ) return Arrays.hashCode( (float[] )  o );
+		if ( o instanceof int[]     ) return Arrays.hashCode( (int[]   )  o );
+		if ( o instanceof char[]    ) return Arrays.hashCode( (char[]  )  o );
+		if ( o instanceof double[]  ) return Arrays.hashCode( (double[])  o );
+		if ( o instanceof long[]    ) return Arrays.hashCode( (long[]  )  o );
+		if ( o instanceof byte[]    ) return Arrays.hashCode( (byte[]  )  o );
+		if ( o instanceof short[]   ) return Arrays.hashCode( (short[] )  o );
+		if ( o instanceof boolean[] ) return Arrays.hashCode( (boolean[]) o );
+		if ( o instanceof Object[]  ) return Arrays.hashCode( (Object[])  o );
+		return Objects.hashCode( o );
 	}
 
 }
