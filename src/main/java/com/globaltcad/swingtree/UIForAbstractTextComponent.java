@@ -75,7 +75,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
     }
 
     public final I withText( Val<String> val ) {
-        val.onView(_component::setText);
+        val.onView(v->doUI(()->_component.setText(v)));
         return withText( val.get() );
     }
 
@@ -119,9 +119,9 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      */
     public final I onContentChange(Consumer<SimpleDelegate<JTextComponent, DocumentEvent>> action) {
         _component.getDocument().addDocumentListener(new DocumentListener() {
-            @Override public void insertUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));}
-            @Override public void removeUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));}
-            @Override public void changedUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));}
+            @Override public void insertUpdate(DocumentEvent e) {doApp(()->action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));}
+            @Override public void removeUpdate(DocumentEvent e) {doApp(()->action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));}
+            @Override public void changedUpdate(DocumentEvent e) {doApp(()->action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));}
         });
         return (I) this;
     }
@@ -135,8 +135,8 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      */
     public final I onTextChange(Consumer<SimpleDelegate<JTextComponent, DocumentEvent>> action) {
         _component.getDocument().addDocumentListener(new DocumentListener() {
-            @Override public void insertUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));}
-            @Override public void removeUpdate(DocumentEvent e) {action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));}
+            @Override public void insertUpdate(DocumentEvent e) {doApp(()->action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));}
+            @Override public void removeUpdate(DocumentEvent e) {doApp(()->action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));}
             @Override public void changedUpdate(DocumentEvent e) {}
         });
         return (I) this;

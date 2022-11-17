@@ -35,6 +35,32 @@ import java.util.function.Supplier;
  */
 public final class UI
 {
+    private static final ThreadLocal<Settings> _SETTINGS = new ThreadLocal<>();
+
+    static Settings SETTINGS() {
+        Settings settings = _SETTINGS.get();
+        if ( settings == null ) {
+            settings = new Settings();
+            _SETTINGS.set(settings);
+        }
+        return settings;
+    }
+
+    public static void use(ThreadMode mode, Runnable scope) {
+        Settings settings = _SETTINGS.get();
+        ThreadMode oldMode = settings.getThreadMode();
+        settings.setThreadMode(mode);
+        try {
+            scope.run();
+        } finally {
+            settings.setThreadMode(oldMode);
+        }
+    }
+
+    public static void processEvents() {
+        EventQueue.INSTANCE().pocess(100);
+    }
+
     // Common Mig layout constants:
     public static LayoutAttr FILL     = LayoutAttr.of("fill");
     public static LayoutAttr FILL_X     = LayoutAttr.of("fillx");

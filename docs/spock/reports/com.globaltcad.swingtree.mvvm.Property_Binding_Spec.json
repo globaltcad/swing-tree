@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.023 seconds"
+    "duration":"0.020 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can bind a property to the size of a swing component.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that the binding of a Swing-Tree property will only have side effects\n            when it is deliberately triggered to execute its side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
       },
@@ -91,7 +91,7 @@
     {
       "id":"We can enable and disable a UI component dynamically through property binding.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -116,7 +116,7 @@
     {
       "id":"We can select or unselect a UI component dynamically through properties.",
       "result":"PASS",
-      "duration":"0.006 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

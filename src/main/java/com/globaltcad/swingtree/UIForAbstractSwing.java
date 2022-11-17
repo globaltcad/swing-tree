@@ -45,6 +45,20 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public UIForAbstractSwing( C component ) { super(component); }
 
+    protected void doUI(Runnable action) {
+        if ( UI.SETTINGS().getThreadMode() == ThreadMode.DECOUPLED ) {
+            SwingUtilities.invokeLater(action);
+        } 
+        else action.run();
+    }
+
+    protected void doApp(Runnable action) {
+        if ( UI.SETTINGS().getThreadMode() == ThreadMode.DECOUPLED ) {
+            EventQueue.INSTANCE().register(action);
+        }
+        else action.run();
+    }
+
     /**
      *  This method exposes a concise way to set an identifier for the component
      *  wrapped by this {@link UI}!
@@ -83,7 +97,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public I isVisibleIf( Val<Boolean> isVisible ) {
-        isVisible.onView(_component::setVisible);
+        isVisible.onView(v->doUI(()->_component.setVisible(v)));
         return isVisibleIf( isVisible.get() );
     }
 
@@ -106,7 +120,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public I isEnabledIf( Val<Boolean> isEnabled ) {
-        isEnabled.onView(_component::setEnabled);
+        isEnabled.onView(v->doUI(()->_component.setEnabled(v)));
         return isEnabledIf( isEnabled.get() );
     }
 
@@ -152,7 +166,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withBorder( Val<Border> border ) {
-        border.onView(_component::setBorder);
+        border.onView(v->doUI(()->_component.setBorder(v)));
         return this.withBorder( border.orElseNull() );
     }
 
@@ -518,7 +532,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I with( Val<UI.Cursor> type ) {
-        type.onView(t -> _component.setCursor( new java.awt.Cursor( t.type ) ) );
+        type.onView(t -> doUI(()->_component.setCursor( new java.awt.Cursor( t.type ) )) );
         return with( type.get() );
     }
 
@@ -664,7 +678,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final I withTooltip( Val<String> tip ) {
-        tip.onView(_component::setToolTipText);
+        tip.onView(v->doUI(()->_component.setToolTipText(v)));
         return this.withTooltip( tip.get() );
     }
 
@@ -702,7 +716,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withBackground( Val<Color> bg ) {
-        bg.onView(_component::setBackground);
+        bg.onView(v->doUI(()->_component.setBackground(v)));
         return this.withBackground( bg.orElseNull() );
     }
 
@@ -737,7 +751,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withForeground( Val<Color> fg ) {
-        fg.onView(_component::setForeground);
+        fg.onView(v->doUI(()->_component.setForeground(v)));
         return this.withForeground( fg.orElseNull() );
     }
 
@@ -767,7 +781,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public I withMinimumSize( Val<Dimension> size ) {
-        size.onView(_component::setMinimumSize);
+        size.onView(v->doUI(()->_component.setMinimumSize(v)));
         return this.withMinimumSize( size.get() );
     }
 
@@ -792,8 +806,12 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public I withMinimumSize( Val<Integer> width, Val<Integer> height ) {
-        width.onView(w -> _component.setMinimumSize(new Dimension(w, _component.getMinimumSize().height)) );
-        height.onView(h -> _component.setMinimumSize(new Dimension(_component.getMinimumSize().width, h)) );
+        width.onView(w -> 
+                doUI(()-> _component.setMinimumSize(new Dimension(w, _component.getMinimumSize().height)))
+            );
+        height.onView(h ->
+                doUI(()-> _component.setMinimumSize(new Dimension(_component.getMinimumSize().width, h)))
+            );
         return this.withMinimumSize( width.get(), height.get() );
     }
 
@@ -815,7 +833,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public I withMinimumWidth( Val<Integer> width ) {
-        width.onView(w -> _component.setMinimumSize(new Dimension(w, _component.getMinimumSize().height)) );
+        width.onView(w -> doUI(()-> _component.setMinimumSize(new Dimension(w, _component.getMinimumSize().height))) );
         return this.withMinimumWidth( width.get() );
     }
 
@@ -838,7 +856,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public I withMinimumHeight( Val<Integer> height ) {
-        height.onView(h -> _component.setMinimumSize(new Dimension(_component.getMinimumSize().width, h)) );
+        height.onView(h -> doUI(()-> _component.setMinimumSize(new Dimension(_component.getMinimumSize().width, h))) );
         return this.withMinimumHeight( height.get() );
     }
 
@@ -861,7 +879,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public I withMaximumSize( Val<Dimension> size ) {
-        size.onView(_component::setMaximumSize);
+        size.onView( v -> doUI(()-> _component.setMaximumSize(v)) );
         return this.withMaximumSize( size.get() );
     }
 
@@ -886,8 +904,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public I withMaximumSize( Val<Integer> width, Val<Integer> height ) {
-        width.onView(w -> _component.setMaximumSize(new Dimension(w, _component.getMaximumSize().height)) );
-        height.onView(h -> _component.setMaximumSize(new Dimension(_component.getMaximumSize().width, h)) );
+        width.onView(w -> doUI(()-> _component.setMaximumSize(new Dimension(w, _component.getMaximumSize().height))) );
+        height.onView(h -> doUI(()-> _component.setMaximumSize(new Dimension(_component.getMaximumSize().width, h))) );
         return this.withMaximumSize( width.get(), height.get() );
     }
 
@@ -909,7 +927,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public I withMaximumWidth( Val<Integer> width ) {
-        width.onView(w -> _component.setMaximumSize(new Dimension(w, _component.getMaximumSize().height)) );
+        width.onView(w -> doUI(()-> _component.setMaximumSize(new Dimension(w, _component.getMaximumSize().height))) );
         return this.withMaximumWidth( width.get() );
     }
 
@@ -931,7 +949,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public I withMaximumHeight( Val<Integer> height ) {
-        height.onView(h -> _component.setMaximumSize(new Dimension(_component.getMaximumSize().width, h)) );
+        height.onView(h -> doUI(()-> _component.setMaximumSize(new Dimension(_component.getMaximumSize().width, h))) );
         return this.withMaximumHeight( height.get() );
     }
 
@@ -954,7 +972,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public I withPreferredSize( Val<Dimension> size ) {
-        size.onView(v -> _component.setPreferredSize(v) );
+        size.onView(v -> doUI(()-> _component.setPreferredSize(v)) );
         return this.withPreferredSize( size.orElseNull() );
     }
 
@@ -979,8 +997,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public I withPreferredSize( Val<Integer> width, Val<Integer> height ) {
-        width.onView(w -> _component.setPreferredSize(new Dimension(w, _component.getPreferredSize().height)) );
-        height.onView(h -> _component.setPreferredSize(new Dimension(_component.getPreferredSize().width, h)) );
+        width.onView(w -> doUI(()-> _component.setPreferredSize(new Dimension(w, _component.getPreferredSize().height))) );
+        height.onView(h -> doUI(()-> _component.setPreferredSize(new Dimension(_component.getPreferredSize().width, h))) );
         return this.withPreferredSize( width.get(), height.get() );
     }
 
@@ -1002,7 +1020,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public I withPreferredWidth( Val<Integer> width ) {
-        width.onView(w -> _component.setPreferredSize(new Dimension(w, _component.getPreferredSize().height)) );
+        width.onView(w -> doUI(()-> _component.setPreferredSize(new Dimension(w, _component.getPreferredSize().height))) );
         return this.withPreferredWidth( width.get() );
     }
 
@@ -1024,7 +1042,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public I withPreferredHeight( Val<Integer> height ) {
-        height.onView(h -> _component.setPreferredSize(new Dimension(_component.getPreferredSize().width, h)) );
+        height.onView(h -> doUI(()-> _component.setPreferredSize(new Dimension(_component.getPreferredSize().width, h))) );
         return this.withPreferredHeight( height.get() );
     }
 
@@ -1041,7 +1059,9 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I onMouseClick( UIAction<SimpleDelegate<C, MouseEvent>> onClick ) {
         LogUtil.nullArgCheck(onClick, "onClick", UIAction.class);
         _component.addMouseListener(new MouseAdapter() {
-            @Override public void mouseClicked(MouseEvent e) { onClick.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())); }
+            @Override public void mouseClicked(MouseEvent e) { 
+                doApp(() -> onClick.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));
+            }
         });
         return (I) this;
     }
@@ -1056,7 +1076,9 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I onResize( UIAction<SimpleDelegate<C, ComponentEvent>> onResize ) {
         LogUtil.nullArgCheck(onResize, "onResize", UIAction.class);
         _component.addComponentListener(new ComponentAdapter() {
-            @Override public void componentResized(ComponentEvent e) { onResize.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())); }
+            @Override public void componentResized(ComponentEvent e) {
+                doApp(()->onResize.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));
+            }
         });
         return (I) this;
     }
@@ -1071,7 +1093,9 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I onMoved( UIAction<SimpleDelegate<C, ComponentEvent>> onMoved ) {
         LogUtil.nullArgCheck(onMoved, "onMoved", UIAction.class);
         _component.addComponentListener(new ComponentAdapter() {
-            @Override public void componentMoved(ComponentEvent e) { onMoved.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())); }
+            @Override public void componentMoved(ComponentEvent e) {
+                doApp(()->onMoved.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));
+            }
         });
         return (I) this;
     }
@@ -1086,7 +1110,9 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I onShown( UIAction<SimpleDelegate<C, ComponentEvent>> onShown ) {
         LogUtil.nullArgCheck(onShown, "onShown", UIAction.class);
         _component.addComponentListener(new ComponentAdapter() {
-            @Override public void componentShown(ComponentEvent e) { onShown.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())); }
+            @Override public void componentShown(ComponentEvent e) {
+                doApp(()->onShown.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));
+            }
         });
         return (I) this;
     }
@@ -1101,7 +1127,9 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I onHidden( UIAction<SimpleDelegate<C, ComponentEvent>> onHidden ) {
         LogUtil.nullArgCheck(onHidden, "onHidden", UIAction.class);
         _component.addComponentListener(new ComponentAdapter() {
-            @Override public void componentHidden(ComponentEvent e) { onHidden.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())); }
+            @Override public void componentHidden(ComponentEvent e) {
+                doApp(()->onHidden.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));
+            }
         });
         return (I) this;
     }
@@ -1116,7 +1144,9 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I onFocusGained(UIAction<SimpleDelegate<C, ComponentEvent>> onFocus) {
         LogUtil.nullArgCheck(onFocus, "onFocus", UIAction.class);
         _component.addFocusListener(new FocusAdapter() {
-            @Override public void focusGained(FocusEvent e) { onFocus.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())); }
+            @Override public void focusGained(FocusEvent e) {
+                doApp(()->onFocus.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));
+            }
         });
         return (I) this;
     }
@@ -1131,7 +1161,9 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I onFocusLost(UIAction<SimpleDelegate<C, ComponentEvent>> onFocus) {
         LogUtil.nullArgCheck(onFocus, "onFocus", UIAction.class);
         _component.addFocusListener(new FocusAdapter() {
-            @Override public void focusLost(FocusEvent e) { onFocus.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())); }
+            @Override public void focusLost(FocusEvent e) {
+                doApp(()->onFocus.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));
+            }
         });
         return (I) this;
     }
@@ -1146,7 +1178,9 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I onKeyPressed(UIAction<SimpleDelegate<C, KeyEvent>> onKeyPressed) {
         LogUtil.nullArgCheck(onKeyPressed, "onKeyPressed", UIAction.class);
         _component.addKeyListener(new KeyAdapter() {
-            @Override public void keyPressed(KeyEvent e) { onKeyPressed.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())); }
+            @Override public void keyPressed(KeyEvent e) {
+                doApp(()->onKeyPressed.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));
+            }
         });
         return (I) this;
     }
@@ -1166,7 +1200,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         _component.addKeyListener(new KeyAdapter() {
             @Override public void keyPressed( KeyEvent e ) {
                 if ( e.getKeyCode() == key.code )
-                    onKeyPressed.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));
+                    doApp(()->onKeyPressed.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));
             }
         });
         return (I) this;
@@ -1183,7 +1217,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I onKeyReleased(UIAction<SimpleDelegate<C, KeyEvent>> onKeyReleased) {
         LogUtil.nullArgCheck(onKeyReleased, "onKeyReleased", UIAction.class);
         _component.addKeyListener(new KeyAdapter() {
-            @Override public void keyReleased(KeyEvent e) { onKeyReleased.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())); }
+            @Override public void keyReleased(KeyEvent e) {
+                doApp(()->onKeyReleased.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()))); }
         });
         return (I) this;
     }
@@ -1205,7 +1240,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         _component.addKeyListener(new KeyAdapter() {
             @Override public void keyReleased( KeyEvent e ) {
                 if ( e.getKeyCode() == key.code )
-                    onKeyReleased.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));
+                    doApp(()->onKeyReleased.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));
             }
         });
         return (I) this;
@@ -1223,7 +1258,9 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public I onKeyTyped(UIAction<SimpleDelegate<C, KeyEvent>> onKeyTyped) {
         LogUtil.nullArgCheck(onKeyTyped, "onKeyTyped", UIAction.class);
         _component.addKeyListener(new KeyAdapter() {
-            @Override public void keyTyped(KeyEvent e) { onKeyTyped.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())); }
+            @Override public void keyTyped(KeyEvent e) {
+                doApp(()->onKeyTyped.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));
+            }
         });
         return (I) this;
     }
@@ -1246,7 +1283,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         _component.addKeyListener(new KeyAdapter() {
             @Override public void keyTyped( KeyEvent e ) {
                 if ( e.getKeyCode() == key.code )
-                    onKeyTyped.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));
+                    doApp(()->onKeyTyped.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));
             }
         });
         return (I) this;

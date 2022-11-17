@@ -28,7 +28,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
            .ifPresent( onSelection ->
                _component.addChangeListener(e -> {
                    if (index == _component.getSelectedIndex())
-                       onSelection.accept(new SimpleDelegate<>(_component, e, () -> getSiblinghood()));
+                       doApp(()->onSelection.accept(new SimpleDelegate<>(_component, e, () -> getSiblinghood())));
                })
            );
 
@@ -38,7 +38,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
                     @Override
                     public void mouseClicked( MouseEvent e ) {
                         if ( index == _component.getSelectedIndex() )
-                            onMouseClick.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));
+                            doApp(()->onMouseClick.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));
                     }
                 })
             );
@@ -59,11 +59,13 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
                 new java.awt.event.MouseAdapter() {
                     @Override
                     public void mouseClicked( MouseEvent e ) {
-                        if ( index == _component.getSelectedIndex() )
-                            tab.onMouseClick().ifPresent( onMouseClick -> {
-                                onMouseClick.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()));
-                            });
-                        _component.setSelectedIndex( index );
+                        doApp(()-> {
+                            if (index == _component.getSelectedIndex())
+                                tab.onMouseClick().ifPresent(onMouseClick -> {
+                                    onMouseClick.accept(new SimpleDelegate<>(_component, e, () -> getSiblinghood()));
+                                });
+                            _component.setSelectedIndex(index);
+                        });
                     }
                 };
 
@@ -98,7 +100,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
      */
     public final UIForTabbedPane<P> onChange(UIAction<SimpleDelegate<P, ChangeEvent>> onChange) {
         LogUtil.nullArgCheck(onChange, "onChange", UIAction.class);
-        _component.addChangeListener(e -> onChange.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));
+        _component.addChangeListener(e -> doApp(()->onChange.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()))));
         return this;
     }
 

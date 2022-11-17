@@ -24,22 +24,22 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
      */
     public final UIForSlider<S> onChange(UIAction<SimpleDelegate<JSlider, ChangeEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        _component.addChangeListener(e -> action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())) );
+        _component.addChangeListener(e -> doApp(()->action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()))) );
         return this;
     }
 
     public final UIForSlider<S> withValue( Val<Integer> val ) {
-        val.onView(_component::setValue);
+        val.onView(v->doUI(()->_component.setValue(v)));
         return this;
     }
 
     public final UIForSlider<S> withMin( Val<Integer> val ) {
-        val.onView(_component::setMinimum);
+        val.onView(v->doUI(()->_component.setMinimum(v)));
         return this;
     }
 
     public final UIForSlider<S> withMax( Val<Integer> val ) {
-        val.onView(_component::setMaximum);
+        val.onView(v->doUI(()->_component.setMaximum(v)));
         return this;
     }
 

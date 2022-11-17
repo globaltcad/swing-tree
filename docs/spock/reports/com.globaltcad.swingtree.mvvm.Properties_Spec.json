@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.039 seconds"
+    "duration":"0.013 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -56,7 +56,7 @@
     {
       "id":"Properties can be bound by subscribing to them using the \"onView(..)\" method.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that bound Swing-Tree properties only have side effects\n            when they are deliberately triggered to execute their side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
       },
@@ -81,7 +81,7 @@
     {
       "id":"Properties not only have a value but also a type and id!",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -119,7 +119,7 @@
     {
       "id":"The \"withID(..)\" method produces a new property with all bindings inherited.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The wither methods on properties are used to create new property instances\n            with the same value and bindings as the original property\n            but without side effects of the original property.\n            So if you add bindings to a withered property they will not affect the original property.\n        "]
       },
@@ -146,7 +146,7 @@
     {
       "id":"Properties are similar to the \"Optional\" class, you can map them and see if their are empty or not.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -167,7 +167,7 @@
     {
       "id":"The \"ifPresent\" method allows us to see if a property has a value or not.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -203,7 +203,7 @@
     {
       "id":"The \"orElseThrow\" method should be used instead of \"get\".",
       "result":"PASS",
-      "duration":"0.011 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that accessing the value of an empty property using the \"get\" method\n            will throw an exception.\n            Use this method instead to make the intend of your code more clear.\n        "]
       },
@@ -220,7 +220,7 @@
     {
       "id":"The equality and hash code of a property are based on its value, type and id!",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

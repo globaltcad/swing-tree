@@ -38,7 +38,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     }
 
     public final I withText( Val<String> val ) {
-        val.onView(_component::setText);
+        val.onView(v->doUI(()->_component.setText(v)));
         return withText( val.get() );
     }
 
@@ -53,7 +53,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  wrapped {@link AbstractButton} type.
      */
     public final I isSelectedIf( Val<Boolean> val ) {
-        val.onView(_component::setSelected);
+        val.onView(v->doUI(()->_component.setSelected(v)));
         return isSelectedIf( val.get() );
     }
 
@@ -63,7 +63,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  wrapped {@link AbstractButton} type.
      */
     public final I isSelectedIf( Var<Boolean> var ) {
-        var.onView(_component::setSelected);
+        var.onView(v->doUI(()->_component.setSelected(v)));
         this.onClick( it -> var.set(it.getComponent().isSelected()).act() );
         return isSelectedIf( var.get() );
     }
@@ -96,7 +96,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public I onChange(UIAction<SimpleDelegate<B, ItemEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        _component.addItemListener(e -> action.accept(new SimpleDelegate<>(_component, e, this::getSiblinghood)));
+        _component.addItemListener(e -> doApp(()->action.accept(new SimpleDelegate<>(_component, e, this::getSiblinghood))));
         return (I) this;
     }
 
@@ -114,9 +114,9 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public I onClick(UIAction<SimpleDelegate<B, ActionEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         _component.addActionListener(
-           e -> action.accept(
+           e -> doApp(()->action.accept(
                new SimpleDelegate<>(_component, e, this::getSiblinghood)
-           )
+           ))
         );
         return (I) this;
     }
