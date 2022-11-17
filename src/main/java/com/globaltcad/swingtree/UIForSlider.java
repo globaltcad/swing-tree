@@ -29,17 +29,17 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
     }
 
     public final UIForSlider<S> withValue( Val<Integer> val ) {
-        val.onView(v->doUI(()->_component.setValue(v)));
+        val.onShow(v->doUI(()->_component.setValue(v)));
         return this;
     }
 
     public final UIForSlider<S> withMin( Val<Integer> val ) {
-        val.onView(v->doUI(()->_component.setMinimum(v)));
+        val.onShow(v->doUI(()->_component.setMinimum(v)));
         return this;
     }
 
     public final UIForSlider<S> withMax( Val<Integer> val ) {
-        val.onView(v->doUI(()->_component.setMaximum(v)));
+        val.onShow(v->doUI(()->_component.setMaximum(v)));
         return this;
     }
 

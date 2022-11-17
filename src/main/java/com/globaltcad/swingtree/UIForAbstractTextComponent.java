@@ -75,7 +75,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
     }
 
     public final I withText( Val<String> val ) {
-        val.onView(v->doUI(()->_component.setText(v)));
+        val.onShow(v->doUI(()->_component.setText(v)));
         return withText( val.get() );
     }
 

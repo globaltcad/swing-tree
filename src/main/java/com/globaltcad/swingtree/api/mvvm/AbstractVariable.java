@@ -111,7 +111,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override public Val<T> onViewThis( Consumer<Val<T>> displayAction ) {
+	@Override public Val<T> onShowThis( Consumer<Val<T>> displayAction ) {
 		this.viewActions.add(displayAction);
 		return this;
 	}
@@ -120,7 +120,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Val<T> view() {
+	public Val<T> show() {
 		for ( Consumer<Val<T>> action : this.viewActions )
 			try {
 				action.accept(this);

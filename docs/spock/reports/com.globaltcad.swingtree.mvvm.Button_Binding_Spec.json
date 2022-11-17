@@ -18,7 +18,7 @@
       "result":"PASS",
       "duration":"0.004 seconds",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Note that for a binding to work, the property must be a Var or Val\n            implementation and it is required to call the \"view()\" method on the\n            property to apply its value to the view.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Note that for a binding to work, the property must be a Var or Val\n            implementation and it is required to call the \"show()\" method on the\n            property to apply its value to the view.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a simple swing-tree property for modelling the text.","code":["Val<String> text = Var.of(\"Hello World\")"]},
@@ -31,7 +31,7 @@
 
         {"kind":"then","text":"The button should NOT be updated.","code":["node.component.text == \"Hello World\""]},
 
-        {"kind":"when","text":"We call the \"view\" method on the property...","code":["text.view()"]},
+        {"kind":"when","text":"We call the \"view\" method on the property...","code":["text.show()"]},
 
         {"kind":"then","text":"The button should be updated.","code":["node.component.text == \"Goodbye World\""]}
       ],
@@ -56,7 +56,7 @@
 
         {"kind":"then","text":"The button should NOT be updated.","code":["node.component.selected == false"]},
 
-        {"kind":"when","text":"We call the \"view\" method on the property...","code":["selected.view()"]},
+        {"kind":"when","text":"We call the \"view\" method on the property...","code":["selected.show()"]},
 
         {"kind":"then","text":"The button should be updated.","code":["node.component.selected == true"]}
       ],
@@ -81,7 +81,7 @@
 
         {"kind":"then","text":"The button should NOT be updated.","code":["node.component.enabled == false"]},
 
-        {"kind":"when","text":"We call the \"view\" method on the property...","code":["enabled.view()"]},
+        {"kind":"when","text":"We call the \"view\" method on the property...","code":["enabled.show()"]},
 
         {"kind":"then","text":"The button should be updated.","code":["node.component.enabled == true"]}
       ],

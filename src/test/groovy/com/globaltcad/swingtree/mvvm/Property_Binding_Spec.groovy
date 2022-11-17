@@ -44,8 +44,8 @@ class Property_Binding_Spec extends Specification
         then : 'Nothing will happen at first.'
             node.component.components[1].minimumSize == new Dimension(100, 100)
 
-        when : 'We call the "view()" method on the property however...'
-            property.view()
+        when : 'We call the "show()" method on the property however...'
+            property.show()
 
         then : 'The button will have the new size.'
             node.component.components[1].minimumSize == new Dimension(200, 200)
@@ -70,8 +70,8 @@ class Property_Binding_Spec extends Specification
         then : 'Nothing will happen at first.'
             node.component.components[1].background == Color.RED
 
-        when : 'We call the "view()" method on the property however...'
-            property.view()
+        when : 'We call the "show()" method on the property however...'
+            property.show()
 
         then : 'The label will have the new color.'
             node.component.components[1].background == Color.BLUE
@@ -96,8 +96,8 @@ class Property_Binding_Spec extends Specification
         then : 'Nothing will happen at first.'
             node.component.components[1].text == "Hello World"
 
-        when : 'We call the "view()" method on the property however...'
-            property.view()
+        when : 'We call the "show()" method on the property however...'
+            property.show()
 
         then : 'The text field will have the new text.'
             node.component.components[1].text == "Goodbye World"
@@ -122,8 +122,8 @@ class Property_Binding_Spec extends Specification
         then : 'Nothing will happen at first.'
             node.component.components[1].enabled == true
 
-        when : 'We call the "view()" method on the property however...'
-            property.view()
+        when : 'We call the "show()" method on the property however...'
+            property.show()
 
         then : 'The spinner will be disabled.'
             node.component.components[1].enabled == false
@@ -147,8 +147,8 @@ class Property_Binding_Spec extends Specification
         then : 'Nothing will happen at first.'
             node.component.components[1].selected == true
 
-        when : 'We call the "view()" method on the property however...'
-            property.view()
+        when : 'We call the "show()" method on the property however...'
+            property.show()
 
         then : 'The checkbox will be unselected.'
             node.component.components[1].selected == false

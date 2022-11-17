@@ -62,7 +62,7 @@ class Properties_Spec extends Specification
             immutable.get() == 69
     }
 
-    def 'Properties can be bound by subscribing to them using the "onView(..)" method.'()
+    def 'Properties can be bound by subscribing to them using the "onShow(..)" method.'()
     {
         reportInfo"""
             Note that bound Swing-Tree properties only have side effects
@@ -75,15 +75,15 @@ class Properties_Spec extends Specification
             Var<String> mutable = Var.of("Tempeh")
         and : 'Something we want to have a side effect on:'
             var list = []
-        when : 'We subscribe to the property using the "onView(..)" method.'
-            mutable.onView { list.add(it) }
+        when : 'We subscribe to the property using the "onShow(..)" method.'
+            mutable.onShow { list.add(it) }
         and : 'We change the value of the property.'
             mutable.set("Tofu")
         then : 'Nothing happens initially...'
             list == []
 
-        when : 'We call the "view()" method on the property however...'
-            mutable.view()
+        when : 'We call the "show()" method on the property however...'
+            mutable.show()
         then : 'The side effect is executed.'
             list == ["Tofu"]
     }
@@ -126,21 +126,21 @@ class Properties_Spec extends Specification
             Var<String> property = Var.of("Hello World")
         and : 'we bind 1 subscriber to the property.'
             var list1 = []
-            property.onView { list1.add(it) }
+            property.onShow { list1.add(it) }
         and : 'We create a new property with a different id.'
             Val<String> property2 = property.withID("XY")
         and : 'Another subscriber to the new property.'
             var list2 = []
-            property2.onView { list2.add(it) }
+            property2.onShow { list2.add(it) }
 
         when : 'We change and "view" the value of the original property.'
-            property.set("Tofu").view()
+            property.set("Tofu").show()
         then : 'The subscriber of the original property is triggered but not the subscriber of the new property.'
             list1 == ["Tofu"]
             list2 == []
 
         when : 'We change and "view" the value of the new property.'
-            property2.set("Tempeh").view()
+            property2.set("Tempeh").show()
         then : 'Both subscribers are receive the effect.'
             list1 == ["Tofu", "Tempeh"]
             list2 == ["Tempeh"]

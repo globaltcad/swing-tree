@@ -38,7 +38,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     }
 
     public final I withText( Val<String> val ) {
-        val.onView(v->doUI(()->_component.setText(v)));
+        val.onShow(v->doUI(()->_component.setText(v)));
         return withText( val.get() );
     }
 
@@ -53,7 +53,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  wrapped {@link AbstractButton} type.
      */
     public final I isSelectedIf( Val<Boolean> val ) {
-        val.onView(v->doUI(()->_component.setSelected(v)));
+        val.onShow(v->doUI(()->_component.setSelected(v)));
         return isSelectedIf( val.get() );
     }
 
@@ -63,7 +63,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  wrapped {@link AbstractButton} type.
      */
     public final I isSelectedIf( Var<Boolean> var ) {
-        var.onView(v->doUI(()->_component.setSelected(v)));
+        var.onShow(v->doUI(()->_component.setSelected(v)));
         this.onClick( it -> var.set(it.getComponent().isSelected()).act() );
         return isSelectedIf( var.get() );
     }

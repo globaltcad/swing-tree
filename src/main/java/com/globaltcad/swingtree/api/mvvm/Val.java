@@ -213,13 +213,13 @@ public interface Val<T>
 
 	default Optional<T> toOptional() { return Optional.ofNullable(this.orElseNull()); }
 
-	Val<T> onViewThis( Consumer<Val<T>> displayAction );
+	Val<T> onShowThis( Consumer<Val<T>> displayAction );
 
-	default Val<T> onView( Consumer<T> displayAction ) {
-		return onViewThis( v -> displayAction.accept(v.orElseNullable(null)) );
+	default Val<T> onShow( Consumer<T> displayAction ) {
+		return onShowThis( property -> displayAction.accept( property.orElseNullable(null)) );
 	}
 
-	Val<T> view();
+	Val<T> show();
 
 	/**
 	 *  The values of {@link Var} implementations ought to be viewed

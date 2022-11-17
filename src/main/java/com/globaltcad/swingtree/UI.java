@@ -47,7 +47,7 @@ public final class UI
     }
 
     public static void use(ThreadMode mode, Runnable scope) {
-        Settings settings = _SETTINGS.get();
+        Settings settings = SETTINGS();
         ThreadMode oldMode = settings.getThreadMode();
         settings.setThreadMode(mode);
         try {
@@ -1147,6 +1147,16 @@ public final class UI
         return of(new JLabel(text)).makeBold();
     }
 
+    /**
+     *  Use this to create a UI builder for a bound {@link JLabel} with bold font.
+     *  This is in essence a convenience method for {@code UI.label(Val<String> text).makeBold()}.
+     *  @param text The text property which should be displayed on the label dynamically.
+     *  @return A builder instance for the label, which enables fluent method chaining.
+     */
+    public static UIForLabel<JLabel> boldLabel(Val<String> text) {
+        return of(new JLabel()).withText(text).makeBold();
+    }
+
     public static UIForCheckBox<JCheckBox> checkBox(String text) {
         LogUtil.nullArgCheck(text, "text", String.class);
         return of(new JCheckBox(text));
@@ -1164,6 +1174,16 @@ public final class UI
         LogUtil.nullArgCheck(state, "state", Var.class);
         return of(new JCheckBox())
                 .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .applyIf(!state.isUnnamed(), it -> it.getComponent().setName(state.id()))
+                .withText(text)
+                .isSelectedIf(state);
+    }
+
+    public static UIForCheckBox<JCheckBox> checkBox(String text, Var<Boolean> state) {
+        LogUtil.nullArgCheck(text, "text", String.class);
+        LogUtil.nullArgCheck(state, "state", Var.class);
+        return of(new JCheckBox())
+                .applyIf(!state.isUnnamed(), it -> it.getComponent().setName(state.id()))
                 .withText(text)
                 .isSelectedIf(state);
     }
@@ -1188,6 +1208,24 @@ public final class UI
         return of(new JRadioButton())
                 .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
                 .withText(text);
+    }
+
+    public static UIForRadioButton<JRadioButton> radioButton(Val<String> text, Var<Boolean> selected) {
+        LogUtil.nullArgCheck(text, "text", Val.class);
+        LogUtil.nullArgCheck(text, "selected", Var.class);
+        return of(new JRadioButton())
+                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .applyIf(!selected.isUnnamed(), it -> it.getComponent().setName(selected.id()))
+                .withText(text)
+                .onClick( it -> selected.set(it.getComponent().isSelected()).act() );
+    }
+
+    public static UIForRadioButton<JRadioButton> radioButton(String text, Var<Boolean> selected) {
+        LogUtil.nullArgCheck(text, "text", String.class);
+        LogUtil.nullArgCheck(text, "selected", Var.class);
+        return of(new JRadioButton())
+                .withText(text)
+                .onClick( it -> selected.set(it.getComponent().isSelected()).act() );
     }
 
     /**

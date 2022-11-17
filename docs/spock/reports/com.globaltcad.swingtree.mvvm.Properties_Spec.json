@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.013 seconds"
+    "duration":"0.012 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -54,7 +54,7 @@
     },
   
     {
-      "id":"Properties can be bound by subscribing to them using the \"onView(..)\" method.",
+      "id":"Properties can be bound by subscribing to them using the \"onShow(..)\" method.",
       "result":"PASS",
       "duration":"0",
       "iterations":{
@@ -65,13 +65,13 @@
 
         {"kind":"and","text":"Something we want to have a side effect on:","code":["var list = []"]},
 
-        {"kind":"when","text":"We subscribe to the property using the \"onView(..)\" method.","code":["mutable.onView { list.add(it) }"]},
+        {"kind":"when","text":"We subscribe to the property using the \"onShow(..)\" method.","code":["mutable.onShow { list.add(it) }"]},
 
         {"kind":"and","text":"We change the value of the property.","code":["mutable.set(\"Tofu\")"]},
 
         {"kind":"then","text":"Nothing happens initially...","code":["list == []"]},
 
-        {"kind":"when","text":"We call the \"view()\" method on the property however...","code":["mutable.view()"]},
+        {"kind":"when","text":"We call the \"show()\" method on the property however...","code":["mutable.show()"]},
 
         {"kind":"then","text":"The side effect is executed.","code":["list == [\"Tofu\"]"]}
       ],
@@ -126,17 +126,17 @@
       "blocks":[
         {"kind":"given","text":"We create a property...","code":["Var<String> property = Var.of(\"Hello World\")"]},
 
-        {"kind":"and","text":"we bind 1 subscriber to the property.","code":["var list1 = []","property.onView { list1.add(it) }"]},
+        {"kind":"and","text":"we bind 1 subscriber to the property.","code":["var list1 = []","property.onShow { list1.add(it) }"]},
 
         {"kind":"and","text":"We create a new property with a different id.","code":["Val<String> property2 = property.withID(\"XY\")"]},
 
-        {"kind":"and","text":"Another subscriber to the new property.","code":["var list2 = []","property2.onView { list2.add(it) }"]},
+        {"kind":"and","text":"Another subscriber to the new property.","code":["var list2 = []","property2.onShow { list2.add(it) }"]},
 
-        {"kind":"when","text":"We change and \"view\" the value of the original property.","code":["property.set(\"Tofu\").view()"]},
+        {"kind":"when","text":"We change and \"view\" the value of the original property.","code":["property.set(\"Tofu\").show()"]},
 
         {"kind":"then","text":"The subscriber of the original property is triggered but not the subscriber of the new property.","code":["list1 == [\"Tofu\"]","list2 == []"]},
 
-        {"kind":"when","text":"We change and \"view\" the value of the new property.","code":["property2.set(\"Tempeh\").view()"]},
+        {"kind":"when","text":"We change and \"view\" the value of the new property.","code":["property2.set(\"Tempeh\").show()"]},
 
         {"kind":"then","text":"Both subscribers are receive the effect.","code":["list1 == [\"Tofu\", \"Tempeh\"]","list2 == [\"Tempeh\"]"]}
       ],
@@ -146,7 +146,7 @@
     {
       "id":"Properties are similar to the \"Optional\" class, you can map them and see if their are empty or not.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

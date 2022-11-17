@@ -27,7 +27,7 @@ class Label_Binding_Spec extends Specification
     {
         reportInfo """
             Note that for a binding to work, the property must be a Var or Val
-            implementation and it is required to call the "view()" method on the
+            implementation and it is required to call the "show()" method on the
             property to apply its value to the view.
         """
 
@@ -46,7 +46,7 @@ class Label_Binding_Spec extends Specification
             node.component.text == "Hello World"
 
         when : 'We call the "view" method on the property...'
-            text.view()
+            text.show()
         then : 'The label should be updated.'
             node.component.text == "Goodbye World"
     }
@@ -75,8 +75,8 @@ class Label_Binding_Spec extends Specification
             node.component.background == Color.BLUE
 
         when : 'We call the "view" method on the property...'
-            color1.view()
-            color2.view()
+            color1.show()
+            color2.show()
         then : 'The label should be updated.'
             node.component.foreground == Color.GREEN
             node.component.background == Color.YELLOW
@@ -114,9 +114,9 @@ class Label_Binding_Spec extends Specification
             node.component.preferredSize == new Dimension(150, 150)
 
         when : 'We call the "view" method on the property...'
-            minSize.view()
-            maxSize.view()
-            prefSize.view()
+            minSize.show()
+            maxSize.show()
+            prefSize.show()
         then : 'The label should be updated.'
             node.component.minimumSize == new Dimension(50, 50)
             node.component.maximumSize == new Dimension(100, 100)
@@ -145,7 +145,7 @@ class Label_Binding_Spec extends Specification
             node.component.enabled == true
 
         when : 'We call the "view" method on the property...'
-            enabled.view()
+            enabled.show()
         then : 'The label should be updated.'
             node.component.enabled == false
     }
@@ -172,7 +172,7 @@ class Label_Binding_Spec extends Specification
             node.component.visible == true
 
         when : 'We call the "view" method on the property...'
-            visible.view()
+            visible.show()
         then : 'The label should be updated.'
             node.component.visible == false
     }

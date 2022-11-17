@@ -1,5 +1,6 @@
 package example;
 
+import com.globaltcad.swingtree.api.mvvm.Val;
 import com.globaltcad.swingtree.api.mvvm.Var;
 
 public class FormViewModel
@@ -15,26 +16,31 @@ public class FormViewModel
 
     public Var<String> password() { return password; }
 
-    public Var<String> validity() { return validity; }
+    public Val<String> validity() { return validity; }
+
 
     public Var<Boolean> loginEnabled() { return loginEnabled; }
 
     public void validate() {
         if ( username.get().isEmpty() || password.get().isEmpty() ) {
-            validity.set( "Username and password must not be empty!" ).view();
-            loginEnabled.set( false ).view();
+            validity.set( "Username and password must not be empty!" ).show();
+            loginEnabled.set( false ).show();
             this.finalForm = null;
         } else {
-            validity.set( "" ).view();
-            loginEnabled.set( true ).view();
+            validity.set( "" ).show();
+            loginEnabled.set( true ).show();
             this.finalForm = new Form( username.get(), password.get() );
         }
     }
 
     public void login() {
+        validity.set("Please wait...").show();
+        try {Thread.sleep(6000);}catch(Exception e) {}
         if ( finalForm != null ) {
             System.out.println( "Logging in with " + finalForm.username() + " and " + finalForm.password() );
+            validity.set("Login failed!").show();
         }
+        else validity.set("Login successful").show();
     }
 
 }

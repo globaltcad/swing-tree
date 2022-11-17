@@ -25,7 +25,7 @@ class Button_Binding_Spec extends Specification
     {
         reportInfo """
             Note that for a binding to work, the property must be a Var or Val
-            implementation and it is required to call the "view()" method on the
+            implementation and it is required to call the "show()" method on the
             property to apply its value to the view.
         """
 
@@ -44,7 +44,7 @@ class Button_Binding_Spec extends Specification
             node.component.text == "Hello World"
 
         when : 'We call the "view" method on the property...'
-            text.view()
+            text.show()
         then : 'The button should be updated.'
             node.component.text == "Goodbye World"
     }
@@ -69,7 +69,7 @@ class Button_Binding_Spec extends Specification
             node.component.selected == false
 
         when : 'We call the "view" method on the property...'
-            selected.view()
+            selected.show()
         then : 'The button should be updated.'
             node.component.selected == true
     }
@@ -94,7 +94,7 @@ class Button_Binding_Spec extends Specification
             node.component.enabled == false
 
         when : 'We call the "view" method on the property...'
-            enabled.view()
+            enabled.show()
         then : 'The button should be updated.'
             node.component.enabled == true
     }

@@ -9,16 +9,16 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.011 seconds"
+    "duration":"0.010 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can bind to the text of a label.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Note that for a binding to work, the property must be a Var or Val\n            implementation and it is required to call the \"view()\" method on the\n            property to apply its value to the view.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Note that for a binding to work, the property must be a Var or Val\n            implementation and it is required to call the \"show()\" method on the\n            property to apply its value to the view.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a simple swing-tree property for modelling the text.","code":["Val<String> text = Var.of(\"Hello World\")"]},
@@ -31,7 +31,7 @@
 
         {"kind":"then","text":"The label should NOT be updated.","code":["node.component.text == \"Hello World\""]},
 
-        {"kind":"when","text":"We call the \"view\" method on the property...","code":["text.view()"]},
+        {"kind":"when","text":"We call the \"view\" method on the property...","code":["text.show()"]},
 
         {"kind":"then","text":"The label should be updated.","code":["node.component.text == \"Goodbye World\""]}
       ],
@@ -41,7 +41,7 @@
     {
       "id":"We can bind to the foreground and background color of a UI node.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -56,7 +56,7 @@
 
         {"kind":"then","text":"The label should NOT be updated.","code":["node.component.foreground == Color.RED","node.component.background == Color.BLUE"]},
 
-        {"kind":"when","text":"We call the \"view\" method on the property...","code":["color1.view()","color2.view()"]},
+        {"kind":"when","text":"We call the \"view\" method on the property...","code":["color1.show()","color2.show()"]},
 
         {"kind":"then","text":"The label should be updated.","code":["node.component.foreground == Color.GREEN","node.component.background == Color.YELLOW"]}
       ],
@@ -81,7 +81,7 @@
 
         {"kind":"then","text":"The label should NOT be updated.","code":["node.component.minimumSize == new Dimension(100, 100)","node.component.maximumSize == new Dimension(200, 200)","node.component.preferredSize == new Dimension(150, 150)"]},
 
-        {"kind":"when","text":"We call the \"view\" method on the property...","code":["minSize.view()","maxSize.view()","prefSize.view()"]},
+        {"kind":"when","text":"We call the \"view\" method on the property...","code":["minSize.show()","maxSize.show()","prefSize.show()"]},
 
         {"kind":"then","text":"The label should be updated.","code":["node.component.minimumSize == new Dimension(50, 50)","node.component.maximumSize == new Dimension(100, 100)","node.component.preferredSize == new Dimension(75, 75)"]}
       ],
@@ -106,7 +106,7 @@
 
         {"kind":"then","text":"The label should NOT be updated.","code":["node.component.enabled == true"]},
 
-        {"kind":"when","text":"We call the \"view\" method on the property...","code":["enabled.view()"]},
+        {"kind":"when","text":"We call the \"view\" method on the property...","code":["enabled.show()"]},
 
         {"kind":"then","text":"The label should be updated.","code":["node.component.enabled == false"]}
       ],
@@ -116,7 +116,7 @@
     {
       "id":"You can bind a variable to the \"visible\" flag of a label.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that this works for all kind of UI nodes, not just labels.\n        "]
       },
@@ -131,7 +131,7 @@
 
         {"kind":"then","text":"The label should NOT be updated.","code":["node.component.visible == true"]},
 
-        {"kind":"when","text":"We call the \"view\" method on the property...","code":["visible.view()"]},
+        {"kind":"when","text":"We call the \"view\" method on the property...","code":["visible.show()"]},
 
         {"kind":"then","text":"The label should be updated.","code":["node.component.visible == false"]}
       ],

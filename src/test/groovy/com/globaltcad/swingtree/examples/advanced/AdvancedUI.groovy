@@ -30,7 +30,9 @@ class AdvancedUI {
                             )
                             .add("growx, shrinky, pushx, alignx left", UI.label("Acti proticus: APIC"))
                             .add("growx, shrinky, pushx, alignx right, wrap",
-                               UI.label("").doUpdates(100, {it.component.setText(new Date().toString())})
+                               UI.label("").doUpdates(100, {
+                                   it.component.setText(new Date().toString())
+                               })
                             )
                         )
                         .add("push, grow, span, wrap",
