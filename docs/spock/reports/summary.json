@@ -1,14 +1,14 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Wed Nov 16 17:07:51 CET 2022",
+  "created": "Thu Nov 17 09:12:04 CET 2022",
   "statistics":{
-    "runs":"14",
-    "passed":"14",
+    "runs":"15",
+    "passed":"15",
     "failed":"0",
     "featureFailures":"0",
     "successRate":"1.0",
-    "duration":"3735.0"
+    "duration":"3949.0"
   },
   "specifications": [{
       "className":"com.globaltcad.swingtree.common.Basic_UI_Builder_Examples_Spec",
@@ -19,7 +19,7 @@
       "errors":"0",
       "skipped":"1" ,
       "successRate":"1.0",
-      "duration":"213",
+      "duration":"236",
       "executedFeatures":[{"id":"A tabbed pane can be created and populated in a declarative way.","extraInfo":[]},{"id":"Swing tree nests components (trough builder nodes).","extraInfo":[]},{"id":"Tab header components can be passed to the \"tab\" factory method instead of the title.","extraInfo":[]},{"id":"The tab buttons of a tabbed pane can have custom components.","extraInfo":[]},{"id":"We can add a list of components to the swing tree API and get a builder node in return.","extraInfo":[]},{"id":"We can easily define the cursor on a wrapped UI component","extraInfo":[]},{"id":"We can register list selection events on a JList based swing tree node.","extraInfo":[]},{"id":"We can register various UI focus events in swing tree nodes.","extraInfo":[]},{"id":"We can register various keyboard events in swing tree nodes.","extraInfo":[]},{"id":"We can use the swing tree to build a valid Swing GUI tree.","extraInfo":[]}],
       "ignoredFeatures":[{"id":"Swing tree makes us a viewable window!","extraInfo":[]}]
     },{
@@ -31,7 +31,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"942",
+      "duration":"1096",
       "executedFeatures":[{"id":"The advanced UI define in the examples has the expected state.","extraInfo":[]},{"id":"The calculator UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The form UI define in the examples has the expected state.","extraInfo":[]},{"id":"The simple Table-UI example has the expected state.","extraInfo":[]},{"id":"The todo app UI defined in the examples has the expected state.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -55,7 +55,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"130",
+      "duration":"144",
       "executedFeatures":[{"id":"We can query the swing tree within an action lambda.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -67,7 +67,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"215",
+      "duration":"227",
       "executedFeatures":[{"id":"We can register periodically called UI updates!","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -79,7 +79,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"747",
+      "duration":"716",
       "executedFeatures":[{"id":"A button will delegate its siblings within actions:","extraInfo":[]},{"id":"We can easily create a button with an associated action:","extraInfo":[]},{"id":"We can go through the entire siblinghood, including the current button!","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -91,7 +91,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"76",
+      "duration":"94",
       "executedFeatures":[{"id":"A map can be used as a data source for tables.","extraInfo":[]},{"id":"We can attach a simple table cell renderer to a JTable in just a few lines of code.","extraInfo":[]},{"id":"We can create a simple column major table cell renderer through a UI factory method.","extraInfo":[]},{"id":"We can create a simple table cell renderer through a UI factory method.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -103,7 +103,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"1073",
+      "duration":"1083",
       "executedFeatures":[{"id":"A button item can undo any multi-selection.","extraInfo":[]},{"id":"It is possible to select more than 1 item.","extraInfo":[]},{"id":"The most simple kind of split button can be built like so:","extraInfo":[]},{"id":"We can easily build a split button where only one item text will have its text displayed:","extraInfo":[]},{"id":"We can easily build a split button whose text becomes the current user selection:","extraInfo":[]},{"id":"We can register button click events for button items as well as the split button as a whole.","extraInfo":[]},{"id":"We can specify which item should be initially selected.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -127,7 +127,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"17",
+      "duration":"9",
       "executedFeatures":[{"id":"We can build a JSplitButton.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -139,7 +139,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"20",
+      "duration":"18",
       "executedFeatures":[{"id":"It is possible to bind to the minimum, maximum and preferred size of a label","extraInfo":[]},{"id":"We can bind to the foreground and background color of a UI node.","extraInfo":[]},{"id":"We can bind to the text of a label.","extraInfo":[]},{"id":"You can bind a variable to the \"enable\" flag of a label.","extraInfo":[]},{"id":"You can bind a variable to the \"visible\" flag of a label.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -151,7 +151,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"21",
+      "duration":"23",
       "executedFeatures":[{"id":"We can bind to the text of a button.","extraInfo":[]},{"id":"You can bind to the enabled state of a button.","extraInfo":[]},{"id":"You can bind to the selection state of a button.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -163,7 +163,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"33",
+      "duration":"39",
       "executedFeatures":[{"id":"A property can only wrap null if we specify a type class.","extraInfo":[]},{"id":"An empty property will throw an exception if you try to access its value.","extraInfo":[]},{"id":"Properties are similar to the \"Optional\" class, you can map them and see if their are empty or not.","extraInfo":[]},{"id":"Properties are simple wrappers around a value","extraInfo":[]},{"id":"Properties can be bound by subscribing to them using the \"onView(..)\" method.","extraInfo":[]},{"id":"Properties not only have a value but also a type and id!","extraInfo":[]},{"id":"The \"ifPresent\" method allows us to see if a property has a value or not.","extraInfo":[]},{"id":"The \"orElseThrow\" method should be used instead of \"get\".","extraInfo":[]},{"id":"The \"withID(..)\" method produces a new property with all bindings inherited.","extraInfo":[]},{"id":"The equality and hash code of a property are based on its value, type and id!","extraInfo":[]},{"id":"There are 2 types of properties, an immutable property, and its mutable sub-type.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -175,8 +175,20 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"22",
+      "duration":"23",
       "executedFeatures":[{"id":"We can bind a property to the size of a swing component.","extraInfo":[]},{"id":"We can bind to the color of a component.","extraInfo":[]},{"id":"We can bind to the text of a component.","extraInfo":[]},{"id":"We can enable and disable a UI component dynamically through property binding.","extraInfo":[]},{"id":"We can select or unselect a UI component dynamically through properties.","extraInfo":[]}],
+      "ignoredFeatures":[]
+    },{
+      "className":"com.globaltcad.swingtree.mvvm.MVVM_Example_Spec",
+      "title":"MVVM Introduction",
+      "narrative":"Swing-Tree allows you to create a Model-View-ViewModel (MVVM) architecture\n    based on 2 simple property interfaces: `Val`, and `Var`!\n\n    `Val` is a read-only property, and `Var` is a read-write property.\n\n    The state of both properties can be observed by the view using simple listeners.\n    This happens automatically when you pass them to the Swing-Tree view.\n    If you want to trigger an action when the property changes, you \n    have to pass the `Var` property to the view and define a action\n    for it inside of your view model.",
+      "featureCount":"1",
+      "failures":"0",
+      "errors":"0",
+      "skipped":"0" ,
+      "successRate":"1.0",
+      "duration":"15",
+      "executedFeatures":[{"id":"We can create a property based view model and build a view for it.","extraInfo":[]}],
       "ignoredFeatures":[]
     }
   ],

@@ -7,6 +7,8 @@ import com.globaltcad.swingtree.api.SwingBuilder;
 import com.globaltcad.swingtree.api.model.BasicTableModel;
 import com.globaltcad.swingtree.api.model.TableListDataSource;
 import com.globaltcad.swingtree.api.model.TableMapDataSource;
+import com.globaltcad.swingtree.api.mvvm.Val;
+import com.globaltcad.swingtree.api.mvvm.Var;
 import com.globaltcad.swingtree.layout.CompAttr;
 import com.globaltcad.swingtree.layout.LayoutAttr;
 import net.miginfocom.swing.MigLayout;
@@ -1069,6 +1071,20 @@ public final class UI
     }
 
     /**
+     *  Use this to create a builder for the {@link JLabel} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JLabel(Val<String> text)}.
+     *
+     * @param text The text property which should be bound to the label.
+     * @return A builder instance for the label, which enables fluent method chaining.
+     */
+    public static UIForLabel<JLabel> label(Val<String> text) {
+        LogUtil.nullArgCheck(text, "text", Val.class);
+        return of(new JLabel())
+                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .withText(text);
+    }
+
+    /**
      *  Use this to create a UI builder for a text-less label containing and displaying an icon.
      *
      * @param icon The icon which should be placed into a {@link JLabel}.
@@ -1110,6 +1126,22 @@ public final class UI
         return of(new JCheckBox(text));
     }
 
+    public static UIForCheckBox<JCheckBox> checkBox(Val<String> text) {
+        LogUtil.nullArgCheck(text, "text", Val.class);
+        return of(new JCheckBox())
+                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .withText(text);
+    }
+
+    public static UIForCheckBox<JCheckBox> checkBox(Val<String> text, Var<Boolean> state) {
+        LogUtil.nullArgCheck(text, "text", Val.class);
+        LogUtil.nullArgCheck(state, "state", Var.class);
+        return of(new JCheckBox())
+                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .withText(text)
+                .isSelectedIf(state);
+    }
+
     /**
      *  Use this to create a builder for the provided {@link JCheckBox} instance.
      *
@@ -1123,6 +1155,13 @@ public final class UI
     public static UIForRadioButton<JRadioButton> radioButton(String text) {
         LogUtil.nullArgCheck(text, "text", String.class);
         return of(new JRadioButton(text));
+    }
+
+    public static UIForRadioButton<JRadioButton> radioButton(Val<String> text) {
+        LogUtil.nullArgCheck(text, "text", Val.class);
+        return of(new JRadioButton())
+                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .withText(text);
     }
 
     /**
@@ -1145,9 +1184,24 @@ public final class UI
         return new UIForTextField<>(component);
     }
 
-    public static UIForTextField<JTextField> textField(String text) {
+    public static UIForTextField<JTextField> textField( String text ) {
         LogUtil.nullArgCheck(text, "text", String.class);
         return of(new JTextField(text));
+    }
+
+    public static UIForTextField<JTextField> textField( Val<String> text ) {
+        LogUtil.nullArgCheck(text, "text", Val.class);
+        return of(new JTextField())
+                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .withText(text);
+    }
+
+    public static UIForTextField<JTextField> textField( Var<String> text ) {
+        LogUtil.nullArgCheck(text, "text", Var.class);
+        return of(new JTextField())
+                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .withText(text)
+                .onKeyTyped( it -> text.set(it.getComponent().getText()).act() );
     }
 
     /**
@@ -1173,6 +1227,21 @@ public final class UI
         return of(new JFormattedTextField(text));
     }
 
+    public static UIForFormattedTextField formattedTextField(Val<String> text) {
+        LogUtil.nullArgCheck(text, "text", Val.class);
+        return of(new JFormattedTextField())
+                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .withText(text);
+    }
+
+    public static UIForFormattedTextField formattedTextField(Var<String> text) {
+        LogUtil.nullArgCheck(text, "text", Var.class);
+        return of(new JFormattedTextField())
+                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .withText(text)
+                .onKeyTyped( it -> text.set(it.getComponent().getText()).act() );
+    }
+
     /**
      *  Use this to create a builder for a new {@link JFormattedTextField} UI component.
      *  This is in essence a convenience method for {@code UI.of(new JFormattedTextField())}.
@@ -1196,6 +1265,21 @@ public final class UI
         return of(new JPasswordField(text));
     }
 
+    public static UIForPasswordField<JPasswordField> passwordField(Val<String> text) {
+        LogUtil.nullArgCheck(text, "text", Val.class);
+        return of(new JPasswordField())
+                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .withText(text);
+    }
+
+    public static UIForPasswordField<JPasswordField> passwordField(Var<String> text) {
+        LogUtil.nullArgCheck(text, "text", Val.class);
+        return of(new JPasswordField())
+                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .withText(text)
+                .onKeyTyped( it -> text.set(String.valueOf(it.getComponent().getPassword())).act() );
+    }
+
     /**
      *  Use this to create a builder for a new {@link JPasswordField} UI component.
      *  This is in essence a convenience method for {@code UI.of(new JPasswordField())}.
@@ -1217,6 +1301,21 @@ public final class UI
     public static UIForTextArea<JTextArea> textArea(String text) {
         LogUtil.nullArgCheck(text, "text", String.class);
         return of(new JTextArea(text));
+    }
+
+    public static UIForTextArea<JTextArea> textArea(Val<String> text) {
+        LogUtil.nullArgCheck(text, "text", Val.class);
+        return of(new JTextArea())
+                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .withText(text);
+    }
+
+    public static UIForTextArea<JTextArea> textArea(Var<String> text) {
+        LogUtil.nullArgCheck(text, "text", Var.class);
+        return of(new JTextArea())
+                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .withText(text)
+                .onKeyTyped( it -> text.set(it.getComponent().getText()).act() );
     }
 
     /**
@@ -1261,6 +1360,25 @@ public final class UI
     public static UIForTextArea<JTextArea> textArea(UI.HorizontalDirection direction, String text) {
         LogUtil.nullArgCheck(direction, "direction", HorizontalDirection.class);
         return of(new JTextArea()).withTextOrientation(direction).withText(text);
+    }
+
+    public static UIForTextArea<JTextArea> textArea(UI.HorizontalDirection direction, Val<String> text) {
+        LogUtil.nullArgCheck(direction, "direction", HorizontalDirection.class);
+        LogUtil.nullArgCheck(text, "text", Val.class);
+        return of(new JTextArea())
+                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .withTextOrientation(direction)
+                .withText(text);
+    }
+
+    public static UIForTextArea<JTextArea> textArea(UI.HorizontalDirection direction, Var<String> text) {
+        LogUtil.nullArgCheck(direction, "direction", HorizontalDirection.class);
+        LogUtil.nullArgCheck(text, "text", Var.class);
+        return of(new JTextArea())
+                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .withTextOrientation(direction)
+                .withText(text)
+                .onKeyTyped( it -> text.set(it.getComponent().getText()).act() );
     }
 
     /**

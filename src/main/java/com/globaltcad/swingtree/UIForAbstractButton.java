@@ -2,6 +2,7 @@ package com.globaltcad.swingtree;
 
 import com.globaltcad.swingtree.api.UIAction;
 import com.globaltcad.swingtree.api.mvvm.Val;
+import com.globaltcad.swingtree.api.mvvm.Var;
 
 import javax.swing.*;
 import java.awt.*;
@@ -54,6 +55,17 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public final I isSelectedIf( Val<Boolean> val ) {
         val.onView(_component::setSelected);
         return isSelectedIf( val.get() );
+    }
+
+    /**
+     *  Use this to dynamically bind to a {@link com.globaltcad.swingtree.api.mvvm.Var}
+     *  instance which will be used to dynamically model the selection state of the
+     *  wrapped {@link AbstractButton} type.
+     */
+    public final I isSelectedIf( Var<Boolean> var ) {
+        var.onView(_component::setSelected);
+        this.onClick( it -> var.set(it.getComponent().isSelected()).act() );
+        return isSelectedIf( var.get() );
     }
 
     /**

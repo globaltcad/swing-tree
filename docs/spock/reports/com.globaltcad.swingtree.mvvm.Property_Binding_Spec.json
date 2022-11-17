@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.022 seconds"
+    "duration":"0.023 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -91,7 +91,7 @@
     {
       "id":"We can enable and disable a UI component dynamically through property binding.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -116,7 +116,7 @@
     {
       "id":"We can select or unselect a UI component dynamically through properties.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"0.006 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

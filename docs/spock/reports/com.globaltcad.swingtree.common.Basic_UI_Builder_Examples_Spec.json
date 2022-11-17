@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"1",
-    "duration":"0.213 seconds"
+    "duration":"0.236 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can add a list of components to the swing tree API and get a builder node in return.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -35,7 +35,7 @@
     {
       "id":"Swing tree nests components (trough builder nodes).",
       "result":"PASS",
-      "duration":"0.007 seconds",
+      "duration":"0.006 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -64,7 +64,7 @@
     {
       "id":"We can easily define the cursor on a wrapped UI component",
       "result":"PASS",
-      "duration":"0.008 seconds",
+      "duration":"0.006 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -83,7 +83,7 @@
     {
       "id":"We can use the swing tree to build a valid Swing GUI tree.",
       "result":"PASS",
-      "duration":"0.095 seconds",
+      "duration":"0.115 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -102,7 +102,7 @@
     {
       "id":"We can register various keyboard events in swing tree nodes.",
       "result":"PASS",
-      "duration":"0.013 seconds",
+      "duration":"0.016 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -132,7 +132,7 @@
     {
       "id":"We can register list selection events on a JList based swing tree node.",
       "result":"PASS",
-      "duration":"0.020 seconds",
+      "duration":"0.019 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

@@ -13,13 +13,15 @@ public abstract class AbstractVariable<T> implements Var<T>
 	private T value;
 	private final Class<T> type;
 	private final String name;
+	private final Consumer<Val<T>> action;
 
 
-	protected AbstractVariable( Class<T> type, T iniValue, String name ) {
+	protected AbstractVariable( Class<T> type, T iniValue, String name, Consumer<Val<T>> action ) {
 		Objects.requireNonNull(name);
 		this.value = iniValue;
 		this.type = ( iniValue == null ? type : (Class<T>) iniValue.getClass());
 		this.name = name;
+		this.action = ( action == null ? v -> {} : action );
 		if ( this.value != null ) {
 			// We check if the type is correct
 			if ( !type.isAssignableFrom(this.value.getClass()) )
@@ -43,9 +45,27 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 * {@inheritDoc}
 	 */
 	@Override public Var<T> withID( String id ) {
-		AbstractVariable<T> newVar = new AbstractVariable<T>(type, value, id){};
+		AbstractVariable<T> newVar = new AbstractVariable<T>(type, value, id, null){};
 		newVar.viewActions.addAll(viewActions);
 		return newVar;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override public Var<T> withAct( Consumer<Val<T>> action ) {
+		Objects.requireNonNull(action);
+		AbstractVariable<T> newVar = new AbstractVariable<T>(type, value, name, action){};
+		newVar.viewActions.addAll(viewActions);
+		return newVar;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override public Var<T> act() {
+		action.accept(this);
+		return this;
 	}
 
 	/**

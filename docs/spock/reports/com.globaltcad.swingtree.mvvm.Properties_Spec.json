@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.033 seconds"
+    "duration":"0.039 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -56,7 +56,7 @@
     {
       "id":"Properties can be bound by subscribing to them using the \"onView(..)\" method.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that bound Swing-Tree properties only have side effects\n            when they are deliberately triggered to execute their side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
       },
@@ -81,7 +81,7 @@
     {
       "id":"Properties not only have a value but also a type and id!",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -186,7 +186,7 @@
     {
       "id":"An empty property will throw an exception if you try to access its value.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -203,7 +203,7 @@
     {
       "id":"The \"orElseThrow\" method should be used instead of \"get\".",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.011 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that accessing the value of an empty property using the \"get\" method\n            will throw an exception.\n            Use this method instead to make the intend of your code more clear.\n        "]
       },

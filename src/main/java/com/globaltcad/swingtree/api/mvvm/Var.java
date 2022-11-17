@@ -1,11 +1,12 @@
 package com.globaltcad.swingtree.api.mvvm;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public interface Var<T> extends Val<T>
 {
 	static <T> Var<T> of( Class<T> type, T value ) {
-		return new AbstractVariable<T>(type, value, UNNAMED){};
+		return new AbstractVariable<T>(type, value, UNNAMED, null){};
 	}
 
 	/**
@@ -36,4 +37,8 @@ public interface Var<T> extends Val<T>
 	Var<T> set(T newValue );
 
 	@Override Var<T> withID( String id );
+
+	Var<T> withAct( Consumer<Val<T>> action );
+
+	Var<T> act();
 }

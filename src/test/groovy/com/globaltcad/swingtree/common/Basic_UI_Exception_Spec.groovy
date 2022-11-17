@@ -4,6 +4,8 @@ import com.alexandriasoftware.swing.JSplitButton
 import com.globaltcad.swingtree.UI
 import com.globaltcad.swingtree.api.MenuBuilder
 import com.globaltcad.swingtree.api.SwingBuilder
+import com.globaltcad.swingtree.api.mvvm.Val
+import com.globaltcad.swingtree.api.mvvm.Var
 import spock.lang.Specification
 
 import javax.swing.*
@@ -24,7 +26,8 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.of((JSeparator)null)},
                     {UI.of((JMenuItem)null)},
                     {UI.of((JPanel)null)},
-                    {UI.label(null)},
+                    {UI.label((String)null)},
+                    {UI.label((Val)null)},
                     {UI.label(300,200,null)},
                     {UI.button(null, null,null)},
                     {UI.of((SwingBuilder)null)},
@@ -48,8 +51,12 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.menuItem(null)},
                     {UI.splitItem(null)},
                     {UI.splitRadioItem(null)},
-                    {UI.textField(null)},
-                    {UI.textArea(null)},
+                    {UI.textField((Val)null)},
+                    {UI.textField((Var)null)},
+                    {UI.textField((String)null)},
+                    {UI.textArea((Var)null)},
+                    {UI.textArea((Val)null)},
+                    {UI.textArea((String)null)},
                     {UI.panel().onMouseClick(null)},
                     {UI.of(new JComboBox<>()).onMouseClick(null)},
                     {UI.of(new JComboBox<>()).onSelection(null)},
