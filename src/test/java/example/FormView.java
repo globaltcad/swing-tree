@@ -11,15 +11,13 @@ public class FormView extends JPanel
 {
     public FormView( FormViewModel vm ) {
         use(ThreadMode.COUPLED, ()->
-            of(this)
-            .withLayout("fill, wrap 2")
-            .add( label( "Username:" ) )
-            .add( "grow", textField(vm.username()))
+            of(this).withPreferredSize(350,150)
+            .withLayout(FILL.and(WRAP(2)))
+            .add( SHRINK, label( "Username:" ) )
+            .add( GROW.and(PUSH_X), textField(vm.username()))
             .add( label( "Password:" ) )
-            .add( "grow", passwordField(vm.password()) )
-            .add( "span",
-               label(vm.validity())
-            )
+            .add( GROW.and(PUSH_X), passwordField(vm.password()) )
+            .add( SPAN, label(vm.validity()))
             .add( "span",
                 button( "Login" )
                 .isEnabledIf(vm.loginEnabled())
@@ -29,14 +27,7 @@ public class FormView extends JPanel
     }
 
     public static void main( String[] args ) {
-        JFrame frame = new JFrame();
-        frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-        frame.add( new FormView( new FormViewModel() ) );
-        frame.pack();
-        frame.setVisible( true );
-        while (true) {
-            UI.processEvents();
-        }
+        UI.showInNewFrame(new FormView( new FormViewModel() ));
+        while (true) { UI.processEvents(); }
     }
-
 }
