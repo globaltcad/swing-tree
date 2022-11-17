@@ -155,7 +155,7 @@ function printSearchResults(target, results) {
         let title = spec['title'];
         let narrative = spec['narrative'];
         if ( title.length === 0 ) {
-            let parts = spec['name'].replaceAll("_", " ").split(".");
+            let parts = spec['name'].replace(/_/g, " ").split(".");
             title = parts[parts.length-1];
             title = trimEnds(title, ["spec", "specification", "test", "tests", "unit test", "unit tests", "test case", "test cases"]);
         }
@@ -200,10 +200,10 @@ function printSearchResults(target, results) {
 
 function createNarrativeParagraphs(narrative) {
     if ( narrative.length === 0 ) return [];
-    //return [$('<div style="font-size:95%"></div>').html(marked.parse(narrative.replaceAll("���", "")))]
-    let paragraphs = narrative.replaceAll("\n \n", "\n\n").split("\n\n");
+    //return [$('<div style="font-size:95%"></div>').html(marked.parse(narrative.replace(/���/g, "")))]
+    let paragraphs = narrative.replace(/\n \n/g, "\n\n").split("\n\n");
     paragraphs = paragraphs.map((paragraph)=>{
-        return $('<div style="font-size:95%"></div>').html(marked.parse(paragraph).replaceAll("���", ""));
+        return $('<div style="font-size:95%"></div>').html(marked.parse(paragraph).replace(/���/g, ""));
     });
     return paragraphs;
 }
@@ -262,7 +262,7 @@ function createLoaderDropDownFor(specName, expandableFeature) {
 function buildFeatureListFor(expandableFeature, data, content) {
     let nothingHappened = true;
     data['features'].forEach((feature)=>{
-        if ( feature['id'] === expandableFeature ) {
+        if ( feature['id'].toString() == expandableFeature.toString() ) {
             content.append(createUIForFeature(feature));
             nothingHappened = false;
         }
@@ -270,8 +270,8 @@ function buildFeatureListFor(expandableFeature, data, content) {
     if ( nothingHappened ) {
         // If the feature is unrolled then its id contains table data... we need to account for this.
         let choices = data['features']
-            .filter( f => f['id'].startsWith(expandableFeature) )
-            .sort( (a,b) => b.length - a.length ) // We sort them by size
+                            .filter( f => f['id'].startsWith(expandableFeature) )
+                            .sort( (a,b) => b.length - a.length ) // We sort them by size
         // Now we unroll the iterations (we call them examples here) so that the user can see them all!
         choices.forEach( (iteration, i) => {
             content.append('<p style="font-weight: bold;">Example '+i+':</p>')
@@ -440,8 +440,9 @@ function dictionaryOfHeaderNamesToColumnArraysToTable(dataTable) {
             else if ( size > 20 ) cell.css('font-size', '85%');
             else if ( size > 15 ) cell.css('font-size', '90%');
             else if ( size > 10 ) cell.css('font-size', '95%');
-
-            cell.text(text);
+            let code = $('<code class="hljs language-java"></code>');
+            code.text(text);
+            cell.append(code);
             row.append(cell);
         }
         table.append(row);
