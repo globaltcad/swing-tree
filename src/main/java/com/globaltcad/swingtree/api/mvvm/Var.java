@@ -34,11 +34,11 @@ public interface Var<T> extends Val<T>
 	 * @param newValue The new value which ought to replace the old one.
 	 * @return This very wrapper instance, in order to enable method chaining.
 	 */
-	Var<T> set(T newValue );
+	Var<T> set( T newValue );
 
 	@Override Var<T> withID( String id );
 
-	Var<T> withAct( Consumer<Val<T>> action );
+	Var<T> withAction( Consumer<Val<T>> action );
 
 	Var<T> act();
 }

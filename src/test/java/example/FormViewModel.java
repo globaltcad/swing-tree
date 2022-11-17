@@ -5,8 +5,8 @@ import com.globaltcad.swingtree.api.mvvm.Var;
 
 public class FormViewModel
 {
-    private final Var<String> username = Var.of( "" ).withAct( v -> validate() );
-    private final Var<String> password = Var.of( "" ).withAct( v -> validate() );
+    private final Var<String> username = Var.of( "" ).withAction( v -> validate() );
+    private final Var<String> password = Var.of( "" ).withAction( v -> validate() );
     private final Var<String> validity = Var.of( "" );
     private final Var<Boolean> loginEnabled = Var.of( false );
 

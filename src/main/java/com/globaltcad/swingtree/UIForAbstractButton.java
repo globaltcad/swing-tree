@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.function.Consumer;
 
 /**
  *  The following is a more specialized type of builder node based on the {@link UIForAbstractSwing} builder type,
@@ -64,7 +65,9 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public final I isSelectedIf( Var<Boolean> var ) {
         var.onShow(v->doUI(()->_component.setSelected(v)));
-        this.onClick( it -> var.set(it.getComponent().isSelected()).act() );
+        _onClick(
+            e -> doApp(_component.isSelected(), sel->var.set(sel).act())
+        );
         return isSelectedIf( var.get() );
     }
 
@@ -113,12 +116,18 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public I onClick(UIAction<SimpleDelegate<B, ActionEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        _component.addActionListener(
+        _onClick(
            e -> doApp(()->action.accept(
                new SimpleDelegate<>(_component, e, this::getSiblinghood)
            ))
         );
         return (I) this;
+    }
+
+    protected void _onClick(Consumer<ActionEvent> action) {
+        _component.addActionListener(
+            action::accept
+        );
     }
 
     /**

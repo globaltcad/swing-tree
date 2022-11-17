@@ -10,7 +10,7 @@ import static com.globaltcad.swingtree.UI.*;
 public class FormView extends JPanel
 {
     public FormView( FormViewModel vm ) {
-        use(ThreadMode.COUPLED, ()->
+        use(ThreadMode.DECOUPLED, ()->
             of(this).withPreferredSize(350,150)
             .withLayout(FILL.and(WRAP(2)))
             .add( SHRINK, label( "Username:" ) )

@@ -17,6 +17,7 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.function.Consumer;
 
 
 /**
@@ -58,6 +59,10 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
             EventQueue.INSTANCE().register(action);
         else
             action.run();
+    }
+
+    protected <T> void doApp(T value, Consumer<T> action) {
+        doApp(()->action.accept(value));
     }
 
     /**
@@ -1258,12 +1263,18 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public I onKeyTyped(UIAction<SimpleDelegate<C, KeyEvent>> onKeyTyped) {
         LogUtil.nullArgCheck(onKeyTyped, "onKeyTyped", UIAction.class);
+        _onKeyTyped( e ->
+            doApp(()->onKeyTyped.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())))
+        );
+        return (I) this;
+    }
+
+    protected void _onKeyTyped(Consumer<KeyEvent> action) {
         _component.addKeyListener(new KeyAdapter() {
             @Override public void keyTyped(KeyEvent e) {
-                doApp(()->onKeyTyped.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));
+                action.accept(e);
             }
         });
-        return (I) this;
     }
 
     /**

@@ -53,7 +53,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override public Var<T> withAct( Consumer<Val<T>> action ) {
+	@Override public Var<T> withAction(Consumer<Val<T>> action ) {
 		Objects.requireNonNull(action);
 		AbstractVariable<T> newVar = new AbstractVariable<T>(type, value, name, action){};
 		newVar.viewActions.addAll(viewActions);

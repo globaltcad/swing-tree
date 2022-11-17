@@ -3,11 +3,13 @@ package com.globaltcad.swingtree;
 
 import com.globaltcad.swingtree.api.UIAction;
 import com.globaltcad.swingtree.api.mvvm.Val;
+import com.globaltcad.swingtree.api.mvvm.Var;
 
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.util.function.Consumer;
 
 /**
@@ -77,6 +79,26 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
     public final I withText( Val<String> val ) {
         val.onShow(v->doUI(()->_component.setText(v)));
         return withText( val.get() );
+    }
+
+    public final I withText( Var<String> var ) {
+        var.onShow(v->doUI(()->_component.setText(v)));
+        _onKeyTyped( (KeyEvent e) -> {
+            String oldText = _component.getText();
+            // We need to add the now typed character to the old text, because the key typed event
+            // is fired before the text is actually inserted into the text component.
+            String part1 = oldText.substring(0, _component.getCaretPosition());
+            String part2 = oldText.substring(_component.getCaretPosition());
+            String newText;
+            if ( e.getKeyChar() == '\b' ) // backspace
+                newText = part1 + part2; // The user has deleted a character, so we need to remove it from the text.
+            else if ( e.getKeyChar() == '\u007f' ) // delete
+                newText = part1 + ( part2.length() < 2 ? part2 : part2.substring(1) );
+            else
+                newText = part1 + e.getKeyChar() + part2;
+            doApp(newText, t -> var.set(t).act() );
+        });
+        return withText( var.get() );
     }
 
     /**

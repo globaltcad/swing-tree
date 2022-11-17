@@ -1217,7 +1217,7 @@ public final class UI
                 .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
                 .applyIf(!selected.isUnnamed(), it -> it.getComponent().setName(selected.id()))
                 .withText(text)
-                .onClick( it -> selected.set(it.getComponent().isSelected()).act() );
+                .isSelectedIf(selected);
     }
 
     public static UIForRadioButton<JRadioButton> radioButton(String text, Var<Boolean> selected) {
@@ -1225,7 +1225,7 @@ public final class UI
         LogUtil.nullArgCheck(text, "selected", Var.class);
         return of(new JRadioButton())
                 .withText(text)
-                .onClick( it -> selected.set(it.getComponent().isSelected()).act() );
+                .isSelectedIf(selected);
     }
 
     /**
@@ -1264,8 +1264,7 @@ public final class UI
         LogUtil.nullArgCheck(text, "text", Var.class);
         return of(new JTextField())
                 .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
-                .withText(text)
-                .onKeyTyped( it -> text.set(it.getComponent().getText()).act() );
+                .withText(text);
     }
 
     /**
@@ -1302,8 +1301,7 @@ public final class UI
         LogUtil.nullArgCheck(text, "text", Var.class);
         return of(new JFormattedTextField())
                 .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
-                .withText(text)
-                .onKeyTyped( it -> text.set(it.getComponent().getText()).act() );
+                .withText(text);
     }
 
     /**
@@ -1340,8 +1338,7 @@ public final class UI
         LogUtil.nullArgCheck(text, "text", Val.class);
         return of(new JPasswordField())
                 .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
-                .withText(text)
-                .onKeyTyped( it -> text.set(String.valueOf(it.getComponent().getPassword())).act() );
+                .withText(text);
     }
 
     /**
@@ -1378,8 +1375,7 @@ public final class UI
         LogUtil.nullArgCheck(text, "text", Var.class);
         return of(new JTextArea())
                 .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
-                .withText(text)
-                .onKeyTyped( it -> text.set(it.getComponent().getText()).act() );
+                .withText(text);
     }
 
     /**
@@ -1441,8 +1437,7 @@ public final class UI
         return of(new JTextArea())
                 .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
                 .withTextOrientation(direction)
-                .withText(text)
-                .onKeyTyped( it -> text.set(it.getComponent().getText()).act() );
+                .withText(text);
     }
 
     /**
