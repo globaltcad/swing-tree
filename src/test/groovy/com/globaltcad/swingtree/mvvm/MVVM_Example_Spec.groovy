@@ -102,4 +102,20 @@ class MVVM_Example_Spec extends Specification
             radioButton.get() == true
     }
 
+    def 'We can bind a boolean property to a toggle button, and when the user presses it, we notice it.'()
+    {
+        given : 'We instantiate the "view model" in the form of a single property.'
+            Var<Boolean> isToggled = Var.of(false)
+        when : 'We create a view for our view model...'
+            var node =
+                UI.toggleButton("Toggle me!").isSelectedIf(isToggled)
+
+        then : 'The view was successfully created.'
+            node != null
+        when : 'We press the toggle button.'
+            node.component.doClick()
+        then : 'The property was updated.'
+            isToggled.get() == true
+    }
+
 }

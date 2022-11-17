@@ -1238,6 +1238,38 @@ public final class UI
         return new UIForRadioButton<>(component);
     }
 
+    public static UIForToggleButton<JToggleButton> toggleButton(String text) {
+        LogUtil.nullArgCheck(text, "text", String.class);
+        return of(new JToggleButton(text));
+    }
+
+    public static UIForToggleButton<JToggleButton> toggleButton(Val<String> text) {
+        LogUtil.nullArgCheck(text, "text", Val.class);
+        return of(new JToggleButton())
+                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .withText(text);
+    }
+
+    public static UIForToggleButton<JToggleButton> toggleButton(Val<String> text, Var<Boolean> selected) {
+        LogUtil.nullArgCheck(text, "text", Val.class);
+        LogUtil.nullArgCheck(text, "selected", Var.class);
+        return of(new JToggleButton())
+                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .applyIf(!selected.isUnnamed(), it -> it.getComponent().setName(selected.id()))
+                .withText(text)
+                .isSelectedIf(selected);
+    }
+
+    /**
+     *  Use this to create a builder for the provided {@link JToggleButton} instance.
+     *
+     * @return A builder instance for the provided {@link JToggleButton}, which enables fluent method chaining.
+     */
+    public static <B extends JToggleButton> UIForToggleButton<B> of(B component) {
+        LogUtil.nullArgCheck(component, "component", JToggleButton.class);
+        return new UIForToggleButton<>(component);
+    }
+
     /**
      *  Use this to create a builder for the provided {@link JTextField} instance.
      *

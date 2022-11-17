@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.703 seconds"
+    "duration":"1.331 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"The advanced UI define in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.528 seconds",
+      "duration":"0.988 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -37,7 +37,7 @@
     {
       "id":"The form UI define in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.093 seconds",
+      "duration":"0.159 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -54,7 +54,7 @@
     {
       "id":"The calculator UI defined in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.039 seconds",
+      "duration":"0.074 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -69,7 +69,7 @@
     {
       "id":"The simple Table-UI example has the expected state.",
       "result":"PASS",
-      "duration":"0.028 seconds",
+      "duration":"0.081 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -94,7 +94,7 @@
     {
       "id":"The todo app UI defined in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.008 seconds",
+      "duration":"0.020 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
