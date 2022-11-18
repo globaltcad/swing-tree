@@ -46,12 +46,12 @@ public final class UI
         return settings;
     }
 
-    public static void use(ThreadMode mode, Runnable scope) {
+    public static <T> T use( ThreadMode mode, Supplier<T> scope ) {
         Settings settings = SETTINGS();
         ThreadMode oldMode = settings.getThreadMode();
         settings.setThreadMode(mode);
         try {
-            scope.run();
+            return scope.get();
         } finally {
             settings.setThreadMode(oldMode);
         }

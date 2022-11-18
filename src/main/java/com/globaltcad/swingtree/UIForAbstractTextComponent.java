@@ -71,7 +71,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      * @param text The new text to be set for the wrapped text component type.
      * @return This very builder to allow for method chaining.
      */
-    public final I withText(String text) {
+    public final I withText( String text ) {
         _component.setText(text);
         return (I) this;
     }
