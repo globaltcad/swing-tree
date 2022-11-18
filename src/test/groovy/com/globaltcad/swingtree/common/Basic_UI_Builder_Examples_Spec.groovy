@@ -17,8 +17,10 @@ import java.awt.event.KeyListener
 @Title("Swing tree makes UI building fun again!")
 @Narrative('''
 
-    The Swing-Tree library is like a more dynamic type of HTML for swing,
-    which allows for very readable declarative UI design.
+    The Swing-Tree library allows you to build UIs declaratively, which you can think of
+    as a more dynamic type of HTML but for swing.
+    It is inspired by frameworks like Jetpack Compose, Flutter, React and SwiftUI
+    and allows for very readable declarative builder pattern based UI design.
     In this specification we cover the utter most basic properties of swing tree.
 
 ''')
@@ -27,16 +29,16 @@ class Basic_UI_Builder_Examples_Spec extends Specification
     def 'We can add a list of components to the swing tree API and get a builder node in return.'()
     {
         given : 'We have a simple JPanel UI node.'
-            var node = UI.panel()
+            var ui = UI.panel()
 
         expect : 'At the beginning the wrapped component will have no children.'
-            node.component.components.length == 0
+            ui.component.components.length == 0
 
         when : 'We add a list of panels...'
-            node.add([new JPanel(), new JPanel(), new JPanel()])
+            ui.add([new JPanel(), new JPanel(), new JPanel()])
 
         then : 'The wrapped component will have the expected amount of child components.'
-            node.component.components.length == 3
+            ui.component.components.length == 3
     }
 
 
@@ -45,15 +47,15 @@ class Basic_UI_Builder_Examples_Spec extends Specification
         given : 'A regular swing object.'
             var panel = new JPanel()
         and : 'A simple UI builder instance.'
-            var node = UI.of(panel)
+            var ui = UI.of(panel)
 
         expect :
-            node.component === panel
+            ui.component === panel
         and :
             panel.components.length == 0
 
         when : 'We now add something to our UI node...'
-            node.add(UI.label("Hey! I am a wrapped JLabel."))
+            ui.add(UI.label("Hey! I am a wrapped JLabel."))
 
         then : 'The panel will have received a new component.'
             panel.components.length == 1
@@ -62,7 +64,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             panel.components[0].text == "Hey! I am a wrapped JLabel."
 
         when : 'We add 2 more components...'
-            node.add(UI.button("Button 1"), UI.button("Button 2"))
+            ui.add(UI.button("Button 1"), UI.button("Button 2"))
 
         then : 'The panel will have 3 components in total.'
             panel.components.length == 3
@@ -71,14 +73,14 @@ class Basic_UI_Builder_Examples_Spec extends Specification
     def 'We can easily define the cursor on a wrapped UI component'()
     {
         given : 'We create a UI builder node containing a simple button.'
-            var node = UI.button()
+            var ui = UI.button()
         expect : 'At the beginning the default cursor will be set.'
-            node.component.cursor.type == Cursor.DEFAULT_CURSOR
+            ui.component.cursor.type == Cursor.DEFAULT_CURSOR
 
         when : 'We set the cursor of the button to be something else...'
-            node.with(UI.Cursor.RESIZE_SOUTH_EAST)
+            ui.with(UI.Cursor.RESIZE_SOUTH_EAST)
         then : 'This will lead to the correct cursor being chosen.'
-            node.component.cursor.type == Cursor.SE_RESIZE_CURSOR
+            ui.component.cursor.type == Cursor.SE_RESIZE_CURSOR
     }
 
     def 'We can use the swing tree to build a valid Swing GUI tree.'()

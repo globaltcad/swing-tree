@@ -65,7 +65,7 @@ class JSplitButton_Examples_Spec extends Specification
             Utility.getSplitButtonText(ui) == "I may be replaced!"
 
         when : 'We simulate a user selecting the first button item'
-            ((JMenuItem)ui.popupMenu.getComponent(0)).doClick()
+            UI.runAndWait(()->((JMenuItem)ui.popupMenu.getComponent(0)).doClick())
         then : 'The displayed button should still be as it was previously.'
             Utility.getSplitButtonText(ui) == "I may be replaced!"
 
@@ -75,7 +75,7 @@ class JSplitButton_Examples_Spec extends Specification
             Utility.getSplitButtonText(ui) == "I may be replaced!"
 
         when : 'We now simulate a selection on the second item (for which we registered an action).'
-            ((JMenuItem)ui.popupMenu.getComponent(1)).doClick()
+            UI.runAndWait(()->((JMenuItem)ui.popupMenu.getComponent(1)).doClick())
         then : 'The displayed button text will have changed because of our selection lambda'
             Utility.getSplitButtonText(ui) == "second"
     }
@@ -139,7 +139,7 @@ class JSplitButton_Examples_Spec extends Specification
                 .add(UI.splitItem("third").makeSelected().onButtonClick( it -> it.appendToButtonText(" 3") ))
 
         when : 'We click the button.'
-            Utility.click(ui)
+            UI.runAndWait(()->Utility.click(ui))
         then : 'The button text now indicates which items were selected and triggered!'
             Utility.getSplitButtonText(ui) == "triggered: 2 3"
     }
@@ -159,17 +159,17 @@ class JSplitButton_Examples_Spec extends Specification
                 .add(UI.splitItem("third").makeSelected().onButtonClick( it -> it.appendToButtonText(" 3") ))
 
         when : 'We click the button.'
-            Utility.click(ui)
+            UI.runAndWait(()->Utility.click(ui))
         then : 'The button text now indicates which items were selected and triggered!'
             Utility.getSplitButtonText(ui) == "triggered: 1 3"
 
         when : 'We now select the second button item.'
-            ((JMenuItem)ui.popupMenu.getComponent(1)).doClick()
+            UI.runAndWait(()->((JMenuItem)ui.popupMenu.getComponent(1)).doClick())
         then : 'The split button text will not have changed (internally the selection should be different however).'
             Utility.getSplitButtonText(ui) == "triggered: 1 3"
 
         when : 'We now click the second button item.'
-            Utility.click(ui)
+            UI.runAndWait(()->Utility.click(ui))
         then : 'The split button text will indicate that now only the second split item button action was triggered!'
             Utility.getSplitButtonText(ui) == "triggered: 1 3 2"
     }

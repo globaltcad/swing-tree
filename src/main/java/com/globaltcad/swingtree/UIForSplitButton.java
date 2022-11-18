@@ -20,8 +20,8 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
 
     protected UIForSplitButton(B component) {
         super(component);
-        _component.setPopupMenu(popupMenu);
-        _component.addButtonClickedActionListener(e -> doApp(()->{
+        getComponent().setPopupMenu(popupMenu);
+        getComponent().addButtonClickedActionListener(e -> doApp(()->{
             List<JMenuItem> selected = getSelected();
             for ( JMenuItem item : selected ) {
                 UIAction<SplitItem.Delegate<JMenuItem>> action = options.get(item);
@@ -62,11 +62,12 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
         UIAction<SplitItem.Delegate<JMenuItem>> action
     ) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        _component.addSplitButtonClickedActionListener(
+        B button = getComponent();
+        button.addSplitButtonClickedActionListener(
             e -> doApp(()->action.accept(
                  new SplitItem.Delegate<>(
                          e,
-                         _component,
+                         button,
                          () -> new ArrayList<>(options.keySet()),
                          lastSelected[0]
                  ))
@@ -98,11 +99,12 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
         UIAction<SplitItem.Delegate<JMenuItem>> action
     ) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        _component.addButtonClickedActionListener(
+        B button = getComponent();
+        button.addButtonClickedActionListener(
             e -> doApp(()->action.accept(
                     new SplitItem.Delegate<>(
                        e,
-                            _component,
+                       button,
                        () -> new ArrayList<>(options.keySet()),
                        lastSelected[0]
                     )
@@ -123,9 +125,10 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
     @Override
     public UIForSplitButton<B> onClick(UIAction<SimpleDelegate<B, ActionEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        _component.addButtonClickedActionListener(
+        B button = getComponent();
+        button.addButtonClickedActionListener(
             e -> doApp(()->action.accept(
-                 new SimpleDelegate<>(_component, e, ()->this.getSiblinghood())
+                 new SimpleDelegate<>(button, e, ()->this.getSiblinghood())
             ))
         );
         return this;
@@ -138,7 +141,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
      */
     public <M extends JMenuItem> UIForSplitButton<B> add(UIForMenuItem<M> forItem) {
         LogUtil.nullArgCheck(forItem, "forItem", UIForMenuItem.class);
-        return this.add(forItem._component);
+        return this.add(forItem.getComponent());
     }
 
     /**
@@ -161,6 +164,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
         if ( item.isSelected() )
             lastSelected[0] = item;
 
+        B button = getComponent();
         popupMenu.add(item);
         options.put(item, ( (SplitItem<JMenuItem>) splitItem).getOnClick());
         item.addActionListener(
@@ -170,7 +174,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
                 SplitItem.Delegate<I> delegate =
                         new SplitItem.Delegate<>(
                                 e,
-                                _component,
+                                button,
                                 () -> options.keySet().stream().map( o -> (I) o ).collect(Collectors.toList()),
                                 item
                             );

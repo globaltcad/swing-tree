@@ -36,7 +36,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E> extends AbstractBuilder<
      */
     protected final List<E> getSiblinghood() {
         if ( _parent == null ) return new ArrayList<>();
-        return _parent._children.stream().map(c -> (E) c._component).collect(Collectors.toList());
+        return _parent._children.stream().map(c -> (E) c.getComponent()).collect(Collectors.toList());
     }
 
     /**
@@ -86,7 +86,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E> extends AbstractBuilder<
 
         builder._parent = this;
 
-        _add((E) builder._component, conf);
+        _add((E) builder.getComponent(), conf);
     }
 
     /**

@@ -37,7 +37,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
         if ( SwingUtilities.isEventDispatchThread() ) return component;
         else
             throw new IllegalStateException(
-                    "Component can only be accessed from the Swing thread."
+                    "Component can only be accessed by the Swing thread."
                 );
     }
 
@@ -65,7 +65,8 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
         // We make sure that only the Swing thread can access the sibling components:
         if ( !SwingUtilities.isEventDispatchThread() )
             throw new IllegalStateException(
-                    "Sibling components can only be accessed from the Swing thread."
+                    "Sibling components can only be accessed by the Swing thread. " +
+                    "Please use 'forSiblings(..)' methods instead."
                 );
         return siblingSource.get().stream().filter( s -> component != s ).collect(Collectors.toList());
     }
@@ -94,7 +95,8 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
         // We make sure that only the Swing thread can access the sibling components:
         if ( !SwingUtilities.isEventDispatchThread() )
             throw new IllegalStateException(
-                    "Sibling components can only be accessed from the Swing thread."
+                    "Sibling components can only be accessed by the Swing thread. " +
+                    "Please use 'forSiblingsOfType(..)' methods instead."
             );
         return getSiblings()
                 .stream()
@@ -130,7 +132,8 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
         // We make sure that only the Swing thread can access the sibling components:
         if ( !SwingUtilities.isEventDispatchThread() )
             throw new IllegalStateException(
-                    "Sibling components can only be accessed from the Swing thread."
+                    "Sibling components can only be accessed by the Swing thread. " +
+                    "Please use 'forSiblinghood(..)' methods instead."
             );
         return new ArrayList<>(siblingSource.get());
     }
@@ -159,7 +162,8 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
         // We make sure that only the Swing thread can access the sibling components:
         if ( !SwingUtilities.isEventDispatchThread() )
             throw new IllegalStateException(
-                "Sibling components can only be accessed from the Swing thread."
+                "Sibling components can only be accessed by the Swing thread. " +
+                "Please use 'forSiblinghoodOfType(..)' methods instead."
             );
         return new ArrayList<>(siblingSource.get())
                 .stream()

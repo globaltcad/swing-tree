@@ -19,7 +19,7 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAbstractSwing<U
     protected void _add(JComponent component, Object conf) {
         if ( conf != null )
             throw new IllegalArgumentException("Unknown constraint '"+conf+"'! (scroll pane does not support any constraint)");
-        _component.setViewportView(component);
+        getComponent().setViewportView(component);
     }
 
     public final UIForScrollPane<P> with(UI.ScrollBarPolicy scrollPolicy) {
@@ -29,21 +29,23 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAbstractSwing<U
     }
 
     public final UIForScrollPane<P> withVertical(UI.ScrollBarPolicy scrollBarPolicy) {
+        P pane = getComponent();
         switch ( scrollBarPolicy )
         {
-            case NEVER: _component.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER); break;
-            case ALWAYS: _component.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS); break;
-            case AS_NEEDED: _component.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED); break;
+            case NEVER: pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER); break;
+            case ALWAYS: pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS); break;
+            case AS_NEEDED: pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED); break;
         }
         return this;
     }
 
     public final UIForScrollPane<P> withHorizontal(UI.ScrollBarPolicy scrollBarPolicy) {
+        P pane = getComponent();
         switch ( scrollBarPolicy )
         {
-            case NEVER: _component.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); break;
-            case ALWAYS: _component.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS); break;
-            case AS_NEEDED: _component.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED); break;
+            case NEVER: pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); break;
+            case ALWAYS: pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS); break;
+            case AS_NEEDED: pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED); break;
         }
         return this;
     }

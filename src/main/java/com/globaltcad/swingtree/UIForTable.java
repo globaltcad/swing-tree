@@ -56,7 +56,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
     public final UIForTable<T> withRendererForColumn(String columnName, TableCellRenderer renderer) {
         LogUtil.nullArgCheck(columnName, "columnName", String.class);
         LogUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
-        _component.getColumn(columnName).setCellRenderer(renderer);
+        getComponent().getColumn(columnName).setCellRenderer(renderer);
         return this;
     }
 
@@ -67,7 +67,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      */
     public final UIForTable<T> withRendererForColumn(int columnIndex, TableCellRenderer renderer) {
         LogUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
-        _component.getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);
+        getComponent().getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);
         return this;
     }
 
@@ -79,7 +79,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
     public final UIForTable<T> withCellEditorForColumn(String columnName, TableCellEditor editor) {
         LogUtil.nullArgCheck(columnName, "columnName", String.class);
         LogUtil.nullArgCheck(editor, "editor", TableCellEditor.class);
-        _component.getColumn(columnName).setCellEditor(editor);
+        getComponent().getColumn(columnName).setCellEditor(editor);
         return this;
     }
 
@@ -90,7 +90,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      */
     public final UIForTable<T> withCellEditorForColumn(int columnIndex, TableCellEditor editor) {
         LogUtil.nullArgCheck(editor, "editor", TableCellEditor.class);
-        _component.getColumnModel().getColumn(columnIndex).setCellEditor(editor);
+        getComponent().getColumnModel().getColumn(columnIndex).setCellEditor(editor);
         return this;
     }
 
@@ -112,7 +112,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      */
     public final UIForTable<T> withModel(BasicTableModel model) {
         LogUtil.nullArgCheck(model, "model", BasicTableModel.class);
-        _component.setModel(model);
+        getComponent().setModel(model);
         return this;
     }
 
@@ -131,7 +131,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
         boolean isRowMajor = model.isRowMajor();
         boolean isEditable = model.isEditable();
         if ( isRowMajor ) {
-            _component.setModel(new ListBasedTableModel<E>(isEditable, dataSource)
+            getComponent().setModel(new ListBasedTableModel<E>(isEditable, dataSource)
             {
                 @Override public int getRowCount() { return getData().size(); }
                 @Override public int getColumnCount() {
@@ -150,7 +150,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
                 }
             });
         } else { // isColumnMajor
-            _component.setModel(new ListBasedTableModel<E>(isEditable, dataSource)
+            getComponent().setModel(new ListBasedTableModel<E>(isEditable, dataSource)
             {
                 @Override public int getRowCount() {
                     List<List<E>> data = getData();
@@ -183,7 +183,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param <E> The type of the table entry {@link Object}s.
      */
     public final <E> UIForTable<T> with(UI.MapData model, TableMapDataSource<E> dataSource ) {
-        _component.setModel(new MapBasedColumnMajorTableModel<>(model.isEditable(), dataSource));
+        getComponent().setModel(new MapBasedColumnMajorTableModel<>(model.isEditable(), dataSource));
         return this;
     }
 

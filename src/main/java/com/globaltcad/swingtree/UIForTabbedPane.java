@@ -22,28 +22,30 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
     public UIForTabbedPane( P component ) { super(component); }
 
     public final UIForTabbedPane<P> add( Tab tab ) {
-        final int index = _component.getTabCount();
+
+        P pane = getComponent();
+        final int index = pane.getTabCount();
 
         tab.onSelection()
            .ifPresent( onSelection ->
-               _component.addChangeListener(e -> {
-                   if (index == _component.getSelectedIndex())
-                       doApp(()->onSelection.accept(new SimpleDelegate<>(_component, e, () -> getSiblinghood())));
+                   pane.addChangeListener(e -> {
+                   if (index == pane.getSelectedIndex())
+                       doApp(()->onSelection.accept(new SimpleDelegate<>(pane, e, () -> getSiblinghood())));
                })
            );
 
         tab.onMouseClick()
             .ifPresent( onMouseClick ->
-                _component.addMouseListener(new java.awt.event.MouseAdapter() {
+                    pane.addMouseListener(new java.awt.event.MouseAdapter() {
                     @Override
                     public void mouseClicked( MouseEvent e ) {
-                        if ( index == _component.getSelectedIndex() )
-                            doApp(()->onMouseClick.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));
+                        if ( index == pane.getSelectedIndex() )
+                            doApp(()->onMouseClick.accept(new SimpleDelegate<>(pane, e, ()->getSiblinghood())));
                     }
                 })
             );
 
-        _component.addTab(
+        pane.addTab(
                         tab.title().orElse(null),
                         tab.icon().orElse(null),
                         tab.contents().orElse(null),
@@ -55,16 +57,18 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
 
     private void _buildTabHeader( Tab tab, int index ) {
 
+        P pane = getComponent();
+
         MouseListener mouseListener =
                 new java.awt.event.MouseAdapter() {
                     @Override
                     public void mouseClicked( MouseEvent e ) {
                         doApp(()-> {
-                            if (index == _component.getSelectedIndex())
+                            if (index == pane.getSelectedIndex())
                                 tab.onMouseClick().ifPresent(onMouseClick -> {
-                                    onMouseClick.accept(new SimpleDelegate<>(_component, e, () -> getSiblinghood()));
+                                    onMouseClick.accept(new SimpleDelegate<>(pane, e, () -> getSiblinghood()));
                                 });
-                            _component.setSelectedIndex(index);
+                            pane.setSelectedIndex(index);
                         });
                     }
                 };
@@ -86,7 +90,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
                 .map( p -> (JComponent) p )
                 .orElse(tab.headerContents().orElse(new JPanel()));
 
-        _component.setTabComponentAt( index, header );
+        pane.setTabComponentAt( index, header );
     }
 
     /**
@@ -100,7 +104,8 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
      */
     public final UIForTabbedPane<P> onChange(UIAction<SimpleDelegate<P, ChangeEvent>> onChange) {
         LogUtil.nullArgCheck(onChange, "onChange", UIAction.class);
-        _component.addChangeListener(e -> doApp(()->onChange.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()))));
+        P pane = getComponent();
+        pane.addChangeListener(e -> doApp(()->onChange.accept(new SimpleDelegate<>(pane, e, ()->getSiblinghood()))));
         return this;
     }
 

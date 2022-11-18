@@ -24,37 +24,41 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
      */
     public final UIForSlider<S> onChange(UIAction<SimpleDelegate<JSlider, ChangeEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        _component.addChangeListener(e -> doApp(()->action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()))) );
+        S slider = getComponent();
+        slider.addChangeListener(e -> doApp(()->action.accept(new SimpleDelegate<>(slider, e, ()->getSiblinghood()))) );
         return this;
     }
 
     public final UIForSlider<S> withValue( Val<Integer> val ) {
-        val.onShow(v->doUI(()->_component.setValue(v)));
+        S slider = getComponent();
+        val.onShow(v->doUI(()->slider.setValue(v)));
         return this;
     }
 
     public final UIForSlider<S> withMin( Val<Integer> val ) {
-        val.onShow(v->doUI(()->_component.setMinimum(v)));
+        S slider = getComponent();
+        val.onShow(v->doUI(()->slider.setMinimum(v)));
         return this;
     }
 
     public final UIForSlider<S> withMax( Val<Integer> val ) {
-        val.onShow(v->doUI(()->_component.setMaximum(v)));
+        S slider = getComponent();
+        val.onShow(v->doUI(()->slider.setMaximum(v)));
         return this;
     }
 
     public final UIForSlider<S> withMin( int min ) {
-        _component.setMinimum( min );
+        getComponent().setMinimum( min );
         return this;
     }
 
     public final UIForSlider<S> withMax( int max ) {
-        _component.setMaximum( max );
+        getComponent().setMaximum( max );
         return this;
     }
 
     public final UIForSlider<S> withValue( int value ) {
-        _component.setValue( value );
+        getComponent().setValue( value );
         return this;
     }
 

@@ -26,7 +26,7 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
      * @return This instance of the builder node.
      */
     public final UIForList<E, L> withEntries(List<E> entries) {
-        _component.setListData((E[]) entries.toArray(new Object[0]));
+        getComponent().setListData((E[]) entries.toArray(new Object[0]));
         return this;
     }
 
@@ -37,12 +37,12 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
      * @return This instance of the builder node.
      */
     public final UIForList<E, L> withEntries(E... entries) {
-        _component.setListData(entries.clone());
+        getComponent().setListData(entries.clone());
         return this;
     }
 
     public final UIForList<E, L> withRenderer(ListEntryRenderer<E, L> renderer) {
-        _component.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> renderer.render(new ListEntryDelegate<E, L>() {
+        getComponent().setCellRenderer((list, value, index, isSelected, cellHasFocus) -> renderer.render(new ListEntryDelegate<E, L>() {
             @Override public L list() { return (L) list; }
             @Override public E entry() { return value; }
             @Override public int index() { return index; }
@@ -63,7 +63,8 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
      */
     public final UIForList<E, L> onSelection(UIAction<SimpleDelegate<JList<E>, ListSelectionEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        _component.addListSelectionListener(e -> doApp(()->action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()))) );
+        L list = getComponent();
+        list.addListSelectionListener(e -> doApp(()->action.accept(new SimpleDelegate<>(list, e, ()->getSiblinghood()))) );
         return this;
     }
 
@@ -73,7 +74,7 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
     }
 
     public final UIForList<E, L> withRenderer( ListCellRenderer<E> renderer ) {
-        _component.setCellRenderer(renderer);
+        getComponent().setCellRenderer(renderer);
         return this;
     }
 

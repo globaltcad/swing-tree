@@ -1,7 +1,7 @@
 {
   "className":"com.globaltcad.swingtree.common.Basic_UI_Builder_Examples_Spec",
   "title":"Swing tree makes UI building fun again!",
-  "narrative":"The Swing-Tree library is like a more dynamic type of HTML for swing,\n    which allows for very readable declarative UI design.\n    In this specification we cover the utter most basic properties of swing tree.",
+  "narrative":"The Swing-Tree library allows you to build UIs declaratively, which you can think of\n    as a more dynamic type of HTML but for swing.\n    It is inspired by frameworks like Jetpack Compose, Flutter, React and SwiftUI\n    and allows for very readable declarative builder pattern based UI design.\n    In this specification we cover the utter most basic properties of swing tree.",
   "subjects":[],
   "statistics":{
     "runs":"10",
@@ -9,25 +9,25 @@
     "failures":"0",
     "errors":"0",
     "skipped":"1",
-    "duration":"0.223 seconds"
+    "duration":"0.198 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can add a list of components to the swing tree API and get a builder node in return.",
       "result":"PASS",
-      "duration":"0.105 seconds",
+      "duration":"0.092 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We have a simple JPanel UI node.","code":["var node = UI.panel()"]},
+        {"kind":"given","text":"We have a simple JPanel UI node.","code":["var ui = UI.panel()"]},
 
-        {"kind":"expect","text":"At the beginning the wrapped component will have no children.","code":["node.component.components.length == 0"]},
+        {"kind":"expect","text":"At the beginning the wrapped component will have no children.","code":["ui.component.components.length == 0"]},
 
-        {"kind":"when","text":"We add a list of panels...","code":["node.add([new JPanel(), new JPanel(), new JPanel()])"]},
+        {"kind":"when","text":"We add a list of panels...","code":["ui.add([new JPanel(), new JPanel(), new JPanel()])"]},
 
-        {"kind":"then","text":"The wrapped component will have the expected amount of child components.","code":["node.component.components.length == 3"]}
+        {"kind":"then","text":"The wrapped component will have the expected amount of child components.","code":["ui.component.components.length == 3"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -42,19 +42,19 @@
       "blocks":[
         {"kind":"given","text":"A regular swing object.","code":["var panel = new JPanel()"]},
 
-        {"kind":"and","text":"A simple UI builder instance.","code":["var node = UI.of(panel)"]},
+        {"kind":"and","text":"A simple UI builder instance.","code":["var ui = UI.of(panel)"]},
 
-        {"kind":"expect","text":"","code":["node.component === panel"]},
+        {"kind":"expect","text":"","code":["ui.component === panel"]},
 
         {"kind":"and","text":"","code":["panel.components.length == 0"]},
 
-        {"kind":"when","text":"We now add something to our UI node...","code":["node.add(UI.label(\"Hey! I am a wrapped JLabel.\"))"]},
+        {"kind":"when","text":"We now add something to our UI node...","code":["ui.add(UI.label(\"Hey! I am a wrapped JLabel.\"))"]},
 
         {"kind":"then","text":"The panel will have received a new component.","code":["panel.components.length == 1"]},
 
         {"kind":"and","text":"This component is a label with the expected text.","code":["panel.components[0] instanceof JLabel","panel.components[0].text == \"Hey! I am a wrapped JLabel.\""]},
 
-        {"kind":"when","text":"We add 2 more components...","code":["node.add(UI.button(\"Button 1\"), UI.button(\"Button 2\"))"]},
+        {"kind":"when","text":"We add 2 more components...","code":["ui.add(UI.button(\"Button 1\"), UI.button(\"Button 2\"))"]},
 
         {"kind":"then","text":"The panel will have 3 components in total.","code":["panel.components.length == 3"]}
       ],
@@ -64,18 +64,18 @@
     {
       "id":"We can easily define the cursor on a wrapped UI component",
       "result":"PASS",
-      "duration":"0.007 seconds",
+      "duration":"0.006 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We create a UI builder node containing a simple button.","code":["var node = UI.button()"]},
+        {"kind":"given","text":"We create a UI builder node containing a simple button.","code":["var ui = UI.button()"]},
 
-        {"kind":"expect","text":"At the beginning the default cursor will be set.","code":["node.component.cursor.type == Cursor.DEFAULT_CURSOR"]},
+        {"kind":"expect","text":"At the beginning the default cursor will be set.","code":["ui.component.cursor.type == Cursor.DEFAULT_CURSOR"]},
 
-        {"kind":"when","text":"We set the cursor of the button to be something else...","code":["node.with(UI.Cursor.RESIZE_SOUTH_EAST)"]},
+        {"kind":"when","text":"We set the cursor of the button to be something else...","code":["ui.with(UI.Cursor.RESIZE_SOUTH_EAST)"]},
 
-        {"kind":"then","text":"This will lead to the correct cursor being chosen.","code":["node.component.cursor.type == Cursor.SE_RESIZE_CURSOR"]}
+        {"kind":"then","text":"This will lead to the correct cursor being chosen.","code":["ui.component.cursor.type == Cursor.SE_RESIZE_CURSOR"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -83,7 +83,7 @@
     {
       "id":"We can use the swing tree to build a valid Swing GUI tree.",
       "result":"PASS",
-      "duration":"0.038 seconds",
+      "duration":"0.033 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -102,7 +102,7 @@
     {
       "id":"We can register various keyboard events in swing tree nodes.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

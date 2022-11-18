@@ -22,7 +22,7 @@ public class UIForMenuItem<M extends JMenuItem> extends UIForAbstractButton<UIFo
      * @return This very builder to allow for method chaining.
      */
     public UIForMenuItem<M> withKeyStroke( KeyStroke keyStroke ) {
-        _component.setAccelerator(keyStroke);
+        getComponent().setAccelerator(keyStroke);
         return this;
     }
 }

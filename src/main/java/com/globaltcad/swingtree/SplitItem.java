@@ -50,7 +50,7 @@ public final class SplitItem<I extends JMenuItem>
      */
     public static <M extends JMenuItem> SplitItem<M> of(UIForMenuItem<M> item) {
         LogUtil.nullArgCheck(item, "item", UIForMenuItem.class);
-        return new SplitItem<>(item._component);
+        return new SplitItem<>(item.getComponent());
     }
 
     private final I item;
@@ -156,18 +156,39 @@ public final class SplitItem<I extends JMenuItem>
         /**
          * @return The {@link JSplitButton} to which this {@link SplitItem} (and its {@link JMenuItem}) belongs.
          */
-        public JSplitButton getSplitButton() { return splitButton; }
+        public JSplitButton getSplitButton() {
+            // We make sure that only the Swing thread can access the component:
+            if ( SwingUtilities.isEventDispatchThread() ) return splitButton;
+            else
+                throw new IllegalStateException(
+                        "Split button can only be accessed by the Swing thread."
+                    );
+        }
 
         /**
          * @return The {@link JMenuItem} which caused this action to be executed.
          */
-        public I getCurrentItem() { return this.currentItem; }
+        public I getCurrentItem() {
+            // We make sure that only the Swing thread can access the component:
+            if ( SwingUtilities.isEventDispatchThread() ) return this.currentItem;
+            else
+                throw new IllegalStateException(
+                        "The current button item can only be accessed by the Swing thread."
+                    );
+        }
 
         /**
          *
          * @return A list of all the {@link JMenuItem} which constitute the options exposed by the {@link JSplitButton}.
          */
-        public List<I> getSiblinghood() { return this.siblingsSource.get(); }
+        public List<I> getSiblinghood() {
+            // We make sure that only the Swing thread can access the sibling components:
+            if ( !SwingUtilities.isEventDispatchThread() )
+                throw new IllegalStateException(
+                        "Sibling components can only be accessed by the Swing thread."
+                    );
+            return this.siblingsSource.get();
+        }
 
         /**
          *
@@ -175,6 +196,11 @@ public final class SplitItem<I extends JMenuItem>
          *          except the current {@link JMenuItem} exposed by {@link #getCurrentItem()}.
          */
         public List<I> getSiblings() {
+            // We make sure that only the Swing thread can access the sibling components:
+            if ( !SwingUtilities.isEventDispatchThread() )
+                throw new IllegalStateException(
+                        "Sibling components can only be accessed by the Swing thread."
+                    );
             return this.siblingsSource.get()
                     .stream()
                     .filter( s -> s != getCurrentItem() )
@@ -188,6 +214,9 @@ public final class SplitItem<I extends JMenuItem>
          * @return This {@link Delegate} instance to allow for method chaining.
          */
         public Delegate<I> selectCurrentItem() {
+            // We make sure that only the Swing thread can modify components:
+            if ( !SwingUtilities.isEventDispatchThread() )
+                UI.run(this::selectCurrentItem);
             this.getCurrentItem().setSelected(true);
             return this;
         }
@@ -200,6 +229,9 @@ public final class SplitItem<I extends JMenuItem>
          * @return This {@link Delegate} instance to allow for method chaining.
          */
         public Delegate<I> selectOnlyCurrentItem() {
+            // We make sure that only the Swing thread can modify components:
+            if ( !SwingUtilities.isEventDispatchThread() )
+                UI.run(this::selectOnlyCurrentItem);
             this.unselectAllItems();
             this.getCurrentItem().setSelected(true);
             return this;
@@ -212,6 +244,9 @@ public final class SplitItem<I extends JMenuItem>
          * @return This {@link Delegate} instance to allow for method chaining.
          */
         public Delegate<I> unselectCurrentItem() {
+            // We make sure that only the Swing thread can modify components:
+            if ( !SwingUtilities.isEventDispatchThread() )
+                UI.run(this::unselectCurrentItem);
             this.getCurrentItem().setSelected(false);
             return this;
         }
@@ -223,6 +258,9 @@ public final class SplitItem<I extends JMenuItem>
          * @return This {@link Delegate} instance to allow for method chaining.
          */
         public Delegate<I> unselectAllItems() {
+            // We make sure that only the Swing thread can modify components:
+            if ( !SwingUtilities.isEventDispatchThread() )
+                UI.run(this::unselectAllItems);
             getSiblinghood().forEach(it -> it.setSelected(false) );
             return this;
         }
@@ -234,6 +272,9 @@ public final class SplitItem<I extends JMenuItem>
          * @return This {@link Delegate} instance to allow for method chaining.
          */
         public Delegate<I> selectAllItems() {
+            // We make sure that only the Swing thread can modify components:
+            if ( !SwingUtilities.isEventDispatchThread() )
+                UI.run(this::selectAllItems);
             getSiblinghood().forEach(it -> it.setSelected(true) );
             return this;
         }
@@ -245,6 +286,9 @@ public final class SplitItem<I extends JMenuItem>
          * @return This {@link Delegate} instance to allow for method chaining.
          */
         public Delegate<I> displayCurrentItemText() {
+            // We make sure that only the Swing thread can modify components:
+            if ( !SwingUtilities.isEventDispatchThread() )
+                UI.run(this::displayCurrentItemText);
             if ( getCurrentItem() != null )
                 getSplitButton().setText(getCurrentItem().getText());
             return this;
@@ -254,7 +298,10 @@ public final class SplitItem<I extends JMenuItem>
          * @param text The text which should be displayed on the {@link JSplitButton}.
          * @return This {@link Delegate} instance to allow for method chaining.
          */
-        public Delegate<I> setButtonText(String text ) {
+        public Delegate<I> setButtonText( String text ) {
+            // We make sure that only the Swing thread can modify components:
+            if ( !SwingUtilities.isEventDispatchThread() )
+                UI.run(() -> setButtonText(text) );
             LogUtil.nullArgCheck(text, "text", String.class);
             this.splitButton.setText(text);
             return this;
@@ -273,6 +320,9 @@ public final class SplitItem<I extends JMenuItem>
          */
         public Delegate<I> appendToButtonText( String postfix ) {
             LogUtil.nullArgCheck(postfix, "postfix", String.class);
+            // We make sure that only the Swing thread can modify components:
+            if ( !SwingUtilities.isEventDispatchThread() )
+                UI.run(() -> appendToButtonText(postfix) );
             this.splitButton.setText(this.getButtonText()+postfix);
             return this;
         }
@@ -283,6 +333,9 @@ public final class SplitItem<I extends JMenuItem>
          */
         public Delegate<I> prependToButtonText( String prefix ) {
             LogUtil.nullArgCheck(prefix, "postfix", String.class);
+            // We make sure that only the Swing thread can modify components:
+            if ( !SwingUtilities.isEventDispatchThread() )
+                UI.run(() -> prependToButtonText(prefix) );
             this.splitButton.setText(prefix+this.getButtonText());
             return this;
         }
@@ -294,6 +347,9 @@ public final class SplitItem<I extends JMenuItem>
          * @return This {@link Delegate} instance to allow for method chaining.
          */
         public Delegate<I> selectItem( int i ) {
+            // We make sure that only the Swing thread can modify components:
+            if ( !SwingUtilities.isEventDispatchThread() )
+                UI.run(() -> selectItem(i) );
             getSiblinghood().get(i).setSelected(true);
             return this;
         }
@@ -305,6 +361,9 @@ public final class SplitItem<I extends JMenuItem>
          * @return This {@link Delegate} instance to allow for method chaining.
          */
         public Delegate<I> selectOnlyItem( int i ) {
+            // We make sure that only the Swing thread can modify components:
+            if ( !SwingUtilities.isEventDispatchThread() )
+                UI.run(() -> selectOnlyItem(i) );
             unselectAllItems().getSiblinghood().get(i).setSelected(true);
             return this;
         }
@@ -316,6 +375,9 @@ public final class SplitItem<I extends JMenuItem>
          * @return This {@link Delegate} instance to allow for method chaining.
          */
         public Delegate<I> unselectItem( int i ) {
+            // We make sure that only the Swing thread can modify components:
+            if ( !SwingUtilities.isEventDispatchThread() )
+                UI.run(() -> unselectItem(i) );
             getSiblinghood().get(i).setSelected(false);
             return this;
         }

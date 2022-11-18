@@ -11,7 +11,7 @@ public class UIForPopup<P extends JPopupMenu> extends UIForAbstractSwing<UIForPo
 
 
     public UIForPopup<P> isBorderPaintedIf(boolean borderPainted) {
-        _component.setBorderPainted(borderPainted);
+        getComponent().setBorderPainted(borderPainted);
         return this;
     }
 

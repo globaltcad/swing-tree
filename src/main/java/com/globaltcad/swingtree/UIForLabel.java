@@ -37,10 +37,11 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> makeLinkTo(String href) {
-        LazyRef<String> text = LazyRef.of(_component::getText);
+        L list = getComponent();
+        LazyRef<String> text = LazyRef.of(list::getText);
         if ( !href.startsWith("http") ) href = "https://" + href;
         String finalHref = href;
-        _component.addMouseListener(new MouseAdapter() {
+        list.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 try {
@@ -49,10 +50,10 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
                     e1.printStackTrace();
                 }
             }
-            @Override  public void mouseExited(MouseEvent e) { _component.setText(text.get()); }
+            @Override  public void mouseExited(MouseEvent e) { list.setText(text.get()); }
             @Override
             public void mouseEntered(MouseEvent e) {
-                _component.setText("<html><a href=''>" + text.get() + "</a></html>");
+                list.setText("<html><a href=''>" + text.get() + "</a></html>");
             }
         });
         return this;
@@ -95,10 +96,11 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @param text The new text to be set for the wrapped label.
      * @return This very builder to allow for method chaining.
      */
-    public final UIForLabel<L> withText(String text) { _component.setText(text); return this; }
+    public final UIForLabel<L> withText(String text) { getComponent().setText(text); return this; }
 
     public final UIForLabel<L> withText( Val<String> val ) {
-        val.onShow(v->doUI(()->_component.setText(v)));
+        L list = getComponent();
+        val.onShow(v->doUI(()->list.setText(v)));
         return withText( val.get() );
     }
 
@@ -114,7 +116,7 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> with(UI.HorizontalAlignment horizontalAlign) {
-        _component.setHorizontalAlignment(horizontalAlign.forSwing());
+        getComponent().setHorizontalAlignment(horizontalAlign.forSwing());
         return this;
     }
 
@@ -130,7 +132,7 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> with(UI.VerticalAlignment verticalAlign) {
-        _component.setVerticalAlignment(verticalAlign.forSwing());
+        getComponent().setVerticalAlignment(verticalAlign.forSwing());
         return this;
     }
 
@@ -146,7 +148,7 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> withImageRelative(UI.HorizontalAlignment horizontalAlign) {
-        _component.setHorizontalTextPosition(horizontalAlign.forSwing());
+        getComponent().setHorizontalTextPosition(horizontalAlign.forSwing());
         return this;
     }
 
@@ -162,7 +164,7 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> withImageRelative(UI.VerticalAlignment verticalAlign) {
-        _component.setVerticalTextPosition(verticalAlign.forSwing());
+        getComponent().setVerticalTextPosition(verticalAlign.forSwing());
         return this;
     }
 
@@ -180,7 +182,7 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      */
     public UIForLabel<L> with(Icon icon) {
         LogUtil.nullArgCheck(icon,"icon",Icon.class);
-        _component.setIcon(icon);
+        getComponent().setIcon(icon);
         return this;
     }
 
@@ -190,8 +192,9 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> withFontSize(int size) {
-        Font old = _component.getFont();
-        _component.setFont(new Font(old.getName(), old.getStyle(), size));
+        L label = getComponent();
+        Font old = label.getFont();
+        label.setFont(new Font(old.getName(), old.getStyle(), size));
         return this;
     }
 

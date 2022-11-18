@@ -5,6 +5,7 @@ import com.globaltcad.swingtree.api.UIAction;
 import com.globaltcad.swingtree.api.mvvm.Val;
 import com.globaltcad.swingtree.api.mvvm.Var;
 
+import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
@@ -29,25 +30,27 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      */
     private final DocumentFilter filter = new DocumentFilter()
     {
+        C component = getComponent();
+
         /**
          * See documentation in {@link DocumentFilter}!
          */
         public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
-            if ( remove != null ) remove.accept( new RemoveDelegate(getComponent(), fb, offset, length) );
+            if ( remove != null ) remove.accept( new RemoveDelegate(component, fb, offset, length) );
             else fb.remove(offset, length);
         }
         /**
          * See documentation in {@link DocumentFilter}!
          */
         public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-            if ( insert != null ) insert.accept( new InsertDelegate(getComponent(), fb, offset, string.length(), string, attr) );
+            if ( insert != null ) insert.accept( new InsertDelegate(component, fb, offset, string.length(), string, attr) );
             else fb.insertString(offset, string, attr);
         }
         /**
          * See documentation in {@link DocumentFilter}!
          */
         public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-            if ( replace != null ) replace.accept(new ReplaceDelegate(getComponent(), fb, offset, length, text, attrs));
+            if ( replace != null ) replace.accept(new ReplaceDelegate(component, fb, offset, length, text, attrs));
             else fb.replace(offset, length, text, attrs);
         }
     };
@@ -226,7 +229,14 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
             this.length = length;
         }
 
-        public JTextComponent getTextComponent() { return textComponent; }
+        public JTextComponent getTextComponent() {
+            // We make sure that only the Swing thread can access the component:
+            if ( SwingUtilities.isEventDispatchThread() ) return textComponent;
+            else
+                throw new IllegalStateException(
+                        "Text component can only be accessed by the Swing thread."
+                    );
+        }
         public DocumentFilter.FilterBypass getFilterBypass() { return filterBypass; }
         public int getOffset() { return offset; }
         public int getLength() { return length; }

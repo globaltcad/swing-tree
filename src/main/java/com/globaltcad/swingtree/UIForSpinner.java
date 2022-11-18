@@ -29,7 +29,8 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
      */
     public final UIForSpinner<S> onChange(UIAction<SimpleDelegate<JSpinner, ChangeEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        _component.addChangeListener(e -> doApp(()->action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood()))) );
+        S spinner = getComponent();
+        spinner.addChangeListener(e -> doApp(()->action.accept(new SimpleDelegate<>(spinner, e, ()->getSiblinghood()))) );
         return this;
     }
 
@@ -40,7 +41,7 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSpinner<S> withValue( Object value ) {
-        _component.setValue(value);
+        getComponent().setValue(value);
         return this;
     }
 
@@ -51,7 +52,8 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSpinner<S> withValue( Val<Object> val ) {
-        val.onShow(v->doUI(()->_component.setValue(v)));
+        S spinner = getComponent();
+        val.onShow(v->doUI(()->spinner.setValue(v)));
         return this;
     }
 

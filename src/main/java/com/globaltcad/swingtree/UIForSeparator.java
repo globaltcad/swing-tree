@@ -21,10 +21,11 @@ public class UIForSeparator<S extends JSeparator> extends UIForAbstractSwing<UIF
      * @return This very builder to allow for method chaining.
      */
     public UIForSeparator<S> withLength(int separatorLength) {
-        Dimension d = _component.getPreferredSize();
-        if ( _component.getOrientation() == JSeparator.VERTICAL ) d.height = separatorLength;
-        else if ( _component.getOrientation() == JSeparator.HORIZONTAL ) d.width = separatorLength;
-        _component.setPreferredSize(d);
+        S separator = getComponent();
+        Dimension d = separator.getPreferredSize();
+        if ( separator.getOrientation() == JSeparator.VERTICAL ) d.height = separatorLength;
+        else if ( separator.getOrientation() == JSeparator.HORIZONTAL ) d.width = separatorLength;
+        separator.setPreferredSize(d);
         return this;
     }
 }

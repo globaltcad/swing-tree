@@ -28,7 +28,7 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAbstractSwing<UIF
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSplitPane<P> withDividerAt(int location) {
-        _component.setDividerLocation(location);
+        getComponent().setDividerLocation(location);
         return this;
     }
 
@@ -39,7 +39,7 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAbstractSwing<UIF
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSplitPane<P> withDividerSize(int size) {
-        _component.setDividerSize(size);
+        getComponent().setDividerSize(size);
         return this;
     }
 

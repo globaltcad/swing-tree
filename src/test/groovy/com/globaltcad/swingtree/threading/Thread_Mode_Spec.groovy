@@ -14,16 +14,18 @@ import java.awt.event.ActionEvent
 @Title("Thread Modes")
 @Narrative('''
 
-    Swing only knows 1 thread, the Event Dispatch Thread (EDT)m
+    Swing only knows 1 thread, the Event Dispatch Thread (EDT)
     which performs both the UIs rendering as well as event handling.
     This is a problem for Swing applications that need to perform
     long running tasks in the background, as the EDT will be blocked
     until the task is complete.
     SwingTree provides a mechanism for creating UIs which 
-    dispatch events to a custom thread as well as ensure that all UI related 
+    dispatch events to a custom application thread as well as ensure that all UI related 
     operations are performed on the event dispatch thread!
-    This allows SwingTree applications to perform long running tasks
-    in the background without blocking the UI.
+    Not only does this allow your applications to perform long running tasks
+    in the background without blocking the UI, it improves
+    the performance and responsiveness of you desktop application as a whole.
+    
     
 ''')
 class Thread_Mode_Spec extends Specification
@@ -105,7 +107,7 @@ class Thread_Mode_Spec extends Specification
             UI.processEventsUntilException() // This is done by a custom thread in a real world application.
         then: 'The delegate throws an exception!'
             var e = thrown(Exception)
-            e.message == problem
+            e.message.contains(problem)
 
         when : 'We click the button second button and then process the event queue (by this current non-swing thread).'
             UI.runAndWait( () -> ui2.component.doClick() )
@@ -114,12 +116,12 @@ class Thread_Mode_Spec extends Specification
             noExceptionThrown()
 
         where : 'We can use safe, as well as unsafe, ways to access the UI.'
-            problem                                                          | unsafeAccess                         | safeAccess
-            "Component can only be accessed from the Swing thread."          | { it.getComponent() }                | { it.forComponent(c -> {}) }
-            "Sibling components can only be accessed from the Swing thread." | { it.getSiblings() }                 | { it.forSiblings(s -> {}) }
-            "Sibling components can only be accessed from the Swing thread." | { it.getSiblinghood() }              | { it.forSiblinghood(c -> {}) }
-            "Sibling components can only be accessed from the Swing thread." | { it.getSiblingsOfType(JButton) }    | { it.forSiblingsOfType(JButton, c -> {}) }
-            "Sibling components can only be accessed from the Swing thread." | { it.getSiblinghoodOfType(JButton) } | { it.forSiblinghoodOfType(JButton, c -> {}) }
+            problem                                    | unsafeAccess                         | safeAccess
+            "can only be accessed by the Swing thread" | { it.getComponent() }                | { it.forComponent(c -> {}) }
+            "can only be accessed by the Swing thread" | { it.getSiblings() }                 | { it.forSiblings(s -> {}) }
+            "can only be accessed by the Swing thread" | { it.getSiblinghood() }              | { it.forSiblinghood(c -> {}) }
+            "can only be accessed by the Swing thread" | { it.getSiblingsOfType(JButton) }    | { it.forSiblingsOfType(JButton, c -> {}) }
+            "can only be accessed by the Swing thread" | { it.getSiblinghoodOfType(JButton) } | { it.forSiblinghoodOfType(JButton, c -> {}) }
     }
 
     def 'The application thread can safely effect the state of the UI by using the "UI.run(()->{..})" method.'()
@@ -136,6 +138,32 @@ class Thread_Mode_Spec extends Specification
             UI.runAndWait( () -> ui.component.doClick() )
             UI.processEventsUntilException() // This is done by a custom thread in a real world application.
         then: 'The delegate does not throw an exception!'
+            noExceptionThrown()
+    }
+
+    def 'Accessing the UI from something other than the UI thread, leads to an exception when in decoupled thread mode.'()
+    {
+        reportInfo """
+            The UI you build in the decoupled thread mode will try to protect itself
+            from being accessed from a potential application thread (so anything but the UI thread). 
+            So if you try to access the UI from another thread, an exception will be thrown.
+        """
+        given : 'A UI built with the decoupled thread mode:'
+            var ui = UI.use(ThreadMode.DECOUPLED, ()-> UI.panel())
+        when : 'We try to access the component by this current non-swing thread.'
+            ui.component
+        then: 'An exception is thrown!'
+            var e = thrown(Exception)
+            e.message == "This UI is configured to be decoupled from the application thread, " +
+                         "which means that it can only be modified from the EDT. " +
+                         "Please use 'UI.run(()->...)' method to execute your modifications on the EDT."
+
+        when : 'We want to still access the component from this current non-swing thread, we can use the "UI.run(()->{..})" method.'
+            UI.run(()-> ui.component )
+        and : 'Alternatively we can also use "UI.runAndGet(()->{..})".'
+            var panel = UI.runAndGet(()-> ui.component )
+            panel.updateUI()
+        then: 'No exception is thrown!'
             noExceptionThrown()
     }
 

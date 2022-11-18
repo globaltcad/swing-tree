@@ -15,12 +15,16 @@ import java.util.function.Consumer;
  */
 abstract class AbstractBuilder<I, C>
 {
-    protected final ThreadMode _threadMode = UI.SETTINGS().getThreadMode();
-
     /**
      *  The component wrapped by this builder node.
      */
-    protected final C _component;
+    private final C _component;
+
+    /**
+     * The thread mode determines how events are dispatched to the component.
+     * And also which type of thread can access the component.
+     */
+    protected final ThreadMode _threadMode = UI.SETTINGS().getThreadMode();
 
     /**
      *  The type class of the component wrapped by this builder node.
@@ -78,7 +82,7 @@ abstract class AbstractBuilder<I, C>
      * @return This very instance, which enables builder-style method chaining.
      */
     public I peek( Peeker<C> action ) {
-        action.accept(_component);
+        action.accept(getComponent());
         return (I) this;
     }
 
