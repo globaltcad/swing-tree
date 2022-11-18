@@ -64,7 +64,7 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
     public final UIForList<E, L> onSelection(UIAction<SimpleDelegate<JList<E>, ListSelectionEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         L list = getComponent();
-        list.addListSelectionListener(e -> doApp(()->action.accept(new SimpleDelegate<>(list, e, ()->getSiblinghood()))) );
+        list.addListSelectionListener(e -> _doApp(()->action.accept(new SimpleDelegate<>(list, e, ()->getSiblinghood()))) );
         return this;
     }
 

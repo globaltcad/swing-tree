@@ -2,15 +2,30 @@ package com.globaltcad.swingtree.common
 
 import com.globaltcad.swingtree.UI
 import com.globaltcad.swingtree.utility.Utility
+import spock.lang.Narrative
 import spock.lang.Specification
+import spock.lang.Title
 
 import javax.swing.*
 
+@Title("Swing Tree UI Query")
+@Narrative('''
+    
+    The Swing-Tree UI builder allows you to easily build UIs and query them for
+    specific components inside component event action lambdas! 
+    This allows you to easily build UIs that are event driven and react to
+    user input in a very flexible way.
+    Note that this should be used with care as it can lead to very complex
+    UIs that are hard to maintain.
+    Please consider modelling your UIs logic using MVVM based on 
+    property bindings (See the properties specification).
+    
+''')
 class UI_Query_Spec extends Specification
 {
     def 'We can query the swing tree within an action lambda.'()
     {
-        given :
+        given : 'we have a fancy UI tree:'
             var root =
             UI.panel("fill, insets 3", "[grow][shrink]")
             .add("grow",
@@ -49,17 +64,17 @@ class UI_Query_Spec extends Specification
             )
             .get(JPanel)
 
-        expect :
+        expect : 'We can query the tree for different kinds of components.'
             new Utility.Query(root).find(JButton, "B1").isPresent()
             new Utility.Query(root).find(JButton, "B2").isPresent()
             new Utility.Query(root).find(JButton, "B3").isPresent()
             new Utility.Query(root).find(JTextArea, "TA1").isPresent()
             new Utility.Query(root).find(JTextField, "TF1").isPresent()
 
-        when :
+        when : 'We click on the button with the actions performing query actions...'
             new Utility.Query(root).find(JButton, "B3").get().doClick()
 
-        then :
+        then : '...the text fields and text areas are updated.'
             new Utility.Query(root).find(JButton, "B1").get().text == "A"
             new Utility.Query(root).find(JButton, "B2").get().text == "I got hacked by B3"
             new Utility.Query(root).find(JButton, "B3").get().text == "C"

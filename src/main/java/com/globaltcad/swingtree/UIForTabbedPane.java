@@ -30,7 +30,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
            .ifPresent( onSelection ->
                    pane.addChangeListener(e -> {
                    if (index == pane.getSelectedIndex())
-                       doApp(()->onSelection.accept(new SimpleDelegate<>(pane, e, () -> getSiblinghood())));
+                       _doApp(()->onSelection.accept(new SimpleDelegate<>(pane, e, () -> getSiblinghood())));
                })
            );
 
@@ -40,17 +40,17 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
                     @Override
                     public void mouseClicked( MouseEvent e ) {
                         if ( index == pane.getSelectedIndex() )
-                            doApp(()->onMouseClick.accept(new SimpleDelegate<>(pane, e, ()->getSiblinghood())));
+                            _doApp(()->onMouseClick.accept(new SimpleDelegate<>(pane, e, ()->getSiblinghood())));
                     }
                 })
             );
 
         pane.addTab(
-                        tab.title().orElse(null),
-                        tab.icon().orElse(null),
-                        tab.contents().orElse(null),
-                        tab.tip().orElse(null)
-                    );
+                  tab.title().orElse(null),
+                  tab.icon().orElse(null),
+                  tab.contents().orElse(null),
+                  tab.tip().orElse(null)
+              );
         tab.headerContents().ifPresent( c -> _buildTabHeader( tab, index ) );
         return this;
     }
@@ -63,7 +63,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
                 new java.awt.event.MouseAdapter() {
                     @Override
                     public void mouseClicked( MouseEvent e ) {
-                        doApp(()-> {
+                        _doApp(()-> {
                             if (index == pane.getSelectedIndex())
                                 tab.onMouseClick().ifPresent(onMouseClick -> {
                                     onMouseClick.accept(new SimpleDelegate<>(pane, e, () -> getSiblinghood()));
@@ -102,10 +102,10 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
      * @param onChange The {@link UIAction} that will be called through the underlying change event.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForTabbedPane<P> onChange(UIAction<SimpleDelegate<P, ChangeEvent>> onChange) {
+    public final UIForTabbedPane<P> onChange( UIAction<SimpleDelegate<P, ChangeEvent>> onChange ) {
         LogUtil.nullArgCheck(onChange, "onChange", UIAction.class);
         P pane = getComponent();
-        pane.addChangeListener(e -> doApp(()->onChange.accept(new SimpleDelegate<>(pane, e, ()->getSiblinghood()))));
+        pane.addChangeListener(e -> _doApp(()->onChange.accept(new SimpleDelegate<>(pane, e, ()->getSiblinghood()))));
         return this;
     }
 

@@ -2,9 +2,11 @@ package com.globaltcad.swingtree;
 
 import com.globaltcad.swingtree.api.UIAction;
 import com.globaltcad.swingtree.api.mvvm.Val;
+import com.globaltcad.swingtree.api.mvvm.Var;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
+import java.util.function.Consumer;
 
 /**
  *  A swing tree builder node for {@link JSpinner} instances.
@@ -30,8 +32,12 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
     public final UIForSpinner<S> onChange(UIAction<SimpleDelegate<JSpinner, ChangeEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         S spinner = getComponent();
-        spinner.addChangeListener(e -> doApp(()->action.accept(new SimpleDelegate<>(spinner, e, ()->getSiblinghood()))) );
+        _onChange(e -> _doApp(()->action.accept(new SimpleDelegate<>(spinner, e, ()->getSiblinghood()))) );
         return this;
+    }
+
+    private void _onChange( Consumer<ChangeEvent> consumer ) {
+        getComponent().addChangeListener( e -> consumer.accept(e) );
     }
 
     /**
@@ -52,9 +58,21 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSpinner<S> withValue( Val<Object> val ) {
-        S spinner = getComponent();
-        val.onShow(v->doUI(()->spinner.setValue(v)));
+        val.onShow(v-> _doUI(()->getComponent().setValue(v)));
         return this;
     }
+
+    /**
+     * Sets the value of the spinner and also binds to the provided property.
+     *
+     * @param var The {@link com.globaltcad.swingtree.api.mvvm.Var} wrapper whose value should be set.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSpinner<S> withValue( Var<Object> var ) {
+        var.onShow(v -> _doUI(() -> getComponent().setValue(v)));
+        _onChange(e -> _doApp(() -> var.set(getComponent().getValue()).act()));
+        return this;
+    }
+
 
 }

@@ -99,8 +99,7 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
     public final UIForLabel<L> withText(String text) { getComponent().setText(text); return this; }
 
     public final UIForLabel<L> withText( Val<String> val ) {
-        L list = getComponent();
-        val.onShow(v->doUI(()->list.setText(v)));
+        val.onShow(v-> _doUI(()->getComponent().setText(v)));
         return withText( val.get() );
     }
 

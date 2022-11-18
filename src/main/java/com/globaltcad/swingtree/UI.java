@@ -942,7 +942,7 @@ public final class UI
      *
      * @see JSlider#setOrientation
      */
-    public static UIForSlider<JSlider> slider(Align align) {
+    public static UIForSlider<JSlider> slider( Align align ) {
         LogUtil.nullArgCheck(align, "align", Align.class);
         return of(new JSlider(align.forSlider()));
     }
@@ -962,7 +962,7 @@ public final class UI
      * @see JSlider#setMinimum
      * @see JSlider#setMaximum
      */
-    public static UIForSlider<JSlider> slider(Align align, int min, int max) {
+    public static UIForSlider<JSlider> slider( Align align, int min, int max ) {
         LogUtil.nullArgCheck(align, "align", Align.class);
         return of(new JSlider(align.forSlider(), min, max, (min + max) / 2));
     }
@@ -983,9 +983,53 @@ public final class UI
      * @see JSlider#setMaximum
      * @see JSlider#setValue
      */
-    public static UIForSlider<JSlider> slider(Align align, int min, int max, int value) {
+    public static UIForSlider<JSlider> slider( Align align, int min, int max, int value ) {
         LogUtil.nullArgCheck(align, "align", Align.class);
         return of(new JSlider(align.forSlider(), min, max, value));
+    }
+
+    /**
+     * Creates a slider with the specified alignment and the
+     * specified minimum, maximum, and dynamic value.
+     *
+     * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
+     * @param min The minimum possible value of the slider.
+     * @param max The maximum possible value of the slider.
+     * @param value The property holding the value of the slider
+     *
+     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     *
+     * @see JSlider#setOrientation
+     * @see JSlider#setMinimum
+     * @see JSlider#setMaximum
+     * @see JSlider#setValue
+     */
+    public static UIForSlider<JSlider> slider( Align align, int min, int max, Val<Integer> value ) {
+        LogUtil.nullArgCheck(align, "align", Align.class);
+        return of(new JSlider(align.forSlider(), min, max, value.get()))
+                .withValue(value);
+    }
+
+    /**
+     * Creates a slider with the specified alignment and the
+     * specified minimum, maximum, and dynamic value.
+     *
+     * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
+     * @param min The minimum possible value of the slider.
+     * @param max The maximum possible value of the slider.
+     * @param value The property holding the value of the slider
+     *
+     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     *
+     * @see JSlider#setOrientation
+     * @see JSlider#setMinimum
+     * @see JSlider#setMaximum
+     * @see JSlider#setValue
+     */
+    public static UIForSlider<JSlider> slider( Align align, int min, int max, Var<Integer> value ) {
+        LogUtil.nullArgCheck(align, "align", Align.class);
+        return of(new JSlider(align.forSlider(), min, max, value.get()))
+                .withValue(value);
     }
 
     /**
@@ -993,7 +1037,7 @@ public final class UI
      *
      * @return A builder instance for the provided {@link JComboBox}, which enables fluent method chaining.
      */
-    public static <E, C extends JComboBox<E>> UIForCombo<E,C> of(C component) {
+    public static <E, C extends JComboBox<E>> UIForCombo<E,C> of( C component ) {
         LogUtil.nullArgCheck(component, "component", JComboBox.class);
         return new UIForCombo<>(component);
     }
@@ -1015,7 +1059,7 @@ public final class UI
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     @SafeVarargs
-    public static <E> UIForCombo<E,JComboBox<E>> comboBox(E... items) {
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( E... items ) {
         LogUtil.nullArgCheck(items, "items", Object[].class);
         return of(new JComboBox<>(items));
     }
@@ -1028,7 +1072,7 @@ public final class UI
      * @return A builder instance for the provided {@link JList}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
-    public static <E> UIForCombo<E,JComboBox<E>> comboBox(java.util.List<E> items) {
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( java.util.List<E> items ) {
         LogUtil.nullArgCheck(items, "items", List.class);
         return of(new JComboBox<>((E[]) items.toArray()));
     }
@@ -1038,7 +1082,7 @@ public final class UI
      *
      * @return A builder instance for the provided {@link JSpinner}, which enables fluent method chaining.
      */
-    public static <S extends JSpinner> UIForSpinner<S> of(S spinner) {
+    public static <S extends JSpinner> UIForSpinner<S> of( S spinner ) {
         LogUtil.nullArgCheck(spinner, "spinner", JSpinner.class);
         return new UIForSpinner<>(spinner);
     }
@@ -1058,7 +1102,7 @@ public final class UI
      * @param model The {@link SpinnerModel} to be used by the {@link JSpinner}.
      * @return A builder instance for the provided {@link JSpinner}, which enables fluent method chaining.
      */
-    public static UIForSpinner<javax.swing.JSpinner> spinner(SpinnerModel model) {
+    public static UIForSpinner<javax.swing.JSpinner> spinner( SpinnerModel model ) {
         LogUtil.nullArgCheck(model, "model", SpinnerModel.class);
         return of(new JSpinner(model));
     }
@@ -1073,7 +1117,7 @@ public final class UI
      * @param step The step size of the {@link JSpinner}.
      * @return A builder instance for the provided {@link JSpinner}, which enables fluent method chaining.
      */
-    public static UIForSpinner<javax.swing.JSpinner> spinner(int value, int min, int max, int step) {
+    public static UIForSpinner<javax.swing.JSpinner> spinner( int value, int min, int max, int step ) {
         return of(new JSpinner(new SpinnerNumberModel(value, min, max, step)));
     }
 
@@ -1086,7 +1130,7 @@ public final class UI
      * @param max The maximum possible value of the {@link JSpinner}.
      * @return A builder instance for the provided {@link JSpinner}, which enables fluent method chaining.
      */
-    public static UIForSpinner<javax.swing.JSpinner> spinner(int value, int min, int max) {
+    public static UIForSpinner<javax.swing.JSpinner> spinner( int value, int min, int max ) {
         return of(new JSpinner(new SpinnerNumberModel(value, min, max, 1)));
     }
 
@@ -1095,7 +1139,7 @@ public final class UI
      *
      * @return A builder instance for the provided {@link JLabel}, which enables fluent method chaining.
      */
-    public static <L extends JLabel> UIForLabel<L> of(L component) {
+    public static <L extends JLabel> UIForLabel<L> of( L component ) {
         LogUtil.nullArgCheck(component, "component", JLabel.class);
         return new UIForLabel<>(component);
     }
@@ -1107,7 +1151,7 @@ public final class UI
      * @param text The text which should be displayed on the label.
      * @return A builder instance for the label, which enables fluent method chaining.
      */
-    public static UIForLabel<JLabel> label(String text) {
+    public static UIForLabel<JLabel> label( String text ) {
         LogUtil.nullArgCheck(text, "text", String.class);
         return of(new JLabel(text));
     }
@@ -1119,10 +1163,10 @@ public final class UI
      * @param text The text property which should be bound to the label.
      * @return A builder instance for the label, which enables fluent method chaining.
      */
-    public static UIForLabel<JLabel> label(Val<String> text) {
+    public static UIForLabel<JLabel> label( Val<String> text ) {
         LogUtil.nullArgCheck(text, "text", Val.class);
         return of(new JLabel())
-                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
                 .withText(text);
     }
 
@@ -1132,7 +1176,7 @@ public final class UI
      * @param icon The icon which should be placed into a {@link JLabel}.
      * @return A builder instance for the label, which enables fluent method chaining.
      */
-    public static UIForLabel<JLabel> label(Icon icon) {
+    public static UIForLabel<JLabel> label( Icon icon ) {
         LogUtil.nullArgCheck(icon, "icon", Icon.class);
         return of(new JLabel()).with(icon);
     }
@@ -1159,7 +1203,7 @@ public final class UI
      *  @param text The text which should be displayed on the label.
      *  @return A builder instance for the label, which enables fluent method chaining.
      */
-    public static UIForLabel<JLabel> boldLabel(String text) {
+    public static UIForLabel<JLabel> boldLabel( String text ) {
         return of(new JLabel(text)).makeBold();
     }
 
@@ -1169,37 +1213,37 @@ public final class UI
      *  @param text The text property which should be displayed on the label dynamically.
      *  @return A builder instance for the label, which enables fluent method chaining.
      */
-    public static UIForLabel<JLabel> boldLabel(Val<String> text) {
+    public static UIForLabel<JLabel> boldLabel( Val<String> text ) {
         return of(new JLabel()).withText(text).makeBold();
     }
 
-    public static UIForCheckBox<JCheckBox> checkBox(String text) {
+    public static UIForCheckBox<JCheckBox> checkBox( String text ) {
         LogUtil.nullArgCheck(text, "text", String.class);
         return of(new JCheckBox(text));
     }
 
-    public static UIForCheckBox<JCheckBox> checkBox(Val<String> text) {
+    public static UIForCheckBox<JCheckBox> checkBox( Val<String> text ) {
         LogUtil.nullArgCheck(text, "text", Val.class);
         return of(new JCheckBox())
-                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
                 .withText(text);
     }
 
-    public static UIForCheckBox<JCheckBox> checkBox(Val<String> text, Var<Boolean> state) {
+    public static UIForCheckBox<JCheckBox> checkBox( Val<String> text, Var<Boolean> state ) {
         LogUtil.nullArgCheck(text, "text", Val.class);
         LogUtil.nullArgCheck(state, "state", Var.class);
         return of(new JCheckBox())
-                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
-                .applyIf(!state.isUnnamed(), it -> it.getComponent().setName(state.id()))
+                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
+                .applyIf(!state.isUnnamed(), it -> it.id(state.id()))
                 .withText(text)
                 .isSelectedIf(state);
     }
 
-    public static UIForCheckBox<JCheckBox> checkBox(String text, Var<Boolean> state) {
+    public static UIForCheckBox<JCheckBox> checkBox( String text, Var<Boolean> state ) {
         LogUtil.nullArgCheck(text, "text", String.class);
         LogUtil.nullArgCheck(state, "state", Var.class);
         return of(new JCheckBox())
-                .applyIf(!state.isUnnamed(), it -> it.getComponent().setName(state.id()))
+                .applyIf(!state.isUnnamed(), it -> it.id(state.id()))
                 .withText(text)
                 .isSelectedIf(state);
     }
@@ -1209,34 +1253,34 @@ public final class UI
      *
      * @return A builder instance for the provided {@link JCheckBox}, which enables fluent method chaining.
      */
-    public static <B extends JCheckBox> UIForCheckBox<B> of(B component) {
+    public static <B extends JCheckBox> UIForCheckBox<B> of( B component ) {
         LogUtil.nullArgCheck(component, "component", JCheckBox.class);
         return new UIForCheckBox<>(component);
     }
 
-    public static UIForRadioButton<JRadioButton> radioButton(String text) {
+    public static UIForRadioButton<JRadioButton> radioButton( String text ) {
         LogUtil.nullArgCheck(text, "text", String.class);
         return of(new JRadioButton(text));
     }
 
-    public static UIForRadioButton<JRadioButton> radioButton(Val<String> text) {
+    public static UIForRadioButton<JRadioButton> radioButton( Val<String> text ) {
         LogUtil.nullArgCheck(text, "text", Val.class);
         return of(new JRadioButton())
-                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
                 .withText(text);
     }
 
-    public static UIForRadioButton<JRadioButton> radioButton(Val<String> text, Var<Boolean> selected) {
+    public static UIForRadioButton<JRadioButton> radioButton( Val<String> text, Var<Boolean> selected ) {
         LogUtil.nullArgCheck(text, "text", Val.class);
         LogUtil.nullArgCheck(text, "selected", Var.class);
         return of(new JRadioButton())
-                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
-                .applyIf(!selected.isUnnamed(), it -> it.getComponent().setName(selected.id()))
+                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
+                .applyIf(!selected.isUnnamed(), it -> it.id(selected.id()))
                 .withText(text)
                 .isSelectedIf(selected);
     }
 
-    public static UIForRadioButton<JRadioButton> radioButton(String text, Var<Boolean> selected) {
+    public static UIForRadioButton<JRadioButton> radioButton( String text, Var<Boolean> selected ) {
         LogUtil.nullArgCheck(text, "text", String.class);
         LogUtil.nullArgCheck(text, "selected", Var.class);
         return of(new JRadioButton())
@@ -1249,29 +1293,29 @@ public final class UI
      *
      * @return A builder instance for the provided {@link JRadioButton}, which enables fluent method chaining.
      */
-    public static <R extends JRadioButton> UIForRadioButton<R> of(R component) {
+    public static <R extends JRadioButton> UIForRadioButton<R> of( R component ) {
         LogUtil.nullArgCheck(component, "component", JRadioButton.class);
         return new UIForRadioButton<>(component);
     }
 
-    public static UIForToggleButton<JToggleButton> toggleButton(String text) {
+    public static UIForToggleButton<JToggleButton> toggleButton( String text ) {
         LogUtil.nullArgCheck(text, "text", String.class);
         return of(new JToggleButton(text));
     }
 
-    public static UIForToggleButton<JToggleButton> toggleButton(Val<String> text) {
+    public static UIForToggleButton<JToggleButton> toggleButton( Val<String> text ) {
         LogUtil.nullArgCheck(text, "text", Val.class);
         return of(new JToggleButton())
-                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
                 .withText(text);
     }
 
-    public static UIForToggleButton<JToggleButton> toggleButton(Val<String> text, Var<Boolean> selected) {
+    public static UIForToggleButton<JToggleButton> toggleButton( Val<String> text, Var<Boolean> selected ) {
         LogUtil.nullArgCheck(text, "text", Val.class);
         LogUtil.nullArgCheck(text, "selected", Var.class);
         return of(new JToggleButton())
-                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
-                .applyIf(!selected.isUnnamed(), it -> it.getComponent().setName(selected.id()))
+                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
+                .applyIf(!selected.isUnnamed(), it -> it.id(selected.id()))
                 .withText(text)
                 .isSelectedIf(selected);
     }
@@ -1281,7 +1325,7 @@ public final class UI
      *
      * @return A builder instance for the provided {@link JToggleButton}, which enables fluent method chaining.
      */
-    public static <B extends JToggleButton> UIForToggleButton<B> of(B component) {
+    public static <B extends JToggleButton> UIForToggleButton<B> of( B component ) {
         LogUtil.nullArgCheck(component, "component", JToggleButton.class);
         return new UIForToggleButton<>(component);
     }
@@ -1291,7 +1335,7 @@ public final class UI
      *
      * @return A builder instance for the provided {@link JTextField}, which enables fluent method chaining.
      */
-    public static <F extends JTextField> UIForTextField<F> of(F component) {
+    public static <F extends JTextField> UIForTextField<F> of( F component ) {
         LogUtil.nullArgCheck(component, "component", JTextComponent.class);
         return new UIForTextField<>(component);
     }
@@ -1304,14 +1348,14 @@ public final class UI
     public static UIForTextField<JTextField> textField( Val<String> text ) {
         LogUtil.nullArgCheck(text, "text", Val.class);
         return of(new JTextField())
-                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
                 .withText(text);
     }
 
     public static UIForTextField<JTextField> textField( Var<String> text ) {
         LogUtil.nullArgCheck(text, "text", Var.class);
         return of(new JTextField())
-                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
                 .withText(text);
     }
 
@@ -1338,17 +1382,17 @@ public final class UI
         return of(new JFormattedTextField(text));
     }
 
-    public static UIForFormattedTextField formattedTextField(Val<String> text) {
+    public static UIForFormattedTextField formattedTextField( Val<String> text ) {
         LogUtil.nullArgCheck(text, "text", Val.class);
         return of(new JFormattedTextField())
-                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
                 .withText(text);
     }
 
-    public static UIForFormattedTextField formattedTextField(Var<String> text) {
+    public static UIForFormattedTextField formattedTextField( Var<String> text ) {
         LogUtil.nullArgCheck(text, "text", Var.class);
         return of(new JFormattedTextField())
-                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
                 .withText(text);
     }
 
@@ -1365,27 +1409,27 @@ public final class UI
      *
      * @return A builder instance for the provided {@link JPasswordField}, which enables fluent method chaining.
      */
-    public static <F extends JPasswordField> UIForPasswordField<F> of(F component) {
+    public static <F extends JPasswordField> UIForPasswordField<F> of( F component ) {
         LogUtil.nullArgCheck(component, "component", JPasswordField.class);
         return new UIForPasswordField<>(component);
     }
 
-    public static UIForPasswordField<JPasswordField> passwordField(String text) {
+    public static UIForPasswordField<JPasswordField> passwordField( String text ) {
         LogUtil.nullArgCheck(text, "text", String.class);
         return of(new JPasswordField(text));
     }
 
-    public static UIForPasswordField<JPasswordField> passwordField(Val<String> text) {
+    public static UIForPasswordField<JPasswordField> passwordField( Val<String> text ) {
         LogUtil.nullArgCheck(text, "text", Val.class);
         return of(new JPasswordField())
-                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
                 .withText(text);
     }
 
-    public static UIForPasswordField<JPasswordField> passwordField(Var<String> text) {
+    public static UIForPasswordField<JPasswordField> passwordField( Var<String> text ) {
         LogUtil.nullArgCheck(text, "text", Val.class);
         return of(new JPasswordField())
-                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
                 .withText(text);
     }
 
@@ -1402,27 +1446,27 @@ public final class UI
      *
      * @return A builder instance for the provided {@link JTextArea}, which enables fluent method chaining.
      */
-    public static <A extends JTextArea> UIForTextArea<A> of(A area) {
+    public static <A extends JTextArea> UIForTextArea<A> of( A area ) {
         LogUtil.nullArgCheck(area, "area", JTextArea.class);
         return new UIForTextArea<>(area);
     }
 
-    public static UIForTextArea<JTextArea> textArea(String text) {
+    public static UIForTextArea<JTextArea> textArea( String text ) {
         LogUtil.nullArgCheck(text, "text", String.class);
         return of(new JTextArea(text));
     }
 
-    public static UIForTextArea<JTextArea> textArea(Val<String> text) {
+    public static UIForTextArea<JTextArea> textArea( Val<String> text ) {
         LogUtil.nullArgCheck(text, "text", Val.class);
         return of(new JTextArea())
-                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
                 .withText(text);
     }
 
-    public static UIForTextArea<JTextArea> textArea(Var<String> text) {
+    public static UIForTextArea<JTextArea> textArea( Var<String> text ) {
         LogUtil.nullArgCheck(text, "text", Var.class);
         return of(new JTextArea())
-                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
                 .withText(text);
     }
 
@@ -1442,7 +1486,7 @@ public final class UI
      * @param direction The text orientation type which should be used.
      * @return A builder instance for a new {@link JTextArea}, which enables fluent method chaining.
      */
-    public static UIForTextArea<JTextArea> textArea(UI.HorizontalDirection direction) {
+    public static UIForTextArea<JTextArea> textArea( UI.HorizontalDirection direction ) {
         LogUtil.nullArgCheck(direction, "direction", HorizontalDirection.class);
         return of(new JTextArea()).withTextOrientation(direction);
     }
@@ -1465,25 +1509,25 @@ public final class UI
      * @param text The new text to be set for the wrapped text component type.
      * @return A builder instance for a new {@link JTextArea}, which enables fluent method chaining.
      */
-    public static UIForTextArea<JTextArea> textArea(UI.HorizontalDirection direction, String text) {
+    public static UIForTextArea<JTextArea> textArea( UI.HorizontalDirection direction, String text ) {
         LogUtil.nullArgCheck(direction, "direction", HorizontalDirection.class);
         return of(new JTextArea()).withTextOrientation(direction).withText(text);
     }
 
-    public static UIForTextArea<JTextArea> textArea(UI.HorizontalDirection direction, Val<String> text) {
+    public static UIForTextArea<JTextArea> textArea( UI.HorizontalDirection direction, Val<String> text ) {
         LogUtil.nullArgCheck(direction, "direction", HorizontalDirection.class);
         LogUtil.nullArgCheck(text, "text", Val.class);
         return of(new JTextArea())
-                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
                 .withTextOrientation(direction)
                 .withText(text);
     }
 
-    public static UIForTextArea<JTextArea> textArea(UI.HorizontalDirection direction, Var<String> text) {
+    public static UIForTextArea<JTextArea> textArea( UI.HorizontalDirection direction, Var<String> text ) {
         LogUtil.nullArgCheck(direction, "direction", HorizontalDirection.class);
         LogUtil.nullArgCheck(text, "text", Var.class);
         return of(new JTextArea())
-                .applyIf(!text.isUnnamed(), it -> it.getComponent().setName(text.id()))
+                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
                 .withTextOrientation(direction)
                 .withText(text);
     }
@@ -1491,7 +1535,7 @@ public final class UI
     /**
      * @return A builder instance for the provided {@link JList}.
      */
-    public static <E> UIForList<E, JList<E>> of(JList<E> list) {
+    public static <E> UIForList<E, JList<E>> of( JList<E> list ) {
         LogUtil.nullArgCheck(list, "list", JList.class);
         return new UIForList<>(list);
     }
@@ -1499,7 +1543,7 @@ public final class UI
     /**
      * @return A builder instance for a new {@link JList}.
      */
-    public static <E> UIForList<E, JList<E>> list(ListModel<E> model) {
+    public static <E> UIForList<E, JList<E>> list( ListModel<E> model ) {
         LogUtil.nullArgCheck(model, "model", ListModel.class);
         return of(new JList<>(model));
     }
@@ -1507,26 +1551,26 @@ public final class UI
     /**
      * @return A builder instance for a new {@link JTable}.
      */
-    public static <T extends JTable> UIForTable<T> of(T table) {
+    public static <T extends JTable> UIForTable<T> of( T table ) {
         LogUtil.nullArgCheck(table, "table", JTable.class);
         return new UIForTable<>(table);
     }
 
     public static UIForTable<JTable> table() { return of(new JTable()); }
 
-    public static <E> UIForTable<JTable> table(ListData dataFormat, TableListDataSource<E> dataSource) {
+    public static <E> UIForTable<JTable> table( ListData dataFormat, TableListDataSource<E> dataSource ) {
         LogUtil.nullArgCheck(dataFormat, "dataFormat", ListData.class);
         LogUtil.nullArgCheck(dataSource, "dataSource", TableListDataSource.class);
         return of(new JTable()).with(dataFormat, dataSource);
     }
 
-    public static <E> UIForTable<JTable> table(MapData dataFormat, TableMapDataSource<E> dataSource) {
+    public static <E> UIForTable<JTable> table( MapData dataFormat, TableMapDataSource<E> dataSource ) {
         LogUtil.nullArgCheck(dataFormat, "dataFormat", ListData.class);
         LogUtil.nullArgCheck(dataSource, "dataSource", TableMapDataSource.class);
         return of(new JTable()).with(dataFormat, dataSource);
     }
 
-    public static UIForTable<JTable> table(Buildable<BasicTableModel> tableModelBuildable) {
+    public static UIForTable<JTable> table( Buildable<BasicTableModel> tableModelBuildable ) {
         return of(new JTable()).withModel(tableModelBuildable);
     }
 
@@ -1540,11 +1584,11 @@ public final class UI
         return Render.forList(Object.class, null).when(Object.class).as(cell->{});
     }
 
-    public static <T> Render.Builder<JList<T>, T> renderList(Class<T> itemType) {
+    public static <T> Render.Builder<JList<T>, T> renderList( Class<T> itemType ) {
         return Render.forList(itemType, null).when(itemType).as(cell->{});
     }
 
-    public static <T> Render.As<JList<T>, T, T> renderListItem(Class<T> itemType) {
+    public static <T> Render.As<JList<T>, T, T> renderListItem( Class<T> itemType ) {
         return Render.forList(itemType, null).when(itemType);
     }
 
@@ -1556,7 +1600,7 @@ public final class UI
      * @param borderSupplier A lambda which provides a border for rendered cells.
      * @return The builder API allowing method chaining.
      */
-    public static Render.Builder<JTable, Object> renderTableWithBorder(Supplier<Border> borderSupplier) {
+    public static Render.Builder<JTable, Object> renderTableWithBorder( Supplier<Border> borderSupplier ) {
         return Render.forTable(Object.class, borderSupplier).when(Object.class).as(cell->{});
     }
 
@@ -1564,7 +1608,7 @@ public final class UI
      * @param borderSupplier A lambda which provides a border for rendered cells.
      * @return The builder API allowing method chaining.
      */
-    public static Render.Builder<JList<Object>, Object> renderListWithBorder(Supplier<Border> borderSupplier) {
+    public static Render.Builder<JList<Object>, Object> renderListWithBorder( Supplier<Border> borderSupplier ) {
         return Render.forList(Object.class, borderSupplier).when(Object.class).as(cell->{});
     }
 
@@ -1572,7 +1616,7 @@ public final class UI
      * @param borderSupplier A lambda which provides a border for rendered cells.
      * @return The builder API allowing method chaining.
      */
-    public static Render.Builder<JComboBox<Object>, Object> renderComboWithBorder(Supplier<Border> borderSupplier) {
+    public static Render.Builder<JComboBox<Object>, Object> renderComboWithBorder( Supplier<Border> borderSupplier ) {
         return Render.forCombo(Object.class, borderSupplier).when(Object.class).as(cell->{});
     }
 
@@ -1580,24 +1624,48 @@ public final class UI
      * @param border A border for rendered cells.
      * @return The builder API allowing method chaining.
      */
-    public static Render.Builder<JTable, Object> renderTableWithBorder(Border border) {
+    public static Render.Builder<JTable, Object> renderTableWithBorder( Border border ) {
         return renderTableWithBorder(()->border);
     }
 
     /**
-     * @param border A border for rendered cells.
+     * @param border A property holding a {@link Border} used for rendered cells.
      * @return The builder API allowing method chaining.
      */
-    public static Render.Builder<JList<Object>, Object> renderListWithBorder(Border border) {
-        return renderListWithBorder(()->border);
+    public static Render.Builder<JTable, Object> renderTableWithBorder( Val<Border> border ) {
+        return renderTableWithBorder(border::orElseThrow);
     }
 
     /**
      * @param border A border for rendered cells.
      * @return The builder API allowing method chaining.
      */
-    public static Render.Builder<JComboBox<Object>, Object> renderComboWithBorder(Border border) {
+    public static Render.Builder<JList<Object>, Object> renderListWithBorder( Border border ) {
+        return renderListWithBorder(()->border);
+    }
+
+    /**
+     * @param border A property holding a {@link Border} used for rendered cells.
+     * @return The builder API allowing method chaining.
+     */
+    public static Render.Builder<JList<Object>, Object> renderListWithBorder( Var<Border> border ) {
+        return renderListWithBorder(border::orElseThrow);
+    }
+
+    /**
+     * @param border A border for rendered cells.
+     * @return The builder API allowing method chaining.
+     */
+    public static Render.Builder<JComboBox<Object>, Object> renderComboWithBorder( Border border ) {
         return renderComboWithBorder(()->border);
+    }
+
+    /**
+     * @param border A property holding a {@link Border} used for rendered cells.
+     * @return The builder API allowing method chaining.
+     */
+    public static Render.Builder<JComboBox<Object>, Object> renderComboWithBorder( Val<Border> border ) {
+        return renderComboWithBorder(border::orElseThrow);
     }
 
     /**
@@ -1605,7 +1673,7 @@ public final class UI
      *
      * @return A builder instance for the provided object, which enables fluent method chaining.
      */
-    public static <T> UIForAnything<T> of(T component) {
+    public static <T> UIForAnything<T> of( T component ) {
         LogUtil.nullArgCheck(component, "component", Object.class);
         return new UIForAnything<>(component);
     }

@@ -2,9 +2,11 @@ package com.globaltcad.swingtree;
 
 import com.globaltcad.swingtree.api.UIAction;
 import com.globaltcad.swingtree.api.mvvm.Val;
+import com.globaltcad.swingtree.api.mvvm.Var;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
+import java.util.function.Consumer;
 
 /**
  *  A swing tree builder node for {@link JSlider} instances.
@@ -25,30 +27,21 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
     public final UIForSlider<S> onChange(UIAction<SimpleDelegate<JSlider, ChangeEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         S slider = getComponent();
-        slider.addChangeListener(e -> doApp(()->action.accept(new SimpleDelegate<>(slider, e, ()->getSiblinghood()))) );
+        _onChange( e -> _doApp(()->action.accept(new SimpleDelegate<>(slider, e, ()->getSiblinghood()))) );
         return this;
     }
 
-    public final UIForSlider<S> withValue( Val<Integer> val ) {
-        S slider = getComponent();
-        val.onShow(v->doUI(()->slider.setValue(v)));
-        return this;
-    }
-
-    public final UIForSlider<S> withMin( Val<Integer> val ) {
-        S slider = getComponent();
-        val.onShow(v->doUI(()->slider.setMinimum(v)));
-        return this;
-    }
-
-    public final UIForSlider<S> withMax( Val<Integer> val ) {
-        S slider = getComponent();
-        val.onShow(v->doUI(()->slider.setMaximum(v)));
-        return this;
+    private void _onChange( Consumer<ChangeEvent> action ) {
+        getComponent().addChangeListener(e -> action.accept(e) );
     }
 
     public final UIForSlider<S> withMin( int min ) {
         getComponent().setMinimum( min );
+        return this;
+    }
+
+    public final UIForSlider<S> withMin( Val<Integer> val ) {
+        val.onShow(v-> _doUI(()->getComponent().setMinimum(v)));
         return this;
     }
 
@@ -57,9 +50,24 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
         return this;
     }
 
+    public final UIForSlider<S> withMax( Val<Integer> val ) {
+        val.onShow(v-> _doUI(()->getComponent().setMaximum(v)));
+        return this;
+    }
+
     public final UIForSlider<S> withValue( int value ) {
         getComponent().setValue( value );
         return this;
+    }
+
+    public final UIForSlider<S> withValue( Val<Integer> val ) {
+        val.onShow(v-> _doUI(()->getComponent().setValue(v)));
+        return this;
+    }
+
+    public final UIForSlider<S> withValue( Var<Integer> var ) {
+        _onChange( e -> _doApp(getComponent().getValue(), v -> var.set(v).act()));
+        return this.withValue((Val<Integer>) var);
     }
 
 }

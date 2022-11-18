@@ -1,7 +1,7 @@
 {
   "className":"com.globaltcad.swingtree.common.UI_Updates_Spec",
-  "title":"",
-  "narrative":"",
+  "title":"Dynamic UI Updates",
+  "narrative":"The Swing-Tree UI builder allows you to easily build UI with periodic updates.\n    This is useful for example when you want to build animated UIs or UIs that\n    perform some sort of refreshes periodically.",
   "subjects":[],
   "statistics":{
     "runs":"1",
@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.203 seconds"
+    "duration":"0.202 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 

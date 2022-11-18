@@ -26,7 +26,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
     public UIForCombo<E,C> onSelection(UIAction<SimpleDelegate<JComboBox<E>, ActionEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         JComboBox<E> combo = getComponent();
-        combo.addActionListener(e -> doApp(()->action.accept(new SimpleDelegate<>(combo, e, ()->getSiblinghood()))) );
+        combo.addActionListener(e -> _doApp(()->action.accept(new SimpleDelegate<>(combo, e, ()->getSiblinghood()))) );
         return this;
     }
 

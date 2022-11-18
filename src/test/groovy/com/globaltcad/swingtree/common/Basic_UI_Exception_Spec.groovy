@@ -6,11 +6,19 @@ import com.globaltcad.swingtree.api.MenuBuilder
 import com.globaltcad.swingtree.api.SwingBuilder
 import com.globaltcad.swingtree.api.mvvm.Val
 import com.globaltcad.swingtree.api.mvvm.Var
+import spock.lang.Narrative
 import spock.lang.Specification
+import spock.lang.Title
 
 import javax.swing.*
 import javax.swing.text.JTextComponent
 
+@Title("How Not To Use")
+@Narrative('''
+
+    This specification shows you how NOT to use the Swing-Tree API. 
+
+''')
 class Basic_UI_Exception_Spec extends Specification
 {
     def 'The given factory methods do not accept null arguments.'(
@@ -30,6 +38,13 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.label((Val)null)},
                     {UI.label(300,200,null)},
                     {UI.button(null, null,null)},
+                    {UI.button().onClick(null)},
+                    {UI.button().onChange(null)},
+                    {UI.button((Icon)null)},
+                    {UI.button((Icon)null,(Icon)null)},
+                    {UI.button("").isSelectedIf((Var)null)},
+                    {UI.toggleButton(null)},
+                    {UI.toggleButton(null, (Var)null)},
                     {UI.of((SwingBuilder)null)},
                     {UI.of((MenuBuilder)null)},
                     {UI.of((JCheckBox)null)},
@@ -48,6 +63,7 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.splitButton(null)},
                     {UI.checkBox(null)},
                     {UI.radioButton(null)},
+                    {UI.radioButton(null, (Var)null)},
                     {UI.menuItem(null)},
                     {UI.splitItem(null)},
                     {UI.splitRadioItem(null)},
@@ -61,10 +77,6 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.of(new JComboBox<>()).onMouseClick(null)},
                     {UI.of(new JComboBox<>()).onSelection(null)},
                     {UI.of(new JSlider()).onChange(null)},
-                    {UI.button().onClick(null)},
-                    {UI.button().onChange(null)},
-                    {UI.button((Icon)null)},
-                    {UI.button((Icon)null,(Icon)null)},
                     {UI.tabbedPane((UI.Position)null)},
                     {UI.tabbedPane((UI.OverflowPolicy)null)},
                     {UI.tabbedPane((UI.Position)null,(UI.OverflowPolicy)null)},

@@ -1,15 +1,15 @@
 {
   "className":"com.globaltcad.swingtree.mvvm.Properties_Spec",
   "title":"Properties",
-  "narrative":"Properties are a powerful tool to model the state\n    as well as business logic of your UI without actually depending on it.\n    This is especially useful for testing your UIs logic.\n    Therefore properties are a root concept in the Swing-Tree library.\n    The decoupling between your UI and the UIs state and logic\n    is achieved by binding properties to UI components.\n    This specification shows you how to use model UI state\n    and business logic with properties\n    and how to bind them to UI components.",
+  "narrative":"Properties are a powerful tool to model the state\n    as well as business logic of your UI without actually depending on it.\n    This is especially useful for testing your UIs logic.\n    Therefore properties are a root concept in the Swing-Tree library.\n    The decoupling between your UI and the UIs state and logic\n    is achieved by binding properties to UI components.\n    This specification shows you how to model UI state\n    and business logic using properties\n    and how to bind them to UI components.",
   "subjects":[],
   "statistics":{
-    "runs":"11",
+    "runs":"12",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.009 seconds"
+    "duration":"0.078 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -24,6 +24,33 @@
         {"kind":"given","text":"We create a property using the \"of\" factory method.","code":["Var<String> property = Var.of(\"Hello World\")"]},
 
         {"kind":"expect","text":"The property has the same value as the value we passed to the factory method.","code":["property.get() == \"Hello World\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"They can be bound to the UI by passing them to a builder node.",
+      "result":"PASS",
+      "duration":"0.070 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Binding goes both ways, so when the property changes we can update the UI\n            using the \"show()\" method on the property, and when\n            the UI is changed by the user, it will update the property for us\n            and trigger the property action (if present).\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A simple boolean property modelling a toggle state.","code":["boolean userDidToggle = false","Val<Boolean> toggled = Var.of(false)","                            .withAction({userDidToggle = true})"]},
+
+        {"kind":"when","text":"We create a toggle button using the \"toggleButton\" factory method and pass the property to it.","code":["var ui = UI.toggleButton(\"Toggle Me!\").isSelectedIf(toggled)"]},
+
+        {"kind":"then","text":"The button should be updated when the property changes.","code":["ui.component.selected == false"]},
+
+        {"kind":"when","text":"We change and then show the property value...","code":["toggled.set(true).show()"]},
+
+        {"kind":"then","text":"The button should be updated.","code":["ui.component.selected == true"]},
+
+        {"kind":"when","text":"We try to un-toggle the toggle button in the UI...","code":["ui.component.doClick()"]},
+
+        {"kind":"then","text":"The property should be toggled off again.","code":["toggled.get() == false"]},
+
+        {"kind":"and","text":"","code":["userDidToggle == true"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -144,7 +171,7 @@
     },
   
     {
-      "id":"Properties are similar to the \"Optional\" class, you can map them and see if their are empty or not.",
+      "id":"Properties are similar to the \"Optional\" class, you can map them and see if they are empty or not.",
       "result":"PASS",
       "duration":"0.001 seconds",
       "iterations":{

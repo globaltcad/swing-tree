@@ -46,22 +46,22 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public UIForAbstractSwing( C component ) { super(component); }
 
-    protected void doUI(Runnable action) {
+    protected void _doUI( Runnable action ) {
         if ( _threadMode == ThreadMode.DECOUPLED )
             SwingUtilities.invokeLater(action);
         else
             action.run();
     }
 
-    protected void doApp(Runnable action) {
+    protected void _doApp( Runnable action ) {
         if ( _threadMode == ThreadMode.DECOUPLED )
             EventQueue.INSTANCE().register(action);
         else
             action.run();
     }
 
-    protected <T> void doApp(T value, Consumer<T> action) {
-        doApp(()->action.accept(value));
+    protected <T> void _doApp( T value, Consumer<T> action ) {
+        _doApp(()->action.accept(value));
     }
 
     /**
@@ -96,13 +96,14 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     *  Use this to make the wrapped UI component dynamically visible or invisible.
+     *  Use this to make the wrapped UI component dynamically visible or invisible. <br>
+     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
      *
      * @param isVisible The truth value determining if the UI component should be visible or not wrapped in a {@link Val}.
      * @return This very instance, which enables builder-style method chaining.
      */
     public I isVisibleIf( Val<Boolean> isVisible ) {
-        isVisible.onShow(v->doUI(()->getComponent().setVisible(v)));
+        isVisible.onShow(v-> _doUI(()->getComponent().setVisible(v)));
         return isVisibleIf( isVisible.get() );
     }
 
@@ -125,7 +126,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public I isEnabledIf( Val<Boolean> isEnabled ) {
-        isEnabled.onShow(v->doUI(()->getComponent().setEnabled(v)));
+        isEnabled.onShow(v-> _doUI(()->getComponent().setEnabled(v)));
         return isEnabledIf( isEnabled.get() );
     }
 
@@ -142,7 +143,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * the {@link #peek(Peeker)} method to peek into the builder's component like so: <br>
      * <pre>{@code
      *     UI.button()
-     *         .peek( button -> button.withProperty("key", "value") );
+     *     .peek( button -> button.putClientProperty("key", "value") );
      * }</pre>
      *
      * @param key the new client property key which may be used for styles or layout managers.
@@ -165,13 +166,14 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     *  Use this to dynamically attach a border to the wrapped component.
+     *  Use this to dynamically attach a border to the wrapped component. <br>
+     *  <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
      *
      * @param border The {@link Border} which should be set for the wrapped component wrapped in a {@link Val}.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withBorder( Val<Border> border ) {
-        border.onShow(v->doUI(()->getComponent().setBorder(v)));
+        border.onShow(v-> _doUI(()->getComponent().setBorder(v)));
         return this.withBorder( border.orElseNull() );
     }
 
@@ -531,13 +533,14 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
 
     /**
      *  Use this to dynamically set the cursor type which should be displayed
-     *  when hovering over the UI component wrapped by this builder.
+     *  when hovering over the UI component wrapped by this builder. <br>
+     *  <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
      *
      * @param type The {@link UI.Cursor} type defined by a simple enum exposed by this API wrapped in a {@link Val}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I with( Val<UI.Cursor> type ) {
-        type.onShow(t -> doUI(()->getComponent().setCursor( new java.awt.Cursor( t.type ) )) );
+    public final I withCursor( Val<UI.Cursor> type ) {
+        type.onShow(t -> _doUI(()->getComponent().setCursor( new java.awt.Cursor( t.type ) )) );
         return with( type.get() );
     }
 
@@ -547,7 +550,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  the {@link #peek(Peeker)} method to peek into the builder's component like so: <br>
      *  <pre>{@code
      *      UI.panel()
-     *          .peek( panel -> panel.setLayout(new FavouriteLayoutManager()) );
+     *      .peek( panel -> panel.setLayout(new FavouriteLayoutManager()) );
      *  }</pre>
      *
      * @param layout The {@link LayoutManager} which should be supplied to the wrapped component.
@@ -566,7 +569,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  the {@link #peek(Peeker)} method to peek into the builder's component like so: <br>
      *  <pre>{@code
      *      UI.panel()
-     *          .peek( panel -> panel.setLayout(new FlowLayout()) );
+     *      .peek( panel -> panel.setLayout(new FlowLayout()) );
      *  }</pre>
      *
      * @return This very instance, which enables builder-style method chaining.
@@ -581,7 +584,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  the {@link #peek(Peeker)} method to peek into the builder's component like so: <br>
      *  <pre>{@code
      *      UI.panel()
-     *          .peek( panel -> panel.setLayout(new GridLayout()) );
+     *      .peek( panel -> panel.setLayout(new GridLayout()) );
      *  }</pre>
      *
      * @return This very instance, which enables builder-style method chaining.
@@ -597,7 +600,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param attr A string defining the layout (usually mig layout).
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withLayout(String attr) { return withLayout(attr, null); }
+    public final I withLayout( String attr ) { return withLayout(attr, null); }
 
     /**
      *  Passes the provided string to the {@link MigLayout} manager of the wrapped component.
@@ -605,7 +608,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param attr Essentially an immutable string wrapper defining the mig layout.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withLayout(LayoutAttr attr) { return withLayout(attr.toString(), null); }
+    public final I withLayout( LayoutAttr attr ) { return withLayout(attr.toString(), null); }
 
     /**
      *  This creates a {@link MigLayout} for the component wrapped by this UI builder.
@@ -614,7 +617,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param colConstrains The column layout for the {@link MigLayout} instance.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withLayout(String attr, String colConstrains) {
+    public final I withLayout( String attr, String colConstrains ) {
         return withLayout(attr, colConstrains, null);
     }
 
@@ -623,7 +626,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param colConstrains The column layout for the {@link MigLayout} instance.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withLayout(LayoutAttr attr, String colConstrains) {
+    public final I withLayout( LayoutAttr attr, String colConstrains ) {
         return withLayout(attr.toString(), colConstrains, null);
     }
 
@@ -634,7 +637,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param colConstrains The column layout for the {@link MigLayout} instance.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withLayout(String constraints, String colConstrains, String rowConstraints) {
+    public final I withLayout( String constraints, String colConstrains, String rowConstraints ) {
         if (_migAlreadySet)
             throw new IllegalArgumentException("The mig layout has already been specified for this component!");
 
@@ -658,13 +661,13 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  through the {@link #peek(Peeker)} method like so: <br>
      *  <pre>{@code
      *      UI.button("Click Me")
-     *          .peek( button -> button.setToolTipText("Can be clicked!") );
+     *      .peek( button -> button.setToolTipText("Can be clicked!") );
      *  }</pre>
      *
      * @param tooltip The tool tip text which should be set for the UI component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withTooltip(String tooltip) {
+    public final I withTooltip( String tooltip ) {
         getComponent().setToolTipText(tooltip);
         return (I) this;
     }
@@ -676,14 +679,18 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  be equivalent to:
      *  <pre>{@code
      *      UI.button("Click Me")
-     *          .peek( button -> tip.onView(JButton::setToolTipText) );
-     *  }</pre>
+     *      .peek( button -> {
+     *          tip.onShow(JButton::setToolTipText);
+     *          button.setToolTipText(tip.get());
+     *      });
+     *  }</pre><br>
+     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
      *
      * @param tip The tooltip which should be displayed when hovering over the tab header.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final I withTooltip( Val<String> tip ) {
-        tip.onShow(v->doUI(()->getComponent().setToolTipText(v)));
+        tip.onShow(v-> _doUI(()->getComponent().setToolTipText(v)));
         return this.withTooltip( tip.get() );
     }
 
@@ -694,9 +701,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  through the {@link #peek(Peeker)} method like so: <br>
      *  <pre>{@code
      *      UI.label("Something")
-     *          .peek( label -> label.setBackground(Color.CYAN) );
+     *      .peek( label -> label.setBackground(Color.CYAN) );
      *  }</pre>
-     *
      *
      * @param color The background color which should be set for the UI component.
      * @return This very instance, which enables builder-style method chaining.
@@ -714,14 +720,18 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  be equivalent to:
      *  <pre>{@code
      *      UI.button("Click Me")
-     *          .peek( button -> bg.onView(JButton::setBackground) );
-     *  }</pre>
+     *      .peek( button -> {
+     *          bg.onShow(JButton::setBackground);
+     *          button.setBackground(bg.get());
+     *      });
+     *  }</pre><br>
+     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
      *
      * @param bg The background color which should be set for the UI component wrapped by a {@link Val}.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withBackground( Val<Color> bg ) {
-        bg.onShow(v->doUI(()->getComponent().setBackground(v)));
+        bg.onShow(v-> _doUI(()->getComponent().setBackground(v)));
         return this.withBackground( bg.orElseNull() );
     }
 
@@ -731,7 +741,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  through the {@link #peek(Peeker)} method like so: <br>
      *  <pre>{@code
      *      UI.label("Something")
-     *          .peek( label -> label.setForeground(Color.GRAY) );
+     *      .peek( label -> label.setForeground(Color.GRAY) );
      *  }</pre>
      *
      * @param color The color of the foreground (usually text).
@@ -749,14 +759,18 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  be equivalent to:
      *  <pre>{@code
      *      UI.button("Click Me")
-     *          .peek( button -> fg.onView(JButton::setForeground) );
-     *  }</pre>
+     *      .peek( button -> {
+     *          fg.onShow(JButton::setForeground);
+     *          button.setForeground(fg.get());
+     *      });
+     *  }</pre><br>
+     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
      *
      * @param fg The foreground color which should be set for the UI component wrapped by a {@link Val}.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withForeground( Val<Color> fg ) {
-        fg.onShow(v->doUI(()->getComponent().setForeground(v)));
+        fg.onShow(v-> _doUI(()->getComponent().setForeground(v)));
         return this.withForeground( fg.orElseNull() );
     }
 
@@ -779,14 +793,17 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  be equivalent to:
      *  <pre>{@code
      *    UI.button("Click Me")
-     *    .peek( button -> size.onView(JButton::setMinimumSize) );
-     *    }</pre>
+     *    .peek( button -> {
+     *      size.onShow(JButton::setMinimumSize);
+     *      button.setMinimumSize(size.get());
+     *    });
+     *  }</pre>
      *
      * @param size The minimum {@link Dimension} of the component wrapped by a {@link Val}.
      * @return This very builder to allow for method chaining.
      */
     public I withMinimumSize( Val<Dimension> size ) {
-        size.onShow(v->doUI(()->getComponent().setMinimumSize(v)));
+        size.onShow(v-> _doUI(()->getComponent().setMinimumSize(v)));
         return this.withMinimumSize( size.get() );
     }
 
@@ -812,10 +829,10 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public I withMinimumSize( Val<Integer> width, Val<Integer> height ) {
         width.onShow(w ->
-                doUI(()-> getComponent().setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height)))
+                _doUI(()-> getComponent().setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height)))
             );
         height.onShow(h ->
-                doUI(()-> getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, h)))
+                _doUI(()-> getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, h)))
             );
         return this.withMinimumSize( width.get(), height.get() );
     }
@@ -838,7 +855,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public I withMinimumWidth( Val<Integer> width ) {
-        width.onShow(w -> doUI(()-> getComponent().setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height))) );
+        width.onShow(w -> _doUI(()-> getComponent().setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height))) );
         return this.withMinimumWidth( width.get() );
     }
 
@@ -861,7 +878,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public I withMinimumHeight( Val<Integer> height ) {
-        height.onShow(h -> doUI(()-> getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, h))) );
+        height.onShow(h -> _doUI(()-> getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, h))) );
         return this.withMinimumHeight( height.get() );
     }
 
@@ -884,7 +901,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public I withMaximumSize( Val<Dimension> size ) {
-        size.onShow(v -> doUI(()-> getComponent().setMaximumSize(v)) );
+        size.onShow(v -> _doUI(()-> getComponent().setMaximumSize(v)) );
         return this.withMaximumSize( size.get() );
     }
 
@@ -909,8 +926,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public I withMaximumSize( Val<Integer> width, Val<Integer> height ) {
-        width.onShow(w -> doUI(()-> getComponent().setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height))) );
-        height.onShow(h -> doUI(()-> getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h))) );
+        width.onShow(w -> _doUI(()-> getComponent().setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height))) );
+        height.onShow(h -> _doUI(()-> getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h))) );
         return this.withMaximumSize( width.get(), height.get() );
     }
 
@@ -932,7 +949,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public I withMaximumWidth( Val<Integer> width ) {
-        width.onShow(w -> doUI(()-> getComponent().setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height))) );
+        width.onShow(w -> _doUI(()-> getComponent().setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height))) );
         return this.withMaximumWidth( width.get() );
     }
 
@@ -954,7 +971,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public I withMaximumHeight( Val<Integer> height ) {
-        height.onShow(h -> doUI(()-> getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h))) );
+        height.onShow(h -> _doUI(()-> getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h))) );
         return this.withMaximumHeight( height.get() );
     }
 
@@ -977,7 +994,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public I withPreferredSize( Val<Dimension> size ) {
-        size.onShow(v -> doUI(()-> getComponent().setPreferredSize(v)) );
+        size.onShow(v -> _doUI(()-> getComponent().setPreferredSize(v)) );
         return this.withPreferredSize( size.orElseNull() );
     }
 
@@ -1002,8 +1019,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public I withPreferredSize( Val<Integer> width, Val<Integer> height ) {
-        width.onShow(w -> doUI(()-> getComponent().setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height))) );
-        height.onShow(h -> doUI(()-> getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h))) );
+        width.onShow(w -> _doUI(()-> getComponent().setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height))) );
+        height.onShow(h -> _doUI(()-> getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h))) );
         return this.withPreferredSize( width.get(), height.get() );
     }
 
@@ -1025,7 +1042,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public I withPreferredWidth( Val<Integer> width ) {
-        width.onShow(w -> doUI(()-> getComponent().setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height))) );
+        width.onShow(w -> _doUI(()-> getComponent().setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height))) );
         return this.withPreferredWidth( width.get() );
     }
 
@@ -1047,7 +1064,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public I withPreferredHeight( Val<Integer> height ) {
-        height.onShow(h -> doUI(()-> getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h))) );
+        height.onShow(h -> _doUI(()-> getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h))) );
         return this.withPreferredHeight( height.get() );
     }
 
@@ -1066,7 +1083,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) { 
-                doApp(() -> onClick.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(() -> onClick.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return (I) this;
@@ -1084,7 +1101,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         C component = getComponent();
         component.addComponentListener(new ComponentAdapter() {
             @Override public void componentResized(ComponentEvent e) {
-                doApp(()->onResize.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(()->onResize.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return (I) this;
@@ -1102,7 +1119,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         C component = getComponent();
         component.addComponentListener(new ComponentAdapter() {
             @Override public void componentMoved(ComponentEvent e) {
-                doApp(()->onMoved.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(()->onMoved.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return (I) this;
@@ -1120,7 +1137,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         C component = getComponent();
         component.addComponentListener(new ComponentAdapter() {
             @Override public void componentShown(ComponentEvent e) {
-                doApp(()->onShown.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(()->onShown.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return (I) this;
@@ -1138,7 +1155,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         C component = getComponent();
         component.addComponentListener(new ComponentAdapter() {
             @Override public void componentHidden(ComponentEvent e) {
-                doApp(()->onHidden.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(()->onHidden.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return (I) this;
@@ -1151,12 +1168,12 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onFocus The {@link UIAction} which should be executed once the input focus was gained on the wrapped component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onFocusGained(UIAction<SimpleDelegate<C, ComponentEvent>> onFocus) {
+    public final I onFocusGained( UIAction<SimpleDelegate<C, ComponentEvent>> onFocus ) {
         LogUtil.nullArgCheck(onFocus, "onFocus", UIAction.class);
         C component = getComponent();
         component.addFocusListener(new FocusAdapter() {
             @Override public void focusGained(FocusEvent e) {
-                doApp(()->onFocus.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(()->onFocus.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return (I) this;
@@ -1169,12 +1186,12 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onFocus The {@link UIAction} which should be executed once the input focus was lost on the wrapped component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onFocusLost(UIAction<SimpleDelegate<C, ComponentEvent>> onFocus) {
+    public final I onFocusLost( UIAction<SimpleDelegate<C, ComponentEvent>> onFocus ) {
         LogUtil.nullArgCheck(onFocus, "onFocus", UIAction.class);
         C component = getComponent();
         component.addFocusListener(new FocusAdapter() {
             @Override public void focusLost(FocusEvent e) {
-                doApp(()->onFocus.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(()->onFocus.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return (I) this;
@@ -1187,12 +1204,12 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onKeyPressed The {@link UIAction} which will be executed once the wrapped component received a key press.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onKeyPressed(UIAction<SimpleDelegate<C, KeyEvent>> onKeyPressed) {
+    public final I onKeyPressed( UIAction<SimpleDelegate<C, KeyEvent>> onKeyPressed ) {
         LogUtil.nullArgCheck(onKeyPressed, "onKeyPressed", UIAction.class);
         C component = getComponent();
         component.addKeyListener(new KeyAdapter() {
             @Override public void keyPressed(KeyEvent e) {
-                doApp(()->onKeyPressed.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(()->onKeyPressed.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return (I) this;
@@ -1207,14 +1224,14 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onKeyPressed The {@link UIAction} which will be executed once the wrapped component received the targeted key press.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onPressed(Keyboard.Key key, UIAction<SimpleDelegate<C, KeyEvent>> onKeyPressed) {
+    public final I onPressed( Keyboard.Key key, UIAction<SimpleDelegate<C, KeyEvent>> onKeyPressed ) {
         LogUtil.nullArgCheck(key, "key", Keyboard.Key.class);
         LogUtil.nullArgCheck(onKeyPressed, "onKeyPressed", UIAction.class);
         C component = getComponent();
         component.addKeyListener(new KeyAdapter() {
             @Override public void keyPressed( KeyEvent e ) {
                 if ( e.getKeyCode() == key.code )
-                    doApp(()->onKeyPressed.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                    _doApp(()->onKeyPressed.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return (I) this;
@@ -1228,12 +1245,12 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      * @see #onKeyPressed(UIAction)
      */
-    public final I onKeyReleased(UIAction<SimpleDelegate<C, KeyEvent>> onKeyReleased) {
+    public final I onKeyReleased( UIAction<SimpleDelegate<C, KeyEvent>> onKeyReleased ) {
         LogUtil.nullArgCheck(onKeyReleased, "onKeyReleased", UIAction.class);
         C component = getComponent();
         component.addKeyListener(new KeyAdapter() {
             @Override public void keyReleased(KeyEvent e) {
-                doApp(()->onKeyReleased.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood()))); }
+                _doApp(()->onKeyReleased.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood()))); }
         });
         return (I) this;
     }
@@ -1249,14 +1266,14 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @see #onKeyPressed(UIAction)
      * @see #onKeyReleased(UIAction)
      */
-    public I onReleased(Keyboard.Key key, UIAction<SimpleDelegate<C, KeyEvent>> onKeyReleased) {
+    public I onReleased( Keyboard.Key key, UIAction<SimpleDelegate<C, KeyEvent>> onKeyReleased ) {
         LogUtil.nullArgCheck(key, "key", Keyboard.Key.class);
         LogUtil.nullArgCheck(onKeyReleased, "onKeyReleased", UIAction.class);
         C component = getComponent();
         component.addKeyListener(new KeyAdapter() {
             @Override public void keyReleased( KeyEvent e ) {
                 if ( e.getKeyCode() == key.code )
-                    doApp(()->onKeyReleased.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                    _doApp(()->onKeyReleased.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return (I) this;
@@ -1271,16 +1288,16 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @see #onKeyPressed(UIAction)
      * @see #onKeyReleased(UIAction)
      */
-    public I onKeyTyped(UIAction<SimpleDelegate<C, KeyEvent>> onKeyTyped) {
+    public I onKeyTyped( UIAction<SimpleDelegate<C, KeyEvent>> onKeyTyped ) {
         LogUtil.nullArgCheck(onKeyTyped, "onKeyTyped", UIAction.class);
         C component = getComponent();
         _onKeyTyped( e ->
-            doApp(()->onKeyTyped.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())))
+            _doApp(()->onKeyTyped.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())))
         );
         return (I) this;
     }
 
-    protected void _onKeyTyped(Consumer<KeyEvent> action) {
+    protected void _onKeyTyped( Consumer<KeyEvent> action ) {
         getComponent().addKeyListener(new KeyAdapter() {
             @Override public void keyTyped(KeyEvent e) {
                 action.accept(e);
@@ -1300,14 +1317,14 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @see #onKeyReleased(UIAction)
      * @see #onKeyTyped(UIAction)
      */
-    public I onTyped(Keyboard.Key key, UIAction<SimpleDelegate<C, KeyEvent>> onKeyTyped) {
+    public I onTyped( Keyboard.Key key, UIAction<SimpleDelegate<C, KeyEvent>> onKeyTyped ) {
         LogUtil.nullArgCheck(key, "key", Keyboard.Key.class);
         LogUtil.nullArgCheck(onKeyTyped, "onKeyTyped", UIAction.class);
         C component = getComponent();
         component.addKeyListener(new KeyAdapter() {
             @Override public void keyTyped( KeyEvent e ) {
                 if ( e.getKeyCode() == key.code )
-                    doApp(()->onKeyTyped.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                    _doApp(()->onKeyTyped.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return (I) this;
@@ -1326,7 +1343,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onUpdate The {@link UIAction} which should be called periodically.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I doUpdates(int delay, UIAction<SimpleDelegate<C, ActionEvent>> onUpdate) {
+    public final I doUpdates( int delay, UIAction<SimpleDelegate<C, ActionEvent>> onUpdate ) {
         LogUtil.nullArgCheck(onUpdate, "onUpdate", UIAction.class);
         Timer timer = new Timer(delay, e -> onUpdate.accept(new SimpleDelegate<>(getComponent(), e, ()->getSiblinghood())));
         synchronized (_timers) {
@@ -1349,7 +1366,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param builder A builder for another {@link JComponent} instance which ought to be added to the wrapped component type.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final <T extends JComponent> I add(UIForAbstractSwing<?, T> builder) {
+    public final <T extends JComponent> I add( UIForAbstractSwing<?, T> builder ) {
         return (I) this.add(new AbstractNestedBuilder[]{builder});
     }
 
@@ -1365,7 +1382,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param builder A builder for another {@link JComponent} instance which ought to be added to the wrapped component type.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final <T extends JComponent> I add(String attr, UIForAbstractSwing<?, T> builder) {
+    public final <T extends JComponent> I add( String attr, UIForAbstractSwing<?, T> builder ) {
         return this.add(attr, new UIForAbstractSwing[]{builder});
     }
 
@@ -1381,7 +1398,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param builder A builder for another {@link JComponent} instance which ought to be added to the wrapped component type.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final <T extends JComponent> I add(CompAttr attr, UIForAbstractSwing<?, T> builder ) {
+    public final <T extends JComponent> I add( CompAttr attr, UIForAbstractSwing<?, T> builder ) {
         return this.add(attr.toString(), new UIForAbstractSwing[]{builder});
     }
 

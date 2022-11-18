@@ -80,12 +80,12 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
     }
 
     public final I withText( Val<String> val ) {
-        val.onShow(v->doUI(()->getComponent().setText(v)));
+        val.onShow(v-> _doUI(()->getComponent().setText(v)));
         return withText( val.get() );
     }
 
     public final I withText( Var<String> var ) {
-        var.onShow(v->doUI(()->getComponent().setText(v)));
+        var.onShow(v-> _doUI(()->getComponent().setText(v)));
         _onKeyTyped( (KeyEvent e) -> {
             String oldText = getComponent().getText();
             // We need to add the now typed character to the old text, because the key typed event
@@ -99,7 +99,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
                 newText = part1 + ( part2.length() < 2 ? part2 : part2.substring(1) );
             else
                 newText = part1 + e.getKeyChar() + part2;
-            doApp(newText, t -> var.set(t).act() );
+            _doApp(newText, t -> var.set(t).act() );
         });
         return withText( var.get() );
     }
@@ -145,9 +145,12 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
     public final I onContentChange(Consumer<SimpleDelegate<JTextComponent, DocumentEvent>> action) {
         C component = getComponent();
         component.getDocument().addDocumentListener(new DocumentListener() {
-            @Override public void insertUpdate(DocumentEvent e)  {doApp(()->action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));}
-            @Override public void removeUpdate(DocumentEvent e)  {doApp(()->action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));}
-            @Override public void changedUpdate(DocumentEvent e) {doApp(()->action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));}
+            @Override public void insertUpdate(DocumentEvent e)  {
+                _doApp(()->action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));}
+            @Override public void removeUpdate(DocumentEvent e)  {
+                _doApp(()->action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));}
+            @Override public void changedUpdate(DocumentEvent e) {
+                _doApp(()->action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));}
         });
         return (I) this;
     }
@@ -162,8 +165,10 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
     public final I onTextChange(Consumer<SimpleDelegate<JTextComponent, DocumentEvent>> action) {
         C component = getComponent();
         component.getDocument().addDocumentListener(new DocumentListener() {
-            @Override public void insertUpdate(DocumentEvent e) {doApp(()->action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));}
-            @Override public void removeUpdate(DocumentEvent e) {doApp(()->action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));}
+            @Override public void insertUpdate(DocumentEvent e) {
+                _doApp(()->action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));}
+            @Override public void removeUpdate(DocumentEvent e) {
+                _doApp(()->action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));}
             @Override public void changedUpdate(DocumentEvent e) {}
         });
         return (I) this;

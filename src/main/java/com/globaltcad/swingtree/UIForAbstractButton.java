@@ -24,7 +24,7 @@ import java.util.function.Consumer;
  */
 public abstract class UIForAbstractButton<I, B extends AbstractButton> extends UIForAbstractSwing<I, B>
 {
-    protected UIForAbstractButton(B component) { super(component); }
+    protected UIForAbstractButton( B component ) { super(component); }
 
     /**
      * Defines the single line of text the wrapped button type will display.
@@ -38,8 +38,16 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
         return (I) this;
     }
 
+    /**
+     *  Binds the provided {@link Val} property to the wrapped button type
+     *  and sets the text of the button to the value of the property.
+     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     * @param val The view model property which should be bound to this UI.
+     * @return This very builder to allow for method chaining.
+     */
     public final I withText( Val<String> val ) {
-        val.onShow(v->doUI(()->getComponent().setText(v)));
+        LogUtil.nullArgCheck(val, "val", Val.class);
+        val.onShow(v-> _doUI(()->getComponent().setText(v)));
         return withText( val.get() );
     }
 
@@ -54,7 +62,8 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  wrapped {@link AbstractButton} type.
      */
     public final I isSelectedIf( Val<Boolean> val ) {
-        val.onShow(v->doUI(()->getComponent().setSelected(v)));
+        LogUtil.nullArgCheck(val, "val", Val.class);
+        val.onShow(v-> _doUI(()->getComponent().setSelected(v)));
         return isSelectedIf( val.get() );
     }
 
@@ -64,9 +73,10 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  wrapped {@link AbstractButton} type.
      */
     public final I isSelectedIf( Var<Boolean> var ) {
-        var.onShow(v->doUI(()->getComponent().setSelected(v)));
+        LogUtil.nullArgCheck(var, "var", Var.class);
+        var.onShow(v-> _doUI(()->getComponent().setSelected(v)));
         _onClick(
-            e -> doApp(getComponent().isSelected(), sel->var.set(sel).act())
+            e -> _doApp(getComponent().isSelected(), sel->var.set(sel).act())
         );
         return isSelectedIf( var.get() );
     }
@@ -100,7 +110,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public I onChange(UIAction<SimpleDelegate<B, ItemEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         B button = getComponent();
-        button.addItemListener(e -> doApp(()->action.accept(new SimpleDelegate<>(button, e, this::getSiblinghood))));
+        button.addItemListener(e -> _doApp(()->action.accept(new SimpleDelegate<>(button, e, this::getSiblinghood))));
         return (I) this;
     }
 
@@ -119,7 +129,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         B button = getComponent();
         _onClick(
-           e -> doApp(()->action.accept(
+           e -> _doApp(()->action.accept(
                new SimpleDelegate<>(button, e, this::getSiblinghood)
            ))
         );
@@ -153,6 +163,28 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  A convenience method to avoid peeking into this builder like so:
      *  <pre>{@code
      *     UI.button("Clickable!")
+     *     .peek( button -> {
+     *          property.onShow(v->button.setHorizontalAlignment(v.forSwing()));
+     *          button.setHorizontalAlignment(property.get().forSwing());
+     *     });
+     *  }</pre>
+     * This sets the horizontal alignment of the icon and text
+     * and also binds the provided property to the underlying component. <br>
+     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     *
+     * @param horizontalAlign The horizontal alignment property which should be bound to the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withHorizontalAlignment(Val<UI.HorizontalAlignment> horizontalAlign) {
+        LogUtil.nullArgCheck(horizontalAlign, "horizontalAlign", Val.class);
+        horizontalAlign.onShow(align-> _doUI(()->getComponent().setHorizontalAlignment(align.forSwing())));
+        return with(horizontalAlign.get());
+    }
+
+    /**
+     *  A convenience method to avoid peeking into this builder like so:
+     *  <pre>{@code
+     *     UI.button("Clickable!")
      *         .peek( button -> button.setVerticalAlignment(...) );
      *  }</pre>
      * This sets the vertical alignment of the icon and text.
@@ -164,6 +196,28 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
         LogUtil.nullArgCheck(verticalAlign, "verticalAlign", UI.VerticalAlignment.class);
         getComponent().setVerticalAlignment(verticalAlign.forSwing());
         return (I) this;
+    }
+
+    /**
+     *  A convenience method to avoid peeking into this builder like so:
+     *  <pre>{@code
+     *     UI.button("Clickable!")
+     *     .peek( button -> {
+     *          property.onShow(v->button.setVerticalAlignment(v.forSwing()));
+     *          button.setVerticalAlignment(property.get().forSwing());
+     *     });
+     *  }</pre>
+     * This sets the vertical alignment of the icon and text
+     * and also binds the provided property to the underlying component. <br>
+     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     *
+     * @param verticalAlign The vertical alignment property which should be bound to the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withVerticalAlignment(Val<UI.VerticalAlignment> verticalAlign) {
+        LogUtil.nullArgCheck(verticalAlign, "verticalAlign", Val.class);
+        verticalAlign.onShow(align-> _doUI(()->getComponent().setVerticalAlignment(align.forSwing())));
+        return with(verticalAlign.get());
     }
 
     /**
@@ -187,6 +241,28 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  A convenience method to avoid peeking into this builder like so:
      *  <pre>{@code
      *     UI.button("Clickable!")
+     *     .peek( button -> {
+     *          property.onShow(v->button.setHorizontalTextPosition(v.forSwing()));
+     *          button.setHorizontalTextPosition(property.get().forSwing());
+     *     });
+     *  }</pre>
+     * This sets the horizontal position of the text relative to the icon
+     * and also binds the provided property to the underlying component. <br>
+     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     *
+     * @param horizontalAlign The horizontal text alignment property relative to the icon which should be bound to the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withImageRelativeHorizontalAlignment(Val<UI.HorizontalAlignment> horizontalAlign) {
+        LogUtil.nullArgCheck(horizontalAlign, "horizontalAlign", Val.class);
+        horizontalAlign.onShow(align-> _doUI(()->getComponent().setHorizontalTextPosition(align.forSwing())));
+        return withImageRelative(horizontalAlign.get());
+    }
+
+    /**
+     *  A convenience method to avoid peeking into this builder like so:
+     *  <pre>{@code
+     *     UI.button("Clickable!")
      *         .peek( button -> button.setVerticalTextPosition(...) );
      *  }</pre>
      * This sets the vertical position of the text relative to the icon.
@@ -198,6 +274,28 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
         LogUtil.nullArgCheck(verticalAlign, "verticalAlign", UI.VerticalAlignment.class);
         getComponent().setVerticalTextPosition(verticalAlign.forSwing());
         return (I) this;
+    }
+
+    /**
+     *  A convenience method to avoid peeking into this builder like so:
+     *  <pre>{@code
+     *     UI.button("Clickable!")
+     *     .peek( button -> {
+     *          property.onShow(v->button.setVerticalTextPosition(v.forSwing()));
+     *          button.setVerticalTextPosition(property.get().forSwing());
+     *     });
+     *  }</pre>
+     * This sets the vertical position of the text relative to the icon
+     * and also binds the provided property to the underlying component. <br>
+     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     *
+     * @param verticalAlign The vertical text alignment property relative to the icon which should be bound to the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withImageRelativeVerticalAlignment(Val<UI.VerticalAlignment> verticalAlign) {
+        LogUtil.nullArgCheck(verticalAlign, "verticalAlign", Val.class);
+        verticalAlign.onShow(align -> _doUI(() -> getComponent().setVerticalTextPosition(align.forSwing())));
+        return withImageRelative(verticalAlign.get());
     }
 
 }

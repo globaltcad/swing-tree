@@ -13,7 +13,5 @@ public class UIForSwing<C extends JComponent> extends UIForAbstractSwing<UIForSw
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    public UIForSwing( C component ) {
-        super(component);
-    }
+    public UIForSwing( C component ) { super(component); }
 }

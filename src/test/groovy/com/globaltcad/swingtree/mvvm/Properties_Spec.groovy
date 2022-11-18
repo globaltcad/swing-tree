@@ -1,5 +1,6 @@
 package com.globaltcad.swingtree.mvvm
 
+import com.globaltcad.swingtree.UI
 import com.globaltcad.swingtree.api.mvvm.Val
 import com.globaltcad.swingtree.api.mvvm.Var
 import spock.lang.Narrative
@@ -17,8 +18,8 @@ import java.util.function.Consumer
     Therefore properties are a root concept in the Swing-Tree library.
     The decoupling between your UI and the UIs state and logic 
     is achieved by binding properties to UI components.
-    This specification shows you how to use model UI state 
-    and business logic with properties 
+    This specification shows you how to model UI state 
+    and business logic using properties 
     and how to bind them to UI components.
     
 ''')
@@ -31,6 +32,38 @@ class Properties_Spec extends Specification
 
         expect : 'The property has the same value as the value we passed to the factory method.'
             property.get() == "Hello World"
+    }
+
+    def 'They can be bound to the UI by passing them to a builder node.'()
+    {
+        reportInfo """
+            Binding goes both ways, so when the property changes we can update the UI
+            using the "show()" method on the property, and when
+            the UI is changed by the user, it will update the property for us
+            and trigger the property action (if present).
+        """
+        given : 'A simple boolean property modelling a toggle state.'
+            boolean userDidToggle = false
+            Val<Boolean> toggled = Var.of(false)
+                                        .withAction({userDidToggle = true})
+
+        when : 'We create a toggle button using the "toggleButton" factory method and pass the property to it.'
+            var ui = UI.toggleButton("Toggle Me!").isSelectedIf(toggled)
+
+        then : 'The button should be updated when the property changes.'
+            ui.component.selected == false
+
+        when : 'We change and then show the property value...'
+            toggled.set(true).show()
+        then : 'The button should be updated.'
+            ui.component.selected == true
+
+        when : 'We try to un-toggle the toggle button in the UI...'
+            ui.component.doClick()
+        then : 'The property should be toggled off again.'
+            toggled.get() == false
+        and :
+            userDidToggle == true
     }
 
     def 'There are 2 types of properties, an immutable property, and its mutable sub-type.'()
@@ -146,7 +179,7 @@ class Properties_Spec extends Specification
             list2 == ["Tempeh"]
     }
 
-    def 'Properties are similar to the "Optional" class, you can map them and see if their are empty or not.'()
+    def 'Properties are similar to the "Optional" class, you can map them and see if they are empty or not.'()
     {
         given : 'We create a property...'
             Val<String> property = Val.of("Hello World")

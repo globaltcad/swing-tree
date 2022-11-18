@@ -1,7 +1,7 @@
 {
   "className":"com.globaltcad.swingtree.common.UI_Query_Spec",
-  "title":"",
-  "narrative":"",
+  "title":"Swing Tree UI Query",
+  "narrative":"The Swing-Tree UI builder allows you to easily build UIs and query them for\n    specific components inside component event action lambdas!\n    This allows you to easily build UIs that are event driven and react to\n    user input in a very flexible way.\n    Note that this should be used with care as it can lead to very complex\n    UIs that are hard to maintain.\n    Please consider modelling your UIs logic using MVVM based on\n    property bindings (See the properties specification).",
   "subjects":[],
   "statistics":{
     "runs":"1",
@@ -16,18 +16,18 @@
     {
       "id":"We can query the swing tree within an action lambda.",
       "result":"PASS",
-      "duration":"0.074 seconds",
+      "duration":"0.075 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["var root =","UI.panel(\"fill, insets 3\", \"[grow][shrink]\")",".add(\"grow\",","    UI.splitPane(UI.Split.HORIZONTAL)","    .withDividerAt(50)","    .add(","        UI.scrollPane()","        .add(","            UI.tabbedPane()","            .add(UI.tab(\"1\").add(UI.panel(\"fill\").add(\"grow\", UI.button(\"A\").id(\"B1\"))))","            .add(UI.tab(\"2\").add(UI.panel(\"fill\").add(\"grow\", UI.button(\"B\").id(\"B2\"))))","            .add(UI.tab(\"3\").add(","                UI.panel(\"fill\").add(\"grow\",","                    UI.button(\"C\").id(\"B3\")","                    .onClick( it -> { // The delegate lets us query the tree!","                        it.find(JButton, \"B2\").ifPresent(b -> b.setText(\"I got hacked by B3\"))","                        it.find(JTextArea, \"TA1\").ifPresent(a -> a.setText(\"I got hacked by B3\"))","                        it.find(JTextField, \"TF1\").ifPresent(a -> a.setText(\"I got hacked by B3\"))","                    })","                )","            ))","        )","    )","    .add(","        UI.scrollPane()","        .add(","            UI.panel(\"fill\")","            .add(\"grow,  wrap\",","                UI.scrollPane().add( UI.textArea(\"I am a text area!\").id(\"TA1\") )","            )","            .add(\"shrinky, growx\",","                UI.textField(\"I am a text field\").id(\"TF1\")","            )","        )","    )",")",".get(JPanel)"]},
+        {"kind":"given","text":"we have a fancy UI tree:","code":["var root =","UI.panel(\"fill, insets 3\", \"[grow][shrink]\")",".add(\"grow\",","    UI.splitPane(UI.Split.HORIZONTAL)","    .withDividerAt(50)","    .add(","        UI.scrollPane()","        .add(","            UI.tabbedPane()","            .add(UI.tab(\"1\").add(UI.panel(\"fill\").add(\"grow\", UI.button(\"A\").id(\"B1\"))))","            .add(UI.tab(\"2\").add(UI.panel(\"fill\").add(\"grow\", UI.button(\"B\").id(\"B2\"))))","            .add(UI.tab(\"3\").add(","                UI.panel(\"fill\").add(\"grow\",","                    UI.button(\"C\").id(\"B3\")","                    .onClick( it -> { // The delegate lets us query the tree!","                        it.find(JButton, \"B2\").ifPresent(b -> b.setText(\"I got hacked by B3\"))","                        it.find(JTextArea, \"TA1\").ifPresent(a -> a.setText(\"I got hacked by B3\"))","                        it.find(JTextField, \"TF1\").ifPresent(a -> a.setText(\"I got hacked by B3\"))","                    })","                )","            ))","        )","    )","    .add(","        UI.scrollPane()","        .add(","            UI.panel(\"fill\")","            .add(\"grow,  wrap\",","                UI.scrollPane().add( UI.textArea(\"I am a text area!\").id(\"TA1\") )","            )","            .add(\"shrinky, growx\",","                UI.textField(\"I am a text field\").id(\"TF1\")","            )","        )","    )",")",".get(JPanel)"]},
 
-        {"kind":"expect","text":"","code":["new Utility.Query(root).find(JButton, \"B1\").isPresent()","new Utility.Query(root).find(JButton, \"B2\").isPresent()","new Utility.Query(root).find(JButton, \"B3\").isPresent()","new Utility.Query(root).find(JTextArea, \"TA1\").isPresent()","new Utility.Query(root).find(JTextField, \"TF1\").isPresent()"]},
+        {"kind":"expect","text":"We can query the tree for different kinds of components.","code":["new Utility.Query(root).find(JButton, \"B1\").isPresent()","new Utility.Query(root).find(JButton, \"B2\").isPresent()","new Utility.Query(root).find(JButton, \"B3\").isPresent()","new Utility.Query(root).find(JTextArea, \"TA1\").isPresent()","new Utility.Query(root).find(JTextField, \"TF1\").isPresent()"]},
 
-        {"kind":"when","text":"","code":["new Utility.Query(root).find(JButton, \"B3\").get().doClick()"]},
+        {"kind":"when","text":"We click on the button with the actions performing query actions...","code":["new Utility.Query(root).find(JButton, \"B3\").get().doClick()"]},
 
-        {"kind":"then","text":"","code":["new Utility.Query(root).find(JButton, \"B1\").get().text == \"A\"","new Utility.Query(root).find(JButton, \"B2\").get().text == \"I got hacked by B3\"","new Utility.Query(root).find(JButton, \"B3\").get().text == \"C\"","new Utility.Query(root).find(JTextArea, \"TA1\").get().text == \"I got hacked by B3\"","new Utility.Query(root).find(JTextField, \"TF1\").get().text == \"I got hacked by B3\""]}
+        {"kind":"then","text":"...the text fields and text areas are updated.","code":["new Utility.Query(root).find(JButton, \"B1\").get().text == \"A\"","new Utility.Query(root).find(JButton, \"B2\").get().text == \"I got hacked by B3\"","new Utility.Query(root).find(JButton, \"B3\").get().text == \"C\"","new Utility.Query(root).find(JTextArea, \"TA1\").get().text == \"I got hacked by B3\"","new Utility.Query(root).find(JTextField, \"TF1\").get().text == \"I got hacked by B3\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

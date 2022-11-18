@@ -20,9 +20,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    public UIForTable(T component) {
-        super(component);
-    }
+    public UIForTable( T component ) { super(component); }
 
     /**
      *  Use this to build a table cell renderer for a particular column.
@@ -31,7 +29,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param columnName The name of the column for which the cell renderer will be built.
      * @param renderBuilder The builder API for a cell renderer.
      */
-    public final UIForTable<T> withRendererForColumn(String columnName, Render.Builder<JTable, ?> renderBuilder) {
+    public final UIForTable<T> withRendererForColumn( String columnName, Render.Builder<JTable, ?> renderBuilder ) {
         LogUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
         return withRendererForColumn(columnName, renderBuilder.getForTable());
     }
@@ -43,7 +41,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param columnIndex The index of the column for which the cell renderer will be built.
      * @param renderBuilder The builder API for a cell renderer.
      */
-    public final UIForTable<T> withRendererForColumn(int columnIndex, Render.Builder<JTable, ?> renderBuilder) {
+    public final UIForTable<T> withRendererForColumn( int columnIndex, Render.Builder<JTable, ?> renderBuilder ) {
         LogUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
         return withRendererForColumn(columnIndex, renderBuilder.getForTable());
     }
@@ -53,7 +51,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param columnName The name of the column for which the cell renderer will be registered.
      * @param renderer The cell renderer to be registered.
      */
-    public final UIForTable<T> withRendererForColumn(String columnName, TableCellRenderer renderer) {
+    public final UIForTable<T> withRendererForColumn( String columnName, TableCellRenderer renderer ) {
         LogUtil.nullArgCheck(columnName, "columnName", String.class);
         LogUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
         getComponent().getColumn(columnName).setCellRenderer(renderer);
@@ -65,7 +63,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param columnIndex The index of the column for which the cell renderer will be registered.
      * @param renderer The cell renderer to be registered.
      */
-    public final UIForTable<T> withRendererForColumn(int columnIndex, TableCellRenderer renderer) {
+    public final UIForTable<T> withRendererForColumn( int columnIndex, TableCellRenderer renderer ) {
         LogUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
         getComponent().getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);
         return this;
@@ -76,7 +74,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param columnName The name of the column for which the cell editor will be registered.
      * @param editor The cell editor to be registered.
      */
-    public final UIForTable<T> withCellEditorForColumn(String columnName, TableCellEditor editor) {
+    public final UIForTable<T> withCellEditorForColumn( String columnName, TableCellEditor editor ) {
         LogUtil.nullArgCheck(columnName, "columnName", String.class);
         LogUtil.nullArgCheck(editor, "editor", TableCellEditor.class);
         getComponent().getColumn(columnName).setCellEditor(editor);
@@ -88,7 +86,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param columnIndex The index of the column for which the cell editor will be registered.
      * @param editor The cell editor to be registered.
      */
-    public final UIForTable<T> withCellEditorForColumn(int columnIndex, TableCellEditor editor) {
+    public final UIForTable<T> withCellEditorForColumn( int columnIndex, TableCellEditor editor ) {
         LogUtil.nullArgCheck(editor, "editor", TableCellEditor.class);
         getComponent().getColumnModel().getColumn(columnIndex).setCellEditor(editor);
         return this;
@@ -101,7 +99,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param dataModelBuilder The builder object which will be used to build and then set the table model.
      * @return This builder object.
      */
-    public final UIForTable<T> withModel(Buildable<BasicTableModel> dataModelBuilder) {
+    public final UIForTable<T> withModel( Buildable<BasicTableModel> dataModelBuilder ) {
         return this.withModel(dataModelBuilder.build());
     }
 
@@ -110,7 +108,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param model The model for the table model.
      * @return This builder object.
      */
-    public final UIForTable<T> withModel(BasicTableModel model) {
+    public final UIForTable<T> withModel( BasicTableModel model ) {
         LogUtil.nullArgCheck(model, "model", BasicTableModel.class);
         getComponent().setModel(model);
         return this;
@@ -127,7 +125,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @return This builder node.
      * @param <E> The type of the table entry {@link Object}s.
      */
-    public final <E> UIForTable<T> with(UI.ListData model, TableListDataSource<E> dataSource ) {
+    public final <E> UIForTable<T> with( UI.ListData model, TableListDataSource<E> dataSource ) {
         boolean isRowMajor = model.isRowMajor();
         boolean isEditable = model.isEditable();
         if ( isRowMajor ) {
@@ -182,7 +180,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @return This builder node.
      * @param <E> The type of the table entry {@link Object}s.
      */
-    public final <E> UIForTable<T> with(UI.MapData model, TableMapDataSource<E> dataSource ) {
+    public final <E> UIForTable<T> with( UI.MapData model, TableMapDataSource<E> dataSource ) {
         getComponent().setModel(new MapBasedColumnMajorTableModel<>(model.isEditable(), dataSource));
         return this;
     }
@@ -197,7 +195,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
             this.dataSource = dataSource;
         }
 
-        @Override public boolean isCellEditable(int rowIndex, int columnIndex) { return this.isEditable; }
+        @Override public boolean isCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }
 
         protected List<List<E>> getData() {
             List<List<E>> data = dataSource.get();

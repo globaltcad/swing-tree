@@ -1,5 +1,7 @@
 package com.globaltcad.swingtree;
 
+import com.globaltcad.swingtree.api.mvvm.Val;
+
 import javax.swing.*;
 
 /**
@@ -13,7 +15,7 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAbstractSwing<UIF
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    public UIForSplitPane(P component) { super(component); }
+    public UIForSplitPane( P component ) { super(component); }
 
     /**
      * Sets the location of the divider. This is passed off to the
@@ -27,8 +29,27 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAbstractSwing<UIF
      *        pixel count)
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForSplitPane<P> withDividerAt(int location) {
+    public final UIForSplitPane<P> withDividerAt( int location ) {
         getComponent().setDividerLocation(location);
+        return this;
+    }
+
+    /**
+     * Sets the location of the divider in the form of a property,
+     * which can be dynamically update the divide.
+     * This is passed off to the
+     * look and feel implementation, and then listeners are notified. A value
+     * less than 0 implies the divider should be reset to a value that
+     * attempts to honor the preferred size of the left/top component.
+     * After notifying the listeners, the last divider location is updated,
+     * via <code>setLastDividerLocation</code>.
+     *
+     * @param location A property dynamically determining a UI-specific value (typically a
+     *        pixel count)
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSplitPane<P> withDividerAt( Val<Integer> location ) {
+        location.onShow(v -> _doUI(() -> withDividerAt(v)));
         return this;
     }
 
@@ -38,8 +59,20 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAbstractSwing<UIF
      * @param size An integer giving the size of the divider in pixels
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForSplitPane<P> withDividerSize(int size) {
+    public final UIForSplitPane<P> withDividerSize( int size ) {
         getComponent().setDividerSize(size);
+        return this;
+    }
+
+    /**
+     * Sets the size of the divider in the form of a property,
+     * which can be dynamically update.
+     *
+     * @param size A property dynamically determining the size of the divider in pixels
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSplitPane<P> withDividerSize( Val<Integer> size ) {
+        size.onShow(v -> _doUI(() -> withDividerSize(v)));
         return this;
     }
 
