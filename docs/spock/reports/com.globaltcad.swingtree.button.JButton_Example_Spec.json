@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.252 seconds"
+    "duration":"0.247 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can easily create a button with an associated action:",
       "result":"PASS",
-      "duration":"0.071 seconds",
+      "duration":"0.070 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -27,7 +27,7 @@
 
         {"kind":"and","text":"The button is enabled by default!","code":["ui.component.isEnabled()"]},
 
-        {"kind":"when","text":"We simulate a user click...","code":["ui.component.doClick()"]},
+        {"kind":"when","text":"We simulate a user click...","code":["UI.runAndWait( ()-> ui.component.doClick() )"]},
 
         {"kind":"then","text":"The button will be disabled because of the click action we specified!","code":["!ui.component.isEnabled()"]}
       ],
@@ -48,7 +48,7 @@
 
         {"kind":"and","text":"They are enabled by default!","code":["ui.component.getComponent(0).isEnabled()","ui.component.getComponent(1).isEnabled()"]},
 
-        {"kind":"when","text":"We simulate a user click...","code":["ui.component.getComponent(1).doClick()"]},
+        {"kind":"when","text":"We simulate a user click...","code":["UI.runAndWait( () -> ui.component.getComponent(1).doClick() )"]},
 
         {"kind":"then","text":"They are enabled by default!","code":["!ui.component.getComponent(0).isEnabled()","ui.component.getComponent(1).isEnabled()"]}
       ],
@@ -58,14 +58,14 @@
     {
       "id":"We can go through the entire siblinghood, including the current button!",
       "result":"PASS",
-      "duration":"0.106 seconds",
+      "duration":"0.103 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
         {"kind":"given","text":"We create a panel with some random components and a fancy click action","code":["var ui =","    UI.panel()","    .add(UI.textField(\"text field\"))","    .add(UI.label(\"innocent label\"))","    .add(","        UI.button(\"Click me!\")","        .onClick(it ->","            it.siblinghood.each {s -> { if ( s instanceof JLabel ) s.setText(\"I got hacked!\") }}","        )","    )","    .add(UI.spinner())"]},
 
-        {"kind":"when","text":"We simulate a user click...","code":["ui.component.getComponent(2).doClick()"]},
+        {"kind":"when","text":"We simulate a user click...","code":["UI.runAndWait( () -> ui.component.getComponent(2).doClick() )"]},
 
         {"kind":"then","text":"The label text changed!","code":["ui.component.getComponent(1).getText() == \"I got hacked!\""]}
       ],

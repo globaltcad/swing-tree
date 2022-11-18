@@ -21,7 +21,7 @@ class JButton_Example_Spec extends Specification
             ui.component.isEnabled()
 
         when : 'We simulate a user click...'
-            ui.component.doClick()
+            UI.runAndWait( ()-> ui.component.doClick() )
         then : 'The button will be disabled because of the click action we specified!'
             !ui.component.isEnabled()
     }
@@ -45,7 +45,7 @@ class JButton_Example_Spec extends Specification
             ui.component.getComponent(1).isEnabled()
 
         when : 'We simulate a user click...'
-            ui.component.getComponent(1).doClick()
+            UI.runAndWait( () -> ui.component.getComponent(1).doClick() )
         then :  'They are enabled by default!'
             !ui.component.getComponent(0).isEnabled()
             ui.component.getComponent(1).isEnabled()
@@ -67,7 +67,7 @@ class JButton_Example_Spec extends Specification
                 .add(UI.spinner())
 
         when : 'We simulate a user click...'
-            ui.component.getComponent(2).doClick()
+            UI.runAndWait( () -> ui.component.getComponent(2).doClick() )
         then :  'The label text changed!'
             ui.component.getComponent(1).getText() == "I got hacked!"
     }

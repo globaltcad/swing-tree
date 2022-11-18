@@ -33,21 +33,21 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
          * See documentation in {@link DocumentFilter}!
          */
         public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
-            if ( remove != null ) remove.accept( new RemoveDelegate(_component, fb, offset, length) );
+            if ( remove != null ) remove.accept( new RemoveDelegate(getComponent(), fb, offset, length) );
             else fb.remove(offset, length);
         }
         /**
          * See documentation in {@link DocumentFilter}!
          */
         public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-            if ( insert != null ) insert.accept( new InsertDelegate(_component, fb, offset, string.length(), string, attr) );
+            if ( insert != null ) insert.accept( new InsertDelegate(getComponent(), fb, offset, string.length(), string, attr) );
             else fb.insertString(offset, string, attr);
         }
         /**
          * See documentation in {@link DocumentFilter}!
          */
         public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-            if ( replace != null ) replace.accept(new ReplaceDelegate(_component, fb, offset, length, text, attrs));
+            if ( replace != null ) replace.accept(new ReplaceDelegate(getComponent(), fb, offset, length, text, attrs));
             else fb.replace(offset, length, text, attrs);
         }
     };
@@ -72,23 +72,23 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      * @return This very builder to allow for method chaining.
      */
     public final I withText( String text ) {
-        _component.setText(text);
+        getComponent().setText(text);
         return (I) this;
     }
 
     public final I withText( Val<String> val ) {
-        val.onShow(v->doUI(()->_component.setText(v)));
+        val.onShow(v->doUI(()->getComponent().setText(v)));
         return withText( val.get() );
     }
 
     public final I withText( Var<String> var ) {
-        var.onShow(v->doUI(()->_component.setText(v)));
+        var.onShow(v->doUI(()->getComponent().setText(v)));
         _onKeyTyped( (KeyEvent e) -> {
-            String oldText = _component.getText();
+            String oldText = getComponent().getText();
             // We need to add the now typed character to the old text, because the key typed event
             // is fired before the text is actually inserted into the text component.
-            String part1 = oldText.substring(0, _component.getCaretPosition());
-            String part2 = oldText.substring(_component.getCaretPosition());
+            String part1 = oldText.substring(0, getComponent().getCaretPosition());
+            String part2 = oldText.substring(getComponent().getCaretPosition());
             String newText;
             if ( e.getKeyChar() == '\b' ) // backspace
                 newText = part1 + part2; // The user has deleted a character, so we need to remove it from the text.
@@ -116,7 +116,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      */
     public final I withTextOrientation(UI.HorizontalDirection direction) {
         LogUtil.nullArgCheck(direction, "direction", UI.HorizontalDirection.class);
-        _component.setComponentOrientation(direction.forTextOrientation());
+        getComponent().setComponentOrientation(direction.forTextOrientation());
         return (I) this;
     }
 
@@ -127,7 +127,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      * @return This very builder to allow for method chaining.
      */
     public final I isEditableIf(boolean isEditable) {
-        _component.setEditable(isEditable);
+        getComponent().setEditable(isEditable);
         return (I) this;
     }
 
@@ -140,10 +140,11 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      * @return This very builder to allow for method chaining.
      */
     public final I onContentChange(Consumer<SimpleDelegate<JTextComponent, DocumentEvent>> action) {
-        _component.getDocument().addDocumentListener(new DocumentListener() {
-            @Override public void insertUpdate(DocumentEvent e) {doApp(()->action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));}
-            @Override public void removeUpdate(DocumentEvent e) {doApp(()->action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));}
-            @Override public void changedUpdate(DocumentEvent e) {doApp(()->action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));}
+        C component = getComponent();
+        component.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e)  {doApp(()->action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));}
+            @Override public void removeUpdate(DocumentEvent e)  {doApp(()->action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));}
+            @Override public void changedUpdate(DocumentEvent e) {doApp(()->action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));}
         });
         return (I) this;
     }
@@ -156,9 +157,10 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      * @return This very builder to allow for method chaining.
      */
     public final I onTextChange(Consumer<SimpleDelegate<JTextComponent, DocumentEvent>> action) {
-        _component.getDocument().addDocumentListener(new DocumentListener() {
-            @Override public void insertUpdate(DocumentEvent e) {doApp(()->action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));}
-            @Override public void removeUpdate(DocumentEvent e) {doApp(()->action.accept(new SimpleDelegate<>(_component, e, ()->getSiblinghood())));}
+        C component = getComponent();
+        component.getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e) {doApp(()->action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));}
+            @Override public void removeUpdate(DocumentEvent e) {doApp(()->action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));}
             @Override public void changedUpdate(DocumentEvent e) {}
         });
         return (I) this;
@@ -169,9 +171,9 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      *               component supports text filtering (The underlying document is an {@link AbstractDocument}).
      */
     private void ifFilterable(Runnable action) {
-        if ( _component.getDocument() instanceof AbstractDocument ) {
+        if ( getComponent().getDocument() instanceof AbstractDocument ) {
             action.run();
-            AbstractDocument doc = (AbstractDocument)_component.getDocument();
+            AbstractDocument doc = (AbstractDocument)getComponent().getDocument();
             doc.setDocumentFilter(filter);
         }
     }

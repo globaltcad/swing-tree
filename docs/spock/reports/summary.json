@@ -1,25 +1,25 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Fri Nov 18 11:49:19 CET 2022",
+  "created": "Fri Nov 18 18:06:57 CET 2022",
   "statistics":{
     "runs":"16",
     "passed":"16",
     "failed":"0",
     "featureFailures":"0",
     "successRate":"1.0",
-    "duration":"2783.0"
+    "duration":"3553.0"
   },
   "specifications": [{
       "className":"com.globaltcad.swingtree.common.Basic_UI_Builder_Examples_Spec",
       "title":"Swing tree makes UI building fun again!",
-      "narrative":"The swing tree library is in essence a more dynamic type of HTML for swing,\n    which allows for very readable UI design.\n    In this specification we cover the utter most basic properties of swing tree.",
+      "narrative":"The Swing-Tree library is like a more dynamic type of HTML for swing,\n    which allows for very readable declarative UI design.\n    In this specification we cover the utter most basic properties of swing tree.",
       "featureCount":"11",
       "failures":"0",
       "errors":"0",
       "skipped":"1" ,
       "successRate":"1.0",
-      "duration":"221",
+      "duration":"223",
       "executedFeatures":[{"id":"A tabbed pane can be created and populated in a declarative way.","extraInfo":[]},{"id":"Swing tree nests components (trough builder nodes).","extraInfo":[]},{"id":"Tab header components can be passed to the \"tab\" factory method instead of the title.","extraInfo":[]},{"id":"The tab buttons of a tabbed pane can have custom components.","extraInfo":[]},{"id":"We can add a list of components to the swing tree API and get a builder node in return.","extraInfo":[]},{"id":"We can easily define the cursor on a wrapped UI component","extraInfo":[]},{"id":"We can register list selection events on a JList based swing tree node.","extraInfo":[]},{"id":"We can register various UI focus events in swing tree nodes.","extraInfo":[]},{"id":"We can register various keyboard events in swing tree nodes.","extraInfo":[]},{"id":"We can use the swing tree to build a valid Swing GUI tree.","extraInfo":[]}],
       "ignoredFeatures":[{"id":"Swing tree makes us a viewable window!","extraInfo":[]}]
     },{
@@ -31,7 +31,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"400",
+      "duration":"395",
       "executedFeatures":[{"id":"The advanced UI define in the examples has the expected state.","extraInfo":[]},{"id":"The calculator UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The form UI define in the examples has the expected state.","extraInfo":[]},{"id":"The simple Table-UI example has the expected state.","extraInfo":[]},{"id":"The todo app UI defined in the examples has the expected state.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -43,7 +43,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"57",
+      "duration":"53",
       "executedFeatures":[{"id":"The given factory methods do not accept null arguments.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -55,7 +55,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"77",
+      "duration":"75",
       "executedFeatures":[{"id":"We can query the swing tree within an action lambda.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -67,7 +67,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"203",
+      "duration":"202",
       "executedFeatures":[{"id":"We can register periodically called UI updates!","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -79,7 +79,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"252",
+      "duration":"247",
       "executedFeatures":[{"id":"A button will delegate its siblings within actions:","extraInfo":[]},{"id":"We can easily create a button with an associated action:","extraInfo":[]},{"id":"We can go through the entire siblinghood, including the current button!","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -91,7 +91,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"54",
+      "duration":"44",
       "executedFeatures":[{"id":"A map can be used as a data source for tables.","extraInfo":[]},{"id":"We can attach a simple table cell renderer to a JTable in just a few lines of code.","extraInfo":[]},{"id":"We can create a simple column major table cell renderer through a UI factory method.","extraInfo":[]},{"id":"We can create a simple table cell renderer through a UI factory method.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -103,7 +103,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"1041",
+      "duration":"1052",
       "executedFeatures":[{"id":"A button item can undo any multi-selection.","extraInfo":[]},{"id":"It is possible to select more than 1 item.","extraInfo":[]},{"id":"The most simple kind of split button can be built like so:","extraInfo":[]},{"id":"We can easily build a split button where only one item text will have its text displayed:","extraInfo":[]},{"id":"We can easily build a split button whose text becomes the current user selection:","extraInfo":[]},{"id":"We can register button click events for button items as well as the split button as a whole.","extraInfo":[]},{"id":"We can specify which item should be initially selected.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -115,7 +115,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"6",
+      "duration":"4",
       "executedFeatures":[{"id":"A JSplitButton does not accept null actions.","extraInfo":[]},{"id":"Split button items do not take null as an answer.","extraInfo":[]},{"id":"Split buttons do not take null as an answer.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -175,7 +175,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"11",
+      "duration":"9",
       "executedFeatures":[{"id":"We can bind a property to the size of a swing component.","extraInfo":[]},{"id":"We can bind to the color of a component.","extraInfo":[]},{"id":"We can bind to the text of a component.","extraInfo":[]},{"id":"We can enable and disable a UI component dynamically through property binding.","extraInfo":[]},{"id":"We can select or unselect a UI component dynamically through properties.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -187,20 +187,20 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"291",
+      "duration":"287",
       "executedFeatures":[{"id":"We can bind a boolean property to a button, and when the user presses it, we notice it.","extraInfo":[]},{"id":"We can bind a boolean property to a checkbox, and when the user presses it, we notice it.","extraInfo":[]},{"id":"We can bind a boolean property to a radio button, and when the user presses it, we notice it.","extraInfo":[]},{"id":"We can bind a boolean property to a toggle button, and when the user presses it, we notice it.","extraInfo":[]},{"id":"We can create a property based view model and build a view for it.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"com.globaltcad.swingtree.threading.Thread_Mode_Spec",
       "title":"Thread Modes",
       "narrative":"Swing only knows 1 thread, the Event Dispatch Thread (EDT)m\n    which performs both the UIs rendering as well as event handling.\n    This is a problem for Swing applications that need to perform\n    long running tasks in the background, as the EDT will be blocked\n    until the task is complete.\n    SwingTree provides a mechanism for creating UIs which\n    dispatch events to a custom thread as well as ensure that all UI related\n    operations are performed on the event dispatch thread!\n    This allows SwingTree applications to perform long running tasks\n    in the background without blocking the UI.",
-      "featureCount":"2",
+      "featureCount":"4",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"145",
-      "executedFeatures":[{"id":"The default \"coupled\" thread mode will use the AWT thread for event handling.","extraInfo":[]},{"id":"We can use the decoupled thread mode to queue backend events.","extraInfo":[]}],
+      "duration":"937",
+      "executedFeatures":[{"id":"Inside an event lambda we can not access the UI from a background thread.","extraInfo":[]},{"id":"The application thread can safely effect the state of the UI by using the \"UI.run(()->{..})\" method.","extraInfo":[]},{"id":"The default \"coupled\" thread mode will use the AWT thread for event handling.","extraInfo":[]},{"id":"We can use the decoupled thread mode to queue backend events.","extraInfo":[]}],
       "ignoredFeatures":[]
     }
   ],

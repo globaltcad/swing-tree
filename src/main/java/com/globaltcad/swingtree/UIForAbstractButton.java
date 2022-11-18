@@ -34,17 +34,17 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @return This very builder to allow for method chaining.
      */
     public final I withText( String text ) {
-        _component.setText(text);
+        getComponent().setText(text);
         return (I) this;
     }
 
     public final I withText( Val<String> val ) {
-        val.onShow(v->doUI(()->_component.setText(v)));
+        val.onShow(v->doUI(()->getComponent().setText(v)));
         return withText( val.get() );
     }
 
     public final I isSelectedIf(boolean isSelected) {
-        _component.setSelected(isSelected);
+        getComponent().setSelected(isSelected);
         return (I) this;
     }
 
@@ -54,7 +54,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  wrapped {@link AbstractButton} type.
      */
     public final I isSelectedIf( Val<Boolean> val ) {
-        val.onShow(v->doUI(()->_component.setSelected(v)));
+        val.onShow(v->doUI(()->getComponent().setSelected(v)));
         return isSelectedIf( val.get() );
     }
 
@@ -64,9 +64,9 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  wrapped {@link AbstractButton} type.
      */
     public final I isSelectedIf( Var<Boolean> var ) {
-        var.onShow(v->doUI(()->_component.setSelected(v)));
+        var.onShow(v->doUI(()->getComponent().setSelected(v)));
         _onClick(
-            e -> doApp(_component.isSelected(), sel->var.set(sel).act())
+            e -> doApp(getComponent().isSelected(), sel->var.set(sel).act())
         );
         return isSelectedIf( var.get() );
     }
@@ -99,7 +99,8 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public I onChange(UIAction<SimpleDelegate<B, ItemEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        _component.addItemListener(e -> doApp(()->action.accept(new SimpleDelegate<>(_component, e, this::getSiblinghood))));
+        B button = getComponent();
+        button.addItemListener(e -> doApp(()->action.accept(new SimpleDelegate<>(button, e, this::getSiblinghood))));
         return (I) this;
     }
 
@@ -116,16 +117,17 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public I onClick(UIAction<SimpleDelegate<B, ActionEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
+        B button = getComponent();
         _onClick(
            e -> doApp(()->action.accept(
-               new SimpleDelegate<>(_component, e, this::getSiblinghood)
+               new SimpleDelegate<>(button, e, this::getSiblinghood)
            ))
         );
         return (I) this;
     }
 
     protected void _onClick(Consumer<ActionEvent> action) {
-        _component.addActionListener(
+        getComponent().addActionListener(
             action::accept
         );
     }
@@ -143,7 +145,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public I with(UI.HorizontalAlignment horizontalAlign) {
         LogUtil.nullArgCheck(horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class);
-        _component.setHorizontalAlignment(horizontalAlign.forSwing());
+        getComponent().setHorizontalAlignment(horizontalAlign.forSwing());
         return (I) this;
     }
 
@@ -160,7 +162,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public I with(UI.VerticalAlignment verticalAlign) {
         LogUtil.nullArgCheck(verticalAlign, "verticalAlign", UI.VerticalAlignment.class);
-        _component.setVerticalAlignment(verticalAlign.forSwing());
+        getComponent().setVerticalAlignment(verticalAlign.forSwing());
         return (I) this;
     }
 
@@ -177,7 +179,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public I withImageRelative(UI.HorizontalAlignment horizontalAlign) {
         LogUtil.nullArgCheck(horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class);
-        _component.setHorizontalTextPosition(horizontalAlign.forSwing());
+        getComponent().setHorizontalTextPosition(horizontalAlign.forSwing());
         return (I) this;
     }
 
@@ -194,7 +196,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public I withImageRelative(UI.VerticalAlignment verticalAlign) {
         LogUtil.nullArgCheck(verticalAlign, "verticalAlign", UI.VerticalAlignment.class);
-        _component.setVerticalTextPosition(verticalAlign.forSwing());
+        getComponent().setVerticalTextPosition(verticalAlign.forSwing());
         return (I) this;
     }
 

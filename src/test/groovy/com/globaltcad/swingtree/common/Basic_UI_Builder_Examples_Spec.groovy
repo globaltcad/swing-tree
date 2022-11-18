@@ -17,8 +17,8 @@ import java.awt.event.KeyListener
 @Title("Swing tree makes UI building fun again!")
 @Narrative('''
 
-    The swing tree library is in essence a more dynamic type of HTML for swing,
-    which allows for very readable UI design.
+    The Swing-Tree library is like a more dynamic type of HTML for swing,
+    which allows for very readable declarative UI design.
     In this specification we cover the utter most basic properties of swing tree.
 
 ''')

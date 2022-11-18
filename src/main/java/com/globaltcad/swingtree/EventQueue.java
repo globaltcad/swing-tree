@@ -1,5 +1,6 @@
 package com.globaltcad.swingtree;
 
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -26,19 +27,26 @@ class EventQueue
 		}
 	}
 
-	public void pocess(int numberOfEventsToBeProcessed)
-	{
+	public void process( int numberOfEventsToBeProcessed, boolean rethrow ) throws InterruptedException {
 		int processed = 0;
 		while ( processed < numberOfEventsToBeProcessed && !this.rendererQueue.isEmpty() ) {
 			try {
 				this.rendererQueue.take().run();
 			}
 			catch (Exception e) {
-				e.printStackTrace();
+				if ( rethrow )
+					throw e;
+				else
+					e.printStackTrace();
 				processed--;
 			}
 			processed++;
 		}
+	}
+
+	public void processAll( boolean rethrow ) throws InterruptedException {
+		while ( !this.rendererQueue.isEmpty() )
+			process(this.rendererQueue.size(), rethrow);
 	}
 
 }

@@ -1,11 +1,15 @@
 package com.globaltcad.swingtree.threading
 
+import com.globaltcad.swingtree.SimpleDelegate
 import com.globaltcad.swingtree.ThreadMode
 import com.globaltcad.swingtree.UI
+import com.globaltcad.swingtree.api.UIAction
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 
+import javax.swing.*
+import java.awt.event.ActionEvent
 
 @Title("Thread Modes")
 @Narrative('''
@@ -31,7 +35,6 @@ class Thread_Mode_Spec extends Specification
             you must process the events yourself using the "UI.processEvents()" method
             preferably by a custom thread or the main thread of your application.
         """
-
         given: 'A UI built with the decoupled thread mode.'
             var eventWasHandled = false
             var node =
@@ -40,7 +43,7 @@ class Thread_Mode_Spec extends Specification
                                 .onClick({ eventWasHandled = true })
                     )
         when: 'We click the button.'
-            node.component.doClick()
+            UI.runAndGet(()->node.component).doClick()
         then: 'The event is queued up, waiting to be handled.'
             !eventWasHandled
 
@@ -74,6 +77,66 @@ class Thread_Mode_Spec extends Specification
             node.component.doClick()
         then: 'The event is handled immediately by the swing thread.'
             eventWasHandled
+    }
+
+    def 'Inside an event lambda we can not access the UI from a background thread.'(
+        String problem,
+        UIAction<SimpleDelegate<JButton, ActionEvent>> unsafeAccess,
+        UIAction<SimpleDelegate<JButton, ActionEvent>> safeAccess
+    ) {
+        reportInfo """
+                The event delegate (which is passed to things like `onClick` actions) 
+                throws an exception if you try to access the UI from a background thread.
+                This is because SwingTree can not guarantee that the UI is thread safe.
+                However, the delegate provides a `safe` method which will execute the
+                passed lambda on the event dispatch thread.
+            """
+        given: '2 UIs built with the decoupled thread mode, one error prone and the other one safe.'
+            var ui1 =
+                    UI.use(ThreadMode.DECOUPLED,
+                            ()-> UI.button("X").onClick(unsafeAccess)
+                        )
+            var ui2 =
+                    UI.use(ThreadMode.DECOUPLED,
+                            ()-> UI.button("X").onClick(safeAccess)
+                        )
+        when : 'We click the button and process the event queue (by this current non-swing thread).'
+            UI.runAndWait( () -> ui1.component.doClick() )
+            UI.processEventsUntilException() // This is done by a custom thread in a real world application.
+        then: 'The delegate throws an exception!'
+            var e = thrown(Exception)
+            e.message == problem
+
+        when : 'We click the button second button and then process the event queue (by this current non-swing thread).'
+            UI.runAndWait( () -> ui2.component.doClick() )
+            UI.processEventsUntilException() // This is done by a custom thread in a real world application.
+        then: 'The delegate does not throw an exception!'
+            noExceptionThrown()
+
+        where : 'We can use safe, as well as unsafe, ways to access the UI.'
+            problem                                                          | unsafeAccess                         | safeAccess
+            "Component can only be accessed from the Swing thread."          | { it.getComponent() }                | { it.forComponent(c -> {}) }
+            "Sibling components can only be accessed from the Swing thread." | { it.getSiblings() }                 | { it.forSiblings(s -> {}) }
+            "Sibling components can only be accessed from the Swing thread." | { it.getSiblinghood() }              | { it.forSiblinghood(c -> {}) }
+            "Sibling components can only be accessed from the Swing thread." | { it.getSiblingsOfType(JButton) }    | { it.forSiblingsOfType(JButton, c -> {}) }
+            "Sibling components can only be accessed from the Swing thread." | { it.getSiblinghoodOfType(JButton) } | { it.forSiblinghoodOfType(JButton, c -> {}) }
+    }
+
+    def 'The application thread can safely effect the state of the UI by using the "UI.run(()->{..})" method.'()
+    {
+        given : 'A UI built with the decoupled thread mode.'
+            var ui =
+                    UI.use(ThreadMode.DECOUPLED,
+                            ()-> UI.checkBox("X").onClick( it ->{
+                                UI.run(()-> it.getComponent() )
+                                // it.getComponent() // This would throw an exception!
+                            })
+                        )
+        when : 'We check the check box and process the event queue (by this current non-swing thread).'
+            UI.runAndWait( () -> ui.component.doClick() )
+            UI.processEventsUntilException() // This is done by a custom thread in a real world application.
+        then: 'The delegate does not throw an exception!'
+            noExceptionThrown()
     }
 
 }

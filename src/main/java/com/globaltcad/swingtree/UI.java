@@ -47,6 +47,14 @@ public final class UI
     }
 
     public static <T> T use( ThreadMode mode, Supplier<T> scope ) {
+
+        if ( !SwingUtilities.isEventDispatchThread() )
+            try {
+                return runAndGet(()-> use(mode, scope));
+            } catch (InvocationTargetException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
         Settings settings = SETTINGS();
         ThreadMode oldMode = settings.getThreadMode();
         settings.setThreadMode(mode);
@@ -58,7 +66,15 @@ public final class UI
     }
 
     public static void processEvents() {
-        EventQueue.INSTANCE().pocess(100);
+        try {
+            EventQueue.INSTANCE().processAll(false);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void processEventsUntilException() throws InterruptedException {
+        EventQueue.INSTANCE().processAll( true );
     }
 
     // Common Mig layout constants:
@@ -1605,7 +1621,7 @@ public final class UI
      * on the event dispatching thread and
      * then prints a message.
      * <pre>
-     * UI.runLater( () -> System.out.println("Hello World on " + Thread.currentThread()) );
+     * UI.run( () -> System.out.println("Hello World on " + Thread.currentThread()) );
      * System.out.println("This might well be displayed before the other message.");
      * </pre>
      * If invokeLater is called from the event dispatching thread --
@@ -1617,7 +1633,7 @@ public final class UI
      * @param runnable the instance of {@code Runnable}
      * @see #runAndWait
      */
-    public static void runLater( Runnable runnable ) {
+    public static void run( Runnable runnable ) {
         LogUtil.nullArgCheck(runnable, "runnable", Runnable.class);
         SwingUtilities.invokeLater(runnable);
     }
@@ -1664,11 +1680,18 @@ public final class UI
      * @exception  InvocationTargetException  if an exception is thrown
      *             while running <code>doRun</code>
      *
-     * @see #runLater
+     * @see #run
      */
     public static void runAndWait( Runnable runnable ) throws InterruptedException, InvocationTargetException {
         LogUtil.nullArgCheck(runnable, "runnable", Runnable.class);
         SwingUtilities.invokeAndWait(runnable);
+    }
+
+    public static <T> T runAndGet( Supplier<T> supplier ) throws InterruptedException, InvocationTargetException {
+        LogUtil.nullArgCheck(supplier, "callable", Supplier.class);
+        T[] ref = (T[]) new Object[1];
+        runAndWait( () -> ref[0] = supplier.get() );
+        return ref[0];
     }
 
     /**
