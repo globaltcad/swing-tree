@@ -14,34 +14,34 @@
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
-      "id":"We can build a JSplitButton.",
+      "id":"We can build a JSplitButton and add components to it.",
       "result":"PASS",
       "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We create a UI builder node containing a simple split button.","code":["var node = UI.splitButton(\"\")"]},
+        {"kind":"given","text":"We create a UI builder node containing a simple split button.","code":["var ui = UI.splitButton(\"\")"]},
 
-        {"kind":"expect","text":"It wraps a JSplitButton.","code":["node.component instanceof JSplitButton"]},
+        {"kind":"expect","text":"It wraps a JSplitButton.","code":["ui.component instanceof JSplitButton"]},
 
-        {"kind":"when","text":"","code":["node.add(new JMenuItem(\"First\"))"]},
+        {"kind":"when","text":"We add a menu item to the split button.","code":["ui.add(new JMenuItem(\"First\"))"]},
 
-        {"kind":"then","text":"","code":["node.popupMenu.components.length == 1"]},
+        {"kind":"then","text":"The split button has a popup menu with one component.","code":["ui.popupMenu.components.length == 1"]},
 
-        {"kind":"when","text":"","code":["node.add(UI.menuItem(\"Second\"))"]},
+        {"kind":"when","text":"We add another menu item to the split button.","code":["ui.add(UI.menuItem(\"Second\"))"]},
 
-        {"kind":"then","text":"","code":["node.popupMenu.components.length == 2"]},
+        {"kind":"then","text":"The split button has a popup menu with two components.","code":["ui.popupMenu.components.length == 2"]},
 
-        {"kind":"when","text":"","code":["node.add(UI.splitItem(\"Third\"))"]},
+        {"kind":"when","text":"We add a split item to the split button.","code":["ui.add(UI.splitItem(\"Third\"))"]},
 
-        {"kind":"then","text":"","code":["node.popupMenu.components.length == 3"]},
+        {"kind":"then","text":"The split button has a popup menu with three components.","code":["ui.popupMenu.components.length == 3"]},
 
-        {"kind":"when","text":"","code":["node.add(UI.splitRadioItem(\"Fourth\"))"]},
+        {"kind":"when","text":"We add a split radio button to the split button.","code":["ui.add(UI.splitRadioItem(\"Fourth\"))"]},
 
-        {"kind":"then","text":"","code":["node.popupMenu.components.length == 4"]},
+        {"kind":"then","text":"The split button has a popup menu with four components.","code":["ui.popupMenu.components.length == 4"]},
 
-        {"kind":"and","text":"","code":["node.popupMenu.components.findAll({it instanceof JRadioButtonMenuItem}).size() == 1","node.popupMenu.components.findAll({it instanceof JMenuItem}).size() == 4"]}
+        {"kind":"and","text":"","code":["ui.popupMenu.components.findAll({it instanceof JRadioButtonMenuItem}).size() == 1","ui.popupMenu.components.findAll({it instanceof JMenuItem}).size() == 4"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

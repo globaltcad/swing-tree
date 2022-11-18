@@ -33,20 +33,20 @@ class Button_Binding_Spec extends Specification
             Val<String> text = Var.of("Hello World")
 
         when : 'We create and bind to a button UI node...'
-            var node = UI.button("").withText(text)
+            var ui = UI.button("").withText(text)
 
         then : 'The button should be updated when the property changes.'
-            node.component.text == "Hello World"
+            ui.component.text == "Hello World"
 
         when : 'We change the property value...'
             text.set("Goodbye World")
         then : 'The button should NOT be updated.'
-            node.component.text == "Hello World"
+            ui.component.text == "Hello World"
 
         when : 'We call the "view" method on the property...'
             text.show()
         then : 'The button should be updated.'
-            node.component.text == "Goodbye World"
+            ui.component.text == "Goodbye World"
     }
 
     def 'You can bind to the selection state of a button.'()
@@ -58,20 +58,20 @@ class Button_Binding_Spec extends Specification
             Val<Boolean> selected = Var.of(false)
 
         when : 'We create and bind to a button UI node...'
-            var node = UI.button("").isSelectedIf(selected)
+            var ui = UI.button("").isSelectedIf(selected)
 
         then : 'The button should be updated when the property changes.'
-            node.component.selected == false
+            ui.component.selected == false
 
         when : 'We change the property value...'
             selected.set(true)
         then : 'The button should NOT be updated.'
-            node.component.selected == false
+            ui.component.selected == false
 
         when : 'We call the "view" method on the property...'
             selected.show()
         then : 'The button should be updated.'
-            node.component.selected == true
+            ui.component.selected == true
     }
 
     def 'You can bind to the enabled state of a button.'()
@@ -83,20 +83,20 @@ class Button_Binding_Spec extends Specification
             Val<Boolean> enabled = Var.of(false)
 
         when : 'We create and bind to a button UI node...'
-            var node = UI.button("").isEnabledIf(enabled)
+            var ui = UI.button("").isEnabledIf(enabled)
 
         then : 'The button should be updated when the property changes.'
-            node.component.enabled == false
+            ui.component.enabled == false
 
         when : 'We change the property value...'
             enabled.set(true)
         then : 'The button should NOT be updated.'
-            node.component.enabled == false
+            ui.component.enabled == false
 
         when : 'We call the "view" method on the property...'
             enabled.show()
         then : 'The button should be updated.'
-            node.component.enabled == true
+            ui.component.enabled == true
     }
     
 }

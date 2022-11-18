@@ -21,13 +21,13 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["var node =","     UI.panel()","    .add(","        UI.label(\"Label 1\").id(\"L1\")","        .doUpdates(20,it -> {","            it.component.text = LocalDateTime.now().toString()","        })","    )"]},
+        {"kind":"given","text":"","code":["var ui =","     UI.panel()","    .add(","        UI.label(\"Label 1\").id(\"L1\")","        .doUpdates(20,it -> {","            it.component.text = LocalDateTime.now().toString()","        })","    )"]},
 
         {"kind":"when","text":"","code":["Thread.sleep(200)"]},
 
-        {"kind":"then","text":"","code":["new Utility.Query(node.component).find(JLabel, \"L1\").isPresent()"]},
+        {"kind":"then","text":"","code":["new Utility.Query(ui.component).find(JLabel, \"L1\").isPresent()"]},
 
-        {"kind":"and","text":"","code":["new Utility.Query(node.component).find(JLabel, \"L1\").get().text != \"Label 1\""]}
+        {"kind":"and","text":"","code":["new Utility.Query(ui.component).find(JLabel, \"L1\").get().text != \"Label 1\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

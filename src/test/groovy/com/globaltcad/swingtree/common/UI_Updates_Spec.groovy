@@ -12,7 +12,7 @@ class UI_Updates_Spec extends Specification
     def 'We can register periodically called UI updates!'()
     {
         given :
-            var node =
+            var ui =
                  UI.panel()
                 .add(
                     UI.label("Label 1").id("L1")
@@ -25,9 +25,9 @@ class UI_Updates_Spec extends Specification
             Thread.sleep(200)
 
         then :
-            new Utility.Query(node.component).find(JLabel, "L1").isPresent()
+            new Utility.Query(ui.component).find(JLabel, "L1").isPresent()
         and :
-            new Utility.Query(node.component).find(JLabel, "L1").get().text != "Label 1"
+            new Utility.Query(ui.component).find(JLabel, "L1").get().text != "Label 1"
     }
 
 
