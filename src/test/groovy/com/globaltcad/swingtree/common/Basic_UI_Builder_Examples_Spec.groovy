@@ -83,14 +83,22 @@ class Basic_UI_Builder_Examples_Spec extends Specification
 
     def 'Swing tree nests all kinds of components (trough builder nodes).'()
     {
+        reportInfo """
+            Swing tree wraps you components in builder nodes, so you can
+            use the same API to add any kind of component to your UI.
+            Use the `UI.of(..)` factory method to wrap your components
+            or simply use the various kinds of default factory methods like
+             `UI.panel()`, `UI.button()`, `UI.label()` etc.
+        """
         given : 'A regular swing object.'
             var panel = new JPanel()
-        and : 'A simple UI builder instance.'
+        and : 'A simple UI builder instance wrapping the swing object.'
             var ui = UI.of(panel)
 
-        expect :
+        expect : 'The UI node contains the swing object.'
             ui.component === panel
-        and :
+        and : 'The UI node is a JPanel without children.'
+            ui.component instanceof JPanel
             panel.components.length == 0
 
         when : 'We now add something to our UI node...'
@@ -122,10 +130,10 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             ui.component.cursor.type == Cursor.SE_RESIZE_CURSOR
     }
 
-    def 'We can a border layout based Swing tree.'()
+    def 'We can create a border layout based Swing tree.'()
     {
         when :
-             def tree =
+             var tree =
                      Tree.of( // <- A test utility class used to find all the tree nodes...
                          UI.panel().id("Root")
                          .add(
@@ -172,7 +180,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             tree['B5'  ] == 'javax.swing.JButton[B5,0,0,0x0,invalid,alignmentX=0.0,alignmentY=0.5,border=javax.swing.plaf.BorderUIResource$CompoundBorderUIResource,flags=296,maximumSize=,minimumSize=,preferredSize=,defaultIcon=,disabledIcon=,disabledSelectedIcon=,margin=javax.swing.plaf.InsetsUIResource[top=2,left=14,bottom=2,right=14],paintBorder=true,paintFocus=true,pressedIcon=,rolloverEnabled=true,rolloverIcon=,rolloverSelectedIcon=,selectedIcon=,text=5 (LINE_END),defaultCapable=true]'
     }
 
-    def 'We can register various keyboard events in swing tree nodes.'()
+    def 'We can register various kinds of different keyboard event handlers to swing tree nodes.'()
     {
         reportInfo """
             The Swing-Tree API exposes various methods to register different kinds of Swing component
@@ -195,7 +203,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             panel.getListeners(KeyListener.class).size() == 6
     }
 
-    def 'We can register various UI focus events in swing tree nodes.'()
+    def 'We can register different UI focus event handlers to swing tree nodes.'()
     {
         reportInfo """
             The Swing-Tree API exposes various methods to register different kinds of Swing component
@@ -309,7 +317,10 @@ class Basic_UI_Builder_Examples_Spec extends Specification
 
     def 'Tab header components can be passed to the "tab" factory method instead of the title.'()
     {
-        when :
+        reportInfo """
+            Custom tab header components are often used to display icons or a tab close button. 
+        """
+        when : 'We create a tabbed pane UI node and attach tabs with custom tab header components to it.'
             def tabbedPane =
                 UI.tabbedPane(UI.Position.BOTTOM).id("Tabs")
                 .add(
@@ -323,7 +334,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
                     UI.tab(UI.label("Tab 3 header"))
                     .add(UI.label("Tab 3 content")))
                 .get(JTabbedPane)
-        then :
+        then : 'We can verify that the tabbed pane has the expected number of tabs.'
             tabbedPane.getTabCount() == 3
             tabbedPane.getTitleAt(0) == ""
             tabbedPane.getTitleAt(1) == ""
@@ -332,6 +343,25 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             tabbedPane.getTabComponentAt(0) instanceof JLabel
             tabbedPane.getTabComponentAt(1) instanceof JLabel
             tabbedPane.getTabComponentAt(2) instanceof JLabel
+    }
+
+    def 'Use the "peek( c -> {} )" method to access the wrapped Swing component in your Swing-Tree.'()
+    {
+        reportInfo """
+            The Swing-Tree API provides a "peek( c -> {} )" method that allows you to access the wrapped Swing component
+            in your Swing-Tree within the provided Peeker lambda. 
+            This is useful for when you want more control over the Swing component than what the Swing-Tree API provides.
+        """
+        when : 'We create a panel UI node and set a custom location.'
+            def panel =
+                UI.panel()
+                .peek(it -> it.setLocation(42, 73))
+                .add(UI.label("Label 1"))
+                .add(UI.label("Label 2"))
+                .add(UI.label("Label 3"))
+                .get(JPanel)
+        then : 'We can verify that the panel has the expected location.'
+            panel.getLocation() == new Point(42, 73)
     }
 
     /**
