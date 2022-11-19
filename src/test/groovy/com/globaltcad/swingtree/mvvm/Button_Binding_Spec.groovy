@@ -35,7 +35,7 @@ class Button_Binding_Spec extends Specification
         when : 'We create and bind to a button UI node...'
             var ui = UI.button("").withText(text)
 
-        then : 'The button should be updated when the property changes.'
+        then : 'The button should be updated when the property is changed and shown.'
             ui.component.text == "Hello World"
 
         when : 'We change the property value...'
@@ -43,7 +43,7 @@ class Button_Binding_Spec extends Specification
         then : 'The button should NOT be updated.'
             ui.component.text == "Hello World"
 
-        when : 'We call the "view" method on the property...'
+        when : 'We call the "show" method on the property...'
             text.show()
         then : 'The button should be updated.'
             ui.component.text == "Goodbye World"
@@ -60,7 +60,7 @@ class Button_Binding_Spec extends Specification
         when : 'We create and bind to a button UI node...'
             var ui = UI.button("").isSelectedIf(selected)
 
-        then : 'The button should be updated when the property changes.'
+        then : 'The button should be updated when the property is changed and shown.'
             ui.component.selected == false
 
         when : 'We change the property value...'
@@ -68,7 +68,7 @@ class Button_Binding_Spec extends Specification
         then : 'The button should NOT be updated.'
             ui.component.selected == false
 
-        when : 'We call the "view" method on the property...'
+        when : 'We call the "show" method on the property...'
             selected.show()
         then : 'The button should be updated.'
             ui.component.selected == true
@@ -85,7 +85,7 @@ class Button_Binding_Spec extends Specification
         when : 'We create and bind to a button UI node...'
             var ui = UI.button("").isEnabledIf(enabled)
 
-        then : 'The button should be updated when the property changes.'
+        then : 'The button should be updated when the property is changed and shown.'
             ui.component.enabled == false
 
         when : 'We change the property value...'
@@ -93,7 +93,7 @@ class Button_Binding_Spec extends Specification
         then : 'The button should NOT be updated.'
             ui.component.enabled == false
 
-        when : 'We call the "view" method on the property...'
+        when : 'We call the "show" method on the property...'
             enabled.show()
         then : 'The button should be updated.'
             ui.component.enabled == true
