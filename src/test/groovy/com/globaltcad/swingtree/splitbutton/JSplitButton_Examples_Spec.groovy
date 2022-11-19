@@ -4,6 +4,7 @@ import com.alexandriasoftware.swing.JSplitButton
 import com.globaltcad.swingtree.UI
 import com.globaltcad.swingtree.utility.Utility
 import groovy.transform.CompileDynamic
+import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 
@@ -11,6 +12,16 @@ import javax.swing.*
 
 @CompileDynamic
 @Title("A Button of Buttons")
+@Narrative('''
+
+    The Swing-Tree split button component allows 
+    you to easily create split buttons in your UIs.
+    A split button is a button that has a drop down menu attached to it.
+    This allows you to easily add additional functionality to your buttons.
+    The split button component is a wrapper around the AlexAndria Software
+    JSplitButton component.
+    
+''')
 class JSplitButton_Examples_Spec extends Specification
 {
 
@@ -174,5 +185,44 @@ class JSplitButton_Examples_Spec extends Specification
             Utility.getSplitButtonText(ui) == "triggered: 1 3 2"
     }
 
+
+    def 'We can build a JSplitButton and add components to it.'()
+    {
+        reportInfo """
+            Note that adding components to a JSplitButton is not the same as 
+            in a normal JButton. The components are added to the popup menu
+            and not to the button itself.
+            This is because the JSplitButton is a composite component and
+            the button itself is not a container.
+        """
+
+        given : 'We create a UI builder node containing a simple split button.'
+            var ui = UI.splitButton("")
+        expect : 'It wraps a JSplitButton.'
+            ui.component instanceof JSplitButton
+
+        when : 'We add a menu item to the split button.'
+            ui.add(new JMenuItem("First"))
+        then : 'The split button has a popup menu with one component.'
+            ui.popupMenu.components.length == 1
+
+        when : 'We add another menu item to the split button.'
+            ui.add(UI.menuItem("Second"))
+        then : 'The split button has a popup menu with two components.'
+            ui.popupMenu.components.length == 2
+
+        when : 'We add a split item to the split button.'
+            ui.add(UI.splitItem("Third"))
+        then : 'The split button has a popup menu with three components.'
+            ui.popupMenu.components.length == 3
+
+        when : 'We add a split radio button to the split button.'
+            ui.add(UI.splitRadioItem("Fourth"))
+        then : 'The split button has a popup menu with four components.'
+            ui.popupMenu.components.length == 4
+        and :
+            ui.popupMenu.components.findAll({it instanceof JRadioButtonMenuItem}).size() == 1
+            ui.popupMenu.components.findAll({it instanceof JMenuItem}).size() == 4
+    }
 
 }

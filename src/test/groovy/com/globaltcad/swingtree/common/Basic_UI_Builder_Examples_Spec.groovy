@@ -2,7 +2,6 @@ package com.globaltcad.swingtree.common
 
 import com.globaltcad.swingtree.UI
 import com.globaltcad.swingtree.input.Keyboard
-import spock.lang.Ignore
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
@@ -10,24 +9,63 @@ import spock.lang.Title
 import javax.swing.*
 import javax.swing.event.ListSelectionListener
 import java.awt.*
-import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
 import java.awt.event.KeyListener
 
 @Title("Swing tree makes UI building fun again!")
 @Narrative('''
 
-    The Swing-Tree library allows you to build UIs declaratively, which you can think of
-    as a more dynamic type of HTML but for swing.
+    The Swing-Tree library allows you to build UIs using declarative code, 
+    which you can think of as a more dynamic type of HTML but for swing.
     It is inspired by frameworks like Jetpack Compose, Flutter, React and SwiftUI
-    and allows for very readable declarative builder pattern based UI design.
-    In this specification we cover the utter most basic properties of swing tree.
+    which are also based on nested builder patterns to design your UI.
+    In this specification we cover the utter most basics of swing tree.
 
 ''')
 class Basic_UI_Builder_Examples_Spec extends Specification
 {
+
+    def 'We can nest JPanel UI nodes to structure UIs.'()
+    {
+        reportInfo """
+            Just like in regular Swing, the JPanel is the most basic 
+            yet most important type of component in Swing-Tree
+            and you can create one using the `UI.panel()` factory method. 
+            Don't hesitate to use as the main tool for grouping and structuring
+            your UI, just like you would use the 'div' tag in HTML.
+        """
+        given : 'We create a simple swing tree if JPanel instances.'
+            var ui =
+                    UI.panel()
+                    .add(UI.panel())
+                    .add(
+                        UI.panel()
+                        .add(UI.panel())
+                        .add(UI.panel())
+                    )
+                    .add(UI.panel())
+
+        expect : 'The UI node contains a root JPanel with 3 children.'
+            ui.component instanceof JPanel
+            ui.component.components.length == 3
+        and : 'Because this is a regular Swing UI, we traverse the tree and find the children.'
+            ui.component.components[0] instanceof JPanel
+            ui.component.components[1] instanceof JPanel
+            ui.component.components[2] instanceof JPanel
+        and : 'We can also traverse the tree to find the children of the children.'
+            ui.component.components[1].components[0] instanceof JPanel
+            ui.component.components[1].components[1] instanceof JPanel
+    }
+
     def 'We can add a list of components to the swing tree API and get a builder node in return.'()
     {
+        reportInfo """
+            Just like in regular Swing, the JPanel is the most basic 
+            yet most important type of component in Swing-Tree
+            and you can create one using the `UI.panel()` factory method. 
+            Don't hesitate to use as the main tool for grouping and structuring
+            your UI, just like you would use the 'div' tag in HTML.
+        """
         given : 'We have a simple JPanel UI node.'
             var ui = UI.panel()
 
@@ -35,14 +73,15 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             ui.component.components.length == 0
 
         when : 'We add a list of panels...'
-            ui.add([new JPanel(), new JPanel(), new JPanel()])
+            var ui2 = ui.add([new JPanel(), new JPanel(), new JPanel()])
+        then : 'We get the same UI node back, because Swing-Tree is based on the builder pattern.'
+            ui === ui2
 
-        then : 'The wrapped component will have the expected amount of child components.'
+        and : 'The wrapped component will have the expected amount of child components.'
             ui.component.components.length == 3
     }
 
-
-    def 'Swing tree nests components (trough builder nodes).'()
+    def 'Swing tree nests all kinds of components (trough builder nodes).'()
     {
         given : 'A regular swing object.'
             var panel = new JPanel()
@@ -83,32 +122,32 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             ui.component.cursor.type == Cursor.SE_RESIZE_CURSOR
     }
 
-    def 'We can use the swing tree to build a valid Swing GUI tree.'()
+    def 'We can a border layout based Swing tree.'()
     {
         when :
              def tree =
-                     Tree.of(
-                         UI.of(new JPanel()).id("Root")
+                     Tree.of( // <- A test utility class used to find all the tree nodes...
+                         UI.panel().id("Root")
                          .add(
                              BorderLayout.PAGE_START,
-                             UI.of(new JButton("Button 1 (PAGE_START)")).id("B1")
+                             UI.button("Button 1 (PAGE_START)").id("B1")
                          )
                          .add(
                              BorderLayout.CENTER,
-                             UI.of(new JRadioButton("Button 2 (CENTER)")).id("B2")
+                             UI.radioButton("Button 2 (CENTER)").id("B2")
                              .peek(button -> button.setPreferredSize(new Dimension(200, 100)) )
                          )
                          .add(
                              BorderLayout.LINE_START,
-                             UI.of(new JButton("Button 3 (LINE_START)")).id("B3")
+                             UI.button("Button 3 (LINE_START)").id("B3")
                          )
                          .add(
                              BorderLayout.PAGE_END,
-                             UI.of(new JButton("Long-Named Button 4 (PAGE_END)")).id("B4")
+                             UI.button("Long-Named Button 4 (PAGE_END)").id("B4")
                          )
                          .add(
                              BorderLayout.LINE_END,
-                             UI.of(new JButton("5 (LINE_END)")).id("B5")
+                             UI.button("5 (LINE_END)").id("B5")
                          )
                          .get(JPanel)
                      )
@@ -135,9 +174,15 @@ class Basic_UI_Builder_Examples_Spec extends Specification
 
     def 'We can register various keyboard events in swing tree nodes.'()
     {
-        when :
+        reportInfo """
+            The Swing-Tree API exposes various methods to register different kinds of Swing component
+            or keyboard events. 
+            All such event registration methods can be identified by the 'on' prefix.
+        """
+
+        when : 'We create a panel UI node and attach various kinds of actions to it.'
             def panel =
-                    UI.of(new JPanel()).id("Root")
+                    UI.panel().id("Root")
                     .onKeyPressed(it -> {/*something*/})
                     .onPressed(Keyboard.Key.H, it -> {/*something*/})
                     .onKeyReleased(it -> {/*something*/})
@@ -146,38 +191,55 @@ class Basic_UI_Builder_Examples_Spec extends Specification
                     .onTyped(Keyboard.Key.X, it -> {/*something*/})
                     .get(JPanel)
 
-        then :
+        then : 'We can verify that the panel has the expected number of listeners.'
             panel.getListeners(KeyListener.class).size() == 6
     }
 
     def 'We can register various UI focus events in swing tree nodes.'()
     {
-        when :
+        reportInfo """
+            The Swing-Tree API exposes various methods to register different kinds of Swing component
+            events, like for example UI focus events. 
+            All such event registration methods can be identified by the 'on' prefix.
+        """
+        when : 'We create a panel UI node and attach various kinds of actions to it.'
             def panel =
                     UI.of(new JPanel()).id("Root")
                     .onFocusGained(it -> {/*something*/})
                     .onFocusLost(it -> {/*something*/})
                     .get(JPanel)
-        then :
+        then : 'We can verify that the panel has the expected number of listeners.'
             panel.getListeners(FocusListener.class).size() == 2
     }
 
     def 'We can register list selection events on a JList based swing tree node.'()
     {
-        when :
+        reportInfo """
+            The Swing-Tree API exposes various methods to register different kinds of Swing component
+            events, like for example list selection events. 
+            All such event registration methods can be identified by the 'on' prefix.
+        """
+        when : 'We create a JList UI node and attach various kinds of actions to it.'
             def list =
                     UI.of(new JList<>())
                     .onSelection(it -> {/*something*/})
                     .onSelection(it -> {/*something*/})
                     .onSelection(it -> {/*something*/})
                     .get(JList)
-        then :
+        then : 'We can verify that the list has the expected number of listeners.'
             list.getListeners(ListSelectionListener.class).size() == 3
     }
 
     def 'A tabbed pane can be created and populated in a declarative way.'()
     {
-        when :
+        reportInfo """
+            Although Swing has the JTabbedPane component as a collection of tabs, 
+            there is no abstraction defining a tab on its own.
+            The Swing-Tree API provides a Tab class that allows you to define
+            a tab and its content in a more intuitive as well as declarative manner
+            with tab specific properties and event handlers.
+        """
+        when : 'We create a tabbed pane UI node and attach various kinds of tabs with custom actions to it.'
             def tabbedPane =
                 UI.tabbedPane(UI.Position.LEFT).id("Tabs")
                 .add(
@@ -194,7 +256,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
                     .onMouseClick(it -> {/*something*/})
                     .add(UI.label("Tab 3 content")))
                 .get(JTabbedPane)
-        then :
+        then : 'We can verify that the tabbed pane has the expected number of tabs.'
             tabbedPane.getTabCount() == 3
             tabbedPane.getTitleAt(0) == "Tab 1"
             tabbedPane.getTitleAt(1) == "Tab 2"
@@ -207,7 +269,14 @@ class Basic_UI_Builder_Examples_Spec extends Specification
 
     def 'The tab buttons of a tabbed pane can have custom components.'()
     {
-        when :
+        reportInfo """
+            Although Swing has the JTabbedPane component as a collection of tabs, 
+            there is no abstraction defining a tab on its own.
+            The Swing-Tree API provides a Tab class that allows you to define
+            a tab and its content in a more intuitive as well as declarative manner
+            with tab specific properties and event handlers.
+        """
+        when : 'We create a tabbed pane UI node and attach tabs with custom tab header components to it.'
             def tabbedPane =
                 UI.tabbedPane(UI.Position.RIGHT).id("Tabs")
                 .add(
@@ -224,7 +293,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
                     .withHeader(UI.label("Tab 3 header"))
                     .add(UI.label("Tab 3 content")))
                 .get(JTabbedPane)
-        then :
+        then : 'We can verify that the tabbed pane has the expected number of tabs.'
             tabbedPane.getTabCount() == 3
             tabbedPane.getTitleAt(0) == "Tab 1"
             tabbedPane.getTitleAt(1) == "Tab 2"
@@ -263,39 +332,6 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             tabbedPane.getTabComponentAt(0) instanceof JLabel
             tabbedPane.getTabComponentAt(1) instanceof JLabel
             tabbedPane.getTabComponentAt(2) instanceof JLabel
-    }
-
-    /**
-     *  Use this to take a look at what the UIMake produces...
-     */
-    @Ignore
-    def 'Swing tree makes us a viewable window!'()
-    {
-        expect :
-            UI.of(new JFrame("Test"))
-            .peek(frame -> frame.add(
-                UI.of(new JPanel())
-                .add(BorderLayout.PAGE_START, new JButton("Button 1 (PAGE_START)"))
-                .add(
-                    BorderLayout.CENTER,
-                    UI.of(new JRadioButton("Button 2 (CENTER)"))
-                    .peek(
-                        button ->
-                                button.setPreferredSize(new Dimension(200, 100))
-                    )
-                )
-                .add(BorderLayout.LINE_START, new JButton("Button 3 (LINE_START)"))
-                .add(BorderLayout.PAGE_END, new JButton("Long-Named Button 4 (PAGE_END)"))
-                .add(BorderLayout.LINE_END, new JButton("5 (LINE_END)"))
-                .get(JPanel)
-            ))
-            .peek(
-                frame -> {
-                    frame.setSize(300, 300)
-                    frame.show()
-                }
-            )
-            != null
     }
 
     /**

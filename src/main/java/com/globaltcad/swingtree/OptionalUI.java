@@ -98,9 +98,7 @@ public final class OptionalUI<C extends Component> {
      *        ensure the value is non-{@code null} unless creating the singleton
      *        instance returned by {@code empty()}.
      */
-    private OptionalUI(C value) {
-        this._component = value;
-    }
+    private OptionalUI( C value ) { this._component = value; }
 
     /**
      * Returns an {@code OptionalUI} describing the given value, if
@@ -122,9 +120,7 @@ public final class OptionalUI<C extends Component> {
      *
      * @return {@code true} if a component is present, otherwise {@code false}
      */
-    public boolean isPresent() {
-        return _component != null;
-    }
+    public boolean isPresent() { return _component != null; }
 
     /**
      * If a component is  not present, returns {@code true}, otherwise
@@ -133,9 +129,7 @@ public final class OptionalUI<C extends Component> {
      * @return  {@code true} if a component is not present, otherwise {@code false}
      * @since   11
      */
-    public boolean isEmpty() {
-        return _component == null;
-    }
+    public boolean isEmpty() { return _component == null; }
 
     /**
      * If a component is present, performs the given action with the component,
@@ -146,12 +140,8 @@ public final class OptionalUI<C extends Component> {
      *         {@code null}
      */
     public void ifPresent(Consumer<? super C> action) {
-        if ( _component != null ) {
-            if ( !UI.thisIsUIThread() )
-                UI.run(() -> action.accept(_component));
-            else
-                action.accept(_component);
-        }
+        if ( _component != null )
+            UI.run(() -> action.accept(_component));
     }
 
     /**
@@ -167,13 +157,12 @@ public final class OptionalUI<C extends Component> {
      * @since 9
      */
     public void ifPresentOrElse(Consumer<? super C> action, Runnable emptyAction) {
-        if ( UI.thisIsUIThread() ) {
+        UI.run(()->{
             if ( _component != null )
                 action.accept(_component);
             else
                 emptyAction.run();
-        }
-        else UI.run( () -> ifPresentOrElse(action, emptyAction) );
+        });
     }
 
     /**
@@ -375,15 +364,9 @@ public final class OptionalUI<C extends Component> {
      *         otherwise {@code false}
      */
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (!(obj instanceof OptionalUI)) {
-            return false;
-        }
-
+    public boolean equals( Object obj ) {
+        if ( this == obj ) return true;
+        if ( !(obj instanceof OptionalUI) ) return false;
         OptionalUI<?> other = (OptionalUI<?>) obj;
         return Objects.equals(_component, other._component);
     }
@@ -396,9 +379,7 @@ public final class OptionalUI<C extends Component> {
      *         present
      */
     @Override
-    public int hashCode() {
-        return Objects.hashCode(_component);
-    }
+    public int hashCode() { return Objects.hashCode(_component); }
 
     /**
      * Returns a non-empty string representation of this {@code OptionalUI}
