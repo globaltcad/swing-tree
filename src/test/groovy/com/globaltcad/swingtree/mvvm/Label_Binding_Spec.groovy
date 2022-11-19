@@ -35,51 +35,51 @@ class Label_Binding_Spec extends Specification
             Val<String> text = Var.of("Hello World")
 
         when : 'We create and bind to a label UI node...'
-            var node = UI.label("").withText(text)
+            var ui = UI.label("").withText(text)
 
         then : 'The label should be updated when the property changes.'
-            node.component.text == "Hello World"
+            ui.component.text == "Hello World"
 
         when : 'We change the property value...'
             text.set("Goodbye World")
         then : 'The label should NOT be updated.'
-            node.component.text == "Hello World"
+            ui.component.text == "Hello World"
 
-        when : 'We call the "view" method on the property...'
+        when : 'We call the "show" method on the property...'
             text.show()
         then : 'The label should be updated.'
-            node.component.text == "Goodbye World"
+            ui.component.text == "Goodbye World"
     }
 
     def 'We can bind to the foreground and background color of a UI node.'()
     {
-        given : 'We create a simple swing-tree property for modelling the color.'
+        given : 'We create 2 simple swing-tree properties for modelling colors.'
             Val<Color> color1 = Var.of(Color.RED)
             Val<Color> color2 = Var.of(Color.BLUE)
 
         when : 'We create and bind to a label UI node...'
-            var node =
+            var ui =
                     UI.label("")
                     .withForeground(color1)
                     .withBackground(color2)
 
-        then : 'The label should be updated when the property changes.'
-            node.component.foreground == Color.RED
-            node.component.background == Color.BLUE
+        then : 'The label should have the property colors.'
+            ui.component.foreground == Color.RED
+            ui.component.background == Color.BLUE
 
-        when : 'We change the property values...'
+        when : 'We change the color values of both properties...'
             color1.set(Color.GREEN)
             color2.set(Color.YELLOW)
-        then : 'The label should NOT be updated.'
-            node.component.foreground == Color.RED
-            node.component.background == Color.BLUE
+        then : 'At first the label colors are NOT updated.'
+            ui.component.foreground == Color.RED
+            ui.component.background == Color.BLUE
 
-        when : 'We call the "view" method on the property...'
+        when : 'We call the "show" method on the properties however...'
             color1.show()
             color2.show()
-        then : 'The label should be updated.'
-            node.component.foreground == Color.GREEN
-            node.component.background == Color.YELLOW
+        then : 'The label colors are updated.'
+            ui.component.foreground == Color.GREEN
+            ui.component.background == Color.YELLOW
     }
 
     def 'It is possible to bind to the minimum, maximum and preferred size of a label'()
@@ -93,34 +93,34 @@ class Label_Binding_Spec extends Specification
             Val<Dimension> prefSize = Var.of(new Dimension(150, 150))
 
         when : 'We create and bind to a label UI node...'
-            var node =
+            var ui =
                     UI.label("")
                     .withMinimumSize(minSize)
                     .withMaximumSize(maxSize)
                     .withPreferredSize(prefSize)
 
         then : 'The label should be updated when the property changes.'
-            node.component.minimumSize == new Dimension(100, 100)
-            node.component.maximumSize == new Dimension(200, 200)
-            node.component.preferredSize == new Dimension(150, 150)
+            ui.component.minimumSize == new Dimension(100, 100)
+            ui.component.maximumSize == new Dimension(200, 200)
+            ui.component.preferredSize == new Dimension(150, 150)
 
         when : 'We change the property values...'
             minSize.set(new Dimension(50, 50))
             maxSize.set(new Dimension(100, 100))
             prefSize.set(new Dimension(75, 75))
-        then : 'The label should NOT be updated.'
-            node.component.minimumSize == new Dimension(100, 100)
-            node.component.maximumSize == new Dimension(200, 200)
-            node.component.preferredSize == new Dimension(150, 150)
+        then : 'The label should NOT be updated at first.'
+            ui.component.minimumSize == new Dimension(100, 100)
+            ui.component.maximumSize == new Dimension(200, 200)
+            ui.component.preferredSize == new Dimension(150, 150)
 
-        when : 'We call the "view" method on the property...'
+        when : 'We call the "show" method on the property...'
             minSize.show()
             maxSize.show()
             prefSize.show()
         then : 'The label should be updated.'
-            node.component.minimumSize == new Dimension(50, 50)
-            node.component.maximumSize == new Dimension(100, 100)
-            node.component.preferredSize == new Dimension(75, 75)
+            ui.component.minimumSize == new Dimension(50, 50)
+            ui.component.maximumSize == new Dimension(100, 100)
+            ui.component.preferredSize == new Dimension(75, 75)
     }
 
     def 'You can bind a variable to the "enable" flag of a label.'()
@@ -132,22 +132,22 @@ class Label_Binding_Spec extends Specification
             Val<Boolean> enabled = Var.of(true)
 
         when : 'We create and bind to a label UI node...'
-            var node =
+            var ui =
                     UI.label("")
                     .isEnabledIf(enabled)
 
         then : 'The label should be updated when the property changes.'
-            node.component.enabled == true
+            ui.component.enabled == true
 
         when : 'We change the property values...'
             enabled.set(false)
         then : 'The label should NOT be updated.'
-            node.component.enabled == true
+            ui.component.enabled == true
 
-        when : 'We call the "view" method on the property...'
+        when : 'We call the "show" method on the property...'
             enabled.show()
         then : 'The label should be updated.'
-            node.component.enabled == false
+            ui.component.enabled == false
     }
 
     def 'You can bind a variable to the "visible" flag of a label.'()
@@ -159,22 +159,22 @@ class Label_Binding_Spec extends Specification
             Val<Boolean> visible = Var.of(true)
 
         when : 'We create and bind to a label UI node...'
-            var node =
+            var ui =
                     UI.label("")
                     .isVisibleIf(visible)
 
         then : 'The label should be updated when the property changes.'
-            node.component.visible == true
+            ui.component.visible == true
 
         when : 'We change the property values...'
             visible.set(false)
         then : 'The label should NOT be updated.'
-            node.component.visible == true
+            ui.component.visible == true
 
-        when : 'We call the "view" method on the property...'
+        when : 'We call the "show" method on the property...'
             visible.show()
         then : 'The label should be updated.'
-            node.component.visible == false
+            ui.component.visible == false
     }
 
 }
