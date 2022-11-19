@@ -1679,6 +1679,31 @@ public final class UI
     }
 
     /**
+     * A convenience method for
+     * <pre>{@code
+     *      if ( !UI.thisIsUIThread() )
+     *          SwingUtilities.invokeLater(runnable);
+     *      else
+     *          runnable.run();
+     * }</pre>,
+     * which causes <i>runnable.run()</i> to be executed asynchronously on the
+     * AWT event dispatching thread if this current thread is not already
+     * the AWT thread.
+     * The 'invokeLater' execution will happen after all pending AWT events have been processed.
+     * This method should be used when an application thread needs to update the GUI.
+     *
+     * @param runnable the instance of {@code Runnable}
+     * @see #runAndWait
+     */
+    public static void run( Runnable runnable ) {
+        LogUtil.nullArgCheck(runnable, "runnable", Runnable.class);
+        if ( !UI.thisIsUIThread() )
+            SwingUtilities.invokeLater(runnable);
+        else
+            runnable.run();
+    }
+
+    /**
      * A convenience method for {@link SwingUtilities#invokeLater(Runnable)},
      * which causes <i>doRun.run()</i> to be executed asynchronously on the
      * AWT event dispatching thread.  This will happen after all
@@ -1701,7 +1726,7 @@ public final class UI
      * @param runnable the instance of {@code Runnable}
      * @see #runAndWait
      */
-    public static void run( Runnable runnable ) {
+    public static void runLater( Runnable runnable ) {
         LogUtil.nullArgCheck(runnable, "runnable", Runnable.class);
         SwingUtilities.invokeLater(runnable);
     }
