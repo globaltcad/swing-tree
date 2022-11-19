@@ -104,7 +104,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public I isVisibleIf( Val<Boolean> isVisible ) {
         isVisible.onShow(v-> _doUI(()->getComponent().setVisible(v)));
-        return isVisibleIf( isVisible.get() );
+        return isVisibleIf( isVisible.orElseThrow() );
     }
 
 
@@ -127,7 +127,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public I isEnabledIf( Val<Boolean> isEnabled ) {
         isEnabled.onShow(v-> _doUI(()->getComponent().setEnabled(v)));
-        return isEnabledIf( isEnabled.get() );
+        return isEnabledIf( isEnabled.orElseThrow() );
     }
 
     /**
@@ -541,7 +541,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I withCursor( Val<UI.Cursor> type ) {
         type.onShow(t -> _doUI(()->getComponent().setCursor( new java.awt.Cursor( t.type ) )) );
-        return with( type.get() );
+        return with( type.orElseThrow() );
     }
 
     /**
@@ -691,7 +691,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I withTooltip( Val<String> tip ) {
         tip.onShow(v-> _doUI(()->getComponent().setToolTipText(v)));
-        return this.withTooltip( tip.get() );
+        return this.withTooltip( tip.orElseThrow() );
     }
 
     /**
@@ -804,7 +804,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public I withMinimumSize( Val<Dimension> size ) {
         size.onShow(v-> _doUI(()->getComponent().setMinimumSize(v)));
-        return this.withMinimumSize( size.get() );
+        return this.withMinimumSize( size.orElseThrow() );
     }
 
     /**
@@ -834,7 +834,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         height.onShow(h ->
                 _doUI(()-> getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, h)))
             );
-        return this.withMinimumSize( width.get(), height.get() );
+        return this.withMinimumSize( width.orElseThrow(), height.orElseThrow() );
     }
 
     /**
@@ -856,7 +856,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public I withMinimumWidth( Val<Integer> width ) {
         width.onShow(w -> _doUI(()-> getComponent().setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height))) );
-        return this.withMinimumWidth( width.get() );
+        return this.withMinimumWidth( width.orElseThrow() );
     }
 
 
@@ -879,7 +879,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public I withMinimumHeight( Val<Integer> height ) {
         height.onShow(h -> _doUI(()-> getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, h))) );
-        return this.withMinimumHeight( height.get() );
+        return this.withMinimumHeight( height.orElseThrow() );
     }
 
     /**
@@ -902,7 +902,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public I withMaximumSize( Val<Dimension> size ) {
         size.onShow(v -> _doUI(()-> getComponent().setMaximumSize(v)) );
-        return this.withMaximumSize( size.get() );
+        return this.withMaximumSize( size.orElseThrow() );
     }
 
     /**
@@ -928,7 +928,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public I withMaximumSize( Val<Integer> width, Val<Integer> height ) {
         width.onShow(w -> _doUI(()-> getComponent().setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height))) );
         height.onShow(h -> _doUI(()-> getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h))) );
-        return this.withMaximumSize( width.get(), height.get() );
+        return this.withMaximumSize( width.orElseThrow(), height.orElseThrow() );
     }
 
     /**
@@ -950,7 +950,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public I withMaximumWidth( Val<Integer> width ) {
         width.onShow(w -> _doUI(()-> getComponent().setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height))) );
-        return this.withMaximumWidth( width.get() );
+        return this.withMaximumWidth( width.orElseThrow() );
     }
 
     /**
@@ -972,7 +972,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public I withMaximumHeight( Val<Integer> height ) {
         height.onShow(h -> _doUI(()-> getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h))) );
-        return this.withMaximumHeight( height.get() );
+        return this.withMaximumHeight( height.orElseThrow() );
     }
 
     /**
@@ -1021,7 +1021,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public I withPreferredSize( Val<Integer> width, Val<Integer> height ) {
         width.onShow(w -> _doUI(()-> getComponent().setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height))) );
         height.onShow(h -> _doUI(()-> getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h))) );
-        return this.withPreferredSize( width.get(), height.get() );
+        return this.withPreferredSize( width.orElseThrow(), height.orElseThrow() );
     }
 
     /**
@@ -1043,7 +1043,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public I withPreferredWidth( Val<Integer> width ) {
         width.onShow(w -> _doUI(()-> getComponent().setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height))) );
-        return this.withPreferredWidth( width.get() );
+        return this.withPreferredWidth( width.orElseThrow() );
     }
 
     /**
@@ -1065,7 +1065,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public I withPreferredHeight( Val<Integer> height ) {
         height.onShow(h -> _doUI(()-> getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h))) );
-        return this.withPreferredHeight( height.get() );
+        return this.withPreferredHeight( height.orElseThrow() );
     }
 
     /**

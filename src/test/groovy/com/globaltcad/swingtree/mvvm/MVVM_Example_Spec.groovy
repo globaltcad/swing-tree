@@ -83,7 +83,7 @@ class MVVM_Example_Spec extends Specification
         when : 'We press the button.'
             node.component.doClick()
         then : 'The property was updated.'
-            checkBoxSelected.get() == true
+            checkBoxSelected.orElseNull() == true
     }
 
     def 'We can bind a boolean property to a radio button, and when the user presses it, we notice it.'()
@@ -99,7 +99,7 @@ class MVVM_Example_Spec extends Specification
         when : 'We press the radio button.'
             node.component.doClick()
         then : 'The property was updated.'
-            radioButton.get() == true
+            radioButton.orElseNull() == true
     }
 
     def 'We can bind a boolean property to a toggle button, and when the user presses it, we notice it.'()
@@ -115,7 +115,7 @@ class MVVM_Example_Spec extends Specification
         when : 'We press the toggle button.'
             node.component.doClick()
         then : 'The property was updated.'
-            isToggled.get() == true
+            isToggled.orElseNull() == true
     }
 
 }

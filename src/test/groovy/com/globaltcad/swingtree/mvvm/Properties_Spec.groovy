@@ -31,7 +31,7 @@ class Properties_Spec extends Specification
             Var<String> property = Var.of("Hello World")
 
         expect : 'The property has the same value as the value we passed to the factory method.'
-            property.get() == "Hello World"
+            property.orElseNull() == "Hello World"
     }
 
     def 'They can be bound to the UI by passing them to a builder node.'()
@@ -61,7 +61,7 @@ class Properties_Spec extends Specification
         when : 'We try to un-toggle the toggle button in the UI...'
             ui.component.doClick()
         then : 'The property should be toggled off again.'
-            toggled.get() == false
+            toggled.orElseNull() == false
         and :
             userDidToggle == true
     }
@@ -80,19 +80,19 @@ class Properties_Spec extends Specification
         given : 'We create a mutable property...'
             Var<Integer> mutable = Var.of(42)
         expect : 'The property stores the value 42.'
-            mutable.get() == 42
+            mutable.orElseNull() == 42
         and : "It has the expected type."
             mutable.type() == Integer.class
 
         when : 'We change the value of the mutable property.'
             mutable.set(69)
         then : 'The property stores the new value.'
-            mutable.get() == 69
+            mutable.orElseNull() == 69
 
         when : 'We now downcast the mutable property to an immutable property.'
             Val<Integer> immutable = mutable
         then : 'The immutable property will only expose the "get()" method, but not "set(..)".'
-            immutable.get() == 69
+            immutable.orElseNull() == 69
     }
 
     def 'Properties can be bound by subscribing to them using the "onShow(..)" method.'()
@@ -212,15 +212,15 @@ class Properties_Spec extends Specification
         given : 'We create a property...'
             Val<Long> property = Val.of(Long, null)
         when : 'We try to access the value of the property.'
-            property.get()
+            property.orElseThrow()
         then : 'The property will throw an exception.'
             thrown(NoSuchElementException)
     }
 
-    def 'The "orElseThrow" method should be used instead of "get".'()
+    def 'The "orElseNull" method should be used instead of "orElseThrow".'()
     {
         reportInfo """
-            Note that accessing the value of an empty property using the "get" method
+            Note that accessing the value of an empty property using the "orElseThrow" method
             will throw an exception.
             Use this method instead to make the intend of your code more clear.
         """

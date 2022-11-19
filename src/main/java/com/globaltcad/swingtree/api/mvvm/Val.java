@@ -27,18 +27,6 @@ public interface Val<T>
 	static <T> Val<T> of( T iniValue ) { return Var.of( iniValue ); }
 
 	/**
-	 * If a value is present, returns the value, otherwise throws
-	 * {@code NoSuchElementException}.
-	 *
-	 * @apiNote
-	 * The preferred alternative to this method is {@link #orElseThrow()}.
-	 *
-	 * @return the non-{@code null} value described by this {@code Val}
-	 * @throws NoSuchElementException if no value is present
-	 */
-	T get();
-
-	/**
 	 * If a value is present, returns the value, otherwise returns
 	 * {@code other}.
 	 *
@@ -114,7 +102,7 @@ public interface Val<T>
 	 */
 	default void ifPresent( Consumer<T> action ) {
 		if ( this.isPresent() )
-			action.accept( get() );
+			action.accept( orElseThrow() );
 	}
 
 	/**
@@ -165,7 +153,7 @@ public interface Val<T>
 
 	/**
 	 *  This method simply returns a {@link String} representation of the wrapped value
-	 *  which would otherwise be accessed via the {@link #get()} method.
+	 *  which would otherwise be accessed via the {@link #orElseThrow()} method.
 	 *  Calling it should not have any side effects.
 	 *
 	 * @return The {@link String} representation of the value wrapped by an implementation of this interface.
@@ -205,7 +193,7 @@ public interface Val<T>
 
 	/**
 	 *  This returns the type of the value wrapped by this {@link Var}
-	 *  which can be accessed by calling the {@link Var#get()} method.
+	 *  which can be accessed by calling the {@link Var#orElseThrow()} method.
 	 *
 	 * @return The type of the value wrapped by the {@link Var}.
 	 */

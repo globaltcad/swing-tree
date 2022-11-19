@@ -22,14 +22,14 @@ public class FormViewModel
     public Var<Boolean> loginEnabled() { return loginEnabled; }
 
     public void validate() {
-        if ( username.get().isEmpty() || password.get().isEmpty() ) {
+        if ( username.orElseThrow().isEmpty() || password.orElseThrow().isEmpty() ) {
             validity.set( "Username and password must not be empty!" ).show();
             loginEnabled.set( false ).show();
             this.finalForm = null;
         } else {
             validity.set( "" ).show();
             loginEnabled.set( true ).show();
-            this.finalForm = new Form( username.get(), password.get() );
+            this.finalForm = new Form( username.orElseThrow(), password.orElseThrow() );
         }
     }
 

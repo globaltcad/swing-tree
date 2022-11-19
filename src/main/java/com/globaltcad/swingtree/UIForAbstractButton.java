@@ -48,7 +48,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public final I withText( Val<String> val ) {
         LogUtil.nullArgCheck(val, "val", Val.class);
         val.onShow(v-> _doUI(()->getComponent().setText(v)));
-        return withText( val.get() );
+        return withText( val.orElseThrow() );
     }
 
     public final I isSelectedIf(boolean isSelected) {
@@ -64,7 +64,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public final I isSelectedIf( Val<Boolean> val ) {
         LogUtil.nullArgCheck(val, "val", Val.class);
         val.onShow(v-> _doUI(()->getComponent().setSelected(v)));
-        return isSelectedIf( val.get() );
+        return isSelectedIf( val.orElseThrow() );
     }
 
     /**
@@ -78,7 +78,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
         _onClick(
             e -> _doApp(getComponent().isSelected(), sel->var.set(sel).act())
         );
-        return isSelectedIf( var.get() );
+        return isSelectedIf( var.orElseThrow() );
     }
 
     /**
@@ -178,7 +178,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public I withHorizontalAlignment(Val<UI.HorizontalAlignment> horizontalAlign) {
         LogUtil.nullArgCheck(horizontalAlign, "horizontalAlign", Val.class);
         horizontalAlign.onShow(align-> _doUI(()->getComponent().setHorizontalAlignment(align.forSwing())));
-        return with(horizontalAlign.get());
+        return with(horizontalAlign.orElseThrow());
     }
 
     /**
@@ -217,7 +217,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public I withVerticalAlignment(Val<UI.VerticalAlignment> verticalAlign) {
         LogUtil.nullArgCheck(verticalAlign, "verticalAlign", Val.class);
         verticalAlign.onShow(align-> _doUI(()->getComponent().setVerticalAlignment(align.forSwing())));
-        return with(verticalAlign.get());
+        return with(verticalAlign.orElseThrow());
     }
 
     /**
@@ -256,7 +256,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public I withImageRelativeHorizontalAlignment(Val<UI.HorizontalAlignment> horizontalAlign) {
         LogUtil.nullArgCheck(horizontalAlign, "horizontalAlign", Val.class);
         horizontalAlign.onShow(align-> _doUI(()->getComponent().setHorizontalTextPosition(align.forSwing())));
-        return withImageRelative(horizontalAlign.get());
+        return withImageRelative(horizontalAlign.orElseThrow());
     }
 
     /**
@@ -295,7 +295,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public I withImageRelativeVerticalAlignment(Val<UI.VerticalAlignment> verticalAlign) {
         LogUtil.nullArgCheck(verticalAlign, "verticalAlign", Val.class);
         verticalAlign.onShow(align -> _doUI(() -> getComponent().setVerticalTextPosition(align.forSwing())));
-        return withImageRelative(verticalAlign.get());
+        return withImageRelative(verticalAlign.orElseThrow());
     }
 
 }

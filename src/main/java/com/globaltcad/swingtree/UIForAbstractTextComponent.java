@@ -80,7 +80,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
 
     public final I withText( Val<String> val ) {
         val.onShow(v-> _doUI(()->getComponent().setText(v)));
-        return withText( val.get() );
+        return withText( val.orElseThrow() );
     }
 
     public final I withText( Var<String> var ) {
@@ -100,7 +100,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
                 newText = part1 + e.getKeyChar() + part2;
             _doApp(newText, t -> var.set(t).act() );
         });
-        return withText( var.get() );
+        return withText( var.orElseThrow() );
     }
 
     /**

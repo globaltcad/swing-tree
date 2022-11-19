@@ -23,7 +23,7 @@
       "blocks":[
         {"kind":"given","text":"We create a property using the \"of\" factory method.","code":["Var<String> property = Var.of(\"Hello World\")"]},
 
-        {"kind":"expect","text":"The property has the same value as the value we passed to the factory method.","code":["property.get() == \"Hello World\""]}
+        {"kind":"expect","text":"The property has the same value as the value we passed to the factory method.","code":["property.orElseNull() == \"Hello World\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -48,7 +48,7 @@
 
         {"kind":"when","text":"We try to un-toggle the toggle button in the UI...","code":["ui.component.doClick()"]},
 
-        {"kind":"then","text":"The property should be toggled off again.","code":["toggled.get() == false"]},
+        {"kind":"then","text":"The property should be toggled off again.","code":["toggled.orElseNull() == false"]},
 
         {"kind":"and","text":"","code":["userDidToggle == true"]}
       ],
@@ -65,17 +65,17 @@
       "blocks":[
         {"kind":"given","text":"We create a mutable property...","code":["Var<Integer> mutable = Var.of(42)"]},
 
-        {"kind":"expect","text":"The property stores the value 42.","code":["mutable.get() == 42"]},
+        {"kind":"expect","text":"The property stores the value 42.","code":["mutable.orElseNull() == 42"]},
 
         {"kind":"and","text":"It has the expected type.","code":["mutable.type() == Integer.class"]},
 
         {"kind":"when","text":"We change the value of the mutable property.","code":["mutable.set(69)"]},
 
-        {"kind":"then","text":"The property stores the new value.","code":["mutable.get() == 69"]},
+        {"kind":"then","text":"The property stores the new value.","code":["mutable.orElseNull() == 69"]},
 
         {"kind":"when","text":"We now downcast the mutable property to an immutable property.","code":["Val<Integer> immutable = mutable"]},
 
-        {"kind":"then","text":"The immutable property will only expose the \"get()\" method, but not \"set(..)\".","code":["immutable.get() == 69"]}
+        {"kind":"then","text":"The immutable property will only expose the \"get()\" method, but not \"set(..)\".","code":["immutable.orElseNull() == 69"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -220,7 +220,7 @@
       "blocks":[
         {"kind":"given","text":"We create a property...","code":["Val<Long> property = Val.of(Long, null)"]},
 
-        {"kind":"when","text":"We try to access the value of the property.","code":["property.get()"]},
+        {"kind":"when","text":"We try to access the value of the property.","code":["property.orElseThrow()"]},
 
         {"kind":"then","text":"The property will throw an exception.","code":["thrown(NoSuchElementException)"]}
       ],
@@ -228,11 +228,11 @@
     },
   
     {
-      "id":"The \"orElseThrow\" method should be used instead of \"get\".",
+      "id":"The \"orElseNull\" method should be used instead of \"orElseThrow\".",
       "result":"PASS",
       "duration":"0",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Note that accessing the value of an empty property using the \"get\" method\n            will throw an exception.\n            Use this method instead to make the intend of your code more clear.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Note that accessing the value of an empty property using the \"orElseThrow\" method\n            will throw an exception.\n            Use this method instead to make the intend of your code more clear.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a property...","code":["Val<Long> property = Val.of(Long, null)"]},

@@ -1006,7 +1006,7 @@ public final class UI
      */
     public static UIForSlider<JSlider> slider( Align align, int min, int max, Val<Integer> value ) {
         LogUtil.nullArgCheck(align, "align", Align.class);
-        return of(new JSlider(align.forSlider(), min, max, value.get()))
+        return of(new JSlider(align.forSlider(), min, max, value.orElseThrow()))
                 .withValue(value);
     }
 
@@ -1028,7 +1028,7 @@ public final class UI
      */
     public static UIForSlider<JSlider> slider( Align align, int min, int max, Var<Integer> value ) {
         LogUtil.nullArgCheck(align, "align", Align.class);
-        return of(new JSlider(align.forSlider(), min, max, value.get()))
+        return of(new JSlider(align.forSlider(), min, max, value.orElseThrow()))
                 .withValue(value);
     }
 

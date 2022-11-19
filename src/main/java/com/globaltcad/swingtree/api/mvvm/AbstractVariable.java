@@ -72,7 +72,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 * {@inheritDoc}
 	 */
 	@Override
-	public T get() {
+	public T orElseThrow() {
 		// This class is similar to optional, so if the value is null, we throw an exception!
 		if ( value == null )
 			throw new NoSuchElementException("No value present");
@@ -90,16 +90,6 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 */
 	public T orElseNullable(T other) {
 		return value != null ? value : other;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public T orElseThrow() {
-		if (value == null) {
-			throw new NoSuchElementException("No value present");
-		}
-		return value;
 	}
 
 	/**
@@ -150,7 +140,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 			Val<?> other = (Val<?>) obj;
 			if ( other.type() != this.type ) return false;
 			if ( other.orElseNull() == null ) return this.value == null;
-			return Val.equals( other.get(), this.value ); // Arrays are compared with Arrays.equals
+			return Val.equals( other.orElseThrow(), this.value ); // Arrays are compared with Arrays.equals
 		}
 		return false;
 	}

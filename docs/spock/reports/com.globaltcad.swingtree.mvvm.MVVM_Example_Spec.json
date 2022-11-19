@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.286 seconds"
+    "duration":"0.287 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -67,7 +67,7 @@
 
         {"kind":"when","text":"We press the button.","code":["node.component.doClick()"]},
 
-        {"kind":"then","text":"The property was updated.","code":["checkBoxSelected.get() == true"]}
+        {"kind":"then","text":"The property was updated.","code":["checkBoxSelected.orElseNull() == true"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -88,7 +88,7 @@
 
         {"kind":"when","text":"We press the radio button.","code":["node.component.doClick()"]},
 
-        {"kind":"then","text":"The property was updated.","code":["radioButton.get() == true"]}
+        {"kind":"then","text":"The property was updated.","code":["radioButton.orElseNull() == true"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -109,7 +109,7 @@
 
         {"kind":"when","text":"We press the toggle button.","code":["node.component.doClick()"]},
 
-        {"kind":"then","text":"The property was updated.","code":["isToggled.get() == true"]}
+        {"kind":"then","text":"The property was updated.","code":["isToggled.orElseNull() == true"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }
