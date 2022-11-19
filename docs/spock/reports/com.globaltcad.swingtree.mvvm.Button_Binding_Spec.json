@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.004 seconds"
+    "duration":"0.003 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can bind to the text of a button.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that for a binding to work, the property must be a Var or Val\n            implementation and it is required to call the \"show()\" method on the\n            property to apply its value to the view.\n        "]
       },
@@ -25,13 +25,13 @@
 
         {"kind":"when","text":"We create and bind to a button UI node...","code":["var ui = UI.button(\"\").withText(text)"]},
 
-        {"kind":"then","text":"The button should be updated when the property changes.","code":["ui.component.text == \"Hello World\""]},
+        {"kind":"then","text":"The button should be updated when the property is changed and shown.","code":["ui.component.text == \"Hello World\""]},
 
         {"kind":"when","text":"We change the property value...","code":["text.set(\"Goodbye World\")"]},
 
         {"kind":"then","text":"The button should NOT be updated.","code":["ui.component.text == \"Hello World\""]},
 
-        {"kind":"when","text":"We call the \"view\" method on the property...","code":["text.show()"]},
+        {"kind":"when","text":"We call the \"show\" method on the property...","code":["text.show()"]},
 
         {"kind":"then","text":"The button should be updated.","code":["ui.component.text == \"Goodbye World\""]}
       ],
@@ -50,13 +50,13 @@
 
         {"kind":"when","text":"We create and bind to a button UI node...","code":["var ui = UI.button(\"\").isSelectedIf(selected)"]},
 
-        {"kind":"then","text":"The button should be updated when the property changes.","code":["ui.component.selected == false"]},
+        {"kind":"then","text":"The button should be updated when the property is changed and shown.","code":["ui.component.selected == false"]},
 
         {"kind":"when","text":"We change the property value...","code":["selected.set(true)"]},
 
         {"kind":"then","text":"The button should NOT be updated.","code":["ui.component.selected == false"]},
 
-        {"kind":"when","text":"We call the \"view\" method on the property...","code":["selected.show()"]},
+        {"kind":"when","text":"We call the \"show\" method on the property...","code":["selected.show()"]},
 
         {"kind":"then","text":"The button should be updated.","code":["ui.component.selected == true"]}
       ],
@@ -75,13 +75,13 @@
 
         {"kind":"when","text":"We create and bind to a button UI node...","code":["var ui = UI.button(\"\").isEnabledIf(enabled)"]},
 
-        {"kind":"then","text":"The button should be updated when the property changes.","code":["ui.component.enabled == false"]},
+        {"kind":"then","text":"The button should be updated when the property is changed and shown.","code":["ui.component.enabled == false"]},
 
         {"kind":"when","text":"We change the property value...","code":["enabled.set(true)"]},
 
         {"kind":"then","text":"The button should NOT be updated.","code":["ui.component.enabled == false"]},
 
-        {"kind":"when","text":"We call the \"view\" method on the property...","code":["enabled.show()"]},
+        {"kind":"when","text":"We call the \"show\" method on the property...","code":["enabled.show()"]},
 
         {"kind":"then","text":"The button should be updated.","code":["ui.component.enabled == true"]}
       ],

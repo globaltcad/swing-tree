@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.078 seconds"
+    "duration":"0.079 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -31,7 +31,7 @@
     {
       "id":"They can be bound to the UI by passing them to a builder node.",
       "result":"PASS",
-      "duration":"0.070 seconds",
+      "duration":"0.069 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Binding goes both ways, so when the property changes we can update the UI\n            using the \"show()\" method on the property, and when\n            the UI is changed by the user, it will update the property for us\n            and trigger the property action (if present).\n        "]
       },
@@ -159,11 +159,11 @@
 
         {"kind":"and","text":"Another subscriber to the new property.","code":["var list2 = []","property2.onShow { list2.add(it) }"]},
 
-        {"kind":"when","text":"We change and \"view\" the value of the original property.","code":["property.set(\"Tofu\").show()"]},
+        {"kind":"when","text":"We change and \"show\" the value of the original property.","code":["property.set(\"Tofu\").show()"]},
 
         {"kind":"then","text":"The subscriber of the original property is triggered but not the subscriber of the new property.","code":["list1 == [\"Tofu\"]","list2 == []"]},
 
-        {"kind":"when","text":"We change and \"view\" the value of the new property.","code":["property2.set(\"Tempeh\").show()"]},
+        {"kind":"when","text":"We change and \"show\" the value of the new property.","code":["property2.set(\"Tempeh\").show()"]},
 
         {"kind":"then","text":"Both subscribers are receive the effect.","code":["list1 == [\"Tofu\", \"Tempeh\"]","list2 == [\"Tempeh\"]"]}
       ],

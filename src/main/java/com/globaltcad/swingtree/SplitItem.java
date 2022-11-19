@@ -158,7 +158,7 @@ public final class SplitItem<I extends JMenuItem>
          */
         public JSplitButton getSplitButton() {
             // We make sure that only the Swing thread can access the component:
-            if ( SwingUtilities.isEventDispatchThread() ) return splitButton;
+            if ( UI.thisIsUIThread() ) return splitButton;
             else
                 throw new IllegalStateException(
                         "Split button can only be accessed by the Swing thread."
@@ -170,7 +170,7 @@ public final class SplitItem<I extends JMenuItem>
          */
         public I getCurrentItem() {
             // We make sure that only the Swing thread can access the component:
-            if ( SwingUtilities.isEventDispatchThread() ) return this.currentItem;
+            if ( UI.thisIsUIThread() ) return this.currentItem;
             else
                 throw new IllegalStateException(
                         "The current button item can only be accessed by the Swing thread."
@@ -183,7 +183,7 @@ public final class SplitItem<I extends JMenuItem>
          */
         public List<I> getSiblinghood() {
             // We make sure that only the Swing thread can access the sibling components:
-            if ( !SwingUtilities.isEventDispatchThread() )
+            if ( !UI.thisIsUIThread() )
                 throw new IllegalStateException(
                         "Sibling components can only be accessed by the Swing thread."
                     );
@@ -197,7 +197,7 @@ public final class SplitItem<I extends JMenuItem>
          */
         public List<I> getSiblings() {
             // We make sure that only the Swing thread can access the sibling components:
-            if ( !SwingUtilities.isEventDispatchThread() )
+            if ( !UI.thisIsUIThread() )
                 throw new IllegalStateException(
                         "Sibling components can only be accessed by the Swing thread."
                     );
@@ -215,7 +215,7 @@ public final class SplitItem<I extends JMenuItem>
          */
         public Delegate<I> selectCurrentItem() {
             // We make sure that only the Swing thread can modify components:
-            if ( !SwingUtilities.isEventDispatchThread() )
+            if ( !UI.thisIsUIThread() )
                 UI.run(this::selectCurrentItem);
             this.getCurrentItem().setSelected(true);
             return this;
@@ -230,7 +230,7 @@ public final class SplitItem<I extends JMenuItem>
          */
         public Delegate<I> selectOnlyCurrentItem() {
             // We make sure that only the Swing thread can modify components:
-            if ( !SwingUtilities.isEventDispatchThread() )
+            if ( !UI.thisIsUIThread() )
                 UI.run(this::selectOnlyCurrentItem);
             this.unselectAllItems();
             this.getCurrentItem().setSelected(true);
@@ -245,7 +245,7 @@ public final class SplitItem<I extends JMenuItem>
          */
         public Delegate<I> unselectCurrentItem() {
             // We make sure that only the Swing thread can modify components:
-            if ( !SwingUtilities.isEventDispatchThread() )
+            if ( !UI.thisIsUIThread() )
                 UI.run(this::unselectCurrentItem);
             this.getCurrentItem().setSelected(false);
             return this;
@@ -259,7 +259,7 @@ public final class SplitItem<I extends JMenuItem>
          */
         public Delegate<I> unselectAllItems() {
             // We make sure that only the Swing thread can modify components:
-            if ( !SwingUtilities.isEventDispatchThread() )
+            if ( !UI.thisIsUIThread() )
                 UI.run(this::unselectAllItems);
             getSiblinghood().forEach(it -> it.setSelected(false) );
             return this;
@@ -273,7 +273,7 @@ public final class SplitItem<I extends JMenuItem>
          */
         public Delegate<I> selectAllItems() {
             // We make sure that only the Swing thread can modify components:
-            if ( !SwingUtilities.isEventDispatchThread() )
+            if ( !UI.thisIsUIThread() )
                 UI.run(this::selectAllItems);
             getSiblinghood().forEach(it -> it.setSelected(true) );
             return this;
@@ -287,7 +287,7 @@ public final class SplitItem<I extends JMenuItem>
          */
         public Delegate<I> displayCurrentItemText() {
             // We make sure that only the Swing thread can modify components:
-            if ( !SwingUtilities.isEventDispatchThread() )
+            if ( !UI.thisIsUIThread() )
                 UI.run(this::displayCurrentItemText);
             if ( getCurrentItem() != null )
                 getSplitButton().setText(getCurrentItem().getText());
@@ -300,7 +300,7 @@ public final class SplitItem<I extends JMenuItem>
          */
         public Delegate<I> setButtonText( String text ) {
             // We make sure that only the Swing thread can modify components:
-            if ( !SwingUtilities.isEventDispatchThread() )
+            if ( !UI.thisIsUIThread() )
                 UI.run(() -> setButtonText(text) );
             LogUtil.nullArgCheck(text, "text", String.class);
             this.splitButton.setText(text);
@@ -321,7 +321,7 @@ public final class SplitItem<I extends JMenuItem>
         public Delegate<I> appendToButtonText( String postfix ) {
             LogUtil.nullArgCheck(postfix, "postfix", String.class);
             // We make sure that only the Swing thread can modify components:
-            if ( !SwingUtilities.isEventDispatchThread() )
+            if ( !UI.thisIsUIThread() )
                 UI.run(() -> appendToButtonText(postfix) );
             this.splitButton.setText(this.getButtonText()+postfix);
             return this;
@@ -334,7 +334,7 @@ public final class SplitItem<I extends JMenuItem>
         public Delegate<I> prependToButtonText( String prefix ) {
             LogUtil.nullArgCheck(prefix, "postfix", String.class);
             // We make sure that only the Swing thread can modify components:
-            if ( !SwingUtilities.isEventDispatchThread() )
+            if ( !UI.thisIsUIThread() )
                 UI.run(() -> prependToButtonText(prefix) );
             this.splitButton.setText(prefix+this.getButtonText());
             return this;
@@ -348,7 +348,7 @@ public final class SplitItem<I extends JMenuItem>
          */
         public Delegate<I> selectItem( int i ) {
             // We make sure that only the Swing thread can modify components:
-            if ( !SwingUtilities.isEventDispatchThread() )
+            if ( !UI.thisIsUIThread() )
                 UI.run(() -> selectItem(i) );
             getSiblinghood().get(i).setSelected(true);
             return this;
@@ -362,7 +362,7 @@ public final class SplitItem<I extends JMenuItem>
          */
         public Delegate<I> selectOnlyItem( int i ) {
             // We make sure that only the Swing thread can modify components:
-            if ( !SwingUtilities.isEventDispatchThread() )
+            if ( !UI.thisIsUIThread() )
                 UI.run(() -> selectOnlyItem(i) );
             unselectAllItems().getSiblinghood().get(i).setSelected(true);
             return this;
@@ -376,7 +376,7 @@ public final class SplitItem<I extends JMenuItem>
          */
         public Delegate<I> unselectItem( int i ) {
             // We make sure that only the Swing thread can modify components:
-            if ( !SwingUtilities.isEventDispatchThread() )
+            if ( !UI.thisIsUIThread() )
                 UI.run(() -> unselectItem(i) );
             getSiblinghood().get(i).setSelected(false);
             return this;

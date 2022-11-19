@@ -11,17 +11,19 @@ final class Query
 
     Query(Component current) { _current = current; }
 
-    <C extends Component> Optional<C> find(Class<C> type, String id) {
+    <C extends Component> OptionalUI<C> find(Class<C> type, String id) {
         if ( !_tree.containsKey(id) ) {
             _tree.clear();
             List<Component> roots = traverseUpwards(_current, new ArrayList<>());
             roots.stream().forEach(this::_traverseDownwardsAndFillTree);
         }
         return _tree.getOrDefault(id, new ArrayList<>())
-                    .stream()
-                    .filter( c -> type.isAssignableFrom(c.getClass()) )
-                    .map( c -> (C) c )
-                    .findFirst();
+                .stream()
+                .filter( c -> type.isAssignableFrom(c.getClass()) )
+                .map( c -> (C) c )
+                .findFirst()
+                .map(OptionalUI::ofNullable)
+                .get();
     }
 
     private List<Component> traverseUpwards(Component component, List<Component> roots)

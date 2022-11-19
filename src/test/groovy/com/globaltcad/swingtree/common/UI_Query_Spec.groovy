@@ -72,7 +72,7 @@ class UI_Query_Spec extends Specification
             new Utility.Query(root).find(JTextField, "TF1").isPresent()
 
         when : 'We click on the button with the actions performing query actions...'
-            new Utility.Query(root).find(JButton, "B3").get().doClick()
+            UI.runAndWait(()->new Utility.Query(root).find(JButton, "B3").get().doClick())
 
         then : '...the text fields and text areas are updated.'
             new Utility.Query(root).find(JButton, "B1").get().text == "A"

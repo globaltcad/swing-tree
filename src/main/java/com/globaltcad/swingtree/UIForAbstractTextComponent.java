@@ -5,7 +5,6 @@ import com.globaltcad.swingtree.api.UIAction;
 import com.globaltcad.swingtree.api.mvvm.Val;
 import com.globaltcad.swingtree.api.mvvm.Var;
 
-import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
@@ -236,7 +235,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
 
         public JTextComponent getTextComponent() {
             // We make sure that only the Swing thread can access the component:
-            if ( SwingUtilities.isEventDispatchThread() ) return textComponent;
+            if ( UI.thisIsUIThread() ) return textComponent;
             else
                 throw new IllegalStateException(
                         "Text component can only be accessed by the Swing thread."

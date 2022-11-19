@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"1.043 seconds"
+    "duration":"1.053 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -54,7 +54,7 @@
     {
       "id":"We can easily build a split button where only one item text will have its text displayed:",
       "result":"PASS",
-      "duration":"0.206 seconds",
+      "duration":"0.211 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -81,7 +81,7 @@
     {
       "id":"We can register button click events for button items as well as the split button as a whole.",
       "result":"PASS",
-      "duration":"0.412 seconds",
+      "duration":"0.414 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -108,7 +108,7 @@
     {
       "id":"We can specify which item should be initially selected.",
       "result":"PASS",
-      "duration":"0.069 seconds",
+      "duration":"0.070 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -125,7 +125,7 @@
     {
       "id":"It is possible to select more than 1 item.",
       "result":"PASS",
-      "duration":"0.070 seconds",
+      "duration":"0.071 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -142,7 +142,7 @@
     {
       "id":"A button item can undo any multi-selection.",
       "result":"PASS",
-      "duration":"0.207 seconds",
+      "duration":"0.208 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

@@ -2,7 +2,6 @@ package com.globaltcad.swingtree;
 
 import com.globaltcad.swingtree.api.Peeker;
 
-import javax.swing.*;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -47,7 +46,7 @@ abstract class AbstractBuilder<I, C>
      *  The component wrapped by this builder node.
      */
     public final C getComponent() {
-        if ( _threadMode == ThreadMode.DECOUPLED && !SwingUtilities.isEventDispatchThread() )
+        if ( _threadMode == ThreadMode.DECOUPLED && !UI.thisIsUIThread() )
             throw new IllegalStateException(
                     "This UI is configured to be decoupled from the application thread, " +
                     "which means that it can only be modified from the EDT. " +

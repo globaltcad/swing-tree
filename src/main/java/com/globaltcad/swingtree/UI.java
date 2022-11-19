@@ -48,7 +48,7 @@ public final class UI
 
     public static <T> T use( ThreadMode mode, Supplier<T> scope ) {
 
-        if ( !SwingUtilities.isEventDispatchThread() )
+        if ( !UI.thisIsUIThread() )
             try {
                 return runAndGet(()-> use(mode, scope));
             } catch (InvocationTargetException | InterruptedException e) {
@@ -1704,6 +1704,10 @@ public final class UI
     public static void run( Runnable runnable ) {
         LogUtil.nullArgCheck(runnable, "runnable", Runnable.class);
         SwingUtilities.invokeLater(runnable);
+    }
+
+    public static boolean thisIsUIThread() {
+        return SwingUtilities.isEventDispatchThread();
     }
 
     /**

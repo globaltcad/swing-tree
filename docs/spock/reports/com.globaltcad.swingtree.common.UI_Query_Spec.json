@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.076 seconds"
+    "duration":"0.082 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can query the swing tree within an action lambda.",
       "result":"PASS",
-      "duration":"0.075 seconds",
+      "duration":"0.080 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -25,7 +25,7 @@
 
         {"kind":"expect","text":"We can query the tree for different kinds of components.","code":["new Utility.Query(root).find(JButton, \"B1\").isPresent()","new Utility.Query(root).find(JButton, \"B2\").isPresent()","new Utility.Query(root).find(JButton, \"B3\").isPresent()","new Utility.Query(root).find(JTextArea, \"TA1\").isPresent()","new Utility.Query(root).find(JTextField, \"TF1\").isPresent()"]},
 
-        {"kind":"when","text":"We click on the button with the actions performing query actions...","code":["new Utility.Query(root).find(JButton, \"B3\").get().doClick()"]},
+        {"kind":"when","text":"We click on the button with the actions performing query actions...","code":["UI.runAndWait(()->new Utility.Query(root).find(JButton, \"B3\").get().doClick())"]},
 
         {"kind":"then","text":"...the text fields and text areas are updated.","code":["new Utility.Query(root).find(JButton, \"B1\").get().text == \"A\"","new Utility.Query(root).find(JButton, \"B2\").get().text == \"I got hacked by B3\"","new Utility.Query(root).find(JButton, \"B3\").get().text == \"C\"","new Utility.Query(root).find(JTextArea, \"TA1\").get().text == \"I got hacked by B3\"","new Utility.Query(root).find(JTextField, \"TF1\").get().text == \"I got hacked by B3\""]}
       ],

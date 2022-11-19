@@ -34,7 +34,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
      */
     public C getComponent() {
         // We make sure that only the Swing thread can access the component:
-        if ( SwingUtilities.isEventDispatchThread() ) return component;
+        if ( UI.thisIsUIThread() ) return component;
         else
             throw new IllegalStateException(
                     "Component can only be accessed by the Swing thread."
@@ -50,7 +50,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
      *               which will be executed by the Swing thread.
      */
     public void forComponent( Consumer<C> action ) {
-        if ( SwingUtilities.isEventDispatchThread() )
+        if ( UI.thisIsUIThread() )
             action.accept(component);
         else
             UI.run( () -> action.accept(component) );
@@ -63,7 +63,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
      */
     public List<JComponent> getSiblings() {
         // We make sure that only the Swing thread can access the sibling components:
-        if ( !SwingUtilities.isEventDispatchThread() )
+        if ( !UI.thisIsUIThread() )
             throw new IllegalStateException(
                     "Sibling components can only be accessed by the Swing thread. " +
                     "Please use 'forSiblings(..)' methods instead."
@@ -81,7 +81,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
      *               which will be executed by the Swing thread.
      */
     public void forSiblings( Consumer<List<JComponent>> action ) {
-        if ( SwingUtilities.isEventDispatchThread() )
+        if ( UI.thisIsUIThread() )
             action.accept(getSiblings());
         else
             UI.run( () -> action.accept(getSiblings()) );
@@ -93,7 +93,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
      */
     public <T extends JComponent> List<T> getSiblingsOfType(Class<T> type) {
         // We make sure that only the Swing thread can access the sibling components:
-        if ( !SwingUtilities.isEventDispatchThread() )
+        if ( !UI.thisIsUIThread() )
             throw new IllegalStateException(
                     "Sibling components can only be accessed by the Swing thread. " +
                     "Please use 'forSiblingsOfType(..)' methods instead."
@@ -119,7 +119,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
     public <T extends JComponent> void forSiblingsOfType(
         Class<T> type, Consumer<List<T>> action
     ) {
-        if ( SwingUtilities.isEventDispatchThread() )
+        if ( UI.thisIsUIThread() )
             action.accept(getSiblingsOfType(type));
         else
             UI.run( () -> action.accept(getSiblingsOfType(type)) );
@@ -130,7 +130,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
      */
     public List<JComponent> getSiblinghood() {
         // We make sure that only the Swing thread can access the sibling components:
-        if ( !SwingUtilities.isEventDispatchThread() )
+        if ( !UI.thisIsUIThread() )
             throw new IllegalStateException(
                     "Sibling components can only be accessed by the Swing thread. " +
                     "Please use 'forSiblinghood(..)' methods instead."
@@ -148,7 +148,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
      *               which will be executed by the Swing thread.
      */
     public void forSiblinghood( Consumer<List<JComponent>> action ) {
-        if ( SwingUtilities.isEventDispatchThread() )
+        if ( UI.thisIsUIThread() )
             action.accept(getSiblinghood());
         else
             UI.run( () -> action.accept(getSiblinghood()) );
@@ -160,7 +160,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
      */
     public <T extends JComponent> List<T> getSiblinghoodOfType(Class<T> type) {
         // We make sure that only the Swing thread can access the sibling components:
-        if ( !SwingUtilities.isEventDispatchThread() )
+        if ( !UI.thisIsUIThread() )
             throw new IllegalStateException(
                 "Sibling components can only be accessed by the Swing thread. " +
                 "Please use 'forSiblinghoodOfType(..)' methods instead."
@@ -186,7 +186,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
     public <T extends JComponent> void forSiblinghoodOfType(
         Class<T> type, Consumer<List<T>> action
     ) {
-        if ( SwingUtilities.isEventDispatchThread() )
+        if ( UI.thisIsUIThread() )
             action.accept(getSiblinghoodOfType(type));
         else
             UI.run( () -> action.accept(getSiblinghoodOfType(type)) );

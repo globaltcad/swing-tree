@@ -69,7 +69,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E> extends AbstractBuilder<
     {
         LogUtil.nullArgCheck(builder, "builder", AbstractNestedBuilder.class);
 
-        if ( _threadMode == ThreadMode.DECOUPLED && !SwingUtilities.isEventDispatchThread() )
+        if ( _threadMode == ThreadMode.DECOUPLED && !UI.thisIsUIThread() )
             throw new IllegalStateException(
                     "This UI is configured to be decoupled from the application thread, " +
                     "which means that it can only be modified from the EDT. " +

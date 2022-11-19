@@ -23,17 +23,17 @@
       "blocks":[
         {"kind":"given","text":"We create a simple swing-tree property for modelling the text.","code":["Val<String> text = Var.of(\"Hello World\")"]},
 
-        {"kind":"when","text":"We create and bind to a label UI node...","code":["var node = UI.label(\"\").withText(text)"]},
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui = UI.label(\"\").withText(text)"]},
 
-        {"kind":"then","text":"The label should be updated when the property changes.","code":["node.component.text == \"Hello World\""]},
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.text == \"Hello World\""]},
 
         {"kind":"when","text":"We change the property value...","code":["text.set(\"Goodbye World\")"]},
 
-        {"kind":"then","text":"The label should NOT be updated.","code":["node.component.text == \"Hello World\""]},
+        {"kind":"then","text":"The label should NOT be updated.","code":["ui.component.text == \"Hello World\""]},
 
-        {"kind":"when","text":"We call the \"view\" method on the property...","code":["text.show()"]},
+        {"kind":"when","text":"We call the \"show\" method on the property...","code":["text.show()"]},
 
-        {"kind":"then","text":"The label should be updated.","code":["node.component.text == \"Goodbye World\""]}
+        {"kind":"then","text":"The label should be updated.","code":["ui.component.text == \"Goodbye World\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -46,19 +46,19 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We create a simple swing-tree property for modelling the color.","code":["Val<Color> color1 = Var.of(Color.RED)","Val<Color> color2 = Var.of(Color.BLUE)"]},
+        {"kind":"given","text":"We create 2 simple swing-tree properties for modelling colors.","code":["Val<Color> color1 = Var.of(Color.RED)","Val<Color> color2 = Var.of(Color.BLUE)"]},
 
-        {"kind":"when","text":"We create and bind to a label UI node...","code":["var node =","        UI.label(\"\")","        .withForeground(color1)","        .withBackground(color2)"]},
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withForeground(color1)","        .withBackground(color2)"]},
 
-        {"kind":"then","text":"The label should be updated when the property changes.","code":["node.component.foreground == Color.RED","node.component.background == Color.BLUE"]},
+        {"kind":"then","text":"The label should have the property colors.","code":["ui.component.foreground == Color.RED","ui.component.background == Color.BLUE"]},
 
-        {"kind":"when","text":"We change the property values...","code":["color1.set(Color.GREEN)","color2.set(Color.YELLOW)"]},
+        {"kind":"when","text":"We change the color values of both properties...","code":["color1.set(Color.GREEN)","color2.set(Color.YELLOW)"]},
 
-        {"kind":"then","text":"The label should NOT be updated.","code":["node.component.foreground == Color.RED","node.component.background == Color.BLUE"]},
+        {"kind":"then","text":"At first the label colors are NOT updated.","code":["ui.component.foreground == Color.RED","ui.component.background == Color.BLUE"]},
 
-        {"kind":"when","text":"We call the \"view\" method on the property...","code":["color1.show()","color2.show()"]},
+        {"kind":"when","text":"We call the \"show\" method on the properties however...","code":["color1.show()","color2.show()"]},
 
-        {"kind":"then","text":"The label should be updated.","code":["node.component.foreground == Color.GREEN","node.component.background == Color.YELLOW"]}
+        {"kind":"then","text":"The label colors are updated.","code":["ui.component.foreground == Color.GREEN","ui.component.background == Color.YELLOW"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -73,17 +73,17 @@
       "blocks":[
         {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Dimension> minSize = Var.of(new Dimension(100, 100))","Val<Dimension> maxSize = Var.of(new Dimension(200, 200))","Val<Dimension> prefSize = Var.of(new Dimension(150, 150))"]},
 
-        {"kind":"when","text":"We create and bind to a label UI node...","code":["var node =","        UI.label(\"\")","        .withMinimumSize(minSize)","        .withMaximumSize(maxSize)","        .withPreferredSize(prefSize)"]},
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withMinimumSize(minSize)","        .withMaximumSize(maxSize)","        .withPreferredSize(prefSize)"]},
 
-        {"kind":"then","text":"The label should be updated when the property changes.","code":["node.component.minimumSize == new Dimension(100, 100)","node.component.maximumSize == new Dimension(200, 200)","node.component.preferredSize == new Dimension(150, 150)"]},
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.minimumSize == new Dimension(100, 100)","ui.component.maximumSize == new Dimension(200, 200)","ui.component.preferredSize == new Dimension(150, 150)"]},
 
         {"kind":"when","text":"We change the property values...","code":["minSize.set(new Dimension(50, 50))","maxSize.set(new Dimension(100, 100))","prefSize.set(new Dimension(75, 75))"]},
 
-        {"kind":"then","text":"The label should NOT be updated.","code":["node.component.minimumSize == new Dimension(100, 100)","node.component.maximumSize == new Dimension(200, 200)","node.component.preferredSize == new Dimension(150, 150)"]},
+        {"kind":"then","text":"The label should NOT be updated at first.","code":["ui.component.minimumSize == new Dimension(100, 100)","ui.component.maximumSize == new Dimension(200, 200)","ui.component.preferredSize == new Dimension(150, 150)"]},
 
-        {"kind":"when","text":"We call the \"view\" method on the property...","code":["minSize.show()","maxSize.show()","prefSize.show()"]},
+        {"kind":"when","text":"We call the \"show\" method on the property...","code":["minSize.show()","maxSize.show()","prefSize.show()"]},
 
-        {"kind":"then","text":"The label should be updated.","code":["node.component.minimumSize == new Dimension(50, 50)","node.component.maximumSize == new Dimension(100, 100)","node.component.preferredSize == new Dimension(75, 75)"]}
+        {"kind":"then","text":"The label should be updated.","code":["ui.component.minimumSize == new Dimension(50, 50)","ui.component.maximumSize == new Dimension(100, 100)","ui.component.preferredSize == new Dimension(75, 75)"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -98,17 +98,17 @@
       "blocks":[
         {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Boolean> enabled = Var.of(true)"]},
 
-        {"kind":"when","text":"We create and bind to a label UI node...","code":["var node =","        UI.label(\"\")","        .isEnabledIf(enabled)"]},
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .isEnabledIf(enabled)"]},
 
-        {"kind":"then","text":"The label should be updated when the property changes.","code":["node.component.enabled == true"]},
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.enabled == true"]},
 
         {"kind":"when","text":"We change the property values...","code":["enabled.set(false)"]},
 
-        {"kind":"then","text":"The label should NOT be updated.","code":["node.component.enabled == true"]},
+        {"kind":"then","text":"The label should NOT be updated.","code":["ui.component.enabled == true"]},
 
-        {"kind":"when","text":"We call the \"view\" method on the property...","code":["enabled.show()"]},
+        {"kind":"when","text":"We call the \"show\" method on the property...","code":["enabled.show()"]},
 
-        {"kind":"then","text":"The label should be updated.","code":["node.component.enabled == false"]}
+        {"kind":"then","text":"The label should be updated.","code":["ui.component.enabled == false"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -123,17 +123,17 @@
       "blocks":[
         {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Boolean> visible = Var.of(true)"]},
 
-        {"kind":"when","text":"We create and bind to a label UI node...","code":["var node =","        UI.label(\"\")","        .isVisibleIf(visible)"]},
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .isVisibleIf(visible)"]},
 
-        {"kind":"then","text":"The label should be updated when the property changes.","code":["node.component.visible == true"]},
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.visible == true"]},
 
         {"kind":"when","text":"We change the property values...","code":["visible.set(false)"]},
 
-        {"kind":"then","text":"The label should NOT be updated.","code":["node.component.visible == true"]},
+        {"kind":"then","text":"The label should NOT be updated.","code":["ui.component.visible == true"]},
 
-        {"kind":"when","text":"We call the \"view\" method on the property...","code":["visible.show()"]},
+        {"kind":"when","text":"We call the \"show\" method on the property...","code":["visible.show()"]},
 
-        {"kind":"then","text":"The label should be updated.","code":["node.component.visible == false"]}
+        {"kind":"then","text":"The label should be updated.","code":["ui.component.visible == false"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }
