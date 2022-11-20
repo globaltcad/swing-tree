@@ -8,38 +8,43 @@ class JSplitButton_Exception_Spec extends Specification
 {
     def 'A JSplitButton does not accept null actions.'()
     {
+        reportInfo """
+            Here you can see that Swing-Tree tries to be as null-safe as possible.
+            Because a 'null-action' is an undefined state, which may mean
+            different things to different developers, so it is not allowed.
+        """
         given : 'We create a UI builder node containing a simple split button.'
-            var node = UI.splitButton("")
+            var ui = UI.splitButton("")
         expect : 'It wraps a JSplitButton.'
-            node.component instanceof JSplitButton
+            ui.component instanceof JSplitButton
 
         when :
-            node.onSplitClick(null)
+            ui.onSplitClick(null)
         then :
             thrown(IllegalArgumentException)
 
         when :
-            node.onClick(null)
+            ui.onClick(null)
         then :
             thrown(IllegalArgumentException)
 
         when :
-            node.onChange(null)
+            ui.onChange(null)
         then :
             thrown(IllegalArgumentException)
 
         when :
-            node.onButtonClick(null)
+            ui.onButtonClick(null)
         then :
             thrown(IllegalArgumentException)
 
         when :
-            node.onSelection(null)
+            ui.onSelection(null)
         then :
             thrown(IllegalArgumentException)
 
         when :
-            node.onSplitClick(null)
+            ui.onSplitClick(null)
         then :
             thrown(IllegalArgumentException)
     }

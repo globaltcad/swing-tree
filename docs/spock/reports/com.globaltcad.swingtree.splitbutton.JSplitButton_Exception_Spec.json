@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.004 seconds"
+    "duration":"0.005 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -18,34 +18,34 @@
       "result":"PASS",
       "duration":"0.001 seconds",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n            Here you can see that Swing-Tree tries to be as null-safe as possible.\n            Because a 'null-action' is an undefined state, which may mean\n            different things to different developers, so it is not allowed.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We create a UI builder node containing a simple split button.","code":["var node = UI.splitButton(\"\")"]},
+        {"kind":"given","text":"We create a UI builder node containing a simple split button.","code":["var ui = UI.splitButton(\"\")"]},
 
-        {"kind":"expect","text":"It wraps a JSplitButton.","code":["node.component instanceof JSplitButton"]},
+        {"kind":"expect","text":"It wraps a JSplitButton.","code":["ui.component instanceof JSplitButton"]},
 
-        {"kind":"when","text":"","code":["node.onSplitClick(null)"]},
-
-        {"kind":"then","text":"","code":["thrown(IllegalArgumentException)"]},
-
-        {"kind":"when","text":"","code":["node.onClick(null)"]},
+        {"kind":"when","text":"","code":["ui.onSplitClick(null)"]},
 
         {"kind":"then","text":"","code":["thrown(IllegalArgumentException)"]},
 
-        {"kind":"when","text":"","code":["node.onChange(null)"]},
+        {"kind":"when","text":"","code":["ui.onClick(null)"]},
 
         {"kind":"then","text":"","code":["thrown(IllegalArgumentException)"]},
 
-        {"kind":"when","text":"","code":["node.onButtonClick(null)"]},
+        {"kind":"when","text":"","code":["ui.onChange(null)"]},
 
         {"kind":"then","text":"","code":["thrown(IllegalArgumentException)"]},
 
-        {"kind":"when","text":"","code":["node.onSelection(null)"]},
+        {"kind":"when","text":"","code":["ui.onButtonClick(null)"]},
 
         {"kind":"then","text":"","code":["thrown(IllegalArgumentException)"]},
 
-        {"kind":"when","text":"","code":["node.onSplitClick(null)"]},
+        {"kind":"when","text":"","code":["ui.onSelection(null)"]},
+
+        {"kind":"then","text":"","code":["thrown(IllegalArgumentException)"]},
+
+        {"kind":"when","text":"","code":["ui.onSplitClick(null)"]},
 
         {"kind":"then","text":"","code":["thrown(IllegalArgumentException)"]}
       ],
@@ -74,7 +74,7 @@
     {
       "id":"Split button items do not take null as an answer.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

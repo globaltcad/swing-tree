@@ -1067,6 +1067,12 @@ public final class UI
         return of(new JComboBox<>(items));
     }
 
+    public static <E extends Enum<E>> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var ) {
+        LogUtil.nullArgCheck(var, "var", Var.class);
+        // We get an array of possible enum states from the enum class
+        return comboBox(var.type().getEnumConstants()).withSelectedItem(var);
+    }
+
     /**
      *  Use this to create a builder for the provided {@link JList} instance
      *  with the provided list of elements as selectable items.

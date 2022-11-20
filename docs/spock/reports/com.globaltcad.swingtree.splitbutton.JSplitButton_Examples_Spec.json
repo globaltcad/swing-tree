@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"1.060 seconds"
+    "duration":"1.058 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -81,7 +81,7 @@
     {
       "id":"We can register button click events for button items as well as the split button as a whole.",
       "result":"PASS",
-      "duration":"0.417 seconds",
+      "duration":"0.416 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

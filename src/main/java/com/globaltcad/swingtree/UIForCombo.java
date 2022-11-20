@@ -1,10 +1,12 @@
 package com.globaltcad.swingtree;
 
 import com.globaltcad.swingtree.api.UIAction;
+import com.globaltcad.swingtree.api.mvvm.Var;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.function.Consumer;
 
 /**
  *  A swing tree builder node for {@link JComboBox} instances.
@@ -29,8 +31,12 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
     public UIForCombo<E,C> onSelection(UIAction<SimpleDelegate<JComboBox<E>, ActionEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         JComboBox<E> combo = getComponent();
-        combo.addActionListener(e -> _doApp(()->action.accept(new SimpleDelegate<>(combo, e, ()->getSiblinghood()))) );
+        _onSelection(e -> _doApp(()->action.accept(new SimpleDelegate<>(combo, e, ()->getSiblinghood()))) );
         return this;
+    }
+
+    private void _onSelection(Consumer<ActionEvent> consumer) {
+        getComponent().addActionListener(consumer::accept);
     }
 
     /**
@@ -51,6 +57,20 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
 
     public final UIForCombo<E,C> withRenderer( ListCellRenderer<E> renderer ) {
         getComponent().setRenderer(renderer);
+        return this;
+    }
+
+    public final UIForCombo<E,C> withSelectedItem( Var<E> var ) {
+        LogUtil.nullArgCheck(var, "var", Var.class);
+        var.onShow(v-> _doUI(()->getComponent().setSelectedItem(v)));
+        _onSelection(
+            e -> _doApp((E)getComponent().getSelectedItem(), sel->var.set(sel).act())
+        );
+        return withSelectedItem(var.get());
+    }
+
+    public final UIForCombo<E,C> withSelectedItem(E item) {
+        getComponent().setSelectedItem(item);
         return this;
     }
 

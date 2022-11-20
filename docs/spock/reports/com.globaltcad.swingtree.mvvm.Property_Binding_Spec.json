@@ -91,7 +91,7 @@
     {
       "id":"We can enable and disable a UI component dynamically through property binding.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
