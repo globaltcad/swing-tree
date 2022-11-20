@@ -217,17 +217,35 @@ class Properties_Spec extends Specification
             thrown(NoSuchElementException)
     }
 
-    def 'The "orElseNull" method should be used instead of "orElseThrow".'()
+    def 'The "orElseNull" method should be used instead of "orElseThrow" if you are fine with null values.'()
     {
         reportInfo """
             Note that accessing the value of an empty property using the "orElseThrow" method
-            will throw an exception.
-            Use this method instead to make the intend of your code more clear.
+            will throw an exception if it is null!
+            Use "orElseNull" if you are fine with your property being empty 
+            and to also make this intend clear.
         """
         given : 'We create a property...'
             Val<Long> property = Val.of(Long, null)
         when : 'We try to access the value of the property.'
             property.orElseThrow()
+        then : 'The property will throw an exception.'
+            thrown(NoSuchElementException)
+    }
+
+    def 'The "get" method will throw an exception if there is no element present.'()
+    {
+        reportInfo """
+            Note that accessing the value of an empty property using the "get" method
+            will throw an exception.
+            It is recommended to use the "orElseNull" method instead, because the "get"
+            method is intended to be used for non-nullable types, or when it
+            is clear that the property is not empty!
+        """
+        given : 'We create a property...'
+            Val<Long> property = Val.of(Long, null)
+        when : 'We try to access the value of the property.'
+            property.get()
         then : 'The property will throw an exception.'
             thrown(NoSuchElementException)
     }

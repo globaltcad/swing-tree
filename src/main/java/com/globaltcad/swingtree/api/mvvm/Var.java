@@ -3,6 +3,38 @@ package com.globaltcad.swingtree.api.mvvm;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+/**
+ * 	A mutable wrapper for a value which can be observed by the Swing-Tree UI
+ * 	to dynamically update UI components for you, as well
+ * 	as trigger an action inside your view model.
+ *  <p>
+ * 	So for example if you have a {@link Var} which represents the username
+ * 	of a form, in your Swing-Tree UI you can register a callback which will update the UI
+ * 	accordingly or trigger a view model action. <br>
+ * 	Consider the following example property in your view model:
+ * 	<pre>{@code
+ * 	    // A username property with a validation action:
+ * 		private final Var<String> username = Var.of("").withAction( v -> validateUser(v) );
+ * 	}</pre>
+ * 	And the following Swing-Tree UI:
+ * 	<pre>{@code
+ * 	    UI.textField()
+ * 	    .peek( ta -> vm.getUsername().onShow( t -> ta.setText(t) ) )
+ * 	    .onKeyReleased( e -> vm.getUsername().set( ta.getText() ).act() );
+ * 	}</pre>
+ * 	Your view will automatically update the text field with the value of the property
+ * 	and inside your view model you can also update the value of the property
+ * 	to be shown in the UI:
+ * 	<pre>{@code
+ * 	    // Initially empty username:
+ * 		username.set( "" ).show();
+ * 	}</pre>
+ * 	<p>
+ * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
+ * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
+ *
+ * @param <T> The type of the wrapped value.
+ */
 public interface Var<T> extends Val<T>
 {
 	static <T> Var<T> of( Class<T> type, T value ) {

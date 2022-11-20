@@ -16,7 +16,7 @@
     {
       "id":"We can bind to the text of a button.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that for a binding to work, the property must be a Var or Val\n            implementation and it is required to call the \"show()\" method on the\n            property to apply its value to the view.\n        "]
       },

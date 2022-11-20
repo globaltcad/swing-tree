@@ -32,6 +32,9 @@ import java.util.function.Supplier;
  *  Simply pass {@link String} constraints to the {@link UIForAbstractSwing#withLayout(String, String)}
  *  and any given {@link UIForAbstractSwing#add(String, UIForAbstractSwing[])} method
  *  or variant of, to make use of mig layouts.
+ * 	<p>
+ * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
+ * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
  */
 public final class UI
 {

@@ -7,6 +7,19 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * 	A read only view on a value which can be observed by the Swing-Tree UI
+ * 	to dynamically update UI components for you.
+ * 	The API of this is very similar to the {@link Optional} API in the
+ * 	sense that it is a wrapper around a value which can be empty or not.
+ * 	Use the {@link #onShow(Consumer)} method to register a callbacks which
+ * 	will be called when the {@link #show()} method is called.
+ * 	<p>
+ * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
+ * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
+ *
+ * @param <T> The type of the value held by this {@link Val}.
+ */
 public interface Val<T>
 {
 	String UNNAMED = "UNNAMED"; // This is the default name for properties
@@ -25,6 +38,21 @@ public interface Val<T>
 	 * @return The builder for a {@link AbstractVariable}.
 	 */
 	static <T> Val<T> of( T iniValue ) { return Var.of( iniValue ); }
+
+	/**
+	 * This method is intended to be used for when you want to wrap non-nullable types.
+	 * So if a value is present, it returns the value, otherwise however
+	 * {@code NoSuchElementException} will be thrown.
+	 * If you simply want to get the value of this property irrespective of
+	 * it being null or not, use {@link #orElseNull()} to avoid an exception.
+	 * However, if this property wraps a nullable type, which is not intended to be null,
+	 * please use {@link #orElseThrow()} to make this intention clear.
+	 * The {@link #orElseThrow()} method is functionally identical to this method.
+	 *
+	 * @return the non-{@code null} value described by this {@code Val}
+	 * @throws NoSuchElementException if no value is present
+	 */
+	default T get() { return orElseThrow(); }
 
 	/**
 	 * If a value is present, returns the value, otherwise returns

@@ -24,6 +24,9 @@ import java.util.function.Consumer;
  *  A swing tree builder node for any kind {@link JComponent} instance.
  *  This is the most generic builder type and therefore abstract super-type for almost all other builders.
  *  This builder defines nested building for anything extending the {@link JComponent} class.
+ * 	<p>
+ * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
+ * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
  *  <br><br>
  *
  * @param <I> The concrete extension of the {@link AbstractNestedBuilder}.

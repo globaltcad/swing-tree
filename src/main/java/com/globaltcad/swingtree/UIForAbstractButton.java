@@ -18,6 +18,9 @@ import java.util.function.Consumer;
  *  {@link AbstractButton}" Swing component type.
  *  One of such features is the {@link #onClick(UIAction)} method allowing for a more readable way of adding
  *  {@link ActionListener} instances to button types...
+ * 	<p>
+ * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
+ * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
  *  <br><br>
  *
  * @param <B> The type parameter for the component wrapped by an instance of this class.

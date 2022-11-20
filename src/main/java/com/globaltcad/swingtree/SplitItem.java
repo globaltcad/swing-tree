@@ -20,8 +20,11 @@ import java.util.stream.Collectors;
  *      .add(UI.splitItem("second").onClick( it -> ... ))
  *      .add(UI.splitItem("third").onClick( it -> ... ).onSelected( it -> ... ))
  *  }</pre>
+ * 	<p>
+ * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
+ * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
  *
- * @param <I>
+ * @param <I> The type of the item which will be passed to the {@link UIAction}s.
  */
 public final class SplitItem<I extends JMenuItem>
 {

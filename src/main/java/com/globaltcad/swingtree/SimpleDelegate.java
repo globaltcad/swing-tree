@@ -10,6 +10,9 @@ import java.util.stream.Collectors;
 /**
  *  Instances of this are passed to action lambdas for UI components
  *  to give an action more context information.
+ * 	<p>
+ * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
+ * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
  *
  * @param <C> The delegate (in most cases origin UI component) type parameter stored by this.
  * @param <E> The event type parameter of the event stored by this.

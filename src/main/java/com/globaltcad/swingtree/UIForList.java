@@ -8,6 +8,14 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import java.util.List;
 
+/**
+ * A swing tree builder node for {@link JList} instances.
+ * 	<p>
+ * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
+ * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
+ *
+ * @param <L> The type of the {@link JList} instance which will be wrapped by this builder node.
+ */
 public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForList<E, L>, L>
 {
 

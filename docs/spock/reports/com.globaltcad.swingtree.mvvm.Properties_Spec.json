@@ -4,7 +4,7 @@
   "narrative":"Properties are a powerful tool to model the state\n    as well as business logic of your UI without actually depending on it.\n    This is especially useful for testing your UIs logic.\n    Therefore properties are a root concept in the Swing-Tree library.\n    The decoupling between your UI and the UIs state and logic\n    is achieved by binding properties to UI components.\n    This specification shows you how to model UI state\n    and business logic using properties\n    and how to bind them to UI components.",
   "subjects":[],
   "statistics":{
-    "runs":"12",
+    "runs":"13",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -228,16 +228,33 @@
     },
   
     {
-      "id":"The \"orElseNull\" method should be used instead of \"orElseThrow\".",
+      "id":"The \"orElseNull\" method should be used instead of \"orElseThrow\" if you are fine with null values.",
       "result":"PASS",
       "duration":"0",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Note that accessing the value of an empty property using the \"orElseThrow\" method\n            will throw an exception.\n            Use this method instead to make the intend of your code more clear.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Note that accessing the value of an empty property using the \"orElseThrow\" method\n            will throw an exception if it is null!\n            Use \"orElseNull\" if you are fine with your property being empty \n            and to also make this intend clear.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a property...","code":["Val<Long> property = Val.of(Long, null)"]},
 
         {"kind":"when","text":"We try to access the value of the property.","code":["property.orElseThrow()"]},
+
+        {"kind":"then","text":"The property will throw an exception.","code":["thrown(NoSuchElementException)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"get\" method will throw an exception if there is no element present.",
+      "result":"PASS",
+      "duration":"0",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that accessing the value of an empty property using the \"get\" method\n            will throw an exception.\n            It is recommended to use the \"orElseNull\" method instead, because the \"get\"\n            method is intended to be used for non-nullable types, or when it\n            is clear that the property is not empty!\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property...","code":["Val<Long> property = Val.of(Long, null)"]},
+
+        {"kind":"when","text":"We try to access the value of the property.","code":["property.get()"]},
 
         {"kind":"then","text":"The property will throw an exception.","code":["thrown(NoSuchElementException)"]}
       ],

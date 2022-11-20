@@ -58,6 +58,9 @@ import java.util.function.Supplier;
  * is likely to cause errors. A variable whose type is {@code OptionalUI} should
  * never itself be {@code null}; it should always point to an {@code OptionalUI}
  * instance.
+ * 	<p>
+ * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
+ * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
  *
  * @param <C> the type of component held by this instance
  */
