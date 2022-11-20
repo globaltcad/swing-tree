@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.223 seconds"
+    "duration":"0.238 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can nest JPanel UI nodes to structure UIs.",
       "result":"PASS",
-      "duration":"0.106 seconds",
+      "duration":"0.111 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Just like in regular Swing, the JPanel is the most basic \n            yet most important type of component in Swing-Tree\n            and you can create one using the `UI.panel()` factory method. \n            Don't hesitate to use as the main tool for grouping and structuring\n            your UI, just like you would use the 'div' tag in HTML.\n        "]
       },
@@ -35,7 +35,7 @@
     {
       "id":"We can add a list of components to the swing tree API and get a builder node in return.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Just like in regular Swing, the JPanel is the most basic \n            yet most important type of component in Swing-Tree\n            and you can create one using the `UI.panel()` factory method. \n            Don't hesitate to use as the main tool for grouping and structuring\n            your UI, just like you would use the 'div' tag in HTML.\n        "]
       },
@@ -56,7 +56,7 @@
     {
       "id":"Swing tree nests all kinds of components (trough builder nodes).",
       "result":"PASS",
-      "duration":"0.007 seconds",
+      "duration":"0.012 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Swing tree wraps you components in builder nodes, so you can\n            use the same API to add any kind of component to your UI.\n            Use the `UI.of(..)` factory method to wrap your components\n            or simply use the various kinds of default factory methods like\n             `UI.panel()`, `UI.button()`, `UI.label()` etc.\n        "]
       },
@@ -85,7 +85,7 @@
     {
       "id":"We can easily define the cursor on a wrapped UI component",
       "result":"PASS",
-      "duration":"0.006 seconds",
+      "duration":"0.008 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -104,7 +104,7 @@
     {
       "id":"We can create a border layout based Swing tree.",
       "result":"PASS",
-      "duration":"0.035 seconds",
+      "duration":"0.036 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -123,7 +123,7 @@
     {
       "id":"We can register various kinds of different keyboard event handlers to swing tree nodes.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"0.006 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The Swing-Tree API exposes various methods to register different kinds of Swing component\n            or keyboard events. \n            All such event registration methods can be identified by the 'on' prefix.\n        "]
       },
@@ -153,7 +153,7 @@
     {
       "id":"We can register list selection events on a JList based swing tree node.",
       "result":"PASS",
-      "duration":"0.011 seconds",
+      "duration":"0.012 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The Swing-Tree API exposes various methods to register different kinds of Swing component\n            events, like for example list selection events. \n            All such event registration methods can be identified by the 'on' prefix.\n        "]
       },
@@ -219,7 +219,7 @@
     {
       "id":"Use the \"peek( c -> {} )\" method to access the wrapped Swing component in your Swing-Tree.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The Swing-Tree API provides a \"peek( c -> {} )\" method that allows you to access the wrapped Swing component\n            in your Swing-Tree within the provided Peeker lambda. \n            This is useful for when you want more control over the Swing component than what the Swing-Tree API provides.\n        "]
       },

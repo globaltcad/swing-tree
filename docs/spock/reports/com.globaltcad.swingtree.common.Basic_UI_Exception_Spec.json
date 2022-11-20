@@ -16,7 +16,7 @@
     {
       "id":"The given factory methods do not accept null arguments.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

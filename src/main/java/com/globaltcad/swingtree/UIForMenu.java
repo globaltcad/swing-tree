@@ -12,14 +12,14 @@ public class UIForMenu<M extends JMenu> extends UIForAbstractButton<UIForMenu<M>
     protected UIForMenu( M component ) { super(component); }
 
 
-    public final UIForMenu<M> isPopupMenuVisibleIf( boolean popupMenuVisible ) {
+    public final UIForMenu<M> popupMenuIsVisibleIf( boolean popupMenuVisible ) {
         getComponent().setPopupMenuVisible(popupMenuVisible);
         return this;
     }
 
-    public final UIForMenu<M> isPopupMenuVisibleIf( Val<Boolean> val ) {
-        val.onShow(v -> _doUI(() -> isPopupMenuVisibleIf(v)));
-        return isPopupMenuVisibleIf( val.get() );
+    public final UIForMenu<M> popupMenuIsVisibleIf( Val<Boolean> val ) {
+        val.onShow(v -> _doUI(() -> popupMenuIsVisibleIf(v)));
+        return popupMenuIsVisibleIf( val.get() );
     }
 
 }

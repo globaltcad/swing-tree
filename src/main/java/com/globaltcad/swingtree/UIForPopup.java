@@ -9,17 +9,17 @@ import javax.swing.*;
  */
 public class UIForPopup<P extends JPopupMenu> extends UIForAbstractSwing<UIForPopup<P>, P>
 {
-    protected UIForPopup(P component) { super(component); }
+    protected UIForPopup( P component ) { super(component); }
 
 
-    public UIForPopup<P> isBorderPaintedIf( boolean borderPainted ) {
+    public UIForPopup<P> borderIsPaintedIf( boolean borderPainted ) {
         getComponent().setBorderPainted(borderPainted);
         return this;
     }
 
-    public UIForPopup<P> isBorderPaintedIf( Val<Boolean> val ) {
-        val.onShow(v -> _doUI(() -> isBorderPaintedIf(v)));
-        return isBorderPaintedIf( val.get() );
+    public UIForPopup<P> borderIsPaintedIf( Val<Boolean> val ) {
+        val.onShow(v -> _doUI(() -> borderIsPaintedIf(v)));
+        return borderIsPaintedIf( val.get() );
     }
 
     public UIForPopup<P> add(JMenuItem item) { return this.add(UI.of(item)); }

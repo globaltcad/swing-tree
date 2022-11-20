@@ -12,14 +12,14 @@ public class UIForCheckBox<B extends JCheckBox> extends UIForAbstractButton<UIFo
     protected UIForCheckBox(B component) { super(component); }
 
 
-    public UIForCheckBox<B> isBorderPaintedFlatIf( boolean borderPainted ) {
+    public UIForCheckBox<B> borderIsPaintedFlatIf(boolean borderPainted ) {
         getComponent().setBorderPaintedFlat(borderPainted);
         return this;
     }
 
-    public UIForCheckBox<B> isBorderPaintedFlatIf( Val<Boolean> val ) {
-        val.onShow(v -> _doUI(() -> isBorderPaintedFlatIf(v)));
-        return isBorderPaintedFlatIf( val.get() );
+    public UIForCheckBox<B> borderIsPaintedFlatIf(Val<Boolean> val ) {
+        val.onShow(v -> _doUI(() -> borderIsPaintedFlatIf(v)));
+        return borderIsPaintedFlatIf( val.get() );
     }
 
 }

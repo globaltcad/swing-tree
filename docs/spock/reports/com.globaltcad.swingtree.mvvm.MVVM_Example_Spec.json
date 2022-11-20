@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.315 seconds"
+    "duration":"0.314 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can create a property based view model and build a view for it.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that we use a pre-made example view model here.\n            Feel free to look at the source code of the view model\n            to see what it is doing.\n        "]
       },
@@ -117,7 +117,7 @@
     {
       "id":"We can bind a enum property to a combo box and when the user selects an item, we notice it.",
       "result":"PASS",
-      "duration":"0.023 seconds",
+      "duration":"0.021 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n        "]
       },
@@ -142,7 +142,7 @@
     {
       "id":"An enum based combo box can infer its possible states directly from the binding property.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n        "]
       },

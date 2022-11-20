@@ -548,6 +548,41 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
+     *  Use this to set the cursor type which should be displayed
+     *  when hovering over the UI component wrapped by this builder
+     *  based on boolean property determining if the provided cursor should be set ot not. <br>
+     *  <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     *
+     * @param condition The boolean property determining if the provided cursor should be set ot not.
+     * @param type The {@link UI.Cursor} type defined by a simple enum exposed by this API wrapped in a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withCursorIf( Val<Boolean> condition, UI.Cursor type ) {
+        condition.onShow( c -> _doUI(()->getComponent().setCursor( new java.awt.Cursor( c ? type.type : UI.Cursor.DEFAULT.type ) )) );
+        return with( condition.orElseThrow() ? type : UI.Cursor.DEFAULT );
+    }
+
+    /**
+     *  Use this to dynamically set the cursor type which should be displayed
+     *  when hovering over the UI component wrapped by this builder
+     *  based on boolean property determining if the provided cursor should be set ot not. <br>
+     *  <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     *
+     * @param condition The boolean property determining if the provided cursor should be set ot not.
+     * @param type The {@link UI.Cursor} type property defined by a simple enum exposed by this API.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withCursorIf( Val<Boolean> condition, Val<UI.Cursor> type ) {
+        Cursor[] baseCursor = new Cursor[1];
+        condition.onShow( c -> _doUI(type::show) );
+        type.onShow( c -> _doUI(()-> {
+            if (baseCursor[0] == null) baseCursor[0] = getComponent().getCursor();
+            getComponent().setCursor( new java.awt.Cursor( condition.get() ? c.type : baseCursor[0].getType() ) );
+        }) );
+        return with( condition.orElseThrow() ? type.orElseThrow() : UI.Cursor.DEFAULT );
+    }
+
+    /**
      *  Use this to set the {@link LayoutManager} of the component wrapped by this builder. <br>
      *  This is in essence a more convenient way than the alternative usage pattern involving
      *  the {@link #peek(Peeker)} method to peek into the builder's component like so: <br>
@@ -739,6 +774,49 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
+     *  Use this to bind to a background color
+     *  which will be set dynamically based on a boolean property.
+     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     *
+     * @param bg The background color which should be set for the UI component.
+     * @param condition The condition property which determines whether the background color should be set or not.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBackgroundIf( Val<Boolean> condition, Color bg ) {
+        Color[] oldColor = new Color[1];
+        condition.onShow( v -> _doUI(()->{
+            if (v) {
+                oldColor[0] = getComponent().getBackground();
+                getComponent().setBackground(bg);
+            } else {
+                getComponent().setBackground(oldColor[0]);
+            }
+        }));
+        return this.withBackground( condition.orElse(false) ? bg : getComponent().getBackground() );
+    }
+    
+    /**
+     *  Use this to dynamically bind to a background color
+     *  which will be set dynamically based on a boolean property.
+     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     *
+     * @param color The background color property which should be set for the UI component.
+     * @param condition The condition property which determines whether the background color should be set or not.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBackgroundIf( Val<Boolean> condition, Val<Color> color ) {
+        Color[] baseColor = new Color[1];
+        condition.onShow(setColor -> _doUI(color::show));
+        color.onShow(v -> _doUI(() -> {
+            if (condition.get()) {
+                if (!color.is(baseColor[0])) baseColor[0] = getComponent().getBackground();
+                getComponent().setBackground(color.get());
+            } else getComponent().setBackground(baseColor[0]);
+        }));
+        return this.withBackground(condition.orElse(false) ? color.orElseThrow() : getComponent().getBackground());
+    }
+    
+    /**
      *  Set the color of this {@link JComponent}. (This is usually the font color for components displaying text) <br>
      *  This is in essence a convenience method, which avoid having to expose the underlying component
      *  through the {@link #peek(Peeker)} method like so: <br>
@@ -775,6 +853,49 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withForeground( Val<Color> fg ) {
         fg.onShow(v-> _doUI(()->getComponent().setForeground(v)));
         return this.withForeground( fg.orElseNull() );
+    }
+    
+    /**
+     *  Use this to bind to a foreground color
+     *  which will be set dynamically based on a boolean property.
+     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     *
+     * @param fg The foreground color which should be set for the UI component.
+     * @param condition The condition property which determines whether the foreground color should be set or not.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withForegroundIf( Val<Boolean> condition, Color fg ) {
+        Color[] oldColor = new Color[1];
+        condition.onShow( v -> _doUI(()->{
+            if (v) {
+                oldColor[0] = getComponent().getForeground();
+                getComponent().setForeground(fg);
+            } else {
+                getComponent().setForeground(oldColor[0]);
+            }
+        }));
+        return this.withForeground( condition.orElse(false) ? fg : getComponent().getForeground() );
+    }
+    
+    /**
+     *  Use this to dynamically bind to a foreground color
+     *  which will be set dynamically based on a boolean property.
+     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     *
+     * @param color The foreground color property which should be set for the UI component.
+     * @param condition The condition property which determines whether the foreground color should be set or not.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withForegroundIf( Val<Boolean> condition, Val<Color> color ) {
+        Color[] baseColor = new Color[1];
+        condition.onShow(setColor -> _doUI(color::show));
+        color.onShow(v -> _doUI(() -> {
+            if (condition.get()) {
+                if (!color.is(baseColor[0])) baseColor[0] = getComponent().getForeground();
+                getComponent().setForeground(color.get());
+            } else getComponent().setForeground(baseColor[0]);
+        }));
+        return this.withForeground(condition.orElse(false) ? color.orElseThrow() : getComponent().getForeground());
     }
 
     /**
