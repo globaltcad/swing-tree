@@ -157,9 +157,9 @@ class MVVM_Example_Spec extends Specification
         """
         given : 'We instantiate the "view model" in the form of a single property holding an example enum.'
             boolean actionPerformed = false
-            Var<Size> selected = Var.of(Size.SMALL).withAction({actionPerformed = true})
+            Var<Option> selected = Var.of(Option.YES).withAction({actionPerformed = true})
         expect : 'The enum we use for demonstration has the following values.'
-            Size.values() == [Size.SMALL, Size.MEDIUM, Size.LARGE]
+            Option.values() == [Option.YES, Option.NO, Option.MAYBE]
 
         when : 'We create a view for our view model...'
             var ui = UI.comboBox(selected)
@@ -167,9 +167,9 @@ class MVVM_Example_Spec extends Specification
         then : 'The view was successfully created.'
             ui != null
         when : 'We select an item in the combo box.'
-            ui.component.setSelectedIndex(1)
+            ui.component.setSelectedItem(Option.MAYBE)
         then : 'The property was updated.'
-            selected.orElseNull() == Size.MEDIUM
+            selected.orElseNull() == Option.MAYBE
         and : 'The action was triggered.'
             actionPerformed == true
     }
@@ -204,6 +204,11 @@ class MVVM_Example_Spec extends Specification
     private static enum Size
     {
         SMALL, MEDIUM, LARGE
+    }
+
+    private static enum Option
+    {
+        YES, NO, MAYBE
     }
 
 }

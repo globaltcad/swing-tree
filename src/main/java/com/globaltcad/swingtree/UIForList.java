@@ -33,7 +33,7 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
      * @param entries The list of entries to set as data.
      * @return This instance of the builder node.
      */
-    public final UIForList<E, L> withEntries(List<E> entries) {
+    public final UIForList<E, L> withEntries( List<E> entries ) {
         getComponent().setListData((E[]) entries.toArray(new Object[0]));
         return this;
     }
@@ -44,12 +44,12 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
      * @param entries The array of entries to set as data.
      * @return This instance of the builder node.
      */
-    public final UIForList<E, L> withEntries(E... entries) {
+    public final UIForList<E, L> withEntries( E... entries ) {
         getComponent().setListData(entries.clone());
         return this;
     }
 
-    public final UIForList<E, L> withRenderer(ListEntryRenderer<E, L> renderer) {
+    public final UIForList<E, L> withRenderer( ListEntryRenderer<E, L> renderer ) {
         getComponent().setCellRenderer((list, value, index, isSelected, cellHasFocus) -> renderer.render(new ListEntryDelegate<E, L>() {
             @Override public L list() { return (L) list; }
             @Override public E entry() { return value; }
@@ -69,7 +69,7 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
      * @param action The {@link UIAction} that will be notified.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForList<E, L> onSelection(UIAction<SimpleDelegate<JList<E>, ListSelectionEvent>> action) {
+    public final UIForList<E, L> onSelection( UIAction<SimpleDelegate<JList<E>, ListSelectionEvent>> action ) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         L list = getComponent();
         list.addListSelectionListener(e -> _doApp(()->action.accept(new SimpleDelegate<>(list, e, ()->getSiblinghood()))) );

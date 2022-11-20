@@ -7,6 +7,8 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 
+import javax.swing.Icon
+import javax.swing.SwingConstants
 import java.awt.Color
 import java.awt.Dimension
 
@@ -175,6 +177,140 @@ class Label_Binding_Spec extends Specification
             visible.show()
         then : 'The label should be updated.'
             ui.component.visible == false
+    }
+
+    def 'A property can define the horizontal and vertical alignment of a label.'()
+    {
+        reportInfo """
+            Not only should a view model contain state relevant for modelling the
+            text displayed on a label,
+            but it should also model state defining how the UI component should
+            behave and look like depending on your business logic.
+        """
+        given : 'We create a simple swing-tree property for modelling the size.'
+            Val<UI.HorizontalAlignment> horizontal = Var.of(UI.HorizontalAlignment.LEFT)
+            Val<UI.VerticalAlignment> vertical = Var.of(UI.VerticalAlignment.TOP)
+
+        when : 'We create and bind to a label UI node...'
+            var ui =
+                    UI.label("")
+                    .withHorizontalAlignment(horizontal)
+                    .withVerticalAlignment(vertical)
+
+        then : 'The label should be updated when the property changes.'
+            ui.component.horizontalAlignment == SwingConstants.LEFT
+            ui.component.verticalAlignment == SwingConstants.TOP
+
+        when : 'We change the property values...'
+            horizontal.set(UI.HorizontalAlignment.CENTER)
+            vertical.set(UI.VerticalAlignment.BOTTOM)
+        then : 'The label should NOT be updated.'
+            ui.component.horizontalAlignment == SwingConstants.LEFT
+            ui.component.verticalAlignment == SwingConstants.TOP
+
+        when : 'We call the "show" method on the property...'
+            horizontal.show()
+            vertical.show()
+        then : 'The label should be updated.'
+            ui.component.horizontalAlignment == SwingConstants.CENTER
+            ui.component.verticalAlignment == SwingConstants.BOTTOM
+    }
+
+    def 'A property can define the image relative horizontal and vertical alignment of a label.'()
+    {
+        reportInfo """
+            Not only should a view model contain state relevant for modelling the
+            text displayed on a label,
+            but it should also model state defining how the UI component should
+            behave and look like depending on your business logic.
+        """
+        given : 'We create a simple swing-tree property for modelling the size.'
+            Val<UI.HorizontalAlignment> horizontal = Var.of(UI.HorizontalAlignment.LEFT)
+            Val<UI.VerticalAlignment> vertical = Var.of(UI.VerticalAlignment.TOP)
+
+        when : 'We create and bind to a label UI node...'
+            var ui =
+                    UI.label("")
+                    .withImageRelativeHorizontalAlignment(horizontal)
+                    .withImageRelativeVerticalAlignment(vertical)
+
+        then : 'The label should be updated when the property changes.'
+            ui.component.horizontalTextPosition == SwingConstants.LEFT
+            ui.component.verticalTextPosition == SwingConstants.TOP
+
+        when : 'We change the property values...'
+            horizontal.set(UI.HorizontalAlignment.CENTER)
+            vertical.set(UI.VerticalAlignment.BOTTOM)
+        then : 'The label should NOT be updated.'
+            ui.component.horizontalTextPosition == SwingConstants.LEFT
+            ui.component.verticalTextPosition == SwingConstants.TOP
+
+        when : 'We call the "show" method on the property...'
+            horizontal.show()
+            vertical.show()
+        then : 'The label should be updated.'
+            ui.component.horizontalTextPosition == SwingConstants.CENTER
+            ui.component.verticalTextPosition == SwingConstants.BOTTOM
+    }
+
+    def 'You can dynamically model the font size of your labels using an integer based property.'()
+    {
+        reportInfo """
+            Not only should a view model contain state relevant for modelling the
+            text displayed on a label,
+            but it should also model state defining how the UI component should
+            behave and look like depending on your business logic.
+        """
+        given : 'We create a simple swing-tree property for modelling the size.'
+            Val<Integer> fontSize = Var.of(12)
+
+        when : 'We create and bind to a label UI node...'
+            var ui =
+                    UI.label("")
+                    .withFontSize(fontSize)
+
+        then : 'The label should be updated when the property changes.'
+            ui.component.font.size == 12
+
+        when : 'We change the property values...'
+            fontSize.set(24)
+        then : 'The label should NOT be updated.'
+            ui.component.font.size == 12
+
+        when : 'We call the "show" method on the property...'
+            fontSize.show()
+        then : 'The label should be updated.'
+            ui.component.font.size == 24
+    }
+
+    def 'We can store icons inside properties and then bind them to labels.'()
+    {
+        reportInfo """
+            Not only should a view model contain state relevant for modelling the
+            text displayed on a label,
+            but it should also model state defining how the UI component should
+            behave and look like depending on your business logic.
+        """
+        given : 'We create a simple swing-tree property for modelling the size.'
+            Val<Icon> icon = Var.of(UI.icon("img/seed.png"))
+
+        when : 'We create and bind to a label UI node...'
+            var ui =
+                    UI.label("")
+                    .withIcon(icon)
+
+        then : 'The label should be updated when the property changes.'
+            ui.component.icon != null
+
+        when : 'We change the property values...'
+            icon.set(UI.icon("img/swing.png"))
+        then : 'The label should NOT be updated.'
+            ui.component.icon != null
+
+        when : 'We call the "show" method on the property...'
+            icon.show()
+        then : 'The label should be updated.'
+            ui.component.icon != null
     }
 
 }

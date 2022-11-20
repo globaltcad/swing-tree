@@ -16,7 +16,7 @@ import java.util.function.Consumer;
  */
 public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIForCombo<E,C>, JComboBox<E>>
 {
-    protected UIForCombo(JComboBox<E> component) { super(component); }
+    protected UIForCombo( JComboBox<E> component ) { super(component); }
 
     /**
      * Adds an {@link UIAction} to the underlying {@link JComboBox}
@@ -28,14 +28,14 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
      * @param action The {@link UIAction} that will be notified.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public UIForCombo<E,C> onSelection(UIAction<SimpleDelegate<JComboBox<E>, ActionEvent>> action) {
+    public UIForCombo<E,C> onSelection( UIAction<SimpleDelegate<JComboBox<E>, ActionEvent>> action ) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         JComboBox<E> combo = getComponent();
         _onSelection(e -> _doApp(()->action.accept(new SimpleDelegate<>(combo, e, ()->getSiblinghood()))) );
         return this;
     }
 
-    private void _onSelection(Consumer<ActionEvent> consumer) {
+    private void _onSelection( Consumer<ActionEvent> consumer ) {
         getComponent().addActionListener(consumer::accept);
     }
 
@@ -45,8 +45,20 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
      * @param isEditable The truth value determining if the UI component should be editable or not.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public UIForCombo<E,C> isEditableIf(boolean isEditable) {
+    public UIForCombo<E,C> isEditableIf( boolean isEditable ) {
         getComponent().setEditable(isEditable);
+        return this;
+    }
+
+    /**
+     *  Use this to enable or disable editing of the wrapped UI component
+     *  through property binding dynamically.
+     *
+     * @param isEditable The boolean property determining if the UI component should be editable or not.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public UIForCombo<E,C> isEditableIf( Var<Boolean> isEditable ) {
+        isEditable.onShow(v -> _doUI(() -> isEditableIf(v)));
         return this;
     }
 
@@ -69,7 +81,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
         return withSelectedItem(var.get());
     }
 
-    public final UIForCombo<E,C> withSelectedItem(E item) {
+    public final UIForCombo<E,C> withSelectedItem( E item ) {
         getComponent().setSelectedItem(item);
         return this;
     }

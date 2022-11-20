@@ -1,5 +1,7 @@
 package com.globaltcad.swingtree;
 
+import com.globaltcad.swingtree.api.mvvm.Val;
+
 import javax.swing.*;
 
 /**
@@ -10,9 +12,14 @@ public class UIForPopup<P extends JPopupMenu> extends UIForAbstractSwing<UIForPo
     protected UIForPopup(P component) { super(component); }
 
 
-    public UIForPopup<P> isBorderPaintedIf(boolean borderPainted) {
+    public UIForPopup<P> isBorderPaintedIf( boolean borderPainted ) {
         getComponent().setBorderPainted(borderPainted);
         return this;
+    }
+
+    public UIForPopup<P> isBorderPaintedIf( Val<Boolean> val ) {
+        val.onShow(v -> _doUI(() -> isBorderPaintedIf(v)));
+        return isBorderPaintedIf( val.get() );
     }
 
     public UIForPopup<P> add(JMenuItem item) { return this.add(UI.of(item)); }

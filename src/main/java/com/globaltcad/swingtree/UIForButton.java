@@ -1,5 +1,7 @@
 package com.globaltcad.swingtree;
 
+import com.globaltcad.swingtree.api.mvvm.Val;
+
 import javax.swing.*;
 
 /**
@@ -8,6 +10,16 @@ import javax.swing.*;
  */
 public class UIForButton<B extends AbstractButton> extends UIForAbstractButton<UIForButton<B>, B>
 {
-    protected UIForButton(B component) { super(component); }
+    protected UIForButton( B component ) { super(component); }
+
+    public UIForButton<B> isBorderPaintedIf( boolean borderPainted ) {
+        getComponent().setBorderPainted(borderPainted);
+        return this;
+    }
+
+    public UIForButton<B> isBorderPaintedIf( Val<Boolean> val ) {
+        val.onShow(v -> _doUI(() -> isBorderPaintedIf(v)));
+        return isBorderPaintedIf( val.get() );
+    }
 
 }

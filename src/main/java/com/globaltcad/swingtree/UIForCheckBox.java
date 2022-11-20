@@ -1,5 +1,7 @@
 package com.globaltcad.swingtree;
 
+import com.globaltcad.swingtree.api.mvvm.Val;
+
 import javax.swing.*;
 
 /**
@@ -8,5 +10,16 @@ import javax.swing.*;
 public class UIForCheckBox<B extends JCheckBox> extends UIForAbstractButton<UIForCheckBox<B>, B>
 {
     protected UIForCheckBox(B component) { super(component); }
+
+
+    public UIForCheckBox<B> isBorderPaintedFlatIf( boolean borderPainted ) {
+        getComponent().setBorderPaintedFlat(borderPainted);
+        return this;
+    }
+
+    public UIForCheckBox<B> isBorderPaintedFlatIf( Val<Boolean> val ) {
+        val.onShow(v -> _doUI(() -> isBorderPaintedFlatIf(v)));
+        return isBorderPaintedFlatIf( val.get() );
+    }
 
 }

@@ -13,5 +13,5 @@ public class UIForEditorPane<P extends JEditorPane> extends UIForAbstractEditorP
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    public UIForEditorPane(P component) { super(component); }
+    public UIForEditorPane( P component ) { super(component); }
 }

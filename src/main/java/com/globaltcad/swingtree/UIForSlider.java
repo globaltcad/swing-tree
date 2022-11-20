@@ -27,7 +27,7 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
      * @param action The {@link UIAction} that will be called through the underlying change event.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForSlider<S> onChange(UIAction<SimpleDelegate<JSlider, ChangeEvent>> action) {
+    public final UIForSlider<S> onChange( UIAction<SimpleDelegate<JSlider, ChangeEvent>> action ) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         S slider = getComponent();
         _onChange( e -> _doApp(()->action.accept(new SimpleDelegate<>(slider, e, ()->getSiblinghood()))) );

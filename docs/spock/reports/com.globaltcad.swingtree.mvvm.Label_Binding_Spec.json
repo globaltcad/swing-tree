@@ -4,12 +4,12 @@
   "narrative":"As a developer, I want to bind a label to a property so\n    that the label is updated when the property changes.\n    Binding is a powerful feature that allows us to create\n    UIs which are not only decoupled from the business logic of\n    an application, but also make it easy to create UIs which\n    are dynamic and reactive.",
   "subjects":[],
   "statistics":{
-    "runs":"5",
+    "runs":"9",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.006 seconds"
+    "duration":"0.013 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -134,6 +134,106 @@
         {"kind":"when","text":"We call the \"show\" method on the property...","code":["visible.show()"]},
 
         {"kind":"then","text":"The label should be updated.","code":["ui.component.visible == false"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A property can define the horizontal and vertical alignment of a label.",
+      "result":"PASS",
+      "duration":"0.002 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<UI.HorizontalAlignment> horizontal = Var.of(UI.HorizontalAlignment.LEFT)","Val<UI.VerticalAlignment> vertical = Var.of(UI.VerticalAlignment.TOP)"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withHorizontalAlignment(horizontal)","        .withVerticalAlignment(vertical)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.horizontalAlignment == SwingConstants.LEFT","ui.component.verticalAlignment == SwingConstants.TOP"]},
+
+        {"kind":"when","text":"We change the property values...","code":["horizontal.set(UI.HorizontalAlignment.CENTER)","vertical.set(UI.VerticalAlignment.BOTTOM)"]},
+
+        {"kind":"then","text":"The label should NOT be updated.","code":["ui.component.horizontalAlignment == SwingConstants.LEFT","ui.component.verticalAlignment == SwingConstants.TOP"]},
+
+        {"kind":"when","text":"We call the \"show\" method on the property...","code":["horizontal.show()","vertical.show()"]},
+
+        {"kind":"then","text":"The label should be updated.","code":["ui.component.horizontalAlignment == SwingConstants.CENTER","ui.component.verticalAlignment == SwingConstants.BOTTOM"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A property can define the image relative horizontal and vertical alignment of a label.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<UI.HorizontalAlignment> horizontal = Var.of(UI.HorizontalAlignment.LEFT)","Val<UI.VerticalAlignment> vertical = Var.of(UI.VerticalAlignment.TOP)"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withImageRelativeHorizontalAlignment(horizontal)","        .withImageRelativeVerticalAlignment(vertical)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.horizontalTextPosition == SwingConstants.LEFT","ui.component.verticalTextPosition == SwingConstants.TOP"]},
+
+        {"kind":"when","text":"We change the property values...","code":["horizontal.set(UI.HorizontalAlignment.CENTER)","vertical.set(UI.VerticalAlignment.BOTTOM)"]},
+
+        {"kind":"then","text":"The label should NOT be updated.","code":["ui.component.horizontalTextPosition == SwingConstants.LEFT","ui.component.verticalTextPosition == SwingConstants.TOP"]},
+
+        {"kind":"when","text":"We call the \"show\" method on the property...","code":["horizontal.show()","vertical.show()"]},
+
+        {"kind":"then","text":"The label should be updated.","code":["ui.component.horizontalTextPosition == SwingConstants.CENTER","ui.component.verticalTextPosition == SwingConstants.BOTTOM"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can dynamically model the font size of your labels using an integer based property.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Integer> fontSize = Var.of(12)"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withFontSize(fontSize)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.font.size == 12"]},
+
+        {"kind":"when","text":"We change the property values...","code":["fontSize.set(24)"]},
+
+        {"kind":"then","text":"The label should NOT be updated.","code":["ui.component.font.size == 12"]},
+
+        {"kind":"when","text":"We call the \"show\" method on the property...","code":["fontSize.show()"]},
+
+        {"kind":"then","text":"The label should be updated.","code":["ui.component.font.size == 24"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can store icons inside properties and then bind them to labels.",
+      "result":"PASS",
+      "duration":"0",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Icon> icon = Var.of(UI.icon(\"img/seed.png\"))"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withIcon(icon)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.icon != null"]},
+
+        {"kind":"when","text":"We change the property values...","code":["icon.set(UI.icon(\"img/swing.png\"))"]},
+
+        {"kind":"then","text":"The label should NOT be updated.","code":["ui.component.icon != null"]},
+
+        {"kind":"when","text":"We call the \"show\" method on the property...","code":["icon.show()"]},
+
+        {"kind":"then","text":"The label should be updated.","code":["ui.component.icon != null"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

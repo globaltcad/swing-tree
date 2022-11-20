@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.078 seconds"
+    "duration":"0.079 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -108,7 +108,7 @@
     {
       "id":"Properties not only have a value but also a type and id!",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

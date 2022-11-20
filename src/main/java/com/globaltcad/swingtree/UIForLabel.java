@@ -81,12 +81,23 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      *
      * @return This very builder to allow for method chaining.
      */
-    public UIForLabel<L> toggleBold() {
+    public final UIForLabel<L> toggleBold() {
         this.peek(label -> {
             Font f = label.getFont();
             label.setFont(f.deriveFont(f.getStyle() ^ Font.BOLD));
         });
         return this;
+    }
+
+    public final UIForLabel<L> isBoldIf( boolean isBold ) {
+        if ( isBold ) makeBold();
+        else makePlain();
+        return this;
+    }
+
+    public final UIForLabel<L> isBoldIf( Val<Boolean> val ) {
+        val.onShow(v -> _doUI(() -> isBoldIf(v)));
+        return isBoldIf( val.get() );
     }
 
     /**
@@ -99,7 +110,7 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @param text The new text to be set for the wrapped label.
      * @return This very builder to allow for method chaining.
      */
-    public final UIForLabel<L> withText(String text) { getComponent().setText(text); return this; }
+    public final UIForLabel<L> withText( String text ) { getComponent().setText(text); return this; }
 
     public final UIForLabel<L> withText( Val<String> val ) {
         val.onShow(v-> _doUI(()->getComponent().setText(v)));
@@ -117,9 +128,21 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @param horizontalAlign The horizontal alignment which should be applied to the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public UIForLabel<L> with(UI.HorizontalAlignment horizontalAlign) {
+    public UIForLabel<L> with( UI.HorizontalAlignment horizontalAlign ) {
         getComponent().setHorizontalAlignment(horizontalAlign.forSwing());
         return this;
+    }
+
+
+    /**
+     * This binds to a property defining the horizontal alignment of the label's content (icon and text).
+     *
+     * @param horizontalAlign The horizontal alignment property which should be applied to the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public UIForLabel<L> withHorizontalAlignment( Val<UI.HorizontalAlignment> horizontalAlign ) {
+        horizontalAlign.onShow(v -> _doUI(() -> getComponent().setHorizontalAlignment(v.forSwing())));
+        return with(horizontalAlign.orElseThrow());
     }
 
     /**
@@ -133,9 +156,20 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @param verticalAlign The vertical alignment which should be applied to the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public UIForLabel<L> with(UI.VerticalAlignment verticalAlign) {
+    public UIForLabel<L> with( UI.VerticalAlignment verticalAlign ) {
         getComponent().setVerticalAlignment(verticalAlign.forSwing());
         return this;
+    }
+
+    /**
+     * This binds to a property defining the vertical alignment of the label's content (icon and text).
+     *
+     * @param verticalAlign The vertical alignment property which should be applied to the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public UIForLabel<L> withVerticalAlignment( Val<UI.VerticalAlignment> verticalAlign ) {
+        verticalAlign.onShow(v -> _doUI(() -> getComponent().setVerticalAlignment(v.forSwing())));
+        return with(verticalAlign.orElseThrow());
     }
 
     /**
@@ -149,9 +183,20 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @param horizontalAlign The horizontal alignment which should be applied to the text of the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public UIForLabel<L> withImageRelative(UI.HorizontalAlignment horizontalAlign) {
+    public UIForLabel<L> withImageRelative( UI.HorizontalAlignment horizontalAlign ) {
         getComponent().setHorizontalTextPosition(horizontalAlign.forSwing());
         return this;
+    }
+
+    /**
+     *  Use this to bind to a property defining the horizontal position of the label's text, relative to its image.
+     *
+     * @param horizontalAlign The horizontal alignment property which should be applied to the text of the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public UIForLabel<L> withImageRelativeHorizontalAlignment( Val<UI.HorizontalAlignment> horizontalAlign ) {
+        horizontalAlign.onShow(v -> _doUI(() -> getComponent().setHorizontalTextPosition(v.forSwing())));
+        return withImageRelative(horizontalAlign.orElseThrow());
     }
 
     /**
@@ -165,9 +210,20 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @param verticalAlign The vertical alignment which should be applied to the text of the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public UIForLabel<L> withImageRelative(UI.VerticalAlignment verticalAlign) {
+    public UIForLabel<L> withImageRelative( UI.VerticalAlignment verticalAlign ) {
         getComponent().setVerticalTextPosition(verticalAlign.forSwing());
         return this;
+    }
+
+    /**
+     *  Use this to bind to a property defining the vertical position of the label's text, relative to its image.
+     *
+     * @param verticalAlign The vertical alignment property which should be applied to the text of the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public UIForLabel<L> withImageRelativeVerticalAlignment( Val<UI.VerticalAlignment> verticalAlign ) {
+        verticalAlign.onShow(v -> _doUI(() -> getComponent().setVerticalTextPosition(v.forSwing())));
+        return withImageRelative(verticalAlign.orElseThrow());
     }
 
     /**
@@ -182,10 +238,21 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @param icon The {@link Icon} which should be displayed on the label.
      * @return This very builder to allow for method chaining.
      */
-    public UIForLabel<L> with(Icon icon) {
+    public UIForLabel<L> with( Icon icon ) {
         LogUtil.nullArgCheck(icon,"icon",Icon.class);
         getComponent().setIcon(icon);
         return this;
+    }
+
+    /**
+     *  Use this to dynamically set the icon property for the wrapped {@link JLabel}.
+     *
+     * @param icon The {@link Icon} property which should be displayed on the label.
+     * @return This very builder to allow for method chaining.
+     */
+    public UIForLabel<L> withIcon( Val<Icon> icon ) {
+        icon.onShow(i-> _doUI(()->getComponent().setIcon(i)));
+        return with(icon.orElseThrow());
     }
 
     /**
@@ -193,12 +260,22 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @param size The size of the font which should be displayed on the label.
      * @return This very builder to allow for method chaining.
      */
-    public UIForLabel<L> withFontSize(int size) {
+    public UIForLabel<L> withFontSize( int size ) {
         L label = getComponent();
         Font old = label.getFont();
         label.setFont(new Font(old.getName(), old.getStyle(), size));
         return this;
     }
 
+    /**
+     *  Use this to dynamically set the size of the font of the wrapped {@link JLabel}
+     *  through the provided view model property.
+     * @param size The size property of the font which should be displayed on the label.
+     * @return This very builder to allow for method chaining.
+     */
+    public UIForLabel<L> withFontSize( Val<Integer> size ) {
+        size.onShow(s -> _doUI(() -> withFontSize(s)));
+        return withFontSize(size.orElseThrow());
+    }
 }
 

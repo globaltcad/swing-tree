@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.381 seconds"
+    "duration":"0.387 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"The advanced UI define in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.268 seconds",
+      "duration":"0.270 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -37,7 +37,7 @@
     {
       "id":"The form UI define in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.070 seconds",
+      "duration":"0.073 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -54,7 +54,7 @@
     {
       "id":"The calculator UI defined in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.022 seconds",
+      "duration":"0.024 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

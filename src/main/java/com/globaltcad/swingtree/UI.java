@@ -13,11 +13,17 @@ import com.globaltcad.swingtree.layout.CompAttr;
 import com.globaltcad.swingtree.layout.LayoutAttr;
 import net.miginfocom.swing.MigLayout;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -124,6 +130,26 @@ public final class UI
     public static CompAttr PAD(int size) { return PAD(size, size, size, size); }
     public static CompAttr PAD(int top, int left, int bottom, int right) { return CompAttr.of("pad "+top+" "+left+" "+bottom+" "+right); }
 
+    public static Icon icon( String path ) {
+        // First we make the path platform independent:
+        path = path.replace('\\', '/');
+        // Then we try to load the icon url from the classpath:
+        URL url = UI.class.getResource(path);
+        // We check if the url is null:
+        if ( url == null ) {
+            // It is, let's do some troubleshooting:
+            if ( !path.startsWith("/") )
+                url = UI.class.getResource("/" + path);
+
+            if ( url == null ) // Still null? Let's try to load it as a file:
+                try {
+                    url = new File(path).toURI().toURL();
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                }
+        }
+        return new ImageIcon(url);
+    }
 
     private UI(){} // This is a static API
 
