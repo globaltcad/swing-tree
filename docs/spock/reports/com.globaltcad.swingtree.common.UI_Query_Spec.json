@@ -1,7 +1,7 @@
 {
   "className":"com.globaltcad.swingtree.common.UI_Query_Spec",
   "title":"Swing Tree UI Query",
-  "narrative":"The Swing-Tree UI builder allows you to easily build UIs and query them for\n    specific components inside component event action lambdas!\n    This allows you to easily build UIs that are event driven and react to\n    user input in a very flexible way.\n    Note that this should be used with care as it can lead to very complex\n    UIs that are hard to maintain.\n    Please consider modelling your UIs logic using MVVM based on\n    property bindings (See the properties specification).",
+  "narrative":"The Swing-Tree UI builder allows you to easily build UIs and query them for\n    specific components inside component event action lambdas! \n    This allows you to easily build UIs that are event driven and react to\n    user input in a very flexible way.\n    Note that this should be used with care as it can lead to very complex\n    UIs that are hard to maintain.\n    Please consider modelling your UIs logic using MVVM based on \n    property bindings (See the properties specification).",
   "subjects":[],
   "statistics":{
     "runs":"1",
@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.077 seconds"
+    "duration":"0.170 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can query the swing tree within an action lambda.",
       "result":"PASS",
-      "duration":"0.075 seconds",
+      "duration":"0.167 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

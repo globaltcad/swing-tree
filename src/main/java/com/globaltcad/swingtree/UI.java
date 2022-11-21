@@ -97,6 +97,7 @@ public final class UI
     public static LayoutAttr WRAP(int times) { return LayoutAttr.of( "wrap " + times ); }
     public static LayoutAttr FLOW_X   = LayoutAttr.of("flowx");
     public static LayoutAttr FLOW_Y   = LayoutAttr.of("flowy");
+    public static LayoutAttr DEBUG    = LayoutAttr.of("debug");
 
     public static CompAttr WRAP     = CompAttr.of("wrap");
     public static CompAttr SPAN     = CompAttr.of("SPAN");
@@ -129,6 +130,13 @@ public final class UI
     public static CompAttr HEIGHT(int min, int pref, int max) { return CompAttr.of("height "+min+":"+pref+":"+max); }
     public static CompAttr PAD(int size) { return PAD(size, size, size, size); }
     public static CompAttr PAD(int top, int left, int bottom, int right) { return CompAttr.of("pad "+top+" "+left+" "+bottom+" "+right); }
+    public static CompAttr ALIGN_CENTER = CompAttr.of("align center");
+    public static CompAttr ALIGN_LEFT = CompAttr.of("align left");
+    public static CompAttr ALIGN_RIGHT = CompAttr.of("align right");
+    public static CompAttr GAP_LEFT_PUSH = CompAttr.of("gapleft push");
+    public static CompAttr GAP_RIGHT_PUSH = CompAttr.of("gapright push");
+    public static CompAttr GAP_TOP_PUSH = CompAttr.of("gaptop push");
+    public static CompAttr GAP_BOTTOM_PUSH = CompAttr.of("gapbottom push");
 
     public static Icon icon( String path ) {
         // First we make the path platform independent:
@@ -1142,6 +1150,11 @@ public final class UI
         return of(new JSpinner(model));
     }
 
+    public static UIForSpinner<javax.swing.JSpinner> spinner( Var<Integer> var ) {
+        LogUtil.nullArgCheck(var, "var", Var.class);
+        return spinner().withValue(var);
+    }
+
     /**
      * Use this to create a builder for the provided {@link JSpinner} instance
      * with the provided {@code min}, {@code max}, default {@code value} and {@code step} as the model.
@@ -1629,6 +1642,14 @@ public final class UI
 
     public static Render.Builder<JComboBox<Object>, Object> renderCombo() {
         return Render.forCombo(Object.class, null).when(Object.class).as(cell->{});
+    }
+
+    public static <T> Render.Builder<JComboBox<T>, T> renderCombo( Class<T> itemType ) {
+        return Render.forCombo(itemType, null).when(itemType).as(cell->{});
+    }
+
+    public static <T> Render.As<JComboBox<T>, T, T> renderComboItem( Class<T> itemType ) {
+        return Render.forCombo(itemType, null).when(itemType);
     }
 
     /**

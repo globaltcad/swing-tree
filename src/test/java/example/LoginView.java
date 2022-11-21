@@ -7,9 +7,9 @@ import javax.swing.*;
 
 import static com.globaltcad.swingtree.UI.*;
 
-public class FormView extends JPanel
+public class LoginView extends JPanel
 {
-    public FormView( FormViewModel vm ) {
+    public LoginView(LoginViewModel vm ) {
         use(ThreadMode.DECOUPLED, ()->
             of(this).withPreferredSize(350,150)
             .withLayout(FILL.and(WRAP(2)))
@@ -27,7 +27,7 @@ public class FormView extends JPanel
     }
 
     public static void main( String[] args ) {
-        UI.showInNewFrame(new FormView( new FormViewModel() ));
+        UI.showInNewFrame(new LoginView( new LoginViewModel() ));
         while (true) { UI.processEvents(); }
     }
 }

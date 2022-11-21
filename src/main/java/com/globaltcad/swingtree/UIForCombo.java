@@ -74,7 +74,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
 
     public final UIForCombo<E,C> withSelectedItem( Var<E> var ) {
         LogUtil.nullArgCheck(var, "var", Var.class);
-        var.onShow(v-> _doUI(()->getComponent().setSelectedItem(v)));
+        var.onShow(v-> _doUI(()-> _setSelectedItem(v)));
         _onSelection(
             e -> _doApp((E)getComponent().getSelectedItem(), sel->var.set(sel).act())
         );
@@ -82,8 +82,24 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
     }
 
     public final UIForCombo<E,C> withSelectedItem( E item ) {
-        getComponent().setSelectedItem(item);
+        _setSelectedItem(item);
         return this;
+    }
+
+    private void _setSelectedItem( E item ) {
+        // Ok, so a combo box fires an event when the selection is changed programmatically.
+        // This is a problem, because we don't want to trigger the action listener.
+        // So we temporarily remove the action listener(s), and then add them back.
+        // 1. Get the action listener(s)
+        ActionListener[] listeners = getComponent().getActionListeners();
+        // 2. Remove them
+        for ( ActionListener listener : listeners )
+            getComponent().removeActionListener(listener);
+        // 3. Set the selected item
+        getComponent().setSelectedItem(item);
+        // 4. Add them back
+        for ( ActionListener listener : listeners )
+            getComponent().addActionListener(listener);
     }
 
 }

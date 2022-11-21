@@ -2,7 +2,7 @@ package com.globaltcad.swingtree.mvvm
 
 import com.globaltcad.swingtree.UI
 import com.globaltcad.swingtree.api.mvvm.Var
-import example.FormViewModel
+import example.LoginViewModel
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
@@ -33,7 +33,7 @@ class MVVM_Example_Spec extends Specification
             to see what it is doing.
         """
         given : 'We instantiate the view model.'
-            var vm = new FormViewModel()
+            var vm = new LoginViewModel()
         when : 'We create a view for our view model...'
             var ui =
                 UI.panel("fill, wrap 2")

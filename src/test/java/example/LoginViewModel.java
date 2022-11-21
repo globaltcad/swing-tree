@@ -3,7 +3,7 @@ package example;
 import com.globaltcad.swingtree.api.mvvm.Val;
 import com.globaltcad.swingtree.api.mvvm.Var;
 
-public class FormViewModel
+public class LoginViewModel
 {
     private final Var<String> username = Var.of( "" ).withAction( v -> validate() );
     private final Var<String> password = Var.of( "" ).withAction( v -> validate() );

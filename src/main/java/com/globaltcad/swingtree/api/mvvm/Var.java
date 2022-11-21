@@ -70,7 +70,7 @@ public interface Var<T> extends Val<T>
 
 	@Override Var<T> withID( String id );
 
-	Var<T> withAction( Consumer<Val<T>> action );
+	Var<T> withAction( ModelAction<T> action );
 
 	Var<T> act();
 }

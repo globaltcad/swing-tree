@@ -57,7 +57,7 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
      * @param val The {@link com.globaltcad.swingtree.api.mvvm.Val} wrapper whose value should be set.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForSpinner<S> withValue( Val<Object> val ) {
+    public final UIForSpinner<S> withValue( Val<?> val ) {
         val.onShow(v-> _doUI(()->getComponent().setValue(v)));
         return this;
     }
@@ -68,9 +68,9 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
      * @param var The {@link com.globaltcad.swingtree.api.mvvm.Var} wrapper whose value should be set.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForSpinner<S> withValue( Var<Object> var ) {
+    public final UIForSpinner<S> withValue( Var<?> var ) {
         var.onShow(v -> _doUI(() -> getComponent().setValue(v)));
-        _onChange(e -> _doApp(() -> var.set(getComponent().getValue()).act()));
+        _onChange(e -> _doApp(() -> ((Var<Object>)var).set(getComponent().getValue()).act()));
         return this;
     }
 

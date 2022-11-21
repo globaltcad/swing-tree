@@ -1,22 +1,27 @@
 package com.globaltcad.swingtree.api.mvvm;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 public abstract class AbstractVariable<T> implements Var<T>
 {
 	private final List<Consumer<Val<T>>> viewActions = new ArrayList<>();
 
+	private final List<Val<T>> history = new ArrayList<>(17);
+
 	private T value;
 	private final Class<T> type;
 	private final String name;
-	private final Consumer<Val<T>> action;
+	private final ModelAction<T> action;
 
 
-	protected AbstractVariable( Class<T> type, T iniValue, String name, Consumer<Val<T>> action ) {
+	protected AbstractVariable( Class<T> type, T iniValue, String name, ModelAction<T> action ) {
+		this( type, iniValue, name, action, Collections.emptyList() );
+	}
+
+	protected AbstractVariable(
+		Class<T> type, T iniValue, String name, ModelAction<T> action, List<Consumer<Val<T>>> viewActions
+	) {
 		Objects.requireNonNull(name);
 		this.value = iniValue;
 		this.type = ( iniValue == null ? type : (Class<T>) iniValue.getClass());
@@ -29,6 +34,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 						"The provided type of the initial value is not compatible with the actual type of the variable"
 					);
 		}
+		this.viewActions.addAll(viewActions);
 	}
 
 	/**
@@ -53,7 +59,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override public Var<T> withAction(Consumer<Val<T>> action ) {
+	@Override public Var<T> withAction(ModelAction<T> action ) {
 		Objects.requireNonNull(action);
 		AbstractVariable<T> newVar = new AbstractVariable<T>(type, value, name, action){};
 		newVar.viewActions.addAll(viewActions);
@@ -64,7 +70,19 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 * {@inheritDoc}
 	 */
 	@Override public Var<T> act() {
-		action.accept(this);
+		action.act(new ActionDelegate<T>() {
+			@Override public Var<T> current() { return AbstractVariable.this; }
+			@Override
+			public Val<T> previous() {
+				if ( AbstractVariable.this.history.isEmpty() )
+					return Val.of(AbstractVariable.this.type, null);
+				return AbstractVariable.this.history.get(AbstractVariable.this.history.size()-1);
+			}
+			@Override
+			public List<Val<T>> history() {
+				return Collections.unmodifiableList(AbstractVariable.this.history);
+			}
+		});
 		return this;
 	}
 
@@ -96,7 +114,15 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Var<T> set(T newValue) { value = newValue; return this; }
+	public Var<T> set( T newValue ) {
+		if ( !Objects.equals( this.value, newValue ) ) {
+			history.add(Val.of(this.type(), this.value).withID(this.id()));
+			if ( history.size() > 16 )
+				history.remove(0);
+			value = newValue;
+		}
+		return this;
+	}
 
 	/**
 	 * {@inheritDoc}
