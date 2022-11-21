@@ -1,7 +1,7 @@
 package com.globaltcad.swingtree.threading
 
 import com.globaltcad.swingtree.SimpleDelegate
-import com.globaltcad.swingtree.ThreadMode
+import com.globaltcad.swingtree.EventProcessor
 import com.globaltcad.swingtree.UI
 import com.globaltcad.swingtree.api.UIAction
 import spock.lang.Narrative
@@ -40,7 +40,7 @@ class Thread_Mode_Spec extends Specification
         given: 'A UI built with the decoupled thread mode.'
             var eventWasHandled = false
             var node =
-                    UI.use(ThreadMode.DECOUPLED,
+                    UI.use(EventProcessor.DECOUPLED,
                         ()-> UI.button("Click Me")
                                 .onClick({ eventWasHandled = true })
                     )
@@ -64,14 +64,14 @@ class Thread_Mode_Spec extends Specification
         reportInfo """
             This is the default thread mode, which means that
             the explicit specification of 
-            `UI.use(ThreadMode.COUPLED, ...)` is not required.
+            `UI.use(EventProcessor.COUPLED, ...)` is not required.
             However, note that in this thread mode the UI will be blocked 
             until the event is handled. 
         """
         given: 'A UI built with the coupled thread mode.'
             var eventWasHandled = false
             var node =
-                    UI.use(ThreadMode.COUPLED,
+                    UI.use(EventProcessor.COUPLED,
                         ()-> UI.button("Click Me")
                                 .onClick({ eventWasHandled = true })
                     )
@@ -95,11 +95,11 @@ class Thread_Mode_Spec extends Specification
             """
         given: '2 UIs built with the decoupled thread mode, one error prone and the other one safe.'
             var ui1 =
-                    UI.use(ThreadMode.DECOUPLED,
+                    UI.use(EventProcessor.DECOUPLED,
                             ()-> UI.button("X").onClick(unsafeAccess)
                         )
             var ui2 =
-                    UI.use(ThreadMode.DECOUPLED,
+                    UI.use(EventProcessor.DECOUPLED,
                             ()-> UI.button("X").onClick(safeAccess)
                         )
         when : 'We click the button and process the event queue (by this current non-swing thread).'
@@ -128,7 +128,7 @@ class Thread_Mode_Spec extends Specification
     {
         given : 'A UI built with the decoupled thread mode.'
             var ui =
-                    UI.use(ThreadMode.DECOUPLED,
+                    UI.use(EventProcessor.DECOUPLED,
                             ()-> UI.checkBox("X").onClick( it ->{
                                 UI.run(()-> it.getComponent() )
                                 // it.getComponent() // This would throw an exception!
@@ -149,7 +149,7 @@ class Thread_Mode_Spec extends Specification
             So if you try to access the UI from another thread, an exception will be thrown.
         """
         given : 'A UI built with the decoupled thread mode:'
-            var ui = UI.use(ThreadMode.DECOUPLED, ()-> UI.panel())
+            var ui = UI.use(EventProcessor.DECOUPLED, ()-> UI.panel())
         when : 'We try to access the component by this current non-swing thread.'
             ui.component
         then: 'An exception is thrown!'

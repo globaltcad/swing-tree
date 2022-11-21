@@ -1,6 +1,6 @@
 package example;
 
-import com.globaltcad.swingtree.ThreadMode;
+import com.globaltcad.swingtree.EventProcessor;
 import com.globaltcad.swingtree.UI;
 
 import javax.swing.*;
@@ -10,7 +10,7 @@ import static com.globaltcad.swingtree.UI.*;
 public class LoginView extends JPanel
 {
     public LoginView(LoginViewModel vm ) {
-        use(ThreadMode.DECOUPLED, ()->
+        use(EventProcessor.DECOUPLED, ()->
             of(this).withPreferredSize(350,150)
             .withLayout(FILL.and(WRAP(2)))
             .add( SHRINK, label( "Username:" ) )

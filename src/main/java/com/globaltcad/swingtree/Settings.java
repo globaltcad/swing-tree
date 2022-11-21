@@ -2,14 +2,14 @@ package com.globaltcad.swingtree;
 
 class Settings {
 
-	private ThreadMode threadMode = ThreadMode.COUPLED;
+	private EventProcessor _eventProcessor = EventProcessor.COUPLED;
 
-	public ThreadMode getThreadMode() {
-		return threadMode;
+	public EventProcessor getEventProcessor() {
+		return _eventProcessor;
 	}
 
-	public void setThreadMode(ThreadMode threadMode) {
-		this.threadMode = threadMode;
+	public void setEventProcessor(EventProcessor eventProcessor) {
+		_eventProcessor = eventProcessor;
 	}
 
 }

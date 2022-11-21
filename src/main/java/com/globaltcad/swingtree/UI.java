@@ -13,17 +13,14 @@ import com.globaltcad.swingtree.layout.CompAttr;
 import com.globaltcad.swingtree.layout.LayoutAttr;
 import net.miginfocom.swing.MigLayout;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -55,7 +52,7 @@ public final class UI
         return settings;
     }
 
-    public static <T> T use( ThreadMode mode, Supplier<T> scope ) {
+    public static <T> T use(EventProcessor mode, Supplier<T> scope ) {
 
         if ( !UI.thisIsUIThread() )
             try {
@@ -65,12 +62,12 @@ public final class UI
             }
 
         Settings settings = SETTINGS();
-        ThreadMode oldMode = settings.getThreadMode();
-        settings.setThreadMode(mode);
+        EventProcessor oldProcessor = settings.getEventProcessor();
+        settings.setEventProcessor(mode);
         try {
             return scope.get();
         } finally {
-            settings.setThreadMode(oldMode);
+            settings.setEventProcessor(oldProcessor);
         }
     }
 

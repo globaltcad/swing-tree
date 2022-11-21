@@ -6,7 +6,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * This is a synchronized singleton wrapping a {@link BlockingQueue}.
  */
-class EventQueue
+class EventQueue implements EventProcessor
 {
 	private static final EventQueue _INSTANCE = new EventQueue();
 
@@ -18,12 +18,17 @@ class EventQueue
 	 */
 	private final BlockingQueue<Runnable> rendererQueue = new LinkedBlockingQueue<>();
 
-	public void register(Runnable task) {
+	@Override public void processAppEvent(Runnable task) {
 		try {
 			rendererQueue.put(task);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void processUIEvent(Runnable runnable) {
+		UI.run(runnable);
 	}
 
 	public void process( int numberOfEventsToBeProcessed, boolean rethrow ) throws InterruptedException {

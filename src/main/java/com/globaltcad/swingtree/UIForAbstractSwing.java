@@ -50,17 +50,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public UIForAbstractSwing( C component ) { super(component); }
 
     protected void _doUI( Runnable action ) {
-        if ( _threadMode == ThreadMode.DECOUPLED )
-            SwingUtilities.invokeLater(action);
-        else
-            action.run();
+        _eventProcessor.processUIEvent( action );
     }
 
     protected void _doApp( Runnable action ) {
-        if ( _threadMode == ThreadMode.DECOUPLED )
-            EventQueue.INSTANCE().register(action);
-        else
-            action.run();
+        _eventProcessor.processAppEvent(action);
     }
 
     protected <T> void _doApp( T value, Consumer<T> action ) {

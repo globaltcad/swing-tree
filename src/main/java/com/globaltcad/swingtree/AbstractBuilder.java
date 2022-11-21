@@ -23,7 +23,7 @@ abstract class AbstractBuilder<I, C>
      * The thread mode determines how events are dispatched to the component.
      * And also which type of thread can access the component.
      */
-    protected final ThreadMode _threadMode = UI.SETTINGS().getThreadMode();
+    protected final EventProcessor _eventProcessor = UI.SETTINGS().getEventProcessor();
 
     /**
      *  The type class of the component wrapped by this builder node.
@@ -46,7 +46,7 @@ abstract class AbstractBuilder<I, C>
      *  The component wrapped by this builder node.
      */
     public final C getComponent() {
-        if ( _threadMode == ThreadMode.DECOUPLED && !UI.thisIsUIThread() )
+        if ( _eventProcessor != EventProcessor.COUPLED && !UI.thisIsUIThread() )
             throw new IllegalStateException(
                     "This UI is configured to be decoupled from the application thread, " +
                     "which means that it can only be modified from the EDT. " +
