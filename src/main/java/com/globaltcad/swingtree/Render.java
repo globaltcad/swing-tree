@@ -1,7 +1,5 @@
 package com.globaltcad.swingtree;
 
-import sun.swing.DefaultLookup;
-
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -136,8 +134,8 @@ public final class Render<C extends JComponent,E> {
 			return this.as( cell -> {
 				JLabel l = new JLabel(renderer.apply(cell));
 				l.setOpaque(true);
-				Color bg = DefaultLookup.getColor(l, l.getUI(), "List.dropCellBackground");
-				Color fg = DefaultLookup.getColor(l, l.getUI(), "List.dropCellForeground");
+				Color bg = UIManager.getColor( "List.selectionBackground" );
+				Color fg = UIManager.getColor( "List.selectionForeground" );
 
 				if ( bg == null )
 					bg = UIManager.getColor( "ComboBox.selectionBackground" );
@@ -145,9 +143,14 @@ public final class Render<C extends JComponent,E> {
 					fg = UIManager.getColor( "ComboBox.selectionForeground" );
 
 				if ( bg == null )
-					bg = DefaultLookup.getColor(l, l.getUI(), "ComboBox.selectionBackground", null);
+					bg = UIManager.getColor( "List.dropCellBackground" );
 				if ( fg == null )
-					fg = DefaultLookup.getColor(l, l.getUI(), "ComboBox.selectionForeground", null);
+					fg = UIManager.getColor( "List.dropCellForeground" );
+
+				if ( bg == null )
+					bg = UIManager.getColor( "ComboBox.background" );
+				if ( fg == null )
+					fg = UIManager.getColor( "ComboBox.foreground" );
 
 				if (cell.isSelected()) {
 					if ( bg != null ) l.setBackground( bg );
@@ -161,14 +164,13 @@ public final class Render<C extends JComponent,E> {
 				Border border = null;
 				if ( cell.hasFocus() ) {
 					if ( cell.isSelected() )
-						border = DefaultLookup.getBorder(l, l.getUI(), "List.focusSelectedCellHighlightBorder");
+						border = UIManager.getBorder( "List.focusSelectedCellHighlightBorder" );
 
 					if ( border == null )
-						border = DefaultLookup.getBorder(l, l.getUI(), "List.focusCellHighlightBorder");
-
+						border = UIManager.getBorder( "List.focusCellHighlightBorder" );
 				}
 				else
-					border = DefaultLookup.getBorder(l, l.getUI(), "List.cellNoFocusBorder");
+					border = UIManager.getBorder( "List.cellNoFocusBorder" );
 
 				if ( border != null ) l.setBorder(border);
 
