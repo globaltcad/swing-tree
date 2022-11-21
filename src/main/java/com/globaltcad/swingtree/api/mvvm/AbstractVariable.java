@@ -12,15 +12,15 @@ public abstract class AbstractVariable<T> implements Var<T>
 	private T value;
 	private final Class<T> type;
 	private final String name;
-	private final ModelAction<T> action;
+	private final PropertyAction<T> action;
 
 
-	protected AbstractVariable( Class<T> type, T iniValue, String name, ModelAction<T> action ) {
+	protected AbstractVariable( Class<T> type, T iniValue, String name, PropertyAction<T> action ) {
 		this( type, iniValue, name, action, Collections.emptyList() );
 	}
 
 	protected AbstractVariable(
-		Class<T> type, T iniValue, String name, ModelAction<T> action, List<Consumer<Val<T>>> viewActions
+			Class<T> type, T iniValue, String name, PropertyAction<T> action, List<Consumer<Val<T>>> viewActions
 	) {
 		Objects.requireNonNull(name);
 		this.value = iniValue;
@@ -59,7 +59,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override public Var<T> withAction(ModelAction<T> action ) {
+	@Override public Var<T> withAction(PropertyAction<T> action ) {
 		Objects.requireNonNull(action);
 		AbstractVariable<T> newVar = new AbstractVariable<T>(type, value, name, action){};
 		newVar.viewActions.addAll(viewActions);
@@ -70,17 +70,19 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 * {@inheritDoc}
 	 */
 	@Override public Var<T> act() {
+		List<Val<T>> reverseHistory = new ArrayList<>(AbstractVariable.this.history);
+		Collections.reverse(reverseHistory);
 		action.act(new ActionDelegate<T>() {
 			@Override public Var<T> current() { return AbstractVariable.this; }
 			@Override
 			public Val<T> previous() {
 				if ( AbstractVariable.this.history.isEmpty() )
 					return Val.of(AbstractVariable.this.type, null);
-				return AbstractVariable.this.history.get(AbstractVariable.this.history.size()-1);
+				return reverseHistory.get(0);
 			}
 			@Override
 			public List<Val<T>> history() {
-				return Collections.unmodifiableList(AbstractVariable.this.history);
+				return Collections.unmodifiableList(reverseHistory);
 			}
 		});
 		return this;

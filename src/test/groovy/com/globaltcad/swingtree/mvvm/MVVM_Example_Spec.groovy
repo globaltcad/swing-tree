@@ -189,16 +189,19 @@ class MVVM_Example_Spec extends Specification
             to the combo box at runtime.
         """
         given : 'We instantiate the "view model" in the form of a single property holding a string.'
-            Var<String> selected = Var.of("Tofu")
+            boolean actionPerformed = false
+            Var<String> selected = Var.of("Tofu").withAction({actionPerformed = true})
         when : 'We create a view for our view model...'
             var ui = UI.comboBox("Tofu", "Tempeh", "Seitan").withSelectedItem(selected)
 
         then : 'The view was successfully created.'
-            ui != null
+            ui != null && !actionPerformed
         when : 'We select an item in the combo box.'
             ui.component.setSelectedIndex(1)
         then : 'The property was updated.'
             selected.orElseNull() == "Tempeh"
+        and : 'The action was triggered.'
+            actionPerformed == true
     }
 
     private static enum Size

@@ -1,6 +1,7 @@
 package com.globaltcad.swingtree.common
 
 import com.globaltcad.swingtree.UI
+import com.globaltcad.swingtree.api.mvvm.Var
 import com.globaltcad.swingtree.input.Keyboard
 import spock.lang.Narrative
 import spock.lang.Specification
@@ -128,6 +129,41 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             ui.with(UI.Cursor.RESIZE_SOUTH_EAST)
         then : 'This will lead to the correct cursor being chosen.'
             ui.component.cursor.type == Cursor.SE_RESIZE_CURSOR
+    }
+
+    def 'An enum based combo box can have custom cell rendering.'()
+    {
+        reportInfo """
+            Swing tree exposes a builder API for creating combo box cell renderers.
+            This is a very powerful feature, because it allows you to customize
+            the look and feel of your combo box in a very flexible way.
+            So if the state of your combo box is based on a simple enum, whose
+            instance names are all written in capital letters, you can use
+            define a custom cell renderer to display the enum values in a more
+            readable way.
+        """
+        given : 'We create a simple property to model the selection.'
+            var sel = Var.of(Keyboard.Key.A)
+        and : 'We creat a combo box with a cell renderer that renders the enum value as a lower case string.'
+            var ui =
+                    UI.comboBox(sel)
+                    .withRenderer(
+                        UI.renderComboItem(Keyboard.Key)
+                        .asText( cell -> cell.value.name().toLowerCase() )
+                    )
+
+        expect : 'The combo box will have the correct amount of items.'
+            ui.component.itemCount == Keyboard.Key.values().length
+        and : 'The combo box will have the correct selected item.'
+            ui.component.selectedItem == Keyboard.Key.A
+        and : 'The combo box will have a renderer that renders the enum value as a lower case string.'
+            ui.component.renderer instanceof DefaultListCellRenderer
+            ui.component.renderer.getListCellRendererComponent(null, Keyboard.Key.A, 0, false, false).text == "a"
+
+        when : 'We change the selection...'
+            sel.set(Keyboard.Key.B).show()
+        then : 'The combo box will have the correct selected item.'
+            ui.component.selectedItem == Keyboard.Key.B
     }
 
     def 'We can create a border layout based Swing tree.'()

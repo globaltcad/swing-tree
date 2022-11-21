@@ -278,4 +278,85 @@ class Properties_Spec extends Specification
             str2.hashCode() != bool.hashCode()
             arr1.hashCode() == arr2.hashCode()
     }
+
+    def 'Properties expose a state history in their property actions.'()
+    {
+        reportInfo """
+            When the view changes the state of a property and then triggers a model action, 
+            the property will remember its previous state and store it in an internal history.
+            This history will be exposed to the property action, and it can be used to undo 
+            or redo changes to the property.
+        """
+        given : 'We create a reference to catch the action delegate and a property with an action to set the reference...'
+            var delegate = null
+            Var<String> property = Var.of("Hello World")
+                                        .withAction( it ->{
+                                            delegate = it
+                                        })
+        when : 'We change the property and trigger the action.'
+            property.set("Tofu").act()
+        then : 'The history contains the previous state of the property.'
+            delegate.history() == [Var.of("Hello World")]
+
+        when : 'We change the property a few times and trigger the action again.'
+            property
+                .set("Tempeh")
+                .set("Tempeh") // Duplicate "changes" will not be recorded in the history.
+                .set("Saitan")
+                .act()
+        then : 'The history contains the previous states of the property.'
+            delegate.history() == [Var.of("Tempeh"), Var.of("Tofu"), Var.of("Hello World")]
+    }
+
+    def 'The delegate of a property action exposes the current as well as the previous state of the property.'()
+    {
+        given : 'We create a reference to catch the action delegate and a property with an action to set the reference...'
+            var delegate = null
+            Var<String> property = Var.of("Hello World")
+                                        .withAction( it ->{
+                                            delegate = it
+                                        })
+        when : 'We change the property and trigger the action.'
+            property.set("Tofu").act()
+        then : 'The delegate exposes the current and previous state of the property.'
+            delegate.current() == Var.of("Tofu")
+            delegate.previous() == Var.of("Hello World")
+    }
+
+    def 'We can search for a previous state of a property in its history.'()
+    {
+        reportInfo """
+            You can query the history of a property for a previous state of the property
+            using the "previous(int)" method.
+            It returns an optional that contains the previous state if it is found.
+            Note that the index passed to the method is relative to the current state,
+            so a value of 0 will return the current state, a value of 1 will return the
+            previous state, and so on. 
+        """
+        given : 'We create a reference to catch the action delegate and a property with an action to set the reference...'
+            var delegate = null
+            Var<String> property = Var.of("Apple")
+                                        .withAction( it ->{
+                                            delegate = it
+                                        })
+        when : 'We change the property a few times and trigger the action again.'
+            property
+                .set("Banana")
+                .set("Cherry")
+                .act()
+        then : 'We can check the presents of previous states in the property history.'
+            delegate.previous(0).isPresent()
+            delegate.previous(1).isPresent()
+            delegate.previous(2).isPresent()
+            delegate.previous(3).isPresent() == false
+        and : 'We can check the value of previous states in the property history.'
+            delegate.previous(0).get() == Var.of("Cherry")
+            delegate.previous(1).get() == Var.of("Banana")
+            delegate.previous(2).get() == Var.of("Apple")
+        and : 'Alternatively we can use the "get(int)" method which takes negative indices.'
+            delegate.get(-0).get() == Var.of("Cherry")
+            delegate.get(-1).get() == Var.of("Banana")
+            delegate.get(-2).get() == Var.of("Apple")
+    }
+
 }

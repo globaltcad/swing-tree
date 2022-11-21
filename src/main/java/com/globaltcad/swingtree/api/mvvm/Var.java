@@ -1,7 +1,6 @@
 package com.globaltcad.swingtree.api.mvvm;
 
 import java.util.Objects;
-import java.util.function.Consumer;
 
 /**
  * 	A mutable wrapper for a value which can be observed by the Swing-Tree UI
@@ -70,7 +69,7 @@ public interface Var<T> extends Val<T>
 
 	@Override Var<T> withID( String id );
 
-	Var<T> withAction( ModelAction<T> action );
+	Var<T> withAction( PropertyAction<T> action );
 
 	Var<T> act();
 }
