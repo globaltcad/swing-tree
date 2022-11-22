@@ -1147,7 +1147,14 @@ public final class UI
         return of(new JSpinner(model));
     }
 
-    public static UIForSpinner<javax.swing.JSpinner> spinner( Var<Integer> var ) {
+    /**
+     *  Use this factory method to create a {@link JSpinner} bound to a property of any type.
+     *  The property will be updated when the user modifies its value.
+     *
+     * @param var A property of any type which should be bound to this spinner.
+     * @return A builder instance for the provided {@link JSpinner}, which enables fluent method chaining.
+     */
+    public static UIForSpinner<javax.swing.JSpinner> spinner( Var<?> var ) {
         LogUtil.nullArgCheck(var, "var", Var.class);
         return spinner().withValue(var);
     }
@@ -1791,7 +1798,7 @@ public final class UI
      * This method should be used when an application thread needs to update the GUI.
      *
      * @param runnable the instance of {@code Runnable}
-     * @see #runAndWait
+     * @see #runNow
      */
     public static void run( Runnable runnable ) {
         LogUtil.nullArgCheck(runnable, "runnable", Runnable.class);
@@ -1822,7 +1829,7 @@ public final class UI
      * the event dispatching thread will unwind (not the current thread).
      *
      * @param runnable the instance of {@code Runnable}
-     * @see #runAndWait
+     * @see #runNow
      */
     public static void runLater( Runnable runnable ) {
         LogUtil.nullArgCheck(runnable, "runnable", Runnable.class);
@@ -1863,7 +1870,7 @@ public final class UI
      * Thread appThread = new Thread() {
      *     public void run() {
      *         try {
-     *             UI.runAndWait(doHelloWorld);
+     *             UI.runNow(doHelloWorld);
      *         }
      *         catch (Exception e) {
      *             e.printStackTrace();
@@ -1887,7 +1894,7 @@ public final class UI
      *
      * @see #run
      */
-    public static void runAndWait( Runnable runnable ) throws InterruptedException, InvocationTargetException {
+    public static void runNow( Runnable runnable ) throws InterruptedException, InvocationTargetException {
         LogUtil.nullArgCheck(runnable, "runnable", Runnable.class);
         SwingUtilities.invokeAndWait(runnable);
     }
@@ -1895,7 +1902,7 @@ public final class UI
     public static <T> T runAndGet( Supplier<T> supplier ) throws InterruptedException, InvocationTargetException {
         LogUtil.nullArgCheck(supplier, "callable", Supplier.class);
         T[] ref = (T[]) new Object[1];
-        runAndWait( () -> ref[0] = supplier.get() );
+        runNow( () -> ref[0] = supplier.get() );
         return ref[0];
     }
 
@@ -1907,7 +1914,7 @@ public final class UI
         private final JFrame frame;
         private final Component component;
 
-        public TestWindow(Supplier<JFrame> frameSupplier,Component component) {
+        public TestWindow( Supplier<JFrame> frameSupplier,Component component ) {
             this.frame = frameSupplier.get();
             this.component = component;
             frame.add(component);
@@ -1924,7 +1931,7 @@ public final class UI
     /**
      *  Use this to quickly create and inspect a test window for a UI component.
      */
-    public static void show(Component component) {
+    public static void show( Component component ) {
         JFrame frame = new JFrame();
         new UI.TestWindow( () -> frame,component );
         // We set the size to fit the component:

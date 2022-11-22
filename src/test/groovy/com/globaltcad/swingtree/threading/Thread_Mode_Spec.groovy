@@ -103,14 +103,14 @@ class Thread_Mode_Spec extends Specification
                             ()-> UI.button("X").onClick(safeAccess)
                         )
         when : 'We click the button and process the event queue (by this current non-swing thread).'
-            UI.runAndWait( () -> ui1.component.doClick() )
+            UI.runNow( () -> ui1.component.doClick() )
             UI.processEventsUntilException() // This is done by a custom thread in a real world application.
         then: 'The delegate throws an exception!'
             var e = thrown(Exception)
             e.message.contains(problem)
 
         when : 'We click the button second button and then process the event queue (by this current non-swing thread).'
-            UI.runAndWait( () -> ui2.component.doClick() )
+            UI.runNow( () -> ui2.component.doClick() )
             UI.processEventsUntilException() // This is done by a custom thread in a real world application.
         then: 'The delegate does not throw an exception!'
             noExceptionThrown()
@@ -135,7 +135,7 @@ class Thread_Mode_Spec extends Specification
                             })
                         )
         when : 'We check the check box and process the event queue (by this current non-swing thread).'
-            UI.runAndWait( () -> ui.component.doClick() )
+            UI.runNow( () -> ui.component.doClick() )
             UI.processEventsUntilException() // This is done by a custom thread in a real world application.
         then: 'The delegate does not throw an exception!'
             noExceptionThrown()

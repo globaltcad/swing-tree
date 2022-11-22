@@ -10,7 +10,7 @@ public class SomeSpinnersView extends JPanel {
 
 	public SomeSpinnersView(SomeSpinnersViewModel vm) {
 		of(this).withLayout(FILL.and(INS(0)).and(DEBUG))
-		.withPreferredSize(320, 100)
+		.withPreferredSize(320, 140)
 		.add(GROW,
 			panel(FILL.and(INS(0)).and(WRAP(1)))
 			.add(GROW, label("Base Size:"))
@@ -22,7 +22,7 @@ public class SomeSpinnersView extends JPanel {
 				)
 			)
 		)
-		.add(GROW.and(PUSH_Y),
+		.add(GROW.and(PUSH_Y).and(WRAP),
 			panel(FILL.and(INS(0)).and(DEBUG))
 			.add(GROW.and(WRAP),
 				panel(FILL.and(INS(0)))
@@ -38,17 +38,20 @@ public class SomeSpinnersView extends JPanel {
 			.add(GROW,
 				panel(FILL.and(INS((3))).and(DEBUG))
 				.add(PUSH_Y, panel())
-				.add(PUSH_Y.and(GAP_LEFT_PUSH),
+				.add(GAP_LEFT_PUSH,
 					button("-")
 				)
 				.add(ALIGN_CENTER,
 					button("o")
 				)
-				.add(PUSH_Y.and(GAP_RIGHT_PUSH),
+				.add(GAP_RIGHT_PUSH,
 					button("+")
 				)
 				.add(PUSH_Y, panel())
 			)
+		)
+		.add(SPAN.and(GROW),
+			comboBox("A", "B", "C").isEditableIf(true)
 		);
 	}
 
