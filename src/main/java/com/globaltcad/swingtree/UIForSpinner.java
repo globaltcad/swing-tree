@@ -59,6 +59,7 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
      */
     public final UIForSpinner<S> withValue( Val<?> val ) {
         val.onShow(v-> _doUI(()->getComponent().setValue(v)));
+        getComponent().setValue(val.get());
         return this;
     }
 
@@ -71,8 +72,44 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
     public final UIForSpinner<S> withValue( Var<?> var ) {
         var.onShow(v -> _doUI(() -> getComponent().setValue(v)));
         _onChange(e -> _doApp(() -> ((Var<Object>)var).set(getComponent().getValue()).act()));
+        getComponent().setValue(var.get());
         return this;
     }
 
+    /**
+     * Sets the numeric step size of the value of the spinner.
+     * This expects your spinner to be based on the {@link SpinnerNumberModel}.
+     *
+     * @param n The {@link Number} which should be set as step size.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSpinner<S> withStepSize( Number n ) {
+        SpinnerModel model = getComponent().getModel();
+        if ( !(model instanceof SpinnerNumberModel) )
+            throw new IllegalArgumentException(
+                    "This JSpinner can not have a numeric step size as it is not based on the SpinnerNumberModel!"
+            );
+        SpinnerNumberModel numberModel = (SpinnerNumberModel) model;
+        numberModel.setStepSize(n);
+        return this;
+    }
 
+    /**
+     * Sets the numeric step size of the value of the spinner and also binds to said value.
+     * This expects your spinner to be based on the {@link SpinnerNumberModel}.
+     *
+     * @param val The {@link com.globaltcad.swingtree.api.mvvm.Val} wrapper whose step size should be set.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final <N extends Number> UIForSpinner<S> withStepSize( Val<N> val ) {
+        SpinnerModel model = getComponent().getModel();
+        if ( !(model instanceof SpinnerNumberModel) )
+            throw new IllegalArgumentException(
+                    "This JSpinner can not have a numeric step size as it is not based on the SpinnerNumberModel!"
+                );
+        SpinnerNumberModel numberModel = (SpinnerNumberModel) model;
+        val.onShow(v -> _doUI(() -> numberModel.setStepSize(v)));
+        numberModel.setStepSize(val.get());
+        return this;
+    }
 }

@@ -15,12 +15,15 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.plaf.basic.BasicComboBoxEditor;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.Array;
+import java.util.Collections;
 import java.util.function.Supplier;
 
 /**
@@ -1095,7 +1098,14 @@ public final class UI
     @SafeVarargs
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( E... items ) {
         LogUtil.nullArgCheck(items, "items", Object[].class);
-        return of(new JComboBox<>(items));
+        return of(new JComboBox<>(new ArrayBasedComboModel<>(items)));
+    }
+
+    @SafeVarargs
+    public static <E> UIForCombo<E,JComboBox<E>> comboBoxWithUndmodifyable( E... items ) {
+        LogUtil.nullArgCheck(items, "items", Object[].class);
+        java.util.List<E> unmodifiableList = Collections.unmodifiableList(java.util.Arrays.asList(items));
+        return comboBox(unmodifiableList);
     }
 
     public static <E extends Enum<E>> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var ) {
@@ -1114,7 +1124,27 @@ public final class UI
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( java.util.List<E> items ) {
         LogUtil.nullArgCheck(items, "items", List.class);
-        return of(new JComboBox<>((E[]) items.toArray()));
+        return of(new JComboBox<>(new ListBasedComboModel<>(items)));
+    }
+
+    public static <E> UIForCombo<E,JComboBox<E>> comboBoxWithUnmodifyable( java.util.List<E> items ) {
+        LogUtil.nullArgCheck(items, "items", List.class);
+        java.util.List<E> unmodifiableList = Collections.unmodifiableList(items);
+        return comboBox(unmodifiableList);
+    }
+
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var, java.util.List<E> items ) {
+        LogUtil.nullArgCheck(items, "items", List.class);
+        return of(new JComboBox<>(new ListBasedComboModel<>(var, items)));
+    }
+
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var, E... items ) {
+        LogUtil.nullArgCheck(items, "items", List.class);
+        return of(new JComboBox<>(new ArrayBasedComboModel<>(var, items)));
+    }
+
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( ComboBoxModel<E> model ) {
+        return of(new JComboBox<>(model));
     }
 
     /**

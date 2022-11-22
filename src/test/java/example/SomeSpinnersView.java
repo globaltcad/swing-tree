@@ -52,6 +52,9 @@ public class SomeSpinnersView extends JPanel {
 		)
 		.add(SPAN.and(GROW),
 			comboBox("A", "B", "C").isEditableIf(true)
+		)
+		.add(SPAN.and(GROW),
+			comboBoxWithUndmodifyable("X", "Y", "Z").isEditableIf(true)
 		);
 	}
 

@@ -1,0 +1,261 @@
+{
+  "className":"com.globaltcad.swingtree.common.Basic_UI_Builder_Examples_Spec",
+  "title":"Swing tree makes UI building fun again!",
+  "narrative":"The Swing-Tree library allows you to build UIs using declarative code, \n    which you can think of as a more dynamic type of HTML but for swing.\n    It is inspired by frameworks like Jetpack Compose, Flutter, React and SwiftUI\n    which are also based on nested builder patterns to design your UI.\n    In this specification we cover the utter most basics of swing tree.",
+  "subjects":[],
+  "statistics":{
+    "runs":"13",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"0.389 seconds"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"We can nest JPanel UI nodes to structure UIs.",
+      "result":"PASS",
+      "duration":"0.151 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Just like in regular Swing, the JPanel is the most basic \n            yet most important type of component in Swing-Tree\n            and you can create one using the `UI.panel()` factory method. \n            Don't hesitate to use as the main tool for grouping and structuring\n            your UI, just like you would use the 'div' tag in HTML.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple swing tree if JPanel instances.","code":["var ui =","        UI.panel()","        .add(UI.panel())","        .add(","            UI.panel()","            .add(UI.panel())","            .add(UI.panel())","        )","        .add(UI.panel())"]},
+
+        {"kind":"expect","text":"The UI node contains a root JPanel with 3 children.","code":["ui.component instanceof JPanel","ui.component.components.length == 3"]},
+
+        {"kind":"and","text":"Because this is a regular Swing UI, we traverse the tree and find the children.","code":["ui.component.components[0] instanceof JPanel","ui.component.components[1] instanceof JPanel","ui.component.components[2] instanceof JPanel"]},
+
+        {"kind":"and","text":"We can also traverse the tree to find the children of the children.","code":["ui.component.components[1].components[0] instanceof JPanel","ui.component.components[1].components[1] instanceof JPanel"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can add a list of components to the swing tree API and get a builder node in return.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Just like in regular Swing, the JPanel is the most basic \n            yet most important type of component in Swing-Tree\n            and you can create one using the `UI.panel()` factory method. \n            Don't hesitate to use as the main tool for grouping and structuring\n            your UI, just like you would use the 'div' tag in HTML.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We have a simple JPanel UI node.","code":["var ui = UI.panel()"]},
+
+        {"kind":"expect","text":"At the beginning the wrapped component will have no children.","code":["ui.component.components.length == 0"]},
+
+        {"kind":"when","text":"We add a list of panels...","code":["var ui2 = ui.add([new JPanel(), new JPanel(), new JPanel()])"]},
+
+        {"kind":"then","text":"We get the same UI node back, because Swing-Tree is based on the builder pattern.","code":["ui === ui2"]},
+
+        {"kind":"and","text":"The wrapped component will have the expected amount of child components.","code":["ui.component.components.length == 3"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Swing tree nests all kinds of components (trough builder nodes).",
+      "result":"PASS",
+      "duration":"0.011 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Swing tree wraps you components in builder nodes, so you can\n            use the same API to add any kind of component to your UI.\n            Use the `UI.of(..)` factory method to wrap your components\n            or simply use the various kinds of default factory methods like\n             `UI.panel()`, `UI.button()`, `UI.label()` etc.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A regular swing object.","code":["var panel = new JPanel()"]},
+
+        {"kind":"and","text":"A simple UI builder instance wrapping the swing object.","code":["var ui = UI.of(panel)"]},
+
+        {"kind":"expect","text":"The UI node contains the swing object.","code":["ui.component === panel"]},
+
+        {"kind":"and","text":"The UI node is a JPanel without children.","code":["ui.component instanceof JPanel","panel.components.length == 0"]},
+
+        {"kind":"when","text":"We now add something to our UI node...","code":["ui.add(UI.label(\"Hey! I am a wrapped JLabel.\"))"]},
+
+        {"kind":"then","text":"The panel will have received a new component.","code":["panel.components.length == 1"]},
+
+        {"kind":"and","text":"This component is a label with the expected text.","code":["panel.components[0] instanceof JLabel","panel.components[0].text == \"Hey! I am a wrapped JLabel.\""]},
+
+        {"kind":"when","text":"We add 2 more components...","code":["ui.add(UI.button(\"Button 1\"), UI.button(\"Button 2\"))"]},
+
+        {"kind":"then","text":"The panel will have 3 components in total.","code":["panel.components.length == 3"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can easily define the cursor on a wrapped UI component",
+      "result":"PASS",
+      "duration":"0.009 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a UI builder node containing a simple button.","code":["var ui = UI.button()"]},
+
+        {"kind":"expect","text":"At the beginning the default cursor will be set.","code":["ui.component.cursor.type == Cursor.DEFAULT_CURSOR"]},
+
+        {"kind":"when","text":"We set the cursor of the button to be something else...","code":["ui.with(UI.Cursor.RESIZE_SOUTH_EAST)"]},
+
+        {"kind":"then","text":"This will lead to the correct cursor being chosen.","code":["ui.component.cursor.type == Cursor.SE_RESIZE_CURSOR"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An enum based combo box can have custom cell rendering.",
+      "result":"PASS",
+      "duration":"0.099 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Swing tree exposes a builder API for creating combo box cell renderers.\n            This is a very powerful feature, because it allows you to customize\n            the look and feel of your combo box in a very flexible way.\n            So if the state of your combo box is based on a simple enum, whose\n            instance names are all written in capital letters, you can use\n            define a custom cell renderer to display the enum values in a more\n            readable way.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple property to model the selection.","code":["var sel = Var.of(Keyboard.Key.A)"]},
+
+        {"kind":"and","text":"We creat a combo box with a cell renderer that renders the enum value as a lower case string.","code":["var ui =","        UI.comboBox(sel)","        .withRenderer(","            UI.renderComboItem(Keyboard.Key)","            .asText( cell -> cell.value.name().toLowerCase() )","        )"]},
+
+        {"kind":"expect","text":"The combo box will have the correct amount of items.","code":["ui.component.itemCount == Keyboard.Key.values().length"]},
+
+        {"kind":"and","text":"The combo box will have the correct selected item.","code":["ui.component.selectedItem == Keyboard.Key.A"]},
+
+        {"kind":"and","text":"The combo box will have a renderer that renders the enum value as a lower case string.","code":["ui.component.renderer instanceof DefaultListCellRenderer","ui.component.renderer.getListCellRendererComponent(null, Keyboard.Key.A, 0, false, false).text == \"a\""]},
+
+        {"kind":"when","text":"We change the selection...","code":["sel.set(Keyboard.Key.B).show()"]},
+
+        {"kind":"then","text":"The combo box will have the correct selected item.","code":["ui.component.selectedItem == Keyboard.Key.B"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can create a border layout based Swing tree.",
+      "result":"PASS",
+      "duration":"0.050 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"when","text":"","code":["var tree =","        Tree.of( // <- A test utility class used to find all the tree nodes...","            UI.panel().id(\"Root\")","            .add(","                BorderLayout.PAGE_START,","                UI.button(\"Button 1 (PAGE_START)\").id(\"B1\")","            )","            .add(","                BorderLayout.CENTER,","                UI.radioButton(\"Button 2 (CENTER)\").id(\"B2\")","                .peek(button -> button.setPreferredSize(new Dimension(200, 100)) )","            )","            .add(","                BorderLayout.LINE_START,","                UI.button(\"Button 3 (LINE_START)\").id(\"B3\")","            )","            .add(","                BorderLayout.PAGE_END,","                UI.button(\"Long-Named Button 4 (PAGE_END)\").id(\"B4\")","            )","            .add(","                BorderLayout.LINE_END,","                UI.button(\"5 (LINE_END)\").id(\"B5\")","            )","            .get(JPanel)","        )"]},
+
+        {"kind":"and","text":"We do this little trick to remove hash code...","code":["tree.entrySet().each {","    entry -> tree[entry.key] = entry.value.replaceAll(\"(\\\\@([0-9]?[abcdef]?)+)\", \"\")","}"]},
+
+        {"kind":"then","text":"","code":["'Root' in tree","'B1' in tree","'B2' in tree","'B3' in tree","'B4' in tree","'B5' in tree"]},
+
+        {"kind":"and","text":"","code":["tree['Root'] == 'javax.swing.JPanel[Root,0,0,0x0,invalid,layout=java.awt.BorderLayout,alignmentX=0.0,alignmentY=0.0,border=,flags=9,maximumSize=,minimumSize=,preferredSize=]'","tree['B1'  ] == 'javax.swing.JButton[B1,0,0,0x0,invalid,alignmentX=0.0,alignmentY=0.5,border=javax.swing.plaf.BorderUIResource$CompoundBorderUIResource,flags=296,maximumSize=,minimumSize=,preferredSize=,defaultIcon=,disabledIcon=,disabledSelectedIcon=,margin=javax.swing.plaf.InsetsUIResource[top=2,left=14,bottom=2,right=14],paintBorder=true,paintFocus=true,pressedIcon=,rolloverEnabled=true,rolloverIcon=,rolloverSelectedIcon=,selectedIcon=,text=Button 1 (PAGE_START),defaultCapable=true]'","tree['B2'  ] == 'javax.swing.JRadioButton[B2,0,0,0x0,invalid,alignmentX=0.0,alignmentY=0.5,border=javax.swing.plaf.BorderUIResource$CompoundBorderUIResource,flags=360,maximumSize=,minimumSize=,preferredSize=java.awt.Dimension[width=200,height=100],defaultIcon=,disabledIcon=,disabledSelectedIcon=,margin=javax.swing.plaf.InsetsUIResource[top=2,left=2,bottom=2,right=2],paintBorder=false,paintFocus=true,pressedIcon=,rolloverEnabled=true,rolloverIcon=,rolloverSelectedIcon=,selectedIcon=,text=Button 2 (CENTER)]'","tree['B3'  ] == 'javax.swing.JButton[B3,0,0,0x0,invalid,alignmentX=0.0,alignmentY=0.5,border=javax.swing.plaf.BorderUIResource$CompoundBorderUIResource,flags=296,maximumSize=,minimumSize=,preferredSize=,defaultIcon=,disabledIcon=,disabledSelectedIcon=,margin=javax.swing.plaf.InsetsUIResource[top=2,left=14,bottom=2,right=14],paintBorder=true,paintFocus=true,pressedIcon=,rolloverEnabled=true,rolloverIcon=,rolloverSelectedIcon=,selectedIcon=,text=Button 3 (LINE_START),defaultCapable=true]'","tree['B4'  ] == 'javax.swing.JButton[B4,0,0,0x0,invalid,alignmentX=0.0,alignmentY=0.5,border=javax.swing.plaf.BorderUIResource$CompoundBorderUIResource,flags=296,maximumSize=,minimumSize=,preferredSize=,defaultIcon=,disabledIcon=,disabledSelectedIcon=,margin=javax.swing.plaf.InsetsUIResource[top=2,left=14,bottom=2,right=14],paintBorder=true,paintFocus=true,pressedIcon=,rolloverEnabled=true,rolloverIcon=,rolloverSelectedIcon=,selectedIcon=,text=Long-Named Button 4 (PAGE_END),defaultCapable=true]'","tree['B5'  ] == 'javax.swing.JButton[B5,0,0,0x0,invalid,alignmentX=0.0,alignmentY=0.5,border=javax.swing.plaf.BorderUIResource$CompoundBorderUIResource,flags=296,maximumSize=,minimumSize=,preferredSize=,defaultIcon=,disabledIcon=,disabledSelectedIcon=,margin=javax.swing.plaf.InsetsUIResource[top=2,left=14,bottom=2,right=14],paintBorder=true,paintFocus=true,pressedIcon=,rolloverEnabled=true,rolloverIcon=,rolloverSelectedIcon=,selectedIcon=,text=5 (LINE_END),defaultCapable=true]'"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can register various kinds of different keyboard event handlers to swing tree nodes.",
+      "result":"PASS",
+      "duration":"0.005 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The Swing-Tree API exposes various methods to register different kinds of Swing component\n            or keyboard events. \n            All such event registration methods can be identified by the 'on' prefix.\n        "]
+      },
+      "blocks":[
+        {"kind":"when","text":"We create a panel UI node and attach various kinds of actions to it.","code":["def panel =","        UI.panel().id(\"Root\")","        .onKeyPressed(it -> {/*something*/})","        .onPressed(Keyboard.Key.H, it -> {/*something*/})","        .onKeyReleased(it -> {/*something*/})","        .onReleased(Keyboard.Key.X, it -> {/*something*/})","        .onKeyTyped(it -> {/*something*/})","        .onTyped(Keyboard.Key.X, it -> {/*something*/})","        .get(JPanel)"]},
+
+        {"kind":"then","text":"We can verify that the panel has the expected number of listeners.","code":["panel.getListeners(KeyListener.class).size() == 6"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can register different UI focus event handlers to swing tree nodes.",
+      "result":"PASS",
+      "duration":"0.002 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The Swing-Tree API exposes various methods to register different kinds of Swing component\n            events, like for example UI focus events. \n            All such event registration methods can be identified by the 'on' prefix.\n        "]
+      },
+      "blocks":[
+        {"kind":"when","text":"We create a panel UI node and attach various kinds of actions to it.","code":["def panel =","        UI.of(new JPanel()).id(\"Root\")","        .onFocusGained(it -> {/*something*/})","        .onFocusLost(it -> {/*something*/})","        .get(JPanel)"]},
+
+        {"kind":"then","text":"We can verify that the panel has the expected number of listeners.","code":["panel.getListeners(FocusListener.class).size() == 2"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can register list selection events on a JList based swing tree node.",
+      "result":"PASS",
+      "duration":"0.007 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The Swing-Tree API exposes various methods to register different kinds of Swing component\n            events, like for example list selection events. \n            All such event registration methods can be identified by the 'on' prefix.\n        "]
+      },
+      "blocks":[
+        {"kind":"when","text":"We create a JList UI node and attach various kinds of actions to it.","code":["def list =","        UI.of(new JList<>())","        .onSelection(it -> {/*something*/})","        .onSelection(it -> {/*something*/})","        .onSelection(it -> {/*something*/})","        .get(JList)"]},
+
+        {"kind":"then","text":"We can verify that the list has the expected number of listeners.","code":["list.getListeners(ListSelectionListener.class).size() == 3"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A tabbed pane can be created and populated in a declarative way.",
+      "result":"PASS",
+      "duration":"0.013 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Although Swing has the JTabbedPane component as a collection of tabs, \n            there is no abstraction defining a tab on its own.\n            The Swing-Tree API provides a Tab class that allows you to define\n            a tab and its content in a more intuitive as well as declarative manner\n            with tab specific properties and event handlers.\n        "]
+      },
+      "blocks":[
+        {"kind":"when","text":"We create a tabbed pane UI node and attach various kinds of tabs with custom actions to it.","code":["def tabbedPane =","    UI.tabbedPane(UI.Position.LEFT).id(\"Tabs\")","    .add(","        UI.tab(\"Tab 1\")","        .onSelection(it -> {/*something*/})","        .add(UI.label(\"Tab 1 content\"))","    )","    .add(","        UI.tab(\"Tab 2\")","        .withTip(\"Tab 2 tip\")","        .add(UI.label(\"Tab 2 content\")))","    .add(","        UI.tab(\"Tab 3\")","        .onMouseClick(it -> {/*something*/})","        .add(UI.label(\"Tab 3 content\")))","    .get(JTabbedPane)"]},
+
+        {"kind":"then","text":"We can verify that the tabbed pane has the expected number of tabs.","code":["tabbedPane.getTabCount() == 3","tabbedPane.getTitleAt(0) == \"Tab 1\"","tabbedPane.getTitleAt(1) == \"Tab 2\"","tabbedPane.getTitleAt(2) == \"Tab 3\""]},
+
+        {"kind":"and","text":"The tabbed pane has only titles but no header components:","code":["tabbedPane.getTabComponentAt(0) == null","tabbedPane.getTabComponentAt(1) == null","tabbedPane.getTabComponentAt(2) == null"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The tab buttons of a tabbed pane can have custom components.",
+      "result":"PASS",
+      "duration":"0.004 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Although Swing has the JTabbedPane component as a collection of tabs, \n            there is no abstraction defining a tab on its own.\n            The Swing-Tree API provides a Tab class that allows you to define\n            a tab and its content in a more intuitive as well as declarative manner\n            with tab specific properties and event handlers.\n        "]
+      },
+      "blocks":[
+        {"kind":"when","text":"We create a tabbed pane UI node and attach tabs with custom tab header components to it.","code":["def tabbedPane =","    UI.tabbedPane(UI.Position.RIGHT).id(\"Tabs\")","    .add(","        UI.tab(\"Tab 1\")","        .withHeader(UI.label(\"Tab 1 header\"))","        .add(UI.label(\"Tab 1 content\"))","    )","    .add(","        UI.tab(\"Tab 2\")","        .withHeader(UI.label(\"Tab 2 header\"))","        .add(UI.label(\"Tab 2 content\")))","    .add(","        UI.tab(\"Tab 3\")","        .withHeader(UI.label(\"Tab 3 header\"))","        .add(UI.label(\"Tab 3 content\")))","    .get(JTabbedPane)"]},
+
+        {"kind":"then","text":"We can verify that the tabbed pane has the expected number of tabs.","code":["tabbedPane.getTabCount() == 3","tabbedPane.getTitleAt(0) == \"Tab 1\"","tabbedPane.getTitleAt(1) == \"Tab 2\"","tabbedPane.getTitleAt(2) == \"Tab 3\""]},
+
+        {"kind":"and","text":"The tabbed pane has both title labels and header components:","code":["tabbedPane.getTabComponentAt(0) instanceof JPanel // wrapping both the title and the header","tabbedPane.getTabComponentAt(1) instanceof JPanel","tabbedPane.getTabComponentAt(2) instanceof JPanel","((JPanel)tabbedPane.getTabComponentAt(0)).getComponentCount() == 2","((JPanel)tabbedPane.getTabComponentAt(1)).getComponentCount() == 2","((JPanel)tabbedPane.getTabComponentAt(2)).getComponentCount() == 2"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Tab header components can be passed to the \"tab\" factory method instead of the title.",
+      "result":"PASS",
+      "duration":"0.002 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Custom tab header components are often used to display icons or a tab close button. \n        "]
+      },
+      "blocks":[
+        {"kind":"when","text":"We create a tabbed pane UI node and attach tabs with custom tab header components to it.","code":["def tabbedPane =","    UI.tabbedPane(UI.Position.BOTTOM).id(\"Tabs\")","    .add(","        UI.tab(UI.label(\"Tab 1 header\"))","        .add(UI.label(\"Tab 1 content\"))","    )","    .add(","        UI.tab(UI.label(\"Tab 2 header\"))","        .add(UI.label(\"Tab 2 content\")))","    .add(","        UI.tab(UI.label(\"Tab 3 header\"))","        .add(UI.label(\"Tab 3 content\")))","    .get(JTabbedPane)"]},
+
+        {"kind":"then","text":"We can verify that the tabbed pane has the expected number of tabs.","code":["tabbedPane.getTabCount() == 3","tabbedPane.getTitleAt(0) == \"\"","tabbedPane.getTitleAt(1) == \"\"","tabbedPane.getTitleAt(2) == \"\""]},
+
+        {"kind":"and","text":"The tabbed pane has header components:","code":["tabbedPane.getTabComponentAt(0) instanceof JLabel","tabbedPane.getTabComponentAt(1) instanceof JLabel","tabbedPane.getTabComponentAt(2) instanceof JLabel"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use the \"peek( c -> {} )\" method to access the wrapped Swing component in your Swing-Tree.",
+      "result":"PASS",
+      "duration":"0.002 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The Swing-Tree API provides a \"peek( c -> {} )\" method that allows you to access the wrapped Swing component\n            in your Swing-Tree within the provided Peeker lambda. \n            This is useful for when you want more control over the Swing component than what the Swing-Tree API provides.\n        "]
+      },
+      "blocks":[
+        {"kind":"when","text":"We create a panel UI node and set a custom location.","code":["def panel =","    UI.panel()","    .peek(it -> it.setLocation(42, 73))","    .add(UI.label(\"Label 1\"))","    .add(UI.label(\"Label 2\"))","    .add(UI.label(\"Label 3\"))","    .get(JPanel)"]},
+
+        {"kind":"then","text":"We can verify that the panel has the expected location.","code":["panel.getLocation() == new Point(42, 73)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

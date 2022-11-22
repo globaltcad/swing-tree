@@ -118,6 +118,12 @@ public abstract class AbstractVariable<T> implements Var<T>
 	@Override
 	public Var<T> set( T newValue ) {
 		if ( !Objects.equals( this.value, newValue ) ) {
+			// First we check if the value is compatible with the type
+			if ( newValue != null && !type.isAssignableFrom(newValue.getClass()) )
+				throw new IllegalArgumentException(
+						"The provided type of the new value is not compatible with the type of this property"
+					);
+
 			history.add(Val.of(this.type(), this.value).withID(this.id()));
 			if ( history.size() > 16 )
 				history.remove(0);
