@@ -53,7 +53,7 @@ public class SomeSpinnersView extends JPanel {
 	}
 
 	public static void main(String... args) {
-		UI.showInNewFrame(new SomeSpinnersView(new SomeSpinnersViewModel()));
+		UI.show(new SomeSpinnersView(new SomeSpinnersViewModel()));
 	}
 
 }

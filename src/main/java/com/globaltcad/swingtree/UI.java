@@ -1594,6 +1594,15 @@ public final class UI
     }
 
     /**
+     * @return A builder instance for a new {@link JList}.
+     */
+    @SafeVarargs
+    public static <E> UIForList<E, JList<E>> list( E... elements ) {
+        LogUtil.nullArgCheck(elements, "elements", Object[].class);
+        return of(new JList<>(elements));
+    }
+
+    /**
      * @return A builder instance for a new {@link JTable}.
      */
     public static <T extends JTable> UIForTable<T> of( T table ) {
@@ -1633,6 +1642,24 @@ public final class UI
         return Render.forList(itemType, null).when(itemType).as(cell->{});
     }
 
+    /**
+     *  Use this to build a list cell renderer for a specific item type.
+     *  What you would typically want to do is customize the text that should be displayed
+     *  for a specific item type. <br>
+     *  This is done like so:
+     *  <pre>{@code
+     *  UI.list("A", "B", "C")
+     *  .withRenderer(
+     *      UI.renderListItem(String.class)
+     *      .asText(cell -> cell.getValue().toLowerCase())
+     *  );
+     *  }</pre>
+     *
+     * @param itemType The type of the items which should be rendered using a custom renderer.
+     * @return A render builder exposing an API that allows you to
+     *          configure how he passed item type should be rendered.
+     * @param <T> The type of the items which should be rendered.
+     */
     public static <T> Render.As<JList<T>, T, T> renderListItem( Class<T> itemType ) {
         return Render.forList(itemType, null).when(itemType);
     }
@@ -1645,6 +1672,24 @@ public final class UI
         return Render.forCombo(itemType, null).when(itemType).as(cell->{});
     }
 
+    /**
+     *  Use this to build a combo box cell renderer for a specific item type.
+     *  What you would typically want to do is customize the text that should be displayed
+     *  for a specific item type. <br>
+     *  This is done like so:
+     *  <pre>{@code
+     *  UI.comboBox(Size.LARGE, Size.MEDIUM, Size.SMALL)
+     *  .withRenderer(
+     *      UI.renderComboItem(Size.class)
+     *      .asText(cell -> cell.getValue().name().toLowerCase())
+     *  );
+     *  }</pre>
+     *
+     * @param itemType The type of the items which should be rendered using a custom renderer.
+     * @return A render builder exposing an API that allows you to
+     *          configure how he passed item type should be rendered.
+     * @param <T> The type of the items which should be rendered.
+     */
     public static <T> Render.As<JComboBox<T>, T, T> renderComboItem( Class<T> itemType ) {
         return Render.forCombo(itemType, null).when(itemType);
     }
@@ -1784,6 +1829,16 @@ public final class UI
         SwingUtilities.invokeLater(runnable);
     }
 
+    /**
+     * Returns true if the current thread is an AWT event dispatching thread.
+     * <p>
+     * This method is just a cover for
+     * <code>javax.swing.SwingUtilities.isEventDispatchThread()</code>
+     * and indirectly also for
+     * <code>java.awt.EventQueue.isDispatchThread()</code>.
+     *
+     * @return true if the current thread is an AWT event dispatching thread
+     */
     public static boolean thisIsUIThread() {
         return SwingUtilities.isEventDispatchThread();
     }
@@ -1869,12 +1924,13 @@ public final class UI
     /**
      *  Use this to quickly create and inspect a test window for a UI component.
      */
-    public static void showInNewFrame(Component component) {
+    public static void show(Component component) {
         JFrame frame = new JFrame();
-        new UI.TestWindow(()->frame,component);
+        new UI.TestWindow( () -> frame,component );
         // We set the size to fit the component:
         frame.setSize(component.getPreferredSize());
         frame.setVisible(true);
+        while ( true ) { UI.processEvents(); }
     }
 
 }

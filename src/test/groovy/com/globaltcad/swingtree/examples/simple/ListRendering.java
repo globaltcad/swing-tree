@@ -1,5 +1,6 @@
 package com.globaltcad.swingtree.examples.simple;
 
+import com.globaltcad.swingtree.UI;
 import com.sun.tools.javac.util.List;
 
 import javax.swing.*;
@@ -25,7 +26,7 @@ public class ListRendering extends JPanel
     // Here you can test the UI:
 
     public static void main(String[] args) {
-        showInNewFrame(new ListRendering());
+        UI.show(new ListRendering());
     }
 
 }
