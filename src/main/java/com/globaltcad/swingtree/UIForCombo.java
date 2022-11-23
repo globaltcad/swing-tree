@@ -4,6 +4,8 @@ import com.globaltcad.swingtree.api.UIAction;
 import com.globaltcad.swingtree.api.mvvm.Var;
 
 import javax.swing.*;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,7 +30,31 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
         Component editor = getComponent().getEditor().getEditorComponent();
         if ( editor instanceof JTextField ) {
             JTextField field = (JTextField) editor;
-            UI.of(field).onTextChange( it -> model.setFromEditor(field.getText()) );
+            boolean[] comboIsOpen = {false};
+            UI.of(field).onTextChange( it -> {
+                if ( !comboIsOpen[0] )
+                    model.setFromEditor(field.getText());
+            });
+
+            // Adds a PopupMenu listener which will listen to notification
+            // messages from the popup portion of the combo box.
+            getComponent().addPopupMenuListener(new PopupMenuListener() {
+                public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                    // This method is called before the popup menu becomes visible.
+                    comboIsOpen[0] = true;
+                }
+
+                public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                    // This method is called before the popup menu becomes invisible
+                    comboIsOpen[0] = false;
+                }
+
+                public void popupMenuCanceled(PopupMenuEvent e) {
+                    // This method is called when the popup menu is canceled
+                    comboIsOpen[0] = false;
+                }
+            });
+
         }
     }
 

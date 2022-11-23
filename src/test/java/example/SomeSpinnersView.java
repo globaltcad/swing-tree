@@ -1,6 +1,7 @@
 package example;
 
 import com.globaltcad.swingtree.UI;
+import com.globaltcad.swingtree.api.mvvm.Var;
 
 import javax.swing.*;
 
@@ -49,6 +50,9 @@ public class SomeSpinnersView extends JPanel {
 				)
 				.add(PUSH_Y, panel())
 			)
+		)
+		.add(SPAN.and(GROW),
+			comboBox(Var.of("A"),"A", "B", "C")
 		)
 		.add(SPAN.and(GROW),
 			comboBox("A", "B", "C").isEditableIf(true)
