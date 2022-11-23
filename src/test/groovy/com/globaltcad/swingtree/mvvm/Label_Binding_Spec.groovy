@@ -243,6 +243,7 @@ class Label_Binding_Spec extends Specification
         """
         given : 'We create a simple swing-tree property for modelling the size.'
             Val<Icon> icon = Var.of(UI.icon("img/seed.png"))
+            var originalIcon = icon.orElseThrow()
 
         when : 'We create and bind to a label UI node...'
             var ui =
@@ -251,16 +252,17 @@ class Label_Binding_Spec extends Specification
 
         then : 'The label should be updated when the property changes.'
             ui.component.icon != null
+            ui.component.icon === originalIcon
+            ui.component.icon.iconHeight == 512
+            ui.component.icon.iconWidth == 512
 
         when : 'We change the property values...'
             icon.set(UI.icon("img/swing.png"))
-        then : 'The label should NOT be updated.'
+        then : 'The label should be a different one.'
             ui.component.icon != null
-
-        when : 'We call the "show" method on the property...'
-            icon.show()
-        then : 'The label should be updated.'
-            ui.component.icon != null
+            ui.component.icon !== originalIcon
+            ui.component.icon.iconHeight == 512
+            ui.component.icon.iconWidth == 512
     }
 
 }

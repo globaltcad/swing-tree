@@ -37,9 +37,10 @@ class Properties_Spec extends Specification
     def 'They can be bound to the UI by passing them to a builder node.'()
     {
         reportInfo """
-            Binding goes both ways, so when the property changes we can update the UI
-            using the "show()" method on the property, and when
-            the UI is changed by the user, it will update the property for us
+            Binding goes both ways, so when the property changes state through the "set" method
+            it will update the UI
+            using the "show()" method on the property (which you can also call manually for UI updates), 
+            and when the UI is changed by the user, it will update the property for us
             and trigger the property action (if present).
         """
         given : 'A simple boolean property modelling a toggle state.'
@@ -161,13 +162,13 @@ class Properties_Spec extends Specification
             var list2 = []
             property2.onShow { list2.add(it) }
 
-        when : 'We change and "show" the value of the original property.'
+        when : 'We change the value of the original property.'
             property.set("Tofu")
         then : 'The subscriber of the original property is triggered but not the subscriber of the new property.'
             list1 == ["Tofu"]
             list2 == []
 
-        when : 'We change and "show" the value of the new property.'
+        when : 'We change the value of the new property.'
             property2.set("Tempeh")
         then : 'Both subscribers are receive the effect.'
             list1 == ["Tofu", "Tempeh"]
@@ -352,6 +353,43 @@ class Properties_Spec extends Specification
             delegate.get(-0).get() == Var.of("Cherry")
             delegate.get(-1).get() == Var.of("Banana")
             delegate.get(-2).get() == Var.of("Apple")
+    }
+
+    def 'The UI uses the "act(T)" method to change the property state to avoid feedback looping.'()
+    {
+        reportInfo """
+            Unfortunately Swing does not allow us to implement models for all types of UI components.
+            A JButton for example does not have a model that we can use to bind to a property.
+            Instead Swing-Tree has to perform precise updates to the UI components without
+            triggering any events.
+            Therefore the UI uses the "act(T)" method to change the property state and triggers the
+            action of the property. On the contrary the "set(T)" method is used to change the state
+            of a property without triggering the action, but it will trigger the "onShow" actions
+            of the property. This is so that the UI can update itself when the user changes the
+            state of a property.
+        """
+        given : 'A simple property with a view and model actions.'
+            var showListener = []
+            var modelListener = []
+            var property = Var.of(":)")
+                                .withAction( it ->{
+                                    modelListener << it.current().orElseThrow()
+                                })
+            property.onShow( it -> showListener << it )
+
+        when : 'We change the state of the property using the "set(T)" method.'
+            property.set(":(")
+        then : 'The "onShow" actions are triggered.'
+            showListener == [":("]
+        and : 'The "onModel" actions are not triggered.'
+            modelListener == []
+
+        when : 'We change the state of the property using the "act(T)" method.'
+            property.act(":|")
+        then : 'The "onShow" actions are NOT triggered, because the "act" method performs an "act on your view model"!'
+            showListener == [":("]
+        and : 'The "onModel" actions are triggered.'
+            modelListener == [":|"]
     }
 
 }

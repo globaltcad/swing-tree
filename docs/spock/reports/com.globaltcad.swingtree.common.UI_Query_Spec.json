@@ -16,7 +16,7 @@
     {
       "id":"We can query the swing tree within an action lambda.",
       "result":"PASS",
-      "duration":"0.077 seconds",
+      "duration":"0.078 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

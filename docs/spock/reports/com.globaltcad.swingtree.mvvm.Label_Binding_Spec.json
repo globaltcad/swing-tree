@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.012 seconds"
+    "duration":"0.013 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can bind to the text of a label.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that for a binding to work, the property must be a Var or Val\n            implementation and it is required to call the \"show()\" method on the\n            property to apply its value to the view.\n        "]
       },
@@ -37,7 +37,7 @@
     {
       "id":"We can bind to the foreground and background color of a UI node.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -189,19 +189,15 @@
       "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Icon> icon = Var.of(UI.icon(\"img/seed.png\"))"]},
+        {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Icon> icon = Var.of(UI.icon(\"img/seed.png\"))","var originalIcon = icon.orElseThrow()"]},
 
         {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withIcon(icon)"]},
 
-        {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.icon != null"]},
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.icon != null","ui.component.icon === originalIcon","ui.component.icon.iconHeight == 512","ui.component.icon.iconWidth == 512"]},
 
         {"kind":"when","text":"We change the property values...","code":["icon.set(UI.icon(\"img/swing.png\"))"]},
 
-        {"kind":"then","text":"The label should NOT be updated.","code":["ui.component.icon != null"]},
-
-        {"kind":"when","text":"We call the \"show\" method on the property...","code":["icon.show()"]},
-
-        {"kind":"then","text":"The label should be updated.","code":["ui.component.icon != null"]}
+        {"kind":"then","text":"The label should be a different one.","code":["ui.component.icon != null","ui.component.icon !== originalIcon","ui.component.icon.iconHeight == 512","ui.component.icon.iconWidth == 512"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

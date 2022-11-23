@@ -35,7 +35,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             Don't hesitate to use as the main tool for grouping and structuring
             your UI, just like you would use the 'div' tag in HTML.
         """
-        given : 'We create a simple swing tree if JPanel instances.'
+        given : 'We create a simple swing tree of JPanel instances.'
             var ui =
                     UI.panel()
                     .add(UI.panel())
