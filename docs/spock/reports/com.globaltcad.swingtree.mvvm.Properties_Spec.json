@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.083 seconds"
+    "duration":"0.242 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"Properties are simple wrappers around a value",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.007 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -31,7 +31,7 @@
     {
       "id":"They can be bound to the UI by passing them to a builder node.",
       "result":"PASS",
-      "duration":"0.069 seconds",
+      "duration":"0.184 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Binding goes both ways, so when the property changes we can update the UI\n            using the \"show()\" method on the property, and when\n            the UI is changed by the user, it will update the property for us\n            and trigger the property action (if present).\n        "]
       },
@@ -83,7 +83,7 @@
     {
       "id":"Properties can be bound by subscribing to them using the \"onShow(..)\" method.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that bound Swing-Tree properties only have side effects\n            when they are deliberately triggered to execute their side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
       },
@@ -95,10 +95,6 @@
         {"kind":"when","text":"We subscribe to the property using the \"onShow(..)\" method.","code":["mutable.onShow { list.add(it) }"]},
 
         {"kind":"and","text":"We change the value of the property.","code":["mutable.set(\"Tofu\")"]},
-
-        {"kind":"then","text":"Nothing happens initially...","code":["list == []"]},
-
-        {"kind":"when","text":"We call the \"show()\" method on the property however...","code":["mutable.show()"]},
 
         {"kind":"then","text":"The side effect is executed.","code":["list == [\"Tofu\"]"]}
       ],
@@ -125,7 +121,7 @@
     {
       "id":"A property can only wrap null if we specify a type class.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -159,11 +155,11 @@
 
         {"kind":"and","text":"Another subscriber to the new property.","code":["var list2 = []","property2.onShow { list2.add(it) }"]},
 
-        {"kind":"when","text":"We change and \"show\" the value of the original property.","code":["property.set(\"Tofu\").show()"]},
+        {"kind":"when","text":"We change and \"show\" the value of the original property.","code":["property.set(\"Tofu\")"]},
 
         {"kind":"then","text":"The subscriber of the original property is triggered but not the subscriber of the new property.","code":["list1 == [\"Tofu\"]","list2 == []"]},
 
-        {"kind":"when","text":"We change and \"show\" the value of the new property.","code":["property2.set(\"Tempeh\").show()"]},
+        {"kind":"when","text":"We change and \"show\" the value of the new property.","code":["property2.set(\"Tempeh\")"]},
 
         {"kind":"then","text":"Both subscribers are receive the effect.","code":["list1 == [\"Tofu\", \"Tempeh\"]","list2 == [\"Tempeh\"]"]}
       ],
@@ -173,7 +169,7 @@
     {
       "id":"Properties are similar to the \"Optional\" class, you can map them and see if they are empty or not.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -247,7 +243,7 @@
     {
       "id":"The \"get\" method will throw an exception if there is no element present.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that accessing the value of an empty property using the \"get\" method\n            will throw an exception.\n            It is recommended to use the \"orElseNull\" method instead, because the \"get\"\n            method is intended to be used for non-nullable types, or when it\n            is clear that the property is not empty!\n        "]
       },
@@ -285,7 +281,7 @@
     {
       "id":"Properties expose a state history in their property actions.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            When the view changes the state of a property and then triggers a model action, \n            the property will remember its previous state and store it in an internal history.\n            This history will be exposed to the property action, and it can be used to undo \n            or redo changes to the property.\n        "]
       },
@@ -323,7 +319,7 @@
     {
       "id":"We can search for a previous state of a property in its history.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can query the history of a property for a previous state of the property\n            using the \"previous(int)\" method.\n            It returns an optional that contains the previous state if it is found.\n            Note that the index passed to the method is relative to the current state,\n            so a value of 0 will return the current state, a value of 1 will return the\n            previous state, and so on. \n        "]
       },

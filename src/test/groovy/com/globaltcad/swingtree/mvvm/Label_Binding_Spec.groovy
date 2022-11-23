@@ -44,11 +44,6 @@ class Label_Binding_Spec extends Specification
 
         when : 'We change the property value...'
             text.set("Goodbye World")
-        then : 'The label should NOT be updated.'
-            ui.component.text == "Hello World"
-
-        when : 'We call the "show" method on the property...'
-            text.show()
         then : 'The label should be updated.'
             ui.component.text == "Goodbye World"
     }
@@ -72,13 +67,6 @@ class Label_Binding_Spec extends Specification
         when : 'We change the color values of both properties...'
             color1.set(Color.GREEN)
             color2.set(Color.YELLOW)
-        then : 'At first the label colors are NOT updated.'
-            ui.component.foreground == Color.RED
-            ui.component.background == Color.BLUE
-
-        when : 'We call the "show" method on the properties however...'
-            color1.show()
-            color2.show()
         then : 'The label colors are updated.'
             ui.component.foreground == Color.GREEN
             ui.component.background == Color.YELLOW
@@ -110,15 +98,6 @@ class Label_Binding_Spec extends Specification
             minSize.set(new Dimension(50, 50))
             maxSize.set(new Dimension(100, 100))
             prefSize.set(new Dimension(75, 75))
-        then : 'The label should NOT be updated at first.'
-            ui.component.minimumSize == new Dimension(100, 100)
-            ui.component.maximumSize == new Dimension(200, 200)
-            ui.component.preferredSize == new Dimension(150, 150)
-
-        when : 'We call the "show" method on the property...'
-            minSize.show()
-            maxSize.show()
-            prefSize.show()
         then : 'The label should be updated.'
             ui.component.minimumSize == new Dimension(50, 50)
             ui.component.maximumSize == new Dimension(100, 100)
@@ -143,11 +122,6 @@ class Label_Binding_Spec extends Specification
 
         when : 'We change the property values...'
             enabled.set(false)
-        then : 'The label should NOT be updated.'
-            ui.component.enabled == true
-
-        when : 'We call the "show" method on the property...'
-            enabled.show()
         then : 'The label should be updated.'
             ui.component.enabled == false
     }
@@ -170,11 +144,6 @@ class Label_Binding_Spec extends Specification
 
         when : 'We change the property values...'
             visible.set(false)
-        then : 'The label should NOT be updated.'
-            ui.component.visible == true
-
-        when : 'We call the "show" method on the property...'
-            visible.show()
         then : 'The label should be updated.'
             ui.component.visible == false
     }
@@ -204,13 +173,6 @@ class Label_Binding_Spec extends Specification
         when : 'We change the property values...'
             horizontal.set(UI.HorizontalAlignment.CENTER)
             vertical.set(UI.VerticalAlignment.BOTTOM)
-        then : 'The label should NOT be updated.'
-            ui.component.horizontalAlignment == SwingConstants.LEFT
-            ui.component.verticalAlignment == SwingConstants.TOP
-
-        when : 'We call the "show" method on the property...'
-            horizontal.show()
-            vertical.show()
         then : 'The label should be updated.'
             ui.component.horizontalAlignment == SwingConstants.CENTER
             ui.component.verticalAlignment == SwingConstants.BOTTOM
@@ -241,13 +203,6 @@ class Label_Binding_Spec extends Specification
         when : 'We change the property values...'
             horizontal.set(UI.HorizontalAlignment.CENTER)
             vertical.set(UI.VerticalAlignment.BOTTOM)
-        then : 'The label should NOT be updated.'
-            ui.component.horizontalTextPosition == SwingConstants.LEFT
-            ui.component.verticalTextPosition == SwingConstants.TOP
-
-        when : 'We call the "show" method on the property...'
-            horizontal.show()
-            vertical.show()
         then : 'The label should be updated.'
             ui.component.horizontalTextPosition == SwingConstants.CENTER
             ui.component.verticalTextPosition == SwingConstants.BOTTOM
@@ -274,11 +229,6 @@ class Label_Binding_Spec extends Specification
 
         when : 'We change the property values...'
             fontSize.set(24)
-        then : 'The label should NOT be updated.'
-            ui.component.font.size == 12
-
-        when : 'We call the "show" method on the property...'
-            fontSize.show()
         then : 'The label should be updated.'
             ui.component.font.size == 24
     }

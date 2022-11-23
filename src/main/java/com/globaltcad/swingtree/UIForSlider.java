@@ -69,7 +69,7 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
     }
 
     public final UIForSlider<S> withValue( Var<Integer> var ) {
-        _onChange( e -> _doApp(getComponent().getValue(), v -> var.set(v).act()));
+        _onChange( e -> _doApp(getComponent().getValue(), v -> var.act(v)));
         return this.withValue((Val<Integer>) var);
     }
 

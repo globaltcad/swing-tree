@@ -79,7 +79,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
         LogUtil.nullArgCheck(var, "var", Var.class);
         var.onShow(v-> _doUI(()->getComponent().setSelected(v)));
         _onClick(
-            e -> _doApp(getComponent().isSelected(), sel->var.set(sel).act())
+            e -> _doApp(getComponent().isSelected(), sel->var.act(sel))
         );
         return isSelectedIf( var.orElseThrow() );
     }

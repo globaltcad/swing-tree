@@ -40,11 +40,6 @@ class Button_Binding_Spec extends Specification
 
         when : 'We change the property value...'
             text.set("Goodbye World")
-        then : 'The button should NOT be updated.'
-            ui.component.text == "Hello World"
-
-        when : 'We call the "show" method on the property...'
-            text.show()
         then : 'The button should be updated.'
             ui.component.text == "Goodbye World"
     }
@@ -65,11 +60,6 @@ class Button_Binding_Spec extends Specification
 
         when : 'We change the property value...'
             selected.set(true)
-        then : 'The button should NOT be updated.'
-            ui.component.selected == false
-
-        when : 'We call the "show" method on the property...'
-            selected.show()
         then : 'The button should be updated.'
             ui.component.selected == true
     }
@@ -90,11 +80,6 @@ class Button_Binding_Spec extends Specification
 
         when : 'We change the property value...'
             enabled.set(true)
-        then : 'The button should NOT be updated.'
-            ui.component.enabled == false
-
-        when : 'We call the "show" method on the property...'
-            enabled.show()
         then : 'The button should be updated.'
             ui.component.enabled == true
     }

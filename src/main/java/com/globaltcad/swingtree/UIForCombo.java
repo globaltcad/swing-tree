@@ -76,7 +76,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
         LogUtil.nullArgCheck(var, "var", Var.class);
         var.onShow(v-> _doUI(()-> _setSelectedItem(v)));
         _onSelection(
-            e -> _doApp((E)getComponent().getSelectedItem(), sel->var.set(sel).act())
+            e -> _doApp((E)getComponent().getSelectedItem(), sel->var.act(sel))
         );
         return withSelectedItem(var.get());
     }

@@ -29,10 +29,6 @@
 
         {"kind":"when","text":"We change the value of the property.","code":["property.set(new Dimension(200, 200))"]},
 
-        {"kind":"then","text":"Nothing will happen at first.","code":["node.component.components[1].minimumSize == new Dimension(100, 100)"]},
-
-        {"kind":"when","text":"We call the \"show()\" method on the property however...","code":["property.show()"]},
-
         {"kind":"then","text":"The button will have the new size.","code":["node.component.components[1].minimumSize == new Dimension(200, 200)"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
@@ -53,10 +49,6 @@
         {"kind":"expect","text":"The label will have the background color of the property.","code":["node.component.components[1].background == Color.RED"]},
 
         {"kind":"when","text":"We change the value of the property.","code":["property.set(Color.BLUE)"]},
-
-        {"kind":"then","text":"Nothing will happen at first.","code":["node.component.components[1].background == Color.RED"]},
-
-        {"kind":"when","text":"We call the \"show()\" method on the property however...","code":["property.show()"]},
 
         {"kind":"then","text":"The label will have the new color.","code":["node.component.components[1].background == Color.BLUE"]}
       ],
@@ -79,10 +71,6 @@
 
         {"kind":"when","text":"We change the value of the property.","code":["property.set(\"Goodbye World\")"]},
 
-        {"kind":"then","text":"Nothing will happen at first.","code":["node.component.components[1].text == \"Hello World\""]},
-
-        {"kind":"when","text":"We call the \"show()\" method on the property however...","code":["property.show()"]},
-
         {"kind":"then","text":"The text field will have the new text.","code":["node.component.components[1].text == \"Goodbye World\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
@@ -104,10 +92,6 @@
 
         {"kind":"when","text":"We change the value of the property.","code":["property.set(false)"]},
 
-        {"kind":"then","text":"Nothing will happen at first.","code":["node.component.components[1].enabled == true"]},
-
-        {"kind":"when","text":"We call the \"show()\" method on the property however...","code":["property.show()"]},
-
         {"kind":"then","text":"The spinner will be disabled.","code":["node.component.components[1].enabled == false"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
@@ -128,10 +112,6 @@
         {"kind":"expect","text":"The checkbox will be selected.","code":["node.component.components[1].selected == true"]},
 
         {"kind":"when","text":"We change the value of the property.","code":["property.set(false)"]},
-
-        {"kind":"then","text":"Nothing will happen at first.","code":["node.component.components[1].selected == true"]},
-
-        {"kind":"when","text":"We call the \"show()\" method on the property however...","code":["property.show()"]},
 
         {"kind":"then","text":"The checkbox will be unselected.","code":["node.component.components[1].selected == false"]}
       ],

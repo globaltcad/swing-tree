@@ -112,11 +112,6 @@ class Properties_Spec extends Specification
             mutable.onShow { list.add(it) }
         and : 'We change the value of the property.'
             mutable.set("Tofu")
-        then : 'Nothing happens initially...'
-            list == []
-
-        when : 'We call the "show()" method on the property however...'
-            mutable.show()
         then : 'The side effect is executed.'
             list == ["Tofu"]
     }
@@ -167,13 +162,13 @@ class Properties_Spec extends Specification
             property2.onShow { list2.add(it) }
 
         when : 'We change and "show" the value of the original property.'
-            property.set("Tofu").show()
+            property.set("Tofu")
         then : 'The subscriber of the original property is triggered but not the subscriber of the new property.'
             list1 == ["Tofu"]
             list2 == []
 
         when : 'We change and "show" the value of the new property.'
-            property2.set("Tempeh").show()
+            property2.set("Tempeh")
         then : 'Both subscribers are receive the effect.'
             list1 == ["Tofu", "Tempeh"]
             list2 == ["Tempeh"]

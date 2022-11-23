@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.004 seconds"
+    "duration":"0.010 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can bind to the text of a button.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that for a binding to work, the property must be a Var or Val\n            implementation and it is required to call the \"show()\" method on the\n            property to apply its value to the view.\n        "]
       },
@@ -28,10 +28,6 @@
         {"kind":"then","text":"The button should be updated when the property is changed and shown.","code":["ui.component.text == \"Hello World\""]},
 
         {"kind":"when","text":"We change the property value...","code":["text.set(\"Goodbye World\")"]},
-
-        {"kind":"then","text":"The button should NOT be updated.","code":["ui.component.text == \"Hello World\""]},
-
-        {"kind":"when","text":"We call the \"show\" method on the property...","code":["text.show()"]},
 
         {"kind":"then","text":"The button should be updated.","code":["ui.component.text == \"Goodbye World\""]}
       ],
@@ -54,10 +50,6 @@
 
         {"kind":"when","text":"We change the property value...","code":["selected.set(true)"]},
 
-        {"kind":"then","text":"The button should NOT be updated.","code":["ui.component.selected == false"]},
-
-        {"kind":"when","text":"We call the \"show\" method on the property...","code":["selected.show()"]},
-
         {"kind":"then","text":"The button should be updated.","code":["ui.component.selected == true"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
@@ -66,7 +58,7 @@
     {
       "id":"You can bind to the enabled state of a button.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["  \n            Note that this works with all kinds of buttons, not just the JButton.\n        "]
       },
@@ -78,10 +70,6 @@
         {"kind":"then","text":"The button should be updated when the property is changed and shown.","code":["ui.component.enabled == false"]},
 
         {"kind":"when","text":"We change the property value...","code":["enabled.set(true)"]},
-
-        {"kind":"then","text":"The button should NOT be updated.","code":["ui.component.enabled == false"]},
-
-        {"kind":"when","text":"We call the \"show\" method on the property...","code":["enabled.show()"]},
 
         {"kind":"then","text":"The button should be updated.","code":["ui.component.enabled == true"]}
       ],

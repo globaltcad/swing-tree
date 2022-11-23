@@ -91,6 +91,14 @@ public abstract class AbstractVariable<T> implements Var<T>
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override public Var<T> act(T newValue) {
+		_setInternal(newValue);
+		return act();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public T orElseThrow() {
 		// This class is similar to optional, so if the value is null, we throw an exception!
@@ -117,13 +125,18 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 */
 	@Override
 	public Var<T> set( T newValue ) {
+		_setInternal(newValue);
+		this.show();
+		return this;
+	}
+
+	private void _setInternal( T newValue ) {
 		if ( !Objects.equals( this.value, newValue ) ) {
 			history.add(Val.of(this.type(), this.value).withID(this.id()));
 			if ( history.size() > 16 )
 				history.remove(0);
 			value = newValue;
 		}
-		return this;
 	}
 
 	/**

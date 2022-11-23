@@ -19,7 +19,7 @@ import java.util.Objects;
  * 	<pre>{@code
  * 	    UI.textField()
  * 	    .peek( ta -> vm.getUsername().onShow( t -> ta.setText(t) ) )
- * 	    .onKeyReleased( e -> vm.getUsername().set( ta.getText() ).act() );
+ * 	    .onKeyReleased( e -> vm.getUsername().act( ta.getText() ) );
  * 	}</pre>
  * 	Your view will automatically update the text field with the value of the property
  * 	and inside your view model you can also update the value of the property
@@ -72,4 +72,6 @@ public interface Var<T> extends Val<T>
 	Var<T> withAction( PropertyAction<T> action );
 
 	Var<T> act();
+
+	Var<T> act(T newValue);
 }

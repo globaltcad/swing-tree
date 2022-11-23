@@ -101,7 +101,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
                 newText = part1 + ( part2.length() < 2 ? part2 : part2.substring(1) );
             else
                 newText = part1 + e.getKeyChar() + part2;
-            _doApp(newText, t -> var.set(t).act() );
+            _doApp(newText, t -> var.act(t) );
         });
         return withText( var.orElseThrow() );
     }

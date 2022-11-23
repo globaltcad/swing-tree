@@ -70,7 +70,7 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
      */
     public final UIForSpinner<S> withValue( Var<?> var ) {
         var.onShow(v -> _doUI(() -> getComponent().setValue(v)));
-        _onChange(e -> _doApp(() -> ((Var<Object>)var).set(getComponent().getValue()).act()));
+        _onChange(e -> _doApp(() -> ((Var<Object>)var).act(getComponent().getValue())));
         return this;
     }
 
