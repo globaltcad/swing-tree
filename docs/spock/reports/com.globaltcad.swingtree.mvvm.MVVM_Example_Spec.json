@@ -4,19 +4,19 @@
   "narrative":"Swing-Tree allows you to create a Model-View-ViewModel (MVVM) architecture\n    based on 2 simple property interfaces: `Val`, and `Var`!\n\n    `Val` is a read-only property, and `Var` is a read-write property.\n\n    The state of both properties can be observed by the view using simple listeners.\n    This happens automatically when you pass them to the Swing-Tree view.\n    If you want to trigger an action when the property changes, you\n    have to pass the `Var` property to the view and define a action\n    for it inside of your view model.",
   "subjects":[],
   "statistics":{
-    "runs":"8",
+    "runs":"11",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.315 seconds"
+    "duration":"0.311 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can create a property based view model and build a view for it.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that we use a pre-made example view model here.\n            Feel free to look at the source code of the view model\n            to see what it is doing.\n        "]
       },
@@ -33,7 +33,7 @@
     {
       "id":"We can bind a boolean property to a button, and when the user presses it, we notice it.",
       "result":"PASS",
-      "duration":"0.071 seconds",
+      "duration":"0.070 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -96,7 +96,7 @@
     {
       "id":"We can bind a boolean property to a toggle button, and when the user presses it, we notice it.",
       "result":"PASS",
-      "duration":"0.071 seconds",
+      "duration":"0.072 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -117,7 +117,7 @@
     {
       "id":"We can bind a enum property to a combo box and when the user selects an item, we notice it.",
       "result":"PASS",
-      "duration":"0.013 seconds",
+      "duration":"0.010 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n        "]
       },
@@ -142,7 +142,7 @@
     {
       "id":"An enum based combo box can infer its possible states directly from the binding property.",
       "result":"PASS",
-      "duration":"0.008 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n        "]
       },
@@ -167,7 +167,7 @@
     {
       "id":"A string property can be bound to a combo box holding string elements.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n            In the example below you can see how the usage of a string property\n            makes sense, because there might be requirements to add new food items\n            to the combo box at runtime.\n        "]
       },
@@ -183,6 +183,85 @@
         {"kind":"then","text":"The property was updated.","code":["selected.orElseNull() == \"Tempeh\""]},
 
         {"kind":"and","text":"The action was triggered.","code":["actionPerformed == true"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A simple list of elements can be used as a data model for a combo box.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Always prefer Enums over Strings but if you have to model generic data\n            you can always bind a simple list of elements as a data model to a combo box.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple list, holding the data.","code":["List<String> data = [\"Tofu\", \"Tempeh\", \"Seitan\"]"]},
+
+        {"kind":"when","text":"We create a combo box and bind it to the data.","code":["var ui = UI.comboBox(data)"]},
+
+        {"kind":"then","text":"The combo box was successfully created.","code":["ui != null"]},
+
+        {"kind":"and","text":"The combo box contains the data.","code":["ui.component.itemCount == data.size()","ui.component.getItemAt(0) == data.get(0)","ui.component.getItemAt(1) == data.get(1)","ui.component.getItemAt(2) == data.get(2)"]},
+
+        {"kind":"when","text":"We modify the list...","code":["data.add(\"Soy Milk\")"]},
+
+        {"kind":"then","text":"The combo box is updated.","code":["ui.component.itemCount == data.size()","ui.component.getItemAt(0) == data.get(0)","ui.component.getItemAt(1) == data.get(1)","ui.component.getItemAt(2) == data.get(2)","ui.component.getItemAt(3) == data.get(3)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A simple array of elements can be used as a data model for a combo box.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Always prefer Enums over Strings but if you have to model generic data\n            you can always bind a simple array of elements as a data model to a combo box.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple array, holding the data.","code":["String[] data = [\"Tofu\", \"Tempeh\", \"Seitan\"]"]},
+
+        {"kind":"when","text":"We create a combo box and bind it to the data.","code":["var ui = UI.comboBox(data)"]},
+
+        {"kind":"then","text":"The combo box was successfully created.","code":["ui != null"]},
+
+        {"kind":"and","text":"The combo box contains the data.","code":["ui.component.itemCount == data.size()","ui.component.getItemAt(0) == data[0]","ui.component.getItemAt(1) == data[1]","ui.component.getItemAt(2) == data[2]"]},
+
+        {"kind":"when","text":"We modify the array...","code":["data[1] = \"Soy Milk\""]},
+
+        {"kind":"then","text":"The combo box is updated.","code":["ui.component.itemCount == data.size()","ui.component.getItemAt(0) == data[0]","ui.component.getItemAt(1) == data[1]","ui.component.getItemAt(2) == data[2]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can bind a property as the current selection as well as list of elements as options to a combo box.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple list, holding the data.","code":["List<String> data = [\"Tofu\", \"Tempeh\", \"Seitan\"]"]},
+
+        {"kind":"and","text":"We create a property holding the current selection.","code":["Var<String> selected = Var.of(\"Tofu\")"]},
+
+        {"kind":"when","text":"We create a combo box and bind it to the data.","code":["var ui = UI.comboBox(selected, data)"]},
+
+        {"kind":"then","text":"The combo box was successfully created.","code":["ui != null"]},
+
+        {"kind":"and","text":"The combo box contains the data.","code":["ui.component.itemCount == data.size()","ui.component.getItemAt(0) == data.get(0)","ui.component.getItemAt(1) == data.get(1)","ui.component.getItemAt(2) == data.get(2)"]},
+
+        {"kind":"and","text":"The combo box has the correct selection.","code":["ui.component.selectedItem == selected.orElseNull()"]},
+
+        {"kind":"when","text":"We modify the list...","code":["data.add(\"Soy Milk\")"]},
+
+        {"kind":"then","text":"The combo box is updated.","code":["ui.component.itemCount == data.size()","ui.component.getItemAt(0) == data.get(0)","ui.component.getItemAt(1) == data.get(1)","ui.component.getItemAt(2) == data.get(2)","ui.component.getItemAt(3) == data.get(3)"]},
+
+        {"kind":"and","text":"The combo box has the correct selection.","code":["ui.component.selectedItem == selected.orElseNull()"]},
+
+        {"kind":"when","text":"We modify the selection...","code":["selected.set(\"Seitan\")"]},
+
+        {"kind":"then","text":"The combo box has the correct selection.","code":["ui.component.selectedItem == selected.orElseNull()"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

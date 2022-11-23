@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.088 seconds"
+    "duration":"0.084 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -83,7 +83,7 @@
     {
       "id":"Properties can be bound by subscribing to them using the \"onShow(..)\" method.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that bound Swing-Tree properties only have side effects\n            when they are deliberately triggered to execute their side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
       },
@@ -281,7 +281,7 @@
     {
       "id":"Properties expose a state history in their property actions.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            When the view changes the state of a property and then triggers a model action, \n            the property will remember its previous state and store it in an internal history.\n            This history will be exposed to the property action, and it can be used to undo \n            or redo changes to the property.\n        "]
       },
@@ -340,7 +340,7 @@
     {
       "id":"The UI uses the \"act(T)\" method to change the property state to avoid feedback looping.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Unfortunately Swing does not allow us to implement models for all types of UI components.\n            A JButton for example does not have a model that we can use to bind to a property.\n            Instead Swing-Tree has to perform precise updates to the UI components without\n            triggering any events.\n            Therefore the UI uses the \"act(T)\" method to change the property state and triggers the\n            action of the property. On the contrary the \"set(T)\" method is used to change the state\n            of a property without triggering the action, but it will trigger the \"onShow\" actions\n            of the property. This is so that the UI can update itself when the user changes the\n            state of a property.\n        "]
       },
