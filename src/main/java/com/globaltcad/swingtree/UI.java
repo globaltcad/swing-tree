@@ -15,12 +15,15 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.plaf.basic.BasicComboBoxEditor;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.Array;
+import java.util.Collections;
 import java.util.function.Supplier;
 
 /**
@@ -1095,7 +1098,14 @@ public final class UI
     @SafeVarargs
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( E... items ) {
         LogUtil.nullArgCheck(items, "items", Object[].class);
-        return of(new JComboBox<>(items));
+        return of(new JComboBox<>(new ArrayBasedComboModel<>(items)));
+    }
+
+    @SafeVarargs
+    public static <E> UIForCombo<E,JComboBox<E>> comboBoxWithUndmodifyable( E... items ) {
+        LogUtil.nullArgCheck(items, "items", Object[].class);
+        java.util.List<E> unmodifiableList = Collections.unmodifiableList(java.util.Arrays.asList(items));
+        return comboBox(unmodifiableList);
     }
 
     public static <E extends Enum<E>> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var ) {
@@ -1114,7 +1124,27 @@ public final class UI
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( java.util.List<E> items ) {
         LogUtil.nullArgCheck(items, "items", List.class);
-        return of(new JComboBox<>((E[]) items.toArray()));
+        return of(new JComboBox<>(new ListBasedComboModel<>(items)));
+    }
+
+    public static <E> UIForCombo<E,JComboBox<E>> comboBoxWithUnmodifyable( java.util.List<E> items ) {
+        LogUtil.nullArgCheck(items, "items", List.class);
+        java.util.List<E> unmodifiableList = Collections.unmodifiableList(items);
+        return comboBox(unmodifiableList);
+    }
+
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var, java.util.List<E> items ) {
+        LogUtil.nullArgCheck(items, "items", List.class);
+        return of(new JComboBox<>(new ListBasedComboModel<>(var, items)));
+    }
+
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var, E... items ) {
+        LogUtil.nullArgCheck(items, "items", List.class);
+        return of(new JComboBox<>(new ArrayBasedComboModel<>(var, items)));
+    }
+
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( ComboBoxModel<E> model ) {
+        return of(new JComboBox<>(model));
     }
 
     /**
@@ -1147,7 +1177,14 @@ public final class UI
         return of(new JSpinner(model));
     }
 
-    public static UIForSpinner<javax.swing.JSpinner> spinner( Var<Integer> var ) {
+    /**
+     *  Use this factory method to create a {@link JSpinner} bound to a property of any type.
+     *  The property will be updated when the user modifies its value.
+     *
+     * @param var A property of any type which should be bound to this spinner.
+     * @return A builder instance for the provided {@link JSpinner}, which enables fluent method chaining.
+     */
+    public static UIForSpinner<javax.swing.JSpinner> spinner( Var<?> var ) {
         LogUtil.nullArgCheck(var, "var", Var.class);
         return spinner().withValue(var);
     }
@@ -1594,6 +1631,15 @@ public final class UI
     }
 
     /**
+     * @return A builder instance for a new {@link JList}.
+     */
+    @SafeVarargs
+    public static <E> UIForList<E, JList<E>> list( E... elements ) {
+        LogUtil.nullArgCheck(elements, "elements", Object[].class);
+        return of(new JList<>(elements));
+    }
+
+    /**
      * @return A builder instance for a new {@link JTable}.
      */
     public static <T extends JTable> UIForTable<T> of( T table ) {
@@ -1633,6 +1679,24 @@ public final class UI
         return Render.forList(itemType, null).when(itemType).as(cell->{});
     }
 
+    /**
+     *  Use this to build a list cell renderer for a specific item type.
+     *  What you would typically want to do is customize the text that should be displayed
+     *  for a specific item type. <br>
+     *  This is done like so:
+     *  <pre>{@code
+     *  UI.list("A", "B", "C")
+     *  .withRenderer(
+     *      UI.renderListItem(String.class)
+     *      .asText(cell -> cell.getValue().toLowerCase())
+     *  );
+     *  }</pre>
+     *
+     * @param itemType The type of the items which should be rendered using a custom renderer.
+     * @return A render builder exposing an API that allows you to
+     *          configure how he passed item type should be rendered.
+     * @param <T> The type of the items which should be rendered.
+     */
     public static <T> Render.As<JList<T>, T, T> renderListItem( Class<T> itemType ) {
         return Render.forList(itemType, null).when(itemType);
     }
@@ -1645,6 +1709,24 @@ public final class UI
         return Render.forCombo(itemType, null).when(itemType).as(cell->{});
     }
 
+    /**
+     *  Use this to build a combo box cell renderer for a specific item type.
+     *  What you would typically want to do is customize the text that should be displayed
+     *  for a specific item type. <br>
+     *  This is done like so:
+     *  <pre>{@code
+     *  UI.comboBox(Size.LARGE, Size.MEDIUM, Size.SMALL)
+     *  .withRenderer(
+     *      UI.renderComboItem(Size.class)
+     *      .asText(cell -> cell.getValue().name().toLowerCase())
+     *  );
+     *  }</pre>
+     *
+     * @param itemType The type of the items which should be rendered using a custom renderer.
+     * @return A render builder exposing an API that allows you to
+     *          configure how he passed item type should be rendered.
+     * @param <T> The type of the items which should be rendered.
+     */
     public static <T> Render.As<JComboBox<T>, T, T> renderComboItem( Class<T> itemType ) {
         return Render.forCombo(itemType, null).when(itemType);
     }
@@ -1746,7 +1828,7 @@ public final class UI
      * This method should be used when an application thread needs to update the GUI.
      *
      * @param runnable the instance of {@code Runnable}
-     * @see #runAndWait
+     * @see #runNow
      */
     public static void run( Runnable runnable ) {
         LogUtil.nullArgCheck(runnable, "runnable", Runnable.class);
@@ -1777,13 +1859,23 @@ public final class UI
      * the event dispatching thread will unwind (not the current thread).
      *
      * @param runnable the instance of {@code Runnable}
-     * @see #runAndWait
+     * @see #runNow
      */
     public static void runLater( Runnable runnable ) {
         LogUtil.nullArgCheck(runnable, "runnable", Runnable.class);
         SwingUtilities.invokeLater(runnable);
     }
 
+    /**
+     * Returns true if the current thread is an AWT event dispatching thread.
+     * <p>
+     * This method is just a cover for
+     * <code>javax.swing.SwingUtilities.isEventDispatchThread()</code>
+     * and indirectly also for
+     * <code>java.awt.EventQueue.isDispatchThread()</code>.
+     *
+     * @return true if the current thread is an AWT event dispatching thread
+     */
     public static boolean thisIsUIThread() {
         return SwingUtilities.isEventDispatchThread();
     }
@@ -1808,7 +1900,7 @@ public final class UI
      * Thread appThread = new Thread() {
      *     public void run() {
      *         try {
-     *             UI.runAndWait(doHelloWorld);
+     *             UI.runNow(doHelloWorld);
      *         }
      *         catch (Exception e) {
      *             e.printStackTrace();
@@ -1832,7 +1924,7 @@ public final class UI
      *
      * @see #run
      */
-    public static void runAndWait( Runnable runnable ) throws InterruptedException, InvocationTargetException {
+    public static void runNow( Runnable runnable ) throws InterruptedException, InvocationTargetException {
         LogUtil.nullArgCheck(runnable, "runnable", Runnable.class);
         SwingUtilities.invokeAndWait(runnable);
     }
@@ -1840,7 +1932,7 @@ public final class UI
     public static <T> T runAndGet( Supplier<T> supplier ) throws InterruptedException, InvocationTargetException {
         LogUtil.nullArgCheck(supplier, "callable", Supplier.class);
         T[] ref = (T[]) new Object[1];
-        runAndWait( () -> ref[0] = supplier.get() );
+        runNow( () -> ref[0] = supplier.get() );
         return ref[0];
     }
 
@@ -1852,7 +1944,7 @@ public final class UI
         private final JFrame frame;
         private final Component component;
 
-        public TestWindow(Supplier<JFrame> frameSupplier,Component component) {
+        public TestWindow( Supplier<JFrame> frameSupplier,Component component ) {
             this.frame = frameSupplier.get();
             this.component = component;
             frame.add(component);
@@ -1869,12 +1961,13 @@ public final class UI
     /**
      *  Use this to quickly create and inspect a test window for a UI component.
      */
-    public static void showInNewFrame(Component component) {
+    public static void show( Component component ) {
         JFrame frame = new JFrame();
-        new UI.TestWindow(()->frame,component);
+        new UI.TestWindow( () -> frame,component );
         // We set the size to fit the component:
         frame.setSize(component.getPreferredSize());
         frame.setVisible(true);
+        while ( true ) { UI.processEvents(); }
     }
 
 }

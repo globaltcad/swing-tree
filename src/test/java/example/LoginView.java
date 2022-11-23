@@ -27,7 +27,7 @@ public class LoginView extends JPanel
     }
 
     public static void main( String[] args ) {
-        UI.showInNewFrame(new LoginView( new LoginViewModel() ));
+        UI.show(new LoginView( new LoginViewModel() ));
         while (true) { UI.processEvents(); }
     }
 }

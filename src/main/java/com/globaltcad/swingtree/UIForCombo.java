@@ -4,6 +4,7 @@ import com.globaltcad.swingtree.api.UIAction;
 import com.globaltcad.swingtree.api.mvvm.Var;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.function.Consumer;
@@ -16,7 +17,22 @@ import java.util.function.Consumer;
  */
 public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIForCombo<E,C>, JComboBox<E>>
 {
-    protected UIForCombo( JComboBox<E> component ) { super(component); }
+    protected UIForCombo( JComboBox<E> component ) {
+        super(component);
+        if ( component.getModel() instanceof AbstractComboModel )
+            _bindComboModelToEditor((AbstractComboModel<E>) component.getModel());
+
+    }
+
+    private void _bindComboModelToEditor(AbstractComboModel<E> model ) {
+        Component editor = getComponent().getEditor().getEditorComponent();
+        if ( editor instanceof JTextField ) {
+            JTextField field = (JTextField) editor;
+            UI.of(field).onTextChange( it -> model.setFromEditor(field.getText()) );
+        }
+    }
+
+
 
     /**
      * Adds an {@link UIAction} to the underlying {@link JComboBox}

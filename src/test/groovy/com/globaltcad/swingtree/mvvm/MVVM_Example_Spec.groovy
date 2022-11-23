@@ -204,6 +204,92 @@ class MVVM_Example_Spec extends Specification
             actionPerformed == true
     }
 
+    def 'A simple list of elements can be used as a data model for a combo box.'()
+    {
+        reportInfo """
+            Always prefer Enums over Strings but if you have to model generic data
+            you can always bind a simple list of elements as a data model to a combo box.
+        """
+        given : 'We create a simple list, holding the data.'
+            List<String> data = ["Tofu", "Tempeh", "Seitan"]
+        when : 'We create a combo box and bind it to the data.'
+            var ui = UI.comboBox(data)
+        then : 'The combo box was successfully created.'
+            ui != null
+        and : 'The combo box contains the data.'
+            ui.component.itemCount == data.size()
+            ui.component.getItemAt(0) == data.get(0)
+            ui.component.getItemAt(1) == data.get(1)
+            ui.component.getItemAt(2) == data.get(2)
+        when : 'We modify the list...'
+            data.add("Soy Milk")
+        then : 'The combo box is updated.'
+            ui.component.itemCount == data.size()
+            ui.component.getItemAt(0) == data.get(0)
+            ui.component.getItemAt(1) == data.get(1)
+            ui.component.getItemAt(2) == data.get(2)
+            ui.component.getItemAt(3) == data.get(3)
+    }
+
+    def 'A simple array of elements can be used as a data model for a combo box.'()
+    {
+        reportInfo """
+            Always prefer Enums over Strings but if you have to model generic data
+            you can always bind a simple array of elements as a data model to a combo box.
+        """
+        given : 'We create a simple array, holding the data.'
+            String[] data = ["Tofu", "Tempeh", "Seitan"]
+        when : 'We create a combo box and bind it to the data.'
+            var ui = UI.comboBox(data)
+        then : 'The combo box was successfully created.'
+            ui != null
+        and : 'The combo box contains the data.'
+            ui.component.itemCount == data.size()
+            ui.component.getItemAt(0) == data[0]
+            ui.component.getItemAt(1) == data[1]
+            ui.component.getItemAt(2) == data[2]
+        when : 'We modify the array...'
+            data[1] = "Soy Milk"
+        then : 'The combo box is updated.'
+            ui.component.itemCount == data.size()
+            ui.component.getItemAt(0) == data[0]
+            ui.component.getItemAt(1) == data[1]
+            ui.component.getItemAt(2) == data[2]
+    }
+
+    def 'You can bind a property as the current selection as well as list of elements as options to a combo box.'()
+    {
+        given : 'We create a simple list, holding the data.'
+            List<String> data = ["Tofu", "Tempeh", "Seitan"]
+        and : 'We create a property holding the current selection.'
+            Var<String> selected = Var.of("Tofu")
+        when : 'We create a combo box and bind it to the data.'
+            var ui = UI.comboBox(selected, data)
+        then : 'The combo box was successfully created.'
+            ui != null
+        and : 'The combo box contains the data.'
+            ui.component.itemCount == data.size()
+            ui.component.getItemAt(0) == data.get(0)
+            ui.component.getItemAt(1) == data.get(1)
+            ui.component.getItemAt(2) == data.get(2)
+        and : 'The combo box has the correct selection.'
+            ui.component.selectedItem == selected.orElseNull()
+        when : 'We modify the list...'
+            data.add("Soy Milk")
+        then : 'The combo box is updated.'
+            ui.component.itemCount == data.size()
+            ui.component.getItemAt(0) == data.get(0)
+            ui.component.getItemAt(1) == data.get(1)
+            ui.component.getItemAt(2) == data.get(2)
+            ui.component.getItemAt(3) == data.get(3)
+        and : 'The combo box has the correct selection.'
+            ui.component.selectedItem == selected.orElseNull()
+        when : 'We modify the selection...'
+            selected.set("Seitan")
+        then : 'The combo box has the correct selection.'
+            ui.component.selectedItem == selected.orElseNull()
+    }
+
     private static enum Size
     {
         SMALL, MEDIUM, LARGE

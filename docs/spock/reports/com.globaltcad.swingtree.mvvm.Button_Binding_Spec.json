@@ -1,7 +1,7 @@
 {
   "className":"com.globaltcad.swingtree.mvvm.Button_Binding_Spec",
   "title":"Button Binding",
-  "narrative":"As a developer, I want to bind a button to a property so\n    that is is updated when the property changes.\n    Binding is a powerful feature that allows us to create\n    UIs which are not only decoupled from the business logic of\n    an application, but also make it easy to create UIs which\n    are dynamic and reactive.",
+  "narrative":"As a developer, I want to bind a button to a property so \n    that is is updated when the property changes.\n    Binding is a powerful feature that allows us to create\n    UIs which are not only decoupled from the business logic of\n    an application, but also make it easy to create UIs which\n    are dynamic and reactive.",
   "subjects":[],
   "statistics":{
     "runs":"3",
