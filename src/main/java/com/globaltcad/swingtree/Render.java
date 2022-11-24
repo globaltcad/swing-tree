@@ -134,13 +134,33 @@ public final class Render<C extends JComponent,E> {
 			return this.as( cell -> {
 				JLabel l = new JLabel(renderer.apply(cell));
 				l.setOpaque(true);
-				Color bg = UIManager.getColor( "List.selectionBackground" );
-				Color fg = UIManager.getColor( "List.selectionForeground" );
+
+				Color bg = null;
+				Color fg = null;
+
+				if ( cell.getComponent() instanceof JList ) {
+					JList<?> jList = (JList<?>) cell.getComponent();
+					bg = jList.getSelectionBackground();
+					fg = jList.getSelectionForeground();
+					if ( bg == null )
+						bg = UIManager.getColor("List.selectionBackground");
+					if ( fg == null )
+						fg = UIManager.getColor("List.selectionForeground");
+					if ( bg == null )
+						bg = cell.getComponent().getBackground();
+					if ( fg == null )
+						fg = cell.getComponent().getForeground();
+				}
 
 				if ( bg == null )
 					bg = UIManager.getColor( "ComboBox.selectionBackground" );
 				if ( fg == null )
 					fg = UIManager.getColor( "ComboBox.selectionForeground" );
+
+				if ( bg == null )
+					bg = cell.getComponent().getBackground();
+				if ( fg == null )
+					fg = cell.getComponent().getForeground();
 
 				if ( bg == null )
 					bg = UIManager.getColor( "List.dropCellBackground" );

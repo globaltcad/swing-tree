@@ -1,15 +1,22 @@
 package example;
 
+import com.formdev.flatlaf.intellijthemes.FlatMaterialDesignDarkIJTheme;
 import com.globaltcad.swingtree.UI;
 import com.globaltcad.swingtree.api.mvvm.Var;
 
 import javax.swing.*;
+
+import java.awt.*;
 
 import static com.globaltcad.swingtree.UI.*;
 
 public class SomeSpinnersView extends JPanel {
 
 	public SomeSpinnersView(SomeSpinnersViewModel vm) {
+		try { UIManager.setLookAndFeel(new FlatMaterialDesignDarkIJTheme()); }
+		catch (Exception e) {e.printStackTrace();}
+		UIManager.put("ComboBox.selectionBackground", Color.BLUE);
+		UIManager.put("List.selectionBackground", Color.GREEN);
 		of(this).withLayout(FILL.and(INS(0)).and(DEBUG))
 		.withPreferredSize(320, 140)
 		.add(GROW,
@@ -50,6 +57,9 @@ public class SomeSpinnersView extends JPanel {
 				)
 				.add(PUSH_Y, panel())
 			)
+		)
+		.add(SPAN.and(GROW),
+			of(new JComboBox<>(new String[]{"1", "2", "3"}))
 		)
 		.add(SPAN.and(GROW),
 			comboBox(Var.of("A"),"A", "B", "C")

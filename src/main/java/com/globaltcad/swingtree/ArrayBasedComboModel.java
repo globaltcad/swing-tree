@@ -6,13 +6,13 @@ class ArrayBasedComboModel<E> extends AbstractComboModel<E>
 {
 	private final E[] items;
 
-	public ArrayBasedComboModel(E[] items) {
+	ArrayBasedComboModel(E[] items) {
 		super(Var.of(_findCommonType( items ), null));
 		this.items = items;
 		selectedIndex = _indexOf(selectedItem.orElseNull());
 	}
 
-	public ArrayBasedComboModel(Var<E> selection, E[] items) {
+	ArrayBasedComboModel(Var<E> selection, E[] items) {
 		super(selection);
 		this.items = items;
 		selectedIndex = _indexOf(selectedItem.orElseNull());
