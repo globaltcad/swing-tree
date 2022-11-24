@@ -3,16 +3,23 @@ package com.globaltcad.swingtree.api.mvvm;
 import java.util.*;
 import java.util.function.Consumer;
 
+/**
+ * 	The base implementation for both {@link Var} and {@link Val} interfaces.
+ * 	This also serves as a reference implementation for the concept of
+ *  {@link Var}/{@link Val} properties in general.
+ * 
+ * @param <T> The type of the value wrapped by a given property...
+ */
 public abstract class AbstractVariable<T> implements Var<T>
 {
-	private final List<Consumer<Val<T>>> viewActions = new ArrayList<>();
+	private final List<Consumer<Val<T>>> _viewActions = new ArrayList<>();
 
-	private final List<Val<T>> history = new ArrayList<>(17);
+	private final List<Val<T>> _history = new ArrayList<>(17);
 
-	private T value;
-	private final Class<T> type;
-	private final String name;
-	private final PropertyAction<T> action;
+	private T _value;
+	private final Class<T> _type;
+	private final String _name;
+	private final PropertyAction<T> _action;
 
 
 	protected AbstractVariable( Class<T> type, T iniValue, String name, PropertyAction<T> action ) {
@@ -23,36 +30,36 @@ public abstract class AbstractVariable<T> implements Var<T>
 			Class<T> type, T iniValue, String name, PropertyAction<T> action, List<Consumer<Val<T>>> viewActions
 	) {
 		Objects.requireNonNull(name);
-		this.value = iniValue;
-		this.type = ( iniValue == null ? type : (Class<T>) iniValue.getClass());
-		this.name = name;
-		this.action = ( action == null ? v -> {} : action );
-		if ( this.value != null ) {
+		_value = iniValue;
+		_type = ( iniValue == null ? type : (Class<T>) iniValue.getClass());
+		_name = name;
+		_action = ( action == null ? v -> {} : action );
+		if ( _value != null ) {
 			// We check if the type is correct
-			if ( !type.isAssignableFrom(this.value.getClass()) )
+			if ( !type.isAssignableFrom(_value.getClass()) )
 				throw new IllegalArgumentException(
 						"The provided type of the initial value is not compatible with the actual type of the variable"
 					);
 		}
-		this.viewActions.addAll(viewActions);
+		_viewActions.addAll(viewActions);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override public Class<T> type() { return type; }
+	@Override public Class<T> type() { return _type; }
 
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override public String id() { return name; }
+	@Override public String id() { return _name; }
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override public Var<T> withID( String id ) {
-		AbstractVariable<T> newVar = new AbstractVariable<T>(type, value, id, null){};
-		newVar.viewActions.addAll(viewActions);
+		AbstractVariable<T> newVar = new AbstractVariable<T>(_type, _value, id, null){};
+		newVar._viewActions.addAll(_viewActions);
 		return newVar;
 	}
 
@@ -61,8 +68,8 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 */
 	@Override public Var<T> withAction(PropertyAction<T> action ) {
 		Objects.requireNonNull(action);
-		AbstractVariable<T> newVar = new AbstractVariable<T>(type, value, name, action){};
-		newVar.viewActions.addAll(viewActions);
+		AbstractVariable<T> newVar = new AbstractVariable<T>(_type, _value, _name, action){};
+		newVar._viewActions.addAll(_viewActions);
 		return newVar;
 	}
 
@@ -70,14 +77,14 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 * {@inheritDoc}
 	 */
 	@Override public Var<T> act() {
-		List<Val<T>> reverseHistory = new ArrayList<>(AbstractVariable.this.history);
+		List<Val<T>> reverseHistory = new ArrayList<>(AbstractVariable.this._history);
 		Collections.reverse(reverseHistory);
-		action.act(new ActionDelegate<T>() {
+		_action.act(new ActionDelegate<T>() {
 			@Override public Var<T> current() { return AbstractVariable.this; }
 			@Override
 			public Val<T> previous() {
-				if ( AbstractVariable.this.history.isEmpty() )
-					return Val.of(AbstractVariable.this.type, null);
+				if ( AbstractVariable.this._history.isEmpty() )
+					return Val.of(AbstractVariable.this._type, null);
 				return reverseHistory.get(0);
 			}
 			@Override
@@ -102,22 +109,22 @@ public abstract class AbstractVariable<T> implements Var<T>
 	@Override
 	public T orElseThrow() {
 		// This class is similar to optional, so if the value is null, we throw an exception!
-		if ( value == null )
+		if ( _value == null )
 			throw new NoSuchElementException("No value present");
 
-		return value;
+		return _value;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public boolean isPresent() { return value != null; }
+	public boolean isPresent() { return _value != null; }
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public T orElseNullable(T other) {
-		return value != null ? value : other;
+		return _value != null ? _value : other;
 	}
 
 	/**
@@ -130,17 +137,17 @@ public abstract class AbstractVariable<T> implements Var<T>
 	}
 
 	private boolean _setInternal( T newValue ) {
-		if ( !Objects.equals( this.value, newValue ) ) {
+		if ( !Objects.equals( _value, newValue ) ) {
 			// First we check if the value is compatible with the type
-			if ( newValue != null && !type.isAssignableFrom(newValue.getClass()) )
+			if ( newValue != null && !_type.isAssignableFrom(newValue.getClass()) )
 				throw new IllegalArgumentException(
 						"The provided type of the new value is not compatible with the type of this property"
 					);
 
-			history.add(Val.of(this.type(), this.value).withID(this.id()));
-			if ( history.size() > 16 )
-				history.remove(0);
-			value = newValue;
+			_history.add(Val.of(this.type(), _value).withID(this.id()));
+			if ( _history.size() > 16 )
+				_history.remove(0);
+			_value = newValue;
 			return true;
 		}
 		return false;
@@ -150,7 +157,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 * {@inheritDoc}
 	 */
 	@Override public Val<T> onShowThis( Consumer<Val<T>> displayAction ) {
-		this.viewActions.add(displayAction);
+		_viewActions.add(displayAction);
 		return this;
 	}
 
@@ -159,7 +166,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 */
 	@Override
 	public Val<T> show() {
-		for ( Consumer<Val<T>> action : this.viewActions )
+		for ( Consumer<Val<T>> action : _viewActions)
 			try {
 				action.accept(this);
 			} catch (Exception e) {
@@ -186,9 +193,9 @@ public abstract class AbstractVariable<T> implements Var<T>
 		if ( obj == this ) return true;
 		if ( obj instanceof Val ) {
 			Val<?> other = (Val<?>) obj;
-			if ( other.type() != this.type ) return false;
-			if ( other.orElseNull() == null ) return this.value == null;
-			return Val.equals( other.orElseThrow(), this.value ); // Arrays are compared with Arrays.equals
+			if ( other.type() != _type) return false;
+			if ( other.orElseNull() == null ) return _value == null;
+			return Val.equals( other.orElseThrow(), _value); // Arrays are compared with Arrays.equals
 		}
 		return false;
 	}
@@ -196,9 +203,9 @@ public abstract class AbstractVariable<T> implements Var<T>
 	@Override
 	public int hashCode() {
 		int hash = 7;
-		hash = 31 * hash + ( this.value == null ? 0 : Val.hashCode(this.value) );
-		hash = 31 * hash + ( this.type  == null ? 0 : this.type.hashCode() );
-		hash = 31 * hash + ( this.name  == null ? 0 : this.name.hashCode() );
+		hash = 31 * hash + ( _value == null ? 0 : Val.hashCode(_value) );
+		hash = 31 * hash + ( _type == null ? 0 : _type.hashCode() );
+		hash = 31 * hash + ( _name == null ? 0 : _name.hashCode() );
 		return hash;
 	}
 }

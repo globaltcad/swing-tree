@@ -11,5 +11,9 @@ package com.globaltcad.swingtree.api;
  */
 public interface Peeker<C>
 {
+    /**
+     * Applies an action to the current component.
+     * @param component The component to be modified.
+     */
     void accept(C component);
 }
