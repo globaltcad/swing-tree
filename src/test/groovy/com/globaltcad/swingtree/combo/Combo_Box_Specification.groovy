@@ -2,6 +2,7 @@ package com.globaltcad.swingtree.combo
 
 import com.globaltcad.swingtree.UI
 import com.globaltcad.swingtree.UIForCombo
+import com.globaltcad.swingtree.api.mvvm.Var
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
@@ -61,6 +62,11 @@ class Combo_Box_Specification extends Specification
 
     def 'A combo box created by Swing-Tree uses the provided item array as data model.'()
     {
+        reportInfo """
+           You don't have to create a ComboBoxModel implementation to model the state
+           of your combo box! If you pass an array or a list to a combo box
+           factory method it will serve as a model of your combo box items.  
+        """
         given : 'We create an array and pass it to the combo box factory method.'
             var items = new String[]{"A" , "B" , "C"}
             var ui = UI.comboBox(items)
@@ -75,6 +81,11 @@ class Combo_Box_Specification extends Specification
 
     def 'A combo box created by Swing-Tree uses the provided item list as data model.'()
     {
+        reportInfo """
+           You don't have to create a ComboBoxModel implementation to model the state
+           of your combo box! If you pass an array or a list to a combo box
+           factory method it will serve as a model of your combo box items.  
+        """
         given : 'We create an array and pass it to the combo box factory method.'
             var items = ["A" , "B" , "C"]
             var ui = UI.comboBox(items)
@@ -130,5 +141,96 @@ class Combo_Box_Specification extends Specification
             ui.component.model.getElementAt(0) == "A"
             ui.component.model.getElementAt(1) == "B"
             ui.component.model.getElementAt(2) == "C"
+    }
+
+    def 'You can model both the current selection state as well as options of your combo box using a property and an array.'()
+    {
+        reportInfo """
+           In essence, the state of a combo box consists of the current selection, and
+           the options that are available for selection. You can model both of these
+           aspects using a property and a list. The property will be used to model
+           the current selection, and the list will be used to model the options.
+        """
+        given : 'We create our "model", a property and an array.'
+            var selection = Var.of(42)
+            var options = new Integer[]{ 73 , 42 , 17 }
+        and : 'We create a combo box that is bound to the property and the list.'
+            var ui = UI.comboBox(selection, options)
+        expect : 'The combo box is initialized with the current selection.'
+            ui.component.getSelectedItem() == 42
+        and : 'It also reports the correct selection index.'
+            ui.component.getSelectedIndex() == 1
+        and : 'The there are all 3 options available.'
+            ui.component.itemCount == 3
+            ui.component.getItemAt(0) == 73
+            ui.component.getItemAt(1) == 42
+            ui.component.getItemAt(2) == 17
+
+        when : 'We change the selection.'
+            selection.set(17)
+        then : 'This change translates from the property to the UI element.'
+            ui.component.getSelectedItem() == 17
+        and : 'The combo box options are still the same.'
+            ui.component.itemCount == 3
+            ui.component.getItemAt(0) == 73
+            ui.component.getItemAt(1) == 42
+            ui.component.getItemAt(2) == 17
+
+        when : 'We change one of the options.'
+            options[0] = 99
+        and : 'We select this option...'
+            ui.component.setSelectedItem(99)
+        then : 'The selection is updated.'
+            selection.get() == 99
+        and : 'The combo box also reports the correct selection index!'
+            ui.component.getSelectedIndex() == 0
+    }
+
+
+    def 'You can model both the current selection state as well as options of your combo box using a property and a list.'()
+    {
+        reportInfo """
+           In essence, the state of a combo box consists of the current selection, and
+           the options that are available for selection. You can model both of these
+           aspects using a property and a list. The property will be used to model
+           the current selection, and the list will be used to model the options.
+        """
+        given : 'We create our "model", a property and a list.'
+            var selection = Var.of(42)
+            var options = [73, 42, 17]
+        and : 'We create a combo box that is bound to the property and the list.'
+            var ui = UI.comboBox(selection, options)
+        expect : 'The combo box is initialized with the current selection.'
+            ui.component.getSelectedItem() == 42
+        and : 'It also reports the correct selection index.'
+            ui.component.getSelectedIndex() == 1
+        and : 'The there are all 3 options available.'
+            ui.component.itemCount == 3
+            ui.component.getItemAt(0) == 73
+            ui.component.getItemAt(1) == 42
+            ui.component.getItemAt(2) == 17
+
+        when : 'We change the selection.'
+            selection.set(17)
+        then : 'This change translates from the property to the UI element.'
+            ui.component.getSelectedItem() == 17
+        and : 'The combo box options are still the same.'
+            ui.component.itemCount == 3
+            ui.component.getItemAt(0) == 73
+            ui.component.getItemAt(1) == 42
+            ui.component.getItemAt(2) == 17
+
+        when : 'We add another option somewhere in the middle.'
+            options.add(1, 99)
+        then : 'The combo box options are updated.'
+            ui.component.itemCount == 4
+            ui.component.getItemAt(0) == 73
+            ui.component.getItemAt(1) == 99
+            ui.component.getItemAt(2) == 42
+            ui.component.getItemAt(3) == 17
+        and : 'The selection is still the same.'
+            ui.component.getSelectedItem() == 17
+        and : 'The combo box also reports the correct selection index!'
+            ui.component.getSelectedIndex() == 3
     }
 }

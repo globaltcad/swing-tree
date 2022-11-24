@@ -4,19 +4,19 @@
   "narrative":"In Swing drop downs are called combo boxes, which\n    is what they will be referred to in this specification as well.  \n    This specification will show you how you can create them and\n    how you can interact with them.",
   "subjects":["com.globaltcad.swingtree.UIForCombo"],
   "statistics":{
-    "runs":"6",
+    "runs":"8",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.019 seconds"
+    "duration":"0.165 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"Swing tree is a wrapper around Swing, which means you can create the combo box yourself.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.049 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -33,7 +33,7 @@
     {
       "id":"The \"comboBox\" factory method allows you to easily create a combo box from an array.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.021 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -52,9 +52,9 @@
     {
       "id":"A combo box created by Swing-Tree uses the provided item array as data model.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.007 seconds",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n           You don't have to create a ComboBoxModel implementation to model the state\n           of your combo box! If you pass an array or a list to a combo box\n           factory method it will serve as a model of your combo box items.  \n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create an array and pass it to the combo box factory method.","code":["var items = new String[]{\"A\" , \"B\" , \"C\"}","var ui = UI.comboBox(items)"]},
@@ -69,9 +69,9 @@
     {
       "id":"A combo box created by Swing-Tree uses the provided item list as data model.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.009 seconds",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n           You don't have to create a ComboBoxModel implementation to model the state\n           of your combo box! If you pass an array or a list to a combo box\n           factory method it will serve as a model of your combo box items.  \n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create an array and pass it to the combo box factory method.","code":["var items = [\"A\" , \"B\" , \"C\"]","var ui = UI.comboBox(items)"]},
@@ -86,7 +86,7 @@
     {
       "id":"A combo box can be made editable in a declarative way.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.020 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -109,7 +109,7 @@
     {
       "id":"The options of an editable combo box are only editable if their items list is modifyable.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.013 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -125,6 +125,76 @@
         {"kind":"then","text":"The combo box is updated.","code":["ui.component.getSelectedItem() == \"XY\""]},
 
         {"kind":"and","text":"This change is NOT reflected in the model.","code":["ui.component.model.size == 3","ui.component.model.getElementAt(0) == \"A\"","ui.component.model.getElementAt(1) == \"B\"","ui.component.model.getElementAt(2) == \"C\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can model both the current selection state as well as options of your combo box using a property and an array.",
+      "result":"PASS",
+      "duration":"0.019 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n           In essence, the state of a combo box consists of the current selection, and\n           the options that are available for selection. You can model both of these\n           aspects using a property and a list. The property will be used to model\n           the current selection, and the list will be used to model the options.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create our \"model\", a property and an array.","code":["var selection = Var.of(42)","var options = new Integer[]{ 73 , 42 , 17 }"]},
+
+        {"kind":"and","text":"We create a combo box that is bound to the property and the list.","code":["var ui = UI.comboBox(selection, options)"]},
+
+        {"kind":"expect","text":"The combo box is initialized with the current selection.","code":["ui.component.getSelectedItem() == 42"]},
+
+        {"kind":"and","text":"It also reports the correct selection index.","code":["ui.component.getSelectedIndex() == 1"]},
+
+        {"kind":"and","text":"The there are all 3 options available.","code":["ui.component.itemCount == 3","ui.component.getItemAt(0) == 73","ui.component.getItemAt(1) == 42","ui.component.getItemAt(2) == 17"]},
+
+        {"kind":"when","text":"We change the selection.","code":["selection.set(17)"]},
+
+        {"kind":"then","text":"This change translates from the property to the UI element.","code":["ui.component.getSelectedItem() == 17"]},
+
+        {"kind":"and","text":"The combo box options are still the same.","code":["ui.component.itemCount == 3","ui.component.getItemAt(0) == 73","ui.component.getItemAt(1) == 42","ui.component.getItemAt(2) == 17"]},
+
+        {"kind":"when","text":"We change one of the options.","code":["options[0] = 99"]},
+
+        {"kind":"and","text":"We select this option...","code":["ui.component.setSelectedItem(99)"]},
+
+        {"kind":"then","text":"The selection is updated.","code":["selection.get() == 99"]},
+
+        {"kind":"and","text":"The combo box also reports the correct selection index!","code":["ui.component.getSelectedIndex() == 0"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can model both the current selection state as well as options of your combo box using a property and a list.",
+      "result":"PASS",
+      "duration":"0.007 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n           In essence, the state of a combo box consists of the current selection, and\n           the options that are available for selection. You can model both of these\n           aspects using a property and a list. The property will be used to model\n           the current selection, and the list will be used to model the options.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create our \"model\", a property and a list.","code":["var selection = Var.of(42)","var options = [73, 42, 17]"]},
+
+        {"kind":"and","text":"We create a combo box that is bound to the property and the list.","code":["var ui = UI.comboBox(selection, options)"]},
+
+        {"kind":"expect","text":"The combo box is initialized with the current selection.","code":["ui.component.getSelectedItem() == 42"]},
+
+        {"kind":"and","text":"It also reports the correct selection index.","code":["ui.component.getSelectedIndex() == 1"]},
+
+        {"kind":"and","text":"The there are all 3 options available.","code":["ui.component.itemCount == 3","ui.component.getItemAt(0) == 73","ui.component.getItemAt(1) == 42","ui.component.getItemAt(2) == 17"]},
+
+        {"kind":"when","text":"We change the selection.","code":["selection.set(17)"]},
+
+        {"kind":"then","text":"This change translates from the property to the UI element.","code":["ui.component.getSelectedItem() == 17"]},
+
+        {"kind":"and","text":"The combo box options are still the same.","code":["ui.component.itemCount == 3","ui.component.getItemAt(0) == 73","ui.component.getItemAt(1) == 42","ui.component.getItemAt(2) == 17"]},
+
+        {"kind":"when","text":"We add another option somewhere in the middle.","code":["options.add(1, 99)"]},
+
+        {"kind":"then","text":"The combo box options are updated.","code":["ui.component.itemCount == 4","ui.component.getItemAt(0) == 73","ui.component.getItemAt(1) == 99","ui.component.getItemAt(2) == 42","ui.component.getItemAt(3) == 17"]},
+
+        {"kind":"and","text":"The selection is still the same.","code":["ui.component.getSelectedItem() == 17"]},
+
+        {"kind":"and","text":"The combo box also reports the correct selection index!","code":["ui.component.getSelectedIndex() == 3"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }
