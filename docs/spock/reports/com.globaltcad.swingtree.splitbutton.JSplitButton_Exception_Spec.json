@@ -1,0 +1,95 @@
+{
+  "className":"com.globaltcad.swingtree.splitbutton.JSplitButton_Exception_Spec",
+  "title":"",
+  "narrative":"",
+  "subjects":[],
+  "statistics":{
+    "runs":"3",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"0.004 seconds"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A JSplitButton does not accept null actions.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Here you can see that Swing-Tree tries to be as null-safe as possible.\n            Because a 'null-action' is an undefined state, which may mean\n            different things to different developers, so it is not allowed.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a UI builder node containing a simple split button.","code":["var ui = UI.splitButton(\"\")"]},
+
+        {"kind":"expect","text":"It wraps a JSplitButton.","code":["ui.component instanceof JSplitButton"]},
+
+        {"kind":"when","text":"","code":["ui.onSplitClick(null)"]},
+
+        {"kind":"then","text":"","code":["thrown(IllegalArgumentException)"]},
+
+        {"kind":"when","text":"","code":["ui.onClick(null)"]},
+
+        {"kind":"then","text":"","code":["thrown(IllegalArgumentException)"]},
+
+        {"kind":"when","text":"","code":["ui.onChange(null)"]},
+
+        {"kind":"then","text":"","code":["thrown(IllegalArgumentException)"]},
+
+        {"kind":"when","text":"","code":["ui.onButtonClick(null)"]},
+
+        {"kind":"then","text":"","code":["thrown(IllegalArgumentException)"]},
+
+        {"kind":"when","text":"","code":["ui.onSelection(null)"]},
+
+        {"kind":"then","text":"","code":["thrown(IllegalArgumentException)"]},
+
+        {"kind":"when","text":"","code":["ui.onSplitClick(null)"]},
+
+        {"kind":"then","text":"","code":["thrown(IllegalArgumentException)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Split buttons do not take null as an answer.",
+      "result":"PASS",
+      "duration":"0",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"when","text":"We create an invalid button state.","code":["UI.splitButton(\"I will be replaced!\")",".onSelection(null)"]},
+
+        {"kind":"then","text":"","code":["thrown(IllegalArgumentException)"]},
+
+        {"kind":"when","text":"We commit some nonsense another way:","code":["UI.splitButton(\"item\").onButtonClick(null)"]},
+
+        {"kind":"then","text":"","code":["thrown(IllegalArgumentException)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Split button items do not take null as an answer.",
+      "result":"PASS",
+      "duration":"0",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"when","text":"We create an invalid button item state.","code":["UI.splitItem(\"second\").onSelection(null)"]},
+
+        {"kind":"then","text":"","code":["thrown(IllegalArgumentException)"]},
+
+        {"kind":"when","text":"We commit some nonsense another way:","code":["UI.splitItem(\"item\").onButtonClick(null)"]},
+
+        {"kind":"then","text":"","code":["thrown(IllegalArgumentException)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}
