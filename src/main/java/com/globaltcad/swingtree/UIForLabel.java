@@ -34,21 +34,34 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
     }
 
     /**
-     *  Use this to transform the underlying {@link JLabel} into a clickable link.
+     *  Use this to make the underlying {@link JLabel} into a clickable link.
      *
      * @param href A string containing a valid URL used as link hyper reference.
      * @return This very builder to allow for method chaining.
      */
-    public UIForLabel<L> makeLinkTo(String href) {
+    public UIForLabel<L> makeLinkTo( String href ) {
+        return makeLinkTo( Val.of(href) );
+    }
+
+    /**
+     *  Use this to make the underlying {@link JLabel} into a clickable link
+     *  based on the string provided property defining the link address.
+     *  When the link wrapped by the provided property changes,
+     *  then a click on the label will lead to the wrapped link.
+     *
+     * @param href A string property containing a valid URL used as link hyper reference.
+     * @return This very builder to allow for method chaining.
+     */
+    public UIForLabel<L> makeLinkTo( Val<String> href ) {
         L list = getComponent();
         LazyRef<String> text = LazyRef.of(list::getText);
-        if ( !href.startsWith("http") ) href = "https://" + href;
-        String finalHref = href;
         list.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 try {
-                    Desktop.getDesktop().browse(new URI(finalHref));
+                    String ref = href.orElseThrow();
+                    if ( !ref.startsWith("http") ) ref = "https://" + ref;
+                    Desktop.getDesktop().browse(new URI(ref));
                 } catch (IOException | URISyntaxException e1) {
                     e1.printStackTrace();
                 }
@@ -89,12 +102,23 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
         return this;
     }
 
+    /**
+     * @param isBold The flag determining if the font of this label should be bold or plain.
+     * @return This very builder to allow for method chaining.
+     */
     public final UIForLabel<L> isBoldIf( boolean isBold ) {
         if ( isBold ) makeBold();
         else makePlain();
         return this;
     }
 
+    /**
+     *  When the flag wrapped by the provided property changes,
+     *  then the font of this label will switch between being bold and plain.
+     *
+     * @param val The property which should be bound to the boldness of this label.
+     * @return This very builder to allow for method chaining.
+     */
     public final UIForLabel<L> isBoldIf( Val<Boolean> val ) {
         val.onShow(v -> _doUI(() -> isBoldIf(v)));
         return isBoldIf( val.get() );
@@ -112,6 +136,15 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      */
     public final UIForLabel<L> withText( String text ) { getComponent().setText(text); return this; }
 
+    /**
+     *  Dynamically defines a single line of text displayed on this label.
+     *  If the value of text is null or an empty string, nothing is displayed.
+     *  When the text wrapped by the provided property changes,
+     *  then so does the text displayed on this label change.
+     *
+     * @param val The text property to be bound to the wrapped label.
+     * @return This very builder to allow for method chaining.
+     */
     public final UIForLabel<L> withText( Val<String> val ) {
         val.onShow(v-> _doUI(()->getComponent().setText(v)));
         return withText( val.orElseThrow() );
@@ -135,7 +168,9 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
 
 
     /**
-     * This binds to a property defining the horizontal alignment of the label's content (icon and text).
+     *  This binds to a property defining the horizontal alignment of the label's content (icon and text).
+     *  When the alignment enum wrapped by the provided property changes,
+     *  then so does the alignment of this label.
      *
      * @param horizontalAlign The horizontal alignment property which should be applied to the underlying component.
      * @return This very builder to allow for method chaining.
@@ -163,6 +198,8 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
 
     /**
      * This binds to a property defining the vertical alignment of the label's content (icon and text).
+     *  When the alignment enum wrapped by the provided property changes,
+     *  then so does the alignment of this label.
      *
      * @param verticalAlign The vertical alignment property which should be applied to the underlying component.
      * @return This very builder to allow for method chaining.
@@ -190,6 +227,8 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
 
     /**
      *  Use this to bind to a property defining the horizontal position of the label's text, relative to its image.
+     *  When the alignment enum wrapped by the provided property changes,
+     *  then so does the alignment of this label.
      *
      * @param horizontalAlign The horizontal alignment property which should be applied to the text of the underlying component.
      * @return This very builder to allow for method chaining.
@@ -217,6 +256,8 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
 
     /**
      *  Use this to bind to a property defining the vertical position of the label's text, relative to its image.
+     *  When the alignment enum wrapped by the provided property changes,
+     *  then so does the alignment of this label.
      *
      * @param verticalAlign The vertical alignment property which should be applied to the text of the underlying component.
      * @return This very builder to allow for method chaining.
@@ -246,6 +287,8 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
 
     /**
      *  Use this to dynamically set the icon property for the wrapped {@link JLabel}.
+     *  When the icon wrapped by the provided property changes,
+     *  then so does the icon of this label.
      *
      * @param icon The {@link Icon} property which should be displayed on the label.
      * @return This very builder to allow for method chaining.
@@ -270,6 +313,9 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
     /**
      *  Use this to dynamically set the size of the font of the wrapped {@link JLabel}
      *  through the provided view model property.
+     *  When the integer wrapped by the provided property changes,
+     *  then so does the font size of this label.
+     *
      * @param size The size property of the font which should be displayed on the label.
      * @return This very builder to allow for method chaining.
      */
