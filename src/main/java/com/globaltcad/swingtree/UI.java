@@ -1096,7 +1096,7 @@ public final class UI
     @SafeVarargs
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( E... items ) {
         LogUtil.nullArgCheck(items, "items", Object[].class);
-        return of(new JComboBox<>(new ArrayBasedComboModel<>(items)));
+        return of(new JComboBox<E>()).withModel(new ArrayBasedComboModel<>(items));
     }
 
     @SafeVarargs
@@ -1122,7 +1122,7 @@ public final class UI
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( java.util.List<E> items ) {
         LogUtil.nullArgCheck(items, "items", List.class);
-        return of(new JComboBox<>(new ListBasedComboModel<>(items)));
+        return of(new JComboBox<E>()).withModel(new ListBasedComboModel<>(items));
     }
 
     public static <E> UIForCombo<E,JComboBox<E>> comboBoxWithUnmodifyable( java.util.List<E> items ) {
@@ -1133,12 +1133,12 @@ public final class UI
 
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var, java.util.List<E> items ) {
         LogUtil.nullArgCheck(items, "items", List.class);
-        return of(new JComboBox<>(new ListBasedComboModel<>(var, items)));
+        return of(new JComboBox<E>()).withModel(new ListBasedComboModel<>(var, items));
     }
 
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var, E... items ) {
         LogUtil.nullArgCheck(items, "items", List.class);
-        return of(new JComboBox<>(new ArrayBasedComboModel<>(var, items)));
+        return of(new JComboBox<E>()).withModel(new ArrayBasedComboModel<>(var, items));
     }
 
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( ComboBoxModel<E> model ) {

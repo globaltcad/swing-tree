@@ -18,7 +18,13 @@ class ArrayBasedComboModel<E> extends AbstractComboModel<E>
 		selectedIndex = _indexOf(selectedItem.orElseNull());
 	}
 
+	@Override
+	public AbstractComboModel<E> withVar(Var<E> newVar) {
+		return new ArrayBasedComboModel<>(newVar, items);
+	}
+
 	@Override protected void setAt(int index, E element) { items[index] = element; }
 	@Override public int getSize() { return items.length; }
 	@Override public E getElementAt( int index ) { return items[index]; }
+
 }

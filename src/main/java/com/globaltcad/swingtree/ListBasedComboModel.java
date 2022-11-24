@@ -22,6 +22,12 @@ class ListBasedComboModel<E> extends AbstractComboModel<E>
 
 	@Override public int getSize() { return items.size(); }
 	@Override public E getElementAt( int index ) { return items.get(index); }
+
+	@Override
+	public AbstractComboModel<E> withVar(Var<E> newVar) {
+		return new ListBasedComboModel<>(newVar, items);
+	}
+
 	@Override protected void setAt(int index, E element) {
 		/*
 			So the UI component tells us a combo option should be changed...
@@ -40,4 +46,5 @@ class ListBasedComboModel<E> extends AbstractComboModel<E>
 			// ignore, the user of this library doesn't want us to modify the list
 		}
 	}
+
 }

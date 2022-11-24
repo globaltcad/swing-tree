@@ -21,24 +21,23 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
 {
     protected UIForCombo( JComboBox<E> component ) {
         super(component);
-        if ( component.getModel() instanceof AbstractComboModel )
-            _bindComboModelToEditor((AbstractComboModel<E>) component.getModel());
 
     }
 
-    private void _bindComboModelToEditor(AbstractComboModel<E> model ) {
+    private void _bindComboModelToEditor( AbstractComboModel<E> model ) {
         Component editor = getComponent().getEditor().getEditorComponent();
         if ( editor instanceof JTextField ) {
             JTextField field = (JTextField) editor;
+            JComboBox<E> comboBox = getComponent();
             boolean[] comboIsOpen = {false};
             UI.of(field).onTextChange( it -> {
-                if ( !comboIsOpen[0] )
+                if ( !comboIsOpen[0] && comboBox.isEditable() )
                     model.setFromEditor(field.getText());
             });
 
             // Adds a PopupMenu listener which will listen to notification
             // messages from the popup portion of the combo box.
-            getComponent().addPopupMenuListener(new PopupMenuListener() {
+            comboBox.addPopupMenuListener(new PopupMenuListener() {
                 public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
                     // This method is called before the popup menu becomes visible.
                     comboIsOpen[0] = true;
@@ -109,6 +108,13 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
         return withRenderer((ListCellRenderer<E>) renderBuilder.getForList());
     }
 
+    public final UIForCombo<E,C> withModel(ComboBoxModel<E> model) {
+        if ( model instanceof AbstractComboModel )
+            _bindComboModelToEditor((AbstractComboModel<E>) model);
+        getComponent().setModel(model);
+        return this;
+    }
+
     public final UIForCombo<E,C> withRenderer( ListCellRenderer<E> renderer ) {
         getComponent().setRenderer(renderer);
         return this;
@@ -116,10 +122,16 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
 
     public final UIForCombo<E,C> withSelectedItem( Var<E> var ) {
         LogUtil.nullArgCheck(var, "var", Var.class);
-        var.onShow(v-> _doUI(()-> _setSelectedItem(v)));
-        _onSelection(
-            e -> _doApp((E)getComponent().getSelectedItem(), sel->var.act(sel))
-        );
+        ComboBoxModel<E> model = getComponent().getModel();
+        if ( model instanceof AbstractComboModel )
+            withModel(((AbstractComboModel<E>)model).withVar(var));
+        else {
+            // The user has a custom model AND wants to bind to a property:
+            var.onShow(v-> _doUI(()-> _setSelectedItem(v)));
+            _onSelection(
+                e -> _doApp((E)getComponent().getSelectedItem(), sel->var.act(sel))
+            );
+        }
         return withSelectedItem(var.get());
     }
 
@@ -139,6 +151,9 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
             getComponent().removeActionListener(listener);
         // 3. Set the selected item
         getComponent().setSelectedItem(item);
+        // 3.1 We make sure the editor also gets an update!
+        getComponent().getEditor().setItem(item);
+
         // 4. Add them back
         for ( ActionListener listener : listeners )
             getComponent().addActionListener(listener);

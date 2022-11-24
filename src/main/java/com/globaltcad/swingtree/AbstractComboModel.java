@@ -30,6 +30,8 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 		this.selectedItem = selectedItem;
 	}
 
+	public abstract AbstractComboModel<E> withVar( Var<E> newVar );
+
 	@Override public void setSelectedItem( Object anItem ) {
 		selectedItem.set((E) anItem).act();
 		selectedIndex = _indexOf(anItem);

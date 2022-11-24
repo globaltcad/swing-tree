@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.085 seconds"
+    "duration":"0.086 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -31,7 +31,7 @@
     {
       "id":"They can be bound to the UI by passing them to a builder node.",
       "result":"PASS",
-      "duration":"0.068 seconds",
+      "duration":"0.069 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Binding goes both ways, so when the property changes state through the \"set\" method\n            it will update the UI\n            using the \"show()\" method on the property (which you can also call manually for UI updates), \n            and when the UI is changed by the user, it will update the property for us\n            and trigger the property action (if present).\n        "]
       },
@@ -104,7 +104,7 @@
     {
       "id":"Properties not only have a value but also a type and id!",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
