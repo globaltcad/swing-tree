@@ -21,7 +21,6 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
 {
     protected UIForCombo( JComboBox<E> component ) {
         super(component);
-
     }
 
     private void _bindComboModelToEditor( AbstractComboModel<E> model ) {
@@ -33,6 +32,11 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
             UI.of(field).onTextChange( it -> {
                 if ( !comboIsOpen[0] && comboBox.isEditable() )
                     model.setFromEditor(field.getText());
+            });
+
+            model.onSelectedItemShow( v -> {
+                if ( comboBox.isEditable() )
+                    comboBox.getEditor().setItem(v);
             });
 
             // Adds a PopupMenu listener which will listen to notification

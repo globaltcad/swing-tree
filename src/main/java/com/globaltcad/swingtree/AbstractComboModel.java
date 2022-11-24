@@ -6,6 +6,7 @@ import javax.swing.*;
 import javax.swing.event.ListDataListener;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 {
@@ -28,6 +29,10 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 
 	AbstractComboModel( Var<E> selectedItem ) {
 		this.selectedItem = selectedItem;
+	}
+
+	public final void onSelectedItemShow(Consumer<E> consumer) {
+		this.selectedItem.onShow(consumer);
 	}
 
 	public abstract AbstractComboModel<E> withVar( Var<E> newVar );

@@ -125,12 +125,11 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 */
 	@Override
 	public Var<T> set( T newValue ) {
-		_setInternal(newValue);
-		this.show();
+		if ( _setInternal(newValue) ) this.show();
 		return this;
 	}
 
-	private void _setInternal( T newValue ) {
+	private boolean _setInternal( T newValue ) {
 		if ( !Objects.equals( this.value, newValue ) ) {
 			// First we check if the value is compatible with the type
 			if ( newValue != null && !type.isAssignableFrom(newValue.getClass()) )
@@ -142,7 +141,9 @@ public abstract class AbstractVariable<T> implements Var<T>
 			if ( history.size() > 16 )
 				history.remove(0);
 			value = newValue;
+			return true;
 		}
+		return false;
 	}
 
 	/**
