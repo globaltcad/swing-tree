@@ -109,7 +109,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
 
     public final <V extends E> UIForCombo<E,C> withRenderer( Render.Builder<C,V> renderBuilder ) {
         LogUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
-        return withRenderer((ListCellRenderer<E>) renderBuilder.getForList());
+        return withRenderer((ListCellRenderer<E>) renderBuilder.getForCombo());
     }
 
     public final UIForCombo<E,C> withModel(ComboBoxModel<E> model) {

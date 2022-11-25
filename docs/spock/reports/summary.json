@@ -1,37 +1,37 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Thu Nov 24 19:18:32 CET 2022",
+  "created": "Fri Nov 25 11:46:59 CET 2022",
   "statistics":{
     "runs":"18",
     "passed":"18",
     "failed":"0",
     "featureFailures":"0",
     "successRate":"1.0",
-    "duration":"5875.0"
+    "duration":"3929.0"
   },
   "specifications": [{
       "className":"com.globaltcad.swingtree.common.Basic_UI_Builder_Examples_Spec",
       "title":"Swing tree makes UI building fun again!",
-      "narrative":"The Swing-Tree library allows you to build UIs using declarative code, \n    which you can think of as a more dynamic type of HTML but for swing.\n    It is inspired by frameworks like Jetpack Compose, Flutter, React and SwiftUI\n    which are also based on nested builder patterns to design your UI.\n    In this specification we cover the utter most basics of swing tree.",
+      "narrative":"The Swing-Tree library allows you to build UIs using declarative code,\n    which you can think of as a more dynamic type of HTML but for swing.\n    It is inspired by frameworks like Jetpack Compose, Flutter, React and SwiftUI\n    which are also based on nested builder patterns to design your UI.\n    In this specification we cover the utter most basics of swing tree.",
       "featureCount":"13",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"264",
+      "duration":"363",
       "executedFeatures":[{"id":"A tabbed pane can be created and populated in a declarative way.","extraInfo":[]},{"id":"An enum based combo box can have custom cell rendering.","extraInfo":[]},{"id":"Swing tree nests all kinds of components (trough builder nodes).","extraInfo":[]},{"id":"Tab header components can be passed to the \"tab\" factory method instead of the title.","extraInfo":[]},{"id":"The tab buttons of a tabbed pane can have custom components.","extraInfo":[]},{"id":"Use the \"peek( c -> {} )\" method to access the wrapped Swing component in your Swing-Tree.","extraInfo":[]},{"id":"We can add a list of components to the swing tree API and get a builder node in return.","extraInfo":[]},{"id":"We can create a border layout based Swing tree.","extraInfo":[]},{"id":"We can easily define the cursor on a wrapped UI component","extraInfo":[]},{"id":"We can nest JPanel UI nodes to structure UIs.","extraInfo":[]},{"id":"We can register different UI focus event handlers to swing tree nodes.","extraInfo":[]},{"id":"We can register list selection events on a JList based swing tree node.","extraInfo":[]},{"id":"We can register various kinds of different keyboard event handlers to swing tree nodes.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"com.globaltcad.swingtree.examples.Examples_Spec",
       "title":"Execution and Validation of Example Code",
-      "narrative":"This specification ensures that the\n    various UI examples in the test suite, \n    run successfully and also produce\n    UIs with expected states.",
+      "narrative":"This specification ensures that the\n    various UI examples in the test suite,\n    run successfully and also produce\n    UIs with expected states.",
       "featureCount":"7",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"1183",
+      "duration":"482",
       "executedFeatures":[{"id":"The advanced UI define in the examples has the expected state.","extraInfo":[]},{"id":"The calculator UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The form UI define in the examples has the expected state.","extraInfo":[]},{"id":"The login example UI define in the examples can be created.","extraInfo":[]},{"id":"The simple Table-UI example has the expected state.","extraInfo":[]},{"id":"The spinners example UI define in the examples can be created.","extraInfo":[]},{"id":"The todo app UI defined in the examples has the expected state.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -43,19 +43,19 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"203",
+      "duration":"53",
       "executedFeatures":[{"id":"The given factory methods do not accept null arguments.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"com.globaltcad.swingtree.common.UI_Query_Spec",
       "title":"Swing Tree UI Query",
-      "narrative":"The Swing-Tree UI builder allows you to easily build UIs and query them for\n    specific components inside component event action lambdas! \n    This allows you to easily build UIs that are event driven and react to\n    user input in a very flexible way.\n    Note that this should be used with care as it can lead to very complex\n    UIs that are hard to maintain.\n    Please consider modelling your UIs logic using MVVM based on \n    property bindings (See the properties specification).",
+      "narrative":"The Swing-Tree UI builder allows you to easily build UIs and query them for\n    specific components inside component event action lambdas!\n    This allows you to easily build UIs that are event driven and react to\n    user input in a very flexible way.\n    Note that this should be used with care as it can lead to very complex\n    UIs that are hard to maintain.\n    Please consider modelling your UIs logic using MVVM based on\n    property bindings (See the properties specification).",
       "featureCount":"1",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"177",
+      "duration":"78",
       "executedFeatures":[{"id":"We can query the swing tree within an action lambda.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -67,7 +67,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"223",
+      "duration":"203",
       "executedFeatures":[{"id":"We can register periodically called UI updates!","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -79,7 +79,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"741",
+      "duration":"231",
       "executedFeatures":[{"id":"A button will delegate its siblings within actions:","extraInfo":[]},{"id":"We can easily create a button with an associated action:","extraInfo":[]},{"id":"We can go through the entire siblinghood, including the current button!","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -91,19 +91,19 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"82",
+      "duration":"47",
       "executedFeatures":[{"id":"A map can be used as a data source for tables.","extraInfo":[]},{"id":"We can attach a simple table cell renderer to a JTable in just a few lines of code.","extraInfo":[]},{"id":"We can create a simple column major table cell renderer through a UI factory method.","extraInfo":[]},{"id":"We can create a simple table cell renderer through a UI factory method.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"com.globaltcad.swingtree.splitbutton.JSplitButton_Examples_Spec",
       "title":"A Button of Buttons",
-      "narrative":"The Swing-Tree split button component allows \n    you to easily create split buttons in your UIs.\n    A split button is a button that has a drop down menu attached to it.\n    This allows you to easily add additional functionality to your buttons.\n    The split button component is a wrapper around the AlexAndria Software\n    JSplitButton component.",
+      "narrative":"The Swing-Tree split button component allows\n    you to easily create split buttons in your UIs.\n    A split button is a button that has a drop down menu attached to it.\n    This allows you to easily add additional functionality to your buttons.\n    The split button component is a wrapper around the AlexAndria Software\n    JSplitButton component.",
       "featureCount":"8",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"1144",
+      "duration":"1055",
       "executedFeatures":[{"id":"A button item can undo any multi-selection.","extraInfo":[]},{"id":"It is possible to select more than 1 item.","extraInfo":[]},{"id":"The most simple kind of split button can be built like so:","extraInfo":[]},{"id":"We can build a JSplitButton and add components to it.","extraInfo":[]},{"id":"We can easily build a split button where only one item text will have its text displayed:","extraInfo":[]},{"id":"We can easily build a split button whose text becomes the current user selection:","extraInfo":[]},{"id":"We can register button click events for button items as well as the split button as a whole.","extraInfo":[]},{"id":"We can specify which item should be initially selected.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -115,7 +115,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"11",
+      "duration":"5",
       "executedFeatures":[{"id":"A JSplitButton does not accept null actions.","extraInfo":[]},{"id":"Split button items do not take null as an answer.","extraInfo":[]},{"id":"Split buttons do not take null as an answer.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -133,97 +133,97 @@
     },{
       "className":"com.globaltcad.swingtree.mvvm.Label_Binding_Spec",
       "title":"Label Binding",
-      "narrative":"As a developer, I want to bind a label to a property so \n    that the label is updated when the property changes.\n    Binding is a powerful feature that allows us to create\n    UIs which are not only decoupled from the business logic of\n    an application, but also make it easy to create UIs which\n    are dynamic and reactive.",
+      "narrative":"As a developer, I want to bind a label to a property so\n    that the label is updated when the property changes.\n    Binding is a powerful feature that allows us to create\n    UIs which are not only decoupled from the business logic of\n    an application, but also make it easy to create UIs which\n    are dynamic and reactive.",
       "featureCount":"9",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"49",
+      "duration":"14",
       "executedFeatures":[{"id":"A property can define the horizontal and vertical alignment of a label.","extraInfo":[]},{"id":"A property can define the image relative horizontal and vertical alignment of a label.","extraInfo":[]},{"id":"It is possible to bind to the minimum, maximum and preferred size of a label","extraInfo":[]},{"id":"We can bind to the foreground and background color of a UI node.","extraInfo":[]},{"id":"We can bind to the text of a label.","extraInfo":[]},{"id":"We can store icons inside properties and then bind them to labels.","extraInfo":[]},{"id":"You can bind a variable to the \"enable\" flag of a label.","extraInfo":[]},{"id":"You can bind a variable to the \"visible\" flag of a label.","extraInfo":[]},{"id":"You can dynamically model the font size of your labels using an integer based property.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"com.globaltcad.swingtree.mvvm.Button_Binding_Spec",
       "title":"Button Binding",
-      "narrative":"As a developer, I want to bind a button to a property so \n    that is is updated when the property changes.\n    Binding is a powerful feature that allows us to create\n    UIs which are not only decoupled from the business logic of\n    an application, but also make it easy to create UIs which\n    are dynamic and reactive.",
+      "narrative":"As a developer, I want to bind a button to a property so\n    that is is updated when the property changes.\n    Binding is a powerful feature that allows us to create\n    UIs which are not only decoupled from the business logic of\n    an application, but also make it easy to create UIs which\n    are dynamic and reactive.",
       "featureCount":"3",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"12",
+      "duration":"3",
       "executedFeatures":[{"id":"We can bind to the text of a button.","extraInfo":[]},{"id":"You can bind to the enabled state of a button.","extraInfo":[]},{"id":"You can bind to the selection state of a button.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"com.globaltcad.swingtree.mvvm.Properties_Spec",
       "title":"Properties",
-      "narrative":"Properties are a powerful tool to model the state \n    as well as business logic of your UI without actually depending on it.\n    This is especially useful for testing your UIs logic.\n    Therefore properties are a root concept in the Swing-Tree library.\n    The decoupling between your UI and the UIs state and logic \n    is achieved by binding properties to UI components.\n    This specification shows you how to model UI state \n    and business logic using properties \n    and how to bind them to UI components.",
+      "narrative":"Properties are a powerful tool to model the state\n    as well as business logic of your UI without actually depending on it.\n    This is especially useful for testing your UIs logic.\n    Therefore properties are a root concept in the Swing-Tree library.\n    The decoupling between your UI and the UIs state and logic\n    is achieved by binding properties to UI components.\n    This specification shows you how to model UI state\n    and business logic using properties\n    and how to bind them to UI components.",
       "featureCount":"17",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"118",
+      "duration":"87",
       "executedFeatures":[{"id":"A property can only wrap null if we specify a type class.","extraInfo":[]},{"id":"An empty property will throw an exception if you try to access its value.","extraInfo":[]},{"id":"Properties are similar to the \"Optional\" class, you can map them and see if they are empty or not.","extraInfo":[]},{"id":"Properties are simple wrappers around a value","extraInfo":[]},{"id":"Properties can be bound by subscribing to them using the \"onShow(..)\" method.","extraInfo":[]},{"id":"Properties expose a state history in their property actions.","extraInfo":[]},{"id":"Properties not only have a value but also a type and id!","extraInfo":[]},{"id":"The \"get\" method will throw an exception if there is no element present.","extraInfo":[]},{"id":"The \"ifPresent\" method allows us to see if a property has a value or not.","extraInfo":[]},{"id":"The \"orElseNull\" method should be used instead of \"orElseThrow\" if you are fine with null values.","extraInfo":[]},{"id":"The \"withID(..)\" method produces a new property with all bindings inherited.","extraInfo":[]},{"id":"The UI uses the \"act(T)\" method to change the property state to avoid feedback looping.","extraInfo":[]},{"id":"The delegate of a property action exposes the current as well as the previous state of the property.","extraInfo":[]},{"id":"The equality and hash code of a property are based on its value, type and id!","extraInfo":[]},{"id":"There are 2 types of properties, an immutable property, and its mutable sub-type.","extraInfo":[]},{"id":"They can be bound to the UI by passing them to a builder node.","extraInfo":[]},{"id":"We can search for a previous state of a property in its history.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"com.globaltcad.swingtree.mvvm.Property_Binding_Spec",
       "title":"Property Binding",
-      "narrative":"This specification shows you how to bind properties to \n    the states of common types UI components.",
+      "narrative":"This specification shows you how to bind properties to\n    the states of common types UI components.",
       "featureCount":"5",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"19",
+      "duration":"11",
       "executedFeatures":[{"id":"We can bind a property to the size of a swing component.","extraInfo":[]},{"id":"We can bind to the color of a component.","extraInfo":[]},{"id":"We can bind to the text of a component.","extraInfo":[]},{"id":"We can enable and disable a UI component dynamically through property binding.","extraInfo":[]},{"id":"We can select or unselect a UI component dynamically through properties.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"com.globaltcad.swingtree.mvvm.MVVM_Example_Spec",
       "title":"MVVM Introduction",
-      "narrative":"Swing-Tree allows you to create a Model-View-ViewModel (MVVM) architecture\n    based on 2 simple property interfaces: `Val`, and `Var`!\n\n    `Val` is a read-only property, and `Var` is a read-write property.\n\n    The state of both properties can be observed by the view using simple listeners.\n    This happens automatically when you pass them to the Swing-Tree view.\n    If you want to trigger an action when the property changes, you \n    have to pass the `Var` property to the view and define a action\n    for it inside of your view model.",
+      "narrative":"Swing-Tree allows you to create a Model-View-ViewModel (MVVM) architecture\n    based on 2 simple property interfaces: `Val`, and `Var`!\n\n    `Val` is a read-only property, and `Var` is a read-write property.\n\n    The state of both properties can be observed by the view using simple listeners.\n    This happens automatically when you pass them to the Swing-Tree view.\n    If you want to trigger an action when the property changes, you\n    have to pass the `Var` property to the view and define a action\n    for it inside of your view model.",
       "featureCount":"11",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"459",
+      "duration":"320",
       "executedFeatures":[{"id":"A simple array of elements can be used as a data model for a combo box.","extraInfo":[]},{"id":"A simple list of elements can be used as a data model for a combo box.","extraInfo":[]},{"id":"A string property can be bound to a combo box holding string elements.","extraInfo":[]},{"id":"An enum based combo box can infer its possible states directly from the binding property.","extraInfo":[]},{"id":"We can bind a boolean property to a button, and when the user presses it, we notice it.","extraInfo":[]},{"id":"We can bind a boolean property to a checkbox, and when the user presses it, we notice it.","extraInfo":[]},{"id":"We can bind a boolean property to a radio button, and when the user presses it, we notice it.","extraInfo":[]},{"id":"We can bind a boolean property to a toggle button, and when the user presses it, we notice it.","extraInfo":[]},{"id":"We can bind a enum property to a combo box and when the user selects an item, we notice it.","extraInfo":[]},{"id":"We can create a property based view model and build a view for it.","extraInfo":[]},{"id":"You can bind a property as the current selection as well as list of elements as options to a combo box.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"com.globaltcad.swingtree.threading.Thread_Mode_Spec",
       "title":"Thread Modes",
-      "narrative":"Swing only knows 1 thread, the Event Dispatch Thread (EDT)\n    which performs both the UIs rendering as well as event handling.\n    This is a problem for Swing applications that need to perform\n    long running tasks in the background, as the EDT will be blocked\n    until the task is complete.\n    SwingTree provides a mechanism for creating UIs which \n    dispatch events to a custom application thread as well as ensure that all UI related \n    operations are performed on the event dispatch thread!\n    Not only does this allow your applications to perform long running tasks\n    in the background without blocking the UI, it improves\n    the performance and responsiveness of you desktop application as a whole.",
+      "narrative":"Swing only knows 1 thread, the Event Dispatch Thread (EDT)\n    which performs both the UIs rendering as well as event handling.\n    This is a problem for Swing applications that need to perform\n    long running tasks in the background, as the EDT will be blocked\n    until the task is complete.\n    SwingTree provides a mechanism for creating UIs which\n    dispatch events to a custom application thread as well as ensure that all UI related\n    operations are performed on the event dispatch thread!\n    Not only does this allow your applications to perform long running tasks\n    in the background without blocking the UI, it improves\n    the performance and responsiveness of you desktop application as a whole.",
       "featureCount":"5",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"1007",
+      "duration":"945",
       "executedFeatures":[{"id":"Accessing the UI from something other than the UI thread, leads to an exception when in decoupled thread mode.","extraInfo":[]},{"id":"Inside an event lambda we can not access the UI from a background thread.","extraInfo":[]},{"id":"The application thread can safely effect the state of the UI by using the \"UI.run(()->{..})\" method.","extraInfo":[]},{"id":"The default \"coupled\" thread mode will use the AWT thread for event handling.","extraInfo":[]},{"id":"We can use the decoupled thread mode to queue backend events.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"com.globaltcad.swingtree.mvvm.Scroll_Pane_Binding_Spec",
       "title":"Scroll Pane Binding",
-      "narrative":"Although a scroll pane does not hold information\n    that is relevant to your core business logic, it certainly has certain properties\n    relevant to the view and its usability. \n    For example, the scroll pane can be enabled or disabled, or it\n    can have certain kinds of scroll policies.\n    This specifications shows how to bind `Val` properties to scroll panes.",
+      "narrative":"Although a scroll pane does not hold information\n    that is relevant to your core business logic, it certainly has certain properties\n    relevant to the view and its usability.\n    For example, the scroll pane can be enabled or disabled, or it\n    can have certain kinds of scroll policies.\n    This specifications shows how to bind `Val` properties to scroll panes.",
       "featureCount":"2",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"13",
+      "duration":"9",
       "executedFeatures":[{"id":"A property holding a vertical scroll bar policy can be bound to the UI.","extraInfo":[]},{"id":"You can model the horizontal scroll bar policy us ing a view model property dynamically.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"com.globaltcad.swingtree.combo.Combo_Box_Specification",
       "title":"Drop Downs, aka Combo Boxes",
-      "narrative":"In Swing drop downs are called combo boxes, which\n    is what they will be referred to in this specification as well.  \n    This specification will show you how you can create them and\n    how you can interact with them.",
+      "narrative":"In Swing drop downs are called combo boxes, which\n    is what they will be referred to in this specification as well.\n    This specification will show you how you can create them and\n    how you can interact with them.",
       "featureCount":"8",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"165",
+      "duration":"18",
       "executedFeatures":[{"id":"A combo box can be made editable in a declarative way.","extraInfo":[]},{"id":"A combo box created by Swing-Tree uses the provided item array as data model.","extraInfo":[]},{"id":"A combo box created by Swing-Tree uses the provided item list as data model.","extraInfo":[]},{"id":"Swing tree is a wrapper around Swing, which means you can create the combo box yourself.","extraInfo":[]},{"id":"The \"comboBox\" factory method allows you to easily create a combo box from an array.","extraInfo":[]},{"id":"The options of an editable combo box are only editable if their items list is modifyable.","extraInfo":[]},{"id":"You can model both the current selection state as well as options of your combo box using a property and a list.","extraInfo":[]},{"id":"You can model both the current selection state as well as options of your combo box using a property and an array.","extraInfo":[]}],
       "ignoredFeatures":[]
     }

@@ -28,9 +28,11 @@ class Label_Binding_Spec extends Specification
     def 'We can bind to the text of a label.'()
     {
         reportInfo """
-            Note that for a binding to work, the property must be a Var or Val
-            implementation and it is required to call the "show()" method on the
-            property to apply its value to the view.
+            Note that for a binding to work, the property must be a `Var` or `Val`
+            implementation. All you have to do to then change the state of the UI component
+            is changing the state of the property by calling its "set" method.
+            Internally it will then call the "show()" method for you 
+            which triggers the observers registered by the UI.
         """
 
         given : 'We create a simple swing-tree property for modelling the text.'
