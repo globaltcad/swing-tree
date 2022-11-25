@@ -91,7 +91,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *
      * @return This very instance, which enables builder-style method chaining.
      */
-    public I makePlain() {
+    public final I makePlain() {
         peek(it -> {
             it.setBorderPainted(false);
             it.setContentAreaFilled(false);
@@ -110,7 +110,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @param action The change action lambda which will be passed to the button component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public I onChange(UIAction<SimpleDelegate<B, ItemEvent>> action) {
+    public final I onChange(UIAction<SimpleDelegate<B, ItemEvent>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
         B button = getComponent();
         button.addItemListener(e -> _doApp(()->action.accept(new SimpleDelegate<>(button, e, this::getSiblinghood))));
@@ -156,7 +156,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @param horizontalAlign The horizontal alignment which should be applied to the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public I with(UI.HorizontalAlignment horizontalAlign) {
+    public final I with(UI.HorizontalAlignment horizontalAlign) {
         LogUtil.nullArgCheck(horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class);
         getComponent().setHorizontalAlignment(horizontalAlign.forSwing());
         return (I) this;
@@ -178,7 +178,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @param horizontalAlign The horizontal alignment property which should be bound to the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public I withHorizontalAlignment(Val<UI.HorizontalAlignment> horizontalAlign) {
+    public final I withHorizontalAlignment(Val<UI.HorizontalAlignment> horizontalAlign) {
         LogUtil.nullArgCheck(horizontalAlign, "horizontalAlign", Val.class);
         horizontalAlign.onShow(align-> _doUI(()->getComponent().setHorizontalAlignment(align.forSwing())));
         return with(horizontalAlign.orElseThrow());
@@ -195,7 +195,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @param verticalAlign The vertical alignment which should be applied to the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public I with(UI.VerticalAlignment verticalAlign) {
+    public final I with(UI.VerticalAlignment verticalAlign) {
         LogUtil.nullArgCheck(verticalAlign, "verticalAlign", UI.VerticalAlignment.class);
         getComponent().setVerticalAlignment(verticalAlign.forSwing());
         return (I) this;
@@ -217,7 +217,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @param verticalAlign The vertical alignment property which should be bound to the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public I withVerticalAlignment(Val<UI.VerticalAlignment> verticalAlign) {
+    public final I withVerticalAlignment(Val<UI.VerticalAlignment> verticalAlign) {
         LogUtil.nullArgCheck(verticalAlign, "verticalAlign", Val.class);
         verticalAlign.onShow(align-> _doUI(()->getComponent().setVerticalAlignment(align.forSwing())));
         return with(verticalAlign.orElseThrow());
@@ -234,7 +234,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @param horizontalAlign The horizontal text alignment relative to the icon which should be applied to the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public I withImageRelative(UI.HorizontalAlignment horizontalAlign) {
+    public final I withImageRelative(UI.HorizontalAlignment horizontalAlign) {
         LogUtil.nullArgCheck(horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class);
         getComponent().setHorizontalTextPosition(horizontalAlign.forSwing());
         return (I) this;
@@ -256,7 +256,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @param horizontalAlign The horizontal text alignment property relative to the icon which should be bound to the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public I withImageRelativeHorizontalAlignment(Val<UI.HorizontalAlignment> horizontalAlign) {
+    public final I withImageRelativeHorizontalAlignment(Val<UI.HorizontalAlignment> horizontalAlign) {
         LogUtil.nullArgCheck(horizontalAlign, "horizontalAlign", Val.class);
         horizontalAlign.onShow(align-> _doUI(()->getComponent().setHorizontalTextPosition(align.forSwing())));
         return withImageRelative(horizontalAlign.orElseThrow());
@@ -273,7 +273,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @param verticalAlign The vertical text alignment relative to the icon which should be applied to the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public I withImageRelative(UI.VerticalAlignment verticalAlign) {
+    public final I withImageRelative(UI.VerticalAlignment verticalAlign) {
         LogUtil.nullArgCheck(verticalAlign, "verticalAlign", UI.VerticalAlignment.class);
         getComponent().setVerticalTextPosition(verticalAlign.forSwing());
         return (I) this;
@@ -295,7 +295,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @param verticalAlign The vertical text alignment property relative to the icon which should be bound to the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public I withImageRelativeVerticalAlignment(Val<UI.VerticalAlignment> verticalAlign) {
+    public final I withImageRelativeVerticalAlignment(Val<UI.VerticalAlignment> verticalAlign) {
         LogUtil.nullArgCheck(verticalAlign, "verticalAlign", Val.class);
         verticalAlign.onShow(align -> _doUI(() -> getComponent().setVerticalTextPosition(align.forSwing())));
         return withImageRelative(verticalAlign.orElseThrow());

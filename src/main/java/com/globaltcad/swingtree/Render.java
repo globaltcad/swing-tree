@@ -215,6 +215,20 @@ public final class Render<C extends JComponent,E> {
 						fg = cell.getComponent().getForeground();
 				}
 
+				if ( cell.getComponent() instanceof JTable ) {
+					JTable jTable = (JTable) cell.getComponent();
+					bg = jTable.getSelectionBackground();
+					fg = jTable.getSelectionForeground();
+					if ( bg == null )
+						bg = UIManager.getColor("Table.selectionBackground");
+					if ( fg == null )
+						fg = UIManager.getColor("Table.selectionForeground");
+					if ( bg == null )
+						bg = cell.getComponent().getBackground();
+					if ( fg == null )
+						fg = cell.getComponent().getForeground();
+				}
+
 				if ( bg == null )
 					bg = UIManager.getColor( "ComboBox.selectionBackground" );
 				if ( fg == null )

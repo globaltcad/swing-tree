@@ -7,5 +7,5 @@ import javax.swing.*;
  */
 public class UIForTextField<F extends JTextField> extends UIForAbstractTextComponent<UIForTextField<F>, F>
 {
-    protected UIForTextField(F component) { super(component); }
+    protected UIForTextField( F component ) { super(component); }
 }

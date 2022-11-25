@@ -198,7 +198,7 @@ public final class UI
      */
     public enum Position {
         TOP, LEFT, BOTTOM, RIGHT;
-        private int forTabbedPane() {
+        int forTabbedPane() {
             switch ( this ) {
                 case TOP  : return JTabbedPane.TOP  ;
                 case LEFT : return JTabbedPane.LEFT ;
@@ -215,7 +215,7 @@ public final class UI
     public enum OverflowPolicy {
         WRAP, SCROLL;
 
-        private int forTabbedPane() {
+        int forTabbedPane() {
             switch ( this ) {
                 case WRAP:   return JTabbedPane.WRAP_TAB_LAYOUT  ;
                 case SCROLL: return JTabbedPane.SCROLL_TAB_LAYOUT ;
@@ -601,6 +601,26 @@ public final class UI
     }
 
     /**
+     *  Use this to add property bound entries to the {@link JSplitButton} by
+     *  passing {@link SplitItem} instances to {@link UIForSplitButton} builder like so: <br>
+     *  <pre>{@code
+     *      UI.splitButton("Button")
+     *      .add(UI.splitItem(viewModel.getFirstButtonName()))
+     *      .add(UI.splitItem(viewModel.getSecondButtonName()))
+     *      .add(UI.splitItem(viewModel.getThirdButtonName()))
+     *  }</pre>
+     *  You can also use the {@link SplitItem} wrapper class to wrap
+     *  useful action lambdas for the split item.
+     *
+     * @param text The text property to dynamically display text on the {@link JMenuItem} exposed by the {@link JSplitButton}s {@link JPopupMenu}.
+     * @return A new {@link SplitItem} wrapping a simple {@link JMenuItem}.
+     */
+    public static SplitItem<JMenuItem> splitItem( Val<String> text ) {
+        LogUtil.nullArgCheck(text, "text", Val.class);
+        return SplitItem.of(text);
+    }
+
+    /**
      *  Use this to add radio item entries to the {@link JSplitButton} by
      *  passing {@link SplitItem} instances to {@link UIForSplitButton} builder like so: <br>
      *  <pre>{@code
@@ -615,7 +635,7 @@ public final class UI
      * @param text The text displayed on the {@link JRadioButtonMenuItem} exposed by the {@link JSplitButton}s {@link JPopupMenu}.
      * @return A new {@link SplitItem} wrapping a simple {@link JRadioButtonMenuItem}.
      */
-    public static SplitItem<JRadioButtonMenuItem> splitRadioItem(String text) {
+    public static SplitItem<JRadioButtonMenuItem> splitRadioItem( String text ) {
         LogUtil.nullArgCheck(text, "text", String.class);
         return SplitItem.of(new JRadioButtonMenuItem(text));
     }
@@ -683,7 +703,7 @@ public final class UI
      * @return A builder instance wrapping a new {@link JTabbedPane}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code tabsPosition} or {@code tabsPolicy} are {@code null}.
      */
-    public static UIForTabbedPane<JTabbedPane> tabbedPane(Position tabsPosition, OverflowPolicy tabsPolicy) {
+    public static UIForTabbedPane<JTabbedPane> tabbedPane( Position tabsPosition, OverflowPolicy tabsPolicy ) {
         LogUtil.nullArgCheck(tabsPosition, "tabsPosition", Position.class);
         LogUtil.nullArgCheck(tabsPolicy, "tabsPolicy", OverflowPolicy.class);
         return of(new JTabbedPane(tabsPosition.forTabbedPane(), tabsPolicy.forTabbedPane()));
@@ -784,7 +804,7 @@ public final class UI
      * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
-    public static <M extends JMenuItem> UIForMenuItem<M> of(M component) {
+    public static <M extends JMenuItem> UIForMenuItem<M> of( M component ) {
         LogUtil.nullArgCheck(component, "component", JMenuItem.class);
         return new UIForMenuItem<>(component);
     }
@@ -793,9 +813,18 @@ public final class UI
      * @param text The text which should be displayed on the wrapped {@link JMenuItem}.
      * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
      */
-    public static UIForMenuItem<JMenuItem> menuItem(String text) {
+    public static UIForMenuItem<JMenuItem> menuItem( String text ) {
         LogUtil.nullArgCheck(text, "text", String.class);
         return new UIForMenuItem<>(new JMenuItem(text));
+    }
+
+    /**
+     * @param text The text property which should be displayed on the wrapped {@link JMenuItem} dynamically.
+     * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
+     */
+    public static UIForMenuItem<JMenuItem> menuItem( Val<String> text ) {
+        LogUtil.nullArgCheck(text, "text", Val.class);
+        return new UIForMenuItem<>(new JMenuItem()).withText(text);
     }
 
     /**

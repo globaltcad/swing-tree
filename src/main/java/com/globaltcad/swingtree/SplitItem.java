@@ -3,6 +3,7 @@ package com.globaltcad.swingtree;
 
 import com.alexandriasoftware.swing.JSplitButton;
 import com.globaltcad.swingtree.api.UIAction;
+import com.globaltcad.swingtree.api.mvvm.Val;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -38,6 +39,15 @@ public final class SplitItem<I extends JMenuItem>
     }
 
     /**
+     * @param text The text which should be displayed on the {@link SplitItem} (and its underlying {@link JMenuItem}).
+     * @return A {@link SplitItem} wrapping a simple {@link JMenuItem} displaying the provided text.
+     */
+    public static SplitItem<JMenuItem> of( Val<String> text ) {
+        LogUtil.nullArgCheck(text, "text", Val.class);
+        return new SplitItem<>(UI.of(new JMenuItem()).withText(text).getComponent());
+    }
+
+    /**
      * @param item The {@link JMenuItem} subtype for which a {@link SplitItem} (for {@link JSplitButton}) should be created.
      * @return A {@link SplitItem} wrapping the provided {@link JMenuItem} type.
      * @param <I> The type parameter for the provided item type.
@@ -51,29 +61,29 @@ public final class SplitItem<I extends JMenuItem>
      * @param item The {@link UIForMenuItem} which wraps a {@link  JMenuItem} for which a {@link SplitItem} should be created.
      * @return A {@link SplitItem} wrapping {@link JMenuItem} represented by the provided UI builder.
      */
-    public static <M extends JMenuItem> SplitItem<M> of(UIForMenuItem<M> item) {
+    public static <M extends JMenuItem> SplitItem<M> of( UIForMenuItem<M> item ) {
         LogUtil.nullArgCheck(item, "item", UIForMenuItem.class);
         return new SplitItem<>(item.getComponent());
     }
 
-    private final I item;
-    private final UIAction<Delegate<I>> onButtonClick;
-    private final UIAction<Delegate<I>> onItemSelected;
+    private final I _item;
+    private final UIAction<Delegate<I>> _onButtonClick;
+    private final UIAction<Delegate<I>> _onItemSelected;
 
     private SplitItem( I item ) {
-        this.item = item; this.onButtonClick = null; this.onItemSelected = null;
+        _item = item; _onButtonClick = null; _onItemSelected = null;
     }
 
     private SplitItem(
-            I item,
-            UIAction<Delegate<I>> onClick,
-            UIAction<Delegate<I>> onSelected
+        I item,
+        UIAction<Delegate<I>> onClick,
+        UIAction<Delegate<I>> onSelected
     ) {
-        this.item = item; this.onButtonClick = onClick; this.onItemSelected = onSelected;
+        _item = item; _onButtonClick = onClick; _onItemSelected = onSelected;
     }
 
     public SplitItem<I> makeSelected() {
-        this.item.setSelected(true);
+        _item.setSelected(true);
         return this;
     }
 
@@ -93,15 +103,15 @@ public final class SplitItem<I extends JMenuItem>
      */
     public SplitItem<I> onButtonClick(UIAction<Delegate<I>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        if ( this.onButtonClick != null )
+        if ( _onButtonClick != null )
             throw new IllegalArgumentException("Property already specified!");
-        return new SplitItem<>(item, action, onItemSelected);
+        return new SplitItem<>(_item, action, _onItemSelected);
     }
 
     /**
      *  Use this to perform some action when the user selects a {@link SplitItem} among all other
      *  split button items.
-     *  A common usecase would be to set the text of the {@link JSplitButton} by calling
+     *  A common use case would be to set the text of the {@link JSplitButton} by calling
      *  the {@link Delegate#getSplitButton()} method on the context object supplied to the
      *  provided action lambda like so:
      *  <pre>{@code
@@ -117,15 +127,15 @@ public final class SplitItem<I extends JMenuItem>
      */
     public SplitItem<I> onSelection(UIAction<Delegate<I>> action) {
         LogUtil.nullArgCheck(action, "action", UIAction.class);
-        if ( this.onItemSelected != null ) throw new IllegalArgumentException("Property already specified!");
-        return new SplitItem<>(item, onButtonClick, action);
+        if ( _onItemSelected != null ) throw new IllegalArgumentException("Property already specified!");
+        return new SplitItem<>(_item, _onButtonClick, action);
     }
 
-    I getItem() { return item; }
+    I getItem() { return _item; }
 
-    UIAction<Delegate<I>> getOnClick() { return onButtonClick == null ? it -> {} : onButtonClick; }
+    UIAction<Delegate<I>> getOnClick() { return _onButtonClick == null ? it -> {} : _onButtonClick; }
 
-    UIAction<Delegate<I>> getOnSelected() { return onItemSelected == null ? c -> {} : onItemSelected; }
+    UIAction<Delegate<I>> getOnSelected() { return _onItemSelected == null ? c -> {} : _onItemSelected; }
 
     /**
      *  Instances of this are exposed as delegates through the {@link SimpleDelegate} passed
@@ -171,7 +181,7 @@ public final class SplitItem<I extends JMenuItem>
         /**
          * @return The {@link JMenuItem} which caused this action to be executed.
          */
-        public I getCurrentItem() {
+        public final I getCurrentItem() {
             // We make sure that only the Swing thread can access the component:
             if ( UI.thisIsUIThread() ) return this.currentItem;
             else

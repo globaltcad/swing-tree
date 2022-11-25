@@ -16,7 +16,7 @@ import java.util.function.Consumer;
  */
 public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlider<S>, S>
 {
-    protected UIForSlider(S component) { super(component); }
+    protected UIForSlider( S component ) { super(component); }
 
     /**
      * Adds an {@link UIAction} to the underlying {@link JSlider}

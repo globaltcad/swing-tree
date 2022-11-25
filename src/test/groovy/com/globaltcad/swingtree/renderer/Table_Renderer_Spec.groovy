@@ -6,6 +6,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 
+import javax.swing.JLabel
 import javax.swing.JTable
 
 @Title("Rendering Table Cells")
@@ -158,6 +159,37 @@ class Table_Renderer_Spec extends Specification
 
         then : 'The mocked cell interpreter is called.'
             1 * render.interpret(_)
+    }
+
+    def 'You can render the cells of a table as text by using the "asText" method.'()
+    {
+        reportInfo """
+            Usually you want to render the cells of a table as text, you don't have to
+            define a renderer component for that. Simply use the "asText" method to 
+            define how a cell should be converted to a string, which will be rendered for you.
+            Also, note that you can actually pass a simple list of lists provider to the table factory method
+            and it will create a table model for you.
+            In the table defined below we create a list data based row major table. 
+        """
+        given : """
+                A simple table UI with a nested list based data table model
+                and a default renderer used for all columns.
+            """
+            var ui =
+                        UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { [[1, 2, 3], [7, 8, 9]] })
+                        .withRenderer(
+                            UI.renderTable()
+                            .when(Integer).asText( cell -> cell.value.toString()+"!" )
+                        )
+        when : 'We access the resulting TableCellRenderer instance from the UI.'
+            var found = ui.get(JTable)
+                                    .getDefaultRenderer(Object)
+        and : 'Finally we access the component from the renderer (which is responsible for the actual rendering).'
+            var component = found.getTableCellRendererComponent(null, 1, false, false, 0, 0)
+
+        then : 'The cell is rendered as text (based on a JLabel).'
+            component instanceof JLabel
+            component.text == "1!"
     }
 
 }

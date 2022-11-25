@@ -80,7 +80,7 @@ abstract class AbstractBuilder<I, C>
      * @param action A Consumer lambda which simply returned the wrapped JComponent type for interacting it.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public I peek( Peeker<C> action ) {
+    public final I peek( Peeker<C> action ) {
         action.accept(getComponent());
         return (I) this;
     }
@@ -99,7 +99,7 @@ abstract class AbstractBuilder<I, C>
      * @param building A Consumer lambda which simply consumes this builder.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public I applyIf( boolean condition, Consumer<I> building ) {
+    public final I applyIf( boolean condition, Consumer<I> building ) {
         LogUtil.nullArgCheck(building, "building", Consumer.class);
         I builder = (I) this;
         if ( condition ) building.accept(builder);
@@ -121,7 +121,7 @@ abstract class AbstractBuilder<I, C>
      * @param building An optional consumer lambda which simply consumes this builder node.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public I applyIfPresent( Optional<Consumer<I>> building ) {
+    public final I applyIfPresent( Optional<Consumer<I>> building ) {
         LogUtil.nullArgCheck(building, "building", Optional.class);
         I builder = (I) this;
         building.ifPresent( buildingLambda -> buildingLambda.accept(builder) );
@@ -139,7 +139,7 @@ abstract class AbstractBuilder<I, C>
      * @param building A Consumer lambda which simply consumes this builder.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public I apply( Consumer<I> building ) {
+    public final I apply( Consumer<I> building ) {
         LogUtil.nullArgCheck(building, "building", Consumer.class);
         return applyIf(true, building);
     }

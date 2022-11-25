@@ -1,6 +1,8 @@
 package com.globaltcad.swingtree;
 
 import com.globaltcad.swingtree.api.UIAction;
+import com.globaltcad.swingtree.api.mvvm.Val;
+import com.globaltcad.swingtree.api.mvvm.Var;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -20,6 +22,19 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
     public UIForTabbedPane( P component ) { super(component); }
+
+
+    public final UIForTabbedPane<P> withPosition( Val<UI.Position> position ) {
+        LogUtil.nullArgCheck(position, "position", Var.class);
+        position.onShow(v-> _doUI(()->getComponent().setTabPlacement(position.orElseThrow().forTabbedPane())));
+        return this;
+    }
+
+    public final UIForTabbedPane<P> withOverflowPolicy( Val<UI.OverflowPolicy> policy ) {
+        LogUtil.nullArgCheck(policy, "policy", Var.class);
+        policy.onShow(v-> _doUI(()->getComponent().setTabLayoutPolicy(policy.orElseThrow().forTabbedPane())));
+        return this;
+    }
 
     public final UIForTabbedPane<P> add( Tab tab ) {
 

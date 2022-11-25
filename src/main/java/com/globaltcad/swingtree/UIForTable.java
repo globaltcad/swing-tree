@@ -70,6 +70,27 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
     }
 
     /**
+     * Use this to register a table cell renderer for all columns of this table.
+     * @param renderer The cell renderer to be registered.
+     * @return This builder node.
+     */
+    public final UIForTable<T> withRenderer( TableCellRenderer renderer ) {
+        LogUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
+        getComponent().setDefaultRenderer(Object.class, renderer);
+        return this;
+    }
+
+    /**
+     * Use this to register a table cell renderer for all columns of this table.
+     * @param renderBuilder The builder API for a cell renderer.
+     * @return  This builder node.
+     */
+    public final UIForTable<T> withRenderer( Render.Builder<JTable, ?> renderBuilder ) {
+        LogUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
+        return withRenderer(renderBuilder.getForTable());
+    }
+
+    /**
      * Use this to register a table cell editor for a particular column.
      * @param columnName The name of the column for which the cell editor will be registered.
      * @param editor The cell editor to be registered.

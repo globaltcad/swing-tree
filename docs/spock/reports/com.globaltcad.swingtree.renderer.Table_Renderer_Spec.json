@@ -4,19 +4,19 @@
   "narrative":"Swing-Tree exposes a user friendly API for rendering table cells.\n    For simple table UIs none of this is necessary, but it\n    is important when you want to populate your table with more complex data.\n    The renderer is a simple function that takes a value and returns a UI node.\n    The UI node is then rendered as a table cell.",
   "subjects":[],
   "statistics":{
-    "runs":"4",
+    "runs":"5",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.047 seconds"
+    "duration":"0.046 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can attach a simple table cell renderer to a JTable in just a few lines of code.",
       "result":"PASS",
-      "duration":"0.031 seconds",
+      "duration":"0.029 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -107,6 +107,25 @@
         {"kind":"and","text":"Finally we access the component from the renderer (which is responsible for the actual rendering).","code":["found.getTableCellRendererComponent(null, \"1\", false, false, 0, 0)"]},
 
         {"kind":"then","text":"The mocked cell interpreter is called.","code":["1 * render.interpret(_)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can render the cells of a table as text by using the \"asText\" method.",
+      "result":"PASS",
+      "duration":"0.002 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Usually you want to render the cells of a table as text, you don't have to\n            define a renderer component for that. Simply use the \"asText\" method to \n            define how a cell should be converted to a string, which will be rendered for you.\n            Also, note that you can actually pass a simple list of lists provider to the table factory method\n            and it will create a table model for you.\n            In the table defined below we create a list data based row major table. \n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n                A simple table UI with a nested list based data table model\n                and a default renderer used for all columns.\n            ","code":["var ui =","            UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { [[1, 2, 3], [7, 8, 9]] })","            .withRenderer(","                UI.renderTable()","                .when(Integer).asText( cell -> cell.value.toString()+\"!\" )","            )"]},
+
+        {"kind":"when","text":"We access the resulting TableCellRenderer instance from the UI.","code":["var found = ui.get(JTable)","                        .getDefaultRenderer(Object)"]},
+
+        {"kind":"and","text":"Finally we access the component from the renderer (which is responsible for the actual rendering).","code":["var component = found.getTableCellRendererComponent(null, 1, false, false, 0, 0)"]},
+
+        {"kind":"then","text":"The cell is rendered as text (based on a JLabel).","code":["component instanceof JLabel","component.text == \"1!\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

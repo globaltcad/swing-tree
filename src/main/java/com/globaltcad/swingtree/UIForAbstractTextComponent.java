@@ -32,27 +32,27 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      */
     private final DocumentFilter filter = new DocumentFilter()
     {
-        C component = getComponent();
+        private C _component = getComponent();
 
         /**
          * See documentation in {@link DocumentFilter}!
          */
         public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
-            if ( remove != null ) remove.accept( new RemoveDelegate(component, fb, offset, length) );
+            if ( remove != null ) remove.accept( new RemoveDelegate(_component, fb, offset, length) );
             else fb.remove(offset, length);
         }
         /**
          * See documentation in {@link DocumentFilter}!
          */
         public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-            if ( insert != null ) insert.accept( new InsertDelegate(component, fb, offset, string.length(), string, attr) );
+            if ( insert != null ) insert.accept( new InsertDelegate(_component, fb, offset, string.length(), string, attr) );
             else fb.insertString(offset, string, attr);
         }
         /**
          * See documentation in {@link DocumentFilter}!
          */
         public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-            if ( replace != null ) replace.accept(new ReplaceDelegate(component, fb, offset, length, text, attrs));
+            if ( replace != null ) replace.accept(new ReplaceDelegate(_component, fb, offset, length, text, attrs));
             else fb.replace(offset, length, text, attrs);
         }
     };
@@ -106,6 +106,16 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
         return withText( var.orElseThrow() );
     }
 
+    public final I withFont( Font font ) {
+        this.getComponent().setFont( font );
+        return (I) this;
+    }
+
+    public final I withFont( Val<Font> font ) {
+        font.onShow(v-> _doUI(()->withFont(v)));
+        return withFont( font.orElseThrow() );
+    }
+
     /**
      * The provided {@link UI.HorizontalDirection} translates to {@link ComponentOrientation}
      * instances which are used to align the elements or text within the wrapped {@link JTextComponent}.
@@ -119,10 +129,32 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      * @param direction The text orientation type which should be used.
      * @return This very builder to allow for method chaining.
      */
-    public final I withTextOrientation(UI.HorizontalDirection direction) {
+    public final I withTextOrientation( UI.HorizontalDirection direction ) {
         LogUtil.nullArgCheck(direction, "direction", UI.HorizontalDirection.class);
         getComponent().setComponentOrientation(direction.forTextOrientation());
         return (I) this;
+    }
+
+    /**
+     * The provided {@link UI.HorizontalDirection} property translates to {@link ComponentOrientation}
+     * instances which are used to align the elements or text within the wrapped {@link JTextComponent}.
+     * {@link LayoutManager} and {@link Component}
+     * subclasses will use this property to
+     * determine how to lay out and draw components.
+     * <p>
+     * Note: This method indirectly changes layout-related information, and therefore,
+     * invalidates the component hierarchy.
+     *
+     * @param direction The text orientation type which should be used.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withHorizontalTextOrientation( Val<UI.HorizontalDirection> direction ) {
+        LogUtil.nullArgCheck( direction, "direction", Val.class );
+        direction.onShow(v-> _doUI(()->{
+            withTextOrientation(v);
+            getComponent().validate();
+        }));
+        return withTextOrientation(direction.orElseThrow());
     }
 
     /**
@@ -131,7 +163,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      * @param isEditable The flag determining if the underlying {@link JTextComponent} should be editable or not.
      * @return This very builder to allow for method chaining.
      */
-    public final I isEditableIf(boolean isEditable) {
+    public final I isEditableIf( boolean isEditable ) {
         getComponent().setEditable(isEditable);
         return (I) this;
     }
@@ -144,7 +176,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      * @param action An action which will be executed when the text or its attributes in the underlying {@link JTextComponent} changes.
      * @return This very builder to allow for method chaining.
      */
-    public final I onContentChange(Consumer<SimpleDelegate<JTextComponent, DocumentEvent>> action) {
+    public final I onContentChange( Consumer<SimpleDelegate<JTextComponent, DocumentEvent>> action ) {
         C component = getComponent();
         component.getDocument().addDocumentListener(new DocumentListener() {
             @Override public void insertUpdate(DocumentEvent e)  {
@@ -180,7 +212,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      * @param action An action which will be executed in case the underlying
      *               component supports text filtering (The underlying document is an {@link AbstractDocument}).
      */
-    private void ifFilterable(Runnable action) {
+    private void _ifFilterable( Runnable action ) {
         if ( getComponent().getDocument() instanceof AbstractDocument ) {
             action.run();
             AbstractDocument doc = (AbstractDocument)getComponent().getDocument();
@@ -194,8 +226,8 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      *
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextRemove(UIAction<RemoveDelegate> action) {
-        ifFilterable( () -> this.remove = action );
+    public final I onTextRemove( UIAction<RemoveDelegate> action ) {
+        _ifFilterable( () -> this.remove = action );
         return (I) this;
     }
 
@@ -205,8 +237,8 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      *
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextInsert(UIAction<InsertDelegate> action) {
-        ifFilterable( () -> this.insert = action );
+    public final I onTextInsert( UIAction<InsertDelegate> action ) {
+        _ifFilterable( () -> this.insert = action );
         return (I) this;
     }
 
@@ -216,8 +248,8 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      *
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextReplace(UIAction<ReplaceDelegate> action) {
-        ifFilterable( () -> this.replace = action );
+    public final I onTextReplace( UIAction<ReplaceDelegate> action ) {
+        _ifFilterable( () -> this.replace = action );
         return (I) this;
     }
 
