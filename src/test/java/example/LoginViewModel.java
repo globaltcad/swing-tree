@@ -23,24 +23,24 @@ public class LoginViewModel
 
     public void validate() {
         if ( username.orElseThrow().isEmpty() || password.orElseThrow().isEmpty() ) {
-            validity.set( "Username and password must not be empty!" ).show();
-            loginEnabled.set( false ).show();
+            validity.set( "Username and password must not be empty!" );
+            loginEnabled.set( false );
             this.finalForm = null;
         } else {
-            validity.set( "" ).show();
-            loginEnabled.set( true ).show();
+            validity.set( "" );
+            loginEnabled.set( true );
             this.finalForm = new Form( username.orElseThrow(), password.orElseThrow() );
         }
     }
 
     public void login() {
-        validity.set("Please wait...").show();
+        validity.set("Please wait...");
         try {Thread.sleep(6000);}catch(Exception e) {}
         if ( finalForm != null ) {
             System.out.println( "Logging in with " + finalForm.username() + " and " + finalForm.password() );
-            validity.set("Login failed!").show();
+            validity.set("Login failed!");
         }
-        else validity.set("Login successful").show();
+        else validity.set("Login successful");
     }
 
 }

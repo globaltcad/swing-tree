@@ -9,7 +9,7 @@ class ListBasedComboModel<E> extends AbstractComboModel<E>
 	private final List<E> items;
 
 	ListBasedComboModel(List<E> items) {
-		super(Var.of(_findCommonType( (E[]) items.toArray() ), null));
+		super(Var.ofNullable(_findCommonType( (E[]) items.toArray() ), null));
 		this.items = items;
 		selectedIndex = _indexOf(selectedItem.orElseNull());
 	}

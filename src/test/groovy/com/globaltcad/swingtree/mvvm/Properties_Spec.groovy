@@ -55,7 +55,7 @@ class Properties_Spec extends Specification
             ui.component.selected == false
 
         when : 'We change and then show the property value...'
-            toggled.set(true).show()
+            toggled.set(true)
         then : 'The button should be updated.'
             ui.component.selected == true
 
@@ -77,7 +77,6 @@ class Properties_Spec extends Specification
             property expose Val, if on the other hand it should
             be able to change the state of the property, use Var!
         """
-
         given : 'We create a mutable property...'
             Var<Integer> mutable = Var.of(42)
         expect : 'The property stores the value 42.'
@@ -119,9 +118,9 @@ class Properties_Spec extends Specification
 
     def 'Properties not only have a value but also a type and id!'()
     {
-        given : 'We create a named property...'
-            Val<String> property = Var.of(String, "Hello World").withID("XY")
-        expect : 'The property has the expected name.'
+        given : 'We create a property with an id...'
+            Val<String> property = Var.ofNullable(String, "Hello World").withID("XY")
+        expect : 'The property has the expected id.'
             property.id() == "XY"
         and : 'The property has the expected type.'
             property.type() == String.class
@@ -130,7 +129,7 @@ class Properties_Spec extends Specification
     def 'A property can only wrap null if we specify a type class.'()
     {
         given : 'We create a property with a type class...'
-            Val<String> property = Var.of(String, null)
+            Val<String> property = Var.ofNullable(String, null)
         expect : 'The property has the expected type.'
             property.type() == String.class
         and : 'The property is empty.'
@@ -185,9 +184,9 @@ class Properties_Spec extends Specification
             property.isEmpty() == false
 
         when : 'We create a property that is empty...'
-            Val<String> empty = Val.of(String, null)
+            Val<String> empty = Val.ofNullable(String, null)
         then : 'The property is empty, regardless of how we map it.'
-            empty.map( it -> it.length() ) == Val.of(Void, null)
+            empty.map( it -> it.length() ) == Val.ofNullable(Void, null)
     }
 
     def 'The "ifPresent" method allows us to see if a property has a value or not.'()
@@ -206,7 +205,7 @@ class Properties_Spec extends Specification
     def 'An empty property will throw an exception if you try to access its value.'()
     {
         given : 'We create a property...'
-            Val<Long> property = Val.of(Long, null)
+            Val<Long> property = Val.ofNullable(Long, null)
         when : 'We try to access the value of the property.'
             property.orElseThrow()
         then : 'The property will throw an exception.'
@@ -222,7 +221,7 @@ class Properties_Spec extends Specification
             and to also make this intend clear.
         """
         given : 'We create a property...'
-            Val<Long> property = Val.of(Long, null)
+            Val<Long> property = Val.ofNullable(Long, null)
         when : 'We try to access the value of the property.'
             property.orElseThrow()
         then : 'The property will throw an exception.'
@@ -239,7 +238,7 @@ class Properties_Spec extends Specification
             is clear that the property is not empty!
         """
         given : 'We create a property...'
-            Val<Long> property = Val.of(Long, null)
+            Val<Long> property = Val.ofNullable(Long, null)
         when : 'We try to access the value of the property.'
             property.get()
         then : 'The property will throw an exception.'
@@ -252,9 +251,9 @@ class Properties_Spec extends Specification
             Var<Integer> num = Var.of(1)
             Var<Long>    num2 = Var.of(1L)
             Var<String>  str = Var.of("Hello World")
-            Var<String>  str2 = Var.of(String, null)
-            Var<String>  str3 = Var.of(String, null)
-            Var<Boolean> bool = Var.of(Boolean, null)
+            Var<String>  str2 = Var.ofNullable(String, null)
+            Var<String>  str3 = Var.ofNullable(String, null)
+            Var<Boolean> bool = Var.ofNullable(Boolean, null)
             Var<int[]> arr1 = Var.of(new int[]{1,2,3})
             Var<int[]> arr2 = Var.of(new int[]{1,2,3})
         expect : 'The properties are equal if they have the same value, type and id.'
@@ -404,6 +403,36 @@ class Properties_Spec extends Specification
             property.set(null)
         then : 'An exception is thrown.'
             thrown(NullPointerException)
+    }
+
+    def 'The string representation of a property will give you all the information you need.'()
+    {
+        reportInfo """
+            The string representation of a property will tell you the 
+            the current state, type and id of the property.
+        """
+        given : 'Some simple non-null properties.'
+            var v1 = Var.of("Apple")
+            var v2 = Var.of("Berry").withID("fruit")
+            var v3 = Var.of(42)
+            var v4 = Var.of(42).withID("number")
+            var v5 = Var.of(99f).withID("ninety-nine")
+        and : 'Nullable properties:'
+            var v6 = Var.ofNullable(String, null)
+            var v7 = Var.ofNullable(Long, 5L).withID("maybe long")
+            var v8 = Var.ofNullable(Integer, 7).withID("maybe int")
+
+        expect :
+            v1.toString() == '"Apple" ( type = String, id = "?" )'
+            v2.toString() == '"Berry" ( type = String, id = "fruit" )'
+            v3.toString() == '42 ( type = Integer, id = "?" )'
+            v4.toString() == '42 ( type = Integer, id = "number" )'
+            v5.toString() == '99.0 ( type = Float, id = "ninety-nine" )'
+        and : 'Nullable properties have a "?" in the type:'
+            v6.toString() == 'null ( type = String?, id = "?" )'
+            v7.toString() == '5 ( type = Long?, id = "maybe long" )'
+            v8.toString() == '7 ( type = Integer?, id = "maybe int" )'
+
     }
 
 }

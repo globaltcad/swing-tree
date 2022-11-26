@@ -24,7 +24,7 @@ public interface Val<T>
 {
 	String UNNAMED = "UNNAMED"; // This is the default name for properties
 
-	static <T> Val<T> of( Class<T> type, T value ) { return Var.of( type, value ); }
+	static <T> Val<T> ofNullable( Class<T> type, T value ) { return Var.ofNullable( type, value ); }
 
 	/**
 	 *  This factory method will expose a builder which will create a very simple type of Property,
@@ -175,7 +175,7 @@ public interface Val<T>
 
 	default <V> Val<V> map( java.util.function.Function<T, V> mapper ) {
 		if ( !isPresent() )
-			return Val.of( (Class<V>) Void.class, null );
+			return Val.ofNullable( (Class<V>) Void.class, null );
 		return Val.of( mapper.apply( orElseNull() ) );
 	}
 

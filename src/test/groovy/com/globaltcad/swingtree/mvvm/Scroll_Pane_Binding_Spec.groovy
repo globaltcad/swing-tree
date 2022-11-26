@@ -38,7 +38,7 @@ class Scroll_Pane_Binding_Spec extends Specification
         then : 'The property was successfully bound to the UI.'
             ui != null
         when : 'We change and show the property value.'
-            policy.set(UI.ScrollBarPolicy.ALWAYS).show()
+            policy.set(UI.ScrollBarPolicy.ALWAYS)
         then : 'The UI was updated.'
             ui.component.verticalScrollBarPolicy == ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS
     }
@@ -60,7 +60,7 @@ class Scroll_Pane_Binding_Spec extends Specification
         then : 'The property was successfully bound to the UI.'
             ui != null
         when : 'We change and show the property value.'
-            policy.set(UI.ScrollBarPolicy.AS_NEEDED).show()
+            policy.set(UI.ScrollBarPolicy.AS_NEEDED)
         then : 'The UI was updated.'
             ui.component.horizontalScrollBarPolicy == ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED
     }

@@ -36,7 +36,7 @@ import java.util.Objects;
  */
 public interface Var<T> extends Val<T>
 {
-	static <T> Var<T> of( Class<T> type, T value ) {
+	static <T> Var<T> ofNullable( Class<T> type, T value ) {
 		return new AbstractVariable<T>( type, value, UNNAMED, null, true ){};
 	}
 

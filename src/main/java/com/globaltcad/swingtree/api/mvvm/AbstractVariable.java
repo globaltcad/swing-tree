@@ -17,7 +17,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 
 	private T _value;
 	private final Class<T> _type;
-	private final String _name;
+	private final String _id;
 	private final PropertyAction<T> _action;
 
 	private final boolean _allowsNull;
@@ -38,7 +38,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 		Objects.requireNonNull(name);
 		_value = iniValue;
 		_type = ( iniValue == null ? type : (Class<T>) iniValue.getClass());
-		_name = name;
+		_id = name;
 		_action = ( action == null ? v -> {} : action );
 		if ( _value != null ) {
 			// We check if the type is correct
@@ -59,7 +59,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override public String id() { return _name; }
+	@Override public String id() { return _id; }
 
 	/**
 	 * {@inheritDoc}
@@ -75,7 +75,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 */
 	@Override public Var<T> withAction(PropertyAction<T> action ) {
 		Objects.requireNonNull(action);
-		AbstractVariable<T> newVar = new AbstractVariable<T>( _type, _value, _name, action, _allowsNull ){};
+		AbstractVariable<T> newVar = new AbstractVariable<T>( _type, _value, _id, action, _allowsNull ){};
 		newVar._viewActions.addAll(_viewActions);
 		return newVar;
 	}
@@ -96,7 +96,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 			@Override
 			public Val<T> previous() {
 				if ( AbstractVariable.this._history.isEmpty() )
-					return Val.of(AbstractVariable.this._type, null);
+					return Val.ofNullable(AbstractVariable.this._type, null);
 				return reverseHistory.get(0);
 			}
 			@Override
@@ -162,7 +162,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 						"The provided type of the new value is not compatible with the type of this property"
 					);
 
-			_history.add(Val.of(this.type(), _value).withID(this.id()));
+			_history.add(Val.ofNullable(this.type(), _value).withID(this.id()));
 			if ( _history.size() > 16 )
 				_history.remove(0);
 			_value = newValue;
@@ -195,14 +195,19 @@ public abstract class AbstractVariable<T> implements Var<T>
 
 	@Override
 	public String toString() {
-		String asString = ( this.orElseNull() == null ? "null" : this.orElseNull().toString() );
-		if ( id() == null ) return asString;
-		else return
-				asString +
-						" ( " +
-						"type='"+( type() == null ? "?" : type().getSimpleName() )+"', " +
-						"name='"+ id()+"' " +
-						")";
+		String value = this.map(Object::toString).orElse("null");
+		String id = this.id() == null ? "?" : this.id();
+		if ( id.equals(UNNAMED) ) id = "?";
+		String type = ( type() == null ? "?" : type().getSimpleName() );
+		if ( type.equals("Object") ) type = "?";
+		if ( type.equals("String") && this.isPresent() ) value = "\"" + value + "\"";
+		if ( _allowsNull ) type = type + "?";
+		return
+			value +
+			" ( " +
+				"type = "+type+", " +
+				"id = \""+ id+"\" " +
+			")";
 	}
 
 	@Override
@@ -223,7 +228,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 		int hash = 7;
 		hash = 31 * hash + ( _value == null ? 0 : Val.hashCode(_value) );
 		hash = 31 * hash + ( _type == null ? 0 : _type.hashCode() );
-		hash = 31 * hash + ( _name == null ? 0 : _name.hashCode() );
+		hash = 31 * hash + ( _id == null ? 0 : _id.hashCode() );
 		return hash;
 	}
 }

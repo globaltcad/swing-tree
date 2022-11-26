@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.013 seconds"
+    "duration":"0.017 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -58,7 +58,7 @@
     {
       "id":"It is possible to bind to the minimum, maximum and preferred size of a label",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that this works for all kind of UI nodes, not just labels.\n        "]
       },

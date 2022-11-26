@@ -161,7 +161,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             ui.component.renderer.getListCellRendererComponent(null, Keyboard.Key.A, 0, false, false).text == "a"
 
         when : 'We change the selection...'
-            sel.set(Keyboard.Key.B).show()
+            sel.set(Keyboard.Key.B)
         then : 'The combo box will have the correct selected item.'
             ui.component.selectedItem == Keyboard.Key.B
     }
