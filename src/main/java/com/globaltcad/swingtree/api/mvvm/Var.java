@@ -36,6 +36,22 @@ import java.util.Objects;
  */
 public interface Var<T> extends Val<T>
 {
+	/**
+	 *  Use this factory method to create a new {@link Var} instance
+	 *  whose value may or may not be null.
+	 *  <p>
+	 *  <b>Example:</b>
+	 *  <pre>{@code
+	 *      Var.ofNullable(String.class, null);
+	 *  }</pre>
+	 *  <p>
+	 * @param type The type of the value wrapped by the property.
+	 *             This is used to check if the value is of the correct type.
+	 * @param value The initial value of the property.
+	 *              This may be null.
+	 * @param <T> The type of the wrapped value.
+	 * @return A new {@link Var} instance.
+	 */
 	static <T> Var<T> ofNullable( Class<T> type, T value ) {
 		return new AbstractVariable<T>( type, value, UNNAMED, null, true ){};
 	}

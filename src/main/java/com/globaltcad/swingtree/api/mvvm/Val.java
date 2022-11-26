@@ -24,6 +24,22 @@ public interface Val<T>
 {
 	String UNNAMED = "UNNAMED"; // This is the default name for properties
 
+	/**
+	 *  Use this factory method to create a new {@link Val} instance
+	 *  whose value may or may not be null.
+	 *  <p>
+	 *  <b>Example:</b>
+	 *  <pre>{@code
+	 *      Val.ofNullable(String.class, null);
+	 *  }</pre>
+	 *  <p>
+	 * @param type The type of the value wrapped by the property.
+	 *             This is used to check if the value is of the correct type.
+	 * @param value The initial value of the property.
+	 *              This may be null.
+	 * @param <T> The type of the wrapped value.
+	 * @return A new {@link Val} instance.
+	 */
 	static <T> Val<T> ofNullable( Class<T> type, T value ) { return Var.ofNullable( type, value ); }
 
 	/**
