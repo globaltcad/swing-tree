@@ -25,7 +25,7 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    UIForList(L component) { super(component); }
+    UIForList( L component ) { super(component); }
 
     /**
      *  Takes the provided list of entry objects and sets them as {@link JList} data.
@@ -34,7 +34,12 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
      * @return This instance of the builder node.
      */
     public final UIForList<E, L> withEntries( List<E> entries ) {
-        getComponent().setListData((E[]) entries.toArray(new Object[0]));
+        getComponent().setModel (
+                new AbstractListModel<E>() {
+                    public int getSize() { return entries.size(); }
+                    public E getElementAt( int i ) { return entries.get( i ); }
+                }
+            );
         return this;
     }
 
@@ -45,7 +50,7 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
      * @return This instance of the builder node.
      */
     public final UIForList<E, L> withEntries( E... entries ) {
-        getComponent().setListData(entries.clone());
+        getComponent().setListData(entries);
         return this;
     }
 

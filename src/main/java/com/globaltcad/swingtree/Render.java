@@ -22,7 +22,7 @@ public final class Render<C extends JComponent,E> {
 	private final Supplier<Border> _borderSupplier;
 
 	static <E> Render<JList<E>,E> forList(Class<E> elementType, Supplier<Border> borderSupplier) {
-		Render r = new Render<>(JComboBox.class, elementType, borderSupplier);
+		Render r = new Render<>(JList.class, elementType, borderSupplier);
 		return (Render<JList<E>,E>) r;
 	}
 	static <E> Render<JComboBox<E>,E> forCombo(Class<E> elementType, Supplier<Border> borderSupplier) {

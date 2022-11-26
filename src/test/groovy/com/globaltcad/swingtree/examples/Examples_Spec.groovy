@@ -4,6 +4,7 @@ import com.alexandriasoftware.swing.JSplitButton
 import com.globaltcad.swingtree.examples.advanced.AdvancedUI
 import com.globaltcad.swingtree.examples.simple.Calculator
 import com.globaltcad.swingtree.examples.simple.Form
+import com.globaltcad.swingtree.examples.simple.ListRendering
 import com.globaltcad.swingtree.examples.simple.TableUI
 import com.globaltcad.swingtree.examples.slim.TodoApp
 import com.globaltcad.swingtree.utility.Utility
@@ -67,9 +68,14 @@ class Examples_Spec extends Specification
         expect : new LoginView(new LoginViewModel())
     }
 
-    def 'The spinners example UI define in the examples can be created.'()
+    def 'The spinners example UI defined in the examples can be created.'()
     {
         expect : new SomeSpinnersView(new SomeSpinnersViewModel())
+    }
+
+    def 'The list rendering example UI defined in the examples can be created.'()
+    {
+        expect : new ListRendering()
     }
 
     def 'The calculator UI defined in the examples has the expected state.'()

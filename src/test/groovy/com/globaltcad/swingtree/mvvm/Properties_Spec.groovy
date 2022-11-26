@@ -435,4 +435,25 @@ class Properties_Spec extends Specification
 
     }
 
+    def 'A property can be converted to an Optional.'()
+    {
+        reportInfo """
+            A property can be converted to an Optional using the "toOptional()" method.
+            This is useful when you want to use the Optional API to query the state of the property.
+        """
+        given : 'A property with a non-null value.'
+            var property = Var.of("Hello World")
+        when : 'We convert the property to an Optional.'
+            var optional = property.toOptional()
+        then : 'The Optional contains the current state of the property.'
+            optional.isPresent()
+            optional.get() == "Hello World"
+
+        when : 'The try the same using a nullable property.'
+            property = Var.ofNullable(String, null)
+            optional = property.toOptional()
+        then : 'The Optional is empty.'
+            optional.isEmpty()
+    }
+
 }

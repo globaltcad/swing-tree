@@ -1275,7 +1275,7 @@ public final class UI
     public static UIForLabel<JLabel> label( Val<String> text ) {
         LogUtil.nullArgCheck(text, "text", Val.class);
         return of(new JLabel())
-                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
 
@@ -1334,7 +1334,7 @@ public final class UI
     public static UIForCheckBox<JCheckBox> checkBox( Val<String> text ) {
         LogUtil.nullArgCheck(text, "text", Val.class);
         return of(new JCheckBox())
-                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
 
@@ -1342,8 +1342,8 @@ public final class UI
         LogUtil.nullArgCheck(text, "text", Val.class);
         LogUtil.nullArgCheck(state, "state", Var.class);
         return of(new JCheckBox())
-                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
-                .applyIf(!state.isUnnamed(), it -> it.id(state.id()))
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
+                .applyIf(!state.hasNoID(), it -> it.id(state.id()))
                 .withText(text)
                 .isSelectedIf(state);
     }
@@ -1352,7 +1352,7 @@ public final class UI
         LogUtil.nullArgCheck(text, "text", String.class);
         LogUtil.nullArgCheck(state, "state", Var.class);
         return of(new JCheckBox())
-                .applyIf(!state.isUnnamed(), it -> it.id(state.id()))
+                .applyIf(!state.hasNoID(), it -> it.id(state.id()))
                 .withText(text)
                 .isSelectedIf(state);
     }
@@ -1375,7 +1375,7 @@ public final class UI
     public static UIForRadioButton<JRadioButton> radioButton( Val<String> text ) {
         LogUtil.nullArgCheck(text, "text", Val.class);
         return of(new JRadioButton())
-                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
 
@@ -1383,8 +1383,8 @@ public final class UI
         LogUtil.nullArgCheck(text, "text", Val.class);
         LogUtil.nullArgCheck(text, "selected", Var.class);
         return of(new JRadioButton())
-                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
-                .applyIf(!selected.isUnnamed(), it -> it.id(selected.id()))
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
+                .applyIf(!selected.hasNoID(), it -> it.id(selected.id()))
                 .withText(text)
                 .isSelectedIf(selected);
     }
@@ -1415,7 +1415,7 @@ public final class UI
     public static UIForToggleButton<JToggleButton> toggleButton( Val<String> text ) {
         LogUtil.nullArgCheck(text, "text", Val.class);
         return of(new JToggleButton())
-                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
 
@@ -1423,8 +1423,8 @@ public final class UI
         LogUtil.nullArgCheck(text, "text", Val.class);
         LogUtil.nullArgCheck(text, "selected", Var.class);
         return of(new JToggleButton())
-                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
-                .applyIf(!selected.isUnnamed(), it -> it.id(selected.id()))
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
+                .applyIf(!selected.hasNoID(), it -> it.id(selected.id()))
                 .withText(text)
                 .isSelectedIf(selected);
     }
@@ -1457,14 +1457,14 @@ public final class UI
     public static UIForTextField<JTextField> textField( Val<String> text ) {
         LogUtil.nullArgCheck(text, "text", Val.class);
         return of(new JTextField())
-                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
 
     public static UIForTextField<JTextField> textField( Var<String> text ) {
         LogUtil.nullArgCheck(text, "text", Var.class);
         return of(new JTextField())
-                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
 
@@ -1494,14 +1494,14 @@ public final class UI
     public static UIForFormattedTextField formattedTextField( Val<String> text ) {
         LogUtil.nullArgCheck(text, "text", Val.class);
         return of(new JFormattedTextField())
-                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
 
     public static UIForFormattedTextField formattedTextField( Var<String> text ) {
         LogUtil.nullArgCheck(text, "text", Var.class);
         return of(new JFormattedTextField())
-                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
 
@@ -1531,14 +1531,14 @@ public final class UI
     public static UIForPasswordField<JPasswordField> passwordField( Val<String> text ) {
         LogUtil.nullArgCheck(text, "text", Val.class);
         return of(new JPasswordField())
-                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
 
     public static UIForPasswordField<JPasswordField> passwordField( Var<String> text ) {
         LogUtil.nullArgCheck(text, "text", Val.class);
         return of(new JPasswordField())
-                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
 
@@ -1568,14 +1568,14 @@ public final class UI
     public static UIForTextArea<JTextArea> textArea( Val<String> text ) {
         LogUtil.nullArgCheck(text, "text", Val.class);
         return of(new JTextArea())
-                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
 
     public static UIForTextArea<JTextArea> textArea( Var<String> text ) {
         LogUtil.nullArgCheck(text, "text", Var.class);
         return of(new JTextArea())
-                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
 
@@ -1627,7 +1627,7 @@ public final class UI
         LogUtil.nullArgCheck(direction, "direction", HorizontalDirection.class);
         LogUtil.nullArgCheck(text, "text", Val.class);
         return of(new JTextArea())
-                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withTextOrientation(direction)
                 .withText(text);
     }
@@ -1636,7 +1636,7 @@ public final class UI
         LogUtil.nullArgCheck(direction, "direction", HorizontalDirection.class);
         LogUtil.nullArgCheck(text, "text", Var.class);
         return of(new JTextArea())
-                .applyIf(!text.isUnnamed(), it -> it.id(text.id()))
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withTextOrientation(direction)
                 .withText(text);
     }
@@ -1658,12 +1658,53 @@ public final class UI
     }
 
     /**
-     * @return A builder instance for a new {@link JList}.
+     *  Creates a new {@link JList} instance with the provided array
+     *  as data model.
+     *  This is functionally equivalent to {@link #listOf(Object...)}.
+     *
+     * @return A builder instance for a new {@link JList} with the provided array as data model.
      */
     @SafeVarargs
     public static <E> UIForList<E, JList<E>> list( E... elements ) {
         LogUtil.nullArgCheck(elements, "elements", Object[].class);
         return of(new JList<>(elements));
+    }
+
+    /**
+     *  Creates a new {@link JList} instance with the provided array
+     *  as data model.
+     *  This is functionally equivalent to {@link #list(Object...)}.
+     *
+     * @return A builder instance for a new {@link JList} with the provided array as data model.
+     */
+    @SafeVarargs
+    public static <E> UIForList<E, JList<E>> listOf( E... elements ) {
+        return list( elements );
+    }
+
+    /**
+     *  Creates a new {@link JList} instance with the provided {@link List}
+     *  as data model.
+     *  This is functionally equivalent to {@link #listOf(java.util.List)}.
+     *
+     * @return A builder instance for a new {@link JList} with the provided {@link List} as data model.
+     */
+    public static <E> UIForList<E, JList<E>> list( java.util.List<E> entries ) {
+        return of(new JList<>(new AbstractListModel<E>() {
+            public int getSize() { return entries.size(); }
+            public E getElementAt( int i ) { return entries.get(i); }
+        }));
+    }
+
+    /**
+     *  Creates a new {@link JList} instance with the provided {@link List}
+     *  as data model.
+     *  This is functionally equivalent to {@link #list(java.util.List)}.
+     *
+     * @return A builder instance for a new {@link JList} with the provided {@link List} as data model.
+     */
+    public static <E> UIForList<E, JList<E>> listOf( java.util.List<E> entries ) {
+        return list( entries );
     }
 
     /**
@@ -1695,15 +1736,55 @@ public final class UI
     public static BasicTableModel.Builder tableModel() { return new BasicTableModel.Builder(); }
 
     public static Render.Builder<JTable, Object> renderTable() {
-        return Render.forTable(Object.class, null).when(Object.class).as(cell->{});
+        return Render.forTable(Object.class, null).when(Object.class).asText(cell->String.valueOf(cell.getValue()));
     }
 
+    /**
+     *  Use this to build a list cell renderer for various item types without
+     *  a meaningful common super-type (see {@link #renderList(Class)}).
+     *  You would typically want to use this method to render generic types where the only
+     *  common type is {@link Object}, yet you want to render the item
+     *  in a specific way depending on their actual type.
+     *  This is done like so:
+     *  <pre>{@code
+     *  UI.list(new Object[]{":-)", 42L, '§'})
+     *  .withRenderer(
+     *      UI.renderList()
+     *      .when(String.class).asText( cell -> "String: "+cell.getValue() )
+     *      .when(Character.class).asText( cell -> "Char: "+cell.getValue() )
+     *      .when(Number.class).asText( cell -> "Number: "+cell.getValue() )
+     *  );
+     *  }</pre>
+     *
+     * @return A render builder exposing an API that allows you to
+     *          configure how he passed item types should be rendered.
+     */
     public static Render.Builder<JList<Object>, Object> renderList() {
-        return Render.forList(Object.class, null).when(Object.class).as(cell->{});
+        return Render.forList(Object.class, null).when(Object.class).asText(cell->String.valueOf(cell.getValue()));
     }
 
-    public static <T> Render.Builder<JList<T>, T> renderList( Class<T> itemType ) {
-        return Render.forList(itemType, null).when(itemType).as(cell->{});
+    /**
+     *  Use this to build a list cell renderer for a specific item type and its sub-type.
+     *  You would typically want to use this method to render generic types like {@link Object}
+     *  where you want to render the item in a specific way depending on its actual type.
+     *  This is done like so:
+     *  <pre>{@code
+     *  UI.list(new Number[]{1f, 42L, 4.20d})
+     *  .withRenderer(
+     *      UI.renderList(Number.class)
+     *      .when(Integer.class).asText( cell -> "Integer: "+cell.getValue() )
+     *      .when(Long.class).asText( cell -> "Long: "+cell.getValue() )
+     *      .when(Float.class).asText( cell -> "Float: "+cell.getValue() )
+     *  );
+     *  }</pre>
+     *
+     * @param commonType The common type of the items which should be rendered using a custom renderer.
+     * @return A render builder exposing an API that allows you to
+     *          configure how he passed item types should be rendered.
+     * @param <T> The common super-type type of the items which should be rendered.
+     */
+    public static <T> Render.Builder<JList<T>, T> renderList( Class<T> commonType ) {
+        return Render.forList(commonType, null).when(commonType).asText(cell->String.valueOf(cell.getValue()));
     }
 
     /**
@@ -1729,11 +1810,11 @@ public final class UI
     }
 
     public static Render.Builder<JComboBox<Object>, Object> renderCombo() {
-        return Render.forCombo(Object.class, null).when(Object.class).as(cell->{});
+        return Render.forCombo(Object.class, null).when(Object.class).asText(cell->String.valueOf(cell.getValue()));
     }
 
     public static <T> Render.Builder<JComboBox<T>, T> renderCombo( Class<T> itemType ) {
-        return Render.forCombo(itemType, null).when(itemType).as(cell->{});
+        return Render.forCombo(itemType, null).when(itemType).asText(cell->String.valueOf(cell.getValue()));
     }
 
     /**

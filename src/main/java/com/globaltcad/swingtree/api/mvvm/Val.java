@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 public interface Val<T>
 {
 	String UNNAMED = "UNNAMED"; // This is the default name for properties
+	String EMPTY = "EMPTY"; // This is the default string for empty properties
 
 	/**
 	 *  Use this factory method to create a new {@link Val} instance
@@ -179,7 +180,7 @@ public interface Val<T>
 	 * @throws NullPointerException if the supplying function is {@code null} or
 	 *         produces a {@code null} result
 	 */
-	default Val<T> or(Supplier<? extends Val<? extends T>> supplier) {
+	default Val<T> or( Supplier<? extends Val<? extends T>> supplier ) {
 		Objects.requireNonNull(supplier);
 		if ( isPresent() ) return this;
 		else {
@@ -202,7 +203,7 @@ public interface Val<T>
 	 *
 	 * @return The {@link String} representation of the value wrapped by an implementation of this interface.
 	 */
-	default String valueAsString() { return this.map(String::valueOf).orElseNullable("EMPTY"); }
+	default String valueAsString() { return this.map(String::valueOf).orElseNullable(EMPTY); }
 
 	/**
 	 *  This method returns a {@link String} representation of the type of the wrapped value.
@@ -233,7 +234,10 @@ public interface Val<T>
 
 	Val<T> withID( String id );
 
-	default boolean isUnnamed() { return UNNAMED.equals(id()); }
+	/**
+	 * @return The truth value determining if this property has been assigned an id.
+	 */
+	default boolean hasNoID() { return UNNAMED.equals(id()); }
 
 	/**
 	 *  This returns the type of the value wrapped by this {@link Var}
@@ -243,6 +247,11 @@ public interface Val<T>
 	 */
 	Class<T> type();
 
+	/**
+	 *  Use this to turn this property to an {@link Optional} which can be used to
+	 *  interact with the value wrapped by this {@link Var} in a more functional way.
+	 * @return An {@link Optional} wrapping the value wrapped by this {@link Var}.
+	 */
 	default Optional<T> toOptional() { return Optional.ofNullable(this.orElseNull()); }
 
 	Val<T> onShowThis( PropertyAction<T> displayAction );
@@ -261,7 +270,7 @@ public interface Val<T>
 	 *  This is because the method does not compare the contents of the two arrays!
 	 *  In order to ensure that two {@link Var} values are viewed as the same values
 	 *  simply when the data is identical we use the following utility method to
-	 *  account for these exceptional situation...
+	 *  account for these exceptional situations...
 	 *
 	 * @param o1 The first object which ought to be compared to the second one.
 	 * @param o2 The second object which ought to be compared to the first one.
