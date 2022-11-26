@@ -1,7 +1,6 @@
 package com.globaltcad.swingtree.api.mvvm;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 /**
  * 	The base implementation for both {@link Var} and {@link Val} interfaces.
@@ -12,7 +11,7 @@ import java.util.function.Consumer;
  */
 public abstract class AbstractVariable<T> implements Var<T>
 {
-	private final List<Consumer<Val<T>>> _viewActions = new ArrayList<>();
+	private final List<PropertyAction<T>> _viewActions = new ArrayList<>();
 
 	private final List<Val<T>> _history = new ArrayList<>(17);
 
@@ -21,13 +20,20 @@ public abstract class AbstractVariable<T> implements Var<T>
 	private final String _name;
 	private final PropertyAction<T> _action;
 
+	private final boolean _allowsNull;
 
-	protected AbstractVariable( Class<T> type, T iniValue, String name, PropertyAction<T> action ) {
-		this( type, iniValue, name, action, Collections.emptyList() );
+
+	protected AbstractVariable( Class<T> type, T iniValue, String name, PropertyAction<T> action, boolean allowsNull ) {
+		this( type, iniValue, name, action, Collections.emptyList(), allowsNull );
 	}
 
 	protected AbstractVariable(
-			Class<T> type, T iniValue, String name, PropertyAction<T> action, List<Consumer<Val<T>>> viewActions
+			Class<T> type,
+			T iniValue,
+			String name,
+			PropertyAction<T> action,
+			List<PropertyAction<T>> viewActions,
+			boolean allowsNull
 	) {
 		Objects.requireNonNull(name);
 		_value = iniValue;
@@ -42,6 +48,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 					);
 		}
 		_viewActions.addAll(viewActions);
+		_allowsNull = allowsNull;
 	}
 
 	/**
@@ -58,7 +65,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 * {@inheritDoc}
 	 */
 	@Override public Var<T> withID( String id ) {
-		AbstractVariable<T> newVar = new AbstractVariable<T>(_type, _value, id, null){};
+		AbstractVariable<T> newVar = new AbstractVariable<T>(_type, _value, id, null, _allowsNull ){};
 		newVar._viewActions.addAll(_viewActions);
 		return newVar;
 	}
@@ -68,7 +75,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 */
 	@Override public Var<T> withAction(PropertyAction<T> action ) {
 		Objects.requireNonNull(action);
-		AbstractVariable<T> newVar = new AbstractVariable<T>(_type, _value, _name, action){};
+		AbstractVariable<T> newVar = new AbstractVariable<T>( _type, _value, _name, action, _allowsNull ){};
 		newVar._viewActions.addAll(_viewActions);
 		return newVar;
 	}
@@ -77,9 +84,14 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 * {@inheritDoc}
 	 */
 	@Override public Var<T> act() {
+		_action.act(_createDelegate());
+		return this;
+	}
+
+	private ActionDelegate<T> _createDelegate() {
 		List<Val<T>> reverseHistory = new ArrayList<>(AbstractVariable.this._history);
 		Collections.reverse(reverseHistory);
-		_action.act(new ActionDelegate<T>() {
+		return new ActionDelegate<T>() {
 			@Override public Var<T> current() { return AbstractVariable.this; }
 			@Override
 			public Val<T> previous() {
@@ -91,16 +103,16 @@ public abstract class AbstractVariable<T> implements Var<T>
 			public List<Val<T>> history() {
 				return Collections.unmodifiableList(reverseHistory);
 			}
-		});
-		return this;
+		};
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override public Var<T> act(T newValue) {
-		_setInternal(newValue);
-		return act();
+		if ( _setInternal(newValue) )
+			return act();
+		return this;
 	}
 
 	/**
@@ -137,6 +149,12 @@ public abstract class AbstractVariable<T> implements Var<T>
 	}
 
 	private boolean _setInternal( T newValue ) {
+		if ( !_allowsNull && newValue == null )
+			throw new NullPointerException(
+					"This property is configured to not allow null values! " +
+					"If you want your property to allow null values, use the 'of(Class, T)' factory method."
+				);
+
 		if ( !Objects.equals( _value, newValue ) ) {
 			// First we check if the value is compatible with the type
 			if ( newValue != null && !_type.isAssignableFrom(newValue.getClass()) )
@@ -156,7 +174,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override public Val<T> onShowThis( Consumer<Val<T>> displayAction ) {
+	@Override public Val<T> onShowThis( PropertyAction<T> displayAction ) {
 		_viewActions.add(displayAction);
 		return this;
 	}
@@ -166,9 +184,9 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 */
 	@Override
 	public Val<T> show() {
-		for ( Consumer<Val<T>> action : _viewActions)
+		for ( PropertyAction<T> action : _viewActions)
 			try {
-				action.accept(this);
+				action.act(_createDelegate());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

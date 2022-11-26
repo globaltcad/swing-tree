@@ -392,4 +392,18 @@ class Properties_Spec extends Specification
             modelListener == [":|"]
     }
 
+    def 'A property constructed using the "of" factory method, does not allow null values.'()
+    {
+        reportInfo """
+            The "of" factory method is used to create a property that does not allow null values.
+            If you try to set a null value, the property will throw an exception.
+        """
+        given : 'A property constructed using the "of" factory method.'
+            var property = Var.of("Hello World")
+        when : 'We try to set a null value.'
+            property.set(null)
+        then : 'An exception is thrown.'
+            thrown(NullPointerException)
+    }
+
 }

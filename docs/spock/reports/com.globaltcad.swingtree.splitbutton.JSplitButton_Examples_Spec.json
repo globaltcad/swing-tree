@@ -54,7 +54,7 @@
     {
       "id":"We can easily build a split button where only one item text will have its text displayed:",
       "result":"PASS",
-      "duration":"0.208 seconds",
+      "duration":"0.206 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -142,7 +142,7 @@
     {
       "id":"A button item can undo any multi-selection.",
       "result":"PASS",
-      "duration":"0.210 seconds",
+      "duration":"0.209 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -167,7 +167,7 @@
     {
       "id":"We can build a JSplitButton and add components to it.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that adding components to a JSplitButton is not the same as \n            in a normal JButton. The components are added to the popup menu\n            and not to the button itself.\n            This is because the JSplitButton is a composite component and\n            the button itself is not a container.\n        "]
       },

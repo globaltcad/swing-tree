@@ -4,12 +4,12 @@
   "narrative":"Swing-Tree allows you to create a Model-View-ViewModel (MVVM) architecture\n    based on 2 simple property interfaces: `Val`, and `Var`!\n\n    `Val` is a read-only property, and `Var` is a read-write property.\n\n    The state of both properties can be observed by the view using simple listeners.\n    This happens automatically when you pass them to the Swing-Tree view.\n    If you want to trigger an action when the property changes, you\n    have to pass the `Var` property to the view and define a action\n    for it inside of your view model.",
   "subjects":[],
   "statistics":{
-    "runs":"11",
+    "runs":"12",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.314 seconds"
+    "duration":"0.387 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -33,7 +33,28 @@
     {
       "id":"We can bind a boolean property to a button, and when the user presses it, we notice it.",
       "result":"PASS",
-      "duration":"0.069 seconds",
+      "duration":"0.070 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We instantiate the \"view model\" in the form of a single property.","code":["var pressedStates = []","Var<Boolean> buttonPressed = Var.of(false).withAction({pressedStates.add(it.current().get()) })"]},
+
+        {"kind":"when","text":"We create a view for our view model...","code":["var ui = UI.button(\"Press me!\").isPressedIf(buttonPressed)"]},
+
+        {"kind":"then","text":"The view was successfully created.","code":["ui != null"]},
+
+        {"kind":"when","text":"We press the button.","code":["ui.component.doClick()"]},
+
+        {"kind":"then","text":"\n                The property was updated 2 times, because the pressed state switches \n                from false to true and then false again.\n            ","code":["pressedStates == [true, false]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Binding to the selection state of a button does nothing, because a JButton can only be pressed.",
+      "result":"PASS",
+      "duration":"0.068 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -46,7 +67,7 @@
 
         {"kind":"when","text":"We press the button.","code":["ui.component.doClick()"]},
 
-        {"kind":"then","text":"The property was updated.","code":["actionPerformed == true"]}
+        {"kind":"then","text":"The property was not updated because a JButton can only be pressed.","code":["actionPerformed == false"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -117,7 +138,7 @@
     {
       "id":"We can bind a enum property to a combo box and when the user selects an item, we notice it.",
       "result":"PASS",
-      "duration":"0.014 seconds",
+      "duration":"0.015 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n        "]
       },
@@ -167,7 +188,7 @@
     {
       "id":"A string property can be bound to a combo box holding string elements.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n            In the example below you can see how the usage of a string property\n            makes sense, because there might be requirements to add new food items\n            to the combo box at runtime.\n        "]
       },
@@ -236,7 +257,7 @@
     {
       "id":"You can bind a property as the current selection as well as list of elements as options to a combo box.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

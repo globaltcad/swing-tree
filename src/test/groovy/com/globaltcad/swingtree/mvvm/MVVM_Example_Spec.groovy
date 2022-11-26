@@ -56,6 +56,25 @@ class MVVM_Example_Spec extends Specification
     def 'We can bind a boolean property to a button, and when the user presses it, we notice it.'()
     {
         given : 'We instantiate the "view model" in the form of a single property.'
+            var pressedStates = []
+            Var<Boolean> buttonPressed = Var.of(false).withAction({pressedStates.add(it.current().get()) })
+        when : 'We create a view for our view model...'
+            var ui = UI.button("Press me!").isPressedIf(buttonPressed)
+
+        then : 'The view was successfully created.'
+            ui != null
+        when : 'We press the button.'
+            ui.component.doClick()
+        then : """
+                The property was updated 2 times, because the pressed state switches 
+                from false to true and then false again.
+            """
+            pressedStates == [true, false]
+    }
+
+    def 'Binding to the selection state of a button does nothing, because a JButton can only be pressed.'()
+    {
+        given : 'We instantiate the "view model" in the form of a single property.'
             boolean actionPerformed = false
             Var<Boolean> buttonPressed = Var.of(false).withAction({actionPerformed = true})
         when : 'We create a view for our view model...'
@@ -65,8 +84,8 @@ class MVVM_Example_Spec extends Specification
             ui != null
         when : 'We press the button.'
             ui.component.doClick()
-        then : 'The property was updated.'
-            actionPerformed == true
+        then : 'The property was not updated because a JButton can only be pressed.'
+            actionPerformed == false
     }
 
     def 'We can bind a boolean property to a checkbox, and when the user presses it, we notice it.'()

@@ -85,6 +85,23 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     }
 
     /**
+     *  Use this to dynamically bind to a {@link com.globaltcad.swingtree.api.mvvm.Var}
+     *  instance which will be used to dynamically model the pressed state of the
+     *  wrapped {@link AbstractButton} type.
+     */
+    public final I isPressedIf( Var<Boolean> var ) {
+        LogUtil.nullArgCheck(var, "var", Var.class);
+        var.onShow(v-> _doUI(()->getComponent().getModel().setPressed(v)));
+        _onClick(
+            e -> _doApp(getComponent().getModel().isPressed(), pressed->{
+                var.act(true);
+                var.act(pressed);
+            })
+        );
+        return isSelectedIf( var.orElseThrow() );
+    }
+
+    /**
      *  Effectively removes the native style of this button.
      *  Without an icon or text, one will not be able to recognize the button.
      *  Use this for buttons with a custom icon or clickable text!
@@ -92,7 +109,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I makePlain() {
-        peek(it -> {
+        peek( it -> {
             it.setBorderPainted(false);
             it.setContentAreaFilled(false);
             it.setOpaque(false);

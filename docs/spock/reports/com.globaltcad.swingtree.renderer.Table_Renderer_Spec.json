@@ -16,7 +16,7 @@
     {
       "id":"We can attach a simple table cell renderer to a JTable in just a few lines of code.",
       "result":"PASS",
-      "duration":"0.029 seconds",
+      "duration":"0.031 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

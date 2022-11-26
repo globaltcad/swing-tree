@@ -58,7 +58,7 @@
     {
       "id":"We can bind to the text of a component.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

@@ -229,10 +229,10 @@ public interface Val<T>
 
 	default Optional<T> toOptional() { return Optional.ofNullable(this.orElseNull()); }
 
-	Val<T> onShowThis( Consumer<Val<T>> displayAction );
+	Val<T> onShowThis( PropertyAction<T> displayAction );
 
 	default Val<T> onShow( Consumer<T> displayAction ) {
-		return onShowThis( property -> displayAction.accept( property.orElseNullable(null)) );
+		return onShowThis( it -> displayAction.accept( it.current().orElseNullable(null)) );
 	}
 
 	Val<T> show();

@@ -4,7 +4,7 @@
   "narrative":"Properties are a powerful tool to model the state\n    as well as business logic of your UI without actually depending on it.\n    This is especially useful for testing your UIs logic.\n    Therefore properties are a root concept in the Swing-Tree library.\n    The decoupling between your UI and the UIs state and logic\n    is achieved by binding properties to UI components.\n    This specification shows you how to model UI state\n    and business logic using properties\n    and how to bind them to UI components.",
   "subjects":[],
   "statistics":{
-    "runs":"17",
+    "runs":"18",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -358,6 +358,23 @@
         {"kind":"then","text":"The \"onShow\" actions are NOT triggered, because the \"act\" method performs an \"act on your view model\"!","code":["showListener == [\":(\"]"]},
 
         {"kind":"and","text":"The \"onModel\" actions are triggered.","code":["modelListener == [\":|\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A property constructed using the \"of\" factory method, does not allow null values.",
+      "result":"PASS",
+      "duration":"0",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The \"of\" factory method is used to create a property that does not allow null values.\n            If you try to set a null value, the property will throw an exception.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property constructed using the \"of\" factory method.","code":["var property = Var.of(\"Hello World\")"]},
+
+        {"kind":"when","text":"We try to set a null value.","code":["property.set(null)"]},
+
+        {"kind":"then","text":"An exception is thrown.","code":["thrown(NullPointerException)"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }
