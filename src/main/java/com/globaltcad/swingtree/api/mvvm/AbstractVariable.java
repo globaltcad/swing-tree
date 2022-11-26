@@ -152,7 +152,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 		if ( !_allowsNull && newValue == null )
 			throw new NullPointerException(
 					"This property is configured to not allow null values! " +
-					"If you want your property to allow null values, use the 'of(Class, T)' factory method."
+					"If you want your property to allow null values, use the 'ofNullable(Class, T)' factory method."
 				);
 
 		if ( !Objects.equals( _value, newValue ) ) {
