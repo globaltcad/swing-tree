@@ -42,7 +42,7 @@ class MVVM_Example_Spec extends Specification
                 .add( UI.label( "Password:" ) )
                 .add( "grow", UI.passwordField(vm.password()))
                 .add( "span",
-                    UI.label(vm.validity())
+                    UI.label(vm.feedback())
                 )
                 .add( "span",
                     UI.button( "Login" )
