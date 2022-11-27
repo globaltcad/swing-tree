@@ -8,5 +8,5 @@ package com.globaltcad.swingtree.api;
 @FunctionalInterface
 public interface UIAction<D>
 {
-    void accept( D context );
+    void accept( D delegate );
 }

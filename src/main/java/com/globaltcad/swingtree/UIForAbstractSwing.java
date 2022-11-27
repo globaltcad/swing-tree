@@ -3,6 +3,7 @@ package com.globaltcad.swingtree;
 
 import com.globaltcad.swingtree.api.Peeker;
 import com.globaltcad.swingtree.api.UIAction;
+import com.globaltcad.swingtree.api.UIVerifier;
 import com.globaltcad.swingtree.api.mvvm.Val;
 import com.globaltcad.swingtree.input.Keyboard;
 import com.globaltcad.swingtree.layout.CompAttr;
@@ -125,6 +126,35 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I isEnabledIf( Val<Boolean> isEnabled ) {
         isEnabled.onShow(v-> _doUI(()->getComponent().setEnabled(v)));
         return isEnabledIf( isEnabled.orElseThrow() );
+    }
+
+    /**
+     *  This allows you to register validation logic for the wrapped UI component.
+     *  Although the delegate exposed to the {@link UIVerifier} lambda
+     *  indirectly exposes you to the UIs state, you should not access the UI directly
+     *  from within the lambda, but modify the properties inside your view model instead.
+     *
+     * @param verifier The validation logic provided by your view model.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isValidIf( UIVerifier<C> verifier ) {
+        getComponent().setInputVerifier(new InputVerifier() {
+            @Override
+            public boolean verify( JComponent input ) {
+                return verifier.isValid(
+                        new SimpleDelegate<>(
+                                getComponent(),
+                                new ComponentEvent(getComponent(), 0),
+                                () -> getSiblinghood()
+                            )
+                        );
+                /*
+                    We expect the user to model the state of the UI components
+                    using properties in the view model.
+                 */
+            }
+        });
+        return (I) this;
     }
 
     /**

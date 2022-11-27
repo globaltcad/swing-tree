@@ -34,13 +34,34 @@ public class LoginViewModel
     }
 
     public void login() {
+        loginEnabled.set( false );
         validity.set("Please wait...");
-        try {Thread.sleep(6000);}catch(Exception e) {}
+        try {
+            Thread.sleep(500);
+            validity.set("Please wait.");
+            Thread.sleep(500);
+            validity.set("Please wait..");
+            Thread.sleep(500);
+            validity.set("Please wait...");
+            Thread.sleep(500);
+            validity.set("Please wait.");
+            Thread.sleep(500);
+            validity.set("Please wait..");
+            Thread.sleep(500);
+            validity.set("Please wait...");
+            Thread.sleep(500);
+            validity.set("Please wait..");
+            Thread.sleep(500);
+            validity.set("Please wait! Almost done!");
+            Thread.sleep(1000);
+        }
+        catch(Exception e) {}
         if ( finalForm != null ) {
             System.out.println( "Logging in with " + finalForm.username() + " and " + finalForm.password() );
             validity.set("Login failed!");
         }
         else validity.set("Login successful");
+        loginEnabled.set( true );
     }
 
 }
