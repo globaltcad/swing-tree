@@ -82,10 +82,12 @@ UI.of(this/*JPanel subtype*/).withLayout("fill, insets 10")
       }),
       UI.panel("fill, ins 0")
       .add("grow", 
-         UI.button("-").withProperty("JButton.buttonType", "roundRect")
+         UI.button("-")
+	.withProperty("JButton.buttonType", "roundRect")
       )
       .add("grow, wrap", 
-         UI.button("/").withProperty("JButton.buttonType", "roundRect")
+         UI.button("/")
+	.withProperty("JButton.buttonType", "roundRect")
       )
       .add("span, grow, wrap",
          UI.panel("fill, ins 0")
@@ -116,7 +118,7 @@ This code will produce the following UI when added to a `JFrame`.
 	
 ---
 	
-<img href="" title="example" src="docs/img/simple-example.png" style="width:100%"/>
+<img href="" title="example" src="docs/img/simple-example.png" style="width:200px"/>
 
 ---
 	
