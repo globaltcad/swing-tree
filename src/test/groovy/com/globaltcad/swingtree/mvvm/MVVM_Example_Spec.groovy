@@ -46,7 +46,7 @@ class MVVM_Example_Spec extends Specification
                 )
                 .add( "span",
                     UI.button( "Login" )
-                    .isEnabledIf(vm.loginEnabled())
+                    .isEnabledIf(vm.buttonEnabled())
                     .onClick( it -> vm.login() )
                 )
         then : 'The view was successfully created.'

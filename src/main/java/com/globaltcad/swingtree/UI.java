@@ -494,7 +494,17 @@ public final class UI
      *
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
-    public static UIForButton<JButton> button(String text) { return of(new JButton(text)); }
+    public static UIForButton<JButton> button( String text ) { return of(new JButton(text)); }
+
+    /**
+     *  Create a builder for the {@link JButton} UI component where the text of the provided
+     *  property is dynamically displayed on top.
+     *
+     * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
+     */
+    public static UIForButton<JButton> button( Val<String> text ) { return of(new JButton()).withText(text); }
+
+
 
     /**
      *  Use this to create a builder for the {@link JButton} UI component

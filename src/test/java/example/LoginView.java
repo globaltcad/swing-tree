@@ -21,9 +21,8 @@ public class LoginView extends JPanel
             .add( label( "Password:" ) )
             .add( GROW.and(PUSH_X), passwordField(vm.password()).withBackground(vm.validityColor()) )
             .add( SPAN, label(vm.feedback()).withForeground(vm.feedbackColor()) )
-            .add( "span",
-                button( "Login" )
-                .isEnabledIf(vm.loginEnabled())
+            .add( SPAN,
+                button(vm.buttonText()).isEnabledIf(vm.buttonEnabled())
                 .onClick( it -> vm.login() )
             )
         );
