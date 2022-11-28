@@ -5,6 +5,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -190,6 +191,13 @@ public interface Val<T>
 		}
 	}
 
+	/**
+	 *  Essentially the same as {@link Optional#map(Function)}. but with a {@link Val} as return type.
+	 *
+	 * @param mapper the mapping function to apply to a value, if present
+	 * @return the result of applying an {@code Optional}-bearing mapping
+	 * @param <V> The type of the value returned from the mapping function
+	 */
 	default <V> Val<V> map( java.util.function.Function<T, V> mapper ) {
 		if ( !isPresent() )
 			return Val.ofNullable( (Class<V>) Void.class, null );
@@ -232,12 +240,26 @@ public interface Val<T>
 	 */
 	String id();
 
+	/**
+	 *  Use this method to create a new property with an id.
+	 *  This id is used to identify the property in the UI
+	 *  or as a key in a map, which is useful when converting your
+	 *  view model to a JSON object, or similar formats.
+	 *
+	 * @param id The id of the property.
+	 * @return A new {@link Val} instance with the given id.
+	 */
 	Val<T> withID( String id );
+
+	/**
+	 * @return True when this property has not been assigned an id.
+	 */
+	default boolean hasNoID() { return !hasID(); }
 
 	/**
 	 * @return The truth value determining if this property has been assigned an id.
 	 */
-	default boolean hasNoID() { return UNNAMED.equals(id()); }
+	default boolean hasID() { return !UNNAMED.equals(id()); }
 
 	/**
 	 *  This returns the type of the value wrapped by this {@link Var}
@@ -254,19 +276,45 @@ public interface Val<T>
 	 */
 	default Optional<T> toOptional() { return Optional.ofNullable(this.orElseNull()); }
 
+	/**
+	 *  Use this to register an observer lambda which will be called whenever the value
+	 *  wrapped by this {@link Val} changes through the {@link Var#set(T)} method.
+	 *  The lambda will receive a delegate which not only exposes the current
+	 *  value of this property, but also a fixed number of previous values.
+	 *
+	 * @param displayAction The lambda which will be called whenever the value wrapped by this {@link Var} changes.
+	 * @return The {@link Val} instance itself.
+	 */
 	Val<T> onShowThis( PropertyAction<T> displayAction );
 
+	/**
+	 *  Use this to register an observer lambda which will be called whenever the value
+	 *  wrapped by this {@link Val} changes through the {@link Var#set(T)} method.
+	 *  The lambda will receive the current value of this property.
+	 *
+	 * @param displayAction The lambda which will be called whenever the value wrapped by this {@link Var} changes.
+	 * @return The {@link Val} instance itself.
+	 */
 	default Val<T> onShow( Consumer<T> displayAction ) {
 		return onShowThis( it -> displayAction.accept( it.current().orElseNullable(null)) );
 	}
 
+	/**
+	 *  Triggers the observer lambdas registered through the {@link #onShow(Consumer)}
+	 *  as well as the {@link #onShowThis(PropertyAction)} methods.
+	 *  This method is called automatically by the {@link Var#set(T)} method,
+	 *  and it is supposed to be used by the UI to update the UI components.
+	 *  This is in essence how binding works in Swing-Tree.
+	 *
+	 * @return The {@link Val} instance itself.
+	 */
 	Val<T> show();
 
 	/**
-	 *  The values of {@link Var} implementations ought to be viewed
+	 *  The values of {@link Val} and {@link Var} implementations ought to be viewed
 	 *  as wrapper for data centric quasi value types!
 	 *  Two arrays of integer for example would not be recognized as
-	 *  equal when calling one of their {@link int[]#equals(Object, Object)} methods.
+	 *  equal when calling one of their {@link Object#equals(Object)} methods.
 	 *  This is because the method does not compare the contents of the two arrays!
 	 *  In order to ensure that two {@link Var} values are viewed as the same values
 	 *  simply when the data is identical we use the following utility method to
@@ -289,6 +337,16 @@ public interface Val<T>
 		return Objects.equals( o1, o2 );
 	}
 
+	/**
+	 * 	{@link Val} and {@link Var} implementations require their own {@link Object#hashCode()}
+	 * 	method because they are supposed to be viewed as data centric quasi value types!
+	 * 	So two arrays of integer for example would not have the same hash code when calling
+	 * 	{@link Object#hashCode()} on them.
+	 * 	This is because the method does not compare the contents of the two arrays!
+	 *
+	 * @param o The object for which a hash code is required.
+	 * @return The hash code of the object.
+	 */
 	static int hashCode( Object o ) {
 		if ( o instanceof float[]   ) return Arrays.hashCode( (float[] )  o );
 		if ( o instanceof int[]     ) return Arrays.hashCode( (int[]   )  o );
