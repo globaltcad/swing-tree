@@ -58,9 +58,8 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSpinner<S> withValue( Val<?> val ) {
-        val.onShow(v-> _doUI(()->getComponent().setValue(v)));
-        getComponent().setValue(val.get());
-        return this;
+        val.onShow( v -> _doUI(()->withValue(v)) );
+        return withValue(val.get());
     }
 
     /**
@@ -70,10 +69,10 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSpinner<S> withValue( Var<?> var ) {
-        var.onShow(v -> _doUI(() -> getComponent().setValue(v)));
-        _onChange(e -> _doApp(() -> ((Var<Object>)var).act(getComponent().getValue())));
+        var.onShow( v -> _doUI(() -> withValue(v)) );
+        _onChange( e -> _doApp(() -> ((Var<Object>)var).act(getComponent().getValue())) );
         getComponent().setValue(var.get());
-        return this;
+        return withValue( var.get() );
     }
 
     /**
