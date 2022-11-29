@@ -233,4 +233,41 @@ class Combo_Box_Specification extends Specification
         and : 'The combo box also reports the correct selection index!'
             ui.component.getSelectedIndex() == 3
     }
+
+
+    def 'You can model both the current selection state as well as options of your combo box using 2 properties.'()
+    {
+        reportInfo """
+           In essence, the state of a combo box consists of the current selection, and
+           the options that are available for selection. You can model both of these
+           aspects using 2 properties. One modelling the current selection, and another one
+           storing an array to model all available options. 
+        """
+        given : 'We create our "model", 2 properties.'
+            var selection = Var.of(42)
+            var options = Var.of([73, 42, 17] as Integer[])
+        and : 'We create a combo box that is bound to the property and the list.'
+            var ui = UI.comboBox(selection, options)
+        expect : 'The combo box is initialized with the current selection.'
+            ui.component.getSelectedItem() == 42
+        and : 'It also reports the correct selection index.'
+            ui.component.getSelectedIndex() == 1
+        and : 'The there are all 3 options available.'
+            ui.component.itemCount == 3
+            ui.component.getItemAt(0) == 73
+            ui.component.getItemAt(1) == 42
+            ui.component.getItemAt(2) == 17
+
+        when : 'We change the selection.'
+            selection.set(17)
+        then : 'This change translates from the property to the UI element.'
+            ui.component.getSelectedItem() == 17
+
+        when : 'We change the options property.'
+            options.set([99, 17] as Integer[])
+        then : 'The combo box options are updated.'
+            ui.component.itemCount == 2
+            ui.component.getItemAt(0) == 99
+            ui.component.getItemAt(1) == 17
+    }
 }

@@ -1254,6 +1254,23 @@ public final class UI
     }
 
     /**
+     *  Creates a combo box UI builder node with a {@link Var} property as the model
+     *  for the current selection and an array property of items as a selectable items model
+     *  of variable length.
+     *  <p>
+     *  Note that the provided array may be mutated by the combo box UI component
+     *
+     * @param var The property holding the current selection.
+     * @param items The property holding an array of selectable items.
+     * @return A builder instance for the provided {@link JList}, which enables fluent method chaining.
+     * @param <E> The type of the elements in the combo box.
+     */
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var, Var<E[]> items ) {
+        NullUtil.nullArgCheck(items, "items", List.class);
+        return of(new JComboBox<E>()).withModel(new ArrayPropertyComboModel<>(var, items));
+    }
+
+    /**
      *  Created a combo box UI builder node with the provided {@link ComboBoxModel}.
      *
      * @param model The model to be used by the combo box.

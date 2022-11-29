@@ -10,11 +10,12 @@ import java.util.function.Consumer;
 
 abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 {
-	protected int selectedIndex = -1;
-	final Var<E> selectedItem;
+	protected int _selectedIndex = -1;
+	final Var<E> _selectedItem;
 	protected java.util.List<ListDataListener> listeners = new ArrayList<>();
 
 	protected static <E> Class<E> _findCommonType( E[] items ) {
+		if ( items == null ) return (Class<E>) Object.class;
 		Class<E> type = null;
 		for ( E item : items ) {
 			if ( item == null ) continue;
@@ -28,30 +29,30 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 	}
 
 	AbstractComboModel( Var<E> selectedItem ) {
-		this.selectedItem = selectedItem;
+		_selectedItem = selectedItem;
 	}
 
 	public final void onSelectedItemShow(Consumer<E> consumer) {
-		this.selectedItem.onShow(consumer);
+		_selectedItem.onShow(consumer);
 	}
 
-	public abstract AbstractComboModel<E> withVar( Var<E> newVar );
+	abstract AbstractComboModel<E> withVar( Var<E> newVar );
 
 	@Override public void setSelectedItem( Object anItem ) {
-		selectedItem.set((E) anItem).act();
-		selectedIndex = _indexOf(anItem);
+		_selectedItem.set((E) anItem).act();
+		_selectedIndex = _indexOf(anItem);
 	}
-	@Override public Object getSelectedItem() { return selectedItem.orElseNull(); }
+	@Override public Object getSelectedItem() { return _selectedItem.orElseNull(); }
 	@Override public void addListDataListener( ListDataListener l ) { listeners.add(l); }
 	@Override public void removeListDataListener( ListDataListener l ) { listeners.remove(l); }
 	abstract protected void setAt( int index, E element );
 
-	public void setFromEditor( String o ) {
-		if ( selectedIndex != -1 ) {
+	void setFromEditor( String o ) {
+		if ( _selectedIndex != -1 ) {
 			E e = _convert(o);
 			try {
-				this.setAt(selectedIndex, e);
-				selectedItem.set(e).act();
+				this.setAt(_selectedIndex, e);
+				_selectedItem.set(e).act();
 			} catch (Exception ignored) {
 				// It looks like conversion was not successful
 				// So this means the editor input could not be converted to the type of the combo box
@@ -63,7 +64,7 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 	private E _convert( String o ) {
 		// We need to turn the above string into an object of the correct type!
 		// First of all, we know our target type:
-		Class<E> type = selectedItem.type();
+		Class<E> type = _selectedItem.type();
 		// Now we need to convert it to that type, let's try a few things:
 		if ( type == Object.class )
 			return (E) o; // So apparently the type is intended to be Object, so we'll just return the string
@@ -93,7 +94,7 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 			} catch ( NumberFormatException e ) {
 				// We failed to parse the number... the input is invalid!
 				// So we cannot update the model, and simply return the old value:
-				return selectedItem.orElseNull();
+				return _selectedItem.orElseNull();
 			}
 		}
 		// What now? Hmmm, let's try Boolean!
@@ -112,7 +113,7 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 			} catch ( IllegalArgumentException e ) {
 				// We failed to parse the enum... the input is invalid!
 				// So we cannot update the model, and simply return the old value:
-				return selectedItem.orElseNull();
+				return _selectedItem.orElseNull();
 			}
 		}
 		// Or a character?
@@ -144,7 +145,7 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 		}
 
 		// What else is there? We don't know, so we just return the old value:
-		return selectedItem.orElseNull();
+		return _selectedItem.orElseNull();
 	}
 
 	protected int _indexOf( Object anItem ) {
@@ -152,6 +153,6 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 			if ( Objects.equals(anItem, getElementAt(i)) )
 				return i;
 		}
-		return selectedIndex;
+		return _selectedIndex;
 	}
 }

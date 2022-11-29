@@ -11,13 +11,13 @@ class ListBasedComboModel<E> extends AbstractComboModel<E>
 	ListBasedComboModel(List<E> items) {
 		super(Var.ofNullable(_findCommonType( (E[]) items.toArray() ), null));
 		this.items = items;
-		selectedIndex = _indexOf(selectedItem.orElseNull());
+		_selectedIndex = _indexOf(_selectedItem.orElseNull());
 	}
 
 	ListBasedComboModel(Var<E> var, List<E> items) {
 		super(var);
 		this.items = items;
-		selectedIndex = _indexOf(selectedItem.orElseNull());
+		_selectedIndex = _indexOf(_selectedItem.orElseNull());
 	}
 
 	@Override public int getSize() { return items.size(); }
