@@ -48,7 +48,7 @@ public final class Render<C extends JComponent,E> {
 	 * @return The {@link As} builder API step which expects you to provide a lambda for customizing how a cell is rendered.
 	 */
 	public <T extends E> As<C,E,T> when( Class<T> valueType ) {
-		LogUtil.nullArgCheck(valueType, "valueType", Class.class);
+		NullUtil.nullArgCheck(valueType, "valueType", Class.class);
 		return when( valueType, cell -> true );
 	}
 
@@ -65,12 +65,12 @@ public final class Render<C extends JComponent,E> {
 			Class<T> valueType,
 			Predicate<Cell<C,T>> valueValidator
 	) {
-		LogUtil.nullArgCheck(valueType, "valueType", Class.class);
-		LogUtil.nullArgCheck(valueValidator, "valueValidator", Predicate.class);
+		NullUtil.nullArgCheck(valueType, "valueType", Class.class);
+		NullUtil.nullArgCheck(valueValidator, "valueValidator", Predicate.class);
 		return new As<C,E,T>() {
 			@Override
 			public Builder<C,E> as(Cell.Interpreter<C,T> valueInterpreter) {
-				LogUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
+				NullUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
 				return new Builder(_componentType,valueType, valueValidator, valueInterpreter, _borderSupplier);
 			}
 		};
@@ -321,9 +321,9 @@ public final class Render<C extends JComponent,E> {
 				Cell.Interpreter<C, E> valueInterpreter,
 				Supplier<Border> border
 		) {
-			LogUtil.nullArgCheck(valueType, "valueType", Class.class);
-			LogUtil.nullArgCheck(valueValidator, "valueValidator", Predicate.class);
-			LogUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
+			NullUtil.nullArgCheck(valueType, "valueType", Class.class);
+			NullUtil.nullArgCheck(valueValidator, "valueValidator", Predicate.class);
+			NullUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
 			_componentType = componentType;
 			_border = border;
 			when(valueType, valueValidator).as(valueInterpreter);
@@ -338,7 +338,7 @@ public final class Render<C extends JComponent,E> {
 		 * @return The {@link As} builder API step which expects you to provide a lambda for customizing how a cell is rendered.
 		 */
 		public <T extends E> As<C,E,T> when( Class<T> valueType ) {
-			LogUtil.nullArgCheck(valueType, "valueType", Class.class);
+			NullUtil.nullArgCheck(valueType, "valueType", Class.class);
 			return when( valueType, cell -> true );
 		}
 
@@ -346,12 +346,12 @@ public final class Render<C extends JComponent,E> {
 				Class<T> valueType,
 				Predicate<Cell<C,T>> valueValidator
 		) {
-			LogUtil.nullArgCheck(valueType, "valueType", Class.class);
-			LogUtil.nullArgCheck(valueValidator, "valueValidator", Predicate.class);
+			NullUtil.nullArgCheck(valueType, "valueType", Class.class);
+			NullUtil.nullArgCheck(valueValidator, "valueValidator", Predicate.class);
 			return new As<C,E,T>() {
 				@Override
 				public Builder<C,E> as( Cell.Interpreter<C,T> valueInterpreter ) {
-					LogUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
+					NullUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
 					_store(valueType, valueValidator, valueInterpreter);
 					return Builder.this;
 				}
@@ -363,9 +363,9 @@ public final class Render<C extends JComponent,E> {
 			Predicate predicate,
 			Cell.Interpreter valueInterpreter
 		) {
-			LogUtil.nullArgCheck(valueType, "valueType", Class.class);
-			LogUtil.nullArgCheck(predicate, "predicate", Predicate.class);
-			LogUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
+			NullUtil.nullArgCheck(valueType, "valueType", Class.class);
+			NullUtil.nullArgCheck(predicate, "predicate", Predicate.class);
+			NullUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
 			List<Consumer<Cell<C,?>>> found = rendererLoopup.computeIfAbsent(valueType, k -> new ArrayList<>());
 			found.add( cell -> {
 				if ( predicate.test(cell) )

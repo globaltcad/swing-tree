@@ -50,7 +50,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E> extends AbstractBuilder<
      */
     @SafeVarargs
     public final I add( E... components ) {
-        LogUtil.nullArgCheck(components, "components", Object[].class);
+        NullUtil.nullArgCheck(components, "components", Object[].class);
         for ( E c : components ) _doAdd(UI.of((JComponent) c), null);
         return (I) this;
     }
@@ -67,7 +67,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E> extends AbstractBuilder<
 
     protected final void _doAdd( AbstractNestedBuilder<?, ?, ?> builder, Object conf)
     {
-        LogUtil.nullArgCheck(builder, "builder", AbstractNestedBuilder.class);
+        NullUtil.nullArgCheck(builder, "builder", AbstractNestedBuilder.class);
 
         if ( _eventProcessor != EventProcessor.COUPLED && !UI.thisIsUIThread() )
             throw new IllegalStateException(

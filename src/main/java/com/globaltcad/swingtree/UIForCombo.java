@@ -74,7 +74,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
      * @return This very instance, which enables builder-style method chaining.
      */
     public UIForCombo<E,C> onSelection( UIAction<SimpleDelegate<JComboBox<E>, ActionEvent>> action ) {
-        LogUtil.nullArgCheck(action, "action", UIAction.class);
+        NullUtil.nullArgCheck(action, "action", UIAction.class);
         JComboBox<E> combo = getComponent();
         _onSelection(e -> _doApp(()->action.accept(new SimpleDelegate<>(combo, e, ()->getSiblinghood()))) );
         return this;
@@ -108,7 +108,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
     }
 
     public final <V extends E> UIForCombo<E,C> withRenderer( Render.Builder<C,V> renderBuilder ) {
-        LogUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
+        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
         return withRenderer((ListCellRenderer<E>) renderBuilder.getForCombo());
     }
 
@@ -125,7 +125,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
     }
 
     public final UIForCombo<E,C> withSelectedItem( Var<E> var ) {
-        LogUtil.nullArgCheck(var, "var", Var.class);
+        NullUtil.nullArgCheck(var, "var", Var.class);
         ComboBoxModel<E> model = getComponent().getModel();
         if ( model instanceof AbstractComboModel )
             withModel(((AbstractComboModel<E>)model).withVar(var));

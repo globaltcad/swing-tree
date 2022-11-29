@@ -30,7 +30,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param renderBuilder The builder API for a cell renderer.
      */
     public final UIForTable<T> withRendererForColumn( String columnName, Render.Builder<JTable, ?> renderBuilder ) {
-        LogUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
+        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
         return withRendererForColumn(columnName, renderBuilder.getForTable());
     }
 
@@ -42,7 +42,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param renderBuilder The builder API for a cell renderer.
      */
     public final UIForTable<T> withRendererForColumn( int columnIndex, Render.Builder<JTable, ?> renderBuilder ) {
-        LogUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
+        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
         return withRendererForColumn(columnIndex, renderBuilder.getForTable());
     }
 
@@ -52,8 +52,8 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param renderer The cell renderer to be registered.
      */
     public final UIForTable<T> withRendererForColumn( String columnName, TableCellRenderer renderer ) {
-        LogUtil.nullArgCheck(columnName, "columnName", String.class);
-        LogUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
+        NullUtil.nullArgCheck(columnName, "columnName", String.class);
+        NullUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
         getComponent().getColumn(columnName).setCellRenderer(renderer);
         return this;
     }
@@ -64,7 +64,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param renderer The cell renderer to be registered.
      */
     public final UIForTable<T> withRendererForColumn( int columnIndex, TableCellRenderer renderer ) {
-        LogUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
+        NullUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
         getComponent().getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);
         return this;
     }
@@ -75,7 +75,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @return This builder node.
      */
     public final UIForTable<T> withRenderer( TableCellRenderer renderer ) {
-        LogUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
+        NullUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
         getComponent().setDefaultRenderer(Object.class, renderer);
         return this;
     }
@@ -86,7 +86,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @return  This builder node.
      */
     public final UIForTable<T> withRenderer( Render.Builder<JTable, ?> renderBuilder ) {
-        LogUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
+        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
         return withRenderer(renderBuilder.getForTable());
     }
 
@@ -96,8 +96,8 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param editor The cell editor to be registered.
      */
     public final UIForTable<T> withCellEditorForColumn( String columnName, TableCellEditor editor ) {
-        LogUtil.nullArgCheck(columnName, "columnName", String.class);
-        LogUtil.nullArgCheck(editor, "editor", TableCellEditor.class);
+        NullUtil.nullArgCheck(columnName, "columnName", String.class);
+        NullUtil.nullArgCheck(editor, "editor", TableCellEditor.class);
         getComponent().getColumn(columnName).setCellEditor(editor);
         return this;
     }
@@ -108,7 +108,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @param editor The cell editor to be registered.
      */
     public final UIForTable<T> withCellEditorForColumn( int columnIndex, TableCellEditor editor ) {
-        LogUtil.nullArgCheck(editor, "editor", TableCellEditor.class);
+        NullUtil.nullArgCheck(editor, "editor", TableCellEditor.class);
         getComponent().getColumnModel().getColumn(columnIndex).setCellEditor(editor);
         return this;
     }
@@ -130,7 +130,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      * @return This builder object.
      */
     public final UIForTable<T> withModel( BasicTableModel model ) {
-        LogUtil.nullArgCheck(model, "model", BasicTableModel.class);
+        NullUtil.nullArgCheck(model, "model", BasicTableModel.class);
         getComponent().setModel(model);
         return this;
     }

@@ -49,7 +49,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @return This very builder to allow for method chaining.
      */
     public final I withText( Val<String> val ) {
-        LogUtil.nullArgCheck(val, "val", Val.class);
+        NullUtil.nullArgCheck(val, "val", Val.class);
         val.onShow(v-> _doUI(()->getComponent().setText(v)));
         return withText( val.orElseThrow() );
     }
@@ -65,7 +65,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  wrapped {@link AbstractButton} type.
      */
     public final I isSelectedIf( Val<Boolean> val ) {
-        LogUtil.nullArgCheck(val, "val", Val.class);
+        NullUtil.nullArgCheck(val, "val", Val.class);
         val.onShow(v-> _doUI(()->getComponent().setSelected(v)));
         return isSelectedIf( val.orElseThrow() );
     }
@@ -76,7 +76,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  wrapped {@link AbstractButton} type.
      */
     public final I isSelectedIf( Var<Boolean> var ) {
-        LogUtil.nullArgCheck(var, "var", Var.class);
+        NullUtil.nullArgCheck(var, "var", Var.class);
         var.onShow(v-> _doUI(()->getComponent().setSelected(v)));
         _onClick(
             e -> _doApp(getComponent().isSelected(), sel->var.act(sel))
@@ -90,7 +90,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  wrapped {@link AbstractButton} type.
      */
     public final I isPressedIf( Var<Boolean> var ) {
-        LogUtil.nullArgCheck(var, "var", Var.class);
+        NullUtil.nullArgCheck(var, "var", Var.class);
         var.onShow(v-> _doUI(()->getComponent().getModel().setPressed(v)));
         _onClick(
             e -> _doApp(getComponent().getModel().isPressed(), pressed->{
@@ -128,7 +128,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I onChange( UIAction<SimpleDelegate<B, ItemEvent>> action ) {
-        LogUtil.nullArgCheck(action, "action", UIAction.class);
+        NullUtil.nullArgCheck(action, "action", UIAction.class);
         B button = getComponent();
         button.addItemListener(e -> _doApp(()->action.accept(new SimpleDelegate<>(button, e, this::getSiblinghood))));
         return (I) this;
@@ -146,7 +146,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @return This very instance, which enables builder-style method chaining.
      */
     public I onClick( UIAction<SimpleDelegate<B, ActionEvent>> action ) {
-        LogUtil.nullArgCheck(action, "action", UIAction.class);
+        NullUtil.nullArgCheck(action, "action", UIAction.class);
         B button = getComponent();
         _onClick(
            e -> _doApp(()->action.accept(
@@ -174,7 +174,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @return This very builder to allow for method chaining.
      */
     public final I with( UI.HorizontalAlignment horizontalAlign ) {
-        LogUtil.nullArgCheck(horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class);
+        NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class);
         getComponent().setHorizontalAlignment(horizontalAlign.forSwing());
         return (I) this;
     }
@@ -196,7 +196,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @return This very builder to allow for method chaining.
      */
     public final I withHorizontalAlignment( Val<UI.HorizontalAlignment> horizontalAlign ) {
-        LogUtil.nullArgCheck(horizontalAlign, "horizontalAlign", Val.class);
+        NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", Val.class);
         horizontalAlign.onShow(align-> _doUI(()->getComponent().setHorizontalAlignment(align.forSwing())));
         return with(horizontalAlign.orElseThrow());
     }
@@ -213,7 +213,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @return This very builder to allow for method chaining.
      */
     public final I with( UI.VerticalAlignment verticalAlign ) {
-        LogUtil.nullArgCheck(verticalAlign, "verticalAlign", UI.VerticalAlignment.class);
+        NullUtil.nullArgCheck(verticalAlign, "verticalAlign", UI.VerticalAlignment.class);
         getComponent().setVerticalAlignment(verticalAlign.forSwing());
         return (I) this;
     }
@@ -235,7 +235,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @return This very builder to allow for method chaining.
      */
     public final I withVerticalAlignment( Val<UI.VerticalAlignment> verticalAlign ) {
-        LogUtil.nullArgCheck(verticalAlign, "verticalAlign", Val.class);
+        NullUtil.nullArgCheck(verticalAlign, "verticalAlign", Val.class);
         verticalAlign.onShow(align-> _doUI(()->getComponent().setVerticalAlignment(align.forSwing())));
         return with(verticalAlign.orElseThrow());
     }
@@ -252,7 +252,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @return This very builder to allow for method chaining.
      */
     public final I withImageRelative( UI.HorizontalAlignment horizontalAlign ) {
-        LogUtil.nullArgCheck(horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class);
+        NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class);
         getComponent().setHorizontalTextPosition(horizontalAlign.forSwing());
         return (I) this;
     }
@@ -274,7 +274,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @return This very builder to allow for method chaining.
      */
     public final I withImageRelativeHorizontalAlignment( Val<UI.HorizontalAlignment> horizontalAlign ) {
-        LogUtil.nullArgCheck(horizontalAlign, "horizontalAlign", Val.class);
+        NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", Val.class);
         horizontalAlign.onShow(align-> _doUI(()->getComponent().setHorizontalTextPosition(align.forSwing())));
         return withImageRelative(horizontalAlign.orElseThrow());
     }
@@ -291,7 +291,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @return This very builder to allow for method chaining.
      */
     public final I withImageRelative( UI.VerticalAlignment verticalAlign ) {
-        LogUtil.nullArgCheck(verticalAlign, "verticalAlign", UI.VerticalAlignment.class);
+        NullUtil.nullArgCheck(verticalAlign, "verticalAlign", UI.VerticalAlignment.class);
         getComponent().setVerticalTextPosition(verticalAlign.forSwing());
         return (I) this;
     }
@@ -313,7 +313,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @return This very builder to allow for method chaining.
      */
     public final I withImageRelativeVerticalAlignment( Val<UI.VerticalAlignment> verticalAlign ) {
-        LogUtil.nullArgCheck(verticalAlign, "verticalAlign", Val.class);
+        NullUtil.nullArgCheck(verticalAlign, "verticalAlign", Val.class);
         verticalAlign.onShow(align -> _doUI(() -> getComponent().setVerticalTextPosition(align.forSwing())));
         return withImageRelative(verticalAlign.orElseThrow());
     }

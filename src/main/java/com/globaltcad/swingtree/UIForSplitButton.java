@@ -61,7 +61,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
     public UIForSplitButton<B> onSplitClick(
         UIAction<SplitItem.Delegate<JMenuItem>> action
     ) {
-        LogUtil.nullArgCheck(action, "action", UIAction.class);
+        NullUtil.nullArgCheck(action, "action", UIAction.class);
         B button = getComponent();
         button.addSplitButtonClickedActionListener(
             e -> _doApp(()->action.accept(
@@ -79,7 +79,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
     public UIForSplitButton<B> onSelection(
             UIAction<SplitItem.Delegate<JMenuItem>> action
     ) {
-        LogUtil.nullArgCheck(action, "action", UIAction.class);
+        NullUtil.nullArgCheck(action, "action", UIAction.class);
         this.onSelections.add(action);
         return this;
     }
@@ -98,7 +98,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
     public UIForSplitButton<B> onButtonClick(
         UIAction<SplitItem.Delegate<JMenuItem>> action
     ) {
-        LogUtil.nullArgCheck(action, "action", UIAction.class);
+        NullUtil.nullArgCheck(action, "action", UIAction.class);
         B button = getComponent();
         button.addButtonClickedActionListener(
             e -> _doApp(()->action.accept(
@@ -124,7 +124,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
      */
     @Override
     public UIForSplitButton<B> onClick( UIAction<SimpleDelegate<B, ActionEvent>> action ) {
-        LogUtil.nullArgCheck(action, "action", UIAction.class);
+        NullUtil.nullArgCheck(action, "action", UIAction.class);
         B button = getComponent();
         button.addButtonClickedActionListener(
             e -> _doApp(()->action.accept(
@@ -140,7 +140,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
      * @return This very instance, which enables builder-style method chaining.
      */
     public <M extends JMenuItem> UIForSplitButton<B> add( UIForMenuItem<M> forItem ) {
-        LogUtil.nullArgCheck(forItem, "forItem", UIForMenuItem.class);
+        NullUtil.nullArgCheck(forItem, "forItem", UIForMenuItem.class);
         return this.add(forItem.getComponent());
     }
 
@@ -149,7 +149,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
      * @return This very instance, which enables builder-style method chaining.
      */
     public UIForSplitButton<B> add( JMenuItem item ) {
-        LogUtil.nullArgCheck(item, "item", JMenuItem.class);
+        NullUtil.nullArgCheck(item, "item", JMenuItem.class);
         return this.add(SplitItem.of(item));
     }
 
@@ -159,7 +159,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
      * @return This very instance, which enables builder-style method chaining.
      */
     public <I extends JMenuItem> UIForSplitButton<B> add( SplitItem<I> splitItem ) {
-        LogUtil.nullArgCheck(splitItem, "buttonItem", SplitItem.class);
+        NullUtil.nullArgCheck(splitItem, "buttonItem", SplitItem.class);
         I item = splitItem.getItem();
         if ( item.isSelected() )
             lastSelected[0] = item;

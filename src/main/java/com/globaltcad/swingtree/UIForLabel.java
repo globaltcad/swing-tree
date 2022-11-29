@@ -280,7 +280,7 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> with( Icon icon ) {
-        LogUtil.nullArgCheck(icon,"icon",Icon.class);
+        NullUtil.nullArgCheck(icon,"icon",Icon.class);
         getComponent().setIcon(icon);
         return this;
     }

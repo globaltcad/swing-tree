@@ -25,13 +25,13 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
 
 
     public final UIForTabbedPane<P> withPosition( Val<UI.Position> position ) {
-        LogUtil.nullArgCheck(position, "position", Var.class);
+        NullUtil.nullArgCheck(position, "position", Var.class);
         position.onShow(v-> _doUI(()->getComponent().setTabPlacement(position.orElseThrow().forTabbedPane())));
         return this;
     }
 
     public final UIForTabbedPane<P> withOverflowPolicy( Val<UI.OverflowPolicy> policy ) {
-        LogUtil.nullArgCheck(policy, "policy", Var.class);
+        NullUtil.nullArgCheck(policy, "policy", Var.class);
         policy.onShow(v-> _doUI(()->getComponent().setTabLayoutPolicy(policy.orElseThrow().forTabbedPane())));
         return this;
     }
@@ -118,7 +118,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForTabbedPane<P> onChange( UIAction<SimpleDelegate<P, ChangeEvent>> onChange ) {
-        LogUtil.nullArgCheck(onChange, "onChange", UIAction.class);
+        NullUtil.nullArgCheck(onChange, "onChange", UIAction.class);
         P pane = getComponent();
         pane.addChangeListener(e -> _doApp(()->onChange.accept(new SimpleDelegate<>(pane, e, ()->getSiblinghood()))));
         return this;

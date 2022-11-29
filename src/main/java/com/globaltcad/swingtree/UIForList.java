@@ -75,14 +75,14 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForList<E, L> onSelection( UIAction<SimpleDelegate<JList<E>, ListSelectionEvent>> action ) {
-        LogUtil.nullArgCheck(action, "action", UIAction.class);
+        NullUtil.nullArgCheck(action, "action", UIAction.class);
         L list = getComponent();
         list.addListSelectionListener(e -> _doApp(()->action.accept(new SimpleDelegate<>(list, e, ()->getSiblinghood()))) );
         return this;
     }
 
     public final <V extends E> UIForList<E, L> withRenderer( Render.Builder<L,V> renderBuilder ) {
-        LogUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
+        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
         return withRenderer((ListCellRenderer<E>) renderBuilder.getForList());
     }
 

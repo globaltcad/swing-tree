@@ -230,7 +230,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withEmptyBorderTitled( String title, int top, int left, int bottom, int right ) {
-        LogUtil.nullArgCheck( title, "title", String.class );
+        NullUtil.nullArgCheck( title, "title", String.class );
     	getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(top, left, bottom, right), title));
     	return (I) this;
     }
@@ -255,7 +255,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withEmptyBorderTitled( String title, int topBottom, int leftRight ) {
-        LogUtil.nullArgCheck( title, "title", String.class );
+        NullUtil.nullArgCheck( title, "title", String.class );
         return withEmptyBorderTitled( title, topBottom, leftRight, topBottom, leftRight );
     }
 
@@ -277,7 +277,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withEmptyBorderTitled( String title, int all ) {
-        LogUtil.nullArgCheck( title, "title", String.class );
+        NullUtil.nullArgCheck( title, "title", String.class );
         return withEmptyBorderTitled(title, all, all, all, all);
     }
 
@@ -289,7 +289,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withLineBorder( Color color, int thickness ) {
-        LogUtil.nullArgCheck( color, "color", Color.class );
+        NullUtil.nullArgCheck( color, "color", Color.class );
         getComponent().setBorder(BorderFactory.createLineBorder(color, thickness));
         return (I) this;
     }
@@ -303,8 +303,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withLineBorderTitled( String title, Color color, int thickness ) {
-        LogUtil.nullArgCheck( title, "title", String.class );
-        LogUtil.nullArgCheck( color, "color", Color.class );
+        NullUtil.nullArgCheck( title, "title", String.class );
+        NullUtil.nullArgCheck( color, "color", Color.class );
         getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color, thickness), title));
         return (I) this;
     }
@@ -316,7 +316,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withLineBorder( Color color ) {
-        LogUtil.nullArgCheck( color, "color", Color.class );
+        NullUtil.nullArgCheck( color, "color", Color.class );
         return withLineBorder(color, 1);
     }
 
@@ -328,8 +328,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withLineBorderTitled( String title, Color color ) {
-        LogUtil.nullArgCheck( title, "title", String.class );
-        LogUtil.nullArgCheck( color, "color", Color.class );
+        NullUtil.nullArgCheck( title, "title", String.class );
+        NullUtil.nullArgCheck( color, "color", Color.class );
         return withLineBorderTitled( title, color, 1 );
     }
 
@@ -342,7 +342,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withRoundedLineBorder( Color color, int thickness ) {
-        LogUtil.nullArgCheck( color, "color", Color.class );
+        NullUtil.nullArgCheck( color, "color", Color.class );
         getComponent().setBorder(BorderFactory.createLineBorder(color, thickness, true));
         return (I) this;
     }
@@ -357,8 +357,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withRoundedLineBorderTitled( String title, Color color, int thickness ) {
-        LogUtil.nullArgCheck( title, "title", String.class );
-        LogUtil.nullArgCheck( color, "color", Color.class );
+        NullUtil.nullArgCheck( title, "title", String.class );
+        NullUtil.nullArgCheck( color, "color", Color.class );
         getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color, thickness, true), title));
         return (I) this;
     }
@@ -371,7 +371,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withRoundedLineBorder( Color color ) {
-        LogUtil.nullArgCheck( color, "color", Color.class );
+        NullUtil.nullArgCheck( color, "color", Color.class );
         return withRoundedLineBorder(color, 1);
     }
 
@@ -384,8 +384,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withRoundedLineBorderTitled( String title, Color color ) {
-        LogUtil.nullArgCheck( title, "title", String.class );
-        LogUtil.nullArgCheck( color, "color", Color.class );
+        NullUtil.nullArgCheck( title, "title", String.class );
+        NullUtil.nullArgCheck( color, "color", Color.class );
         return withRoundedLineBorderTitled( title, color, 1 );
     }
 
@@ -407,7 +407,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withRoundedLineBorderTitled( String title ) {
-        LogUtil.nullArgCheck( title, "title", String.class );
+        NullUtil.nullArgCheck( title, "title", String.class );
         return withRoundedLineBorderTitled( title, Color.BLACK, 1 );
     }
 
@@ -423,7 +423,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withMatteBorder( Color color, int top, int left, int bottom, int right ) {
-        LogUtil.nullArgCheck( color, "color", Color.class );
+        NullUtil.nullArgCheck( color, "color", Color.class );
         getComponent().setBorder(BorderFactory.createMatteBorder(top, left, bottom, right, color));
         return (I) this;
     }
@@ -441,8 +441,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withMatteBorderTitled( String title, Color color, int top, int left, int bottom, int right ) {
-        LogUtil.nullArgCheck( title, "title", String.class );
-        LogUtil.nullArgCheck( color, "color", Color.class );
+        NullUtil.nullArgCheck( title, "title", String.class );
+        NullUtil.nullArgCheck( color, "color", Color.class );
         getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createMatteBorder(top, left, bottom, right, color), title));
         return (I) this;
     }
@@ -457,7 +457,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withMatteBorder( Color color, int topBottom, int leftRight ) {
-        LogUtil.nullArgCheck( color, "color", Color.class );
+        NullUtil.nullArgCheck( color, "color", Color.class );
         return withMatteBorder(color, topBottom, leftRight, topBottom, leftRight);
     }
 
@@ -472,8 +472,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withMatteBorderTitled( String title, Color color, int topBottom, int leftRight ) {
-        LogUtil.nullArgCheck( title, "title", String.class );
-        LogUtil.nullArgCheck( color, "color", Color.class );
+        NullUtil.nullArgCheck( title, "title", String.class );
+        NullUtil.nullArgCheck( color, "color", Color.class );
         return withMatteBorderTitled(title, color, topBottom, leftRight, topBottom, leftRight);
     }
 
@@ -486,7 +486,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withMatteBorder( Color color, int all ) {
-        LogUtil.nullArgCheck( color, "color", Color.class );
+        NullUtil.nullArgCheck( color, "color", Color.class );
         return withMatteBorder(color, all, all, all, all);
     }
 
@@ -500,8 +500,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withMatteBorderTitled( String title, Color color, int all ) {
-        LogUtil.nullArgCheck( title, "title", String.class );
-        LogUtil.nullArgCheck( color, "color", Color.class );
+        NullUtil.nullArgCheck( title, "title", String.class );
+        NullUtil.nullArgCheck( color, "color", Color.class );
         return withMatteBorderTitled(title, color, all, all, all, all);
     }
 
@@ -514,8 +514,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withCompoundBorder( Border first, Border second ) {
-        LogUtil.nullArgCheck( first, "first", Border.class );
-        LogUtil.nullArgCheck( second, "second", Border.class );
+        NullUtil.nullArgCheck( first, "first", Border.class );
+        NullUtil.nullArgCheck( second, "second", Border.class );
         getComponent().setBorder(BorderFactory.createCompoundBorder(first, second));
         return (I) this;
     }
@@ -541,7 +541,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withBorderTitled( String title ) {
-        LogUtil.nullArgCheck(title, "title", String.class);
+        NullUtil.nullArgCheck(title, "title", String.class);
         getComponent().setBorder(BorderFactory.createTitledBorder(title));
         return (I) this;
     }
@@ -770,7 +770,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withBackground( Color color ) {
-        LogUtil.nullArgCheck(color, "color", Color.class);
+        NullUtil.nullArgCheck(color, "color", Color.class);
         getComponent().setBackground(color);
         return (I) this;
     }
@@ -1227,7 +1227,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I onMouseClick( UIAction<SimpleDelegate<C, MouseEvent>> onClick ) {
-        LogUtil.nullArgCheck(onClick, "onClick", UIAction.class);
+        NullUtil.nullArgCheck(onClick, "onClick", UIAction.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) { 
@@ -1245,7 +1245,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I onResize( UIAction<SimpleDelegate<C, ComponentEvent>> onResize ) {
-        LogUtil.nullArgCheck(onResize, "onResize", UIAction.class);
+        NullUtil.nullArgCheck(onResize, "onResize", UIAction.class);
         C component = getComponent();
         component.addComponentListener(new ComponentAdapter() {
             @Override public void componentResized(ComponentEvent e) {
@@ -1263,7 +1263,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I onMoved( UIAction<SimpleDelegate<C, ComponentEvent>> onMoved ) {
-        LogUtil.nullArgCheck(onMoved, "onMoved", UIAction.class);
+        NullUtil.nullArgCheck(onMoved, "onMoved", UIAction.class);
         C component = getComponent();
         component.addComponentListener(new ComponentAdapter() {
             @Override public void componentMoved(ComponentEvent e) {
@@ -1281,7 +1281,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I onShown( UIAction<SimpleDelegate<C, ComponentEvent>> onShown ) {
-        LogUtil.nullArgCheck(onShown, "onShown", UIAction.class);
+        NullUtil.nullArgCheck(onShown, "onShown", UIAction.class);
         C component = getComponent();
         component.addComponentListener(new ComponentAdapter() {
             @Override public void componentShown(ComponentEvent e) {
@@ -1299,7 +1299,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I onHidden( UIAction<SimpleDelegate<C, ComponentEvent>> onHidden ) {
-        LogUtil.nullArgCheck(onHidden, "onHidden", UIAction.class);
+        NullUtil.nullArgCheck(onHidden, "onHidden", UIAction.class);
         C component = getComponent();
         component.addComponentListener(new ComponentAdapter() {
             @Override public void componentHidden(ComponentEvent e) {
@@ -1317,7 +1317,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I onFocusGained( UIAction<SimpleDelegate<C, ComponentEvent>> onFocus ) {
-        LogUtil.nullArgCheck(onFocus, "onFocus", UIAction.class);
+        NullUtil.nullArgCheck(onFocus, "onFocus", UIAction.class);
         C component = getComponent();
         component.addFocusListener(new FocusAdapter() {
             @Override public void focusGained(FocusEvent e) {
@@ -1335,7 +1335,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I onFocusLost( UIAction<SimpleDelegate<C, ComponentEvent>> onFocus ) {
-        LogUtil.nullArgCheck(onFocus, "onFocus", UIAction.class);
+        NullUtil.nullArgCheck(onFocus, "onFocus", UIAction.class);
         C component = getComponent();
         component.addFocusListener(new FocusAdapter() {
             @Override public void focusLost(FocusEvent e) {
@@ -1353,7 +1353,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I onKeyPressed( UIAction<SimpleDelegate<C, KeyEvent>> onKeyPressed ) {
-        LogUtil.nullArgCheck(onKeyPressed, "onKeyPressed", UIAction.class);
+        NullUtil.nullArgCheck(onKeyPressed, "onKeyPressed", UIAction.class);
         C component = getComponent();
         component.addKeyListener(new KeyAdapter() {
             @Override public void keyPressed(KeyEvent e) {
@@ -1373,8 +1373,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I onPressed( Keyboard.Key key, UIAction<SimpleDelegate<C, KeyEvent>> onKeyPressed ) {
-        LogUtil.nullArgCheck(key, "key", Keyboard.Key.class);
-        LogUtil.nullArgCheck(onKeyPressed, "onKeyPressed", UIAction.class);
+        NullUtil.nullArgCheck(key, "key", Keyboard.Key.class);
+        NullUtil.nullArgCheck(onKeyPressed, "onKeyPressed", UIAction.class);
         C component = getComponent();
         component.addKeyListener(new KeyAdapter() {
             @Override public void keyPressed( KeyEvent e ) {
@@ -1394,7 +1394,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @see #onKeyPressed(UIAction)
      */
     public final I onKeyReleased( UIAction<SimpleDelegate<C, KeyEvent>> onKeyReleased ) {
-        LogUtil.nullArgCheck(onKeyReleased, "onKeyReleased", UIAction.class);
+        NullUtil.nullArgCheck(onKeyReleased, "onKeyReleased", UIAction.class);
         C component = getComponent();
         component.addKeyListener(new KeyAdapter() {
             @Override public void keyReleased(KeyEvent e) {
@@ -1415,8 +1415,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @see #onKeyReleased(UIAction)
      */
     public final I onReleased( Keyboard.Key key, UIAction<SimpleDelegate<C, KeyEvent>> onKeyReleased ) {
-        LogUtil.nullArgCheck(key, "key", Keyboard.Key.class);
-        LogUtil.nullArgCheck(onKeyReleased, "onKeyReleased", UIAction.class);
+        NullUtil.nullArgCheck(key, "key", Keyboard.Key.class);
+        NullUtil.nullArgCheck(onKeyReleased, "onKeyReleased", UIAction.class);
         C component = getComponent();
         component.addKeyListener(new KeyAdapter() {
             @Override public void keyReleased( KeyEvent e ) {
@@ -1437,7 +1437,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @see #onKeyReleased(UIAction)
      */
     public final I onKeyTyped( UIAction<SimpleDelegate<C, KeyEvent>> onKeyTyped ) {
-        LogUtil.nullArgCheck(onKeyTyped, "onKeyTyped", UIAction.class);
+        NullUtil.nullArgCheck(onKeyTyped, "onKeyTyped", UIAction.class);
         C component = getComponent();
         _onKeyTyped( e ->
             _doApp(()->onKeyTyped.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())))
@@ -1466,8 +1466,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @see #onKeyTyped(UIAction)
      */
     public final I onTyped( Keyboard.Key key, UIAction<SimpleDelegate<C, KeyEvent>> onKeyTyped ) {
-        LogUtil.nullArgCheck(key, "key", Keyboard.Key.class);
-        LogUtil.nullArgCheck(onKeyTyped, "onKeyTyped", UIAction.class);
+        NullUtil.nullArgCheck(key, "key", Keyboard.Key.class);
+        NullUtil.nullArgCheck(onKeyTyped, "onKeyTyped", UIAction.class);
         C component = getComponent();
         component.addKeyListener(new KeyAdapter() {
             @Override public void keyTyped( KeyEvent e ) {
@@ -1492,7 +1492,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I doUpdates( int delay, UIAction<SimpleDelegate<C, ActionEvent>> onUpdate ) {
-        LogUtil.nullArgCheck(onUpdate, "onUpdate", UIAction.class);
+        NullUtil.nullArgCheck(onUpdate, "onUpdate", UIAction.class);
         Timer timer = new Timer(delay, e -> onUpdate.accept(new SimpleDelegate<>(getComponent(), e, ()->getSiblinghood())));
         synchronized (_timers) {
             _timers.getOrDefault(getComponent(), new ArrayList<>()).add(timer);
@@ -1503,7 +1503,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
 
     @Override
     protected void _add( JComponent component, Object conf ) {
-        LogUtil.nullArgCheck(component, "component", JComponent.class);
+        NullUtil.nullArgCheck(component, "component", JComponent.class);
         if ( conf == null )
             getComponent().add(component);
         else
@@ -1606,10 +1606,10 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     @SafeVarargs
     public final <E extends JComponent> I add( String attr, E... components ) {
-        LogUtil.nullArgCheck(attr, "conf", Object.class);
-        LogUtil.nullArgCheck(components, "components", Object[].class);
+        NullUtil.nullArgCheck(attr, "conf", Object.class);
+        NullUtil.nullArgCheck(components, "components", Object[].class);
         for( E component : components ) {
-            LogUtil.nullArgCheck(component, "component", JComponent.class);
+            NullUtil.nullArgCheck(component, "component", JComponent.class);
             this.add(attr, UI.of(component));
         }
         return (I) this;

@@ -130,7 +130,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      * @return This very builder to allow for method chaining.
      */
     public final I withTextOrientation( UI.HorizontalDirection direction ) {
-        LogUtil.nullArgCheck(direction, "direction", UI.HorizontalDirection.class);
+        NullUtil.nullArgCheck(direction, "direction", UI.HorizontalDirection.class);
         getComponent().setComponentOrientation(direction.forTextOrientation());
         return (I) this;
     }
@@ -149,7 +149,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      * @return This very builder to allow for method chaining.
      */
     public final I withHorizontalTextOrientation( Val<UI.HorizontalDirection> direction ) {
-        LogUtil.nullArgCheck( direction, "direction", Val.class );
+        NullUtil.nullArgCheck( direction, "direction", Val.class );
         direction.onShow(v-> _doUI(()->{
             withTextOrientation(v);
             getComponent().validate();

@@ -9,21 +9,21 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.432 seconds"
+    "duration":"0.483 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can create a property based view model and build a view for it.",
       "result":"PASS",
-      "duration":"0.008 seconds",
+      "duration":"0.010 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that we use a pre-made example view model here.\n            Feel free to look at the source code of the view model\n            to see what it is doing.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We instantiate the view model.","code":["var vm = new LoginViewModel()"]},
 
-        {"kind":"when","text":"We create a view for our view model...","code":["var ui =","    UI.panel(\"fill, wrap 2\")","    .add( UI.label( \"Username:\" ) )","    .add( \"grow\", UI.textField(vm.username()))","    .add( UI.label( \"Password:\" ) )","    .add( \"grow\", UI.passwordField(vm.password()))","    .add( \"span\",","        UI.label(vm.validity())","    )","    .add( \"span\",","        UI.button( \"Login\" )","        .isEnabledIf(vm.loginEnabled())","        .onClick( it -> vm.login() )","    )"]},
+        {"kind":"when","text":"We create a view for our view model...","code":["var ui =","    UI.panel(\"fill, wrap 2\")","    .add( UI.label( \"Username:\" ) )","    .add( \"grow\", UI.textField(vm.username()))","    .add( UI.label( \"Password:\" ) )","    .add( \"grow\", UI.passwordField(vm.password()))","    .add( \"span\",","        UI.label(vm.feedback())","    )","    .add( \"span\",","        UI.button( \"Login\" )","        .isEnabledIf(vm.buttonEnabled())","        .onClick( it -> vm.login() )","    )"]},
 
         {"kind":"then","text":"The view was successfully created.","code":["ui != null"]}
       ],
@@ -33,7 +33,7 @@
     {
       "id":"We can bind a boolean property to a button, and when the user presses it, we notice it.",
       "result":"PASS",
-      "duration":"0.081 seconds",
+      "duration":"0.077 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -54,7 +54,7 @@
     {
       "id":"Binding to the selection state of a button does nothing, because a JButton can only be pressed.",
       "result":"PASS",
-      "duration":"0.070 seconds",
+      "duration":"0.069 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -96,7 +96,7 @@
     {
       "id":"We can bind a boolean property to a radio button, and when the user presses it, we notice it.",
       "result":"PASS",
-      "duration":"0.068 seconds",
+      "duration":"0.069 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -117,7 +117,7 @@
     {
       "id":"We can bind a boolean property to a toggle button, and when the user presses it, we notice it.",
       "result":"PASS",
-      "duration":"0.072 seconds",
+      "duration":"0.076 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -138,7 +138,7 @@
     {
       "id":"We can bind a enum property to a combo box and when the user selects an item, we notice it.",
       "result":"PASS",
-      "duration":"0.020 seconds",
+      "duration":"0.047 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n        "]
       },
@@ -163,7 +163,7 @@
     {
       "id":"An enum based combo box can infer its possible states directly from the binding property.",
       "result":"PASS",
-      "duration":"0.008 seconds",
+      "duration":"0.016 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n        "]
       },
@@ -188,7 +188,7 @@
     {
       "id":"A string property can be bound to a combo box holding string elements.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.007 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n            In the example below you can see how the usage of a string property\n            makes sense, because there might be requirements to add new food items\n            to the combo box at runtime.\n        "]
       },
@@ -211,7 +211,7 @@
     {
       "id":"A simple list of elements can be used as a data model for a combo box.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Always prefer Enums over Strings but if you have to model generic data\n            you can always bind a simple list of elements as a data model to a combo box.\n        "]
       },
@@ -234,7 +234,7 @@
     {
       "id":"A simple array of elements can be used as a data model for a combo box.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Always prefer Enums over Strings but if you have to model generic data\n            you can always bind a simple array of elements as a data model to a combo box.\n        "]
       },
@@ -257,7 +257,7 @@
     {
       "id":"You can bind a property as the current selection as well as list of elements as options to a combo box.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.007 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

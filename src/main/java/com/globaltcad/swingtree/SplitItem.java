@@ -34,7 +34,7 @@ public final class SplitItem<I extends JMenuItem>
      * @return A {@link SplitItem} wrapping a simple {@link JMenuItem} displaying the provided text.
      */
     public static SplitItem<JMenuItem> of( String text ) {
-        LogUtil.nullArgCheck(text, "text", String.class);
+        NullUtil.nullArgCheck(text, "text", String.class);
         return new SplitItem<>(new JMenuItem(text));
     }
 
@@ -43,7 +43,7 @@ public final class SplitItem<I extends JMenuItem>
      * @return A {@link SplitItem} wrapping a simple {@link JMenuItem} displaying the provided text.
      */
     public static SplitItem<JMenuItem> of( Val<String> text ) {
-        LogUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullArgCheck(text, "text", Val.class);
         return new SplitItem<>(UI.of(new JMenuItem()).withText(text).getComponent());
     }
 
@@ -53,7 +53,7 @@ public final class SplitItem<I extends JMenuItem>
      * @param <I> The type parameter for the provided item type.
      */
     public static <I extends JMenuItem> SplitItem<I> of( I item ) {
-        LogUtil.nullArgCheck(item, "item", JMenuItem.class);
+        NullUtil.nullArgCheck(item, "item", JMenuItem.class);
         return new SplitItem<>(item);
     }
 
@@ -62,7 +62,7 @@ public final class SplitItem<I extends JMenuItem>
      * @return A {@link SplitItem} wrapping {@link JMenuItem} represented by the provided UI builder.
      */
     public static <M extends JMenuItem> SplitItem<M> of( UIForMenuItem<M> item ) {
-        LogUtil.nullArgCheck(item, "item", UIForMenuItem.class);
+        NullUtil.nullArgCheck(item, "item", UIForMenuItem.class);
         return new SplitItem<>(item.getComponent());
     }
 
@@ -102,7 +102,7 @@ public final class SplitItem<I extends JMenuItem>
      * @return An immutable copy of this with the provided lambda set.
      */
     public SplitItem<I> onButtonClick(UIAction<Delegate<I>> action) {
-        LogUtil.nullArgCheck(action, "action", UIAction.class);
+        NullUtil.nullArgCheck(action, "action", UIAction.class);
         if ( _onButtonClick != null )
             throw new IllegalArgumentException("Property already specified!");
         return new SplitItem<>(_item, action, _onItemSelected);
@@ -126,7 +126,7 @@ public final class SplitItem<I extends JMenuItem>
      * @return An immutable copy of this with the provided lambda set.
      */
     public SplitItem<I> onSelection(UIAction<Delegate<I>> action) {
-        LogUtil.nullArgCheck(action, "action", UIAction.class);
+        NullUtil.nullArgCheck(action, "action", UIAction.class);
         if ( _onItemSelected != null ) throw new IllegalArgumentException("Property already specified!");
         return new SplitItem<>(_item, _onButtonClick, action);
     }
@@ -315,7 +315,7 @@ public final class SplitItem<I extends JMenuItem>
             // We make sure that only the Swing thread can modify components:
             if ( !UI.thisIsUIThread() )
                 UI.run(() -> setButtonText(text) );
-            LogUtil.nullArgCheck(text, "text", String.class);
+            NullUtil.nullArgCheck(text, "text", String.class);
             this.splitButton.setText(text);
             return this;
         }
@@ -332,7 +332,7 @@ public final class SplitItem<I extends JMenuItem>
          * @return This {@link Delegate} instance to allow for method chaining.
          */
         public Delegate<I> appendToButtonText( String postfix ) {
-            LogUtil.nullArgCheck(postfix, "postfix", String.class);
+            NullUtil.nullArgCheck(postfix, "postfix", String.class);
             // We make sure that only the Swing thread can modify components:
             if ( !UI.thisIsUIThread() )
                 UI.run(() -> appendToButtonText(postfix) );
@@ -345,7 +345,7 @@ public final class SplitItem<I extends JMenuItem>
          * @return This {@link Delegate} instance to allow for method chaining.
          */
         public Delegate<I> prependToButtonText( String prefix ) {
-            LogUtil.nullArgCheck(prefix, "postfix", String.class);
+            NullUtil.nullArgCheck(prefix, "postfix", String.class);
             // We make sure that only the Swing thread can modify components:
             if ( !UI.thisIsUIThread() )
                 UI.run(() -> prependToButtonText(prefix) );

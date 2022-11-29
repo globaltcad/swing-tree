@@ -43,9 +43,9 @@ public final class Tab
         UIAction<SimpleDelegate<JTabbedPane, MouseEvent>> onMouseClick
     ) {
         if ( headerComponent == null )
-            LogUtil.nullArgCheck(title,"title",String.class);
+            NullUtil.nullArgCheck(title,"title",String.class);
         if ( title == null )
-            LogUtil.nullArgCheck(headerComponent,"headerComponent",JComponent.class);
+            NullUtil.nullArgCheck(headerComponent,"headerComponent",JComponent.class);
         _contents = contents;
         _headerComponent = headerComponent;
         _title = title;
@@ -60,7 +60,7 @@ public final class Tab
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab withIcon(Icon icon) {
-        LogUtil.nullArgCheck(icon,"icon",Icon.class);
+        NullUtil.nullArgCheck(icon,"icon",Icon.class);
         if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
         if ( _icon != null ) throw new IllegalArgumentException("Icon already specified!");
         return new Tab(_contents, _headerComponent, _title, icon, _tip, _onSelected, _onMouseClick);
@@ -71,21 +71,21 @@ public final class Tab
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab withTip(String tip) {
-        LogUtil.nullArgCheck(tip,"tip",String.class);
+        NullUtil.nullArgCheck(tip,"tip",String.class);
         if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
         if ( _tip != null ) throw new IllegalArgumentException("Tip already specified!");
         return new Tab(_contents, _headerComponent, _title, _icon, tip, _onSelected, _onMouseClick);
     }
 
     public final Tab withHeader( JComponent headerComponent ) {
-        LogUtil.nullArgCheck(headerComponent,"headerComponent",JComponent.class);
+        NullUtil.nullArgCheck(headerComponent,"headerComponent",JComponent.class);
         if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
         if ( _headerComponent != null ) throw new IllegalArgumentException("Header component already specified!");
         return new Tab(_contents, headerComponent, _title, _icon, _tip, _onSelected, _onMouseClick);
     }
 
     public final Tab withHeader( UIForAbstractSwing<?,?> headerComponent ) {
-        LogUtil.nullArgCheck(headerComponent,"headerComponent",UIForAbstractSwing.class);
+        NullUtil.nullArgCheck(headerComponent,"headerComponent",UIForAbstractSwing.class);
         return this.withHeader( headerComponent.getComponent() );
     }
 

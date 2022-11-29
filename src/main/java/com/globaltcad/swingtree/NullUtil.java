@@ -8,9 +8,9 @@ import java.util.stream.Collectors;
 /**
  *  A utility class for message formatting.
  */
-final class LogUtil
+final class NullUtil
 {
-    private LogUtil() {} // This is a utility class!
+    private NullUtil() {} // This is a utility class!
 
     /**
      * @param withPlaceholders The {@link String} which may or may not contain placeholder in the for of "{}".

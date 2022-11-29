@@ -100,7 +100,7 @@ abstract class AbstractBuilder<I, C>
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I applyIf( boolean condition, Consumer<I> building ) {
-        LogUtil.nullArgCheck(building, "building", Consumer.class);
+        NullUtil.nullArgCheck(building, "building", Consumer.class);
         I builder = (I) this;
         if ( condition ) building.accept(builder);
         return builder;
@@ -122,7 +122,7 @@ abstract class AbstractBuilder<I, C>
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I applyIfPresent( Optional<Consumer<I>> building ) {
-        LogUtil.nullArgCheck(building, "building", Optional.class);
+        NullUtil.nullArgCheck(building, "building", Optional.class);
         I builder = (I) this;
         building.ifPresent( buildingLambda -> buildingLambda.accept(builder) );
         return builder;
@@ -140,7 +140,7 @@ abstract class AbstractBuilder<I, C>
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I apply( Consumer<I> building ) {
-        LogUtil.nullArgCheck(building, "building", Consumer.class);
+        NullUtil.nullArgCheck(building, "building", Consumer.class);
         return applyIf(true, building);
     }
 

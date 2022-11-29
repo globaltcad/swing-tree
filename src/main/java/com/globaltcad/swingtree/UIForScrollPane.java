@@ -1,7 +1,6 @@
 package com.globaltcad.swingtree;
 
 import com.globaltcad.swingtree.api.mvvm.Val;
-import com.globaltcad.swingtree.api.mvvm.Var;
 
 import javax.swing.*;
 
@@ -61,7 +60,7 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAbstractSwing<U
      * @return This builder node.
      */
     public final UIForScrollPane<P> withVerticalScrollBarPolicy( Val<UI.ScrollBarPolicy> scrollBarPolicy ) {
-        LogUtil.nullArgCheck(scrollBarPolicy, "scrollBarPolicy", Val.class);
+        NullUtil.nullArgCheck(scrollBarPolicy, "scrollBarPolicy", Val.class);
         scrollBarPolicy.onShow(v-> _doUI(()->withVertical(v)));
         return this;
     }
@@ -90,7 +89,7 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAbstractSwing<U
      * @return This builder node.
      */
     public final UIForScrollPane<P> withHorizontalScrollBarPolicy( Val<UI.ScrollBarPolicy> scrollBarPolicy ) {
-        LogUtil.nullArgCheck(scrollBarPolicy, "scrollBarPolicy", Val.class);
+        NullUtil.nullArgCheck(scrollBarPolicy, "scrollBarPolicy", Val.class);
         scrollBarPolicy.onShow(v-> _doUI(()->withHorizontal(v)));
         return this;
     }

@@ -6,6 +6,7 @@ import com.globaltcad.swingtree.api.MenuBuilder
 import com.globaltcad.swingtree.api.SwingBuilder
 import com.globaltcad.swingtree.api.mvvm.Val
 import com.globaltcad.swingtree.api.mvvm.Var
+import com.globaltcad.swingtree.layout.LayoutAttr
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
@@ -41,7 +42,9 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.button().onClick(null)},
                     {UI.button().onChange(null)},
                     {UI.button((Icon)null)},
+                    {UI.button((Val<String>)null)},
                     {UI.button((Icon)null,(Icon)null)},
+                    {UI.button(0,0, (ImageIcon)null, (ImageIcon)null)},
                     {UI.button("").isSelectedIf((Var)null)},
                     {UI.toggleButton(null)},
                     {UI.toggleButton(null, (Var)null)},
@@ -58,7 +61,7 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.of((JTextArea)null)},
                     {UI.of((JLabel)null)},
                     {UI.of((Object)null)},
-                    {UI.of((JSplitButton)null)},
+                    {UI.of((JTabbedPane)null)},
                     {UI.splitItem(null)},
                     {UI.splitButton(null)},
                     {UI.checkBox(null)},
@@ -85,7 +88,12 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.slider(UI.Align.HORIZONTAL).onChange(null)},
                     {UI.comboBox((List)null)},
                     {UI.comboBox((Object[])null)},
-                    {UI.comboBox().onSelection(null)}
+                    {UI.comboBox().onSelection(null)},
+                    {UI.panel((String)null)},
+                    {UI.panel((String)null, (String)null)},
+                    {UI.panel((String)null, (String)null, (String)null)},
+                    {UI.panel((LayoutAttr)null)},
+                    {UI.panel((Val<LayoutAttr>)null)}
             ]
     }
 
