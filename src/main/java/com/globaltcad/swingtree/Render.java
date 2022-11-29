@@ -209,10 +209,6 @@ public final class Render<C extends JComponent,E> {
 						bg = UIManager.getColor("List.selectionBackground");
 					if ( fg == null )
 						fg = UIManager.getColor("List.selectionForeground");
-					if ( bg == null )
-						bg = cell.getComponent().getBackground();
-					if ( fg == null )
-						fg = cell.getComponent().getForeground();
 				}
 
 				if ( cell.getComponent() instanceof JTable ) {
@@ -223,21 +219,17 @@ public final class Render<C extends JComponent,E> {
 						bg = UIManager.getColor("Table.selectionBackground");
 					if ( fg == null )
 						fg = UIManager.getColor("Table.selectionForeground");
-					if ( bg == null )
-						bg = cell.getComponent().getBackground();
-					if ( fg == null )
-						fg = cell.getComponent().getForeground();
 				}
-
-				if ( bg == null )
-					bg = UIManager.getColor( "ComboBox.selectionBackground" );
-				if ( fg == null )
-					fg = UIManager.getColor( "ComboBox.selectionForeground" );
 
 				if ( bg == null )
 					bg = cell.getComponent().getBackground();
 				if ( fg == null )
 					fg = cell.getComponent().getForeground();
+
+				if ( bg == null )
+					bg = UIManager.getColor( "ComboBox.selectionBackground" );
+				if ( fg == null )
+					fg = UIManager.getColor( "ComboBox.selectionForeground" );
 
 				if ( bg == null )
 					bg = UIManager.getColor( "List.dropCellBackground" );
@@ -271,8 +263,6 @@ public final class Render<C extends JComponent,E> {
 
 				if ( border != null ) l.setBorder(border);
 
-				if ( cell.isSelected() ) l.setBackground(bg);
-				l.setForeground(fg);
 				cell.setRenderer(l);
 			} );
 		}
