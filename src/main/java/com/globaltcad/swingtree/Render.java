@@ -221,9 +221,9 @@ public final class Render<C extends JComponent,E> {
 						fg = UIManager.getColor("Table.selectionForeground");
 				}
 
-				if ( bg == null )
+				if ( bg == null && cell.getComponent() != null )
 					bg = cell.getComponent().getBackground();
-				if ( fg == null )
+				if ( fg == null && cell.getComponent() != null )
 					fg = cell.getComponent().getForeground();
 
 				if ( bg == null )
@@ -246,7 +246,9 @@ public final class Render<C extends JComponent,E> {
 					if ( fg != null ) l.setForeground( fg );
 				}
 				else {
-					Color normalBg = cell.getComponent().getBackground();
+					Color normalBg = Color.WHITE;
+					if (  cell.getComponent() != null )
+						normalBg = cell.getComponent().getBackground();
 
 					if ( cell.getRow() % 2 == 0 ) {
 						// We determine if the base color is more bright or dark,
@@ -258,7 +260,8 @@ public final class Render<C extends JComponent,E> {
 							normalBg = normalBg.darker();
 					}
 					if ( bg != null ) l.setBackground( normalBg );
-					if ( fg != null ) l.setForeground( cell.getComponent().getForeground() );
+					if ( fg != null && cell.getComponent() != null )
+						l.setForeground( cell.getComponent().getForeground() );
 				}
 
 				// TODO:

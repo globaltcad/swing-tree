@@ -70,7 +70,29 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
      */
     public final UIForSpinner<S> withValue( Var<?> var ) {
         var.onShow( v -> _doUI(() -> withValue(v)) );
-        _onChange( e -> _doApp(() -> ((Var<Object>)var).act(getComponent().getValue())) );
+        _onChange( e -> _doApp(() -> {
+            Object value = getComponent().getValue();
+            if ( value != null && Number.class.isAssignableFrom(var.type()) ) {
+                if ( Number.class.isAssignableFrom(value.getClass()) ) {
+                    Number n = (Number) value;
+                    if      ( var.type() == Integer.class ) value = n.intValue();
+                    else if ( var.type() == Long.class    ) value = n.longValue();
+                    else if ( var.type() == Float.class   ) value = n.floatValue();
+                    else if ( var.type() == Double.class  ) value = n.doubleValue();
+                    else if ( var.type() == Short.class   ) value = n.shortValue();
+                    else if ( var.type() == Byte.class    ) value = n.byteValue();
+                }
+                if ( value.getClass() == String.class ) {
+                    if      ( var.type() == Integer.class ) value = Integer.parseInt((String) value);
+                    else if ( var.type() == Long.class    ) value = Long.parseLong((String) value);
+                    else if ( var.type() == Float.class   ) value = Float.parseFloat((String) value);
+                    else if ( var.type() == Double.class  ) value = Double.parseDouble((String) value);
+                    else if ( var.type() == Short.class   ) value = Short.parseShort((String) value);
+                    else if ( var.type() == Byte.class    ) value = Byte.parseByte((String) value);
+                }
+            }
+            ((Var<Object>) var).act(value);
+        }));
         getComponent().setValue(var.get());
         return withValue( var.get() );
     }
