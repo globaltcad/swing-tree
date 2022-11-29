@@ -245,6 +245,14 @@ public final class Render<C extends JComponent,E> {
 					if ( bg != null ) l.setBackground( bg );
 					if ( fg != null ) l.setForeground( fg );
 				}
+				else {
+					Color normalBg = cell.getComponent().getBackground();
+					if ( cell.getRow() % 2 != 0 )
+						normalBg = normalBg.darker();
+
+					if ( bg != null ) l.setBackground( normalBg );
+					if ( fg != null ) l.setForeground( cell.getComponent().getForeground() );
+				}
 
 				// TODO:
 				//l.setEnabled(cell.getComponent().isEnabled());
@@ -264,7 +272,7 @@ public final class Render<C extends JComponent,E> {
 				if ( border != null ) l.setBorder(border);
 
 				cell.setRenderer(l);
-			} );
+			});
 		}
 
 		/**
