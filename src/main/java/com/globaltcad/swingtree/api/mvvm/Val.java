@@ -201,7 +201,11 @@ public interface Val<T>
 	default <V> Val<V> map( java.util.function.Function<T, V> mapper ) {
 		if ( !isPresent() )
 			return Val.ofNullable( (Class<V>) Void.class, null );
-		return Val.of( mapper.apply( orElseNull() ) );
+
+		V newValue = mapper.apply( orElseNull() );
+		if ( newValue == null )
+			return Val.ofNullable( (Class<V>) Void.class, null );
+		return Val.of( newValue );
 	}
 
 	/**
