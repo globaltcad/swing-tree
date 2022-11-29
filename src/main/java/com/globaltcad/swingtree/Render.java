@@ -247,8 +247,8 @@ public final class Render<C extends JComponent,E> {
 				}
 				else {
 					Color normalBg = cell.getComponent().getBackground();
-					if ( cell.getRow() % 2 != 0 )
-						normalBg = normalBg.darker();
+					if ( cell.getRow() % 2 == 0 )
+						normalBg = normalBg.brighter();
 
 					if ( bg != null ) l.setBackground( normalBg );
 					if ( fg != null ) l.setForeground( cell.getComponent().getForeground() );
