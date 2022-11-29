@@ -39,7 +39,7 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 	abstract AbstractComboModel<E> withVar( Var<E> newVar );
 
 	@Override public void setSelectedItem( Object anItem ) {
-		_selectedItem.set((E) anItem).act();
+		_selectedItem.act((E) anItem).show();
 		_selectedIndex = _indexOf(anItem);
 	}
 	@Override public Object getSelectedItem() { return _selectedItem.orElseNull(); }
@@ -52,7 +52,7 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 			E e = _convert(o);
 			try {
 				this.setAt(_selectedIndex, e);
-				_selectedItem.set(e).act();
+				_selectedItem.act(e).show();
 			} catch (Exception ignored) {
 				// It looks like conversion was not successful
 				// So this means the editor input could not be converted to the type of the combo box
