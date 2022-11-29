@@ -247,9 +247,16 @@ public final class Render<C extends JComponent,E> {
 				}
 				else {
 					Color normalBg = cell.getComponent().getBackground();
-					if ( cell.getRow() % 2 == 0 )
-						normalBg = normalBg.brighter();
 
+					if ( cell.getRow() % 2 == 0 ) {
+						// We determine if the base color is more bright or dark,
+						// and then we set the foreground color accordingly
+						double brightness = 1 - (0.299 * normalBg.getRed() + 0.587 * normalBg.getGreen() + 0.114 * normalBg.getBlue()) / 255;
+						if ( brightness > 0.5 )
+							normalBg = normalBg.brighter();
+						else
+							normalBg = normalBg.darker();
+					}
 					if ( bg != null ) l.setBackground( normalBg );
 					if ( fg != null ) l.setForeground( cell.getComponent().getForeground() );
 				}
