@@ -161,6 +161,9 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
     public <I extends JMenuItem> UIForSplitButton<B> add( SplitItem<I> splitItem ) {
         NullUtil.nullArgCheck(splitItem, "buttonItem", SplitItem.class);
         I item = splitItem.getItem();
+        if ( splitItem.getIsEnabled() != null )
+            splitItem.getIsEnabled().onShow(item::setEnabled);
+
         if ( item.isSelected() )
             lastSelected[0] = item;
 

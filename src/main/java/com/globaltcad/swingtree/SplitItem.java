@@ -4,6 +4,7 @@ package com.globaltcad.swingtree;
 import com.alexandriasoftware.swing.JSplitButton;
 import com.globaltcad.swingtree.api.UIAction;
 import com.globaltcad.swingtree.api.mvvm.Val;
+import com.globaltcad.swingtree.api.mvvm.Var;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -69,17 +70,19 @@ public final class SplitItem<I extends JMenuItem>
     private final I _item;
     private final UIAction<Delegate<I>> _onButtonClick;
     private final UIAction<Delegate<I>> _onItemSelected;
+    private final Val<Boolean> _isEnabled;
 
     private SplitItem( I item ) {
-        _item = item; _onButtonClick = null; _onItemSelected = null;
+        _item = item; _onButtonClick = null; _onItemSelected = null; _isEnabled = null;
     }
 
     private SplitItem(
         I item,
         UIAction<Delegate<I>> onClick,
-        UIAction<Delegate<I>> onSelected
+        UIAction<Delegate<I>> onSelected,
+        Val<Boolean> isEnabled
     ) {
-        _item = item; _onButtonClick = onClick; _onItemSelected = onSelected;
+        _item = item; _onButtonClick = onClick; _onItemSelected = onSelected; _isEnabled = isEnabled;
     }
 
     public SplitItem<I> makeSelected() {
@@ -105,7 +108,7 @@ public final class SplitItem<I extends JMenuItem>
         NullUtil.nullArgCheck(action, "action", UIAction.class);
         if ( _onButtonClick != null )
             throw new IllegalArgumentException("Property already specified!");
-        return new SplitItem<>(_item, action, _onItemSelected);
+        return new SplitItem<>(_item, action, _onItemSelected, _isEnabled);
     }
 
     /**
@@ -128,7 +131,13 @@ public final class SplitItem<I extends JMenuItem>
     public SplitItem<I> onSelection(UIAction<Delegate<I>> action) {
         NullUtil.nullArgCheck(action, "action", UIAction.class);
         if ( _onItemSelected != null ) throw new IllegalArgumentException("Property already specified!");
-        return new SplitItem<>(_item, _onButtonClick, action);
+        return new SplitItem<>(_item, _onButtonClick, action, _isEnabled);
+    }
+
+    public SplitItem<I> isEnabledIf( Var<Boolean> isEnabled ) {
+        NullUtil.nullArgCheck(isEnabled, "isEnabled", Var.class);
+        if ( _isEnabled != null ) throw new IllegalArgumentException("Property already specified!");
+        return new SplitItem<>(_item, _onButtonClick, _onItemSelected, isEnabled);
     }
 
     I getItem() { return _item; }
@@ -136,6 +145,8 @@ public final class SplitItem<I extends JMenuItem>
     UIAction<Delegate<I>> getOnClick() { return _onButtonClick == null ? it -> {} : _onButtonClick; }
 
     UIAction<Delegate<I>> getOnSelected() { return _onItemSelected == null ? c -> {} : _onItemSelected; }
+
+    Val<Boolean> getIsEnabled(){ return _isEnabled; }
 
     /**
      *  Instances of this are exposed as delegates through the {@link SimpleDelegate} passed
