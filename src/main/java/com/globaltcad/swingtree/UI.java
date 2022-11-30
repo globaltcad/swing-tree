@@ -1544,6 +1544,13 @@ public final class UI
                 .withText(text);
     }
 
+    public static UIForToggleButton<JToggleButton> toggleButton( Var<Boolean> isToggled ) {
+        NullUtil.nullArgCheck(isToggled, "isToggled", Var.class);
+        return of(new JToggleButton())
+                .applyIf(!isToggled.hasNoID(), it -> it.id(isToggled.id()))
+                .isSelectedIf(isToggled);
+    }
+
     public static UIForToggleButton<JToggleButton> toggleButton( Val<String> text, Var<Boolean> selected ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullArgCheck(text, "selected", Var.class);
