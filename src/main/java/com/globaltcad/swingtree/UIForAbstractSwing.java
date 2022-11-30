@@ -50,6 +50,10 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public UIForAbstractSwing( C component ) { super(component); }
 
+    protected final I _this() { 
+        return (I) this;
+    }
+    
     protected void _doUI( Runnable action ) {
         _eventProcessor.processUIEvent( action );
     }
@@ -79,7 +83,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
             throw new IllegalArgumentException("The id has already been specified for this component!");
         getComponent().setName(id);
         _idAlreadySet = true;
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -90,7 +94,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I isVisibleIf( boolean isVisible ) {
         getComponent().setVisible( isVisible );
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -116,7 +120,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I isEnabledIf( boolean isEnabled ) {
         getComponent().setEnabled( isEnabled );
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -158,7 +162,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
                  */
             }
         });
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -182,7 +186,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I withProperty( String key, String value ) {
         getComponent().putClientProperty(key, value);
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -193,7 +197,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I withBorder( Border border ) {
         getComponent().setBorder( border );
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -222,7 +226,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I withEmptyBorder( int top, int left, int bottom, int right ) {
         getComponent().setBorder(BorderFactory.createEmptyBorder(top, left, bottom, right));
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -238,7 +242,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withEmptyBorderTitled( String title, int top, int left, int bottom, int right ) {
         NullUtil.nullArgCheck( title, "title", String.class );
     	getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(top, left, bottom, right), title));
-    	return (I) this;
+    	return _this();
     }
 
     /**
@@ -297,7 +301,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withLineBorder( Color color, int thickness ) {
         NullUtil.nullArgCheck( color, "color", Color.class );
         getComponent().setBorder(BorderFactory.createLineBorder(color, thickness));
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -312,7 +316,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullArgCheck( title, "title", String.class );
         NullUtil.nullArgCheck( color, "color", Color.class );
         getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color, thickness), title));
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -350,7 +354,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withRoundedLineBorder( Color color, int thickness ) {
         NullUtil.nullArgCheck( color, "color", Color.class );
         getComponent().setBorder(BorderFactory.createLineBorder(color, thickness, true));
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -366,7 +370,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullArgCheck( title, "title", String.class );
         NullUtil.nullArgCheck( color, "color", Color.class );
         getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color, thickness, true), title));
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -431,7 +435,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withMatteBorder( Color color, int top, int left, int bottom, int right ) {
         NullUtil.nullArgCheck( color, "color", Color.class );
         getComponent().setBorder(BorderFactory.createMatteBorder(top, left, bottom, right, color));
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -450,7 +454,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullArgCheck( title, "title", String.class );
         NullUtil.nullArgCheck( color, "color", Color.class );
         getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createMatteBorder(top, left, bottom, right, color), title));
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -523,7 +527,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullArgCheck( first, "first", Border.class );
         NullUtil.nullArgCheck( second, "second", Border.class );
         getComponent().setBorder(BorderFactory.createCompoundBorder(first, second));
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -537,7 +541,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I withCompoundBorderTitled( String title, Border first, Border second ) {
         getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createCompoundBorder(first, second), title));
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -549,7 +553,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withBorderTitled( String title ) {
         NullUtil.nullArgCheck(title, "title", String.class);
         getComponent().setBorder(BorderFactory.createTitledBorder(title));
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -561,7 +565,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I with( UI.Cursor type ) {
         getComponent().setCursor( new java.awt.Cursor( type.type ) );
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -637,7 +641,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         if (_migAlreadySet)
             throw new IllegalArgumentException("The mig layout has already been specified for this component!");
         getComponent().setLayout(layout);
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -739,7 +743,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         MigLayout migLayout = new MigLayout(constraints, colConstrains, rowConstraints);
         getComponent().setLayout(migLayout);
         _migAlreadySet = true;
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -758,7 +762,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I withTooltip( String tooltip ) {
         getComponent().setToolTipText(tooltip);
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -801,7 +805,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withBackground( Color color ) {
         NullUtil.nullArgCheck(color, "color", Color.class);
         getComponent().setBackground(color);
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -893,7 +897,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withForeground( Color color ) {
         NullUtil.nullArgCheck(color, "color", Color.class);
         getComponent().setForeground(color);
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -979,7 +983,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withMinimumSize( Dimension size ) {
         NullUtil.nullArgCheck(size, "size", Dimension.class);
         getComponent().setMinimumSize(size);
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1015,7 +1019,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I withMinimumSize( int width, int height ) {
         getComponent().setMinimumSize(new Dimension(width, height));
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1048,7 +1052,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I withMinimumWidth( int width ) {
         getComponent().setMinimumSize(new Dimension(width, getComponent().getMinimumSize().height));
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1073,7 +1077,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I withMinimumHeight( int height ) {
         getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, height));
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1098,7 +1102,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withMaximumSize( Dimension size ) {
         NullUtil.nullArgCheck(size, "size", Dimension.class);
         getComponent().setMaximumSize(size);
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1124,7 +1128,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I withMaximumSize( int width, int height ) {
         getComponent().setMaximumSize(new Dimension(width, height));
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1153,7 +1157,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I withMaximumWidth( int width ) {
         getComponent().setMaximumSize(new Dimension(width, getComponent().getMaximumSize().height));
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1177,7 +1181,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I withMaximumHeight( int height ) {
         getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, height));
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1202,7 +1206,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withPreferredSize( Dimension size ) {
         NullUtil.nullArgCheck(size, "size", Dimension.class);
         getComponent().setPreferredSize(size);
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1228,7 +1232,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I withPreferredSize( int width, int height ) {
         getComponent().setPreferredSize(new Dimension(width, height));
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1257,7 +1261,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I withPreferredWidth( int width ) {
         getComponent().setPreferredSize(new Dimension(width, getComponent().getPreferredSize().height));
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1281,7 +1285,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I withPreferredHeight( int height ) {
         getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, height));
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1315,7 +1319,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
                 _doApp(() -> onClick.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1333,7 +1337,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
                 _doApp(()->onResize.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1351,7 +1355,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
                 _doApp(()->onMoved.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1369,7 +1373,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
                 _doApp(()->onShown.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1387,7 +1391,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
                 _doApp(()->onHidden.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1405,7 +1409,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
                 _doApp(()->onFocus.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1423,7 +1427,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
                 _doApp(()->onFocus.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1441,7 +1445,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
                 _doApp(()->onKeyPressed.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1463,7 +1467,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
                     _doApp(()->onKeyPressed.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
-        return (I) this;
+        return _this();
     }
 
                              /**
@@ -1481,7 +1485,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
             @Override public void keyReleased(KeyEvent e) {
                 _doApp(()->onKeyReleased.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood()))); }
         });
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1505,7 +1509,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
                     _doApp(()->onKeyReleased.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1523,7 +1527,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         _onKeyTyped( e ->
             _doApp(()->onKeyTyped.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())))
         );
-        return (I) this;
+        return _this();
     }
 
     protected void _onKeyTyped( Consumer<KeyEvent> action ) {
@@ -1556,7 +1560,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
                     _doApp(()->onKeyTyped.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1579,7 +1583,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
             _timers.getOrDefault(getComponent(), new ArrayList<>()).add(timer);
         }
         timer.start();
-        return (I) this;
+        return _this();
     }
 
     @Override
@@ -1653,7 +1657,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
             getComponent().setLayout(new BorderLayout()); // The UI Maker tries to fill in the blanks!
         }
         for ( UIForAbstractSwing<?, ?> b : builders ) _doAdd(b, attr);
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -1693,7 +1697,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
             NullUtil.nullArgCheck(component, "component", JComponent.class);
             this.add(attr, UI.of(component));
         }
-        return (I) this;
+        return _this();
     }
 
     /**

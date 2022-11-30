@@ -201,7 +201,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      * @param action An action which will be executed when the text string in the underlying {@link JTextComponent} changes.
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextChange(Consumer<SimpleDelegate<JTextComponent, DocumentEvent>> action) {
+    public final I onTextChange( Consumer<SimpleDelegate<JTextComponent, DocumentEvent>> action ) {
         C component = getComponent();
         component.getDocument().addDocumentListener(new DocumentListener() {
             @Override public void insertUpdate(DocumentEvent e) {
