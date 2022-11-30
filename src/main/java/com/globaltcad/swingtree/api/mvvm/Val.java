@@ -315,6 +315,11 @@ public interface Val<T>
 	Val<T> show();
 
 	/**
+	 * @return If this property can contain null.
+	 */
+	boolean allowsNull();
+
+	/**
 	 *  The values of {@link Val} and {@link Var} implementations ought to be viewed
 	 *  as wrapper for data centric quasi value types!
 	 *  Two arrays of integer for example would not be recognized as

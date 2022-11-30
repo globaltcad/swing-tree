@@ -193,6 +193,11 @@ public abstract class AbstractVariable<T> implements Var<T>
 		return this;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override public final boolean allowsNull() { return _allowsNull; }
+
 	@Override
 	public String toString() {
 		String value = this.map(Object::toString).orElse("null");

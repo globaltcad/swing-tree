@@ -1119,6 +1119,7 @@ public final class UI
      */
     public static UIForSlider<JSlider> slider( Align align, int min, int max, Val<Integer> value ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
+        NullUtil.nullPropertyCheck(value, "value", "The state of the slider should not be null!");
         return of(new JSlider(align.forSlider(), min, max, value.orElseThrow()))
                 .withValue(value);
     }
@@ -1141,6 +1142,7 @@ public final class UI
      */
     public static UIForSlider<JSlider> slider( Align align, int min, int max, Var<Integer> value ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
+        NullUtil.nullPropertyCheck(value, "value", "The state of the slider should not be null!");
         return of(new JSlider(align.forSlider(), min, max, value.orElseThrow()))
                 .withValue(value);
     }
@@ -1333,12 +1335,13 @@ public final class UI
      *  Use this factory method to create a {@link JSpinner} bound to a property of any type.
      *  The property will be updated when the user modifies its value.
      *
-     * @param var A property of any type which should be bound to this spinner.
+     * @param value A property of any type which should be bound to this spinner.
      * @return A builder instance for the provided {@link JSpinner}, which enables fluent method chaining.
      */
-    public static UIForSpinner<javax.swing.JSpinner> spinner( Var<?> var ) {
-        NullUtil.nullArgCheck(var, "var", Var.class);
-        return spinner().withValue(var);
+    public static UIForSpinner<javax.swing.JSpinner> spinner( Var<?> value ) {
+        NullUtil.nullArgCheck(value, "value", Var.class);
+        NullUtil.nullPropertyCheck(value, "value", "The state of the spinner should not be null!");
+        return spinner().withValue(value);
     }
 
     /**
@@ -1399,6 +1402,7 @@ public final class UI
      */
     public static UIForLabel<JLabel> label( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         return of(new JLabel())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
@@ -1448,6 +1452,7 @@ public final class UI
      *  @return A builder instance for the label, which enables fluent method chaining.
      */
     public static UIForLabel<JLabel> boldLabel( Val<String> text ) {
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         return of(new JLabel()).withText(text).makeBold();
     }
 
@@ -1458,6 +1463,7 @@ public final class UI
 
     public static UIForCheckBox<JCheckBox> checkBox( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         return of(new JCheckBox())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
@@ -1466,6 +1472,8 @@ public final class UI
     public static UIForCheckBox<JCheckBox> checkBox( Val<String> text, Var<Boolean> state ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullArgCheck(state, "state", Var.class);
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
+        NullUtil.nullPropertyCheck(state, "state", "The selection state of a check box may not be modelled using null!");
         return of(new JCheckBox())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .applyIf(!state.hasNoID(), it -> it.id(state.id()))
@@ -1476,6 +1484,7 @@ public final class UI
     public static UIForCheckBox<JCheckBox> checkBox( String text, Var<Boolean> state ) {
         NullUtil.nullArgCheck(text, "text", String.class);
         NullUtil.nullArgCheck(state, "state", Var.class);
+        NullUtil.nullPropertyCheck(state, "state", "The selection state of a check box may not be modelled using null!");
         return of(new JCheckBox())
                 .applyIf(!state.hasNoID(), it -> it.id(state.id()))
                 .withText(text)
@@ -1499,6 +1508,7 @@ public final class UI
 
     public static UIForRadioButton<JRadioButton> radioButton( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         return of(new JRadioButton())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
@@ -1507,6 +1517,8 @@ public final class UI
     public static UIForRadioButton<JRadioButton> radioButton( Val<String> text, Var<Boolean> selected ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullArgCheck(text, "selected", Var.class);
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
+        NullUtil.nullPropertyCheck(selected, "selected", "The selection state of a radio button may not be modelled using null!");
         return of(new JRadioButton())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .applyIf(!selected.hasNoID(), it -> it.id(selected.id()))
@@ -1517,6 +1529,7 @@ public final class UI
     public static UIForRadioButton<JRadioButton> radioButton( String text, Var<Boolean> selected ) {
         NullUtil.nullArgCheck(text, "text", String.class);
         NullUtil.nullArgCheck(text, "selected", Var.class);
+        NullUtil.nullPropertyCheck(selected, "selected", "The selection state of a radio button may not be modelled using null!");
         return of(new JRadioButton())
                 .withText(text)
                 .isSelectedIf(selected);
@@ -1539,21 +1552,30 @@ public final class UI
 
     public static UIForToggleButton<JToggleButton> toggleButton( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         return of(new JToggleButton())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
 
     public static UIForToggleButton<JToggleButton> toggleButton( Var<Boolean> isToggled ) {
-        NullUtil.nullArgCheck(isToggled, "isToggled", Var.class);
+        NullUtil.nullPropertyCheck(isToggled, "isToggled");
         return of(new JToggleButton())
                 .applyIf(!isToggled.hasNoID(), it -> it.id(isToggled.id()))
                 .isSelectedIf(isToggled);
     }
 
+    public static UIForToggleButton<JToggleButton> toggleButton( String text, Var<Boolean> selected ) {
+        NullUtil.nullArgCheck(text, "text", String.class);
+        NullUtil.nullPropertyCheck(selected, "selected");
+        return of(new JToggleButton())
+                .withText(text)
+                .isSelectedIf(selected);
+    }
+
     public static UIForToggleButton<JToggleButton> toggleButton( Val<String> text, Var<Boolean> selected ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
-        NullUtil.nullArgCheck(text, "selected", Var.class);
+        NullUtil.nullPropertyCheck(selected, "selected", "The selection state of a toggle button may not be modelled using null!");
         return of(new JToggleButton())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .applyIf(!selected.hasNoID(), it -> it.id(selected.id()))
@@ -1588,6 +1610,7 @@ public final class UI
 
     public static UIForTextField<JTextField> textField( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         return of(new JTextField())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
@@ -1595,6 +1618,7 @@ public final class UI
 
     public static UIForTextField<JTextField> textField( Var<String> text ) {
         NullUtil.nullArgCheck(text, "text", Var.class);
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         return of(new JTextField())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
@@ -1625,6 +1649,7 @@ public final class UI
 
     public static UIForFormattedTextField formattedTextField( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         return of(new JFormattedTextField())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
@@ -1632,6 +1657,7 @@ public final class UI
 
     public static UIForFormattedTextField formattedTextField( Var<String> text ) {
         NullUtil.nullArgCheck(text, "text", Var.class);
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         return of(new JFormattedTextField())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
@@ -1662,6 +1688,7 @@ public final class UI
 
     public static UIForPasswordField<JPasswordField> passwordField( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         return of(new JPasswordField())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
@@ -1669,6 +1696,7 @@ public final class UI
 
     public static UIForPasswordField<JPasswordField> passwordField( Var<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         return of(new JPasswordField())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
@@ -1699,6 +1727,7 @@ public final class UI
 
     public static UIForTextArea<JTextArea> textArea( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         return of(new JTextArea())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
@@ -1706,6 +1735,7 @@ public final class UI
 
     public static UIForTextArea<JTextArea> textArea( Var<String> text ) {
         NullUtil.nullArgCheck(text, "text", Var.class);
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         return of(new JTextArea())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
@@ -1758,6 +1788,7 @@ public final class UI
     public static UIForTextArea<JTextArea> textArea( UI.HorizontalDirection direction, Val<String> text ) {
         NullUtil.nullArgCheck(direction, "direction", HorizontalDirection.class);
         NullUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         return of(new JTextArea())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withTextOrientation(direction)
@@ -1767,6 +1798,7 @@ public final class UI
     public static UIForTextArea<JTextArea> textArea( UI.HorizontalDirection direction, Var<String> text ) {
         NullUtil.nullArgCheck(direction, "direction", HorizontalDirection.class);
         NullUtil.nullArgCheck(text, "text", Var.class);
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         return of(new JTextArea())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withTextOrientation(direction)
@@ -2040,6 +2072,7 @@ public final class UI
      * @return The builder API allowing method chaining.
      */
     public static Render.Builder<JComboBox<Object>, Object> renderComboWithBorder( Val<Border> border ) {
+        NullUtil.nullPropertyCheck(border, "border", "Null is not a valid border.");
         return renderComboWithBorder(border::orElseThrow);
     }
 

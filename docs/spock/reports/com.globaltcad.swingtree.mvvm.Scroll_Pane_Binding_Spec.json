@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.007 seconds"
+    "duration":"0.010 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"A property holding a vertical scroll bar policy can be bound to the UI.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for your business logic\n            but it should also contain state relevant for your view and how it should\n            behave and look like depending on the state of the view model\n            and your business logic.\n            This is why Swing-Tree allows you to bind properties to the scroll\n            bar policy of your scroll panes.\n        "]
       },
@@ -37,7 +37,7 @@
     {
       "id":"You can model the horizontal scroll bar policy us ing a view model property dynamically.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for your business logic\n            but it should also contain state relevant for your view and how it should\n            behave and look like depending on the state of the view model\n            and your business logic.\n            This is why Swing-Tree allows you to bind properties to the scroll\n            bar policy of your scroll panes.\n        "]
       },

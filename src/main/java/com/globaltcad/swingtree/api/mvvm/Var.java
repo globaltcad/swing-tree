@@ -127,4 +127,5 @@ public interface Var<T> extends Val<T>
 	 * @return This very wrapper instance, in order to enable method chaining.
 	 */
 	Var<T> act(T newValue);
+
 }

@@ -1,5 +1,7 @@
 package com.globaltcad.swingtree;
 
+import com.globaltcad.swingtree.api.mvvm.Val;
+import com.globaltcad.swingtree.api.mvvm.Var;
 import org.slf4j.helpers.MessageFormatter;
 
 import java.util.Arrays;
@@ -34,6 +36,18 @@ final class NullUtil
                         thing, type.getSimpleName(), postfix
                 )
             );
+        }
+    }
+
+    public static <T> void nullPropertyCheck( Val<T> property, String thing, String... notes  ) {
+        nullArgCheck( property, thing, Val.class, "Properties are not supposed to be null, they may wrap null values though." );
+        if ( property.allowsNull() ) {
+            Class<T> type = property.type();
+            String message = "Property '{}' of type '{}' is not allowed to contain null!";
+            if ( notes.length > 0 )
+                message += " " + String.join(" ", notes);
+
+            throw new IllegalArgumentException( format( message, thing, type.getSimpleName() ) );
         }
     }
 

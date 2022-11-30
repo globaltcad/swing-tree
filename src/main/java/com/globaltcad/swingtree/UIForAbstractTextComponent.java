@@ -86,8 +86,9 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
         return withText( val.orElseThrow() );
     }
 
-    public final I withText( Var<String> var ) {
-        var.onShow(v-> _doUI(()->getComponent().setText(v)));
+    public final I withText( Var<String> text ) {
+        NullUtil.nullPropertyCheck(text, "text", "Use an empty string instead of null!");
+        text.onShow(v-> _doUI(()->getComponent().setText(v)));
         _onKeyTyped( (KeyEvent e) -> {
             String oldText = getComponent().getText();
             // We need to add the now typed character to the old text, because the key typed event
@@ -101,17 +102,20 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
                 newText = part1 + ( part2.length() < 2 ? part2 : part2.substring(1) );
             else
                 newText = part1 + e.getKeyChar() + part2;
-            _doApp(newText, t -> var.act(t) );
+            _doApp(newText, t -> text.act(t) );
         });
-        return withText( var.orElseThrow() );
+        return withText( text.orElseThrow() );
     }
 
     public final I withFont( Font font ) {
+        NullUtil.nullArgCheck(font, "font", Font.class);
         this.getComponent().setFont( font );
         return (I) this;
     }
 
     public final I withFont( Val<Font> font ) {
+        NullUtil.nullArgCheck(font, "font", Val.class);
+        NullUtil.nullPropertyCheck(font, "font", "Use the default font of this component instead of null!");
         font.onShow(v-> _doUI(()->withFont(v)));
         return withFont( font.orElseThrow() );
     }
@@ -150,6 +154,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      */
     public final I withHorizontalTextOrientation( Val<UI.HorizontalDirection> direction ) {
         NullUtil.nullArgCheck( direction, "direction", Val.class );
+        NullUtil.nullPropertyCheck(direction, "direction", "Null is not a valid value for the text orientation!");
         direction.onShow(v-> _doUI(()->{
             withTextOrientation(v);
             getComponent().validate();

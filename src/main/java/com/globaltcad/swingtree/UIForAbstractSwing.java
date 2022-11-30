@@ -101,6 +101,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I isVisibleIf( Val<Boolean> isVisible ) {
+        NullUtil.nullArgCheck(isVisible, "isVisible", Val.class);
+        NullUtil.nullPropertyCheck(isVisible, "isVisible", "Null is not allowed to model the visibility of a UI component!");
         isVisible.onShow(v-> _doUI(()->getComponent().setVisible(v)));
         return isVisibleIf( isVisible.orElseThrow() );
     }
@@ -124,6 +126,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I isEnabledIf( Val<Boolean> isEnabled ) {
+        NullUtil.nullArgCheck(isEnabled, "isEnabled", Val.class);
+        NullUtil.nullPropertyCheck(isEnabled, "isEnabled", "Null value for isEnabled is not allowed!");
         isEnabled.onShow(v-> _doUI(()->getComponent().setEnabled(v)));
         return isEnabledIf( isEnabled.orElseThrow() );
     }
@@ -200,6 +204,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withBorder( Val<Border> border ) {
+        NullUtil.nullArgCheck(border, "border", Val.class);
+        NullUtil.nullPropertyCheck(border, "border", "Null value for border is not allowed!");
         border.onShow(v-> _doUI(()->getComponent().setBorder(v)));
         return this.withBorder( border.orElseNull() );
     }
@@ -567,6 +573,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withCursor( Val<UI.Cursor> type ) {
+        NullUtil.nullArgCheck( type, "type", Val.class );
+        NullUtil.nullPropertyCheck(type, "type", "Null is not allowed to model a cursor type.");
         type.onShow(t -> _doUI(()->getComponent().setCursor( new java.awt.Cursor( t.type ) )) );
         return with( type.orElseThrow() );
     }
@@ -582,6 +590,9 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withCursorIf( Val<Boolean> condition, UI.Cursor type ) {
+        NullUtil.nullArgCheck( condition, "condition", Val.class );
+        NullUtil.nullArgCheck( type, "type", UI.Cursor.class );
+        NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the cursor selection state.");
         condition.onShow( c -> _doUI(()->getComponent().setCursor( new java.awt.Cursor( c ? type.type : UI.Cursor.DEFAULT.type ) )) );
         return with( condition.orElseThrow() ? type : UI.Cursor.DEFAULT );
     }
@@ -597,6 +608,10 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withCursorIf( Val<Boolean> condition, Val<UI.Cursor> type ) {
+        NullUtil.nullArgCheck( condition, "condition", Val.class );
+        NullUtil.nullArgCheck( type, "type", Val.class );
+        NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the cursor selection state.");
+        NullUtil.nullPropertyCheck(type, "type", "Null is not allowed to model a cursor type.");
         Cursor[] baseCursor = new Cursor[1];
         condition.onShow( c -> _doUI(type::show) );
         type.onShow( c -> _doUI(()-> {
@@ -636,9 +651,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withFlowLayout() {
-        return this.withLayout(new FlowLayout());
-    }
+    public final I withFlowLayout() { return this.withLayout(new FlowLayout()); }
 
     /**
      *  Use this to set a {@link GridLayout} for the component wrapped by this builder. <br>
@@ -651,9 +664,23 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withGridLayout() {
-        return this.withLayout(new GridLayout());
-    }
+    public final I withGridLayout() { return this.withLayout(new GridLayout()); }
+
+
+    /**
+     *  Use this to set a {@link GridLayout} for the component wrapped by this builder. <br>
+     *  This is in essence a more convenient way than the alternative usage pattern involving
+     *  the {@link #peek(Peeker)} method to peek into the builder's component like so: <br>
+     *  <pre>{@code
+     *      UI.panel()
+     *      .peek( panel -> panel.setLayout(new GridLayout(rows, cols)) );
+     *  }</pre>
+     *
+     * @param rows The number of rows in the grid.
+     * @param cols The number of columns in the grid.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withGridLayout( int rows, int cols ) { return this.withLayout(new GridLayout(rows, cols)); }
 
     /**
      *  Passes the provided string to the layout manager of the wrapped component.
@@ -752,6 +779,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final I withTooltip( Val<String> tip ) {
+        NullUtil.nullArgCheck(tip, "tip", Val.class);
+        NullUtil.nullPropertyCheck(tip, "tip", "Please use an empty string instead of null!");
         tip.onShow(v-> _doUI(()->getComponent().setToolTipText(v)));
         return this.withTooltip( tip.orElseThrow() );
     }
@@ -793,6 +822,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withBackground( Val<Color> bg ) {
+        NullUtil.nullArgCheck(bg, "bg", Val.class);
+        NullUtil.nullPropertyCheck(bg, "bg", "Please use the default color of this component instead of null!");
         bg.onShow(v-> _doUI(()->getComponent().setBackground(v)));
         return this.withBackground( bg.orElseNull() );
     }
@@ -807,6 +838,9 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withBackgroundIf( Val<Boolean> condition, Color bg ) {
+        NullUtil.nullArgCheck(condition, "condition", Val.class);
+        NullUtil.nullArgCheck(bg, "bg", Color.class);
+        NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided background color!");
         Color[] oldColor = new Color[1];
         condition.onShow( v -> _doUI(()->{
             if (v) {
@@ -829,6 +863,10 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withBackgroundIf( Val<Boolean> condition, Val<Color> color ) {
+        NullUtil.nullArgCheck(condition, "condition", Val.class);
+        NullUtil.nullArgCheck(color, "color", Val.class);
+        NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided background color!");
+        NullUtil.nullPropertyCheck(color, "color", "Null is not allowed to model the the provided background color! Please use the default color of this component instead.");
         Color[] baseColor = new Color[1];
         condition.onShow(setColor -> _doUI(color::show));
         color.onShow(v -> _doUI(() -> {
@@ -853,6 +891,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public final I withForeground( Color color ) {
+        NullUtil.nullArgCheck(color, "color", Color.class);
         getComponent().setForeground(color);
         return (I) this;
     }
@@ -875,6 +914,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withForeground( Val<Color> fg ) {
+        NullUtil.nullArgCheck(fg, "fg", Val.class);
+        NullUtil.nullPropertyCheck(fg, "fg", "Please use the default color of this component instead of null!");
         fg.onShow(v-> _doUI(()->getComponent().setForeground(v)));
         return this.withForeground( fg.orElseNull() );
     }
@@ -889,6 +930,9 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withForegroundIf( Val<Boolean> condition, Color fg ) {
+        NullUtil.nullArgCheck(condition, "condition", Val.class);
+        NullUtil.nullArgCheck(fg, "fg", Color.class);
+        NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided foreground color!");
         Color[] oldColor = new Color[1];
         condition.onShow( v -> _doUI(()->{
             if (v) {
@@ -911,6 +955,10 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withForegroundIf( Val<Boolean> condition, Val<Color> color ) {
+        NullUtil.nullArgCheck(condition, "condition", Val.class);
+        NullUtil.nullArgCheck(color, "color", Val.class);
+        NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided foreground color!");
+        NullUtil.nullPropertyCheck(color, "color", "Null is not allowed to model the the provided foreground color! Please use the default color of this component instead.");
         Color[] baseColor = new Color[1];
         condition.onShow(setColor -> _doUI(color::show));
         color.onShow(v -> _doUI(() -> {
@@ -929,6 +977,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public final I withMinimumSize( Dimension size ) {
+        NullUtil.nullArgCheck(size, "size", Dimension.class);
         getComponent().setMinimumSize(size);
         return (I) this;
     }
@@ -951,6 +1000,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public final I withMinimumSize( Val<Dimension> size ) {
+        NullUtil.nullArgCheck(size, "size", Val.class);
+        NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the minimum size of this component!");
         size.onShow(v-> _doUI(()->getComponent().setMinimumSize(v)));
         return this.withMinimumSize( size.orElseThrow() );
     }
@@ -976,6 +1027,10 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public final I withMinimumSize( Val<Integer> width, Val<Integer> height ) {
+        NullUtil.nullArgCheck(width, "width", Val.class);
+        NullUtil.nullArgCheck(height, "height", Val.class);
+        NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the minimum width of this component!");
+        NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the minimum height of this component!");
         width.onShow(w ->
                 _doUI(()-> getComponent().setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height)))
             );
@@ -1003,6 +1058,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public final I withMinimumWidth( Val<Integer> width ) {
+        NullUtil.nullArgCheck(width, "width", Val.class);
+        NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the minimum width of this component!");
         width.onShow(w -> _doUI(()-> getComponent().setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height))) );
         return this.withMinimumWidth( width.orElseThrow() );
     }
@@ -1026,6 +1083,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public final I withMinimumHeight( Val<Integer> height ) {
+        NullUtil.nullArgCheck(height, "height", Val.class);
+        NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the minimum height of this component!");
         height.onShow(h -> _doUI(()-> getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, h))) );
         return this.withMinimumHeight( height.orElseThrow() );
     }
@@ -1037,6 +1096,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public final I withMaximumSize( Dimension size ) {
+        NullUtil.nullArgCheck(size, "size", Dimension.class);
         getComponent().setMaximumSize(size);
         return (I) this;
     }
@@ -1049,6 +1109,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public final I withMaximumSize( Val<Dimension> size ) {
+        NullUtil.nullArgCheck(size, "size", Val.class);
+        NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the maximum size of this component!");
         size.onShow(v -> _doUI(()-> getComponent().setMaximumSize(v)) );
         return this.withMaximumSize( size.orElseThrow() );
     }
@@ -1074,6 +1136,10 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public final I withMaximumSize( Val<Integer> width, Val<Integer> height ) {
+        NullUtil.nullArgCheck(width, "width", Val.class);
+        NullUtil.nullArgCheck(height, "height", Val.class);
+        NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the maximum width of this component!");
+        NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the maximum height of this component!");
         width.onShow(w -> _doUI(()-> getComponent().setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height))) );
         height.onShow(h -> _doUI(()-> getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h))) );
         return this.withMaximumSize( width.orElseThrow(), height.orElseThrow() );
@@ -1097,6 +1163,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public final I withMaximumWidth( Val<Integer> width ) {
+        NullUtil.nullArgCheck(width, "width", Val.class);
+        NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the maximum width of this component!");
         width.onShow(w -> _doUI(()-> getComponent().setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height))) );
         return this.withMaximumWidth( width.orElseThrow() );
     }
@@ -1119,6 +1187,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public final I withMaximumHeight( Val<Integer> height ) {
+        NullUtil.nullArgCheck(height, "height", Val.class);
+        NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the maximum height of this component!");
         height.onShow(h -> _doUI(()-> getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h))) );
         return this.withMaximumHeight( height.orElseThrow() );
     }
@@ -1130,6 +1200,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public final I withPreferredSize( Dimension size ) {
+        NullUtil.nullArgCheck(size, "size", Dimension.class);
         getComponent().setPreferredSize(size);
         return (I) this;
     }
@@ -1142,6 +1213,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public final I withPreferredSize( Val<Dimension> size ) {
+        NullUtil.nullArgCheck(size, "size", Val.class);
+        NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the preferred size of this component!");
         size.onShow(v -> _doUI(()-> getComponent().setPreferredSize(v)) );
         return this.withPreferredSize( size.orElseNull() );
     }
@@ -1167,6 +1240,10 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public final I withPreferredSize( Val<Integer> width, Val<Integer> height ) {
+        NullUtil.nullArgCheck(width, "width", Val.class);
+        NullUtil.nullArgCheck(height, "height", Val.class);
+        NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the preferred width of this component!");
+        NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the preferred height of this component!");
         width.onShow(w -> _doUI(()-> getComponent().setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height))) );
         height.onShow(h -> _doUI(()-> getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h))) );
         return this.withPreferredSize( width.orElseThrow(), height.orElseThrow() );
@@ -1190,6 +1267,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public final I withPreferredWidth( Val<Integer> width ) {
+        NullUtil.nullArgCheck(width, "width", Val.class);
+        NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the preferred width of this component!");
         width.onShow(w -> _doUI(()-> getComponent().setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height))) );
         return this.withPreferredWidth( width.orElseThrow() );
     }
@@ -1212,6 +1291,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very builder to allow for method chaining.
      */
     public final I withPreferredHeight( Val<Integer> height ) {
+        NullUtil.nullArgCheck(height, "height", Val.class);
+        NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the preferred height of this component!");
         height.onShow(h -> _doUI(()-> getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h))) );
         return this.withPreferredHeight( height.orElseThrow() );
     }
