@@ -58,6 +58,8 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSpinner<S> withValue( Val<?> val ) {
+        NullUtil.nullArgCheck(val, "val", Val.class);
+        NullUtil.nullPropertyCheck(val, "val", "Null is not a valid spinner state!");
         val.onShow( v -> _doUI(()->withValue(v)) );
         return withValue(val.get());
     }
@@ -69,6 +71,8 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSpinner<S> withValue( Var<?> var ) {
+        NullUtil.nullArgCheck(var, "var", Var.class);
+        NullUtil.nullPropertyCheck(var, "var", "Null is not a valid spinner state!");
         var.onShow( v -> _doUI(() -> withValue(v)) );
         _onChange( e -> _doApp(() -> {
             Object value = getComponent().getValue();
@@ -105,6 +109,7 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSpinner<S> withStepSize( Number n ) {
+        NullUtil.nullArgCheck(n, "n", Number.class);
         SpinnerModel model = getComponent().getModel();
         if ( !(model instanceof SpinnerNumberModel) )
             throw new IllegalArgumentException(
@@ -123,6 +128,8 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
      * @return This very instance, which enables builder-style method chaining.
      */
     public final <N extends Number> UIForSpinner<S> withStepSize( Val<N> val ) {
+        NullUtil.nullArgCheck(val, "val", Val.class);
+        NullUtil.nullPropertyCheck(val, "val", "Null is not a valid spinner step size!");
         SpinnerModel model = getComponent().getModel();
         if ( !(model instanceof SpinnerNumberModel) )
             throw new IllegalArgumentException(

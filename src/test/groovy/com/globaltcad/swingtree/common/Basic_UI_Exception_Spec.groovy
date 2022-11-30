@@ -13,6 +13,7 @@ import spock.lang.Title
 
 import javax.swing.*
 import javax.swing.text.JTextComponent
+import java.awt.Color
 
 @Title("How Not To Use")
 @Narrative('''
@@ -98,6 +99,44 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.panel((LayoutAttr)null)},
                     {UI.panel((Val<LayoutAttr>)null)}
             ]
+    }
+
+    def 'Certain Swing-Tree UI builder, do not allow you to use nullable properties.'(
+            Runnable illegalAction
+    ) {
+        when : 'We execute the error prone code...'
+            illegalAction()
+        then : 'An illegal argument exception will be thrown!'
+            thrown(IllegalArgumentException)
+        where :
+            illegalAction << [
+                    { UI.toggleButton(Var.ofNullable(Boolean, false)) },
+                    { UI.toggleButton("Toggle Me!", Var.ofNullable(Boolean, true)) },
+                    { UI.toggleButton(Var.ofNullable(String, null), Var.of(true)) },
+                    { UI.textArea(Var.ofNullable(String, "Ooops")) },
+                    { UI.textArea(Val.ofNullable(String, null)) },
+                    { UI.textArea(UI.HorizontalDirection.LEFT_TO_RIGHT, Val.ofNullable(String, "")) },
+                    { UI.textArea(UI.HorizontalDirection.RIGHT_TO_LEFT, Var.ofNullable(String, "")) },
+                    { UI.panel(Val.ofNullable(LayoutAttr,UI.FILL)) },
+                    { UI.spinner(Var.ofNullable(Byte,null)) },
+                    { UI.radioButton(Val.ofNullable(String,"")) },
+                    { UI.radioButton("Hi!",Var.ofNullable(Boolean,true)) },
+                    { UI.radioButton(Val.ofNullable(String,""),Var.ofNullable(Boolean,true)) },
+                    { UI.checkBox(Val.ofNullable(String,"")) },
+                    { UI.checkBox("Done!", Var.ofNullable(Boolean,true)) },
+                    { UI.checkBox(Val.ofNullable(String,""), Var.ofNullable(Boolean,true)) },
+                    { UI.panel().isEnabledIf(Val.ofNullable(Boolean, false)) },
+                    { UI.button().isSelectedIf(Val.ofNullable(Boolean, true)) },
+                    { UI.button().isSelectedIf(Var.ofNullable(Boolean, true)) },
+                    { UI.popupMenu().isVisibleIf(Val.ofNullable(Boolean,true)) },
+                    { UI.button(Val.ofNullable(String,"Click Me!")) },
+                    { UI.label(Val.ofNullable(String, "")) },
+                    { UI.spinner().withValue(Val.ofNullable(Number, 4)) },
+                    { UI.spinner().withValue(Var.ofNullable(Number, 4)) },
+                    { UI.panel().withForeground(Val.ofNullable(Color,null)) },
+                    { UI.passwordField(Val.ofNullable(String, "")) },
+                    { UI.passwordField(Var.ofNullable(String, "")) }
+                ]
     }
 
 }

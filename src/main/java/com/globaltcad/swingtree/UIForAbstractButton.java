@@ -45,13 +45,14 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  Binds the provided {@link Val} property to the wrapped button type
      *  and sets the text of the button to the value of the property.
      * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
-     * @param val The view model property which should be bound to this UI.
+     * @param text The view model property which should be bound to this UI.
      * @return This very builder to allow for method chaining.
      */
-    public final I withText( Val<String> val ) {
-        NullUtil.nullArgCheck(val, "val", Val.class);
-        val.onShow(v-> _doUI(()->getComponent().setText(v)));
-        return withText( val.orElseThrow() );
+    public final I withText( Val<String> text ) {
+        NullUtil.nullArgCheck(text, "val", Val.class);
+        NullUtil.nullPropertyCheck(text, "text");
+        text.onShow(v-> _doUI(()->getComponent().setText(v)));
+        return withText( text.orElseThrow() );
     }
 
     public final I isSelectedIf( boolean isSelected ) {
@@ -64,10 +65,11 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  instance which will be used to dynamically model the selection state of the
      *  wrapped {@link AbstractButton} type.
      */
-    public final I isSelectedIf( Val<Boolean> val ) {
-        NullUtil.nullArgCheck(val, "val", Val.class);
-        val.onShow(v-> _doUI(()->getComponent().setSelected(v)));
-        return isSelectedIf( val.orElseThrow() );
+    public final I isSelectedIf( Val<Boolean> selected ) {
+        NullUtil.nullArgCheck(selected, "selected", Val.class);
+        NullUtil.nullPropertyCheck(selected, "selected", "Null can not be used to model the selection state of a button type.");
+        selected.onShow(v-> _doUI(()->getComponent().setSelected(v)));
+        return isSelectedIf( selected.orElseThrow() );
     }
 
     /**
@@ -75,13 +77,14 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  instance which will be used to dynamically model the selection state of the
      *  wrapped {@link AbstractButton} type.
      */
-    public final I isSelectedIf( Var<Boolean> var ) {
-        NullUtil.nullArgCheck(var, "var", Var.class);
-        var.onShow(v-> _doUI(()->getComponent().setSelected(v)));
+    public final I isSelectedIf( Var<Boolean> selected ) {
+        NullUtil.nullArgCheck(selected, "selected", Var.class);
+        NullUtil.nullPropertyCheck(selected, "selected", "Null can not be used to model the selection state of a button type.");
+        selected.onShow(v-> _doUI(()->getComponent().setSelected(v)));
         _onClick(
-            e -> _doApp(getComponent().isSelected(), sel->var.act(sel))
+            e -> _doApp(getComponent().isSelected(), selected::act)
         );
-        return isSelectedIf( var.orElseThrow() );
+        return isSelectedIf( selected.orElseThrow() );
     }
 
     /**

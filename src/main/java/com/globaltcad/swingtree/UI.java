@@ -913,13 +913,14 @@ public final class UI
      * @throws IllegalArgumentException if {@code attr} is {@code null}.
      */
     public static UIForPanel<JPanel> panel( LayoutAttr attr ) {
-        NullUtil.nullArgCheck(attr, "attr", String.class);
+        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
         return panel(attr.toString());
     }
 
     public static UIForPanel<JPanel> panel( Val<LayoutAttr> attr ) {
         NullUtil.nullArgCheck(attr, "attr", Val.class);
-        UIForPanel<JPanel> ui = panel(attr.toString());
+        NullUtil.nullPropertyCheck(attr, "attr", "Null is not a valid layout attribute.");
+        UIForPanel<JPanel> ui = panel(attr.get().toString());
         attr.onShow( it -> {
             // Every time the value changes, we need to re-layout the panel.
             // Note that this is for mig layout:
