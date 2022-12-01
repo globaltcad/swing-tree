@@ -507,8 +507,6 @@ public final class UI
         return of(new JButton()).withText(text);
     }
 
-
-
     /**
      *  Use this to create a builder for the {@link JButton} UI component
      *  with an icon displayed on top.
@@ -519,6 +517,19 @@ public final class UI
     public static UIForButton<JButton> button( Icon icon ) {
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
         return button().peek(it -> it.setIcon(icon) );
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JButton} UI component
+     *  with a dynamically displayed icon on top.
+     *  This is in essence a convenience method for {@code UI.of(new JButton()).withIcon(icon) )}.
+     *
+     * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
+     */
+    public static UIForButton<JButton> buttonWithIcon( Val<Icon> icon ) {
+        NullUtil.nullArgCheck(icon, "icon", Icon.class);
+        NullUtil.nullPropertyCheck(icon, "icon");
+        return button().withIcon(icon);
     }
 
     /**
@@ -1421,6 +1432,18 @@ public final class UI
     }
 
     /**
+     *  Use this to create a UI builder for a text-less label containing and displaying an icon dynamically.
+     *
+     * @param icon The icon property which should dynamically provide a desired icon for the {@link JLabel}.
+     * @return A builder instance for the label, which enables fluent method chaining.
+     */
+    public static UIForLabel<JLabel> labelWithIcon( Val<Icon> icon ) {
+        NullUtil.nullArgCheck(icon, "icon", Val.class);
+        NullUtil.nullPropertyCheck(icon, "icon", "Null icons are not allowed!");
+        return of(new JLabel()).withIcon(icon);
+    }
+
+    /**
      *  Use this to create a UI builder for a text-less label containing and displaying an icon.
      *
      * @param width The width of the icon when displayed on the label.
@@ -1453,6 +1476,7 @@ public final class UI
      *  @return A builder instance for the label, which enables fluent method chaining.
      */
     public static UIForLabel<JLabel> boldLabel( Val<String> text ) {
+        NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         return of(new JLabel()).withText(text).makeBold();
     }
@@ -1546,6 +1570,8 @@ public final class UI
         return new UIForRadioButton<>(component);
     }
 
+    public static UIForToggleButton<JToggleButton> toggleButton() { return of(new JToggleButton()); }
+
     public static UIForToggleButton<JToggleButton> toggleButton( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
         return of(new JToggleButton(text));
@@ -1581,6 +1607,38 @@ public final class UI
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .applyIf(!selected.hasNoID(), it -> it.id(selected.id()))
                 .withText(text)
+                .isSelectedIf(selected);
+    }
+
+    public static UIForToggleButton<JToggleButton> toggleButton( Icon icon ) {
+        NullUtil.nullArgCheck(icon, "icon", Icon.class);
+        return of(new JToggleButton(icon));
+    }
+
+    public static UIForToggleButton<JToggleButton> toggleButton( Icon icon, Var<Boolean> selected ) {
+        NullUtil.nullArgCheck(icon, "icon", Icon.class);
+        NullUtil.nullPropertyCheck(selected, "selected", "The selection state of a toggle button may not be modelled using null!");
+        return of(new JToggleButton(icon))
+                .applyIf(!selected.hasNoID(), it -> it.id(selected.id()))
+                .isSelectedIf(selected);
+    }
+
+    public static UIForToggleButton<JToggleButton> toggleButtonWithIcon( Val<Icon> icon ) {
+        NullUtil.nullArgCheck(icon, "icon", Val.class);
+        NullUtil.nullPropertyCheck(icon, "icon", "The icon of a toggle button may not be modelled using null!");
+        return of(new JToggleButton())
+                .applyIf(!icon.hasNoID(), it -> it.id(icon.id()))
+                .withIcon(icon);
+    }
+
+    public static UIForToggleButton<JToggleButton> toggleButtonWithIcon( Val<Icon> icon, Var<Boolean> selected ) {
+        NullUtil.nullArgCheck(icon, "icon", Val.class);
+        NullUtil.nullPropertyCheck(icon, "icon", "The icon of a toggle button may not be modelled using null!");
+        NullUtil.nullPropertyCheck(selected, "selected", "The selection state of a toggle button may not be modelled using null!");
+        return of(new JToggleButton())
+                .applyIf(!icon.hasNoID(), it -> it.id(icon.id()))
+                .applyIf(!selected.hasNoID(), it -> it.id(selected.id()))
+                .withIcon(icon)
                 .isSelectedIf(selected);
     }
 

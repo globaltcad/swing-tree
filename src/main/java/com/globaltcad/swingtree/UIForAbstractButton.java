@@ -54,10 +54,71 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
         text.onShow(v-> _doUI(()->getComponent().setText(v)));
         return withText( text.orElseThrow() );
     }
+    
+    /**
+     *  Use this to set the icon for the wrapped button type. 
+     *  This is in essence a convenience method to avoid peeking into this builder like so:
+     *  <pre>{@code
+     *     UI.button("Something")
+     *         .peek( button -> button.setIcon(...) );
+     *  }</pre>
+     *
+     *
+     * @param icon The {@link Icon} which should be displayed on the button.
+     * @return This very builder to allow for method chaining.
+     */
+    public I with( Icon icon ) {
+        NullUtil.nullArgCheck(icon,"icon",Icon.class);
+        getComponent().setIcon(icon);
+        return _this();
+    }
+
+    /**
+     *  Use this to dynamically set the icon property for the wrapped button type.
+     *  When the icon wrapped by the provided property changes,
+     *  then so does the icon displayed on this button.
+     *
+     * @param icon The {@link Icon} property which should be displayed on the button.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withIcon( Val<Icon> icon ) {
+        NullUtil.nullArgCheck(icon, "icon", Val.class);
+        NullUtil.nullPropertyCheck(icon, "icon");
+        icon.onShow(i-> _doUI(()->getComponent().setIcon(i)));
+        return with(icon.orElseThrow());
+    }
+
+    /**
+     *  Use this to set the size of the font of the wrapped button type.
+     * @param size The size of the font which should be displayed on the button.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withFontSize( int size ) {
+        B button = getComponent();
+        Font old = button.getFont();
+        button.setFont(new Font(old.getName(), old.getStyle(), size));
+        return _this();
+    }
+
+    /**
+     *  Use this to dynamically set the size of the font of the wrapped button type
+     *  through the provided view model property.
+     *  When the integer wrapped by the provided property changes,
+     *  then so does the font size of the text displayed on this button.
+     *
+     * @param size The size property of the font which should be displayed on the button.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withFontSize( Val<Integer> size ) {
+        NullUtil.nullArgCheck(size, "val", Val.class);
+        NullUtil.nullPropertyCheck(size, "size", "Null is not a sensible value for a font size.");
+        size.onShow(s -> _doUI(() -> withFontSize(s)));
+        return withFontSize(size.orElseThrow());
+    }
 
     public final I isSelectedIf( boolean isSelected ) {
         getComponent().setSelected(isSelected);
-        return (I) this;
+        return _this();
     }
 
     /**
