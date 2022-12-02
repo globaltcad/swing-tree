@@ -2268,6 +2268,8 @@ public final class UI
         return ref[0];
     }
 
+    public static void sync() throws InterruptedException, InvocationTargetException { runNow( () -> {} ); }
+
     /**
      *  Use this to quickly create and inspect a test window for a UI component.
      */

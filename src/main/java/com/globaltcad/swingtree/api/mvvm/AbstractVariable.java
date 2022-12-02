@@ -1,5 +1,7 @@
 package com.globaltcad.swingtree.api.mvvm;
 
+import com.globaltcad.swingtree.UI;
+
 import java.util.*;
 
 /**
@@ -186,7 +188,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 	public Val<T> show() {
 		for ( PropertyAction<T> action : _viewActions)
 			try {
-				action.act(_createDelegate());
+				UI.run( () -> action.act(_createDelegate()) );
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

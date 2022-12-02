@@ -70,12 +70,17 @@ class Panel_Spec extends Specification
 
         when : 'We change the width of the panel.'
             width.set(400)
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
+
         then : 'The panel has the correct width and height.'
             ui.component.preferredSize.width == 400
             ui.component.preferredSize.height == 200
 
         when : 'We change the height of the panel.'
             height.set(300)
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
         then : 'The panel has the correct width and height.'
             ui.component.preferredSize.width == 400
             ui.component.preferredSize.height == 300

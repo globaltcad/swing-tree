@@ -42,6 +42,8 @@ class Button_Binding_Spec extends Specification
 
         when : 'We change the property value...'
             text.set("Goodbye World")
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
         then : 'The button should be updated.'
             ui.component.text == "Goodbye World"
     }
@@ -62,6 +64,8 @@ class Button_Binding_Spec extends Specification
 
         when : 'We change the property value...'
             selected.set(true)
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
         then : 'The button should be updated.'
             ui.component.selected == true
     }
@@ -82,6 +86,8 @@ class Button_Binding_Spec extends Specification
 
         when : 'We change the property value...'
             enabled.set(true)
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
         then : 'The button should be updated.'
             ui.component.enabled == true
     }

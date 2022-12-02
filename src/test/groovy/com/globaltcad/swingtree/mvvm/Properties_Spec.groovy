@@ -56,6 +56,8 @@ class Properties_Spec extends Specification
 
         when : 'We change and then show the property value...'
             toggled.set(true)
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
         then : 'The button should be updated.'
             ui.component.selected == true
 
@@ -112,6 +114,8 @@ class Properties_Spec extends Specification
             mutable.onShow { list.add(it) }
         and : 'We change the value of the property.'
             mutable.set("Tofu")
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
         then : 'The side effect is executed.'
             list == ["Tofu"]
     }
@@ -163,12 +167,16 @@ class Properties_Spec extends Specification
 
         when : 'We change the value of the original property.'
             property.set("Tofu")
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
         then : 'The subscriber of the original property is triggered but not the subscriber of the new property.'
             list1 == ["Tofu"]
             list2 == []
 
         when : 'We change the value of the new property.'
             property2.set("Tempeh")
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
         then : 'Both subscribers are receive the effect.'
             list1 == ["Tofu", "Tempeh"]
             list2 == ["Tempeh"]
@@ -378,6 +386,8 @@ class Properties_Spec extends Specification
 
         when : 'We change the state of the property using the "set(T)" method.'
             property.set(":(")
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
         then : 'The "onShow" actions are triggered.'
             showListener == [":("]
         and : 'The "onModel" actions are not triggered.'

@@ -1,7 +1,7 @@
 {
   "className":"com.globaltcad.swingtree.mvvm.Label_Binding_Spec",
   "title":"Label Binding",
-  "narrative":"As a developer, I want to bind a label to a property so \n    that the label is updated when the property changes.\n    Binding is a powerful feature that allows us to create\n    UIs which are not only decoupled from the business logic of\n    an application, but also make it easy to create UIs which\n    are dynamic and reactive.",
+  "narrative":"As a developer, I want to bind a label to a property so\n    that the label is updated when the property changes.\n    Binding is a powerful feature that allows us to create\n    UIs which are not only decoupled from the business logic of\n    an application, but also make it easy to create UIs which\n    are dynamic and reactive.",
   "subjects":[],
   "statistics":{
     "runs":"9",
@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.034 seconds"
+    "duration":"0.015 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -29,6 +29,8 @@
 
         {"kind":"when","text":"We change the property value...","code":["text.set(\"Goodbye World\")"]},
 
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
         {"kind":"then","text":"The label should be updated.","code":["ui.component.text == \"Goodbye World\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
@@ -37,7 +39,7 @@
     {
       "id":"We can bind to the foreground and background color of a UI node.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -50,6 +52,8 @@
 
         {"kind":"when","text":"We change the color values of both properties...","code":["color1.set(Color.GREEN)","color2.set(Color.YELLOW)"]},
 
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
         {"kind":"then","text":"The label colors are updated.","code":["ui.component.foreground == Color.GREEN","ui.component.background == Color.YELLOW"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
@@ -58,7 +62,7 @@
     {
       "id":"It is possible to bind to the minimum, maximum and preferred size of a label",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that this works for all kind of UI nodes, not just labels.\n        "]
       },
@@ -70,6 +74,8 @@
         {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.minimumSize == new Dimension(100, 100)","ui.component.maximumSize == new Dimension(200, 200)","ui.component.preferredSize == new Dimension(150, 150)"]},
 
         {"kind":"when","text":"We change the property values...","code":["minSize.set(new Dimension(50, 50))","maxSize.set(new Dimension(100, 100))","prefSize.set(new Dimension(75, 75))"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 
         {"kind":"then","text":"The label should be updated.","code":["ui.component.minimumSize == new Dimension(50, 50)","ui.component.maximumSize == new Dimension(100, 100)","ui.component.preferredSize == new Dimension(75, 75)"]}
       ],
@@ -92,6 +98,8 @@
 
         {"kind":"when","text":"We change the property values...","code":["enabled.set(false)"]},
 
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
         {"kind":"then","text":"The label should be updated.","code":["ui.component.enabled == false"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
@@ -100,7 +108,7 @@
     {
       "id":"You can bind a variable to the \"visible\" flag of a label.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that this works for all kind of UI nodes, not just labels.\n        "]
       },
@@ -113,6 +121,8 @@
 
         {"kind":"when","text":"We change the property values...","code":["visible.set(false)"]},
 
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
         {"kind":"then","text":"The label should be updated.","code":["ui.component.visible == false"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
@@ -121,7 +131,7 @@
     {
       "id":"A property can define the horizontal and vertical alignment of a label.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
       },
@@ -134,6 +144,8 @@
 
         {"kind":"when","text":"We change the property values...","code":["horizontal.set(UI.HorizontalAlignment.CENTER)","vertical.set(UI.VerticalAlignment.BOTTOM)"]},
 
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
         {"kind":"then","text":"The label should be updated.","code":["ui.component.horizontalAlignment == SwingConstants.CENTER","ui.component.verticalAlignment == SwingConstants.BOTTOM"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
@@ -142,7 +154,7 @@
     {
       "id":"A property can define the image relative horizontal and vertical alignment of a label.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
       },
@@ -155,6 +167,8 @@
 
         {"kind":"when","text":"We change the property values...","code":["horizontal.set(UI.HorizontalAlignment.CENTER)","vertical.set(UI.VerticalAlignment.BOTTOM)"]},
 
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
         {"kind":"then","text":"The label should be updated.","code":["ui.component.horizontalTextPosition == SwingConstants.CENTER","ui.component.verticalTextPosition == SwingConstants.BOTTOM"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
@@ -163,7 +177,7 @@
     {
       "id":"You can dynamically model the font size of your labels using an integer based property.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
       },
@@ -176,6 +190,8 @@
 
         {"kind":"when","text":"We change the property values...","code":["fontSize.set(24)"]},
 
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
         {"kind":"then","text":"The label should be updated.","code":["ui.component.font.size == 24"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
@@ -184,7 +200,7 @@
     {
       "id":"We can store icons inside properties and then bind them to labels.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
       },
@@ -196,6 +212,8 @@
         {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.icon != null","ui.component.icon === originalIcon","ui.component.icon.iconHeight == 512","ui.component.icon.iconWidth == 512"]},
 
         {"kind":"when","text":"We change the property values...","code":["icon.set(UI.icon(\"img/swing.png\"))"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 
         {"kind":"then","text":"The label should be a different one.","code":["ui.component.icon != null","ui.component.icon !== originalIcon","ui.component.icon.iconHeight == 512","ui.component.icon.iconWidth == 512"]}
       ],
