@@ -186,7 +186,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 */
 	@Override
 	public Val<T> show() {
-		for ( PropertyAction<T> action : _viewActions)
+		for ( PropertyAction<T> action : new ArrayList<>(_viewActions) ) // We copy the list to avoid concurrent modification
 			try {
 				UI.run( () -> action.act(_createDelegate()) );
 			} catch (Exception e) {
