@@ -289,7 +289,7 @@ public interface Val<T>
 	 * @param displayAction The lambda which will be called whenever the value wrapped by this {@link Var} changes.
 	 * @return The {@link Val} instance itself.
 	 */
-	Val<T> onShowThis( PropertyAction<T> displayAction );
+	Val<T> onShowThis( DisplayAction<T> displayAction );
 
 	/**
 	 *  Use this to register an observer lambda which will be called whenever the value
@@ -305,7 +305,7 @@ public interface Val<T>
 
 	/**
 	 *  Triggers the observer lambdas registered through the {@link #onShow(Consumer)}
-	 *  as well as the {@link #onShowThis(PropertyAction)} methods.
+	 *  as well as the {@link #onShowThis(DisplayAction)} methods.
 	 *  This method is called automatically by the {@link Var#set(T)} method,
 	 *  and it is supposed to be used by the UI to update the UI components.
 	 *  This is in essence how binding works in Swing-Tree.

@@ -18,7 +18,7 @@ public class UIForCheckBox<B extends JCheckBox> extends UIForAbstractButton<UIFo
     }
 
     public UIForCheckBox<B> borderIsPaintedFlatIf(Val<Boolean> val ) {
-        val.onShow(v -> _doUI(() -> borderIsPaintedFlatIf(v)));
+        _onShow(val, v -> borderIsPaintedFlatIf(v) );
         return borderIsPaintedFlatIf( val.get() );
     }
 

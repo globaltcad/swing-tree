@@ -51,7 +51,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public final I withText( Val<String> text ) {
         NullUtil.nullArgCheck(text, "val", Val.class);
         NullUtil.nullPropertyCheck(text, "text");
-        text.onShow(v-> _doUI(()->getComponent().setText(v)));
+        _onShow(text, v -> getComponent().setText(v) );
         return withText( text.orElseThrow() );
     }
     
@@ -84,7 +84,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public I withIcon( Val<Icon> icon ) {
         NullUtil.nullArgCheck(icon, "icon", Val.class);
         NullUtil.nullPropertyCheck(icon, "icon");
-        icon.onShow(i-> _doUI(()->getComponent().setIcon(i)));
+        _onShow( icon, i -> getComponent().setIcon(i) );
         return with(icon.orElseThrow());
     }
 
@@ -112,7 +112,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public I withFontSize( Val<Integer> size ) {
         NullUtil.nullArgCheck(size, "val", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not a sensible value for a font size.");
-        size.onShow(s -> _doUI(() -> withFontSize(s)));
+        _onShow(size, s -> withFontSize(s) );
         return withFontSize(size.orElseThrow());
     }
 
@@ -129,7 +129,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public final I isSelectedIf( Val<Boolean> selected ) {
         NullUtil.nullArgCheck(selected, "selected", Val.class);
         NullUtil.nullPropertyCheck(selected, "selected", "Null can not be used to model the selection state of a button type.");
-        selected.onShow(v-> _doUI(()->getComponent().setSelected(v)));
+        _onShow(selected, v -> getComponent().setSelected(v) );
         return isSelectedIf( selected.orElseThrow() );
     }
 
@@ -141,7 +141,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public final I isSelectedIf( Var<Boolean> selected ) {
         NullUtil.nullArgCheck(selected, "selected", Var.class);
         NullUtil.nullPropertyCheck(selected, "selected", "Null can not be used to model the selection state of a button type.");
-        selected.onShow(v-> _doUI(()->getComponent().setSelected(v)));
+        _onShow(selected, v -> getComponent().setSelected(v) );
         _onClick(
             e -> _doApp(getComponent().isSelected(), selected::act)
         );
@@ -155,7 +155,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public final I isPressedIf( Var<Boolean> var ) {
         NullUtil.nullArgCheck(var, "var", Var.class);
-        var.onShow(v-> _doUI(()->getComponent().getModel().setPressed(v)));
+        _onShow( var, v -> getComponent().getModel().setPressed(v) );
         _onClick(
             e -> _doApp(getComponent().getModel().isPressed(), pressed->{
                 var.act(true);
@@ -261,7 +261,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public final I withHorizontalAlignment( Val<UI.HorizontalAlignment> horizontalAlign ) {
         NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", Val.class);
-        horizontalAlign.onShow(align-> _doUI(()->getComponent().setHorizontalAlignment(align.forSwing())));
+        _onShow(horizontalAlign, align -> getComponent().setHorizontalAlignment(align.forSwing()) );
         return with(horizontalAlign.orElseThrow());
     }
 
@@ -300,7 +300,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public final I withVerticalAlignment( Val<UI.VerticalAlignment> verticalAlign ) {
         NullUtil.nullArgCheck(verticalAlign, "verticalAlign", Val.class);
-        verticalAlign.onShow(align-> _doUI(()->getComponent().setVerticalAlignment(align.forSwing())));
+        _onShow(verticalAlign, align -> getComponent().setVerticalAlignment(align.forSwing()) );
         return with(verticalAlign.orElseThrow());
     }
 
@@ -339,7 +339,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public final I withImageRelativeHorizontalAlignment( Val<UI.HorizontalAlignment> horizontalAlign ) {
         NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", Val.class);
-        horizontalAlign.onShow(align-> _doUI(()->getComponent().setHorizontalTextPosition(align.forSwing())));
+        _onShow(horizontalAlign, align -> getComponent().setHorizontalTextPosition(align.forSwing()) );
         return withImageRelative(horizontalAlign.orElseThrow());
     }
 
@@ -378,7 +378,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public final I withImageRelativeVerticalAlignment( Val<UI.VerticalAlignment> verticalAlign ) {
         NullUtil.nullArgCheck(verticalAlign, "verticalAlign", Val.class);
-        verticalAlign.onShow(align -> _doUI(() -> getComponent().setVerticalTextPosition(align.forSwing())));
+        _onShow( verticalAlign, align -> getComponent().setVerticalTextPosition(align.forSwing()) );
         return withImageRelative(verticalAlign.orElseThrow());
     }
 

@@ -37,7 +37,7 @@ public class UIForAbstractMenuItem<I, M extends JMenuItem> extends UIForAbstract
      * @return This very builder to allow for method chaining.
      */
     public I withKeyStroke( Val<KeyStroke> val ) {
-        val.onShow(v -> _doUI(() -> withKeyStroke(v)));
+        _onShow(val, v -> withKeyStroke(v) );
         getComponent().setAccelerator(val.get());
         @SuppressWarnings("unchecked") I self = (I) this;
         return self;

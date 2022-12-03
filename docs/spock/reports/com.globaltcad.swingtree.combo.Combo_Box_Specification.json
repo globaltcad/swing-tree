@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.029 seconds"
+    "duration":"0.026 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -109,7 +109,7 @@
     {
       "id":"The options of an editable combo box are only editable if their items list is modifyable.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -202,7 +202,7 @@
     {
       "id":"You can model both the current selection state as well as options of your combo box using 2 properties.",
       "result":"PASS",
-      "duration":"0.011 seconds",
+      "duration":"0.010 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n           In essence, the state of a combo box consists of the current selection, and\n           the options that are available for selection. You can model both of these\n           aspects using 2 properties. One modelling the current selection, and another one\n           storing an array to model all available options. \n        "]
       },

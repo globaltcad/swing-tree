@@ -1,6 +1,7 @@
 package com.globaltcad.swingtree;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,7 +15,7 @@ import java.util.stream.Collectors;
  * @param <I> The concrete implementation type of this abstract class.
  * @param <C> The component type parameter which ought to be built in some way.
  */
-abstract class AbstractNestedBuilder<I, C extends E, E> extends AbstractBuilder<I, C>
+abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extends AbstractBuilder<I, C>
 {
     /**
      *  A list of all the child builders.
@@ -87,6 +88,8 @@ abstract class AbstractNestedBuilder<I, C extends E, E> extends AbstractBuilder<
         builder._parent = this;
 
         _add((E) builder.getComponent(), conf);
+
+        _detachStrongRef(); // Detach strong reference to the component to allow it to be garbage collected.
     }
 
     /**
@@ -121,7 +124,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E> extends AbstractBuilder<
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I add( List<E> components ) {
-        final C[] array = (C[]) new Object[components.size()];
+        final C[] array = (C[]) new Component[components.size()];
         for ( int i = 0; i < array.length; i++ )
             _doAdd(UI.of((JComponent) components.get(i)), null);
 

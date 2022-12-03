@@ -120,7 +120,7 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @return This very builder to allow for method chaining.
      */
     public final UIForLabel<L> isBoldIf( Val<Boolean> val ) {
-        val.onShow(v -> _doUI(() -> isBoldIf(v)));
+        _onShow(val, v -> isBoldIf(v) );
         return isBoldIf( val.get() );
     }
 
@@ -146,7 +146,7 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @return This very builder to allow for method chaining.
      */
     public final UIForLabel<L> withText( Val<String> val ) {
-        val.onShow(v-> _doUI(()->getComponent().setText(v)));
+        _onShow( val, v -> getComponent().setText(v) );
         return withText( val.orElseThrow() );
     }
 
@@ -176,7 +176,7 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> withHorizontalAlignment( Val<UI.HorizontalAlignment> horizontalAlign ) {
-        horizontalAlign.onShow(v -> _doUI(() -> getComponent().setHorizontalAlignment(v.forSwing())));
+        _onShow( horizontalAlign, v -> getComponent().setHorizontalAlignment(v.forSwing()) );
         return with(horizontalAlign.orElseThrow());
     }
 
@@ -205,7 +205,7 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> withVerticalAlignment( Val<UI.VerticalAlignment> verticalAlign ) {
-        verticalAlign.onShow(v -> _doUI(() -> getComponent().setVerticalAlignment(v.forSwing())));
+        _onShow( verticalAlign, v -> getComponent().setVerticalAlignment(v.forSwing()) );
         return with(verticalAlign.orElseThrow());
     }
 
@@ -234,7 +234,7 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> withImageRelativeHorizontalAlignment( Val<UI.HorizontalAlignment> horizontalAlign ) {
-        horizontalAlign.onShow(v -> _doUI(() -> getComponent().setHorizontalTextPosition(v.forSwing())));
+        _onShow( horizontalAlign, v -> getComponent().setHorizontalTextPosition(v.forSwing()) );
         return withImageRelative(horizontalAlign.orElseThrow());
     }
 
@@ -263,7 +263,7 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> withImageRelativeVerticalAlignment( Val<UI.VerticalAlignment> verticalAlign ) {
-        verticalAlign.onShow(v -> _doUI(() -> getComponent().setVerticalTextPosition(v.forSwing())));
+        _onShow( verticalAlign, v -> getComponent().setVerticalTextPosition(v.forSwing()) );
         return withImageRelative(verticalAlign.orElseThrow());
     }
 
@@ -294,7 +294,7 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> withIcon( Val<Icon> icon ) {
-        icon.onShow(i-> _doUI(()->getComponent().setIcon(i)));
+        _onShow( icon, i -> getComponent().setIcon(i) );
         return with(icon.orElseThrow());
     }
 
@@ -320,7 +320,7 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> withFontSize( Val<Integer> size ) {
-        size.onShow(s -> _doUI(() -> withFontSize(s)));
+        _onShow( size, s -> withFontSize(s) );
         return withFontSize(size.orElseThrow());
     }
 }

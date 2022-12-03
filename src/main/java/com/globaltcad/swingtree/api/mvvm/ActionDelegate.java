@@ -16,12 +16,12 @@ public interface ActionDelegate<T> {
     /**
      * @return The current property.
      */
-    Var<T> current();
+    Val<T> current();
 
     /**
      * @return The current property.
      */
-    default Var<T> getCurrent() { return current(); }
+    default Val<T> getCurrent() { return current(); }
 
     /**
      * @return The previous property.

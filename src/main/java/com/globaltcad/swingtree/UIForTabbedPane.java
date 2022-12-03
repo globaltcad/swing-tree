@@ -26,13 +26,13 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
 
     public final UIForTabbedPane<P> withPosition( Val<UI.Position> position ) {
         NullUtil.nullArgCheck(position, "position", Var.class);
-        position.onShow(v-> _doUI(()->getComponent().setTabPlacement(position.orElseThrow().forTabbedPane())));
+        _onShow(position, v -> getComponent().setTabPlacement(position.orElseThrow().forTabbedPane()));
         return this;
     }
 
     public final UIForTabbedPane<P> withOverflowPolicy( Val<UI.OverflowPolicy> policy ) {
         NullUtil.nullArgCheck(policy, "policy", Var.class);
-        policy.onShow(v-> _doUI(()->getComponent().setTabLayoutPolicy(policy.orElseThrow().forTabbedPane())));
+        _onShow(policy, v -> getComponent().setTabLayoutPolicy(policy.orElseThrow().forTabbedPane()));
         return this;
     }
 

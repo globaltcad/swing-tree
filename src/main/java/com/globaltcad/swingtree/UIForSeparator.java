@@ -39,7 +39,7 @@ public class UIForSeparator<S extends JSeparator> extends UIForAbstractSwing<UIF
      * @return This very builder to allow for method chaining.
      */
     public UIForSeparator<S> withLength( Val<Integer> separatorLength ) {
-        separatorLength.onShow(v -> _doUI(() -> withLength(v)));
+        _onShow(separatorLength, v -> withLength(v));
         return this;
     }
 }

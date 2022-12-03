@@ -18,7 +18,7 @@ public class UIForMenu<M extends JMenu> extends UIForAbstractMenuItem<UIForMenu<
     }
 
     public final UIForMenu<M> popupMenuIsVisibleIf( Val<Boolean> val ) {
-        val.onShow(v -> _doUI(() -> popupMenuIsVisibleIf(v)));
+        _onShow(val, v -> popupMenuIsVisibleIf(v));
         return popupMenuIsVisibleIf( val.get() );
     }
 

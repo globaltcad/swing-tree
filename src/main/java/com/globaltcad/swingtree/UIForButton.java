@@ -18,7 +18,7 @@ public class UIForButton<B extends AbstractButton> extends UIForAbstractButton<U
     }
 
     public UIForButton<B> isBorderPaintedIf( Val<Boolean> val ) {
-        val.onShow(v -> _doUI(() -> isBorderPaintedIf(v)));
+        _onShow(val, v -> isBorderPaintedIf(v) );
         return isBorderPaintedIf( val.get() );
     }
 

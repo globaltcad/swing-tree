@@ -9,6 +9,7 @@ import javax.swing.event.PopupMenuListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.lang.ref.WeakReference;
 import java.util.function.Consumer;
 
 /**
@@ -27,21 +28,24 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
         Component editor = getComponent().getEditor().getEditorComponent();
         if ( editor instanceof JTextField ) {
             JTextField field = (JTextField) editor;
-            JComboBox<E> comboBox = getComponent();
             boolean[] comboIsOpen = {false};
+            WeakReference<JComboBox<E>> weakCombo = new WeakReference<>(getComponent());
             UI.of(field).onTextChange( it -> {
-                if ( !comboIsOpen[0] && comboBox.isEditable() )
+                JComboBox<E> strongCombo = weakCombo.get();
+                if ( !comboIsOpen[0] && strongCombo != null && strongCombo.isEditable() )
                     model.setFromEditor(field.getText());
             });
 
-            model.onSelectedItemShow( v -> {
-                if ( comboBox.isEditable() )
-                    comboBox.getEditor().setItem(v);
+            _onShow( model._getSelectedItemVar(), v -> {
+                component().ifPresent( combo -> {
+                    if ( combo.isEditable() )
+                        combo.getEditor().setItem(v);
+                });
             });
 
             // Adds a PopupMenu listener which will listen to notification
             // messages from the popup portion of the combo box.
-            comboBox.addPopupMenuListener(new PopupMenuListener() {
+            getComponent().addPopupMenuListener(new PopupMenuListener() {
                 public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
                     // This method is called before the popup menu becomes visible.
                     comboIsOpen[0] = true;
@@ -103,7 +107,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
      * @return This very instance, which enables builder-style method chaining.
      */
     public UIForCombo<E,C> isEditableIf( Var<Boolean> isEditable ) {
-        isEditable.onShow(v -> _doUI(() -> isEditableIf(v)));
+        _onShow( isEditable, v -> isEditableIf(v) );
         return this;
     }
 
@@ -131,7 +135,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
             withModel(((AbstractComboModel<E>)model).withVar(var));
         else {
             // The user has a custom model AND wants to bind to a property:
-            var.onShow(v-> _doUI(()-> _setSelectedItem(v)));
+            _onShow( var, v -> _setSelectedItem(v) );
             _onSelection(
                 e -> _doApp((E)getComponent().getSelectedItem(), sel->var.act(sel))
             );

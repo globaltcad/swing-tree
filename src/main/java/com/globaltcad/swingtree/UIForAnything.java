@@ -1,10 +1,12 @@
 package com.globaltcad.swingtree;
 
+import java.awt.*;
+
 /**
  *  A swing tree builder node for anything.
  *  Note: This does not support nesting.
  */
-public class UIForAnything<T> extends AbstractBuilder<UIForAnything<T>, T>
+public class UIForAnything<T extends Component> extends AbstractBuilder<UIForAnything<T>, T>
 {
     /**
      * Instances of the {@link UIForAnything} builder do not support the

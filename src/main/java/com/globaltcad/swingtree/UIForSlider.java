@@ -44,7 +44,7 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
     }
 
     public final UIForSlider<S> withMin( Val<Integer> val ) {
-        val.onShow(v-> _doUI(()->getComponent().setMinimum(v)));
+        _onShow(val, v -> getComponent().setMinimum(v) );
         return this;
     }
 
@@ -54,7 +54,7 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
     }
 
     public final UIForSlider<S> withMax( Val<Integer> val ) {
-        val.onShow(v-> _doUI(()->getComponent().setMaximum(v)));
+        _onShow(val, v -> getComponent().setMaximum(v) );
         return this;
     }
 
@@ -64,7 +64,7 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
     }
 
     public final UIForSlider<S> withValue( Val<Integer> val ) {
-        val.onShow(v-> _doUI(()->getComponent().setValue(v)));
+        _onShow(val, v -> getComponent().setValue(v) );
         return this;
     }
 

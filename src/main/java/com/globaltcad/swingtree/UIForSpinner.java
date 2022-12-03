@@ -60,7 +60,7 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
     public final UIForSpinner<S> withValue( Val<?> val ) {
         NullUtil.nullArgCheck(val, "val", Val.class);
         NullUtil.nullPropertyCheck(val, "val", "Null is not a valid spinner state!");
-        val.onShow( v -> _doUI(()->withValue(v)) );
+        _onShow(val, v -> withValue(v) );
         return withValue(val.get());
     }
 
@@ -73,7 +73,7 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
     public final UIForSpinner<S> withValue( Var<?> var ) {
         NullUtil.nullArgCheck(var, "var", Var.class);
         NullUtil.nullPropertyCheck(var, "var", "Null is not a valid spinner state!");
-        var.onShow( v -> _doUI(() -> withValue(v)) );
+        _onShow( var, v -> withValue(v) );
         _onChange( e -> _doApp(() -> {
             Object value = getComponent().getValue();
             if ( value != null && Number.class.isAssignableFrom(var.type()) ) {
@@ -136,7 +136,7 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
                     "This JSpinner can not have a numeric step size as it is not based on the SpinnerNumberModel!"
                 );
         SpinnerNumberModel numberModel = (SpinnerNumberModel) model;
-        val.onShow(v -> _doUI(() -> numberModel.setStepSize(v)));
+        _onShow(val, v -> numberModel.setStepSize(v) );
         numberModel.setStepSize(val.get());
         return this;
     }

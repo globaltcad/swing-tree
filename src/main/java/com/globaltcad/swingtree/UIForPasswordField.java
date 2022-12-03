@@ -39,7 +39,7 @@ public class UIForPasswordField<F extends JPasswordField> extends UIForAbstractT
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForPasswordField<F> withEchoChar( Val<Character> echoChar ) {
-        echoChar.onShow(v -> _doUI(() -> withEchoChar(v)));
+        _onShow(echoChar, v -> withEchoChar(v) );
         return this;
     }
 

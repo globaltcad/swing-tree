@@ -82,13 +82,13 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
     }
 
     public final I withText( Val<String> val ) {
-        val.onShow(v-> _doUI(()->getComponent().setText(v)));
+        _onShow(val, v -> getComponent().setText(v) );
         return withText( val.orElseThrow() );
     }
 
     public final I withText( Var<String> text ) {
         NullUtil.nullPropertyCheck(text, "text", "Use an empty string instead of null!");
-        text.onShow(v-> _doUI(()->getComponent().setText(v)));
+        _onShow( text, v-> getComponent().setText(v) );
         _onKeyTyped( (KeyEvent e) -> {
             String oldText = getComponent().getText();
             // We need to add the now typed character to the old text, because the key typed event
@@ -116,7 +116,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
     public final I withFont( Val<Font> font ) {
         NullUtil.nullArgCheck(font, "font", Val.class);
         NullUtil.nullPropertyCheck(font, "font", "Use the default font of this component instead of null!");
-        font.onShow(v-> _doUI(()->withFont(v)));
+        _onShow( font, v -> withFont(v) );
         return withFont( font.orElseThrow() );
     }
 
@@ -155,10 +155,10 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
     public final I withHorizontalTextOrientation( Val<UI.HorizontalDirection> direction ) {
         NullUtil.nullArgCheck( direction, "direction", Val.class );
         NullUtil.nullPropertyCheck(direction, "direction", "Null is not a valid value for the text orientation!");
-        direction.onShow(v-> _doUI(()->{
+        _onShow( direction, v -> {
             withTextOrientation(v);
             getComponent().validate();
-        }));
+        });
         return withTextOrientation(direction.orElseThrow());
     }
 

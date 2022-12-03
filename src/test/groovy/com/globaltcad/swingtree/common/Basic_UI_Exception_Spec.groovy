@@ -14,6 +14,7 @@ import spock.lang.Title
 import javax.swing.*
 import javax.swing.text.JTextComponent
 import java.awt.Color
+import java.awt.Component
 
 @Title("How Not To Use")
 @Narrative('''
@@ -70,7 +71,7 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.separator((UI.Align)null)},
                     {UI.of((JTextArea)null)},
                     {UI.of((JLabel)null)},
-                    {UI.of((Object)null)},
+                    {UI.of((Component)null)},
                     {UI.of((JTabbedPane)null)},
                     {UI.splitItem(null)},
                     {UI.splitButton(null)},

@@ -2,6 +2,8 @@ package com.globaltcad.swingtree;
 
 import com.globaltcad.swingtree.api.Peeker;
 
+import java.awt.*;
+import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -12,12 +14,13 @@ import java.util.function.Consumer;
  * @param <I> The concrete implementation type of this builder.
  * @param <C> The component type parameter.
  */
-abstract class AbstractBuilder<I, C>
+abstract class AbstractBuilder<I, C extends Component>
 {
     /**
      *  The component wrapped by this builder node.
      */
-    private final C _component;
+    private final WeakReference<C> _component;
+    private C _componentStrongRef; // A strong reference to the component (This is only used to prevent the component from being garbage collected)
 
     /**
      * The thread mode determines how events are dispatched to the component.
@@ -39,8 +42,11 @@ abstract class AbstractBuilder<I, C>
      */
     public AbstractBuilder( C component ) {
         _type = (Class<C>) component.getClass();
-        _component = component;
+        _component = new WeakReference<>(component);
+        _componentStrongRef = component;
     }
+
+    protected final void _detachStrongRef() { _componentStrongRef = null; }
 
     /**
      *  The component wrapped by this builder node.
@@ -52,7 +58,14 @@ abstract class AbstractBuilder<I, C>
                     "which means that it can only be modified from the EDT. " +
                     "Please use 'UI.run(()->...)' method to execute your modifications on the EDT."
                 );
-        return _component;
+        return _component.get();
+    }
+
+    /**
+     *  The optional component wrapped by this builder node.
+     */
+    public final OptionalUI<C> component() {
+        return OptionalUI.ofNullable(_component.get());
     }
 
     /**
@@ -162,6 +175,6 @@ abstract class AbstractBuilder<I, C>
      */
     public <T extends C> T get(Class<T> type) {
         assert type == _type || type.isAssignableFrom(_type);
-        return (T) _component;
+        return (T) _component.get();
     }
 }

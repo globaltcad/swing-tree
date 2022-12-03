@@ -4,6 +4,8 @@ package com.globaltcad.swingtree;
 import com.globaltcad.swingtree.api.Peeker;
 import com.globaltcad.swingtree.api.UIAction;
 import com.globaltcad.swingtree.api.UIVerifier;
+import com.globaltcad.swingtree.api.mvvm.ActionDelegate;
+import com.globaltcad.swingtree.api.mvvm.DisplayAction;
 import com.globaltcad.swingtree.api.mvvm.Val;
 import com.globaltcad.swingtree.input.Keyboard;
 import com.globaltcad.swingtree.layout.CompAttr;
@@ -15,9 +17,11 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 
@@ -66,6 +70,25 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         _doApp(()->action.accept(value));
     }
 
+    <T> void _onShow( Val<T> val, Consumer<T> displayAction ) {
+        val.onShowThis(new DisplayAction<T>() {
+            @Override
+            public void display(ActionDelegate<T> delegate) {
+                _doUI(() ->
+                    component().ifPresent(c -> {
+                        displayAction.accept(val.orElseNull());
+                        /*
+                            We make sure that the action is only executed if the component
+                            is not disposed. This is important because the action may
+                            access the component, and we don't want to get a NPE.
+                         */
+                    })
+                );
+            }
+            @Override public boolean canBeRemoved() { return !component().isPresent(); }
+        });
+    }
+
     /**
      *  This method exposes a concise way to set an identifier for the component
      *  wrapped by this {@link UI}!
@@ -107,7 +130,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I isVisibleIf( Val<Boolean> isVisible ) {
         NullUtil.nullArgCheck(isVisible, "isVisible", Val.class);
         NullUtil.nullPropertyCheck(isVisible, "isVisible", "Null is not allowed to model the visibility of a UI component!");
-        isVisible.onShow(v-> _doUI(()->getComponent().setVisible(v)));
+        _onShow( isVisible, v -> getComponent().setVisible(v) );
         return isVisibleIf( isVisible.orElseThrow() );
     }
 
@@ -132,7 +155,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I isEnabledIf( Val<Boolean> isEnabled ) {
         NullUtil.nullArgCheck(isEnabled, "isEnabled", Val.class);
         NullUtil.nullPropertyCheck(isEnabled, "isEnabled", "Null value for isEnabled is not allowed!");
-        isEnabled.onShow(v-> _doUI(()->getComponent().setEnabled(v)));
+        _onShow( isEnabled, v -> getComponent().setEnabled(v) );
         return isEnabledIf( isEnabled.orElseThrow() );
     }
 
@@ -210,7 +233,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withBorder( Val<Border> border ) {
         NullUtil.nullArgCheck(border, "border", Val.class);
         NullUtil.nullPropertyCheck(border, "border", "Null value for border is not allowed!");
-        border.onShow(v-> _doUI(()->getComponent().setBorder(v)));
+        _onShow( border, v -> getComponent().setBorder(v) );
         return this.withBorder( border.orElseNull() );
     }
 
@@ -579,7 +602,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withCursor( Val<UI.Cursor> type ) {
         NullUtil.nullArgCheck( type, "type", Val.class );
         NullUtil.nullPropertyCheck(type, "type", "Null is not allowed to model a cursor type.");
-        type.onShow(t -> _doUI(()->getComponent().setCursor( new java.awt.Cursor( t.type ) )) );
+        _onShow( type, t -> getComponent().setCursor( new java.awt.Cursor( t.type ) ) );
         return with( type.orElseThrow() );
     }
 
@@ -597,7 +620,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullArgCheck( condition, "condition", Val.class );
         NullUtil.nullArgCheck( type, "type", UI.Cursor.class );
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the cursor selection state.");
-        condition.onShow( c -> _doUI(()->getComponent().setCursor( new java.awt.Cursor( c ? type.type : UI.Cursor.DEFAULT.type ) )) );
+        _onShow( condition, c -> getComponent().setCursor( new java.awt.Cursor( c ? type.type : UI.Cursor.DEFAULT.type ) ) );
         return with( condition.orElseThrow() ? type : UI.Cursor.DEFAULT );
     }
 
@@ -617,11 +640,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the cursor selection state.");
         NullUtil.nullPropertyCheck(type, "type", "Null is not allowed to model a cursor type.");
         Cursor[] baseCursor = new Cursor[1];
-        condition.onShow( c -> _doUI(type::show) );
-        type.onShow( c -> _doUI(()-> {
+        _onShow( condition, c -> type.show() );
+        _onShow( type, c ->{
             if (baseCursor[0] == null) baseCursor[0] = getComponent().getCursor();
             getComponent().setCursor( new java.awt.Cursor( condition.get() ? c.type : baseCursor[0].getType() ) );
-        }) );
+        });
         return with( condition.orElseThrow() ? type.orElseThrow() : UI.Cursor.DEFAULT );
     }
 
@@ -785,7 +808,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withTooltip( Val<String> tip ) {
         NullUtil.nullArgCheck(tip, "tip", Val.class);
         NullUtil.nullPropertyCheck(tip, "tip", "Please use an empty string instead of null!");
-        tip.onShow(v-> _doUI(()->getComponent().setToolTipText(v)));
+        _onShow( tip, v -> getComponent().setToolTipText(v) );
         return this.withTooltip( tip.orElseThrow() );
     }
 
@@ -828,7 +851,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withBackground( Val<Color> bg ) {
         NullUtil.nullArgCheck(bg, "bg", Val.class);
         NullUtil.nullPropertyCheck(bg, "bg", "Please use the default color of this component instead of null!");
-        bg.onShow(v-> _doUI(()->getComponent().setBackground(v)));
+        _onShow( bg, v -> getComponent().setBackground(v) );
         return this.withBackground( bg.orElseNull() );
     }
 
@@ -846,14 +869,13 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullArgCheck(bg, "bg", Color.class);
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided background color!");
         Color[] oldColor = new Color[1];
-        condition.onShow( v -> _doUI(()->{
+        _onShow( condition, v -> {
             if (v) {
                 oldColor[0] = getComponent().getBackground();
                 getComponent().setBackground(bg);
-            } else {
-                getComponent().setBackground(oldColor[0]);
             }
-        }));
+            else getComponent().setBackground(oldColor[0]);
+        });
         return this.withBackground( condition.orElse(false) ? bg : getComponent().getBackground() );
     }
     
@@ -872,13 +894,13 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided background color!");
         NullUtil.nullPropertyCheck(color, "color", "Null is not allowed to model the the provided background color! Please use the default color of this component instead.");
         Color[] baseColor = new Color[1];
-        condition.onShow(setColor -> _doUI(color::show));
-        color.onShow(v -> _doUI(() -> {
+        _onShow( condition, setColor -> color.show() );
+        _onShow( color, v -> {
             if (condition.get()) {
                 if (!color.is(baseColor[0])) baseColor[0] = getComponent().getBackground();
                 getComponent().setBackground(color.get());
             } else getComponent().setBackground(baseColor[0]);
-        }));
+        });
         return this.withBackground(condition.orElse(false) ? color.orElseThrow() : getComponent().getBackground());
     }
     
@@ -920,7 +942,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withForeground( Val<Color> fg ) {
         NullUtil.nullArgCheck(fg, "fg", Val.class);
         NullUtil.nullPropertyCheck(fg, "fg", "Please use the default color of this component instead of null!");
-        fg.onShow(v-> _doUI(()->getComponent().setForeground(v)));
+        _onShow( fg, v -> getComponent().setForeground(v) );
         return this.withForeground( fg.orElseNull() );
     }
     
@@ -938,14 +960,13 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullArgCheck(fg, "fg", Color.class);
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided foreground color!");
         Color[] oldColor = new Color[1];
-        condition.onShow( v -> _doUI(()->{
+        _onShow( condition, v -> {
             if (v) {
                 oldColor[0] = getComponent().getForeground();
                 getComponent().setForeground(fg);
-            } else {
-                getComponent().setForeground(oldColor[0]);
             }
-        }));
+            else getComponent().setForeground(oldColor[0]);
+        });
         return this.withForeground( condition.orElse(false) ? fg : getComponent().getForeground() );
     }
     
@@ -964,13 +985,14 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided foreground color!");
         NullUtil.nullPropertyCheck(color, "color", "Null is not allowed to model the the provided foreground color! Please use the default color of this component instead.");
         Color[] baseColor = new Color[1];
-        condition.onShow(setColor -> _doUI(color::show));
-        color.onShow(v -> _doUI(() -> {
+        _onShow( condition, setColor -> color.show() );
+        _onShow( color, v -> {
             if (condition.get()) {
                 if (!color.is(baseColor[0])) baseColor[0] = getComponent().getForeground();
                 getComponent().setForeground(color.get());
-            } else getComponent().setForeground(baseColor[0]);
-        }));
+            }
+            else getComponent().setForeground(baseColor[0]);
+        });
         return this.withForeground(condition.orElse(false) ? color.orElseThrow() : getComponent().getForeground());
     }
 
@@ -1006,7 +1028,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withMinimumSize( Val<Dimension> size ) {
         NullUtil.nullArgCheck(size, "size", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the minimum size of this component!");
-        size.onShow(v-> _doUI(()->getComponent().setMinimumSize(v)));
+        _onShow( size, v -> getComponent().setMinimumSize(v) );
         return this.withMinimumSize( size.orElseThrow() );
     }
 
@@ -1035,11 +1057,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the minimum width of this component!");
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the minimum height of this component!");
-        width.onShow(w ->
-                _doUI(()-> getComponent().setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height)))
+        _onShow( width, w ->
+                getComponent().setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height))
             );
-        height.onShow(h ->
-                _doUI(()-> getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, h)))
+        _onShow( height, h ->
+                getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, h))
             );
         return this.withMinimumSize( width.orElseThrow(), height.orElseThrow() );
     }
@@ -1064,7 +1086,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withMinimumWidth( Val<Integer> width ) {
         NullUtil.nullArgCheck(width, "width", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the minimum width of this component!");
-        width.onShow(w -> _doUI(()-> getComponent().setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height))) );
+        _onShow( width, w -> getComponent().setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height)) );
         return this.withMinimumWidth( width.orElseThrow() );
     }
 
@@ -1089,7 +1111,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withMinimumHeight( Val<Integer> height ) {
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the minimum height of this component!");
-        height.onShow(h -> _doUI(()-> getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, h))) );
+        _onShow( height, h -> getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, h)) );
         return this.withMinimumHeight( height.orElseThrow() );
     }
 
@@ -1115,7 +1137,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withMaximumSize( Val<Dimension> size ) {
         NullUtil.nullArgCheck(size, "size", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the maximum size of this component!");
-        size.onShow(v -> _doUI(()-> getComponent().setMaximumSize(v)) );
+        _onShow( size, v -> getComponent().setMaximumSize(v) );
         return this.withMaximumSize( size.orElseThrow() );
     }
 
@@ -1144,8 +1166,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the maximum width of this component!");
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the maximum height of this component!");
-        width.onShow(w -> _doUI(()-> getComponent().setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height))) );
-        height.onShow(h -> _doUI(()-> getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h))) );
+        _onShow( width, w -> getComponent().setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height)) );
+        _onShow( height, h -> getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h)) );
         return this.withMaximumSize( width.orElseThrow(), height.orElseThrow() );
     }
 
@@ -1169,7 +1191,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withMaximumWidth( Val<Integer> width ) {
         NullUtil.nullArgCheck(width, "width", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the maximum width of this component!");
-        width.onShow(w -> _doUI(()-> getComponent().setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height))) );
+        _onShow( width, w -> getComponent().setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height)) );
         return this.withMaximumWidth( width.orElseThrow() );
     }
 
@@ -1193,7 +1215,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withMaximumHeight( Val<Integer> height ) {
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the maximum height of this component!");
-        height.onShow(h -> _doUI(()-> getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h))) );
+        _onShow( height, h -> getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h)) );
         return this.withMaximumHeight( height.orElseThrow() );
     }
 
@@ -1219,7 +1241,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withPreferredSize( Val<Dimension> size ) {
         NullUtil.nullArgCheck(size, "size", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the preferred size of this component!");
-        size.onShow(v -> _doUI(()-> getComponent().setPreferredSize(v)) );
+        _onShow( size, v -> getComponent().setPreferredSize(v) );
         return this.withPreferredSize( size.orElseNull() );
     }
 
@@ -1248,8 +1270,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the preferred width of this component!");
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the preferred height of this component!");
-        width.onShow(w -> _doUI(()-> getComponent().setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height))) );
-        height.onShow(h -> _doUI(()-> getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h))) );
+        _onShow( width, w -> getComponent().setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height)) );
+        _onShow( height, h -> getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h)) );
         return this.withPreferredSize( width.orElseThrow(), height.orElseThrow() );
     }
 
@@ -1273,7 +1295,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withPreferredWidth( Val<Integer> width ) {
         NullUtil.nullArgCheck(width, "width", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the preferred width of this component!");
-        width.onShow(w -> _doUI(()-> getComponent().setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height))) );
+        _onShow( width, w -> getComponent().setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height)) );
         return this.withPreferredWidth( width.orElseThrow() );
     }
 
@@ -1297,7 +1319,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withPreferredHeight( Val<Integer> height ) {
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the preferred height of this component!");
-        height.onShow(h -> _doUI(()-> getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h))) );
+        _onShow( height, h -> getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h)) );
         return this.withPreferredHeight( height.orElseThrow() );
     }
 

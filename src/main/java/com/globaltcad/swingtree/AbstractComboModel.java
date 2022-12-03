@@ -32,9 +32,7 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 		_selectedItem = selectedItem;
 	}
 
-	public final void onSelectedItemShow(Consumer<E> consumer) {
-		_selectedItem.onShow(consumer);
-	}
+	final Var<E> _getSelectedItemVar() { return _selectedItem; }
 
 	abstract AbstractComboModel<E> withVar( Var<E> newVar );
 

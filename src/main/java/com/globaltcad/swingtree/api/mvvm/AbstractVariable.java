@@ -13,7 +13,7 @@ import java.util.*;
  */
 public abstract class AbstractVariable<T> implements Var<T>
 {
-	private final List<PropertyAction<T>> _viewActions = new ArrayList<>();
+	private final List<DisplayAction<T>> _viewActions = new ArrayList<>();
 
 	private final List<Val<T>> _history = new ArrayList<>(17);
 
@@ -34,7 +34,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 			T iniValue,
 			String name,
 			PropertyAction<T> action,
-			List<PropertyAction<T>> viewActions,
+			List<DisplayAction<T>> viewActions,
 			boolean allowsNull
 	) {
 		Objects.requireNonNull(name);
@@ -91,20 +91,22 @@ public abstract class AbstractVariable<T> implements Var<T>
 	}
 
 	private ActionDelegate<T> _createDelegate() {
+		// We clone the current state of the variable because
+		// it might be accessed from a different thread! (e.g. Swing EDT or Application Thread)
+		AbstractVariable<T> clone = new AbstractVariable<T>( _type, _value, _id, _action, _allowsNull ){};
+		clone._viewActions.addAll(_viewActions);
 		List<Val<T>> reverseHistory = new ArrayList<>(AbstractVariable.this._history);
 		Collections.reverse(reverseHistory);
 		return new ActionDelegate<T>() {
-			@Override public Var<T> current() { return AbstractVariable.this; }
+			@Override public Val<T> current() { return clone; }
 			@Override
 			public Val<T> previous() {
-				if ( AbstractVariable.this._history.isEmpty() )
-					return Val.ofNullable(AbstractVariable.this._type, null);
+				if ( reverseHistory.isEmpty() )
+					return Val.ofNullable(clone._type, null);
 				return reverseHistory.get(0);
 			}
 			@Override
-			public List<Val<T>> history() {
-				return Collections.unmodifiableList(reverseHistory);
-			}
+			public List<Val<T>> history() { return Collections.unmodifiableList(reverseHistory); }
 		};
 	}
 
@@ -176,7 +178,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override public Val<T> onShowThis( PropertyAction<T> displayAction ) {
+	@Override public Val<T> onShowThis( DisplayAction<T> displayAction ) {
 		_viewActions.add(displayAction);
 		return this;
 	}
@@ -186,12 +188,19 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 */
 	@Override
 	public Val<T> show() {
-		for ( PropertyAction<T> action : new ArrayList<>(_viewActions) ) // We copy the list to avoid concurrent modification
+		List<DisplayAction<T>> removableActions = new ArrayList<>();
+		for ( DisplayAction<T> action : new ArrayList<>(_viewActions) ) // We copy the list to avoid concurrent modification
 			try {
-				UI.run( () -> action.act(_createDelegate()) );
+				if ( action.canBeRemoved() )
+					removableActions.add(action);
+				else {
+					ActionDelegate<T> delegate = _createDelegate();
+					UI.run(() -> action.display(delegate));
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		_viewActions.removeAll(removableActions);
 		return this;
 	}
 

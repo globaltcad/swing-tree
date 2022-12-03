@@ -932,7 +932,7 @@ public final class UI
         NullUtil.nullArgCheck(attr, "attr", Val.class);
         NullUtil.nullPropertyCheck(attr, "attr", "Null is not a valid layout attribute.");
         UIForPanel<JPanel> ui = panel(attr.get().toString());
-        attr.onShow( it -> {
+        ui._onShow(attr, it -> {
             // Every time the value changes, we need to re-layout the panel.
             // Note that this is for mig layout:
             LayoutManager lm = ui.getComponent().getLayout();
@@ -2140,8 +2140,8 @@ public final class UI
      *
      * @return A builder instance for the provided object, which enables fluent method chaining.
      */
-    public static <T> UIForAnything<T> of( T component ) {
-        NullUtil.nullArgCheck(component, "component", Object.class);
+    public static <T extends Component> UIForAnything<T> of( T component ) {
+        NullUtil.nullArgCheck(component, "component", Component.class);
         return new UIForAnything<>(component);
     }
 

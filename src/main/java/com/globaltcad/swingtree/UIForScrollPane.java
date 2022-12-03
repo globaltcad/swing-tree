@@ -61,7 +61,7 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAbstractSwing<U
      */
     public final UIForScrollPane<P> withVerticalScrollBarPolicy( Val<UI.ScrollBarPolicy> scrollBarPolicy ) {
         NullUtil.nullArgCheck(scrollBarPolicy, "scrollBarPolicy", Val.class);
-        scrollBarPolicy.onShow(v-> _doUI(()->withVertical(v)));
+        _onShow(scrollBarPolicy, v -> withVertical(v));
         return this;
     }
 
@@ -90,7 +90,7 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAbstractSwing<U
      */
     public final UIForScrollPane<P> withHorizontalScrollBarPolicy( Val<UI.ScrollBarPolicy> scrollBarPolicy ) {
         NullUtil.nullArgCheck(scrollBarPolicy, "scrollBarPolicy", Val.class);
-        scrollBarPolicy.onShow(v-> _doUI(()->withHorizontal(v)));
+        _onShow(scrollBarPolicy, v -> withHorizontal(v) );
         return this;
     }
 
