@@ -26,16 +26,17 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
      *
      * @param action The {@link UIAction} that will be called through the underlying change event.
      * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public final UIForSlider<S> onChange( UIAction<SimpleDelegate<JSlider, ChangeEvent>> action ) {
-        NullUtil.nullArgCheck(action, "action", UIAction.class);
+        NullUtil.nullArgCheck( action, "action", UIAction.class );
         S slider = getComponent();
-        _onChange( e -> _doApp(()->action.accept(new SimpleDelegate<>(slider, e, ()->getSiblinghood()))) );
+        _onChange( e -> _doApp(()->action.accept(new SimpleDelegate<>(slider, e, this::getSiblinghood))) );
         return this;
     }
 
     private void _onChange( Consumer<ChangeEvent> action ) {
-        getComponent().addChangeListener(e -> action.accept(e) );
+        getComponent().addChangeListener(action::accept);
     }
 
     public final UIForSlider<S> withMin( int min ) {
@@ -43,8 +44,14 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
         return this;
     }
 
-    public final UIForSlider<S> withMin( Val<Integer> val ) {
-        _onShow(val, v -> getComponent().setMinimum(v) );
+    /**
+     * @param min The min property used to dynamically update the min value of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code min} is {@code null}.
+     */
+    public final UIForSlider<S> withMin( Val<Integer> min ) {
+        NullUtil.nullArgCheck( min, "min", Val.class );
+        _onShow(min, v -> getComponent().setMinimum(v) );
         return this;
     }
 
@@ -53,8 +60,14 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
         return this;
     }
 
-    public final UIForSlider<S> withMax( Val<Integer> val ) {
-        _onShow(val, v -> getComponent().setMaximum(v) );
+    /**
+     * @param max An integer property used to dynamically update the max value of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code max} is {@code null}.
+     */
+    public final UIForSlider<S> withMax( Val<Integer> max ) {
+        NullUtil.nullArgCheck( max, "max", Val.class );
+        _onShow(max, v -> getComponent().setMaximum(v) );
         return this;
     }
 
@@ -64,12 +77,14 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
     }
 
     public final UIForSlider<S> withValue( Val<Integer> val ) {
+        NullUtil.nullArgCheck( val, "val", Val.class );
         _onShow(val, v -> getComponent().setValue(v) );
         return this;
     }
 
     public final UIForSlider<S> withValue( Var<Integer> var ) {
-        _onChange( e -> _doApp(getComponent().getValue(), v -> var.act(v)));
+        NullUtil.nullArgCheck( var, "var", Var.class );
+        _onChange( e -> _doApp(getComponent().getValue(), var::act) );
         return this.withValue((Val<Integer>) var);
     }
 

@@ -1,5 +1,6 @@
 package com.globaltcad.swingtree;
 
+import com.globaltcad.swingtree.api.UIAction;
 import com.globaltcad.swingtree.api.mvvm.Val;
 
 import javax.swing.*;
@@ -15,7 +16,7 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAbstractSwing<UIF
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    public UIForSplitPane( P component ) { super(component); }
+    public UIForSplitPane( P component ) { super( component ); }
 
     /**
      * Sets the location of the divider. This is passed off to the
@@ -47,9 +48,12 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAbstractSwing<UIF
      * @param location A property dynamically determining a UI-specific value (typically a
      *        pixel count)
      * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code location} is {@code null}.
      */
     public final UIForSplitPane<P> withDividerAt( Val<Integer> location ) {
-        _onShow(location, v -> withDividerAt(v));
+        NullUtil.nullArgCheck( location, "location", Val.class );
+        NullUtil.nullPropertyCheck( location, "location", "Null is not a valid divider location." );
+        _onShow( location, this::withDividerAt );
         return this;
     }
 
@@ -70,9 +74,12 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAbstractSwing<UIF
      *
      * @param size A property dynamically determining the size of the divider in pixels
      * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code size} is {@code null}.
      */
     public final UIForSplitPane<P> withDividerSize( Val<Integer> size ) {
-        _onShow(size, v -> withDividerSize(v) );
+        NullUtil.nullArgCheck( size, "size", Val.class );
+        NullUtil.nullPropertyCheck( size, "size", "Null is not a valid divider size." );
+        _onShow( size, this::withDividerSize );
         return this;
     }
 

@@ -120,7 +120,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
     public final UIForTabbedPane<P> onChange( UIAction<SimpleDelegate<P, ChangeEvent>> onChange ) {
         NullUtil.nullArgCheck(onChange, "onChange", UIAction.class);
         P pane = getComponent();
-        pane.addChangeListener(e -> _doApp(()->onChange.accept(new SimpleDelegate<>(pane, e, ()->getSiblinghood()))));
+        pane.addChangeListener(e -> _doApp(()->onChange.accept(new SimpleDelegate<>(pane, e, this::getSiblinghood))));
         return this;
     }
 

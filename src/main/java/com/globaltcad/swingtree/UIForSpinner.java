@@ -32,12 +32,12 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
     public final UIForSpinner<S> onChange( UIAction<SimpleDelegate<JSpinner, ChangeEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", UIAction.class);
         S spinner = getComponent();
-        _onChange(e -> _doApp(()->action.accept(new SimpleDelegate<>(spinner, e, ()->getSiblinghood()))) );
+        _onChange(e -> _doApp(()->action.accept(new SimpleDelegate<>(spinner, e, this::getSiblinghood))) );
         return this;
     }
 
     private void _onChange( Consumer<ChangeEvent> consumer ) {
-        getComponent().addChangeListener( e -> consumer.accept(e) );
+        getComponent().addChangeListener(consumer::accept);
     }
 
     /**
@@ -45,8 +45,10 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
      *
      * @param value The value to set.
      * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code value} is {@code null}.
      */
     public final UIForSpinner<S> withValue( Object value ) {
+        NullUtil.nullArgCheck(value, "value", Object.class);
         getComponent().setValue(value);
         return this;
     }
@@ -54,51 +56,53 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
     /**
      * Sets the value of the spinner and also binds to said value.
      *
-     * @param val The {@link com.globaltcad.swingtree.api.mvvm.Val} wrapper whose value should be set.
+     * @param value The {@link com.globaltcad.swingtree.api.mvvm.Val} wrapper whose value should be set.
      * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code value} is {@code null}.
      */
-    public final UIForSpinner<S> withValue( Val<?> val ) {
-        NullUtil.nullArgCheck(val, "val", Val.class);
-        NullUtil.nullPropertyCheck(val, "val", "Null is not a valid spinner state!");
-        _onShow(val, v -> withValue(v) );
-        return withValue(val.get());
+    public final UIForSpinner<S> withValue( Val<?> value ) {
+        NullUtil.nullArgCheck(value, "value", Val.class);
+        NullUtil.nullPropertyCheck(value, "value", "Null is not a valid spinner state!");
+        _onShow(value, this::withValue);
+        return withValue(value.get());
     }
 
     /**
      * Sets the value of the spinner and also binds to the provided property.
      *
-     * @param var The {@link com.globaltcad.swingtree.api.mvvm.Var} wrapper whose value should be set.
+     * @param value The {@link com.globaltcad.swingtree.api.mvvm.Var} wrapper whose value should be set.
      * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code value} is {@code null}.
      */
-    public final UIForSpinner<S> withValue( Var<?> var ) {
-        NullUtil.nullArgCheck(var, "var", Var.class);
-        NullUtil.nullPropertyCheck(var, "var", "Null is not a valid spinner state!");
-        _onShow( var, v -> withValue(v) );
+    public final UIForSpinner<S> withValue( Var<?> value ) {
+        NullUtil.nullArgCheck(value, "value", Var.class);
+        NullUtil.nullPropertyCheck(value, "value", "Null is not a valid spinner state!");
+        _onShow( value, this::withValue );
         _onChange( e -> _doApp(() -> {
-            Object value = getComponent().getValue();
-            if ( value != null && Number.class.isAssignableFrom(var.type()) ) {
-                if ( Number.class.isAssignableFrom(value.getClass()) ) {
-                    Number n = (Number) value;
-                    if      ( var.type() == Integer.class ) value = n.intValue();
-                    else if ( var.type() == Long.class    ) value = n.longValue();
-                    else if ( var.type() == Float.class   ) value = n.floatValue();
-                    else if ( var.type() == Double.class  ) value = n.doubleValue();
-                    else if ( var.type() == Short.class   ) value = n.shortValue();
-                    else if ( var.type() == Byte.class    ) value = n.byteValue();
+            Object current = getComponent().getValue();
+            if ( current != null && Number.class.isAssignableFrom(value.type()) ) {
+                if ( Number.class.isAssignableFrom(current.getClass()) ) {
+                    Number n = (Number) current;
+                    if      ( value.type() == Integer.class ) current = n.intValue();
+                    else if ( value.type() == Long.class    ) current = n.longValue();
+                    else if ( value.type() == Float.class   ) current = n.floatValue();
+                    else if ( value.type() == Double.class  ) current = n.doubleValue();
+                    else if ( value.type() == Short.class   ) current = n.shortValue();
+                    else if ( value.type() == Byte.class    ) current = n.byteValue();
                 }
-                if ( value.getClass() == String.class ) {
-                    if      ( var.type() == Integer.class ) value = Integer.parseInt((String) value);
-                    else if ( var.type() == Long.class    ) value = Long.parseLong((String) value);
-                    else if ( var.type() == Float.class   ) value = Float.parseFloat((String) value);
-                    else if ( var.type() == Double.class  ) value = Double.parseDouble((String) value);
-                    else if ( var.type() == Short.class   ) value = Short.parseShort((String) value);
-                    else if ( var.type() == Byte.class    ) value = Byte.parseByte((String) value);
+                if ( current.getClass() == String.class ) {
+                    if      ( value.type() == Integer.class ) current = Integer.parseInt((String) current);
+                    else if ( value.type() == Long.class    ) current = Long.parseLong((String) current);
+                    else if ( value.type() == Float.class   ) current = Float.parseFloat((String) current);
+                    else if ( value.type() == Double.class  ) current = Double.parseDouble((String) current);
+                    else if ( value.type() == Short.class   ) current = Short.parseShort((String) current);
+                    else if ( value.type() == Byte.class    ) current = Byte.parseByte((String) current);
                 }
             }
-            ((Var<Object>) var).act(value);
+            ((Var<Object>) value).act(current);
         }));
-        getComponent().setValue(var.get());
-        return withValue( var.get() );
+        getComponent().setValue(value.get());
+        return withValue( value.get() );
     }
 
     /**
@@ -136,7 +140,7 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
                     "This JSpinner can not have a numeric step size as it is not based on the SpinnerNumberModel!"
                 );
         SpinnerNumberModel numberModel = (SpinnerNumberModel) model;
-        _onShow(val, v -> numberModel.setStepSize(v) );
+        _onShow(val, numberModel::setStepSize);
         numberModel.setStepSize(val.get());
         return this;
     }
