@@ -18,7 +18,7 @@ import java.net.URISyntaxException;
  */
 public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<L>, L>
 {
-    protected UIForLabel(L component) { super(component); }
+    protected UIForLabel( L component ) { super(component); }
 
     /**
      *  Makes the wrapped {@link JLabel} font bold (!plain).
@@ -26,7 +26,7 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> makeBold() {
-        this.peek(label -> {
+        this.peek( label -> {
             Font f = label.getFont();
             label.setFont(f.deriveFont(f.getStyle() | Font.BOLD));
         });
@@ -38,8 +38,10 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      *
      * @param href A string containing a valid URL used as link hyper reference.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code href} is {@code null}.
      */
     public UIForLabel<L> makeLinkTo( String href ) {
+        NullUtil.nullArgCheck( href, "href", String.class );
         return makeLinkTo( Val.of(href) );
     }
 
@@ -51,15 +53,19 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      *
      * @param href A string property containing a valid URL used as link hyper reference.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code href} is {@code null}.
      */
     public UIForLabel<L> makeLinkTo( Val<String> href ) {
+        NullUtil.nullArgCheck( href, "href", Val.class );
+        NullUtil.nullPropertyCheck( href, "href", "Use an empty String instead of null to model a link going nowhere." );
         L list = getComponent();
         LazyRef<String> text = LazyRef.of(list::getText);
         list.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 try {
-                    String ref = href.orElseThrow();
+                    String ref = href.orElseThrow().trim();
+                    if ( ref.isEmpty() ) return;
                     if ( !ref.startsWith("http") ) ref = "https://" + ref;
                     Desktop.getDesktop().browse(new URI(ref));
                 } catch (IOException | URISyntaxException e1) {
@@ -116,12 +122,15 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      *  When the flag wrapped by the provided property changes,
      *  then the font of this label will switch between being bold and plain.
      *
-     * @param val The property which should be bound to the boldness of this label.
+     * @param isBold The property which should be bound to the boldness of this label.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code isBold} is {@code null}.
      */
-    public final UIForLabel<L> isBoldIf( Val<Boolean> val ) {
-        _onShow(val, v -> isBoldIf(v) );
-        return isBoldIf( val.get() );
+    public final UIForLabel<L> isBoldIf( Val<Boolean> isBold ) {
+        NullUtil.nullArgCheck( isBold, "isBold", Val.class );
+        NullUtil.nullPropertyCheck( isBold, "isBold", "You can not use null to model if a label is bold or not." );
+        _onShow( isBold, this::isBoldIf );
+        return isBoldIf( isBold.get() );
     }
 
     /**
@@ -133,8 +142,13 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      *
      * @param text The new text to be set for the wrapped label.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code text} is {@code null}.
      */
-    public final UIForLabel<L> withText( String text ) { getComponent().setText(text); return this; }
+    public final UIForLabel<L> withText( String text ) {
+        NullUtil.nullArgCheck( text, "text", String.class );
+        getComponent().setText(text);
+        return this;
+    }
 
     /**
      *  Dynamically defines a single line of text displayed on this label.
@@ -142,12 +156,15 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      *  When the text wrapped by the provided property changes,
      *  then so does the text displayed on this label change.
      *
-     * @param val The text property to be bound to the wrapped label.
+     * @param text The text property to be bound to the wrapped label.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code text} is {@code null}.
      */
-    public final UIForLabel<L> withText( Val<String> val ) {
-        _onShow( val, v -> getComponent().setText(v) );
-        return withText( val.orElseThrow() );
+    public final UIForLabel<L> withText( Val<String> text ) {
+        NullUtil.nullArgCheck( text, "text", Val.class );
+        NullUtil.nullPropertyCheck( text, "text", "Please use an empty String instead of null." );
+        _onShow( text, v -> getComponent().setText(v) );
+        return withText( text.orElseThrow() );
     }
 
     /**
@@ -160,8 +177,10 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      *
      * @param horizontalAlign The horizontal alignment which should be applied to the underlying component.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public UIForLabel<L> with( UI.HorizontalAlignment horizontalAlign ) {
+        NullUtil.nullArgCheck( horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class );
         getComponent().setHorizontalAlignment(horizontalAlign.forSwing());
         return this;
     }
@@ -174,8 +193,11 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      *
      * @param horizontalAlign The horizontal alignment property which should be applied to the underlying component.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public UIForLabel<L> withHorizontalAlignment( Val<UI.HorizontalAlignment> horizontalAlign ) {
+        NullUtil.nullArgCheck( horizontalAlign, "horizontalAlign", Val.class );
+        NullUtil.nullPropertyCheck( horizontalAlign, "horizontalAlign", "Null is not a valid alignment." );
         _onShow( horizontalAlign, v -> getComponent().setHorizontalAlignment(v.forSwing()) );
         return with(horizontalAlign.orElseThrow());
     }
@@ -190,8 +212,10 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      *
      * @param verticalAlign The vertical alignment which should be applied to the underlying component.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public UIForLabel<L> with( UI.VerticalAlignment verticalAlign ) {
+        NullUtil.nullArgCheck( verticalAlign, "verticalAlign", UI.VerticalAlignment.class );
         getComponent().setVerticalAlignment(verticalAlign.forSwing());
         return this;
     }
@@ -203,8 +227,11 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      *
      * @param verticalAlign The vertical alignment property which should be applied to the underlying component.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public UIForLabel<L> withVerticalAlignment( Val<UI.VerticalAlignment> verticalAlign ) {
+        NullUtil.nullArgCheck( verticalAlign, "verticalAlign", Val.class );
+        NullUtil.nullPropertyCheck( verticalAlign, "verticalAlign", "Null is not a valid alignment." );
         _onShow( verticalAlign, v -> getComponent().setVerticalAlignment(v.forSwing()) );
         return with(verticalAlign.orElseThrow());
     }
@@ -219,8 +246,10 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      *
      * @param horizontalAlign The horizontal alignment which should be applied to the text of the underlying component.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public UIForLabel<L> withImageRelative( UI.HorizontalAlignment horizontalAlign ) {
+        NullUtil.nullArgCheck( horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class );
         getComponent().setHorizontalTextPosition(horizontalAlign.forSwing());
         return this;
     }
@@ -232,8 +261,11 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      *
      * @param horizontalAlign The horizontal alignment property which should be applied to the text of the underlying component.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public UIForLabel<L> withImageRelativeHorizontalAlignment( Val<UI.HorizontalAlignment> horizontalAlign ) {
+        NullUtil.nullArgCheck( horizontalAlign, "horizontalAlign", Val.class );
+        NullUtil.nullPropertyCheck( horizontalAlign, "horizontalAlign", "Null is not a valid alignment." );
         _onShow( horizontalAlign, v -> getComponent().setHorizontalTextPosition(v.forSwing()) );
         return withImageRelative(horizontalAlign.orElseThrow());
     }
@@ -243,13 +275,15 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      *  This is a convenience method to avoid peeking into this builder like so:
      *  <pre>{@code
      *     UI.label("Something")
-     *         .peek( label -> label.setVerticalTextPosition(...) );
+     *     .peek( label -> label.setVerticalTextPosition(...) );
      *  }</pre>
      *
      * @param verticalAlign The vertical alignment which should be applied to the text of the underlying component.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public UIForLabel<L> withImageRelative( UI.VerticalAlignment verticalAlign ) {
+        NullUtil.nullArgCheck( verticalAlign, "verticalAlign", UI.VerticalAlignment.class );
         getComponent().setVerticalTextPosition(verticalAlign.forSwing());
         return this;
     }
@@ -261,8 +295,11 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      *
      * @param verticalAlign The vertical alignment property which should be applied to the text of the underlying component.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public UIForLabel<L> withImageRelativeVerticalAlignment( Val<UI.VerticalAlignment> verticalAlign ) {
+        NullUtil.nullArgCheck( verticalAlign, "verticalAlign", Val.class );
+        NullUtil.nullPropertyCheck( verticalAlign, "verticalAlign", "Null is not a valid alignment." );
         _onShow( verticalAlign, v -> getComponent().setVerticalTextPosition(v.forSwing()) );
         return withImageRelative(verticalAlign.orElseThrow());
     }
@@ -280,7 +317,6 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> with( Icon icon ) {
-        NullUtil.nullArgCheck(icon,"icon",Icon.class);
         getComponent().setIcon(icon);
         return this;
     }
@@ -292,10 +328,12 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      *
      * @param icon The {@link Icon} property which should be displayed on the label.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code icon} is {@code null}.
      */
     public UIForLabel<L> withIcon( Val<Icon> icon ) {
+        NullUtil.nullArgCheck(icon,"icon",Val.class);
         _onShow( icon, i -> getComponent().setIcon(i) );
-        return with(icon.orElseThrow());
+        return with(icon.orElseNull());
     }
 
     /**
@@ -318,9 +356,11 @@ public class UIForLabel<L extends JLabel> extends UIForAbstractSwing<UIForLabel<
      *
      * @param size The size property of the font which should be displayed on the label.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code size} is {@code null}.
      */
     public UIForLabel<L> withFontSize( Val<Integer> size ) {
-        _onShow( size, s -> withFontSize(s) );
+        NullUtil.nullArgCheck( size, "size", Val.class );
+        _onShow( size, this::withFontSize );
         return withFontSize(size.orElseThrow());
     }
 }

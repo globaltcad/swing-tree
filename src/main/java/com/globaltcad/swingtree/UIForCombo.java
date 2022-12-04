@@ -76,6 +76,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
      *
      * @param action The {@link UIAction} that will be notified.
      * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public UIForCombo<E,C> onSelection( UIAction<SimpleDelegate<JComboBox<E>, ActionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", UIAction.class);
@@ -105,6 +106,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
      *
      * @param isEditable The boolean property determining if the UI component should be editable or not.
      * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code isEditable} is {@code null}.
      */
     public UIForCombo<E,C> isEditableIf( Var<Boolean> isEditable ) {
         _onShow( isEditable, v -> isEditableIf(v) );
