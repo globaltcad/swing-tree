@@ -97,11 +97,6 @@ public final class UI
     public static LayoutAttr FLOW_Y   = LayoutAttr.of("flowy");
     public static LayoutAttr NO_GRID  = LayoutAttr.of("nogrid");
     public static LayoutAttr NO_CACHE = LayoutAttr.of("nocache");
-    public static LayoutAttr DOCK_NORTH = LayoutAttr.of("dock north");
-    public static LayoutAttr DOCK_SOUTH = LayoutAttr.of("dock south");
-    public static LayoutAttr DOCK_EAST  = LayoutAttr.of("dock east");
-    public static LayoutAttr DOCK_WEST  = LayoutAttr.of("dock west");
-    public static LayoutAttr DOCK( Position pos ) { return LayoutAttr.of("dock " + pos.toDirectionString()); }
     public static LayoutAttr DEBUG    = LayoutAttr.of("debug");
 
     public static CompAttr WRAP     = CompAttr.of("wrap");
@@ -142,6 +137,11 @@ public final class UI
     public static CompAttr GAP_RIGHT_PUSH = CompAttr.of("gapright push");
     public static CompAttr GAP_TOP_PUSH = CompAttr.of("gaptop push");
     public static CompAttr GAP_BOTTOM_PUSH = CompAttr.of("gapbottom push");
+    public static CompAttr DOCK_NORTH = CompAttr.of("dock north");
+    public static CompAttr DOCK_SOUTH = CompAttr.of("dock south");
+    public static CompAttr DOCK_EAST  = CompAttr.of("dock east");
+    public static CompAttr DOCK_WEST  = CompAttr.of("dock west");
+    public static CompAttr DOCK( Position pos ) { return CompAttr.of("dock " + pos.toDirectionString()); }
 
     public static Icon icon( String path ) {
         // First we make the path platform independent:
