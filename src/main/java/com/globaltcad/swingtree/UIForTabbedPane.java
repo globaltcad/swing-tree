@@ -45,7 +45,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
            .ifPresent( onSelection ->
                    pane.addChangeListener(e -> {
                    if (index == pane.getSelectedIndex())
-                       _doApp(()->onSelection.accept(new SimpleDelegate<>(pane, e, () -> getSiblinghood())));
+                       _doApp(()->onSelection.accept(new SimpleDelegate<>(pane, e, this::getSiblinghood)));
                })
            );
 
@@ -80,9 +80,9 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
                     public void mouseClicked( MouseEvent e ) {
                         _doApp(()-> {
                             if (index == pane.getSelectedIndex())
-                                tab.onMouseClick().ifPresent(onMouseClick -> {
-                                    onMouseClick.accept(new SimpleDelegate<>(pane, e, () -> getSiblinghood()));
-                                });
+                                tab.onMouseClick().ifPresent( onMouseClick ->
+                                    onMouseClick.accept(new SimpleDelegate<>(pane, e, () -> getSiblinghood()))
+                                );
                             pane.setSelectedIndex(index);
                         });
                     }

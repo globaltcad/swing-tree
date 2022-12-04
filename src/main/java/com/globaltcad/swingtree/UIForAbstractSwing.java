@@ -1543,7 +1543,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullArgCheck(onKeyTyped, "onKeyTyped", UIAction.class);
         C component = getComponent();
         _onKeyTyped( e ->
-            _doApp(()->onKeyTyped.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())))
+            _doApp(()->onKeyTyped.accept(new SimpleDelegate<>(component, e, this::getSiblinghood)))
         );
         return _this();
     }
@@ -1596,7 +1596,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I doUpdates( int delay, UIAction<SimpleDelegate<C, ActionEvent>> onUpdate ) {
         NullUtil.nullArgCheck(onUpdate, "onUpdate", UIAction.class);
-        Timer timer = new Timer(delay, e -> onUpdate.accept(new SimpleDelegate<>(getComponent(), e, ()->getSiblinghood())));
+        Timer timer = new Timer(delay, e -> onUpdate.accept(new SimpleDelegate<>(getComponent(), e, this::getSiblinghood)));
         synchronized (_timers) {
             _timers.getOrDefault(getComponent(), new ArrayList<>()).add(timer);
         }
@@ -1618,7 +1618,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final <T extends JComponent> I add( UIForAbstractSwing<?, T> builder ) {
-        return (I) this.add(new AbstractNestedBuilder[]{builder});
+        this.add(new AbstractNestedBuilder[]{builder});
+        return _this();
     }
 
     /**

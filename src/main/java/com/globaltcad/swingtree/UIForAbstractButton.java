@@ -116,7 +116,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public I withFontSize( Val<Integer> size ) {
         NullUtil.nullArgCheck(size, "val", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not a sensible value for a font size.");
-        _onShow(size, s -> withFontSize(s) );
+        _onShow( size, this::withFontSize );
         return withFontSize(size.orElseThrow());
     }
 

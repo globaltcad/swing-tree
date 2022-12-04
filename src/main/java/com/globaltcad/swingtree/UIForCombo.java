@@ -36,12 +36,12 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
                     model.setFromEditor(field.getText());
             });
 
-            _onShow( model._getSelectedItemVar(), v -> {
+            _onShow( model._getSelectedItemVar(), v ->
                 component().ifPresent( combo -> {
                     if ( combo.isEditable() )
                         combo.getEditor().setItem(v);
-                });
-            });
+                })
+            );
 
             // Adds a PopupMenu listener which will listen to notification
             // messages from the popup portion of the combo box.
@@ -81,7 +81,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
     public UIForCombo<E,C> onSelection( UIAction<SimpleDelegate<JComboBox<E>, ActionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", UIAction.class);
         JComboBox<E> combo = getComponent();
-        _onSelection(e -> _doApp(()->action.accept(new SimpleDelegate<>(combo, e, ()->getSiblinghood()))) );
+        _onSelection(e -> _doApp(()->action.accept(new SimpleDelegate<>( combo, e, this::getSiblinghood ))) );
         return this;
     }
 
@@ -109,7 +109,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
      * @throws IllegalArgumentException if {@code isEditable} is {@code null}.
      */
     public UIForCombo<E,C> isEditableIf( Var<Boolean> isEditable ) {
-        _onShow( isEditable, v -> isEditableIf(v) );
+        _onShow( isEditable, this::isEditableIf );
         return this;
     }
 
@@ -137,9 +137,9 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
             withModel(((AbstractComboModel<E>)model).withVar(var));
         else {
             // The user has a custom model AND wants to bind to a property:
-            _onShow( var, v -> _setSelectedItem(v) );
+            _onShow( var, this::_setSelectedItem );
             _onSelection(
-                e -> _doApp((E)getComponent().getSelectedItem(), sel->var.act(sel))
+                e -> _doApp( (E)getComponent().getSelectedItem(), var::act )
             );
         }
         return withSelectedItem(var.get());
