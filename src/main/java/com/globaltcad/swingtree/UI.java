@@ -95,39 +95,46 @@ public final class UI
     public static LayoutAttr WRAP(int times) { return LayoutAttr.of( "wrap " + times ); }
     public static LayoutAttr FLOW_X   = LayoutAttr.of("flowx");
     public static LayoutAttr FLOW_Y   = LayoutAttr.of("flowy");
+    public static LayoutAttr NO_GRID  = LayoutAttr.of("nogrid");
+    public static LayoutAttr NO_CACHE = LayoutAttr.of("nocache");
+    public static LayoutAttr DOCK_NORTH = LayoutAttr.of("dock north");
+    public static LayoutAttr DOCK_SOUTH = LayoutAttr.of("dock south");
+    public static LayoutAttr DOCK_EAST  = LayoutAttr.of("dock east");
+    public static LayoutAttr DOCK_WEST  = LayoutAttr.of("dock west");
+    public static LayoutAttr DOCK( Position pos ) { return LayoutAttr.of("dock " + pos.toDirectionString()); }
     public static LayoutAttr DEBUG    = LayoutAttr.of("debug");
 
     public static CompAttr WRAP     = CompAttr.of("wrap");
     public static CompAttr SPAN     = CompAttr.of("SPAN");
-    public static CompAttr SPAN(int times) { return CompAttr.of( "span " + times ); }
-    public static CompAttr SPAN(int xTimes, int yTimes) { return CompAttr.of( "span " + xTimes + " " + yTimes ); }
-    public static CompAttr SPAN_X(int times) { return CompAttr.of( "spanx " + times ); }
-    public static CompAttr SPAN_Y(int times) { return CompAttr.of( "spany " + times ); }
+    public static CompAttr SPAN( int times ) { return CompAttr.of( "span " + times ); }
+    public static CompAttr SPAN( int xTimes, int yTimes ) { return CompAttr.of( "span " + xTimes + " " + yTimes ); }
+    public static CompAttr SPAN_X( int times ) { return CompAttr.of( "spanx " + times ); }
+    public static CompAttr SPAN_Y( int times ) { return CompAttr.of( "spany " + times ); }
     public static CompAttr GROW     = CompAttr.of("grow");
     public static CompAttr GROW_X   = CompAttr.of("growx");
     public static CompAttr GROW_Y   = CompAttr.of("growy");
-    public static CompAttr GROW(int weight) { return CompAttr.of( "grow " + weight ); }
-    public static CompAttr GROW_X(int weight) { return CompAttr.of( "growx " + weight ); }
-    public static CompAttr GROW_Y(int weight) { return CompAttr.of( "growy " + weight ); }
+    public static CompAttr GROW( int weight ) { return CompAttr.of( "grow " + weight ); }
+    public static CompAttr GROW_X( int weight ) { return CompAttr.of( "growx " + weight ); }
+    public static CompAttr GROW_Y( int weight ) { return CompAttr.of( "growy " + weight ); }
     public static CompAttr SHRINK   = CompAttr.of("shrink");
     public static CompAttr SHRINK_X = CompAttr.of("shrinkx");
     public static CompAttr SHRINK_Y = CompAttr.of("shrinky");
-    public static CompAttr SHRINK(int weight)  { return CompAttr.of("shrink "+weight); }
-    public static CompAttr SHRINK_X(int weight)  { return CompAttr.of("shrinkx "+weight); }
-    public static CompAttr SHRINK_Y(int weight)  { return CompAttr.of("shrinky "+weight); }
-    public static CompAttr SHRINK_PRIO(int priority)  { return CompAttr.of("shrinkprio "+priority); }
+    public static CompAttr SHRINK( int weight )  { return CompAttr.of("shrink "+weight); }
+    public static CompAttr SHRINK_X( int weight )  { return CompAttr.of("shrinkx "+weight); }
+    public static CompAttr SHRINK_Y( int weight )  { return CompAttr.of("shrinky "+weight); }
+    public static CompAttr SHRINK_PRIO( int priority )  { return CompAttr.of("shrinkprio "+priority); }
     public static CompAttr PUSH     = CompAttr.of("push");
     public static CompAttr PUSH_X   = CompAttr.of("pushx");
     public static CompAttr PUSH_Y   = CompAttr.of("pushy");
-    public static CompAttr PUSH(int weight)  { return CompAttr.of("push "+weight); }
-    public static CompAttr PUSH_X(int weight) { return CompAttr.of("pushx "+weight); }
-    public static CompAttr PUSH_Y(int weight) { return CompAttr.of("pushy "+weight); }
-    public static CompAttr SKIP(int cells) { return CompAttr.of("skip "+cells); }
-    public static CompAttr SPLIT(int cells) { return CompAttr.of("split "+cells); }
-    public static CompAttr WIDTH(int min, int pref, int max) { return CompAttr.of("width "+min+":"+pref+":"+max); }
-    public static CompAttr HEIGHT(int min, int pref, int max) { return CompAttr.of("height "+min+":"+pref+":"+max); }
-    public static CompAttr PAD(int size) { return PAD(size, size, size, size); }
-    public static CompAttr PAD(int top, int left, int bottom, int right) { return CompAttr.of("pad "+top+" "+left+" "+bottom+" "+right); }
+    public static CompAttr PUSH( int weight )  { return CompAttr.of("push "+weight); }
+    public static CompAttr PUSH_X( int weight ) { return CompAttr.of("pushx "+weight); }
+    public static CompAttr PUSH_Y( int weight ) { return CompAttr.of("pushy "+weight); }
+    public static CompAttr SKIP( int cells ) { return CompAttr.of("skip "+cells); }
+    public static CompAttr SPLIT( int cells ) { return CompAttr.of("split "+cells); }
+    public static CompAttr WIDTH( int min, int pref, int max ) { return CompAttr.of("width "+min+":"+pref+":"+max); }
+    public static CompAttr HEIGHT( int min, int pref, int max ) { return CompAttr.of("height "+min+":"+pref+":"+max); }
+    public static CompAttr PAD( int size ) { return PAD(size, size, size, size); }
+    public static CompAttr PAD( int top, int left, int bottom, int right ) { return CompAttr.of("pad "+top+" "+left+" "+bottom+" "+right); }
     public static CompAttr ALIGN_CENTER = CompAttr.of("align center");
     public static CompAttr ALIGN_LEFT = CompAttr.of("align left");
     public static CompAttr ALIGN_RIGHT = CompAttr.of("align right");
@@ -204,6 +211,16 @@ public final class UI
                 case LEFT : return JTabbedPane.LEFT ;
                 case BOTTOM: return JTabbedPane.BOTTOM;
                 case RIGHT: return JTabbedPane.RIGHT;
+            }
+            throw new RuntimeException();
+        }
+
+        String toDirectionString() {
+            switch ( this ) {
+                case TOP  : return "north";
+                case LEFT : return "west";
+                case BOTTOM: return "south";
+                case RIGHT: return "east";
             }
             throw new RuntimeException();
         }
