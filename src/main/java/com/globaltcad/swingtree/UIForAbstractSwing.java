@@ -54,23 +54,23 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public UIForAbstractSwing( C component ) { super(component); }
 
-    protected final I _this() { 
+    protected final I _this() {
         return (I) this;
     }
     
-    protected void _doUI( Runnable action ) {
+    protected final void _doUI( Runnable action ) {
         _eventProcessor.processUIEvent( action );
     }
 
-    protected void _doApp( Runnable action ) {
+    protected final void _doApp( Runnable action ) {
         _eventProcessor.processAppEvent(action);
     }
 
-    protected <T> void _doApp( T value, Consumer<T> action ) {
+    protected final <T> void _doApp( T value, Consumer<T> action ) {
         _doApp(()->action.accept(value));
     }
 
-    <T> void _onShow( Val<T> val, Consumer<T> displayAction ) {
+    protected final <T> void _onShow( Val<T> val, Consumer<T> displayAction ) {
         val.onShowThis(new DisplayAction<T>() {
             @Override
             public void display(ActionDelegate<T> delegate) {
@@ -102,7 +102,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return The JComponent type which will be wrapped by this builder node.
      */
     public final I id( String id ) {
-        if (_idAlreadySet)
+        if ( _idAlreadySet )
             throw new IllegalArgumentException("The id has already been specified for this component!");
         getComponent().setName(id);
         _idAlreadySet = true;

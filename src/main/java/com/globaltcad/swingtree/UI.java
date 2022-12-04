@@ -928,25 +928,19 @@ public final class UI
         return panel(attr.toString());
     }
 
+    /**
+     *  Use this to create a builder for the {@link JPanel} UI component with a
+     *  dynamically updated set of {@link MigLayout} attributes.
+     *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr)}.
+     *
+     * @param attr The layout attributes property which will be passed to the {@link MigLayout} constructor as first argument.
+     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code attr} is {@code null}.
+     */
     public static UIForPanel<JPanel> panel( Val<LayoutAttr> attr ) {
         NullUtil.nullArgCheck(attr, "attr", Val.class);
         NullUtil.nullPropertyCheck(attr, "attr", "Null is not a valid layout attribute.");
-        UIForPanel<JPanel> ui = panel(attr.get().toString());
-        ui._onShow(attr, it -> {
-            // Every time the value changes, we need to re-layout the panel.
-            // Note that this is for mig layout:
-            LayoutManager lm = ui.getComponent().getLayout();
-            if (lm instanceof MigLayout) {
-                ((MigLayout)lm).setLayoutConstraints(it.toString());
-                ui.getComponent().revalidate();
-                ui.getComponent().repaint();
-            }
-            else
-                throw new IllegalStateException(
-                        "Cannot set layout mig-layout specific constraints on a panel with a non-mig layout."
-                    );
-        });
-        return ui;
+        return panel(attr.get().toString()).withLayout(attr);
     }
 
     /**
@@ -1570,6 +1564,11 @@ public final class UI
         return new UIForRadioButton<>(component);
     }
 
+    /**
+     *  Use this to create a builder for a {@link JToggleButton} instance.
+     *
+     * @return A builder instance for a new {@link JToggleButton}, which enables fluent method chaining.
+     */
     public static UIForToggleButton<JToggleButton> toggleButton() { return of(new JToggleButton()); }
 
     public static UIForToggleButton<JToggleButton> toggleButton( String text ) {

@@ -47,6 +47,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
      * @param text The view model property which should be bound to this UI.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code text} is {@code null}.
      */
     public final I withText( Val<String> text ) {
         NullUtil.nullArgCheck(text, "val", Val.class);
@@ -66,6 +67,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *
      * @param icon The {@link Icon} which should be displayed on the button.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code icon} is {@code null}.
      */
     public I with( Icon icon ) {
         NullUtil.nullArgCheck(icon,"icon",Icon.class);
@@ -80,6 +82,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *
      * @param icon The {@link Icon} property which should be displayed on the button.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code icon} is {@code null}.
      */
     public I withIcon( Val<Icon> icon ) {
         NullUtil.nullArgCheck(icon, "icon", Val.class);
@@ -108,6 +111,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *
      * @param size The size property of the font which should be displayed on the button.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code size} is {@code null}.
      */
     public I withFontSize( Val<Integer> size ) {
         NullUtil.nullArgCheck(size, "val", Val.class);
@@ -125,6 +129,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  Use this to dynamically bind to a {@link com.globaltcad.swingtree.api.mvvm.Var}
      *  instance which will be used to dynamically model the selection state of the
      *  wrapped {@link AbstractButton} type.
+     * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final I isSelectedIf( Val<Boolean> selected ) {
         NullUtil.nullArgCheck(selected, "selected", Val.class);
@@ -137,6 +142,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  Use this to dynamically bind to a {@link com.globaltcad.swingtree.api.mvvm.Var}
      *  instance which will be used to dynamically model the selection state of the
      *  wrapped {@link AbstractButton} type.
+     * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final I isSelectedIf( Var<Boolean> selected ) {
         NullUtil.nullArgCheck(selected, "selected", Var.class);
@@ -152,6 +158,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  Use this to dynamically bind to a {@link com.globaltcad.swingtree.api.mvvm.Var}
      *  instance which will be used to dynamically model the pressed state of the
      *  wrapped {@link AbstractButton} type.
+     * @throws IllegalArgumentException if {@code var} is {@code null}.
      */
     public final I isPressedIf( Var<Boolean> var ) {
         NullUtil.nullArgCheck(var, "var", Var.class);
@@ -190,6 +197,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *
      * @param action The change action lambda which will be passed to the button component.
      * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public final I onChange( UIAction<SimpleDelegate<B, ItemEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", UIAction.class);
@@ -208,6 +216,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *
      * @param action an {@link UIAction} instance which will receive an {@link SimpleDelegate} containing important context information.
      * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public I onClick( UIAction<SimpleDelegate<B, ActionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", UIAction.class);
@@ -236,6 +245,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *
      * @param horizontalAlign The horizontal alignment which should be applied to the underlying component.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public final I with( UI.HorizontalAlignment horizontalAlign ) {
         NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class);
@@ -258,6 +268,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *
      * @param horizontalAlign The horizontal alignment property which should be bound to the underlying component.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public final I withHorizontalAlignment( Val<UI.HorizontalAlignment> horizontalAlign ) {
         NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", Val.class);
@@ -275,6 +286,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *
      * @param verticalAlign The vertical alignment which should be applied to the underlying component.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public final I with( UI.VerticalAlignment verticalAlign ) {
         NullUtil.nullArgCheck(verticalAlign, "verticalAlign", UI.VerticalAlignment.class);
@@ -297,6 +309,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *
      * @param verticalAlign The vertical alignment property which should be bound to the underlying component.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public final I withVerticalAlignment( Val<UI.VerticalAlignment> verticalAlign ) {
         NullUtil.nullArgCheck(verticalAlign, "verticalAlign", Val.class);
@@ -314,6 +327,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *
      * @param horizontalAlign The horizontal text alignment relative to the icon which should be applied to the underlying component.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public final I withImageRelative( UI.HorizontalAlignment horizontalAlign ) {
         NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class);
@@ -336,6 +350,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *
      * @param horizontalAlign The horizontal text alignment property relative to the icon which should be bound to the underlying component.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public final I withImageRelativeHorizontalAlignment( Val<UI.HorizontalAlignment> horizontalAlign ) {
         NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", Val.class);
@@ -353,6 +368,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *
      * @param verticalAlign The vertical text alignment relative to the icon which should be applied to the underlying component.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public final I withImageRelative( UI.VerticalAlignment verticalAlign ) {
         NullUtil.nullArgCheck(verticalAlign, "verticalAlign", UI.VerticalAlignment.class);
@@ -375,6 +391,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *
      * @param verticalAlign The vertical text alignment property relative to the icon which should be bound to the underlying component.
      * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public final I withImageRelativeVerticalAlignment( Val<UI.VerticalAlignment> verticalAlign ) {
         NullUtil.nullArgCheck(verticalAlign, "verticalAlign", Val.class);
