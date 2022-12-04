@@ -1,6 +1,5 @@
 package com.globaltcad.swingtree;
 
-import com.globaltcad.swingtree.api.UIAction;
 import com.globaltcad.swingtree.api.mvvm.Val;
 
 import javax.swing.*;
