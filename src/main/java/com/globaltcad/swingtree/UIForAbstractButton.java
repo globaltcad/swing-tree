@@ -38,7 +38,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public final I withText( String text ) {
         getComponent().setText(text);
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -187,7 +187,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
             it.setFocusPainted(false);
             it.setMargin(new Insets(0,0,0,0));
         });
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -203,7 +203,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
         NullUtil.nullArgCheck(action, "action", UIAction.class);
         B button = getComponent();
         button.addItemListener(e -> _doApp(()->action.accept(new SimpleDelegate<>(button, e, this::getSiblinghood))));
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -226,7 +226,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
                new SimpleDelegate<>(button, e, this::getSiblinghood)
            ))
         );
-        return (I) this;
+        return _this();
     }
 
     protected void _onClick( Consumer<ActionEvent> action ) {
@@ -250,7 +250,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public final I with( UI.HorizontalAlignment horizontalAlign ) {
         NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class);
         getComponent().setHorizontalAlignment(horizontalAlign.forSwing());
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -291,7 +291,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public final I with( UI.VerticalAlignment verticalAlign ) {
         NullUtil.nullArgCheck(verticalAlign, "verticalAlign", UI.VerticalAlignment.class);
         getComponent().setVerticalAlignment(verticalAlign.forSwing());
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -332,7 +332,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public final I withImageRelative( UI.HorizontalAlignment horizontalAlign ) {
         NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class);
         getComponent().setHorizontalTextPosition(horizontalAlign.forSwing());
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -373,7 +373,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public final I withImageRelative( UI.VerticalAlignment verticalAlign ) {
         NullUtil.nullArgCheck(verticalAlign, "verticalAlign", UI.VerticalAlignment.class);
         getComponent().setVerticalTextPosition(verticalAlign.forSwing());
-        return (I) this;
+        return _this();
     }
 
     /**

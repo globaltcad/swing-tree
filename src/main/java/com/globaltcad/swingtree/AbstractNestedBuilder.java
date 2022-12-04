@@ -87,7 +87,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
 
         builder._parent = this;
 
-        _add((E) builder.getComponent(), conf);
+        _add( (E) builder.getComponent(), conf );
 
         _detachStrongRef(); // Detach strong reference to the component to allow it to be garbage collected.
     }

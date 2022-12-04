@@ -78,7 +78,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      */
     public final I withText( String text ) {
         getComponent().setText(text);
-        return (I) this;
+        return _this();
     }
 
     public final I withText( Val<String> val ) {
@@ -110,7 +110,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
     public final I withFont( Font font ) {
         NullUtil.nullArgCheck(font, "font", Font.class);
         this.getComponent().setFont( font );
-        return (I) this;
+        return _this();
     }
 
     public final I withFont( Val<Font> font ) {
@@ -136,7 +136,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
     public final I withTextOrientation( UI.HorizontalDirection direction ) {
         NullUtil.nullArgCheck(direction, "direction", UI.HorizontalDirection.class);
         getComponent().setComponentOrientation(direction.forTextOrientation());
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -170,7 +170,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      */
     public final I isEditableIf( boolean isEditable ) {
         getComponent().setEditable(isEditable);
-        return (I) this;
+        return _this();
     }
 
 
@@ -191,7 +191,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
             @Override public void changedUpdate(DocumentEvent e) {
                 _doApp(()->action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));}
         });
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -210,7 +210,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
                 _doApp(()->action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));}
             @Override public void changedUpdate(DocumentEvent e) {}
         });
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -233,7 +233,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      */
     public final I onTextRemove( UIAction<RemoveDelegate> action ) {
         _ifFilterable( () -> this.remove = action );
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -244,7 +244,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      */
     public final I onTextInsert( UIAction<InsertDelegate> action ) {
         _ifFilterable( () -> this.insert = action );
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -255,7 +255,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      */
     public final I onTextReplace( UIAction<ReplaceDelegate> action ) {
         _ifFilterable( () -> this.replace = action );
-        return (I) this;
+        return _this();
     }
 
 
