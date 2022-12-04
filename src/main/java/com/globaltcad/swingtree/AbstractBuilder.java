@@ -46,6 +46,8 @@ abstract class AbstractBuilder<I, C extends Component>
         _componentStrongRef = component;
     }
 
+    protected final I _this() { return (I) this; }
+
     protected final void _detachStrongRef() { _componentStrongRef = null; }
 
     /**
@@ -64,9 +66,7 @@ abstract class AbstractBuilder<I, C extends Component>
     /**
      *  The optional component wrapped by this builder node.
      */
-    public final OptionalUI<C> component() {
-        return OptionalUI.ofNullable(_component.get());
-    }
+    public final OptionalUI<C> component() { return OptionalUI.ofNullable(_component.get()); }
 
     /**
      *  The type class of the component wrapped by this builder node.
@@ -95,7 +95,7 @@ abstract class AbstractBuilder<I, C extends Component>
      */
     public final I peek( Peeker<C> action ) {
         action.accept(getComponent());
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -114,7 +114,7 @@ abstract class AbstractBuilder<I, C extends Component>
      */
     public final I applyIf( boolean condition, Consumer<I> building ) {
         NullUtil.nullArgCheck(building, "building", Consumer.class);
-        I builder = (I) this;
+        I builder = _this();
         if ( condition ) building.accept(builder);
         return builder;
     }
@@ -136,7 +136,7 @@ abstract class AbstractBuilder<I, C extends Component>
      */
     public final I applyIfPresent( Optional<Consumer<I>> building ) {
         NullUtil.nullArgCheck(building, "building", Optional.class);
-        I builder = (I) this;
+        I builder = _this();
         building.ifPresent( buildingLambda -> buildingLambda.accept(builder) );
         return builder;
     }

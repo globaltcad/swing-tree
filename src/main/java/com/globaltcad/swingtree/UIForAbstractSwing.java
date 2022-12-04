@@ -54,10 +54,6 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public UIForAbstractSwing( C component ) { super(component); }
 
-    protected final I _this() {
-        return (I) this;
-    }
-    
     protected final void _doUI( Runnable action ) {
         _eventProcessor.processUIEvent( action );
     }

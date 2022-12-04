@@ -118,7 +118,7 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
         if ( !(model instanceof SpinnerNumberModel) )
             throw new IllegalArgumentException(
                     "This JSpinner can not have a numeric step size as it is not based on the SpinnerNumberModel!"
-            );
+                );
         SpinnerNumberModel numberModel = (SpinnerNumberModel) model;
         numberModel.setStepSize(n);
         return this;

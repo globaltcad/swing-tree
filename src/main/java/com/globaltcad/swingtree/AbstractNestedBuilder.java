@@ -53,7 +53,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
     public final I add( E... components ) {
         NullUtil.nullArgCheck(components, "components", Object[].class);
         for ( E c : components ) _doAdd(UI.of((JComponent) c), null);
-        return (I) this;
+        return _this();
     }
 
     /**
@@ -110,7 +110,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
         for ( AbstractNestedBuilder<?, ?, ?> b : builders )
             _doAdd( b, null );
 
-        return (I) this;
+        return _this();
     }
 
 
@@ -128,7 +128,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
         for ( int i = 0; i < array.length; i++ )
             _doAdd(UI.of((JComponent) components.get(i)), null);
 
-        return (I) this;
+        return _this();
     }
 
 }
