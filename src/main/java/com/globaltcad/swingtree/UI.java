@@ -738,7 +738,7 @@ public final class UI
      */
     public static UIForTabbedPane<JTabbedPane> tabbedPane( Position tabsPosition ) {
         NullUtil.nullArgCheck(tabsPosition, "tabsPosition", Position.class);
-        return of(new JTabbedPane(tabsPosition.forTabbedPane()));
+        return tabbedPane().with(tabsPosition);
     }
 
     /**
@@ -762,7 +762,7 @@ public final class UI
     public static UIForTabbedPane<JTabbedPane> tabbedPane( Position tabsPosition, OverflowPolicy tabsPolicy ) {
         NullUtil.nullArgCheck(tabsPosition, "tabsPosition", Position.class);
         NullUtil.nullArgCheck(tabsPolicy, "tabsPolicy", OverflowPolicy.class);
-        return of(new JTabbedPane(tabsPosition.forTabbedPane(), tabsPolicy.forTabbedPane()));
+        return tabbedPane().with(tabsPosition).with(tabsPolicy);
     }
 
     /**
@@ -783,7 +783,15 @@ public final class UI
      */
     public static UIForTabbedPane<JTabbedPane> tabbedPane( OverflowPolicy tabsPolicy ) {
         NullUtil.nullArgCheck(tabsPolicy, "tabsPolicy", OverflowPolicy.class);
-        return of(new JTabbedPane(Position.TOP.forTabbedPane(), tabsPolicy.forTabbedPane()));
+        return tabbedPane().with(Position.TOP).with(tabsPolicy);
+    }
+
+    public static UIForTabbedPane<JTabbedPane> tabbedPane( Val<Integer> selectedIndex ) {
+        return tabbedPane().withSelectedIndex(selectedIndex);
+    }
+
+    public static UIForTabbedPane<JTabbedPane> tabbedPane( Var<Integer> selectedIndex ) {
+        return tabbedPane().withSelectedIndex(selectedIndex);
     }
 
     /**

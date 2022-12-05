@@ -9,6 +9,7 @@ import javax.swing.event.ChangeEvent;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.function.Consumer;
 
 /**
  *  A swing tree builder node for {@link JTabbedPane} instances.
@@ -24,16 +25,48 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
     public UIForTabbedPane( P component ) { super(component); }
 
 
+    public final UIForTabbedPane<P> withSelectedIndex( int index ) {
+        getComponent().setSelectedIndex(index);
+        return this;
+    }
+
+    public final UIForTabbedPane<P> withSelectedIndex( Val<Integer> index ) {
+        NullUtil.nullArgCheck( index, "index", Val.class );
+        NullUtil.nullPropertyCheck( index, "index", "Null is not a valid state for modelling a selected index." );
+        _onShow( index, i -> getComponent().setSelectedIndex(i) );
+        return withSelectedIndex(index.get());
+    }
+
+    public final UIForTabbedPane<P> withSelectedIndex( Var<Integer> index ) {
+        NullUtil.nullArgCheck( index, "index", Var.class );
+        NullUtil.nullPropertyCheck( index, "index", "Null is not a valid state for modelling a selected index." );
+        _onShow( index, i -> getComponent().setSelectedIndex(i) );
+        _onChange( e -> _doApp(()->index.act(getComponent().getSelectedIndex())) );
+        return withSelectedIndex(index.get());
+    }
+
+    public final UIForTabbedPane<P> with( UI.Position position ) {
+        NullUtil.nullArgCheck( position, "position", UI.Position.class );
+        getComponent().setTabPlacement(position.forTabbedPane());
+        return this;
+    }
+
     public final UIForTabbedPane<P> withPosition( Val<UI.Position> position ) {
         NullUtil.nullArgCheck(position, "position", Var.class);
-        _onShow(position, v -> getComponent().setTabPlacement(position.orElseThrow().forTabbedPane()));
+        _onShow(position, v -> with(position.orElseThrow()));
+        return with(position.get());
+    }
+
+    public final UIForTabbedPane<P> with( UI.OverflowPolicy policy ) {
+        NullUtil.nullArgCheck( policy, "policy", UI.OverflowPolicy.class );
+        getComponent().setTabLayoutPolicy(policy.forTabbedPane());
         return this;
     }
 
     public final UIForTabbedPane<P> withOverflowPolicy( Val<UI.OverflowPolicy> policy ) {
         NullUtil.nullArgCheck(policy, "policy", Var.class);
-        _onShow(policy, v -> getComponent().setTabLayoutPolicy(policy.orElseThrow().forTabbedPane()));
-        return this;
+        _onShow(policy, v -> with(policy.orElseThrow()));
+        return with(policy.orElseThrow());
     }
 
     public final UIForTabbedPane<P> add( Tab tab ) {
@@ -120,8 +153,13 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
     public final UIForTabbedPane<P> onChange( UIAction<SimpleDelegate<P, ChangeEvent>> onChange ) {
         NullUtil.nullArgCheck(onChange, "onChange", UIAction.class);
         P pane = getComponent();
-        pane.addChangeListener(e -> _doApp(()->onChange.accept(new SimpleDelegate<>(pane, e, this::getSiblinghood))));
+        _onChange(e -> _doApp(()->onChange.accept(new SimpleDelegate<>(pane, e, this::getSiblinghood))));
         return this;
     }
+
+    private void _onChange( Consumer<ChangeEvent> action ) {
+        getComponent().addChangeListener(action::accept);
+    }
+
 
 }
