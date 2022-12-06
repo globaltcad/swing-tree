@@ -1619,29 +1619,37 @@ public final class UI
      *
      * @param text The text property which should be bound to the checkbox.
      *             This is the text which is displayed on the checkbox.
-     * @param state The selection property which should be bound to the checkbox and determines whether it is selected or not.
+     * @param isChecked The selection property which should be bound to the checkbox and determines whether it is selected or not.
      * @return A builder instance for the checkbox, which enables fluent method chaining.
      */
-    public static UIForCheckBox<JCheckBox> checkBox( Val<String> text, Var<Boolean> state ) {
+    public static UIForCheckBox<JCheckBox> checkBox( Val<String> text, Var<Boolean> isChecked ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
-        NullUtil.nullArgCheck(state, "state", Var.class);
+        NullUtil.nullArgCheck(isChecked, "isChecked", Var.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        NullUtil.nullPropertyCheck(state, "state", "The selection state of a check box may not be modelled using null!");
+        NullUtil.nullPropertyCheck(isChecked, "isChecked", "The selection state of a check box may not be modelled using null!");
         return of(new JCheckBox())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
-                .applyIf(!state.hasNoID(), it -> it.id(state.id()))
+                .applyIf(!isChecked.hasNoID(), it -> it.id(isChecked.id()))
                 .withText(text)
-                .isSelectedIf(state);
+                .isSelectedIf(isChecked);
     }
 
-    public static UIForCheckBox<JCheckBox> checkBox( String text, Var<Boolean> state ) {
+    /**
+     *  Creates a builder node wrapping a new {@link JCheckBox} instance
+     *  with the provided text displayed on it and the provided selection property
+     *  dynamically determining whether the checkbox is selected or not.
+     *  @param text The text which should be displayed on the checkbox.
+     *  @param isChecked The selection property which should be bound to the checkbox and determines whether it is selected or not.
+     *  @return A builder instance for the checkbox, which enables fluent method chaining.
+     */
+    public static UIForCheckBox<JCheckBox> checkBox( String text, Var<Boolean> isChecked ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        NullUtil.nullArgCheck(state, "state", Var.class);
-        NullUtil.nullPropertyCheck(state, "state", "The selection state of a check box may not be modelled using null!");
+        NullUtil.nullArgCheck(isChecked, "isChecked", Var.class);
+        NullUtil.nullPropertyCheck(isChecked, "isChecked", "The selection state of a check box may not be modelled using null!");
         return of(new JCheckBox())
-                .applyIf(!state.hasNoID(), it -> it.id(state.id()))
+                .applyIf(!isChecked.hasNoID(), it -> it.id(isChecked.id()))
                 .withText(text)
-                .isSelectedIf(state);
+                .isSelectedIf(isChecked);
     }
 
     /**
@@ -1654,11 +1662,25 @@ public final class UI
         return new UIForCheckBox<>(component);
     }
 
+    /**
+     *  Creates a builder node wrapping a new {@link JRadioButton} instance with the provided
+     *  text displayed on it.
+     *
+     * @param text The text which should be displayed on the radio button.
+     * @return A builder instance for the radio button, which enables fluent method chaining.
+     */
     public static UIForRadioButton<JRadioButton> radioButton( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
         return of(new JRadioButton(text));
     }
 
+    /**
+     *  Creates a builder node wrapping a new {@link JRadioButton} instance where the provided
+     *  text property dynamically displays its value on the radio button.
+     *
+     * @param text The text property which should be bound to the radio button.
+     * @return A builder instance for the radio button, which enables fluent method chaining.
+     */
     public static UIForRadioButton<JRadioButton> radioButton( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
@@ -1667,6 +1689,17 @@ public final class UI
                 .withText(text);
     }
 
+    /**
+     *  Creates a builder node wrapping a new {@link JRadioButton} instance
+     *  where the provided text property dynamically displays its value on the radio button
+     *  and the provided selection property dynamically determines whether the radio button
+     *  is selected or not.
+     *
+     * @param text The text property which should be bound to the radio button.
+     *             This is the text which is displayed on the radio button.
+     * @param selected The selection property which should be bound to the radio button and determines whether it is selected or not.
+     * @return A builder instance for the radio button, which enables fluent method chaining.
+     */
     public static UIForRadioButton<JRadioButton> radioButton( Val<String> text, Var<Boolean> selected ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullArgCheck(text, "selected", Var.class);
@@ -1679,6 +1712,14 @@ public final class UI
                 .isSelectedIf(selected);
     }
 
+    /**
+     *  Creates a builder node wrapping a new {@link JRadioButton} instance
+     *  with the provided text displayed on it and the provided selection property
+     *  dynamically determining whether the radio button is selected or not.
+     *  @param text The text which should be displayed on the radio button.
+     *  @param selected The selection property which should be bound to the radio button and determines whether it is selected or not.
+     *  @return A builder instance for the radio button, which enables fluent method chaining.
+     */
     public static UIForRadioButton<JRadioButton> radioButton( String text, Var<Boolean> selected ) {
         NullUtil.nullArgCheck(text, "text", String.class);
         NullUtil.nullArgCheck(text, "selected", Var.class);
@@ -1705,11 +1746,23 @@ public final class UI
      */
     public static UIForToggleButton<JToggleButton> toggleButton() { return of(new JToggleButton()); }
 
+    /**
+     *  Use this to create a builder for a new {@link JToggleButton} instance
+     *  with the provided text displayed on it.
+     *
+     * @return A builder instance for a new {@link JToggleButton}, which enables fluent method chaining.
+     */
     public static UIForToggleButton<JToggleButton> toggleButton( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
         return of(new JToggleButton(text));
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JToggleButton} instance
+     *  where the provided text property dynamically displays its value on the toggle button.
+     *
+     * @return A builder instance for a new {@link JToggleButton}, which enables fluent method chaining.
+     */
     public static UIForToggleButton<JToggleButton> toggleButton( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
@@ -1718,6 +1771,12 @@ public final class UI
                 .withText(text);
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JToggleButton} instance
+     *  where the provided boolean property dynamically determines whether the toggle button is selected or not.
+     *  @param  isToggled The boolean property which should be bound to the toggle button and determines whether it is selected or not.
+     *  @return A builder instance for a new {@link JToggleButton}, which enables fluent method chaining.
+     */
     public static UIForToggleButton<JToggleButton> toggleButton( Var<Boolean> isToggled ) {
         NullUtil.nullPropertyCheck(isToggled, "isToggled");
         return of(new JToggleButton())
@@ -1725,37 +1784,78 @@ public final class UI
                 .isSelectedIf(isToggled);
     }
 
-    public static UIForToggleButton<JToggleButton> toggleButton( String text, Var<Boolean> selected ) {
+    /**
+     *  Use this to create a builder for a new {@link JToggleButton} instance
+     *  with the provided text displayed on it and the provided boolean property
+     *  dynamically determining whether the toggle button is selected or not.
+     *  @param text The text which should be displayed on the toggle button.
+     *  @param isToggled The boolean property which should be bound to the toggle button and determines whether it is selected or not.
+     *  @return A builder instance for a new {@link JToggleButton}, which enables fluent method chaining.
+     */
+    public static UIForToggleButton<JToggleButton> toggleButton( String text, Var<Boolean> isToggled ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        NullUtil.nullPropertyCheck(selected, "selected");
+        NullUtil.nullPropertyCheck(isToggled, "isToggled");
         return of(new JToggleButton())
                 .withText(text)
-                .isSelectedIf(selected);
+                .isSelectedIf(isToggled);
     }
 
-    public static UIForToggleButton<JToggleButton> toggleButton( Val<String> text, Var<Boolean> selected ) {
+    /**
+     *  Use this to create a builder for a new {@link JToggleButton} instance
+     *  where the provided text property dynamically displays its value on the toggle button
+     *  and the provided boolean property dynamically determines whether the toggle button is selected or not.
+     *  @param text The text property which should be bound to the toggle button.
+     *             This is the text which is displayed on the toggle button.
+     *  @param isToggled The boolean property which should be bound to the toggle button and determines whether it is selected or not.
+     *  @return A builder instance for a new {@link JToggleButton}, which enables fluent method chaining.
+     */
+    public static UIForToggleButton<JToggleButton> toggleButton( Val<String> text, Var<Boolean> isToggled ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
-        NullUtil.nullPropertyCheck(selected, "selected", "The selection state of a toggle button may not be modelled using null!");
+        NullUtil.nullArgCheck(isToggled, "isToggled", Var.class);
+        NullUtil.nullPropertyCheck(isToggled, "isToggled", "The selection state of a toggle button may not be modelled using null!");
         return of(new JToggleButton())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
-                .applyIf(!selected.hasNoID(), it -> it.id(selected.id()))
+                .applyIf(!isToggled.hasNoID(), it -> it.id(isToggled.id()))
                 .withText(text)
-                .isSelectedIf(selected);
+                .isSelectedIf(isToggled);
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JToggleButton} instance with
+     *  the provided {@link Icon} displayed on it.
+     *
+     * @param icon The icon which should be displayed on the toggle button.
+     * @return A builder instance for the provided {@link JToggleButton}, which enables fluent method chaining.
+     */
     public static UIForToggleButton<JToggleButton> toggleButton( Icon icon ) {
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
         return of(new JToggleButton(icon));
     }
 
-    public static UIForToggleButton<JToggleButton> toggleButton( Icon icon, Var<Boolean> selected ) {
+    /**
+     *  Use this to create a builder for a new {@link JToggleButton} instance with
+     *  the provided {@link Icon} displayed on it and the provided boolean property
+     *  dynamically determining whether the toggle button is selected or not.
+     *
+     * @param icon The icon which should be displayed on the toggle button.
+     * @param isToggled The boolean property which should be bound to the toggle button and determines whether it is selected or not.
+     * @return A builder instance for the provided {@link JToggleButton}, which enables fluent method chaining.
+     */
+    public static UIForToggleButton<JToggleButton> toggleButton( Icon icon, Var<Boolean> isToggled ) {
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
-        NullUtil.nullPropertyCheck(selected, "selected", "The selection state of a toggle button may not be modelled using null!");
+        NullUtil.nullPropertyCheck(isToggled, "isToggled", "The selection state of a toggle button may not be modelled using null!");
         return of(new JToggleButton(icon))
-                .applyIf(!selected.hasNoID(), it -> it.id(selected.id()))
-                .isSelectedIf(selected);
+                .applyIf(!isToggled.hasNoID(), it -> it.id(isToggled.id()))
+                .isSelectedIf(isToggled);
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JToggleButton} instance where
+     *  the provided {@link Icon} property dynamically displays its value on the toggle button.
+     *
+     * @param icon The icon property which should be bound to the toggle button.
+     * @return A builder instance for the provided {@link JToggleButton}, which enables fluent method chaining.
+     */
     public static UIForToggleButton<JToggleButton> toggleButtonWithIcon( Val<Icon> icon ) {
         NullUtil.nullArgCheck(icon, "icon", Val.class);
         NullUtil.nullPropertyCheck(icon, "icon", "The icon of a toggle button may not be modelled using null!");
@@ -1764,15 +1864,24 @@ public final class UI
                 .withIcon(icon);
     }
 
-    public static UIForToggleButton<JToggleButton> toggleButtonWithIcon( Val<Icon> icon, Var<Boolean> selected ) {
+    /**
+     *  Use this to create a builder for a new {@link JToggleButton} instance where
+     *  the provided {@link Icon} property dynamically displays its value on the toggle button
+     *  and the provided boolean property dynamically determines whether the toggle button is selected or not.
+     *
+     * @param icon The icon property which should be bound to the toggle button.
+     * @param isToggled The boolean property which should be bound to the toggle button and determines whether it is selected or not.
+     * @return A builder instance for the provided {@link JToggleButton}, which enables fluent method chaining.
+     */
+    public static UIForToggleButton<JToggleButton> toggleButtonWithIcon( Val<Icon> icon, Var<Boolean> isToggled ) {
         NullUtil.nullArgCheck(icon, "icon", Val.class);
         NullUtil.nullPropertyCheck(icon, "icon", "The icon of a toggle button may not be modelled using null!");
-        NullUtil.nullPropertyCheck(selected, "selected", "The selection state of a toggle button may not be modelled using null!");
+        NullUtil.nullPropertyCheck(isToggled, "isToggled", "The selection state of a toggle button may not be modelled using null!");
         return of(new JToggleButton())
                 .applyIf(!icon.hasNoID(), it -> it.id(icon.id()))
-                .applyIf(!selected.hasNoID(), it -> it.id(selected.id()))
+                .applyIf(!isToggled.hasNoID(), it -> it.id(isToggled.id()))
                 .withIcon(icon)
-                .isSelectedIf(selected);
+                .isSelectedIf(isToggled);
     }
 
     /**
@@ -1795,11 +1904,27 @@ public final class UI
         return new UIForTextField<>(component);
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JTextField} instance with
+     *  the provided text displayed on it.
+     *
+     * @param text The text which should be displayed on the text field.
+     * @return A builder instance for the provided {@link JTextField}, which enables fluent method chaining.
+     */
     public static UIForTextField<JTextField> textField( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
         return of(new JTextField(text));
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JTextField} instance with
+     *  the provided text property dynamically displaying its value on the text field.
+     *  The property is a {@link Val}, meaning that it is read-only and may not be changed
+     *  by the text field.
+     *
+     * @param text The text property which should be bound to the text field.
+     * @return A builder instance for the provided {@link JTextField}, which enables fluent method chaining.
+     */
     public static UIForTextField<JTextField> textField( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
@@ -1808,6 +1933,14 @@ public final class UI
                 .withText(text);
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JTextField} instance with
+     *  the provided text property dynamically displaying its value on the text field.
+     *  The property may also be modified by the user.
+     *
+     * @param text The text property which should be bound to the text field.
+     * @return A builder instance for the provided {@link JTextField}, which enables fluent method chaining.
+     */
     public static UIForTextField<JTextField> textField( Var<String> text ) {
         NullUtil.nullArgCheck(text, "text", Var.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
@@ -1829,16 +1962,32 @@ public final class UI
      *
      * @return A builder instance for the provided {@link JFormattedTextField}, which enables fluent method chaining.
      */
-    public static UIForFormattedTextField of(JFormattedTextField component) {
+    public static UIForFormattedTextField of( JFormattedTextField component ) {
         NullUtil.nullArgCheck(component, "component", JFormattedTextField.class);
         return new UIForFormattedTextField(component);
     }
 
-    public static UIForFormattedTextField formattedTextField(String text) {
+    /**
+     *  Use this to create a builder for a new {@link JFormattedTextField} instance with
+     *  the provided text displayed on it.
+     *
+     * @param text The text which should be displayed on the text field.
+     * @return A builder instance for the provided {@link JFormattedTextField}, which enables fluent method chaining.
+     */
+    public static UIForFormattedTextField formattedTextField( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
         return of(new JFormattedTextField(text));
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JFormattedTextField} instance with
+     *  the provided text property dynamically displaying its value in the text field.
+     *  The property is a {@link Val}, meaning that it is read-only and may not be changed
+     *  by the text field.
+     *
+     * @param text The text property which should be bound to the text field.
+     * @return A builder instance for the provided {@link JFormattedTextField}, which enables fluent method chaining.
+     */
     public static UIForFormattedTextField formattedTextField( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
@@ -1847,6 +1996,14 @@ public final class UI
                 .withText(text);
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JFormattedTextField} instance with
+     *  the provided text property dynamically displaying its value in the formatted text field.
+     *  The property may also be modified by the user.
+     *
+     * @param text The text property which should be bound to the formatted text field.
+     * @return A builder instance for the provided {@link JFormattedTextField}, which enables fluent method chaining.
+     */
     public static UIForFormattedTextField formattedTextField( Var<String> text ) {
         NullUtil.nullArgCheck(text, "text", Var.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
@@ -1873,11 +2030,27 @@ public final class UI
         return new UIForPasswordField<>(component);
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JPasswordField} instance with
+     *  the provided text as the initial password.
+     *
+     * @param text The initial password which should be displayed on the password field.
+     * @return A builder instance for the provided {@link JPasswordField}, which enables fluent method chaining.
+     */
     public static UIForPasswordField<JPasswordField> passwordField( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
         return of(new JPasswordField(text));
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JPasswordField} instance with
+     *  the provided text property dynamically displaying its value in the password field.
+     *  The property is a {@link Val}, meaning that it is read-only and may not be changed
+     *  by the password field.
+     *
+     * @param text The text property which should be bound to the password field.
+     * @return A builder instance for the provided {@link JPasswordField}, which enables fluent method chaining.
+     */
     public static UIForPasswordField<JPasswordField> passwordField( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
@@ -1886,6 +2059,14 @@ public final class UI
                 .withText(text);
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JPasswordField} instance with
+     *  the provided text property dynamically displaying its value in the password field.
+     *  The property may also be modified by the user.
+     *
+     * @param text The text property which should be bound to the password field.
+     * @return A builder instance for the provided {@link JPasswordField}, which enables fluent method chaining.
+     */
     public static UIForPasswordField<JPasswordField> passwordField( Var<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
@@ -1912,11 +2093,27 @@ public final class UI
         return new UIForTextArea<>(area);
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JTextArea} instance with
+     *  the provided text as the initial text.
+     *
+     * @param text The initial text which should be displayed on the text area.
+     * @return A builder instance for the provided {@link JTextArea}, which enables fluent method chaining.
+     */
     public static UIForTextArea<JTextArea> textArea( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
         return of(new JTextArea(text));
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JTextArea} instance with
+     *  the provided text property dynamically displaying its value in the text area.
+     *  The property is a {@link Val}, meaning that it is read-only and may not be changed
+     *  by the text area.
+     *
+     * @param text The text property which should be bound to the text area.
+     * @return A builder instance for the provided {@link JTextArea}, which enables fluent method chaining.
+     */
     public static UIForTextArea<JTextArea> textArea( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
@@ -1925,6 +2122,14 @@ public final class UI
                 .withText(text);
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JTextArea} instance with
+     *  the provided text property dynamically displaying its value in the text area.
+     *  The property may also be modified by the user.
+     *
+     * @param text The text property which should be bound to the text area.
+     * @return A builder instance for the provided {@link JTextArea}, which enables fluent method chaining.
+     */
     public static UIForTextArea<JTextArea> textArea( Var<String> text ) {
         NullUtil.nullArgCheck(text, "text", Var.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
