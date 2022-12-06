@@ -19,7 +19,7 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    protected UIForSpinner(S component) { super(component); }
+    protected UIForSpinner( S component ) { super(component); }
 
     /**
      * Adds an {@link UIAction} to the underlying {@link JSpinner}

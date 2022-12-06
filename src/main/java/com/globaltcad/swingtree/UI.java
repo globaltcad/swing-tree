@@ -276,7 +276,7 @@ public final class UI
             }
             throw new RuntimeException();
         }
-        private int forSeparator() {
+        int forSeparator() {
             switch ( this )
             {
                 case HORIZONTAL: return JSeparator.HORIZONTAL;
@@ -328,19 +328,6 @@ public final class UI
             }
             throw new RuntimeException();
         }
-    }
-
-    public enum Data {
-        EDITABLE, READ_ONLY;
-
-        final boolean isEditable() {
-            switch ( this ) {
-                case EDITABLE: return true;
-                case READ_ONLY: return false;
-            }
-            throw new RuntimeException();
-        }
-
     }
 
     public enum ListData {
@@ -399,7 +386,7 @@ public final class UI
      * @param <T> The concrete type of this new component.
      * @return A basic UI builder instance wrapping any {@link JComponent}.
      */
-    public static <T extends JComponent> UIForSwing<T> of(T component)
+    public static <T extends JComponent> UIForSwing<T> of( T component )
     {
         NullUtil.nullArgCheck(component, "component", JComponent.class);
         return new UIForSwing<>(component);
@@ -415,7 +402,7 @@ public final class UI
      * @param <T> The UI component type built by implementations of the provided builder.
      * @return A basic UI builder instance wrapping any {@link JComponent}.
      */
-    public static <T extends JComponent> UIForSwing<T> of(SwingBuilder<T> builder)
+    public static <T extends JComponent> UIForSwing<T> of( SwingBuilder<T> builder )
     {
         NullUtil.nullArgCheck(builder, "builder", SwingBuilder.class);
         return of(builder.build());
@@ -430,7 +417,7 @@ public final class UI
      * @param <M> The {@link JMenuItem} type built by implementations of the provided builder.
      * @return A builder instance for a {@link JMenuItem}, which enables fluent method chaining.
      */
-    public static <M extends JMenuItem> UIForMenuItem<M> of(MenuBuilder<M> builder)
+    public static <M extends JMenuItem> UIForMenuItem<M> of( MenuBuilder<M> builder )
     {
         NullUtil.nullArgCheck(builder, "builder", MenuBuilder.class);
         return new UIForMenuItem<>(builder.build());
@@ -441,7 +428,7 @@ public final class UI
      *
      * @return A builder instance for a {@link JPopupMenu}, which enables fluent method chaining.
      */
-    public static <P extends JPopupMenu> UIForPopup<P> of(P popup)
+    public static <P extends JPopupMenu> UIForPopup<P> of( P popup )
     {
         NullUtil.nullArgCheck(popup, "popup", JPopupMenu.class);
         return new UIForPopup<>(popup);
@@ -462,7 +449,7 @@ public final class UI
      * @param separator The new {@link JSeparator} instance which ought to be part of the Swing UI.
      * @return A {@link UIForSeparator} UI builder instance which wraps the {@link JSeparator} and exposes helpful methods.
      */
-    public static <S extends JSeparator> UIForSeparator<S> of(S separator)
+    public static <S extends JSeparator> UIForSeparator<S> of( S separator )
     {
         NullUtil.nullArgCheck(separator, "separator", JSeparator.class);
         return new UIForSeparator<>(separator);
@@ -485,9 +472,21 @@ public final class UI
      * @param align The alignment of the separator which may either be horizontal or vertical.
      * @return A {@link UIForSeparator} UI builder instance which wraps the {@link JSeparator} and exposes helpful methods.
      */
-    public static UIForSeparator<JSeparator> separator(Align align) {
+    public static UIForSeparator<JSeparator> separator( Align align ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
-        return of(new JSeparator(align.forSeparator()));
+        return separator().with(align);
+    }
+
+    /**
+     *  Use this to create a swing tree builder node for the {@link JSeparator} whose
+     *  alignment is dynamically determined based on a provided property.
+     *
+     * @param align The alignment property of the separator which may either be horizontal or vertical.
+     * @return A {@link UIForSeparator} UI builder instance which wraps the {@link JSeparator} and exposes helpful methods.
+     */
+    public static UIForSeparator<JSeparator> separator( Val<Align> align ) {
+        NullUtil.nullArgCheck(align, "align", Val.class);
+        return separator().withAlignment(align);
     }
 
     /**
@@ -496,7 +495,7 @@ public final class UI
      * @param component The button component which ought to be wrapped by the swing tree UI builder.
      * @return A basic UI {@link JButton} builder instance.
      */
-    public static <T extends AbstractButton> UIForButton<T> of(T component)
+    public static <T extends AbstractButton> UIForButton<T> of( T component )
     {
         NullUtil.nullArgCheck(component, "component", AbstractButton.class);
         return new UIForButton<>(component);
@@ -538,7 +537,7 @@ public final class UI
      */
     public static UIForButton<JButton> button( Icon icon ) {
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
-        return button().peek(it -> it.setIcon(icon) );
+        return button().peek( it -> it.setIcon(icon) );
     }
 
     /**
@@ -560,7 +559,7 @@ public final class UI
      *
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
-    public static UIForButton<JButton> button(Icon icon, Icon onHover) {
+    public static UIForButton<JButton> button( Icon icon, Icon onHover ) {
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
         NullUtil.nullArgCheck(onHover, "onHover", Icon.class);
         return button(icon, onHover, onHover);
@@ -573,7 +572,7 @@ public final class UI
      *
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
-    public static UIForButton<JButton> button(int width, int height, ImageIcon icon, ImageIcon onHover) {
+    public static UIForButton<JButton> button( int width, int height, ImageIcon icon, ImageIcon onHover ) {
         NullUtil.nullArgCheck(icon, "icon", ImageIcon.class);
         NullUtil.nullArgCheck(onHover, "onHover", ImageIcon.class);
         onHover = new ImageIcon(onHover.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT));
@@ -604,6 +603,12 @@ public final class UI
                 .peek(it -> it.setPressedIcon(onPress) );
     }
 
+    /**
+     *  Use this to create a builder for the {@link JSplitButton} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JSplitButton())}.
+     *
+     * @return A builder instance for a {@link JSplitButton}, which enables fluent method chaining.
+     */
     public static <B extends JSplitButton> UIForSplitButton<B> of( B splitButton ) {
         NullUtil.nullArgCheck(splitButton, "splitButton", JSplitButton.class);
         return new UIForSplitButton<>(splitButton);
@@ -786,10 +791,49 @@ public final class UI
         return tabbedPane().with(Position.TOP).with(tabsPolicy);
     }
 
+
+    /**
+     *  Use this to create a builder for a new {@link JTabbedPane} UI component
+     *  with the provided {@code selectionIndex} property which should be determine the
+     *  tab selection of the {@link JTabbedPane} dynamically.
+     *  To add tabs to this builder use the tab object returned by {@link #tab(String)}
+     *  like so:
+     *  <pre>{@code
+     *      UI.tabbedPane(vm.getSelectionIndex())
+     *      .add(UI.tab("First").add(UI.panel().add(..)))
+     *      .add(UI.tab("second").withTip("I give info!").add(UI.label("read me")))
+     *      .add(UI.tab("third").with(someIcon).add(UI.button("click me")))
+     *  }</pre>
+     *  Note that contrary to method {@link #tabbedPane(Var)}, this method receives a {@link Val}
+     *  property which may not be changed by the GUI user. If you want to allow the user to change
+     *  the selection index property state, use {@link #tabbedPane(Var)} instead.
+     *
+     * @param selectedIndex The index of the tab to select.
+     * @return A builder instance wrapping a new {@link JTabbedPane}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code selectedIndex} is {@code null}.
+     */
     public static UIForTabbedPane<JTabbedPane> tabbedPane( Val<Integer> selectedIndex ) {
         return tabbedPane().withSelectedIndex(selectedIndex);
     }
 
+
+    /**
+     *  Use this to create a builder for a new {@link JTabbedPane} UI component
+     *  with the provided {@code selectionIndex} property which should be determine the
+     *  tab selection of the {@link JTabbedPane} dynamically.
+     *  To add tabs to this builder use the tab object returned by {@link #tab(String)}
+     *  like so:
+     *  <pre>{@code
+     *      UI.tabbedPane(vm.getSelectionIndex())
+     *      .add(UI.tab("First").add(UI.panel().add(..)))
+     *      .add(UI.tab("second").withTip("I give info!").add(UI.label("read me")))
+     *      .add(UI.tab("third").with(someIcon).add(UI.button("click me")))
+     *  }</pre>
+     *
+     * @param selectedIndex The index of the tab to select.
+     * @return A builder instance wrapping a new {@link JTabbedPane}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code selectedIndex} is {@code null}.
+     */
     public static UIForTabbedPane<JTabbedPane> tabbedPane( Var<Integer> selectedIndex ) {
         return tabbedPane().withSelectedIndex(selectedIndex);
     }

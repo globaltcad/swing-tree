@@ -22,10 +22,38 @@ public class UIForSeparator<S extends JSeparator> extends UIForAbstractSwing<UIF
     protected UIForSeparator(S component) { super(component); }
 
     /**
+     * Sets the orientation of the separator which can be either
+     * {@link SwingConstants#HORIZONTAL} or {@link SwingConstants#VERTICAL}.
+     * This method is a convenience method for {@link JSeparator#setOrientation(int)}
+     * which receives the {@link UI.Align} enum instead of an integer.
+     *
+     * @param align The orientation of the separator.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     */
+    public final UIForSeparator<S> with( UI.Align align ) {
+        NullUtil.nullArgCheck( align, "align", Val.class );
+        getComponent().setOrientation(align.forSeparator());
+        return this;
+    }
+
+    /**
+     * @param align The alignment property used to dynamically update the alignment of the separator.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     */
+    public final UIForSeparator<S> withAlignment( Val<UI.Align> align ) {
+        NullUtil.nullArgCheck( align, "align", Val.class );
+        NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment." );
+        _onShow( align, v -> getComponent().setOrientation(v.forSeparator()) );
+        return with(align.get());
+    }
+
+    /**
      * @param separatorLength The length of the separation line.
      * @return This very builder to allow for method chaining.
      */
-    public UIForSeparator<S> withLength( int separatorLength ) {
+    public final UIForSeparator<S> withLength( int separatorLength ) {
         S separator = getComponent();
         Dimension d = separator.getPreferredSize();
         if ( separator.getOrientation() == JSeparator.VERTICAL ) d.height = separatorLength;
@@ -39,7 +67,9 @@ public class UIForSeparator<S extends JSeparator> extends UIForAbstractSwing<UIF
      * @return This very builder to allow for method chaining.
      */
     public UIForSeparator<S> withLength( Val<Integer> separatorLength ) {
-        _onShow(separatorLength, v -> withLength(v));
+        NullUtil.nullArgCheck( separatorLength, "separatorLength", Val.class );
+        NullUtil.nullPropertyCheck( separatorLength, "separatorLength", "Null is not a valid separator length." );
+        _onShow( separatorLength, this::withLength );
         return this;
     }
 }
