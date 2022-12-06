@@ -268,7 +268,7 @@ public final class UI
     public enum Align {
         HORIZONTAL, VERTICAL;
 
-        private int forSlider () {
+        int forSlider() {
             switch ( this )
             {
                 case HORIZONTAL: return JSlider.HORIZONTAL;
@@ -1137,7 +1137,23 @@ public final class UI
      */
     public static UIForSlider<JSlider> slider( Align align ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
-        return of(new JSlider(align.forSlider()));
+        return of(new JSlider()).with(align);
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JSlider} instance
+     *  based on tbe provided alignment property which dynamically
+     *  determines if the property is aligned vertically or horizontally.
+     *
+     * @param align The alignment property determining if the {@link JSlider} aligns vertically or horizontally.
+     * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if the {@code align} property is {@code null}.
+     *
+     * @see JSlider#setOrientation
+     */
+    public static UIForSlider<JSlider> slider( Val<Align> align ) {
+        NullUtil.nullArgCheck( align, "align", Val.class );
+        return of(new JSlider()).withAlignment(align);
     }
 
     /**
@@ -1246,11 +1262,11 @@ public final class UI
     public static UIForCombo<Object,JComboBox<Object>> comboBox() { return of(new JComboBox<>()); }
 
     /**
-     *  Use this to create a builder for the provided {@link JList} instance
+     *  Use this to create a builder for a new {@link JComboBox} instance
      *  with the provided array of elements as selectable items.
      *
-     * @param items The array of elements to be selectable in the {@link JList}.
-     * @return A builder instance for the provided {@link JList}, which enables fluent method chaining.
+     * @param items The array of elements to be selectable in the {@link JComboBox}.
+     * @return A builder instance for the new {@link JComboBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     @SafeVarargs
@@ -1259,6 +1275,15 @@ public final class UI
         return of(new JComboBox<E>()).withModel(new ArrayBasedComboModel<>(items));
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JComboBox} instance
+     *  with the provided array of elements as selectable items which
+     *  may not be modified by the user.
+     *
+     * @param items The unmodifiable array of elements to be selectable in the {@link JList}.
+     * @return A builder instance for the new {@link JComboBox}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
+     */
     @SafeVarargs
     public static <E> UIForCombo<E,JComboBox<E>> comboBoxWithUnmodifiable( E... items ) {
         NullUtil.nullArgCheck(items, "items", Object[].class); // Unmodifiable
@@ -1266,10 +1291,21 @@ public final class UI
         return comboBox(unmodifiableList);
     }
 
-    public static <E extends Enum<E>> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var ) {
-        NullUtil.nullArgCheck(var, "var", Var.class);
+    /**
+     *  Use this to create a builder for a new {@link JComboBox} instance
+     *  where the provided property dynamically models the selected item.
+     *  This means that the property will be updated whenever the user
+     *  selects a new item in the {@link JComboBox} and the {@link JComboBox}
+     *  will be updated whenever the property changes in your code (see {@link Var#set(Object)}).
+     *
+     * @param selectedItem A property modelling the selected item in the combo box.
+     * @return A builder instance for the new {@link JComboBox}, which enables fluent method chaining.
+     * @param <E> The type of the elements in the combo box.
+     */
+    public static <E extends Enum<E>> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selectedItem ) {
+        NullUtil.nullArgCheck(selectedItem, "var", Var.class);
         // We get an array of possible enum states from the enum class
-        return comboBox(var.type().getEnumConstants()).withSelectedItem(var);
+        return comboBox(selectedItem.type().getEnumConstants()).withSelectedItem(selectedItem);
     }
 
     /**
@@ -1359,14 +1395,15 @@ public final class UI
      *  <p>
      *  Note that the provided array may be mutated by the combo box UI component
      *
-     * @param var The property holding the current selection.
+     * @param selectedItem The property holding the current selection.
      * @param items The property holding an array of selectable items which may not be modified by the user.
      * @return A builder instance for the provided {@link JList}, which enables fluent method chaining.
      * @param <E> The type of the elements in the combo box.
      */
-    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var, Val<E[]> items ) {
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selectedItem, Val<E[]> items ) {
         NullUtil.nullArgCheck(items, "items", List.class);
-        return of(new JComboBox<E>()).withModel(new ArrayPropertyComboModel<>(var, items));
+        NullUtil.nullArgCheck(selectedItem, "selectedItem", Var.class);
+        return of(new JComboBox<E>()).withModel(new ArrayPropertyComboModel<>(selectedItem, items));
     }
 
     /**

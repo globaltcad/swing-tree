@@ -19,6 +19,29 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
     protected UIForSlider( S component ) { super(component); }
 
     /**
+     *  Sets the orientation of the slider.
+     *  @param align The orientation of the slider.
+     *  @return This builder node.
+     */
+    public final UIForSlider<S> with( UI.Align align ) {
+        NullUtil.nullArgCheck( align, "align", UI.Align.class );
+        getComponent().setOrientation(align.forSlider());
+        return this;
+    }
+
+    /**
+     *  Dynamically sets the orientation of the slider.
+     *  @param align The orientation of the slider.
+     *  @return This builder node.
+     */
+    public final UIForSlider<S> withAlignment( Val<UI.Align> align ) {
+        NullUtil.nullArgCheck( align, "align", Val.class );
+        NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment" );
+        _onShow( align, v -> with(align.orElseThrow()) );
+        return this;
+    }
+
+    /**
      * Adds an {@link UIAction} to the underlying {@link JSlider}
      * through an {@link javax.swing.event.ChangeListener},
      * which will be called when the state of the slider changes.
@@ -156,5 +179,20 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
         _onShow( spacing, v -> getComponent().setMajorTickSpacing(v) );
         return this;
     }
+
+    /**
+     * Dynamically sets the minor tick spacing of the slider.
+     * For more information see {@link JSlider#setMinorTickSpacing(int)}.
+     * @param spacing The minor tick spacing of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code spacing} is {@code null}.
+     */
+    public final UIForSlider<S> withMinorTickSpacing( Val<Integer> spacing ) {
+        NullUtil.nullArgCheck( spacing, "spacing", Val.class );
+        NullUtil.nullPropertyCheck( spacing, "spacing" );
+        _onShow( spacing, v -> getComponent().setMinorTickSpacing(v) );
+        return this;
+    }
+
 
 }
