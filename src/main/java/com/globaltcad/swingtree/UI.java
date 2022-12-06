@@ -1556,12 +1556,10 @@ public final class UI
      * @param icon The icon which should be placed into a {@link JLabel}.
      * @return A builder instance for the label, which enables fluent method chaining.
      */
-    public static UIForLabel<JLabel> label(int width, int height, ImageIcon icon) {
+    public static UIForLabel<JLabel> label( int width, int height, ImageIcon icon ) {
         NullUtil.nullArgCheck(icon, "icon", ImageIcon.class);
         return of(new JLabel())
-                .with(
-                    new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT))
-                );
+                .with(new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT)));
     }
 
     /**
@@ -1586,11 +1584,25 @@ public final class UI
         return of(new JLabel()).withText(text).makeBold();
     }
 
+    /**
+     *  Creates a builder node wrapping a new {@link JCheckBox} instance with the provided
+     *  text displayed on it.
+     *
+     * @param text The text which should be displayed on the checkbox.
+     * @return A builder instance for the checkbox, which enables fluent method chaining.
+     */
     public static UIForCheckBox<JCheckBox> checkBox( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
         return of(new JCheckBox(text));
     }
 
+    /**
+     *  Creates a builder node wrapping a new {@link JCheckBox} instance where the provided
+     *  text property dynamically displays its value on the checkbox.
+     *
+     * @param text The text property which should be bound to the checkbox.
+     * @return A builder instance for the checkbox, which enables fluent method chaining.
+     */
     public static UIForCheckBox<JCheckBox> checkBox( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
@@ -1599,6 +1611,17 @@ public final class UI
                 .withText(text);
     }
 
+    /**
+     *  Creates a builder node wrapping a new {@link JCheckBox} instance
+     *  where the provided text property dynamically displays its value on the checkbox
+     *  and the provided selection property dynamically determines whether the checkbox
+     *  is selected or not.
+     *
+     * @param text The text property which should be bound to the checkbox.
+     *             This is the text which is displayed on the checkbox.
+     * @param state The selection property which should be bound to the checkbox and determines whether it is selected or not.
+     * @return A builder instance for the checkbox, which enables fluent method chaining.
+     */
     public static UIForCheckBox<JCheckBox> checkBox( Val<String> text, Var<Boolean> state ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullArgCheck(state, "state", Var.class);
