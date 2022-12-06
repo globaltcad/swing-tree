@@ -7,9 +7,13 @@ import com.globaltcad.swingtree.api.mvvm.Var;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  *  A swing tree builder node for {@link JTabbedPane} instances.
@@ -69,76 +73,140 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
         return with(policy.orElseThrow());
     }
 
+    private Supplier<Integer> _indexFinderFor(
+        WeakReference<P> paneRef,
+        WeakReference<JComponent> contentRef
+    ) {
+        return ()->{
+            P foundPane = paneRef.get();
+            JComponent foundContent = contentRef.get();
+            if ( foundPane != null && foundContent != null ) {
+                for ( int i = 0; i < foundPane.getTabCount(); i++ ) {
+                    if ( foundContent == foundPane.getComponentAt(i) ) return i;
+                }
+            }
+            return -1;
+        };
+    }
+
     public final UIForTabbedPane<P> add( Tab tab ) {
 
-        P pane = getComponent();
-        final int index = pane.getTabCount();
-
+        JComponent dummyContent = new JPanel();
+        WeakReference<P> paneRef = new WeakReference<>(getComponent());
+        WeakReference<JComponent> contentRef = new WeakReference<>(tab.contents().orElse(dummyContent));
+        Supplier<Integer> indexFinder = _indexFinderFor(paneRef, contentRef);
         tab.onSelection()
-           .ifPresent( onSelection ->
-                   pane.addChangeListener(e -> {
-                   if (index == pane.getSelectedIndex())
-                       _doApp(()->onSelection.accept(new SimpleDelegate<>(pane, e, this::getSiblinghood)));
-               })
+           .ifPresent(
+               onSelection ->
+                   getComponent().addChangeListener(e -> {
+                       JTabbedPane tabbedPane = paneRef.get();
+                       if ( tabbedPane == null ) return;
+                       int index = indexFinder.get();
+                       if (index >= 0 && index == tabbedPane.getSelectedIndex())
+                           _doApp(()->onSelection.accept(new SimpleDelegate<>(tabbedPane, e, this::getSiblinghood)));
+                   })
            );
 
-        tab.onMouseClick()
-            .ifPresent( onMouseClick ->
-                    pane.addMouseListener(new java.awt.event.MouseAdapter() {
-                    @Override
-                    public void mouseClicked( MouseEvent e ) {
-                        if ( index == pane.getSelectedIndex() )
-                            _doApp(()->onMouseClick.accept(new SimpleDelegate<>(pane, e, ()->getSiblinghood())));
-                    }
-                })
-            );
+        TabMouseClickListener mouseListener = new TabMouseClickListener(getComponent(), indexFinder, tab.onMouseClick().orElse(null));
 
-        pane.addTab(
+        getComponent().addTab(
                   tab.title().orElse(null),
                   tab.icon().orElse(null),
-                  tab.contents().orElse(null),
+                  tab.contents().orElse(dummyContent),
                   tab.tip().orElse(null)
               );
-        tab.headerContents().ifPresent( c -> _buildTabHeader( tab, index ) );
+
+        tab.headerContents().ifPresent( c -> {
+            getComponent()
+            .setTabComponentAt(
+                getComponent().getTabCount()-1,
+                _buildTabHeader( tab, mouseListener )
+            );
+        });
         return this;
     }
 
-    private void _buildTabHeader( Tab tab, int index ) {
+    private JComponent _buildTabHeader(Tab tab, TabMouseClickListener mouseListener )
+    {
+        return
+            tab.title().map( title ->
+                // We want both title and user component in the header!
+                UI.panel("fill, ins 0").withBackground(new Color(0,0,0,0))
+                .applyIfPresent( tab.tip().map( tip -> panel -> panel.withTooltip(tip) ) )
+                .peek( it -> {
+                    it.addMouseListener(mouseListener);
+                    mouseListener.addOwner(it);
+                })
+                .add("shrink",
+                    UI.label(title).withBackground(new Color(0,0,0,0))
+                    .applyIfPresent( tab.tip().map( tip -> label -> label.withTooltip(tip) ) )
+                    .peek( it -> {
+                        it.addMouseListener(mouseListener);
+                        mouseListener.addOwner(it);
+                    })
+                )
+                .add("grow", tab.headerContents().orElse(new JPanel()))
+                .getComponent()
+            )
+            .map( p -> (JComponent) p )
+            .orElse(tab.headerContents().orElse(new JPanel()));
+    }
 
-        P pane = getComponent();
+    private class TabMouseClickListener extends MouseAdapter
+    {
+        private final List<WeakReference<JComponent>> ownerRefs = new ArrayList<>();
+        private final WeakReference<JTabbedPane> paneRef;
+        private final Supplier<Integer> indexFinder;
+        private final UIAction<SimpleDelegate<JTabbedPane, MouseEvent>> mouseClickAction;
 
-        MouseListener mouseListener =
-                new java.awt.event.MouseAdapter() {
+
+        private TabMouseClickListener(
+            JTabbedPane pane,
+            Supplier<Integer> indexFinder,
+            UIAction<SimpleDelegate<JTabbedPane, MouseEvent>> mouseClickAction
+        ) {
+            this.paneRef = new WeakReference<>(pane);
+            this.indexFinder = indexFinder;
+            this.mouseClickAction = mouseClickAction;
+            if ( mouseClickAction != null ) {
+                pane.addMouseListener(new java.awt.event.MouseAdapter() {
                     @Override
                     public void mouseClicked( MouseEvent e ) {
-                        _doApp(()-> {
-                            if (index == pane.getSelectedIndex())
-                                tab.onMouseClick().ifPresent( onMouseClick ->
-                                    onMouseClick.accept(new SimpleDelegate<>(pane, e, () -> getSiblinghood()))
-                                );
-                            pane.setSelectedIndex(index);
-                        });
+                        JTabbedPane currentPane = paneRef.get();
+                        int index = indexFinder.get();
+                        if ( index < 0 ) return;
+                        if ( currentPane != null && index == currentPane.getSelectedIndex() )
+                            _doApp(()-> mouseClickAction.accept(new SimpleDelegate<>(currentPane, e, UIForTabbedPane.this::getSiblinghood)));
                     }
-                };
+                });
+            }
+        }
 
-        JComponent header =
-                tab.title().map( title ->
-                    // We want both title and user component in the header!
-                    UI.panel("fill, ins 0").withBackground(new Color(0,0,0,0))
-                    .applyIfPresent( tab.tip().map( tip -> panel -> panel.withTooltip(tip) ) )
-                    .peek( it -> it.addMouseListener(mouseListener) )
-                    .add("shrink",
-                        UI.label(title).withBackground(new Color(0,0,0,0))
-                        .applyIfPresent( tab.tip().map( tip -> label -> label.withTooltip(tip) ) )
-                        .peek( it -> it.addMouseListener(mouseListener) )
-                    )
-                    .add("grow", tab.headerContents().orElse(new JPanel()))
-                    .getComponent()
-                )
-                .map( p -> (JComponent) p )
-                .orElse(tab.headerContents().orElse(new JPanel()));
+        public void addOwner(JComponent c) { this.ownerRefs.add(new WeakReference<>(c)); }
 
-        pane.setTabComponentAt( index, header );
+        @Override
+        public void mouseClicked( MouseEvent e ) {
+            JTabbedPane pane = this.paneRef.get();
+            if ( pane == null ) {
+                for ( WeakReference<JComponent> compRef : this.ownerRefs) {
+                    JComponent owner = compRef.get();
+                    if ( owner != null )
+                        owner.removeMouseListener(this);
+                }
+            }
+            else doAction( pane, e );
+        }
+
+        private void doAction(JTabbedPane pane, MouseEvent e) {
+            _doApp(()-> {
+                int index = indexFinder.get();
+                if ( index < 0 ) return;
+                if ( index == pane.getSelectedIndex() && mouseClickAction != null )
+                    mouseClickAction.accept(new SimpleDelegate<>(pane, e, UIForTabbedPane.this::getSiblinghood));
+                if ( index < pane.getTabCount() )
+                    pane.setSelectedIndex(index);
+            });
+        }
     }
 
     /**
