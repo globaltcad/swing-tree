@@ -2523,10 +2523,10 @@ public final class UI
      * the <code>Runnable</code> object <code>doHelloWorld</code>
      * on the event dispatching thread and
      * then prints a message.
-     * <pre>
-     * UI.run( () -> System.out.println("Hello World on " + Thread.currentThread()) );
-     * System.out.println("This might well be displayed before the other message.");
-     * </pre>
+     * <pre>{@code
+     *  UI.run( () -> System.out.println("Hello World on " + Thread.currentThread()) );
+     *  System.out.println("This might well be displayed before the other message.");
+     * }</pre>
      * If invokeLater is called from the event dispatching thread --
      * for example, from a JButton's ActionListener -- the <i>doRun.run()</i> will
      * still be deferred until all pending events have been processed.
@@ -2567,7 +2567,7 @@ public final class UI
      * that uses <code>invokeAndWait</code> to print a string from the event
      * dispatching thread and then, when that's finished, print
      * a string from the application thread.
-     * <pre>
+     * <pre>{@code
      * final Runnable doHelloWorld = () -> {
      *         System.out.println("Hello World on " + Thread.currentThread());
      *      };
@@ -2584,7 +2584,7 @@ public final class UI
      *     }
      * };
      * appThread.start();
-     * </pre>
+     * }</pre>
      * Note that if the <code>Runnable.run</code> method throws an
      * uncaught exception
      * (on the event dispatching thread) it's caught and rethrown, as

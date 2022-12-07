@@ -282,7 +282,7 @@ public interface Val<T>
 
 	/**
 	 *  Use this to register an observer lambda which will be called whenever the value
-	 *  wrapped by this {@link Val} changes through the {@link Var#set(T)} method.
+	 *  wrapped by this {@link Val} changes through the {@code Var::set(T)} method.
 	 *  The lambda will receive a delegate which not only exposes the current
 	 *  value of this property, but also a fixed number of previous values.
 	 *
@@ -293,7 +293,7 @@ public interface Val<T>
 
 	/**
 	 *  Use this to register an observer lambda which will be called whenever the value
-	 *  wrapped by this {@link Val} changes through the {@link Var#set(T)} method.
+	 *  wrapped by this {@link Val} changes through the {@code Var::set(T)} method.
 	 *  The lambda will receive the current value of this property.
 	 *
 	 * @param displayAction The lambda which will be called whenever the value wrapped by this {@link Var} changes.
@@ -306,7 +306,7 @@ public interface Val<T>
 	/**
 	 *  Triggers the observer lambdas registered through the {@link #onShow(Consumer)}
 	 *  as well as the {@link #onShowThis(DisplayAction)} methods.
-	 *  This method is called automatically by the {@link Var#set(T)} method,
+	 *  This method is called automatically by the {@code Var::set(T)} method,
 	 *  and it is supposed to be used by the UI to update the UI components.
 	 *  This is in essence how binding works in Swing-Tree.
 	 *

@@ -97,10 +97,10 @@ public interface Var<T> extends Val<T>
 	/**
 	 *  Use this method to create a new property with an action which is supposed to be triggered
 	 *  when the UI changes the value of this property through
-	 *  the {@link #act(T)} method, or simply when it is explicitly
-	 *  triggered by the {@link #act()} method.
+	 *  the {@code Var::act(T)} method, or simply when it is explicitly
+	 *  triggered by the {@code Var::act(T)} method.
 	 *
-	 * @param action The action to be triggered when {@link #act()} or {@link #act(T)} is called.
+	 * @param action The action to be triggered when {@code Var::act()} or {@code Var::act(T)} is called.
 	 * @return A new {@link Var} instance which is identical to this one, except that it has the given action.
 	 */
 	Var<T> withAction( PropertyAction<T> action );
@@ -121,7 +121,7 @@ public interface Var<T> extends Val<T>
 	 *  trigger its action using the {@link #act()} method. <br>
 	 *  This method is intended to be used in the UI.
 	 *  If you want to modify the state of the property from the view model,
-	 *  as part of your business logic, you should use the {@link #set(T)} method instead.
+	 *  as part of your business logic, you should use the {@code Var::set(T)} method instead.
 	 *
 	 * @param newValue The new value which ought to replace the old one.
 	 * @return This very wrapper instance, in order to enable method chaining.

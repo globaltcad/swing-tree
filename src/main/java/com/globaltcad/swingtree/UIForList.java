@@ -69,7 +69,7 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
      * Adds an {@link UIAction} to the underlying {@link JList}
      * through an {@link javax.swing.event.ListSelectionListener},
      * which will be called when a list selection has been made.
-     * {@see JList#addListSelectionListener(ListSelectionListener)}.
+     * {see JList#addListSelectionListener(ListSelectionListener)}.
      *
      * @param action The {@link UIAction} that will be notified.
      * @return This very instance, which enables builder-style method chaining.

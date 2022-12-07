@@ -51,7 +51,7 @@ import java.util.function.Supplier;
  * ({@code ==}), identity hash code, or synchronization) on instances of
  * {@code OptionalUI} may have unpredictable results and should be avoided.
  *
- * @apiNote
+ * Note that
  * {@code OptionalUI} is primarily intended for use as a Swing-Tree query return type where
  * there is a clear need to represent "no result," and where returning {@code null} as well
  * as expose the UI components to the application thread directly
@@ -330,7 +330,7 @@ public final class OptionalUI<C extends Component> {
      * If a component is present, returns the component, otherwise throws an exception
      * produced by the exception supplying function.
      *
-     * @apiNote
+     * Note that
      * A method reference to the exception constructor with an empty argument
      * list can be used as the supplier. For example,
      * {@code IllegalStateException::new}
@@ -389,7 +389,6 @@ public final class OptionalUI<C extends Component> {
      * suitable for debugging.  The exact presentation format is unspecified and
      * may vary between implementations and versions.
      *
-     * @implSpec
      * If a component is present the result must include its string representation
      * in the result.  Empty and present {@code OptionalUI}s must be unambiguously
      * differentiable.
