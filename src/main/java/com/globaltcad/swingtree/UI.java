@@ -854,7 +854,7 @@ public final class UI
      */
     public static Tab tab( String title ) {
         NullUtil.nullArgCheck(title, "title", String.class);
-        return new Tab(null, null, title, null, null, null, null);
+        return new Tab(null, null, Val.of(title), null, null, null, null, null, null);
     }
 
     /**
@@ -873,7 +873,7 @@ public final class UI
      */
     public static Tab tab( JComponent component ) {
         NullUtil.nullArgCheck(component, "component", Component.class);
-        return new Tab(null, component, null, null, null, null, null);
+        return new Tab(null, component, null, null, null, null, null, null, null);
     }
 
     /**
@@ -892,7 +892,7 @@ public final class UI
      */
     public static Tab tab( UIForAbstractSwing<?, ?> builder ) {
         NullUtil.nullArgCheck(builder, "builder", UIForAbstractSwing.class);
-        return new Tab(null, builder.getComponent(), null, null, null, null, null);
+        return new Tab(null, builder.getComponent(), null, null, null, null, null, null, null);
     }
 
     /**

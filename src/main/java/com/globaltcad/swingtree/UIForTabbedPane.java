@@ -12,6 +12,7 @@ import java.awt.event.MouseEvent;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -20,6 +21,9 @@ import java.util.function.Supplier;
  */
 public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<UIForTabbedPane<P>, P>
 {
+    private final List<Consumer<Integer>> _selectionListeners = new ArrayList<>();
+    private Var<Integer> _selectedTabIndex = null;
+
     /**
      * {@link UIForAbstractSwing} (sub)types always wrap
      * a single component for which they are responsible.
@@ -44,7 +48,13 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
     public final UIForTabbedPane<P> withSelectedIndex( Var<Integer> index ) {
         NullUtil.nullArgCheck( index, "index", Var.class );
         NullUtil.nullPropertyCheck( index, "index", "Null is not a valid state for modelling a selected index." );
-        _onShow( index, i -> getComponent().setSelectedIndex(i) );
+        if ( _selectedTabIndex != null )
+            throw new IllegalStateException("A selected index property has already been set for this tabbed pane.");
+        _selectedTabIndex = index;
+        _onShow( index, i -> {
+            getComponent().setSelectedIndex(i);
+            _selectionListeners.forEach( l -> l.accept(i) );
+        });
         _onChange( e -> _doApp(()->index.act(getComponent().getSelectedIndex())) );
         return withSelectedIndex(index.get());
     }
@@ -109,21 +119,46 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
 
         TabMouseClickListener mouseListener = new TabMouseClickListener(getComponent(), indexFinder, tab.onMouseClick().orElse(null));
 
+        // Initial tab setup:
         getComponent().addTab(
-                  tab.title().orElse(null),
-                  tab.icon().orElse(null),
+                  tab.title().map(Val::orElseNull).orElse(null),
+                  tab.icon().map(Val::orElseNull).orElse(null),
                   tab.contents().orElse(dummyContent),
-                  tab.tip().orElse(null)
+                  tab.tip().map(Val::orElseNull).orElse(null)
               );
+        tab.isEnabled().ifPresent( isEnabled -> getComponent().setEnabledAt(indexFinder.get(), isEnabled.get()) );
+        tab.isSelected().ifPresent( isSelected -> {
+            _selectTab( indexFinder.get(), isSelected.get() );
+            _selectionListeners.add( i -> isSelected.act(Objects.equals(i, indexFinder.get())) );
+            /*
+                The above listener will ensure that the isSelected property of the tab is updated when
+                the selection index property changes.
+             */
+        });
 
-        tab.headerContents().ifPresent( c -> {
+        // Now on to binding:
+        tab.title()     .ifPresent( title      -> _onShow(title,      t -> getComponent().setTitleAt(indexFinder.get(), t)) );
+        tab.icon()      .ifPresent( icon       -> _onShow(icon,       i -> getComponent().setIconAt(indexFinder.get(), i)) );
+        tab.tip()       .ifPresent( tip        -> _onShow(tip,        t -> getComponent().setToolTipTextAt(indexFinder.get(), t)) );
+        tab.isEnabled() .ifPresent( enabled    -> _onShow(enabled,    e -> getComponent().setEnabledAt(indexFinder.get(), e)) );
+        tab.isSelected().ifPresent( isSelected -> _onShow(isSelected, s -> _selectTab(indexFinder.get(), s) ));
+
+        tab.headerContents().ifPresent( c ->
             getComponent()
             .setTabComponentAt(
                 getComponent().getTabCount()-1,
                 _buildTabHeader( tab, mouseListener )
-            );
-        });
+            )
+        );
         return this;
+    }
+
+    private void _selectTab( int tabIndex, boolean isSelected ) {
+        int selectedIndex = ( isSelected ? tabIndex : -1 );
+        if ( _selectedTabIndex != null )
+            _selectedTabIndex.set(selectedIndex); // The "set" method will trigger the selection listeners.
+        else
+            getComponent().setSelectedIndex(selectedIndex);
     }
 
     private JComponent _buildTabHeader(Tab tab, TabMouseClickListener mouseListener )
