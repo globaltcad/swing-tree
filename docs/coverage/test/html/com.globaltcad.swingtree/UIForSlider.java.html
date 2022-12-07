@@ -1,16 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForSlider.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree</a> &gt; <span class="el_source">UIForSlider.java</span></div><h1>UIForSlider.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree;
 
 import com.globaltcad.swingtree.api.UIAction;
+import com.globaltcad.swingtree.api.mvvm.Val;
+import com.globaltcad.swingtree.api.mvvm.Var;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
+import java.util.function.Consumer;
 
 /**
  *  A swing tree builder node for {@link JSlider} instances.
+ * 	&lt;p&gt;
+ * 	&lt;b&gt;Please take a look at the &lt;a href=&quot;https://globaltcad.github.io/swing-tree/&quot;&gt;living swing-tree documentation&lt;/a&gt;
+ * 	where you can browse a large collection of examples demonstrating how to use the API of this class.&lt;/b&gt;
  */
 public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;UIForSlider&lt;S&gt;, S&gt;
 {
-<span class="fc" id="L13">    protected UIForSlider(S component) { super(component); }</span>
+<span class="fc" id="L19">    protected UIForSlider( S component ) { super(component); }</span>
+
+    /**
+     *  Sets the orientation of the slider.
+     *  @param align The orientation of the slider.
+     *  @return This builder node.
+     */
+    public final UIForSlider&lt;S&gt; with( UI.Align align ) {
+<span class="fc" id="L27">        NullUtil.nullArgCheck( align, &quot;align&quot;, UI.Align.class );</span>
+<span class="fc" id="L28">        getComponent().setOrientation(align.forSlider());</span>
+<span class="fc" id="L29">        return this;</span>
+    }
+
+    /**
+     *  Dynamically sets the orientation of the slider.
+     *  @param align The orientation of the slider.
+     *  @return This builder node.
+     */
+    public final UIForSlider&lt;S&gt; withAlignment( Val&lt;UI.Align&gt; align ) {
+<span class="nc" id="L38">        NullUtil.nullArgCheck( align, &quot;align&quot;, Val.class );</span>
+<span class="nc" id="L39">        NullUtil.nullPropertyCheck( align, &quot;align&quot;, &quot;Null is not a valid alignment&quot; );</span>
+<span class="nc" id="L40">        _onShow( align, v -&gt; with(align.orElseThrow()) );</span>
+<span class="nc" id="L41">        return this;</span>
+    }
 
     /**
      * Adds an {@link UIAction} to the underlying {@link JSlider}
@@ -20,12 +49,151 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;
      *
      * @param action The {@link UIAction} that will be called through the underlying change event.
      * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public final UIForSlider&lt;S&gt; onChange(UIAction&lt;SimpleDelegate&lt;JSlider, ChangeEvent&gt;&gt; action) {
-<span class="fc" id="L25">        LogUtil.nullArgCheck(action, &quot;action&quot;, UIAction.class);</span>
-<span class="pc" id="L26">        _component.addChangeListener(e -&gt; action.accept(new SimpleDelegate&lt;&gt;(_component, e, ()-&gt;getSiblinghood())) );</span>
-<span class="fc" id="L27">        return this;</span>
+    public final UIForSlider&lt;S&gt; onChange( UIAction&lt;SimpleDelegate&lt;JSlider, ChangeEvent&gt;&gt; action ) {
+<span class="fc" id="L55">        NullUtil.nullArgCheck( action, &quot;action&quot;, UIAction.class );</span>
+<span class="fc" id="L56">        S slider = getComponent();</span>
+<span class="pc" id="L57">        _onChange( e -&gt; _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;(slider, e, this::getSiblinghood))) );</span>
+<span class="fc" id="L58">        return this;</span>
     }
+
+    private void _onChange( Consumer&lt;ChangeEvent&gt; action ) {
+<span class="fc" id="L62">        getComponent().addChangeListener(action::accept);</span>
+<span class="fc" id="L63">    }</span>
+
+    /**
+     * Sets the minimum value of the slider.
+     * For more information see {@link JSlider#setMinimum(int)}.
+     *
+     * @param min The minimum value of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSlider&lt;S&gt; withMin( int min ) {
+<span class="nc" id="L73">        getComponent().setMinimum( min );</span>
+<span class="nc" id="L74">        return this;</span>
+    }
+
+    /**
+     * @param min The min property used to dynamically update the min value of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code min} is {@code null}.
+     */
+    public final UIForSlider&lt;S&gt; withMin( Val&lt;Integer&gt; min ) {
+<span class="nc" id="L83">        NullUtil.nullArgCheck( min, &quot;min&quot;, Val.class );</span>
+<span class="nc" id="L84">        _onShow( min, v -&gt; getComponent().setMinimum(v) );</span>
+<span class="nc" id="L85">        return this;</span>
+    }
+
+    /**
+     * Sets the maximum value of the slider.
+     * For more information see {@link JSlider#setMaximum(int)} (int)}.
+     *
+     * @param max The maximum value of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSlider&lt;S&gt; withMax( int max ) {
+<span class="nc" id="L96">        getComponent().setMaximum( max );</span>
+<span class="nc" id="L97">        return this;</span>
+    }
+
+    /**
+     * @param max An integer property used to dynamically update the max value of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code max} is {@code null}.
+     */
+    public final UIForSlider&lt;S&gt; withMax( Val&lt;Integer&gt; max ) {
+<span class="nc" id="L106">        NullUtil.nullArgCheck( max, &quot;max&quot;, Val.class );</span>
+<span class="nc" id="L107">        _onShow( max, v -&gt; getComponent().setMaximum(v) );</span>
+<span class="nc" id="L108">        return this;</span>
+    }
+
+    /**
+     * Sets the current value of the slider.
+     * For more information see {@link JSlider#setValue(int)}.
+     *
+     * @param value The current value of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSlider&lt;S&gt; withValue( int value ) {
+<span class="nc" id="L119">        getComponent().setValue( value );</span>
+<span class="nc" id="L120">        return this;</span>
+    }
+
+    /**
+     * @param val An integer property used to dynamically update the value of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code value} is {@code null}.
+     */
+    public final UIForSlider&lt;S&gt; withValue( Val&lt;Integer&gt; val ) {
+<span class="nc" id="L129">        NullUtil.nullArgCheck( val, &quot;val&quot;, Val.class );</span>
+<span class="nc" id="L130">        _onShow( val, v -&gt; getComponent().setValue(v) );</span>
+<span class="nc" id="L131">        return this;</span>
+    }
+
+    /**
+     * @param var An integer property used to dynamically update the value of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code value} is {@code null}.
+     */
+    public final UIForSlider&lt;S&gt; withValue( Var&lt;Integer&gt; var ) {
+<span class="nc" id="L140">        NullUtil.nullArgCheck( var, &quot;var&quot;, Var.class );</span>
+<span class="nc" id="L141">        _onChange( e -&gt; _doApp(getComponent().getValue(), var::act) );</span>
+<span class="nc" id="L142">        return this.withValue( (Val&lt;Integer&gt;) var );</span>
+    }
+
+    /**
+     * Sets the major tick spacing of the slider.
+     * For more information see {@link JSlider#setMajorTickSpacing(int)}.
+     *
+     * @param spacing The major tick spacing of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSlider&lt;S&gt; withMajorTickSpacing( int spacing ) {
+<span class="nc" id="L153">        getComponent().setMajorTickSpacing( spacing );</span>
+<span class="nc" id="L154">        return this;</span>
+    }
+
+    /**
+     * Sets the minor tick spacing of the slider.
+     * For more information see {@link JSlider#setMinorTickSpacing(int)}.
+     *
+     * @param spacing The minor tick spacing of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSlider&lt;S&gt; withMinorTickSpacing( int spacing ) {
+<span class="nc" id="L165">        getComponent().setMinorTickSpacing( spacing );</span>
+<span class="nc" id="L166">        return this;</span>
+    }
+
+    /**
+     * Dynamically sets the major tick spacing of the slider.
+     * For more information see {@link JSlider#setMajorTickSpacing(int)}.
+     * @param spacing The major tick spacing of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code spacing} is {@code null}.
+     */
+    public final UIForSlider&lt;S&gt; withMajorTickSpacing( Val&lt;Integer&gt; spacing ) {
+<span class="nc" id="L177">        NullUtil.nullArgCheck( spacing, &quot;spacing&quot;, Val.class );</span>
+<span class="nc" id="L178">        NullUtil.nullPropertyCheck( spacing, &quot;spacing&quot; );</span>
+<span class="nc" id="L179">        _onShow( spacing, v -&gt; getComponent().setMajorTickSpacing(v) );</span>
+<span class="nc" id="L180">        return this;</span>
+    }
+
+    /**
+     * Dynamically sets the minor tick spacing of the slider.
+     * For more information see {@link JSlider#setMinorTickSpacing(int)}.
+     * @param spacing The minor tick spacing of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code spacing} is {@code null}.
+     */
+    public final UIForSlider&lt;S&gt; withMinorTickSpacing( Val&lt;Integer&gt; spacing ) {
+<span class="nc" id="L191">        NullUtil.nullArgCheck( spacing, &quot;spacing&quot;, Val.class );</span>
+<span class="nc" id="L192">        NullUtil.nullPropertyCheck( spacing, &quot;spacing&quot; );</span>
+<span class="nc" id="L193">        _onShow( spacing, v -&gt; getComponent().setMinorTickSpacing(v) );</span>
+<span class="nc" id="L194">        return this;</span>
+    }
+
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

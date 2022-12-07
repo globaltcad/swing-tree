@@ -18,7 +18,7 @@ class AbstractDelegate
      * @return An {@link Optional} instance which may or may not contain the requested component.
      * @param &lt;T&gt; The type parameter of the component which should be found.
      */
-    public final &lt;T extends JComponent&gt; Optional&lt;T&gt; find(Class&lt;T&gt; type, String id) {
+    public final &lt;T extends JComponent&gt; OptionalUI&lt;T&gt; find( Class&lt;T&gt; type, String id ) {
 <span class="fc" id="L22">        return _query.find(type, id);</span>
     }
 

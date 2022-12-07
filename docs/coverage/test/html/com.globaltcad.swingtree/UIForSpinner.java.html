@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForSpinner.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree</a> &gt; <span class="el_source">UIForSpinner.java</span></div><h1>UIForSpinner.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree;
 
+import com.globaltcad.swingtree.api.UIAction;
+import com.globaltcad.swingtree.api.mvvm.Val;
+import com.globaltcad.swingtree.api.mvvm.Var;
+
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import java.util.function.Consumer;
 
 /**
  *  A swing tree builder node for {@link JSpinner} instances.
@@ -13,6 +19,130 @@ public class UIForSpinner&lt;S extends JSpinner&gt; extends UIForAbstractSwing&l
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-<span class="fc" id="L16">    protected UIForSpinner(S component) { super(component); }</span>
+<span class="fc" id="L22">    protected UIForSpinner( S component ) { super(component); }</span>
+
+    /**
+     * Adds an {@link UIAction} to the underlying {@link JSpinner}
+     * through an {@link javax.swing.event.ChangeListener},
+     * Use this to register an action to be performed when the spinner's value changes.
+     *
+     * @param action The action to be performed.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSpinner&lt;S&gt; onChange( UIAction&lt;SimpleDelegate&lt;JSpinner, ChangeEvent&gt;&gt; action ) {
+<span class="nc" id="L33">        NullUtil.nullArgCheck(action, &quot;action&quot;, UIAction.class);</span>
+<span class="nc" id="L34">        S spinner = getComponent();</span>
+<span class="nc" id="L35">        _onChange(e -&gt; _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;(spinner, e, this::getSiblinghood))) );</span>
+<span class="nc" id="L36">        return this;</span>
+    }
+
+    private void _onChange( Consumer&lt;ChangeEvent&gt; consumer ) {
+<span class="fc" id="L40">        getComponent().addChangeListener(consumer::accept);</span>
+<span class="fc" id="L41">    }</span>
+
+    /**
+     * Sets the value of the spinner.
+     *
+     * @param value The value to set.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code value} is {@code null}.
+     */
+    public final UIForSpinner&lt;S&gt; withValue( Object value ) {
+<span class="fc" id="L51">        NullUtil.nullArgCheck(value, &quot;value&quot;, Object.class);</span>
+<span class="fc" id="L52">        getComponent().setValue(value);</span>
+<span class="fc" id="L53">        return this;</span>
+    }
+
+    /**
+     * Sets the value of the spinner and also binds to said value.
+     *
+     * @param value The {@link com.globaltcad.swingtree.api.mvvm.Val} wrapper whose value should be set.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code value} is {@code null}.
+     */
+    public final UIForSpinner&lt;S&gt; withValue( Val&lt;?&gt; value ) {
+<span class="nc" id="L64">        NullUtil.nullArgCheck(value, &quot;value&quot;, Val.class);</span>
+<span class="nc" id="L65">        NullUtil.nullPropertyCheck(value, &quot;value&quot;, &quot;Null is not a valid spinner state!&quot;);</span>
+<span class="nc" id="L66">        _onShow(value, this::withValue);</span>
+<span class="nc" id="L67">        return withValue(value.get());</span>
+    }
+
+    /**
+     * Sets the value of the spinner and also binds to the provided property.
+     *
+     * @param value The {@link com.globaltcad.swingtree.api.mvvm.Var} wrapper whose value should be set.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code value} is {@code null}.
+     */
+    public final UIForSpinner&lt;S&gt; withValue( Var&lt;?&gt; value ) {
+<span class="fc" id="L78">        NullUtil.nullArgCheck(value, &quot;value&quot;, Var.class);</span>
+<span class="fc" id="L79">        NullUtil.nullPropertyCheck(value, &quot;value&quot;, &quot;Null is not a valid spinner state!&quot;);</span>
+<span class="fc" id="L80">        _onShow( value, this::withValue );</span>
+<span class="fc" id="L81">        _onChange( e -&gt; _doApp(() -&gt; {</span>
+<span class="fc" id="L82">            Object current = getComponent().getValue();</span>
+<span class="pc bpc" id="L83" title="2 of 4 branches missed.">            if ( current != null &amp;&amp; Number.class.isAssignableFrom(value.type()) ) {</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">                if ( Number.class.isAssignableFrom(current.getClass()) ) {</span>
+<span class="fc" id="L85">                    Number n = (Number) current;</span>
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">                    if      ( value.type() == Integer.class ) current = n.intValue();</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">                    else if ( value.type() == Long.class    ) current = n.longValue();</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">                    else if ( value.type() == Float.class   ) current = n.floatValue();</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">                    else if ( value.type() == Double.class  ) current = n.doubleValue();</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">                    else if ( value.type() == Short.class   ) current = n.shortValue();</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">                    else if ( value.type() == Byte.class    ) current = n.byteValue();</span>
+                }
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">                if ( current.getClass() == String.class ) {</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">                    if      ( value.type() == Integer.class ) current = Integer.parseInt((String) current);</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">                    else if ( value.type() == Long.class    ) current = Long.parseLong((String) current);</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">                    else if ( value.type() == Float.class   ) current = Float.parseFloat((String) current);</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">                    else if ( value.type() == Double.class  ) current = Double.parseDouble((String) current);</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">                    else if ( value.type() == Short.class   ) current = Short.parseShort((String) current);</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">                    else if ( value.type() == Byte.class    ) current = Byte.parseByte((String) current);</span>
+                }
+            }
+<span class="fc" id="L102">            ((Var&lt;Object&gt;) value).act(current);</span>
+<span class="fc" id="L103">        }));</span>
+<span class="fc" id="L104">        getComponent().setValue(value.get());</span>
+<span class="fc" id="L105">        return withValue( value.get() );</span>
+    }
+
+    /**
+     * Sets the numeric step size of the value of the spinner.
+     * This expects your spinner to be based on the {@link SpinnerNumberModel}.
+     *
+     * @param n The {@link Number} which should be set as step size.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSpinner&lt;S&gt; withStepSize( Number n ) {
+<span class="nc" id="L116">        NullUtil.nullArgCheck(n, &quot;n&quot;, Number.class);</span>
+<span class="nc" id="L117">        SpinnerModel model = getComponent().getModel();</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">        if ( !(model instanceof SpinnerNumberModel) )</span>
+<span class="nc" id="L119">            throw new IllegalArgumentException(</span>
+                    &quot;This JSpinner can not have a numeric step size as it is not based on the SpinnerNumberModel!&quot;
+                );
+<span class="nc" id="L122">        SpinnerNumberModel numberModel = (SpinnerNumberModel) model;</span>
+<span class="nc" id="L123">        numberModel.setStepSize(n);</span>
+<span class="nc" id="L124">        return this;</span>
+    }
+
+    /**
+     * Sets the numeric step size of the value of the spinner and also binds to said value.
+     * This expects your spinner to be based on the {@link SpinnerNumberModel}.
+     *
+     * @param val The {@link com.globaltcad.swingtree.api.mvvm.Val} wrapper whose step size should be set.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final &lt;N extends Number&gt; UIForSpinner&lt;S&gt; withStepSize( Val&lt;N&gt; val ) {
+<span class="nc" id="L135">        NullUtil.nullArgCheck(val, &quot;val&quot;, Val.class);</span>
+<span class="nc" id="L136">        NullUtil.nullPropertyCheck(val, &quot;val&quot;, &quot;Null is not a valid spinner step size!&quot;);</span>
+<span class="nc" id="L137">        SpinnerModel model = getComponent().getModel();</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">        if ( !(model instanceof SpinnerNumberModel) )</span>
+<span class="nc" id="L139">            throw new IllegalArgumentException(</span>
+                    &quot;This JSpinner can not have a numeric step size as it is not based on the SpinnerNumberModel!&quot;
+                );
+<span class="nc" id="L142">        SpinnerNumberModel numberModel = (SpinnerNumberModel) model;</span>
+<span class="nc" id="L143">        _onShow(val, numberModel::setStepSize);</span>
+<span class="nc" id="L144">        numberModel.setStepSize(val.get());</span>
+<span class="nc" id="L145">        return this;</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

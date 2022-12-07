@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForScrollPane.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree</a> &gt; <span class="el_source">UIForScrollPane.java</span></div><h1>UIForScrollPane.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree;
 
+import com.globaltcad.swingtree.api.mvvm.Val;
+
 import javax.swing.*;
 
 /**
@@ -13,39 +15,83 @@ public class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAbstractS
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-<span class="fc" id="L16">    public UIForScrollPane(P component) { super(component); }</span>
+<span class="fc" id="L18">    public UIForScrollPane( P component ) { super(component); }</span>
 
     @Override
-    protected void _add(JComponent component, Object conf) {
-<span class="pc bpc" id="L20" title="1 of 2 branches missed.">        if ( conf != null )</span>
-<span class="nc" id="L21">            throw new IllegalArgumentException(&quot;Unknown constraint '&quot;+conf+&quot;'! (scroll pane does not support any constraint)&quot;);</span>
-<span class="fc" id="L22">        _component.setViewportView(component);</span>
-<span class="fc" id="L23">    }</span>
+    protected void _add( JComponent component, Object conf ) {
+<span class="pc bpc" id="L22" title="1 of 2 branches missed.">        if ( conf != null )</span>
+<span class="nc" id="L23">            throw new IllegalArgumentException(&quot;Unknown constraint '&quot;+conf+&quot;'! (scroll pane does not support any constraint)&quot;);</span>
+<span class="fc" id="L24">        getComponent().setViewportView(component);</span>
+<span class="fc" id="L25">    }</span>
 
-    public final UIForScrollPane&lt;P&gt; with(UI.ScrollBarPolicy scrollPolicy) {
-<span class="fc" id="L26">        this.withVertical(scrollPolicy);</span>
-<span class="fc" id="L27">        this.withHorizontal(scrollPolicy);</span>
-<span class="fc" id="L28">        return this;</span>
+    /**
+     *  Use this to set the scroll bars policy for both horizontal and vertical scroll bars.
+     *
+     * @param scrollPolicy The scroll policy to use.
+     * @return This builder node.
+     */
+    public final UIForScrollPane&lt;P&gt; with( UI.ScrollBarPolicy scrollPolicy ) {
+<span class="fc" id="L34">        this.withVertical(scrollPolicy);</span>
+<span class="fc" id="L35">        this.withHorizontal(scrollPolicy);</span>
+<span class="fc" id="L36">        return this;</span>
     }
 
-    public final UIForScrollPane&lt;P&gt; withVertical(UI.ScrollBarPolicy scrollBarPolicy) {
-<span class="pc bpc" id="L32" title="2 of 4 branches missed.">        switch ( scrollBarPolicy )</span>
+    /**
+     *  Use this to set the scroll bars policy for the vertical scroll bar.
+     *
+     * @param scrollBarPolicy The scroll policy to use.
+     * @return This builder node.
+     */
+    public final UIForScrollPane&lt;P&gt; withVertical( UI.ScrollBarPolicy scrollBarPolicy ) {
+<span class="fc" id="L46">        P pane = getComponent();</span>
+<span class="pc bpc" id="L47" title="1 of 4 branches missed.">        switch ( scrollBarPolicy )</span>
         {
-<span class="fc" id="L34">            case NEVER: _component.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER); break;</span>
-<span class="nc" id="L35">            case ALWAYS: _component.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS); break;</span>
-<span class="fc" id="L36">            case AS_NEEDED: _component.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED); break;</span>
+<span class="fc" id="L49">            case NEVER: pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER); break;</span>
+<span class="fc" id="L50">            case ALWAYS: pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS); break;</span>
+<span class="fc" id="L51">            case AS_NEEDED: pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED); break;</span>
         }
-<span class="fc" id="L38">        return this;</span>
+<span class="fc" id="L53">        return this;</span>
     }
 
-    public final UIForScrollPane&lt;P&gt; withHorizontal(UI.ScrollBarPolicy scrollBarPolicy) {
-<span class="pc bpc" id="L42" title="2 of 4 branches missed.">        switch ( scrollBarPolicy )</span>
+    /**
+     *  Use this to dynamically set the scroll bars policy for the vertical scroll bar.
+     *
+     * @param scrollBarPolicy The scroll policy property to use.
+     * @return This builder node.
+     */
+    public final UIForScrollPane&lt;P&gt; withVerticalScrollBarPolicy( Val&lt;UI.ScrollBarPolicy&gt; scrollBarPolicy ) {
+<span class="fc" id="L63">        NullUtil.nullArgCheck(scrollBarPolicy, &quot;scrollBarPolicy&quot;, Val.class);</span>
+<span class="fc" id="L64">        _onShow(scrollBarPolicy, v -&gt; withVertical(v));</span>
+<span class="fc" id="L65">        return this;</span>
+    }
+
+    /**
+     *  Use this to set the scroll bars policy for the horizontal scroll bar.
+     *
+     * @param scrollBarPolicy The scroll policy to use.
+     * @return This builder node.
+     */
+    public final UIForScrollPane&lt;P&gt; withHorizontal( UI.ScrollBarPolicy scrollBarPolicy ) {
+<span class="fc" id="L75">        P pane = getComponent();</span>
+<span class="pc bpc" id="L76" title="2 of 4 branches missed.">        switch ( scrollBarPolicy )</span>
         {
-<span class="fc" id="L44">            case NEVER: _component.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); break;</span>
-<span class="nc" id="L45">            case ALWAYS: _component.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS); break;</span>
-<span class="fc" id="L46">            case AS_NEEDED: _component.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED); break;</span>
+<span class="fc" id="L78">            case NEVER: pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); break;</span>
+<span class="nc" id="L79">            case ALWAYS: pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS); break;</span>
+<span class="fc" id="L80">            case AS_NEEDED: pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED); break;</span>
         }
-<span class="fc" id="L48">        return this;</span>
+<span class="fc" id="L82">        return this;</span>
+    }
+
+    /**
+     *  Use this to dynamically set the scroll bars policy for the horizontal scroll bar.
+     *
+     * @param scrollBarPolicy The scroll policy property to use.
+     * @return This builder node.
+     */
+    public final UIForScrollPane&lt;P&gt; withHorizontalScrollBarPolicy( Val&lt;UI.ScrollBarPolicy&gt; scrollBarPolicy ) {
+<span class="fc" id="L92">        NullUtil.nullArgCheck(scrollBarPolicy, &quot;scrollBarPolicy&quot;, Val.class);</span>
+<span class="fc" id="L93">        _onShow(scrollBarPolicy, v -&gt; withHorizontal(v) );</span>
+<span class="fc" id="L94">        return this;</span>
     }
 
 }

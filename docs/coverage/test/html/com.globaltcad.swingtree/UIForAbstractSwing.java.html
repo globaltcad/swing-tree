@@ -3,7 +3,13 @@
 
 import com.globaltcad.swingtree.api.Peeker;
 import com.globaltcad.swingtree.api.UIAction;
+import com.globaltcad.swingtree.api.UIVerifier;
+import com.globaltcad.swingtree.api.mvvm.ActionDelegate;
+import com.globaltcad.swingtree.api.mvvm.DisplayAction;
+import com.globaltcad.swingtree.api.mvvm.Val;
 import com.globaltcad.swingtree.input.Keyboard;
+import com.globaltcad.swingtree.layout.CompAttr;
+import com.globaltcad.swingtree.layout.LayoutAttr;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 
@@ -11,15 +17,21 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 
 /**
  *  A swing tree builder node for any kind {@link JComponent} instance.
  *  This is the most generic builder type and therefore abstract super-type for almost all other builders.
  *  This builder defines nested building for anything extending the {@link JComponent} class.
+ * 	&lt;p&gt;
+ * 	&lt;b&gt;Please take a look at the &lt;a href=&quot;https://globaltcad.github.io/swing-tree/&quot;&gt;living swing-tree documentation&lt;/a&gt;
+ * 	where you can browse a large collection of examples demonstrating how to use the API of this class.&lt;/b&gt;
  *  &lt;br&gt;&lt;br&gt;
  *
  * @param &lt;I&gt; The concrete extension of the {@link AbstractNestedBuilder}.
@@ -27,12 +39,12 @@ import java.util.WeakHashMap;
  */
 public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends AbstractNestedBuilder&lt;I, C, JComponent&gt;
 {
-<span class="fc" id="L30">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(UI.class);</span>
+<span class="fc" id="L42">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(UI.class);</span>
 
-<span class="fc" id="L32">    private final static Map&lt;JComponent, java.util.List&lt;Timer&gt;&gt; timers = new WeakHashMap&lt;&gt;(); // We attach garbage collectable timers to components this way!</span>
+<span class="fc" id="L44">    private final static Map&lt;JComponent, java.util.List&lt;Timer&gt;&gt; _timers = new WeakHashMap&lt;&gt;(); // We attach garbage collectable timers to components this way!</span>
 
-<span class="fc" id="L34">    private boolean idAlreadySet = false; // The id translates to the 'name' property of swing components.</span>
-<span class="fc" id="L35">    private boolean migAlreadySet = false;</span>
+<span class="fc" id="L46">    private boolean _idAlreadySet = false; // The id translates to the 'name' property of swing components.</span>
+<span class="fc" id="L47">    private boolean _migAlreadySet = false;</span>
 
     /**
      *  Extensions of the {@link  UIForAbstractSwing} always wrap
@@ -40,7 +52,38 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-<span class="fc" id="L43">    public UIForAbstractSwing(C component) { super(component); }</span>
+<span class="fc" id="L55">    public UIForAbstractSwing( C component ) { super(component); }</span>
+
+    protected final void _doUI( Runnable action ) {
+<span class="fc" id="L58">        _eventProcessor.processUIEvent( action );</span>
+<span class="fc" id="L59">    }</span>
+
+    protected final void _doApp( Runnable action ) {
+<span class="fc" id="L62">        _eventProcessor.processAppEvent(action);</span>
+<span class="fc" id="L63">    }</span>
+
+    protected final &lt;T&gt; void _doApp( T value, Consumer&lt;T&gt; action ) {
+<span class="fc" id="L66">        _doApp(()-&gt;action.accept(value));</span>
+<span class="fc" id="L67">    }</span>
+
+    protected final &lt;T&gt; void _onShow( Val&lt;T&gt; val, Consumer&lt;T&gt; displayAction ) {
+<span class="fc" id="L70">        val.onShowThis(new DisplayAction&lt;T&gt;() {</span>
+            @Override
+            public void display(ActionDelegate&lt;T&gt; delegate) {
+<span class="fc" id="L73">                _doUI(() -&gt;</span>
+<span class="fc" id="L74">                    component().ifPresent(c -&gt; {</span>
+<span class="fc" id="L75">                        displayAction.accept(val.orElseNull());</span>
+                        /*
+                            We make sure that the action is only executed if the component
+                            is not disposed. This is important because the action may
+                            access the component, and we don't want to get a NPE.
+                         */
+<span class="fc" id="L81">                    })</span>
+                );
+<span class="fc" id="L83">            }</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">            @Override public boolean canBeRemoved() { return !component().isPresent(); }</span>
+        });
+<span class="fc" id="L86">    }</span>
 
     /**
      *  This method exposes a concise way to set an identifier for the component
@@ -54,12 +97,12 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      *
      * @return The JComponent type which will be wrapped by this builder node.
      */
-    public final I id(String id) {
-<span class="pc bpc" id="L58" title="1 of 2 branches missed.">        if ( idAlreadySet )</span>
-<span class="nc" id="L59">            throw new IllegalArgumentException(&quot;The id has already been specified for this component!&quot;);</span>
-<span class="fc" id="L60">        _component.setName(id);</span>
-<span class="fc" id="L61">        idAlreadySet = true;</span>
-<span class="fc" id="L62">        return (I) this;</span>
+    public final I id( String id ) {
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">        if ( _idAlreadySet )</span>
+<span class="nc" id="L102">            throw new IllegalArgumentException(&quot;The id has already been specified for this component!&quot;);</span>
+<span class="fc" id="L103">        getComponent().setName(id);</span>
+<span class="fc" id="L104">        _idAlreadySet = true;</span>
+<span class="fc" id="L105">        return _this();</span>
     }
 
     /**
@@ -68,10 +111,25 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param isVisible The truth value determining if the UI component should be visible or not.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public I isVisibleIf(boolean isVisible) {
-<span class="nc" id="L72">        _component.setVisible( isVisible );</span>
-<span class="nc" id="L73">        return (I) this;</span>
+    public final I isVisibleIf( boolean isVisible ) {
+<span class="fc" id="L115">        getComponent().setVisible( isVisible );</span>
+<span class="fc" id="L116">        return _this();</span>
     }
+
+    /**
+     *  Use this to make the wrapped UI component dynamically visible or invisible. &lt;br&gt;
+     * &lt;i&gt;Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param isVisible The truth value determining if the UI component should be visible or not wrapped in a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isVisibleIf( Val&lt;Boolean&gt; isVisible ) {
+<span class="fc" id="L127">        NullUtil.nullArgCheck(isVisible, &quot;isVisible&quot;, Val.class);</span>
+<span class="fc" id="L128">        NullUtil.nullPropertyCheck(isVisible, &quot;isVisible&quot;, &quot;Null is not allowed to model the visibility of a UI component!&quot;);</span>
+<span class="fc" id="L129">        _onShow( isVisible, v -&gt; getComponent().setVisible(v) );</span>
+<span class="fc" id="L130">        return isVisibleIf( isVisible.orElseThrow() );</span>
+    }
+
 
     /**
      *  Use this to enable or disable the wrapped UI component.
@@ -79,9 +137,51 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param isEnabled The truth value determining if the UI component should be enabled or not.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public I isEnabledIf(boolean isEnabled) {
-<span class="fc" id="L83">        _component.setEnabled( isEnabled );</span>
-<span class="fc" id="L84">        return (I) this;</span>
+    public final I isEnabledIf( boolean isEnabled ) {
+<span class="fc" id="L141">        getComponent().setEnabled( isEnabled );</span>
+<span class="fc" id="L142">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically enable or disable the wrapped UI component.
+     *
+     * @param isEnabled The truth value determining if the UI component should be enabled or not wrapped in a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isEnabledIf( Val&lt;Boolean&gt; isEnabled ) {
+<span class="fc" id="L152">        NullUtil.nullArgCheck(isEnabled, &quot;isEnabled&quot;, Val.class);</span>
+<span class="fc" id="L153">        NullUtil.nullPropertyCheck(isEnabled, &quot;isEnabled&quot;, &quot;Null value for isEnabled is not allowed!&quot;);</span>
+<span class="fc" id="L154">        _onShow( isEnabled, v -&gt; getComponent().setEnabled(v) );</span>
+<span class="fc" id="L155">        return isEnabledIf( isEnabled.orElseThrow() );</span>
+    }
+
+    /**
+     *  This allows you to register validation logic for the wrapped UI component.
+     *  Although the delegate exposed to the {@link UIVerifier} lambda
+     *  indirectly exposes you to the UIs state, you should not access the UI directly
+     *  from within the lambda, but modify the properties inside your view model instead.
+     *
+     * @param verifier The validation logic provided by your view model.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isValidIf( UIVerifier&lt;C&gt; verifier ) {
+<span class="fc" id="L168">        getComponent().setInputVerifier(new InputVerifier() {</span>
+            @Override
+            public boolean verify( JComponent input ) {
+<span class="nc" id="L171">                return verifier.isValid(</span>
+                        new SimpleDelegate&lt;&gt;(
+<span class="nc" id="L173">                                getComponent(),</span>
+<span class="nc" id="L174">                                new ComponentEvent(getComponent(), 0),</span>
+<span class="nc" id="L175">                                () -&gt; getSiblinghood()</span>
+                            )
+                        );
+                /*
+                    We expect the user to model the state of the UI components
+                    using properties in the view model.
+                 */
+            }
+        });
+<span class="fc" id="L184">        return _this();</span>
     }
 
     /**
@@ -97,15 +197,15 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * the {@link #peek(Peeker)} method to peek into the builder's component like so: &lt;br&gt;
      * &lt;pre&gt;{@code
      *     UI.button()
-     *         .peek( button -&gt; button.withProperty(&quot;key&quot;, &quot;value&quot;) );
+     *     .peek( button -&gt; button.putClientProperty(&quot;key&quot;, &quot;value&quot;) );
      * }&lt;/pre&gt;
      *
      * @param key the new client property key which may be used for styles or layout managers.
      * @param value the new client property value.
      */
-    public final I withProperty(String key, String value) {
-<span class="fc" id="L107">        _component.putClientProperty(key, value);</span>
-<span class="fc" id="L108">        return (I) this;</span>
+    public final I withProperty( String key, String value ) {
+<span class="fc" id="L207">        getComponent().putClientProperty(key, value);</span>
+<span class="fc" id="L208">        return _this();</span>
     }
 
     /**
@@ -114,9 +214,365 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param border The {@link Border} which should be set for the wrapped component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I with(Border border) {
-<span class="fc" id="L118">        _component.setBorder( border );</span>
-<span class="fc" id="L119">        return (I) this;</span>
+    public final I withBorder( Border border ) {
+<span class="fc" id="L218">        getComponent().setBorder( border );</span>
+<span class="fc" id="L219">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically attach a border to the wrapped component. &lt;br&gt;
+     *  &lt;i&gt;Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param border The {@link Border} which should be set for the wrapped component wrapped in a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBorder( Val&lt;Border&gt; border ) {
+<span class="nc" id="L230">        NullUtil.nullArgCheck(border, &quot;border&quot;, Val.class);</span>
+<span class="nc" id="L231">        NullUtil.nullPropertyCheck(border, &quot;border&quot;, &quot;Null value for border is not allowed!&quot;);</span>
+<span class="nc" id="L232">        _onShow( border, v -&gt; getComponent().setBorder(v) );</span>
+<span class="nc" id="L233">        return this.withBorder( border.orElseNull() );</span>
+    }
+
+
+    /**
+     *  Use this to define an empty {@link Border} with the provided insets.
+     *
+     * @param top The top inset.
+     * @param left The left inset.
+     * @param bottom The bottom inset.
+     * @param right The right inset.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorder( int top, int left, int bottom, int right ) {
+<span class="nc" id="L247">        getComponent().setBorder(BorderFactory.createEmptyBorder(top, left, bottom, right));</span>
+<span class="nc" id="L248">        return _this();</span>
+    }
+
+    /**
+     *  Use this to define a titled empty {@link Border} with the provided insets.
+     *
+     * @param title The title of the border.
+     * @param top The top inset.
+     * @param left The left inset.
+     * @param bottom The bottom inset.
+     * @param right The right inset.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorderTitled( String title, int top, int left, int bottom, int right ) {
+<span class="fc" id="L262">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="fc" id="L263">    	getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(top, left, bottom, right), title));</span>
+<span class="fc" id="L264">    	return _this();</span>
+    }
+
+    /**
+     *  Use this to define an empty {@link Border} with the provided insets.
+     *
+     * @param topBottom The top and bottom insets.
+     * @param leftRight The left and right insets.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorder( int topBottom, int leftRight ) {
+<span class="nc" id="L275">        return withEmptyBorder(topBottom, leftRight, topBottom, leftRight);</span>
+    }
+
+    /**
+     *  Use this to define a titled empty {@link Border} with the provided insets.
+     *
+     * @param title The title of the border.
+     * @param topBottom The top and bottom insets.
+     * @param leftRight The left and right insets.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorderTitled( String title, int topBottom, int leftRight ) {
+<span class="nc" id="L287">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="nc" id="L288">        return withEmptyBorderTitled( title, topBottom, leftRight, topBottom, leftRight );</span>
+    }
+
+    /**
+     *  Use this to define an empty {@link Border} with the provided insets.
+     *
+     * @param all The insets for all sides.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorder( int all ) {
+<span class="nc" id="L298">        return withEmptyBorder(all, all, all, all);</span>
+    }
+
+    /**
+     *  Use this to define a titled empty {@link Border} with the provided insets.
+     *
+     * @param title The title of the border.
+     * @param all The insets for all sides.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorderTitled( String title, int all ) {
+<span class="fc" id="L309">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="fc" id="L310">        return withEmptyBorderTitled(title, all, all, all, all);</span>
+    }
+
+    /**
+     *  Use this to define a line {@link Border} with the provided color and insets.
+     *
+     * @param color The color of the line border.
+     * @param thickness The thickness of the line border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLineBorder( Color color, int thickness ) {
+<span class="nc" id="L321">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L322">        getComponent().setBorder(BorderFactory.createLineBorder(color, thickness));</span>
+<span class="nc" id="L323">        return _this();</span>
+    }
+
+    /**
+     *  Use this to define a titled line {@link Border} with the provided color and insets.
+     *
+     * @param title The title of the border.
+     * @param color The color of the line border.
+     * @param thickness The thickness of the line border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLineBorderTitled( String title, Color color, int thickness ) {
+<span class="nc" id="L335">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="nc" id="L336">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L337">        getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color, thickness), title));</span>
+<span class="nc" id="L338">        return _this();</span>
+    }
+
+    /**
+     *  Use this to define a line {@link Border} with the provided color and a default thickness of {@code 1}.
+     *
+     * @param color The color of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLineBorder( Color color ) {
+<span class="nc" id="L348">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L349">        return withLineBorder(color, 1);</span>
+    }
+
+    /**
+     *  Use this to define a titled line {@link Border} with the provided color and a default thickness of {@code 1}.
+     *
+     * @param title The title of the border.
+     * @param color The color of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLineBorderTitled( String title, Color color ) {
+<span class="nc" id="L360">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="nc" id="L361">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L362">        return withLineBorderTitled( title, color, 1 );</span>
+    }
+
+    /**
+     *  Use this to attach a rounded line {@link Border} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param color The color of the border.
+     * @param thickness The thickness of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorder( Color color, int thickness ) {
+<span class="nc" id="L374">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L375">        getComponent().setBorder(BorderFactory.createLineBorder(color, thickness, true));</span>
+<span class="nc" id="L376">        return _this();</span>
+    }
+
+    /**
+     *  Use this to attach a titled rounded line {@link Border} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param title The title of the border.
+     * @param color The color of the border.
+     * @param thickness The thickness of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorderTitled( String title, Color color, int thickness ) {
+<span class="nc" id="L389">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="nc" id="L390">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L391">        getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color, thickness, true), title));</span>
+<span class="nc" id="L392">        return _this();</span>
+    }
+
+    /**
+     *  Use this to attach a rounded line {@link Border} with the provided
+     *  color and a default thickness of {@code 1} to the {@link JComponent}.
+     *
+     * @param color The color of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorder( Color color ) {
+<span class="nc" id="L403">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L404">        return withRoundedLineBorder(color, 1);</span>
+    }
+
+    /**
+     *  Use this to attach a titled rounded line {@link Border} with the provided
+     *  color and a default thickness of {@code 1} to the {@link JComponent}.
+     *
+     * @param title The title of the border.
+     * @param color The color of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorderTitled( String title, Color color ) {
+<span class="nc" id="L416">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="nc" id="L417">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L418">        return withRoundedLineBorderTitled( title, color, 1 );</span>
+    }
+
+    /**
+     *  Use this to attach a rounded black line {@link Border} with
+     *  a thickness of {@code 1} to the {@link JComponent}.
+     *
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorder() {
+<span class="nc" id="L428">        return withRoundedLineBorder(Color.BLACK, 1);</span>
+    }
+
+    /**
+     *  Use this to attach a titled rounded black line {@link Border} with
+     *  a thickness of {@code 1} to the {@link JComponent}.
+     *
+     * @param title The title of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorderTitled( String title ) {
+<span class="nc" id="L439">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="nc" id="L440">        return withRoundedLineBorderTitled( title, Color.BLACK, 1 );</span>
+    }
+
+    /**
+     *  Use this to attach a {@link javax.swing.border.MatteBorder} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param color The color of the border.
+     * @param top The top inset.
+     * @param left The left inset.
+     * @param bottom The bottom inset.
+     * @param right The right inset.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withMatteBorder( Color color, int top, int left, int bottom, int right ) {
+<span class="nc" id="L455">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L456">        getComponent().setBorder(BorderFactory.createMatteBorder(top, left, bottom, right, color));</span>
+<span class="nc" id="L457">        return _this();</span>
+    }
+
+    /**
+     *  Use this to attach a titled {@link javax.swing.border.MatteBorder} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param title The title of the border.
+     * @param color The color of the border.
+     * @param top The top inset.
+     * @param left The left inset.
+     * @param bottom The bottom inset.
+     * @param right The right inset.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withMatteBorderTitled( String title, Color color, int top, int left, int bottom, int right ) {
+<span class="nc" id="L473">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="nc" id="L474">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L475">        getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createMatteBorder(top, left, bottom, right, color), title));</span>
+<span class="nc" id="L476">        return _this();</span>
+    }
+
+    /**
+     *  Use this to attach a {@link javax.swing.border.MatteBorder} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param color The color of the border.
+     * @param topBottom The top and bottom insets.
+     * @param leftRight The left and right insets.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withMatteBorder( Color color, int topBottom, int leftRight ) {
+<span class="nc" id="L489">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L490">        return withMatteBorder(color, topBottom, leftRight, topBottom, leftRight);</span>
+    }
+
+    /**
+     *  Use this to attach a titled {@link javax.swing.border.MatteBorder} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param title The title of the border.
+     * @param color The color of the border.
+     * @param topBottom The top and bottom insets.
+     * @param leftRight The left and right insets.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withMatteBorderTitled( String title, Color color, int topBottom, int leftRight ) {
+<span class="nc" id="L504">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="nc" id="L505">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L506">        return withMatteBorderTitled(title, color, topBottom, leftRight, topBottom, leftRight);</span>
+    }
+
+    /**
+     *  Use this to attach a {@link javax.swing.border.MatteBorder} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param color The color of the border.
+     * @param all The insets for all sides.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withMatteBorder( Color color, int all ) {
+<span class="nc" id="L518">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L519">        return withMatteBorder(color, all, all, all, all);</span>
+    }
+
+    /**
+     *  Use this to attach a titled {@link javax.swing.border.MatteBorder} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param title The title of the border.
+     * @param color The color of the border.
+     * @param all The insets for all sides.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withMatteBorderTitled( String title, Color color, int all ) {
+<span class="nc" id="L532">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="nc" id="L533">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L534">        return withMatteBorderTitled(title, color, all, all, all, all);</span>
+    }
+
+    /**
+     *  Use this to attach a {@link javax.swing.border.CompoundBorder} with the provided
+     *  borders to the {@link JComponent}.
+     *
+     * @param first The first border.
+     * @param second The second border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withCompoundBorder( Border first, Border second ) {
+<span class="nc" id="L546">        NullUtil.nullArgCheck( first, &quot;first&quot;, Border.class );</span>
+<span class="nc" id="L547">        NullUtil.nullArgCheck( second, &quot;second&quot;, Border.class );</span>
+<span class="nc" id="L548">        getComponent().setBorder(BorderFactory.createCompoundBorder(first, second));</span>
+<span class="nc" id="L549">        return _this();</span>
+    }
+
+    /**
+     *  Use this to attach a titled {@link javax.swing.border.CompoundBorder} with the
+     *  provided borders to the {@link JComponent}.
+     *
+     * @param title The title of the border.
+     * @param first The first border.
+     * @param second The second border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withCompoundBorderTitled( String title, Border first, Border second ) {
+<span class="nc" id="L562">        getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createCompoundBorder(first, second), title));</span>
+<span class="nc" id="L563">        return _this();</span>
+    }
+
+    /**
+     *  Use this to attach a {@link javax.swing.border.TitledBorder} with the provided title.
+     *
+     * @param title The title of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBorderTitled( String title ) {
+<span class="fc" id="L573">        NullUtil.nullArgCheck(title, &quot;title&quot;, String.class);</span>
+<span class="fc" id="L574">        getComponent().setBorder(BorderFactory.createTitledBorder(title));</span>
+<span class="fc" id="L575">        return _this();</span>
     }
 
     /**
@@ -126,9 +582,66 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param type The {@link UI.Cursor} type defined by a simple enum exposed by this API.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I with(UI.Cursor type) {
-<span class="fc" id="L130">        _component.setCursor( new java.awt.Cursor( type.type ) );</span>
-<span class="fc" id="L131">        return (I) this;</span>
+    public final I with( UI.Cursor type ) {
+<span class="fc" id="L586">        getComponent().setCursor( new java.awt.Cursor( type.type ) );</span>
+<span class="fc" id="L587">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically set the cursor type which should be displayed
+     *  when hovering over the UI component wrapped by this builder. &lt;br&gt;
+     *  &lt;i&gt;Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param type The {@link UI.Cursor} type defined by a simple enum exposed by this API wrapped in a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withCursor( Val&lt;UI.Cursor&gt; type ) {
+<span class="nc" id="L599">        NullUtil.nullArgCheck( type, &quot;type&quot;, Val.class );</span>
+<span class="nc" id="L600">        NullUtil.nullPropertyCheck(type, &quot;type&quot;, &quot;Null is not allowed to model a cursor type.&quot;);</span>
+<span class="nc" id="L601">        _onShow( type, t -&gt; getComponent().setCursor( new java.awt.Cursor( t.type ) ) );</span>
+<span class="nc" id="L602">        return with( type.orElseThrow() );</span>
+    }
+
+    /**
+     *  Use this to set the cursor type which should be displayed
+     *  when hovering over the UI component wrapped by this builder
+     *  based on boolean property determining if the provided cursor should be set ot not. &lt;br&gt;
+     *  &lt;i&gt;Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param condition The boolean property determining if the provided cursor should be set ot not.
+     * @param type The {@link UI.Cursor} type defined by a simple enum exposed by this API wrapped in a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withCursorIf( Val&lt;Boolean&gt; condition, UI.Cursor type ) {
+<span class="nc" id="L616">        NullUtil.nullArgCheck( condition, &quot;condition&quot;, Val.class );</span>
+<span class="nc" id="L617">        NullUtil.nullArgCheck( type, &quot;type&quot;, UI.Cursor.class );</span>
+<span class="nc" id="L618">        NullUtil.nullPropertyCheck(condition, &quot;condition&quot;, &quot;Null is not allowed to model the cursor selection state.&quot;);</span>
+<span class="nc bnc" id="L619" title="All 2 branches missed.">        _onShow( condition, c -&gt; getComponent().setCursor( new java.awt.Cursor( c ? type.type : UI.Cursor.DEFAULT.type ) ) );</span>
+<span class="nc bnc" id="L620" title="All 2 branches missed.">        return with( condition.orElseThrow() ? type : UI.Cursor.DEFAULT );</span>
+    }
+
+    /**
+     *  Use this to dynamically set the cursor type which should be displayed
+     *  when hovering over the UI component wrapped by this builder
+     *  based on boolean property determining if the provided cursor should be set ot not. &lt;br&gt;
+     *  &lt;i&gt;Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param condition The boolean property determining if the provided cursor should be set ot not.
+     * @param type The {@link UI.Cursor} type property defined by a simple enum exposed by this API.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withCursorIf( Val&lt;Boolean&gt; condition, Val&lt;UI.Cursor&gt; type ) {
+<span class="nc" id="L634">        NullUtil.nullArgCheck( condition, &quot;condition&quot;, Val.class );</span>
+<span class="nc" id="L635">        NullUtil.nullArgCheck( type, &quot;type&quot;, Val.class );</span>
+<span class="nc" id="L636">        NullUtil.nullPropertyCheck(condition, &quot;condition&quot;, &quot;Null is not allowed to model the cursor selection state.&quot;);</span>
+<span class="nc" id="L637">        NullUtil.nullPropertyCheck(type, &quot;type&quot;, &quot;Null is not allowed to model a cursor type.&quot;);</span>
+<span class="nc" id="L638">        Cursor[] baseCursor = new Cursor[1];</span>
+<span class="nc" id="L639">        _onShow( condition, c -&gt; type.show() );</span>
+<span class="nc" id="L640">        _onShow( type, c -&gt;{</span>
+<span class="nc bnc" id="L641" title="All 2 branches missed.">            if (baseCursor[0] == null) baseCursor[0] = getComponent().getCursor();</span>
+<span class="nc bnc" id="L642" title="All 2 branches missed.">            getComponent().setCursor( new java.awt.Cursor( condition.get() ? c.type : baseCursor[0].getType() ) );</span>
+<span class="nc" id="L643">        });</span>
+<span class="nc bnc" id="L644" title="All 2 branches missed.">        return with( condition.orElseThrow() ? type.orElseThrow() : UI.Cursor.DEFAULT );</span>
     }
 
     /**
@@ -137,26 +650,97 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      *  the {@link #peek(Peeker)} method to peek into the builder's component like so: &lt;br&gt;
      *  &lt;pre&gt;{@code
      *      UI.panel()
-     *          .peek( panel -&gt; panel.setLayout(new FavouriteLayoutManager()) );
+     *      .peek( panel -&gt; panel.setLayout(new FavouriteLayoutManager()) );
      *  }&lt;/pre&gt;
      *
      * @param layout The {@link LayoutManager} which should be supplied to the wrapped component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I with(LayoutManager layout) {
-<span class="pc bpc" id="L147" title="1 of 2 branches missed.">        if ( migAlreadySet )</span>
-<span class="nc" id="L148">            throw new IllegalArgumentException(&quot;The mig layout has already been specified for this component!&quot;);</span>
-<span class="fc" id="L149">        _component.setLayout(layout);</span>
-<span class="fc" id="L150">        return (I) this;</span>
+    public final I withLayout( LayoutManager layout ) {
+<span class="pc bpc" id="L660" title="1 of 2 branches missed.">        if (_migAlreadySet)</span>
+<span class="nc" id="L661">            throw new IllegalArgumentException(&quot;The mig layout has already been specified for this component!&quot;);</span>
+<span class="fc" id="L662">        getComponent().setLayout(layout);</span>
+<span class="fc" id="L663">        return _this();</span>
     }
+
+    /**
+     *  Use this to set a {@link FlowLayout} for the component wrapped by this builder. &lt;br&gt;
+     *  This is in essence a more convenient way than the alternative usage pattern involving
+     *  the {@link #peek(Peeker)} method to peek into the builder's component like so: &lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *      UI.panel()
+     *      .peek( panel -&gt; panel.setLayout(new FlowLayout()) );
+     *  }&lt;/pre&gt;
+     *
+     * @return This very instance, which enables builder-style method chaining.
+     */
+<span class="fc" id="L677">    public final I withFlowLayout() { return this.withLayout(new FlowLayout()); }</span>
+
+    /**
+     *  Use this to set a {@link GridLayout} for the component wrapped by this builder. &lt;br&gt;
+     *  This is in essence a more convenient way than the alternative usage pattern involving
+     *  the {@link #peek(Peeker)} method to peek into the builder's component like so: &lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *      UI.panel()
+     *      .peek( panel -&gt; panel.setLayout(new GridLayout()) );
+     *  }&lt;/pre&gt;
+     *
+     * @return This very instance, which enables builder-style method chaining.
+     */
+<span class="nc" id="L690">    public final I withGridLayout() { return this.withLayout(new GridLayout()); }</span>
+
+
+    /**
+     *  Use this to set a {@link GridLayout} for the component wrapped by this builder. &lt;br&gt;
+     *  This is in essence a more convenient way than the alternative usage pattern involving
+     *  the {@link #peek(Peeker)} method to peek into the builder's component like so: &lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *      UI.panel()
+     *      .peek( panel -&gt; panel.setLayout(new GridLayout(rows, cols)) );
+     *  }&lt;/pre&gt;
+     *
+     * @param rows The number of rows in the grid.
+     * @param cols The number of columns in the grid.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+<span class="nc" id="L706">    public final I withGridLayout( int rows, int cols ) { return this.withLayout(new GridLayout(rows, cols)); }</span>
+
+    /**
+     *  Passes the provided string to the layout manager of the wrapped component.
+     *  By default, a {@link MigLayout} is used for the component wrapped by this UI builder.
+     *
+     * @param attr A string defining the layout (usually mig layout).
+     * @return This very instance, which enables builder-style method chaining.
+     */
+<span class="fc" id="L715">    public final I withLayout( String attr ) { return withLayout(attr, null); }</span>
+
+    /**
+     *  Passes the provided string to the {@link MigLayout} manager of the wrapped component.
+     *
+     * @param attr Essentially an immutable string wrapper defining the mig layout.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+<span class="fc" id="L723">    public final I withLayout( LayoutAttr attr ) { return withLayout(attr.toString(), null); }</span>
 
     /**
      *  This creates a {@link MigLayout} for the component wrapped by this UI builder.
      *
-     * @param constraints A string defining the mig layout.
+     * @param attr The constraints for the layout.
+     * @param colConstrains The column layout for the {@link MigLayout} instance.
      * @return This very instance, which enables builder-style method chaining.
      */
-<span class="fc" id="L159">    public final I withLayout(String constraints) { return withLayout(constraints, null); }</span>
+    public final I withLayout( String attr, String colConstrains ) {
+<span class="fc" id="L733">        return withLayout(attr, colConstrains, null);</span>
+    }
+
+    /**
+     * @param attr The constraints for the layout.
+     * @param colConstrains The column layout for the {@link MigLayout} instance.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLayout( LayoutAttr attr, String colConstrains ) {
+<span class="nc" id="L742">        return withLayout(attr.toString(), colConstrains, null);</span>
+    }
 
     /**
      *  This creates a {@link MigLayout} for the component wrapped by this UI builder.
@@ -165,31 +749,20 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param colConstrains The column layout for the {@link MigLayout} instance.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withLayout(String constraints, String colConstrains) {
-<span class="fc" id="L169">        return withLayout(constraints, colConstrains, null);</span>
-    }
-
-    /**
-     *  This creates a {@link MigLayout} for the component wrapped by this UI builder.
-     *
-     * @param constraints The constraints for the layout.
-     * @param colConstrains The column layout for the {@link MigLayout} instance.
-     * @return This very instance, which enables builder-style method chaining.
-     */
-    public final I withLayout(String constraints, String colConstrains, String rowConstraints) {
-<span class="pc bpc" id="L180" title="1 of 2 branches missed.">        if ( migAlreadySet )</span>
-<span class="nc" id="L181">            throw new IllegalArgumentException(&quot;The mig layout has already been specified for this component!&quot;);</span>
+    public final I withLayout( String constraints, String colConstrains, String rowConstraints ) {
+<span class="pc bpc" id="L753" title="1 of 2 branches missed.">        if (_migAlreadySet)</span>
+<span class="nc" id="L754">            throw new IllegalArgumentException(&quot;The mig layout has already been specified for this component!&quot;);</span>
 
         // We make sure the default hidemode is 2 instead of 3 (which sucks because it takes up too much space)
-<span class="pc bpc" id="L184" title="1 of 2 branches missed.">        if ( constraints == null )</span>
-<span class="nc" id="L185">            constraints = &quot;hidemode 2&quot;;</span>
-<span class="pc bpc" id="L186" title="1 of 2 branches missed.">        else if ( !constraints.contains(&quot;hidemode&quot;) )</span>
-<span class="fc" id="L187">            constraints += &quot;, hidemode 2&quot;;</span>
+<span class="pc bpc" id="L757" title="1 of 2 branches missed.">        if ( constraints == null )</span>
+<span class="nc" id="L758">            constraints = &quot;hidemode 2&quot;;</span>
+<span class="pc bpc" id="L759" title="1 of 2 branches missed.">        else if ( !constraints.contains(&quot;hidemode&quot;) )</span>
+<span class="fc" id="L760">            constraints += &quot;, hidemode 2&quot;;</span>
 
-<span class="fc" id="L189">        MigLayout migLayout = new MigLayout(constraints, colConstrains, rowConstraints);</span>
-<span class="fc" id="L190">        _component.setLayout(migLayout);</span>
-<span class="fc" id="L191">        migAlreadySet = true;</span>
-<span class="fc" id="L192">        return (I) this;</span>
+<span class="fc" id="L762">        MigLayout migLayout = new MigLayout(constraints, colConstrains, rowConstraints);</span>
+<span class="fc" id="L763">        getComponent().setLayout(migLayout);</span>
+<span class="fc" id="L764">        _migAlreadySet = true;</span>
+<span class="fc" id="L765">        return _this();</span>
     }
 
     /**
@@ -200,15 +773,39 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      *  through the {@link #peek(Peeker)} method like so: &lt;br&gt;
      *  &lt;pre&gt;{@code
      *      UI.button(&quot;Click Me&quot;)
-     *          .peek( button -&gt; button.setToolTipText(&quot;Can be clicked!&quot;) );
+     *      .peek( button -&gt; button.setToolTipText(&quot;Can be clicked!&quot;) );
      *  }&lt;/pre&gt;
      *
      * @param tooltip The tool tip text which should be set for the UI component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withTooltip(String tooltip) {
-<span class="fc" id="L210">        _component.setToolTipText(tooltip);</span>
-<span class="fc" id="L211">        return (I) this;</span>
+    public final I withTooltip( String tooltip ) {
+<span class="fc" id="L783">        getComponent().setToolTipText(tooltip);</span>
+<span class="fc" id="L784">        return _this();</span>
+    }
+
+    /**
+     *  Use this to bind to a {@link com.globaltcad.swingtree.api.mvvm.Val}
+     *  containing a tooltip string.
+     *  This is a convenience method, which would
+     *  be equivalent to:
+     *  &lt;pre&gt;{@code
+     *      UI.button(&quot;Click Me&quot;)
+     *      .peek( button -&gt; {
+     *          tip.onShow(JButton::setToolTipText);
+     *          button.setToolTipText(tip.get());
+     *      });
+     *  }&lt;/pre&gt;&lt;br&gt;
+     * &lt;i&gt;Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param tip The tooltip which should be displayed when hovering over the tab header.
+     * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
+     */
+    public final I withTooltip( Val&lt;String&gt; tip ) {
+<span class="nc" id="L805">        NullUtil.nullArgCheck(tip, &quot;tip&quot;, Val.class);</span>
+<span class="nc" id="L806">        NullUtil.nullPropertyCheck(tip, &quot;tip&quot;, &quot;Please use an empty string instead of null!&quot;);</span>
+<span class="nc" id="L807">        _onShow( tip, v -&gt; getComponent().setToolTipText(v) );</span>
+<span class="nc" id="L808">        return this.withTooltip( tip.orElseThrow() );</span>
     }
 
     /**
@@ -218,34 +815,181 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      *  through the {@link #peek(Peeker)} method like so: &lt;br&gt;
      *  &lt;pre&gt;{@code
      *      UI.label(&quot;Something&quot;)
-     *          .peek( label -&gt; label.setBackground(Color.CYAN) );
+     *      .peek( label -&gt; label.setBackground(Color.CYAN) );
      *  }&lt;/pre&gt;
-     *
      *
      * @param color The background color which should be set for the UI component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withBackground(Color color) {
-<span class="fc" id="L229">        LogUtil.nullArgCheck(color, &quot;color&quot;, Color.class);</span>
-<span class="fc" id="L230">        _component.setBackground(color);</span>
-<span class="fc" id="L231">        return (I) this;</span>
+    public final I withBackground( Color color ) {
+<span class="fc" id="L825">        NullUtil.nullArgCheck(color, &quot;color&quot;, Color.class);</span>
+<span class="fc" id="L826">        getComponent().setBackground(color);</span>
+<span class="fc" id="L827">        return _this();</span>
     }
 
+    /**
+     *  Use this to bind to a {@link com.globaltcad.swingtree.api.mvvm.Val}
+     *  containing a background color.
+     *  This is a convenience method, which would
+     *  be equivalent to:
+     *  &lt;pre&gt;{@code
+     *      UI.button(&quot;Click Me&quot;)
+     *      .peek( button -&gt; {
+     *          bg.onShow(JButton::setBackground);
+     *          button.setBackground(bg.get());
+     *      });
+     *  }&lt;/pre&gt;&lt;br&gt;
+     * &lt;i&gt;Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param bg The background color which should be set for the UI component wrapped by a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBackground( Val&lt;Color&gt; bg ) {
+<span class="fc" id="L848">        NullUtil.nullArgCheck(bg, &quot;bg&quot;, Val.class);</span>
+<span class="fc" id="L849">        NullUtil.nullPropertyCheck(bg, &quot;bg&quot;, &quot;Please use the default color of this component instead of null!&quot;);</span>
+<span class="fc" id="L850">        _onShow( bg, v -&gt; getComponent().setBackground(v) );</span>
+<span class="fc" id="L851">        return this.withBackground( bg.orElseNull() );</span>
+    }
+
+    /**
+     *  Use this to bind to a background color
+     *  which will be set dynamically based on a boolean property.
+     * &lt;i&gt;Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param bg The background color which should be set for the UI component.
+     * @param condition The condition property which determines whether the background color should be set or not.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBackgroundIf( Val&lt;Boolean&gt; condition, Color bg ) {
+<span class="nc" id="L864">        NullUtil.nullArgCheck(condition, &quot;condition&quot;, Val.class);</span>
+<span class="nc" id="L865">        NullUtil.nullArgCheck(bg, &quot;bg&quot;, Color.class);</span>
+<span class="nc" id="L866">        NullUtil.nullPropertyCheck(condition, &quot;condition&quot;, &quot;Null is not allowed to model the usage of the provided background color!&quot;);</span>
+<span class="nc" id="L867">        Color[] oldColor = new Color[1];</span>
+<span class="nc" id="L868">        _onShow( condition, v -&gt; {</span>
+<span class="nc bnc" id="L869" title="All 2 branches missed.">            if (v) {</span>
+<span class="nc" id="L870">                oldColor[0] = getComponent().getBackground();</span>
+<span class="nc" id="L871">                getComponent().setBackground(bg);</span>
+            }
+<span class="nc" id="L873">            else getComponent().setBackground(oldColor[0]);</span>
+<span class="nc" id="L874">        });</span>
+<span class="nc bnc" id="L875" title="All 2 branches missed.">        return this.withBackground( condition.orElse(false) ? bg : getComponent().getBackground() );</span>
+    }
+    
+    /**
+     *  Use this to dynamically bind to a background color
+     *  which will be set dynamically based on a boolean property.
+     * &lt;i&gt;Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param color The background color property which should be set for the UI component.
+     * @param condition The condition property which determines whether the background color should be set or not.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBackgroundIf( Val&lt;Boolean&gt; condition, Val&lt;Color&gt; color ) {
+<span class="nc" id="L888">        NullUtil.nullArgCheck(condition, &quot;condition&quot;, Val.class);</span>
+<span class="nc" id="L889">        NullUtil.nullArgCheck(color, &quot;color&quot;, Val.class);</span>
+<span class="nc" id="L890">        NullUtil.nullPropertyCheck(condition, &quot;condition&quot;, &quot;Null is not allowed to model the usage of the provided background color!&quot;);</span>
+<span class="nc" id="L891">        NullUtil.nullPropertyCheck(color, &quot;color&quot;, &quot;Null is not allowed to model the the provided background color! Please use the default color of this component instead.&quot;);</span>
+<span class="nc" id="L892">        Color[] baseColor = new Color[1];</span>
+<span class="nc" id="L893">        _onShow( condition, setColor -&gt; color.show() );</span>
+<span class="nc" id="L894">        _onShow( color, v -&gt; {</span>
+<span class="nc bnc" id="L895" title="All 2 branches missed.">            if (condition.get()) {</span>
+<span class="nc bnc" id="L896" title="All 2 branches missed.">                if (!color.is(baseColor[0])) baseColor[0] = getComponent().getBackground();</span>
+<span class="nc" id="L897">                getComponent().setBackground(color.get());</span>
+<span class="nc" id="L898">            } else getComponent().setBackground(baseColor[0]);</span>
+<span class="nc" id="L899">        });</span>
+<span class="nc bnc" id="L900" title="All 2 branches missed.">        return this.withBackground(condition.orElse(false) ? color.orElseThrow() : getComponent().getBackground());</span>
+    }
+    
     /**
      *  Set the color of this {@link JComponent}. (This is usually the font color for components displaying text) &lt;br&gt;
      *  This is in essence a convenience method, which avoid having to expose the underlying component
      *  through the {@link #peek(Peeker)} method like so: &lt;br&gt;
      *  &lt;pre&gt;{@code
      *      UI.label(&quot;Something&quot;)
-     *          .peek( label -&gt; label.setForeground(Color.GRAY) );
+     *      .peek( label -&gt; label.setForeground(Color.GRAY) );
      *  }&lt;/pre&gt;
      *
      * @param color The color of the foreground (usually text).
      * @return This very builder to allow for method chaining.
      */
-    public I withForeground(Color color) {
-<span class="fc" id="L247">        _component.setForeground(color);</span>
-<span class="fc" id="L248">        return (I) this;</span>
+    public final I withForeground( Color color ) {
+<span class="fc" id="L916">        NullUtil.nullArgCheck(color, &quot;color&quot;, Color.class);</span>
+<span class="fc" id="L917">        getComponent().setForeground(color);</span>
+<span class="fc" id="L918">        return _this();</span>
+    }
+
+    /**
+     *  Use this to bind to a {@link com.globaltcad.swingtree.api.mvvm.Val}
+     *  containing a foreground color.
+     *  This is a convenience method, which would
+     *  be equivalent to:
+     *  &lt;pre&gt;{@code
+     *      UI.button(&quot;Click Me&quot;)
+     *      .peek( button -&gt; {
+     *          fg.onShow(JButton::setForeground);
+     *          button.setForeground(fg.get());
+     *      });
+     *  }&lt;/pre&gt;&lt;br&gt;
+     * &lt;i&gt;Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param fg The foreground color which should be set for the UI component wrapped by a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withForeground( Val&lt;Color&gt; fg ) {
+<span class="fc" id="L939">        NullUtil.nullArgCheck(fg, &quot;fg&quot;, Val.class);</span>
+<span class="fc" id="L940">        NullUtil.nullPropertyCheck(fg, &quot;fg&quot;, &quot;Please use the default color of this component instead of null!&quot;);</span>
+<span class="fc" id="L941">        _onShow( fg, v -&gt; getComponent().setForeground(v) );</span>
+<span class="fc" id="L942">        return this.withForeground( fg.orElseNull() );</span>
+    }
+    
+    /**
+     *  Use this to bind to a foreground color
+     *  which will be set dynamically based on a boolean property.
+     * &lt;i&gt;Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param fg The foreground color which should be set for the UI component.
+     * @param condition The condition property which determines whether the foreground color should be set or not.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withForegroundIf( Val&lt;Boolean&gt; condition, Color fg ) {
+<span class="nc" id="L955">        NullUtil.nullArgCheck(condition, &quot;condition&quot;, Val.class);</span>
+<span class="nc" id="L956">        NullUtil.nullArgCheck(fg, &quot;fg&quot;, Color.class);</span>
+<span class="nc" id="L957">        NullUtil.nullPropertyCheck(condition, &quot;condition&quot;, &quot;Null is not allowed to model the usage of the provided foreground color!&quot;);</span>
+<span class="nc" id="L958">        Color[] oldColor = new Color[1];</span>
+<span class="nc" id="L959">        _onShow( condition, v -&gt; {</span>
+<span class="nc bnc" id="L960" title="All 2 branches missed.">            if (v) {</span>
+<span class="nc" id="L961">                oldColor[0] = getComponent().getForeground();</span>
+<span class="nc" id="L962">                getComponent().setForeground(fg);</span>
+            }
+<span class="nc" id="L964">            else getComponent().setForeground(oldColor[0]);</span>
+<span class="nc" id="L965">        });</span>
+<span class="nc bnc" id="L966" title="All 2 branches missed.">        return this.withForeground( condition.orElse(false) ? fg : getComponent().getForeground() );</span>
+    }
+    
+    /**
+     *  Use this to dynamically bind to a foreground color
+     *  which will be set dynamically based on a boolean property.
+     * &lt;i&gt;Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param color The foreground color property which should be set for the UI component.
+     * @param condition The condition property which determines whether the foreground color should be set or not.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withForegroundIf( Val&lt;Boolean&gt; condition, Val&lt;Color&gt; color ) {
+<span class="nc" id="L979">        NullUtil.nullArgCheck(condition, &quot;condition&quot;, Val.class);</span>
+<span class="nc" id="L980">        NullUtil.nullArgCheck(color, &quot;color&quot;, Val.class);</span>
+<span class="nc" id="L981">        NullUtil.nullPropertyCheck(condition, &quot;condition&quot;, &quot;Null is not allowed to model the usage of the provided foreground color!&quot;);</span>
+<span class="nc" id="L982">        NullUtil.nullPropertyCheck(color, &quot;color&quot;, &quot;Null is not allowed to model the the provided foreground color! Please use the default color of this component instead.&quot;);</span>
+<span class="nc" id="L983">        Color[] baseColor = new Color[1];</span>
+<span class="nc" id="L984">        _onShow( condition, setColor -&gt; color.show() );</span>
+<span class="nc" id="L985">        _onShow( color, v -&gt; {</span>
+<span class="nc bnc" id="L986" title="All 2 branches missed.">            if (condition.get()) {</span>
+<span class="nc bnc" id="L987" title="All 2 branches missed.">                if (!color.is(baseColor[0])) baseColor[0] = getComponent().getForeground();</span>
+<span class="nc" id="L988">                getComponent().setForeground(color.get());</span>
+            }
+<span class="nc" id="L990">            else getComponent().setForeground(baseColor[0]);</span>
+<span class="nc" id="L991">        });</span>
+<span class="nc bnc" id="L992" title="All 2 branches missed.">        return this.withForeground(condition.orElse(false) ? color.orElseThrow() : getComponent().getForeground());</span>
     }
 
     /**
@@ -254,9 +998,34 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param size The minimum {@link Dimension} of the component.
      * @return This very builder to allow for method chaining.
      */
-    public I withMinimumSize(Dimension size) {
-<span class="nc" id="L258">        _component.setMinimumSize(size);</span>
-<span class="nc" id="L259">        return (I) this;</span>
+    public final I withMinimumSize( Dimension size ) {
+<span class="fc" id="L1002">        NullUtil.nullArgCheck(size, &quot;size&quot;, Dimension.class);</span>
+<span class="fc" id="L1003">        getComponent().setMinimumSize(size);</span>
+<span class="fc" id="L1004">        return _this();</span>
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the maximum {@link Dimension} of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMinimumSize(Dimension)} (Dimension)} on the underlying component. &lt;br&gt;
+     *  This is a convenience method, which would
+     *  be equivalent to:
+     *  &lt;pre&gt;{@code
+     *    UI.button(&quot;Click Me&quot;)
+     *    .peek( button -&gt; {
+     *      size.onShow(JButton::setMinimumSize);
+     *      button.setMinimumSize(size.get());
+     *    });
+     *  }&lt;/pre&gt;
+     *
+     * @param size The minimum {@link Dimension} of the component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMinimumSize( Val&lt;Dimension&gt; size ) {
+<span class="fc" id="L1025">        NullUtil.nullArgCheck(size, &quot;size&quot;, Val.class);</span>
+<span class="fc" id="L1026">        NullUtil.nullPropertyCheck(size, &quot;size&quot;, &quot;Null is not allowed to model the minimum size of this component!&quot;);</span>
+<span class="fc" id="L1027">        _onShow( size, v -&gt; getComponent().setMinimumSize(v) );</span>
+<span class="fc" id="L1028">        return this.withMinimumSize( size.orElseThrow() );</span>
     }
 
     /**
@@ -266,9 +1035,31 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param height The minimum height of the component.
      * @return This very builder to allow for method chaining.
      */
-    public I withMinimumSize(int width, int height) {
-<span class="nc" id="L270">        _component.setMinimumSize(new Dimension(width, height));</span>
-<span class="nc" id="L271">        return (I) this;</span>
+    public final I withMinimumSize( int width, int height ) {
+<span class="fc" id="L1039">        getComponent().setMinimumSize(new Dimension(width, height));</span>
+<span class="fc" id="L1040">        return _this();</span>
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the minimum {@link Dimension} of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param width The minimum width of the component.
+     * @param height The minimum height of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMinimumSize( Val&lt;Integer&gt; width, Val&lt;Integer&gt; height ) {
+<span class="nc" id="L1052">        NullUtil.nullArgCheck(width, &quot;width&quot;, Val.class);</span>
+<span class="nc" id="L1053">        NullUtil.nullArgCheck(height, &quot;height&quot;, Val.class);</span>
+<span class="nc" id="L1054">        NullUtil.nullPropertyCheck(width, &quot;width&quot;, &quot;Null is not allowed to model the minimum width of this component!&quot;);</span>
+<span class="nc" id="L1055">        NullUtil.nullPropertyCheck(height, &quot;height&quot;, &quot;Null is not allowed to model the minimum height of this component!&quot;);</span>
+<span class="nc" id="L1056">        _onShow( width, w -&gt;</span>
+<span class="nc" id="L1057">                getComponent().setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height))</span>
+            );
+<span class="nc" id="L1059">        _onShow( height, h -&gt;</span>
+<span class="nc" id="L1060">                getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, h))</span>
+            );
+<span class="nc" id="L1062">        return this.withMinimumSize( width.orElseThrow(), height.orElseThrow() );</span>
     }
 
     /**
@@ -277,10 +1068,24 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param width The minimum width which should be set for the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public I withMinimumWidth(int width) {
-<span class="nc" id="L281">        _component.setMinimumSize(new Dimension(width, _component.getMinimumSize().height));</span>
-<span class="nc" id="L282">        return (I) this;</span>
+    public final I withMinimumWidth( int width ) {
+<span class="nc" id="L1072">        getComponent().setMinimumSize(new Dimension(width, getComponent().getMinimumSize().height));</span>
+<span class="nc" id="L1073">        return _this();</span>
     }
+
+    /**
+     *  Use this to dynamically set only the minimum width of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component for you. &lt;br&gt;
+     * @param width The minimum width which should be set for the underlying component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMinimumWidth( Val&lt;Integer&gt; width ) {
+<span class="nc" id="L1083">        NullUtil.nullArgCheck(width, &quot;width&quot;, Val.class);</span>
+<span class="nc" id="L1084">        NullUtil.nullPropertyCheck(width, &quot;width&quot;, &quot;Null is not allowed to model the minimum width of this component!&quot;);</span>
+<span class="nc" id="L1085">        _onShow( width, w -&gt; getComponent().setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height)) );</span>
+<span class="nc" id="L1086">        return this.withMinimumWidth( width.orElseThrow() );</span>
+    }
+
 
     /**
      *  Use this to only set the minimum height of this {@link JComponent}. &lt;br&gt;
@@ -288,9 +1093,22 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param height The minimum height which should be set for the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public I withMinimumHeight(int height) {
-<span class="nc" id="L292">        _component.setMinimumSize(new Dimension(_component.getMinimumSize().width, height));</span>
-<span class="nc" id="L293">        return (I) this;</span>
+    public final I withMinimumHeight( int height ) {
+<span class="nc" id="L1097">        getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, height));</span>
+<span class="nc" id="L1098">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically set only the minimum height of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component for you. &lt;br&gt;
+     * @param height The minimum height which should be set for the underlying component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMinimumHeight( Val&lt;Integer&gt; height ) {
+<span class="nc" id="L1108">        NullUtil.nullArgCheck(height, &quot;height&quot;, Val.class);</span>
+<span class="nc" id="L1109">        NullUtil.nullPropertyCheck(height, &quot;height&quot;, &quot;Null is not allowed to model the minimum height of this component!&quot;);</span>
+<span class="nc" id="L1110">        _onShow( height, h -&gt; getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, h)) );</span>
+<span class="nc" id="L1111">        return this.withMinimumHeight( height.orElseThrow() );</span>
     }
 
     /**
@@ -299,9 +1117,24 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param size The maximum {@link Dimension} of the component.
      * @return This very builder to allow for method chaining.
      */
-    public I withMaximumSize(Dimension size) {
-<span class="nc" id="L303">        _component.setMaximumSize(size);</span>
-<span class="nc" id="L304">        return (I) this;</span>
+    public final I withMaximumSize( Dimension size ) {
+<span class="fc" id="L1121">        NullUtil.nullArgCheck(size, &quot;size&quot;, Dimension.class);</span>
+<span class="fc" id="L1122">        getComponent().setMaximumSize(size);</span>
+<span class="fc" id="L1123">        return _this();</span>
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the maximum {@link Dimension} of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param size The maximum {@link Dimension} of the component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMaximumSize( Val&lt;Dimension&gt; size ) {
+<span class="fc" id="L1134">        NullUtil.nullArgCheck(size, &quot;size&quot;, Val.class);</span>
+<span class="fc" id="L1135">        NullUtil.nullPropertyCheck(size, &quot;size&quot;, &quot;Null is not allowed to model the maximum size of this component!&quot;);</span>
+<span class="fc" id="L1136">        _onShow( size, v -&gt; getComponent().setMaximumSize(v) );</span>
+<span class="fc" id="L1137">        return this.withMaximumSize( size.orElseThrow() );</span>
     }
 
     /**
@@ -311,9 +1144,27 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param height The maximum height of the component.
      * @return This very builder to allow for method chaining.
      */
-    public I withMaximumSize(int width, int height) {
-<span class="nc" id="L315">        _component.setMaximumSize(new Dimension(width, height));</span>
-<span class="nc" id="L316">        return (I) this;</span>
+    public final I withMaximumSize( int width, int height ) {
+<span class="nc" id="L1148">        getComponent().setMaximumSize(new Dimension(width, height));</span>
+<span class="nc" id="L1149">        return _this();</span>
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the maximum {@link Dimension} of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param width The maximum width of the component.
+     * @param height The maximum height of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMaximumSize( Val&lt;Integer&gt; width, Val&lt;Integer&gt; height ) {
+<span class="nc" id="L1161">        NullUtil.nullArgCheck(width, &quot;width&quot;, Val.class);</span>
+<span class="nc" id="L1162">        NullUtil.nullArgCheck(height, &quot;height&quot;, Val.class);</span>
+<span class="nc" id="L1163">        NullUtil.nullPropertyCheck(width, &quot;width&quot;, &quot;Null is not allowed to model the maximum width of this component!&quot;);</span>
+<span class="nc" id="L1164">        NullUtil.nullPropertyCheck(height, &quot;height&quot;, &quot;Null is not allowed to model the maximum height of this component!&quot;);</span>
+<span class="nc" id="L1165">        _onShow( width, w -&gt; getComponent().setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height)) );</span>
+<span class="nc" id="L1166">        _onShow( height, h -&gt; getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h)) );</span>
+<span class="nc" id="L1167">        return this.withMaximumSize( width.orElseThrow(), height.orElseThrow() );</span>
     }
 
     /**
@@ -322,9 +1173,22 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param width The maximum width which should be set for the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public I withMaximumWidth(int width) {
-<span class="nc" id="L326">        _component.setMaximumSize(new Dimension(width, _component.getMaximumSize().height));</span>
-<span class="nc" id="L327">        return (I) this;</span>
+    public final I withMaximumWidth( int width ) {
+<span class="nc" id="L1177">        getComponent().setMaximumSize(new Dimension(width, getComponent().getMaximumSize().height));</span>
+<span class="nc" id="L1178">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically set only the maximum width of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component for you. &lt;br&gt;
+     * @param width The maximum width which should be set for the underlying component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMaximumWidth( Val&lt;Integer&gt; width ) {
+<span class="nc" id="L1188">        NullUtil.nullArgCheck(width, &quot;width&quot;, Val.class);</span>
+<span class="nc" id="L1189">        NullUtil.nullPropertyCheck(width, &quot;width&quot;, &quot;Null is not allowed to model the maximum width of this component!&quot;);</span>
+<span class="nc" id="L1190">        _onShow( width, w -&gt; getComponent().setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height)) );</span>
+<span class="nc" id="L1191">        return this.withMaximumWidth( width.orElseThrow() );</span>
     }
 
     /**
@@ -333,9 +1197,22 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param height The maximum height which should be set for the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public I withMaximumHeight(int height) {
-<span class="nc" id="L337">        _component.setMaximumSize(new Dimension(_component.getMaximumSize().width, height));</span>
-<span class="nc" id="L338">        return (I) this;</span>
+    public final I withMaximumHeight( int height ) {
+<span class="nc" id="L1201">        getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, height));</span>
+<span class="nc" id="L1202">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically set only the maximum height of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component for you. &lt;br&gt;
+     * @param height The maximum height which should be set for the underlying component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMaximumHeight( Val&lt;Integer&gt; height ) {
+<span class="nc" id="L1212">        NullUtil.nullArgCheck(height, &quot;height&quot;, Val.class);</span>
+<span class="nc" id="L1213">        NullUtil.nullPropertyCheck(height, &quot;height&quot;, &quot;Null is not allowed to model the maximum height of this component!&quot;);</span>
+<span class="nc" id="L1214">        _onShow( height, h -&gt; getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h)) );</span>
+<span class="nc" id="L1215">        return this.withMaximumHeight( height.orElseThrow() );</span>
     }
 
     /**
@@ -344,9 +1221,24 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param size The preferred {@link Dimension} of the component.
      * @return This very builder to allow for method chaining.
      */
-    public I withPreferredSize(Dimension size) {
-<span class="nc" id="L348">        _component.setPreferredSize(size);</span>
-<span class="nc" id="L349">        return (I) this;</span>
+    public final I withPreferredSize( Dimension size ) {
+<span class="fc" id="L1225">        NullUtil.nullArgCheck(size, &quot;size&quot;, Dimension.class);</span>
+<span class="fc" id="L1226">        getComponent().setPreferredSize(size);</span>
+<span class="fc" id="L1227">        return _this();</span>
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the preferred {@link Dimension} of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param size The preferred {@link Dimension} of the component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withPreferredSize( Val&lt;Dimension&gt; size ) {
+<span class="fc" id="L1238">        NullUtil.nullArgCheck(size, &quot;size&quot;, Val.class);</span>
+<span class="fc" id="L1239">        NullUtil.nullPropertyCheck(size, &quot;size&quot;, &quot;Null is not allowed to model the preferred size of this component!&quot;);</span>
+<span class="fc" id="L1240">        _onShow( size, v -&gt; getComponent().setPreferredSize(v) );</span>
+<span class="fc" id="L1241">        return this.withPreferredSize( size.orElseNull() );</span>
     }
 
     /**
@@ -356,9 +1248,27 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param height The preferred height of the component.
      * @return This very builder to allow for method chaining.
      */
-    public I withPreferredSize(int width, int height) {
-<span class="nc" id="L360">        _component.setPreferredSize(new Dimension(width, height));</span>
-<span class="nc" id="L361">        return (I) this;</span>
+    public final I withPreferredSize( int width, int height ) {
+<span class="fc" id="L1252">        getComponent().setPreferredSize(new Dimension(width, height));</span>
+<span class="fc" id="L1253">        return _this();</span>
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the preferred {@link Dimension} of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param width The preferred width of the component.
+     * @param height The preferred height of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withPreferredSize( Val&lt;Integer&gt; width, Val&lt;Integer&gt; height ) {
+<span class="nc" id="L1265">        NullUtil.nullArgCheck(width, &quot;width&quot;, Val.class);</span>
+<span class="nc" id="L1266">        NullUtil.nullArgCheck(height, &quot;height&quot;, Val.class);</span>
+<span class="nc" id="L1267">        NullUtil.nullPropertyCheck(width, &quot;width&quot;, &quot;Null is not allowed to model the preferred width of this component!&quot;);</span>
+<span class="nc" id="L1268">        NullUtil.nullPropertyCheck(height, &quot;height&quot;, &quot;Null is not allowed to model the preferred height of this component!&quot;);</span>
+<span class="nc" id="L1269">        _onShow( width, w -&gt; getComponent().setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height)) );</span>
+<span class="nc" id="L1270">        _onShow( height, h -&gt; getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h)) );</span>
+<span class="nc" id="L1271">        return this.withPreferredSize( width.orElseThrow(), height.orElseThrow() );</span>
     }
 
     /**
@@ -367,9 +1277,22 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param width The preferred width which should be set for the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public I withPreferredWidth(int width) {
-<span class="nc" id="L371">        _component.setPreferredSize(new Dimension(width, _component.getPreferredSize().height));</span>
-<span class="nc" id="L372">        return (I) this;</span>
+    public final I withPreferredWidth( int width ) {
+<span class="fc" id="L1281">        getComponent().setPreferredSize(new Dimension(width, getComponent().getPreferredSize().height));</span>
+<span class="fc" id="L1282">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically set only the preferred width of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component for you. &lt;br&gt;
+     * @param width The preferred width which should be set for the underlying component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withPreferredWidth( Val&lt;Integer&gt; width ) {
+<span class="fc" id="L1292">        NullUtil.nullArgCheck(width, &quot;width&quot;, Val.class);</span>
+<span class="fc" id="L1293">        NullUtil.nullPropertyCheck(width, &quot;width&quot;, &quot;Null is not allowed to model the preferred width of this component!&quot;);</span>
+<span class="fc" id="L1294">        _onShow( width, w -&gt; getComponent().setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height)) );</span>
+<span class="fc" id="L1295">        return this.withPreferredWidth( width.orElseThrow() );</span>
     }
 
     /**
@@ -378,9 +1301,22 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param height The preferred height which should be set for the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public I withPreferredHeight(int height) {
-<span class="nc" id="L382">        _component.setPreferredSize(new Dimension(_component.getPreferredSize().width, height));</span>
-<span class="nc" id="L383">        return (I) this;</span>
+    public final I withPreferredHeight( int height ) {
+<span class="fc" id="L1305">        getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, height));</span>
+<span class="fc" id="L1306">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically set only the preferred height of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component for you. &lt;br&gt;
+     * @param height The preferred height which should be set for the underlying component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withPreferredHeight( Val&lt;Integer&gt; height ) {
+<span class="fc" id="L1316">        NullUtil.nullArgCheck(height, &quot;height&quot;, Val.class);</span>
+<span class="fc" id="L1317">        NullUtil.nullPropertyCheck(height, &quot;height&quot;, &quot;Null is not allowed to model the preferred height of this component!&quot;);</span>
+<span class="fc" id="L1318">        _onShow( height, h -&gt; getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h)) );</span>
+<span class="fc" id="L1319">        return this.withPreferredHeight( height.orElseThrow() );</span>
     }
 
     /**
@@ -393,12 +1329,15 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseClick(UIAction&lt;SimpleDelegate&lt;C, MouseEvent&gt;&gt; onClick) {
-<span class="fc" id="L397">        LogUtil.nullArgCheck(onClick, &quot;onClick&quot;, UIAction.class);</span>
-<span class="fc" id="L398">        _component.addMouseListener(new MouseAdapter() {</span>
-<span class="nc" id="L399">            @Override public void mouseClicked(MouseEvent e) { onClick.accept(new SimpleDelegate&lt;&gt;(_component, e, ()-&gt;getSiblinghood())); }</span>
+    public final I onMouseClick( UIAction&lt;SimpleDelegate&lt;C, MouseEvent&gt;&gt; onClick ) {
+<span class="fc" id="L1333">        NullUtil.nullArgCheck(onClick, &quot;onClick&quot;, UIAction.class);</span>
+<span class="fc" id="L1334">        C component = getComponent();</span>
+<span class="fc" id="L1335">        component.addMouseListener(new MouseAdapter() {</span>
+            @Override public void mouseClicked(MouseEvent e) { 
+<span class="nc" id="L1337">                _doApp(() -&gt; onClick.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L1338">            }</span>
         });
-<span class="fc" id="L401">        return (I) this;</span>
+<span class="fc" id="L1340">        return _this();</span>
     }
 
     /**
@@ -408,12 +1347,15 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param onResize The resize action which will be called when the underlying component changes size.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onResize(UIAction&lt;SimpleDelegate&lt;C, ComponentEvent&gt;&gt; onResize) {
-<span class="nc" id="L412">        LogUtil.nullArgCheck(onResize, &quot;onResize&quot;, UIAction.class);</span>
-<span class="nc" id="L413">        _component.addComponentListener(new ComponentAdapter() {</span>
-<span class="nc" id="L414">            @Override public void componentResized(ComponentEvent e) { onResize.accept(new SimpleDelegate&lt;&gt;(_component, e, ()-&gt;getSiblinghood())); }</span>
+    public final I onResize( UIAction&lt;SimpleDelegate&lt;C, ComponentEvent&gt;&gt; onResize ) {
+<span class="nc" id="L1351">        NullUtil.nullArgCheck(onResize, &quot;onResize&quot;, UIAction.class);</span>
+<span class="nc" id="L1352">        C component = getComponent();</span>
+<span class="nc" id="L1353">        component.addComponentListener(new ComponentAdapter() {</span>
+            @Override public void componentResized(ComponentEvent e) {
+<span class="nc" id="L1355">                _doApp(()-&gt;onResize.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L1356">            }</span>
         });
-<span class="nc" id="L416">        return (I) this;</span>
+<span class="nc" id="L1358">        return _this();</span>
     }
 
     /**
@@ -423,12 +1365,15 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param onMoved The action lambda which will be executed once the component was moved / its position canged.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMoved(UIAction&lt;SimpleDelegate&lt;C, ComponentEvent&gt;&gt; onMoved) {
-<span class="nc" id="L427">        LogUtil.nullArgCheck(onMoved, &quot;onMoved&quot;, UIAction.class);</span>
-<span class="nc" id="L428">        _component.addComponentListener(new ComponentAdapter() {</span>
-<span class="nc" id="L429">            @Override public void componentMoved(ComponentEvent e) { onMoved.accept(new SimpleDelegate&lt;&gt;(_component, e, ()-&gt;getSiblinghood())); }</span>
+    public final I onMoved( UIAction&lt;SimpleDelegate&lt;C, ComponentEvent&gt;&gt; onMoved ) {
+<span class="nc" id="L1369">        NullUtil.nullArgCheck(onMoved, &quot;onMoved&quot;, UIAction.class);</span>
+<span class="nc" id="L1370">        C component = getComponent();</span>
+<span class="nc" id="L1371">        component.addComponentListener(new ComponentAdapter() {</span>
+            @Override public void componentMoved(ComponentEvent e) {
+<span class="nc" id="L1373">                _doApp(()-&gt;onMoved.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L1374">            }</span>
         });
-<span class="nc" id="L431">        return (I) this;</span>
+<span class="nc" id="L1376">        return _this();</span>
     }
 
     /**
@@ -438,12 +1383,15 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param onShown The {@link UIAction} which gets invoked when the component has been made visible.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onShown(UIAction&lt;SimpleDelegate&lt;C, ComponentEvent&gt;&gt; onShown) {
-<span class="nc" id="L442">        LogUtil.nullArgCheck(onShown, &quot;onShown&quot;, UIAction.class);</span>
-<span class="nc" id="L443">        _component.addComponentListener(new ComponentAdapter() {</span>
-<span class="nc" id="L444">            @Override public void componentShown(ComponentEvent e) { onShown.accept(new SimpleDelegate&lt;&gt;(_component, e, ()-&gt;getSiblinghood())); }</span>
+    public final I onShown( UIAction&lt;SimpleDelegate&lt;C, ComponentEvent&gt;&gt; onShown ) {
+<span class="nc" id="L1387">        NullUtil.nullArgCheck(onShown, &quot;onShown&quot;, UIAction.class);</span>
+<span class="nc" id="L1388">        C component = getComponent();</span>
+<span class="nc" id="L1389">        component.addComponentListener(new ComponentAdapter() {</span>
+            @Override public void componentShown(ComponentEvent e) {
+<span class="nc" id="L1391">                _doApp(()-&gt;onShown.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L1392">            }</span>
         });
-<span class="nc" id="L446">        return (I) this;</span>
+<span class="nc" id="L1394">        return _this();</span>
     }
 
     /**
@@ -453,12 +1401,15 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param onHidden The {@link UIAction} which gets invoked when the component has been made invisible.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onHidden(UIAction&lt;SimpleDelegate&lt;C, ComponentEvent&gt;&gt; onHidden) {
-<span class="nc" id="L457">        LogUtil.nullArgCheck(onHidden, &quot;onHidden&quot;, UIAction.class);</span>
-<span class="nc" id="L458">        _component.addComponentListener(new ComponentAdapter() {</span>
-<span class="nc" id="L459">            @Override public void componentHidden(ComponentEvent e) { onHidden.accept(new SimpleDelegate&lt;&gt;(_component, e, ()-&gt;getSiblinghood())); }</span>
+    public final I onHidden( UIAction&lt;SimpleDelegate&lt;C, ComponentEvent&gt;&gt; onHidden ) {
+<span class="nc" id="L1405">        NullUtil.nullArgCheck(onHidden, &quot;onHidden&quot;, UIAction.class);</span>
+<span class="nc" id="L1406">        C component = getComponent();</span>
+<span class="nc" id="L1407">        component.addComponentListener(new ComponentAdapter() {</span>
+            @Override public void componentHidden(ComponentEvent e) {
+<span class="nc" id="L1409">                _doApp(()-&gt;onHidden.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L1410">            }</span>
         });
-<span class="nc" id="L461">        return (I) this;</span>
+<span class="nc" id="L1412">        return _this();</span>
     }
 
     /**
@@ -468,12 +1419,15 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param onFocus The {@link UIAction} which should be executed once the input focus was gained on the wrapped component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onFocusGained(UIAction&lt;SimpleDelegate&lt;C, ComponentEvent&gt;&gt; onFocus) {
-<span class="fc" id="L472">        LogUtil.nullArgCheck(onFocus, &quot;onFocus&quot;, UIAction.class);</span>
-<span class="fc" id="L473">        _component.addFocusListener(new FocusAdapter() {</span>
-<span class="nc" id="L474">            @Override public void focusGained(FocusEvent e) { onFocus.accept(new SimpleDelegate&lt;&gt;(_component, e, ()-&gt;getSiblinghood())); }</span>
+    public final I onFocusGained( UIAction&lt;SimpleDelegate&lt;C, ComponentEvent&gt;&gt; onFocus ) {
+<span class="fc" id="L1423">        NullUtil.nullArgCheck(onFocus, &quot;onFocus&quot;, UIAction.class);</span>
+<span class="fc" id="L1424">        C component = getComponent();</span>
+<span class="fc" id="L1425">        component.addFocusListener(new FocusAdapter() {</span>
+            @Override public void focusGained(FocusEvent e) {
+<span class="nc" id="L1427">                _doApp(()-&gt;onFocus.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L1428">            }</span>
         });
-<span class="fc" id="L476">        return (I) this;</span>
+<span class="fc" id="L1430">        return _this();</span>
     }
 
     /**
@@ -483,12 +1437,15 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param onFocus The {@link UIAction} which should be executed once the input focus was lost on the wrapped component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onFocusLost(UIAction&lt;SimpleDelegate&lt;C, ComponentEvent&gt;&gt; onFocus) {
-<span class="fc" id="L487">        LogUtil.nullArgCheck(onFocus, &quot;onFocus&quot;, UIAction.class);</span>
-<span class="fc" id="L488">        _component.addFocusListener(new FocusAdapter() {</span>
-<span class="nc" id="L489">            @Override public void focusLost(FocusEvent e) { onFocus.accept(new SimpleDelegate&lt;&gt;(_component, e, ()-&gt;getSiblinghood())); }</span>
+    public final I onFocusLost( UIAction&lt;SimpleDelegate&lt;C, ComponentEvent&gt;&gt; onFocus ) {
+<span class="fc" id="L1441">        NullUtil.nullArgCheck(onFocus, &quot;onFocus&quot;, UIAction.class);</span>
+<span class="fc" id="L1442">        C component = getComponent();</span>
+<span class="fc" id="L1443">        component.addFocusListener(new FocusAdapter() {</span>
+            @Override public void focusLost(FocusEvent e) {
+<span class="nc" id="L1445">                _doApp(()-&gt;onFocus.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L1446">            }</span>
         });
-<span class="fc" id="L491">        return (I) this;</span>
+<span class="fc" id="L1448">        return _this();</span>
     }
 
     /**
@@ -498,12 +1455,15 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param onKeyPressed The {@link UIAction} which will be executed once the wrapped component received a key press.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onKeyPressed(UIAction&lt;SimpleDelegate&lt;C, KeyEvent&gt;&gt; onKeyPressed) {
-<span class="fc" id="L502">        LogUtil.nullArgCheck(onKeyPressed, &quot;onKeyPressed&quot;, UIAction.class);</span>
-<span class="fc" id="L503">        _component.addKeyListener(new KeyAdapter() {</span>
-<span class="nc" id="L504">            @Override public void keyPressed(KeyEvent e) { onKeyPressed.accept(new SimpleDelegate&lt;&gt;(_component, e, ()-&gt;getSiblinghood())); }</span>
+    public final I onKeyPressed( UIAction&lt;SimpleDelegate&lt;C, KeyEvent&gt;&gt; onKeyPressed ) {
+<span class="fc" id="L1459">        NullUtil.nullArgCheck(onKeyPressed, &quot;onKeyPressed&quot;, UIAction.class);</span>
+<span class="fc" id="L1460">        C component = getComponent();</span>
+<span class="fc" id="L1461">        component.addKeyListener(new KeyAdapter() {</span>
+            @Override public void keyPressed(KeyEvent e) {
+<span class="nc" id="L1463">                _doApp(()-&gt;onKeyPressed.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L1464">            }</span>
         });
-<span class="fc" id="L506">        return (I) this;</span>
+<span class="fc" id="L1466">        return _this();</span>
     }
 
     /**
@@ -515,16 +1475,17 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param onKeyPressed The {@link UIAction} which will be executed once the wrapped component received the targeted key press.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onPressed(Keyboard.Key key, UIAction&lt;SimpleDelegate&lt;C, KeyEvent&gt;&gt; onKeyPressed) {
-<span class="fc" id="L519">        LogUtil.nullArgCheck(key, &quot;key&quot;, Keyboard.Key.class);</span>
-<span class="fc" id="L520">        LogUtil.nullArgCheck(onKeyPressed, &quot;onKeyPressed&quot;, UIAction.class);</span>
-<span class="fc" id="L521">        _component.addKeyListener(new KeyAdapter() {</span>
+    public final I onPressed( Keyboard.Key key, UIAction&lt;SimpleDelegate&lt;C, KeyEvent&gt;&gt; onKeyPressed ) {
+<span class="fc" id="L1479">        NullUtil.nullArgCheck(key, &quot;key&quot;, Keyboard.Key.class);</span>
+<span class="fc" id="L1480">        NullUtil.nullArgCheck(onKeyPressed, &quot;onKeyPressed&quot;, UIAction.class);</span>
+<span class="fc" id="L1481">        C component = getComponent();</span>
+<span class="fc" id="L1482">        component.addKeyListener(new KeyAdapter() {</span>
             @Override public void keyPressed( KeyEvent e ) {
-<span class="nc bnc" id="L523" title="All 2 branches missed.">                if ( e.getKeyCode() == key.code )</span>
-<span class="nc" id="L524">                    onKeyPressed.accept(new SimpleDelegate&lt;&gt;(_component, e, ()-&gt;getSiblinghood()));</span>
-<span class="nc" id="L525">            }</span>
+<span class="nc bnc" id="L1484" title="All 2 branches missed.">                if ( e.getKeyCode() == key.code )</span>
+<span class="nc" id="L1485">                    _doApp(()-&gt;onKeyPressed.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L1486">            }</span>
         });
-<span class="fc" id="L527">        return (I) this;</span>
+<span class="fc" id="L1488">        return _this();</span>
     }
 
                              /**
@@ -535,12 +1496,14 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @return This very instance, which enables builder-style method chaining.
      * @see #onKeyPressed(UIAction)
      */
-    public final I onKeyReleased(UIAction&lt;SimpleDelegate&lt;C, KeyEvent&gt;&gt; onKeyReleased) {
-<span class="fc" id="L539">        LogUtil.nullArgCheck(onKeyReleased, &quot;onKeyReleased&quot;, UIAction.class);</span>
-<span class="fc" id="L540">        _component.addKeyListener(new KeyAdapter() {</span>
-<span class="nc" id="L541">            @Override public void keyReleased(KeyEvent e) { onKeyReleased.accept(new SimpleDelegate&lt;&gt;(_component, e, ()-&gt;getSiblinghood())); }</span>
+    public final I onKeyReleased( UIAction&lt;SimpleDelegate&lt;C, KeyEvent&gt;&gt; onKeyReleased ) {
+<span class="fc" id="L1500">        NullUtil.nullArgCheck(onKeyReleased, &quot;onKeyReleased&quot;, UIAction.class);</span>
+<span class="fc" id="L1501">        C component = getComponent();</span>
+<span class="fc" id="L1502">        component.addKeyListener(new KeyAdapter() {</span>
+            @Override public void keyReleased(KeyEvent e) {
+<span class="nc" id="L1504">                _doApp(()-&gt;onKeyReleased.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood()))); }</span>
         });
-<span class="fc" id="L543">        return (I) this;</span>
+<span class="fc" id="L1506">        return _this();</span>
     }
 
     /**
@@ -554,16 +1517,17 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @see #onKeyPressed(UIAction)
      * @see #onKeyReleased(UIAction)
      */
-    public I onReleased(Keyboard.Key key, UIAction&lt;SimpleDelegate&lt;C, KeyEvent&gt;&gt; onKeyReleased) {
-<span class="fc" id="L558">        LogUtil.nullArgCheck(key, &quot;key&quot;, Keyboard.Key.class);</span>
-<span class="fc" id="L559">        LogUtil.nullArgCheck(onKeyReleased, &quot;onKeyReleased&quot;, UIAction.class);</span>
-<span class="fc" id="L560">        _component.addKeyListener(new KeyAdapter() {</span>
+    public final I onReleased( Keyboard.Key key, UIAction&lt;SimpleDelegate&lt;C, KeyEvent&gt;&gt; onKeyReleased ) {
+<span class="fc" id="L1521">        NullUtil.nullArgCheck(key, &quot;key&quot;, Keyboard.Key.class);</span>
+<span class="fc" id="L1522">        NullUtil.nullArgCheck(onKeyReleased, &quot;onKeyReleased&quot;, UIAction.class);</span>
+<span class="fc" id="L1523">        C component = getComponent();</span>
+<span class="fc" id="L1524">        component.addKeyListener(new KeyAdapter() {</span>
             @Override public void keyReleased( KeyEvent e ) {
-<span class="nc bnc" id="L562" title="All 2 branches missed.">                if ( e.getKeyCode() == key.code )</span>
-<span class="nc" id="L563">                    onKeyReleased.accept(new SimpleDelegate&lt;&gt;(_component, e, ()-&gt;getSiblinghood()));</span>
-<span class="nc" id="L564">            }</span>
+<span class="nc bnc" id="L1526" title="All 2 branches missed.">                if ( e.getKeyCode() == key.code )</span>
+<span class="nc" id="L1527">                    _doApp(()-&gt;onKeyReleased.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L1528">            }</span>
         });
-<span class="fc" id="L566">        return (I) this;</span>
+<span class="fc" id="L1530">        return _this();</span>
     }
 
     /**
@@ -575,13 +1539,22 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @see #onKeyPressed(UIAction)
      * @see #onKeyReleased(UIAction)
      */
-    public I onKeyTyped(UIAction&lt;SimpleDelegate&lt;C, KeyEvent&gt;&gt; onKeyTyped) {
-<span class="fc" id="L579">        LogUtil.nullArgCheck(onKeyTyped, &quot;onKeyTyped&quot;, UIAction.class);</span>
-<span class="fc" id="L580">        _component.addKeyListener(new KeyAdapter() {</span>
-<span class="nc" id="L581">            @Override public void keyTyped(KeyEvent e) { onKeyTyped.accept(new SimpleDelegate&lt;&gt;(_component, e, ()-&gt;getSiblinghood())); }</span>
-        });
-<span class="fc" id="L583">        return (I) this;</span>
+    public final I onKeyTyped( UIAction&lt;SimpleDelegate&lt;C, KeyEvent&gt;&gt; onKeyTyped ) {
+<span class="fc" id="L1543">        NullUtil.nullArgCheck(onKeyTyped, &quot;onKeyTyped&quot;, UIAction.class);</span>
+<span class="fc" id="L1544">        C component = getComponent();</span>
+<span class="fc" id="L1545">        _onKeyTyped( e -&gt;</span>
+<span class="nc" id="L1546">            _doApp(()-&gt;onKeyTyped.accept(new SimpleDelegate&lt;&gt;(component, e, this::getSiblinghood)))</span>
+        );
+<span class="fc" id="L1548">        return _this();</span>
     }
+
+    protected void _onKeyTyped( Consumer&lt;KeyEvent&gt; action ) {
+<span class="fc" id="L1552">        getComponent().addKeyListener(new KeyAdapter() {</span>
+            @Override public void keyTyped(KeyEvent e) {
+<span class="nc" id="L1554">                action.accept(e);</span>
+<span class="nc" id="L1555">            }</span>
+        });
+<span class="fc" id="L1557">    }</span>
 
     /**
      * Adds the supplied {@link UIAction} wrapped in a {@link KeyListener} to the component,
@@ -595,16 +1568,17 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @see #onKeyReleased(UIAction)
      * @see #onKeyTyped(UIAction)
      */
-    public I onTyped(Keyboard.Key key, UIAction&lt;SimpleDelegate&lt;C, KeyEvent&gt;&gt; onKeyTyped) {
-<span class="fc" id="L599">        LogUtil.nullArgCheck(key, &quot;key&quot;, Keyboard.Key.class);</span>
-<span class="fc" id="L600">        LogUtil.nullArgCheck(onKeyTyped, &quot;onKeyTyped&quot;, UIAction.class);</span>
-<span class="fc" id="L601">        _component.addKeyListener(new KeyAdapter() {</span>
+    public final I onTyped( Keyboard.Key key, UIAction&lt;SimpleDelegate&lt;C, KeyEvent&gt;&gt; onKeyTyped ) {
+<span class="fc" id="L1572">        NullUtil.nullArgCheck(key, &quot;key&quot;, Keyboard.Key.class);</span>
+<span class="fc" id="L1573">        NullUtil.nullArgCheck(onKeyTyped, &quot;onKeyTyped&quot;, UIAction.class);</span>
+<span class="fc" id="L1574">        C component = getComponent();</span>
+<span class="fc" id="L1575">        component.addKeyListener(new KeyAdapter() {</span>
             @Override public void keyTyped( KeyEvent e ) {
-<span class="nc bnc" id="L603" title="All 2 branches missed.">                if ( e.getKeyCode() == key.code )</span>
-<span class="nc" id="L604">                    onKeyTyped.accept(new SimpleDelegate&lt;&gt;(_component, e, ()-&gt;getSiblinghood()));</span>
-<span class="nc" id="L605">            }</span>
+<span class="nc bnc" id="L1577" title="All 2 branches missed.">                if ( e.getKeyCode() == key.code )</span>
+<span class="nc" id="L1578">                    _doApp(()-&gt;onKeyTyped.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L1579">            }</span>
         });
-<span class="fc" id="L607">        return (I) this;</span>
+<span class="fc" id="L1581">        return _this();</span>
     }
 
     /**
@@ -620,55 +1594,71 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @param onUpdate The {@link UIAction} which should be called periodically.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I doUpdates(int delay, UIAction&lt;SimpleDelegate&lt;C, ActionEvent&gt;&gt; onUpdate) {
-<span class="fc" id="L624">        LogUtil.nullArgCheck(onUpdate, &quot;onUpdate&quot;, UIAction.class);</span>
-<span class="pc" id="L625">        Timer timer = new Timer(delay, e -&gt; onUpdate.accept(new SimpleDelegate&lt;&gt;(_component, e, ()-&gt;getSiblinghood())));</span>
-<span class="fc" id="L626">        synchronized (timers) {</span>
-<span class="fc" id="L627">            timers.getOrDefault(_component, new ArrayList&lt;&gt;()).add(timer);</span>
-<span class="fc" id="L628">        }</span>
-<span class="fc" id="L629">        timer.start();</span>
-<span class="fc" id="L630">        return (I) this;</span>
+    public final I doUpdates( int delay, UIAction&lt;SimpleDelegate&lt;C, ActionEvent&gt;&gt; onUpdate ) {
+<span class="fc" id="L1598">        NullUtil.nullArgCheck(onUpdate, &quot;onUpdate&quot;, UIAction.class);</span>
+<span class="fc" id="L1599">        Timer timer = new Timer(delay, e -&gt; onUpdate.accept(new SimpleDelegate&lt;&gt;(getComponent(), e, this::getSiblinghood)));</span>
+<span class="fc" id="L1600">        synchronized (_timers) {</span>
+<span class="fc" id="L1601">            _timers.getOrDefault(getComponent(), new ArrayList&lt;&gt;()).add(timer);</span>
+<span class="fc" id="L1602">        }</span>
+<span class="fc" id="L1603">        timer.start();</span>
+<span class="fc" id="L1604">        return _this();</span>
     }
 
     @Override
     protected void _add( JComponent component, Object conf ) {
-<span class="fc" id="L635">        LogUtil.nullArgCheck(component, &quot;component&quot;, JComponent.class);</span>
-<span class="fc bfc" id="L636" title="All 2 branches covered.">        if ( conf == null )</span>
-<span class="fc" id="L637">            _component.add(component);</span>
+<span class="fc" id="L1609">        NullUtil.nullArgCheck(component, &quot;component&quot;, JComponent.class);</span>
+<span class="fc bfc" id="L1610" title="All 2 branches covered.">        if ( conf == null )</span>
+<span class="fc" id="L1611">            getComponent().add(component);</span>
         else
-<span class="fc" id="L639">            _component.add(component, conf);</span>
-<span class="fc" id="L640">    }</span>
+<span class="fc" id="L1613">            getComponent().add(component, conf);</span>
+<span class="fc" id="L1614">    }</span>
 
     /**
      * @param builder A builder for another {@link JComponent} instance which ought to be added to the wrapped component type.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final &lt;T extends JComponent&gt; I add(UIForAbstractSwing&lt;?, T&gt; builder) {
-<span class="fc" id="L647">        return (I) this.add(new AbstractNestedBuilder[]{builder});</span>
+    public final &lt;T extends JComponent&gt; I add( UIForAbstractSwing&lt;?, T&gt; builder ) {
+<span class="fc" id="L1621">        this.add(new AbstractNestedBuilder[]{builder});</span>
+<span class="fc" id="L1622">        return _this();</span>
     }
 
     /**
-     *  Use this to nest builder types into this builder to effectively plug the wrapped {@link JComponent}s 
+     *  Use this to nest builder nodes into this builder to effectively plug the wrapped {@link JComponent}s
      *  into the {@link JComponent} type wrapped by this builder instance.
-     *  This method enables support for nested building as well as the ability to
-     *  pass additional layout information to the layout manager of the wrapped {@link JComponent}, through
-     *  the {@link JComponent#add(Component, Object)} method.
+     *  The first argument is expected to contain layout information for the layout manager of the wrapped {@link JComponent},
+     *  through the {@link JComponent#add(Component, Object)} method.
+     *  By default, the {@link MigLayout} is used.
      *  &lt;br&gt;&lt;br&gt;
      *
      * @param attr The additional mig-layout information which should be passed to the UI tree.
      * @param builder A builder for another {@link JComponent} instance which ought to be added to the wrapped component type.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final &lt;T extends JComponent&gt; I add(String attr, UIForAbstractSwing&lt;?, T&gt; builder) {
-<span class="fc" id="L663">        return this.add(attr, new UIForAbstractSwing[]{builder});</span>
+    public final &lt;T extends JComponent&gt; I add( String attr, UIForAbstractSwing&lt;?, T&gt; builder ) {
+<span class="fc" id="L1638">        return this.add(attr, new UIForAbstractSwing[]{builder});</span>
+    }
+
+    /**
+     *  Use this to nest builder nodes into this builder to effectively plug the wrapped {@link JComponent}s
+     *  into the {@link JComponent} type wrapped by this builder instance.
+     *  The first argument will be passed to the layout manager of the wrapped {@link JComponent},
+     *  through the {@link JComponent#add(Component, Object)} method.
+     *  By default, the {@link MigLayout} is used.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param attr The mig-layout attribute.
+     * @param builder A builder for another {@link JComponent} instance which ought to be added to the wrapped component type.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final &lt;T extends JComponent&gt; I add( CompAttr attr, UIForAbstractSwing&lt;?, T&gt; builder ) {
+<span class="fc" id="L1654">        return this.add(attr.toString(), new UIForAbstractSwing[]{builder});</span>
     }
 
     /**
      *  Use this to nest builder types into this builder to effectively plug the wrapped {@link JComponent}s 
      *  into the {@link JComponent} type wrapped by this builder instance.
      *  The first argument represents layout attributes/constraints which will
-     *  be applied to the {@link JComponent}s of the subsequently provided builder types.
-     *  This additional layout information will be passed to the layout manager of the wrapped {@link JComponent},
+     *  be passed to the {@link LayoutManager} of the underlying {@link JComponent}.
      *  through the {@link JComponent#add(Component, Object)} method.
      *  &lt;br&gt;&lt;br&gt;
      *
@@ -678,15 +1668,33 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @return This very instance, which enables builder-style method chaining.
      */
     @SafeVarargs
-    public final &lt;B extends UIForAbstractSwing&lt;?, ?&gt;&gt; I add(String attr, B... builders) {
-<span class="fc" id="L682">        LayoutManager layout = _component.getLayout();</span>
-<span class="fc bfc" id="L683" title="All 4 branches covered.">        if ( _isBorderLayout(attr) &amp;&amp; !(layout instanceof BorderLayout) ) {</span>
-<span class="pc bpc" id="L684" title="1 of 2 branches missed.">            if ( layout instanceof MigLayout )</span>
-<span class="nc" id="L685">                log.warn(&quot;Layout ambiguity detected! Border layout constraint cannot be added to 'MigLayout'.&quot;);</span>
-<span class="fc" id="L686">            _component.setLayout(new BorderLayout()); // The UI Maker tries to fill in the blanks!</span>
+    public final &lt;B extends UIForAbstractSwing&lt;?, ?&gt;&gt; I add( String attr, B... builders ) {
+<span class="fc" id="L1672">        LayoutManager layout = getComponent().getLayout();</span>
+<span class="fc bfc" id="L1673" title="All 4 branches covered.">        if ( _isBorderLayout(attr) &amp;&amp; !(layout instanceof BorderLayout) ) {</span>
+<span class="pc bpc" id="L1674" title="1 of 2 branches missed.">            if ( layout instanceof MigLayout )</span>
+<span class="fc" id="L1675">                log.warn(&quot;Layout ambiguity detected! Border layout constraint cannot be added to 'MigLayout'.&quot;);</span>
+<span class="fc" id="L1676">            getComponent().setLayout(new BorderLayout()); // The UI Maker tries to fill in the blanks!</span>
         }
-<span class="fc bfc" id="L688" title="All 2 branches covered.">        for ( UIForAbstractSwing&lt;?, ?&gt; b : builders ) _doAdd(b, attr);</span>
-<span class="fc" id="L689">        return (I) this;</span>
+<span class="fc bfc" id="L1678" title="All 2 branches covered.">        for ( UIForAbstractSwing&lt;?, ?&gt; b : builders ) _doAdd(b, attr);</span>
+<span class="fc" id="L1679">        return _this();</span>
+    }
+
+    /**
+     *  Use this to nest builder types into this builder to effectively plug the wrapped {@link JComponent}s
+     *  into the {@link JComponent} type wrapped by this builder instance.
+     *  The first argument will be passed to the {@link LayoutManager}
+     *  of the underlying {@link JComponent} to serve as layout constraints.
+     *  through the {@link JComponent#add(Component, Object)} method.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param attr The first mig-layout information which should be passed to the UI tree.
+     * @param builders An array of builders for a corresponding number of {@link JComponent}
+     *                  type which ought to be added to the wrapped component type of this builder.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    @SafeVarargs
+    public final &lt;B extends UIForAbstractSwing&lt;?, ?&gt;&gt; I add( CompAttr attr, B... builders ) {
+<span class="fc" id="L1697">        return this.add(attr.toString(), builders);</span>
     }
 
     /**
@@ -702,25 +1710,41 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      */
     @SafeVarargs
     public final &lt;E extends JComponent&gt; I add( String attr, E... components ) {
-<span class="nc" id="L705">        LogUtil.nullArgCheck(attr, &quot;conf&quot;, Object.class);</span>
-<span class="nc" id="L706">        LogUtil.nullArgCheck(components, &quot;components&quot;, Object[].class);</span>
-<span class="nc bnc" id="L707" title="All 2 branches missed.">        for( E component : components ) {</span>
-<span class="nc" id="L708">            LogUtil.nullArgCheck(component, &quot;component&quot;, JComponent.class);</span>
-<span class="nc" id="L709">            this.add(attr, UI.of(component));</span>
+<span class="fc" id="L1713">        NullUtil.nullArgCheck(attr, &quot;conf&quot;, Object.class);</span>
+<span class="fc" id="L1714">        NullUtil.nullArgCheck(components, &quot;components&quot;, Object[].class);</span>
+<span class="fc bfc" id="L1715" title="All 2 branches covered.">        for( E component : components ) {</span>
+<span class="fc" id="L1716">            NullUtil.nullArgCheck(component, &quot;component&quot;, JComponent.class);</span>
+<span class="fc" id="L1717">            this.add(attr, UI.of(component));</span>
         }
-<span class="nc" id="L711">        return (I) this;</span>
+<span class="fc" id="L1719">        return _this();</span>
+    }
+
+    /**
+     *  Use this to nest {@link JComponent} types into this builder to effectively plug the provided {@link JComponent}s
+     *  into the {@link JComponent} type wrapped by this builder instance.
+     *  The first 2 arguments will be joined by a comma and passed to the {@link LayoutManager}
+     *  of the underlying {@link JComponent} to serve as layout constraints.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param attr The first layout information which should be passed to the UI tree.
+     * @param components A {@link JComponent}s array which ought to be added to the wrapped component type.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    @SafeVarargs
+    public final &lt;E extends JComponent&gt; I add( CompAttr attr, E... components ) {
+<span class="nc" id="L1735">        return this.add(attr.toString(), components);</span>
     }
 
     private static boolean _isBorderLayout( Object o ) {
-<span class="fc bfc" id="L715" title="All 2 branches covered.">        return BorderLayout.CENTER.equals(o) ||</span>
-<span class="fc bfc" id="L716" title="All 2 branches covered.">                BorderLayout.PAGE_START.equals(o) ||</span>
-<span class="fc bfc" id="L717" title="All 2 branches covered.">                BorderLayout.PAGE_END.equals(o) ||</span>
-<span class="fc bfc" id="L718" title="All 2 branches covered.">                BorderLayout.LINE_END.equals(o) ||</span>
-<span class="fc bfc" id="L719" title="All 2 branches covered.">                BorderLayout.LINE_START.equals(o) ||</span>
-<span class="pc bpc" id="L720" title="1 of 2 branches missed.">                BorderLayout.EAST.equals(o)  ||</span>
-<span class="pc bpc" id="L721" title="1 of 2 branches missed.">                BorderLayout.WEST.equals(o)  ||</span>
-<span class="pc bpc" id="L722" title="1 of 2 branches missed.">                BorderLayout.NORTH.equals(o) ||</span>
-<span class="pc bpc" id="L723" title="1 of 2 branches missed.">                BorderLayout.SOUTH.equals(o);</span>
+<span class="fc bfc" id="L1739" title="All 2 branches covered.">        return BorderLayout.CENTER.equals(o) ||</span>
+<span class="fc bfc" id="L1740" title="All 2 branches covered.">                BorderLayout.PAGE_START.equals(o) ||</span>
+<span class="fc bfc" id="L1741" title="All 2 branches covered.">                BorderLayout.PAGE_END.equals(o) ||</span>
+<span class="fc bfc" id="L1742" title="All 2 branches covered.">                BorderLayout.LINE_END.equals(o) ||</span>
+<span class="fc bfc" id="L1743" title="All 2 branches covered.">                BorderLayout.LINE_START.equals(o) ||</span>
+<span class="pc bpc" id="L1744" title="1 of 2 branches missed.">                BorderLayout.EAST.equals(o)  ||</span>
+<span class="pc bpc" id="L1745" title="1 of 2 branches missed.">                BorderLayout.WEST.equals(o)  ||</span>
+<span class="pc bpc" id="L1746" title="1 of 2 branches missed.">                BorderLayout.NORTH.equals(o) ||</span>
+<span class="pc bpc" id="L1747" title="1 of 2 branches missed.">                BorderLayout.SOUTH.equals(o);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

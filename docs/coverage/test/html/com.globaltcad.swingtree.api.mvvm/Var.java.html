@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Var.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree.api.mvvm</a> &gt; <span class="el_source">Var.java</span></div><h1>Var.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree.api.mvvm;
+
+import java.util.Objects;
+
+/**
+ * 	A mutable wrapper for a value which can be observed by the Swing-Tree UI
+ * 	to dynamically update UI components for you, as well
+ * 	as trigger an action inside your view model.
+ *  &lt;p&gt;
+ * 	So for example if you have a {@link Var} which represents the username
+ * 	of a form, in your Swing-Tree UI you can register a callback which will update the UI
+ * 	accordingly or trigger a view model action. &lt;br&gt;
+ * 	Consider the following example property in your view model:
+ * 	&lt;pre&gt;{@code
+ * 	    // A username property with a validation action:
+ * 		private final Var&lt;String&gt; username = Var.of(&quot;&quot;).withAction( v -&gt; validateUser(v) );
+ * 	}&lt;/pre&gt;
+ * 	And the following Swing-Tree UI:
+ * 	&lt;pre&gt;{@code
+ * 	    UI.textField()
+ * 	    .peek( ta -&gt; vm.getUsername().onShow( t -&gt; ta.setText(t) ) )
+ * 	    .onKeyReleased( e -&gt; vm.getUsername().act( ta.getText() ) );
+ * 	}&lt;/pre&gt;
+ * 	Your view will automatically update the text field with the value of the property
+ * 	and inside your view model you can also update the value of the property
+ * 	to be shown in the UI:
+ * 	&lt;pre&gt;{@code
+ * 	    // Initially empty username:
+ * 		username.set( &quot;&quot; ).show();
+ * 	}&lt;/pre&gt;
+ * 	&lt;p&gt;
+ * 	&lt;b&gt;Please take a look at the &lt;a href=&quot;https://globaltcad.github.io/swing-tree/&quot;&gt;living swing-tree documentation&lt;/a&gt;
+ * 	where you can browse a large collection of examples demonstrating how to use the API of this class.&lt;/b&gt;
+ *
+ * @param &lt;T&gt; The type of the wrapped value.
+ */
+public interface Var&lt;T&gt; extends Val&lt;T&gt;
+{
+	/**
+	 *  Use this factory method to create a new {@link Var} instance
+	 *  whose value may or may not be null.
+	 *  &lt;p&gt;
+	 *  &lt;b&gt;Example:&lt;/b&gt;
+	 *  &lt;pre&gt;{@code
+	 *      Var.ofNullable(String.class, null);
+	 *  }&lt;/pre&gt;
+	 *  &lt;p&gt;
+	 * @param type The type of the value wrapped by the property.
+	 *             This is used to check if the value is of the correct type.
+	 * @param value The initial value of the property.
+	 *              This may be null.
+	 * @param &lt;T&gt; The type of the wrapped value.
+	 * @return A new {@link Var} instance.
+	 */
+	static &lt;T&gt; Var&lt;T&gt; ofNullable( Class&lt;T&gt; type, T value ) {
+<span class="fc" id="L56">		return new AbstractVariable&lt;T&gt;( type, value, UNNAMED, null, true ){};</span>
+	}
+
+	/**
+	 *  This factory method will expose a builder which will create a very simple type of Property,
+	 *  namely: {@link AbstractVariable}!
+	 *  It has a simple implementation for everything defined in the {@link Var} interface.
+	 *  So it can be touched, untouched, validated, initialized and applied.
+	 *  One may or may not use these features depending on the use case, however in most cases
+	 *  {@link Var} implementation are simple view properties which will need these functionalities.
+	 *
+	 * @param iniValue The initial value set to the instance built by this builder. Note: An initialization will overwrite this.
+	 * @param &lt;T&gt; The type of the value held by the {@link Var}!
+	 * @return The builder for a {@link AbstractVariable}.
+	 */
+	static &lt;T&gt; Var&lt;T&gt; of( T iniValue ) {
+<span class="fc" id="L72">		Objects.requireNonNull(iniValue);</span>
+<span class="fc" id="L73">		return new AbstractVariable&lt;T&gt;( (Class&lt;T&gt;) iniValue.getClass(), iniValue, UNNAMED, null, false ){};</span>
+	}
+
+	
+	/**
+	 *  This method provides the ability to change the state of the wrapper.
+	 *  It might have several side effects depending on the implementation.
+	 *
+	 * @param newValue The new value which ought to replace the old one.
+	 * @return This very wrapper instance, in order to enable method chaining.
+	 */
+	Var&lt;T&gt; set( T newValue );
+
+	/**
+	 *  Use this method to create a new property with an id.
+	 *  This id is used to identify the property in the UI
+	 *  or as a key in a map, which is useful when converting your
+	 *  view model to a JSON object, or similar formats.
+	 *
+	 * @param id The id of the property.
+	 * @return A new {@link Var} instance with the given id.
+	 */
+	@Override Var&lt;T&gt; withID( String id );
+
+	/**
+	 *  Use this method to create a new property with an action which is supposed to be triggered
+	 *  when the UI changes the value of this property through
+	 *  the {@code Var::act(T)} method, or simply when it is explicitly
+	 *  triggered by the {@code Var::act(T)} method.
+	 *
+	 * @param action The action to be triggered when {@code Var::act()} or {@code Var::act(T)} is called.
+	 * @return A new {@link Var} instance which is identical to this one, except that it has the given action.
+	 */
+	Var&lt;T&gt; withAction( PropertyAction&lt;T&gt; action );
+
+	/**
+	 *  Triggers the action associated with this property, if one was
+	 *  set using {@link #withAction(PropertyAction)}.
+	 *  This method is intended to be used in the UI
+	 *  to indicate that the user has changed the value of the property
+	 *  not your view model.
+	 *
+	 * @return This very wrapper instance, in order to enable method chaining.
+	 */
+	Var&lt;T&gt; act();
+
+	/**
+	 *  Updates the state of this property and then, if the state has changed,
+	 *  trigger its action using the {@link #act()} method. &lt;br&gt;
+	 *  This method is intended to be used in the UI.
+	 *  If you want to modify the state of the property from the view model,
+	 *  as part of your business logic, you should use the {@code Var::set(T)} method instead.
+	 *
+	 * @param newValue The new value which ought to replace the old one.
+	 * @return This very wrapper instance, in order to enable method chaining.
+	 */
+	Var&lt;T&gt; act(T newValue);
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

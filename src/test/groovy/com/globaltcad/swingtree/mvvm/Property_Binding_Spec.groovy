@@ -28,23 +28,27 @@ class Property_Binding_Spec extends Specification
             the state of a property is "ready" for display in the UI.
         """
         given : 'We create a property representing the size of a component.'
-            Val<Dimension> property = Var.of(new Dimension(100, 100))
+            Val<Dimension> size = Var.of(new Dimension(100, 100))
         and : 'We create a UI to which we want to bind:'
             var node = UI.panel("fill, wrap 1")
-                        .add(UI.label("Hello World"))
-                        .add(UI.button("Click Me").withMinimumSize(property))
-                        .add(UI.textField("Hello World"))
+                        .add(UI.label("Hello World").withPreferredSize(size))
+                        .add(UI.button("Click Me").withMinimumSize(size))
+                        .add(UI.textField("Hello World").withMaximumSize(size))
 
-        expect : 'The button will have the size of the property.'
+        expect : 'The components will have the size of the property.'
+            node.component.components[0].preferredSize == new Dimension(100, 100)
             node.component.components[1].minimumSize == new Dimension(100, 100)
+            node.component.components[2].maximumSize == new Dimension(100, 100)
 
         when : 'We change the value of the property.'
-            property.set(new Dimension(200, 200))
+            size.set(new Dimension(200, 200))
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
 
-        then : 'The button will have the new size.'
+        then : 'The components will have the new sizes.'
+            node.component.components[0].preferredSize == new Dimension(200, 200)
             node.component.components[1].minimumSize == new Dimension(200, 200)
+            node.component.components[2].maximumSize == new Dimension(200, 200)
     }
 
     def 'We can bind to the color of a component.'()

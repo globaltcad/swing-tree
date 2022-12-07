@@ -16,7 +16,7 @@
     {
       "id":"Swing tree is a wrapper around Swing, which means you can create the combo box yourself.",
       "result":"PASS",
-      "duration":"0.036 seconds",
+      "duration":"0.034 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -33,7 +33,7 @@
     {
       "id":"The \"comboBox\" factory method allows you to easily create a combo box from an array.",
       "result":"PASS",
-      "duration":"0.014 seconds",
+      "duration":"0.017 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -52,7 +52,7 @@
     {
       "id":"A combo box created by Swing-Tree uses the provided item array as data model.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"0.006 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n           You don't have to create a ComboBoxModel implementation to model the state\n           of your combo box! If you pass an array or a list to a combo box\n           factory method it will serve as a model of your combo box items.  \n        "]
       },
@@ -109,7 +109,7 @@
     {
       "id":"The options of an editable combo box are only editable if their items list is modifyable.",
       "result":"PASS",
-      "duration":"0.012 seconds",
+      "duration":"0.011 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -202,7 +202,7 @@
     {
       "id":"You can model both the current selection state as well as options of your combo box using 2 properties.",
       "result":"PASS",
-      "duration":"0.031 seconds",
+      "duration":"0.034 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n           In essence, the state of a combo box consists of the current selection, and\n           the options that are available for selection. You can model both of these\n           aspects using 2 properties. One modelling the current selection, and another one\n           storing an array to model all available options. \n        "]
       },

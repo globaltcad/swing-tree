@@ -4,19 +4,19 @@
   "narrative":"The Swing-Tree library allows you to build UIs using declarative code, \n    which you can think of as a more dynamic type of HTML but for swing.\n    It is inspired by frameworks like Jetpack Compose, Flutter, React and SwiftUI\n    which are also based on nested builder patterns to design your UI.\n    In this specification we cover the utter most basics of swing tree.",
   "subjects":[],
   "statistics":{
-    "runs":"13",
+    "runs":"14",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.256 seconds"
+    "duration":"0.241 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can nest JPanel UI nodes to structure UIs.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.007 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Just like in regular Swing, the JPanel is the most basic \n            yet most important type of component in Swing-Tree\n            and you can create one using the `UI.panel()` factory method. \n            Don't hesitate to use as the main tool for grouping and structuring\n            your UI, just like you would use the 'div' tag in HTML.\n        "]
       },
@@ -85,7 +85,7 @@
     {
       "id":"We can easily define the cursor on a wrapped UI component",
       "result":"PASS",
-      "duration":"0.007 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -104,7 +104,7 @@
     {
       "id":"An enum based combo box can have custom cell rendering.",
       "result":"PASS",
-      "duration":"0.029 seconds",
+      "duration":"0.028 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Swing tree exposes a builder API for creating combo box cell renderers.\n            This is a very powerful feature, because it allows you to customize\n            the look and feel of your combo box in a very flexible way.\n            So if the state of your combo box is based on a simple enum, whose\n            instance names are all written in capital letters, you can use\n            define a custom cell renderer to display the enum values in a more\n            readable way.\n        "]
       },
@@ -129,7 +129,7 @@
     {
       "id":"We can create a border layout based Swing tree.",
       "result":"PASS",
-      "duration":"0.111 seconds",
+      "duration":"0.097 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -148,7 +148,7 @@
     {
       "id":"We can register various kinds of different keyboard event handlers to swing tree nodes.",
       "result":"PASS",
-      "duration":"0.014 seconds",
+      "duration":"0.012 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The Swing-Tree API exposes various methods to register different kinds of Swing component\n            or keyboard events. \n            All such event registration methods can be identified by the 'on' prefix.\n        "]
       },
@@ -178,7 +178,7 @@
     {
       "id":"We can register list selection events on a JList based swing tree node.",
       "result":"PASS",
-      "duration":"0.015 seconds",
+      "duration":"0.013 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The Swing-Tree API exposes various methods to register different kinds of Swing component\n            events, like for example list selection events. \n            All such event registration methods can be identified by the 'on' prefix.\n        "]
       },
@@ -191,9 +191,24 @@
     },
   
     {
+      "id":"Component events can be registered on swing tree nodes.",
+      "result":"PASS",
+      "duration":"0.008 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The Swing-Tree API exposes various methods to register different kinds of Swing component\n            events, like for example resize events. \n            All such event registration methods can be identified by the 'on' prefix.\n        "]
+      },
+      "blocks":[
+        {"kind":"when","text":"We create a panel UI node and attach various kinds of actions to it.","code":["def panel =","        UI.of(new JPanel()).id(\"my-panel\")","        .onResize(it -> {/*something*/})","        .onMoved(it -> {/*something*/})","        .onShown(it -> {/*something*/})","        .onHidden(it -> {/*something*/})","        .get(JPanel)"]},
+
+        {"kind":"then","text":"We can verify that the panel has the expected number of listeners.","code":["panel.getListeners(ComponentListener.class).size() == 4"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
       "id":"A tabbed pane can be created and populated in a declarative way.",
       "result":"PASS",
-      "duration":"0.031 seconds",
+      "duration":"0.027 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Although Swing has the JTabbedPane component as a collection of tabs, \n            there is no abstraction defining a tab on its own.\n            The Swing-Tree API provides a Tab class that allows you to define\n            a tab and its content in a more intuitive as well as declarative manner\n            with tab specific properties and event handlers.\n        "]
       },
@@ -210,7 +225,7 @@
     {
       "id":"The tab buttons of a tabbed pane can have custom components.",
       "result":"PASS",
-      "duration":"0.007 seconds",
+      "duration":"0.008 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Although Swing has the JTabbedPane component as a collection of tabs, \n            there is no abstraction defining a tab on its own.\n            The Swing-Tree API provides a Tab class that allows you to define\n            a tab and its content in a more intuitive as well as declarative manner\n            with tab specific properties and event handlers.\n        "]
       },

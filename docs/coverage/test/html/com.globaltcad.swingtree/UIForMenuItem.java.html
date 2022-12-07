@@ -6,24 +6,8 @@ import javax.swing.*;
 /**
  *  A swing tree builder node for {@link JMenuItem} instances.
  */
-public class UIForMenuItem&lt;M extends JMenuItem&gt; extends UIForAbstractButton&lt;UIForMenuItem&lt;M&gt;, M&gt;
+public class UIForMenuItem&lt;M extends JMenuItem&gt; extends UIForAbstractMenuItem&lt;UIForMenuItem&lt;M&gt;, M&gt;
 {
 <span class="fc" id="L11">    protected UIForMenuItem(M component) { super(component); }</span>
-
-    /**
-     * Sets the key combination for which invokes the wrapped {@link JMenuItem}'s
-     * action listeners without navigating the menu hierarchy. It is the
-     * UI's responsibility to install the correct action.  Note that
-     * when the keyboard accelerator is typed, it will work whether or
-     * not the menu is currently displayed.
-     *
-     * @param keyStroke the &lt;code&gt;KeyStroke&lt;/code&gt; which will
-     *          serve as an accelerator
-     * @return This very builder to allow for method chaining.
-     */
-    public UIForMenuItem&lt;M&gt; with(KeyStroke keyStroke) {
-<span class="nc" id="L25">        _component.setAccelerator(keyStroke);</span>
-<span class="nc" id="L26">        return this;</span>
-    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

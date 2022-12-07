@@ -10,6 +10,7 @@ import spock.lang.Title
 import javax.swing.*
 import javax.swing.event.ListSelectionListener
 import java.awt.*
+import java.awt.event.ComponentListener
 import java.awt.event.FocusListener
 import java.awt.event.KeyListener
 
@@ -272,6 +273,25 @@ class Basic_UI_Builder_Examples_Spec extends Specification
                     .get(JList)
         then : 'We can verify that the list has the expected number of listeners.'
             list.getListeners(ListSelectionListener.class).size() == 3
+    }
+
+    def 'Component events can be registered on swing tree nodes.'()
+    {
+        reportInfo """
+            The Swing-Tree API exposes various methods to register different kinds of Swing component
+            events, like for example resize events. 
+            All such event registration methods can be identified by the 'on' prefix.
+        """
+        when : 'We create a panel UI node and attach various kinds of actions to it.'
+            def panel =
+                    UI.of(new JPanel()).id("my-panel")
+                    .onResize(it -> {/*something*/})
+                    .onMoved(it -> {/*something*/})
+                    .onShown(it -> {/*something*/})
+                    .onHidden(it -> {/*something*/})
+                    .get(JPanel)
+        then : 'We can verify that the panel has the expected number of listeners.'
+            panel.getListeners(ComponentListener.class).size() == 4
     }
 
     def 'A tabbed pane can be created and populated in a declarative way.'()

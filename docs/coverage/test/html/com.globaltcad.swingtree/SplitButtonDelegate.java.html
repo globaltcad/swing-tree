@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SplitButtonDelegate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree</a> &gt; <span class="el_source">SplitButtonDelegate.java</span></div><h1>SplitButtonDelegate.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree;
+
+import com.alexandriasoftware.swing.JSplitButton;
+
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends AbstractDelegate
+{
+        private final Supplier&lt;List&lt;JComponent&gt;&gt; _siblingsSource;
+        private final SplitItem.Delegate&lt;I&gt; _itemsDelegate;
+
+        SplitButtonDelegate(
+                JSplitButton button,
+                SplitItem.Delegate&lt;I&gt; itemsDelegate,
+                Supplier&lt;List&lt;JComponent&gt;&gt; siblingsSource
+        ) {
+<span class="fc" id="L21">            super(button);</span>
+<span class="fc" id="L22">            _itemsDelegate = itemsDelegate;</span>
+<span class="fc" id="L23">            _siblingsSource = siblingsSource;</span>
+<span class="fc" id="L24">        }</span>
+
+<span class="nc" id="L26">        public ActionEvent getEvent() { return _itemsDelegate.getEvent(); }</span>
+
+        /**
+         * @return The {@link JSplitButton} to which this {@link SplitItem} (and its {@link JMenuItem}) belongs.
+         */
+        public JSplitButton getSplitButton() {
+<span class="nc" id="L32">            return _itemsDelegate.getSplitButton();</span>
+        }
+
+        /**
+         * @return A list of all split button items.
+         */
+        List&lt;I&gt; getItems() {
+<span class="nc" id="L39">            return _itemsDelegate.getSiblinghood();</span>
+        }
+
+        /**
+         * @return The {@link JMenuItem} which caused this action to be executed.
+         */
+        public final I getCurrentItem() {
+<span class="nc" id="L46">            return _itemsDelegate.getCurrentItem();</span>
+        }
+
+        /**
+         *
+         * @return A list of all the {@link JComponent} siblings of the split button, including the split button itself.
+         */
+        public List&lt;JComponent&gt; getSiblinghood() {
+            // We make sure that only the Swing thread can access the sibling components:
+<span class="nc bnc" id="L55" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() )</span>
+<span class="nc" id="L56">                throw new IllegalStateException(</span>
+                        &quot;Sibling components can only be accessed by the Swing thread.&quot;
+                    );
+<span class="nc" id="L59">            return _siblingsSource.get();</span>
+        }
+
+        /*
+         * @return A list of all the {@link JComponent} which constitute the neighbouring UI components of the split button.
+         *          except the current {@link JSplitButton} itself.
+         */
+        public List&lt;JComponent&gt; getSiblings() {
+            // We make sure that only the Swing thread can access the sibling components:
+<span class="nc bnc" id="L68" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() )</span>
+<span class="nc" id="L69">                throw new IllegalStateException(</span>
+                        &quot;Sibling components can only be accessed by the Swing thread.&quot;
+                    );
+<span class="nc" id="L72">            return _siblingsSource.get()</span>
+<span class="nc" id="L73">                    .stream()</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">                    .filter( s -&gt; s != getCurrentItem() )</span>
+<span class="nc" id="L75">                    .collect(Collectors.toList());</span>
+        }
+
+        /**
+         *  Selects the current {@link JMenuItem} by passing {@code true}
+         *  to the {@link JMenuItem#setSelected(boolean)} method.
+         *
+         * @return This delegate instance to allow for method chaining.
+         */
+        public SplitButtonDelegate&lt;I&gt; selectCurrentItem() {
+<span class="nc" id="L85">            _itemsDelegate.selectCurrentItem();</span>
+<span class="nc" id="L86">            return this;</span>
+        }
+
+        /**
+         *  Selects only the current {@link JMenuItem} by passing {@code true}
+         *  to the {@link JMenuItem#setSelected(boolean)} method.
+         *  All other {@link JMenuItem}s will be unselected.
+         *
+         * @return This delegate instance to allow for method chaining.
+         */
+        public SplitButtonDelegate&lt;I&gt; selectOnlyCurrentItem() {
+<span class="nc" id="L97">            _itemsDelegate.selectOnlyCurrentItem();</span>
+<span class="nc" id="L98">            return this;</span>
+        }
+
+        /**
+         *  Unselects the current {@link JMenuItem} by passing {@code false}
+         *  to the {@link JMenuItem#setSelected(boolean)} method.
+         *
+         * @return This delegate instance to allow for method chaining.
+         */
+        public SplitButtonDelegate&lt;I&gt; unselectCurrentItem() {
+<span class="nc" id="L108">            _itemsDelegate.unselectCurrentItem();</span>
+<span class="nc" id="L109">            return this;</span>
+        }
+
+        /**
+         *  Unselects all {@link JMenuItem}s by passing {@code false}
+         *  to their {@link JMenuItem#setSelected(boolean)} methods.
+         *
+         * @return This delegate instance to allow for method chaining.
+         */
+        public SplitButtonDelegate&lt;I&gt; unselectAllItems() {
+<span class="nc" id="L119">            _itemsDelegate.unselectAllItems();</span>
+<span class="nc" id="L120">            return this;</span>
+        }
+
+        /**
+         *  Selects all {@link JMenuItem}s by passing {@code true}
+         *  to their {@link JMenuItem#setSelected(boolean)} methods.
+         *
+         * @return This delegate instance to allow for method chaining.
+         */
+        public SplitButtonDelegate&lt;I&gt; selectAllItems() {
+<span class="nc" id="L130">            _itemsDelegate.selectAllItems();</span>
+<span class="nc" id="L131">            return this;</span>
+        }
+
+        /**
+         *  Use this to conveniently make the {@link JSplitButton} display the text
+         *  of the currently selected {@link JMenuItem} (button item).
+         *
+         * @return This delegate instance to allow for method chaining.
+         */
+        public SplitButtonDelegate&lt;I&gt; displayCurrentItemText() {
+<span class="nc" id="L141">            _itemsDelegate.displayCurrentItemText();</span>
+<span class="nc" id="L142">            return this;</span>
+        }
+
+        /**
+         * @param text The text which should be displayed on the {@link JSplitButton}.
+         * @return This delegate instance to allow for method chaining.
+         */
+        public SplitButtonDelegate&lt;I&gt; setButtonText( String text ) {
+<span class="fc" id="L150">            _itemsDelegate.setButtonText(text);</span>
+<span class="fc" id="L151">            return this;</span>
+        }
+
+        /**
+         * @return The text displayed on the {@link JSplitButton}.
+         */
+        public String getButtonText() {
+<span class="nc" id="L158">            return _itemsDelegate.getButtonText();</span>
+        }
+
+        /**
+         * @param postfix The text which should be appended to the text displayed on the {@link JSplitButton}.
+         * @return This delegate instance to allow for method chaining.
+         */
+        public SplitButtonDelegate&lt;I&gt; appendToButtonText( String postfix ) {
+<span class="nc" id="L166">            _itemsDelegate.appendToButtonText(postfix);</span>
+<span class="nc" id="L167">            return this;</span>
+        }
+
+        /**
+         * @param prefix The text which should be prepended to the text displayed on the {@link JSplitButton}.
+         * @return This delegate instance to allow for method chaining.
+         */
+        public SplitButtonDelegate&lt;I&gt; prependToButtonText( String prefix ) {
+<span class="nc" id="L175">            _itemsDelegate.prependToButtonText(prefix);</span>
+<span class="nc" id="L176">            return this;</span>
+        }
+
+        /**
+         *  Selects the targeted split item ({@link JMenuItem}).
+         *
+         * @param i The item index of the {@link JMenuItem} which should be selected.
+         * @return This delegate instance to allow for method chaining.
+         */
+        public SplitButtonDelegate&lt;I&gt; selectItem( int i ) {
+<span class="nc" id="L186">            _itemsDelegate.selectItem(i);</span>
+<span class="nc" id="L187">            return this;</span>
+        }
+
+        /**
+         *  Selects the targeted split item ({@link JMenuItem}) and unselects all other items.
+         *
+         * @param i The item index of the {@link JMenuItem} which should be selected exclusively.
+         * @return This delegate instance to allow for method chaining.
+         */
+        public SplitButtonDelegate&lt;I&gt; selectOnlyItem( int i ) {
+<span class="nc" id="L197">            _itemsDelegate.selectOnlyItem(i);</span>
+<span class="nc" id="L198">            return this;</span>
+        }
+
+        /**
+         *  Unselects the targeted split item ({@link JMenuItem}).
+         *
+         * @param i The item index of the {@link JMenuItem} which should be unselected.
+         * @return This delegate instance to allow for method chaining.
+         */
+        public SplitButtonDelegate&lt;I&gt; unselectItem( int i ) {
+<span class="nc" id="L208">            _itemsDelegate.unselectItem(i);</span>
+<span class="nc" id="L209">            return this;</span>
+        }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractComboModel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree</a> &gt; <span class="el_source">AbstractComboModel.java</span></div><h1>AbstractComboModel.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree;
+
+import com.globaltcad.swingtree.api.mvvm.Var;
+
+import javax.swing.*;
+import javax.swing.event.ListDataListener;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.function.Consumer;
+
+abstract class AbstractComboModel&lt;E&gt; implements ComboBoxModel&lt;E&gt;
+{
+<span class="fc" id="L13">	protected int _selectedIndex = -1;</span>
+	final Var&lt;E&gt; _selectedItem;
+<span class="fc" id="L15">	protected java.util.List&lt;ListDataListener&gt; listeners = new ArrayList&lt;&gt;();</span>
+
+	protected static &lt;E&gt; Class&lt;E&gt; _findCommonType( E[] items ) {
+<span class="pc bpc" id="L18" title="1 of 2 branches missed.">		if ( items == null ) return (Class&lt;E&gt;) Object.class;</span>
+<span class="fc" id="L19">		Class&lt;E&gt; type = null;</span>
+<span class="fc bfc" id="L20" title="All 2 branches covered.">		for ( E item : items ) {</span>
+<span class="pc bpc" id="L21" title="1 of 2 branches missed.">			if ( item == null ) continue;</span>
+<span class="fc bfc" id="L22" title="All 2 branches covered.">			if ( type == null ) {</span>
+<span class="fc" id="L23">				type = (Class&lt;E&gt;) item.getClass();</span>
+			} else {
+<span class="fc" id="L25">				type = (Class&lt;E&gt;) Object.class;</span>
+			}
+		}
+<span class="fc" id="L28">		return type;</span>
+	}
+
+<span class="fc" id="L31">	AbstractComboModel( Var&lt;E&gt; selectedItem ) {</span>
+<span class="fc" id="L32">		_selectedItem = selectedItem;</span>
+<span class="fc" id="L33">	}</span>
+
+<span class="fc" id="L35">	final Var&lt;E&gt; _getSelectedItemVar() { return _selectedItem; }</span>
+
+	abstract AbstractComboModel&lt;E&gt; withVar( Var&lt;E&gt; newVar );
+
+	@Override public void setSelectedItem( Object anItem ) {
+<span class="fc" id="L40">		_selectedItem.act((E) anItem).show();</span>
+<span class="fc" id="L41">		_selectedIndex = _indexOf(anItem);</span>
+<span class="fc" id="L42">	}</span>
+<span class="fc" id="L43">	@Override public Object getSelectedItem() { return _selectedItem.orElseNull(); }</span>
+<span class="fc" id="L44">	@Override public void addListDataListener( ListDataListener l ) { listeners.add(l); }</span>
+<span class="fc" id="L45">	@Override public void removeListDataListener( ListDataListener l ) { listeners.remove(l); }</span>
+	abstract protected void setAt( int index, E element );
+
+	void setFromEditor( String o ) {
+<span class="fc bfc" id="L49" title="All 2 branches covered.">		if ( _selectedIndex != -1 ) {</span>
+<span class="fc" id="L50">			E e = _convert(o);</span>
+			try {
+<span class="fc" id="L52">				this.setAt(_selectedIndex, e);</span>
+<span class="fc" id="L53">				_selectedItem.act(e).show();</span>
+<span class="nc" id="L54">			} catch (Exception ignored) {</span>
+				// It looks like conversion was not successful
+				// So this means the editor input could not be converted to the type of the combo box
+				// So we'll just ignore it
+<span class="fc" id="L58">			}</span>
+		}
+<span class="fc" id="L60">	}</span>
+
+	private E _convert( String o ) {
+		// We need to turn the above string into an object of the correct type!
+		// First of all, we know our target type:
+<span class="fc" id="L65">		Class&lt;E&gt; type = _selectedItem.type();</span>
+		// Now we need to convert it to that type, let's try a few things:
+<span class="fc bfc" id="L67" title="All 2 branches covered.">		if ( type == Object.class )</span>
+<span class="fc" id="L68">			return (E) o; // So apparently the type is intended to be Object, so we'll just return the string</span>
+
+<span class="fc bfc" id="L70" title="All 2 branches covered.">		if ( type == String.class )</span>
+<span class="fc" id="L71">			return (E) o;</span>
+
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">		if ( Number.class.isAssignableFrom(type) ) {</span>
+			// Ah, a number, let's try to parse it, but first we make it easier.
+<span class="fc" id="L75">			o = o.trim();</span>
+<span class="pc bpc" id="L76" title="2 of 4 branches missed.">			if ( o.endsWith(&quot;f&quot;) || o.endsWith(&quot;F&quot;) )</span>
+<span class="nc" id="L77">				o = o.substring(0, o.length() - 1);</span>
+
+<span class="pc bpc" id="L79" title="2 of 4 branches missed.">			if ( o.endsWith(&quot;d&quot;) || o.endsWith(&quot;D&quot;) )</span>
+<span class="nc" id="L80">				o = o.substring(0, o.length() - 1);</span>
+
+<span class="pc bpc" id="L82" title="2 of 4 branches missed.">			if ( o.endsWith(&quot;l&quot;) || o.endsWith(&quot;L&quot;) )</span>
+<span class="nc" id="L83">				o = o.substring(0, o.length() - 1);</span>
+
+			try {
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">				if ( type == Integer.class ) return (E) Integer.valueOf(o);</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">				if ( type == Double.class  ) return (E) Double.valueOf(o);</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">				if ( type == Float.class   ) return (E) Float.valueOf(o);</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">				if ( type == Long.class    ) return (E) Long.valueOf(o);</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">				if ( type == Short.class   ) return (E) Short.valueOf(o);</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">				if ( type == Byte.class    ) return (E) Byte.valueOf(o);</span>
+<span class="nc" id="L92">			} catch ( NumberFormatException e ) {</span>
+				// We failed to parse the number... the input is invalid!
+				// So we cannot update the model, and simply return the old value:
+<span class="nc" id="L95">				return _selectedItem.orElseNull();</span>
+<span class="nc" id="L96">			}</span>
+		}
+		// What now? Hmmm, let's try Boolean!
+<span class="nc bnc" id="L99" title="All 2 branches missed.">		if ( type == Boolean.class ) {</span>
+<span class="nc" id="L100">			o = o.trim().toLowerCase();</span>
+<span class="nc bnc" id="L101" title="All 6 branches missed.">			if ( o.equals(&quot;true&quot;) || o.equals(&quot;yes&quot;) || o.equals(&quot;1&quot;) )</span>
+<span class="nc" id="L102">				return (E) Boolean.TRUE;</span>
+
+<span class="nc bnc" id="L104" title="All 6 branches missed.">			if ( o.equals(&quot;false&quot;) || o.equals(&quot;no&quot;) || o.equals(&quot;0&quot;) )</span>
+<span class="nc" id="L105">				return (E) Boolean.FALSE;</span>
+		}
+		// Ok maybe it's an enum?
+<span class="nc bnc" id="L108" title="All 2 branches missed.">		if ( type.isEnum() ) {</span>
+			try {
+<span class="nc" id="L110">				return (E) Enum.valueOf((Class&lt;Enum&gt;) type, o);</span>
+<span class="nc" id="L111">			} catch ( IllegalArgumentException e ) {</span>
+				// We failed to parse the enum... the input is invalid!
+				// So we cannot update the model, and simply return the old value:
+<span class="nc" id="L114">				return _selectedItem.orElseNull();</span>
+			}
+		}
+		// Or a character?
+<span class="nc bnc" id="L118" title="All 2 branches missed.">		if ( type == Character.class ) {</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">			if ( o.length() == 1 )</span>
+<span class="nc" id="L120">				return (E) Character.valueOf(o.charAt(0));</span>
+		}
+		// Now it's getting tricky, but we don't give up. How about arrays?
+<span class="nc bnc" id="L123" title="All 2 branches missed.">		if ( type.isArray() ) {</span>
+			// We need to split the string into elements, and then convert each element
+			// to the correct type. We can do this recursively, but first we need to
+			// find the type of the elements:
+<span class="nc" id="L127">			Class&lt;?&gt; componentType = type.getComponentType();</span>
+			// Now we can split the string:
+<span class="nc" id="L129">			String[] parts = o.split(&quot;,&quot;);</span>
+			// And convert each part to the correct type:
+<span class="nc" id="L131">			Object[] array = (Object[]) java.lang.reflect.Array.newInstance(componentType, parts.length);</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">			for ( int i = 0; i &lt; parts.length; i++ ) {</span>
+<span class="nc" id="L133">				array[i] = _convert(parts[i]);</span>
+			}
+			// And finally we can return the array:
+<span class="nc" id="L136">			return (E) array;</span>
+		}
+		// Uff! Still nothing?!? Ok let's be creative, maybe we can try to use the constructor:
+		try {
+<span class="nc" id="L140">			return type.getConstructor(String.class).newInstance(o);</span>
+<span class="nc" id="L141">		} catch ( Exception e ) {</span>
+			// We failed to instantiate the class...
+		}
+
+		// What else is there? We don't know, so we just return the old value:
+<span class="nc" id="L146">		return _selectedItem.orElseNull();</span>
+	}
+
+	protected int _indexOf( Object anItem ) {
+<span class="fc bfc" id="L150" title="All 2 branches covered.">		for ( int i = 0; i &lt; getSize(); i++ ) {</span>
+<span class="fc bfc" id="L151" title="All 2 branches covered.">			if ( Objects.equals(anItem, getElementAt(i)) )</span>
+<span class="fc" id="L152">				return i;</span>
+		}
+<span class="fc" id="L154">		return _selectedIndex;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
