@@ -55,7 +55,10 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
             getComponent().setSelectedIndex(i);
             _selectionListeners.forEach( l -> l.accept(i) );
         });
-        _onChange( e -> _doApp(()->index.act(getComponent().getSelectedIndex())) );
+        _onChange( e -> _doApp(()->{
+            index.act(getComponent().getSelectedIndex());
+            _selectionListeners.forEach( l -> l.accept(getComponent().getSelectedIndex()) );
+        }) );
         return withSelectedIndex(index.get());
     }
 
@@ -154,11 +157,13 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
     }
 
     private void _selectTab( int tabIndex, boolean isSelected ) {
-        int selectedIndex = ( isSelected ? tabIndex : -1 );
+        int selectedIndex = ( isSelected ? tabIndex : getComponent().getSelectedIndex() );
         if ( _selectedTabIndex != null )
-            _selectedTabIndex.set(selectedIndex); // The "set" method will trigger the selection listeners.
+            _selectedTabIndex.act(selectedIndex);
         else
             getComponent().setSelectedIndex(selectedIndex);
+
+        _selectionListeners.forEach(l -> l.accept(selectedIndex));
     }
 
     private JComponent _buildTabHeader(Tab tab, TabMouseClickListener mouseListener )
@@ -263,6 +268,5 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
     private void _onChange( Consumer<ChangeEvent> action ) {
         getComponent().addChangeListener(action::accept);
     }
-
 
 }

@@ -66,7 +66,7 @@ public final class Tab
      * @param isSelected The selected state of the tab.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
-    public final Tab withSelected( boolean isSelected ) {
+    public final Tab isSelectedIf(boolean isSelected ) {
         if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
         if ( _isSelected != null ) throw new IllegalArgumentException("Selected state already specified!");
         return new Tab(_contents, _headerComponent, _title, Var.of(isSelected), _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
@@ -76,7 +76,7 @@ public final class Tab
      * @param isSelected The selected state property of the tab.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
-    public final Tab withSelected( Var<Boolean> isSelected ) {
+    public final Tab isSelectedIf( Var<Boolean> isSelected ) {
         NullUtil.nullArgCheck(isSelected,"isSelected",Val.class);
         if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
         if ( _isSelected != null ) throw new IllegalArgumentException("Selected state already specified!");
@@ -87,7 +87,7 @@ public final class Tab
      * @param isEnabled The enabled state of the tab.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
-    public final Tab withEnabled( boolean isEnabled ) {
+    public final Tab isEnabledIf( boolean isEnabled ) {
         if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
         if ( _isEnabled != null ) throw new IllegalArgumentException("Enabled state already specified!");
         return new Tab(_contents, _headerComponent, _title, _isSelected, Val.of(isEnabled), _icon, _tip, _onSelected, _onMouseClick);
@@ -97,7 +97,7 @@ public final class Tab
      * @param isEnabled The enabled state property of the tab.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
-    public final Tab withEnabled( Val<Boolean> isEnabled ) {
+    public final Tab isEnabledIf(Val<Boolean> isEnabled ) {
         NullUtil.nullArgCheck(isEnabled,"isEnabled",Val.class);
         if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
         if ( _isEnabled != null ) throw new IllegalArgumentException("Enabled state already specified!");

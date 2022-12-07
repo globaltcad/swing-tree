@@ -857,6 +857,11 @@ public final class UI
         return new Tab(null, null, Val.of(title), null, null, null, null, null, null);
     }
 
+    public static Tab tab( Val<String> title ) {
+        NullUtil.nullArgCheck(title, "title", Val.class);
+        return new Tab(null, null, title, null, null, null, null, null, null);
+    }
+
     /**
      *  Use this to add tabs to a {@link JTabbedPane} by
      *  passing {@link Tab} instances to {@link UIForTabbedPane} builder like so: <br>
