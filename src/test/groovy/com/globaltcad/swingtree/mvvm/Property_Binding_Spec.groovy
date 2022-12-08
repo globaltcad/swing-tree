@@ -3,6 +3,7 @@ package com.globaltcad.swingtree.mvvm
 import com.globaltcad.swingtree.UI
 import com.globaltcad.swingtree.api.mvvm.Val
 import com.globaltcad.swingtree.api.mvvm.Var
+import com.globaltcad.swingtree.utility.Utility
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
@@ -193,4 +194,27 @@ class Property_Binding_Spec extends Specification
         then : 'The checkbox will be unselected.'
             node.component.components[1].selected == false
     }
+
+    def 'Enable or disable the split items of a JSplitButton through properties.'()
+    {
+        given : 'We create a property representing the enabled state of a component.'
+            Val<Boolean> property = Var.of(true)
+        and : 'We create a UI to which we want to bind:'
+            var node = UI.splitButton("I am a split button")
+                            .add(UI.splitItem("I am a button").isEnabledIf(property))
+                            .add(UI.splitItem("I am a button"))
+                            .add(UI.splitItem("I am a button"))
+
+        expect : 'The first split item will be enabled.'
+            Utility.getSplitButtonPopup(node).components[0].enabled == true
+
+        when : 'We change the value of the property.'
+            property.set(false)
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
+
+        then : 'The first split item will be disabled.'
+            Utility.getSplitButtonPopup(node).components[0].enabled == false
+    }
+
 }

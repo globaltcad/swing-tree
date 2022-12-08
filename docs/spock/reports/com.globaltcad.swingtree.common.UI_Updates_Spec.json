@@ -16,7 +16,7 @@
     {
       "id":"We can register periodically called UI updates!",
       "result":"PASS",
-      "duration":"0.211 seconds",
+      "duration":"0.223 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
