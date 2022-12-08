@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.241 seconds"
+    "duration":"0.227 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can register periodically called UI updates!",
       "result":"PASS",
-      "duration":"0.219 seconds",
+      "duration":"0.211 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
