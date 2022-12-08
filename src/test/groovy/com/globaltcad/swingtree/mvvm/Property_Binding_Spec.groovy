@@ -51,6 +51,35 @@ class Property_Binding_Spec extends Specification
             node.component.components[2].maximumSize == new Dimension(200, 200)
     }
 
+    def 'Simple integer properties can be bound to the width or height of components.'()
+    {
+        given : 'We create a property representing the width of a component.'
+            Var<Integer> minWidth = Var.of(60)
+            Var<Integer> prefHeight = Var.of(40)
+            Var<Integer> maxWidth = Var.of(90)
+        and : 'We create a UI to which we want to bind:'
+            var node = UI.panel("fill, wrap 1")
+                        .add(UI.label("Hello World").withMinimumWidth(minWidth))
+                        .add(UI.button("Click Me").withPreferredHeight(prefHeight))
+                        .add(UI.textField("Hello World").withMaximumWidth(maxWidth))
+        expect : 'The components will have the size of the property.'
+            node.component.components[0].minimumSize.width == 60
+            node.component.components[1].preferredSize.height == 40
+            node.component.components[2].maximumSize.width == 90
+
+        when : 'We change the value of the property.'
+            minWidth.set(100)
+            prefHeight.set(80)
+            maxWidth.set(120)
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
+
+        then : 'The components will have the new sizes.'
+            node.component.components[0].minimumSize.width == 100
+            node.component.components[1].preferredSize.height == 80
+            node.component.components[2].maximumSize.width == 120
+    }
+
     def 'We can bind to the color of a component.'()
     {
         given : 'We create a property representing the color of a component.'

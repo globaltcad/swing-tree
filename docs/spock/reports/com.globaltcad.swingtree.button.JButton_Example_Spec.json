@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.710 seconds"
+    "duration":"0.799 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can easily create a button with an associated action:",
       "result":"PASS",
-      "duration":"0.341 seconds",
+      "duration":"0.412 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -58,7 +58,7 @@
     {
       "id":"We can go through the entire siblinghood, including the current button!",
       "result":"PASS",
-      "duration":"0.160 seconds",
+      "duration":"0.189 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
