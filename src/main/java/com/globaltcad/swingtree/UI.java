@@ -201,9 +201,7 @@ public final class UI
     /**
      *  The scroll policy for UI components with scroll behaviour.
      */
-    public enum ScrollBarPolicy {
-        NEVER, AS_NEEDED, ALWAYS
-    }
+    public enum ScrollBarPolicy { NEVER, AS_NEEDED, ALWAYS }
 
     /**
      *  The position of a UI component in terms of directions.
@@ -212,20 +210,20 @@ public final class UI
         TOP, LEFT, BOTTOM, RIGHT;
         int forTabbedPane() {
             switch ( this ) {
-                case TOP  : return JTabbedPane.TOP  ;
-                case LEFT : return JTabbedPane.LEFT ;
+                case TOP   : return JTabbedPane.TOP;
+                case LEFT  : return JTabbedPane.LEFT;
                 case BOTTOM: return JTabbedPane.BOTTOM;
-                case RIGHT: return JTabbedPane.RIGHT;
+                case RIGHT : return JTabbedPane.RIGHT;
             }
             throw new RuntimeException();
         }
 
         String toDirectionString() {
             switch ( this ) {
-                case TOP  : return "north";
-                case LEFT : return "west";
+                case TOP   : return "north";
+                case LEFT  : return "west";
                 case BOTTOM: return "south";
-                case RIGHT: return "east";
+                case RIGHT : return "east";
             }
             throw new RuntimeException();
         }
@@ -239,24 +237,8 @@ public final class UI
 
         int forTabbedPane() {
             switch ( this ) {
-                case WRAP:   return JTabbedPane.WRAP_TAB_LAYOUT  ;
-                case SCROLL: return JTabbedPane.SCROLL_TAB_LAYOUT ;
-            }
-            throw new RuntimeException();
-        }
-    }
-
-    /**
-     *  Vertical or horizontal split.
-     */
-    public enum Split {
-        HORIZONTAL, VERTICAL;
-
-        private int forSplitPane() {
-            switch ( this )
-            {
-                case HORIZONTAL: return JSplitPane.HORIZONTAL_SPLIT;
-                case VERTICAL: return JSplitPane.VERTICAL_SPLIT;
+                case WRAP  : return JTabbedPane.WRAP_TAB_LAYOUT;
+                case SCROLL: return JTabbedPane.SCROLL_TAB_LAYOUT;
             }
             throw new RuntimeException();
         }
@@ -269,18 +251,23 @@ public final class UI
         HORIZONTAL, VERTICAL;
 
         int forSlider() {
-            switch ( this )
-            {
+            switch ( this ) {
                 case HORIZONTAL: return JSlider.HORIZONTAL;
-                case VERTICAL: return JSlider.VERTICAL;
+                case VERTICAL  : return JSlider.VERTICAL;
             }
             throw new RuntimeException();
         }
         int forSeparator() {
-            switch ( this )
-            {
+            switch ( this ) {
                 case HORIZONTAL: return JSeparator.HORIZONTAL;
-                case VERTICAL: return JSeparator.VERTICAL;
+                case VERTICAL  : return JSeparator.VERTICAL;
+            }
+            throw new RuntimeException();
+        }
+        int forSplitPane() {
+            switch ( this ) {
+                case HORIZONTAL: return JSplitPane.VERTICAL_SPLIT;
+                case VERTICAL:   return JSplitPane.HORIZONTAL_SPLIT;
             }
             throw new RuntimeException();
         }
@@ -294,9 +281,9 @@ public final class UI
 
         int forSwing() {
             switch ( this ) {
-                case TOP:    return SwingConstants.TOP  ;
-                case CENTER: return SwingConstants.CENTER ;
-                case BOTTOM: return SwingConstants.BOTTOM ;
+                case TOP:    return SwingConstants.TOP;
+                case CENTER: return SwingConstants.CENTER;
+                case BOTTOM: return SwingConstants.BOTTOM;
             }
             throw new RuntimeException();
         }
@@ -310,9 +297,9 @@ public final class UI
 
         public final int forSwing() {
             switch ( this ) {
-                case LEFT:   return SwingConstants.LEFT   ;
-                case CENTER: return SwingConstants.CENTER ;
-                case RIGHT:  return SwingConstants.RIGHT  ;
+                case LEFT:   return SwingConstants.LEFT;
+                case CENTER: return SwingConstants.CENTER;
+                case RIGHT:  return SwingConstants.RIGHT;
             }
             throw new RuntimeException();
         }
@@ -362,9 +349,7 @@ public final class UI
     }
 
     public enum MapData {
-
-        EDITABLE,
-        READ_ONLY;
+        EDITABLE, READ_ONLY;
 
         final boolean isEditable() {
             switch ( this ) {
@@ -373,7 +358,6 @@ public final class UI
             }
             throw new RuntimeException();
         }
-
     }
 
 
@@ -816,7 +800,6 @@ public final class UI
         return tabbedPane().withSelectedIndex(selectedIndex);
     }
 
-
     /**
      *  Use this to create a builder for a new {@link JTabbedPane} UI component
      *  with the provided {@code selectionIndex} property which should be determine the
@@ -857,6 +840,22 @@ public final class UI
         return new Tab(null, null, Val.of(title), null, null, null, null, null, null);
     }
 
+    /**
+     *  A factory method producing a {@link Tab} instance with the provided {@code title} property
+     *  which can dynamically change the title of the tab button.
+     *  Use this to add tabs to a {@link JTabbedPane} by
+     *  passing {@link Tab} instances to {@link UIForTabbedPane} builder like so: <br>
+     *  <pre>{@code
+     *      UI.tabbedPane()
+     *      .add(UI.tab(property1).add(UI.panel().add(..)))
+     *      .add(UI.tab(property2).withTip("I give info!").add(UI.label("read me")))
+     *      .add(UI.tab(property3).with(someIcon).add(UI.button("click me")))
+     *  }</pre>
+     *
+     * @param title The text property dynamically changing the title of the tab button when the property changes.
+     * @return A {@link Tab} instance containing everything needed to be added to a {@link JTabbedPane}.
+     * @throws IllegalArgumentException if {@code title} is {@code null}.
+     */
     public static Tab tab( Val<String> title ) {
         NullUtil.nullArgCheck(title, "title", Val.class);
         return new Tab(null, null, title, null, null, null, null, null, null);
@@ -960,6 +959,19 @@ public final class UI
      */
     public static UIForPanel<JPanel> panel() { return of(new JPanel()).withLayout(new MigLayout()); }
 
+    /**
+     *  Use this to create a builder for a new {@link JPanel} UI component
+     *  with a {@link MigLayout} as its layout manager and the provided constraints.
+     *  This is essentially a convenience method for the following: <br>
+     *  <pre>{@code
+     *      UI.of(new JPanel(new MigLayout(attr, colConstraints, rowConstraints)))
+     *  }</pre>
+     *  <br>
+     * @param attr The layout attributes.
+     * @param colConstraints The column constraints.
+     * @param rowConstraints The row constraints.
+     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     */
     public static UIForPanel<JPanel> panel( String attr, String colConstraints, String rowConstraints ) {
         NullUtil.nullArgCheck(attr, "attr", String.class);
         NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
@@ -970,7 +982,11 @@ public final class UI
     /**
      *  Use this to create a builder for the {@link JPanel} UI component.
      *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr, layout)}.
-     *
+     *  This is essentially a convenience method for the following: <br>
+     *  <pre>{@code
+     *      UI.of(new JPanel(new MigLayout(attr, colConstraints)))
+     *  }</pre>
+     *  <br>
      * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
      * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
@@ -984,7 +1000,11 @@ public final class UI
     /**
      *  Use this to create a builder for the {@link JPanel} UI component.
      *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr)}.
-     *
+     *  This is essentially a convenience method for the following: <br>
+     *  <pre>{@code
+     *      UI.of(new JPanel(new MigLayout(attr)))
+     *  }</pre>
+     *  <br>
      * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code attr} is {@code null}.
@@ -1059,25 +1079,52 @@ public final class UI
         return new UIForSplitPane<>(component);
     }
 
-
     /**
      *  Use this to create a builder for a new {@link JSplitPane} instance
-     *  based on the provided split alignment. <br>
+     *  based on the provided alignment enum determining how
+     *  the split itself should be aligned. <br>
      *  You can create a simple split pane based UI like so: <br>
      *  <pre>{@code
-     *      UI.splitPane(UI.Split.HORIZONTAL)
+     *      UI.splitPane(UI.Align.HORIZONTAL) // The split bar will be horizontal
      *      .withDividerAt(50)
      *      .add(UI.panel().add(...)) // top
      *      .add(UI.scrollPane().add(...)) // bottom
      *  }</pre>
      *
-     * @param align The alignment determining if the {@link JSplitPane} splits vertically or horizontally.
+     * @param align The alignment determining if the {@link JSplitPane} split bar is aligned vertically or horizontally.
      * @return A builder instance for the provided {@link JSplitPane}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code align} is {@code null}.
      */
-    public static UIForSplitPane<JSplitPane> splitPane( Split align ) {
-        NullUtil.nullArgCheck(align, "align", Split.class);
+    public static UIForSplitPane<JSplitPane> splitPane( Align align ) {
+        NullUtil.nullArgCheck(align, "align", Align.class);
         return of(new JSplitPane(align.forSplitPane()));
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JSplitPane} instance
+     *  based on the provided alignment property determining how
+     *  the split itself should be aligned. <br>
+     *  You can create a simple split pane based UI like so: <br>
+     *  <pre>{@code
+     *    UI.splitPane(viewModel.getAlignment())
+     *    .withDividerAt(50)
+     *    .add(UI.panel().add(...)) // top
+     *    .add(UI.scrollPane().add(...)) // bottom
+     *  }</pre>
+     *  <br>
+     *  The split pane will be updated whenever the provided property changes.
+     *  <br>
+     *  <b>Note:</b> The provided property must not be {@code null}!
+     *  Otherwise, an {@link IllegalArgumentException} will be thrown.
+     *  <br>
+     * @param align The alignment determining if the {@link JSplitPane} split bar is aligned vertically or horizontally.
+     * @return A builder instance for the provided {@link JSplitPane}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     */
+    public static UIForSplitPane<JSplitPane> splitPane( Val<Align> align ) {
+        NullUtil.nullArgCheck(align, "align", Val.class);
+        NullUtil.nullPropertyCheck(align, "align", "Null is not a valid alignment.");
+        return of(new JSplitPane(align.get().forSplitPane())).withAlignment(align);
     }
 
     /**
@@ -2330,7 +2377,7 @@ public final class UI
     }
 
     /**
-     *  Use this to build a list cell renderer for a specific item type and its sub-type.
+     *  Use this to build a list cell renderer for a specific item type and its subtype.
      *  You would typically want to use this method to render generic types like {@link Object}
      *  where you want to render the item in a specific way depending on its actual type.
      *  This is done like so:
@@ -2375,12 +2422,50 @@ public final class UI
         return Render.forList(itemType, null).when(itemType);
     }
 
+    /**
+     *  Use this to create a generic combo box renderer for various item types without
+     *  a meaningful common super-type (see {@link #renderCombo(Class)}).
+     *  You would typically want to use this method to render generic types where the only
+     *  common type is {@link Object}, yet you want to render the item
+     *  in a specific way depending on their actual type.
+     *  This is done like so:
+     *  <pre>{@code
+     *  UI.comboBox(new Object[]{":-)", 42L, '§'})
+     *  .withRenderer(
+     *      UI.renderCombo()
+     *      .when(String.class).asText( cell -> "String: "+cell.getValue() )
+     *      .when(Character.class).asText( cell -> "Char: "+cell.getValue() )
+     *      .when(Number.class).asText( cell -> "Number: "+cell.getValue() )
+     *  );
+     *  }</pre>
+     *
+     * @return A render builder exposing an API that allows you to configure how he passed item types should be rendered.
+     */
     public static Render.Builder<JComboBox<Object>, Object> renderCombo() {
         return Render.forCombo(Object.class, null).when(Object.class).asText(cell->String.valueOf(cell.getValue()));
     }
 
-    public static <T> Render.Builder<JComboBox<T>, T> renderCombo( Class<T> itemType ) {
-        return Render.forCombo(itemType, null).when(itemType).asText(cell->String.valueOf(cell.getValue()));
+    /**
+     *  Use this to create a combo box renderer for a specific item type and its subtype.
+     *  You would typically want to use this method to render generic types like {@link Object}
+     *  where you want to render the item in a specific way depending on its actual type.
+     *  This is done like so:
+     *  <pre>{@code
+     *  UI.comboBox(new Number[]{1f, 42L, 4.20d})
+     *  .withRenderer(
+     *      UI.renderCombo(Number.class)
+     *      .when(Integer.class).asText( cell -> "Integer: "+cell.getValue() )
+     *      .when(Long.class).asText( cell -> "Long: "+cell.getValue() )
+     *      .when(Float.class).asText( cell -> "Float: "+cell.getValue() )
+     *  );
+     *  }</pre>
+     *
+     * @param commonType The common type of the items which should be rendered using a custom renderer.
+     * @return A render builder exposing an API that allows you to configure how he passed item types should be rendered.
+     * @param <T> The common super-type type of the items which should be rendered.
+     */
+    public static <T> Render.Builder<JComboBox<T>, T> renderCombo( Class<T> commonType ) {
+        return Render.forCombo(commonType, null).when(commonType).asText(cell->String.valueOf(cell.getValue()));
     }
 
     /**

@@ -18,6 +18,35 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAbstractSwing<UIF
     public UIForSplitPane( P component ) { super( component ); }
 
     /**
+     * Sets the alignment of the split bar in the split pane.
+     *
+     * @param align The alignment of the split bar in the split pane.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if the provided alignment is null.
+     */
+    public final UIForSplitPane<P> with( UI.Align align ) {
+        NullUtil.nullArgCheck( align, "split", UI.Align.class );
+        getComponent().setOrientation( align.forSplitPane() );
+        return this;
+    }
+
+    /**
+     * Sets the alignment of the split bar in the split pane dynamically
+     * based on the provided {@link Val} property which will be observed
+     * by the split pane.
+     *
+     * @param align The alignment property of the split bar in the split pane.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if the provided alignment is null or the property is allowed to wrap a null value.
+     */
+    public final UIForSplitPane<P> withAlignment( Val<UI.Align> align ) {
+        NullUtil.nullArgCheck( align, "align", Val.class );
+        NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment." );
+        _onShow( align, v -> with(align.orElseThrow()) );
+        return this;
+    }
+
+    /**
      * Sets the location of the divider. This is passed off to the
      * look and feel implementation, and then listeners are notified. A value
      * less than 0 implies the divider should be reset to a value that
