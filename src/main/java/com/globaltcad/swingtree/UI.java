@@ -2653,22 +2653,19 @@ public final class UI
      * dispatching thread and then, when that's finished, print
      * a string from the application thread.
      * <pre>{@code
-     * final Runnable doHelloWorld = () -> {
-     *         System.out.println("Hello World on " + Thread.currentThread());
-     *      };
+     *     var appThread = new Thread(() -> {
+     *             try {
+     *                 UI.runNow(() -> {
+     *                    System.out.println("Hello World on " + Thread.currentThread());
+     *                 });
+     *             }
+     *             catch (Exception e) {
+     *                 e.printStackTrace();
+     *             }
+     *             System.out.println("Finished on " + Thread.currentThread());
+     *         });
      *
-     * Thread appThread = new Thread() {
-     *     public void run() {
-     *         try {
-     *             UI.runNow(doHelloWorld);
-     *         }
-     *         catch (Exception e) {
-     *             e.printStackTrace();
-     *         }
-     *         System.out.println("Finished on " + Thread.currentThread());
-     *     }
-     * };
-     * appThread.start();
+     *     appThread.start();
      * }</pre>
      * Note that if the <code>Runnable.run</code> method throws an
      * uncaught exception
@@ -2689,6 +2686,36 @@ public final class UI
         SwingUtilities.invokeAndWait(runnable);
     }
 
+    /**
+     * A convenience method for {@link SwingUtilities#invokeAndWait(Runnable)},
+     * where the runnable is a lambda expression that has a return value.
+     * This causes the {@link Supplier} to be executed synchronously on the
+     * AWT event dispatching thread.  This call blocks until
+     * all pending AWT events have been processed and (then)
+     * the {@link Supplier} returns. This method should
+     * be used when an application thread needs to update the GUI a
+     * get a return value from the GUI.
+     * It shouldn't be called from the event dispatching thread.
+     * Here's an example that creates a new application thread
+     * that uses <code>runAndGet(..)</code> to access the state of a
+     * {@link javax.swing.JCheckBox} from the event dispatching thread
+     * and then, when that's finished, print the state from the application thread.
+     * <pre>{@code
+     *     JCheckBox checkBox = new JCheckBox("Hello World");
+     *     var appThread = new Thread(()->{
+     *            try {
+     *                boolean state = UI.runAndGet(() -> checkBox.isSelected());
+     *                System.out.println("CheckBox state is " + state);
+     *            }
+     *            catch (Exception e) {
+     *                e.printStackTrace();
+     *            }
+     *            System.out.println("Finished on " + Thread.currentThread());
+     *        });
+     *     appThread.start();
+     * }</pre>
+     *
+     */
     public static <T> T runAndGet( Supplier<T> supplier ) throws InterruptedException, InvocationTargetException {
         NullUtil.nullArgCheck(supplier, "callable", Supplier.class);
         T[] ref = (T[]) new Object[1];
@@ -2696,7 +2723,24 @@ public final class UI
         return ref[0];
     }
 
-    public static void sync() throws InterruptedException, InvocationTargetException { runNow( () -> {} ); }
+    /**
+     *  Use this to synchronize with the UI thread from a non-UI thread.
+     *  After calling this method, the current thread will be blocked
+     *  until the UI thread has finished executing all of its pending events.
+     *  This method should only be called from the application thread
+     *  and not from the UI thread.
+     *
+     * @throws InterruptedException if the current thread is interrupted
+     * @throws InvocationTargetException if the UI thread throws an exception
+     */
+    public static void sync() throws InterruptedException, InvocationTargetException {
+        runNow( () -> {/*
+            This is a no-op, but it forces the event dispatching thread to
+            process all pending events before returning.
+            So when we reach this point, we know that all pending events
+            have been processed.
+        */});
+    }
 
     /**
      *  Use this to quickly create and inspect a test window for a UI component.
