@@ -6,6 +6,7 @@ import com.globaltcad.swingtree.api.mvvm.Var;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.util.function.Consumer;
 
 /**
@@ -25,7 +26,7 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
      */
     public final UIForSlider<S> with( UI.Align align ) {
         NullUtil.nullArgCheck( align, "align", UI.Align.class );
-        getComponent().setOrientation(align.forSlider());
+        _doWithoutListeners(()->getComponent().setOrientation(align.forSlider()));
         return this;
     }
 
@@ -70,7 +71,7 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSlider<S> withMin( int min ) {
-        getComponent().setMinimum( min );
+        _doWithoutListeners(()->getComponent().setMinimum( min ));
         return this;
     }
 
@@ -81,7 +82,7 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
      */
     public final UIForSlider<S> withMin( Val<Integer> min ) {
         NullUtil.nullArgCheck( min, "min", Val.class );
-        _onShow( min, v -> getComponent().setMinimum(v) );
+        _onShow( min, this::withMin);
         return this;
     }
 
@@ -93,7 +94,7 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSlider<S> withMax( int max ) {
-        getComponent().setMaximum( max );
+        _doWithoutListeners(()->getComponent().setMaximum( max ));
         return this;
     }
 
@@ -104,7 +105,7 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
      */
     public final UIForSlider<S> withMax( Val<Integer> max ) {
         NullUtil.nullArgCheck( max, "max", Val.class );
-        _onShow( max, v -> getComponent().setMaximum(v) );
+        _onShow( max, this::withMax);
         return this;
     }
 
@@ -116,7 +117,7 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSlider<S> withValue( int value ) {
-        getComponent().setValue( value );
+        _doWithoutListeners(()->getComponent().setValue( value ));
         return this;
     }
 
@@ -127,7 +128,7 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
      */
     public final UIForSlider<S> withValue( Val<Integer> val ) {
         NullUtil.nullArgCheck( val, "val", Val.class );
-        _onShow( val, v -> getComponent().setValue(v) );
+        _onShow( val, this::withValue);
         return this;
     }
 
@@ -194,5 +195,18 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
         return this;
     }
 
+
+    private void _doWithoutListeners(Runnable someTask) {
+        // We need to first remove the change listener, otherwise we might trigger unwanted events.
+        ChangeListener[] listeners = getComponent().getChangeListeners();
+        for ( ChangeListener listener : listeners )
+            getComponent().removeChangeListener( listener );
+
+        someTask.run();
+
+        // Now we can add the listeners back.
+        for ( ChangeListener listener : listeners )
+            getComponent().addChangeListener( listener );
+    }
 
 }
