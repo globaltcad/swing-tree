@@ -1341,6 +1341,197 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
+     *  Use this to register and catch generic {@link MouseListener} based mouse release events on this UI component.
+     *  This method adds the provided consumer lambda to
+     *  an an{@link MouseListener} instance to the wrapped
+     *  button component.
+     *  <br><br>
+     *
+     * @param onRelease The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMouseRelease( UIAction<SimpleDelegate<C, MouseEvent>> onRelease ) {
+        NullUtil.nullArgCheck(onRelease, "onRelease", UIAction.class);
+        C component = getComponent();
+        component.addMouseListener(new MouseAdapter() {
+            @Override public void mouseReleased(MouseEvent e) {
+                _doApp(() -> onRelease.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+            }
+        });
+        return _this();
+    }
+
+    /**
+     *  Use this to register and catch generic {@link MouseListener} based mouse press events on this UI component.
+     *  This method adds the provided consumer lambda to
+     *  an an{@link MouseListener} instance to the wrapped
+     *  button component.
+     *  <br><br>
+     *
+     * @param onPress The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMousePress( UIAction<SimpleDelegate<C, MouseEvent>> onPress ) {
+        NullUtil.nullArgCheck(onPress, "onPress", UIAction.class);
+        C component = getComponent();
+        component.addMouseListener(new MouseAdapter() {
+            @Override public void mousePressed(MouseEvent e) {
+                _doApp(() -> onPress.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+            }
+        });
+        return _this();
+    }
+
+    /**
+     *  Use this to register and catch generic {@link MouseListener} based mouse enter events on this UI component.
+     *  This method adds the provided consumer lambda to
+     *  an an{@link MouseListener} instance to the wrapped
+     *  button component.
+     *  <br><br>
+     *
+     * @param onEnter The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMouseEnter( UIAction<SimpleDelegate<C, MouseEvent>> onEnter ) {
+        NullUtil.nullArgCheck(onEnter, "onEnter", UIAction.class);
+        C component = getComponent();
+        component.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) {
+                _doApp(() -> onEnter.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+            }
+        });
+        return _this();
+    }
+
+    /**
+     *  Use this to register and catch generic {@link MouseListener} based mouse exit events on this UI component.
+     *  This method adds the provided consumer lambda to
+     *  an an{@link MouseListener} instance to the wrapped
+     *  button component.
+     *  <br><br>
+     *
+     * @param onExit The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMouseExit( UIAction<SimpleDelegate<C, MouseEvent>> onExit ) {
+        NullUtil.nullArgCheck(onExit, "onExit", UIAction.class);
+        C component = getComponent();
+        component.addMouseListener(new MouseAdapter() {
+            @Override public void mouseExited(MouseEvent e) {
+                _doApp(() -> onExit.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+            }
+        });
+        return _this();
+    }
+
+    /**
+     *  Use this to register and catch generic {@link MouseListener} based mouse drag events on this UI component.
+     *  This method adds the provided consumer lambda to
+     *  an an{@link MouseListener} instance to the wrapped
+     *  button component.
+     *  <br><br>
+     *
+     * @param onDrag The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMouseDrag( UIAction<SimpleDelegate<C, MouseEvent>> onDrag ) {
+        NullUtil.nullArgCheck(onDrag, "onDrag", UIAction.class);
+        C component = getComponent();
+        component.addMouseListener(new MouseAdapter() {
+            @Override public void mouseDragged(MouseEvent e) {
+                _doApp(() -> onDrag.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+            }
+        });
+        return _this();
+    }
+
+    /**
+     *  Use this to register and catch generic {@link MouseListener} based mouse move events on this UI component.
+     *  This method adds the provided consumer lambda to
+     *  an an{@link MouseListener} instance to the wrapped
+     *  button component.
+     *  <br><br>
+     *
+     * @param onMove The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMouseMove( UIAction<SimpleDelegate<C, MouseEvent>> onMove ) {
+        NullUtil.nullArgCheck(onMove, "onMove", UIAction.class);
+        C component = getComponent();
+        component.addMouseListener(new MouseAdapter() {
+            @Override public void mouseMoved(MouseEvent e) {
+                _doApp(() -> onMove.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+            }
+        });
+        return _this();
+    }
+
+    /**
+     *  Use this to register and catch generic {@link MouseListener} based mouse wheel events on this UI component.
+     *  This method adds the provided consumer lambda to
+     *  an an{@link MouseListener} instance to the wrapped
+     *  button component.
+     *  <br><br>
+     *
+     * @param onWheel The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMouseWheelMove( UIAction<SimpleDelegate<C, MouseWheelEvent>> onWheel ) {
+        NullUtil.nullArgCheck(onWheel, "onWheel", UIAction.class);
+        C component = getComponent();
+        component.addMouseWheelListener(new MouseWheelListener() {
+            @Override public void mouseWheelMoved(MouseWheelEvent e) {
+                _doApp(() -> onWheel.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+            }
+        });
+        return _this();
+    }
+
+    /**
+     *  Use this to register and catch mouse wheel up movement events on this UI component.
+     *  This method adds the provided consumer lambda to
+     *  an an{@link MouseListener} instance to the wrapped
+     *  button component.
+     *  <br><br>
+     * @param onWheelUp The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMouseWheelUp( UIAction<SimpleDelegate<C, MouseWheelEvent>> onWheelUp ) {
+        NullUtil.nullArgCheck(onWheelUp, "onWheelUp", UIAction.class);
+        C component = getComponent();
+        component.addMouseWheelListener(new MouseWheelListener() {
+            @Override public void mouseWheelMoved(MouseWheelEvent e) {
+                if( e.getWheelRotation() < 0 ) {
+                    _doApp(() -> onWheelUp.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                }
+            }
+        });
+        return _this();
+    }
+
+    /**
+     *  Use this to register and catch mouse wheel down movement events on this UI component.
+     *  This method adds the provided consumer lambda to
+     *  an an{@link MouseListener} instance to the wrapped
+     *  button component.
+     *  <br><br>
+     * @param onWheelDown The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMouseWheelDown( UIAction<SimpleDelegate<C, MouseWheelEvent>> onWheelDown ) {
+        NullUtil.nullArgCheck(onWheelDown, "onWheelDown", UIAction.class);
+        C component = getComponent();
+        component.addMouseWheelListener(new MouseWheelListener() {
+            @Override public void mouseWheelMoved(MouseWheelEvent e) {
+                if( e.getWheelRotation() > 0 ) {
+                    _doApp(() -> onWheelDown.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                }
+            }
+        });
+        return _this();
+    }
+
+    /**
      *  The provided lambda will be invoked when the component's size changes.
      *  This will internally translate to a {@link ComponentListener} implementation.
      *
