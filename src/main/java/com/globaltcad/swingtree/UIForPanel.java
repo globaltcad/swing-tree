@@ -40,4 +40,42 @@ public class UIForPanel<P extends JPanel> extends UIForAbstractSwing<UIForPanel<
         });
         return _this();
     }
+
+    @Override protected void _setEnabled( boolean isEnabled ) {
+        getComponent().setEnabled( isEnabled );
+        /*
+            In the vast vast majority of cases regular JPanels are simple wrappers for
+            other components.
+            They are mostly used to group things together, provide a border and
+            position them using a fancy layout manager.
+            Disabling only a JPanel is therefore not very useful, because it will not
+            disable the components it contains.
+            So what we want to do here is traverse the tree of JPanel instances
+            and disable all the components that are contained in the tree
+            except for the children of non JPanels.
+        */
+        _traverseEnable( getComponent(), isEnabled );
+        /*
+            Note:
+            If you really only want to disable the JPanel itself, then you can
+            simply peek into the tree and disable the JPanel directly.
+            Or, a better idea, is to simply change color and event handling
+            of the JPanel to make it look and behave like a disabled component,
+            but still allow the user to interact with the components it contains.
+         */
+    }
+
+    private void _traverseEnable( Component c, boolean isEnabled ) {
+        c.setEnabled( isEnabled );
+        if ( c.getClass() == JPanel.class )
+            for ( Component c2 : ((JPanel)c).getComponents() )
+                _traverseEnable( c2, isEnabled );
+        /*
+            Note:
+                We use getClass() here, because we want to stop at subclasses of
+                JPanel because they are likely user defined components and not dumb
+                wrappers for other components.
+        */
+    }
+
 }

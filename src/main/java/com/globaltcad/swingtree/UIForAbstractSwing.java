@@ -138,8 +138,12 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I isEnabledIf( boolean isEnabled ) {
-        getComponent().setEnabled( isEnabled );
+        _setEnabled( isEnabled );
         return _this();
+    }
+
+    protected void _setEnabled( boolean isEnabled ) {
+        getComponent().setEnabled( isEnabled );
     }
 
     /**
@@ -151,7 +155,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I isEnabledIf( Val<Boolean> isEnabled ) {
         NullUtil.nullArgCheck(isEnabled, "isEnabled", Val.class);
         NullUtil.nullPropertyCheck(isEnabled, "isEnabled", "Null value for isEnabled is not allowed!");
-        _onShow( isEnabled, v -> getComponent().setEnabled(v) );
+        _onShow( isEnabled, v -> _setEnabled(v) );
         return isEnabledIf( isEnabled.orElseThrow() );
     }
 
