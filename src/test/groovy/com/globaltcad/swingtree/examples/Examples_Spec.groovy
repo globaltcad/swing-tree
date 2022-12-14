@@ -8,10 +8,7 @@ import com.globaltcad.swingtree.examples.simple.ListRendering
 import com.globaltcad.swingtree.examples.simple.TableUI
 import com.globaltcad.swingtree.examples.slim.TodoApp
 import com.globaltcad.swingtree.utility.Utility
-import example.LoginView
-import example.LoginViewModel
-import example.SomeSpinnersView
-import example.SomeSpinnersViewModel
+import example.*
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
@@ -63,9 +60,14 @@ class Examples_Spec extends Specification
             new Utility.Query(ui).find(JButton, "hover-icon-button").get().cursor.type == Cursor.HAND_CURSOR
     }
 
-    def 'The login example UI define in the examples can be created.'()
+    def 'The login example UI defined in the examples can be created.'()
     {
         expect : new LoginView(new LoginViewModel())
+    }
+
+    def 'The settings example UI defined in the examples can be created.'()
+    {
+        expect : new SomeSettingsView(new SomeSettingsViewModel())
     }
 
     def 'The spinners example UI defined in the examples can be created.'()
