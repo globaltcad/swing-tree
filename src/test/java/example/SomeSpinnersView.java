@@ -77,6 +77,9 @@ public class SomeSpinnersView extends JPanel {
 		)
 		.add(SPAN.and(GROW),
 			comboBox(1, 2, 4, 6, 8, 12, 16)
+			.onOpen( it -> System.out.println("open") )
+			.onClose( it -> System.out.println("close") )
+			.onCancel( it -> System.out.println("cancel") )
 			.isEditableIf(true)
 			.withPreferredWidth(50)
 			.withSelectedItem(Var.of(4))

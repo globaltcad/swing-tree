@@ -65,7 +65,76 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
         }
     }
 
+    /**
+     *  Registers a listener to be notified when the combo box is opened,
+     *  meaning its popup menu is shown after the user clicks on the combo box.
+     *
+     * @param action the action to be executed when the combo box is opened.
+     * @return this
+     */
+    public UIForCombo<E,C> onOpen( UIAction<SimpleDelegate<C, PopupMenuEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", UIAction.class);
+        _onPopupOpen( e -> _doApp(()->action.accept(new SimpleDelegate<>( (C) getComponent(), e, this::getSiblinghood )) ) );
+        return this;
+    }
 
+    private void _onPopupOpen( Consumer<PopupMenuEvent> consumer ) {
+        getComponent().addPopupMenuListener(new PopupMenuListener() {
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                // This method is called before the popup menu becomes visible.
+                consumer.accept(e);
+            }
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}
+            public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}
+        });
+    }
+
+    /**
+     *  Registers a listener to be notified when the combo box is closed,
+     *  meaning its popup menu is hidden after the user clicks on the combo box.
+     *
+     * @param action the action to be executed when the combo box is closed.
+     * @return this
+     */
+    public UIForCombo<E,C> onClose( UIAction<SimpleDelegate<C, PopupMenuEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", UIAction.class);
+        _onPopupClose( e -> _doApp(()->action.accept(new SimpleDelegate<>( (C) getComponent(), e, this::getSiblinghood )) ) );
+        return this;
+    }
+
+    private void _onPopupClose( Consumer<PopupMenuEvent> consumer ) {
+        getComponent().addPopupMenuListener(new PopupMenuListener() {
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                consumer.accept(e); // This method is called before the popup menu becomes invisible
+            }
+            public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}
+        });
+    }
+
+    /**
+     *  Registers a listener to be notified when the combo box is canceled,
+     *  meaning its popup menu is hidden which
+     *  typically happens when the user clicks outside the combo box.
+     *
+     * @param action the action to be executed when the combo box is canceled.
+     * @return this
+     */
+    public UIForCombo<E,C> onCancel( UIAction<SimpleDelegate<C, PopupMenuEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", UIAction.class);
+        _onPopupCancel( e -> _doApp(()->action.accept(new SimpleDelegate<>( (C) getComponent(), e, this::getSiblinghood )) ) );
+        return this;
+    }
+
+    private void _onPopupCancel( Consumer<PopupMenuEvent> consumer ) {
+        getComponent().addPopupMenuListener(new PopupMenuListener() {
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}
+            public void popupMenuCanceled(PopupMenuEvent e) {
+                consumer.accept(e); // This method is called when the popup menu is canceled
+            }
+        });
+    }
 
     /**
      * Adds an {@link UIAction} to the underlying {@link JComboBox}

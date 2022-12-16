@@ -112,6 +112,7 @@ class Combo_Box_Specification extends Specification
 
         when : 'We simulate the user typing "XY" into the combo box.'
             ui.component.editor.item = "XY"
+            UI.sync()
         then : 'The combo box is updated.'
             ui.component.getSelectedItem() == "XY"
         and : 'This change is reflected in the model.'
