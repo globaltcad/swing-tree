@@ -47,10 +47,18 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 
 	void setFromEditor( String o ) {
 		if ( _selectedIndex != -1 ) {
-			E e = _convert(o);
 			try {
+				E e = _convert(o);
 				this.setAt(_selectedIndex, e);
-				_selectedItem.act(e).show();
+				boolean stateChanged = _selectedItem.orElseNull() != e;
+				_selectedItem.act(e);
+				if ( stateChanged )
+					UI.runLater(_selectedItem::show);
+					/*
+						We run the "show" method later in case this method was triggered
+						by the combo editor which would cause an invalid feedback modification
+						in the combo box editor!
+					*/
 			} catch (Exception ignored) {
 				// It looks like conversion was not successful
 				// So this means the editor input could not be converted to the type of the combo box

@@ -90,6 +90,29 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
     }
 
     /**
+     * Adds an {@link ActionListener} to the editor component of the underlying {@link JComboBox}
+     * which will be called when a selection has been made. If the combo box is editable, then
+     * an {@link ActionEvent} will be fired when editing has stopped.
+     * For more information see {@link JComboBox#addActionListener(ActionListener)}.
+     * <p>
+     * @param action The {@link UIAction} that will be notified.
+     **/
+    public UIForCombo<E,C> onEnter( UIAction<SimpleDelegate<C, ActionEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", UIAction.class);
+        C combo = (C) getComponent();
+        _onEnter(e -> _doApp(()->action.accept(new SimpleDelegate<>( combo, e, this::getSiblinghood ))) );
+        return this;
+    }
+
+    private void _onEnter( Consumer<ActionEvent> consumer ) {
+        Component editor = getComponent().getEditor().getEditorComponent();
+        if ( editor instanceof JTextField ) {
+            JTextField field = (JTextField) editor;
+            UI.of(field).onEnter( it -> consumer.accept(it.getEvent()) );
+        }
+    }
+
+    /**
      *  Use this to enable or disable editing for the wrapped UI component.
      *
      * @param isEditable The truth value determining if the UI component should be editable or not.
