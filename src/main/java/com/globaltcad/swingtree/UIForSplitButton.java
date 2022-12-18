@@ -4,8 +4,11 @@ import com.alexandriasoftware.swing.JSplitButton;
 import com.globaltcad.swingtree.api.UIAction;
 
 import javax.swing.*;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import java.awt.event.ActionEvent;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -49,7 +52,8 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
     /**
      *  {@link UIAction}s registered here will be called when the split part of the
      *  {@link JSplitButton} was clicked.
-     *  This exposes a delegate a lot of context information including not
+     *  The provided lambda receives a delegate object with a rich API
+     *  exposing a lot of context information including not
      *  only the current {@link JSplitButton} instance, but also
      *  the currently selected {@link JMenuItem} and a list of
      *  all other items.
@@ -66,21 +70,36 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
         button.addSplitButtonClickedActionListener(
             e -> _doApp(()->action.accept(
                     new SplitButtonDelegate<>(
+                         button,
+                         new SplitItem.Delegate<>(
+                             e,
                              button,
-                             new SplitItem.Delegate<>(
-                                     e,
-                                     button,
-                                     () -> new ArrayList<>(_options.keySet()),
-                                     _lastSelected[0]
-                             ),
-                            this::getSiblinghood
-                        )
+                             () -> new ArrayList<>(_options.keySet()),
+                             _lastSelected[0]
+                         ),
+                        this::getSiblinghood
+                    )
                 )
             )
         );
         return this;
     }
 
+    /**
+     * {@link UIAction}s registered here will be called when the
+     * user selects a {@link JMenuItem} from the popup menu
+     * of this {@link JSplitButton}.
+     * The delegate passed to the provided action
+     * lambda exposes a lot of context information including not
+     * only the current {@link JSplitButton} instance, but also
+     * the currently selected {@link JMenuItem} and a list of
+     * all other items.
+     *
+     * @param action The {@link UIAction} which will receive an {@link SplitItem.Delegate}
+     *              exposing all essential components making up this {@link JSplitButton}.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if the provided action is null.
+     */
     public UIForSplitButton<B> onSelection(
             UIAction<SplitButtonDelegate<JMenuItem>> action
     ) {
@@ -90,8 +109,9 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
     }
 
     /**
-     *  Use this as an alternative to {@link #onClick(UIAction)} to
-     *  access a delegate with more context information inclusing not
+     *  Use this as an alternative to {@link #onClick(UIAction)} to register
+     *  a button click action with an action lambda having
+     *  access to a delegate with more context information including not
      *  only the current {@link JSplitButton} instance, but also
      *  the currently selected {@link JMenuItem} and a list of
      *  all other items.
@@ -137,6 +157,80 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
             ))
         );
         return this;
+    }
+
+    /**
+     *  Registers a listener to be notified when the split button is opened,
+     *  meaning its popup menu is shown after the user clicks on the split button drop
+     *  down button.
+     *
+     * @param action the action to be executed when the split button is opened.
+     * @return this very instance, which enables builder-style method chaining.
+     */
+    public UIForSplitButton<B> onOpen( UIAction<SimpleDelegate<B, PopupMenuEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", UIAction.class);
+        _onPopupOpen( e -> _doApp(()->action.accept(new SimpleDelegate<>( getComponent(), e, this::getSiblinghood )) ) );
+        return this;
+    }
+
+    private void _onPopupOpen( Consumer<PopupMenuEvent> consumer ) {
+        getComponent().getPopupMenu().addPopupMenuListener(new PopupMenuListener() {
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                // This method is called before the popup menu becomes visible.
+                consumer.accept(e);
+            }
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}
+            public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}
+        });
+    }
+
+    /**
+     *  Registers a listener to be notified when the split button is closed,
+     *  meaning its popup menu is hidden after the user clicks on the split button drop
+     *  down button.
+     *
+     * @param action the action to be executed when the split button is closed.
+     * @return this very instance, which enables builder-style method chaining.
+     */
+    public UIForSplitButton<B> onClose( UIAction<SimpleDelegate<B, PopupMenuEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", UIAction.class);
+        _onPopupClose( e -> _doApp(()->action.accept(new SimpleDelegate<>( getComponent(), e, this::getSiblinghood )) ) );
+        return this;
+    }
+
+    private void _onPopupClose( Consumer<PopupMenuEvent> consumer ) {
+        getComponent().getPopupMenu().addPopupMenuListener(new PopupMenuListener() {
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                // This method is called before the popup menu becomes invisible.
+                consumer.accept(e);
+            }
+            public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}
+        });
+    }
+
+    /**
+     *  Registers a listener to be notified when the split button options drop down popup is canceled,
+     *  which typically happens when the user clicks outside the popup menu.
+     *
+     * @param action the action to be executed when the split button popup is canceled.
+     * @return this very instance, which enables builder-style method chaining.
+     */
+    public UIForSplitButton<B> onCancel( UIAction<SimpleDelegate<B, PopupMenuEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", UIAction.class);
+        _onPopupCancel( e -> _doApp(()->action.accept(new SimpleDelegate<>( getComponent(), e, this::getSiblinghood )) ) );
+        return this;
+    }
+
+    private void _onPopupCancel( Consumer<PopupMenuEvent> consumer ) {
+        getComponent().getPopupMenu().addPopupMenuListener(new PopupMenuListener() {
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}
+            public void popupMenuCanceled(PopupMenuEvent e) {
+                // This method is called when the popup menu is canceled.
+                consumer.accept(e);
+            }
+        });
     }
 
     /**

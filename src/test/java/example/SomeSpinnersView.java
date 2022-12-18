@@ -88,6 +88,19 @@ public class SomeSpinnersView extends JPanel {
 			comboBox("U", "H", "K")
 			.isEditableIf(true)
 			.withSelectedItem(Var.of("H"))
+		)
+		.add(SPAN.and(GROW),
+			splitButton("Hi")
+			.onSplitClick( it -> System.out.println("split") )
+			.onOpen( it -> System.out.println("open") )
+			.onClose( it -> System.out.println("close") )
+			.onCancel( it -> System.out.println("cancel") )
+			.add(
+				splitItem("A")
+			)
+			.add(
+				splitItem("B")
+			)
 		);
 	}
 
