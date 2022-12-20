@@ -205,11 +205,22 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
         return this;
     }
 
+    /**
+     *  Pass a {@link Render.Builder} to this method to customize the rendering of the combo box.
+     *
+     * @param renderBuilder The {@link Render.Builder} to be used for customizing the rendering of the combo box.
+     * @return This very instance, which enables builder-style method chaining.
+     * @param <V> The type of the value to be rendered.
+     */
     public final <V extends E> UIForCombo<E,C> withRenderer( Render.Builder<C,V> renderBuilder ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
         return withRenderer((ListCellRenderer<E>) renderBuilder.getForCombo());
     }
 
+    /**
+     * @param model The {@link ComboBoxModel} to be used for the combo box.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public final UIForCombo<E,C> withModel(ComboBoxModel<E> model) {
         if ( model instanceof AbstractComboModel )
             _bindComboModelToEditor((AbstractComboModel<E>) model);
@@ -222,19 +233,25 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAbstractSwing<UIF
         return this;
     }
 
-    public final UIForCombo<E,C> withSelectedItem( Var<E> var ) {
-        NullUtil.nullArgCheck(var, "var", Var.class);
+    /**
+     *  Use this to dynamically set the selected item of the combo box.
+     *
+     * @param item The item to be selected.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForCombo<E,C> withSelectedItem( Var<E> item ) {
+        NullUtil.nullArgCheck(item, "item", Var.class);
         ComboBoxModel<E> model = getComponent().getModel();
         if ( model instanceof AbstractComboModel )
-            withModel(((AbstractComboModel<E>)model).withVar(var));
+            withModel(((AbstractComboModel<E>)model).withVar(item));
         else {
             // The user has a custom model AND wants to bind to a property:
-            _onShow( var, this::_setSelectedItem );
+            _onShow( item, this::_setSelectedItem );
             _onSelection(
-                e -> _doApp( (E)getComponent().getSelectedItem(), var::act )
+                e -> _doApp( (E)getComponent().getSelectedItem(), item::act )
             );
         }
-        return withSelectedItem(var.get());
+        return withSelectedItem(item.get());
     }
 
     public final UIForCombo<E,C> withSelectedItem( E item ) {

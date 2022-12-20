@@ -54,18 +54,30 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public UIForAbstractSwing( C component ) { super(component); }
 
-    protected final void _doUI( Runnable action ) {
-        _eventProcessor.processUIEvent( action );
-    }
+    /**
+     * @param action An action which should be executed by the UI thread (EDT).
+     */
+    protected final void _doUI( Runnable action ) { _eventProcessor.processUIEvent( action ); }
 
-    protected final void _doApp( Runnable action ) {
-        _eventProcessor.processAppEvent(action);
-    }
+    /**
+     * @param action An action which should be executed by the application thread.
+     */
+    protected final void _doApp( Runnable action ) { _eventProcessor.processAppEvent(action); }
 
-    protected final <T> void _doApp( T value, Consumer<T> action ) {
-        _doApp(()->action.accept(value));
-    }
+    /**
+     * @param value A value which should be captured.
+     * @param action A consumer lambda receiving the provided value and
+     *               is then executed by the application thread.
+     * @param <T> The type of the value.
+     */
+    protected final <T> void _doApp( T value, Consumer<T> action ) { _doApp(()->action.accept(value)); }
 
+    /**
+     * @param val A property which should be captured.
+     * @param displayAction A consumer lambda receiving the provided value and
+     *                      is then executed by the UI thread.
+     * @param <T> The type of the value.
+     */
     protected final <T> void _onShow( Val<T> val, Consumer<T> displayAction ) {
         val.onShowThis(new DisplayAction<T>() {
             @Override
@@ -298,9 +310,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param all The insets for all sides.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withEmptyBorder( int all ) {
-        return withEmptyBorder(all, all, all, all);
-    }
+    public final I withEmptyBorder( int all ) { return withEmptyBorder(all, all, all, all); }
 
     /**
      *  Use this to define a titled empty {@link Border} with the provided insets.
