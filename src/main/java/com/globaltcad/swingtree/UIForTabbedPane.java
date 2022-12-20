@@ -6,6 +6,7 @@ import com.globaltcad.swingtree.api.mvvm.Var;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -123,12 +124,14 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
         TabMouseClickListener mouseListener = new TabMouseClickListener(getComponent(), indexFinder, tab.onMouseClick().orElse(null));
 
         // Initial tab setup:
-        getComponent().addTab(
-                  tab.title().map(Val::orElseNull).orElse(null),
-                  tab.icon().map(Val::orElseNull).orElse(null),
-                  tab.contents().orElse(dummyContent),
-                  tab.tip().map(Val::orElseNull).orElse(null)
-              );
+        _doWithoutListeners(()->
+            getComponent().addTab(
+                tab.title().map(Val::orElseNull).orElse(null),
+                tab.icon().map(Val::orElseNull).orElse(null),
+                tab.contents().orElse(dummyContent),
+                tab.tip().map(Val::orElseNull).orElse(null)
+            )
+        );
         tab.isEnabled().ifPresent( isEnabled -> getComponent().setEnabledAt(indexFinder.get(), isEnabled.get()) );
         tab.isSelected().ifPresent( isSelected -> {
             _selectTab( indexFinder.get(), isSelected.get() );
@@ -154,6 +157,17 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
             )
         );
         return this;
+    }
+
+    private void _doWithoutListeners( Runnable r ) {
+        ChangeListener[] listeners = getComponent().getChangeListeners();
+        for ( ChangeListener l : listeners ) getComponent().removeChangeListener(l);
+        r.run();
+        for ( ChangeListener l : listeners ) getComponent().addChangeListener(l);
+        /*
+            This is important because the tabbed pane will fire a change event when a tab is added.
+            This is not desirable because the tabbed pane is not yet fully initialized at that point.
+        */
     }
 
     private void _selectTab( int tabIndex, boolean isSelected ) {
