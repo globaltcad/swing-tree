@@ -30,9 +30,18 @@ public class UIForRadioButton<R extends JRadioButton> extends UIForAbstractToggl
         _onShow( selection, s -> isSelectedIf( state.equals(selection.get()) ) );
         R component = getComponent();
         String currentText = component.getText();
-        if ( currentText == null || currentText.isEmpty() ) {
+        if ( currentText == null || currentText.isEmpty() )
             component.setText( state.name() );
-        }
+
+        // When the user clicks the button, we update the selection property!
+        // But only if the button is selected, otherwise we'll ignore the click.
+        // And we also trigger "show" events for the button, so that other buttons
+        // can be updated to reflect the new selection state.
+        _onChange( event -> {
+            if ( component.isSelected() )
+                selection.act( state ).show();
+        });
+
         return this;
     }
 

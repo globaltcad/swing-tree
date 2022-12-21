@@ -201,9 +201,12 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public final I onChange( UIAction<SimpleDelegate<B, ItemEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", UIAction.class);
-        B button = getComponent();
-        button.addItemListener(e -> _doApp(()->action.accept(new SimpleDelegate<>(button, e, this::getSiblinghood))));
+        _onChange(e -> _doApp(()->action.accept(new SimpleDelegate<>(getComponent(), e, this::getSiblinghood))));
         return _this();
+    }
+
+    protected final void _onChange( Consumer<ItemEvent> action ) {
+        getComponent().addItemListener( action::accept );
     }
 
     /**
@@ -229,10 +232,8 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
         return _this();
     }
 
-    protected void _onClick( Consumer<ActionEvent> action ) {
-        getComponent().addActionListener(
-            action::accept
-        );
+    protected final void _onClick( Consumer<ActionEvent> action ) {
+        getComponent().addActionListener( action::accept );
     }
 
     /**
