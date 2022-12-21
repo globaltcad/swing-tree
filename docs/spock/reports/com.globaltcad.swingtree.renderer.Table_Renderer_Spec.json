@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.049 seconds"
+    "duration":"0.043 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can attach a simple table cell renderer to a JTable in just a few lines of code.",
       "result":"PASS",
-      "duration":"0.029 seconds",
+      "duration":"0.027 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -39,7 +39,7 @@
     {
       "id":"We can create a simple table cell renderer through a UI factory method.",
       "result":"PASS",
-      "duration":"0.008 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that you can actually pass a simple list of lists provider to the table factory method\n            and it will create a table model for you.\n            In the table defined below we create a list data based row major table. \n        "]
       },

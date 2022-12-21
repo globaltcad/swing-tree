@@ -4,12 +4,12 @@
   "narrative":"In this specification you can see how to register different kinds of event handlers\n    on Swing components.",
   "subjects":[],
   "statistics":{
-    "runs":"4",
+    "runs":"13",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.159 seconds"
+    "duration":"0.188 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -54,7 +54,7 @@
     {
       "id":"The \"onResize\" event handlers are triggered in the same order as they were registered.",
       "result":"PASS",
-      "duration":"0.010 seconds",
+      "duration":"0.012 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -73,7 +73,7 @@
     {
       "id":"The \"onShown\" event handlers are triggered in the same order as they were registered.",
       "result":"PASS",
-      "duration":"0.006 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -89,6 +89,189 @@
         {"kind":"when","text":"The text area is set to invisible and then visible again.","code":["ui.component.setVisible(false)","ui.component.setVisible(true)","UI.sync()"]},
 
         {"kind":"then","text":"The handlers are triggered in the same order as they were registered.","code":["record == [\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"onEnter\" event handlers are triggered in the same order as they were registered.",
+      "result":"PASS",
+      "duration":"0.004 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A simple list where handlers are going to leave a trace.","code":["var record = []"]},
+
+        {"kind":"and","text":"A simple text field UI.","code":["var ui =","        UI.textField(\"Some content...\")","        .onEnter( it -> record.add(\"1\") )","        .onEnter( it -> record.add(\"2\") )","        .onEnter( it -> record.add(\"3\") )","        .onEnter( it -> record.add(\"4\") )","        .onEnter( it -> record.add(\"5\") )","        .onEnter( it -> record.add(\"6\") )","        .onEnter( it -> record.add(\"7\") )"]},
+
+        {"kind":"when","text":"Something is entered in the text field.","code":["ui.component.setText(\"Some other content...\")","ui.component.postActionEvent()","UI.sync()"]},
+
+        {"kind":"then","text":"The handlers are triggered in the same order as they were registered.","code":["record == [\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"In a formatted text field, the \"onEnter\" event handlers are triggered in the same order as they were registered.",
+      "result":"PASS",
+      "duration":"0.004 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A simple list where handlers are going to leave a trace.","code":["var record = []"]},
+
+        {"kind":"and","text":"A simple text field UI.","code":["var ui =","        UI.formattedTextField(\"Some content...\")","        .onEnter( it -> record.add(\"1\") )","        .onEnter( it -> record.add(\"2\") )","        .onEnter( it -> record.add(\"3\") )","        .onEnter( it -> record.add(\"4\") )","        .onEnter( it -> record.add(\"5\") )","        .onEnter( it -> record.add(\"6\") )","        .onEnter( it -> record.add(\"7\") )"]},
+
+        {"kind":"when","text":"Something is entered in the text field.","code":["ui.component.setText(\"Some other content...\")","ui.component.postActionEvent()","UI.sync()"]},
+
+        {"kind":"then","text":"The handlers are triggered in the same order as they were registered.","code":["record == [\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"onSelection\" event handlers of a combo box are triggered in the same order as they were registered.",
+      "result":"PASS",
+      "duration":"0.007 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A simple list where handlers are going to leave a trace.","code":["var record = []"]},
+
+        {"kind":"and","text":"A simple combo box UI.","code":["var ui =","        UI.comboBox(\"Item 1\", \"Item 2\", \"Item 3\")","        .onSelection( it -> record.add(\"1\") )","        .onSelection( it -> record.add(\"2\") )","        .onSelection( it -> record.add(\"3\") )","        .onSelection( it -> record.add(\"4\") )","        .onSelection( it -> record.add(\"5\") )","        .onSelection( it -> record.add(\"6\") )","        .onSelection( it -> record.add(\"7\") )"]},
+
+        {"kind":"when","text":"An item is selected in the combo box.","code":["ui.component.setSelectedIndex(1)","UI.sync()"]},
+
+        {"kind":"then","text":"The handlers are triggered in the same order as they were registered.","code":["record == [\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"onContentChange\" event handler of a text area is triggered when the text area content changes.",
+      "result":"PASS",
+      "duration":"0.002 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A simple text area UI.","code":["var ui = UI.textArea(\"Some content...\")"]},
+
+        {"kind":"and","text":"A simple list where handlers are going to leave a trace.","code":["var record = []"]},
+
+        {"kind":"and","text":"A handler that records the text area content.","code":["ui.onContentChange( it -> record.add(it.component.text) )"]},
+
+        {"kind":"when","text":"The text area content is changed.","code":["UI.runNow { ui.component.setText(\"Some other content...\") }","UI.sync()"]},
+
+        {"kind":"then","text":"The handler is triggered.","code":["record == [\"\", \"Some other content...\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"onTextChange\" event handler of a text area is triggered when the text area content changes.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A simple text area UI.","code":["var ui = UI.textArea(\"Some content...\")"]},
+
+        {"kind":"and","text":"A simple list where handlers are going to leave a trace.","code":["var record = []"]},
+
+        {"kind":"and","text":"A handler that records the text area content.","code":["ui.onTextChange( it -> record.add(it.component.text) )"]},
+
+        {"kind":"when","text":"The text area content is changed.","code":["UI.runNow { ui.component.setText(\"Some other content...\") }","UI.sync()"]},
+
+        {"kind":"then","text":"The handler is triggered.","code":["record == [\"\", \"Some other content...\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"onTextInsert\" event handler of a text area is triggered when the text area content changes.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A simple text area UI.","code":["var ui = UI.textArea(\"Some content...\")"]},
+
+        {"kind":"and","text":"A simple list where handlers are going to leave a trace.","code":["var record = []"]},
+
+        {"kind":"and","text":"A handler that records the text area content.","code":["ui.onTextInsert( it -> record.add(it.component.text) )"]},
+
+        {"kind":"when","text":"The text area content is changed.","code":["UI.runNow { ui.component.setText(\"Some other content...\") }","UI.sync()"]},
+
+        {"kind":"then","text":"The handler is not triggered.","code":["record == []"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"onTextRemove\" event handler of a text area is triggered when the text area content changes.",
+      "result":"PASS",
+      "duration":"0",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A simple text area UI.","code":["var ui = UI.textArea(\"Some content...\")"]},
+
+        {"kind":"and","text":"A simple list where handlers are going to leave a trace.","code":["var record = []"]},
+
+        {"kind":"and","text":"A handler that records the text area content.","code":["ui.onTextRemove( it -> record.add(it.component.text) )"]},
+
+        {"kind":"when","text":"The text area content is changed.","code":["UI.runNow { ui.component.setText(\"Some other content...\") }","UI.sync()"]},
+
+        {"kind":"then","text":"The handler is not triggered.","code":["record == []"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"onTextReplace\" event handler of a text area is triggered when the text area content changes.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A simple text area UI.","code":["var ui = UI.textArea(\"Some content...\")"]},
+
+        {"kind":"and","text":"A simple list where handlers are going to leave a trace.","code":["var record = []"]},
+
+        {"kind":"and","text":"A handler that records the text area content.","code":["ui.onTextReplace( it -> record.add(it.component.text) )"]},
+
+        {"kind":"when","text":"The text area content is changed.","code":["UI.runNow { ui.component.setText(\"Some other content...\") }","UI.sync()"]},
+
+        {"kind":"then","text":"The handler was triggered.","code":["record == [\"Some content...\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"onTextReplace\" event handlers will be triggered in the correct order.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A simple text area UI.","code":["var ui = UI.textArea(\"Some content...\")"]},
+
+        {"kind":"and","text":"A simple list where handlers are going to leave a trace.","code":["var record = []"]},
+
+        {"kind":"and","text":"A handler that records the text area content.","code":["ui.onTextReplace( it -> record.add(\"1\") )","  .onTextReplace( it -> record.add(\"2\") )","  .onTextReplace( it -> record.add(\"3\") )","  .onTextReplace( it -> record.add(\"4\") )","  .onTextReplace( it -> record.add(\"5\") )","  .onTextReplace( it -> record.add(\"6\") )","  .onTextReplace( it -> record.add(\"7\") )"]},
+
+        {"kind":"when","text":"The text area content is changed.","code":["UI.runNow { ui.component.setText(\"Some other content...\") }","UI.sync()"]},
+
+        {"kind":"then","text":"The handlers are triggered in the correct order.","code":["record == [\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\"]"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.011 seconds"
+    "duration":"0.032 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can bind to the text of a label.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.020 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that for a binding to work, the property must be a `Var` or `Val`\n            implementation. All you have to do to then change the state of the UI component\n            is changing the state of the property by calling its \"set\" method.\n            Internally it will then call the \"show()\" method for you \n            which triggers the observers registered by the UI.\n        "]
       },

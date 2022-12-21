@@ -10,6 +10,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.function.Consumer;
 
 /**
@@ -20,9 +21,9 @@ import java.util.function.Consumer;
  */
 public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> extends UIForAbstractSwing<I, C>
 {
-    private UIAction<RemoveDelegate> remove;
-    private UIAction<InsertDelegate> insert;
-    private UIAction<ReplaceDelegate> replace;
+    private final java.util.List<UIAction<RemoveDelegate>>   removes = new ArrayList<>();
+    private final java.util.List<UIAction<InsertDelegate>>   inserts = new ArrayList<>();
+    private final java.util.List<UIAction<ReplaceDelegate>>  replaces = new ArrayList<>();
 
     /**
      *  A custom document filter which is simply a lambda-rization wrapper which ought to make
@@ -32,28 +33,28 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      */
     private final DocumentFilter filter = new DocumentFilter()
     {
-        private C _component = getComponent();
+        private final C _component = getComponent();
 
         /**
          * See documentation in {@link DocumentFilter}!
          */
         public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
-            if ( remove != null ) remove.accept( new RemoveDelegate(_component, fb, offset, length) );
-            else fb.remove(offset, length);
+            removes.forEach(action -> action.accept( new RemoveDelegate(_component, fb, offset, length) ) );
+            if ( removes.isEmpty() ) fb.remove(offset, length);
         }
         /**
          * See documentation in {@link DocumentFilter}!
          */
         public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-            if ( insert != null ) insert.accept( new InsertDelegate(_component, fb, offset, string.length(), string, attr) );
-            else fb.insertString(offset, string, attr);
+            inserts.forEach(action -> action.accept( new InsertDelegate(_component, fb, offset, string.length(), string, attr) ) );
+            if ( inserts.isEmpty() ) fb.insertString(offset, string, attr);
         }
         /**
          * See documentation in {@link DocumentFilter}!
          */
         public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-            if ( replace != null ) replace.accept(new ReplaceDelegate(_component, fb, offset, length, text, attrs));
-            else fb.replace(offset, length, text, attrs);
+            replaces.forEach(action -> action.accept(new ReplaceDelegate(_component, fb, offset, length, text, attrs)) );
+            if ( replaces.isEmpty() ) fb.replace(offset, length, text, attrs);
         }
     };
 
@@ -102,7 +103,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
                 newText = part1 + ( part2.length() < 2 ? part2 : part2.substring(1) );
             else
                 newText = part1 + e.getKeyChar() + part2;
-            _doApp(newText, t -> text.act(t) );
+            _doApp(newText, text::act);
         });
         return withText( text.orElseThrow() );
     }
@@ -232,7 +233,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      * @return This very builder to allow for method chaining.
      */
     public final I onTextRemove( UIAction<RemoveDelegate> action ) {
-        _ifFilterable( () -> this.remove = action );
+        _ifFilterable( () -> this.removes.add(action) );
         return _this();
     }
 
@@ -243,7 +244,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      * @return This very builder to allow for method chaining.
      */
     public final I onTextInsert( UIAction<InsertDelegate> action ) {
-        _ifFilterable( () -> this.insert = action );
+        _ifFilterable( () -> this.inserts.add(action) );
         return _this();
     }
 
@@ -254,7 +255,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      * @return This very builder to allow for method chaining.
      */
     public final I onTextReplace( UIAction<ReplaceDelegate> action ) {
-        _ifFilterable( () -> this.replace = action );
+        _ifFilterable( () -> this.replaces.add(action) );
         return _this();
     }
 
@@ -273,7 +274,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
             this.length = length;
         }
 
-        public JTextComponent getTextComponent() {
+        public JTextComponent getComponent() {
             // We make sure that only the Swing thread can access the component:
             if ( UI.thisIsUIThread() ) return textComponent;
             else

@@ -301,7 +301,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
 
     protected final void _onClick( Consumer<ActionEvent> action ) {
         /*
-            When an item event is fired Swing will go through all the listeners
+            When an action event is fired, Swing will go through all the listeners
             from the most recently added to the first added. This means that if we simply add
             a listener through the "addActionListener" method, we will be the last to be notified.
             This is problematic because it is built on the assumption that the last listener
