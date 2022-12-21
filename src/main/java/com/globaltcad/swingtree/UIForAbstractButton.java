@@ -206,7 +206,34 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     }
 
     protected final void _onChange( Consumer<ItemEvent> action ) {
-        getComponent().addItemListener( action::accept );
+        /*
+            When an item event is fired Swing will go through all the listeners
+            from the most recently added to the first added. This means that if we simply add
+            a listener through the "addItemListener" method, we will be the last to be notified.
+            This is problematic because the first listeners we register are usually
+            the ones that are responsible for updating properties.
+            This means that when the item listener events of the user
+            are fired, the properties will not be updated yet.
+            To solve this problem, we do the revers by making sure that our listener is added
+            at the first position in the list of listeners inside the button.
+        */
+        ItemListener[] listeners = getComponent().getItemListeners();
+        for (ItemListener listener : listeners)
+            getComponent().removeItemListener(listener);
+
+        getComponent().addItemListener(action::accept);
+
+        for (ItemListener listener : listeners)
+            getComponent().addItemListener(listener);
+        /*
+            The reasoning behind why Swing calls item listeners from last to first is
+            the assumption that the last listener added is more interested in the event
+            than the first listener added.
+            This however is an unintuitive assumption, meaning a user would expect
+            the first listener added to be the most interested in the event
+            simply because it was added first.
+            This is especially true in the context of declarative UI design.
+         */
     }
 
     /**
