@@ -140,8 +140,26 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
 
     /**
      *  Use this to dynamically bind to a {@link com.globaltcad.swingtree.api.mvvm.Var}
+     *  instance which will be used to dynamically model the inverse selection state of the
+     *  wrapped {@link AbstractButton} type.
+     *
+     * @param selected The {@link com.globaltcad.swingtree.api.mvvm.Var} instance which will be used to
+     *                 model the inverse selection state of the wrapped button type.
+     * @throws IllegalArgumentException if {@code selected} is {@code null}.
+     */
+    public final I isSelectedIfNot( Val<Boolean> selected ) {
+        NullUtil.nullArgCheck(selected, "selected", Val.class);
+        NullUtil.nullPropertyCheck(selected, "selected", "Null can not be used to model the selection state of a button type.");
+        _onShow(selected, v -> getComponent().setSelected(!v) );
+        return isSelectedIf( !selected.orElseThrow() );
+    }
+
+    /**
+     *  Use this to dynamically bind to a {@link com.globaltcad.swingtree.api.mvvm.Var}
      *  instance which will be used to dynamically model the selection state of the
      *  wrapped {@link AbstractButton} type.
+     *
+     * @param selected The {@link com.globaltcad.swingtree.api.mvvm.Var} instance which will be used to model the selection state of the wrapped button type.
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final I isSelectedIf( Var<Boolean> selected ) {
@@ -152,6 +170,25 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
             e -> _doApp(getComponent().isSelected(), selected::act)
         );
         return isSelectedIf( selected.orElseThrow() );
+    }
+
+    /**
+     *  Use this to dynamically bind to a {@link com.globaltcad.swingtree.api.mvvm.Var}
+     *  instance which will be used to dynamically model the inverse selection state of the
+     *  wrapped {@link AbstractButton} type.
+     *
+     * @param selected The {@link com.globaltcad.swingtree.api.mvvm.Var} instance which will be used to
+     *                 model the inverse selection state of the wrapped button type.
+     * @throws IllegalArgumentException if {@code selected} is {@code null}.
+     */
+    public final I isSelectedIfNot( Var<Boolean> selected ) {
+        NullUtil.nullArgCheck(selected, "selected", Var.class);
+        NullUtil.nullPropertyCheck(selected, "selected", "Null can not be used to model the selection state of a button type.");
+        _onShow(selected, v -> getComponent().setSelected(!v) );
+        _onClick(
+            e -> _doApp(!getComponent().isSelected(), selected::act)
+        );
+        return isSelectedIf( !selected.orElseThrow() );
     }
 
     /**
