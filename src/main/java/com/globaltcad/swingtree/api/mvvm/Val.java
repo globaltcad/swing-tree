@@ -237,6 +237,23 @@ public interface Val<T>
 	}
 
 	/**
+	 *  This method check if at least one of the provided values is equal to
+	 *  the value wrapped by this {@link Var} instance.
+	 *
+	 * @param first The first value of the same type as is wrapped by this.
+	 * @param second The second value of the same type as is wrapped by this.
+	 * @param otherValues The other values of the same type as is wrapped by this.
+	 * @return The truth value determining if the provided value is equal to the wrapped value.
+	 */
+	default boolean isOneOf( T first, T second, T... otherValues ) {
+		if ( this.is(first) ) return true;
+		if ( this.is(second) ) return true;
+		for ( T otherValue : otherValues )
+			if ( this.is(otherValue) ) return true;
+		return false;
+	}
+
+	/**
 	 *  This returns the name/id of the {@link Var} which is useful for debugging as well as
 	 *  persisting their state by using them as keys for whatever storage data structure one chooses.
 	 *
