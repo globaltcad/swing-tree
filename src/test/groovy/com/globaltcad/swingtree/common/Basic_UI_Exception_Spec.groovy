@@ -137,6 +137,8 @@ class Basic_UI_Exception_Spec extends Specification
                     { UI.radioButton(Val.ofNullable(String,"")) },
                     { UI.radioButton("Hi!",Var.ofNullable(Boolean,true)) },
                     { UI.radioButton(Val.ofNullable(String,""),Var.ofNullable(Boolean,true)) },
+                    { UI.radioButton((Enum)null, Var.ofNullable(Enum.class, (Enum)null)) },
+                    { UI.radioButton("Hi").isSelectedIf((Enum)null, Var.ofNullable(Enum.class, (Enum)null)) },
                     { UI.checkBox(Val.ofNullable(String,"")) },
                     { UI.checkBox("Done!", Var.ofNullable(Boolean,true)) },
                     { UI.checkBox(Val.ofNullable(String,""), Var.ofNullable(Boolean,true)) },

@@ -1642,6 +1642,7 @@ public final class UI
      *
      * @param text The text which should be displayed on the checkbox.
      * @return A builder instance for the checkbox, which enables fluent method chaining.
+     * @throws IllegalArgumentException If the provided text is null.
      */
     public static UIForCheckBox<JCheckBox> checkBox( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
@@ -1654,6 +1655,7 @@ public final class UI
      *
      * @param text The text property which should be bound to the checkbox.
      * @return A builder instance for the checkbox, which enables fluent method chaining.
+     * @throws IllegalArgumentException If the provided text property is null.
      */
     public static UIForCheckBox<JCheckBox> checkBox( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
@@ -1673,6 +1675,7 @@ public final class UI
      *             This is the text which is displayed on the checkbox.
      * @param isChecked The selection property which should be bound to the checkbox and determines whether it is selected or not.
      * @return A builder instance for the checkbox, which enables fluent method chaining.
+     * @throws IllegalArgumentException If the provided text property is null.
      */
     public static UIForCheckBox<JCheckBox> checkBox( Val<String> text, Var<Boolean> isChecked ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
@@ -1693,6 +1696,7 @@ public final class UI
      *  @param text The text which should be displayed on the checkbox.
      *  @param isChecked The selection property which should be bound to the checkbox and determines whether it is selected or not.
      *  @return A builder instance for the checkbox, which enables fluent method chaining.
+     *  @throws IllegalArgumentException If the provided text is null.
      */
     public static UIForCheckBox<JCheckBox> checkBox( String text, Var<Boolean> isChecked ) {
         NullUtil.nullArgCheck(text, "text", String.class);
@@ -1708,6 +1712,7 @@ public final class UI
      *  Use this to create a builder for the provided {@link JCheckBox} instance.
      *
      * @return A builder instance for the provided {@link JCheckBox}, which enables fluent method chaining.
+     * @throws IllegalArgumentException If the provided checkbox is null.
      */
     public static <B extends JCheckBox> UIForCheckBox<B> of( B component ) {
         NullUtil.nullArgCheck(component, "component", JCheckBox.class);
@@ -1720,6 +1725,7 @@ public final class UI
      *
      * @param text The text which should be displayed on the radio button.
      * @return A builder instance for the radio button, which enables fluent method chaining.
+     * @throws IllegalArgumentException If the provided text is null.
      */
     public static UIForRadioButton<JRadioButton> radioButton( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
@@ -1751,6 +1757,7 @@ public final class UI
      *             This is the text which is displayed on the radio button.
      * @param selected The selection property which should be bound to the radio button and determines whether it is selected or not.
      * @return A builder instance for the radio button, which enables fluent method chaining.
+     * @throws IllegalArgumentException If the provided text property is null.
      */
     public static UIForRadioButton<JRadioButton> radioButton( Val<String> text, Var<Boolean> selected ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
@@ -1771,6 +1778,7 @@ public final class UI
      *  @param text The text which should be displayed on the radio button.
      *  @param selected The selection property which should be bound to the radio button and determines whether it is selected or not.
      *  @return A builder instance for the radio button, which enables fluent method chaining.
+     *  @throws IllegalArgumentException If the provided text is null.
      */
     public static UIForRadioButton<JRadioButton> radioButton( String text, Var<Boolean> selected ) {
         NullUtil.nullArgCheck(text, "text", String.class);
@@ -1779,6 +1787,28 @@ public final class UI
         return of(new JRadioButton())
                 .withText(text)
                 .isSelectedIf(selected);
+    }
+
+    /**
+     *  Creates a builder node wrapping a new {@link JRadioButton} instance
+     *  dynamically bound to an enum based {@link com.globaltcad.swingtree.api.mvvm.Var}
+     *  instance which will be used to dynamically model the selection state of the
+     *  wrapped {@link JToggleButton} type by checking
+     *  weather the property matches the provided enum or not.
+     *
+     * @param state The reference {@link Enum} which this {@link JToggleButton} should represent.
+     * @param selection The {@link com.globaltcad.swingtree.api.mvvm.Var} instance which will be used
+     *                  to dynamically model the selection state of the wrapped {@link JToggleButton} type.
+     * @return A builder instance for the radio button, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code selected} is {@code null}.
+     */
+    public static <E extends Enum<E>> UIForRadioButton<JRadioButton> radioButton( E state, Var<E> selection ) {
+        NullUtil.nullArgCheck(state, "state", Enum.class);
+        NullUtil.nullArgCheck(selection, "selection", Var.class);
+        NullUtil.nullPropertyCheck(selection, "selection", "The selection state of a radio button may not be modelled using null!");
+        return of(new JRadioButton())
+                .applyIf(!selection.hasNoID(), it -> it.id(selection.id()))
+                .isSelectedIf( state, selection );
     }
 
     /**
