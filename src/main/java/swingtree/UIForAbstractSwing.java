@@ -7,6 +7,7 @@ import swingtree.api.UIVerifier;
 import swingtree.api.mvvm.ActionDelegate;
 import swingtree.api.mvvm.DisplayAction;
 import swingtree.api.mvvm.Val;
+import swingtree.api.mvvm.Viewable;
 import swingtree.input.Keyboard;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
@@ -93,6 +94,35 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
             }
             @Override public boolean canBeRemoved() { return !component().isPresent(); }
         });
+    }
+
+    /**
+     *  This allows you to bind to a {@link swingtree.api.mvvm.Viewable}
+     *  implementation and automatically update the view when the view model changes.
+     *
+     * @param viewable A {@link swingtree.api.mvvm.Val} property which holds a {@link swingtree.api.mvvm.Viewable} instance
+     *        that will be used to generate the view.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I add( Val<Viewable> viewable ) {
+        NullUtil.nullArgCheck(viewable, "viewable", Val.class);
+        // First we remember the index of the component which will be provided by the viewable dynamically.
+        final int index = _childCount();
+        // Then we add the component provided by the viewable to the list of children.
+        this.add(viewable.get().createView());
+        // Finally we add a listener to the viewable which will update the component when the viewable changes.
+        _onShow(viewable, v -> {
+            component().ifPresent( c -> {
+                // We remove the old component.
+                c.remove(c.getComponent(index));
+                // We add the new component.
+                c.add(v.createView(), index);
+                // We update the layout.
+                c.revalidate();
+                c.repaint();
+            });
+        });
+        return _this();
     }
 
     /**

@@ -4,19 +4,19 @@
   "narrative":"Swing-Tree allows you to create a Model-View-ViewModel (MVVM) architecture\n    based on 2 simple property interfaces: `Val`, and `Var`!\n\n    `Val` is a read-only property, and `Var` is a read-write property.\n\n    The state of both properties can be observed by the view using simple listeners.\n    This happens automatically when you pass them to the Swing-Tree view.\n    If you want to trigger an action when the property changes, you \n    have to pass the `Var` property to the view and define a action\n    for it inside of your view model.",
   "subjects":[],
   "statistics":{
-    "runs":"12",
+    "runs":"13",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.409 seconds"
+    "duration":"0.528 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can create a property based view model and build a view for it.",
       "result":"PASS",
-      "duration":"0.006 seconds",
+      "duration":"0.009 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that we use a pre-made example view model here.\n            Feel free to look at the source code of the view model\n            to see what it is doing.\n        "]
       },
@@ -33,7 +33,7 @@
     {
       "id":"We can bind a boolean property to a button, and when the user presses it, we notice it.",
       "result":"PASS",
-      "duration":"0.074 seconds",
+      "duration":"0.082 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -54,7 +54,7 @@
     {
       "id":"Binding to the selection state of a button does nothing, because a JButton can only be pressed.",
       "result":"PASS",
-      "duration":"0.070 seconds",
+      "duration":"0.078 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -75,7 +75,7 @@
     {
       "id":"We can bind a boolean property to a checkbox, and when the user presses it, we notice it.",
       "result":"PASS",
-      "duration":"0.072 seconds",
+      "duration":"0.084 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -96,7 +96,7 @@
     {
       "id":"We can bind a boolean property to a radio button, and when the user presses it, we notice it.",
       "result":"PASS",
-      "duration":"0.068 seconds",
+      "duration":"0.069 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -117,7 +117,7 @@
     {
       "id":"We can bind a boolean property to a toggle button, and when the user presses it, we notice it.",
       "result":"PASS",
-      "duration":"0.072 seconds",
+      "duration":"0.081 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -138,7 +138,7 @@
     {
       "id":"We can bind a enum property to a combo box and when the user selects an item, we notice it.",
       "result":"PASS",
-      "duration":"0.017 seconds",
+      "duration":"0.037 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n        "]
       },
@@ -163,7 +163,7 @@
     {
       "id":"An enum based combo box can infer its possible states directly from the binding property.",
       "result":"PASS",
-      "duration":"0.006 seconds",
+      "duration":"0.012 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n        "]
       },
@@ -188,7 +188,7 @@
     {
       "id":"A string property can be bound to a combo box holding string elements.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n            In the example below you can see how the usage of a string property\n            makes sense, because there might be requirements to add new food items\n            to the combo box at runtime.\n        "]
       },
@@ -211,7 +211,7 @@
     {
       "id":"A simple list of elements can be used as a data model for a combo box.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Always prefer Enums over Strings but if you have to model generic data\n            you can always bind a simple list of elements as a data model to a combo box.\n        "]
       },
@@ -234,7 +234,7 @@
     {
       "id":"A simple array of elements can be used as a data model for a combo box.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Always prefer Enums over Strings but if you have to model generic data\n            you can always bind a simple array of elements as a data model to a combo box.\n        "]
       },
@@ -257,7 +257,7 @@
     {
       "id":"You can bind a property as the current selection as well as list of elements as options to a combo box.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -283,6 +283,31 @@
         {"kind":"when","text":"We modify the selection...","code":["selected.set(\"Seitan\")"]},
 
         {"kind":"then","text":"The combo box has the correct selection.","code":["ui.component.selectedItem == selected.orElseNull()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"View Models can be represented by properties.",
+      "result":"PASS",
+      "duration":"0.024 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            In larger GUIs usually consist views which themselves consist of multiple\n            sub views. This is also true for their view models which are usually\n            structured in the same tree like fashion. \n            Often times however, your views are highly dynamic and you want to\n            be able to swap out sub views at runtime. In this case it is useful\n            to represent your view models as properties. \n            Simply implement the 'Viewable' interface in your view model and\n            you can bind it to a view.\n            When the property changes, the view will be updated automatically.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a view model.","code":["Var<String> name = Var.of(\"Tofu\")","Var<Integer> population = Var.of(4)","var vm1 = new Viewable() {","    @Override","    JComponent createView() {","        return UI.panel().id(\"sub-1\")","                .add(UI.label(\"Name:\"))","                .add(UI.textField(name))","                .add(UI.button(\"Update\").onClick { name.set(\"Tempeh\") })","                .component","    }","}","var vm2 = new Viewable() {","    @Override","    JComponent createView() {","        return UI.panel().id(\"sub-2\")","                .add(UI.label(\"Population:\"))","                .add(UI.slider(UI.Align.HORIZONTAL).withValue(population))","                .add(UI.button(\"Update\").onClick { population.set(5) })","                .component","    }","}"]},
+
+        {"kind":"and","text":"A property storing the first view model.","code":["Var<Viewable> vm = Var.of(vm1)"]},
+
+        {"kind":"and","text":"Finally a view which binds to the view model property.","code":["var ui = UI.panel()","        .add(UI.label(\"Dynamic Super View:\"))","        .add(UI.panel().id(\"super\").add(vm))"]},
+
+        {"kind":"expect","text":"We query the UI for the views and verify that the \"super\" and \"sub-1\" views are present.","code":["new Utility.Query(ui).find(JPanel, \"super\").isPresent()","new Utility.Query(ui).find(JPanel, \"sub-1\").isPresent()","!new Utility.Query(ui).find(JPanel, \"sub-2\").isPresent()"]},
+
+        {"kind":"when","text":"We update the view model property.","code":["vm.set(vm2)","UI.sync()"]},
+
+        {"kind":"then","text":"The \"sub-1\" view is removed and the \"sub-2\" view is added.","code":["!new Utility.Query(ui).find(JPanel, \"sub-1\").isPresent()","new Utility.Query(ui).find(JPanel, \"sub-2\").isPresent()"]},
+
+        {"kind":"and","text":"The \"super\" view is still present.","code":["new Utility.Query(ui).find(JPanel, \"super\").isPresent()"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

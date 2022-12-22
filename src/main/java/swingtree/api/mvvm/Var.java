@@ -73,6 +73,10 @@ public interface Var<T> extends Val<T>
 		return new AbstractVariable<T>( (Class<T>) iniValue.getClass(), iniValue, UNNAMED, null, false ){};
 	}
 
+	static Var<Viewable> of( Viewable iniValue ) {
+		Objects.requireNonNull(iniValue);
+		return new AbstractVariable<Viewable>( Viewable.class, iniValue, UNNAMED, null, false ){};
+	}
 	
 	/**
 	 *  This method provides the ability to change the state of the wrapper.

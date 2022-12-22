@@ -39,12 +39,12 @@ public abstract class AbstractVariable<T> implements Var<T>
 	) {
 		Objects.requireNonNull(name);
 		_value = iniValue;
-		_type = ( iniValue == null ? type : (Class<T>) iniValue.getClass());
+		_type = ( iniValue == null || type != null ? type : (Class<T>) iniValue.getClass());
 		_id = name;
 		_action = ( action == null ? v -> {} : action );
 		if ( _value != null ) {
 			// We check if the type is correct
-			if ( !type.isAssignableFrom(_value.getClass()) )
+			if ( !_type.isAssignableFrom(_value.getClass()) )
 				throw new IllegalArgumentException(
 						"The provided type of the initial value is not compatible with the actual type of the variable"
 					);

@@ -113,7 +113,6 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
         return _this();
     }
 
-
     /**
      *  This builder class expects its implementations to be builder types
      *  for anything which can be built in a nested tree-like structure.
@@ -130,5 +129,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
 
         return _this();
     }
+
+    protected final int _childCount() { return _children.size(); }
 
 }

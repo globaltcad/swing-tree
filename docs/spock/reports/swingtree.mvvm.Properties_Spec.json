@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.119 seconds"
+    "duration":"0.117 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -85,7 +85,7 @@
     {
       "id":"Properties can be bound by subscribing to them using the \"onShow(..)\" method.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that bound Swing-Tree properties only have side effects\n            when they are deliberately triggered to execute their side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
       },
@@ -108,7 +108,7 @@
     {
       "id":"Properties not only have a value but also a type and id!",
       "result":"PASS",
-      "duration":"0.009 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -146,7 +146,7 @@
     {
       "id":"The \"withID(..)\" method produces a new property with all bindings inherited.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The wither methods on properties are used to create new property instances\n            with the same value and bindings as the original property\n            but without side effects of the original property.\n            So if you add bindings to a withered property they will not affect the original property.\n        "]
       },
@@ -177,7 +177,7 @@
     {
       "id":"Properties are similar to the \"Optional\" class, you can map them and see if they are empty or not.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -310,7 +310,7 @@
     {
       "id":"The delegate of a property action exposes the current as well as the previous state of the property.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -392,7 +392,7 @@
     {
       "id":"The string representation of a property will give you all the information you need.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The string representation of a property will tell you the \n            the current state, type and id of the property.\n        "]
       },
@@ -411,7 +411,7 @@
     {
       "id":"A property can be converted to an Optional.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            A property can be converted to an Optional using the \"toOptional()\" method.\n            This is useful when you want to use the Optional API to query the state of the property.\n        "]
       },

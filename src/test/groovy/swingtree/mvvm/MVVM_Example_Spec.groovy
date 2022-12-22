@@ -1,11 +1,15 @@
 package swingtree.mvvm
 
-import swingtree.UI
-import swingtree.api.mvvm.Var
 import example.LoginViewModel
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
+import swingtree.UI
+import swingtree.Utility
+import swingtree.api.mvvm.Var
+import swingtree.api.mvvm.Viewable
+
+import javax.swing.*
 
 @Title("MVVM Introduction")
 @Narrative('''
@@ -307,6 +311,63 @@ class MVVM_Example_Spec extends Specification
             selected.set("Seitan")
         then : 'The combo box has the correct selection.'
             ui.component.selectedItem == selected.orElseNull()
+    }
+
+    def 'View Models can be represented by properties.'()
+    {
+        reportInfo """
+            In larger GUIs usually consist views which themselves consist of multiple
+            sub views. This is also true for their view models which are usually
+            structured in the same tree like fashion. 
+            Often times however, your views are highly dynamic and you want to
+            be able to swap out sub views at runtime. In this case it is useful
+            to represent your view models as properties. 
+            Simply implement the 'Viewable' interface in your view model and
+            you can bind it to a view.
+            When the property changes, the view will be updated automatically.
+        """
+        given : 'We create a view model.'
+            Var<String> name = Var.of("Tofu")
+            Var<Integer> population = Var.of(4)
+
+            var vm1 = new Viewable() {
+                @Override
+                JComponent createView() {
+                    return UI.panel().id("sub-1")
+                            .add(UI.label("Name:"))
+                            .add(UI.textField(name))
+                            .add(UI.button("Update").onClick { name.set("Tempeh") })
+                            .component
+                }
+            }
+            var vm2 = new Viewable() {
+                @Override
+                JComponent createView() {
+                    return UI.panel().id("sub-2")
+                            .add(UI.label("Population:"))
+                            .add(UI.slider(UI.Align.HORIZONTAL).withValue(population))
+                            .add(UI.button("Update").onClick { population.set(5) })
+                            .component
+                }
+            }
+        and : 'A property storing the first view model.'
+            Var<Viewable> vm = Var.of(vm1)
+        and : 'Finally a view which binds to the view model property.'
+            var ui = UI.panel()
+                    .add(UI.label("Dynamic Super View:"))
+                    .add(UI.panel().id("super").add(vm))
+        expect : 'We query the UI for the views and verify that the "super" and "sub-1" views are present.'
+            new Utility.Query(ui).find(JPanel, "super").isPresent()
+            new Utility.Query(ui).find(JPanel, "sub-1").isPresent()
+            !new Utility.Query(ui).find(JPanel, "sub-2").isPresent()
+        when : 'We update the view model property.'
+            vm.set(vm2)
+            UI.sync()
+        then : 'The "sub-1" view is removed and the "sub-2" view is added.'
+            !new Utility.Query(ui).find(JPanel, "sub-1").isPresent()
+            new Utility.Query(ui).find(JPanel, "sub-2").isPresent()
+        and : 'The "super" view is still present.'
+            new Utility.Query(ui).find(JPanel, "super").isPresent()
     }
 
     private static enum Size

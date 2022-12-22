@@ -61,6 +61,10 @@ public class Utility {
 
         public Query(Component current) { _current = current; }
 
+        public Query(UIForAbstractSwing ui) {
+            this(ui.getComponent());
+        }
+
         public <C extends Component> Optional<C> find(Class<C> type, String id) {
             if ( !_tree.containsKey(id) ) {
                 _tree.clear();
