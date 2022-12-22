@@ -271,6 +271,14 @@ public final class UI
             }
             throw new RuntimeException();
         }
+
+        int forToolBar() {
+            switch ( this ) {
+                case HORIZONTAL: return JToolBar.HORIZONTAL;
+                case VERTICAL  : return JToolBar.VERTICAL;
+            }
+            throw new RuntimeException();
+        }
     }
 
     /**
@@ -937,6 +945,76 @@ public final class UI
     public static UIForMenuItem<JMenuItem> menuItem( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         return new UIForMenuItem<>(new JMenuItem()).withText(text);
+    }
+
+
+    /**
+     *  Use this to create a builder for the provided {@link JToolBar} instance.
+     *  Using method chaining you can populate the {@link JToolBar} by like so: <br>
+     *  <pre>{@code
+     *    UI.of(myToolBar)
+     *    .add(UI.button("X"))
+     *    .add(UI.button("Y"))
+     *    .add(UI.button("Z"))
+     *    .addSeparator()
+     *    .add(UI.button("A"))
+     *  }</pre>
+     *  <br>
+     * @param component The {@link JToolBar} instance to be wrapped.
+     * @param <T> The type of the {@link JToolBar} instance to be wrapped.
+     * @return A builder instance for the provided {@link JToolBar}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
+     */
+    public static <T extends JToolBar> UIForToolBar<T> of( T component ) {
+        NullUtil.nullArgCheck(component, "component", JToolBar.class);
+        return new UIForToolBar<>(component);
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JToolBar} instance.
+     *  Use method chaining to add buttons or other components to a {@link JToolBar} by
+     *  passing them to {@link UIForToolBar} builder like so: <br>
+     *  <pre>{@code
+     *    UI.toolBar()
+     *    .add(UI.button("X"))
+     *    .add(UI.button("Y"))
+     *    .add(UI.button("Z"))
+     *    .addSeparator()
+     *    .add(UI.button("A"))
+     *  }</pre>
+     *  <br>
+     * @return A builder instance for the provided {@link JToolBar}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
+     */
+    public static UIForToolBar<JToolBar> toolBar() {
+        return new UIForToolBar<>(new JToolBar());
+    }
+
+    /**
+     *  A factory method for creating a {@link JToolBar} instance where
+     *  the provided {@link Align} enum defines the orientation of the {@link JToolBar}.
+     *
+     * @param align The {@link Align} enum which defines the orientation of the {@link JToolBar}.
+     * @return A builder instance for the provided {@link JToolBar}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     */
+    public static UIForToolBar<JToolBar> toolBar( Align align ) {
+        NullUtil.nullArgCheck(align, "align", Align.class);
+        return new UIForToolBar<>(new JToolBar()).with(align);
+    }
+
+    /**
+     *  A factory method for creating a {@link JToolBar} instance where
+     *  the provided {@link Val} property dynamically defines
+     *  the orientation of the {@link JToolBar}
+     *
+     * @param align The {@link Val} property which dynamically defines the orientation of the {@link JToolBar}.
+     * @return A builder instance for the provided {@link JToolBar}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     */
+    public static UIForToolBar<JToolBar> toolBar( Val<Align> align ) {
+        NullUtil.nullArgCheck(align, "align", Val.class);
+        return new UIForToolBar<>(new JToolBar()).withAlignment(align);
     }
 
     /**

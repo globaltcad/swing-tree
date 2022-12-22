@@ -112,7 +112,9 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.panel((String)null, (String)null)},
                     {UI.panel((String)null, (String)null, (String)null)},
                     {UI.panel((LayoutAttr)null)},
-                    {UI.panel((Val<LayoutAttr>)null)}
+                    {UI.panel((Val<LayoutAttr>)null)},
+                    {UI.toolBar((UI.Align)null)},
+                    {UI.toolBar((Val)null)}
             ]
     }
 
