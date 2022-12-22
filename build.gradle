@@ -15,7 +15,7 @@ plugins {
 
 String GROUP_ID = "com.globaltcad"
 String PROJECT  = "swingtree"
-String VERSION  = "0.0.0"
+String VERSION  = "1.0.0"
 
 group GROUP_ID
 archivesBaseName = PROJECT
@@ -88,33 +88,34 @@ def deleteFilesIn(String path) {
         delete file
 }
 
+// 1: Cleanup
 task cleanForDeployment(type: Delete) {
     delete "$rootDir/build"
     deleteFilesIn("$rootDir/docs/jdocs")
     deleteFilesIn("$rootDir/docs/spock/reports" )
 }
 
+// 2:
 task deploy() {
 
     // Expected before : dependsOn 'cleanForDeployment'
 
     dependsOn 'check'
     dependsOn 'jar'
+    //dependsOn 'proguard'
     dependsOn 'javadoc'
     dependsOn 'releaseJDocs'
-    dependsOn 'releaseSpockReports'
 
-    // Expected after : dependsOn 'injectSpockStyles'
 }
+// 3:
+//     execute publishToSonatype
+//     go to https://oss.sonatype.org/#stagingRepositories
+//     close and release the repository
+
 
 task releaseJDocs(type: Copy) {
     from "$rootDir/build/docs/javadoc"
     into "$rootDir/docs/jdocs"
-}
-
-task releaseSpockReports(type: Copy) {
-    from "$rootDir/build/spock-reports"
-    into "$rootDir/docs/spock/reports"
 }
 
 // JAR CREATION :
@@ -188,7 +189,7 @@ publishing {
             from(components.java)
             pom {
                 name = PROJECT
-                description = 'A swing UI builder library.'
+                description = 'A library for building declarative Swing GUIs.'
                 url = 'https://globaltcad.github.io/'+PROJECT+'/index.html'
                 organization {
                     name = 'com.globaltcad'
@@ -206,9 +207,14 @@ publishing {
                 }
                 developers {
                     developer {
+                        id = "hdemel"
+                        name = "Harald Demel"
+                        email = "h.demel@globaltcad.com"
+                    }
+                    developer {
                         id = "dnepp"
                         name = "Daniel Nepp"
-                        email = "dnepp@globaltcad.com"
+                        email = "d.nepp@globaltcad.com"
                     }
                 }
                 scm {
