@@ -285,12 +285,21 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
         public DocumentFilter.FilterBypass getFilterBypass() { return filterBypass; }
         public int getOffset() { return offset; }
         public int getLength() { return length; }
+
     }
 
     public static final class RemoveDelegate extends AbstractDelegate
     {
         private RemoveDelegate(JTextComponent textComponent, DocumentFilter.FilterBypass filterBypass, int offset, int length) {
             super(textComponent, filterBypass, offset, length);
+        }
+
+        public String getTextToBeRemoved() {
+            try {
+                return getComponent().getDocument().getText(getOffset(), getLength());
+            } catch (BadLocationException e) {
+                throw new IllegalStateException("Could not get text to be removed!", e);
+            }
         }
     }
 
@@ -304,7 +313,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
             this.text = text;
             this.attributeSet = attributeSet;
         }
-        public String text() { return text; }
+        public String getTextToBeInserted() { return text; }
         public AttributeSet attributeSet() { return attributeSet; }
     }
 
@@ -319,6 +328,13 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
             this.attributeSet = attributeSet;
         }
         public String getText() { return text; }
+        public String getReplacementText() {
+            try {
+                return getComponent().getDocument().getText(getOffset(), getLength());
+            } catch (BadLocationException e) {
+                throw new IllegalStateException("Could not get text to be removed!", e);
+            }
+        }
         public AttributeSet getAttributeSet() { return attributeSet; }
     }
 
