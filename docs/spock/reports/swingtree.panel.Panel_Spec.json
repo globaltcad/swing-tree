@@ -33,7 +33,7 @@
     {
       "id":"A panel can be created with a layout manager.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -67,7 +67,7 @@
     {
       "id":"The dimensions of a panel can be bound to a property.",
       "result":"PASS",
-      "duration":"0.013 seconds",
+      "duration":"0.014 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.204 seconds"
+    "duration":"0.209 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can nest JPanel UI nodes to structure UIs.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"0.007 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Just like in regular Swing, the JPanel is the most basic \n            yet most important type of component in Swing-Tree\n            and you can create one using the `UI.panel()` factory method. \n            Don't hesitate to use as the main tool for grouping and structuring\n            your UI, just like you would use the 'div' tag in HTML.\n        "]
       },
@@ -35,7 +35,7 @@
     {
       "id":"We can add a list of components to the swing tree API and get a builder node in return.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Just like in regular Swing, the JPanel is the most basic \n            yet most important type of component in Swing-Tree\n            and you can create one using the `UI.panel()` factory method. \n            Don't hesitate to use as the main tool for grouping and structuring\n            your UI, just like you would use the 'div' tag in HTML.\n        "]
       },
@@ -56,7 +56,7 @@
     {
       "id":"Swing tree nests all kinds of components (trough builder nodes).",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Swing tree wraps you components in builder nodes, so you can\n            use the same API to add any kind of component to your UI.\n            Use the `UI.of(..)` factory method to wrap your components\n            or simply use the various kinds of default factory methods like\n             `UI.panel()`, `UI.button()`, `UI.label()` etc.\n        "]
       },
@@ -85,7 +85,7 @@
     {
       "id":"We can easily define the cursor on a wrapped UI component",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -178,7 +178,7 @@
     {
       "id":"We can register list selection events on a JList based swing tree node.",
       "result":"PASS",
-      "duration":"0.012 seconds",
+      "duration":"0.010 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The Swing-Tree API exposes various methods to register different kinds of Swing component\n            events, like for example list selection events. \n            All such event registration methods can be identified by the 'on' prefix.\n        "]
       },
@@ -208,7 +208,7 @@
     {
       "id":"A tabbed pane can be created and populated in a declarative way.",
       "result":"PASS",
-      "duration":"0.022 seconds",
+      "duration":"0.021 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Although Swing has the JTabbedPane component as a collection of tabs, \n            there is no abstraction defining a tab on its own.\n            The Swing-Tree API provides a Tab class that allows you to define\n            a tab and its content in a more intuitive as well as declarative manner\n            with tab specific properties and event handlers.\n        "]
       },
