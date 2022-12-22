@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">AbstractBuilder.java</span></div><h1>AbstractBuilder.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import swingtree.api.Peeker;
+
+import java.awt.*;
+import java.lang.ref.WeakReference;
+import java.util.Optional;
+import java.util.function.Consumer;
+
+/**
+ *  This is the root builder type for all other builder subtypes.
+ *  It is a generic builder which may wrap anything to allow for method chaining based building!
+ *
+ * @param &lt;I&gt; The concrete implementation type of this builder.
+ * @param &lt;C&gt; The component type parameter.
+ */
+<span class="pc bpc" id="L17" title="1 of 2 branches missed.">abstract class AbstractBuilder&lt;I, C extends Component&gt;</span>
+{
+    /**
+     *  The component wrapped by this builder node.
+     */
+    private final WeakReference&lt;C&gt; _component;
+    private C _componentStrongRef; // A strong reference to the component (This is only used to prevent the component from being garbage collected)
+
+    /**
+     * The thread mode determines how events are dispatched to the component.
+     * And also which type of thread can access the component.
+     */
+<span class="fc" id="L29">    protected final EventProcessor _eventProcessor = UI.SETTINGS().getEventProcessor();</span>
+
+    /**
+     *  The type class of the component wrapped by this builder node.
+     *  See documentation for method &quot;build&quot; for more information.
+     */
+    protected final Class&lt;C&gt; _type;
+
+    /**
+     *  Instances of the {@link AbstractBuilder} as well as its sub types always wrap
+     *  a single component for which they are responsible.
+     *
+     * @param component The component type which will be wrapped by this builder node.
+     */
+<span class="fc" id="L43">    public AbstractBuilder( C component ) {</span>
+<span class="fc" id="L44">        _type = (Class&lt;C&gt;) component.getClass();</span>
+<span class="fc" id="L45">        _component = new WeakReference&lt;&gt;(component);</span>
+<span class="fc" id="L46">        _componentStrongRef = component;</span>
+<span class="fc" id="L47">    }</span>
+
+<span class="fc" id="L49">    protected final I _this() { return (I) this; }</span>
+
+<span class="fc" id="L51">    protected final void _detachStrongRef() { _componentStrongRef = null; }</span>
+
+    /**
+     *  The component wrapped by this builder node.
+     */
+    public final C getComponent() {
+<span class="fc bfc" id="L57" title="All 4 branches covered.">        if ( _eventProcessor != EventProcessor.COUPLED &amp;&amp; !UI.thisIsUIThread() )</span>
+<span class="fc" id="L58">            throw new IllegalStateException(</span>
+                    &quot;This UI is configured to be decoupled from the application thread, &quot; +
+                    &quot;which means that it can only be modified from the EDT. &quot; +
+                    &quot;Please use 'UI.run(()-&gt;...)' method to execute your modifications on the EDT.&quot;
+                );
+<span class="fc" id="L63">        return _component.get();</span>
+    }
+
+    /**
+     *  The optional component wrapped by this builder node.
+     */
+<span class="fc" id="L69">    public final OptionalUI&lt;C&gt; component() { return OptionalUI.ofNullable(_component.get()); }</span>
+
+    /**
+     *  The type class of the component wrapped by this builder node.
+     *  See documentation for method &quot;build&quot; for more information.
+     */
+<span class="nc" id="L75">    public final Class&lt;C&gt; getType() { return _type; }</span>
+
+    /**
+     *  Use this if you wish to access the component wrapped by this builder directly.
+     *  This is useful for more fine-grained control, like for example calling
+     *  methods like &quot;setName&quot;, &quot;setTitle&quot;, and so on... &lt;br&gt;
+     *  This method accepts a lambda to which the component wrapped by this builder will be supplied.
+     *  The lambda can then call said methods or perform other tasks which
+     *  might be relevant to the component while also not
+     *  breaking the benefits of nesting and method chaining provided by this class...
+     *  &lt;br&gt;
+     *  The below example shows how this method allows for more fine-grained control over the wrapped component:
+     *  &lt;pre&gt;{@code
+     *      UI.panel()
+     *          peek( panel -&gt; panel.setDebugGraphicsOptions(true) );
+     *  }&lt;/pre&gt;
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param action A Consumer lambda which simply returned the wrapped JComponent type for interacting it.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I peek( Peeker&lt;C&gt; action ) {
+<span class="fc" id="L97">        action.accept(getComponent());</span>
+<span class="fc" id="L98">        return _this();</span>
+    }
+
+    /**
+     *  Use this to build or not build UI, based on a boolean condition value and a consumer
+     *  lambda which continues the building process if the previous boolean is true.
+     *  This builder will simply be supplied to the provided consumer lambda.
+     *  Inside the second lambda, one can then continue building the UI while also not
+     *  breaking the benefits of nesting and method chaining provided by this class...
+     *  &lt;p&gt;
+     *  This isin essence a more advanced version of {@link #apply(Consumer)}.
+     *  &lt;br&gt;
+     *
+     * @param condition The truth value which determines if the second consumer lambda will be executed.
+     * @param building A Consumer lambda which simply consumes this builder.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I applyIf( boolean condition, Consumer&lt;I&gt; building ) {
+<span class="fc" id="L116">        NullUtil.nullArgCheck(building, &quot;building&quot;, Consumer.class);</span>
+<span class="fc" id="L117">        I builder = _this();</span>
+<span class="fc bfc" id="L118" title="All 2 branches covered.">        if ( condition ) building.accept(builder);</span>
+<span class="fc" id="L119">        return builder;</span>
+    }
+
+
+    /**
+     *  Use this to build or not build UI, based on a provided {@link Optional} representing a consumer
+     *  lambda which continues the building process if is is present within the optional.
+     *  This builder will simply be supplied to the provided consumer lambda.
+     *  Inside the second lambda, one can then continue building the UI while also not
+     *  breaking the benefits of nesting and method chaining provided by this class...
+     *  &lt;p&gt;
+     *  This is in essence a more advanced version of {@link #applyIf(boolean, Consumer)}
+     *  and {@link #apply(Consumer)}.
+     *  &lt;br&gt;
+     *
+     * @param building An optional consumer lambda which simply consumes this builder node.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I applyIfPresent( Optional&lt;Consumer&lt;I&gt;&gt; building ) {
+<span class="fc" id="L138">        NullUtil.nullArgCheck(building, &quot;building&quot;, Optional.class);</span>
+<span class="fc" id="L139">        I builder = _this();</span>
+<span class="pc" id="L140">        building.ifPresent( buildingLambda -&gt; buildingLambda.accept(builder) );</span>
+<span class="fc" id="L141">        return builder;</span>
+    }
+
+    /**
+     *  Use this to continue building UI inside a provided lambda.
+     *  This is especially useful for when you need to build UI based on loops.
+     *  This builder instance will simply be supplied to the provided consumer lambda.
+     *  Inside this lambda, you can then continue building the UI while also not
+     *  breaking the benefits of nesting and method chaining provided by this class...
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param building A Consumer lambda which simply consumes this builder.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I apply( Consumer&lt;I&gt; building ) {
+<span class="fc" id="L156">        NullUtil.nullArgCheck(building, &quot;building&quot;, Consumer.class);</span>
+<span class="fc" id="L157">        return applyIf(true, building);</span>
+    }
+
+    /**
+     *  This method completes the building process for the wrapped
+     *  {@link javax.swing.JComponent} type by returning it.
+     *  However, it also expects the user to pass the class of the {@link javax.swing.JComponent}
+     *  wrapped by this builder! This is not out of necessity but for better
+     *  readability when using the builder in more extensive ways where
+     *  the beginning and end of the method chaining and nesting of the builder does
+     *  not fit on one screen. &lt;br&gt;
+     *  In that case the expression &quot;{@code .getResulting(JMenu.class)}&quot; helps
+     *  to identify which type of {@link javax.swing.JComponent} is currently being build on a given
+     *  nesting layer... &lt;br&gt;&lt;br&gt;
+     *
+     * @param type The type class of the component which this builder wraps.
+     * @param &lt;T&gt; The type parameter of the component which this builder wraps.
+     * @return The result of the building process, namely: a type of JComponent.
+     */
+    public &lt;T extends C&gt; T get(Class&lt;T&gt; type) {
+<span class="pc bpc" id="L177" title="4 of 6 branches missed.">        assert type == _type || type.isAssignableFrom(_type);</span>
+<span class="fc" id="L178">        return (T) _component.get();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

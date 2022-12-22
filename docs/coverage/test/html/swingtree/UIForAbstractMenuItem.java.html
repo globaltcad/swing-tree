@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForAbstractMenuItem.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForAbstractMenuItem.java</span></div><h1>UIForAbstractMenuItem.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import swingtree.api.mvvm.Val;
+
+import javax.swing.*;
+
+public class UIForAbstractMenuItem&lt;I, M extends JMenuItem&gt; extends UIForAbstractButton&lt;I, M&gt;
+{
+<span class="fc" id="L9">    protected UIForAbstractMenuItem( M component ) { super(component); }</span>
+
+    /**
+     * Sets the key combination which invokes the wrapped {@link JMenuItem}'s
+     * action listeners without navigating the menu hierarchy. It is the
+     * UI's responsibility to install the correct action.  Note that
+     * when the keyboard accelerator is typed, it will work whether or
+     * not the menu is currently displayed.
+     *
+     * @param keyStroke the &lt;code&gt;KeyStroke&lt;/code&gt; which will
+     *          serve as an accelerator
+     * @return This very builder to allow for method chaining.
+     */
+    public I withKeyStroke( KeyStroke keyStroke ) {
+<span class="nc" id="L23">        getComponent().setAccelerator(keyStroke);</span>
+<span class="nc" id="L24">        @SuppressWarnings(&quot;unchecked&quot;) I self = (I) this;</span>
+<span class="nc" id="L25">        return self;</span>
+    }
+
+    /**
+     * Sets the key combination property which invokes the wrapped {@link JMenuItem}'s
+     * action listeners without navigating the menu hierarchy. It is the
+     * UI's responsibility to install the correct action.  Note that
+     * when the keyboard accelerator is typed, it will work whether or
+     * not the menu is currently displayed.
+     *
+     * @param val the dynamically set &lt;code&gt;KeyStroke&lt;/code&gt; property which will
+     *          serve as an accelerator
+     * @return This very builder to allow for method chaining.
+     */
+    public I withKeyStroke( Val&lt;KeyStroke&gt; val ) {
+<span class="nc" id="L40">        _onShow(val, v -&gt; withKeyStroke(v) );</span>
+<span class="nc" id="L41">        getComponent().setAccelerator(val.get());</span>
+<span class="nc" id="L42">        @SuppressWarnings(&quot;unchecked&quot;) I self = (I) this;</span>
+<span class="nc" id="L43">        return self;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

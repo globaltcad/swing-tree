@@ -1,6 +1,6 @@
 package example;
 
-import com.globaltcad.swingtree.api.mvvm.Var;
+import swingtree.api.mvvm.Var;
 
 public class SomeSpinnersViewModel {
 

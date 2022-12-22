@@ -1,14 +1,14 @@
 package example;
 
 import com.formdev.flatlaf.intellijthemes.FlatMaterialDesignDarkIJTheme;
-import com.globaltcad.swingtree.UI;
-import com.globaltcad.swingtree.api.mvvm.Var;
+import swingtree.UI;
+import swingtree.api.mvvm.Var;
 
 import javax.swing.*;
 
 import java.awt.*;
 
-import static com.globaltcad.swingtree.UI.*;
+import static swingtree.UI.*;
 
 public class SomeSpinnersView extends JPanel {
 

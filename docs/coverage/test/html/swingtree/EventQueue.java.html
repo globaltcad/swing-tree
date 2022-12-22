@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EventQueue.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">EventQueue.java</span></div><h1>EventQueue.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+
+/**
+ * This is a synchronized singleton wrapping a {@link BlockingQueue}.
+ */
+<span class="fc" id="L9">class EventQueue implements EventProcessor</span>
+{
+<span class="fc" id="L11">	private static final EventQueue _INSTANCE = new EventQueue();</span>
+
+<span class="fc" id="L13">	static EventQueue INSTANCE() { return _INSTANCE; }</span>
+
+	/**
+	 * This is a simple queue for pending event calls which is thread safe and allows the
+	 * GUI thread to register application events.
+	 */
+<span class="fc" id="L19">	private final BlockingQueue&lt;Runnable&gt; rendererQueue = new LinkedBlockingQueue&lt;&gt;();</span>
+
+	@Override public void processAppEvent(Runnable task) {
+		try {
+<span class="fc" id="L23">			rendererQueue.put(task);</span>
+<span class="nc" id="L24">		} catch (Exception e) {</span>
+<span class="nc" id="L25">			e.printStackTrace();</span>
+<span class="fc" id="L26">		}</span>
+<span class="fc" id="L27">	}</span>
+
+	@Override
+	public void processUIEvent(Runnable runnable) {
+<span class="nc" id="L31">		UI.run(runnable);</span>
+<span class="nc" id="L32">	}</span>
+
+	public void process( int numberOfEventsToBeProcessed, boolean rethrow ) throws InterruptedException {
+<span class="fc" id="L35">		int processed = 0;</span>
+<span class="pc bpc" id="L36" title="1 of 4 branches missed.">		while ( processed &lt; numberOfEventsToBeProcessed &amp;&amp; !this.rendererQueue.isEmpty() ) {</span>
+			try {
+<span class="fc" id="L38">				this.rendererQueue.take().run();</span>
+			}
+<span class="fc" id="L40">			catch (Exception e) {</span>
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">				if ( rethrow )</span>
+<span class="fc" id="L42">					throw e;</span>
+				else
+<span class="nc" id="L44">					e.printStackTrace();</span>
+<span class="nc" id="L45">				processed--;</span>
+<span class="fc" id="L46">			}</span>
+<span class="fc" id="L47">			processed++;</span>
+		}
+<span class="fc" id="L49">	}</span>
+
+	public void processAll( boolean rethrow ) throws InterruptedException {
+<span class="fc bfc" id="L52" title="All 2 branches covered.">		while ( !this.rendererQueue.isEmpty() )</span>
+<span class="fc" id="L53">			process(this.rendererQueue.size(), rethrow);</span>
+<span class="fc" id="L54">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

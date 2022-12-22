@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree</a> &gt; <span class="el_source">UIForPanel.java</span></div><h1>UIForPanel.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree;
 
-import com.globaltcad.swingtree.api.mvvm.Val;
-import com.globaltcad.swingtree.layout.LayoutAttr;
+import swingtree.api.mvvm.Val;
+import swingtree.layout.LayoutAttr;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
@@ -40,5 +40,43 @@ public class UIForPanel&lt;P extends JPanel&gt; extends UIForAbstractSwing&lt;UI
 <span class="nc" id="L40">        });</span>
 <span class="nc" id="L41">        return _this();</span>
     }
+
+    @Override protected void _setEnabled( boolean isEnabled ) {
+<span class="nc" id="L45">        getComponent().setEnabled( isEnabled );</span>
+        /*
+            In the vast vast majority of cases regular JPanels are simple wrappers for
+            other components.
+            They are mostly used to group things together, provide a border and
+            position them using a fancy layout manager.
+            Disabling only a JPanel is therefore not very useful, because it will not
+            disable the components it contains.
+            So what we want to do here is traverse the tree of JPanel instances
+            and disable all the components that are contained in the tree
+            except for the children of non JPanels.
+        */
+<span class="nc" id="L57">        _traverseEnable( getComponent(), isEnabled );</span>
+        /*
+            Note:
+            If you really only want to disable the JPanel itself, then you can
+            simply peek into the tree and disable the JPanel directly.
+            Or, a better idea, is to simply change color and event handling
+            of the JPanel to make it look and behave like a disabled component,
+            but still allow the user to interact with the components it contains.
+         */
+<span class="nc" id="L66">    }</span>
+
+    private void _traverseEnable( Component c, boolean isEnabled ) {
+<span class="nc" id="L69">        c.setEnabled( isEnabled );</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">        if ( c.getClass() == JPanel.class )</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">            for ( Component c2 : ((JPanel)c).getComponents() )</span>
+<span class="nc" id="L72">                _traverseEnable( c2, isEnabled );</span>
+        /*
+            Note:
+                We use getClass() here, because we want to stop at subclasses of
+                JPanel because they are likely user defined components and not dumb
+                wrappers for other components.
+        */
+<span class="nc" id="L79">    }</span>
+
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

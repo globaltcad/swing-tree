@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForSlider.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree</a> &gt; <span class="el_source">UIForSlider.java</span></div><h1>UIForSlider.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree;
 
-import com.globaltcad.swingtree.api.UIAction;
-import com.globaltcad.swingtree.api.mvvm.Val;
-import com.globaltcad.swingtree.api.mvvm.Var;
+import swingtree.api.UIAction;
+import swingtree.api.mvvm.Val;
+import swingtree.api.mvvm.Var;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.util.function.Consumer;
 
 /**
@@ -16,7 +17,7 @@ import java.util.function.Consumer;
  */
 public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;UIForSlider&lt;S&gt;, S&gt;
 {
-<span class="fc" id="L19">    protected UIForSlider( S component ) { super(component); }</span>
+<span class="fc" id="L20">    protected UIForSlider( S component ) { super(component); }</span>
 
     /**
      *  Sets the orientation of the slider.
@@ -24,9 +25,9 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;
      *  @return This builder node.
      */
     public final UIForSlider&lt;S&gt; with( UI.Align align ) {
-<span class="fc" id="L27">        NullUtil.nullArgCheck( align, &quot;align&quot;, UI.Align.class );</span>
-<span class="fc" id="L28">        getComponent().setOrientation(align.forSlider());</span>
-<span class="fc" id="L29">        return this;</span>
+<span class="fc" id="L28">        NullUtil.nullArgCheck( align, &quot;align&quot;, UI.Align.class );</span>
+<span class="fc" id="L29">        _doWithoutListeners(()-&gt;getComponent().setOrientation(align.forSlider()));</span>
+<span class="fc" id="L30">        return this;</span>
     }
 
     /**
@@ -35,10 +36,10 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;
      *  @return This builder node.
      */
     public final UIForSlider&lt;S&gt; withAlignment( Val&lt;UI.Align&gt; align ) {
-<span class="nc" id="L38">        NullUtil.nullArgCheck( align, &quot;align&quot;, Val.class );</span>
-<span class="nc" id="L39">        NullUtil.nullPropertyCheck( align, &quot;align&quot;, &quot;Null is not a valid alignment&quot; );</span>
-<span class="nc" id="L40">        _onShow( align, v -&gt; with(align.orElseThrow()) );</span>
-<span class="nc" id="L41">        return this;</span>
+<span class="nc" id="L39">        NullUtil.nullArgCheck( align, &quot;align&quot;, Val.class );</span>
+<span class="nc" id="L40">        NullUtil.nullPropertyCheck( align, &quot;align&quot;, &quot;Null is not a valid alignment&quot; );</span>
+<span class="nc" id="L41">        _onShow( align, v -&gt; with(align.orElseThrow()) );</span>
+<span class="nc" id="L42">        return this;</span>
     }
 
     /**
@@ -52,15 +53,15 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public final UIForSlider&lt;S&gt; onChange( UIAction&lt;SimpleDelegate&lt;JSlider, ChangeEvent&gt;&gt; action ) {
-<span class="fc" id="L55">        NullUtil.nullArgCheck( action, &quot;action&quot;, UIAction.class );</span>
-<span class="fc" id="L56">        S slider = getComponent();</span>
-<span class="pc" id="L57">        _onChange( e -&gt; _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;(slider, e, this::getSiblinghood))) );</span>
-<span class="fc" id="L58">        return this;</span>
+<span class="fc" id="L56">        NullUtil.nullArgCheck( action, &quot;action&quot;, UIAction.class );</span>
+<span class="fc" id="L57">        S slider = getComponent();</span>
+<span class="pc" id="L58">        _onChange( e -&gt; _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;(slider, e, this::getSiblinghood))) );</span>
+<span class="fc" id="L59">        return this;</span>
     }
 
     private void _onChange( Consumer&lt;ChangeEvent&gt; action ) {
-<span class="fc" id="L62">        getComponent().addChangeListener(action::accept);</span>
-<span class="fc" id="L63">    }</span>
+<span class="fc" id="L63">        getComponent().addChangeListener(action::accept);</span>
+<span class="fc" id="L64">    }</span>
 
     /**
      * Sets the minimum value of the slider.
@@ -70,8 +71,8 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSlider&lt;S&gt; withMin( int min ) {
-<span class="nc" id="L73">        getComponent().setMinimum( min );</span>
-<span class="nc" id="L74">        return this;</span>
+<span class="nc" id="L74">        _doWithoutListeners(()-&gt;getComponent().setMinimum( min ));</span>
+<span class="nc" id="L75">        return this;</span>
     }
 
     /**
@@ -80,9 +81,9 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;
      * @throws IllegalArgumentException if {@code min} is {@code null}.
      */
     public final UIForSlider&lt;S&gt; withMin( Val&lt;Integer&gt; min ) {
-<span class="nc" id="L83">        NullUtil.nullArgCheck( min, &quot;min&quot;, Val.class );</span>
-<span class="nc" id="L84">        _onShow( min, v -&gt; getComponent().setMinimum(v) );</span>
-<span class="nc" id="L85">        return this;</span>
+<span class="nc" id="L84">        NullUtil.nullArgCheck( min, &quot;min&quot;, Val.class );</span>
+<span class="nc" id="L85">        _onShow( min, this::withMin);</span>
+<span class="nc" id="L86">        return this;</span>
     }
 
     /**
@@ -93,8 +94,8 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSlider&lt;S&gt; withMax( int max ) {
-<span class="nc" id="L96">        getComponent().setMaximum( max );</span>
-<span class="nc" id="L97">        return this;</span>
+<span class="nc" id="L97">        _doWithoutListeners(()-&gt;getComponent().setMaximum( max ));</span>
+<span class="nc" id="L98">        return this;</span>
     }
 
     /**
@@ -103,9 +104,9 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;
      * @throws IllegalArgumentException if {@code max} is {@code null}.
      */
     public final UIForSlider&lt;S&gt; withMax( Val&lt;Integer&gt; max ) {
-<span class="nc" id="L106">        NullUtil.nullArgCheck( max, &quot;max&quot;, Val.class );</span>
-<span class="nc" id="L107">        _onShow( max, v -&gt; getComponent().setMaximum(v) );</span>
-<span class="nc" id="L108">        return this;</span>
+<span class="nc" id="L107">        NullUtil.nullArgCheck( max, &quot;max&quot;, Val.class );</span>
+<span class="nc" id="L108">        _onShow( max, this::withMax);</span>
+<span class="nc" id="L109">        return this;</span>
     }
 
     /**
@@ -116,8 +117,8 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSlider&lt;S&gt; withValue( int value ) {
-<span class="nc" id="L119">        getComponent().setValue( value );</span>
-<span class="nc" id="L120">        return this;</span>
+<span class="nc" id="L120">        _doWithoutListeners(()-&gt;getComponent().setValue( value ));</span>
+<span class="nc" id="L121">        return this;</span>
     }
 
     /**
@@ -126,9 +127,9 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;
      * @throws IllegalArgumentException if {@code value} is {@code null}.
      */
     public final UIForSlider&lt;S&gt; withValue( Val&lt;Integer&gt; val ) {
-<span class="nc" id="L129">        NullUtil.nullArgCheck( val, &quot;val&quot;, Val.class );</span>
-<span class="nc" id="L130">        _onShow( val, v -&gt; getComponent().setValue(v) );</span>
-<span class="nc" id="L131">        return this;</span>
+<span class="nc" id="L130">        NullUtil.nullArgCheck( val, &quot;val&quot;, Val.class );</span>
+<span class="nc" id="L131">        _onShow( val, this::withValue);</span>
+<span class="nc" id="L132">        return this;</span>
     }
 
     /**
@@ -137,9 +138,9 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;
      * @throws IllegalArgumentException if {@code value} is {@code null}.
      */
     public final UIForSlider&lt;S&gt; withValue( Var&lt;Integer&gt; var ) {
-<span class="nc" id="L140">        NullUtil.nullArgCheck( var, &quot;var&quot;, Var.class );</span>
-<span class="nc" id="L141">        _onChange( e -&gt; _doApp(getComponent().getValue(), var::act) );</span>
-<span class="nc" id="L142">        return this.withValue( (Val&lt;Integer&gt;) var );</span>
+<span class="nc" id="L141">        NullUtil.nullArgCheck( var, &quot;var&quot;, Var.class );</span>
+<span class="nc" id="L142">        _onChange( e -&gt; _doApp(getComponent().getValue(), var::act) );</span>
+<span class="nc" id="L143">        return this.withValue( (Val&lt;Integer&gt;) var );</span>
     }
 
     /**
@@ -150,8 +151,8 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSlider&lt;S&gt; withMajorTickSpacing( int spacing ) {
-<span class="nc" id="L153">        getComponent().setMajorTickSpacing( spacing );</span>
-<span class="nc" id="L154">        return this;</span>
+<span class="nc" id="L154">        getComponent().setMajorTickSpacing( spacing );</span>
+<span class="nc" id="L155">        return this;</span>
     }
 
     /**
@@ -162,8 +163,8 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSlider&lt;S&gt; withMinorTickSpacing( int spacing ) {
-<span class="nc" id="L165">        getComponent().setMinorTickSpacing( spacing );</span>
-<span class="nc" id="L166">        return this;</span>
+<span class="nc" id="L166">        getComponent().setMinorTickSpacing( spacing );</span>
+<span class="nc" id="L167">        return this;</span>
     }
 
     /**
@@ -174,10 +175,10 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;
      * @throws IllegalArgumentException if {@code spacing} is {@code null}.
      */
     public final UIForSlider&lt;S&gt; withMajorTickSpacing( Val&lt;Integer&gt; spacing ) {
-<span class="nc" id="L177">        NullUtil.nullArgCheck( spacing, &quot;spacing&quot;, Val.class );</span>
-<span class="nc" id="L178">        NullUtil.nullPropertyCheck( spacing, &quot;spacing&quot; );</span>
-<span class="nc" id="L179">        _onShow( spacing, v -&gt; getComponent().setMajorTickSpacing(v) );</span>
-<span class="nc" id="L180">        return this;</span>
+<span class="nc" id="L178">        NullUtil.nullArgCheck( spacing, &quot;spacing&quot;, Val.class );</span>
+<span class="nc" id="L179">        NullUtil.nullPropertyCheck( spacing, &quot;spacing&quot; );</span>
+<span class="nc" id="L180">        _onShow( spacing, v -&gt; getComponent().setMajorTickSpacing(v) );</span>
+<span class="nc" id="L181">        return this;</span>
     }
 
     /**
@@ -188,12 +189,25 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;
      * @throws IllegalArgumentException if {@code spacing} is {@code null}.
      */
     public final UIForSlider&lt;S&gt; withMinorTickSpacing( Val&lt;Integer&gt; spacing ) {
-<span class="nc" id="L191">        NullUtil.nullArgCheck( spacing, &quot;spacing&quot;, Val.class );</span>
-<span class="nc" id="L192">        NullUtil.nullPropertyCheck( spacing, &quot;spacing&quot; );</span>
-<span class="nc" id="L193">        _onShow( spacing, v -&gt; getComponent().setMinorTickSpacing(v) );</span>
-<span class="nc" id="L194">        return this;</span>
+<span class="nc" id="L192">        NullUtil.nullArgCheck( spacing, &quot;spacing&quot;, Val.class );</span>
+<span class="nc" id="L193">        NullUtil.nullPropertyCheck( spacing, &quot;spacing&quot; );</span>
+<span class="nc" id="L194">        _onShow( spacing, v -&gt; getComponent().setMinorTickSpacing(v) );</span>
+<span class="nc" id="L195">        return this;</span>
     }
 
+
+    private void _doWithoutListeners(Runnable someTask) {
+        // We need to first remove the change listener, otherwise we might trigger unwanted events.
+<span class="fc" id="L201">        ChangeListener[] listeners = getComponent().getChangeListeners();</span>
+<span class="pc bpc" id="L202" title="1 of 2 branches missed.">        for ( ChangeListener listener : listeners )</span>
+<span class="nc" id="L203">            getComponent().removeChangeListener( listener );</span>
+
+<span class="fc" id="L205">        someTask.run();</span>
+
+        // Now we can add the listeners back.
+<span class="pc bpc" id="L208" title="1 of 2 branches missed.">        for ( ChangeListener listener : listeners )</span>
+<span class="nc" id="L209">            getComponent().addChangeListener( listener );</span>
+<span class="fc" id="L210">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

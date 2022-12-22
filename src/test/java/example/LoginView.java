@@ -1,11 +1,11 @@
 package example;
 
-import com.globaltcad.swingtree.EventProcessor;
-import com.globaltcad.swingtree.UI;
+import swingtree.EventProcessor;
+import swingtree.UI;
 
 import javax.swing.*;
 
-import static com.globaltcad.swingtree.UI.*;
+import static swingtree.UI.*;
 
 /**
  *  An example login view with property based binding to a view model (see {@link LoginViewModel}).

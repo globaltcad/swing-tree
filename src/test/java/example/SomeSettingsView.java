@@ -2,7 +2,7 @@ package example;
 
 import javax.swing.*;
 
-import static com.globaltcad.swingtree.UI.*;
+import static swingtree.UI.*;
 
 public class SomeSettingsView extends JPanel
 {

@@ -2,9 +2,9 @@
 
 
 import com.alexandriasoftware.swing.JSplitButton;
-import com.globaltcad.swingtree.api.UIAction;
-import com.globaltcad.swingtree.api.mvvm.Val;
-import com.globaltcad.swingtree.api.mvvm.Var;
+import swingtree.api.UIAction;
+import swingtree.api.mvvm.Val;
+import swingtree.api.mvvm.Var;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -135,9 +135,9 @@ public final class SplitItem&lt;I extends JMenuItem&gt;
     }
 
     public SplitItem&lt;I&gt; isEnabledIf( Var&lt;Boolean&gt; isEnabled ) {
-<span class="nc" id="L138">        NullUtil.nullArgCheck(isEnabled, &quot;isEnabled&quot;, Var.class);</span>
-<span class="nc bnc" id="L139" title="All 2 branches missed.">        if ( _isEnabled != null ) throw new IllegalArgumentException(&quot;Property already specified!&quot;);</span>
-<span class="nc" id="L140">        return new SplitItem&lt;&gt;(_item, _onButtonClick, _onItemSelected, isEnabled);</span>
+<span class="fc" id="L138">        NullUtil.nullArgCheck(isEnabled, &quot;isEnabled&quot;, Var.class);</span>
+<span class="pc bpc" id="L139" title="1 of 2 branches missed.">        if ( _isEnabled != null ) throw new IllegalArgumentException(&quot;Property already specified!&quot;);</span>
+<span class="fc" id="L140">        return new SplitItem&lt;&gt;(_item, _onButtonClick, _onItemSelected, isEnabled);</span>
     }
 
 <span class="fc" id="L143">    I getItem() { return _item; }</span>

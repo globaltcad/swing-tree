@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractNestedBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">AbstractNestedBuilder.java</span></div><h1>AbstractNestedBuilder.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ *  This class is a conceptual extension of the AbstractBuilder which expects implementations
+ *  to be builder for nested / tree like data structures.
+ *  This is primarily expressed by the &quot;add&quot; method which takes an arbitrary number of
+ *  builder instances to form this nested / tree like structure.
+ *
+ * @param &lt;I&gt; The concrete implementation type of this abstract class.
+ * @param &lt;C&gt; The component type parameter which ought to be built in some way.
+ */
+abstract class AbstractNestedBuilder&lt;I, C extends E, E extends Component&gt; extends AbstractBuilder&lt;I, C&gt;
+{
+    /**
+     *  A list of all the child builders.
+     */
+<span class="fc" id="L23">    private final List&lt;AbstractNestedBuilder&lt;?,?,?&gt;&gt; _children = new ArrayList&lt;&gt;();</span>
+    private AbstractNestedBuilder&lt;?,?,?&gt; _parent; // The parent builder (This may be null if no parent present or provided)
+
+    /**
+     * Instances of the AbstractNestedBuilder as well as its sub types always wrap
+     * a single component for which they are responsible.
+     * In addition to the AbstractBuilder this builder also requires nesting.
+     *
+     * @param component The component type which will be wrapped by this builder node.
+     */
+<span class="fc" id="L33">    public AbstractNestedBuilder( C component ) { super(component); }</span>
+
+    /**
+     *  A list of all the siblings of the component wrapped by this builder.
+     */
+    protected final List&lt;E&gt; getSiblinghood() {
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        if ( _parent == null ) return new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L40">        return _parent._children.stream().map(c -&gt; (E) c.getComponent()).collect(Collectors.toList());</span>
+    }
+
+    /**
+     *  This builder class expects its implementations to be builder types
+     *  for anything which can be built in a nested tree-like structure.
+     *  Implementations of this abstract method ought to enable support for nested building.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param components An array of component instances which ought to be added to the wrapped component type.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    @SafeVarargs
+    public final I add( E... components ) {
+<span class="nc" id="L54">        NullUtil.nullArgCheck(components, &quot;components&quot;, Object[].class);</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        for ( E c : components ) _doAdd(UI.of((JComponent) c), null);</span>
+<span class="nc" id="L56">        return _this();</span>
+    }
+
+    /**
+     *  This builder class expects its implementations to be builder types
+     *  for anything which can be built in a nested tree-like structure.
+     *  Implementations of this abstract method ought to enable support for nested building.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param component A component instance which ought to be added to the wrapped component type.
+     */
+    protected abstract void _add( E component, Object conf );
+
+    protected final void _doAdd( AbstractNestedBuilder&lt;?, ?, ?&gt; builder, Object conf)
+    {
+<span class="fc" id="L71">        NullUtil.nullArgCheck(builder, &quot;builder&quot;, AbstractNestedBuilder.class);</span>
+
+<span class="pc bpc" id="L73" title="1 of 4 branches missed.">        if ( _eventProcessor != EventProcessor.COUPLED &amp;&amp; !UI.thisIsUIThread() )</span>
+<span class="nc" id="L74">            throw new IllegalStateException(</span>
+                    &quot;This UI is configured to be decoupled from the application thread, &quot; +
+                    &quot;which means that it can only be modified from the EDT. &quot; +
+                    &quot;Please use 'UI.run(()-&gt;...)' method to execute your modifications on the EDT.&quot;
+                );
+
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">        if ( _children.contains(builder) )</span>
+<span class="nc" id="L81">            throw new IllegalArgumentException(&quot;Builder already used!&quot;);</span>
+
+<span class="fc" id="L83">        _children.add(builder);</span>
+
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">        if ( builder._parent != null )</span>
+<span class="nc" id="L86">            throw new IllegalArgumentException(&quot;Builder already used!&quot;);</span>
+
+<span class="fc" id="L88">        builder._parent = this;</span>
+
+<span class="fc" id="L90">        _add( (E) builder.getComponent(), conf );</span>
+
+<span class="fc" id="L92">        _detachStrongRef(); // Detach strong reference to the component to allow it to be garbage collected.</span>
+<span class="fc" id="L93">    }</span>
+
+    /**
+     *  This method provides the same functionality as the other &quot;add&quot; methods.
+     *  However, it bypasses the necessity to call the &quot;get&quot; method by
+     *  calling it internally for you. &lt;br&gt;
+     *  This helps to improve readability, especially when the degree of nesting is very low.
+     *
+     * @param builders An array of builder instances whose JComponents ought to be added to the one wrapped by this builder.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    @SafeVarargs
+    @SuppressWarnings(&quot;varargs&quot;)
+    public final &lt;X, Y extends E, B extends AbstractNestedBuilder&lt;X, Y, E&gt;&gt; I add( B... builders ) {
+<span class="pc bpc" id="L107" title="1 of 2 branches missed.">        if ( builders == null )</span>
+<span class="nc" id="L108">            throw new IllegalArgumentException(&quot;Swing tree builders may not be null!&quot;);</span>
+
+<span class="fc bfc" id="L110" title="All 2 branches covered.">        for ( AbstractNestedBuilder&lt;?, ?, ?&gt; b : builders )</span>
+<span class="fc" id="L111">            _doAdd( b, null );</span>
+
+<span class="fc" id="L113">        return _this();</span>
+    }
+
+
+    /**
+     *  This builder class expects its implementations to be builder types
+     *  for anything which can be built in a nested tree-like structure.
+     *  Implementations of this abstract method ought to enable support for nested building.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param components A list of component instances which ought to be added to the wrapped component type.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I add( List&lt;E&gt; components ) {
+<span class="fc" id="L127">        final C[] array = (C[]) new Component[components.size()];</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">        for ( int i = 0; i &lt; array.length; i++ )</span>
+<span class="fc" id="L129">            _doAdd(UI.of((JComponent) components.get(i)), null);</span>
+
+<span class="fc" id="L131">        return _this();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

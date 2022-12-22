@@ -1,7 +1,7 @@
 package example;
 
-import com.globaltcad.swingtree.api.mvvm.Val;
-import com.globaltcad.swingtree.api.mvvm.Var;
+import swingtree.api.mvvm.Val;
+import swingtree.api.mvvm.Var;
 
 import java.awt.*;
 

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForSplitPane.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForSplitPane.java</span></div><h1>UIForSplitPane.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import swingtree.api.mvvm.Val;
+
+import javax.swing.*;
+
+/**
+ *  A swing tree builder node for {@link JSplitPane} instances.
+ */
+public class UIForSplitPane&lt;P extends JSplitPane&gt; extends UIForAbstractSwing&lt;UIForSplitPane&lt;P&gt;, P&gt;
+{
+    /**
+     * {@link UIForAbstractSwing} (sub)types always wrap
+     * a single component for which they are responsible.
+     *
+     * @param component The {@link JComponent} type which will be wrapped by this builder node.
+     */
+<span class="fc" id="L18">    public UIForSplitPane( P component ) { super( component ); }</span>
+
+    /**
+     * Sets the alignment of the split bar in the split pane.
+     *
+     * @param align The alignment of the split bar in the split pane.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if the provided alignment is null.
+     */
+    public final UIForSplitPane&lt;P&gt; with( UI.Align align ) {
+<span class="nc" id="L28">        NullUtil.nullArgCheck( align, &quot;split&quot;, UI.Align.class );</span>
+<span class="nc" id="L29">        getComponent().setOrientation( align.forSplitPane() );</span>
+<span class="nc" id="L30">        return this;</span>
+    }
+
+    /**
+     * Sets the alignment of the split bar in the split pane dynamically
+     * based on the provided {@link Val} property which will be observed
+     * by the split pane.
+     *
+     * @param align The alignment property of the split bar in the split pane.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if the provided alignment is null or the property is allowed to wrap a null value.
+     */
+    public final UIForSplitPane&lt;P&gt; withAlignment( Val&lt;UI.Align&gt; align ) {
+<span class="nc" id="L43">        NullUtil.nullArgCheck( align, &quot;align&quot;, Val.class );</span>
+<span class="nc" id="L44">        NullUtil.nullPropertyCheck( align, &quot;align&quot;, &quot;Null is not a valid alignment.&quot; );</span>
+<span class="nc" id="L45">        _onShow( align, v -&gt; with(align.orElseThrow()) );</span>
+<span class="nc" id="L46">        return this;</span>
+    }
+
+    /**
+     * Sets the location of the divider. This is passed off to the
+     * look and feel implementation, and then listeners are notified. A value
+     * less than 0 implies the divider should be reset to a value that
+     * attempts to honor the preferred size of the left/top component.
+     * After notifying the listeners, the last divider location is updated,
+     * via &lt;code&gt;setLastDividerLocation&lt;/code&gt;.
+     *
+     * @param location An int specifying a UI-specific value (typically a
+     *        pixel count)
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSplitPane&lt;P&gt; withDividerAt( int location ) {
+<span class="fc" id="L62">        getComponent().setDividerLocation(location);</span>
+<span class="fc" id="L63">        return this;</span>
+    }
+
+    /**
+     * Sets the location of the divider in the form of a property,
+     * which can be dynamically update the divide.
+     * This is passed off to the
+     * look and feel implementation, and then listeners are notified. A value
+     * less than 0 implies the divider should be reset to a value that
+     * attempts to honor the preferred size of the left/top component.
+     * After notifying the listeners, the last divider location is updated,
+     * via &lt;code&gt;setLastDividerLocation&lt;/code&gt;.
+     *
+     * @param location A property dynamically determining a UI-specific value (typically a
+     *        pixel count)
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code location} is {@code null}.
+     */
+    public final UIForSplitPane&lt;P&gt; withDividerAt( Val&lt;Integer&gt; location ) {
+<span class="nc" id="L82">        NullUtil.nullArgCheck( location, &quot;location&quot;, Val.class );</span>
+<span class="nc" id="L83">        NullUtil.nullPropertyCheck( location, &quot;location&quot;, &quot;Null is not a valid divider location.&quot; );</span>
+<span class="nc" id="L84">        _onShow( location, this::withDividerAt );</span>
+<span class="nc" id="L85">        return this;</span>
+    }
+
+    /**
+     * Sets the size of the divider.
+     *
+     * @param size An integer giving the size of the divider in pixels
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSplitPane&lt;P&gt; withDividerSize( int size ) {
+<span class="nc" id="L95">        getComponent().setDividerSize(size);</span>
+<span class="nc" id="L96">        return this;</span>
+    }
+
+    /**
+     * Sets the size of the divider in the form of a property,
+     * which can be dynamically update.
+     *
+     * @param size A property dynamically determining the size of the divider in pixels
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code size} is {@code null}.
+     */
+    public final UIForSplitPane&lt;P&gt; withDividerSize( Val&lt;Integer&gt; size ) {
+<span class="nc" id="L108">        NullUtil.nullArgCheck( size, &quot;size&quot;, Val.class );</span>
+<span class="nc" id="L109">        NullUtil.nullPropertyCheck( size, &quot;size&quot;, &quot;Null is not a valid divider size.&quot; );</span>
+<span class="nc" id="L110">        _onShow( size, this::withDividerSize );</span>
+<span class="nc" id="L111">        return this;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

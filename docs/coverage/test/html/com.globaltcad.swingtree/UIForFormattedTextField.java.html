@@ -1,9 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForFormattedTextField.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">com.globaltcad.swingtree</a> &gt; <span class="el_source">UIForFormattedTextField.java</span></div><h1>UIForFormattedTextField.java</h1><pre class="source lang-java linenums">package com.globaltcad.swingtree;
 
+import swingtree.api.UIAction;
+
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.function.Consumer;
 
 public class UIForFormattedTextField extends UIForAbstractTextComponent&lt;UIForFormattedTextField, JFormattedTextField&gt;
 {
-<span class="nc" id="L7">    protected UIForFormattedTextField( JFormattedTextField component ) { super(component); }</span>
+<span class="fc" id="L12">    protected UIForFormattedTextField( JFormattedTextField component ) { super(component); }</span>
+
+    public UIForFormattedTextField onEnter( UIAction&lt;SimpleDelegate&lt;JFormattedTextField, ActionEvent&gt;&gt; action ) {
+<span class="fc" id="L15">        NullUtil.nullArgCheck(action, &quot;action&quot;, UIAction.class);</span>
+<span class="fc" id="L16">        JFormattedTextField field = getComponent();</span>
+<span class="fc" id="L17">        _onEnter( e -&gt; _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;( field, e, this::getSiblinghood )) ) );</span>
+<span class="fc" id="L18">        return this;</span>
+    }
+
+    private void _onEnter( Consumer&lt;ActionEvent&gt; action ) {
+        /*
+            When an action event is fired, Swing will go through all the listeners
+            from the most recently added to the first added. This means that if we simply add
+            a listener through the &quot;addActionListener&quot; method, we will be the last to be notified.
+            This is problematic because it is built on the assumption that the last listener
+            added is more interested in the event than the first listener added.
+            This however is an unintuitive assumption, meaning a user would expect
+            the first listener added to be the most interested in the event
+            simply because it was added first.
+            This is especially true in the context of declarative UI design.
+        */
+<span class="fc" id="L33">        ActionListener[] listeners = getComponent().getActionListeners();</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        for (ActionListener listener : listeners)</span>
+<span class="fc" id="L35">            getComponent().removeActionListener(listener);</span>
+
+<span class="fc" id="L37">        getComponent().addActionListener(action::accept);</span>
+
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
+<span class="fc" id="L40">            getComponent().addActionListener(listeners[i]);</span>
+<span class="fc" id="L41">    }</span>
+
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

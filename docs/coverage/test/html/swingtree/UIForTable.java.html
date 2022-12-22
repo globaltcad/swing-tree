@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForTable.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForTable.java</span></div><h1>UIForTable.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import swingtree.api.Buildable;
+import swingtree.api.model.BasicTableModel;
+import swingtree.api.model.TableListDataSource;
+import swingtree.api.model.TableMapDataSource;
+
+import javax.swing.*;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
+import java.util.*;
+
+public class UIForTable&lt;T extends JTable&gt; extends UIForAbstractSwing&lt;UIForTable&lt;T&gt;, T&gt;
+{
+    /**
+     * Extensions of the {@link  UIForAbstractSwing} always wrap
+     * a single component for which they are responsible.
+     *
+     * @param component The JComponent type which will be wrapped by this builder node.
+     */
+<span class="fc" id="L23">    public UIForTable( T component ) { super(component); }</span>
+
+    /**
+     *  Use this to build a table cell renderer for a particular column.
+     *  The second argument accepts the builder API for a cell renderer.
+     *
+     * @param columnName The name of the column for which the cell renderer will be built.
+     * @param renderBuilder The builder API for a cell renderer.
+     */
+    public final UIForTable&lt;T&gt; withRendererForColumn( String columnName, Render.Builder&lt;JTable, ?&gt; renderBuilder ) {
+<span class="fc" id="L33">        NullUtil.nullArgCheck(renderBuilder, &quot;renderBuilder&quot;, Render.Builder.class);</span>
+<span class="fc" id="L34">        return withRendererForColumn(columnName, renderBuilder.getForTable());</span>
+    }
+
+    /**
+     *  Use this to build a table cell renderer for a particular column.
+     *  The second argument accepts the builder API for a cell renderer.
+     *
+     * @param columnIndex The index of the column for which the cell renderer will be built.
+     * @param renderBuilder The builder API for a cell renderer.
+     */
+    public final UIForTable&lt;T&gt; withRendererForColumn( int columnIndex, Render.Builder&lt;JTable, ?&gt; renderBuilder ) {
+<span class="fc" id="L45">        NullUtil.nullArgCheck(renderBuilder, &quot;renderBuilder&quot;, Render.Builder.class);</span>
+<span class="fc" id="L46">        return withRendererForColumn(columnIndex, renderBuilder.getForTable());</span>
+    }
+
+    /**
+     * Use this to register a table cell renderer for a particular column.
+     * @param columnName The name of the column for which the cell renderer will be registered.
+     * @param renderer The cell renderer to be registered.
+     */
+    public final UIForTable&lt;T&gt; withRendererForColumn( String columnName, TableCellRenderer renderer ) {
+<span class="fc" id="L55">        NullUtil.nullArgCheck(columnName, &quot;columnName&quot;, String.class);</span>
+<span class="fc" id="L56">        NullUtil.nullArgCheck(renderer, &quot;renderer&quot;, TableCellRenderer.class);</span>
+<span class="fc" id="L57">        getComponent().getColumn(columnName).setCellRenderer(renderer);</span>
+<span class="fc" id="L58">        return this;</span>
+    }
+
+    /**
+     * Use this to register a table cell renderer for a particular column.
+     * @param columnIndex The index of the column for which the cell renderer will be registered.
+     * @param renderer The cell renderer to be registered.
+     */
+    public final UIForTable&lt;T&gt; withRendererForColumn( int columnIndex, TableCellRenderer renderer ) {
+<span class="fc" id="L67">        NullUtil.nullArgCheck(renderer, &quot;renderer&quot;, TableCellRenderer.class);</span>
+<span class="fc" id="L68">        getComponent().getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);</span>
+<span class="fc" id="L69">        return this;</span>
+    }
+
+    /**
+     * Use this to register a table cell renderer for all columns of this table.
+     * @param renderer The cell renderer to be registered.
+     * @return This builder node.
+     */
+    public final UIForTable&lt;T&gt; withRenderer( TableCellRenderer renderer ) {
+<span class="fc" id="L78">        NullUtil.nullArgCheck(renderer, &quot;renderer&quot;, TableCellRenderer.class);</span>
+<span class="fc" id="L79">        getComponent().setDefaultRenderer(Object.class, renderer);</span>
+<span class="fc" id="L80">        return this;</span>
+    }
+
+    /**
+     * Use this to register a table cell renderer for all columns of this table.
+     * @param renderBuilder The builder API for a cell renderer.
+     * @return  This builder node.
+     */
+    public final UIForTable&lt;T&gt; withRenderer( Render.Builder&lt;JTable, ?&gt; renderBuilder ) {
+<span class="fc" id="L89">        NullUtil.nullArgCheck(renderBuilder, &quot;renderBuilder&quot;, Render.Builder.class);</span>
+<span class="fc" id="L90">        return withRenderer(renderBuilder.getForTable());</span>
+    }
+
+    /**
+     * Use this to register a table cell editor for a particular column.
+     * @param columnName The name of the column for which the cell editor will be registered.
+     * @param editor The cell editor to be registered.
+     */
+    public final UIForTable&lt;T&gt; withCellEditorForColumn( String columnName, TableCellEditor editor ) {
+<span class="nc" id="L99">        NullUtil.nullArgCheck(columnName, &quot;columnName&quot;, String.class);</span>
+<span class="nc" id="L100">        NullUtil.nullArgCheck(editor, &quot;editor&quot;, TableCellEditor.class);</span>
+<span class="nc" id="L101">        getComponent().getColumn(columnName).setCellEditor(editor);</span>
+<span class="nc" id="L102">        return this;</span>
+    }
+
+    /**
+     * Use this to register a table cell editor for a particular column.
+     * @param columnIndex The index of the column for which the cell editor will be registered.
+     * @param editor The cell editor to be registered.
+     */
+    public final UIForTable&lt;T&gt; withCellEditorForColumn( int columnIndex, TableCellEditor editor ) {
+<span class="nc" id="L111">        NullUtil.nullArgCheck(editor, &quot;editor&quot;, TableCellEditor.class);</span>
+<span class="nc" id="L112">        getComponent().getColumnModel().getColumn(columnIndex).setCellEditor(editor);</span>
+<span class="nc" id="L113">        return this;</span>
+    }
+
+    /**
+     *  Use this to set a table model.
+     *  The provided argument is a builder object whose build method will be called
+     *  for you instead of having to call the build method on the builder object yourself.
+     * @param dataModelBuilder The builder object which will be used to build and then set the table model.
+     * @return This builder object.
+     */
+    public final UIForTable&lt;T&gt; withModel( Buildable&lt;BasicTableModel&gt; dataModelBuilder ) {
+<span class="fc" id="L124">        return this.withModel(dataModelBuilder.build());</span>
+    }
+
+    /**
+     * Use this to set a table model.
+     * @param model The model for the table model.
+     * @return This builder object.
+     */
+    public final UIForTable&lt;T&gt; withModel( BasicTableModel model ) {
+<span class="fc" id="L133">        NullUtil.nullArgCheck(model, &quot;model&quot;, BasicTableModel.class);</span>
+<span class="fc" id="L134">        getComponent().setModel(model);</span>
+<span class="fc" id="L135">        return this;</span>
+    }
+
+    /**
+     *  Use this instead of {@link JTable#setModel(TableModel)} if your table data can be represented through
+     *  either a row major {@link List} of {@link List}s of entry {@link Object}s (a list of rows)      &lt;br&gt;
+     *  or a columns major {@link List} of {@link List}s of entry {@link Object}s (a list of columns).  &lt;br&gt;
+     *  This method will automatically create a {@link AbstractTableModel} instance for you.
+     *
+     * @param model An enum which configures the layout as well as modifiability of the table in a readable fashion.
+     * @param dataSource The {@link TableListDataSource} returning a list matrix which will be used to populate the table.
+     * @return This builder node.
+     * @param &lt;E&gt; The type of the table entry {@link Object}s.
+     */
+    public final &lt;E&gt; UIForTable&lt;T&gt; with( UI.ListData model, TableListDataSource&lt;E&gt; dataSource ) {
+<span class="fc" id="L150">        boolean isRowMajor = model.isRowMajor();</span>
+<span class="fc" id="L151">        boolean isEditable = model.isEditable();</span>
+<span class="fc bfc" id="L152" title="All 2 branches covered.">        if ( isRowMajor ) {</span>
+<span class="fc" id="L153">            getComponent().setModel(new ListBasedTableModel&lt;E&gt;(isEditable, dataSource)</span>
+<span class="fc" id="L154">            {</span>
+<span class="fc" id="L155">                @Override public int getRowCount() { return getData().size(); }</span>
+                @Override public int getColumnCount() {
+<span class="fc" id="L157">                    List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="pc bpc" id="L158" title="1 of 2 branches missed.">                    return (data.isEmpty() ? 0 : data.get(0).size());</span>
+                }
+                @Override public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="fc" id="L161">                    List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="pc bpc" id="L162" title="1 of 2 branches missed.">                    if (isNotWithinBounds(rowIndex, columnIndex)) return null;</span>
+<span class="fc" id="L163">                    return data.get(rowIndex).get(columnIndex);</span>
+                }
+                @Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+<span class="nc" id="L166">                    List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="nc bnc" id="L167" title="All 4 branches missed.">                    if ( !isEditable || isNotWithinBounds(rowIndex, columnIndex) ) return;</span>
+<span class="nc" id="L168">                    data.get(rowIndex).set(columnIndex, (E)aValue);</span>
+<span class="nc" id="L169">                }</span>
+            });
+        } else { // isColumnMajor
+<span class="fc" id="L172">            getComponent().setModel(new ListBasedTableModel&lt;E&gt;(isEditable, dataSource)</span>
+<span class="fc" id="L173">            {</span>
+                @Override public int getRowCount() {
+<span class="fc" id="L175">                    List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="pc bpc" id="L176" title="1 of 2 branches missed.">                    return (data.isEmpty() ? 0 : data.get(0).size());</span>
+                }
+<span class="fc" id="L178">                @Override public int getColumnCount() { return getData().size(); }</span>
+                @Override public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="fc" id="L180">                    List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="pc bpc" id="L181" title="1 of 2 branches missed.">                    if (isNotWithinBounds(rowIndex, columnIndex)) return null;</span>
+<span class="fc" id="L182">                    return data.get(columnIndex).get(rowIndex);</span>
+                }
+                @Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+<span class="nc" id="L185">                    List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="nc bnc" id="L186" title="All 4 branches missed.">                    if ( !isEditable || isNotWithinBounds(rowIndex, columnIndex) ) return;</span>
+<span class="nc" id="L187">                    data.get(columnIndex).set(rowIndex, (E)aValue);</span>
+<span class="nc" id="L188">                }</span>
+            });
+        }
+<span class="fc" id="L191">        return this;</span>
+    }
+
+    /**
+     *  Use this instead of {@link JTable#setModel(TableModel)} if your table data can be represented based
+     *  on a map of column names to lists of table entries (basically a column major matrix).  &lt;br&gt;
+     *  This method will automatically create a {@link AbstractTableModel} instance for you.
+     *
+     * @param model An enum which configures the modifiability of the table in a readable fashion.
+     * @param dataSource The {@link TableMapDataSource} returning a column major map based matrix which will be used to populate the table.
+     * @return This builder node.
+     * @param &lt;E&gt; The type of the table entry {@link Object}s.
+     */
+    public final &lt;E&gt; UIForTable&lt;T&gt; with( UI.MapData model, TableMapDataSource&lt;E&gt; dataSource ) {
+<span class="fc" id="L205">        getComponent().setModel(new MapBasedColumnMajorTableModel&lt;&gt;(model.isEditable(), dataSource));</span>
+<span class="fc" id="L206">        return this;</span>
+    }
+
+    private static abstract class ListBasedTableModel&lt;E&gt; extends AbstractTableModel
+    {
+        private final TableListDataSource&lt;E&gt; dataSource;
+        private final boolean isEditable;
+
+<span class="fc" id="L214">        ListBasedTableModel(boolean isEditable, TableListDataSource&lt;E&gt; dataSource) {</span>
+<span class="fc" id="L215">            this.isEditable = isEditable;</span>
+<span class="fc" id="L216">            this.dataSource = dataSource;</span>
+<span class="fc" id="L217">        }</span>
+
+<span class="nc" id="L219">        @Override public boolean isCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }</span>
+
+        protected List&lt;List&lt;E&gt;&gt; getData() {
+<span class="fc" id="L222">            List&lt;List&lt;E&gt;&gt; data = dataSource.get();</span>
+<span class="pc bpc" id="L223" title="1 of 2 branches missed.">            if ( data == null ) return new ArrayList&lt;&gt;(); // We really don't want null pointer in UIs.</span>
+<span class="fc" id="L224">            return data;</span>
+        }
+        protected boolean isNotWithinBounds(int rowIndex, int colIndex) {
+<span class="pc bpc" id="L227" title="2 of 4 branches missed.">            if ( rowIndex &lt; 0 || rowIndex &gt;= getRowCount()     ) return true;</span>
+<span class="pc bpc" id="L228" title="2 of 4 branches missed.">            if ( colIndex &lt; 0 || colIndex &gt;= getColumnCount()  ) return true;</span>
+<span class="fc" id="L229">            return false;</span>
+        }
+    }
+
+
+    private abstract static class MapBasedTableModel&lt;E&gt; extends AbstractTableModel
+    {
+        private final TableMapDataSource&lt;E&gt; dataSource;
+        private final boolean isEditable;
+
+<span class="fc" id="L239">        MapBasedTableModel(boolean isEditable, TableMapDataSource&lt;E&gt; dataSource) {</span>
+<span class="fc" id="L240">            this.isEditable = isEditable;</span>
+<span class="fc" id="L241">            this.dataSource = dataSource;</span>
+<span class="fc" id="L242">        }</span>
+
+        protected Map&lt;String, List&lt;E&gt;&gt; getData() {
+<span class="fc" id="L245">            Map&lt;String, List&lt;E&gt;&gt; data = dataSource.get();</span>
+<span class="pc bpc" id="L246" title="1 of 2 branches missed.">            if ( data == null ) return Collections.emptyMap(); // We really don't want null pointer in UIs.</span>
+<span class="fc" id="L247">            return data;</span>
+        }
+
+        @Override
+        public String getColumnName(int column) {
+<span class="fc" id="L252">            List&lt;String&gt; columnNames = new ArrayList&lt;&gt;(getData().keySet());</span>
+<span class="pc bpc" id="L253" title="2 of 4 branches missed.">            if ( column &lt; 0 || column &gt;= columnNames.size() ) return null;</span>
+<span class="fc" id="L254">            return columnNames.get(column);</span>
+        }
+
+<span class="nc" id="L257">        @Override public boolean isCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }</span>
+
+
+        protected boolean isNotWithinBounds(int rowIndex, int colIndex) {
+<span class="pc bpc" id="L261" title="2 of 4 branches missed.">            if ( rowIndex &lt; 0 || rowIndex &gt;= getRowCount()     ) return true;</span>
+<span class="pc bpc" id="L262" title="2 of 4 branches missed.">            if ( colIndex &lt; 0 || colIndex &gt;= getColumnCount()  ) return true;</span>
+<span class="fc" id="L263">            return false;</span>
+        }
+
+    }
+
+    private static class MapBasedColumnMajorTableModel&lt;E&gt; extends MapBasedTableModel&lt;E&gt;
+    {
+        MapBasedColumnMajorTableModel(boolean isEditable, TableMapDataSource&lt;E&gt; dataSource) {
+<span class="fc" id="L271">            super(isEditable, dataSource);</span>
+<span class="fc" id="L272">        }</span>
+
+        @Override
+        public int getRowCount() {
+<span class="fc" id="L276">            Map&lt;String, List&lt;E&gt;&gt; data = getData();</span>
+<span class="fc" id="L277">            return data.values()</span>
+<span class="fc" id="L278">                        .stream()</span>
+<span class="fc" id="L279">                        .filter(Objects::nonNull) // Again, we don't want null pointer exceptions in UIs.</span>
+<span class="fc" id="L280">                        .mapToInt(List::size)</span>
+<span class="fc" id="L281">                        .max()</span>
+<span class="fc" id="L282">                        .orElse(0);</span>
+        }
+
+        @Override
+<span class="fc" id="L286">        public int getColumnCount() { return getData().size(); }</span>
+
+        @Override
+        public Object getValueAt( int rowIndex, int columnIndex ) {
+<span class="pc bpc" id="L290" title="1 of 2 branches missed.">            if ( isNotWithinBounds(rowIndex, columnIndex) ) return null;</span>
+<span class="fc" id="L291">            List&lt;E&gt; column = getData().values().stream().skip(columnIndex).findFirst().orElse(null);</span>
+<span class="pc bpc" id="L292" title="1 of 2 branches missed.">            if ( column == null ) return null;</span>
+<span class="pc bpc" id="L293" title="2 of 4 branches missed.">            if ( rowIndex &lt; 0 || rowIndex &gt;= column.size() ) return null;</span>
+<span class="fc" id="L294">            return column.get(rowIndex);</span>
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
