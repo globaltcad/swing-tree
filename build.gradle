@@ -102,7 +102,6 @@ task deploy() {
 
     dependsOn 'check'
     dependsOn 'jar'
-    //dependsOn 'proguard'
     dependsOn 'javadoc'
     dependsOn 'releaseJDocs'
 

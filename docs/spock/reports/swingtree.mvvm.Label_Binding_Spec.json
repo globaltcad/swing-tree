@@ -1,0 +1,225 @@
+{
+  "className":"swingtree.mvvm.Label_Binding_Spec",
+  "title":"Label Binding",
+  "narrative":"As a developer, I want to bind a label to a property so \n    that the label is updated when the property changes.\n    Binding is a powerful feature that allows us to create\n    UIs which are not only decoupled from the business logic of\n    an application, but also make it easy to create UIs which\n    are dynamic and reactive.",
+  "subjects":[],
+  "statistics":{
+    "runs":"9",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"0.040 seconds"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"We can bind to the text of a label.",
+      "result":"PASS",
+      "duration":"0.002 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that for a binding to work, the property must be a `Var` or `Val`\n            implementation. All you have to do to then change the state of the UI component\n            is changing the state of the property by calling its \"set\" method.\n            Internally it will then call the \"show()\" method for you \n            which triggers the observers registered by the UI.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple swing-tree property for modelling the text.","code":["Val<String> text = Var.of(\"Hello World\")"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui = UI.label(\"\").withText(text)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.text == \"Hello World\""]},
+
+        {"kind":"when","text":"We change the property value...","code":["text.set(\"Goodbye World\")"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label should be updated.","code":["ui.component.text == \"Goodbye World\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can bind to the foreground and background color of a UI node.",
+      "result":"PASS",
+      "duration":"0.009 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create 2 simple swing-tree properties for modelling colors.","code":["Val<Color> color1 = Var.of(Color.RED)","Val<Color> color2 = Var.of(Color.BLUE)"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withForeground(color1)","        .withBackground(color2)"]},
+
+        {"kind":"then","text":"The label should have the property colors.","code":["ui.component.foreground == Color.RED","ui.component.background == Color.BLUE"]},
+
+        {"kind":"when","text":"We change the color values of both properties...","code":["color1.set(Color.GREEN)","color2.set(Color.YELLOW)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label colors are updated.","code":["ui.component.foreground == Color.GREEN","ui.component.background == Color.YELLOW"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"It is possible to bind to the minimum, maximum and preferred size of a label",
+      "result":"PASS",
+      "duration":"0.003 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that this works for all kind of UI nodes, not just labels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Dimension> minSize = Var.of(new Dimension(100, 100))","Val<Dimension> maxSize = Var.of(new Dimension(200, 200))","Val<Dimension> prefSize = Var.of(new Dimension(150, 150))"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withMinimumSize(minSize)","        .withMaximumSize(maxSize)","        .withPreferredSize(prefSize)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.minimumSize == new Dimension(100, 100)","ui.component.maximumSize == new Dimension(200, 200)","ui.component.preferredSize == new Dimension(150, 150)"]},
+
+        {"kind":"when","text":"We change the property values...","code":["minSize.set(new Dimension(50, 50))","maxSize.set(new Dimension(100, 100))","prefSize.set(new Dimension(75, 75))"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label should be updated.","code":["ui.component.minimumSize == new Dimension(50, 50)","ui.component.maximumSize == new Dimension(100, 100)","ui.component.preferredSize == new Dimension(75, 75)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can bind a variable to the \"enable\" flag of a label.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that this works for all kind of UI nodes, not just labels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Boolean> enabled = Var.of(true)"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .isEnabledIf(enabled)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.enabled == true"]},
+
+        {"kind":"when","text":"We change the property values...","code":["enabled.set(false)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label should be updated.","code":["ui.component.enabled == false"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can bind a variable to the \"visible\" flag of a label.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that this works for all kind of UI nodes, not just labels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Boolean> visible = Var.of(true)"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .isVisibleIf(visible)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.visible == true"]},
+
+        {"kind":"when","text":"We change the property values...","code":["visible.set(false)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label should be updated.","code":["ui.component.visible == false"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A property can define the horizontal and vertical alignment of a label.",
+      "result":"PASS",
+      "duration":"0.005 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<UI.HorizontalAlignment> horizontal = Var.of(UI.HorizontalAlignment.LEFT)","Val<UI.VerticalAlignment> vertical = Var.of(UI.VerticalAlignment.TOP)"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withHorizontalAlignment(horizontal)","        .withVerticalAlignment(vertical)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.horizontalAlignment == SwingConstants.LEFT","ui.component.verticalAlignment == SwingConstants.TOP"]},
+
+        {"kind":"when","text":"We change the property values...","code":["horizontal.set(UI.HorizontalAlignment.CENTER)","vertical.set(UI.VerticalAlignment.BOTTOM)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label should be updated.","code":["ui.component.horizontalAlignment == SwingConstants.CENTER","ui.component.verticalAlignment == SwingConstants.BOTTOM"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A property can define the image relative horizontal and vertical alignment of a label.",
+      "result":"PASS",
+      "duration":"0.002 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<UI.HorizontalAlignment> horizontal = Var.of(UI.HorizontalAlignment.LEFT)","Val<UI.VerticalAlignment> vertical = Var.of(UI.VerticalAlignment.TOP)"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withImageRelativeHorizontalAlignment(horizontal)","        .withImageRelativeVerticalAlignment(vertical)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.horizontalTextPosition == SwingConstants.LEFT","ui.component.verticalTextPosition == SwingConstants.TOP"]},
+
+        {"kind":"when","text":"We change the property values...","code":["horizontal.set(UI.HorizontalAlignment.CENTER)","vertical.set(UI.VerticalAlignment.BOTTOM)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label should be updated.","code":["ui.component.horizontalTextPosition == SwingConstants.CENTER","ui.component.verticalTextPosition == SwingConstants.BOTTOM"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can dynamically model the font size of your labels using an integer based property.",
+      "result":"PASS",
+      "duration":"0.003 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Integer> fontSize = Var.of(12)"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withFontSize(fontSize)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.font.size == 12"]},
+
+        {"kind":"when","text":"We change the property values...","code":["fontSize.set(24)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label should be updated.","code":["ui.component.font.size == 24"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can store icons inside properties and then bind them to labels.",
+      "result":"PASS",
+      "duration":"0.004 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Icon> icon = Var.of(UI.icon(\"img/seed.png\"))","var originalIcon = icon.orElseThrow()"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withIcon(icon)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.icon != null","ui.component.icon === originalIcon","ui.component.icon.iconHeight == 512","ui.component.icon.iconWidth == 512"]},
+
+        {"kind":"when","text":"We change the property values...","code":["icon.set(UI.icon(\"img/swing.png\"))"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label should be a different one.","code":["ui.component.icon != null","ui.component.icon !== originalIcon","ui.component.icon.iconHeight == 512","ui.component.icon.iconWidth == 512"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

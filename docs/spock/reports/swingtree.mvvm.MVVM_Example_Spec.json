@@ -1,0 +1,292 @@
+{
+  "className":"swingtree.mvvm.MVVM_Example_Spec",
+  "title":"MVVM Introduction",
+  "narrative":"Swing-Tree allows you to create a Model-View-ViewModel (MVVM) architecture\n    based on 2 simple property interfaces: `Val`, and `Var`!\n\n    `Val` is a read-only property, and `Var` is a read-write property.\n\n    The state of both properties can be observed by the view using simple listeners.\n    This happens automatically when you pass them to the Swing-Tree view.\n    If you want to trigger an action when the property changes, you \n    have to pass the `Var` property to the view and define a action\n    for it inside of your view model.",
+  "subjects":[],
+  "statistics":{
+    "runs":"12",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"0.452 seconds"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"We can create a property based view model and build a view for it.",
+      "result":"PASS",
+      "duration":"0.006 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that we use a pre-made example view model here.\n            Feel free to look at the source code of the view model\n            to see what it is doing.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We instantiate the view model.","code":["var vm = new LoginViewModel()"]},
+
+        {"kind":"when","text":"We create a view for our view model...","code":["var ui =","    UI.panel(\"fill, wrap 2\")","    .add( UI.label( \"Username:\" ) )","    .add( \"grow\", UI.textField(vm.username()))","    .add( UI.label( \"Password:\" ) )","    .add( \"grow\", UI.passwordField(vm.password()))","    .add( \"span\",","        UI.label(vm.feedback())","    )","    .add( \"span\",","        UI.button( \"Login\" )","        .isEnabledIf(vm.buttonEnabled())","        .onClick( it -> vm.login() )","    )"]},
+
+        {"kind":"then","text":"The view was successfully created.","code":["ui != null"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can bind a boolean property to a button, and when the user presses it, we notice it.",
+      "result":"PASS",
+      "duration":"0.081 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We instantiate the \"view model\" in the form of a single property.","code":["var pressedStates = []","Var<Boolean> buttonPressed = Var.of(false).withAction({pressedStates.add(it.current().get()) })"]},
+
+        {"kind":"when","text":"We create a view for our view model...","code":["var ui = UI.button(\"Press me!\").isPressedIf(buttonPressed)"]},
+
+        {"kind":"then","text":"The view was successfully created.","code":["ui != null"]},
+
+        {"kind":"when","text":"We press the button.","code":["ui.component.doClick()"]},
+
+        {"kind":"then","text":"\n                The property was updated 2 times, because the pressed state switches \n                from false to true and then false again.\n            ","code":["pressedStates == [true, false]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Binding to the selection state of a button does nothing, because a JButton can only be pressed.",
+      "result":"PASS",
+      "duration":"0.070 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We instantiate the \"view model\" in the form of a single property.","code":["boolean actionPerformed = false","Var<Boolean> buttonPressed = Var.of(false).withAction({actionPerformed = true})"]},
+
+        {"kind":"when","text":"We create a view for our view model...","code":["var ui = UI.button(\"Press me!\").isSelectedIf(buttonPressed)"]},
+
+        {"kind":"then","text":"The view was successfully created.","code":["ui != null"]},
+
+        {"kind":"when","text":"We press the button.","code":["ui.component.doClick()"]},
+
+        {"kind":"then","text":"The property was not updated because a JButton can only be pressed.","code":["actionPerformed == false"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can bind a boolean property to a checkbox, and when the user presses it, we notice it.",
+      "result":"PASS",
+      "duration":"0.077 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We instantiate the \"view model\" in the form of a single property.","code":["Var<Boolean> checkBoxSelected = Var.of(false)"]},
+
+        {"kind":"when","text":"We create a view for our view model...","code":["var ui = UI.checkBox(\"Press me!\").isSelectedIf(checkBoxSelected)"]},
+
+        {"kind":"then","text":"The view was successfully created.","code":["ui != null"]},
+
+        {"kind":"when","text":"We press the button.","code":["ui.component.doClick()"]},
+
+        {"kind":"then","text":"The property was updated.","code":["checkBoxSelected.orElseNull() == true"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can bind a boolean property to a radio button, and when the user presses it, we notice it.",
+      "result":"PASS",
+      "duration":"0.068 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We instantiate the \"view model\" in the form of a single property.","code":["Var<Boolean> radioButton = Var.of(false)"]},
+
+        {"kind":"when","text":"We create a view for our view model...","code":["var ui = UI.radioButton(\"Press me!\").isSelectedIf(radioButton)"]},
+
+        {"kind":"then","text":"The view was successfully created.","code":["ui != null"]},
+
+        {"kind":"when","text":"We press the radio button.","code":["ui.component.doClick()"]},
+
+        {"kind":"then","text":"The property was updated.","code":["radioButton.orElseNull() == true"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can bind a boolean property to a toggle button, and when the user presses it, we notice it.",
+      "result":"PASS",
+      "duration":"0.080 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We instantiate the \"view model\" in the form of a single property.","code":["Var<Boolean> isToggled = Var.of(false)"]},
+
+        {"kind":"when","text":"We create a view for our view model...","code":["var ui = UI.toggleButton(\"Toggle me!\").isSelectedIf(isToggled)"]},
+
+        {"kind":"then","text":"The view was successfully created.","code":["ui != null"]},
+
+        {"kind":"when","text":"We press the toggle button.","code":["ui.component.doClick()"]},
+
+        {"kind":"then","text":"The property was updated.","code":["isToggled.orElseNull() == true"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can bind a enum property to a combo box and when the user selects an item, we notice it.",
+      "result":"PASS",
+      "duration":"0.034 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We instantiate the \"view model\" in the form of a single property holding an example enum.","code":["boolean actionPerformed = false","Var<Size> selected = Var.of(Size.SMALL).withAction({actionPerformed = true})"]},
+
+        {"kind":"expect","text":"The enum we use for demonstration has the following values.","code":["Size.values() == [Size.SMALL, Size.MEDIUM, Size.LARGE]"]},
+
+        {"kind":"when","text":"We create a view for our view model...","code":["var ui = UI.comboBox(Size.values()).withSelectedItem(selected)"]},
+
+        {"kind":"then","text":"The view was successfully created.","code":["ui != null"]},
+
+        {"kind":"when","text":"We select an item in the combo box.","code":["ui.component.setSelectedIndex(1)"]},
+
+        {"kind":"then","text":"The property was updated.","code":["selected.orElseNull() == Size.MEDIUM"]},
+
+        {"kind":"and","text":"The action was triggered.","code":["actionPerformed == true"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An enum based combo box can infer its possible states directly from the binding property.",
+      "result":"PASS",
+      "duration":"0.006 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We instantiate the \"view model\" in the form of a single property holding an example enum.","code":["boolean actionPerformed = false","Var<Option> selected = Var.of(Option.YES).withAction({actionPerformed = true})"]},
+
+        {"kind":"expect","text":"The enum we use for demonstration has the following values.","code":["Option.values() == [Option.YES, Option.NO, Option.MAYBE]"]},
+
+        {"kind":"when","text":"We create a view for our view model...","code":["var ui = UI.comboBox(selected)"]},
+
+        {"kind":"then","text":"The view was successfully created.","code":["ui != null"]},
+
+        {"kind":"when","text":"We select an item in the combo box.","code":["ui.component.setSelectedItem(Option.MAYBE)"]},
+
+        {"kind":"then","text":"The property was updated.","code":["selected.orElseNull() == Option.MAYBE"]},
+
+        {"kind":"and","text":"The action was triggered.","code":["actionPerformed == true"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A string property can be bound to a combo box holding string elements.",
+      "result":"PASS",
+      "duration":"0.004 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n            In the example below you can see how the usage of a string property\n            makes sense, because there might be requirements to add new food items\n            to the combo box at runtime.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We instantiate the \"view model\" in the form of a single property holding a string.","code":["boolean actionPerformed = false","Var<String> selected = Var.of(\"Tofu\").withAction({actionPerformed = true})"]},
+
+        {"kind":"when","text":"We create a view for our view model...","code":["var ui = UI.comboBox(\"Tofu\", \"Tempeh\", \"Seitan\").withSelectedItem(selected)"]},
+
+        {"kind":"then","text":"The view was successfully created.","code":["ui != null && !actionPerformed"]},
+
+        {"kind":"when","text":"We select an item in the combo box.","code":["ui.component.setSelectedIndex(1)"]},
+
+        {"kind":"then","text":"The property was updated.","code":["selected.orElseNull() == \"Tempeh\""]},
+
+        {"kind":"and","text":"The action was triggered.","code":["actionPerformed == true"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A simple list of elements can be used as a data model for a combo box.",
+      "result":"PASS",
+      "duration":"0.003 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Always prefer Enums over Strings but if you have to model generic data\n            you can always bind a simple list of elements as a data model to a combo box.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple list, holding the data.","code":["List<String> data = [\"Tofu\", \"Tempeh\", \"Seitan\"]"]},
+
+        {"kind":"when","text":"We create a combo box and bind it to the data.","code":["var ui = UI.comboBox(data)"]},
+
+        {"kind":"then","text":"The combo box was successfully created.","code":["ui != null"]},
+
+        {"kind":"and","text":"The combo box contains the data.","code":["ui.component.itemCount == data.size()","ui.component.getItemAt(0) == data.get(0)","ui.component.getItemAt(1) == data.get(1)","ui.component.getItemAt(2) == data.get(2)"]},
+
+        {"kind":"when","text":"We modify the list...","code":["data.add(\"Soy Milk\")"]},
+
+        {"kind":"then","text":"The combo box is updated.","code":["ui.component.itemCount == data.size()","ui.component.getItemAt(0) == data.get(0)","ui.component.getItemAt(1) == data.get(1)","ui.component.getItemAt(2) == data.get(2)","ui.component.getItemAt(3) == data.get(3)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A simple array of elements can be used as a data model for a combo box.",
+      "result":"PASS",
+      "duration":"0.002 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Always prefer Enums over Strings but if you have to model generic data\n            you can always bind a simple array of elements as a data model to a combo box.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple array, holding the data.","code":["String[] data = [\"Tofu\", \"Tempeh\", \"Seitan\"]"]},
+
+        {"kind":"when","text":"We create a combo box and bind it to the data.","code":["var ui = UI.comboBox(data)"]},
+
+        {"kind":"then","text":"The combo box was successfully created.","code":["ui != null"]},
+
+        {"kind":"and","text":"The combo box contains the data.","code":["ui.component.itemCount == data.size()","ui.component.getItemAt(0) == data[0]","ui.component.getItemAt(1) == data[1]","ui.component.getItemAt(2) == data[2]"]},
+
+        {"kind":"when","text":"We modify the array...","code":["data[1] = \"Soy Milk\""]},
+
+        {"kind":"then","text":"The combo box is updated.","code":["ui.component.itemCount == data.size()","ui.component.getItemAt(0) == data[0]","ui.component.getItemAt(1) == data[1]","ui.component.getItemAt(2) == data[2]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can bind a property as the current selection as well as list of elements as options to a combo box.",
+      "result":"PASS",
+      "duration":"0.003 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple list, holding the data.","code":["List<String> data = [\"Tofu\", \"Tempeh\", \"Seitan\"]"]},
+
+        {"kind":"and","text":"We create a property holding the current selection.","code":["Var<String> selected = Var.of(\"Tofu\")"]},
+
+        {"kind":"when","text":"We create a combo box and bind it to the data.","code":["var ui = UI.comboBox(selected, data)"]},
+
+        {"kind":"then","text":"The combo box was successfully created.","code":["ui != null"]},
+
+        {"kind":"and","text":"The combo box contains the data.","code":["ui.component.itemCount == data.size()","ui.component.getItemAt(0) == data.get(0)","ui.component.getItemAt(1) == data.get(1)","ui.component.getItemAt(2) == data.get(2)"]},
+
+        {"kind":"and","text":"The combo box has the correct selection.","code":["ui.component.selectedItem == selected.orElseNull()"]},
+
+        {"kind":"when","text":"We modify the list...","code":["data.add(\"Soy Milk\")"]},
+
+        {"kind":"then","text":"The combo box is updated.","code":["ui.component.itemCount == data.size()","ui.component.getItemAt(0) == data.get(0)","ui.component.getItemAt(1) == data.get(1)","ui.component.getItemAt(2) == data.get(2)","ui.component.getItemAt(3) == data.get(3)"]},
+
+        {"kind":"and","text":"The combo box has the correct selection.","code":["ui.component.selectedItem == selected.orElseNull()"]},
+
+        {"kind":"when","text":"We modify the selection...","code":["selected.set(\"Seitan\")"]},
+
+        {"kind":"then","text":"The combo box has the correct selection.","code":["ui.component.selectedItem == selected.orElseNull()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}
