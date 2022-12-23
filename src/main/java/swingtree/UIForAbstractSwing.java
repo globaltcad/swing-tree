@@ -1,18 +1,18 @@
 package swingtree;
 
 
+import net.miginfocom.swing.MigLayout;
+import org.slf4j.Logger;
 import swingtree.api.Peeker;
 import swingtree.api.UIAction;
 import swingtree.api.UIVerifier;
-import swingtree.api.mvvm.ActionDelegate;
-import swingtree.api.mvvm.DisplayAction;
+import swingtree.api.mvvm.Action;
 import swingtree.api.mvvm.Val;
+import swingtree.api.mvvm.ValDelegate;
 import swingtree.api.mvvm.Viewable;
 import swingtree.input.Keyboard;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
-import net.miginfocom.swing.MigLayout;
-import org.slf4j.Logger;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -78,9 +78,9 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param <T> The type of the value.
      */
     protected final <T> void _onShow( Val<T> val, Consumer<T> displayAction ) {
-        val.onShowThis(new DisplayAction<T>() {
+        val.onShowThis(new Action<ValDelegate<T>>() {
             @Override
-            public void display(ActionDelegate<T> delegate) {
+            public void accept(ValDelegate<T> delegate) {
                 _doUI(() ->
                     component().ifPresent(c -> {
                         displayAction.accept(val.orElseNull());

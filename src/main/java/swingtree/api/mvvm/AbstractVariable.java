@@ -13,29 +13,29 @@ import java.util.*;
  */
 public abstract class AbstractVariable<T> implements Var<T>
 {
-	private final List<DisplayAction<T>> _viewActions = new ArrayList<>();
+	private final List<Action<ValDelegate<T>>> _viewActions = new ArrayList<>();
 
 	private final List<Val<T>> _history = new ArrayList<>(17);
 
 	private T _value;
 	private final Class<T> _type;
 	private final String _id;
-	private final PropertyAction<T> _action;
+	private final Action<ValDelegate<T>> _action;
 
 	private final boolean _allowsNull;
 
 
-	protected AbstractVariable( Class<T> type, T iniValue, String name, PropertyAction<T> action, boolean allowsNull ) {
+	protected AbstractVariable(Class<T> type, T iniValue, String name, Action<ValDelegate<T>> action, boolean allowsNull ) {
 		this( type, iniValue, name, action, Collections.emptyList(), allowsNull );
 	}
 
 	protected AbstractVariable(
-			Class<T> type,
-			T iniValue,
-			String name,
-			PropertyAction<T> action,
-			List<DisplayAction<T>> viewActions,
-			boolean allowsNull
+		Class<T> type,
+		T iniValue,
+		String name,
+		Action<ValDelegate<T>> action,
+		List<Action<ValDelegate<T>>> viewActions,
+		boolean allowsNull
 	) {
 		Objects.requireNonNull(name);
 		_value = iniValue;
@@ -75,7 +75,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override public Var<T> withAction(PropertyAction<T> action ) {
+	@Override public Var<T> withAction( Action<ValDelegate<T>> action ) {
 		Objects.requireNonNull(action);
 		AbstractVariable<T> newVar = new AbstractVariable<T>( _type, _value, _id, action, _allowsNull ){};
 		newVar._viewActions.addAll(_viewActions);
@@ -86,18 +86,18 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 * {@inheritDoc}
 	 */
 	@Override public Var<T> act() {
-		_action.act(_createDelegate());
+		_action.accept(_createDelegate());
 		return this;
 	}
 
-	private ActionDelegate<T> _createDelegate() {
+	private ValDelegate<T> _createDelegate() {
 		// We clone the current state of the variable because
 		// it might be accessed from a different thread! (e.g. Swing EDT or Application Thread)
 		AbstractVariable<T> clone = new AbstractVariable<T>( _type, _value, _id, _action, _allowsNull ){};
 		clone._viewActions.addAll(_viewActions);
 		List<Val<T>> reverseHistory = new ArrayList<>(AbstractVariable.this._history);
 		Collections.reverse(reverseHistory);
-		return new ActionDelegate<T>() {
+		return new ValDelegate<T>() {
 			@Override public Val<T> current() { return clone; }
 			@Override
 			public Val<T> previous() {
@@ -113,7 +113,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override public Var<T> act(T newValue) {
+	@Override public Var<T> act( T newValue ) {
 		if ( _setInternal(newValue) )
 			return act();
 		return this;
@@ -139,9 +139,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 	/**
 	 * {@inheritDoc}
 	 */
-	public T orElseNullable(T other) {
-		return _value != null ? _value : other;
-	}
+	public T orElseNullable(T other) { return _value != null ? _value : other; }
 
 	/**
 	 * {@inheritDoc}
@@ -178,7 +176,7 @@ public abstract class AbstractVariable<T> implements Var<T>
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override public Val<T> onShowThis( DisplayAction<T> displayAction ) {
+	@Override public Val<T> onShowThis( Action<ValDelegate<T>> displayAction ) {
 		_viewActions.add(displayAction);
 		return this;
 	}
@@ -188,14 +186,14 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 */
 	@Override
 	public Val<T> show() {
-		List<DisplayAction<T>> removableActions = new ArrayList<>();
-		for ( DisplayAction<T> action : new ArrayList<>(_viewActions) ) // We copy the list to avoid concurrent modification
+		List<Action<ValDelegate<T>>> removableActions = new ArrayList<>();
+		for ( Action<ValDelegate<T>> action : new ArrayList<>(_viewActions) ) // We copy the list to avoid concurrent modification
 			try {
 				if ( action.canBeRemoved() )
 					removableActions.add(action);
 				else {
-					ActionDelegate<T> delegate = _createDelegate();
-					UI.run(() -> action.display(delegate));
+					ValDelegate<T> delegate = _createDelegate();
+					UI.run(() -> action.accept(delegate));
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

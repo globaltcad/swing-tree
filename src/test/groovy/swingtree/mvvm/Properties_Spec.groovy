@@ -2,10 +2,12 @@ package swingtree.mvvm
 
 import swingtree.UI
 import swingtree.api.mvvm.Val
+import swingtree.api.mvvm.Vals
 import swingtree.api.mvvm.Var
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
+import swingtree.api.mvvm.Vars
 
 import java.util.function.Consumer
 
@@ -464,6 +466,142 @@ class Properties_Spec extends Specification
             optional = property.toOptional()
         then : 'The Optional is empty.'
             optional.isEmpty()
+    }
+
+    def 'Multiple properties can be modelled through the "Vars" and "Vals" classes.'()
+    {
+        given : 'A "Vars" class with two properties.'
+            var vars = Vars.of("Apple", "Banana")
+        and : 'A "Vals" class with two properties.'
+            var vals = Vals.of("Cherry", "Date")
+        expect : 'Both the "Vars" and "Vals" have two properties.'
+            vars.size() == 2
+            vars.at(0).get() == "Apple"
+            vars.at(1).get() == "Banana"
+            vals.size() == 2
+            vals.at(0).get() == "Cherry"
+            vals.at(1).get() == "Date"
+        and : 'You can also use the "First" and "last" methods.'
+            vars.first().get() == "Apple"
+            vars.last().get() == "Banana"
+            vals.first().get() == "Cherry"
+            vals.last().get() == "Date"
+        and : 'They also have the correct type.'
+            vars.type() == String
+            vals.type() == String
+
+        and : 'The "Vals" class has no methods for mutation, it is read only (basically a tuple).'
+            Vals.metaClass.getMethods().findAll{ it.name == "set" }.size() == 0
+            Vals.metaClass.getMethods().findAll{ it.name == "add" }.size() == 0
+            Vals.metaClass.getMethods().findAll{ it.name == "remove" }.size() == 0
+        and : 'Both property lists are not empty'
+            !vars.isEmpty() && vars.isNotEmpty()
+            !vals.isEmpty() && vals.isNotEmpty()
+        and : 'Both property lists are iterable'
+            vars.each{ it }
+            vals.each{ it }
+
+        when : 'We change the state of the "Vars" properties.'
+            vars.at(0).set("Apricot")
+            vars.at(1).set("Blueberry")
+        then : 'The "Vars" properties have changed.'
+            vars.at(0).get() == "Apricot"
+            vars.at(1).get() == "Blueberry"
+
+        when : 'We use the "aetAt" method to change the state of the "Vars" properties.'
+            vars.setAt(0, "Tim")
+            vars.setAt(1, "Tom")
+        then : 'The "Vars" properties have changed.'
+            vars.at(0).get() == "Tim"
+            vars.at(1).get() == "Tom"
+    }
+
+    def 'The "Vars" ist a list of properties which can grow and shrink.'()
+    {
+        given : 'A "Vars" class with two properties.'
+            var vars = Vars.of("Kachori", "Dal Biji")
+        expect : 'The "Vars" class has two properties.'
+            vars.size() == 2
+            vars.at(0).get() == "Kachori"
+            vars.at(1).get() == "Dal Biji"
+        when : 'We add a new property to the "Vars" class.'
+            vars.add("Chapati")
+        then : 'The "Vars" class has three properties.'
+            vars.size() == 3
+            vars.at(0).get() == "Kachori"
+            vars.at(1).get() == "Dal Biji"
+            vars.at(2).get() == "Chapati"
+        when : 'We remove a property from the "Vars" class.'
+            vars.remove("Dal Biji")
+        then : 'The "Vars" class has two properties.'
+            vars.size() == 2
+            vars.at(0).get() == "Kachori"
+            vars.at(1).get() == "Chapati"
+    }
+
+    def 'Both the "Vars" and immutable "Vals" types can be used for functional programming.'()
+    {
+        given : 'A "Vars" class with two properties.'
+            var vars = Vars.of("Kachori", "Dal Biji")
+        and : 'A "Vals" class with two properties.'
+            var vals = Vals.of("Chapati", "Papad")
+
+        when : 'We use the "map" method to transform all the properties.'
+            var mappedVars = vars.map{ it.toUpperCase() }
+            var mappedVals = vals.map{ it.toUpperCase() }
+        then : 'The properties have been transformed.'
+            mappedVars.at(0).get() == "KACHORI"
+            mappedVars.at(1).get() == "DAL BIJI"
+            mappedVals.at(0).get() == "CHAPATI"
+            mappedVals.at(1).get() == "PAPAD"
+    }
+
+    def 'You can create the "Vars"/"Vals" property lists from property instances.'()
+    {
+        given : 'A "Vars" class with two properties.'
+            var vars = Vars.of(Var.of("Chana"), Var.of("Dal"))
+        and : 'A "Vals" class with two properties.'
+            var vals = Vals.of(Val.of("Chapati"), Val.of("Papad"))
+        expect : 'The "Vars" class has two properties.'
+            vars.size() == 2
+            vars.at(0).get() == "Chana"
+            vars.at(1).get() == "Dal"
+        and : 'The "Vals" class has two properties.'
+            vals.size() == 2
+            vals.at(0).get() == "Chapati"
+            vals.at(1).get() == "Papad"
+    }
+
+    def 'Just like a regular "Var" property you can register "show" listeners on "Vars".'()
+    {
+        given : 'A "Vars" class with two properties.'
+            var vars = Vars.of(42, 73)
+        and : 'A list where we are going to record changes.'
+            var changes = []
+        and : 'Now we register a "show" listener on the "Vars" class.'
+            vars.onShow{ changes << it.index() }
+
+        when : 'We modify the property in various ways...'
+            vars.addAt(1, 1)
+            vars.setAt(0, 2)
+            vars.removeAt(1)
+            vars.add(3)
+
+        then : 'The "show" listener has been called four times.'
+            changes.size() == 4
+        and : 'The "show" listener has been called with the correct indices.'
+            changes == [1, 0, 1, 2]
+    }
+
+    def 'The display action of a property or list of properties will not be called if they report "canBeRemoved()"'()
+    {
+        given : 'A single property and list of two properties.'
+            var prop = Var.of(7)
+            var list = Vars.of(42, 73)
+        and : 'A list where we are going to record changes.'
+            var changes = []
+        and : 'Now we register a "show" listeners on both objects.'
+            prop.onShowThis()
     }
 
 }

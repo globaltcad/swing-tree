@@ -198,15 +198,15 @@ public interface Val<T>
 	 * @return the result of applying an {@code Optional}-bearing mapping
 	 * @param <V> The type of the value returned from the mapping function
 	 */
-	default <V> Val<V> map( java.util.function.Function<T, V> mapper ) {
-		if ( !isPresent() )
-			return Val.ofNullable( (Class<V>) Void.class, null );
+	<V> Val<V> map( java.util.function.Function<T, V> mapper );
 
-		V newValue = mapper.apply( orElseNull() );
-		if ( newValue == null )
-			return Val.ofNullable( (Class<V>) Void.class, null );
-		return Val.of( newValue );
-	}
+	/**
+	 * @param type The type of the value returned from the mapping function
+	 * @param mapper the mapping function to apply to a value, if present
+	 * @return the result of applying an {@code Optional}-bearing mapping
+	 * @param <U> The type of the value returned from the mapping function
+	 */
+	<U> Val<U> mapTo( Class<U> type, java.util.function.Function<T, U> mapper );
 
 	/**
 	 *  This method simply returns a {@link String} representation of the wrapped value
@@ -234,6 +234,18 @@ public interface Val<T>
 	default boolean is( T otherValue ) {
 		T current = this.orElseNullable(null);
 		return equals(current, otherValue);
+	}
+
+	default boolean is(  Val<T> other ) {
+		return this.is( other.orElseNullable(null) );
+	}
+
+	default boolean isNot( T otherValue ) {
+		return !this.is(otherValue);
+	}
+
+	default boolean isNot( Val<T> other ) {
+		return !this.is(other);
 	}
 
 	/**
@@ -306,7 +318,7 @@ public interface Val<T>
 	 * @param displayAction The lambda which will be called whenever the value wrapped by this {@link Var} changes.
 	 * @return The {@link Val} instance itself.
 	 */
-	Val<T> onShowThis( DisplayAction<T> displayAction );
+	Val<T> onShowThis( Action<ValDelegate<T>> displayAction );
 
 	/**
 	 *  Use this to register an observer lambda which will be called whenever the value
@@ -322,7 +334,7 @@ public interface Val<T>
 
 	/**
 	 *  Triggers the observer lambdas registered through the {@link #onShow(Consumer)}
-	 *  as well as the {@link #onShowThis(DisplayAction)} methods.
+	 *  as well as the {@link #onShowThis(Action)} methods.
 	 *  This method is called automatically by the {@code Var::set(T)} method,
 	 *  and it is supposed to be used by the UI to update the UI components.
 	 *  This is in essence how binding works in Swing-Tree.

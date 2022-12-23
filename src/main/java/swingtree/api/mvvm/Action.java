@@ -1,9 +1,9 @@
 package swingtree.api.mvvm;
 
 @FunctionalInterface
-public interface DisplayAction<T> {
+public interface Action<D> {
 
-    void display( ActionDelegate<T> delegate );
+    void accept( D delegate );
 
     default boolean canBeRemoved() { return false; }
 

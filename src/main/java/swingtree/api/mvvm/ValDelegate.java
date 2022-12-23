@@ -4,14 +4,14 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- *  Implementations of this are passed to {@link PropertyAction} lambdas
+ *  Implementations of this are passed to {@link VarAction} lambdas
  *  exposing certain context information to the lambda, like the current
  *  value of the property, the previous one as well as access to a limit
  *  list of historic values.
  *
  * @param <T> The type of the value wrapped by a given property...
  */
-public interface ActionDelegate<T> {
+public interface ValDelegate<T> {
 
     /**
      * @return The current property.

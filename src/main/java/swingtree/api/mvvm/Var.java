@@ -1,6 +1,8 @@
 package swingtree.api.mvvm;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * 	A mutable wrapper for a value which can be observed by the Swing-Tree UI
@@ -107,11 +109,11 @@ public interface Var<T> extends Val<T>
 	 * @param action The action to be triggered when {@code Var::act()} or {@code Var::act(T)} is called.
 	 * @return A new {@link Var} instance which is identical to this one, except that it has the given action.
 	 */
-	Var<T> withAction( PropertyAction<T> action );
+	Var<T> withAction( Action<ValDelegate<T>> action );
 
 	/**
 	 *  Triggers the action associated with this property, if one was
-	 *  set using {@link #withAction(PropertyAction)}.
+	 *  set using {@link #withAction(Action)}.
 	 *  This method is intended to be used in the UI
 	 *  to indicate that the user has changed the value of the property
 	 *  not your view model.
@@ -131,5 +133,40 @@ public interface Var<T> extends Val<T>
 	 * @return This very wrapper instance, in order to enable method chaining.
 	 */
 	Var<T> act(T newValue);
+
+
+	/**
+	 *  Essentially the same as {@link Optional#map(Function)}. but with a {@link Val} as return type.
+	 *
+	 * @param mapper the mapping function to apply to a value, if present
+	 * @return the result of applying an {@code Optional}-bearing mapping
+	 * @param <V> The type of the value returned from the mapping function
+	 */
+	@Override default <V> Var<V> map( java.util.function.Function<T, V> mapper ) {
+		if ( !isPresent() )
+			return Var.ofNullable( (Class<V>) Void.class, null );
+
+		V newValue = mapper.apply( orElseNull() );
+		if ( newValue == null )
+			return Var.ofNullable( (Class<V>) Void.class, null );
+		return Var.of( newValue );
+	}
+
+	/**
+	 * @param type The type of the value returned from the mapping function
+	 * @param mapper the mapping function to apply to a value, if present
+	 * @return the result of applying an {@code Optional}-bearing mapping
+	 * @param <U> The type of the value returned from the mapping function
+	 */
+	@Override default <U> Var<U> mapTo( Class<U> type, java.util.function.Function<T, U> mapper ) {
+		if ( !isPresent() )
+			return Var.ofNullable( type, null );
+
+		U newValue = mapper.apply( orElseNull() );
+		if ( newValue == null )
+			return Var.ofNullable( type, null );
+		return Var.of( newValue );
+	}
+
 
 }
