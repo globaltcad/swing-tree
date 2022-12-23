@@ -1,8 +1,12 @@
 package swingtree.mvvm
 
 import swingtree.UI
+import swingtree.api.mvvm.Action
+import swingtree.api.mvvm.Mutation
 import swingtree.api.mvvm.Val
+import swingtree.api.mvvm.ValDelegate
 import swingtree.api.mvvm.Vals
+import swingtree.api.mvvm.ValsDelegate
 import swingtree.api.mvvm.Var
 import spock.lang.Narrative
 import spock.lang.Specification
@@ -601,7 +605,52 @@ class Properties_Spec extends Specification
         and : 'A list where we are going to record changes.'
             var changes = []
         and : 'Now we register a "show" listeners on both objects.'
-            prop.onShowThis()
+            prop.onShowThis(new Action<ValDelegate<Integer>>() {
+                @Override
+                void accept(ValDelegate<Integer> delegate) {
+                    changes << "Something happened to the property."
+                }
+                @Override boolean canBeRemoved() { return true }
+            })
+            list.onShow(new Action<ValsDelegate<Integer>>() {
+                @Override
+                void accept(ValsDelegate<Integer> delegate) {
+                    changes << "Something happened to the list."
+                }
+                @Override boolean canBeRemoved() { return true }
+            })
+
+        when : 'We modify the properties in various ways...'
+            prop.set(42)
+            list.add(1)
+            list.removeAt(1)
+            list.setAt(0, 2)
+            list.addAt(1, 3)
+            list.remove(3)
+
+        then : 'The "show" listener has been called zero times.'
+            changes.size() == 0
+    }
+
+    def 'The listeners registered in property lists will be informed what type of modification occurred.'()
+    {
+        given : 'A "Vars" class with two properties.'
+            var vars = Vars.of(42, 73)
+        and : 'A list where we are going to record changes.'
+            var changes = []
+        and : 'Now we register a "show" listener on the "Vars" class.'
+            vars.onShow{ changes << it.type() }
+
+        when : 'We modify the property in various ways...'
+            vars.addAt(1, 1)
+            vars.setAt(0, 2)
+            vars.removeAt(1)
+            vars.add(3)
+
+        then : 'The "show" listener has been called four times.'
+            changes.size() == 4
+        and : 'The "show" listener has been called with the correct indices.'
+            changes == [Mutation.ADD, Mutation.SET, Mutation.REMOVE, Mutation.ADD]
     }
 
 }

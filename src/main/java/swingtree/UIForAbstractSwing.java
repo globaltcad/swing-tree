@@ -6,10 +6,8 @@ import org.slf4j.Logger;
 import swingtree.api.Peeker;
 import swingtree.api.UIAction;
 import swingtree.api.UIVerifier;
+import swingtree.api.mvvm.*;
 import swingtree.api.mvvm.Action;
-import swingtree.api.mvvm.Val;
-import swingtree.api.mvvm.ValDelegate;
-import swingtree.api.mvvm.Viewable;
 import swingtree.input.Keyboard;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
@@ -97,6 +95,30 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
+     * @param vals A property list which should be captured.
+     * @param displayAction A consumer lambda receiving the action delegate and
+     *                      is then executed by the UI thread.
+     * @param <T> The type of the value.
+     */
+    protected final <T> void _onShow( Vals<T> vals, Consumer<ValsDelegate<T>> displayAction ) {
+        vals.onShow(new Action<ValsDelegate<T>>() {
+            @Override
+            public void accept(ValsDelegate<T> delegate) {
+                _doUI(() ->
+                    component().ifPresent(c -> {
+                        displayAction.accept(delegate);
+                        /*
+                            We make sure that the action is only executed if the component
+                            is not disposed. This is important because the action may
+                            access the component, and we don't want to get a NPE.
+                         */
+                    })
+                );
+            }
+            @Override public boolean canBeRemoved() { return !component().isPresent(); }
+        });
+    }
+    /**
      *  This allows you to bind to a {@link swingtree.api.mvvm.Viewable}
      *  implementation and automatically update the view when the view model changes.
      *
@@ -111,18 +133,76 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         // Then we add the component provided by the viewable to the list of children.
         this.add(viewable.get().createView());
         // Finally we add a listener to the viewable which will update the component when the viewable changes.
-        _onShow(viewable, v -> {
-            component().ifPresent( c -> {
-                // We remove the old component.
-                c.remove(c.getComponent(index));
-                // We add the new component.
-                c.add(v.createView(), index);
-                // We update the layout.
-                c.revalidate();
-                c.repaint();
-            });
-        });
+        _onShow( viewable, v -> _updateComponentAt(index, v) );
         return _this();
+    }
+
+    /**
+     *  This allows you to bind to a property list of {@link swingtree.api.mvvm.Viewable}s
+     *  to automatically update the view when your view models change.
+     *
+     * @param viewables A {@link swingtree.api.mvvm.Vals} list of {@link swingtree.api.mvvm.Viewable}s
+     *                  wrapped in a {@link swingtree.api.mvvm.Val} properties.
+     *                  The Viewables will be used to generate the view.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I add( Vals<Viewable> viewables ) {
+        NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
+        _onShow( viewables, delegate -> {
+            // we simply redo all the components.
+            switch ( delegate.type() ) {
+                case SET: _updateComponentAt(delegate.index(), delegate.newValue().get()); break;
+                case ADD: _addComponentAt(delegate.index(), delegate.newValue().get()); break;
+                case REMOVE: _removeComponentAt(delegate.index()); break;
+                case CLEAR: _clearComponents(); break;
+                case NONE: break;
+                default: throw new IllegalStateException("Unknown type: "+delegate.type());
+            }
+        });
+        viewables.forEach( v -> add(v.createView()) );
+        return _this();
+    }
+
+    private void _updateComponentAt( int index, Viewable v ) {
+        component().ifPresent( c -> {
+            // We remove the old component.
+            c.remove(c.getComponent(index));
+            // We add the new component.
+            c.add(v.createView(), index);
+            // We update the layout.
+            c.revalidate();
+            c.repaint();
+        });
+    }
+
+    private void _addComponentAt( int index, Viewable v ) {
+        component().ifPresent( c -> {
+            // We add the new component.
+            c.add(v.createView(), index);
+            // We update the layout.
+            c.revalidate();
+            c.repaint();
+        });
+    }
+
+    private void _removeComponentAt( int index ) {
+        component().ifPresent( c -> {
+            // We remove the old component.
+            c.remove(c.getComponent(index));
+            // We update the layout.
+            c.revalidate();
+            c.repaint();
+        });
+    }
+
+    private void _clearComponents() {
+        component().ifPresent( c -> {
+            // We remove all components.
+            c.removeAll();
+            // We update the layout.
+            c.revalidate();
+            c.repaint();
+        });
     }
 
     /**

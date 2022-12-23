@@ -103,6 +103,8 @@ public interface Vars<T> extends Vals<T>
 
     Vars<T> setAt( int index, Var<T> value );
 
+    Vars<T> clear();
+
     /**
      *  Use this for mapping a list of properties to another list of properties.
      */

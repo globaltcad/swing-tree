@@ -7,6 +7,7 @@ import spock.lang.Title
 import swingtree.UI
 import swingtree.Utility
 import swingtree.api.mvvm.Var
+import swingtree.api.mvvm.Vars
 import swingtree.api.mvvm.Viewable
 
 import javax.swing.*
@@ -367,6 +368,118 @@ class MVVM_Example_Spec extends Specification
             !new Utility.Query(ui).find(JPanel, "sub-1").isPresent()
             new Utility.Query(ui).find(JPanel, "sub-2").isPresent()
         and : 'The "super" view is still present.'
+            new Utility.Query(ui).find(JPanel, "super").isPresent()
+    }
+
+
+    def 'View Models can be represented by properties lists.'() {
+        reportInfo """
+            In larger GUIs usually consist views which themselves consist of multiple
+            sub views. This is also true for their view models which are usually
+            structured in the same tree like fashion. 
+            Often times however, your views are highly dynamic and you want to
+            be able to swap out sub views at runtime. In this case it is useful
+            to represent your view models as property lists, especially if 
+            one view consists of multiple sub views.
+            Simply implement the 'Viewable' interface in your view model and
+            you can bind it to a view using the "Vars" class wrapping your viewables.
+            When the property list changes, the view will be updated automatically.
+        """
+        given : 'We create a view model.'
+            Var<String> address = Var.of("123 Main Street")
+            Var<String> title = Var.of("Mr.")
+            Var<Double> price = Var.of(1000000.0d)
+            Var<Option> option = Var.of(Option.YES)
+
+        and : 'We create 4 view models with 4 locally created views:'
+            var vm1 = new Viewable() {
+                @Override
+                JComponent createView() {
+                    return UI.panel().id("sub-1")
+                            .add(UI.label("Address:"))
+                            .add(UI.textField(address))
+                            .add(UI.button("Update").onClick { address.set("456 Main Street") })
+                            .component
+                }
+            }
+            var vm2 = new Viewable() {
+                @Override
+                JComponent createView() {
+                    return UI.panel().id("sub-2")
+                            .add(UI.label("Title:"))
+                            .add(UI.textField(title))
+                            .add(UI.button("Update").onClick { title.set("Mrs.") })
+                            .component
+                }
+            }
+            var vm3 = new Viewable() {
+                @Override
+                JComponent createView() {
+                    return UI.panel().id("sub-3")
+                            .add(UI.label("Price:"))
+                            .add(UI.slider(UI.Align.HORIZONTAL).withValue(price))
+                            .add(UI.button("Update").onClick { price.set(2000000.0) })
+                            .component
+                }
+            }
+            var vm4 = new Viewable() {
+                @Override
+                JComponent createView() {
+                    return UI.panel().id("sub-4")
+                            .add(UI.label("Option:"))
+                            .add(UI.comboBox(option, Option.values()))
+                            .add(UI.button("Update").onClick { option.set(Option.NO) })
+                            .component
+                }
+            }
+        and : 'A property list storing the view models.'
+            var vms = Vars.of(vm1, vm2, vm3, vm4)
+        and : 'Finally a view which binds to the view model property list.'
+            var ui = UI.panel()
+                    .add(UI.label("Dynamic Super View:"))
+                    .add(UI.panel().id("super").add(vms))
+        expect : 'We query the UI for the views and verify that the "super" and "sub-1" views are present.'
+            new Utility.Query(ui).find(JPanel, "super").isPresent()
+            new Utility.Query(ui).find(JPanel, "sub-1").isPresent()
+            new Utility.Query(ui).find(JPanel, "sub-2").isPresent()
+            new Utility.Query(ui).find(JPanel, "sub-3").isPresent()
+            new Utility.Query(ui).find(JPanel, "sub-4").isPresent()
+        when : 'We remove something from the view model property list.'
+            vms.remove(vm2)
+            UI.sync()
+        then : 'We expect all views to be present except for the "sub-2" view.'
+            new Utility.Query(ui).find(JPanel, "super").isPresent()
+            new Utility.Query(ui).find(JPanel, "sub-1").isPresent()
+            !new Utility.Query(ui).find(JPanel, "sub-2").isPresent()
+            new Utility.Query(ui).find(JPanel, "sub-3").isPresent()
+            new Utility.Query(ui).find(JPanel, "sub-4").isPresent()
+        and : 'We remove something else from the view model property list but this time, for a change, use the index.'
+            vms.removeAt(2) // vm4
+            UI.sync()
+        then : 'We expect all views to be present except for the "sub-2" and "sub-4" views.'
+            new Utility.Query(ui).find(JPanel, "super").isPresent()
+            new Utility.Query(ui).find(JPanel, "sub-1").isPresent()
+            !new Utility.Query(ui).find(JPanel, "sub-2").isPresent()
+            new Utility.Query(ui).find(JPanel, "sub-3").isPresent()
+            !new Utility.Query(ui).find(JPanel, "sub-4").isPresent()
+        when : 'We reintroduce "vm2"...'
+            vms.add(vm2)
+            UI.sync()
+        then : 'We expect all views to be present except for the "sub-4" view.'
+            new Utility.Query(ui).find(JPanel, "super").isPresent()
+            new Utility.Query(ui).find(JPanel, "sub-1").isPresent()
+            new Utility.Query(ui).find(JPanel, "sub-2").isPresent()
+            new Utility.Query(ui).find(JPanel, "sub-3").isPresent()
+            !new Utility.Query(ui).find(JPanel, "sub-4").isPresent()
+
+        when : 'We clear the view model property list.'
+            vms.clear()
+            UI.sync()
+        then : 'We expect all views to be removed. (except for the "super" view)'
+            !new Utility.Query(ui).find(JPanel, "sub-1").isPresent()
+            !new Utility.Query(ui).find(JPanel, "sub-2").isPresent()
+            !new Utility.Query(ui).find(JPanel, "sub-3").isPresent()
+            !new Utility.Query(ui).find(JPanel, "sub-4").isPresent()
             new Utility.Query(ui).find(JPanel, "super").isPresent()
     }
 
