@@ -1,27 +1,3 @@
-/*
- * Copyright (c) 2012, 2018, Oracle and/or its affiliates. All rights reserved.
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
- *
- * This code is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
- *
- * This code is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * version 2 for more details (a copy is included in the LICENSE file that
- * accompanied this code).
- *
- * You should have received a copy of the GNU General Public License version
- * 2 along with this work; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
- * or visit www.oracle.com if you need additional information or have any
- * questions.
- */
 package swingtree;
 
 import java.awt.*;
@@ -46,7 +22,7 @@ import java.util.function.Supplier;
  * {@link #ifPresent(Consumer) ifPresent()} (performs an
  * action if a value is present).
  *
- * <p>This is a <a href="../lang/doc-files/ValueBased.html">value-based</a>
+ * <p>This is a <b>value-based</b>
  * class; use of identity-sensitive operations (including reference equality
  * ({@code ==}), identity hash code, or synchronization) on instances of
  * {@code OptionalUI} may have unpredictable results and should be avoided.
@@ -142,7 +118,7 @@ public final class OptionalUI<C extends Component> {
      * @throws NullPointerException if component is present and the given action is
      *         {@code null}
      */
-    public void ifPresent(Consumer<? super C> action) {
+    public void ifPresent( Consumer<? super C> action ) {
         if ( _component != null )
             UI.run(() -> action.accept(_component));
     }
@@ -159,7 +135,7 @@ public final class OptionalUI<C extends Component> {
      *         action is {@code null}.
      * @since 9
      */
-    public void ifPresentOrElse(Consumer<? super C> action, Runnable emptyAction) {
+    public void ifPresentOrElse( Consumer<? super C> action, Runnable emptyAction ) {
         UI.run(()->{
             if ( _component != null )
                 action.accept(_component);
@@ -211,7 +187,7 @@ public final class OptionalUI<C extends Component> {
      *         present, otherwise an empty {@code OptionalUI}
      * @throws NullPointerException if the mapping function is {@code null}
      */
-    public <U> Optional<U> map(Function<? super C, ? extends U> mapper) {
+    public <U> Optional<U> map( Function<? super C, ? extends U> mapper ) {
         Objects.requireNonNull(mapper);
         if ( !this.isPresent() ) return Optional.empty();
         else {
@@ -263,7 +239,7 @@ public final class OptionalUI<C extends Component> {
      *        May not be {@code null}.
      * @return the component, if present, otherwise {@code other}
      */
-    public C orElseNullable(C other) {
+    public C orElseNullable( C other ) {
         if ( !UI.thisIsUIThread() )
             throw new RuntimeException("The UI component may only be accessed by the UI thread!");
         return _component != null ? _component : other;
