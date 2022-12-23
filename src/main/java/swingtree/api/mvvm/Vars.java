@@ -97,11 +97,29 @@ public interface Vars<T> extends Vals<T>
         return this;
     }
 
+    default Vars<T> addAll( T... values )
+    {
+        for ( T v : values ) add(v);
+        return this;
+    }
+
     Vars<T> removeAt( int index );
 
     Vars<T> addAt( int index, Var<T> value );
 
     Vars<T> setAt( int index, Var<T> value );
+
+    default Vars<T> removeLast( int count )
+    {
+        for ( int i = 0; i < count; i++ ) removeLast();
+        return this;
+    }
+
+    default Vars<T> removeFirst( int count )
+    {
+        for ( int i = 0; i < count; i++ ) removeFirst();
+        return this;
+    }
 
     Vars<T> clear();
 

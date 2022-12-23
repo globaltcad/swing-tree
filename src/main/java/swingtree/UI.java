@@ -8,7 +8,9 @@ import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
 import swingtree.api.mvvm.Val;
+import swingtree.api.mvvm.Vals;
 import swingtree.api.mvvm.Var;
+import swingtree.api.mvvm.Vars;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
 import net.miginfocom.swing.MigLayout;
@@ -1460,7 +1462,7 @@ public final class UI
      * @return A builder instance for the provided {@link JComboBox}, which enables fluent method chaining.
      * @param <E> The type of the elements in the list.
      */
-    public static <E> UIForCombo<E,JComboBox<E>> comboBoxWithUnmodifiable(java.util.List<E> items ) {
+    public static <E> UIForCombo<E,JComboBox<E>> comboBoxWithUnmodifiable( java.util.List<E> items ) {
         NullUtil.nullArgCheck(items, "items", List.class);
         java.util.List<E> unmodifiableList = Collections.unmodifiableList(items);
         return comboBox(unmodifiableList);
@@ -1482,6 +1484,69 @@ public final class UI
         NullUtil.nullArgCheck(items, "items", List.class);
         NullUtil.nullArgCheck(selection, "selection", Var.class);
         return of(new JComboBox<E>()).withModel(new ListBasedComboModel<>(selection, items));
+    }
+
+    //___
+
+    /**
+     *  Use this to create a builder for a new  {@link JComboBox} instance
+     *  with the provided properties list object as selectable (and mutable) items.
+     *
+     * @param items The {@link Vars} properties of elements to be selectable in the {@link JComboBox}.
+     * @return A builder instance for the provided {@link JComboBox}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
+     */
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Vars<E> items ) {
+        NullUtil.nullArgCheck(items, "items", Vars.class);
+        return of(new JComboBox<E>()).withModel(new VarsBasedComboModel<>(items));
+    }
+
+    /**
+     *  Use this to create a builder for a new  {@link JComboBox} instance
+     *  with the provided properties list object as selectable (and immutable) items which
+     *  may not be modified by the user.
+     *
+     * @param items The {@link swingtree.api.mvvm.Vals} properties of elements to be selectable in the {@link JComboBox}.
+     * @return A builder instance for the provided {@link JComboBox}, which enables fluent method chaining.
+     * @param <E> The type of the elements in the list.
+     */
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Vals<E> items ) {
+        NullUtil.nullArgCheck(items, "items", Vals.class);
+        return of(new JComboBox<E>()).withModel(new ValsBasedComboModel<>(items));
+    }
+
+    /**
+     *  Creates a combo box UI builder node with a {@link Var} property as the model
+     *  for the current selection and a list of items as a dynamically sized model for the
+     *  selectable items.
+     *  <p>
+     *  Note that the provided list may be mutated by the combo box UI component
+     *
+     * @param selection The property holding the current selection.
+     * @param items The list of selectable items.
+     * @return A builder instance for the provided {@link JList}, which enables fluent method chaining.
+     * @param <E> The type of the elements in the list.
+     */
+     public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selection, Vars<E> items ) {
+        NullUtil.nullArgCheck(items, "items", Vars.class);
+        NullUtil.nullArgCheck(selection, "selection", Var.class);
+        return of(new JComboBox<E>()).withModel(new VarsBasedComboModel<>(selection, items));
+    }
+
+    /**
+     *  Creates a combo box UI builder node with a {@link Var} property as the model
+     *  for the current selection and a property list of items as a dynamically sized model for the
+     *  selectable items which may not be modified by the user.
+     *
+     * @param selection The property holding the current selection.
+     * @param items The list of selectable items which may not be modified by the user.
+     * @return A builder instance for the provided {@link JList}, which enables fluent method chaining.
+     * @param <E> The type of the elements in the list.
+     */
+     public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selection, Vals<E> items ) {
+        NullUtil.nullArgCheck(items, "items", Vals.class);
+        NullUtil.nullArgCheck(selection, "selection", Var.class);
+        return of(new JComboBox<E>()).withModel(new ValsBasedComboModel<>(selection, items));
     }
 
     /**

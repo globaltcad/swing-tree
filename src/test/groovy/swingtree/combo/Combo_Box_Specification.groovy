@@ -7,6 +7,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
+import swingtree.api.mvvm.Vars
 
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JComboBox
@@ -270,5 +271,53 @@ class Combo_Box_Specification extends Specification
             ui.component.itemCount == 2
             ui.component.getItemAt(0) == 99
             ui.component.getItemAt(1) == 17
+    }
+
+
+    def 'You can model the options of your combo boxes using "Vars".'()
+    {
+        reportInfo """
+           In essence, the state of a combo box consists of the current selection, and
+           the options that are available for selection. You can model both of these
+           aspects using a standalone property as well as a "Vars" instance
+           representing multiple properties. 
+           The single property models the current selection, and the "Vars"
+           store a list of all available options. 
+        """
+        given : 'We create our "model", a property and a "Vars" instance.'
+            var selection = Var.of(42)
+            var options = Vars.of(73, 42, 17)
+        and : 'We create a combo box that is bound to the property and the list.'
+            var ui = UI.comboBox(selection, options)
+        expect : 'The combo box is initialized with the current selection.'
+            ui.component.getSelectedItem() == 42
+        and : 'It also reports the correct selection index.'
+            ui.component.getSelectedIndex() == 1
+        and : 'The there are all 3 options available.'
+            ui.component.itemCount == 3
+            ui.component.getItemAt(0) == 73
+            ui.component.getItemAt(1) == 42
+            ui.component.getItemAt(2) == 17
+
+        when : 'We change the selection.'
+            selection.set(17)
+        then : 'This change translates from the property to the UI element.'
+            ui.component.getSelectedItem() == 17
+
+        when : 'We change the options property.'
+            options.clear().addAll(99, 17)
+        then : 'The combo box options are updated.'
+            ui.component.itemCount == 2
+            ui.component.getItemAt(0) == 99
+            ui.component.getItemAt(1) == 17
+
+        when : 'We add another option somewhere in the middle.'
+            options.addAll(16, 42)
+        then : 'The combo box options are updated.'
+            ui.component.itemCount == 4
+            ui.component.getItemAt(0) == 99
+            ui.component.getItemAt(1) == 17
+            ui.component.getItemAt(2) == 16
+            ui.component.getItemAt(3) == 42
     }
 }

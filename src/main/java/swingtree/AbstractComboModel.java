@@ -14,6 +14,11 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 	protected java.util.List<ListDataListener> listeners = new ArrayList<>();
 
 	protected static <E> Class<E> _findCommonType( E[] items ) {
+		Iterable<E> iterable = () -> java.util.Arrays.stream(items).iterator();
+		return _findCommonType(iterable);
+	}
+
+	protected static <E> Class<E> _findCommonType( Iterable<E> items ) {
 		if ( items == null ) return (Class<E>) Object.class;
 		Class<E> type = null;
 		for ( E item : items ) {
