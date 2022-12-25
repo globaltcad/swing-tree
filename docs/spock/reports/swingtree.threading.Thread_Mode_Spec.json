@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.931 seconds"
+    "duration":"0.956 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -54,7 +54,7 @@
     {
       "id":"Inside an event lambda we can not access the UI from a background thread.",
       "result":"PASS",
-      "duration":"0.701 seconds",
+      "duration":"0.719 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n                The event delegate (which is passed to things like `onClick` actions) \n                throws an exception if you try to access the UI from a background thread.\n                This is because SwingTree can not guarantee that the UI is thread safe.\n                However, the delegate provides a `safe` method which will execute the\n                passed lambda on the event dispatch thread.\n            ","\n                The event delegate (which is passed to things like `onClick` actions) \n                throws an exception if you try to access the UI from a background thread.\n                This is because SwingTree can not guarantee that the UI is thread safe.\n                However, the delegate provides a `safe` method which will execute the\n                passed lambda on the event dispatch thread.\n            ","\n                The event delegate (which is passed to things like `onClick` actions) \n                throws an exception if you try to access the UI from a background thread.\n                This is because SwingTree can not guarantee that the UI is thread safe.\n                However, the delegate provides a `safe` method which will execute the\n                passed lambda on the event dispatch thread.\n            ","\n                The event delegate (which is passed to things like `onClick` actions) \n                throws an exception if you try to access the UI from a background thread.\n                This is because SwingTree can not guarantee that the UI is thread safe.\n                However, the delegate provides a `safe` method which will execute the\n                passed lambda on the event dispatch thread.\n            ","\n                The event delegate (which is passed to things like `onClick` actions) \n                throws an exception if you try to access the UI from a background thread.\n                This is because SwingTree can not guarantee that the UI is thread safe.\n                However, the delegate provides a `safe` method which will execute the\n                passed lambda on the event dispatch thread.\n            "]
       },
@@ -94,7 +94,7 @@
     {
       "id":"Accessing the UI from something other than the UI thread, leads to an exception when in decoupled thread mode.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The UI you build in the decoupled thread mode will try to protect itself\n            from being accessed from a potential application thread (so anything but the UI thread). \n            So if you try to access the UI from another thread, an exception will be thrown.\n        "]
       },

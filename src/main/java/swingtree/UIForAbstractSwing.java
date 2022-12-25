@@ -14,6 +14,7 @@ import swingtree.layout.LayoutAttr;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
@@ -698,6 +699,26 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
+     *  Use this to attach a {@link javax.swing.border.TitledBorder} with the
+     *  provided title property dynamically setting the title String.
+     *
+     * @param title The title property for the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBorderTitled( Val<String> title ) {
+        NullUtil.nullArgCheck(title, "title", Val.class);
+        getComponent().setBorder(BorderFactory.createTitledBorder(title.get()));
+        _onShow( title, t -> {
+            Border foundBorder = getComponent().getBorder();
+            if ( foundBorder instanceof TitledBorder)
+                ((TitledBorder)foundBorder).setTitle(t);
+            else
+                getComponent().setBorder(BorderFactory.createTitledBorder(t));
+        });
+        return _this();
+    }
+
+    /**
      *  Use this to conveniently set the cursor type which should be displayed
      *  when hovering over the UI component wrapped by this builder.
      *
@@ -811,6 +832,22 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I withGridLayout() { return this.withLayout(new GridLayout()); }
 
+    /**
+     *  Use this to set a new {@link GridBagLayout} for the component wrapped by this builder. <br>
+     *  This is in essence a more convenient way than the alternative usage pattern involving
+     *  the {@link #peek(Peeker)} method to peek into the builder's component like so: <br>
+     *  <pre>{@code
+     *      UI.panel()
+     *      .peek( panel -> panel.setLayout(new GridBagLayout()) );
+     *  }</pre>
+     *  ...or specifying the layout manager like so: <br>
+     *  <pre>{@code
+     *    UI.panel().withLayout( new GridBagLayout() );
+     *  }</pre>
+     *
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withGridBagLayout() { return this.withLayout(new GridBagLayout()); }
 
     /**
      *  Use this to set a {@link GridLayout} for the component wrapped by this builder. <br>
@@ -902,7 +939,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withTooltip( String tooltip ) {
-        getComponent().setToolTipText(tooltip);
+        NullUtil.nullArgCheck(tooltip, "tooltip", String.class, "Use the empty string to clear the tooltip text!");
+        getComponent().setToolTipText(tooltip.isEmpty() ? null : tooltip);
         return _this();
     }
 
@@ -926,7 +964,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withTooltip( Val<String> tip ) {
         NullUtil.nullArgCheck(tip, "tip", Val.class);
         NullUtil.nullPropertyCheck(tip, "tip", "Please use an empty string instead of null!");
-        _onShow( tip, v -> getComponent().setToolTipText(v) );
+        _onShow( tip, v -> getComponent().setToolTipText(v.isEmpty() ? null : v) );
         return this.withTooltip( tip.orElseThrow() );
     }
 

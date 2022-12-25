@@ -86,7 +86,7 @@ abstract class AbstractBuilder<I, C extends Component>
      *  The below example shows how this method allows for more fine-grained control over the wrapped component:
      *  <pre>{@code
      *      UI.panel()
-     *          peek( panel -> panel.setDebugGraphicsOptions(true) );
+     *      peek( panel -> panel.setDebugGraphicsOptions(true) );
      *  }</pre>
      *  <br><br>
      *

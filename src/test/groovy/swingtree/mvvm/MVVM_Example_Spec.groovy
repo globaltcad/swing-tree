@@ -11,6 +11,7 @@ import swingtree.api.mvvm.Vars
 import swingtree.api.mvvm.Viewable
 
 import javax.swing.*
+import javax.swing.border.TitledBorder
 import java.awt.Color
 
 @Title("MVVM Introduction")
@@ -656,6 +657,99 @@ class MVVM_Example_Spec extends Specification
             UI.sync()
         then : 'The label should have the default background color, green.'
             new Utility.Query(ui).find(JLabel, "XYZ").get().getBackground() == Color.GREEN
+    }
+
+    def 'The tooltip of a component can be modelled using a String property.'()
+    {
+        reportInfo """
+            Using the 'withTooltip(Val<String>)' method,
+            the tooltip of a Swing component is set dynamically
+            if the String property changes.
+        """
+        given : 'A String property.'
+            var tooltip = Var.of("Hello World!")
+        and : 'A Swing UI with a simple label bound to the property:'
+            var ui = UI.panel()
+                    .add(
+                        UI.label("Hi!").id("XYZ")
+                        .withTooltip(tooltip)
+                    )
+        expect : 'The label should have the default tooltip.'
+            new Utility.Query(ui).find(JLabel, "XYZ").get().getToolTipText() == "Hello World!"
+        when : 'We set the String property to "Hello Universe!".'
+            tooltip.set("Hello Universe!")
+            UI.sync()
+        then : 'The label should have a tooltip.'
+            new Utility.Query(ui).find(JLabel, "XYZ").get().getToolTipText() == "Hello Universe!"
+        when : 'We set the String property to an empty String.'
+            tooltip.set("")
+            UI.sync()
+        then : 'The label should have no tooltip.'
+            new Utility.Query(ui).find(JLabel, "XYZ").get().getToolTipText() == null
+    }
+
+    def 'A border title can be modelled using properties.'()
+    {
+        reportInfo """
+            Using the 'withBorderTitle(Val<String>)' method,
+            the title of a Swing component's border is set dynamically
+            if the String property changes.
+        """
+        given : 'A String property.'
+            var title = Var.of("Hello World!")
+        and : 'A Swing UI with a simple label bound to the property:'
+            var ui = UI.panel().id("My-Panel")
+                    .withBorderTitled(title)
+                    .add(
+                        UI.label("Hi!")
+                        //... some other stuff
+                    )
+        expect : 'The panel should have the expected default border title.'
+            ((TitledBorder)new Utility.Query(ui).find(JPanel, "My-Panel").get().border).getTitle() == "Hello World!"
+        when : 'We set the String property to "Hello Universe!".'
+            title.set("Hello Universe!")
+            UI.sync()
+        then : 'The panel should have a border title.'
+            ((TitledBorder)new Utility.Query(ui).find(JPanel, "My-Panel").get().border).getTitle() == "Hello Universe!"
+        when : 'We set the String property to an empty String.'
+            title.set("")
+            UI.sync()
+        then : 'The panel should have no border title.'
+            ((TitledBorder)new Utility.Query(ui).find(JPanel, "My-Panel").get().border).getTitle() == ""
+    }
+
+    def 'The type of cursor displayed over a component can be modelled using properties.'()
+    {
+        reportInfo """
+            Using the 'withCursor(Val<Cursor>)' method,
+            the cursor displayed over a Swing component is set dynamically
+            if the Cursor property changes.
+        """
+        given : 'A Cursor property.'
+            var cursor = Var.of(UI.Cursor.DEFAULT)
+        and : 'A Swing UI with a simple label bound to the property:'
+            var ui = UI.panel()
+                    .add(
+                        UI.label("Hi!").id("XYZ")
+                        .withCursor(cursor)
+                    )
+        expect : 'The label should have the default cursor.'
+            new Utility.Query(ui).find(JLabel, "XYZ").get().cursor.type == UI.Cursor.DEFAULT.type
+        when : 'We set the Cursor property to a crosshair cursor.'
+            cursor.set(UI.Cursor.CROSS)
+            UI.sync()
+        then : 'The label should have a crosshair cursor.'
+            new Utility.Query(ui).find(JLabel, "XYZ").get().cursor.type == UI.Cursor.CROSS.type
+        when : 'We set the Cursor property to a hand cursor.'
+            cursor.set(UI.Cursor.HAND)
+            UI.sync()
+        then : 'The label should have a hand cursor.'
+            new Utility.Query(ui).find(JLabel, "XYZ").get().cursor.type == UI.Cursor.HAND.type
+        when : 'We set the Cursor property to a text cursor.'
+            cursor.set(UI.Cursor.TEXT)
+            UI.sync()
+        then : 'The label should have a text cursor.'
+            new Utility.Query(ui).find(JLabel, "XYZ").get().cursor.type == UI.Cursor.TEXT.type
     }
 
     private static enum Size

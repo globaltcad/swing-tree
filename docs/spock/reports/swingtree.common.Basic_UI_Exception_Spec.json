@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.302 seconds"
+    "duration":"0.389 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"The given factory methods do not accept null arguments.",
       "result":"PASS",
-      "duration":"0.043 seconds",
+      "duration":"0.057 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -33,7 +33,7 @@
     {
       "id":"Certain Swing-Tree UI builder, do not allow you to use nullable properties.",
       "result":"PASS",
-      "duration":"0.037 seconds",
+      "duration":"0.045 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
