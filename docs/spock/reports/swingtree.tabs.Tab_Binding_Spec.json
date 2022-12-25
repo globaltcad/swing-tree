@@ -1,0 +1,133 @@
+{
+  "className":"swingtree.tabs.Tab_Binding_Spec",
+  "title":"Binding Tabs to Properties",
+  "narrative":"Tabs are a way to efficiently group related content in a single container.\n    The tabs can be bound to a property, so that the selected tab is always\n    the one that corresponds to the value of the property.\n    You can also model other aspects of a tab using properties, such as\n    whether it is enabled, visible, or has a tooltip.",
+  "subjects":[],
+  "statistics":{
+    "runs":"5",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"0.023 seconds"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"The selection state of tabs can be modelled through various properties.",
+      "result":"PASS",
+      "duration":"0.004 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can bind an integer property to the selected tab index, \n            and multiple boolean properties to the selected state of each tab.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"4 different properties, 1 for each tab and then the selected index property.","code":["var tab1Selected = Var.of(false)","var tab2Selected = Var.of(false)","var tab3Selected = Var.of(false)","var selectedIndex = Var.of(-1)"]},
+
+        {"kind":"and","text":"We create a tabbed pane UI node and attach tabs with custom tab header components to it.","code":["def tabbedPane =","    UI.tabbedPane(UI.Position.TOP).withSelectedIndex(selectedIndex)","    .add(UI.tab(\"Tab 1\").isSelectedIf(tab1Selected))","    .add(UI.tab(\"Tab 2\").isSelectedIf(tab2Selected))","    .add(UI.tab(\"Tab 3\").isSelectedIf(tab3Selected))","    .get(JTabbedPane)"]},
+
+        {"kind":"when","text":"We select the first tab.","code":["tabbedPane.selectedIndex = 0"]},
+
+        {"kind":"then","text":"All properties reflect this change.","code":["selectedIndex.get() == 0","tab1Selected.get() == true","tab2Selected.get() == false","tab3Selected.get() == false"]},
+
+        {"kind":"when","text":"We select the second tab.","code":["tabbedPane.selectedIndex = 1"]},
+
+        {"kind":"then","text":"The selected index property is updated, and the boolean properties are correct too.","code":["selectedIndex.get() == 1","tab2Selected.get() == true","tab1Selected.get() == false","tab3Selected.get() == false"]},
+
+        {"kind":"when","text":"We select the third tab using the boolean property.","code":["tab3Selected.set(true)","UI.sync()"]},
+
+        {"kind":"then","text":"The boolean property is updated, and the selected index property is correct too.","code":["selectedIndex.get() == 2","tab3Selected.get() == true","tab1Selected.get() == false","tab2Selected.get() == false"]},
+
+        {"kind":"when","text":"We change the selected index property to a valid selection.","code":["selectedIndex.set(1)","UI.sync()"]},
+
+        {"kind":"then","text":"All boolean properties are false.","code":["tabbedPane.selectedIndex == 1","tab1Selected.get() == false","tab2Selected.get() == true","tab3Selected.get() == false"]},
+
+        {"kind":"when","text":"We change the selected index property to an invalid selection.","code":["selectedIndex.set(-1)","UI.sync()"]},
+
+        {"kind":"then","text":"All boolean properties are false.","code":["tabbedPane.selectedIndex == -1","tab1Selected.get() == false","tab2Selected.get() == false","tab3Selected.get() == false"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A string property can model the title of a tab!",
+      "result":"PASS",
+      "duration":"0.003 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can bind a string property to the title of a tab.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A string property and a tabbed pane UI node.","code":["var title = Var.of(\"Tab 1\")","def tabbedPane =","    UI.tabbedPane(UI.Position.TOP)","    .add(UI.tab(title))","    .get(JTabbedPane)"]},
+
+        {"kind":"when","text":"We change the title.","code":["title.set(\"Tab 2\")","UI.sync()"]},
+
+        {"kind":"then","text":"The title of the tab is updated.","code":["tabbedPane.getTitleAt(0) == \"Tab 2\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Icons can be bound to tab headers dynamically.",
+      "result":"PASS",
+      "duration":"0.006 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can bind an icon property to the icon of a tab.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"An icon property and a tabbed pane UI node.","code":["var icon = Var.of(UI.icon(\"swing.png\"))","def tabbedPane =","    UI.tabbedPane(UI.Position.TOP)","    .add(UI.tab(\"Tab 1\").withIcon(icon))","    .get(JTabbedPane)"]},
+
+        {"kind":"when","text":"We change the icon.","code":["var newIcon = UI.icon(\"seed.png\")","icon.set(newIcon)","UI.sync()"]},
+
+        {"kind":"then","text":"The icon of the tab is updated.","code":["tabbedPane.getIconAt(0) == newIcon"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Properties allow you to enable or disable individual tabs.",
+      "result":"PASS",
+      "duration":"0.002 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can bind a boolean property to the enabled state of a tab.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"2 properties and a tabbed pane UI node.","code":["var enabled1 = Var.of(true)","var enabled2 = Var.of(true)","def tabbedPane =","    UI.tabbedPane(UI.Position.TOP)","    .add(UI.tab(\"Tab 1\").isEnabledIf(enabled1))","    .add(UI.tab(\"Tab 2\").isEnabledIf(enabled2))","    .get(JTabbedPane)"]},
+
+        {"kind":"when","text":"We disable the first tab.","code":["enabled1.set(false)","UI.sync()"]},
+
+        {"kind":"then","text":"The first tab is disabled.","code":["tabbedPane.isEnabledAt(0) == false"]},
+
+        {"kind":"when","text":"We disable the second tab.","code":["enabled2.set(false)","UI.sync()"]},
+
+        {"kind":"then","text":"The second tab is disabled.","code":["tabbedPane.isEnabledAt(1) == false"]},
+
+        {"kind":"when","text":"We enable the first tab.","code":["enabled1.set(true)","UI.sync()"]},
+
+        {"kind":"then","text":"The first tab is enabled.","code":["tabbedPane.isEnabledAt(0) == true"]},
+
+        {"kind":"when","text":"We enable the second tab.","code":["enabled2.set(true)","UI.sync()"]},
+
+        {"kind":"then","text":"The second tab is enabled.","code":["tabbedPane.isEnabledAt(1) == true"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Modelling the tooltip of a tab is also possible.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can bind a string property to the tooltip of a tab.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A string property and a tabbed pane UI node.","code":["var tooltip = Var.of(\"I am a tooltip!\")","def tabbedPane =","    UI.tabbedPane(UI.Position.TOP)","    .add(UI.tab(\"Tab 1\").withTip(tooltip))","    .get(JTabbedPane)"]},
+
+        {"kind":"when","text":"We change the tooltip.","code":["tooltip.set(\"I am a new tooltip!\")","UI.sync()"]},
+
+        {"kind":"then","text":"The tooltip of the tab is updated.","code":["tabbedPane.getToolTipTextAt(0) == \"I am a new tooltip!\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

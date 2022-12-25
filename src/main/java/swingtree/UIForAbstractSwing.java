@@ -6,8 +6,8 @@ import org.slf4j.Logger;
 import swingtree.api.Peeker;
 import swingtree.api.UIAction;
 import swingtree.api.UIVerifier;
-import swingtree.api.mvvm.*;
 import swingtree.api.mvvm.Action;
+import swingtree.api.mvvm.*;
 import swingtree.input.Keyboard;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
@@ -978,25 +978,20 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  which will be set dynamically based on a boolean property.
      * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
      *
-     * @param bg The background color which should be set for the UI component.
+     * @param colorIfTrue The background color which should be set for the UI component.
      * @param condition The condition property which determines whether the background color should be set or not.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withBackgroundIf( Val<Boolean> condition, Color bg ) {
+    public final I withBackgroundIf( Val<Boolean> condition, Color colorIfTrue ) {
         NullUtil.nullArgCheck(condition, "condition", Val.class);
-        NullUtil.nullArgCheck(bg, "bg", Color.class);
+        NullUtil.nullArgCheck(colorIfTrue, "bg", Color.class);
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided background color!");
-        Color[] oldColor = new Color[1];
-        _onShow( condition, v -> {
-            if (v) {
-                oldColor[0] = getComponent().getBackground();
-                getComponent().setBackground(bg);
-            }
-            else getComponent().setBackground(oldColor[0]);
-        });
-        return this.withBackground( condition.orElse(false) ? bg : getComponent().getBackground() );
+        Var<Color> baseColor = Var.of( getComponent().getBackground() );
+        Var<Color> color = Var.of( colorIfTrue );
+        _onShow( condition, v -> _updateBackground( condition, color, baseColor ) );
+        return this.withBackground( condition.orElse(false) ? colorIfTrue : getComponent().getBackground() );
     }
-    
+
     /**
      *  Use this to dynamically bind to a background color
      *  which will be set dynamically based on a boolean property.
@@ -1011,17 +1006,47 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullArgCheck(color, "color", Val.class);
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided background color!");
         NullUtil.nullPropertyCheck(color, "color", "Null is not allowed to model the the provided background color! Please use the default color of this component instead.");
-        Color[] baseColor = new Color[1];
-        _onShow( condition, setColor -> color.show() );
-        _onShow( color, v -> {
-            if (condition.get()) {
-                if (!color.is(baseColor[0])) baseColor[0] = getComponent().getBackground();
-                getComponent().setBackground(color.get());
-            } else getComponent().setBackground(baseColor[0]);
-        });
+        Var<Color> baseColor = Var.of(getComponent().getBackground());
+        _onShow( condition, setColor -> _updateBackground(condition, color, baseColor) );
+        _onShow( color, v -> _updateBackground(condition, color, baseColor) );
         return this.withBackground(condition.orElse(false) ? color.orElseThrow() : getComponent().getBackground());
     }
-    
+
+    /**
+     *  Use this to bind to 2 different background colors
+     *  which will be set dynamically based on a boolean property.
+     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     *
+     * @param condition The condition property which determines whether the background color should be set or not.
+     * @param colorIfTrue The background color which should be set for the UI component.
+     * @param colorIfFalse The background color which should be set for the UI component.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBackgroundIf( Val<Boolean> condition, Color colorIfTrue, Color colorIfFalse ) {
+        return this.withBackgroundIf( condition, Var.of(colorIfTrue), Var.of(colorIfFalse) );
+    }
+
+    /**
+     *  Use this to bind to 2 different background colors
+     *  which will be set dynamically based on a boolean property.
+     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     *
+     * @param condition The condition property which determines whether the background color should be set or not.
+     * @param colorIfTrue The background color which should be set for the UI component.
+     * @param colorIfFalse The background color which should be set for the UI component.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBackgroundIf( Val<Boolean> condition, Val<Color> colorIfTrue, Val<Color> colorIfFalse ) {
+        NullUtil.nullArgCheck(condition, "condition", Val.class);
+        NullUtil.nullArgCheck(colorIfTrue, "colorIfTrue", Val.class);
+        NullUtil.nullArgCheck(colorIfFalse, "colorIfFalse", Val.class);
+        NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided background color!");
+        _onShow( condition, v -> _updateBackground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
+        _onShow( colorIfTrue, v -> _updateBackground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
+        _onShow( colorIfFalse, v -> _updateBackground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
+        return this.withBackground( condition.get() ? colorIfTrue.orElseNull() : colorIfFalse.orElseNull() );
+    }
+
     /**
      *  Set the color of this {@link JComponent}. (This is usually the font color for components displaying text) <br>
      *  This is in essence a convenience method, which avoid having to expose the underlying component
@@ -1077,14 +1102,9 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullArgCheck(condition, "condition", Val.class);
         NullUtil.nullArgCheck(fg, "fg", Color.class);
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided foreground color!");
-        Color[] oldColor = new Color[1];
-        _onShow( condition, v -> {
-            if (v) {
-                oldColor[0] = getComponent().getForeground();
-                getComponent().setForeground(fg);
-            }
-            else getComponent().setForeground(oldColor[0]);
-        });
+        Var<Color> baseColor = Var.of(getComponent().getForeground());
+        Var<Color> newColor = Var.of(fg);
+        _onShow( condition, v -> _updateForeground( condition, newColor, baseColor ) );
         return this.withForeground( condition.orElse(false) ? fg : getComponent().getForeground() );
     }
     
@@ -1102,16 +1122,74 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullArgCheck(color, "color", Val.class);
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided foreground color!");
         NullUtil.nullPropertyCheck(color, "color", "Null is not allowed to model the the provided foreground color! Please use the default color of this component instead.");
-        Color[] baseColor = new Color[1];
-        _onShow( condition, setColor -> color.show() );
-        _onShow( color, v -> {
-            if (condition.get()) {
-                if (!color.is(baseColor[0])) baseColor[0] = getComponent().getForeground();
-                getComponent().setForeground(color.get());
-            }
-            else getComponent().setForeground(baseColor[0]);
-        });
+        Var<Color> baseColor = Var.of(getComponent().getForeground());
+        _onShow( condition, setColor -> _updateForeground(condition, color, baseColor) );
+        _onShow( color, v -> _updateForeground(condition, color, baseColor) );
         return this.withForeground(condition.orElse(false) ? color.orElseThrow() : getComponent().getForeground());
+    }
+
+    /**
+     *  Use this to dynamically bind to a foreground color
+     *  which will be set dynamically based on a boolean property.
+     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     *
+     * @param condition The condition property which determines whether the foreground color should be set or not.
+     * @param colorIfTrue The foreground color which should be set for the UI component.
+     * @param colorIfFalse The foreground color which should be set for the UI component.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withForegroundIf( Val<Boolean> condition, Color colorIfTrue, Color colorIfFalse ) {
+        NullUtil.nullArgCheck(condition, "condition", Val.class);
+        NullUtil.nullArgCheck(colorIfTrue, "colorIfTrue", Color.class);
+        NullUtil.nullArgCheck(colorIfFalse, "colorIfFalse", Color.class);
+        NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided foreground color!");
+        _onShow( condition, v -> _updateForeground( condition, Var.of(colorIfTrue), Var.of(colorIfFalse) ) );
+        return this.withForeground( condition.get() ? colorIfTrue : colorIfFalse );
+    }
+
+    /**
+     *  Use this to dynamically bind to a foreground color
+     *  which will be set dynamically based on a boolean property.
+     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     *
+     * @param condition The condition property which determines whether the foreground color should be set or not.
+     * @param colorIfTrue The foreground color property which should be set for the UI component.
+     * @param colorIfFalse The foreground color property which should be set for the UI component.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withForegroundIf( Val<Boolean> condition, Val<Color> colorIfTrue, Val<Color> colorIfFalse ) {
+        NullUtil.nullArgCheck(condition, "condition", Val.class);
+        NullUtil.nullArgCheck(colorIfTrue, "colorIfTrue", Val.class);
+        NullUtil.nullArgCheck(colorIfFalse, "colorIfFalse", Val.class);
+        NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided foreground color!");
+        NullUtil.nullPropertyCheck(colorIfTrue, "colorIfTrue", "Null is not allowed to model the the provided foreground color! Please use the default color of this component instead.");
+        NullUtil.nullPropertyCheck(colorIfFalse, "colorIfFalse", "Null is not allowed to model the the provided foreground color! Please use the default color of this component instead.");
+        _onShow( condition, v -> _updateForeground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
+        _onShow( colorIfTrue, v -> _updateForeground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
+        _onShow( colorIfFalse, v -> _updateForeground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
+        return this.withForeground( condition.get() ? colorIfTrue.get() : colorIfFalse.get() );
+    }
+
+    private void _updateForeground(
+        Val<Boolean> condition,
+        Val<Color> color,
+        Val<Color> baseColor
+    ) {
+        if ( condition.get() )
+            getComponent().setForeground(color.get());
+        else
+            getComponent().setForeground(baseColor.get());
+    }
+
+    private void _updateBackground(
+            Val<Boolean> condition,
+            Val<Color> color,
+            Val<Color> baseColor
+    ) {
+        if ( condition.get() )
+            getComponent().setBackground(color.get());
+        else
+            getComponent().setBackground(baseColor.get());
     }
 
     /**

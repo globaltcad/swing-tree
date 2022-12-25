@@ -11,6 +11,7 @@ import swingtree.api.mvvm.Vars
 import swingtree.api.mvvm.Viewable
 
 import javax.swing.*
+import java.awt.Color
 
 @Title("MVVM Introduction")
 @Narrative('''
@@ -481,6 +482,180 @@ class MVVM_Example_Spec extends Specification
             !new Utility.Query(ui).find(JPanel, "sub-3").isPresent()
             !new Utility.Query(ui).find(JPanel, "sub-4").isPresent()
             new Utility.Query(ui).find(JPanel, "super").isPresent()
+    }
+
+    def 'A boolean property can be used to switch between 2 foreground colors.'()
+    {
+        reportInfo """
+            Using the 'withForegroundIf(Val<Boolean>, Color, Color)' method,
+            you can switch between 2 foreground colors of a Swing component set dynamically
+            if the boolean property is true or false.
+        """
+        given : 'We create a property modelling the color switch.'
+            Var<Boolean> isRed = Var.of(true)
+        and : 'We create a 2 colors.'
+            Color red = Color.RED
+            Color green = Color.GREEN
+        and : 'We create a label with a red foreground color.'
+            var ui = UI.label("Hello World!").withForegroundIf(isRed, red, green)
+        expect : 'The label should have a red foreground color.'
+            ui.component.foreground == red
+        when : 'We change the boolean property to false.'
+            isRed.set(false)
+            UI.sync()
+        then : 'The label should have a green foreground color.'
+            ui.component.foreground == green
+    }
+
+    def 'A boolean property can be used to switch between 2 background colors.'()
+    {
+        reportInfo """
+            Using the 'withBackgroundIf(Val<Boolean>, Color, Color)' method,
+            you can switch between 2 background colors of a Swing component set dynamically
+            if the boolean property is true or false.
+        """
+        given : 'We create a property modelling the color switch.'
+            Var<Boolean> isRed = Var.of(true)
+        and : 'We create a 2 colors.'
+            Color red   = Color.RED
+            Color green = Color.GREEN
+        and : 'We create a label with a red background color.'
+            var ui = UI.label("Hello World!").withBackgroundIf(isRed, red, green)
+        expect : 'The label should have a red background color.'
+            ui.component.background == red
+        when : 'We change the boolean property to false.'
+            isRed.set(false)
+            UI.sync()
+        then : 'The label should have a green background color.'
+            ui.component.background == green
+    }
+
+    def 'A boolean property can be used to set or reset a foreground color.'()
+    {
+        reportInfo """
+            Using the 'withForegroundIf(Val<Boolean>, Color)' method,
+            you can set or reset the foreground color of a Swing component dynamically
+            if the boolean property is true or false.
+        """
+        given : 'We create a property modelling the color switch.'
+            Var<Boolean> isRed = Var.of(false)
+        and : 'We create a label with a yellow background color.'
+            var ui = UI.label("Hello World!").withForegroundIf(isRed, Color.YELLOW)
+        and : 'We remember the original foreground color.'
+            Color originalColor = ui.component.foreground
+        expect : 'The label should have the original foreground color.'
+            ui.component.foreground == originalColor
+        when : 'We change the boolean property to true.'
+            isRed.set(true)
+            UI.sync()
+        then : 'The label should have a yellow foreground color because the boolean property is true.'
+            ui.component.foreground == Color.YELLOW
+        when : 'We change the boolean property to false.'
+            isRed.set(false)
+            UI.sync()
+        then : 'Again, the label should have the original foreground color.'
+            ui.component.foreground == originalColor
+    }
+
+    def 'A boolean property can be used to set or reset a background color.'()
+    {
+        reportInfo """
+            Using the 'withBackgroundIf(Val<Boolean>, Color)' method,
+            you can set or reset the background color of a Swing component dynamically
+            if the boolean property is true or false.
+        """
+        given : 'We create a property modelling the color switch.'
+            Var<Boolean> isRed = Var.of(false)
+        and : 'We create a label with a yellow background color.'
+            var ui = UI.label("Hello World!").withBackgroundIf(isRed, Color.YELLOW)
+        and : 'We remember the original background color.'
+            Color originalColor = ui.component.background
+        expect : 'The label should have the original background color.'
+            ui.component.background == originalColor
+        when : 'We change the boolean property to true.'
+            isRed.set(true)
+            UI.sync()
+        then : 'The label should have a yellow background color because the boolean property is true.'
+            ui.component.background == Color.YELLOW
+        when : 'We change the boolean property to false.'
+            isRed.set(false)
+            UI.sync()
+        then : 'Again, the label should have the original background color.'
+            ui.component.background == originalColor
+    }
+
+    def 'The foreground color of a Swing component can be modelled using a boolean and a Color property.'()
+    {
+        reportInfo """
+            Using the 'withForegroundIf(Val<Boolean>, Val<Color>)' method,
+            the foreground color of a Swing component is set dynamically
+            if the boolean property is true.
+        """
+        given : 'A boolean property.'
+            var displayColor = Var.of(false)
+        and : 'A color property.'
+            var color = Var.of(Color.RED)
+        and : 'A Swing UI with a simple label bound to the properties:'
+            var ui = UI.panel()
+                    .add(
+                        UI.label("Hi!").id("XYZ")
+                        .withForeground(Color.GREEN) // default color
+                        .withForegroundIf(displayColor, color)
+                    )
+        expect : 'The label should have the default foreground color.'
+            new Utility.Query(ui).find(JLabel, "XYZ").get().getForeground() == Color.GREEN
+        when : 'We set the boolean property to true.'
+            displayColor.set(true)
+            UI.sync()
+        then : 'The label should have a foreground color.'
+            new Utility.Query(ui).find(JLabel, "XYZ").get().getForeground() == Color.RED
+        when : 'We set the color property to blue.'
+            color.set(Color.BLUE)
+            UI.sync()
+        then : 'The label should have a foreground color of blue.'
+            new Utility.Query(ui).find(JLabel, "XYZ").get().getForeground() == Color.BLUE
+        when : 'We set the boolean property to false.'
+            displayColor.set(false)
+            UI.sync()
+        then : 'The label should have the default foreground color, green.'
+            new Utility.Query(ui).find(JLabel, "XYZ").get().getForeground() == Color.GREEN
+    }
+
+    def 'The background color of a Swing component can be modelled using a boolean and a Color property.'()
+    {
+        reportInfo """
+            Using the 'withBackgroundIf(Val<Boolean>, Val<Color>)' method,
+            the background color of a Swing component is set dynamically
+            if the boolean property is true.
+        """
+        given : 'A boolean property.'
+            var displayColor = Var.of(false)
+        and : 'A color property.'
+            var color = Var.of(Color.RED)
+        and : 'A Swing UI with a simple label bound to the properties:'
+            var ui = UI.panel()
+                    .add(
+                        UI.label("Hi!").id("XYZ")
+                        .withBackground(Color.GREEN) // default color
+                        .withBackgroundIf(displayColor, color)
+                    )
+        expect : 'The label should have the default background color.'
+            new Utility.Query(ui).find(JLabel, "XYZ").get().getBackground() == Color.GREEN
+        when : 'We set the boolean property to true.'
+            displayColor.set(true)
+            UI.sync()
+        then : 'The label should have a background color.'
+            new Utility.Query(ui).find(JLabel, "XYZ").get().getBackground() == Color.RED
+        when : 'We set the color property to blue.'
+            color.set(Color.BLUE)
+            UI.sync()
+        then : 'The label should have a background color of blue.'
+            new Utility.Query(ui).find(JLabel, "XYZ").get().getBackground() == Color.BLUE
+        when : 'We set the boolean property to false.'
+            displayColor.set(false)
+            UI.sync()
+        then : 'The label should have the default background color, green.'
+            new Utility.Query(ui).find(JLabel, "XYZ").get().getBackground() == Color.GREEN
     }
 
     private static enum Size

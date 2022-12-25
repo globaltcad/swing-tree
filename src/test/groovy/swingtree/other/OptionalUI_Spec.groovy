@@ -7,7 +7,7 @@ import spock.lang.Title
 import swingtree.OptionalUI
 import swingtree.UI
 
-import javax.swing.JButton
+import javax.swing.*
 
 @Title('OptionalUI, a Swing-Tree Monad')
 @Narrative('''
@@ -37,6 +37,40 @@ class OptionalUI_Spec extends Specification
             var optionalUI = UI.panel().component().map({ it -> null })
         expect:
             !optionalUI.isPresent()
+    }
+
+    def 'An OptionalUI can be mapped to a regular non-empty optional.'()
+    {
+        given:
+            var optionalUI = UI.runAndGet({UI.panel().component().map({ p -> new JButton() })})
+        expect:
+            optionalUI.isPresent()
+    }
+
+    def 'An empty OptionalUI will throw an exception when orElseThrow is called.'()
+    {
+        given:
+            var optionalUI = UI.panel().component().map({ it -> null })
+        when:
+            optionalUI.orElseThrow()
+        then:
+            thrown(NoSuchElementException)
+    }
+
+    def 'An empty OptionalUI will return a default value when orElse is called.'()
+    {
+        given:
+            var optionalUI = UI.panel().component().map({ it -> null })
+        expect:
+            optionalUI.orElse(new JButton()) instanceof JButton
+    }
+
+    def 'An empty OptionalUI will return a default value when orElseGet is called.'()
+    {
+        given:
+            var optionalUI = UI.panel().component().map({ it -> null })
+        expect:
+            optionalUI.orElseGet({ new JButton() }) instanceof JButton
     }
 
 }

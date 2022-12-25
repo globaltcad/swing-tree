@@ -1,0 +1,119 @@
+{
+  "className":"swingtree.threading.Thread_Mode_Spec",
+  "title":"Thread Modes",
+  "narrative":"Swing only knows 1 thread, the Event Dispatch Thread (EDT)\n    which performs both the UIs rendering as well as event handling.\n    This is a problem for Swing applications that need to perform\n    long running tasks in the background, as the EDT will be blocked\n    until the task is complete.\n    SwingTree provides a mechanism for creating UIs which \n    dispatch events to a custom application thread as well as ensure that all UI related \n    operations are performed on the event dispatch thread!\n    Not only does this allow your applications to perform long running tasks\n    in the background without blocking the UI, it improves\n    the performance and responsiveness of you desktop application as a whole.",
+  "subjects":[],
+  "statistics":{
+    "runs":"5",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"0.931 seconds"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"We can use the decoupled thread mode to queue backend events.",
+      "result":"PASS",
+      "duration":"0.072 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that Swing-Tree will not create a new thread for you,\n            you must process the events yourself using the \"UI.processEvents()\" method\n            preferably by a custom thread or the main thread of your application.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A UI built with the decoupled thread mode.","code":["var eventWasHandled = false","var node =","        UI.use(EventProcessor.DECOUPLED,","            ()-> UI.button(\"Click Me\")","                    .onClick({ eventWasHandled = true })","        )"]},
+
+        {"kind":"when","text":"We click the button.","code":["UI.runAndGet(()->node.component).doClick()"]},
+
+        {"kind":"then","text":"The event is queued up, waiting to be handled.","code":["!eventWasHandled"]},
+
+        {"kind":"when","text":"\n                We process the event queue, which in a real world\n                application would be done by a custom thread, or the main thread\n                of your application (everything but your GUI thread really).\n            ","code":["UI.processEvents()"]},
+
+        {"kind":"then","text":"The event is handled.","code":["eventWasHandled"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The default \"coupled\" thread mode will use the AWT thread for event handling.",
+      "result":"PASS",
+      "duration":"0.069 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the default thread mode, which means that\n            the explicit specification of \n            `UI.use(EventProcessor.COUPLED, ...)` is not required.\n            However, note that in this thread mode the UI will be blocked \n            until the event is handled. \n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A UI built with the coupled thread mode.","code":["var eventWasHandled = false","var node =","        UI.use(EventProcessor.COUPLED,","            ()-> UI.button(\"Click Me\")","                    .onClick({ eventWasHandled = true })","        )"]},
+
+        {"kind":"when","text":"We click the button.","code":["node.component.doClick()"]},
+
+        {"kind":"then","text":"The event is handled immediately by the swing thread.","code":["eventWasHandled"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Inside an event lambda we can not access the UI from a background thread.",
+      "result":"PASS",
+      "duration":"0.701 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n                The event delegate (which is passed to things like `onClick` actions) \n                throws an exception if you try to access the UI from a background thread.\n                This is because SwingTree can not guarantee that the UI is thread safe.\n                However, the delegate provides a `safe` method which will execute the\n                passed lambda on the event dispatch thread.\n            ","\n                The event delegate (which is passed to things like `onClick` actions) \n                throws an exception if you try to access the UI from a background thread.\n                This is because SwingTree can not guarantee that the UI is thread safe.\n                However, the delegate provides a `safe` method which will execute the\n                passed lambda on the event dispatch thread.\n            ","\n                The event delegate (which is passed to things like `onClick` actions) \n                throws an exception if you try to access the UI from a background thread.\n                This is because SwingTree can not guarantee that the UI is thread safe.\n                However, the delegate provides a `safe` method which will execute the\n                passed lambda on the event dispatch thread.\n            ","\n                The event delegate (which is passed to things like `onClick` actions) \n                throws an exception if you try to access the UI from a background thread.\n                This is because SwingTree can not guarantee that the UI is thread safe.\n                However, the delegate provides a `safe` method which will execute the\n                passed lambda on the event dispatch thread.\n            ","\n                The event delegate (which is passed to things like `onClick` actions) \n                throws an exception if you try to access the UI from a background thread.\n                This is because SwingTree can not guarantee that the UI is thread safe.\n                However, the delegate provides a `safe` method which will execute the\n                passed lambda on the event dispatch thread.\n            "]
+      },
+      "blocks":[
+        {"kind":"given","text":"2 UIs built with the decoupled thread mode, one error prone and the other one safe.","code":["var ui1 =","        UI.use(EventProcessor.DECOUPLED,","                ()-> UI.button(\"X\").onClick(unsafeAccess)","            )","var ui2 =","        UI.use(EventProcessor.DECOUPLED,","                ()-> UI.button(\"X\").onClick(safeAccess)","            )"]},
+
+        {"kind":"when","text":"We click the button and process the event queue (by this current non-swing thread).","code":["UI.runNow( () -> ui1.component.doClick() )","UI.processEventsUntilException() // This is done by a custom thread in a real world application."]},
+
+        {"kind":"then","text":"The delegate throws an exception!","code":["var e = thrown(Exception)","e.message.contains(problem)"]},
+
+        {"kind":"when","text":"We click the button second button and then process the event queue (by this current non-swing thread).","code":["UI.runNow( () -> ui2.component.doClick() )","UI.processEventsUntilException() // This is done by a custom thread in a real world application."]},
+
+        {"kind":"then","text":"The delegate does not throw an exception!","code":["noExceptionThrown()"]},
+
+        {"kind":"where","text":"We can use safe, as well as unsafe, ways to access the UI.","code":{"problem":["\"can only be accessed by the Swing thread\"","\"can only be accessed by the Swing thread\"","\"can only be accessed by the Swing thread\"","\"can only be accessed by the Swing thread\"","\"can only be accessed by the Swing thread\""],"unsafeAccess":["{ it.getComponent() }","{ it.getSiblings() }","{ it.getSiblinghood() }","{ it.getSiblingsOfType(JButton) }","{ it.getSiblinghoodOfType(JButton) }"],"safeAccess":["{ it.forComponent(c -> {}) }","{ it.forSiblings(s -> {}) }","{ it.forSiblinghood(c -> {}) }","{ it.forSiblingsOfType(JButton, c -> {}) }","{ it.forSiblinghoodOfType(JButton, c -> {}) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The application thread can safely effect the state of the UI by using the \"UI.run(()->{..})\" method.",
+      "result":"PASS",
+      "duration":"0.072 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A UI built with the decoupled thread mode.","code":["var ui =","        UI.use(EventProcessor.DECOUPLED,","                ()-> UI.checkBox(\"X\").onClick( it ->{","                    UI.run(()-> it.getComponent() )","                    // it.getComponent() // This would throw an exception!","                })","            )"]},
+
+        {"kind":"when","text":"We check the check box and process the event queue (by this current non-swing thread).","code":["UI.runNow( () -> ui.component.doClick() )","UI.processEventsUntilException() // This is done by a custom thread in a real world application."]},
+
+        {"kind":"then","text":"The delegate does not throw an exception!","code":["noExceptionThrown()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Accessing the UI from something other than the UI thread, leads to an exception when in decoupled thread mode.",
+      "result":"PASS",
+      "duration":"0.002 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The UI you build in the decoupled thread mode will try to protect itself\n            from being accessed from a potential application thread (so anything but the UI thread). \n            So if you try to access the UI from another thread, an exception will be thrown.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A UI built with the decoupled thread mode:","code":["var ui = UI.use(EventProcessor.DECOUPLED, ()-> UI.panel())"]},
+
+        {"kind":"when","text":"We try to access the component by this current non-swing thread.","code":["ui.component"]},
+
+        {"kind":"then","text":"An exception is thrown!","code":["var e = thrown(Exception)","e.message == \"This UI is configured to be decoupled from the application thread, \" +","             \"which means that it can only be modified from the EDT. \" +","             \"Please use 'UI.run(()->...)' method to execute your modifications on the EDT.\""]},
+
+        {"kind":"when","text":"We want to still access the component from this current non-swing thread, we can use the \"UI.run(()->{..})\" method.","code":["UI.run(()-> ui.component )"]},
+
+        {"kind":"and","text":"Alternatively we can also use \"UI.runAndGet(()->{..})\".","code":["var panel = UI.runAndGet(()-> ui.component )","panel.updateUI()"]},
+
+        {"kind":"then","text":"No exception is thrown!","code":["noExceptionThrown()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

@@ -1,0 +1,37 @@
+{
+  "className":"swingtree.common.UI_Updates_Spec",
+  "title":"Dynamic UI Updates",
+  "narrative":"The Swing-Tree UI builder allows you to easily build UI with periodic updates.\n    This is useful for example when you want to build animated UIs or UIs that\n    perform some sort of refreshes periodically.",
+  "subjects":[],
+  "statistics":{
+    "runs":"1",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"0.213 seconds"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"We can register periodically called UI updates!",
+      "result":"PASS",
+      "duration":"0.210 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var ui =","     UI.panel()","    .add(","        UI.label(\"Label 1\").id(\"L1\")","        .doUpdates(20,it -> {","            it.component.text = LocalDateTime.now().toString()","        })","    )"]},
+
+        {"kind":"when","text":"","code":["Thread.sleep(200)"]},
+
+        {"kind":"then","text":"","code":["new Utility.Query(ui.component).find(JLabel, \"L1\").isPresent()"]},
+
+        {"kind":"and","text":"","code":["new Utility.Query(ui.component).find(JLabel, \"L1\").get().text != \"Label 1\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}
