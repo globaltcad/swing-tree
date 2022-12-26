@@ -560,6 +560,29 @@ class Properties_Spec extends Specification
             mappedVals.at(1).get() == "PAPAD"
     }
 
+    def 'Map a "Vals" instance from one type of properties to another.'()
+    {
+        given : 'A "Vals" class with two properties.'
+            var vals = Vals.of("Chapati", "Papad")
+        when : 'We use the "mapTo" method to transform all the properties.'
+            var mappedVals = vals.mapTo(Integer, { it.length() })
+        then : 'The properties have been transformed.'
+            mappedVals.at(0).get() == 7
+            mappedVals.at(1).get() == 5
+    }
+
+
+    def 'Map a "Vars" instance from one type of properties to another.'()
+    {
+        given : 'A "Vars" class with two properties.'
+            var vars = Vars.of("Kachori", "Dal Biji")
+        when : 'We use the "mapTo" method to transform all the properties.'
+            var mappedVars = vars.mapTo(Integer, { it.length() })
+        then : 'The properties have been transformed.'
+            mappedVars.at(0).get() == 7
+            mappedVars.at(1).get() == 8
+    }
+
     def 'You can create the "Vars"/"Vals" property lists from property instances.'()
     {
         given : 'A "Vars" class with two properties.'

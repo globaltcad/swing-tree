@@ -12,34 +12,84 @@ import java.util.function.Function;
  */
 public interface Vals<T> extends Iterable<T>
 {
+    /**
+     *  Create a new Vals instance from the given values.
+     * @param type The type of the values.
+     * @param vars The properties to add to the new Vals instance.
+     * @param <T> The type of the values.
+     * @return A new Vals instance.
+     */
     static <T> Vals<T> of( Class<T> type, Val<T>... vars ) {
         return AbstractVariables.of( true, type, (Var<T>[]) vars );
     }
 
+    /**
+     *  Create a new Vals instance from the given values.
+     * @param first The first property to add to the new Vals instance.
+     * @param rest The remaining properties to add to the new Vals instance.
+     * @param <T> The type of the values.
+     * @return A new Vals instance.
+     */
     static <T> Vals<T> of( Val<T> first, Val<T>... rest ) {
         Var<T>[] vars = new Var[rest.length];
         System.arraycopy(rest, 0, vars, 0, rest.length);
         return AbstractVariables.of( true, (Var<T>) first, vars );
     }
 
+    /**
+     *  Create a new Vals instance from the given values.
+     * @param first The first value to add to the new Vals instance.
+     * @param rest The remaining values to add to the new Vals instance.
+     * @param <T> The type of the values.
+     * @return A new Vals instance.
+     */
     static <T> Vals<T> of( T first, T... rest ) {
         return AbstractVariables.of( true, first, rest);
     }
 
+    /**
+     *  Create a new Vals instance from the iterable.
+     *  The iterable must be a collection of Val instances.
+     *  @param type The type of the values.
+     *  @param vars The iterable to add to the new Vals instance.
+     *  @param <T> The type of the values.
+     *  @return A new Vals instance.
+     */
     static <T> Vals<T> of( Class<T> type, Iterable<Val<T>> vars ) {
         return AbstractVariables.of( true, type, (Iterable) vars );
     }
 
-    static <T> Vals<T> ofNullable( Class<T> type, Val<T>... rest ) {
-        Var<T>[] vars = new Var[rest.length];
-        System.arraycopy(rest, 0, vars, 0, rest.length);
+    /**
+     *  Create a new Vals instance from the given values.
+     * @param type The type of the values.
+     * @param vals The properties to add to the new Vals instance.
+     * @param <T> The type of the values.
+     * @return A new Vals instance.
+     */
+    static <T> Vals<T> ofNullable( Class<T> type, Val<T>... vals ) {
+        Var<T>[] vars = new Var[vals.length];
+        System.arraycopy(vals, 0, vars, 0, vals.length);
         return AbstractVariables.ofNullable( true, type, vars );
     }
 
-    static <T> Vals<T> ofNullable( Class<T> type, T... vars ) {
-        return AbstractVariables.ofNullable( true, type, vars );
+    /**
+     *  Create a new Vals instance from the given values.
+     * @param type The type of the values.
+     * @param values The values to add to the new Vals instance.
+     * @param <T> The type of the values.
+     * @return A new Vals instance.
+     */
+    static <T> Vals<T> ofNullable( Class<T> type, T... values ) {
+        return AbstractVariables.ofNullable( true, type, values );
     }
 
+    /**
+     *  Create a new Vals instance from the given values.
+     * @param first The first property to add to the new Vals instance.
+     * @param rest The remaining properties to add to the new Vals instance.
+     * @param <T> The type of the values.
+     * @return A new Vals instance.
+     */
     static <T> Vals<T> ofNullable( Var<T> first, Val<T>... rest ) {
         Var<T>[] vars = new Var[rest.length];
         System.arraycopy(rest, 0, vars, 0, rest.length);
