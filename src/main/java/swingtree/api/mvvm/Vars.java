@@ -1,7 +1,5 @@
 package swingtree.api.mvvm;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -12,61 +10,31 @@ import java.util.function.Function;
 public interface Vars<T> extends Vals<T>
 {
     static <T> Vars<T> of( Class<T> type, Var<T>... vars ) {
-        Objects.requireNonNull(type);
-        Objects.requireNonNull(vars);
-        return new AbstractVariables<T>(type, false, vars ){};
+        return AbstractVariables.of( false, type, vars );
     }
 
     static <T> Vars<T> of( Var<T> first, Var<T>... rest ) {
-        Objects.requireNonNull(first);
-        Objects.requireNonNull(rest);
-        Var<T>[] vars = new Var[rest.length+1];
-        vars[0] = first;
-        System.arraycopy(rest, 0, vars, 1, rest.length);
-        return of(first.type(), vars);
+        return AbstractVariables.of( false, first, rest );
     }
 
     static <T> Vars<T> of( T first, T... rest ) {
-        Objects.requireNonNull(first);
-        Objects.requireNonNull(rest);
-        Var<T>[] vars = new Var[rest.length+1];
-        vars[0] = Var.of(first);
-        for ( int i = 0; i < rest.length; i++ )
-            vars[ i + 1 ] = Var.of( rest[ i ] );
-        return of(vars[0].type(), vars);
+        return AbstractVariables.of( false, first, rest );
     }
 
     static <T> Vars<T> of( Class<T> type, Iterable<Var<T>> vars ) {
-        Objects.requireNonNull(type);
-        Objects.requireNonNull(vars);
-        List<Var<T>> list = new ArrayList<>();
-        vars.forEach( list::add );
-        Var<T>[] array = new Var[list.size()];
-        return new AbstractVariables<T>(type, false, list.toArray(array) ){};
+        return AbstractVariables.of( false, type, vars );
     }
 
     static <T> Vars<T> ofNullable( Class<T> type, Var<T>... vars ) {
-        Objects.requireNonNull(type);
-        Objects.requireNonNull(vars);
-        return new AbstractVariables<T>(type, true, vars ){};
+        return AbstractVariables.ofNullable( false, type, vars );
     }
 
     static <T> Vars<T> ofNullable( Class<T> type, T... vars ) {
-        Objects.requireNonNull(type);
-        Objects.requireNonNull(vars);
-        Var<T>[] array = new Var[vars.length];
-        for ( int i = 0; i < vars.length; i++ )
-            array[i] = Var.ofNullable(type, vars[i]);
-        return new AbstractVariables<T>(type, true, array ){};
+        return AbstractVariables.ofNullable( false, type, vars );
     }
 
     static <T> Vars<T> ofNullable( Var<T> first, Var<T>... vars ) {
-        Objects.requireNonNull(first);
-        Objects.requireNonNull(vars);
-        Var<T>[] array = new Var[vars.length+1];
-        array[0] = first;
-        System.arraycopy(vars, 0, array, 1, vars.length);
-        return ofNullable(first.type(), array);
+        return AbstractVariables.ofNullable( false, first, vars );
     }
 
     @Override Var<T> at( int index );

@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import swingtree.api.Peeker;
 import swingtree.api.UIAction;
 import swingtree.api.UIVerifier;
-import swingtree.api.mvvm.Action;
 import swingtree.api.mvvm.*;
 import swingtree.input.Keyboard;
 import swingtree.layout.CompAttr;
@@ -77,7 +76,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param <T> The type of the value.
      */
     protected final <T> void _onShow( Val<T> val, Consumer<T> displayAction ) {
-        val.onShowThis(new Action<ValDelegate<T>>() {
+        val.onShowThis(new UIAction<ValDelegate<T>>() {
             @Override
             public void accept(ValDelegate<T> delegate) {
                 _doUI(() ->
@@ -102,7 +101,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param <T> The type of the value.
      */
     protected final <T> void _onShow( Vals<T> vals, Consumer<ValsDelegate<T>> displayAction ) {
-        vals.onShow(new Action<ValsDelegate<T>>() {
+        vals.onShow(new UIAction<ValsDelegate<T>>() {
             @Override
             public void accept(ValsDelegate<T> delegate) {
                 _doUI(() ->

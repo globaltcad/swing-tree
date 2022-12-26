@@ -1,7 +1,7 @@
 package swingtree.mvvm
 
 import swingtree.UI
-import swingtree.api.mvvm.Action
+import swingtree.api.UIAction
 import swingtree.api.mvvm.Mutation
 import swingtree.api.mvvm.Val
 import swingtree.api.mvvm.ValDelegate
@@ -605,14 +605,14 @@ class Properties_Spec extends Specification
         and : 'A list where we are going to record changes.'
             var changes = []
         and : 'Now we register a "show" listeners on both objects.'
-            prop.onShowThis(new Action<ValDelegate<Integer>>() {
+            prop.onShowThis(new UIAction<ValDelegate<Integer>>() {
                 @Override
                 void accept(ValDelegate<Integer> delegate) {
                     changes << "Something happened to the property."
                 }
                 @Override boolean canBeRemoved() { return true }
             })
-            list.onShow(new Action<ValsDelegate<Integer>>() {
+            list.onShow(new UIAction<ValsDelegate<Integer>>() {
                 @Override
                 void accept(ValsDelegate<Integer> delegate) {
                     changes << "Something happened to the list."

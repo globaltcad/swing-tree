@@ -1,6 +1,7 @@
 package swingtree.api.mvvm;
 
-import java.util.Objects;
+import swingtree.api.UIAction;
+
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -55,7 +56,7 @@ public interface Var<T> extends Val<T>
 	 * @return A new {@link Var} instance.
 	 */
 	static <T> Var<T> ofNullable( Class<T> type, T value ) {
-		return new AbstractVariable<T>( type, value, UNNAMED, null, true ){};
+		return AbstractVariable.ofNullable( false, type, value );
 	}
 
 	/**
@@ -71,13 +72,11 @@ public interface Var<T> extends Val<T>
 	 * @return The builder for a {@link AbstractVariable}.
 	 */
 	static <T> Var<T> of( T iniValue ) {
-		Objects.requireNonNull(iniValue);
-		return new AbstractVariable<T>( (Class<T>) iniValue.getClass(), iniValue, UNNAMED, null, false ){};
+		return AbstractVariable.of( false, iniValue );
 	}
 
 	static Var<Viewable> of( Viewable iniValue ) {
-		Objects.requireNonNull(iniValue);
-		return new AbstractVariable<Viewable>( Viewable.class, iniValue, UNNAMED, null, false ){};
+		return AbstractVariable.of( false, iniValue );
 	}
 	
 	/**
@@ -109,11 +108,11 @@ public interface Var<T> extends Val<T>
 	 * @param action The action to be triggered when {@code Var::act()} or {@code Var::act(T)} is called.
 	 * @return A new {@link Var} instance which is identical to this one, except that it has the given action.
 	 */
-	Var<T> withAction( Action<ValDelegate<T>> action );
+	Var<T> withAction( UIAction<ValDelegate<T>> action );
 
 	/**
 	 *  Triggers the action associated with this property, if one was
-	 *  set using {@link #withAction(Action)}.
+	 *  set using {@link #withAction(UIAction)}.
 	 *  This method is intended to be used in the UI
 	 *  to indicate that the user has changed the value of the property
 	 *  not your view model.

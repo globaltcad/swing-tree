@@ -9,8 +9,8 @@ import java.util.function.Supplier;
  *
  * @param &lt;V&gt; The value type parameter of the thing wrapped by this.
  */
-final class LazyRef&lt;V&gt; {
-
+final class LazyRef&lt;V&gt;
+{
 <span class="fc" id="L14">	public static &lt;V&gt; LazyRef&lt;V&gt; of(Supplier&lt;V&gt; source) { return new LazyRef&lt;&gt;(source); }</span>
 
 	private Supplier&lt;V&gt; source;
@@ -27,8 +27,6 @@ final class LazyRef&lt;V&gt; {
 <span class="nc" id="L27">		return this.variable;</span>
 	}
 
-	@Override
-<span class="nc" id="L31">	public String toString() { return String.valueOf(this.get()); }</span>
-
+<span class="nc" id="L30">	@Override public String toString() { return String.valueOf(this.get()); }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

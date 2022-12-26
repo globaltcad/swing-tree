@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Var.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.api.mvvm</a> &gt; <span class="el_source">Var.java</span></div><h1>Var.java</h1><pre class="source lang-java linenums">package swingtree.api.mvvm;
 
-import java.util.Objects;
+import swingtree.api.UIAction;
+
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * 	A mutable wrapper for a value which can be observed by the Swing-Tree UI
@@ -53,7 +56,7 @@ public interface Var&lt;T&gt; extends Val&lt;T&gt;
 	 * @return A new {@link Var} instance.
 	 */
 	static &lt;T&gt; Var&lt;T&gt; ofNullable( Class&lt;T&gt; type, T value ) {
-<span class="fc" id="L56">		return new AbstractVariable&lt;T&gt;( type, value, UNNAMED, null, true ){};</span>
+<span class="fc" id="L59">		return AbstractVariable.ofNullable( false, type, value );</span>
 	}
 
 	/**
@@ -69,10 +72,12 @@ public interface Var&lt;T&gt; extends Val&lt;T&gt;
 	 * @return The builder for a {@link AbstractVariable}.
 	 */
 	static &lt;T&gt; Var&lt;T&gt; of( T iniValue ) {
-<span class="fc" id="L72">		Objects.requireNonNull(iniValue);</span>
-<span class="fc" id="L73">		return new AbstractVariable&lt;T&gt;( (Class&lt;T&gt;) iniValue.getClass(), iniValue, UNNAMED, null, false ){};</span>
+<span class="fc" id="L75">		return AbstractVariable.of( false, iniValue );</span>
 	}
 
+	static Var&lt;Viewable&gt; of( Viewable iniValue ) {
+<span class="fc" id="L79">		return AbstractVariable.of( false, iniValue );</span>
+	}
 	
 	/**
 	 *  This method provides the ability to change the state of the wrapper.
@@ -103,11 +108,11 @@ public interface Var&lt;T&gt; extends Val&lt;T&gt;
 	 * @param action The action to be triggered when {@code Var::act()} or {@code Var::act(T)} is called.
 	 * @return A new {@link Var} instance which is identical to this one, except that it has the given action.
 	 */
-	Var&lt;T&gt; withAction( PropertyAction&lt;T&gt; action );
+	Var&lt;T&gt; withAction( UIAction&lt;ValDelegate&lt;T&gt;&gt; action );
 
 	/**
 	 *  Triggers the action associated with this property, if one was
-	 *  set using {@link #withAction(PropertyAction)}.
+	 *  set using {@link #withAction(UIAction)}.
 	 *  This method is intended to be used in the UI
 	 *  to indicate that the user has changed the value of the property
 	 *  not your view model.
@@ -127,6 +132,41 @@ public interface Var&lt;T&gt; extends Val&lt;T&gt;
 	 * @return This very wrapper instance, in order to enable method chaining.
 	 */
 	Var&lt;T&gt; act(T newValue);
+
+
+	/**
+	 *  Essentially the same as {@link Optional#map(Function)}. but with a {@link Val} as return type.
+	 *
+	 * @param mapper the mapping function to apply to a value, if present
+	 * @return the result of applying an {@code Optional}-bearing mapping
+	 * @param &lt;V&gt; The type of the value returned from the mapping function
+	 */
+	@Override default &lt;V&gt; Var&lt;V&gt; map( java.util.function.Function&lt;T, V&gt; mapper ) {
+<span class="fc bfc" id="L145" title="All 2 branches covered.">		if ( !isPresent() )</span>
+<span class="fc" id="L146">			return Var.ofNullable( (Class&lt;V&gt;) Void.class, null );</span>
+
+<span class="fc" id="L148">		V newValue = mapper.apply( orElseNull() );</span>
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">		if ( newValue == null )</span>
+<span class="nc" id="L150">			return Var.ofNullable( (Class&lt;V&gt;) Void.class, null );</span>
+<span class="fc" id="L151">		return Var.of( newValue );</span>
+	}
+
+	/**
+	 * @param type The type of the value returned from the mapping function
+	 * @param mapper the mapping function to apply to a value, if present
+	 * @return the result of applying an {@code Optional}-bearing mapping
+	 * @param &lt;U&gt; The type of the value returned from the mapping function
+	 */
+	@Override default &lt;U&gt; Var&lt;U&gt; mapTo( Class&lt;U&gt; type, java.util.function.Function&lt;T, U&gt; mapper ) {
+<span class="nc bnc" id="L161" title="All 2 branches missed.">		if ( !isPresent() )</span>
+<span class="nc" id="L162">			return Var.ofNullable( type, null );</span>
+
+<span class="nc" id="L164">		U newValue = mapper.apply( orElseNull() );</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">		if ( newValue == null )</span>
+<span class="nc" id="L166">			return Var.ofNullable( type, null );</span>
+<span class="nc" id="L167">		return Var.of( newValue );</span>
+	}
+
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

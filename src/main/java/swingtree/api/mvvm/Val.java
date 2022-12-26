@@ -1,5 +1,7 @@
 package swingtree.api.mvvm;
 
+import swingtree.api.UIAction;
+
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -42,7 +44,7 @@ public interface Val<T>
 	 * @param <T> The type of the wrapped value.
 	 * @return A new {@link Val} instance.
 	 */
-	static <T> Val<T> ofNullable( Class<T> type, T value ) { return Var.ofNullable( type, value ); }
+	static <T> Val<T> ofNullable( Class<T> type, T value ) { return AbstractVariable.ofNullable( true, type, value ); }
 
 	/**
 	 *  This factory method will expose a builder which will create a very simple type of Property,
@@ -55,7 +57,7 @@ public interface Val<T>
 	 * @param <T> The type of the value held by the {@link Var}!
 	 * @return The builder for a {@link AbstractVariable}.
 	 */
-	static <T> Val<T> of( T iniValue ) { return Var.of( iniValue ); }
+	static <T> Val<T> of( T iniValue ) { return AbstractVariable.of( true, iniValue ); }
 
 	/**
 	 * This method is intended to be used for when you want to wrap non-nullable types.
@@ -318,7 +320,7 @@ public interface Val<T>
 	 * @param displayAction The lambda which will be called whenever the value wrapped by this {@link Var} changes.
 	 * @return The {@link Val} instance itself.
 	 */
-	Val<T> onShowThis( Action<ValDelegate<T>> displayAction );
+	Val<T> onShowThis( UIAction<ValDelegate<T>> displayAction );
 
 	/**
 	 *  Use this to register an observer lambda which will be called whenever the value
@@ -334,7 +336,7 @@ public interface Val<T>
 
 	/**
 	 *  Triggers the observer lambdas registered through the {@link #onShow(Consumer)}
-	 *  as well as the {@link #onShowThis(Action)} methods.
+	 *  as well as the {@link #onShowThis(swingtree.api.UIAction)} methods.
 	 *  This method is called automatically by the {@code Var::set(T)} method,
 	 *  and it is supposed to be used by the UI to update the UI components.
 	 *  This is in essence how binding works in Swing-Tree.

@@ -1,28 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OptionalUI.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">OptionalUI.java</span></div><h1>OptionalUI.java</h1><pre class="source lang-java linenums">/*
- * Copyright (c) 2012, 2018, Oracle and/or its affiliates. All rights reserved.
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
- *
- * This code is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the &quot;Classpath&quot; exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
- *
- * This code is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * version 2 for more details (a copy is included in the LICENSE file that
- * accompanied this code).
- *
- * You should have received a copy of the GNU General Public License version
- * 2 along with this work; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
- * or visit www.oracle.com if you need additional information or have any
- * questions.
- */
-package swingtree;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OptionalUI.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">OptionalUI.java</span></div><h1>OptionalUI.java</h1><pre class="source lang-java linenums">package swingtree;
 
 import java.awt.*;
 import java.util.NoSuchElementException;
@@ -46,7 +22,7 @@ import java.util.function.Supplier;
  * {@link #ifPresent(Consumer) ifPresent()} (performs an
  * action if a value is present).
  *
- * &lt;p&gt;This is a &lt;a href=&quot;../lang/doc-files/ValueBased.html&quot;&gt;value-based&lt;/a&gt;
+ * &lt;p&gt;This is a &lt;b&gt;value-based&lt;/b&gt;
  * class; use of identity-sensitive operations (including reference equality
  * ({@code ==}), identity hash code, or synchronization) on instances of
  * {@code OptionalUI} may have unpredictable results and should be avoided.
@@ -68,7 +44,7 @@ public final class OptionalUI&lt;C extends Component&gt; {
     /**
      * Common instance for {@code empty()}.
      */
-<span class="fc" id="L71">    private static final OptionalUI&lt;?&gt; EMPTY = new OptionalUI&lt;&gt;(null);</span>
+<span class="fc" id="L47">    private static final OptionalUI&lt;?&gt; EMPTY = new OptionalUI&lt;&gt;(null);</span>
 
     /**
      * If non-null, the value; if null, indicates no value is present
@@ -90,8 +66,8 @@ public final class OptionalUI&lt;C extends Component&gt; {
      */
     static&lt;T extends Component&gt; OptionalUI&lt;T&gt; empty() {
         @SuppressWarnings(&quot;unchecked&quot;)
-<span class="nc" id="L93">        OptionalUI&lt;T&gt; t = (OptionalUI&lt;T&gt;) EMPTY;</span>
-<span class="nc" id="L94">        return t;</span>
+<span class="nc" id="L69">        OptionalUI&lt;T&gt; t = (OptionalUI&lt;T&gt;) EMPTY;</span>
+<span class="nc" id="L70">        return t;</span>
     }
 
     /**
@@ -101,7 +77,7 @@ public final class OptionalUI&lt;C extends Component&gt; {
      *        ensure the value is non-{@code null} unless creating the singleton
      *        instance returned by {@code empty()}.
      */
-<span class="fc" id="L104">    private OptionalUI( C value ) { this._component = value; }</span>
+<span class="fc" id="L80">    private OptionalUI( C value ) { this._component = value; }</span>
 
     /**
      * Returns an {@code OptionalUI} describing the given value, if
@@ -114,8 +90,8 @@ public final class OptionalUI&lt;C extends Component&gt; {
      */
     @SuppressWarnings(&quot;unchecked&quot;)
     static &lt;T extends Component&gt; OptionalUI&lt;T&gt; ofNullable(T component) {
-<span class="pc bpc" id="L117" title="1 of 2 branches missed.">        return component == null ? (OptionalUI&lt;T&gt;) EMPTY</span>
-<span class="fc" id="L118">                : new OptionalUI&lt;&gt;(component);</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        return component == null ? (OptionalUI&lt;T&gt;) EMPTY</span>
+<span class="fc" id="L94">                : new OptionalUI&lt;&gt;(component);</span>
     }
 
     /**
@@ -123,7 +99,7 @@ public final class OptionalUI&lt;C extends Component&gt; {
      *
      * @return {@code true} if a component is present, otherwise {@code false}
      */
-<span class="pc bpc" id="L126" title="1 of 2 branches missed.">    public boolean isPresent() { return _component != null; }</span>
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">    public boolean isPresent() { return _component != null; }</span>
 
     /**
      * If a component is  not present, returns {@code true}, otherwise
@@ -132,7 +108,7 @@ public final class OptionalUI&lt;C extends Component&gt; {
      * @return  {@code true} if a component is not present, otherwise {@code false}
      * @since   11
      */
-<span class="nc bnc" id="L135" title="All 2 branches missed.">    public boolean isEmpty() { return _component == null; }</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">    public boolean isEmpty() { return _component == null; }</span>
 
     /**
      * If a component is present, performs the given action with the component,
@@ -142,10 +118,10 @@ public final class OptionalUI&lt;C extends Component&gt; {
      * @throws NullPointerException if component is present and the given action is
      *         {@code null}
      */
-    public void ifPresent(Consumer&lt;? super C&gt; action) {
-<span class="pc bpc" id="L146" title="1 of 2 branches missed.">        if ( _component != null )</span>
-<span class="fc" id="L147">            UI.run(() -&gt; action.accept(_component));</span>
-<span class="fc" id="L148">    }</span>
+    public void ifPresent( Consumer&lt;? super C&gt; action ) {
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">        if ( _component != null )</span>
+<span class="fc" id="L123">            UI.run(() -&gt; action.accept(_component));</span>
+<span class="fc" id="L124">    }</span>
 
     /**
      * If a component is present, performs the given action with the component,
@@ -159,14 +135,14 @@ public final class OptionalUI&lt;C extends Component&gt; {
      *         action is {@code null}.
      * @since 9
      */
-    public void ifPresentOrElse(Consumer&lt;? super C&gt; action, Runnable emptyAction) {
-<span class="nc" id="L163">        UI.run(()-&gt;{</span>
-<span class="nc bnc" id="L164" title="All 2 branches missed.">            if ( _component != null )</span>
-<span class="nc" id="L165">                action.accept(_component);</span>
+    public void ifPresentOrElse( Consumer&lt;? super C&gt; action, Runnable emptyAction ) {
+<span class="nc" id="L139">        UI.run(()-&gt;{</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">            if ( _component != null )</span>
+<span class="nc" id="L141">                action.accept(_component);</span>
             else
-<span class="nc" id="L167">                emptyAction.run();</span>
-<span class="nc" id="L168">        });</span>
-<span class="nc" id="L169">    }</span>
+<span class="nc" id="L143">                emptyAction.run();</span>
+<span class="nc" id="L144">        });</span>
+<span class="nc" id="L145">    }</span>
 
     /**
      * If a component is present, and the component matches the given predicate,
@@ -180,19 +156,19 @@ public final class OptionalUI&lt;C extends Component&gt; {
      * @throws NullPointerException if the predicate is {@code null}
      */
     public OptionalUI&lt;C&gt; filter(Predicate&lt;? super C&gt; predicate) {
-<span class="nc" id="L183">        Objects.requireNonNull(predicate);</span>
-<span class="nc bnc" id="L184" title="All 2 branches missed.">        if (!isPresent()) {</span>
-<span class="nc" id="L185">            return this;</span>
+<span class="nc" id="L159">        Objects.requireNonNull(predicate);</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">        if (!isPresent()) {</span>
+<span class="nc" id="L161">            return this;</span>
         } else {
-<span class="nc bnc" id="L187" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
                 try {
-<span class="nc" id="L189">                    return UI.runAndGet(() -&gt; filter(predicate));</span>
-<span class="nc" id="L190">                } catch (Exception e) {</span>
-<span class="nc" id="L191">                    throw new RuntimeException(e);</span>
+<span class="nc" id="L165">                    return UI.runAndGet(() -&gt; filter(predicate));</span>
+<span class="nc" id="L166">                } catch (Exception e) {</span>
+<span class="nc" id="L167">                    throw new RuntimeException(e);</span>
                 }
             }
             else
-<span class="nc bnc" id="L195" title="All 2 branches missed.">                return predicate.test(_component) ? this : empty();</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">                return predicate.test(_component) ? this : empty();</span>
         }
     }
 
@@ -211,20 +187,20 @@ public final class OptionalUI&lt;C extends Component&gt; {
      *         present, otherwise an empty {@code OptionalUI}
      * @throws NullPointerException if the mapping function is {@code null}
      */
-    public &lt;U&gt; Optional&lt;U&gt; map(Function&lt;? super C, ? extends U&gt; mapper) {
-<span class="nc" id="L215">        Objects.requireNonNull(mapper);</span>
-<span class="nc bnc" id="L216" title="All 2 branches missed.">        if ( !this.isPresent() ) return Optional.empty();</span>
+    public &lt;U&gt; Optional&lt;U&gt; map( Function&lt;? super C, ? extends U&gt; mapper ) {
+<span class="fc" id="L191">        Objects.requireNonNull(mapper);</span>
+<span class="pc bpc" id="L192" title="1 of 2 branches missed.">        if ( !this.isPresent() ) return Optional.empty();</span>
         else {
-<span class="nc bnc" id="L218" title="All 2 branches missed.">            if ( UI.thisIsUIThread() )</span>
-<span class="nc" id="L219">                return Optional.ofNullable(mapper.apply(_component));</span>
+<span class="fc bfc" id="L194" title="All 2 branches covered.">            if ( UI.thisIsUIThread() )</span>
+<span class="fc" id="L195">                return Optional.ofNullable(mapper.apply(_component));</span>
             else {
                 try {
-<span class="nc" id="L222">                    Optional&lt;U&gt; opt = UI.runAndGet(() -&gt; map(mapper));</span>
-<span class="nc bnc" id="L223" title="All 6 branches missed.">                    if ( opt.isPresent() &amp;&amp; (opt.get() instanceof Component || opt.get() instanceof UIForAbstractSwing) )</span>
-<span class="nc" id="L224">                        throw new RuntimeException(&quot;A Swing component may not leak to another thread!&quot;);</span>
-<span class="nc" id="L225">                    else return opt;</span>
-<span class="nc" id="L226">                } catch (Exception ex) {</span>
-<span class="nc" id="L227">                    throw new RuntimeException(ex);</span>
+<span class="fc" id="L198">                    Optional&lt;U&gt; opt = UI.runAndGet(() -&gt; map(mapper));</span>
+<span class="pc bpc" id="L199" title="5 of 6 branches missed.">                    if ( opt.isPresent() &amp;&amp; (opt.get() instanceof Component || opt.get() instanceof UIForAbstractSwing) )</span>
+<span class="nc" id="L200">                        throw new RuntimeException(&quot;A Swing component may not leak to another thread!&quot;);</span>
+<span class="fc" id="L201">                    else return opt;</span>
+<span class="nc" id="L202">                } catch (Exception ex) {</span>
+<span class="nc" id="L203">                    throw new RuntimeException(ex);</span>
                 }
             }
         }
@@ -245,12 +221,12 @@ public final class OptionalUI&lt;C extends Component&gt; {
      * @since 9
      */
     public OptionalUI&lt;C&gt; or(Supplier&lt;? extends OptionalUI&lt;? extends C&gt;&gt; supplier) {
-<span class="nc" id="L248">        Objects.requireNonNull(supplier);</span>
-<span class="nc bnc" id="L249" title="All 2 branches missed.">        if ( this.isPresent() ) return this;</span>
+<span class="nc" id="L224">        Objects.requireNonNull(supplier);</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">        if ( this.isPresent() ) return this;</span>
         else {
             @SuppressWarnings(&quot;unchecked&quot;)
-<span class="nc" id="L252">            OptionalUI&lt;C&gt; r = (OptionalUI&lt;C&gt;) supplier.get();</span>
-<span class="nc" id="L253">            return Objects.requireNonNull(r);</span>
+<span class="nc" id="L228">            OptionalUI&lt;C&gt; r = (OptionalUI&lt;C&gt;) supplier.get();</span>
+<span class="nc" id="L229">            return Objects.requireNonNull(r);</span>
         }
     }
 
@@ -263,10 +239,10 @@ public final class OptionalUI&lt;C extends Component&gt; {
      *        May not be {@code null}.
      * @return the component, if present, otherwise {@code other}
      */
-    public C orElseNullable(C other) {
-<span class="nc bnc" id="L267" title="All 2 branches missed.">        if ( !UI.thisIsUIThread() )</span>
-<span class="nc" id="L268">            throw new RuntimeException(&quot;The UI component may only be accessed by the UI thread!&quot;);</span>
-<span class="nc bnc" id="L269" title="All 2 branches missed.">        return _component != null ? _component : other;</span>
+    public C orElseNullable( C other ) {
+<span class="nc bnc" id="L243" title="All 2 branches missed.">        if ( !UI.thisIsUIThread() )</span>
+<span class="nc" id="L244">            throw new RuntimeException(&quot;The UI component may only be accessed by the UI thread!&quot;);</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">        return _component != null ? _component : other;</span>
     }
 
     /**
@@ -278,19 +254,19 @@ public final class OptionalUI&lt;C extends Component&gt; {
      * @return the component, if present, otherwise {@code other}
      */
     public C orElse(C other) {
-<span class="nc bnc" id="L281" title="All 2 branches missed.">        if ( !UI.thisIsUIThread() )</span>
-<span class="nc" id="L282">            throw new RuntimeException(&quot;The UI component may only be accessed by the UI thread!&quot;);</span>
-<span class="nc" id="L283">        Objects.requireNonNull(other);</span>
-<span class="nc bnc" id="L284" title="All 2 branches missed.">        return _component != null ? _component : other;</span>
+<span class="nc bnc" id="L257" title="All 2 branches missed.">        if ( !UI.thisIsUIThread() )</span>
+<span class="nc" id="L258">            throw new RuntimeException(&quot;The UI component may only be accessed by the UI thread!&quot;);</span>
+<span class="nc" id="L259">        Objects.requireNonNull(other);</span>
+<span class="nc bnc" id="L260" title="All 2 branches missed.">        return _component != null ? _component : other;</span>
     }
 
     /**
      * @return The component wrapped in this OptionalUI, or null if no component is present.
      */
     public C orNull() {
-<span class="nc bnc" id="L291" title="All 2 branches missed.">        if ( !UI.thisIsUIThread() )</span>
-<span class="nc" id="L292">            throw new RuntimeException(&quot;The UI component may only be accessed by the UI thread!&quot;);</span>
-<span class="nc" id="L293">        return _component;</span>
+<span class="nc bnc" id="L267" title="All 2 branches missed.">        if ( !UI.thisIsUIThread() )</span>
+<span class="nc" id="L268">            throw new RuntimeException(&quot;The UI component may only be accessed by the UI thread!&quot;);</span>
+<span class="nc" id="L269">        return _component;</span>
     }
 
     /**
@@ -304,9 +280,9 @@ public final class OptionalUI&lt;C extends Component&gt; {
      *         function is {@code null}
      */
     public C orElseGet(Supplier&lt;? extends C&gt; supplier) {
-<span class="nc bnc" id="L307" title="All 2 branches missed.">        if ( !UI.thisIsUIThread() )</span>
-<span class="nc" id="L308">            throw new RuntimeException(&quot;The UI component may only be accessed by the UI thread!&quot;);</span>
-<span class="nc bnc" id="L309" title="All 2 branches missed.">        return _component != null ? _component : supplier.get();</span>
+<span class="nc bnc" id="L283" title="All 2 branches missed.">        if ( !UI.thisIsUIThread() )</span>
+<span class="nc" id="L284">            throw new RuntimeException(&quot;The UI component may only be accessed by the UI thread!&quot;);</span>
+<span class="nc bnc" id="L285" title="All 2 branches missed.">        return _component != null ? _component : supplier.get();</span>
     }
 
     /**
@@ -318,12 +294,12 @@ public final class OptionalUI&lt;C extends Component&gt; {
      * @since 10
      */
     public C orElseThrow() {
-<span class="nc bnc" id="L321" title="All 2 branches missed.">        if ( !UI.thisIsUIThread() )</span>
-<span class="nc" id="L322">            throw new RuntimeException(&quot;The UI component may only be accessed by the UI thread!&quot;);</span>
-<span class="nc bnc" id="L323" title="All 2 branches missed.">        if ( _component == null )</span>
-<span class="nc" id="L324">            throw new NoSuchElementException(&quot;No component present&quot;);</span>
+<span class="pc bpc" id="L297" title="1 of 2 branches missed.">        if ( !UI.thisIsUIThread() )</span>
+<span class="nc" id="L298">            throw new RuntimeException(&quot;The UI component may only be accessed by the UI thread!&quot;);</span>
+<span class="pc bpc" id="L299" title="1 of 2 branches missed.">        if ( _component == null )</span>
+<span class="nc" id="L300">            throw new NoSuchElementException(&quot;No component present&quot;);</span>
 
-<span class="nc" id="L326">        return _component;</span>
+<span class="fc" id="L302">        return _component;</span>
     }
 
     /**
@@ -344,12 +320,12 @@ public final class OptionalUI&lt;C extends Component&gt; {
      *          supplying function is {@code null}
      */
     public &lt;X extends Throwable&gt; C orElseThrow(Supplier&lt;? extends X&gt; exceptionSupplier) throws X {
-<span class="nc bnc" id="L347" title="All 2 branches missed.">        if ( !UI.thisIsUIThread() )</span>
-<span class="nc" id="L348">            throw new RuntimeException(&quot;The UI component may only be accessed by the UI thread!&quot;);</span>
-<span class="nc bnc" id="L349" title="All 2 branches missed.">        if (_component != null) {</span>
-<span class="nc" id="L350">            return _component;</span>
+<span class="nc bnc" id="L323" title="All 2 branches missed.">        if ( !UI.thisIsUIThread() )</span>
+<span class="nc" id="L324">            throw new RuntimeException(&quot;The UI component may only be accessed by the UI thread!&quot;);</span>
+<span class="nc bnc" id="L325" title="All 2 branches missed.">        if (_component != null) {</span>
+<span class="nc" id="L326">            return _component;</span>
         } else {
-<span class="nc" id="L352">            throw exceptionSupplier.get();</span>
+<span class="nc" id="L328">            throw exceptionSupplier.get();</span>
         }
     }
 
@@ -368,10 +344,10 @@ public final class OptionalUI&lt;C extends Component&gt; {
      */
     @Override
     public boolean equals( Object obj ) {
-<span class="nc bnc" id="L371" title="All 2 branches missed.">        if ( this == obj ) return true;</span>
-<span class="nc bnc" id="L372" title="All 2 branches missed.">        if ( !(obj instanceof OptionalUI) ) return false;</span>
-<span class="nc" id="L373">        OptionalUI&lt;?&gt; other = (OptionalUI&lt;?&gt;) obj;</span>
-<span class="nc" id="L374">        return Objects.equals(_component, other._component);</span>
+<span class="nc bnc" id="L347" title="All 2 branches missed.">        if ( this == obj ) return true;</span>
+<span class="nc bnc" id="L348" title="All 2 branches missed.">        if ( !(obj instanceof OptionalUI) ) return false;</span>
+<span class="nc" id="L349">        OptionalUI&lt;?&gt; other = (OptionalUI&lt;?&gt;) obj;</span>
+<span class="nc" id="L350">        return Objects.equals(_component, other._component);</span>
     }
 
     /**
@@ -382,7 +358,7 @@ public final class OptionalUI&lt;C extends Component&gt; {
      *         present
      */
     @Override
-<span class="nc" id="L385">    public int hashCode() { return Objects.hashCode(_component); }</span>
+<span class="nc" id="L361">    public int hashCode() { return Objects.hashCode(_component); }</span>
 
     /**
      * Returns a non-empty string representation of this {@code OptionalUI}
@@ -397,9 +373,9 @@ public final class OptionalUI&lt;C extends Component&gt; {
      */
     @Override
     public String toString() {
-<span class="nc bnc" id="L400" title="All 2 branches missed.">        return _component != null</span>
-<span class="nc" id="L401">                ? String.format(&quot;OptionalUI[%s]&quot;, _component)</span>
-<span class="nc" id="L402">                : &quot;OptionalUI.empty&quot;;</span>
+<span class="nc bnc" id="L376" title="All 2 branches missed.">        return _component != null</span>
+<span class="nc" id="L377">                ? String.format(&quot;OptionalUI[%s]&quot;, _component)</span>
+<span class="nc" id="L378">                : &quot;OptionalUI.empty&quot;;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

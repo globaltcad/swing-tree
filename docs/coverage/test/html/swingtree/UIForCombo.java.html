@@ -239,7 +239,7 @@ public class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIForAbstr
      * @param model The {@link ComboBoxModel} to be used for the combo box.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForCombo&lt;E,C&gt; withModel(ComboBoxModel&lt;E&gt; model) {
+    public final UIForCombo&lt;E,C&gt; withModel( ComboBoxModel&lt;E&gt; model ) {
 <span class="pc bpc" id="L243" title="1 of 2 branches missed.">        if ( model instanceof AbstractComboModel )</span>
 <span class="fc" id="L244">            _bindComboModelToEditor((AbstractComboModel&lt;E&gt;) model);</span>
 <span class="fc" id="L245">        getComponent().setModel(model);</span>

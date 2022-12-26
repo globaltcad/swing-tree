@@ -1,5 +1,7 @@
 package swingtree.api.mvvm;
 
+import swingtree.api.UIAction;
+
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -11,37 +13,37 @@ import java.util.function.Function;
 public interface Vals<T> extends Iterable<T>
 {
     static <T> Vals<T> of( Class<T> type, Val<T>... vars ) {
-        return Vars.of(type, (Var<T>[])vars);
+        return AbstractVariables.of( true, type, (Var<T>[]) vars );
     }
 
     static <T> Vals<T> of( Val<T> first, Val<T>... rest ) {
         Var<T>[] vars = new Var[rest.length];
         System.arraycopy(rest, 0, vars, 0, rest.length);
-        return Vars.of((Var<T>) first, vars);
+        return AbstractVariables.of( true, (Var<T>) first, vars );
     }
 
     static <T> Vals<T> of( T first, T... rest ) {
-        return Vars.of(first, rest);
+        return AbstractVariables.of( true, first, rest);
     }
 
     static <T> Vals<T> of( Class<T> type, Iterable<Val<T>> vars ) {
-        return Vars.of(type, (Iterable)vars);
+        return AbstractVariables.of( true, type, (Iterable) vars );
     }
 
     static <T> Vals<T> ofNullable( Class<T> type, Val<T>... rest ) {
         Var<T>[] vars = new Var[rest.length];
         System.arraycopy(rest, 0, vars, 0, rest.length);
-        return Vars.ofNullable(type, vars);
+        return AbstractVariables.ofNullable( true, type, vars );
     }
 
     static <T> Vals<T> ofNullable( Class<T> type, T... vars ) {
-        return Vars.ofNullable(type, vars);
+        return AbstractVariables.ofNullable( true, type, vars );
     }
 
     static <T> Vals<T> ofNullable( Var<T> first, Val<T>... rest ) {
         Var<T>[] vars = new Var[rest.length];
         System.arraycopy(rest, 0, vars, 0, rest.length);
-        return Vars.ofNullable(first, vars);
+        return AbstractVariables.ofNullable( true, first, vars );
     }
 
 
@@ -123,8 +125,8 @@ public interface Vals<T> extends Iterable<T>
      */
     default boolean is( Vals<T> other )
     {
-        if( size() != other.size() ) return false;
-        for( int i = 0; i < size(); i++ ) {
+        if ( size() != other.size() ) return false;
+        for ( int i = 0; i < size(); i++ ) {
             if( !this.at(i).is(other.at(i)) ) return false;
         }
         return true;
@@ -136,7 +138,7 @@ public interface Vals<T> extends Iterable<T>
      * @param action The action to perform when the list of properties is shown (which is called when its state changes).
      * @return This list of properties.
      */
-    Vals<T> onShow( Action<ValsDelegate<T>> action );
+    Vals<T> onShow( UIAction<ValsDelegate<T>> action );
 
     /**
      *  Similar to {@link Var#show()} but for a list of properties.

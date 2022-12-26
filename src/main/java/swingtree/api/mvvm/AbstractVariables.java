@@ -1,40 +1,114 @@
 package swingtree.api.mvvm;
 
-import java.util.*;
+import swingtree.api.UIAction;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class AbstractVariables<T> implements Vars<T>
 {
+
+    static <T> Vars<T> of( boolean immutable, Class<T> type, Var<T>... vars ) {
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(vars);
+        return new AbstractVariables<T>( immutable, type, false, vars ){};
+    }
+
+    static <T> Vars<T> of( boolean immutable, Var<T> first, Var<T>... rest ) {
+        Objects.requireNonNull(first);
+        Objects.requireNonNull(rest);
+        Var<T>[] vars = new Var[rest.length+1];
+        vars[0] = first;
+        System.arraycopy(rest, 0, vars, 1, rest.length);
+        return of(immutable, first.type(), vars);
+    }
+
+    static <T> Vars<T> of( boolean immutable, T first, T... rest ) {
+        Objects.requireNonNull(first);
+        Objects.requireNonNull(rest);
+        Var<T>[] vars = new Var[rest.length+1];
+        vars[0] = Var.of(first);
+        for ( int i = 0; i < rest.length; i++ )
+            vars[ i + 1 ] = Var.of( rest[ i ] );
+        return of(immutable, vars[0].type(), vars);
+    }
+
+    static <T> Vars<T> of( boolean immutable, Class<T> type, Iterable<Var<T>> vars ) {
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(vars);
+        List<Var<T>> list = new ArrayList<>();
+        vars.forEach( list::add );
+        Var<T>[] array = new Var[list.size()];
+        return new AbstractVariables<T>( immutable, type, false, list.toArray(array) ){};
+    }
+
+    static <T> Vars<T> ofNullable( boolean immutable, Class<T> type, Var<T>... vars ) {
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(vars);
+        return new AbstractVariables<T>( immutable, type, true, vars ){};
+    }
+
+    static <T> Vars<T> ofNullable( boolean immutable, Class<T> type, T... vars ) {
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(vars);
+        Var<T>[] array = new Var[vars.length];
+        for ( int i = 0; i < vars.length; i++ )
+            array[i] = Var.ofNullable(type, vars[i]);
+        return new AbstractVariables<T>( immutable, type, true, array ){};
+    }
+
+    static <T> Vars<T> ofNullable( boolean immutable, Var<T> first, Var<T>... vars ) {
+        Objects.requireNonNull(first);
+        Objects.requireNonNull(vars);
+        Var<T>[] array = new Var[vars.length+1];
+        array[0] = first;
+        System.arraycopy(vars, 0, array, 1, vars.length);
+        return ofNullable(immutable, first.type(), array);
+    }
+
+
     private final List<Var<T>> _variables = new ArrayList<>();
+    private final boolean _isImmutable;
     private final boolean _allowsNull;
     private final Class<T> _type;
 
-    private final List<Action<ValsDelegate<T>>> _viewActions = new ArrayList<>();
+    private final List<UIAction<ValsDelegate<T>>> _viewActions = new ArrayList<>();
 
     @SafeVarargs
-    public AbstractVariables(Class<T> type, boolean allowsNull, Var<T>... vals) {
+    protected AbstractVariables( boolean isImmutable, Class<T> type, boolean allowsNull, Var<T>... vals ) {
+        _isImmutable = isImmutable;
         _type = type;
         _allowsNull = allowsNull;
         _variables.addAll(Arrays.asList(vals));
         _checkNullSafety();
     }
 
-    @Override public Var<T> at(int index) { return _variables.get(index); }
+    /** {@inheritDoc} */
+    @Override public Var<T> at( int index ) { return _variables.get(index); }
 
+    /** {@inheritDoc} */
     @Override public Class<T> type() { return _type; }
 
+    /** {@inheritDoc} */
     @Override public int size() { return _variables.size(); }
 
+    /** {@inheritDoc} */
     @Override
-    public Vars<T> addAt(int index, Var<T> value) {
+    public Vars<T> addAt( int index, Var<T> value ) {
+        if ( _isImmutable ) throw new UnsupportedOperationException("This is an immutable list.");
         _checkNullSafetyOf(value);
         _triggerAction( Mutation.ADD, index, value, null );
         _variables.add(index, value);
         return this;
     }
 
+    /** {@inheritDoc} */
     @Override
-    public Vars<T> removeAt(int index) {
+    public Vars<T> removeAt( int index ) {
+        if ( _isImmutable ) throw new UnsupportedOperationException("This is an immutable list.");
         if ( index < 0 || index >= _variables.size() )
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + _variables.size());
         _triggerAction( Mutation.REMOVE, index, null, _variables.get(index) );
@@ -42,8 +116,10 @@ public class AbstractVariables<T> implements Vars<T>
         return this;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Vars<T> setAt( int index, Var<T> value ) {
+        if ( _isImmutable ) throw new UnsupportedOperationException("This is an immutable list.");
         if ( index < 0 || index >= _variables.size() )
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + _variables.size());
 
@@ -58,19 +134,23 @@ public class AbstractVariables<T> implements Vars<T>
         return this;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Vars<T> clear() {
+        if ( _isImmutable ) throw new UnsupportedOperationException("This is an immutable list.");
         _triggerAction( Mutation.CLEAR, -1, null, null );
         _variables.clear();
         return this;
     }
 
+    /** {@inheritDoc} */
     @Override
-    public Vals<T> onShow(Action<ValsDelegate<T>> action) {
+    public Vals<T> onShow( UIAction<ValsDelegate<T>> action ) {
         _viewActions.add(action);
         return this;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Vals<T> show() {
         _triggerAction(Mutation.NONE, -1, null, null);
@@ -91,9 +171,9 @@ public class AbstractVariables<T> implements Vars<T>
     private void _triggerAction(
             Mutation type, int index, Var<T> newVal, Var<T> oldVal
     ) {
-        List<Action<ValsDelegate<T>>> removableActions = new ArrayList<>();
+        List<UIAction<ValsDelegate<T>>> removableActions = new ArrayList<>();
         ValsDelegate<T> showAction = _createDelegate(index, type, newVal, oldVal);
-        for ( Action<ValsDelegate<T>> action : _viewActions ) {
+        for ( UIAction<ValsDelegate<T>> action : _viewActions ) {
             try {
                 if ( action.canBeRemoved() )
                     removableActions.add(action);
@@ -106,6 +186,7 @@ public class AbstractVariables<T> implements Vars<T>
         _viewActions.removeAll(removableActions);
     }
 
+    /** {@inheritDoc} */
     @Override
     public java.util.Iterator<T> iterator() {
         return new java.util.Iterator<T>() {
@@ -117,11 +198,13 @@ public class AbstractVariables<T> implements Vars<T>
         };
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return "Vars[" + _variables.stream().map(Object::toString).collect(Collectors.joining(",")) + "]";
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
         if( obj == null ) return false;

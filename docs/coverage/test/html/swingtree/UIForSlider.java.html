@@ -127,9 +127,9 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;
      * @throws IllegalArgumentException if {@code value} is {@code null}.
      */
     public final UIForSlider&lt;S&gt; withValue( Val&lt;Integer&gt; val ) {
-<span class="nc" id="L130">        NullUtil.nullArgCheck( val, &quot;val&quot;, Val.class );</span>
-<span class="nc" id="L131">        _onShow( val, this::withValue);</span>
-<span class="nc" id="L132">        return this;</span>
+<span class="fc" id="L130">        NullUtil.nullArgCheck( val, &quot;val&quot;, Val.class );</span>
+<span class="fc" id="L131">        _onShow( val, this::withValue);</span>
+<span class="fc" id="L132">        return this;</span>
     }
 
     /**
@@ -138,9 +138,9 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;
      * @throws IllegalArgumentException if {@code value} is {@code null}.
      */
     public final UIForSlider&lt;S&gt; withValue( Var&lt;Integer&gt; var ) {
-<span class="nc" id="L141">        NullUtil.nullArgCheck( var, &quot;var&quot;, Var.class );</span>
-<span class="nc" id="L142">        _onChange( e -&gt; _doApp(getComponent().getValue(), var::act) );</span>
-<span class="nc" id="L143">        return this.withValue( (Val&lt;Integer&gt;) var );</span>
+<span class="fc" id="L141">        NullUtil.nullArgCheck( var, &quot;var&quot;, Var.class );</span>
+<span class="pc" id="L142">        _onChange( e -&gt; _doApp(getComponent().getValue(), var::act) );</span>
+<span class="fc" id="L143">        return this.withValue( (Val&lt;Integer&gt;) var );</span>
     }
 
     /**
