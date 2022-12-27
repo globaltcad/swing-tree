@@ -31,15 +31,42 @@ Fluent and boilerplate free composition based Swing UI design!
 </tr>
 </table>
 
----
 
-<table>
-<tr>
-<th></th>
-<th></th>
-</tr>
-<tr>
-<td> 
+---
+<div style="float:right;width:200px;">
+<p style="width:200px;margin:0.5em;">
+Here is an example of some swing tree code which defines a simple calculator UI based on the `FlatLaF` look-and-feel. <br>
+This code will produce the following UI when added to a `JFrame`.
+</p>
+
+
+<img href="" title="example" src="docs/img/simple-example.png" style="width:200px;margin:0.5em;"/>
+
+<p style="width:200px;margin:0.5em;">
+As you can see, swing tree has a very simple API, which only requires a
+single class to be imported, the `UI` class which can even be imported
+statically to remove any `UI.` prefixes.
+</p>
+
+<p style="width:200px;margin:0.5em;">
+Also, note that there are usually 2 arguments
+added to a tree node: a `String` and then UI nodes.
+This first argument simply translates
+to the layout constraints which should be applied
+to the UI element(s) added.
+</p>
+
+<p style="width:200px;margin:0.5em;">
+In this example, strings will be passed to a `MigLayout`
+simply because it is a general purpose layout and no other
+layout was specified.
+</p>
+
+<p style="width:200px;margin:0.5em;">
+For more examples take a look at the <a href="src/test/groovy/swingtree/examples">examples folder</a> inside the test suite.
+</p>
+
+</div>
 
 ```java
 FlatLightLaf.setup();
@@ -66,10 +93,8 @@ UI.of(this/*JPanel subtype*/).withLayout("fill, insets 10")
    .add("span, grow, wrap",
        UI.panel("fill, ins 0")
        .add("grow",
-           UI.button("(")
-	   .withProperty("JButton.buttonType", "roundRect"),
-           UI.button(")")
-	   .withProperty("JButton.buttonType", "roundRect")
+           UI.button("(").withProperty("JButton.buttonType", "roundRect"),
+           UI.button(")").withProperty("JButton.buttonType", "roundRect")
        )
    )
    .add("grow",
@@ -82,24 +107,19 @@ UI.of(this/*JPanel subtype*/).withLayout("fill, insets 10")
       }),
       UI.panel("fill, ins 0")
       .add("grow", 
-         UI.button("-")
-	.withProperty("JButton.buttonType", "roundRect")
+         UI.button("-").withProperty("JButton.buttonType", "roundRect")
       )
       .add("grow, wrap", 
-         UI.button("/")
-	.withProperty("JButton.buttonType", "roundRect")
+         UI.button("/").withProperty("JButton.buttonType", "roundRect")
       )
       .add("span, grow, wrap",
          UI.panel("fill, ins 0")
          .add("grow", 
-            UI.button("+")
-	    .withProperty("JButton.buttonType", "roundRect"),
+            UI.button("+").withProperty("JButton.buttonType", "roundRect"),
             UI.panel("fill, ins 0")
             .add("grow, wrap",
-               UI.button("*")
-	       .withProperty("JButton.buttonType", "roundRect"),
-               UI.button("%")
-	       .withProperty("JButton.buttonType", "roundRect")
+               UI.button("*").withProperty("JButton.buttonType", "roundRect"),
+               UI.button("%").withProperty("JButton.buttonType", "roundRect")
             )
          ),
          UI.button("=")
@@ -110,41 +130,29 @@ UI.of(this/*JPanel subtype*/).withLayout("fill, insets 10")
 );
 ```
 
-</td>
-<td style="vertical-align:top">
-	
-Here is an example of some swing tree code which defines a simple calculator UI based on the `FlatLaF` look-and-feel. <br>
-This code will produce the following UI when added to a `JFrame`.
-	
 ---
-	
-<img href="" title="example" src="docs/img/simple-example.png" style="width:200px"/>
+## Getting started with Apache Maven ##
+
+```
+<dependency>
+  <groupId>io.github.globaltcad</groupId>
+  <artifactId>swing-tree</artifactId>
+  <version>0.1.0</version>
+</dependency>
+```
 
 ---
-	
-As you can see, swing tree has a very simple API, which only requires a
-single class to be imported, the `UI` class which can even be imported 
-statically to remove any `UI.` prefixes.
 
+## Getting started with Gradle ##
+Groovy DSL:
+```
+implementation 'io.github.globaltcad:swing-tree:0.1.0'
+```
+Kotlin DSL:
+```
+implementation("io.github.globaltcad:swing-tree:0.1.0")
+```
 ---
-	
-Also, note that there are usually 2 arguments 
-added to a tree node: a `String` and then UI nodes.
-This first argument simply translates 
-to the layout constraints which should be applied
-to the UI element(s) added. <br>
-	
-In this example, strings will be passed to a `MigLayout`
-simply because it is a general purpose layout and no other
-layout was specified.
-
----
-	
-For more examples take a look at the [examples folder](src/test/groovy/com/globaltcad/swingtree/examples) inside the test suite. 
-	
-</td>
-</tr>
-</table>
 
 ## Getting started with [![](https://jitpack.io/v/globaltcad/swing-tree.svg)](https://jitpack.io/#globaltcad/swing-tree) ##
 **1. Add the JitPack url in your root `build.gradle` at the end of `repositories`**
