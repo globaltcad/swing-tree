@@ -33,40 +33,12 @@ Fluent and boilerplate free composition based Swing UI design!
 
 
 ---
-<div style="float:right;width:200px;">
-<p style="width:200px;margin:0.5em;">
-Here is an example of some swing tree code which defines a simple calculator UI based on the `FlatLaF` look-and-feel. <br>
-This code will produce the following UI when added to a `JFrame`.
-</p>
 
+Here an example of a simple calculator UI based on the `FlatLaF` look-and-feel:
 
-<img href="" title="example" src="docs/img/simple-example.png" style="width:200px;margin:0.5em;"/>
+<img href="" title="example" src="docs/img/simple-example.png" style="float:right;width:200px;margin:0.5em;"/>
 
-<p style="width:200px;margin:0.5em;">
-As you can see, swing tree has a very simple API, which only requires a
-single class to be imported, the `UI` class which can even be imported
-statically to remove any `UI.` prefixes.
-</p>
-
-<p style="width:200px;margin:0.5em;">
-Also, note that there are usually 2 arguments
-added to a tree node: a `String` and then UI nodes.
-This first argument simply translates
-to the layout constraints which should be applied
-to the UI element(s) added.
-</p>
-
-<p style="width:200px;margin:0.5em;">
-In this example, strings will be passed to a `MigLayout`
-simply because it is a general purpose layout and no other
-layout was specified.
-</p>
-
-<p style="width:200px;margin:0.5em;">
-For more examples take a look at the <a href="src/test/groovy/swingtree/examples">examples folder</a> inside the test suite.
-</p>
-
-</div>
+This was made using the following code:
 
 ```java
 FlatLightLaf.setup();
@@ -75,19 +47,14 @@ UI.of(this/*JPanel subtype*/).withLayout("fill, insets 10")
    UI.panel("fill, ins 0")
    .add("shrink", UI.label("Result:"))
    .add("grow, wrap",
-      UI.label("42.0").with(UI.HorizontalAlignment.RIGHT
+      UI.label("42.0").with(UI.HorizontalAlignment.RIGHT)
       .withProperty("FlatLaf.styleClass", "large")
    )
-   .add("grow, span, wrap",
-      UI.textArea(UI.HorizontalDirection.RIGHT_TO_LEFT, "13 - 73")
-      .id("input-text-area")
-   )
+   .add("grow, span, wrap", UI.textArea(UI.HorizontalDirection.RIGHT_TO_LEFT, "13 - 73"))
 )
 .add("growx", UI.radioButton("DEG"), UI.radioButton("RAD"))
 .add("shrinkx", UI.splitButton("sin"))
-.add("growx, wrap",
-   UI.button("Help").withProperty("JButton.buttonType", "help")
-)
+.add("growx, wrap", UI.button("Help").withProperty("JButton.buttonType", "help"))
 .add("growx, span, wrap",
    UI.panel("fill")
    .add("span, grow, wrap",
@@ -100,18 +67,12 @@ UI.of(this/*JPanel subtype*/).withLayout("fill, insets 10")
    .add("grow",
       UI.panel("fill, ins 0, wrap 3")
       .apply( it -> {
-         String[] labels = {
-            "7","8","9","4","5","6","1","2","3","0",".","C"
-         };
+         String[] labels = {"7","8","9","4","5","6","1","2","3","0",".","C"};
          for ( var l : labels ) it.add("grow", UI.button(l));
       }),
       UI.panel("fill, ins 0")
-      .add("grow", 
-         UI.button("-").withProperty("JButton.buttonType", "roundRect")
-      )
-      .add("grow, wrap", 
-         UI.button("/").withProperty("JButton.buttonType", "roundRect")
-      )
+      .add("grow", UI.button("-").withProperty("JButton.buttonType", "roundRect"))
+      .add("grow, wrap", UI.button("/").withProperty("JButton.buttonType", "roundRect"))
       .add("span, grow, wrap",
          UI.panel("fill, ins 0")
          .add("grow", 
@@ -129,6 +90,24 @@ UI.of(this/*JPanel subtype*/).withLayout("fill, insets 10")
    )
 );
 ```
+
+
+As you can see, swing tree has a very simple API, which only requires a
+single class to be imported, the `UI` class which can even be imported
+statically to remove any `UI.` prefixes.
+
+Also, note that there are usually 2 arguments
+added to a tree node: a `String` and then UI nodes.
+This first argument simply translates
+to the layout constraints which should be applied
+to the UI element(s) added.
+
+In this example, strings will be passed to a `MigLayout`
+simply because it is a general purpose layout and no other
+layout was specified.
+
+For more examples take a look at the <a href="src/test/groovy/swingtree/examples">examples folder</a> inside the test suite.
+
 
 ---
 ## Getting started with Apache Maven ##
