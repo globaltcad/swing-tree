@@ -1,0 +1,52 @@
+{
+  "className":"swingtree.common.Basic_UI_Exception_Spec",
+  "title":"How Not To Use",
+  "narrative":"This specification shows you how NOT to use the Swing-Tree API.",
+  "subjects":[],
+  "statistics":{
+    "runs":"2",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"0.336 seconds"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"The given factory methods do not accept null arguments.",
+      "result":"PASS",
+      "duration":"0.060 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"when","text":"We execute the error prone code...","code":["illegalAction()"]},
+
+        {"kind":"then","text":"An illegal argument exception will be thrown!","code":["thrown(IllegalArgumentException)"]},
+
+        {"kind":"where","text":"","code":{"illegalAction":["{UI.of((JMenu)null)}","{UI.of((JSeparator)null)}","{UI.of((JMenuItem)null)}","{UI.of((JPanel)null)}","{UI.label((String)null)}","{UI.label((Val<String>)null)}","{UI.label(300,200,null)}","{UI.label((Icon)null)}","{UI.labelWithIcon((Val<Icon>)null)}","{UI.button(null, null,null)}","{UI.button().onClick(null)}","{UI.button().onChange(null)}","{UI.button((Icon)null)}","{UI.button((Val<String>)null)}","{UI.buttonWithIcon((Val<Icon>)null)}","{UI.button((Icon)null,(Icon)null)}","{UI.button(0,0, (ImageIcon)null, (ImageIcon)null)}","{UI.button(\"\").isSelectedIf((Var)null)}","{UI.toggleButton((String)null)}","{UI.toggleButton((Val<String>)null)}","{UI.toggleButton((Var<Boolean>)null)}","{UI.toggleButton((String)null, (Var<Boolean>)null)}","{UI.toggleButton((Val<String>)null, (Var<Boolean>)null)}","{UI.toggleButton((Icon)null)}","{UI.toggleButtonWithIcon((Val<Icon>)null)}","{UI.toggleButtonWithIcon((Val<Icon>)null, (Var<Boolean>)null)}","{UI.of((SwingBuilder)null)}","{UI.of((MenuBuilder)null)}","{UI.of((JCheckBox)null)}","{UI.of((JRadioButton)null)}","{UI.of((JTextComponent)null)}","{UI.of((JComponent)null)}","{UI.of((JSplitButton)null)}","{UI.of((JPopupMenu)null)}","{UI.of((JSeparator)null)}","{UI.separator((UI.Align)null)}","{UI.of((JTextArea)null)}","{UI.of((JLabel)null)}","{UI.of((Component)null)}","{UI.of((JTabbedPane)null)}","{UI.splitItem(null)}","{UI.splitButton(null)}","{UI.checkBox(null)}","{UI.radioButton(null)}","{UI.radioButton(null, (Var)null)}","{UI.menuItem(null)}","{UI.splitItem(null)}","{UI.splitRadioItem(null)}","{UI.textField((Val)null)}","{UI.textField((Var)null)}","{UI.textField((String)null)}","{UI.textArea((Var)null)}","{UI.textArea((Val)null)}","{UI.textArea((String)null)}","{UI.panel().onMouseClick(null)}","{UI.panel().onMouseRelease(null)}","{UI.panel().onMousePress(null)}","{UI.panel().onMouseDrag(null)}","{UI.panel().onMouseEnter(null)}","{UI.panel().onMouseExit(null)}","{UI.panel().onMouseWheelMove(null)}","{UI.panel().onMouseWheelUp(null)}","{UI.panel().onMouseWheelDown(null)}","{UI.of(new JComboBox<>()).onMouseClick(null)}","{UI.of(new JComboBox<>()).onSelection(null)}","{UI.of(new JSlider()).onChange(null)}","{UI.tabbedPane((UI.Position)null)}","{UI.tabbedPane((UI.OverflowPolicy)null)}","{UI.tabbedPane((UI.Position)null,(UI.OverflowPolicy)null)}","{UI.slider((UI.Align)null)}","{UI.slider((UI.Align)null, 1, 10, 3)}","{UI.slider(UI.Align.HORIZONTAL).onChange(null)}","{UI.comboBox((List)null)}","{UI.comboBox((Object])null)}","{UI.comboBox().onSelection(null)}","{UI.panel((String)null)}","{UI.panel((String)null, (String)null)}","{UI.panel((String)null, (String)null, (String)null)}","{UI.panel((LayoutAttr)null)}","{UI.panel((Val<LayoutAttr>)null)}","{UI.toolBar((UI.Align)null)}","{UI.toolBar((Val)null)}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Certain Swing-Tree UI builder, do not allow you to use nullable properties.",
+      "result":"PASS",
+      "duration":"0.037 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"when","text":"We execute the error prone code...","code":["illegalAction()"]},
+
+        {"kind":"then","text":"An illegal argument exception will be thrown!","code":["thrown(IllegalArgumentException)"]},
+
+        {"kind":"where","text":"","code":{"illegalAction":["{ UI.toggleButton(Var.ofNullable(Boolean, false)) }","{ UI.toggleButton(\"Toggle Me!\", Var.ofNullable(Boolean, true)) }","{ UI.toggleButton(Var.ofNullable(String, null), Var.of(true)) }","{ UI.textArea(Var.ofNullable(String, \"Ooops\")) }","{ UI.textArea(Val.ofNullable(String, null)) }","{ UI.textArea(UI.HorizontalDirection.LEFT_TO_RIGHT, Val.ofNullable(String, \"\")) }","{ UI.textArea(UI.HorizontalDirection.RIGHT_TO_LEFT, Var.ofNullable(String, \"\")) }","{ UI.panel(Val.ofNullable(LayoutAttr,UI.FILL)) }","{ UI.spinner(Var.ofNullable(Byte,null)) }","{ UI.radioButton(Val.ofNullable(String,\"\")) }","{ UI.radioButton(\"Hi!\",Var.ofNullable(Boolean,true)) }","{ UI.radioButton(Val.ofNullable(String,\"\"),Var.ofNullable(Boolean,true)) }","{ UI.radioButton((Enum)null, Var.ofNullable(Enum.class, (Enum)null)) }","{ UI.radioButton(\"Hi\").isSelectedIf((Enum)null, Var.ofNullable(Enum.class, (Enum)null)) }","{ UI.checkBox(Val.ofNullable(String,\"\")) }","{ UI.checkBox(\"Done!\", Var.ofNullable(Boolean,true)) }","{ UI.checkBox(Val.ofNullable(String,\"\"), Var.ofNullable(Boolean,true)) }","{ UI.panel().isEnabledIf(Val.ofNullable(Boolean, false)) }","{ UI.button().isSelectedIf(Val.ofNullable(Boolean, true)) }","{ UI.button().isSelectedIfNot(Val.ofNullable(Boolean, true)) }","{ UI.button().isSelectedIf(Var.ofNullable(Boolean, true)) }","{ UI.button().isSelectedIfNot(Var.ofNullable(Boolean, true)) }","{ UI.popupMenu().isVisibleIf(Val.ofNullable(Boolean,true)) }","{ UI.button(Val.ofNullable(String,\"Click Me!\")) }","{ UI.label(Val.ofNullable(String, \"\")) }","{ UI.spinner().withValue(Val.ofNullable(Number, 4)) }","{ UI.spinner().withValue(Var.ofNullable(Number, 4)) }","{ UI.panel().withForeground(Val.ofNullable(Color,null)) }","{ UI.passwordField(Val.ofNullable(String, \"\")) }","{ UI.passwordField(Var.ofNullable(String, \"\")) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

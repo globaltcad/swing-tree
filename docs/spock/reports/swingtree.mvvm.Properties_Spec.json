@@ -4,18 +4,18 @@
   "narrative":"Properties are a powerful tool to model the state \n    as well as business logic of your UI without actually depending on it.\n    This is especially useful for testing your UIs logic.\n    Therefore properties are a root concept in the Swing-Tree library.\n    The decoupling between your UI and the UIs state and logic \n    is achieved by binding properties to UI components.\n    This specification shows you how to model UI state \n    and business logic using properties \n    and how to bind them to UI components.",
   "subjects":[],
   "statistics":{
-    "runs":"1",
+    "runs":"29",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.084 seconds"
+    "duration":"0.222 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"Properties are simple wrappers around a value",
-      "result":"IGNORED",
+      "result":"PASS",
       "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
@@ -30,10 +30,10 @@
   
     {
       "id":"They can be bound to the UI by passing them to a builder node.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.069 seconds",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n            Binding goes both ways, so when the property changes state through the \"set\" method\n            it will update the UI\n            using the \"show()\" method on the property (which you can also call manually for UI updates), \n            and when the UI is changed by the user, it will update the property for us\n            and trigger the property action (if present).\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A simple boolean property modelling a toggle state.","code":["boolean userDidToggle = false","Val<Boolean> toggled = Var.of(false)","                            .withAction({userDidToggle = true})"]},
@@ -59,10 +59,10 @@
   
     {
       "id":"There are 2 types of properties, an immutable property, and its mutable sub-type.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.001 seconds",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n            Mutable properties are called \"Var\" and immutable properties are called \"Val\".\n            This distinction exists so that you can better encapsulating the mutable parts\n            of you business logic and UI state.\n            So if you want your UI to only display but not change a\n            property expose Val, if on the other hand it should\n            be able to change the state of the property, use Var!\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a mutable property...","code":["Var<Integer> mutable = Var.of(42)"]},
@@ -84,10 +84,10 @@
   
     {
       "id":"Properties can be bound by subscribing to them using the \"onShow(..)\" method.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.003 seconds",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n            Note that bound Swing-Tree properties only have side effects\n            when they are deliberately triggered to execute their side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a mutable property...","code":["Var<String> mutable = Var.of(\"Tempeh\")"]},
@@ -107,8 +107,8 @@
   
     {
       "id":"Properties not only have a value but also a type and id!",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.010 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -124,8 +124,8 @@
   
     {
       "id":"A property can only wrap null if we specify a type class.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -145,10 +145,10 @@
   
     {
       "id":"The \"withID(..)\" method produces a new property with all bindings inherited.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.004 seconds",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n            The wither methods on properties are used to create new property instances\n            with the same value and bindings as the original property\n            but without side effects of the original property.\n            So if you add bindings to a withered property they will not affect the original property.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a property...","code":["Var<String> property = Var.of(\"Hello World\")"]},
@@ -176,8 +176,8 @@
   
     {
       "id":"Properties are similar to the \"Optional\" class, you can map them and see if they are empty or not.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -197,8 +197,8 @@
   
     {
       "id":"The \"ifPresent\" method allows us to see if a property has a value or not.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -216,7 +216,7 @@
   
     {
       "id":"An empty property will throw an exception if you try to access its value.",
-      "result":"IGNORED",
+      "result":"PASS",
       "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
@@ -233,10 +233,10 @@
   
     {
       "id":"The \"orElseNull\" method should be used instead of \"orElseThrow\" if you are fine with null values.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.001 seconds",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n            Note that accessing the value of an empty property using the \"orElseThrow\" method\n            will throw an exception if it is null!\n            Use \"orElseNull\" if you are fine with your property being empty \n            and to also make this intend clear.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a property...","code":["Val<Long> property = Val.ofNullable(Long, null)"]},
@@ -250,10 +250,10 @@
   
     {
       "id":"The \"get\" method will throw an exception if there is no element present.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.001 seconds",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n            Note that accessing the value of an empty property using the \"get\" method\n            will throw an exception.\n            It is recommended to use the \"orElseNull\" method instead, because the \"get\"\n            method is intended to be used for non-nullable types, or when it\n            is clear that the property is not empty!\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a property...","code":["Val<Long> property = Val.ofNullable(Long, null)"]},
@@ -267,8 +267,8 @@
   
     {
       "id":"The equality and hash code of a property are based on its value, type and id!",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -288,10 +288,10 @@
   
     {
       "id":"Properties expose a state history in their property actions.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.004 seconds",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n            When the view changes the state of a property and then triggers a model action, \n            the property will remember its previous state and store it in an internal history.\n            This history will be exposed to the property action, and it can be used to undo \n            or redo changes to the property.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a reference to catch the action delegate and a property with an action to set the reference...","code":["var delegate = null","Var<String> property = Var.of(\"Hello World\")","                            .withAction( it ->{","                                delegate = it","                            })"]},
@@ -309,8 +309,8 @@
   
     {
       "id":"The delegate of a property action exposes the current as well as the previous state of the property.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -326,10 +326,10 @@
   
     {
       "id":"We can search for a previous state of a property in its history.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.004 seconds",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n            You can query the history of a property for a previous state of the property\n            using the \"previous(int)\" method.\n            It returns an optional that contains the previous state if it is found.\n            Note that the index passed to the method is relative to the current state,\n            so a value of 0 will return the current state, a value of 1 will return the\n            previous state, and so on. \n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a reference to catch the action delegate and a property with an action to set the reference...","code":["var delegate = null","Var<String> property = Var.of(\"Apple\")","                            .withAction( it ->{","                                delegate = it","                            })"]},
@@ -347,10 +347,10 @@
   
     {
       "id":"The UI uses the \"act(T)\" method to change the property state to avoid feedback looping.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.029 seconds",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n            Unfortunately Swing does not allow us to implement models for all types of UI components.\n            A JButton for example does not have a model that we can use to bind to a property.\n            Instead Swing-Tree has to perform precise updates to the UI components without\n            triggering any events.\n            Therefore the UI uses the \"act(T)\" method to change the property state and triggers the\n            action of the property. On the contrary the \"set(T)\" method is used to change the state\n            of a property without triggering the action, but it will trigger the \"onShow\" actions\n            of the property. This is so that the UI can update itself when the user changes the\n            state of a property.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A simple property with a view and model actions.","code":["var showListener = []","var modelListener = []","var property = Var.of(\":)\")","                    .withAction( it ->{","                        modelListener << it.current().orElseThrow()","                    })","property.onShow( it -> showListener << it )"]},
@@ -374,10 +374,10 @@
   
     {
       "id":"A property constructed using the \"of\" factory method, does not allow null values.",
-      "result":"IGNORED",
+      "result":"PASS",
       "duration":"0",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n            The \"of\" factory method is used to create a property that does not allow null values.\n            If you try to set a null value, the property will throw an exception.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A property constructed using the \"of\" factory method.","code":["var property = Var.of(\"Hello World\")"]},
@@ -391,10 +391,10 @@
   
     {
       "id":"The string representation of a property will give you all the information you need.",
-      "result":"IGNORED",
+      "result":"PASS",
       "duration":"0",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n            The string representation of a property will tell you the \n            the current state, type and id of the property.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"Some simple non-null properties.","code":["var v1 = Var.of(\"Apple\")","var v2 = Var.of(\"Berry\").withID(\"fruit\")","var v3 = Var.of(42)","var v4 = Var.of(42).withID(\"number\")","var v5 = Var.of(99f).withID(\"ninety-nine\")"]},
@@ -410,10 +410,10 @@
   
     {
       "id":"A property can be converted to an Optional.",
-      "result":"IGNORED",
+      "result":"PASS",
       "duration":"0",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n            A property can be converted to an Optional using the \"toOptional()\" method.\n            This is useful when you want to use the Optional API to query the state of the property.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A property with a non-null value.","code":["var property = Var.of(\"Hello World\")"]},
@@ -431,8 +431,8 @@
   
     {
       "id":"Multiple properties can be modelled through the \"Vars\" and \"Vals\" classes.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.010 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -466,7 +466,7 @@
   
     {
       "id":"The \"Vars\" ist a list of properties which can grow and shrink.",
-      "result":"IGNORED",
+      "result":"PASS",
       "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
@@ -489,8 +489,8 @@
   
     {
       "id":"Both the \"Vars\" and immutable \"Vals\" types can be used for functional programming.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.012 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -508,7 +508,7 @@
   
     {
       "id":"Map a \"Vals\" instance from one type of properties to another.",
-      "result":"IGNORED",
+      "result":"PASS",
       "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
@@ -526,7 +526,7 @@
     {
       "id":"Map a \"Vars\" instance from one type of properties to another.",
       "result":"PASS",
-      "duration":"0.053 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -542,7 +542,7 @@
   
     {
       "id":"You can create the \"Vars\"/\"Vals\" property lists from property instances.",
-      "result":"IGNORED",
+      "result":"PASS",
       "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
@@ -561,8 +561,8 @@
   
     {
       "id":"Just like a regular \"Var\" property you can register \"show\" listeners on \"Vars\".",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -584,8 +584,8 @@
   
     {
       "id":"The display action of a property or list of properties will not be called if they report \"canBeRemoved()\"",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.009 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -605,8 +605,8 @@
   
     {
       "id":"The listeners registered in property lists will be informed what type of modification occurred.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

@@ -1,14 +1,14 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Mon Dec 26 23:46:32 CET 2022",
+  "created": "Tue Dec 27 11:04:16 CET 2022",
   "statistics":{
     "runs":"22",
     "passed":"21",
     "failed":"1",
     "featureFailures":"0",
     "successRate":"0.9545454545454546",
-    "duration":"7245.0"
+    "duration":"6255.0"
   },
   "specifications": [{
       "className":"swingtree.button.JButton_Example_Spec",
@@ -19,7 +19,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"353",
+      "duration":"418",
       "executedFeatures":[{"id":"A button will delegate its siblings within actions:","extraInfo":[]},{"id":"We can easily create a button with an associated action:","extraInfo":[]},{"id":"We can go through the entire siblinghood, including the current button!","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -31,7 +31,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"658",
+      "duration":"504",
       "executedFeatures":[{"id":"A combo box can be made editable in a declarative way.","extraInfo":[]},{"id":"A combo box created by Swing-Tree uses the provided item array as data model.","extraInfo":[]},{"id":"A combo box created by Swing-Tree uses the provided item list as data model.","extraInfo":[]},{"id":"Swing tree is a wrapper around Swing, which means you can create the combo box yourself.","extraInfo":[]},{"id":"The \"comboBox\" factory method allows you to easily create a combo box from an array.","extraInfo":[]},{"id":"The options of an editable combo box are only editable if their items list is modifyable.","extraInfo":[]},{"id":"You can model both the current selection state as well as options of your combo box using 2 properties.","extraInfo":[]},{"id":"You can model both the current selection state as well as options of your combo box using a property and a list.","extraInfo":[]},{"id":"You can model both the current selection state as well as options of your combo box using a property and an array.","extraInfo":[]},{"id":"You can model the options of your combo boxes using \"Vars\".","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -43,7 +43,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"266",
+      "duration":"214",
       "executedFeatures":[{"id":"A tabbed pane can be created and populated in a declarative way.","extraInfo":[]},{"id":"An enum based combo box can have custom cell rendering.","extraInfo":[]},{"id":"Component events can be registered on swing tree nodes.","extraInfo":[]},{"id":"Swing tree nests all kinds of components (trough builder nodes).","extraInfo":[]},{"id":"Tab header components can be passed to the \"tab\" factory method instead of the title.","extraInfo":[]},{"id":"The tab buttons of a tabbed pane can have custom components.","extraInfo":[]},{"id":"Use the \"peek( c -> {} )\" method to access the wrapped Swing component in your Swing-Tree.","extraInfo":[]},{"id":"We can add a list of components to the swing tree API and get a builder node in return.","extraInfo":[]},{"id":"We can create a border layout based Swing tree.","extraInfo":[]},{"id":"We can easily define the cursor on a wrapped UI component","extraInfo":[]},{"id":"We can nest JPanel UI nodes to structure UIs.","extraInfo":[]},{"id":"We can register different UI focus event handlers to swing tree nodes.","extraInfo":[]},{"id":"We can register list selection events on a JList based swing tree node.","extraInfo":[]},{"id":"We can register various kinds of different keyboard event handlers to swing tree nodes.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -55,7 +55,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"367",
+      "duration":"336",
       "executedFeatures":[{"id":"Certain Swing-Tree UI builder, do not allow you to use nullable properties.","extraInfo":[]},{"id":"The given factory methods do not accept null arguments.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -67,7 +67,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"242",
+      "duration":"148",
       "executedFeatures":[{"id":"We can query the swing tree within an action lambda.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -79,7 +79,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"212",
+      "duration":"218",
       "executedFeatures":[{"id":"We can register periodically called UI updates!","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -91,7 +91,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"456",
+      "duration":"227",
       "executedFeatures":[{"id":"In a formatted text field, the \"onEnter\" event handlers are triggered in the same order as they were registered.","extraInfo":[]},{"id":"The \"onChange\" event handlers are triggered in the same order as they were registered.","extraInfo":[]},{"id":"The \"onClick\" event handlers are triggered in the same order as they were registered.","extraInfo":[]},{"id":"The \"onContentChange\" event handler of a text area is triggered when the text area content changes.","extraInfo":[]},{"id":"The \"onEnter\" event handlers are triggered in the same order as they were registered.","extraInfo":[]},{"id":"The \"onResize\" event handlers are triggered in the same order as they were registered.","extraInfo":[]},{"id":"The \"onSelection\" event handlers of a combo box are triggered in the same order as they were registered.","extraInfo":[]},{"id":"The \"onShown\" event handlers are triggered in the same order as they were registered.","extraInfo":[]},{"id":"The \"onTextChange\" event handler of a text area is triggered when the text area content changes.","extraInfo":[]},{"id":"The \"onTextInsert\" event handler of a text area is triggered when the text area content changes.","extraInfo":[]},{"id":"The \"onTextRemove\" event handler of a text area is triggered when the text area content changes.","extraInfo":[]},{"id":"The \"onTextReplace\" event handler of a text area is triggered when the text area content changes.","extraInfo":[]},{"id":"The \"onTextReplace\" event handlers will be triggered in the correct order.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -103,7 +103,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"1284",
+      "duration":"911",
       "executedFeatures":[{"id":"The advanced UI define in the examples has the expected state.","extraInfo":[]},{"id":"The calculator UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The form UI define in the examples has the expected state.","extraInfo":[]},{"id":"The list rendering example UI defined in the examples can be created.","extraInfo":[]},{"id":"The login example UI defined in the examples can be created.","extraInfo":[]},{"id":"The settings example UI defined in the examples can be created.","extraInfo":[]},{"id":"The simple Table-UI example has the expected state.","extraInfo":[]},{"id":"The spinners example UI defined in the examples can be created.","extraInfo":[]},{"id":"The todo app UI defined in the examples has the expected state.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -115,7 +115,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"13",
+      "duration":"8",
       "executedFeatures":[{"id":"We can bind to the text of a button.","extraInfo":[]},{"id":"You can bind to the enabled state of a button.","extraInfo":[]},{"id":"You can bind to the selection state of a button.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -127,7 +127,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"86",
+      "duration":"37",
       "executedFeatures":[{"id":"A property can define the horizontal and vertical alignment of a label.","extraInfo":[]},{"id":"A property can define the image relative horizontal and vertical alignment of a label.","extraInfo":[]},{"id":"It is possible to bind to the minimum, maximum and preferred size of a label","extraInfo":[]},{"id":"We can bind to the foreground and background color of a UI node.","extraInfo":[]},{"id":"We can bind to the text of a label.","extraInfo":[]},{"id":"We can store icons inside properties and then bind them to labels.","extraInfo":[]},{"id":"You can bind a variable to the \"enable\" flag of a label.","extraInfo":[]},{"id":"You can bind a variable to the \"visible\" flag of a label.","extraInfo":[]},{"id":"You can dynamically model the font size of your labels using an integer based property.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -139,7 +139,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"559",
+      "duration":"502",
       "executedFeatures":[{"id":"A boolean property can be used to set or reset a background color.","extraInfo":[]},{"id":"A boolean property can be used to set or reset a foreground color.","extraInfo":[]},{"id":"A boolean property can be used to switch between 2 background colors.","extraInfo":[]},{"id":"A boolean property can be used to switch between 2 foreground colors.","extraInfo":[]},{"id":"A border title can be modelled using properties.","extraInfo":[]},{"id":"A simple array of elements can be used as a data model for a combo box.","extraInfo":[]},{"id":"A simple list of elements can be used as a data model for a combo box.","extraInfo":[]},{"id":"A string property can be bound to a combo box holding string elements.","extraInfo":[]},{"id":"An enum based combo box can infer its possible states directly from the binding property.","extraInfo":[]},{"id":"Binding to the selection state of a button does nothing, because a JButton can only be pressed.","extraInfo":[]},{"id":"The background color of a Swing component can be modelled using a boolean and a Color property.","extraInfo":[]},{"id":"The foreground color of a Swing component can be modelled using a boolean and a Color property.","extraInfo":[]},{"id":"The tooltip of a component can be modelled using a String property.","extraInfo":[]},{"id":"The type of cursor displayed over a component can be modelled using properties.","extraInfo":[]},{"id":"View Models can be represented by properties lists.","extraInfo":[]},{"id":"View Models can be represented by properties.","extraInfo":[]},{"id":"We can bind a boolean property to a button, and when the user presses it, we notice it.","extraInfo":[]},{"id":"We can bind a boolean property to a checkbox, and when the user presses it, we notice it.","extraInfo":[]},{"id":"We can bind a boolean property to a radio button, and when the user presses it, we notice it.","extraInfo":[]},{"id":"We can bind a boolean property to a toggle button, and when the user presses it, we notice it.","extraInfo":[]},{"id":"We can bind a enum property to a combo box and when the user selects an item, we notice it.","extraInfo":[]},{"id":"We can create a property based view model and build a view for it.","extraInfo":[]},{"id":"You can bind a property as the current selection as well as list of elements as options to a combo box.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -151,7 +151,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"84",
+      "duration":"222",
       "executedFeatures":[{"id":"A property can be converted to an Optional.","extraInfo":[]},{"id":"A property can only wrap null if we specify a type class.","extraInfo":[]},{"id":"A property constructed using the \"of\" factory method, does not allow null values.","extraInfo":[]},{"id":"An empty property will throw an exception if you try to access its value.","extraInfo":[]},{"id":"Both the \"Vars\" and immutable \"Vals\" types can be used for functional programming.","extraInfo":[]},{"id":"Just like a regular \"Var\" property you can register \"show\" listeners on \"Vars\".","extraInfo":[]},{"id":"Map a \"Vals\" instance from one type of properties to another.","extraInfo":[]},{"id":"Map a \"Vars\" instance from one type of properties to another.","extraInfo":[]},{"id":"Multiple properties can be modelled through the \"Vars\" and \"Vals\" classes.","extraInfo":[]},{"id":"Properties are similar to the \"Optional\" class, you can map them and see if they are empty or not.","extraInfo":[]},{"id":"Properties are simple wrappers around a value","extraInfo":[]},{"id":"Properties can be bound by subscribing to them using the \"onShow(..)\" method.","extraInfo":[]},{"id":"Properties expose a state history in their property actions.","extraInfo":[]},{"id":"Properties not only have a value but also a type and id!","extraInfo":[]},{"id":"The \"Vars\" ist a list of properties which can grow and shrink.","extraInfo":[]},{"id":"The \"get\" method will throw an exception if there is no element present.","extraInfo":[]},{"id":"The \"ifPresent\" method allows us to see if a property has a value or not.","extraInfo":[]},{"id":"The \"orElseNull\" method should be used instead of \"orElseThrow\" if you are fine with null values.","extraInfo":[]},{"id":"The \"withID(..)\" method produces a new property with all bindings inherited.","extraInfo":[]},{"id":"The UI uses the \"act(T)\" method to change the property state to avoid feedback looping.","extraInfo":[]},{"id":"The delegate of a property action exposes the current as well as the previous state of the property.","extraInfo":[]},{"id":"The display action of a property or list of properties will not be called if they report \"canBeRemoved()\"","extraInfo":[]},{"id":"The equality and hash code of a property are based on its value, type and id!","extraInfo":[]},{"id":"The listeners registered in property lists will be informed what type of modification occurred.","extraInfo":[]},{"id":"The string representation of a property will give you all the information you need.","extraInfo":[]},{"id":"There are 2 types of properties, an immutable property, and its mutable sub-type.","extraInfo":[]},{"id":"They can be bound to the UI by passing them to a builder node.","extraInfo":[]},{"id":"We can search for a previous state of a property in its history.","extraInfo":[]},{"id":"You can create the \"Vars\"/\"Vals\" property lists from property instances.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -163,7 +163,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"54",
+      "duration":"43",
       "executedFeatures":[{"id":"Bind to both width and height independently if you want to.","extraInfo":[]},{"id":"Enable or disable the split items of a JSplitButton through properties.","extraInfo":[]},{"id":"Simple integer properties can be bound to the width or height of components.","extraInfo":[]},{"id":"We can bind a property to the size of a swing component.","extraInfo":[]},{"id":"We can bind to the color of a component.","extraInfo":[]},{"id":"We can bind to the text of a component.","extraInfo":[]},{"id":"We can enable and disable a UI component dynamically through property binding.","extraInfo":[]},{"id":"We can select or unselect a UI component dynamically through properties.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -175,7 +175,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"12",
+      "duration":"11",
       "executedFeatures":[{"id":"A property holding a vertical scroll bar policy can be bound to the UI.","extraInfo":[]},{"id":"You can model the horizontal scroll bar policy us ing a view model property dynamically.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -187,7 +187,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"27",
+      "duration":"20",
       "executedFeatures":[{"id":"A panel can be created with a layout manager.","extraInfo":[]},{"id":"A panel node can be created using the UI.panel() factory method.","extraInfo":[]},{"id":"The default layout manager is always a MigLayout","extraInfo":[]},{"id":"The dimensions of a panel can be bound to a property.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -199,7 +199,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"106",
+      "duration":"69",
       "executedFeatures":[{"id":"A map can be used as a data source for tables.","extraInfo":[]},{"id":"We can attach a simple table cell renderer to a JTable in just a few lines of code.","extraInfo":[]},{"id":"We can create a simple column major table cell renderer through a UI factory method.","extraInfo":[]},{"id":"We can create a simple table cell renderer through a UI factory method.","extraInfo":[]},{"id":"You can render the cells of a table as text by using the \"asText\" method.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -211,7 +211,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"1151",
+      "duration":"1095",
       "executedFeatures":[{"id":"A button item can undo any multi-selection.","extraInfo":[]},{"id":"It is possible to select more than 1 item.","extraInfo":[]},{"id":"The most simple kind of split button can be built like so:","extraInfo":[]},{"id":"We can build a JSplitButton and add components to it.","extraInfo":[]},{"id":"We can easily build a split button where only one item text will have its text displayed:","extraInfo":[]},{"id":"We can easily build a split button whose text becomes the current user selection:","extraInfo":[]},{"id":"We can register button click events for button items as well as the split button as a whole.","extraInfo":[]},{"id":"We can specify which item should be initially selected.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -235,7 +235,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"30",
+      "duration":"23",
       "executedFeatures":[{"id":"A string property can model the title of a tab!","extraInfo":[]},{"id":"Icons can be bound to tab headers dynamically.","extraInfo":[]},{"id":"Modelling the tooltip of a tab is also possible.","extraInfo":[]},{"id":"Properties allow you to enable or disable individual tabs.","extraInfo":[]},{"id":"The selection state of tabs can be modelled through various properties.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -247,7 +247,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"984",
+      "duration":"961",
       "executedFeatures":[{"id":"Accessing the UI from something other than the UI thread, leads to an exception when in decoupled thread mode.","extraInfo":[]},{"id":"Inside an event lambda we can not access the UI from a background thread.","extraInfo":[]},{"id":"The application thread can safely effect the state of the UI by using the \"UI.run(()->{..})\" method.","extraInfo":[]},{"id":"The default \"coupled\" thread mode will use the AWT thread for event handling.","extraInfo":[]},{"id":"We can use the decoupled thread mode to queue backend events.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
@@ -259,7 +259,7 @@
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"29",
+      "duration":"16",
       "executedFeatures":[{"id":"An OptionalUI can be mapped to a regular non-empty optional.","extraInfo":[]},{"id":"An empty OptionalUI will return a default value when orElse is called.","extraInfo":[]},{"id":"An empty OptionalUI will return a default value when orElseGet is called.","extraInfo":[]},{"id":"An empty OptionalUI will throw an exception when orElseThrow is called.","extraInfo":[]},{"id":"OptionalUI can be mapped to a regular empty optional.","extraInfo":[]},{"id":"OptionalUI wraps AWT components exclusively.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
