@@ -15,7 +15,7 @@ plugins {
 
 String GROUP_ID = "io.github.globaltcad"
 String PROJECT  = "swingtree"
-String VERSION  = "0.0.0"
+String VERSION  = "0.1.0"
 
 group GROUP_ID
 archivesBaseName = PROJECT
@@ -108,7 +108,7 @@ task deploy() {
 }
 // 3:
 //     execute publishToSonatype
-//     go to https://oss.sonatype.org/#stagingRepositories
+//     go to https://s01.oss.sonatype.org/#stagingRepositories
 //     close and release the repository
 
 

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForToolBar.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForToolBar.java</span></div><h1>UIForToolBar.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import swingtree.api.mvvm.Val;
+
+import javax.swing.*;
+
+public class UIForToolBar&lt;T extends JToolBar&gt; extends UIForAbstractSwing&lt;UIForToolBar&lt;T&gt;, T&gt;
+{
+    /**
+     * {@link UIForAbstractSwing} (sub)types always wrap
+     * a single component for which they are responsible.
+     *
+     * @param component The {@link JComponent} type which will be wrapped by this builder node.
+     */
+<span class="nc" id="L15">    public UIForToolBar(T component) { super(component); }</span>
+
+
+    public final UIForToolBar&lt;T&gt; with(UI.Align alignment) {
+<span class="nc" id="L19">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, UI.Align.class);</span>
+<span class="nc" id="L20">        getComponent().setOrientation(alignment.forToolBar());</span>
+<span class="nc" id="L21">        return this;</span>
+    }
+
+    public final UIForToolBar&lt;T&gt; withAlignment( Val&lt;UI.Align&gt; alignment ) {
+<span class="nc" id="L25">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, Val.class);</span>
+<span class="nc" id="L26">        NullUtil.nullPropertyCheck(alignment, &quot;alignment&quot;, &quot;Null is not a valid alignment.&quot;);</span>
+<span class="nc" id="L27">        _onShow( alignment, a -&gt; with(a) );</span>
+<span class="nc" id="L28">        return with(alignment.get());</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

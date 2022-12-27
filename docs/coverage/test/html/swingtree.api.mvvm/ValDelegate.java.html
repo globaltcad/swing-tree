@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ValDelegate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.api.mvvm</a> &gt; <span class="el_source">ValDelegate.java</span></div><h1>ValDelegate.java</h1><pre class="source lang-java linenums">package swingtree.api.mvvm;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+ *  Implementations of this are passed to {@link VarAction} lambdas
+ *  exposing certain context information to the lambda, like the current
+ *  value of the property, the previous one as well as access to a limit
+ *  list of historic values.
+ *
+ * @param &lt;T&gt; The type of the value wrapped by a given property...
+ */
+public interface ValDelegate&lt;T&gt; {
+
+    /**
+     * @return The current property.
+     */
+    Val&lt;T&gt; current();
+
+    /**
+     * @return The current property.
+     */
+<span class="nc" id="L24">    default Val&lt;T&gt; getCurrent() { return current(); }</span>
+
+    /**
+     * @return The previous property.
+     */
+    Val&lt;T&gt; previous();
+
+    /**
+     * @return The previous property.
+     */
+<span class="nc" id="L34">    default Val&lt;T&gt; getPrevious() { return previous(); }</span>
+
+    /**
+     * @param index The index of the historic value to retrieve (increment to go further back in time).
+     * @return An {@link Optional} of the historic property.
+     */
+    default Optional&lt;Val&lt;T&gt;&gt; previous(int index) {
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        if ( index == 0 ) return Optional.of(current());</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">        if ( index &lt;  0 ) throw new IllegalArgumentException(&quot;The number of steps must be positive&quot;);</span>
+<span class="fc" id="L43">        index--;</span>
+        // The index is accessing the history in reverse order
+        // because the last element is the latest historic value, so the previous one!
+<span class="fc" id="L46">        List&lt;Val&lt;T&gt;&gt; history = history();</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if ( index &gt;= history.size() ) return Optional.empty();</span>
+<span class="fc" id="L48">        return Optional.of(history().get(index));</span>
+    }
+
+    /**
+     * @param index The index of the historic value to retrieve (increment to go further back in time).
+     * @return An {@link Optional} of the historic property.
+     */
+<span class="nc" id="L55">    default Optional&lt;Val&lt;T&gt;&gt; getPrevious(int index) { return previous(index); }</span>
+
+    /**
+     * @param time The index of the historic value to retrieve (decrement to go further back in time).
+     * @return An {@link Optional} of the historic property.
+     */
+<span class="fc" id="L61">    default Optional&lt;Val&lt;T&gt;&gt; get( int time ) { return previous(-time); }</span>
+
+    /**
+     * @return The list of historic values.
+     */
+    List&lt;Val&lt;T&gt;&gt; history();
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
