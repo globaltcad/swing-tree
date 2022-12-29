@@ -2453,7 +2453,7 @@ public final class UI
     @SafeVarargs
     public static <E> UIForList<E, JList<E>> list( E... elements ) {
         NullUtil.nullArgCheck(elements, "elements", Object[].class);
-        return of(new JList<>(elements));
+        return of(new JList<E>()).withEntries( elements );
     }
 
     /**
@@ -2464,9 +2464,7 @@ public final class UI
      * @return A builder instance for a new {@link JList} with the provided array as data model.
      */
     @SafeVarargs
-    public static <E> UIForList<E, JList<E>> listOf( E... elements ) {
-        return list( elements );
-    }
+    public static <E> UIForList<E, JList<E>> listOf( E... elements ) { return list( elements ); }
 
     /**
      *  Creates a new {@link JList} instance with the provided {@link List}
@@ -2476,10 +2474,7 @@ public final class UI
      * @return A builder instance for a new {@link JList} with the provided {@link List} as data model.
      */
     public static <E> UIForList<E, JList<E>> list( java.util.List<E> entries ) {
-        return of(new JList<>(new AbstractListModel<E>() {
-            public int getSize() { return entries.size(); }
-            public E getElementAt( int i ) { return entries.get(i); }
-        }));
+        return of(new JList<E>()).withEntries( entries );
     }
 
     /**
@@ -2489,9 +2484,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JList} with the provided {@link List} as data model.
      */
-    public static <E> UIForList<E, JList<E>> listOf( java.util.List<E> entries ) {
-        return list( entries );
-    }
+    public static <E> UIForList<E, JList<E>> listOf( java.util.List<E> entries ) { return list( entries ); }
 
     /**
      * @return A builder instance for a new {@link JTable}.

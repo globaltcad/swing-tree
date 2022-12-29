@@ -54,6 +54,14 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
         return this;
     }
 
+    /**
+     *  The {@link ListEntryRenderer} passed to this method is a functional interface
+     *  receiving a {@link ListEntryDelegate} instance which is
+     *  used to render each entry of the {@link JList} instance.
+     *
+     * @param renderer The renderer to use for each entry of the {@link JList} instance.
+     * @return This instance of the builder node.
+     */
     public final UIForList<E, L> withRenderer( ListEntryRenderer<E, L> renderer ) {
         getComponent().setCellRenderer((list, value, index, isSelected, cellHasFocus) -> renderer.render(new ListEntryDelegate<E, L>() {
             @Override public L list() { return (L) list; }
@@ -81,11 +89,25 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
         return this;
     }
 
+    /**
+     * Receives a {@link Render.Builder} instance providing
+     * a fluent API for configuring how the values of this {@link JList} instance
+     * should be rendered.
+     * <p>
+     * @param renderBuilder The {@link Render.Builder} instance.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public final <V extends E> UIForList<E, L> withRenderer( Render.Builder<L,V> renderBuilder ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
         return withRenderer((ListCellRenderer<E>) renderBuilder.getForList());
     }
 
+    /**
+     * Sets the Swing internal delegate that is used to paint each cell in the list.
+     * <p>
+     * @param renderer The {@link ListCellRenderer} that will be used to paint each cell in the list.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public final UIForList<E, L> withRenderer( ListCellRenderer<E> renderer ) {
         getComponent().setCellRenderer(renderer);
         return this;
