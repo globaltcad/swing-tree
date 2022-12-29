@@ -150,7 +150,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
                     UI.comboBox(sel)
                     .withRenderer(
                         UI.renderComboItem(Keyboard.Key)
-                        .asText( cell -> cell.value.name().toLowerCase() )
+                        .asText( cell -> cell.value().map( k -> k.name().toLowerCase() ).orElse("") )
                     )
 
         expect : 'The combo box will have the correct amount of items.'

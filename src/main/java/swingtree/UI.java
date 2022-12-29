@@ -2522,7 +2522,7 @@ public final class UI
     public static BasicTableModel.Builder tableModel() { return new BasicTableModel.Builder(); }
 
     public static Render.Builder<JTable, Object> renderTable() {
-        return Render.forTable(Object.class, null).when(Object.class).asText(cell->String.valueOf(cell.getValue()));
+        return Render.forTable(Object.class, null).when(Object.class).asText(cell->cell.valueAsString().orElse(""));
     }
 
     /**
@@ -2546,7 +2546,7 @@ public final class UI
      *          configure how he passed item types should be rendered.
      */
     public static Render.Builder<JList<Object>, Object> renderList() {
-        return Render.forList(Object.class, null).when(Object.class).asText(cell->String.valueOf(cell.getValue()));
+        return Render.forList(Object.class, null).when(Object.class).asText(cell->cell.valueAsString().orElse(""));
     }
 
     /**
@@ -2570,7 +2570,7 @@ public final class UI
      * @param <T> The common super-type type of the items which should be rendered.
      */
     public static <T> Render.Builder<JList<T>, T> renderList( Class<T> commonType ) {
-        return Render.forList(commonType, null).when(commonType).asText(cell->String.valueOf(cell.getValue()));
+        return Render.forList(commonType, null).when(commonType).asText(cell->cell.valueAsString().orElse(""));
     }
 
     /**
@@ -2615,7 +2615,7 @@ public final class UI
      * @return A render builder exposing an API that allows you to configure how he passed item types should be rendered.
      */
     public static Render.Builder<JComboBox<Object>, Object> renderCombo() {
-        return Render.forCombo(Object.class, null).when(Object.class).asText(cell->String.valueOf(cell.getValue()));
+        return Render.forCombo(Object.class, null).when(Object.class).asText(cell->cell.valueAsString().orElse(""));
     }
 
     /**
@@ -2638,7 +2638,7 @@ public final class UI
      * @param <T> The common super-type type of the items which should be rendered.
      */
     public static <T> Render.Builder<JComboBox<T>, T> renderCombo( Class<T> commonType ) {
-        return Render.forCombo(commonType, null).when(commonType).asText(cell->String.valueOf(cell.getValue()));
+        return Render.forCombo(commonType, null).when(commonType).asText(cell->cell.valueAsString().orElse(""));
     }
 
     /**

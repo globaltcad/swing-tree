@@ -26,7 +26,7 @@ public class SomeSpinnersView extends JPanel {
 				comboBox(vm.getBaseSize())
 				.withRenderer(
 					renderComboItem(SomeSpinnersViewModel.BaseSize.class)
-					.asText( cell -> cell.getValue().title())
+					.asText( cell -> cell.value().map(SomeSpinnersViewModel.BaseSize::title).orElse("") )
 				)
 			)
 		)

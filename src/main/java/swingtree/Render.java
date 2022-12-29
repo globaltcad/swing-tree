@@ -4,10 +4,8 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.function.*;
 
 /**
@@ -88,7 +86,8 @@ public final class Render<C extends JComponent,E> {
 	public interface Cell<C extends JComponent, V>
 	{
 		C           getComponent();
-		V	    	getValue();
+		Optional<V> value();
+		default Optional<String> valueAsString() { return value().map(Object::toString); }
 		boolean 	isSelected();
 		boolean 	hasFocus();
 		int     	getRow();
@@ -320,7 +319,7 @@ public final class Render<C extends JComponent,E> {
 
 		private final Class<C> _componentType;
 		private final Supplier<Border> _border;
-		private final Map<Class<?>, java.util.List<Consumer<Cell<C,?>>>> rendererLoopup = new LinkedHashMap<>(16);
+		private final Map<Class<?>, java.util.List<Consumer<Cell<C,?>>>> _rendererLookup = new LinkedHashMap<>(16);
 
 		public Builder(
 				Class<C> componentType,
@@ -374,11 +373,11 @@ public final class Render<C extends JComponent,E> {
 			NullUtil.nullArgCheck(valueType, "valueType", Class.class);
 			NullUtil.nullArgCheck(predicate, "predicate", Predicate.class);
 			NullUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
-			List<Consumer<Cell<C,?>>> found = rendererLoopup.computeIfAbsent(valueType, k -> new ArrayList<>());
+			List<Consumer<Cell<C,?>>> found = _rendererLookup.computeIfAbsent(valueType, k -> new ArrayList<>());
 			found.add( cell -> {
 				if ( predicate.test(cell) )
 					valueInterpreter.interpret(cell);
-			} );
+			});
 		}
 
 		private class SimpleTableCellRenderer extends DefaultTableCellRenderer
@@ -392,7 +391,7 @@ public final class Render<C extends JComponent,E> {
 					final int row,
 					int column
 			) {
-				List<Consumer<Cell<C,?>>> interpreter = _find(value, rendererLoopup);
+				List<Consumer<Cell<C,?>>> interpreter = _find(value, _rendererLookup);
 				if ( interpreter.isEmpty() )
 					return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 				else {
@@ -401,7 +400,7 @@ public final class Render<C extends JComponent,E> {
 					List<String> toolTips = new ArrayList<>();
 					Cell<JTable,Object> cell = new Cell<JTable,Object>() {
 						@Override public JTable getComponent() {return table;}
-						@Override public Object getValue() {return value;}
+						@Override public Optional<Object> value() { return Optional.ofNullable(value); }
 						@Override public boolean isSelected() {return isSelected;}
 						@Override public boolean hasFocus() {return hasFocus;}
 						@Override public int getRow() {return row;}
@@ -445,7 +444,7 @@ public final class Render<C extends JComponent,E> {
 					boolean isSelected,
 					boolean hasFocus
 			) {
-				List<Consumer<Cell<C,?>>> interpreter = _find(value, rendererLoopup);
+				List<Consumer<Cell<C,?>>> interpreter = _find(value, _rendererLookup);
 				if ( interpreter.isEmpty() )
 					return super.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
 				else {
@@ -454,7 +453,7 @@ public final class Render<C extends JComponent,E> {
 					List<String> toolTips = new ArrayList<>();
 					Cell<JList<T>,Object> cell = new Cell<JList<T>, Object>() {
 						@Override public JList<T> getComponent() {return list;}
-						@Override public Object getValue() {return value;}
+						@Override public Optional<Object> value() { return Optional.ofNullable(value); }
 						@Override public boolean isSelected() {return isSelected;}
 						@Override public boolean hasFocus() {return hasFocus;}
 						@Override public int getRow() {return row;}
