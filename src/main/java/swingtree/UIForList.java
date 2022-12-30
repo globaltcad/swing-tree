@@ -4,9 +4,11 @@ import swingtree.api.ListEntryDelegate;
 import swingtree.api.ListEntryRenderer;
 import swingtree.api.UIAction;
 import swingtree.api.mvvm.Vals;
+import swingtree.api.mvvm.ValsDelegate;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,8 +39,27 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
     public final UIForList<E, L> withEntries( List<E> entries ) {
         getComponent().setModel (
                 new AbstractListModel<E>() {
-                    public int getSize() { return entries.size(); }
-                    public E getElementAt( int i ) { return entries.get( i ); }
+
+                    private List<E> _reference = new ArrayList<>(entries);
+
+                    public int getSize() { _checkContentChange(); return entries.size(); }
+                    public E getElementAt( int i ) { _checkContentChange(); return entries.get( i ); }
+
+                    private void _checkContentChange() {
+                        UI.runLater(()-> {
+                            if ( _reference.size() != entries.size() ) {
+                                fireContentsChanged( this, 0, entries.size() );
+                                _reference = new ArrayList<>(entries);
+                            }
+                            else
+                                for ( int i = 0; i < entries.size(); i++ )
+                                    if ( !_reference.get( i ).equals( entries.get( i ) ) ) {
+                                        fireContentsChanged( this, 0, entries.size() );
+                                        _reference = new ArrayList<>(entries);
+                                        break;
+                                    }
+                        });
+                    }
                 }
             );
         return this;
@@ -56,13 +77,32 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
     }
 
     public final UIForList<E, L> withEntries( Vals<E> entries ) {
-        getComponent().setModel (
-                new AbstractListModel<E>() {
-                    public int getSize() { return entries.size(); }
-                    public E getElementAt( int i ) { return entries.at( i ).orElseNull(); }
-                }
-            );
+        ValsListModel<E> model = new ValsListModel<>(entries);
+        getComponent().setModel(model);
+        _onShow( entries, v -> model.fire(v) );
         return this;
+    }
+
+    private static class ValsListModel<E> extends AbstractListModel<E> {
+
+        private final Vals<E> _entries;
+
+        public ValsListModel( Vals<E> entries ) {
+            _entries = entries;
+        }
+
+        @Override public int getSize() { return _entries.size(); }
+        @Override public E getElementAt( int i ) { return _entries.at( i ).orElseNull(); }
+
+        public void fire(ValsDelegate<E> v) {
+            switch ( v.type() ) {
+                case ADD:    fireIntervalAdded( this, v.index(), v.index() ); break;
+                case REMOVE: fireIntervalRemoved( this, v.index(), v.index() ); break;
+                case SET:    fireContentsChanged( this, v.index(), v.index() ); break;
+                default:
+                    fireContentsChanged( this, 0, _entries.size() );
+            }
+        }
     }
 
     /**

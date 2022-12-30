@@ -7,6 +7,8 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -18,7 +20,7 @@ public class ListSearchViewModel {
 
     private final Vars<LocalDateTime> lastSearchTimes = Vars.of(LocalDateTime.now(), LocalDateTime.of(2018, 1, 1, 0, 0));
     private final Vars<String> searchTerms = Vars.of("foo", "bar");
-    private final Var<String> keyword = Var.of("foo");
+    private final Var<String> keyword = Var.of("goo");
     private final Var<Integer> found = Var.of(0);
     private final Var<Boolean> searchEnabled = Var.of(true);
     private final Var<Boolean> searchRunning = Var.of(false);
@@ -28,6 +30,7 @@ public class ListSearchViewModel {
     private final Var<String> searchButtonText = Var.of("Search");
 
     private final Var<Color> validityColor = Var.of(Color.BLACK);
+    private final List<Color> randomColors = new ArrayList<>();
 
 
     public Vars<LocalDateTime> lastSearchTimes() {return lastSearchTimes;}
@@ -50,8 +53,10 @@ public class ListSearchViewModel {
 
     public Var<Color> validityColor() {return validityColor;}
 
+    public List<Color> getRandomColors() {return this.randomColors;}
 
     public void search() {
+        validateKeyword();
         searchRunning.set(true);
         searchButtonText.set("Searching...");
         searchEnabled.set(false);
@@ -59,7 +64,16 @@ public class ListSearchViewModel {
         listBorder.set(BorderFactory.createLineBorder(Color.BLUE));
         found.set(0);
         try {
-            Thread.sleep(1000);
+            Thread.sleep(100);
+            found.set(12);
+            Thread.sleep(100);
+            lastSearchTimes.add(LocalDateTime.now());
+            Thread.sleep(100);
+            searchTerms.add(keyword.get());
+            Thread.sleep(100);
+            this.keyword.set("Error: " + this.hashCode());
+            Thread.sleep(500);
+            randomColors.add(nextPseudoRandomColor());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -71,6 +85,10 @@ public class ListSearchViewModel {
         listBorder.set(BorderFactory.createEmptyBorder());
         lastSearchTimes.add(LocalDateTime.now());
         searchTerms.add(keyword.get());
+    }
+
+    private Color nextPseudoRandomColor() {
+        return new Color((int)(Math.random()*255), (int)(Math.random()*255), (int)(Math.random()*255));
     }
 
     public void validateKeyword() {
@@ -97,5 +115,19 @@ public class ListSearchViewModel {
         clearSearch();
         clearHistory();
         clearTerms();
+        refill();
+    }
+
+    public void refill() {
+        lastSearchTimes.add(LocalDateTime.now());
+        lastSearchTimes.add(LocalDateTime.now());
+        lastSearchTimes.add(LocalDateTime.now());
+        lastSearchTimes.add(LocalDateTime.now());
+        searchTerms.add("foo");
+        searchTerms.add("bar");
+        // Some more random stuff:
+        searchTerms.add("baz");
+        searchTerms.add("qux");
+        searchTerms.add("quux");
     }
 }

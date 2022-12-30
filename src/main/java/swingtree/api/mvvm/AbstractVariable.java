@@ -3,6 +3,7 @@ package swingtree.api.mvvm;
 import swingtree.UI;
 import swingtree.api.UIAction;
 
+import javax.swing.border.Border;
 import java.util.*;
 
 /**
@@ -26,6 +27,11 @@ public abstract class AbstractVariable<T> implements Var<T>
 	static Var<Viewable> of( boolean immutable, Viewable iniValue ) {
 		Objects.requireNonNull(iniValue);
 		return new AbstractVariable<Viewable>( immutable, Viewable.class, iniValue, UNNAMED, null, false ){};
+	}
+
+	static Var<Border> of(boolean immutable, Border iniValue ) {
+		Objects.requireNonNull(iniValue);
+		return new AbstractVariable<Border>( immutable, Border.class, iniValue, UNNAMED, null, false ){};
 	}
 
 	private final boolean _isImmutable;
@@ -186,7 +192,8 @@ public abstract class AbstractVariable<T> implements Var<T>
 			// First we check if the value is compatible with the type
 			if ( newValue != null && !_type.isAssignableFrom(newValue.getClass()) )
 				throw new IllegalArgumentException(
-						"The provided type of the new value is not compatible with the type of this property"
+						"The provided type '"+newValue.getClass()+"' of the new value is not compatible " +
+						"with the type '"+_type+"' of this property"
 					);
 
 			_history.add(Val.ofNullable(this.type(), _value).withID(this.id()));
@@ -231,6 +238,10 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 * {@inheritDoc}
 	 */
 	@Override public final boolean allowsNull() { return _allowsNull; }
+
+	boolean hasActions() {
+		return !_viewActions.isEmpty() || _action != null;
+	}
 
 	@Override
 	public String toString() {

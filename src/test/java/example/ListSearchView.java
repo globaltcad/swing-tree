@@ -1,41 +1,69 @@
 package example;
 
 
+import swingtree.EventProcessor;
 import swingtree.UI;
 
 import javax.swing.*;
+
+import java.awt.*;
+import java.time.LocalDateTime;
 
 import static swingtree.UI.*;
 
 public class ListSearchView extends JPanel
 {
     public ListSearchView(ListSearchViewModel vm) {
-        of(this).withLayout(FILL)
-        .add(
-            UI.list(vm.lastSearchTimes())
-            .withRenderer( delegate -> new JLabel(delegate.entry().toString()))
-        )
-        .add(WRAP,
-            UI.list(vm.searchTerms())
-            .withRenderer( delegate -> new JLabel(delegate.entry()))
-        )
-        .add(WRAP,
-            panel(FILL)
-            .add(PUSH_X,
-                UI.textField(vm.keyword()).withBorder(vm.searchBorder())
+        UI.use(EventProcessor.DECOUPLED, ()->
+            of(this).withLayout(FILL)
+            .add(PUSH_Y.and(GROW),
+                panel(FILL)
+                .add(PUSH.and(GROW),
+                    UI.list(vm.lastSearchTimes())
+                    .withRenderer(renderListItem(LocalDateTime.class).asText(cell -> cell.value().get().toString() ))
+                    .withBorder(vm.listBorder())
+                )
+                .add(PUSH.and(GROW).and(WRAP),
+                    UI.list(vm.searchTerms())
+                    .withRenderer(renderListItem(String.class).asText(cell -> cell.value().get() ))
+                )
+                .add(PUSH.and(GROW).and(SPAN).and(WRAP),
+                    listOf(vm.getRandomColors())
+                    .withRenderer( it -> new Component() {
+                        @Override
+                        public void paint(Graphics g) {
+                            g.setColor(it.entry());
+                            g.fillRect(0, 0, getWidth(), getHeight());
+                        }
+                    } )
+                )
             )
-            .add(
-                UI.button(vm.searchButtonText()).isEnabledIf(vm.searchEnabled()).onClick(it->vm.search())
-            )
-        )
-        .add(WRAP,
-            panel(FILL)
+            .add(WRAP,
+                panel(FILL)
+                .add(PUSH_X,
+                    UI.textField(vm.keyword()).withBorder(vm.searchBorder())
+                )
                 .add(
-                UI.label("Found: ").withForeground(vm.validityColor())
+                    UI.button(vm.searchButtonText()).isEnabledIf(vm.searchEnabled()).onClick(it->vm.search())
+                )
             )
             .add(
-                UI.label(vm.found().viewAs(String.class, Object::toString))
+                panel(FILL)
+                    .add(
+                    UI.label("Found: ").withForeground(vm.validityColor())
+                )
+                .add(
+                    UI.label(vm.found().viewAs(String.class, Object::toString))
+                )
+                .add(
+                    button().withText("Clear").onClick(it->vm.clearAll())
+                )
             )
         );
+    }
+
+    // Here you can test the UI:
+    public static void main(String... args) {
+        UI.show(new ListSearchView(new ListSearchViewModel()));
     }
 }

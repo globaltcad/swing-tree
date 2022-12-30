@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.023 seconds"
+    "duration":"0.018 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"OptionalUI wraps AWT components exclusively.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -33,7 +33,7 @@
     {
       "id":"OptionalUI can be mapped to a regular empty optional.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -48,7 +48,7 @@
     {
       "id":"An OptionalUI can be mapped to a regular non-empty optional.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -95,7 +95,7 @@
     {
       "id":"An empty OptionalUI will return a default value when orElseGet is called.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

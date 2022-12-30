@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.031 seconds"
+    "duration":"0.024 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -67,7 +67,7 @@
     {
       "id":"The dimensions of a panel can be bound to a property.",
       "result":"PASS",
-      "duration":"0.021 seconds",
+      "duration":"0.016 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

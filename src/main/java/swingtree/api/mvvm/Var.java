@@ -2,6 +2,7 @@ package swingtree.api.mvvm;
 
 import swingtree.api.UIAction;
 
+import javax.swing.border.Border;
 import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.function.Function;
@@ -76,10 +77,10 @@ public interface Var<T> extends Val<T>
 		return AbstractVariable.of( false, iniValue );
 	}
 
-	static Var<Viewable> of( Viewable iniValue ) {
-		return AbstractVariable.of( false, iniValue );
-	}
-	
+	static Var<Viewable> of( Viewable iniValue ) { return AbstractVariable.of( false, iniValue ); }
+
+	static Var<Border> of( Border iniValue ) { return AbstractVariable.of( false, iniValue ); }
+
 	/**
 	 *  This method provides the ability to change the state of the wrapper.
 	 *  It might have several side effects depending on the implementation.
@@ -173,6 +174,7 @@ public interface Var<T> extends Val<T>
 		WeakReference<Var<U>> ref = new WeakReference<>(result);
 		// Now we register a live update listener to this property
 		this.onShowThis(new UIAction<ValDelegate<T>>() {
+			private Var<U> _strongRef = ref.get();
 			@Override
 			public void accept(ValDelegate<T> delegate) {
 				Var<U> var = ref.get();
@@ -180,7 +182,14 @@ public interface Var<T> extends Val<T>
 					var.set( mapper.apply( delegate.current().get() ) );
 			}
 
-			@Override public boolean canBeRemoved() { return ref.get() == null; }
+			@Override public boolean canBeRemoved() {
+				if ( _strongRef instanceof AbstractVariable && (((AbstractVariable) _strongRef).hasActions()) )
+					return false;
+				else
+					_strongRef = null;
+
+				return ref.get() == null;
+			}
 		});
 		return result;
 	}

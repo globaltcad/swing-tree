@@ -64,6 +64,11 @@ class Examples_Spec extends Specification
         expect : new LoginView(new LoginViewModel())
     }
 
+    def 'The list examples UI defined in the examples can be created.'()
+    {
+        expect : new ListSearchView(new ListSearchViewModel())
+    }
+
     def 'The settings example UI defined in the examples can be created.'()
     {
         expect : new SomeSettingsView(new SomeSettingsViewModel())
