@@ -82,7 +82,7 @@ public interface Val<T>
 	 *        May be {@code null}.
 	 * @return the value, if present, otherwise {@code other}
 	 */
-	T orElseNullable(T other);
+	T orElseNullable( T other );
 
 	/**
 	 * If a value is present, returns the value, otherwise returns
@@ -104,9 +104,7 @@ public interface Val<T>
 	 * @throws NullPointerException if no value is present and the supplying
 	 *         function is {@code null}
 	 */
-	default T orElseGet( Supplier<? extends T> supplier ) {
-		return this.isPresent() ? orElseThrow() : supplier.get();
-	}
+	default T orElseGet( Supplier<? extends T> supplier ) { return this.isPresent() ? orElseThrow() : supplier.get(); }
 
 	/**
 	 * If a value is present, returns the value, otherwise returns

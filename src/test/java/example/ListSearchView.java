@@ -18,6 +18,8 @@ public class ListSearchView extends JPanel
             of(this).withLayout(FILL)
             .add(PUSH_Y.and(GROW),
                 panel(FILL)
+                .add(SHRINK, label("Search terms:") )
+                .add(SHRINK.and(WRAP), label("Last search:"))
                 .add(PUSH.and(GROW),
                     UI.list(vm.lastSearchTimes())
                     .withRenderer(renderListItem(LocalDateTime.class).asText(cell -> cell.value().get().toString() ))
@@ -27,6 +29,7 @@ public class ListSearchView extends JPanel
                     UI.list(vm.searchTerms())
                     .withRenderer(renderListItem(String.class).asText(cell -> cell.value().get() ))
                 )
+                .add(SHRINK.and(WRAP), label("Search for:"))
                 .add(PUSH.and(GROW).and(SPAN).and(WRAP),
                     listOf(vm.getRandomColors())
                     .withRenderer( it -> new Component() {
@@ -49,7 +52,7 @@ public class ListSearchView extends JPanel
             )
             .add(
                 panel(FILL)
-                    .add(
+                .add(
                     UI.label("Found: ").withForeground(vm.validityColor())
                 )
                 .add(

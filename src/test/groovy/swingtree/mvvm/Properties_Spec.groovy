@@ -207,10 +207,9 @@ class Properties_Spec extends Specification
     {
         reportInfo """
             The "viewAs" method is used to create a dynamically updated view of a property.
-            A view will be updated whenever the original property changes.
-            It will be updated on the EDT.
+            In essence it is a property observing another property and updating its value
+            whenever the observed property changes.
         """
-
         given : 'We create a property...'
             Var<String> property = Var.of("Hello World")
         and : 'We create an integer view of the property.'
@@ -256,6 +255,28 @@ class Properties_Spec extends Specification
             isLong.get() == true
             firstWord.get() == "Tofu"
             lastWord.get() == "Saitan"
+    }
+
+    def 'Changing the value of a property through the "act" method will also affect its views'()
+    {
+        reportInfo """
+            Note that the "act" method is used by the view to change the value of the original property.
+            It is conceptually similar to the "set" method with the simple difference
+            that it represents a user action.
+            Irrespective as to how the value of the original property is changed,
+            the views will be updated.
+        """
+        given : 'We create a property...'
+            Var<String> food = Var.of("Animal Crossing")
+        and : 'We create a view of the property.'
+            Var<Integer> words = food.viewAsInt( f -> f.split(" ").length )
+        expect : 'The view has the expected value.'
+            words.get() == 2
+
+        when : 'We change the value of the food property through the "act" method.'
+            food.act("Faster Than Light")
+        then : 'The view is updated.'
+            words.get() == 3
     }
 
     def 'The "ifPresent" method allows us to see if a property has a value or not.'()

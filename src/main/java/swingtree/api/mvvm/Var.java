@@ -73,9 +73,7 @@ public interface Var<T> extends Val<T>
 	 * @param <T> The type of the value held by the {@link Var}!
 	 * @return The builder for a {@link AbstractVariable}.
 	 */
-	static <T> Var<T> of( T iniValue ) {
-		return AbstractVariable.of( false, iniValue );
-	}
+	static <T> Var<T> of( T iniValue ) { return AbstractVariable.of( false, iniValue ); }
 
 	static Var<Viewable> of( Viewable iniValue ) { return AbstractVariable.of( false, iniValue ); }
 
@@ -133,8 +131,7 @@ public interface Var<T> extends Val<T>
 	 * @param newValue The new value which ought to replace the old one.
 	 * @return This very wrapper instance, in order to enable method chaining.
 	 */
-	Var<T> act(T newValue);
-
+	Var<T> act( T newValue );
 
 	/**
 	 *  Essentially the same as {@link Optional#map(Function)}. but with a {@link Val} as return type.
@@ -167,31 +164,6 @@ public interface Var<T> extends Val<T>
 		if ( newValue == null )
 			return Var.ofNullable( type, null );
 		return Var.of( newValue );
-	}
-
-	@Override default <U> Val<U> viewAs( Class<U> type, java.util.function.Function<T, U> mapper ) {
-		Var<U> result = mapTo(type, mapper);
-		WeakReference<Var<U>> ref = new WeakReference<>(result);
-		// Now we register a live update listener to this property
-		this.onShowThis(new UIAction<ValDelegate<T>>() {
-			private Var<U> _strongRef = ref.get();
-			@Override
-			public void accept(ValDelegate<T> delegate) {
-				Var<U> var = ref.get();
-				if ( var != null )
-					var.set( mapper.apply( delegate.current().get() ) );
-			}
-
-			@Override public boolean canBeRemoved() {
-				if ( _strongRef instanceof AbstractVariable && (((AbstractVariable) _strongRef).hasActions()) )
-					return false;
-				else
-					_strongRef = null;
-
-				return ref.get() == null;
-			}
-		});
-		return result;
 	}
 
 }

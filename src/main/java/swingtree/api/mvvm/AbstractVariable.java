@@ -1,10 +1,13 @@
 package swingtree.api.mvvm;
 
-import swingtree.UI;
 import swingtree.api.UIAction;
 
 import javax.swing.border.Border;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * 	The base implementation for both {@link Var} and {@link Val} interfaces.
@@ -13,7 +16,7 @@ import java.util.*;
  * 
  * @param <T> The type of the value wrapped by a given property...
  */
-public abstract class AbstractVariable<T> implements Var<T>
+public abstract class AbstractVariable<T> extends AbstractValue<T> implements Var<T>
 {
 	static <T> Var<T> ofNullable( boolean immutable, Class<T> type, T value ) {
 		return new AbstractVariable<T>( immutable, type, value, UNNAMED, null, true ){};
@@ -29,22 +32,16 @@ public abstract class AbstractVariable<T> implements Var<T>
 		return new AbstractVariable<Viewable>( immutable, Viewable.class, iniValue, UNNAMED, null, false ){};
 	}
 
-	static Var<Border> of(boolean immutable, Border iniValue ) {
+	static Var<Border> of( boolean immutable, Border iniValue ) {
 		Objects.requireNonNull(iniValue);
 		return new AbstractVariable<Border>( immutable, Border.class, iniValue, UNNAMED, null, false ){};
 	}
 
 	private final boolean _isImmutable;
-	private final List<UIAction<ValDelegate<T>>> _viewActions = new ArrayList<>();
-
 	private final List<Val<T>> _history = new ArrayList<>(17);
-
-	private T _value;
-	private final Class<T> _type;
-	private final String _id;
 	private final UIAction<ValDelegate<T>> _action;
+	private final List<Consumer<T>> _viewers = new ArrayList<>(0);
 
-	private final boolean _allowsNull;
 
 
 	protected AbstractVariable(
@@ -62,37 +59,17 @@ public abstract class AbstractVariable<T> implements Var<T>
 		boolean immutable,
 		Class<T> type,
 		T iniValue,
-		String name,
+		String id,
 		UIAction<ValDelegate<T>> action,
 		List<UIAction<ValDelegate<T>>> viewActions,
 		boolean allowsNull
 	) {
-		Objects.requireNonNull(name);
+		super( type, id, allowsNull, iniValue );
+		Objects.requireNonNull(id);
 		_isImmutable = immutable;
-		_value = iniValue;
-		_type = ( iniValue == null || type != null ? type : (Class<T>) iniValue.getClass());
-		_id = name;
 		_action = ( action == null ? v -> {} : action );
-		if ( _value != null ) {
-			// We check if the type is correct
-			if ( !_type.isAssignableFrom(_value.getClass()) )
-				throw new IllegalArgumentException(
-						"The provided type of the initial value is not compatible with the actual type of the variable"
-					);
-		}
 		_viewActions.addAll(viewActions);
-		_allowsNull = allowsNull;
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override public Class<T> type() { return _type; }
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override public String id() { return _id; }
 
 	/**
 	 * {@inheritDoc}
@@ -118,13 +95,15 @@ public abstract class AbstractVariable<T> implements Var<T>
 	 */
 	@Override public Var<T> act() {
 		_action.accept(_createDelegate());
+		_viewers.forEach( v -> v.accept(_value) );
 		return this;
 	}
 
-	private ValDelegate<T> _createDelegate() {
+	@Override
+	protected ValDelegate<T> _createDelegate() {
 		// We clone the current state of the variable because
 		// it might be accessed from a different thread! (e.g. Swing EDT or Application Thread)
-		AbstractVariable<T> clone = new AbstractVariable<T>( _isImmutable, _type, _value, _id, _action, _allowsNull ){};
+		AbstractVariable<T> clone = _clone();
 		clone._viewActions.addAll(_viewActions);
 		List<Val<T>> reverseHistory = new ArrayList<>(AbstractVariable.this._history);
 		Collections.reverse(reverseHistory);
@@ -141,6 +120,10 @@ public abstract class AbstractVariable<T> implements Var<T>
 		};
 	}
 
+	@Override protected AbstractVariable<T> _clone() {
+		return new AbstractVariable<T>( _isImmutable, _type, _value, _id, _action, _allowsNull ){};
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -149,28 +132,6 @@ public abstract class AbstractVariable<T> implements Var<T>
 			return act();
 		return this;
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public T orElseThrow() {
-		// This class is similar to optional, so if the value is null, we throw an exception!
-		if ( _value == null )
-			throw new NoSuchElementException("No value present");
-
-		return _value;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean isPresent() { return _value != null; }
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public T orElseNullable(T other) { return _value != null ? _value : other; }
 
 	/**
 	 * {@inheritDoc}
@@ -205,80 +166,12 @@ public abstract class AbstractVariable<T> implements Var<T>
 		return false;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override public Val<T> onShowThis( UIAction<ValDelegate<T>> displayAction ) {
-		_viewActions.add(displayAction);
-		return this;
+	@Override public final <U> Val<U> viewAs( Class<U> type, java.util.function.Function<T, U> mapper ) {
+		Var<U> var = mapTo(type, mapper);
+		// Now we register a live update listener to this property
+		this.onShow( v -> var.set( mapper.apply( v ) ));
+		_viewers.add( v -> var.act( mapper.apply( v ) ) );
+		return var;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Val<T> show() {
-		List<UIAction<ValDelegate<T>>> removableActions = new ArrayList<>();
-		for ( UIAction<ValDelegate<T>> action : new ArrayList<>(_viewActions) ) // We copy the list to avoid concurrent modification
-			try {
-				if ( action.canBeRemoved() )
-					removableActions.add(action);
-				else {
-					ValDelegate<T> delegate = _createDelegate();
-					UI.run(() -> action.accept(delegate));
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		_viewActions.removeAll(removableActions);
-		return this;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override public final boolean allowsNull() { return _allowsNull; }
-
-	boolean hasActions() {
-		return !_viewActions.isEmpty() || _action != null;
-	}
-
-	@Override
-	public String toString() {
-		String value = this.map(Object::toString).orElse("null");
-		String id = this.id() == null ? "?" : this.id();
-		if ( id.equals(UNNAMED) ) id = "?";
-		String type = ( type() == null ? "?" : type().getSimpleName() );
-		if ( type.equals("Object") ) type = "?";
-		if ( type.equals("String") && this.isPresent() ) value = "\"" + value + "\"";
-		if ( _allowsNull ) type = type + "?";
-		return
-			value +
-			" ( " +
-				"type = "+type+", " +
-				"id = \""+ id+"\" " +
-			")";
-	}
-
-	@Override
-	public boolean equals( Object obj ) {
-		if ( obj == null ) return false;
-		if ( obj == this ) return true;
-		if ( obj instanceof Val ) {
-			Val<?> other = (Val<?>) obj;
-			if ( other.type() != _type) return false;
-			if ( other.orElseNull() == null ) return _value == null;
-			return Val.equals( other.orElseThrow(), _value); // Arrays are compared with Arrays.equals
-		}
-		return false;
-	}
-
-	@Override
-	public int hashCode() {
-		int hash = 7;
-		hash = 31 * hash + ( _value == null ? 0 : Val.hashCode(_value) );
-		hash = 31 * hash + ( _type == null ? 0 : _type.hashCode() );
-		hash = 31 * hash + ( _id == null ? 0 : _id.hashCode() );
-		return hash;
-	}
 }
