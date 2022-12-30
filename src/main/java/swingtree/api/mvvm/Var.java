@@ -2,6 +2,7 @@ package swingtree.api.mvvm;
 
 import swingtree.api.UIAction;
 
+import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -167,5 +168,21 @@ public interface Var<T> extends Val<T>
 		return Var.of( newValue );
 	}
 
+	@Override default <U> Val<U> viewAs( Class<U> type, java.util.function.Function<T, U> mapper ) {
+		Var<U> result = mapTo(type, mapper);
+		WeakReference<Var<U>> ref = new WeakReference<>(result);
+		// Now we register a live update listener to this property
+		this.onShowThis(new UIAction<ValDelegate<T>>() {
+			@Override
+			public void accept(ValDelegate<T> delegate) {
+				Var<U> var = ref.get();
+				if ( var != null )
+					var.set( mapper.apply( delegate.current().get() ) );
+			}
+
+			@Override public boolean canBeRemoved() { return ref.get() == null; }
+		});
+		return result;
+	}
 
 }

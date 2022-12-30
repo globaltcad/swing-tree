@@ -2428,6 +2428,7 @@ public final class UI
     }
 
     /**
+     * @param <E> The type of the elements in the list.
      * @return A builder instance for the provided {@link JList}.
      */
     public static <E> UIForList<E, JList<E>> of( JList<E> list ) {
@@ -2436,6 +2437,13 @@ public final class UI
     }
 
     /**
+     * @return A builder instance for a new {@link JList}.
+     */
+    public static <E> UIForList<E, JList<E>> list() { return of(new JList<>()); }
+
+    /**
+     * @param model The model which should be used for the new {@link JList}.
+     * @param <E> The type of the elements in the list.
      * @return A builder instance for a new {@link JList}.
      */
     public static <E> UIForList<E, JList<E>> list( ListModel<E> model ) {
@@ -2448,6 +2456,8 @@ public final class UI
      *  as data model.
      *  This is functionally equivalent to {@link #listOf(Object...)}.
      *
+     * @param elements The elements which should be used as model data for the new {@link JList}.
+     * @param <E> The type of the elements in the list.
      * @return A builder instance for a new {@link JList} with the provided array as data model.
      */
     @SafeVarargs
@@ -2456,11 +2466,18 @@ public final class UI
         return of(new JList<E>()).withEntries( elements );
     }
 
+    public static <E> UIForList<E, JList<E>> list( Vals<E> elements ) {
+        NullUtil.nullArgCheck(elements, "elements", Vals.class);
+        return of(new JList<E>()).withEntries( elements );
+    }
+
     /**
      *  Creates a new {@link JList} instance with the provided array
      *  as data model.
      *  This is functionally equivalent to {@link #list(Object...)}.
      *
+     * @param elements The elements which should be used as model data for the new {@link JList}.
+     * @param <E> The type of the elements in the list.
      * @return A builder instance for a new {@link JList} with the provided array as data model.
      */
     @SafeVarargs
@@ -2482,11 +2499,15 @@ public final class UI
      *  as data model.
      *  This is functionally equivalent to {@link #list(java.util.List)}.
      *
+     * @param entries The elements which should be used as model data for the new {@link JList}.
+     * @param <E> The type of the elements in the list.
      * @return A builder instance for a new {@link JList} with the provided {@link List} as data model.
      */
     public static <E> UIForList<E, JList<E>> listOf( java.util.List<E> entries ) { return list( entries ); }
 
     /**
+     * @param table The table which should be wrapped by the builder.
+     * @param <T> The {@link JTable} type.
      * @return A builder instance for a new {@link JTable}.
      */
     public static <T extends JTable> UIForTable<T> of( T table ) {

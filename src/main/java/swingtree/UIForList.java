@@ -3,6 +3,7 @@ package swingtree;
 import swingtree.api.ListEntryDelegate;
 import swingtree.api.ListEntryRenderer;
 import swingtree.api.UIAction;
+import swingtree.api.mvvm.Vals;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -51,6 +52,16 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
      */
     public final UIForList<E, L> withEntries( E... entries ) {
         getComponent().setListData(entries);
+        return this;
+    }
+
+    public final UIForList<E, L> withEntries( Vals<E> entries ) {
+        getComponent().setModel (
+                new AbstractListModel<E>() {
+                    public int getSize() { return entries.size(); }
+                    public E getElementAt( int i ) { return entries.at( i ).orElseNull(); }
+                }
+            );
         return this;
     }
 

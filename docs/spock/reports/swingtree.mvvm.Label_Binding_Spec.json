@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.037 seconds"
+    "duration":"0.149 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can bind to the text of a label.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.048 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that for a binding to work, the property must be a `Var` or `Val`\n            implementation. All you have to do to then change the state of the UI component\n            is changing the state of the property by calling its \"set\" method.\n            Internally it will then call the \"show()\" method for you \n            which triggers the observers registered by the UI.\n        "]
       },
@@ -39,7 +39,7 @@
     {
       "id":"We can bind to the foreground and background color of a UI node.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -62,7 +62,7 @@
     {
       "id":"It is possible to bind to the minimum, maximum and preferred size of a label",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.010 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that this works for all kind of UI nodes, not just labels.\n        "]
       },
@@ -85,7 +85,7 @@
     {
       "id":"You can bind a variable to the \"enable\" flag of a label.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that this works for all kind of UI nodes, not just labels.\n        "]
       },
@@ -108,7 +108,7 @@
     {
       "id":"You can bind a variable to the \"visible\" flag of a label.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that this works for all kind of UI nodes, not just labels.\n        "]
       },
@@ -131,7 +131,7 @@
     {
       "id":"A property can define the horizontal and vertical alignment of a label.",
       "result":"PASS",
-      "duration":"0.006 seconds",
+      "duration":"0.020 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
       },
@@ -154,7 +154,7 @@
     {
       "id":"A property can define the image relative horizontal and vertical alignment of a label.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.010 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
       },
@@ -177,7 +177,7 @@
     {
       "id":"You can dynamically model the font size of your labels using an integer based property.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.014 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
       },
@@ -200,7 +200,7 @@
     {
       "id":"We can store icons inside properties and then bind them to labels.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"0.015 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
       },

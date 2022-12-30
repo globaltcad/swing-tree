@@ -15,7 +15,7 @@ import java.util.function.Supplier;
  * 	to dynamically update UI components for you.
  * 	The API of this is very similar to the {@link Optional} API in the
  * 	sense that it is a wrapper around a value which can be empty or not.
- * 	Use the {@link #onShow(Consumer)} method to register a callbacks which
+ * 	Use the {@link #onShow(UIAction)} method to register a callbacks which
  * 	will be called when the {@link #show()} method is called.
  * 	<p>
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
@@ -211,6 +211,75 @@ public interface Val<T>
 	<U> Val<U> mapTo( Class<U> type, java.util.function.Function<T, U> mapper );
 
 	/**
+	 * 	Use this to create a live view of this property
+	 * 	through a new property based on the provided mapping function.
+	 * @param type The type of the value returned from the mapping function
+ 	 * @param mapper the mapping function to apply to a value, if present
+	 * @return the result of applying an {@code Optional}-bearing mapping
+	 * @param <U> The type of the value returned from the mapping function
+	 */
+	<U> Val<U> viewAs( Class<U> type, java.util.function.Function<T, U> mapper );
+
+	/**
+	 * 	Use this to create a live view of this property
+	 * 	based on a mapping function.
+	 * 	Note that the mapping function is not allowed to return {@code null}.
+	 * 	Instead, use {@link #viewAs(Class, Function)}.
+	 *
+	 * @param mapper the mapping function to apply to a value, if present
+	 * @return the result of applying an {@code Optional}-bearing mapping
+	 */
+	default Val <T> view( java.util.function.Function<T, T> mapper ) {
+		return viewAs( type(), mapper );
+	}
+
+	default Val<String> viewAsString( java.util.function.Function<T, String> mapper ) {
+		return viewAs( String.class, mapper );
+	}
+
+	default Val<String> viewAsString() { return viewAsString( Objects::toString ); }
+
+	default Val<Double> viewAsDouble( java.util.function.Function<T, Double> mapper ) {
+		return viewAs( Double.class, v -> {
+			try {
+				return mapper.apply(v);
+			} catch (Exception e) {
+				return Double.NaN;
+			}
+		});
+	}
+
+	default Val<Double> viewAsDouble() {
+		return viewAsDouble( v -> {
+			try {
+				return Double.parseDouble( v.toString() );
+			} catch ( NumberFormatException e ) {
+				return Double.NaN;
+			}
+		});
+	}
+
+	default Val<Integer> viewAsInt( java.util.function.Function<T, Integer> mapper ) {
+		return viewAs( Integer.class, v -> {
+			try {
+				return mapper.apply(v);
+			} catch (Exception e) {
+				return Integer.MIN_VALUE;
+			}
+		});
+	}
+
+	default Val<Integer> viewAsInt() {
+		return viewAsInt( v -> {
+			try {
+				return Integer.parseInt( v.toString() );
+			} catch ( NumberFormatException e ) {
+				return Integer.MIN_VALUE;
+			}
+		});
+	}
+
+	/**
 	 *  This method simply returns a {@link String} representation of the wrapped value
 	 *  which would otherwise be accessed via the {@link #orElseThrow()} method.
 	 *  Calling it should not have any side effects.
@@ -330,12 +399,18 @@ public interface Val<T>
 	 * @param displayAction The lambda which will be called whenever the value wrapped by this {@link Var} changes.
 	 * @return The {@link Val} instance itself.
 	 */
-	default Val<T> onShow( Consumer<T> displayAction ) {
-		return onShowThis( it -> displayAction.accept( it.current().orElseNullable(null)) );
+	default Val<T> onShow( UIAction<T> displayAction ) {
+		return onShowThis(new UIAction<ValDelegate<T>>() {
+			@Override
+			public void accept(ValDelegate<T> delegate) {
+				displayAction.accept( delegate.current().orElseNullable(null));
+			}
+			@Override public boolean canBeRemoved() { return displayAction.canBeRemoved(); }
+		});
 	}
 
 	/**
-	 *  Triggers the observer lambdas registered through the {@link #onShow(Consumer)}
+	 *  Triggers the observer lambdas registered through the {@link #onShow(UIAction)}
 	 *  as well as the {@link #onShowThis(swingtree.api.UIAction)} methods.
 	 *  This method is called automatically by the {@code Var::set(T)} method,
 	 *  and it is supposed to be used by the UI to update the UI components.
