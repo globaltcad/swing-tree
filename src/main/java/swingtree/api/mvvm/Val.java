@@ -47,15 +47,13 @@ public interface Val<T>
 	static <T> Val<T> ofNullable( Class<T> type, T value ) { return AbstractVariable.ofNullable( true, type, value ); }
 
 	/**
-	 *  This factory method will expose a builder which will create a very simple type of Property,
-	 *  namely: {@link AbstractVariable}!
-	 *  It has a simple implementation for everything defined in the {@link Var} interface.
-	 *  It is similar to an {@link Optional} with the additional feature of being mutable
-	 *  as well as being able to be observed for changes.
+	 * 	This factory method returns a {@code Val} describing the given non-{@code null}
+	 * 	value similar to {@link Optional#of(Object)}, but specifically
+	 * 	designed for use with Swing-Tree.
 	 *
-	 * @param iniValue The initial value set to the instance built by this builder. Note: An initialization will overwrite this.
-	 * @param <T> The type of the value held by the {@link Var}!
-	 * @return The builder for a {@link AbstractVariable}.
+	 * @param iniValue The initial value of the property which must not be null.
+	 * @param <T> The type of the value held by the {@link Val}!
+	 * @return A new {@link Val} instance wrapping the given value.
 	 */
 	static <T> Val<T> of( T iniValue ) { return AbstractVariable.of( true, iniValue ); }
 
@@ -195,7 +193,7 @@ public interface Val<T>
 	 *  Essentially the same as {@link Optional#map(Function)}. but with a {@link Val} as return type.
 	 *
 	 * @param mapper the mapping function to apply to a value, if present
-	 * @return the result of applying an {@code Optional}-bearing mapping
+	 * @return A property that is created from this property based on the provided mapping function.
 	 * @param <V> The type of the value returned from the mapping function
 	 */
 	<V> Val<V> map( java.util.function.Function<T, V> mapper );
@@ -203,7 +201,7 @@ public interface Val<T>
 	/**
 	 * @param type The type of the value returned from the mapping function
 	 * @param mapper the mapping function to apply to a value, if present
-	 * @return the result of applying an {@code Optional}-bearing mapping
+	 * @return A property that is created from this property based on the provided mapping function.
 	 * @param <U> The type of the value returned from the mapping function
 	 */
 	<U> Val<U> mapTo( Class<U> type, java.util.function.Function<T, U> mapper );
@@ -213,7 +211,7 @@ public interface Val<T>
 	 * 	through a new property based on the provided mapping function.
 	 * @param type The type of the value returned from the mapping function
  	 * @param mapper the mapping function to apply to a value, if present
-	 * @return the result of applying an {@code Optional}-bearing mapping
+	 * @return A property that is a live view of this property based on the provided mapping function.
 	 * @param <U> The type of the value returned from the mapping function
 	 */
 	<U> Val<U> viewAs( Class<U> type, java.util.function.Function<T, U> mapper );
@@ -225,18 +223,35 @@ public interface Val<T>
 	 * 	Instead, use {@link #viewAs(Class, Function)}.
 	 *
 	 * @param mapper the mapping function to apply to a value, if present
-	 * @return the result of applying an {@code Optional}-bearing mapping
+	 * @return A property that is a live view of this property based on the provided mapping function.
 	 */
-	default Val <T> view( java.util.function.Function<T, T> mapper ) {
-		return viewAs( type(), mapper );
-	}
+	default Val <T> view( java.util.function.Function<T, T> mapper ) { return viewAs( type(), mapper ); }
 
+	/**
+	 * 	Use this to create a String based live view of this property
+	 * 	through a new property based on the provided mapping function.
+	 * @param mapper the mapping function to turn the value of this property to a String, if present
+	 * @return A property that is a live view of this property based on the provided mapping function.
+	 */
 	default Val<String> viewAsString( java.util.function.Function<T, String> mapper ) {
 		return viewAs( String.class, mapper );
 	}
 
+	/**
+	 * 	Use this to create a String based live view of this property
+	 * 	through a new property based on the "toString" called on the value of this property.
+	 *
+	 * @return A String property that is a live view of this property.
+	 */
 	default Val<String> viewAsString() { return viewAsString( Objects::toString ); }
 
+	/**
+	 * 	Use this to create a Double based live view of this property
+	 * 	through a new property based on the provided mapping function.
+	 *
+	 * @param mapper the mapping function to turn the value of this property to a Double, if present
+	 * @return A property that is a live view of this property based on the provided mapping function.
+	 */
 	default Val<Double> viewAsDouble( java.util.function.Function<T, Double> mapper ) {
 		return viewAs( Double.class, v -> {
 			try {
@@ -247,6 +262,13 @@ public interface Val<T>
 		});
 	}
 
+	/**
+	 * 	Use this to create a Double based live view of this property
+	 * 	through a new property based on the "toString" and "parseDouble(String)" methods.
+	 * 	If the String cannot be parsed to a Double, the value of the property will be Double.NaN.
+	 *
+	 * @return A Double property that is a live view of this property.
+	 */
 	default Val<Double> viewAsDouble() {
 		return viewAsDouble( v -> {
 			try {
@@ -257,6 +279,13 @@ public interface Val<T>
 		});
 	}
 
+	/**
+	 * 	Use this to create an Integer based live view of this property
+	 * 	through a new property based on the provided mapping function.
+	 *
+	 * @param mapper the mapping function to turn the value of this property to a Integer, if present
+	 * @return A property that is a live view of this property based on the provided mapping function.
+	 */
 	default Val<Integer> viewAsInt( java.util.function.Function<T, Integer> mapper ) {
 		return viewAs( Integer.class, v -> {
 			try {
@@ -267,6 +296,13 @@ public interface Val<T>
 		});
 	}
 
+	/**
+	 * 	Use this to create an Integer based live view of this property
+	 * 	through a new property based on the "toString" and "parseInt(String)" methods.
+	 * 	If the String cannot be parsed to an Integer, the value of the property will be Integer.MIN_VALUE.
+	 *
+	 * @return An Integer property that is a live view of this property.
+	 */
 	default Val<Integer> viewAsInt() {
 		return viewAsInt( v -> {
 			try {
@@ -305,17 +341,36 @@ public interface Val<T>
 		return equals(current, otherValue);
 	}
 
+	/**
+	 *  This method check if the value by the provided property
+	 *  is equal to the value wrapped by this {@link Var} instance.
+	 *
+	 * @param other The other property of the same type as is wrapped by this.
+	 * @return The truth value determining if the provided value is equal to the wrapped value.
+	 */
 	default boolean is(  Val<T> other ) {
+		Objects.requireNonNull(other);
 		return this.is( other.orElseNullable(null) );
 	}
 
-	default boolean isNot( T otherValue ) {
-		return !this.is(otherValue);
-	}
+	/**
+	 *  This method check if the provided value is not equal to the value wrapped by this {@link Var} instance.
+	 *  This is the opposite of {@link #is(Object)} which returns true if the values are equal.
+	 *
+	 * @param otherValue The other value of the same type as is wrapped by this.
+	 * @return The truth value determining if the provided value is not equal to the wrapped value.
+	 */
+	default boolean isNot( T otherValue ) { return !this.is(otherValue); }
 
-	default boolean isNot( Val<T> other ) {
-		return !this.is(other);
-	}
+	/**
+	 *  This method check if the value by the provided property
+	 *  is not equal to the value wrapped by this {@link Var} instance.
+	 *  This is the opposite of {@link #is(Val)} which returns true if the values are equal.
+	 *
+	 * @param other The other property of the same type as is wrapped by this.
+	 * @return The truth value determining if the provided value is not equal to the wrapped value.
+	 */
+	default boolean isNot( Val<T> other ) { return !this.is(other); }
 
 	/**
 	 *  This method check if at least one of the provided values is equal to
@@ -335,10 +390,10 @@ public interface Val<T>
 	}
 
 	/**
-	 *  This returns the name/id of the {@link Var} which is useful for debugging as well as
+	 *  This returns the name/id of the property which is useful for debugging as well as
 	 *  persisting their state by using them as keys for whatever storage data structure one chooses.
 	 *
-	 * @return The id which is assigned to this {@link Var}.
+	 * @return The id which is assigned to this property.
 	 */
 	String id();
 

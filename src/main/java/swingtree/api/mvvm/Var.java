@@ -3,7 +3,6 @@ package swingtree.api.mvvm;
 import swingtree.api.UIAction;
 
 import javax.swing.border.Border;
-import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -62,21 +61,34 @@ public interface Var<T> extends Val<T>
 	}
 
 	/**
-	 *  This factory method will expose a builder which will create a very simple type of Property,
-	 *  namely: {@link AbstractVariable}!
-	 *  It has a simple implementation for everything defined in the {@link Var} interface.
-	 *  So it can be touched, untouched, validated, initialized and applied.
-	 *  One may or may not use these features depending on the use case, however in most cases
-	 *  {@link Var} implementation are simple view properties which will need these functionalities.
+	 * 	This factory method returns a {@code Var} describing the given non-{@code null}
+	 * 	value similar to {@link Optional#of(Object)}, but specifically
+	 * 	designed for use with Swing-Tree.
 	 *
-	 * @param iniValue The initial value set to the instance built by this builder. Note: An initialization will overwrite this.
+	 * @param iniValue The initial value of the property which must not be null.
 	 * @param <T> The type of the value held by the {@link Var}!
-	 * @return The builder for a {@link AbstractVariable}.
+	 * @return A new {@link Var} instance wrapping the given value.
 	 */
 	static <T> Var<T> of( T iniValue ) { return AbstractVariable.of( false, iniValue ); }
 
+	/**
+	 * 	This factory method returns a {@code Var} describing the given non-{@code null}
+	 * 	{@link Viewable} type. A {@link Var} is similar to {@link Optional#of(Object)}, but specifically
+	 * 	designed for use with Swing-Tree.
+	 *
+	 * @param iniValue The initial value of the property which must not be null.
+	 * @return A new {@link Var} instance wrapping the given {@link Viewable} type.
+	 */
 	static Var<Viewable> of( Viewable iniValue ) { return AbstractVariable.of( false, iniValue ); }
 
+	/**
+	 * 	This factory method returns a {@code Var} describing the given non-{@code null}
+	 * 	{@link Border} type. A {@link Var} is similar to {@link Optional#of(Object)}, but specifically
+	 * 	designed for use with Swing-Tree.
+	 *
+	 * @param iniValue The initial value of the property which must not be null.
+	 * @return A new {@link Var} instance wrapping the given {@link Border} value.
+	 */
 	static Var<Border> of( Border iniValue ) { return AbstractVariable.of( false, iniValue ); }
 
 	/**
