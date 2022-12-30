@@ -472,14 +472,14 @@ class Properties_Spec extends Specification
             UI.sync()
         then : 'The "onShow" actions are triggered.'
             showListener == [":("]
-        and : 'The "onModel" actions are not triggered.'
+        and : 'The view model actions are not triggered.'
             modelListener == []
 
         when : 'We change the state of the property using the "act(T)" method.'
             property.act(":|")
         then : 'The "onShow" actions are NOT triggered, because the "act" method performs an "act on your view model"!'
             showListener == [":("]
-        and : 'The "onModel" actions are triggered.'
+        and : 'The view model actions are triggered.'
             modelListener == [":|"]
     }
 
