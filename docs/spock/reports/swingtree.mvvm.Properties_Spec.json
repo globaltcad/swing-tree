@@ -2,14 +2,14 @@
   "className":"swingtree.mvvm.Properties_Spec",
   "title":"Properties",
   "narrative":"Properties are a powerful tool to model the state \n    as well as business logic of your UI without actually depending on it.\n    This is especially useful for testing your UIs logic.\n    Therefore properties are a root concept in the Swing-Tree library.\n    The decoupling between your UI and the UIs state and logic \n    is achieved by binding properties to UI components.\n    This specification shows you how to model UI state \n    and business logic using properties \n    and how to bind them to UI components.",
-  "subjects":[],
+  "subjects":["swingtree.api.mvvm.Val","swingtree.api.mvvm.Var"],
   "statistics":{
-    "runs":"34",
+    "runs":"23",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.372 seconds"
+    "duration":"0.132 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -31,7 +31,7 @@
     {
       "id":"They can be bound to the UI by passing them to a builder node.",
       "result":"PASS",
-      "duration":"0.070 seconds",
+      "duration":"0.071 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Binding goes both ways, so when the property changes state through the \"set\" method\n            it will update the UI\n            using the \"show()\" method on the property (which you can also call manually for UI updates), \n            and when the UI is changed by the user, it will update the property for us\n            and trigger the property action (if present).\n        "]
       },
@@ -85,7 +85,7 @@
     {
       "id":"Properties can be bound by subscribing to them using the \"onShow(..)\" method.",
       "result":"PASS",
-      "duration":"0.008 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that bound Swing-Tree properties only have side effects\n            when they are deliberately triggered to execute their side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
       },
@@ -108,7 +108,7 @@
     {
       "id":"Properties not only have a value but also a type and id!",
       "result":"PASS",
-      "duration":"0.012 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -125,7 +125,7 @@
     {
       "id":"A property can only wrap null if we specify a type class.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -146,7 +146,7 @@
     {
       "id":"The \"withID(..)\" method produces a new property with all bindings inherited.",
       "result":"PASS",
-      "duration":"0.006 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The wither methods on properties are used to create new property instances\n            with the same value and bindings as the original property\n            but without side effects of the original property.\n            So if you add bindings to a withered property they will not affect the original property.\n        "]
       },
@@ -177,7 +177,7 @@
     {
       "id":"Properties are similar to the \"Optional\" class, you can map them and see if they are empty or not.",
       "result":"PASS",
-      "duration":"0.008 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -198,7 +198,7 @@
     {
       "id":"Use the \"viewAs\" method to create a dynamically updated view of a property.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The \"viewAs\" method is used to create a dynamically updated view of a property.\n            In essence it is a property observing another property and updating its value\n            whenever the observed property changes.\n        "]
       },
@@ -221,7 +221,7 @@
     {
       "id":"There are various kinds of convenience methods for creating live view of properties.",
       "result":"PASS",
-      "duration":"0.099 seconds",
+      "duration":"0.014 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -244,7 +244,7 @@
     {
       "id":"Changing the value of a property through the \"act\" method will also affect its views",
       "result":"PASS",
-      "duration":"0.006 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that the \"act\" method is used by the view to change the value of the original property.\n            It is conceptually similar to the \"set\" method with the simple difference\n            that it represents a user action.\n            Irrespective as to how the value of the original property is changed,\n            the views will be updated.\n        "]
       },
@@ -265,7 +265,7 @@
     {
       "id":"The \"ifPresent\" method allows us to see if a property has a value or not.",
       "result":"PASS",
-      "duration":"0.006 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -284,7 +284,7 @@
     {
       "id":"An empty property will throw an exception if you try to access its value.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -301,7 +301,7 @@
     {
       "id":"The \"orElseNull\" method should be used instead of \"orElseThrow\" if you are fine with null values.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that accessing the value of an empty property using the \"orElseThrow\" method\n            will throw an exception if it is null!\n            Use \"orElseNull\" if you are fine with your property being empty \n            and to also make this intend clear.\n        "]
       },
@@ -318,7 +318,7 @@
     {
       "id":"The \"get\" method will throw an exception if there is no element present.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that accessing the value of an empty property using the \"get\" method\n            will throw an exception.\n            It is recommended to use the \"orElseNull\" method instead, because the \"get\"\n            method is intended to be used for non-nullable types, or when it\n            is clear that the property is not empty!\n        "]
       },
@@ -335,7 +335,7 @@
     {
       "id":"The equality and hash code of a property are based on its value, type and id!",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -356,7 +356,7 @@
     {
       "id":"Properties expose a state history in their property actions.",
       "result":"PASS",
-      "duration":"0.007 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            When the view changes the state of a property and then triggers a model action, \n            the property will remember its previous state and store it in an internal history.\n            This history will be exposed to the property action, and it can be used to undo \n            or redo changes to the property.\n        "]
       },
@@ -377,7 +377,7 @@
     {
       "id":"The delegate of a property action exposes the current as well as the previous state of the property.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -394,7 +394,7 @@
     {
       "id":"We can search for a previous state of a property in its history.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can query the history of a property for a previous state of the property\n            using the \"previous(int)\" method.\n            It returns an optional that contains the previous state if it is found.\n            Note that the index passed to the method is relative to the current state,\n            so a value of 0 will return the current state, a value of 1 will return the\n            previous state, and so on. \n        "]
       },
@@ -415,7 +415,7 @@
     {
       "id":"The UI uses the \"act(T)\" method to change the property state to avoid feedback looping.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Unfortunately Swing does not allow us to implement models for all types of UI components.\n            A JButton for example does not have a model that we can use to bind to a property.\n            Instead Swing-Tree has to perform precise updates to the UI components without\n            triggering any events.\n            Therefore the UI uses the \"act(T)\" method to change the property state and triggers the\n            action of the property. On the contrary the \"set(T)\" method is used to change the state\n            of a property without triggering the action, but it will trigger the \"onShow\" actions\n            of the property. This is so that the UI can update itself when the user changes the\n            state of a property.\n        "]
       },
@@ -492,263 +492,6 @@
         {"kind":"when","text":"The try the same using a nullable property.","code":["property = Var.ofNullable(String, null)","optional = property.toOptional()"]},
 
         {"kind":"then","text":"The Optional is empty.","code":["optional.isEmpty()"]}
-      ],
-      "problems":{"dataValues":[], "errors":[]}
-    },
-  
-    {
-      "id":"Multiple properties can be modelled through the \"Vars\" and \"Vals\" classes.",
-      "result":"PASS",
-      "duration":"0.028 seconds",
-      "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
-      },
-      "blocks":[
-        {"kind":"given","text":"A \"Vars\" class with two properties.","code":["var vars = Vars.of(\"Apple\", \"Banana\")"]},
-
-        {"kind":"and","text":"A \"Vals\" class with two properties.","code":["var vals = Vals.of(\"Cherry\", \"Date\")"]},
-
-        {"kind":"expect","text":"Both the \"Vars\" and \"Vals\" have two properties.","code":["vars.size() == 2","vars.at(0).get() == \"Apple\"","vars.at(1).get() == \"Banana\"","vals.size() == 2","vals.at(0).get() == \"Cherry\"","vals.at(1).get() == \"Date\""]},
-
-        {"kind":"and","text":"You can also use the \"First\" and \"last\" methods.","code":["vars.first().get() == \"Apple\"","vars.last().get() == \"Banana\"","vals.first().get() == \"Cherry\"","vals.last().get() == \"Date\""]},
-
-        {"kind":"and","text":"They also have the correct type.","code":["vars.type() == String","vals.type() == String"]},
-
-        {"kind":"and","text":"The \"Vals\" class has no methods for mutation, it is read only (basically a tuple).","code":["Vals.metaClass.getMethods().findAll{ it.name == \"set\" }.size() == 0","Vals.metaClass.getMethods().findAll{ it.name == \"add\" }.size() == 0","Vals.metaClass.getMethods().findAll{ it.name == \"remove\" }.size() == 0"]},
-
-        {"kind":"and","text":"Both property lists are not empty","code":["!vars.isEmpty() && vars.isNotEmpty()","!vals.isEmpty() && vals.isNotEmpty()"]},
-
-        {"kind":"and","text":"Both property lists are iterable","code":["vars.each{ it }","vals.each{ it }"]},
-
-        {"kind":"when","text":"We change the state of the \"Vars\" properties.","code":["vars.at(0).set(\"Apricot\")","vars.at(1).set(\"Blueberry\")"]},
-
-        {"kind":"then","text":"The \"Vars\" properties have changed.","code":["vars.at(0).get() == \"Apricot\"","vars.at(1).get() == \"Blueberry\""]},
-
-        {"kind":"when","text":"We use the \"aetAt\" method to change the state of the \"Vars\" properties.","code":["vars.setAt(0, \"Tim\")","vars.setAt(1, \"Tom\")"]},
-
-        {"kind":"then","text":"The \"Vars\" properties have changed.","code":["vars.at(0).get() == \"Tim\"","vars.at(1).get() == \"Tom\""]}
-      ],
-      "problems":{"dataValues":[], "errors":[]}
-    },
-  
-    {
-      "id":"You can remove n leading or trailing entries from a property list.",
-      "result":"PASS",
-      "duration":"0.002 seconds",
-      "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            A very common use case is to remove the first or last entry from a list.\n            Not only can you do this with the \"removeFirst()\" and \"removeLast()\" methods,\n            but you can also remove n entries from the start or end of the list\n            through the \"removeFirst(int)\" and \"removeLast(int)\" methods.\n        "]
-      },
-      "blocks":[
-        {"kind":"given","text":"A \"Vars\" class with six properties.","code":["var vars = Vars.of(\"Racoon\", \"Squirrel\", \"Turtle\", \"Piglet\", \"Rooster\", \"Rabbit\")"]},
-
-        {"kind":"expect","text":"The \"Vars\" class has six properties.","code":["vars.size() == 6"]},
-
-        {"kind":"when","text":"We remove the first entry from the list.","code":["vars.removeFirst()"]},
-
-        {"kind":"then","text":"The \"Vars\" class has five properties.","code":["vars.size() == 5"]},
-
-        {"kind":"and","text":"The first entry has been removed.","code":["vars.at(0).get() == \"Squirrel\""]},
-
-        {"kind":"when","text":"We remove the last entry from the list.","code":["vars.removeLast()"]},
-
-        {"kind":"then","text":"The \"Vars\" class has four properties.","code":["vars.size() == 4"]},
-
-        {"kind":"and","text":"The last entry has been removed.","code":["vars.at(3).get() == \"Rooster\""]},
-
-        {"kind":"when","text":"We remove the first two entries from the list.","code":["vars.removeFirst(2)"]},
-
-        {"kind":"then","text":"The \"Vars\" class has two properties.","code":["vars.size() == 2"]},
-
-        {"kind":"and","text":"The first two entries have been removed.","code":["vars.at(0).get() == \"Piglet\"","vars.at(1).get() == \"Rooster\""]},
-
-        {"kind":"when","text":"We remove the last two entries from the list.","code":["vars.removeLast(2)"]},
-
-        {"kind":"then","text":"The \"Vars\" class has no properties.","code":["vars.size() == 0"]}
-      ],
-      "problems":{"dataValues":[], "errors":[]}
-    },
-  
-    {
-      "id":"The properties of one property list can be added to another property list.",
-      "result":"PASS",
-      "duration":"0.002 seconds",
-      "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The properties of one property list can be added to another property list.\n            This is useful when you want to combine two property lists into one.\n        "]
-      },
-      "blocks":[
-        {"kind":"given","text":"A \"Vars\" class with three properties.","code":["var vars1 = Vars.of(\"Racoon\", \"Squirrel\", \"Turtle\")"]},
-
-        {"kind":"and","text":"A \"Vars\" class with three properties.","code":["var vars2 = Vars.of(\"Piglet\", \"Rooster\", \"Rabbit\")"]},
-
-        {"kind":"expect","text":"The \"Vars\" classes have three properties.","code":["vars1.size() == 3","vars2.size() == 3"]},
-
-        {"kind":"when","text":"We add the properties of the second \"Vars\" class to the first \"Vars\" class.","code":["vars1.addAll(vars2)"]},
-
-        {"kind":"then","text":"The \"Vars\" class has six properties.","code":["vars1.size() == 6"]},
-
-        {"kind":"and","text":"The properties of the second \"Vars\" class have been added to the first \"Vars\" class.","code":["vars1.at(0).get() == \"Racoon\"","vars1.at(1).get() == \"Squirrel\"","vars1.at(2).get() == \"Turtle\"","vars1.at(3).get() == \"Piglet\"","vars1.at(4).get() == \"Rooster\"","vars1.at(5).get() == \"Rabbit\""]}
-      ],
-      "problems":{"dataValues":[], "errors":[]}
-    },
-  
-    {
-      "id":"The \"Vars\" ist a list of properties which can grow and shrink.",
-      "result":"PASS",
-      "duration":"0",
-      "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
-      },
-      "blocks":[
-        {"kind":"given","text":"A \"Vars\" class with two properties.","code":["var vars = Vars.of(\"Kachori\", \"Dal Biji\")"]},
-
-        {"kind":"expect","text":"The \"Vars\" class has two properties.","code":["vars.size() == 2","vars.at(0).get() == \"Kachori\"","vars.at(1).get() == \"Dal Biji\""]},
-
-        {"kind":"when","text":"We add a new property to the \"Vars\" class.","code":["vars.add(\"Chapati\")"]},
-
-        {"kind":"then","text":"The \"Vars\" class has three properties.","code":["vars.size() == 3","vars.at(0).get() == \"Kachori\"","vars.at(1).get() == \"Dal Biji\"","vars.at(2).get() == \"Chapati\""]},
-
-        {"kind":"when","text":"We remove a property from the \"Vars\" class.","code":["vars.remove(\"Dal Biji\")"]},
-
-        {"kind":"then","text":"The \"Vars\" class has two properties.","code":["vars.size() == 2","vars.at(0).get() == \"Kachori\"","vars.at(1).get() == \"Chapati\""]}
-      ],
-      "problems":{"dataValues":[], "errors":[]}
-    },
-  
-    {
-      "id":"Both the \"Vars\" and immutable \"Vals\" types can be used for functional programming.",
-      "result":"PASS",
-      "duration":"0.003 seconds",
-      "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
-      },
-      "blocks":[
-        {"kind":"given","text":"A \"Vars\" class with two properties.","code":["var vars = Vars.of(\"Kachori\", \"Dal Biji\")"]},
-
-        {"kind":"and","text":"A \"Vals\" class with two properties.","code":["var vals = Vals.of(\"Chapati\", \"Papad\")"]},
-
-        {"kind":"when","text":"We use the \"map\" method to transform all the properties.","code":["var mappedVars = vars.map{ it.toUpperCase() }","var mappedVals = vals.map{ it.toUpperCase() }"]},
-
-        {"kind":"then","text":"The properties have been transformed.","code":["mappedVars.at(0).get() == \"KACHORI\"","mappedVars.at(1).get() == \"DAL BIJI\"","mappedVals.at(0).get() == \"CHAPATI\"","mappedVals.at(1).get() == \"PAPAD\""]}
-      ],
-      "problems":{"dataValues":[], "errors":[]}
-    },
-  
-    {
-      "id":"Map a \"Vals\" instance from one type of properties to another.",
-      "result":"PASS",
-      "duration":"0.001 seconds",
-      "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
-      },
-      "blocks":[
-        {"kind":"given","text":"A \"Vals\" class with two properties.","code":["var vals = Vals.of(\"Chapati\", \"Papad\")"]},
-
-        {"kind":"when","text":"We use the \"mapTo\" method to transform all the properties.","code":["var mappedVals = vals.mapTo(Integer, { it.length() })"]},
-
-        {"kind":"then","text":"The properties have been transformed.","code":["mappedVals.at(0).get() == 7","mappedVals.at(1).get() == 5"]}
-      ],
-      "problems":{"dataValues":[], "errors":[]}
-    },
-  
-    {
-      "id":"Map a \"Vars\" instance from one type of properties to another.",
-      "result":"PASS",
-      "duration":"0.001 seconds",
-      "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
-      },
-      "blocks":[
-        {"kind":"given","text":"A \"Vars\" class with two properties.","code":["var vars = Vars.of(\"Kachori\", \"Dal Biji\")"]},
-
-        {"kind":"when","text":"We use the \"mapTo\" method to transform all the properties.","code":["var mappedVars = vars.mapTo(Integer, { it.length() })"]},
-
-        {"kind":"then","text":"The properties have been transformed.","code":["mappedVars.at(0).get() == 7","mappedVars.at(1).get() == 8"]}
-      ],
-      "problems":{"dataValues":[], "errors":[]}
-    },
-  
-    {
-      "id":"You can create the \"Vars\"/\"Vals\" property lists from property instances.",
-      "result":"PASS",
-      "duration":"0",
-      "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
-      },
-      "blocks":[
-        {"kind":"given","text":"A \"Vars\" class with two properties.","code":["var vars = Vars.of(Var.of(\"Chana\"), Var.of(\"Dal\"))"]},
-
-        {"kind":"and","text":"A \"Vals\" class with two properties.","code":["var vals = Vals.of(Val.of(\"Chapati\"), Val.of(\"Papad\"))"]},
-
-        {"kind":"expect","text":"The \"Vars\" class has two properties.","code":["vars.size() == 2","vars.at(0).get() == \"Chana\"","vars.at(1).get() == \"Dal\""]},
-
-        {"kind":"and","text":"The \"Vals\" class has two properties.","code":["vals.size() == 2","vals.at(0).get() == \"Chapati\"","vals.at(1).get() == \"Papad\""]}
-      ],
-      "problems":{"dataValues":[], "errors":[]}
-    },
-  
-    {
-      "id":"Just like a regular \"Var\" property you can register \"show\" listeners on \"Vars\".",
-      "result":"PASS",
-      "duration":"0.007 seconds",
-      "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
-      },
-      "blocks":[
-        {"kind":"given","text":"A \"Vars\" class with two properties.","code":["var vars = Vars.of(42, 73)"]},
-
-        {"kind":"and","text":"A list where we are going to record changes.","code":["var changes = []"]},
-
-        {"kind":"and","text":"Now we register a \"show\" listener on the \"Vars\" class.","code":["vars.onShow{ changes << it.index() }"]},
-
-        {"kind":"when","text":"We modify the property in various ways...","code":["vars.addAt(1, 1)","vars.setAt(0, 2)","vars.removeAt(1)","vars.add(3)"]},
-
-        {"kind":"then","text":"The \"show\" listener has been called four times.","code":["changes.size() == 4"]},
-
-        {"kind":"and","text":"The \"show\" listener has been called with the correct indices.","code":["changes == [1, 0, 1, 2]"]}
-      ],
-      "problems":{"dataValues":[], "errors":[]}
-    },
-  
-    {
-      "id":"The display action of a property or list of properties will not be called if they report \"canBeRemoved()\"",
-      "result":"PASS",
-      "duration":"0.011 seconds",
-      "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
-      },
-      "blocks":[
-        {"kind":"given","text":"A single property and list of two properties.","code":["var prop = Var.of(7)","var list = Vars.of(42, 73)"]},
-
-        {"kind":"and","text":"A list where we are going to record changes.","code":["var changes = []"]},
-
-        {"kind":"and","text":"Now we register a \"show\" listeners on both objects.","code":["prop.onShowThis(new UIAction<ValDelegate<Integer>>() {","    @Override","    void accept(ValDelegate<Integer> delegate) {","        changes << \"Something happened to the property.\"","    }","    @Override boolean canBeRemoved() { return true }","})","list.onShow(new UIAction<ValsDelegate<Integer>>() {","    @Override","    void accept(ValsDelegate<Integer> delegate) {","        changes << \"Something happened to the list.\"","    }","    @Override boolean canBeRemoved() { return true }","})"]},
-
-        {"kind":"when","text":"We modify the properties in various ways...","code":["prop.set(42)","list.add(1)","list.removeAt(1)","list.setAt(0, 2)","list.addAt(1, 3)","list.remove(3)"]},
-
-        {"kind":"then","text":"The \"show\" listener has been called zero times.","code":["changes.size() == 0"]}
-      ],
-      "problems":{"dataValues":[], "errors":[]}
-    },
-  
-    {
-      "id":"The listeners registered in property lists will be informed what type of modification occurred.",
-      "result":"PASS",
-      "duration":"0.004 seconds",
-      "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
-      },
-      "blocks":[
-        {"kind":"given","text":"A \"Vars\" class with two properties.","code":["var vars = Vars.of(42, 73)"]},
-
-        {"kind":"and","text":"A list where we are going to record changes.","code":["var changes = []"]},
-
-        {"kind":"and","text":"Now we register a \"show\" listener on the \"Vars\" class.","code":["vars.onShow{ changes << it.type() }"]},
-
-        {"kind":"when","text":"We modify the property in various ways...","code":["vars.addAt(1, 1)","vars.setAt(0, 2)","vars.removeAt(1)","vars.add(3)"]},
-
-        {"kind":"then","text":"The \"show\" listener has been called four times.","code":["changes.size() == 4"]},
-
-        {"kind":"and","text":"The \"show\" listener has been called with the correct indices.","code":["changes == [Mutation.ADD, Mutation.SET, Mutation.REMOVE, Mutation.ADD]"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

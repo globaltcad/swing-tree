@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.045 seconds"
+    "duration":"0.030 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -51,7 +51,7 @@
     {
       "id":"A string property can model the title of a tab!",
       "result":"PASS",
-      "duration":"0.018 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can bind a string property to the title of a tab.\n        "]
       },
@@ -68,7 +68,7 @@
     {
       "id":"Icons can be bound to tab headers dynamically.",
       "result":"PASS",
-      "duration":"0.008 seconds",
+      "duration":"0.009 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can bind an icon property to the icon of a tab.\n        "]
       },
@@ -85,7 +85,7 @@
     {
       "id":"Properties allow you to enable or disable individual tabs.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can bind a boolean property to the enabled state of a tab.\n        "]
       },
