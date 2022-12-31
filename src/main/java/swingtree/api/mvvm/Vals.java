@@ -2,7 +2,6 @@ package swingtree.api.mvvm;
 
 import swingtree.api.UIAction;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -19,6 +18,7 @@ public interface Vals<T> extends Iterable<T>
      * @param <T> The type of the values.
      * @return A new Vals instance.
      */
+    @SuppressWarnings("unchecked")
     static <T> Vals<T> of( Class<T> type, Val<T>... vars ) {
         return AbstractVariables.of( true, type, (Var<T>[]) vars );
     }
@@ -30,6 +30,7 @@ public interface Vals<T> extends Iterable<T>
      * @param <T> The type of the values.
      * @return A new Vals instance.
      */
+    @SuppressWarnings("unchecked")
     static <T> Vals<T> of( Val<T> first, Val<T>... rest ) {
         Var<T>[] vars = new Var[rest.length];
         System.arraycopy(rest, 0, vars, 0, rest.length);
@@ -43,9 +44,8 @@ public interface Vals<T> extends Iterable<T>
      * @param <T> The type of the values.
      * @return A new Vals instance.
      */
-    static <T> Vals<T> of( T first, T... rest ) {
-        return AbstractVariables.of( true, first, rest);
-    }
+    @SuppressWarnings("unchecked")
+    static <T> Vals<T> of( T first, T... rest ) { return AbstractVariables.of( true, first, rest); }
 
     /**
      *  Create a new Vals instance from the iterable.
@@ -66,6 +66,7 @@ public interface Vals<T> extends Iterable<T>
      * @param <T> The type of the values.
      * @return A new Vals instance.
      */
+    @SuppressWarnings("unchecked")
     static <T> Vals<T> ofNullable( Class<T> type, Val<T>... vals ) {
         Var<T>[] vars = new Var[vals.length];
         System.arraycopy(vals, 0, vars, 0, vals.length);
@@ -79,6 +80,7 @@ public interface Vals<T> extends Iterable<T>
      * @param <T> The type of the values.
      * @return A new Vals instance.
      */
+    @SuppressWarnings("unchecked")
     static <T> Vals<T> ofNullable( Class<T> type, T... values ) {
         return AbstractVariables.ofNullable( true, type, values );
     }
@@ -90,6 +92,7 @@ public interface Vals<T> extends Iterable<T>
      * @param <T> The type of the values.
      * @return A new Vals instance.
      */
+    @SuppressWarnings("unchecked")
     static <T> Vals<T> ofNullable( Var<T> first, Val<T>... rest ) {
         Var<T>[] vars = new Var[rest.length];
         System.arraycopy(rest, 0, vars, 0, rest.length);
@@ -183,7 +186,7 @@ public interface Vals<T> extends Iterable<T>
     }
 
     /**
-     *  Similar to {@link Var#onShow(Consumer)} but for a list of properties.
+     *  Similar to {@link Var#onShow(UIAction)} but for a list of properties.
      *
      * @param action The action to perform when the list of properties is shown (which is called when its state changes).
      * @return This list of properties.

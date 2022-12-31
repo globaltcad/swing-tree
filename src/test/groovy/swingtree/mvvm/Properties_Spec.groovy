@@ -596,6 +596,69 @@ class Properties_Spec extends Specification
             vars.at(1).get() == "Tom"
     }
 
+    def 'You can remove n leading or trailing entries from a property list.'()
+    {
+        reportInfo """
+            A very common use case is to remove the first or last entry from a list.
+            Not only can you do this with the "removeFirst()" and "removeLast()" methods,
+            but you can also remove n entries from the start or end of the list
+            through the "removeFirst(int)" and "removeLast(int)" methods.
+        """
+        given : 'A "Vars" class with six properties.'
+            var vars = Vars.of("Racoon", "Squirrel", "Turtle", "Piglet", "Rooster", "Rabbit")
+        expect : 'The "Vars" class has six properties.'
+            vars.size() == 6
+        when : 'We remove the first entry from the list.'
+            vars.removeFirst()
+        then : 'The "Vars" class has five properties.'
+            vars.size() == 5
+        and : 'The first entry has been removed.'
+            vars.at(0).get() == "Squirrel"
+        when : 'We remove the last entry from the list.'
+            vars.removeLast()
+        then : 'The "Vars" class has four properties.'
+            vars.size() == 4
+        and : 'The last entry has been removed.'
+            vars.at(3).get() == "Rooster"
+        when : 'We remove the first two entries from the list.'
+            vars.removeFirst(2)
+        then : 'The "Vars" class has two properties.'
+            vars.size() == 2
+        and : 'The first two entries have been removed.'
+            vars.at(0).get() == "Piglet"
+            vars.at(1).get() == "Rooster"
+        when : 'We remove the last two entries from the list.'
+            vars.removeLast(2)
+        then : 'The "Vars" class has no properties.'
+            vars.size() == 0
+    }
+
+    def 'The properties of one property list can be added to another property list.'()
+    {
+        reportInfo """
+            The properties of one property list can be added to another property list.
+            This is useful when you want to combine two property lists into one.
+        """
+        given : 'A "Vars" class with three properties.'
+            var vars1 = Vars.of("Racoon", "Squirrel", "Turtle")
+        and : 'A "Vars" class with three properties.'
+            var vars2 = Vars.of("Piglet", "Rooster", "Rabbit")
+        expect : 'The "Vars" classes have three properties.'
+            vars1.size() == 3
+            vars2.size() == 3
+        when : 'We add the properties of the second "Vars" class to the first "Vars" class.'
+            vars1.addAll(vars2)
+        then : 'The "Vars" class has six properties.'
+            vars1.size() == 6
+        and : 'The properties of the second "Vars" class have been added to the first "Vars" class.'
+            vars1.at(0).get() == "Racoon"
+            vars1.at(1).get() == "Squirrel"
+            vars1.at(2).get() == "Turtle"
+            vars1.at(3).get() == "Piglet"
+            vars1.at(4).get() == "Rooster"
+            vars1.at(5).get() == "Rabbit"
+    }
+
     def 'The "Vars" ist a list of properties which can grow and shrink.'()
     {
         given : 'A "Vars" class with two properties.'
