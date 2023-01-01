@@ -11,38 +11,96 @@ import java.util.function.Function;
  */
 public interface Vars<T> extends Vals<T>
 {
+    /**
+     *  Creates a list of non-nullable properties from the supplied type and vararg values.
+     *  This factory method requires that the type be specified because the
+     *  compiler cannot infer the type from a potentially empty vararg array.
+     *  @param type The type of the properties.
+     *  @param vars The properties to add to the new Vars instance.
+     *  @param <T> The type of the properties.
+     *  @return A new Vars instance.
+     */
     @SuppressWarnings("unchecked")
     static <T> Vars<T> of( Class<T> type, Var<T>... vars ) {
         return AbstractVariables.of( false, type, vars );
     }
 
+    /**
+     *  Creates a list of non-nullable properties from one or more non-nullable properties.
+     *  @param first The first property to add to the new Vars instance.
+     *  @param rest The remaining properties to add to the new Vars instance.
+     *  @param <T> The type of the properties.
+     *  @return A new Vars instance.
+     */
     @SuppressWarnings("unchecked")
     static <T> Vars<T> of( Var<T> first, Var<T>... rest ) {
         return AbstractVariables.of( false, first, rest );
     }
 
+    /**
+     *  Creates a list of non-nullable properties from one or more non-null values.
+     *  @param first The first value to add to the new Vars instance.
+     *  @param rest The remaining values to add to the new Vars instance.
+     *  @param <T> The type of the values.
+     *  @return A new Vars instance.
+     */
     @SuppressWarnings("unchecked")
     static <T> Vars<T> of( T first, T... rest ) {
         return AbstractVariables.of( false, first, rest );
     }
 
+    /**
+     *  Creates a list of non-nullable properties from the supplied type and iterable of values.
+     *  This factory method requires that the type be specified because the
+     *  compiler cannot infer the type from a potentially empty iterable.
+     *  @param type The type of the properties.
+     *  @param vars The iterable of values.
+     *  @param <T> The type of the properties.
+     *  @return A new Vars instance.
+     */
     static <T> Vars<T> of( Class<T> type, Iterable<Var<T>> vars ) {
         return AbstractVariables.of( false, type, vars );
     }
 
+    /**
+     *  Creates a list of nullable properties from the supplied type and varargs properties.
+     *  This factory method requires that the type be specified because the
+     *  compiler cannot infer the type from the null values.
+     *  @param type The type of the properties.
+     *  @param vars The properties to add to the new Vars instance.
+     *              The properties may be nullable properties, but they may not be null themselves.
+     *  @param <T> The type of the properties.
+     *  @return A new Vars instance.
+     */
     @SuppressWarnings("unchecked")
     static <T> Vars<T> ofNullable( Class<T> type, Var<T>... vars ) {
         return AbstractVariables.ofNullable( false, type, vars );
     }
 
+    /**
+     *  Creates a list of nullable properties from the supplied type and values.
+     *  This factory method requires that the type be specified because the
+     *  compiler cannot infer the type from the null values.
+     *  @param values The values to be wrapped by properties and then added to the new Vars instance.
+     *                The values may be null.
+     * @param <T> The type of the values.
+     * @return A new Vars instance.
+     */
     @SuppressWarnings("unchecked")
-    static <T> Vars<T> ofNullable( Class<T> type, T... vars ) {
-        return AbstractVariables.ofNullable( false, type, vars );
+    static <T> Vars<T> ofNullable( Class<T> type, T... values ) {
+        return AbstractVariables.ofNullable( false, type, values );
     }
 
+    /**
+     *  Creates a list of nullable properties from the supplied properties.
+     * @param first The first property to add to the new Vars instance.
+     * @param rest The remaining properties to add to the new Vars instance.
+     * @param <T> The type of the properties.
+     * @return A new Vars instance.
+     */
     @SuppressWarnings("unchecked")
-    static <T> Vars<T> ofNullable( Var<T> first, Var<T>... vars ) {
-        return AbstractVariables.ofNullable( false, first, vars );
+    static <T> Vars<T> ofNullable( Var<T> first, Var<T>... rest ) {
+        return AbstractVariables.ofNullable( false, first, rest );
     }
 
     /** {@inheritDoc} */
@@ -221,7 +279,7 @@ public interface Vars<T> extends Vals<T>
         @SuppressWarnings("unchecked")
         Var<T>[] vars = new Var[size()];
         int i = 0;
-        for( T v : this ) vars[i++] = Var.of( mapper.apply(v) );
+        for ( T v : this ) vars[i++] = Var.of( mapper.apply(v) );
         return Vars.of( type(), vars );
     }
 
@@ -234,7 +292,8 @@ public interface Vars<T> extends Vals<T>
         @SuppressWarnings("unchecked")
         Var<U>[] vars = new Var[size()];
         for ( int i = 0; i < size(); i++ )
-            vars[i] = at(i).mapTo( type, mapper );
+            vars[i] = this.at( i ).mapTo( type, mapper );
         return Vars.of( type, vars );
     }
+
 }
