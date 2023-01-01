@@ -128,6 +128,8 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 	 * {@inheritDoc}
 	 */
 	@Override public Var<T> act( T newValue ) {
+		if ( _isImmutable )
+			throw new UnsupportedOperationException("This variable is immutable!");
 		if ( _setInternal(newValue) )
 			return act();
 		return this;
@@ -138,6 +140,8 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 	 */
 	@Override
 	public Var<T> set( T newValue ) {
+		if ( _isImmutable )
+			throw new UnsupportedOperationException("This variable is immutable!");
 		if ( _setInternal(newValue) ) this.show();
 		return this;
 	}

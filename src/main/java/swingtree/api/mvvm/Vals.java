@@ -12,11 +12,11 @@ import java.util.function.Function;
 public interface Vals<T> extends Iterable<T>
 {
     /**
-     *  Create a new Vals instance from the given values.
+     *  Create a new {@link Vals} instance from the given values.
      * @param type The type of the values.
-     * @param vars The properties to add to the new Vals instance.
+     * @param vars The properties to add to the new {@link Vals} instance.
      * @param <T> The type of the values.
-     * @return A new Vals instance.
+     * @return A new {@link Vals} instance.
      */
     @SuppressWarnings("unchecked")
     static <T> Vals<T> of( Class<T> type, Val<T>... vars ) {
@@ -24,11 +24,11 @@ public interface Vals<T> extends Iterable<T>
     }
 
     /**
-     *  Create a new Vals instance from the given values.
-     * @param first The first property to add to the new Vals instance.
-     * @param rest The remaining properties to add to the new Vals instance.
+     *  Create a new {@link Vals} instance from the given values.
+     * @param first The first property to add to the new {@link Vals} instance.
+     * @param rest The remaining properties to add to the new {@link Vals} instance.
      * @param <T> The type of the values.
-     * @return A new Vals instance.
+     * @return A new {@link Vals} instance.
      */
     @SuppressWarnings("unchecked")
     static <T> Vals<T> of( Val<T> first, Val<T>... rest ) {
@@ -38,33 +38,33 @@ public interface Vals<T> extends Iterable<T>
     }
 
     /**
-     *  Create a new Vals instance from the given values.
-     * @param first The first value to add to the new Vals instance.
-     * @param rest The remaining values to add to the new Vals instance.
+     *  Create a new {@link Vals} instance from the given values.
+     * @param first The first value to add to the new {@link Vals} instance.
+     * @param rest The remaining values to add to the new {@link Vals} instance.
      * @param <T> The type of the values.
-     * @return A new Vals instance.
+     * @return A new {@link Vals} instance.
      */
     @SuppressWarnings("unchecked")
     static <T> Vals<T> of( T first, T... rest ) { return AbstractVariables.of( true, first, rest); }
 
     /**
-     *  Create a new Vals instance from the iterable.
+     *  Create a new {@link Vals} instance from the iterable.
      *  The iterable must be a collection of Val instances.
      *  @param type The type of the values.
-     *  @param vars The iterable to add to the new Vals instance.
+     *  @param vars The iterable to add to the new {@link Vals} instance.
      *  @param <T> The type of the values.
-     *  @return A new Vals instance.
+     *  @return A new {@link Vals} instance.
      */
     static <T> Vals<T> of( Class<T> type, Iterable<Val<T>> vars ) {
         return AbstractVariables.of( true, type, (Iterable) vars );
     }
 
     /**
-     *  Create a new Vals instance from the given values.
+     *  Create a new {@link Vals} instance from the given values.
      * @param type The type of the values.
-     * @param vals The properties to add to the new Vals instance.
+     * @param vals The properties to add to the new {@link Vals} instance.
      * @param <T> The type of the values.
-     * @return A new Vals instance.
+     * @return A new {@link Vals} instance.
      */
     @SuppressWarnings("unchecked")
     static <T> Vals<T> ofNullable( Class<T> type, Val<T>... vals ) {
@@ -74,11 +74,11 @@ public interface Vals<T> extends Iterable<T>
     }
 
     /**
-     *  Create a new Vals instance from the given values.
+     *  Create a new {@link Vals} instance from the given values.
      * @param type The type of the values.
-     * @param values The values to add to the new Vals instance.
+     * @param values The values to add to the new {@link Vals} instance.
      * @param <T> The type of the values.
-     * @return A new Vals instance.
+     * @return A new {@link Vals} instance.
      */
     @SuppressWarnings("unchecked")
     static <T> Vals<T> ofNullable( Class<T> type, T... values ) {
@@ -86,11 +86,11 @@ public interface Vals<T> extends Iterable<T>
     }
 
     /**
-     *  Create a new Vals instance from the given values.
-     * @param first The first property to add to the new Vals instance.
-     * @param rest The remaining properties to add to the new Vals instance.
+     *  Create a new {@link Vals} instance from the given values.
+     * @param first The first property to add to the new {@link Vals} instance.
+     * @param rest The remaining properties to add to the new {@link Vals} instance.
      * @param <T> The type of the values.
-     * @return A new Vals instance.
+     * @return A new {@link Vals} instance.
      */
     @SuppressWarnings("unchecked")
     static <T> Vals<T> ofNullable( Var<T> first, Val<T>... rest ) {

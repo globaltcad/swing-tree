@@ -1,5 +1,9 @@
 package swingtree.api.mvvm;
 
-public enum Mutation {
-    ADD, REMOVE, SET, CLEAR, NONE
+/**
+ *  Describes how a {@link Vars} instance was mutated.
+ */
+public enum Mutation
+{
+    ADD, REMOVE, SET, CLEAR, SORT, NONE
 }

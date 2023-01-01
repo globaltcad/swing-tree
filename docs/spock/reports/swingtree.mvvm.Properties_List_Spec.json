@@ -4,12 +4,12 @@
   "narrative":"Just like properties you can create lists of properties\n    and then bind them to UI components.\n    They are a powerful tool to model the state \n    as well as business logic of your UI without actually depending on it.\n    This is especially useful for testing your UIs logic.\n    This specification shows how to use the various\n    methods exposed by the property lists classes, \n    namely \"Vals\" (immutable) and \"Vars\" (mutable).",
   "subjects":["swingtree.api.mvvm.Vals","swingtree.api.mvvm.Vars"],
   "statistics":{
-    "runs":"13",
+    "runs":"15",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.045 seconds"
+    "duration":"0.050 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -300,6 +300,46 @@
         {"kind":"when","text":"We sort the list.","code":["vars.sort((Comparator<Integer>) { a, b -> b - a })"]},
 
         {"kind":"then","text":"The properties have been sorted.","code":["vars.at(0).get() == 73","vars.at(1).get() == 42"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Change listeners registered on a property list will be called when the list is sorted.",
+      "result":"PASS",
+      "duration":"0",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A \"Vars\" list with two properties.","code":["var vars = Vars.of(42, 73)"]},
+
+        {"kind":"and","text":"A regular list where we are going to record changes.","code":["var changes = []"]},
+
+        {"kind":"and","text":"Now we register a \"show\" change listener on the properties.","code":["vars.onShow({ changes << it.type() })"]},
+
+        {"kind":"when","text":"We sort the list.","code":["vars.sort()"]},
+
+        {"kind":"then","text":"The listener has been called once.","code":["changes.size() == 1"]},
+
+        {"kind":"and","text":"It reports the correct type of change/mutation.","code":["changes == [Mutation.SORT]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can create a \"Vars\" list from a regular List of properties.",
+      "result":"PASS",
+      "duration":"0.003 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A \"List\" of properties.","code":["var list = [Var.of(42), Var.of(73)]"]},
+
+        {"kind":"when","text":"We create a \"Vars\" list from the \"List\".","code":["var vars = Vars.of(Integer, list)"]},
+
+        {"kind":"then","text":"The \"Vars\" list has the same properties.","code":["vars.at(0).get() == 42","vars.at(1).get() == 73"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

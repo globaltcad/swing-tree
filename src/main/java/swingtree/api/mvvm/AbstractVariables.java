@@ -141,9 +141,10 @@ public class AbstractVariables<T> implements Vars<T>
     }
 
     @Override
-    public void sort(Comparator<T> comparator) {
+    public void sort( Comparator<T> comparator ) {
         if ( _isImmutable ) throw new UnsupportedOperationException("This is an immutable list.");
-        _variables.sort( (a,b) -> comparator.compare(a.get(), b.get()) );
+        _variables.sort( ( a, b ) -> comparator.compare( a.get(), b.get() ) );
+        _triggerAction( Mutation.SORT, -1, null, null );
     }
 
     /** {@inheritDoc} */
@@ -156,12 +157,12 @@ public class AbstractVariables<T> implements Vars<T>
     /** {@inheritDoc} */
     @Override
     public Vals<T> show() {
-        _triggerAction(Mutation.NONE, -1, null, null);
+        _triggerAction( Mutation.NONE, -1, null, null );
         return this;
     }
 
     private ValsDelegate<T> _createDelegate(
-            int index, Mutation type, Var<T> newVal, Var<T> oldVal
+        int index, Mutation type, Var<T> newVal, Var<T> oldVal
     ) {
         return new ValsDelegate<T>() {
             @Override public int index() { return index; }
@@ -194,9 +195,7 @@ public class AbstractVariables<T> implements Vars<T>
     public java.util.Iterator<T> iterator() {
         return new java.util.Iterator<T>() {
             private int index = 0;
-
             @Override public boolean hasNext() { return index < size(); }
-
             @Override public T next() { return at(index++).get(); }
         };
     }
@@ -209,7 +208,7 @@ public class AbstractVariables<T> implements Vars<T>
 
     /** {@inheritDoc} */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals( Object obj ) {
         if( obj == null ) return false;
         if( obj == this ) return true;
         if( obj instanceof Vals ) {

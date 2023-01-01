@@ -313,4 +313,33 @@ class Properties_List_Spec extends Specification
             vars.at(1).get() == 42
     }
 
+    def 'Change listeners registered on a property list will be called when the list is sorted.'()
+    {
+        given : 'A "Vars" list with two properties.'
+            var vars = Vars.of(42, 73)
+        and : 'A regular list where we are going to record changes.'
+            var changes = []
+        and : 'Now we register a "show" change listener on the properties.'
+            vars.onShow({ changes << it.type() })
+
+        when : 'We sort the list.'
+            vars.sort()
+
+        then : 'The listener has been called once.'
+            changes.size() == 1
+        and : 'It reports the correct type of change/mutation.'
+            changes == [Mutation.SORT]
+    }
+
+    def 'You can create a "Vars" list from a regular List of properties.'()
+    {
+        given : 'A "List" of properties.'
+            var list = [Var.of(42), Var.of(73)]
+        when : 'We create a "Vars" list from the "List".'
+            var vars = Vars.of(Integer, list)
+        then : 'The "Vars" list has the same properties.'
+            vars.at(0).get() == 42
+            vars.at(1).get() == 73
+    }
+
 }

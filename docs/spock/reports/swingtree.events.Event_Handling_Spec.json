@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.232 seconds"
+    "duration":"0.242 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -35,7 +35,7 @@
     {
       "id":"The \"onClick\" event handlers are triggered in the same order as they were registered.",
       "result":"PASS",
-      "duration":"0.072 seconds",
+      "duration":"0.078 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            This type of event occurs when the user clicks the button.\n            Internally this is based on an `ActionListener` which\n            will be triggered by the button and then call \n            your Swing-Tree event handler implementation.\n        "]
       },
@@ -54,7 +54,7 @@
     {
       "id":"The \"onResize\" event handlers are triggered in the same order as they were registered.",
       "result":"PASS",
-      "duration":"0.020 seconds",
+      "duration":"0.022 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            This type of event occurs when the user changes the size of your component.\n            Internally this is based on an `ComponentListener` which\n            will be triggered by the window and then call \n            your Swing-Tree event handler implementation.\n        "]
       },
@@ -115,7 +115,7 @@
     {
       "id":"In a formatted text field, the \"onEnter\" event handlers are triggered in the same order as they were registered.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            This type of event occurs when the user presses the enter key.\n            Internally this is actually based on an `ActionListener` which\n            will be triggered by the formatted text field and then call\n            your Swing-Tree event handler implementation.\n        "]
       },
@@ -153,7 +153,7 @@
     {
       "id":"The \"onContentChange\" event handler of a text area is triggered when the text area content changes.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            This type of event occurs when the user changes the content of the text area.\n            Internally this is actually based on a `DocumentListener`\n            which will forward any one of its events to your `onContentChange` handler.\n        "]
       },
@@ -216,7 +216,7 @@
     {
       "id":"The \"onTextRemove\" event handler of a text area is triggered when the text area content changes.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            This type of event occurs when the user changes the content of the text area.\n            Internally this is actually based on a `DocumentListener`\n            which will forward the `removeUpdate` method call \n            to your `onTextRemove` handler.\n        "]
       },

@@ -4,12 +4,12 @@
   "narrative":"Properties are a powerful tool to model the state \n    as well as business logic of your UI without actually depending on it.\n    This is especially useful for testing your UIs logic.\n    Therefore properties are a root concept in the Swing-Tree library.\n    The decoupling between your UI and the UIs state and logic \n    is achieved by binding properties to UI components.\n    This specification shows you how to model UI state \n    and business logic using properties \n    and how to bind them to UI components.",
   "subjects":["swingtree.api.mvvm.Val","swingtree.api.mvvm.Var"],
   "statistics":{
-    "runs":"23",
+    "runs":"20",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.115 seconds"
+    "duration":"0.121 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -87,7 +87,7 @@
       "result":"PASS",
       "duration":"0.002 seconds",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Note that bound Swing-Tree properties only have side effects\n            when they are deliberately triggered to execute their side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Note that bound Swing-Tree properties have side effects\n            when their state is changed through the \"set\" method, or\n            they are deliberately triggered to execute their side effects.\n            using the \"show()\" method.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a mutable property...","code":["Var<String> mutable = Var.of(\"Tempeh\")"]},
@@ -100,7 +100,11 @@
 
         {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 
-        {"kind":"then","text":"The side effect is executed.","code":["list == [\"Tofu\"]"]}
+        {"kind":"then","text":"The side effect is executed.","code":["list == [\"Tofu\"]"]},
+
+        {"kind":"when","text":"We trigger the side effect manually.","code":["mutable.show()","UI.sync()"]},
+
+        {"kind":"then","text":"The side effect is executed again.","code":["list.size() == 2","list[0] == \"Tofu\"","list[1] == \"Tofu\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -108,7 +112,7 @@
     {
       "id":"Properties not only have a value but also a type and id!",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -118,27 +122,6 @@
         {"kind":"expect","text":"The property has the expected id.","code":["property.id() == \"XY\""]},
 
         {"kind":"and","text":"The property has the expected type.","code":["property.type() == String.class"]}
-      ],
-      "problems":{"dataValues":[], "errors":[]}
-    },
-  
-    {
-      "id":"A property can only wrap null if we specify a type class.",
-      "result":"PASS",
-      "duration":"0",
-      "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
-      },
-      "blocks":[
-        {"kind":"given","text":"We create a property with a type class...","code":["Val<String> property = Var.ofNullable(String, null)"]},
-
-        {"kind":"expect","text":"The property has the expected type.","code":["property.type() == String.class"]},
-
-        {"kind":"and","text":"The property is empty.","code":["property.isEmpty()"]},
-
-        {"kind":"when","text":"We create a property without a type class...","code":["Val<?> property2 = Var.of(null)"]},
-
-        {"kind":"then","text":"The factory method will throw an exception.","code":["thrown(NullPointerException)"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -177,7 +160,7 @@
     {
       "id":"Properties are similar to the \"Optional\" class, you can map them and see if they are empty or not.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -198,7 +181,7 @@
     {
       "id":"Use the \"viewAs\" method to create a dynamically updated view of a property.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The \"viewAs\" method is used to create a dynamically updated view of a property.\n            In essence it is a property observing another property and updating its value\n            whenever the observed property changes.\n        "]
       },
@@ -221,7 +204,7 @@
     {
       "id":"There are various kinds of convenience methods for creating live view of properties.",
       "result":"PASS",
-      "duration":"0.008 seconds",
+      "duration":"0.013 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -282,40 +265,6 @@
     },
   
     {
-      "id":"An empty property will throw an exception if you try to access its value.",
-      "result":"PASS",
-      "duration":"0",
-      "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
-      },
-      "blocks":[
-        {"kind":"given","text":"We create a property...","code":["Val<Long> property = Val.ofNullable(Long, null)"]},
-
-        {"kind":"when","text":"We try to access the value of the property.","code":["property.orElseThrow()"]},
-
-        {"kind":"then","text":"The property will throw an exception.","code":["thrown(NoSuchElementException)"]}
-      ],
-      "problems":{"dataValues":[], "errors":[]}
-    },
-  
-    {
-      "id":"The \"orElseNull\" method should be used instead of \"orElseThrow\" if you are fine with null values.",
-      "result":"PASS",
-      "duration":"0",
-      "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Note that accessing the value of an empty property using the \"orElseThrow\" method\n            will throw an exception if it is null!\n            Use \"orElseNull\" if you are fine with your property being empty \n            and to also make this intend clear.\n        "]
-      },
-      "blocks":[
-        {"kind":"given","text":"We create a property...","code":["Val<Long> property = Val.ofNullable(Long, null)"]},
-
-        {"kind":"when","text":"We try to access the value of the property.","code":["property.orElseThrow()"]},
-
-        {"kind":"then","text":"The property will throw an exception.","code":["thrown(NoSuchElementException)"]}
-      ],
-      "problems":{"dataValues":[], "errors":[]}
-    },
-  
-    {
       "id":"The \"get\" method will throw an exception if there is no element present.",
       "result":"PASS",
       "duration":"0",
@@ -335,7 +284,7 @@
     {
       "id":"The equality and hash code of a property are based on its value, type and id!",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -377,7 +326,7 @@
     {
       "id":"The delegate of a property action exposes the current as well as the previous state of the property.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -417,7 +366,7 @@
       "result":"PASS",
       "duration":"0.001 seconds",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Unfortunately Swing does not allow us to implement models for all types of UI components.\n            A JButton for example does not have a model that we can use to bind to a property.\n            Instead Swing-Tree has to perform precise updates to the UI components without\n            triggering any events.\n            Therefore the UI uses the \"act(T)\" method to change the property state and triggers the\n            action of the property. On the contrary the \"set(T)\" method is used to change the state\n            of a property without triggering the action, but it will trigger the \"onShow\" actions\n            of the property. This is so that the UI can update itself when the user changes the\n            state of a property.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Unfortunately Swing does not allow us to implement models for all types of UI components.\n            A JButton for example does not have a model that we can use to bind to a property.\n            Instead Swing-Tree has to perform precise updates to the UI components without\n            triggering any events.\n            Therefore the UI uses the \"act(T)\" method to change the property state and triggers the\n            action of the property. On the contrary the \"set(T)\" method is used to change the state\n            of a property without triggering the action, but it will trigger the \"onShow\" actions / listeners\n            of the property. This is so that the UI can update itself when the user changes the\n            state of a property.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A simple property with a view and model actions.","code":["var showListener = []","var modelListener = []","var property = Var.of(\":)\")","                    .withAction( it ->{","                        modelListener << it.current().orElseThrow()","                    })","property.onShow( it -> showListener << it )"]},

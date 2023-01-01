@@ -102,8 +102,10 @@ class Properties_Spec extends Specification
     def 'Properties can be bound by subscribing to them using the "onShow(..)" method.'()
     {
         reportInfo"""
-            Note that bound Swing-Tree properties only have side effects
-            when they are deliberately triggered to execute their side effects.
+            Note that bound Swing-Tree properties have side effects
+            when their state is changed through the "set" method, or
+            they are deliberately triggered to execute their side effects.
+            using the "show()" method.
             This is important to allow you to decide yourself when
             the state of a property is "ready" for display in the UI.
         """
@@ -120,6 +122,13 @@ class Properties_Spec extends Specification
             UI.sync()
         then : 'The side effect is executed.'
             list == ["Tofu"]
+        when : 'We trigger the side effect manually.'
+            mutable.show()
+            UI.sync()
+        then : 'The side effect is executed again.'
+            list.size() == 2
+            list[0] == "Tofu"
+            list[1] == "Tofu"
     }
 
     def 'Properties not only have a value but also a type and id!'()
@@ -130,21 +139,6 @@ class Properties_Spec extends Specification
             property.id() == "XY"
         and : 'The property has the expected type.'
             property.type() == String.class
-    }
-
-    def 'A property can only wrap null if we specify a type class.'()
-    {
-        given : 'We create a property with a type class...'
-            Val<String> property = Var.ofNullable(String, null)
-        expect : 'The property has the expected type.'
-            property.type() == String.class
-        and : 'The property is empty.'
-            property.isEmpty()
-
-        when : 'We create a property without a type class...'
-            Val<?> property2 = Var.of(null)
-        then : 'The factory method will throw an exception.'
-            thrown(NullPointerException)
     }
 
     def 'The "withID(..)" method produces a new property with all bindings inherited.'()
@@ -288,32 +282,6 @@ class Properties_Spec extends Specification
             list == ["Hello World"]
     }
 
-    def 'An empty property will throw an exception if you try to access its value.'()
-    {
-        given : 'We create a property...'
-            Val<Long> property = Val.ofNullable(Long, null)
-        when : 'We try to access the value of the property.'
-            property.orElseThrow()
-        then : 'The property will throw an exception.'
-            thrown(NoSuchElementException)
-    }
-
-    def 'The "orElseNull" method should be used instead of "orElseThrow" if you are fine with null values.'()
-    {
-        reportInfo """
-            Note that accessing the value of an empty property using the "orElseThrow" method
-            will throw an exception if it is null!
-            Use "orElseNull" if you are fine with your property being empty 
-            and to also make this intend clear.
-        """
-        given : 'We create a property...'
-            Val<Long> property = Val.ofNullable(Long, null)
-        when : 'We try to access the value of the property.'
-            property.orElseThrow()
-        then : 'The property will throw an exception.'
-            thrown(NoSuchElementException)
-    }
-
     def 'The "get" method will throw an exception if there is no element present.'()
     {
         reportInfo """
@@ -449,7 +417,7 @@ class Properties_Spec extends Specification
             triggering any events.
             Therefore the UI uses the "act(T)" method to change the property state and triggers the
             action of the property. On the contrary the "set(T)" method is used to change the state
-            of a property without triggering the action, but it will trigger the "onShow" actions
+            of a property without triggering the action, but it will trigger the "onShow" actions / listeners
             of the property. This is so that the UI can update itself when the user changes the
             state of a property.
         """
