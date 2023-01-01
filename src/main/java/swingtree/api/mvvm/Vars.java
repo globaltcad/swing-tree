@@ -1,5 +1,6 @@
 package swingtree.api.mvvm;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -294,6 +295,30 @@ public interface Vars<T> extends Vals<T>
         for ( int i = 0; i < size(); i++ )
             vars[i] = this.at( i ).mapTo( type, mapper );
         return Vars.of( type, vars );
+    }
+
+    /**
+     *  Use this for sorting the list of properties.
+     *
+     * @param comparator The comparator to use for sorting.
+     */
+    void sort( Comparator<T> comparator );
+
+    /**
+     * Sorts the list of properties using the natural ordering of the
+     * properties.
+     * Note that this method expected the the wrapped values to be
+     * {@link Comparable}.
+     */
+    default void sort() {
+        // First we have to check if the type is comparable:
+        if ( Comparable.class.isAssignableFrom(type()) ) {
+            @SuppressWarnings("unchecked")
+            Comparator<T> comparator = (Comparator<T>) Comparator.naturalOrder();
+            sort( comparator );
+        }
+        else
+            throw new UnsupportedOperationException("Cannot sort a list of non-comparable types.");
     }
 
 }

@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.132 seconds"
+    "duration":"0.115 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -31,7 +31,7 @@
     {
       "id":"They can be bound to the UI by passing them to a builder node.",
       "result":"PASS",
-      "duration":"0.071 seconds",
+      "duration":"0.070 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Binding goes both ways, so when the property changes state through the \"set\" method\n            it will update the UI\n            using the \"show()\" method on the property (which you can also call manually for UI updates), \n            and when the UI is changed by the user, it will update the property for us\n            and trigger the property action (if present).\n        "]
       },
@@ -85,7 +85,7 @@
     {
       "id":"Properties can be bound by subscribing to them using the \"onShow(..)\" method.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that bound Swing-Tree properties only have side effects\n            when they are deliberately triggered to execute their side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
       },
@@ -108,7 +108,7 @@
     {
       "id":"Properties not only have a value but also a type and id!",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -146,7 +146,7 @@
     {
       "id":"The \"withID(..)\" method produces a new property with all bindings inherited.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The wither methods on properties are used to create new property instances\n            with the same value and bindings as the original property\n            but without side effects of the original property.\n            So if you add bindings to a withered property they will not affect the original property.\n        "]
       },
@@ -177,7 +177,7 @@
     {
       "id":"Properties are similar to the \"Optional\" class, you can map them and see if they are empty or not.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -198,7 +198,7 @@
     {
       "id":"Use the \"viewAs\" method to create a dynamically updated view of a property.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The \"viewAs\" method is used to create a dynamically updated view of a property.\n            In essence it is a property observing another property and updating its value\n            whenever the observed property changes.\n        "]
       },
@@ -221,7 +221,7 @@
     {
       "id":"There are various kinds of convenience methods for creating live view of properties.",
       "result":"PASS",
-      "duration":"0.014 seconds",
+      "duration":"0.008 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -415,7 +415,7 @@
     {
       "id":"The UI uses the \"act(T)\" method to change the property state to avoid feedback looping.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Unfortunately Swing does not allow us to implement models for all types of UI components.\n            A JButton for example does not have a model that we can use to bind to a property.\n            Instead Swing-Tree has to perform precise updates to the UI components without\n            triggering any events.\n            Therefore the UI uses the \"act(T)\" method to change the property state and triggers the\n            action of the property. On the contrary the \"set(T)\" method is used to change the state\n            of a property without triggering the action, but it will trigger the \"onShow\" actions\n            of the property. This is so that the UI can update itself when the user changes the\n            state of a property.\n        "]
       },
@@ -459,7 +459,7 @@
     {
       "id":"The string representation of a property will give you all the information you need.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The string representation of a property will tell you the \n            the current state, type and id of the property.\n        "]
       },

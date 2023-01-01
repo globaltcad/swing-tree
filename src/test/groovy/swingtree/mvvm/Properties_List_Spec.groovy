@@ -291,5 +291,26 @@ class Properties_List_Spec extends Specification
             changes == [Mutation.ADD, Mutation.SET, Mutation.REMOVE, Mutation.ADD]
     }
 
+    def 'Lists of properties can be sorted based on their natural order through the "sort" method.'()
+    {
+        given : 'A "Vars" class with two properties.'
+            var vars = Vars.of(42, 73)
+        when : 'We sort the list.'
+            vars.sort()
+        then : 'The properties have been sorted.'
+            vars.at(0).get() == 42
+            vars.at(1).get() == 73
+    }
+
+    def 'Lists of properties can be sorted using a custom comparator through the "sort" method.'()
+    {
+        given : 'A "Vars" class with two properties.'
+            var vars = Vars.of(42, 73)
+        when : 'We sort the list.'
+            vars.sort((Comparator<Integer>) { a, b -> b - a })
+        then : 'The properties have been sorted.'
+            vars.at(0).get() == 73
+            vars.at(1).get() == 42
+    }
 
 }

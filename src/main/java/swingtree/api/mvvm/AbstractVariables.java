@@ -2,10 +2,7 @@ package swingtree.api.mvvm;
 
 import swingtree.api.UIAction;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class AbstractVariables<T> implements Vars<T>
@@ -141,6 +138,12 @@ public class AbstractVariables<T> implements Vars<T>
         _triggerAction( Mutation.CLEAR, -1, null, null );
         _variables.clear();
         return this;
+    }
+
+    @Override
+    public void sort(Comparator<T> comparator) {
+        if ( _isImmutable ) throw new UnsupportedOperationException("This is an immutable list.");
+        _variables.sort( (a,b) -> comparator.compare(a.get(), b.get()) );
     }
 
     /** {@inheritDoc} */
