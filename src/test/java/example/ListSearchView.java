@@ -35,7 +35,7 @@ public class ListSearchView extends JPanel
                     .withRenderer( it -> new Component() {
                         @Override
                         public void paint(Graphics g) {
-                            g.setColor(it.entry());
+                            g.setColor(it.entry().orElse(Color.BLACK));
                             g.fillRect(0, 0, getWidth(), getHeight());
                         }
                     } )

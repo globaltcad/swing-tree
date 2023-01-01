@@ -10,6 +10,7 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * A swing tree builder node for {@link JList} instances.
@@ -116,7 +117,7 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
     public final UIForList<E, L> withRenderer( ListEntryRenderer<E, L> renderer ) {
         getComponent().setCellRenderer((list, value, index, isSelected, cellHasFocus) -> renderer.render(new ListEntryDelegate<E, L>() {
             @Override public L list() { return (L) list; }
-            @Override public E entry() { return value; }
+            @Override public Optional<E> entry() { return Optional.ofNullable(value); }
             @Override public int index() { return index; }
             @Override public boolean isSelected() { return isSelected; }
             @Override public boolean hasFocus() { return cellHasFocus; }
