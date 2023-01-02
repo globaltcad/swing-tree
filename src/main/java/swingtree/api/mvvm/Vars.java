@@ -1,8 +1,6 @@
 package swingtree.api.mvvm;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -320,5 +318,7 @@ public interface Vars<T> extends Vals<T>
         else
             throw new UnsupportedOperationException("Cannot sort a list of non-comparable types.");
     }
+
+    void distinct();
 
 }

@@ -3,6 +3,8 @@ package swingtree.api.mvvm;
 import swingtree.api.UIAction;
 
 import java.util.function.Function;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  *  An immutable list of immutable MVVM properties.
@@ -207,5 +209,10 @@ public interface Vals<T> extends Iterable<T>
      *  Use this for mapping a list of properties to another list of properties.
      */
     <U> Vals<U> mapTo( Class<U> type, Function<T,U> mapper );
+
+    /**
+     * @return A stream of the values in this list of properties.
+     */
+    default Stream<T> stream() { return StreamSupport.stream(spliterator(), false); }
 
 }

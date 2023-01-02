@@ -147,6 +147,13 @@ public class AbstractVariables<T> implements Vars<T>
         _triggerAction( Mutation.SORT, -1, null, null );
     }
 
+    @Override
+    public final void distinct() {
+        if ( _isImmutable ) throw new UnsupportedOperationException("This is an immutable list.");
+        _variables.removeIf( a -> _variables.indexOf(a) != _variables.lastIndexOf(a) );
+        _triggerAction( Mutation.DISTINCT, -1, null, null );
+    }
+
     /** {@inheritDoc} */
     @Override
     public Vals<T> onShow( UIAction<ValsDelegate<T>> action ) {

@@ -5,5 +5,5 @@ package swingtree.api.mvvm;
  */
 public enum Mutation
 {
-    ADD, REMOVE, SET, CLEAR, SORT, NONE
+    ADD, REMOVE, SET, CLEAR, SORT, DISTINCT, NONE
 }
