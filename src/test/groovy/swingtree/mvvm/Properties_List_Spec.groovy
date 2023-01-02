@@ -392,4 +392,34 @@ class Properties_List_Spec extends Specification
             vals == Vals.of(Val.of("ukraine"), Val.of("belgium"), Val.of("france"))
     }
 
+    def 'The "makeDistinct" method on a mutable list of properties modifies the list in-place.'()
+    {
+        reportInfo """
+            The "makeDistinct" method makes sure that there are only unique values in the Vals list.
+            It does this by removing all duplicates from the list.
+            This is especially useful when you use the properties to model 
+            combo box or radio button selections.
+            This modification will be reported to all "show" listeners,
+            which are usually used to update the UI.
+        """
+        given : 'A "Vars" class with 4 properties that have unique ids.'
+            var vars = Vars.of(
+                                                Var.of(3.1415f),
+                                                Var.of(2.7182f),
+                                                Var.of(3.1415f),
+                                                Var.of(1.6180f)
+                                            )
+        and : 'We register a listener which will record changes for us.'
+            var changes = []
+            vars.onShow({ changes << it.type() })
+
+        when : 'We call the "makeDistinct" method.'
+            vars.makeDistinct()
+        then : 'The list has been modified in-place.'
+            vars.size() == 3
+            vars == Vars.of(Var.of(3.1415f), Var.of(2.7182f), Var.of(1.6180f))
+        and : 'The "show" listeners have been called.'
+            changes == [Mutation.DISTINCT]
+    }
+
 }

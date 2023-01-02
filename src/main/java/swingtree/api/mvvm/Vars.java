@@ -321,6 +321,9 @@ public interface Vars<T> extends Vals<T>
             throw new UnsupportedOperationException("Cannot sort a list of non-comparable types.");
     }
 
-    void distinct();
+    /**
+     *  Removes all duplicate properties from this list of properties.
+     */
+    void makeDistinct();
 
 }

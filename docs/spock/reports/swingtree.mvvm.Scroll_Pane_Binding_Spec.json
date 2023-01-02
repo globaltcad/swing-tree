@@ -1,0 +1,60 @@
+{
+  "className":"swingtree.mvvm.Scroll_Pane_Binding_Spec",
+  "title":"Scroll Pane Binding",
+  "narrative":"Although a scroll pane does not hold information\n    that is relevant to your core business logic, it certainly has certain properties\n    relevant to the view and its usability. \n    For example, the scroll pane can be enabled or disabled, or it\n    can have certain kinds of scroll policies.\n    This specifications shows how to bind `Val` properties to scroll panes.",
+  "subjects":[],
+  "statistics":{
+    "runs":"2",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"0.025 seconds"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A property holding a vertical scroll bar policy can be bound to the UI.",
+      "result":"PASS",
+      "duration":"0.013 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for your business logic\n            but it should also contain state relevant for your view and how it should\n            behave and look like depending on the state of the view model\n            and your business logic.\n            This is why Swing-Tree allows you to bind properties to the scroll\n            bar policy of your scroll panes.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding a vertical scroll bar policy.","code":["var policy = Var.of(UI.ScrollBarPolicy.NEVER)"]},
+
+        {"kind":"when","text":"We create a scroll panel and bind the property to it.","code":["var ui = UI.scrollPane().withVerticalScrollBarPolicy(policy)"]},
+
+        {"kind":"then","text":"The property was successfully bound to the UI.","code":["ui != null"]},
+
+        {"kind":"when","text":"We change and show the property value.","code":["policy.set(UI.ScrollBarPolicy.ALWAYS)","UI.sync()"]},
+
+        {"kind":"then","text":"The UI was updated.","code":["ui.component.verticalScrollBarPolicy == ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can model the horizontal scroll bar policy us ing a view model property dynamically.",
+      "result":"PASS",
+      "duration":"0.003 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for your business logic\n            but it should also contain state relevant for your view and how it should\n            behave and look like depending on the state of the view model\n            and your business logic.\n            This is why Swing-Tree allows you to bind properties to the scroll\n            bar policy of your scroll panes.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding a horizontal scroll bar policy.","code":["var policy = Var.of(UI.ScrollBarPolicy.ALWAYS)"]},
+
+        {"kind":"when","text":"We create a scroll panel and bind the property to it.","code":["var ui = UI.scrollPane().withHorizontalScrollBarPolicy(policy)"]},
+
+        {"kind":"then","text":"The property was successfully bound to the UI.","code":["ui != null"]},
+
+        {"kind":"when","text":"We change and show the property value.","code":["policy.set(UI.ScrollBarPolicy.AS_NEEDED)","UI.sync()"]},
+
+        {"kind":"then","text":"The UI was updated.","code":["ui.component.horizontalScrollBarPolicy == ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

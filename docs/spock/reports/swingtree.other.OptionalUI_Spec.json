@@ -1,0 +1,112 @@
+{
+  "className":"swingtree.other.OptionalUI_Spec",
+  "title":"OptionalUI, a Swing-Tree Monad",
+  "narrative":"The OptionalUI is a monadic container object for AWT Component types\n    which may or may not contain a non-null value.",
+  "subjects":["swingtree.OptionalUI"],
+  "statistics":{
+    "runs":"6",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"0.015 seconds"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"OptionalUI wraps AWT components exclusively.",
+      "result":"PASS",
+      "duration":"0.002 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var component = new JButton()","var optionalUI = UI.of(component).component()"]},
+
+        {"kind":"expect","text":"","code":["optionalUI instanceof OptionalUI","optionalUI.isPresent()"]},
+
+        {"kind":"and","text":"","code":["UI.runAndGet({optionalUI.orElseThrow()}) == component"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"OptionalUI can be mapped to a regular empty optional.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var optionalUI = UI.panel().component().map({ it -> null })"]},
+
+        {"kind":"expect","text":"","code":["!optionalUI.isPresent()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An OptionalUI can be mapped to a regular non-empty optional.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var optionalUI = UI.runAndGet({UI.panel().component().map({ p -> new JButton() })})"]},
+
+        {"kind":"expect","text":"","code":["optionalUI.isPresent()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An empty OptionalUI will throw an exception when orElseThrow is called.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var optionalUI = UI.panel().component().map({ it -> null })"]},
+
+        {"kind":"when","text":"","code":["optionalUI.orElseThrow()"]},
+
+        {"kind":"then","text":"","code":["thrown(NoSuchElementException)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An empty OptionalUI will return a default value when orElse is called.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var optionalUI = UI.panel().component().map({ it -> null })"]},
+
+        {"kind":"expect","text":"","code":["optionalUI.orElse(new JButton()) instanceof JButton"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An empty OptionalUI will return a default value when orElseGet is called.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var optionalUI = UI.panel().component().map({ it -> null })"]},
+
+        {"kind":"expect","text":"","code":["optionalUI.orElseGet({ new JButton() }) instanceof JButton"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

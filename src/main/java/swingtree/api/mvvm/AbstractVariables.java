@@ -150,9 +150,15 @@ public class AbstractVariables<T> implements Vars<T>
 
     /** {@inheritDoc} */
     @Override
-    public final void distinct() {
+    public final void makeDistinct() {
         if ( _isImmutable ) throw new UnsupportedOperationException("This is an immutable list.");
-        _variables.removeIf( a -> _variables.indexOf(a) != _variables.lastIndexOf(a) );
+        List<Var<T>> list = new ArrayList<>();
+        for ( Var<T> v : _variables )
+            if ( !list.contains(v) )
+                list.add(v);
+
+        _variables.clear();
+        _variables.addAll(list);
         _triggerAction( Mutation.DISTINCT, -1, null, null );
     }
 

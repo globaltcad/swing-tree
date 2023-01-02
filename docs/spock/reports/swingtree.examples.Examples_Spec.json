@@ -1,0 +1,176 @@
+{
+  "className":"swingtree.examples.Examples_Spec",
+  "title":"Execution and Validation of Example Code",
+  "narrative":"This specification ensures that the\n    various UI examples in the test suite, \n    run successfully and also produce\n    UIs with expected states.",
+  "subjects":[],
+  "statistics":{
+    "runs":"10",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"0.965 seconds"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"The advanced UI define in the examples has the expected state.",
+      "result":"PASS",
+      "duration":"0.581 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We get the UI.","code":["var ui = AdvancedUI.of(null)"]},
+
+        {"kind":"expect","text":"","code":["new Utility.Query(ui).find(JLabel, \"APIC-label\").isPresent()","new Utility.Query(ui).find(JLabel, \"APIC-label\").get().text == \"6.0\""]},
+
+        {"kind":"and","text":"","code":["new Utility.Query(ui).find(JTabbedPane, \"APIC-Tabs\").isPresent()","new Utility.Query(ui).find(JTabbedPane, \"APIC-Tabs\").get().getTabCount() == 9"]},
+
+        {"kind":"and","text":"","code":["new Utility.Query(ui).find(JSpinner, \"Light-Spinner\").isPresent()","new Utility.Query(ui).find(JSpinner, \"Light-Spinner\").get().getValue() == 0"]},
+
+        {"kind":"and","text":"","code":["new Utility.Query(ui).find(JSplitButton, \"con-split-button\").isPresent()","Utility.getSplitButtonPopup(new Utility.Query(ui).find(JSplitButton, \"con-split-button\").get()).components.length == 4"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The form UI define in the examples has the expected state.",
+      "result":"PASS",
+      "duration":"0.133 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We get the UI.","code":["var ui = new swingtree.examples.simple.Form()"]},
+
+        {"kind":"expect","text":"","code":["new Utility.Query(ui).find(JButton, \"hover-icon-button\").isPresent()","new Utility.Query(ui).find(JButton, \"hover-icon-button\").get().text == \"\"","new Utility.Query(ui).find(JButton, \"hover-icon-button\").get().icon != null","new Utility.Query(ui).find(JButton, \"hover-icon-button\").get().pressedIcon != null","new Utility.Query(ui).find(JButton, \"hover-icon-button\").get().rolloverIcon != null"]},
+
+        {"kind":"and","text":"","code":["new Utility.Query(ui).find(JButton, \"hover-icon-button\").get().cursor.type == Cursor.HAND_CURSOR"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The login example UI defined in the examples can be created.",
+      "result":"PASS",
+      "duration":"0.011 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["expect : new LoginView(new LoginViewModel())"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The list examples UI defined in the examples can be created.",
+      "result":"PASS",
+      "duration":"0.017 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["expect : new ListSearchView(new ListSearchViewModel())"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The settings example UI defined in the examples can be created.",
+      "result":"PASS",
+      "duration":"0.024 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["expect : new SomeSettingsView(new SomeSettingsViewModel())"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The spinners example UI defined in the examples can be created.",
+      "result":"PASS",
+      "duration":"0.057 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["expect : new SomeSpinnersView(new SomeSpinnersViewModel())"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The list rendering example UI defined in the examples can be created.",
+      "result":"PASS",
+      "duration":"0.007 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["expect : new ListRendering()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The calculator UI defined in the examples has the expected state.",
+      "result":"PASS",
+      "duration":"0.053 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We get the UI.","code":["var ui = new Calculator()"]},
+
+        {"kind":"expect","text":"","code":["new Utility.Query(ui).find(JTextArea, \"input-text-area\").isPresent()","new Utility.Query(ui).find(JTextArea, \"input-text-area\").get().componentOrientation == ComponentOrientation.RIGHT_TO_LEFT"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The simple Table-UI example has the expected state.",
+      "result":"PASS",
+      "duration":"0.056 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We get the UI.","code":["var ui = TableUI.create()"]},
+
+        {"kind":"expect","text":"The UI contains 2 different JTables.","code":["new Utility.Query(ui).find(JTable, \"RM\").isPresent()","new Utility.Query(ui).find(JTable, \"CM\").isPresent()"]},
+
+        {"kind":"and","text":"","code":["new Utility.Query(ui).find(JTable, \"RM\").get().getRowCount() == 2","new Utility.Query(ui).find(JTable, \"RM\").get().getColumnCount() == 3","new Utility.Query(ui).find(JTable, \"RM\").get().getValueAt(0, 0) == \"A\"","new Utility.Query(ui).find(JTable, \"RM\").get().getValueAt(0, 1) == \"B\"","new Utility.Query(ui).find(JTable, \"RM\").get().getValueAt(0, 2) == \"C\"","new Utility.Query(ui).find(JTable, \"RM\").get().getValueAt(1, 0) == \"a\"","new Utility.Query(ui).find(JTable, \"RM\").get().getValueAt(1, 1) == \"b\"","new Utility.Query(ui).find(JTable, \"RM\").get().getValueAt(1, 2) == \"c\""]},
+
+        {"kind":"and","text":"","code":["new Utility.Query(ui).find(JTable, \"CM\").get().getRowCount() == 3","new Utility.Query(ui).find(JTable, \"CM\").get().getColumnCount() == 2","new Utility.Query(ui).find(JTable, \"CM\").get().getValueAt(0, 0) == \"A\"","new Utility.Query(ui).find(JTable, \"CM\").get().getValueAt(1, 0) == \"B\"","new Utility.Query(ui).find(JTable, \"CM\").get().getValueAt(2, 0) == \"C\"","new Utility.Query(ui).find(JTable, \"CM\").get().getValueAt(0, 1) == \"a\"","new Utility.Query(ui).find(JTable, \"CM\").get().getValueAt(1, 1) == \"b\"","new Utility.Query(ui).find(JTable, \"CM\").get().getValueAt(2, 1) == \"c\""]},
+
+        {"kind":"and","text":"","code":["new Utility.Query(ui).find(JTable, \"RM2\").isPresent()","new Utility.Query(ui).find(JTable, \"CM2\").isPresent()"]},
+
+        {"kind":"and","text":"","code":["new Utility.Query(ui).find(JTable, \"RM2\").get().getRowCount() == 3","new Utility.Query(ui).find(JTable, \"RM2\").get().getColumnCount() == 2","new Utility.Query(ui).find(JTable, \"RM2\").get().getValueAt(0, 0) == \"X\"","new Utility.Query(ui).find(JTable, \"RM2\").get().getValueAt(1, 0) == \"1\"","new Utility.Query(ui).find(JTable, \"RM2\").get().getValueAt(2, 0) == \"3\"","new Utility.Query(ui).find(JTable, \"RM2\").get().getValueAt(0, 1) == \"Y\"","new Utility.Query(ui).find(JTable, \"RM2\").get().getValueAt(1, 1) == \"2\"","new Utility.Query(ui).find(JTable, \"RM2\").get().getValueAt(2, 1) == \"4\""]},
+
+        {"kind":"and","text":"","code":["new Utility.Query(ui).find(JTable, \"CM2\").get().getRowCount() == 2","new Utility.Query(ui).find(JTable, \"CM2\").get().getColumnCount() == 3","new Utility.Query(ui).find(JTable, \"CM2\").get().getValueAt(0,0) == \"X\"","new Utility.Query(ui).find(JTable, \"CM2\").get().getValueAt(0,1) == \"1\"","new Utility.Query(ui).find(JTable, \"CM2\").get().getValueAt(0,2) == \"3\"","new Utility.Query(ui).find(JTable, \"CM2\").get().getValueAt(1,0) == \"Y\"","new Utility.Query(ui).find(JTable, \"CM2\").get().getValueAt(1,1) == \"2\"","new Utility.Query(ui).find(JTable, \"CM2\").get().getValueAt(1,2) == \"4\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The todo app UI defined in the examples has the expected state.",
+      "result":"PASS",
+      "duration":"0.014 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We get the UI.","code":["var ui = new TodoApp()"]},
+
+        {"kind":"expect","text":"","code":["new Utility.Query(ui).find(JPanel, \"task-1\").isPresent()","new Utility.Query(ui).find(JPanel, \"task-2\").isPresent()","new Utility.Query(ui).find(JPanel, \"task-3\").isPresent()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

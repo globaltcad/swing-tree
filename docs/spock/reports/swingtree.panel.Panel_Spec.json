@@ -1,0 +1,100 @@
+{
+  "className":"swingtree.panel.Panel_Spec",
+  "title":"Panels",
+  "narrative":"Just like in regular Swing, the JPanel is the most basic \n    yet most important type of component in Swing-Tree\n    and you can create one using the `UI.panel()` factory method. \n    Don't hesitate to use as the main tool for grouping and structuring\n    your UI, just like you would use the 'div' tag in HTML.",
+  "subjects":["swingtree.UIForPanel"],
+  "statistics":{
+    "runs":"4",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"0.029 seconds"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A panel node can be created using the UI.panel() factory method.",
+      "result":"PASS",
+      "duration":"0",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"when","text":"We create a panel...","code":["def ui = UI.panel()"]},
+
+        {"kind":"then","text":"The panel UI is not null.","code":["ui != null"]},
+
+        {"kind":"and","text":"The UI node wraps a JPanel.","code":["ui.component instanceof JPanel"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A panel can be created with a layout manager.",
+      "result":"PASS",
+      "duration":"0.002 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"when","text":"We create a panel with a layout manager...","code":["def ui = UI.panel().withLayout(new FlowLayout())"]},
+
+        {"kind":"then","text":"The panel UI is not null.","code":["ui != null"]},
+
+        {"kind":"and","text":"The UI node wraps a JPanel.","code":["ui.component instanceof JPanel"]},
+
+        {"kind":"and","text":"The panel has a FlowLayout.","code":["ui.component.layout instanceof FlowLayout"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The default layout manager is always a MigLayout",
+      "result":"PASS",
+      "duration":"0",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a panel...","code":["def ui = UI.panel()"]},
+
+        {"kind":"expect","text":"The panel has a MigLayout.","code":["ui.component.layout instanceof MigLayout"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The dimensions of a panel can be bound to a property.",
+      "result":"PASS",
+      "duration":"0.020 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A simple property modelling the width of a panel.","code":["var width = Var.of(300)"]},
+
+        {"kind":"and","text":"A simple property modelling the height of a panel.","code":["var height = Var.of(200)"]},
+
+        {"kind":"and","text":"A panel bound to both properties","code":["def ui = UI.panel()","            .withPreferredWidth(width)","            .withPreferredHeight(height)"]},
+
+        {"kind":"expect","text":"The panel has the correct width and height.","code":["ui.component.preferredSize.width == 300","ui.component.preferredSize.height == 200"]},
+
+        {"kind":"when","text":"We change the width of the panel.","code":["width.set(400)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The panel has the correct width and height.","code":["ui.component.preferredSize.width == 400","ui.component.preferredSize.height == 200"]},
+
+        {"kind":"when","text":"We change the height of the panel.","code":["height.set(300)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The panel has the correct width and height.","code":["ui.component.preferredSize.width == 400","ui.component.preferredSize.height == 300"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

@@ -4,19 +4,19 @@
   "narrative":"Just like properties you can create lists of properties\n    and then bind them to UI components.\n    They are a powerful tool to model the state \n    as well as business logic of your UI without actually depending on it.\n    This is especially useful for testing your UIs logic.\n    This specification shows how to use the various\n    methods exposed by the property lists classes, \n    namely \"Vals\" (immutable) and \"Vars\" (mutable).",
   "subjects":["swingtree.api.mvvm.Vals","swingtree.api.mvvm.Vars"],
   "statistics":{
-    "runs":"1",
+    "runs":"18",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.086 seconds"
+    "duration":"0.066 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"Multiple properties can be modelled through the \"Vars\" and \"Vals\" classes.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.012 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -50,10 +50,10 @@
   
     {
       "id":"You can remove n leading or trailing entries from a property list.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.002 seconds",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n            A very common use case is to remove the first or last entry from a list.\n            Not only can you do this with the \"removeFirst()\" and \"removeLast()\" methods,\n            but you can also remove n entries from the start or end of the list\n            through the \"removeFirst(int)\" and \"removeLast(int)\" methods.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A \"Vars\" class with six properties.","code":["var vars = Vars.of(\"Racoon\", \"Squirrel\", \"Turtle\", \"Piglet\", \"Rooster\", \"Rabbit\")"]},
@@ -87,10 +87,10 @@
   
     {
       "id":"The properties of one property list can be added to another property list.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.001 seconds",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n            The properties of one property list can be added to another property list.\n            This is useful when you want to combine two property lists into one.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A \"Vars\" class with three properties.","code":["var vars1 = Vars.of(\"Racoon\", \"Squirrel\", \"Turtle\")"]},
@@ -110,7 +110,7 @@
   
     {
       "id":"The \"Vars\" is a list of properties which can grow and shrink.",
-      "result":"IGNORED",
+      "result":"PASS",
       "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
@@ -133,8 +133,8 @@
   
     {
       "id":"Both the \"Vars\" and immutable \"Vals\" types can be used for functional programming.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -152,7 +152,7 @@
   
     {
       "id":"Map a \"Vals\" instance from one type of properties to another.",
-      "result":"IGNORED",
+      "result":"PASS",
       "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
@@ -169,7 +169,7 @@
   
     {
       "id":"Map a \"Vars\" instance from one type of properties to another.",
-      "result":"IGNORED",
+      "result":"PASS",
       "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
@@ -186,7 +186,7 @@
   
     {
       "id":"You can create the \"Vars\"/\"Vals\" property lists from property instances.",
-      "result":"IGNORED",
+      "result":"PASS",
       "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
@@ -205,8 +205,8 @@
   
     {
       "id":"Just like a regular \"Var\" property you can register \"show\" listeners on \"Vars\".",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -228,8 +228,8 @@
   
     {
       "id":"The display action of a property or list of properties will not be called if they report \"canBeRemoved()\"",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.006 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -249,8 +249,8 @@
   
     {
       "id":"The listeners registered in property lists will be informed what type of modification occurred.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -272,7 +272,7 @@
   
     {
       "id":"Lists of properties can be sorted based on their natural order through the \"sort\" method.",
-      "result":"IGNORED",
+      "result":"PASS",
       "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
@@ -289,8 +289,8 @@
   
     {
       "id":"Lists of properties can be sorted using a custom comparator through the \"sort\" method.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -306,7 +306,7 @@
   
     {
       "id":"Change listeners registered on a property list will be called when the list is sorted.",
-      "result":"IGNORED",
+      "result":"PASS",
       "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
@@ -329,8 +329,8 @@
   
     {
       "id":"You can create a \"Vars\" list from a regular List of properties.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -346,13 +346,13 @@
   
     {
       "id":"A list of properties can be turned into lists, sets or maps using various convenience methods.",
-      "result":"IGNORED",
-      "duration":"0",
+      "result":"PASS",
+      "duration":"0.007 seconds",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n            The \"Vals\" class has a number of convenience methods for turning the list of properties into\n            immutable lists, sets or maps. \n            These methods make property lists more compatible with the rest of the Java ecosystem.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A \"Vars\" class with 4 properties that have unique ids.","code":["var vars = Vars.of(","                                    Var.of(42).withID(\"a\"),","                                    Var.of(73).withID(\"b\"),","                                    Var.of(1).withID(\"c\"),","                                    Var.of(2).withID(\"d\")","                                )"]},
+        {"kind":"given","text":"A \"Vars\" class with 4 properties that have unique ids.","code":["var vars = Vars.of(","                                    Var.of(42).withId(\"a\"),","                                    Var.of(73).withId(\"b\"),","                                    Var.of(1).withId(\"c\"),","                                    Var.of(2).withId(\"d\")","                                )"]},
 
         {"kind":"when","text":"We turn the list of properties into different collection types...","code":["var list = vars.toList()","var set = vars.toSet()","var map = vars.toMap()","var valMap = vars.toValMap()"]},
 
@@ -366,7 +366,7 @@
     {
       "id":"A list of properties can be turned into an immutable \"Vals\" list using the \"toVals\" method.",
       "result":"PASS",
-      "duration":"0.056 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -376,6 +376,27 @@
         {"kind":"when","text":"We turn the list of properties into an immutable \"Vals\" list.","code":["var vals = vars.toVals()"]},
 
         {"kind":"then","text":"The \"Vals\" list has the correct size and values.","code":["vals.size() == 3","vals == Vals.of(Val.of(\"ukraine\"), Val.of(\"belgium\"), Val.of(\"france\"))"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"makeDistinct\" method on a mutable list of properties modifies the list in-place.",
+      "result":"PASS",
+      "duration":"0.002 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The \"makeDistinct\" method makes sure that there are only unique values in the Vals list.\n            It does this by removing all duplicates from the list.\n            This is especially useful when you use the properties to model \n            combo box or radio button selections.\n            This modification will be reported to all \"show\" listeners,\n            which are usually used to update the UI.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A \"Vars\" class with 4 properties that have unique ids.","code":["var vars = Vars.of(","                                    Var.of(3.1415f),","                                    Var.of(2.7182f),","                                    Var.of(3.1415f),","                                    Var.of(1.6180f)","                                )"]},
+
+        {"kind":"and","text":"We register a listener which will record changes for us.","code":["var changes = []","vars.onShow({ changes << it.type() })"]},
+
+        {"kind":"when","text":"We call the \"makeDistinct\" method.","code":["vars.makeDistinct()"]},
+
+        {"kind":"then","text":"The list has been modified in-place.","code":["vars.size() == 3","vars == Vars.of(Var.of(3.1415f), Var.of(2.7182f), Var.of(1.6180f))"]},
+
+        {"kind":"and","text":"The \"show\" listeners have been called.","code":["changes == [Mutation.DISTINCT]"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }
