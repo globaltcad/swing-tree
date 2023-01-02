@@ -74,7 +74,7 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override public Var<T> withID( String id ) {
+	@Override public Var<T> withId(String id ) {
 		AbstractVariable<T> newVar = new AbstractVariable<T>( _isImmutable, _type, _value, id, null, _allowsNull ){};
 		newVar._viewActions.addAll(_viewActions);
 		return newVar;
@@ -161,7 +161,7 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 						"with the type '"+_type+"' of this property"
 					);
 
-			_history.add(Val.ofNullable(this.type(), _value).withID(this.id()));
+			_history.add(Val.ofNullable(this.type(), _value).withId(this.id()));
 			if ( _history.size() > 16 )
 				_history.remove(0);
 			_value = newValue;

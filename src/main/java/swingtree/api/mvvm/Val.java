@@ -406,7 +406,7 @@ public interface Val<T>
 	 * @param id The id of the property.
 	 * @return A new {@link Val} instance with the given id.
 	 */
-	Val<T> withID( String id );
+	Val<T> withId(String id );
 
 	/**
 	 * @return True when this property has not been assigned an id.

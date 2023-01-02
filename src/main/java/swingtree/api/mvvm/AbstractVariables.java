@@ -140,6 +140,7 @@ public class AbstractVariables<T> implements Vars<T>
         return this;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void sort( Comparator<T> comparator ) {
         if ( _isImmutable ) throw new UnsupportedOperationException("This is an immutable list.");
@@ -147,6 +148,7 @@ public class AbstractVariables<T> implements Vars<T>
         _triggerAction( Mutation.SORT, -1, null, null );
     }
 
+    /** {@inheritDoc} */
     @Override
     public final void distinct() {
         if ( _isImmutable ) throw new UnsupportedOperationException("This is an immutable list.");

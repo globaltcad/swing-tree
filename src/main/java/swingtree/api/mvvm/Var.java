@@ -109,7 +109,7 @@ public interface Var<T> extends Val<T>
 	 * @param id The id of the property.
 	 * @return A new {@link Var} instance with the given id.
 	 */
-	@Override Var<T> withID( String id );
+	@Override Var<T> withId(String id );
 
 	/**
 	 *  Use this method to create a new property with an action which is supposed to be triggered

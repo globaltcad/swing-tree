@@ -1,14 +1,14 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Sun Jan 01 22:55:58 CET 2023",
+  "created": "Mon Jan 02 19:28:29 CET 2023",
   "statistics":{
     "runs":"24",
     "passed":"23",
     "failed":"1",
     "featureFailures":"0",
     "successRate":"0.9583333333333334",
-    "duration":"6448.0"
+    "duration":"6484.0"
   },
   "specifications": [{
       "className":"swingtree.button.JButton_Example_Spec",
@@ -278,13 +278,13 @@
       "className":"swingtree.mvvm.Properties_List_Spec",
       "title":"Lists of Properties",
       "narrative":"Just like properties you can create lists of properties\n    and then bind them to UI components.\n    They are a powerful tool to model the state \n    as well as business logic of your UI without actually depending on it.\n    This is especially useful for testing your UIs logic.\n    This specification shows how to use the various\n    methods exposed by the property lists classes, \n    namely \"Vals\" (immutable) and \"Vars\" (mutable).",
-      "featureCount":"15",
+      "featureCount":"17",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
-      "duration":"50",
-      "executedFeatures":[{"id":"Both the \"Vars\" and immutable \"Vals\" types can be used for functional programming.","extraInfo":[]},{"id":"Change listeners registered on a property list will be called when the list is sorted.","extraInfo":[]},{"id":"Just like a regular \"Var\" property you can register \"show\" listeners on \"Vars\".","extraInfo":[]},{"id":"Lists of properties can be sorted based on their natural order through the \"sort\" method.","extraInfo":[]},{"id":"Lists of properties can be sorted using a custom comparator through the \"sort\" method.","extraInfo":[]},{"id":"Map a \"Vals\" instance from one type of properties to another.","extraInfo":[]},{"id":"Map a \"Vars\" instance from one type of properties to another.","extraInfo":[]},{"id":"Multiple properties can be modelled through the \"Vars\" and \"Vals\" classes.","extraInfo":[]},{"id":"The \"Vars\" is a list of properties which can grow and shrink.","extraInfo":[]},{"id":"The display action of a property or list of properties will not be called if they report \"canBeRemoved()\"","extraInfo":[]},{"id":"The listeners registered in property lists will be informed what type of modification occurred.","extraInfo":[]},{"id":"The properties of one property list can be added to another property list.","extraInfo":[]},{"id":"You can create a \"Vars\" list from a regular List of properties.","extraInfo":[]},{"id":"You can create the \"Vars\"/\"Vals\" property lists from property instances.","extraInfo":[]},{"id":"You can remove n leading or trailing entries from a property list.","extraInfo":[]}],
+      "duration":"86",
+      "executedFeatures":[{"id":"A list of properties can be turned into an immutable \"Vals\" list using the \"toVals\" method.","extraInfo":[]},{"id":"A list of properties can be turned into lists, sets or maps using various convenience methods.","extraInfo":[]},{"id":"Both the \"Vars\" and immutable \"Vals\" types can be used for functional programming.","extraInfo":[]},{"id":"Change listeners registered on a property list will be called when the list is sorted.","extraInfo":[]},{"id":"Just like a regular \"Var\" property you can register \"show\" listeners on \"Vars\".","extraInfo":[]},{"id":"Lists of properties can be sorted based on their natural order through the \"sort\" method.","extraInfo":[]},{"id":"Lists of properties can be sorted using a custom comparator through the \"sort\" method.","extraInfo":[]},{"id":"Map a \"Vals\" instance from one type of properties to another.","extraInfo":[]},{"id":"Map a \"Vars\" instance from one type of properties to another.","extraInfo":[]},{"id":"Multiple properties can be modelled through the \"Vars\" and \"Vals\" classes.","extraInfo":[]},{"id":"The \"Vars\" is a list of properties which can grow and shrink.","extraInfo":[]},{"id":"The display action of a property or list of properties will not be called if they report \"canBeRemoved()\"","extraInfo":[]},{"id":"The listeners registered in property lists will be informed what type of modification occurred.","extraInfo":[]},{"id":"The properties of one property list can be added to another property list.","extraInfo":[]},{"id":"You can create a \"Vars\" list from a regular List of properties.","extraInfo":[]},{"id":"You can create the \"Vars\"/\"Vals\" property lists from property instances.","extraInfo":[]},{"id":"You can remove n leading or trailing entries from a property list.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.mvvm.Property_Safety_Spec",

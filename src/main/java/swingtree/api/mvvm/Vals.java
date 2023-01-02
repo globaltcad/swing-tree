@@ -2,7 +2,9 @@ package swingtree.api.mvvm;
 
 import swingtree.api.UIAction;
 
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -59,6 +61,14 @@ public interface Vals<T> extends Iterable<T>
      */
     static <T> Vals<T> of( Class<T> type, Iterable<Val<T>> vars ) {
         return AbstractVariables.of( true, type, (Iterable) vars );
+    }
+
+    static <T> Vals<T> of( Class<T> type, Vals<T> vals ) {
+        List<Val<T>> list = new ArrayList<>();
+        for ( int i = 0; i < vals.size(); i++ ) {
+            list.add( vals.at(i) );
+        }
+        return AbstractVariables.of( true, type, (Iterable) list );
     }
 
     /**
@@ -214,5 +224,39 @@ public interface Vals<T> extends Iterable<T>
      * @return A stream of the values in this list of properties.
      */
     default Stream<T> stream() { return StreamSupport.stream(spliterator(), false); }
+
+    /**
+     * @return An immutable list of the values in this list of properties.
+     */
+    default List<T> toList() { return Collections.unmodifiableList(stream().collect(Collectors.toList())); }
+
+    /**
+     * @return An immutable set of the values in this list of properties.
+     */
+    default Set<T> toSet() { return Collections.unmodifiableSet(stream().collect(Collectors.toSet())); }
+
+    /**
+     * @return An immutable map where the keys are the ids of the properties in this list, and the values are the values of the properties.
+     */
+    default Map<String,T> toMap() {
+        Map<String,T> map = new HashMap<>();
+        for ( int i = 0; i < size(); i++ ) {
+            Val<T> val = at(i);
+            map.put( val.id(), val.orElseNull() );
+        }
+        return Collections.unmodifiableMap(map);
+    }
+
+    /**
+     * @return An immutable map where the keys are the ids of the properties in this list, and the values are the properties themselves.
+     */
+    default Map<String,Val<T>> toValMap() {
+        Map<String,Val<T>> map = new HashMap<>();
+        for ( int i = 0; i < size(); i++ ) {
+            Val<T> val = at(i);
+            map.put( val.id(), val );
+        }
+        return Collections.unmodifiableMap(map);
+    }
 
 }

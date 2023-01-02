@@ -342,4 +342,54 @@ class Properties_List_Spec extends Specification
             vars.at(1).get() == 73
     }
 
+    def 'A list of properties can be turned into lists, sets or maps using various convenience methods.'()
+    {
+        reportInfo """
+            The "Vals" class has a number of convenience methods for turning the list of properties into
+            immutable lists, sets or maps. 
+            These methods make property lists more compatible with the rest of the Java ecosystem.
+        """
+        given : 'A "Vars" class with 4 properties that have unique ids.'
+            var vars = Vars.of(
+                                                Var.of(42).withId("a"),
+                                                Var.of(73).withId("b"),
+                                                Var.of(1).withId("c"),
+                                                Var.of(2).withId("d")
+                                            )
+        when : 'We turn the list of properties into different collection types...'
+            var list = vars.toList()
+            var set = vars.toSet()
+            var map = vars.toMap()
+            var valMap = vars.toValMap()
+        then : 'The collections have the correct size and values.'
+            list.size() == 4
+            set.size() == 4
+            map.size() == 4
+            valMap.size() == 4
+            list == [42, 73, 1, 2]
+            set == [42, 73, 1, 2] as Set
+            map == ["a": 42, "b": 73, "c": 1, "d": 2]
+            valMap == ["a": Val.of(42), "b": Val.of(73), "c": Val.of(1), "d": Val.of(2)]
+        and : 'All of these collections are of the correct type.'
+            list instanceof List
+            set instanceof Set
+            map instanceof Map
+            valMap instanceof Map
+    }
+
+    def 'A list of properties can be turned into an immutable "Vals" list using the "toVals" method.'()
+    {
+        given : 'A "Vars" class with 4 properties that have unique ids.'
+            var vars = Vars.of(
+                                                Var.of("ukraine"),
+                                                Var.of("belgium"),
+                                                Var.of("france")
+                                            )
+        when : 'We turn the list of properties into an immutable "Vals" list.'
+            var vals = vars.toVals()
+        then : 'The "Vals" list has the correct size and values.'
+            vals.size() == 3
+            vals == Vals.of(Val.of("ukraine"), Val.of("belgium"), Val.of("france"))
+    }
+
 }

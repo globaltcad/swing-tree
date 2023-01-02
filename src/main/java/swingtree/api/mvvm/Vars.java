@@ -295,6 +295,8 @@ public interface Vars<T> extends Vals<T>
         return Vars.of( type, vars );
     }
 
+    default Vals<T> toVals() { return Vals.of( type(), this ); }
+
     /**
      *  Use this for sorting the list of properties.
      *

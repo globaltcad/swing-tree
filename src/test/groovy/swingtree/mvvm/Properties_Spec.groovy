@@ -134,7 +134,7 @@ class Properties_Spec extends Specification
     def 'Properties not only have a value but also a type and id!'()
     {
         given : 'We create a property with an id...'
-            Val<String> property = Var.ofNullable(String, "Hello World").withID("XY")
+            Val<String> property = Var.ofNullable(String, "Hello World").withId("XY")
         expect : 'The property has the expected id.'
             property.id() == "XY"
         and : 'The property has the expected type.'
@@ -156,7 +156,7 @@ class Properties_Spec extends Specification
             var list1 = []
             property.onShow { list1.add(it) }
         and : 'We create a new property with a different id.'
-            Val<String> property2 = property.withID("XY")
+            Val<String> property2 = property.withId("XY")
         and : 'Another subscriber to the new property.'
             var list2 = []
             property2.onShow { list2.add(it) }
@@ -469,14 +469,14 @@ class Properties_Spec extends Specification
         """
         given : 'Some simple non-null properties.'
             var v1 = Var.of("Apple")
-            var v2 = Var.of("Berry").withID("fruit")
+            var v2 = Var.of("Berry").withId("fruit")
             var v3 = Var.of(42)
-            var v4 = Var.of(42).withID("number")
-            var v5 = Var.of(99f).withID("ninety-nine")
+            var v4 = Var.of(42).withId("number")
+            var v5 = Var.of(99f).withId("ninety-nine")
         and : 'Nullable properties:'
             var v6 = Var.ofNullable(String, null)
-            var v7 = Var.ofNullable(Long, 5L).withID("maybe long")
-            var v8 = Var.ofNullable(Integer, 7).withID("maybe int")
+            var v7 = Var.ofNullable(Long, 5L).withId("maybe long")
+            var v8 = Var.ofNullable(Integer, 7).withId("maybe int")
 
         expect :
             v1.toString() == '"Apple" ( type = String, id = "?" )'
