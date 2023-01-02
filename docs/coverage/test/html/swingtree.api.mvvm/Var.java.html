@@ -2,6 +2,7 @@
 
 import swingtree.api.UIAction;
 
+import javax.swing.border.Border;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -56,29 +57,40 @@ public interface Var&lt;T&gt; extends Val&lt;T&gt;
 	 * @return A new {@link Var} instance.
 	 */
 	static &lt;T&gt; Var&lt;T&gt; ofNullable( Class&lt;T&gt; type, T value ) {
-<span class="fc" id="L59">		return AbstractVariable.ofNullable( false, type, value );</span>
+<span class="fc" id="L60">		return AbstractVariable.ofNullable( false, type, value );</span>
 	}
 
 	/**
-	 *  This factory method will expose a builder which will create a very simple type of Property,
-	 *  namely: {@link AbstractVariable}!
-	 *  It has a simple implementation for everything defined in the {@link Var} interface.
-	 *  So it can be touched, untouched, validated, initialized and applied.
-	 *  One may or may not use these features depending on the use case, however in most cases
-	 *  {@link Var} implementation are simple view properties which will need these functionalities.
+	 * 	This factory method returns a {@code Var} describing the given non-{@code null}
+	 * 	value similar to {@link Optional#of(Object)}, but specifically
+	 * 	designed for use with Swing-Tree.
 	 *
-	 * @param iniValue The initial value set to the instance built by this builder. Note: An initialization will overwrite this.
+	 * @param iniValue The initial value of the property which must not be null.
 	 * @param &lt;T&gt; The type of the value held by the {@link Var}!
-	 * @return The builder for a {@link AbstractVariable}.
+	 * @return A new {@link Var} instance wrapping the given value.
 	 */
-	static &lt;T&gt; Var&lt;T&gt; of( T iniValue ) {
-<span class="fc" id="L75">		return AbstractVariable.of( false, iniValue );</span>
-	}
+<span class="fc" id="L72">	static &lt;T&gt; Var&lt;T&gt; of( T iniValue ) { return AbstractVariable.of( false, iniValue ); }</span>
 
-	static Var&lt;Viewable&gt; of( Viewable iniValue ) {
-<span class="fc" id="L79">		return AbstractVariable.of( false, iniValue );</span>
-	}
-	
+	/**
+	 * 	This factory method returns a {@code Var} describing the given non-{@code null}
+	 * 	{@link Viewable} type. A {@link Var} is similar to {@link Optional#of(Object)}, but specifically
+	 * 	designed for use with Swing-Tree.
+	 *
+	 * @param iniValue The initial value of the property which must not be null.
+	 * @return A new {@link Var} instance wrapping the given {@link Viewable} type.
+	 */
+<span class="fc" id="L82">	static Var&lt;Viewable&gt; of( Viewable iniValue ) { return AbstractVariable.of( false, iniValue ); }</span>
+
+	/**
+	 * 	This factory method returns a {@code Var} describing the given non-{@code null}
+	 * 	{@link Border} type. A {@link Var} is similar to {@link Optional#of(Object)}, but specifically
+	 * 	designed for use with Swing-Tree.
+	 *
+	 * @param iniValue The initial value of the property which must not be null.
+	 * @return A new {@link Var} instance wrapping the given {@link Border} value.
+	 */
+<span class="fc" id="L92">	static Var&lt;Border&gt; of( Border iniValue ) { return AbstractVariable.of( false, iniValue ); }</span>
+
 	/**
 	 *  This method provides the ability to change the state of the wrapper.
 	 *  It might have several side effects depending on the implementation.
@@ -131,8 +143,7 @@ public interface Var&lt;T&gt; extends Val&lt;T&gt;
 	 * @param newValue The new value which ought to replace the old one.
 	 * @return This very wrapper instance, in order to enable method chaining.
 	 */
-	Var&lt;T&gt; act(T newValue);
-
+	Var&lt;T&gt; act( T newValue );
 
 	/**
 	 *  Essentially the same as {@link Optional#map(Function)}. but with a {@link Val} as return type.
@@ -142,13 +153,13 @@ public interface Var&lt;T&gt; extends Val&lt;T&gt;
 	 * @param &lt;V&gt; The type of the value returned from the mapping function
 	 */
 	@Override default &lt;V&gt; Var&lt;V&gt; map( java.util.function.Function&lt;T, V&gt; mapper ) {
-<span class="fc bfc" id="L145" title="All 2 branches covered.">		if ( !isPresent() )</span>
-<span class="fc" id="L146">			return Var.ofNullable( (Class&lt;V&gt;) Void.class, null );</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">		if ( !isPresent() )</span>
+<span class="fc" id="L157">			return Var.ofNullable( (Class&lt;V&gt;) Void.class, null );</span>
 
-<span class="fc" id="L148">		V newValue = mapper.apply( orElseNull() );</span>
-<span class="pc bpc" id="L149" title="1 of 2 branches missed.">		if ( newValue == null )</span>
-<span class="nc" id="L150">			return Var.ofNullable( (Class&lt;V&gt;) Void.class, null );</span>
-<span class="fc" id="L151">		return Var.of( newValue );</span>
+<span class="fc" id="L159">		V newValue = mapper.apply( orElseNull() );</span>
+<span class="pc bpc" id="L160" title="1 of 2 branches missed.">		if ( newValue == null )</span>
+<span class="nc" id="L161">			return Var.ofNullable( (Class&lt;V&gt;) Void.class, null );</span>
+<span class="fc" id="L162">		return Var.of( newValue );</span>
 	}
 
 	/**
@@ -158,15 +169,14 @@ public interface Var&lt;T&gt; extends Val&lt;T&gt;
 	 * @param &lt;U&gt; The type of the value returned from the mapping function
 	 */
 	@Override default &lt;U&gt; Var&lt;U&gt; mapTo( Class&lt;U&gt; type, java.util.function.Function&lt;T, U&gt; mapper ) {
-<span class="pc bpc" id="L161" title="1 of 2 branches missed.">		if ( !isPresent() )</span>
-<span class="nc" id="L162">			return Var.ofNullable( type, null );</span>
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">		if ( !isPresent() )</span>
+<span class="nc" id="L173">			return Var.ofNullable( type, null );</span>
 
-<span class="fc" id="L164">		U newValue = mapper.apply( orElseNull() );</span>
-<span class="pc bpc" id="L165" title="1 of 2 branches missed.">		if ( newValue == null )</span>
-<span class="nc" id="L166">			return Var.ofNullable( type, null );</span>
-<span class="fc" id="L167">		return Var.of( newValue );</span>
+<span class="fc" id="L175">		U newValue = mapper.apply( orElseNull() );</span>
+<span class="pc bpc" id="L176" title="1 of 2 branches missed.">		if ( newValue == null )</span>
+<span class="nc" id="L177">			return Var.ofNullable( type, null );</span>
+<span class="fc" id="L178">		return Var.of( newValue );</span>
 	}
-
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

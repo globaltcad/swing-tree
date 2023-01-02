@@ -14,11 +14,10 @@ plugins {
 
 
 String GROUP_ID = "io.github.globaltcad"
-String PROJECT  = "swingtree"
-String VERSION  = "0.1.0"
+String PROJECT  = "swing-tree"
+String VERSION  = "0.2.0"
 
 group GROUP_ID
-archivesBaseName = PROJECT
 version VERSION
 
 sourceCompatibility = 8
@@ -208,7 +207,7 @@ publishing {
         */
         maven {
             name = "GitHubPackages"
-            url = "https://maven.pkg.github.com/globaltcad/swing-tree"
+            url = "https://maven.pkg.github.com/globaltcad/" + PROJECT
             credentials {
                 username = System.getenv("GITHUB_ACTOR")
                 password = System.getenv("GITHUB_TOKEN")
@@ -238,14 +237,14 @@ publishing {
                 }
                 developers {
                     developer {
-                        id = "hdemel"
-                        name = "Harald Demel"
-                        email = "h.demel@globaltcad.com"
-                    }
-                    developer {
                         id = "dnepp"
                         name = "Daniel Nepp"
                         email = "d.nepp@globaltcad.com"
+                    }
+                    developer {
+                        id = "hdemel"
+                        name = "Harald Demel"
+                        email = "h.demel@globaltcad.com"
                     }
                 }
                 scm {

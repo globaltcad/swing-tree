@@ -2,7 +2,6 @@
 
 import swingtree.api.UIAction;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -13,87 +12,91 @@ import java.util.function.Function;
 public interface Vals&lt;T&gt; extends Iterable&lt;T&gt;
 {
     /**
-     *  Create a new Vals instance from the given values.
+     *  Create a new {@link Vals} instance from the given values.
      * @param type The type of the values.
-     * @param vars The properties to add to the new Vals instance.
+     * @param vars The properties to add to the new {@link Vals} instance.
      * @param &lt;T&gt; The type of the values.
-     * @return A new Vals instance.
+     * @return A new {@link Vals} instance.
      */
+    @SuppressWarnings(&quot;unchecked&quot;)
     static &lt;T&gt; Vals&lt;T&gt; of( Class&lt;T&gt; type, Val&lt;T&gt;... vars ) {
 <span class="nc" id="L23">        return AbstractVariables.of( true, type, (Var&lt;T&gt;[]) vars );</span>
     }
 
     /**
-     *  Create a new Vals instance from the given values.
-     * @param first The first property to add to the new Vals instance.
-     * @param rest The remaining properties to add to the new Vals instance.
+     *  Create a new {@link Vals} instance from the given values.
+     * @param first The first property to add to the new {@link Vals} instance.
+     * @param rest The remaining properties to add to the new {@link Vals} instance.
      * @param &lt;T&gt; The type of the values.
-     * @return A new Vals instance.
+     * @return A new {@link Vals} instance.
      */
+    @SuppressWarnings(&quot;unchecked&quot;)
     static &lt;T&gt; Vals&lt;T&gt; of( Val&lt;T&gt; first, Val&lt;T&gt;... rest ) {
-<span class="fc" id="L34">        Var&lt;T&gt;[] vars = new Var[rest.length];</span>
-<span class="fc" id="L35">        System.arraycopy(rest, 0, vars, 0, rest.length);</span>
-<span class="fc" id="L36">        return AbstractVariables.of( true, (Var&lt;T&gt;) first, vars );</span>
+<span class="fc" id="L35">        Var&lt;T&gt;[] vars = new Var[rest.length];</span>
+<span class="fc" id="L36">        System.arraycopy(rest, 0, vars, 0, rest.length);</span>
+<span class="fc" id="L37">        return AbstractVariables.of( true, (Var&lt;T&gt;) first, vars );</span>
     }
 
     /**
-     *  Create a new Vals instance from the given values.
-     * @param first The first value to add to the new Vals instance.
-     * @param rest The remaining values to add to the new Vals instance.
+     *  Create a new {@link Vals} instance from the given values.
+     * @param first The first value to add to the new {@link Vals} instance.
+     * @param rest The remaining values to add to the new {@link Vals} instance.
      * @param &lt;T&gt; The type of the values.
-     * @return A new Vals instance.
+     * @return A new {@link Vals} instance.
      */
-    static &lt;T&gt; Vals&lt;T&gt; of( T first, T... rest ) {
-<span class="fc" id="L47">        return AbstractVariables.of( true, first, rest);</span>
-    }
+    @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L48">    static &lt;T&gt; Vals&lt;T&gt; of( T first, T... rest ) { return AbstractVariables.of( true, first, rest); }</span>
 
     /**
-     *  Create a new Vals instance from the iterable.
+     *  Create a new {@link Vals} instance from the iterable.
      *  The iterable must be a collection of Val instances.
      *  @param type The type of the values.
-     *  @param vars The iterable to add to the new Vals instance.
+     *  @param vars The iterable to add to the new {@link Vals} instance.
      *  @param &lt;T&gt; The type of the values.
-     *  @return A new Vals instance.
+     *  @return A new {@link Vals} instance.
      */
     static &lt;T&gt; Vals&lt;T&gt; of( Class&lt;T&gt; type, Iterable&lt;Val&lt;T&gt;&gt; vars ) {
 <span class="nc" id="L59">        return AbstractVariables.of( true, type, (Iterable) vars );</span>
     }
 
     /**
-     *  Create a new Vals instance from the given values.
+     *  Create a new {@link Vals} instance from the given values.
      * @param type The type of the values.
-     * @param vals The properties to add to the new Vals instance.
+     * @param vals The properties to add to the new {@link Vals} instance.
      * @param &lt;T&gt; The type of the values.
-     * @return A new Vals instance.
+     * @return A new {@link Vals} instance.
      */
+    @SuppressWarnings(&quot;unchecked&quot;)
     static &lt;T&gt; Vals&lt;T&gt; ofNullable( Class&lt;T&gt; type, Val&lt;T&gt;... vals ) {
-<span class="nc" id="L70">        Var&lt;T&gt;[] vars = new Var[vals.length];</span>
-<span class="nc" id="L71">        System.arraycopy(vals, 0, vars, 0, vals.length);</span>
-<span class="nc" id="L72">        return AbstractVariables.ofNullable( true, type, vars );</span>
+<span class="nc" id="L71">        Var&lt;T&gt;[] vars = new Var[vals.length];</span>
+<span class="nc" id="L72">        System.arraycopy(vals, 0, vars, 0, vals.length);</span>
+<span class="nc" id="L73">        return AbstractVariables.ofNullable( true, type, vars );</span>
     }
 
     /**
-     *  Create a new Vals instance from the given values.
+     *  Create a new {@link Vals} instance from the given values.
      * @param type The type of the values.
-     * @param values The values to add to the new Vals instance.
+     * @param values The values to add to the new {@link Vals} instance.
      * @param &lt;T&gt; The type of the values.
-     * @return A new Vals instance.
+     * @return A new {@link Vals} instance.
      */
+    @SuppressWarnings(&quot;unchecked&quot;)
     static &lt;T&gt; Vals&lt;T&gt; ofNullable( Class&lt;T&gt; type, T... values ) {
-<span class="nc" id="L83">        return AbstractVariables.ofNullable( true, type, values );</span>
+<span class="nc" id="L85">        return AbstractVariables.ofNullable( true, type, values );</span>
     }
 
     /**
-     *  Create a new Vals instance from the given values.
-     * @param first The first property to add to the new Vals instance.
-     * @param rest The remaining properties to add to the new Vals instance.
+     *  Create a new {@link Vals} instance from the given values.
+     * @param first The first property to add to the new {@link Vals} instance.
+     * @param rest The remaining properties to add to the new {@link Vals} instance.
      * @param &lt;T&gt; The type of the values.
-     * @return A new Vals instance.
+     * @return A new {@link Vals} instance.
      */
+    @SuppressWarnings(&quot;unchecked&quot;)
     static &lt;T&gt; Vals&lt;T&gt; ofNullable( Var&lt;T&gt; first, Val&lt;T&gt;... rest ) {
-<span class="nc" id="L94">        Var&lt;T&gt;[] vars = new Var[rest.length];</span>
-<span class="nc" id="L95">        System.arraycopy(rest, 0, vars, 0, rest.length);</span>
-<span class="nc" id="L96">        return AbstractVariables.ofNullable( true, first, vars );</span>
+<span class="nc" id="L97">        Var&lt;T&gt;[] vars = new Var[rest.length];</span>
+<span class="nc" id="L98">        System.arraycopy(rest, 0, vars, 0, rest.length);</span>
+<span class="nc" id="L99">        return AbstractVariables.ofNullable( true, first, vars );</span>
     }
 
 
@@ -128,18 +131,18 @@ public interface Vals&lt;T&gt; extends Iterable&lt;T&gt;
     /**
      * @return True if the list of properties is empty.
      */
-<span class="pc bpc" id="L131" title="1 of 2 branches missed.">    default boolean isEmpty() { return size() == 0; }</span>
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">    default boolean isEmpty() { return size() == 0; }</span>
 
     /**
      * @return True if the list of properties is not empty.
      */
-<span class="pc bpc" id="L136" title="1 of 2 branches missed.">    default boolean isNotEmpty() { return !isEmpty(); }</span>
+<span class="pc bpc" id="L139" title="1 of 2 branches missed.">    default boolean isNotEmpty() { return !isEmpty(); }</span>
 
     /**
      * @param value The value to search for.
      * @return True if any of the properties of this list wraps the given value.
      */
-<span class="nc bnc" id="L142" title="All 2 branches missed.">    default boolean contains( T value ) { return indexOf(value) != -1; }</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">    default boolean contains( T value ) { return indexOf(value) != -1; }</span>
 
     /**
      * @param value The value to search for.
@@ -147,25 +150,25 @@ public interface Vals&lt;T&gt; extends Iterable&lt;T&gt;
      */
     default int indexOf( T value )
     {
-<span class="fc" id="L150">        int index = 0;</span>
-<span class="pc bpc" id="L151" title="1 of 2 branches missed.">        for( T v : this ) {</span>
-<span class="fc bfc" id="L152" title="All 2 branches covered.">            if( Val.equals(v,value) ) return index;</span>
-<span class="fc" id="L153">            index++;</span>
-<span class="fc" id="L154">        }</span>
-<span class="nc" id="L155">        return -1;</span>
+<span class="fc" id="L153">        int index = 0;</span>
+<span class="fc bfc" id="L154" title="All 2 branches covered.">        for( T v : this ) {</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">            if( Val.equals(v,value) ) return index;</span>
+<span class="fc" id="L156">            index++;</span>
+<span class="fc" id="L157">        }</span>
+<span class="fc" id="L158">        return -1;</span>
     }
 
     /**
      * @param value The property to search for in this list.
      * @return The index of the given property in this list, or -1 if not found.
      */
-<span class="fc" id="L162">    default int indexOf( Val&lt;T&gt; value ) { return indexOf(value.get()); }</span>
+<span class="fc" id="L165">    default int indexOf( Val&lt;T&gt; value ) { return indexOf(value.get()); }</span>
 
     /**
      * @param value The value property to search for.
      * @return True if the given property is in this list.
      */
-<span class="nc" id="L168">    default boolean contains( Val&lt;T&gt; value ) { return contains(value.get()); }</span>
+<span class="nc" id="L171">    default boolean contains( Val&lt;T&gt; value ) { return contains(value.get()); }</span>
 
     /**
      *  Check for equality between this list of properties and another list of properties.
@@ -175,15 +178,15 @@ public interface Vals&lt;T&gt; extends Iterable&lt;T&gt;
      */
     default boolean is( Vals&lt;T&gt; other )
     {
-<span class="nc bnc" id="L178" title="All 2 branches missed.">        if ( size() != other.size() ) return false;</span>
-<span class="nc bnc" id="L179" title="All 2 branches missed.">        for ( int i = 0; i &lt; size(); i++ ) {</span>
-<span class="nc bnc" id="L180" title="All 2 branches missed.">            if( !this.at(i).is(other.at(i)) ) return false;</span>
+<span class="nc bnc" id="L181" title="All 2 branches missed.">        if ( size() != other.size() ) return false;</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">        for ( int i = 0; i &lt; size(); i++ ) {</span>
+<span class="nc bnc" id="L183" title="All 2 branches missed.">            if( !this.at(i).is(other.at(i)) ) return false;</span>
         }
-<span class="nc" id="L182">        return true;</span>
+<span class="nc" id="L185">        return true;</span>
     }
 
     /**
-     *  Similar to {@link Var#onShow(Consumer)} but for a list of properties.
+     *  Similar to {@link Var#onShow(UIAction)} but for a list of properties.
      *
      * @param action The action to perform when the list of properties is shown (which is called when its state changes).
      * @return This list of properties.

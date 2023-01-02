@@ -351,10 +351,10 @@ public abstract class UIForAbstractSwing&lt;I, C extends JComponent&gt; extends 
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withBorder( Val&lt;Border&gt; border ) {
-<span class="nc" id="L354">        NullUtil.nullArgCheck(border, &quot;border&quot;, Val.class);</span>
-<span class="nc" id="L355">        NullUtil.nullPropertyCheck(border, &quot;border&quot;, &quot;Null value for border is not allowed!&quot;);</span>
-<span class="nc" id="L356">        _onShow( border, v -&gt; getComponent().setBorder(v) );</span>
-<span class="nc" id="L357">        return this.withBorder( border.orElseNull() );</span>
+<span class="fc" id="L354">        NullUtil.nullArgCheck(border, &quot;border&quot;, Val.class);</span>
+<span class="fc" id="L355">        NullUtil.nullPropertyCheck(border, &quot;border&quot;, &quot;Null value for border is not allowed!&quot;);</span>
+<span class="pc" id="L356">        _onShow( border, v -&gt; getComponent().setBorder(v) );</span>
+<span class="fc" id="L357">        return this.withBorder( border.orElseNull() );</span>
     }
 
 
