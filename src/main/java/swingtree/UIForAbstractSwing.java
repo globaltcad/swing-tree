@@ -237,6 +237,17 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
+     *  This is the inverse of {@link #isVisibleIf(boolean)}.
+     *  Use this to make the wrapped UI component invisible or visible.
+     * @param isVisible The truth value determining if the UI component should be visible or not.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isVisibleIfNot( boolean isVisible ) {
+        getComponent().setVisible(!isVisible);
+        return _this();
+    }
+
+    /**
      *  Use this to make the wrapped UI component dynamically visible or invisible. <br>
      * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
      *
@@ -250,6 +261,18 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         return isVisibleIf( isVisible.orElseThrow() );
     }
 
+    /**
+     *  This is the inverse of {@link #isVisibleIf(Val)}.
+     *  Use this to make the wrapped UI component dynamically invisible or visible. <br>
+     * @param isVisible The truth value determining if the UI component should be visible or not wrapped in a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isVisibleIfNot( Val<Boolean> isVisible ) {
+        NullUtil.nullArgCheck(isVisible, "isVisible", Val.class);
+        NullUtil.nullPropertyCheck(isVisible, "isVisible", "Null is not allowed to model the visibility of a UI component!");
+        _onShow( isVisible, v -> getComponent().setVisible(!v) );
+        return isVisibleIf( !isVisible.orElseThrow() );
+    }
 
     /**
      *  Use this to enable or disable the wrapped UI component.
@@ -259,6 +282,18 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I isEnabledIf( boolean isEnabled ) {
         _setEnabled( isEnabled );
+        return _this();
+    }
+
+    /**
+     *  This is the inverse of {@link #isEnabledIf(boolean)}.
+     *  Use this to disable or enable the wrapped UI component.
+     *
+     * @param isEnabled The truth value determining if the UI component should be enabled or not.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isEnabledIfNot( boolean isEnabled ) {
+        _setEnabled( !isEnabled );
         return _this();
     }
 
@@ -277,6 +312,20 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullPropertyCheck(isEnabled, "isEnabled", "Null value for isEnabled is not allowed!");
         _onShow( isEnabled, v -> _setEnabled(v) );
         return isEnabledIf( isEnabled.orElseThrow() );
+    }
+
+    /**
+     *  This is the inverse of {@link #isEnabledIf(Val)}.
+     *  Use this to dynamically disable or enable the wrapped UI component.
+     *
+     * @param isEnabled The truth value determining if the UI component should be enabled or not wrapped in a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isEnabledIfNot( Val<Boolean> isEnabled ) {
+        NullUtil.nullArgCheck(isEnabled, "isEnabled", Val.class);
+        NullUtil.nullPropertyCheck(isEnabled, "isEnabled", "Null value for isEnabled is not allowed!");
+        _onShow( isEnabled, v -> _setEnabled(!v) );
+        return isEnabledIf( !isEnabled.orElseThrow() );
     }
 
     /**

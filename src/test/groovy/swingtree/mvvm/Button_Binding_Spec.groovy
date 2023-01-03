@@ -7,6 +7,8 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 
+import javax.swing.ButtonGroup
+
 
 @Title("Button Binding")
 @Narrative('''
@@ -90,6 +92,64 @@ class Button_Binding_Spec extends Specification
             UI.sync()
         then : 'The button should be updated.'
             ui.component.enabled == true
+    }
+
+    def 'A button group will not only synchronize the selection state of radio buttons, but also bound properties.'()
+    {
+        reportInfo """
+            Using a button group is a convenient way to synchronize the selection state of radio buttons.
+            When one radio button is selected, all other radio buttons in the same group will be deselected.
+            This is a very common pattern in UIs, and swing-tree makes it easy to implement
+            along with the binding of properties.
+            So the selection states of a radio buttons will also
+            translate to the selection state of all bound properties.
+        """
+        given : 'Three simple boolean properties:'
+            Val<Boolean> selected1 = Var.of(false)
+            Val<Boolean> selected2 = Var.of(false)
+            Val<Boolean> selected3 = Var.of(false)
+        and : 'A button group for synchronizing the selection state of the radio buttons.'
+            ButtonGroup buttonGroup = new ButtonGroup()
+        and : 'We create three radio buttons and bind them to the properties.'
+            var ui1 = UI.radioButton("1").peek({buttonGroup.add(it)}).isSelectedIf(selected1)
+            var ui2 = UI.radioButton("2").peek({buttonGroup.add(it)}).isSelectedIf(selected2)
+            var ui3 = UI.radioButton("3").peek({buttonGroup.add(it)}).isSelectedIf(selected3)
+
+        when : 'We select the first radio button...'
+            ui1.component.selected = true
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
+        then : 'Both the buttons and the properties have the correct state:'
+            ui1.component.selected == true
+            ui2.component.selected == false
+            ui3.component.selected == false
+            selected1.get() == true
+            selected2.get() == false
+            selected3.get() == false
+
+        when : 'We select the second radio button...'
+            ui2.component.selected = true
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
+        then : 'Both the buttons and the properties have the correct state:'
+            ui1.component.selected == false
+            ui2.component.selected == true
+            ui3.component.selected == false
+            selected1.get() == false
+            selected2.get() == true
+            selected3.get() == false
+
+        when : 'We select the third radio button...'
+            ui3.component.selected = true
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
+        then : 'Both the buttons and the properties have the correct state:'
+            ui1.component.selected == false
+            ui2.component.selected == false
+            ui3.component.selected == true
+            selected1.get() == false
+            selected2.get() == false
+            selected3.get() == true
     }
     
 }

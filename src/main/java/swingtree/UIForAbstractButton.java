@@ -121,8 +121,25 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     }
 
     public final I isSelectedIf( boolean isSelected ) {
-        getComponent().setSelected(isSelected);
+        _setSelectedSilently(isSelected);
         return _this();
+    }
+
+    private void _setSelectedSilently( boolean isSelected ) {
+        /*
+            This is used to change the selection state of the button without triggering
+            any action listeners. We need this because we want to construct the
+            GUI and the state of its properties without side effects.
+         */
+        ItemListener[] listeners = getComponent().getItemListeners();
+        for ( ItemListener l : listeners )
+            getComponent().removeItemListener(l);
+
+        getComponent().setSelected(isSelected);
+
+        for ( ItemListener l : listeners )
+            getComponent().addItemListener(l);
+
     }
 
     /**
@@ -134,7 +151,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public final I isSelectedIf( Val<Boolean> selected ) {
         NullUtil.nullArgCheck(selected, "selected", Val.class);
         NullUtil.nullPropertyCheck(selected, "selected", "Null can not be used to model the selection state of a button type.");
-        _onShow(selected, v -> getComponent().setSelected(v) );
+        _onShow(selected, v -> _setSelectedSilently(v) );
         return isSelectedIf( selected.orElseThrow() );
     }
 
@@ -150,7 +167,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public final I isSelectedIfNot( Val<Boolean> selected ) {
         NullUtil.nullArgCheck(selected, "selected", Val.class);
         NullUtil.nullPropertyCheck(selected, "selected", "Null can not be used to model the selection state of a button type.");
-        _onShow(selected, v -> getComponent().setSelected(!v) );
+        _onShow(selected, v -> _setSelectedSilently(!v) );
         return isSelectedIf( !selected.orElseThrow() );
     }
 
@@ -165,9 +182,12 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public final I isSelectedIf( Var<Boolean> selected ) {
         NullUtil.nullArgCheck(selected, "selected", Var.class);
         NullUtil.nullPropertyCheck(selected, "selected", "Null can not be used to model the selection state of a button type.");
-        _onShow(selected, v -> getComponent().setSelected(v) );
+        _onShow(selected, v -> _setSelectedSilently(v) );
         _onClick(
             e -> _doApp(getComponent().isSelected(), selected::act)
+        );
+        _onChange(
+            v -> _doApp(getComponent().isSelected(), selected::act)
         );
         return isSelectedIf( selected.orElseThrow() );
     }
@@ -184,9 +204,12 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     public final I isSelectedIfNot( Var<Boolean> selected ) {
         NullUtil.nullArgCheck(selected, "selected", Var.class);
         NullUtil.nullPropertyCheck(selected, "selected", "Null can not be used to model the selection state of a button type.");
-        _onShow(selected, v -> getComponent().setSelected(!v) );
+        _onShow(selected, v -> _setSelectedSilently(!v) );
         _onClick(
             e -> _doApp(!getComponent().isSelected(), selected::act)
+        );
+        _onChange(
+            v -> _doApp(!getComponent().isSelected(), selected::act)
         );
         return isSelectedIf( !selected.orElseThrow() );
     }
@@ -206,6 +229,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
                 var.act(pressed);
             })
         );
+        // on change is not needed because the pressed state is only changed by the user.
         return isSelectedIf( var.orElseThrow() );
     }
 
@@ -238,7 +262,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      */
     public final I onChange( UIAction<SimpleDelegate<B, ItemEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", UIAction.class);
-        _onChange(e -> _doApp(()->action.accept(new SimpleDelegate<>(getComponent(), e, this::getSiblinghood))));
+        _onChange( e -> _doApp(()->action.accept(new SimpleDelegate<>(getComponent(), e, this::getSiblinghood))) );
         return _this();
     }
 
