@@ -74,7 +74,7 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override public Var<T> withId(String id ) {
+	@Override public Var<T> withId( String id ) {
 		AbstractVariable<T> newVar = new AbstractVariable<T>( _isImmutable, _type, _value, id, null, _allowsNull ){};
 		newVar._viewActions.addAll(_viewActions);
 		return newVar;
@@ -139,10 +139,10 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Var<T> set( T newValue ) {
+	public Var<T> set( T newItem) {
 		if ( _isImmutable )
 			throw new UnsupportedOperationException("This variable is immutable!");
-		if ( _setInternal(newValue) ) this.show();
+		if ( _setInternal(newItem) ) this.show();
 		return this;
 	}
 

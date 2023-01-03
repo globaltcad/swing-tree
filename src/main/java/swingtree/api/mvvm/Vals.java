@@ -16,10 +16,10 @@ import java.util.stream.StreamSupport;
 public interface Vals<T> extends Iterable<T>
 {
     /**
-     *  Create a new {@link Vals} instance from the given values.
-     * @param type The type of the values.
+     *  Create a new {@link Vals} instance from the given varargs of properties.
+     * @param type The type of the items.
      * @param vars The properties to add to the new {@link Vals} instance.
-     * @param <T> The type of the values.
+     * @param <T> The type of the items.
      * @return A new {@link Vals} instance.
      */
     @SuppressWarnings("unchecked")
@@ -28,10 +28,10 @@ public interface Vals<T> extends Iterable<T>
     }
 
     /**
-     *  Create a new {@link Vals} instance from the given values.
+     *  Create a new {@link Vals} instance from the supplied properties.
      * @param first The first property to add to the new {@link Vals} instance.
      * @param rest The remaining properties to add to the new {@link Vals} instance.
-     * @param <T> The type of the values.
+     * @param <T> The type of the items wrapped by the provided properties.
      * @return A new {@link Vals} instance.
      */
     @SuppressWarnings("unchecked")
@@ -42,25 +42,25 @@ public interface Vals<T> extends Iterable<T>
     }
 
     /**
-     *  Create a new {@link Vals} instance from the given values.
+     *  Create a new {@link Vals} instance from the supplied items.
      * @param first The first value to add to the new {@link Vals} instance.
-     * @param rest The remaining values to add to the new {@link Vals} instance.
-     * @param <T> The type of the values.
+     * @param rest The remaining items to add to the new {@link Vals} instance.
+     * @param <T> The type of the items.
      * @return A new {@link Vals} instance.
      */
     @SuppressWarnings("unchecked")
     static <T> Vals<T> of( T first, T... rest ) { return AbstractVariables.of( true, first, rest); }
 
     /**
-     *  Create a new {@link Vals} instance from the iterable.
+     *  Create a new {@link Vals} instance from the iterable of properties.
      *  The iterable must be a collection of Val instances.
-     *  @param type The type of the values.
-     *  @param vars The iterable to add to the new {@link Vals} instance.
-     *  @param <T> The type of the values.
+     *  @param type The type of the items wrapped by the properties in the iterable.
+     *  @param properties The iterable of properties to add to the new {@link Vals} instance.
+     *  @param <T> The type of the items wrapped by the properties provided by the iterable.
      *  @return A new {@link Vals} instance.
      */
-    static <T> Vals<T> of( Class<T> type, Iterable<Val<T>> vars ) {
-        return AbstractVariables.of( true, type, (Iterable) vars );
+    static <T> Vals<T> of( Class<T> type, Iterable<Val<T>> properties ) {
+        return AbstractVariables.of( true, type, (Iterable) properties );
     }
 
     static <T> Vals<T> of( Class<T> type, Vals<T> vals ) {
@@ -72,10 +72,10 @@ public interface Vals<T> extends Iterable<T>
     }
 
     /**
-     *  Create a new {@link Vals} instance from the given values.
-     * @param type The type of the values.
+     *  Create a new {@link Vals} instance from the given items.
+     * @param type The type of the items.
      * @param vals The properties to add to the new {@link Vals} instance.
-     * @param <T> The type of the values.
+     * @param <T> The type of the items.
      * @return A new {@link Vals} instance.
      */
     @SuppressWarnings("unchecked")
@@ -86,29 +86,29 @@ public interface Vals<T> extends Iterable<T>
     }
 
     /**
-     *  Create a new {@link Vals} instance from the given values.
-     * @param type The type of the values.
-     * @param values The values to add to the new {@link Vals} instance.
-     * @param <T> The type of the values.
+     *  Create a new {@link Vals} instance from the given items.
+     * @param type The type of the items.
+     * @param items The items to add to the new {@link Vals} instance.
+     * @param <T> The type of the items.
      * @return A new {@link Vals} instance.
      */
     @SuppressWarnings("unchecked")
-    static <T> Vals<T> ofNullable( Class<T> type, T... values ) {
-        return AbstractVariables.ofNullable( true, type, values );
+    static <T> Vals<T> ofNullable( Class<T> type, T... items ) {
+        return AbstractVariables.ofNullable( true, type, items );
     }
 
     /**
-     *  Create a new {@link Vals} instance from the given values.
+     *  Create a new {@link Vals} instance from the given items.
      * @param first The first property to add to the new {@link Vals} instance.
      * @param rest The remaining properties to add to the new {@link Vals} instance.
-     * @param <T> The type of the values.
+     * @param <T> The type of the items.
      * @return A new {@link Vals} instance.
      */
     @SuppressWarnings("unchecked")
-    static <T> Vals<T> ofNullable( Var<T> first, Val<T>... rest ) {
+    static <T> Vals<T> ofNullable( Val<T> first, Val<T>... rest ) {
         Var<T>[] vars = new Var[rest.length];
         System.arraycopy(rest, 0, vars, 0, rest.length);
-        return AbstractVariables.ofNullable( true, first, vars );
+        return AbstractVariables.ofNullable( true, (Var<T>) first, vars );
     }
 
 
@@ -221,22 +221,22 @@ public interface Vals<T> extends Iterable<T>
     <U> Vals<U> mapTo( Class<U> type, Function<T,U> mapper );
 
     /**
-     * @return A stream of the values in this list of properties.
+     * @return A stream of the items in this list of properties.
      */
     default Stream<T> stream() { return StreamSupport.stream(spliterator(), false); }
 
     /**
-     * @return An immutable list of the values in this list of properties.
+     * @return An immutable list of the items in this list of properties.
      */
     default List<T> toList() { return Collections.unmodifiableList(stream().collect(Collectors.toList())); }
 
     /**
-     * @return An immutable set of the values in this list of properties.
+     * @return An immutable set of the items in this list of properties.
      */
     default Set<T> toSet() { return Collections.unmodifiableSet(stream().collect(Collectors.toSet())); }
 
     /**
-     * @return An immutable map where the keys are the ids of the properties in this list, and the values are the values of the properties.
+     * @return An immutable map where the keys are the ids of the properties in this list, and the values are the items of the properties.
      */
     default Map<String,T> toMap() {
         Map<String,T> map = new HashMap<>();

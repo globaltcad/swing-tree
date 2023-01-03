@@ -100,7 +100,7 @@ class Label_Binding_Spec extends Specification
             ui.component.maximumSize == new Dimension(200, 200)
             ui.component.preferredSize == new Dimension(150, 150)
 
-        when : 'We change the property values...'
+        when : 'We change the items of the properties...'
             minSize.set(new Dimension(50, 50))
             maxSize.set(new Dimension(100, 100))
             prefSize.set(new Dimension(75, 75))
@@ -128,7 +128,7 @@ class Label_Binding_Spec extends Specification
         then : 'The label should be updated when the property changes.'
             ui.component.enabled == true
 
-        when : 'We change the property values...'
+        when : 'We change the items of the properties...'
             enabled.set(false)
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
@@ -152,7 +152,7 @@ class Label_Binding_Spec extends Specification
         then : 'The label should be updated when the property changes.'
             ui.component.visible == true
 
-        when : 'We change the property values...'
+        when : 'We change the items of the properties...'
             visible.set(false)
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
@@ -182,7 +182,7 @@ class Label_Binding_Spec extends Specification
             ui.component.horizontalAlignment == SwingConstants.LEFT
             ui.component.verticalAlignment == SwingConstants.TOP
 
-        when : 'We change the property values...'
+        when : 'We change the items of the properties...'
             horizontal.set(UI.HorizontalAlignment.CENTER)
             vertical.set(UI.VerticalAlignment.BOTTOM)
         and : 'Then we wait for the EDT to complete the UI modifications...'
@@ -214,7 +214,7 @@ class Label_Binding_Spec extends Specification
             ui.component.horizontalTextPosition == SwingConstants.LEFT
             ui.component.verticalTextPosition == SwingConstants.TOP
 
-        when : 'We change the property values...'
+        when : 'We change the items of the properties...'
             horizontal.set(UI.HorizontalAlignment.CENTER)
             vertical.set(UI.VerticalAlignment.BOTTOM)
         and : 'Then we wait for the EDT to complete the UI modifications...'
@@ -243,7 +243,7 @@ class Label_Binding_Spec extends Specification
         then : 'The label should be updated when the property changes.'
             ui.component.font.size == 12
 
-        when : 'We change the property values...'
+        when : 'We change the items of the properties...'
             fontSize.set(24)
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
@@ -274,7 +274,7 @@ class Label_Binding_Spec extends Specification
             ui.component.icon.iconHeight == 512
             ui.component.icon.iconWidth == 512
 
-        when : 'We change the property values...'
+        when : 'We change the items of the properties...'
             icon.set(UI.icon("img/swing.png"))
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()

@@ -53,9 +53,9 @@ class Property_Safety_Spec extends Specification
     def 'A property can only wrap null if we specify a type class.'()
     {
         reportInfo """
-            A property can only wrap null if we specify a type class. This is simply
+            This is necessary simply
             because we cannot know what type of object the property should wrap
-            based on the supplied null value. Generics are erased at runtime, so
+            based on the supplied null. Generics are erased at runtime, so
             we do not know what type of object the property should wrap.
         """
         given : 'We create a property with a type class...'
@@ -110,7 +110,7 @@ class Property_Safety_Spec extends Specification
             thrown(NoSuchElementException)
     }
 
-    def 'The "orElseNull" method should be used instead of "orElseThrow" if you are fine with null values.'()
+    def 'The "orElseNull" method should be used instead of "orElseThrow" if you are fine with null items.'()
     {
         reportInfo """
             Note that accessing the value of an empty property using the "orElseThrow" method
@@ -171,10 +171,10 @@ class Property_Safety_Spec extends Specification
         then : '...it succeeds.'
             nullable.orElseNull() == null
 
-        when : 'We want to store a non-null value in the nullable property...'
+        when : 'We want to store a non-null item in the nullable property...'
             nullable.set(7L)
 
-        then : '...that also succeeds, because the property can wrap both null and non-null values.'
+        then : '...that also succeeds, because the property can wrap both null and non-null items.'
             nullable.get() == 7L
 
         when : 'On the other hand, the non-nullable property is set to null...'

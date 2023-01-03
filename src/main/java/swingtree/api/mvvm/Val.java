@@ -11,17 +11,17 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * 	A read only view on a value which can be observed by the Swing-Tree UI
+ * 	A read only view on an item which can be observed by the Swing-Tree UI
  * 	to dynamically update UI components for you.
  * 	The API of this is very similar to the {@link Optional} API in the
- * 	sense that it is a wrapper around a value which can be empty or not.
+ * 	sense that it is a wrapper around a single item, which may also be missing (null).
  * 	Use the {@link #onShow(UIAction)} method to register a callbacks which
  * 	will be called when the {@link #show()} method is called.
  * 	<p>
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
  *
- * @param <T> The type of the value held by this {@link Val}.
+ * @param <T> The type of the item held by this {@link Val}.
  */
 public interface Val<T>
 {
@@ -30,118 +30,118 @@ public interface Val<T>
 
 	/**
 	 *  Use this factory method to create a new {@link Val} instance
-	 *  whose value may or may not be null.
+	 *  whose item may or may not be null.
 	 *  <p>
 	 *  <b>Example:</b>
 	 *  <pre>{@code
 	 *      Val.ofNullable(String.class, null);
 	 *  }</pre>
 	 *  <p>
-	 * @param type The type of the value wrapped by the property.
-	 *             This is used to check if the value is of the correct type.
-	 * @param value The initial value of the property.
+	 * @param type The type of the item wrapped by the property.
+	 *             This is used to check if the item is of the correct type.
+	 * @param item The initial item of the property.
 	 *              This may be null.
-	 * @param <T> The type of the wrapped value.
+	 * @param <T> The type of the wrapped item.
 	 * @return A new {@link Val} instance.
 	 */
-	static <T> Val<T> ofNullable( Class<T> type, T value ) { return AbstractVariable.ofNullable( true, type, value ); }
+	static <T> Val<T> ofNullable( Class<T> type, T item ) { return AbstractVariable.ofNullable( true, type, item ); }
 
 	/**
 	 * 	This factory method returns a {@code Val} describing the given non-{@code null}
-	 * 	value similar to {@link Optional#of(Object)}, but specifically
+	 * 	item similar to {@link Optional#of(Object)}, but specifically
 	 * 	designed for use with Swing-Tree.
 	 *
-	 * @param iniValue The initial value of the property which must not be null.
-	 * @param <T> The type of the value held by the {@link Val}!
-	 * @return A new {@link Val} instance wrapping the given value.
+	 * @param item The initial item of the property which must not be null.
+	 * @param <T> The type of the item held by the {@link Val}!
+	 * @return A new {@link Val} instance wrapping the given item.
 	 */
-	static <T> Val<T> of( T iniValue ) { return AbstractVariable.of( true, iniValue ); }
+	static <T> Val<T> of( T item ) { return AbstractVariable.of( true, item ); }
 
 	/**
 	 * This method is intended to be used for when you want to wrap non-nullable types.
-	 * So if a value is present, it returns the value, otherwise however
+	 * So if an item is present (not null), it returns the item, otherwise however
 	 * {@code NoSuchElementException} will be thrown.
-	 * If you simply want to get the value of this property irrespective of
+	 * If you simply want to get the item of this property irrespective of
 	 * it being null or not, use {@link #orElseNull()} to avoid an exception.
 	 * However, if this property wraps a nullable type, which is not intended to be null,
 	 * please use {@link #orElseThrow()} to make this intention clear.
 	 * The {@link #orElseThrow()} method is functionally identical to this method.
 	 *
-	 * @return the non-{@code null} value described by this {@code Val}
-	 * @throws NoSuchElementException if no value is present
+	 * @return the non-{@code null} item described by this {@code Val}
+	 * @throws NoSuchElementException if no item is present
 	 */
 	default T get() { return orElseThrow(); }
 
 	/**
-	 * If a value is present, returns the value, otherwise returns
+	 * If an item is present, returns the item, otherwise returns
 	 * {@code other}.
 	 *
-	 * @param other the value to be returned, if no value is present.
+	 * @param other the item to be returned, if no item is present.
 	 *        May be {@code null}.
-	 * @return the value, if present, otherwise {@code other}
+	 * @return the item, if present, otherwise {@code other}
 	 */
 	T orElseNullable( T other );
 
 	/**
-	 * If a value is present, returns the value, otherwise returns
+	 * If an item is present, returns the item, otherwise returns
 	 * {@code other}.
 	 *
-	 * @param other the value to be returned, if no value is present.
+	 * @param other the item to be returned, if no item is present.
 	 *        May not be {@code null}.
-	 * @return the value, if present, otherwise {@code other}
+	 * @return the item, if present, otherwise {@code other}
 	 */
 	default T orElse( T other ) { return orElseNullable( Objects.requireNonNull(other) ); }
 
 	/**
-	 * If a value is present, returns the value, otherwise returns the result
+	 * If an item is present, returns the item, otherwise returns the result
 	 * produced by the supplying function.
 	 *
-	 * @param supplier the supplying function that produces a value to be returned
-	 * @return the value, if present, otherwise the result produced by the
+	 * @param supplier the supplying function that produces an item to be returned
+	 * @return the item, if present, otherwise the result produced by the
 	 *         supplying function
-	 * @throws NullPointerException if no value is present and the supplying
+	 * @throws NullPointerException if no item is present and the supplying
 	 *         function is {@code null}
 	 */
 	default T orElseGet( Supplier<? extends T> supplier ) { return this.isPresent() ? orElseThrow() : supplier.get(); }
 
 	/**
-	 * If a value is present, returns the value, otherwise returns
+	 * If an item is present, returns the item, otherwise returns
 	 * {@code null}.
 	 *
-	 * @return the value, if present, otherwise {@code null}
+	 * @return the item, if present, otherwise {@code null}
 	 */
 	default T orElseNull() { return orElseNullable(null); }
 
 	/**
-	 * If a value is present, returns the value, otherwise throws
+	 * If an item is present, returns the item, otherwise throws
 	 * {@code NoSuchElementException}.
 	 *
-	 * @return the non-{@code null} value described by this {@code Val}
-	 * @throws NoSuchElementException if no value is present
+	 * @return the non-{@code null} item described by this {@code Val}
+	 * @throws NoSuchElementException if no item is present
 	 */
 	T orElseThrow();
 
 	/**
-	 * If a value is present, returns {@code true}, otherwise {@code false}.
+	 * If an item is present, returns {@code true}, otherwise {@code false}.
 	 *
-	 * @return {@code true} if a value is present, otherwise {@code false}
+	 * @return {@code true} if an item is present, otherwise {@code false}
 	 */
 	boolean isPresent();
 
 	/**
-	 * If a value is  not present, returns {@code true}, otherwise
+	 * If an item is  not present, returns {@code true}, otherwise
 	 * {@code false}.
 	 *
-	 * @return  {@code true} if a value is not present, otherwise {@code false}
+	 * @return  {@code true} if an item is not present, otherwise {@code false}
 	 */
 	default boolean isEmpty() { return !isPresent(); }
 
 	/**
-	 * If a value is present, performs the given action with the value,
+	 * If an item is present, performs the given action with the item,
 	 * otherwise does nothing.
 	 *
-	 * @param action the action to be performed, if a value is present
-	 * @throws NullPointerException if value is present and the given action is
+	 * @param action the action to be performed, if an item is present
+	 * @throws NullPointerException if item is present and the given action is
 	 *         {@code null}
 	 */
 	default void ifPresent( Consumer<T> action ) {
@@ -150,14 +150,14 @@ public interface Val<T>
 	}
 
 	/**
-	 * If a value is present, performs the given action with the value,
+	 * If an item is present, performs the given action with the item,
 	 * otherwise performs the given empty-based action.
 	 *
-	 * @param action the action to be performed, if a value is present
-	 * @param emptyAction the empty-based action to be performed, if no value is
+	 * @param action the action to be performed, if an item is present
+	 * @param emptyAction the empty-based action to be performed, if no item is
 	 *        present
-	 * @throws NullPointerException if a value is present and the given action
-	 *         is {@code null}, or no value is present and the given empty-based
+	 * @throws NullPointerException if an item is present and the given action
+	 *         is {@code null}, or no item is present and the given empty-based
 	 *         action is {@code null}.
 	 */
 	default void ifPresentOrElse( Consumer<? super T> action, Runnable emptyAction ) {
@@ -168,13 +168,13 @@ public interface Val<T>
 	}
 
 	/**
-	 * If a value is present, returns a {@code Val} describing the value,
+	 * If an item is present, returns a {@code Val} describing the item,
 	 * otherwise returns a {@code Val} produced by the supplying function.
 	 *
 	 * @param supplier the supplying function that produces a {@code Val}
 	 *        to be returned
-	 * @return returns a {@code Val} describing the value of this
-	 *         {@code Val}, if a value is present, otherwise a
+	 * @return returns a {@code Val} describing the item of this
+	 *         {@code Val}, if an item is present, otherwise a
 	 *         {@code Val} produced by the supplying function.
 	 * @throws NullPointerException if the supplying function is {@code null} or
 	 *         produces a {@code null} result
@@ -192,27 +192,27 @@ public interface Val<T>
 	/**
 	 *  Essentially the same as {@link Optional#map(Function)}. but with a {@link Val} as return type.
 	 *
-	 * @param mapper the mapping function to apply to a value, if present
+	 * @param mapper the mapping function to apply to an item, if present
 	 * @return A property that is created from this property based on the provided mapping function.
-	 * @param <V> The type of the value returned from the mapping function
+	 * @param <V> The type of the item returned from the mapping function
 	 */
 	<V> Val<V> map( java.util.function.Function<T, V> mapper );
 
 	/**
-	 * @param type The type of the value returned from the mapping function
-	 * @param mapper the mapping function to apply to a value, if present
+	 * @param type The type of the item returned from the mapping function
+	 * @param mapper the mapping function to apply to an item, if present
 	 * @return A property that is created from this property based on the provided mapping function.
-	 * @param <U> The type of the value returned from the mapping function
+	 * @param <U> The type of the item returned from the mapping function
 	 */
 	<U> Val<U> mapTo( Class<U> type, java.util.function.Function<T, U> mapper );
 
 	/**
 	 * 	Use this to create a live view of this property
 	 * 	through a new property based on the provided mapping function.
-	 * @param type The type of the value returned from the mapping function
- 	 * @param mapper the mapping function to apply to a value, if present
+	 * @param type The type of the item returned from the mapping function
+ 	 * @param mapper the mapping function to apply to an item, if present
 	 * @return A property that is a live view of this property based on the provided mapping function.
-	 * @param <U> The type of the value returned from the mapping function
+	 * @param <U> The type of the item returned from the mapping function
 	 */
 	<U> Val<U> viewAs( Class<U> type, java.util.function.Function<T, U> mapper );
 
@@ -222,7 +222,7 @@ public interface Val<T>
 	 * 	Note that the mapping function is not allowed to return {@code null}.
 	 * 	Instead, use {@link #viewAs(Class, Function)}.
 	 *
-	 * @param mapper the mapping function to apply to a value, if present
+	 * @param mapper the mapping function to apply to an item, if present
 	 * @return A property that is a live view of this property based on the provided mapping function.
 	 */
 	default Val <T> view( java.util.function.Function<T, T> mapper ) { return viewAs( type(), mapper ); }
@@ -230,7 +230,7 @@ public interface Val<T>
 	/**
 	 * 	Use this to create a String based live view of this property
 	 * 	through a new property based on the provided mapping function.
-	 * @param mapper the mapping function to turn the value of this property to a String, if present
+	 * @param mapper the mapping function to turn the item of this property to a String, if present
 	 * @return A property that is a live view of this property based on the provided mapping function.
 	 */
 	default Val<String> viewAsString( java.util.function.Function<T, String> mapper ) {
@@ -239,7 +239,7 @@ public interface Val<T>
 
 	/**
 	 * 	Use this to create a String based live view of this property
-	 * 	through a new property based on the "toString" called on the value of this property.
+	 * 	through a new property based on the "toString" called on the item of this property.
 	 *
 	 * @return A String property that is a live view of this property.
 	 */
@@ -249,7 +249,7 @@ public interface Val<T>
 	 * 	Use this to create a Double based live view of this property
 	 * 	through a new property based on the provided mapping function.
 	 *
-	 * @param mapper the mapping function to turn the value of this property to a Double, if present
+	 * @param mapper the mapping function to turn the item of this property to a Double, if present
 	 * @return A property that is a live view of this property based on the provided mapping function.
 	 */
 	default Val<Double> viewAsDouble( java.util.function.Function<T, Double> mapper ) {
@@ -265,7 +265,7 @@ public interface Val<T>
 	/**
 	 * 	Use this to create a Double based live view of this property
 	 * 	through a new property based on the "toString" and "parseDouble(String)" methods.
-	 * 	If the String cannot be parsed to a Double, the value of the property will be Double.NaN.
+	 * 	If the String cannot be parsed to a Double, the item of the property will be Double.NaN.
 	 *
 	 * @return A Double property that is a live view of this property.
 	 */
@@ -283,7 +283,7 @@ public interface Val<T>
 	 * 	Use this to create an Integer based live view of this property
 	 * 	through a new property based on the provided mapping function.
 	 *
-	 * @param mapper the mapping function to turn the value of this property to a Integer, if present
+	 * @param mapper the mapping function to turn the item of this property to a Integer, if present
 	 * @return A property that is a live view of this property based on the provided mapping function.
 	 */
 	default Val<Integer> viewAsInt( java.util.function.Function<T, Integer> mapper ) {
@@ -299,7 +299,7 @@ public interface Val<T>
 	/**
 	 * 	Use this to create an Integer based live view of this property
 	 * 	through a new property based on the "toString" and "parseInt(String)" methods.
-	 * 	If the String cannot be parsed to an Integer, the value of the property will be Integer.MIN_VALUE.
+	 * 	If the String cannot be parsed to an Integer, the item of the property will be Integer.MIN_VALUE.
 	 *
 	 * @return An Integer property that is a live view of this property.
 	 */
@@ -314,39 +314,39 @@ public interface Val<T>
 	}
 
 	/**
-	 *  This method simply returns a {@link String} representation of the wrapped value
+	 *  This method simply returns a {@link String} representation of the wrapped item
 	 *  which would otherwise be accessed via the {@link #orElseThrow()} method.
 	 *  Calling it should not have any side effects.
 	 *
-	 * @return The {@link String} representation of the value wrapped by an implementation of this interface.
+	 * @return The {@link String} representation of the item wrapped by an implementation of this interface.
 	 */
-	default String valueAsString() { return this.map(String::valueOf).orElseNullable(EMPTY); }
+	default String itemAsString() { return this.map(String::valueOf).orElseNullable(EMPTY); }
 
 	/**
-	 *  This method returns a {@link String} representation of the type of the wrapped value.
+	 *  This method returns a {@link String} representation of the type of the wrapped item.
 	 *  Calling it should not have any side effects.
 	 *
-	 * @return A simple {@link String} representation of the type of the value wrapped by an implementation of this interface.
+	 * @return A simple {@link String} representation of the type of the item wrapped by an implementation of this interface.
 	 */
 	default String typeAsString() { return this.type().getName(); }
 
 	/**
-	 *  This method check if the provided value is equal to the value wrapped by this {@link Var} instance.
+	 *  This method check if the provided item is equal to the item wrapped by this {@link Var} instance.
 	 *
-	 * @param otherValue The other value of the same type as is wrapped by this.
-	 * @return The truth value determining if the provided value is equal to the wrapped value.
+	 * @param otherItem The other item of the same type as is wrapped by this.
+	 * @return The truth value determining if the provided item is equal to the wrapped item.
 	 */
-	default boolean is( T otherValue ) {
+	default boolean is( T otherItem ) {
 		T current = this.orElseNullable(null);
-		return equals(current, otherValue);
+		return equals(current, otherItem);
 	}
 
 	/**
-	 *  This method check if the value by the provided property
-	 *  is equal to the value wrapped by this {@link Var} instance.
+	 *  This method check if the item by the provided property
+	 *  is equal to the item wrapped by this {@link Var} instance.
 	 *
 	 * @param other The other property of the same type as is wrapped by this.
-	 * @return The truth value determining if the provided value is equal to the wrapped value.
+	 * @return The truth value determining if the item of the supplied property is equal to the wrapped item.
 	 */
 	default boolean is(  Val<T> other ) {
 		Objects.requireNonNull(other);
@@ -354,32 +354,32 @@ public interface Val<T>
 	}
 
 	/**
-	 *  This method check if the provided value is not equal to the value wrapped by this {@link Var} instance.
-	 *  This is the opposite of {@link #is(Object)} which returns true if the values are equal.
+	 *  This method check if the provided item is not equal to the item wrapped by this {@link Val} instance.
+	 *  This is the opposite of {@link #is(Object)} which returns true if the items are equal.
 	 *
-	 * @param otherValue The other value of the same type as is wrapped by this.
-	 * @return The truth value determining if the provided value is not equal to the wrapped value.
+	 * @param otherItem The other item of the same type as is wrapped by this.
+	 * @return The truth value determining if the provided item is not equal to the wrapped item.
 	 */
-	default boolean isNot( T otherValue ) { return !this.is(otherValue); }
+	default boolean isNot( T otherItem ) { return !this.is(otherItem); }
 
 	/**
-	 *  This method check if the value by the provided property
-	 *  is not equal to the value wrapped by this {@link Var} instance.
-	 *  This is the opposite of {@link #is(Val)} which returns true if the values are equal.
+	 *  This method check if the item of the provided property
+	 *  is not equal to the item wrapped by this {@link Val} instance.
+	 *  This is the opposite of {@link #is(Val)} which returns true if the items are equal.
 	 *
 	 * @param other The other property of the same type as is wrapped by this.
-	 * @return The truth value determining if the provided value is not equal to the wrapped value.
+	 * @return The truth value determining if the item of the supplied property is not equal to the wrapped item.
 	 */
 	default boolean isNot( Val<T> other ) { return !this.is(other); }
 
 	/**
-	 *  This method check if at least one of the provided values is equal to
-	 *  the value wrapped by this {@link Var} instance.
+	 *  This method check if at least one of the provided items is equal to
+	 *  the item wrapped by this {@link Var} instance.
 	 *
-	 * @param first The first value of the same type as is wrapped by this.
-	 * @param second The second value of the same type as is wrapped by this.
-	 * @param otherValues The other values of the same type as is wrapped by this.
-	 * @return The truth value determining if the provided value is equal to the wrapped value.
+	 * @param first The first item of the same type as is wrapped by this.
+	 * @param second The second item of the same type as is wrapped by this.
+	 * @param otherValues The other items of the same type as is wrapped by this.
+	 * @return The truth value determining if the provided item is equal to the wrapped item.
 	 */
 	default boolean isOneOf( T first, T second, T... otherValues ) {
 		if ( this.is(first) ) return true;
@@ -419,37 +419,37 @@ public interface Val<T>
 	default boolean hasID() { return !UNNAMED.equals(id()); }
 
 	/**
-	 *  This returns the type of the value wrapped by this {@link Var}
+	 *  This returns the type of the item wrapped by this {@link Var}
 	 *  which can be accessed by calling the {@link Var#orElseThrow()} method.
 	 *
-	 * @return The type of the value wrapped by the {@link Var}.
+	 * @return The type of the item wrapped by the {@link Var}.
 	 */
 	Class<T> type();
 
 	/**
 	 *  Use this to turn this property to an {@link Optional} which can be used to
-	 *  interact with the value wrapped by this {@link Var} in a more functional way.
-	 * @return An {@link Optional} wrapping the value wrapped by this {@link Var}.
+	 *  interact with the item wrapped by this {@link Val} in a more functional way.
+	 * @return An {@link Optional} wrapping the item wrapped by this {@link Val}.
 	 */
 	default Optional<T> toOptional() { return Optional.ofNullable(this.orElseNull()); }
 
 	/**
-	 *  Use this to register an observer lambda which will be called whenever the value
+	 *  Use this to register an observer lambda which will be called whenever the item
 	 *  wrapped by this {@link Val} changes through the {@code Var::set(T)} method.
 	 *  The lambda will receive a delegate which not only exposes the current
-	 *  value of this property, but also a fixed number of previous values.
+	 *  item of this property, but also a fixed number of previous items.
 	 *
-	 * @param displayAction The lambda which will be called whenever the value wrapped by this {@link Var} changes.
+	 * @param displayAction The lambda which will be called whenever the item wrapped by this {@link Var} changes.
 	 * @return The {@link Val} instance itself.
 	 */
 	Val<T> onShowThis( UIAction<ValDelegate<T>> displayAction );
 
 	/**
-	 *  Use this to register an observer lambda which will be called whenever the value
+	 *  Use this to register an observer lambda which will be called whenever the item
 	 *  wrapped by this {@link Val} changes through the {@code Var::set(T)} method.
-	 *  The lambda will receive the current value of this property.
+	 *  The lambda will receive the current item of this property.
 	 *
-	 * @param displayAction The lambda which will be called whenever the value wrapped by this {@link Var} changes.
+	 * @param displayAction The lambda which will be called whenever the item wrapped by this {@link Var} changes.
 	 * @return The {@link Val} instance itself.
 	 */
 	default Val<T> onShow( UIAction<T> displayAction ) {
@@ -479,14 +479,15 @@ public interface Val<T>
 	boolean allowsNull();
 
 	/**
-	 *  The values of {@link Val} and {@link Var} implementations ought to be viewed
-	 *  as wrapper for data centric quasi value types!
-	 *  Two arrays of integer for example would not be recognized as
-	 *  equal when calling one of their {@link Object#equals(Object)} methods.
-	 *  This is because the method does not compare the contents of the two arrays!
-	 *  In order to ensure that two {@link Var} values are viewed as the same values
-	 *  simply when the data is identical we use the following utility method to
-	 *  account for these exceptional situations...
+	 *  {@link Val} and {@link Var} implementations are expected to represent
+	 *  simple wrappers for data centric quasi value types!
+	 *  So two primitive arrays of integers for example would not be recognized as
+	 *  equal when calling one of their {@link Object#equals(Object)} methods
+	 *  because the method does not compare the contents of the two arrays, it compares the
+	 *  identities of the arrays!
+	 *  This method defines what it means for 2 property items to be equal.
+	 *  So in this example it ensures that two {@link Var} instances wrapping
+	 *  different arrays but with the same contents are treated as the same items.
 	 *
 	 * @param o1 The first object which ought to be compared to the second one.
 	 * @param o2 The second object which ought to be compared to the first one.

@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.034 seconds"
+    "duration":"0.085 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"Multiple properties can be modelled through the \"Vars\" and \"Vals\" classes.",
       "result":"PASS",
-      "duration":"0.006 seconds",
+      "duration":"0.017 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -51,7 +51,7 @@
     {
       "id":"You can remove n leading or trailing entries from a property list.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            A very common use case is to remove the first or last entry from a list.\n            Not only can you do this with the \"removeFirst()\" and \"removeLast()\" methods,\n            but you can also remove n entries from the start or end of the list\n            through the \"removeFirst(int)\" and \"removeLast(int)\" methods.\n        "]
       },
@@ -88,7 +88,7 @@
     {
       "id":"The properties of one property list can be added to another property list.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The properties of one property list can be added to another property list.\n            This is useful when you want to combine two property lists into one.\n        "]
       },
@@ -134,7 +134,7 @@
     {
       "id":"Both the \"Vars\" and immutable \"Vals\" types can be used for functional programming.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -187,7 +187,7 @@
     {
       "id":"You can create the \"Vars\"/\"Vals\" property lists from property instances.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -206,7 +206,7 @@
     {
       "id":"Just like a regular \"Var\" property you can register \"show\" listeners on \"Vars\".",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.006 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -229,7 +229,7 @@
     {
       "id":"The display action of a property or list of properties will not be called if they report \"canBeRemoved()\"",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.008 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -250,7 +250,7 @@
     {
       "id":"The listeners registered in property lists will be informed what type of modification occurred.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -273,7 +273,7 @@
     {
       "id":"Lists of properties can be sorted based on their natural order through the \"sort\" method.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -290,7 +290,7 @@
     {
       "id":"Lists of properties can be sorted using a custom comparator through the \"sort\" method.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -307,7 +307,7 @@
     {
       "id":"Change listeners registered on a property list will be called when the list is sorted.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -330,7 +330,7 @@
     {
       "id":"You can create a \"Vars\" list from a regular List of properties.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -347,7 +347,7 @@
     {
       "id":"A list of properties can be turned into lists, sets or maps using various convenience methods.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.009 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The \"Vals\" class has a number of convenience methods for turning the list of properties into\n            immutable lists, sets or maps. \n            These methods make property lists more compatible with the rest of the Java ecosystem.\n        "]
       },
@@ -366,7 +366,7 @@
     {
       "id":"A list of properties can be turned into an immutable \"Vals\" list using the \"toVals\" method.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -383,7 +383,7 @@
     {
       "id":"The \"makeDistinct\" method on a mutable list of properties modifies the list in-place.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The \"makeDistinct\" method makes sure that there are only unique values in the Vals list.\n            It does this by removing all duplicates from the list.\n            This is especially useful when you use the properties to model \n            combo box or radio button selections.\n            This modification will be reported to all \"show\" listeners,\n            which are usually used to update the UI.\n        "]
       },

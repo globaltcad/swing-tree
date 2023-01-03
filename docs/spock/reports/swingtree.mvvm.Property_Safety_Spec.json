@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.009 seconds"
+    "duration":"0.019 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -35,7 +35,7 @@
       "result":"PASS",
       "duration":"0",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            A property can only wrap null if we specify a type class. This is simply\n            because we cannot know what type of object the property should wrap\n            based on the supplied null value. Generics are erased at runtime, so\n            we do not know what type of object the property should wrap.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            This is necessary simply\n            because we cannot know what type of object the property should wrap\n            based on the supplied null. Generics are erased at runtime, so\n            we do not know what type of object the property should wrap.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a property with a type class...","code":["Val<String> property = Var.ofNullable(String, null)"]},
@@ -88,7 +88,7 @@
     },
   
     {
-      "id":"The \"orElseNull\" method should be used instead of \"orElseThrow\" if you are fine with null values.",
+      "id":"The \"orElseNull\" method should be used instead of \"orElseThrow\" if you are fine with null items.",
       "result":"PASS",
       "duration":"0",
       "iterations":{
@@ -139,9 +139,9 @@
 
         {"kind":"then","text":"...it succeeds.","code":["nullable.orElseNull() == null"]},
 
-        {"kind":"when","text":"We want to store a non-null value in the nullable property...","code":["nullable.set(7L)"]},
+        {"kind":"when","text":"We want to store a non-null item in the nullable property...","code":["nullable.set(7L)"]},
 
-        {"kind":"then","text":"...that also succeeds, because the property can wrap both null and non-null values.","code":["nullable.get() == 7L"]},
+        {"kind":"then","text":"...that also succeeds, because the property can wrap both null and non-null items.","code":["nullable.get() == 7L"]},
 
         {"kind":"when","text":"On the other hand, the non-nullable property is set to null...","code":["nonNull.set(null)"]},
 

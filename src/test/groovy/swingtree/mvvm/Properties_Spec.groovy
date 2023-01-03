@@ -447,15 +447,15 @@ class Properties_Spec extends Specification
             modelListener == [":|"]
     }
 
-    def 'A property constructed using the "of" factory method, does not allow null values.'()
+    def 'A property constructed using the "of" factory method, does not allow null items.'()
     {
         reportInfo """
-            The "of" factory method is used to create a property that does not allow null values.
-            If you try to set a null value, the property will throw an exception.
+            The "of" factory method is used to create a property that does not allow null items.
+            If you try to set an item to null, the property will throw an exception.
         """
         given : 'A property constructed using the "of" factory method.'
             var property = Var.of("Hello World")
-        when : 'We try to set a null value.'
+        when : 'We try to set null.'
             property.set(null)
         then : 'An exception is thrown.'
             thrown(NullPointerException)
@@ -497,7 +497,7 @@ class Properties_Spec extends Specification
             A property can be converted to an Optional using the "toOptional()" method.
             This is useful when you want to use the Optional API to query the state of the property.
         """
-        given : 'A property with a non-null value.'
+        given : 'A property with a non-null item.'
             var property = Var.of("Hello World")
         when : 'We convert the property to an Optional.'
             var optional = property.toOptional()
