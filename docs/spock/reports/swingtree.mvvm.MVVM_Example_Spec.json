@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.501 seconds"
+    "duration":"0.586 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -54,7 +54,7 @@
     {
       "id":"Binding to the selection state of a button does nothing, because a JButton can only be pressed.",
       "result":"PASS",
-      "duration":"0.069 seconds",
+      "duration":"0.070 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -117,7 +117,7 @@
     {
       "id":"We can bind a boolean property to a toggle button, and when the user presses it, we notice it.",
       "result":"PASS",
-      "duration":"0.073 seconds",
+      "duration":"0.075 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -138,7 +138,7 @@
     {
       "id":"We can bind a enum property to a combo box and when the user selects an item, we notice it.",
       "result":"PASS",
-      "duration":"0.024 seconds",
+      "duration":"0.030 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n        "]
       },
@@ -163,7 +163,7 @@
     {
       "id":"An enum based combo box can infer its possible states directly from the binding property.",
       "result":"PASS",
-      "duration":"0.008 seconds",
+      "duration":"0.010 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n        "]
       },
@@ -188,7 +188,7 @@
     {
       "id":"A string property can be bound to a combo box holding string elements.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n            In the example below you can see how the usage of a string property\n            makes sense, because there might be requirements to add new food items\n            to the combo box at runtime.\n        "]
       },
@@ -234,7 +234,7 @@
     {
       "id":"A simple array of elements can be used as a data model for a combo box.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Always prefer Enums over Strings but if you have to model generic data\n            you can always bind a simple array of elements as a data model to a combo box.\n        "]
       },
@@ -257,7 +257,7 @@
     {
       "id":"You can bind a property as the current selection as well as list of elements as options to a combo box.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -290,7 +290,7 @@
     {
       "id":"View Models can be represented by properties.",
       "result":"PASS",
-      "duration":"0.012 seconds",
+      "duration":"0.038 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            In larger GUIs usually consist views which themselves consist of multiple\n            sub views. This is also true for their view models which are usually\n            structured in the same tree like fashion. \n            Often times however, your views are highly dynamic and you want to\n            be able to swap out sub views at runtime. In this case it is useful\n            to represent your view models as properties. \n            Simply implement the 'Viewable' interface in your view model and\n            you can bind it to a view.\n            When the property changes, the view will be updated automatically.\n        "]
       },
@@ -315,7 +315,7 @@
     {
       "id":"View Models can be represented by properties lists.",
       "result":"PASS",
-      "duration":"0.023 seconds",
+      "duration":"0.047 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            In larger GUIs usually consist views which themselves consist of multiple\n            sub views. This is also true for their view models which are usually\n            structured in the same tree like fashion. \n            Often times however, your views are highly dynamic and you want to\n            be able to swap out sub views at runtime. In this case it is useful\n            to represent your view models as property lists, especially if \n            one view consists of multiple sub views.\n            Simply implement the 'Viewable' interface in your view model and\n            you can bind it to a view using the \"Vars\" class wrapping your viewables.\n            When the property list changes, the view will be updated automatically.\n        "]
       },
@@ -352,7 +352,7 @@
     {
       "id":"A boolean property can be used to switch between 2 foreground colors.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Using the 'withForegroundIf(Val<Boolean>, Color, Color)' method,\n            you can switch between 2 foreground colors of a Swing component set dynamically\n            if the boolean property is true or false.\n        "]
       },
@@ -375,7 +375,7 @@
     {
       "id":"A boolean property can be used to switch between 2 background colors.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Using the 'withBackgroundIf(Val<Boolean>, Color, Color)' method,\n            you can switch between 2 background colors of a Swing component set dynamically\n            if the boolean property is true or false.\n        "]
       },
@@ -398,7 +398,7 @@
     {
       "id":"A boolean property can be used to set or reset a foreground color.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Using the 'withForegroundIf(Val<Boolean>, Color)' method,\n            you can set or reset the foreground color of a Swing component dynamically\n            if the boolean property is true or false.\n        "]
       },
@@ -425,7 +425,7 @@
     {
       "id":"A boolean property can be used to set or reset a background color.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Using the 'withBackgroundIf(Val<Boolean>, Color)' method,\n            you can set or reset the background color of a Swing component dynamically\n            if the boolean property is true or false.\n        "]
       },
@@ -452,7 +452,7 @@
     {
       "id":"The foreground color of a Swing component can be modelled using a boolean and a Color property.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Using the 'withForegroundIf(Val<Boolean>, Val<Color>)' method,\n            the foreground color of a Swing component is set dynamically\n            if the boolean property is true.\n        "]
       },
@@ -483,7 +483,7 @@
     {
       "id":"The background color of a Swing component can be modelled using a boolean and a Color property.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Using the 'withBackgroundIf(Val<Boolean>, Val<Color>)' method,\n            the background color of a Swing component is set dynamically\n            if the boolean property is true.\n        "]
       },
@@ -514,7 +514,7 @@
     {
       "id":"The tooltip of a component can be modelled using a String property.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Using the 'withTooltip(Val<String>)' method,\n            the tooltip of a Swing component is set dynamically\n            if the String property changes.\n        "]
       },
@@ -539,7 +539,7 @@
     {
       "id":"A border title can be modelled using properties.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"0.009 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Using the 'withBorderTitle(Val<String>)' method,\n            the title of a Swing component's border is set dynamically\n            if the String property changes.\n        "]
       },

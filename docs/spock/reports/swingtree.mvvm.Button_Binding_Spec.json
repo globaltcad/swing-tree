@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.018 seconds"
+    "duration":"0.020 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -85,7 +85,7 @@
     {
       "id":"A button group will not only synchronize the selection state of radio buttons, but also bound properties.",
       "result":"PASS",
-      "duration":"0.007 seconds",
+      "duration":"0.006 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Using a button group is a convenient way to synchronize the selection state of radio buttons.\n            When one radio button is selected, all other radio buttons in the same group will be deselected.\n            This is a very common pattern in UIs, and swing-tree makes it easy to implement\n            along with the binding of properties.\n            So the selection states of a radio buttons will also\n            translate to the selection state of all bound properties.\n        "]
       },
@@ -94,7 +94,7 @@
 
         {"kind":"and","text":"A button group for synchronizing the selection state of the radio buttons.","code":["ButtonGroup buttonGroup = new ButtonGroup()"]},
 
-        {"kind":"and","text":"We create three radio buttons and bind them to the properties.","code":["var ui1 = UI.radioButton(\"1\").peek({buttonGroup.add(it)}).isSelectedIf(selected1)","var ui2 = UI.radioButton(\"2\").peek({buttonGroup.add(it)}).isSelectedIf(selected2)","var ui3 = UI.radioButton(\"3\").peek({buttonGroup.add(it)}).isSelectedIf(selected3)"]},
+        {"kind":"and","text":"We create three radio buttons and bind them to the properties.","code":["var ui1 = UI.radioButton(\"1\").withButtonGroup(buttonGroup).isSelectedIf(selected1)","var ui2 = UI.radioButton(\"2\").withButtonGroup(buttonGroup).isSelectedIf(selected2)","var ui3 = UI.radioButton(\"3\").withButtonGroup(buttonGroup).isSelectedIf(selected3)"]},
 
         {"kind":"when","text":"We select the first radio button...","code":["ui1.component.selected = true"]},
 

@@ -1079,6 +1079,24 @@ public final class UI
 
     /**
      *  Use this to create a builder for the {@link JPanel} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr, layout)}.
+     *  This is essentially a convenience method for the following: <br>
+     *  <pre>{@code
+     *      UI.of(new JPanel(new MigLayout(attr, colConstraints)))
+     *  }</pre>
+     *  <br>
+     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
+     * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
+     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     */
+    public static UIForPanel<JPanel> panel( LayoutAttr attr, String colConstraints ) {
+        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
+        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
+        return of(new JPanel()).withLayout(attr, colConstraints);
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JPanel} UI component.
      *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr)}.
      *  This is essentially a convenience method for the following: <br>
      *  <pre>{@code

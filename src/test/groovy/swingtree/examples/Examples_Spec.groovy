@@ -1,16 +1,16 @@
 package swingtree.examples
 
 import com.alexandriasoftware.swing.JSplitButton
-import swingtree.examples.advanced.AdvancedUI
-import swingtree.examples.simple.ListRendering
-import swingtree.examples.slim.TodoApp
-import swingtree.Utility
 import example.*
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
+import swingtree.Utility
+import swingtree.examples.advanced.AdvancedUI
 import swingtree.examples.simple.Calculator
+import swingtree.examples.simple.ListRendering
 import swingtree.examples.simple.TableUI
+import swingtree.examples.slim.TodoApp
 
 import javax.swing.*
 import java.awt.*
@@ -62,6 +62,11 @@ class Examples_Spec extends Specification
     def 'The login example UI defined in the examples can be created.'()
     {
         expect : new LoginView(new LoginViewModel())
+    }
+
+    def 'The user registration example UI defined in the examples can be created.'()
+    {
+        expect : new UserRegistrationView(new UserRegistrationViewModel())
     }
 
     def 'The list examples UI defined in the examples can be created.'()
