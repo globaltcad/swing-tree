@@ -111,9 +111,9 @@ class Button_Binding_Spec extends Specification
         and : 'A button group for synchronizing the selection state of the radio buttons.'
             ButtonGroup buttonGroup = new ButtonGroup()
         and : 'We create three radio buttons and bind them to the properties.'
-            var ui1 = UI.radioButton("1").peek({buttonGroup.add(it)}).isSelectedIf(selected1)
-            var ui2 = UI.radioButton("2").peek({buttonGroup.add(it)}).isSelectedIf(selected2)
-            var ui3 = UI.radioButton("3").peek({buttonGroup.add(it)}).isSelectedIf(selected3)
+            var ui1 = UI.radioButton("1").withButtonGroup(buttonGroup).isSelectedIf(selected1)
+            var ui2 = UI.radioButton("2").withButtonGroup(buttonGroup).isSelectedIf(selected2)
+            var ui3 = UI.radioButton("3").withButtonGroup(buttonGroup).isSelectedIf(selected3)
 
         when : 'We select the first radio button...'
             ui1.component.selected = true

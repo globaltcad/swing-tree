@@ -506,4 +506,16 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
         return withImageRelative(verticalAlign.orElseThrow());
     }
 
+    /**
+     *  Use this to attach this button type to a button group.
+     *
+     * @param group The button group to which this button should be attached.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withButtonGroup( ButtonGroup group ) {
+        NullUtil.nullArgCheck(group, "group", ButtonGroup.class);
+        group.add(getComponent());
+        return _this();
+    }
+
 }
