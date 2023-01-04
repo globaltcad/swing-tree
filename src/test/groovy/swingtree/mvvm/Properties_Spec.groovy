@@ -183,14 +183,14 @@ class Properties_Spec extends Specification
         given : 'We create a property...'
             Val<String> property = Val.of("Hello World")
         expect : 'We can map the property to another property.'
-            property.map { it.length() } == Val.of(11)
+            property.mapTo(Integer, it -> it.length() ) == Val.of(11)
         and : 'We can check if the property is empty.'
             property.isEmpty() == false
 
         when : 'We create a property that is empty...'
             Val<String> empty = Val.ofNullable(String, null)
         then : 'The property is empty, regardless of how we map it.'
-            empty.map( it -> it.length() ) == Val.ofNullable(Void, null)
+            empty.mapTo(Integer, it -> it.length() ) == Val.ofNullable(Integer, null)
     }
 
     def 'Use the "viewAs" method to create a dynamically updated view of a property.'()
@@ -510,6 +510,35 @@ class Properties_Spec extends Specification
             optional = property.toOptional()
         then : 'The Optional is empty.'
             optional.isEmpty()
+    }
+
+    def 'Conveniently compare the item of a property with another item using "is", "isOneOf" or "isNot"'()
+    {
+        reportInfo """
+            Properties are all about the item they hold, so there needs to be a convenient way
+            to check whether the item of a property is equal to another item.
+            The "is" method is used to check if the item of a property is equal to another item
+            and the "isNot" method is the exact opposite, it checks if the item of a property
+            is NOT equal to another item.
+            The "isOneOf" method is used to check if the item of a property is equal to one of the
+            items in a varargs list.
+        """
+        given : 'We create a property with a non-null item.'
+            var property = Var.of("Hello World")
+        when : 'We compare the item of the property with another item using the above mentioned methods.'
+            var is1 = property.is("Hello World")
+            var is2 = property.is("Hello World!")
+            var isNot1 = property.isNot("Hello World")
+            var isNot2 = property.isNot("Hello World!")
+            var isOneOf1 = property.isOneOf("Hello World", "Goodbye World")
+            var isOneOf2 = property.isOneOf("Hello World!", "Goodbye World")
+        then : 'The results are as expected.'
+            is1
+            !is2
+            !isNot1
+            isNot2
+            isOneOf1
+            !isOneOf2
     }
 
 }

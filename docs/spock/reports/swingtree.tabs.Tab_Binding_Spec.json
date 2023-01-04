@@ -51,7 +51,7 @@
     {
       "id":"A string property can model the title of a tab!",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can bind a string property to the title of a tab.\n        "]
       },
@@ -68,7 +68,7 @@
     {
       "id":"Icons can be bound to tab headers dynamically.",
       "result":"PASS",
-      "duration":"0.006 seconds",
+      "duration":"0.007 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can bind an icon property to the icon of a tab.\n        "]
       },

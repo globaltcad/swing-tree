@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.085 seconds"
+    "duration":"0.083 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"Multiple properties can be modelled through the \"Vars\" and \"Vals\" classes.",
       "result":"PASS",
-      "duration":"0.017 seconds",
+      "duration":"0.014 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -229,7 +229,7 @@
     {
       "id":"The display action of a property or list of properties will not be called if they report \"canBeRemoved()\"",
       "result":"PASS",
-      "duration":"0.008 seconds",
+      "duration":"0.007 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -290,7 +290,7 @@
     {
       "id":"Lists of properties can be sorted using a custom comparator through the \"sort\" method.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -330,7 +330,7 @@
     {
       "id":"You can create a \"Vars\" list from a regular List of properties.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -347,7 +347,7 @@
     {
       "id":"A list of properties can be turned into lists, sets or maps using various convenience methods.",
       "result":"PASS",
-      "duration":"0.009 seconds",
+      "duration":"0.012 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The \"Vals\" class has a number of convenience methods for turning the list of properties into\n            immutable lists, sets or maps. \n            These methods make property lists more compatible with the rest of the Java ecosystem.\n        "]
       },
@@ -383,7 +383,7 @@
     {
       "id":"The \"makeDistinct\" method on a mutable list of properties modifies the list in-place.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The \"makeDistinct\" method makes sure that there are only unique values in the Vals list.\n            It does this by removing all duplicates from the list.\n            This is especially useful when you use the properties to model \n            combo box or radio button selections.\n            This modification will be reported to all \"show\" listeners,\n            which are usually used to update the UI.\n        "]
       },

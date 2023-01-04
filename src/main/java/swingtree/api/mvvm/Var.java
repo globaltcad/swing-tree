@@ -150,15 +150,15 @@ public interface Var<T> extends Val<T>
 	 *
 	 * @param mapper the mapping function to apply to an item, if present
 	 * @return the result of applying an {@code Optional}-bearing mapping
-	 * @param <V> The type of the item returned from the mapping function
 	 */
-	@Override default <V> Var<V> map( java.util.function.Function<T, V> mapper ) {
+	@Override default Var<T> map( java.util.function.Function<T, T> mapper ) {
 		if ( !isPresent() )
-			return Var.ofNullable( (Class<V>) Void.class, null );
+			return Var.ofNullable( type(), null );
 
-		V newValue = mapper.apply( orElseNull() );
+		T newValue = mapper.apply( orElseNull() );
 		if ( newValue == null )
-			return Var.ofNullable( (Class<V>) Void.class, null );
+			return Var.ofNullable( type(), null );
+
 		return Var.of( newValue );
 	}
 

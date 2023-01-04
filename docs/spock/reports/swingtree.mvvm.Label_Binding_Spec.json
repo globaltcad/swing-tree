@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.043 seconds"
+    "duration":"0.041 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -108,7 +108,7 @@
     {
       "id":"You can bind a variable to the \"visible\" flag of a label.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that this works for all kind of UI nodes, not just labels.\n        "]
       },
@@ -131,7 +131,7 @@
     {
       "id":"A property can define the horizontal and vertical alignment of a label.",
       "result":"PASS",
-      "duration":"0.007 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
       },
@@ -177,7 +177,7 @@
     {
       "id":"You can dynamically model the font size of your labels using an integer based property.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"0.006 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
       },

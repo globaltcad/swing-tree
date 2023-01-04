@@ -4,12 +4,12 @@
   "narrative":"Properties are a powerful tool to model the state \n    as well as business logic of your UI without actually depending on it.\n    This is especially useful for testing your UIs logic.\n    Therefore properties are a root concept in the Swing-Tree library.\n    The decoupling between your UI and the UIs state and logic \n    is achieved by binding properties to UI components.\n    This specification shows you how to model UI state \n    and business logic using properties \n    and how to bind them to UI components.",
   "subjects":["swingtree.api.mvvm.Val","swingtree.api.mvvm.Var"],
   "statistics":{
-    "runs":"20",
+    "runs":"21",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.122 seconds"
+    "duration":"0.126 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -167,13 +167,13 @@
       "blocks":[
         {"kind":"given","text":"We create a property...","code":["Val<String> property = Val.of(\"Hello World\")"]},
 
-        {"kind":"expect","text":"We can map the property to another property.","code":["property.map { it.length() } == Val.of(11)"]},
+        {"kind":"expect","text":"We can map the property to another property.","code":["property.mapTo(Integer, it -> it.length() ) == Val.of(11)"]},
 
         {"kind":"and","text":"We can check if the property is empty.","code":["property.isEmpty() == false"]},
 
         {"kind":"when","text":"We create a property that is empty...","code":["Val<String> empty = Val.ofNullable(String, null)"]},
 
-        {"kind":"then","text":"The property is empty, regardless of how we map it.","code":["empty.map( it -> it.length() ) == Val.ofNullable(Void, null)"]}
+        {"kind":"then","text":"The property is empty, regardless of how we map it.","code":["empty.mapTo(Integer, it -> it.length() ) == Val.ofNullable(Integer, null)"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -204,7 +204,7 @@
     {
       "id":"There are various kinds of convenience methods for creating live view of properties.",
       "result":"PASS",
-      "duration":"0.013 seconds",
+      "duration":"0.015 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -284,7 +284,7 @@
     {
       "id":"The equality and hash code of a property are based on its value, type and id!",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -305,7 +305,7 @@
     {
       "id":"Properties expose a state history in their property actions.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            When the view changes the state of a property and then triggers a model action, \n            the property will remember its previous state and store it in an internal history.\n            This history will be exposed to the property action, and it can be used to undo \n            or redo changes to the property.\n        "]
       },
@@ -343,7 +343,7 @@
     {
       "id":"We can search for a previous state of a property in its history.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can query the history of a property for a previous state of the property\n            using the \"previous(int)\" method.\n            It returns an optional that contains the previous state if it is found.\n            Note that the index passed to the method is relative to the current state,\n            so a value of 0 will return the current state, a value of 1 will return the\n            previous state, and so on. \n        "]
       },
@@ -364,7 +364,7 @@
     {
       "id":"The UI uses the \"act(T)\" method to change the property state to avoid feedback looping.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Unfortunately Swing does not allow us to implement models for all types of UI components.\n            A JButton for example does not have a model that we can use to bind to a property.\n            Instead Swing-Tree has to perform precise updates to the UI components without\n            triggering any events.\n            Therefore the UI uses the \"act(T)\" method to change the property state and triggers the\n            action of the property. On the contrary the \"set(T)\" method is used to change the state\n            of a property without triggering the action, but it will trigger the \"onShow\" actions / listeners\n            of the property. This is so that the UI can update itself when the user changes the\n            state of a property.\n        "]
       },
@@ -427,7 +427,7 @@
     {
       "id":"A property can be converted to an Optional.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            A property can be converted to an Optional using the \"toOptional()\" method.\n            This is useful when you want to use the Optional API to query the state of the property.\n        "]
       },
@@ -441,6 +441,23 @@
         {"kind":"when","text":"The try the same using a nullable property.","code":["property = Var.ofNullable(String, null)","optional = property.toOptional()"]},
 
         {"kind":"then","text":"The Optional is empty.","code":["optional.isEmpty()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Conveniently compare the item of a property with another item using \"is\", \"isOneOf\" or \"isNot\"",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Properties are all about the item they hold, so there needs to be a convenient way\n            to check whether the item of a property is equal to another item.\n            The \"is\" method is used to check if the item of a property is equal to another item\n            and the \"isNot\" method is the exact opposite, it checks if the item of a property\n            is NOT equal to another item.\n            The \"isOneOf\" method is used to check if the item of a property is equal to one of the\n            items in a varargs list.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property with a non-null item.","code":["var property = Var.of(\"Hello World\")"]},
+
+        {"kind":"when","text":"We compare the item of the property with another item using the above mentioned methods.","code":["var is1 = property.is(\"Hello World\")","var is2 = property.is(\"Hello World!\")","var isNot1 = property.isNot(\"Hello World\")","var isNot2 = property.isNot(\"Hello World!\")","var isOneOf1 = property.isOneOf(\"Hello World\", \"Goodbye World\")","var isOneOf2 = property.isOneOf(\"Hello World!\", \"Goodbye World\")"]},
+
+        {"kind":"then","text":"The results are as expected.","code":["is1","!is2","!isNot1","isNot2","isOneOf1","!isOneOf2"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

@@ -194,9 +194,8 @@ public interface Val<T>
 	 *
 	 * @param mapper the mapping function to apply to an item, if present
 	 * @return A property that is created from this property based on the provided mapping function.
-	 * @param <V> The type of the item returned from the mapping function
 	 */
-	<V> Val<V> map( java.util.function.Function<T, V> mapper );
+	Val<T> map( java.util.function.Function<T, T> mapper );
 
 	/**
 	 * @param type The type of the item returned from the mapping function
@@ -233,7 +232,7 @@ public interface Val<T>
 	 * @param mapper the mapping function to turn the item of this property to a String, if present
 	 * @return A property that is a live view of this property based on the provided mapping function.
 	 */
-	default Val<String> viewAsString( java.util.function.Function<T, String> mapper ) {
+	default Val<String> viewAsString( Function<T, String> mapper ) {
 		return viewAs( String.class, mapper );
 	}
 
@@ -320,7 +319,7 @@ public interface Val<T>
 	 *
 	 * @return The {@link String} representation of the item wrapped by an implementation of this interface.
 	 */
-	default String itemAsString() { return this.map(String::valueOf).orElseNullable(EMPTY); }
+	default String itemAsString() { return this.mapTo(String.class, String::valueOf).orElseNullable(EMPTY); }
 
 	/**
 	 *  This method returns a {@link String} representation of the type of the wrapped item.
@@ -406,7 +405,7 @@ public interface Val<T>
 	 * @param id The id of the property.
 	 * @return A new {@link Val} instance with the given id.
 	 */
-	Val<T> withId(String id );
+	Val<T> withId( String id );
 
 	/**
 	 * @return True when this property has not been assigned an id.

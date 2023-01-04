@@ -109,7 +109,7 @@ abstract class AbstractValue<T> implements Val<T>
 
     @Override
     public final String toString() {
-        String value = this.map(Object::toString).orElse("null");
+        String value = this.mapTo(String.class, Object::toString).orElse("null");
         String id = this.id() == null ? "?" : this.id();
         if ( id.equals(UNNAMED) ) id = "?";
         String type = ( type() == null ? "?" : type().getSimpleName() );
