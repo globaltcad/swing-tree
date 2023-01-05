@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.119 seconds"
+    "duration":"0.129 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -36,7 +36,7 @@
       "tags":{},"see":[],"extraInfo":["\n            Binding goes both ways, so when the property changes state through the \"set\" method\n            it will update the UI\n            using the \"show()\" method on the property (which you can also call manually for UI updates), \n            and when the UI is changed by the user, it will update the property for us\n            and trigger the property action (if present).\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A simple boolean property modelling a toggle state.","code":["boolean userDidToggle = false","Val<Boolean> toggled = Var.of(false)","                            .withAction({userDidToggle = true})"]},
+        {"kind":"given","text":"A simple boolean property modelling a toggle state.","code":["boolean userDidToggle = false","Val<Boolean> toggled = Var.of(false)","                            .onAct({userDidToggle = true})"]},
 
         {"kind":"when","text":"We create a toggle button using the \"toggleButton\" factory method and pass the property to it.","code":["var ui = UI.toggleButton(\"Toggle Me!\").isSelectedIf(toggled)"]},
 
@@ -85,7 +85,7 @@
     {
       "id":"Properties can be bound by subscribing to them using the \"onShow(..)\" method.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that bound Swing-Tree properties have side effects\n            when their state is changed through the \"set\" method, or\n            they are deliberately triggered to execute their side effects.\n            using the \"show()\" method.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
       },
@@ -94,7 +94,7 @@
 
         {"kind":"and","text":"Something we want to have a side effect on:","code":["var list = []"]},
 
-        {"kind":"when","text":"We subscribe to the property using the \"onShow(..)\" method.","code":["mutable.onShow { list.add(it) }"]},
+        {"kind":"when","text":"We subscribe to the property using the \"onShow(..)\" method.","code":["mutable.onShowItem { list.add(it) }"]},
 
         {"kind":"and","text":"We change the value of the property.","code":["mutable.set(\"Tofu\")"]},
 
@@ -129,18 +129,18 @@
     {
       "id":"The \"withID(..)\" method produces a new property with all bindings inherited.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The wither methods on properties are used to create new property instances\n            with the same value and bindings as the original property\n            but without side effects of the original property.\n            So if you add bindings to a withered property they will not affect the original property.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a property...","code":["Var<String> property = Var.of(\"Hello World\")"]},
 
-        {"kind":"and","text":"we bind 1 subscriber to the property.","code":["var list1 = []","property.onShow { list1.add(it) }"]},
+        {"kind":"and","text":"we bind 1 subscriber to the property.","code":["var list1 = []","property.onShowItem { list1.add(it) }"]},
 
         {"kind":"and","text":"We create a new property with a different id.","code":["Val<String> property2 = property.withId(\"XY\")"]},
 
-        {"kind":"and","text":"Another subscriber to the new property.","code":["var list2 = []","property2.onShow { list2.add(it) }"]},
+        {"kind":"and","text":"Another subscriber to the new property.","code":["var list2 = []","property2.onShowItem { list2.add(it) }"]},
 
         {"kind":"when","text":"We change the value of the original property.","code":["property.set(\"Tofu\")"]},
 
@@ -204,7 +204,7 @@
     {
       "id":"There are various kinds of convenience methods for creating live view of properties.",
       "result":"PASS",
-      "duration":"0.013 seconds",
+      "duration":"0.014 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -310,7 +310,7 @@
       "tags":{},"see":[],"extraInfo":["\n            When the view changes the state of a property and then triggers a model action, \n            the property will remember its previous state and store it in an internal history.\n            This history will be exposed to the property action, and it can be used to undo \n            or redo changes to the property.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We create a reference to catch the action delegate and a property with an action to set the reference...","code":["var delegate = null","Var<String> property = Var.of(\"Hello World\")","                            .withAction( it ->{","                                delegate = it","                            })"]},
+        {"kind":"given","text":"We create a reference to catch the action delegate and a property with an action to set the reference...","code":["var delegate = null","Var<String> property = Var.of(\"Hello World\")","                            .onAct(it ->{","                                delegate = it","                            })"]},
 
         {"kind":"when","text":"We change the property and trigger the action.","code":["property.set(\"Tofu\").act()"]},
 
@@ -331,7 +331,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We create a reference to catch the action delegate and a property with an action to set the reference...","code":["var delegate = null","Var<String> property = Var.of(\"Hello World\")","                            .withAction( it ->{","                                delegate = it","                            })"]},
+        {"kind":"given","text":"We create a reference to catch the action delegate and a property with an action to set the reference...","code":["var delegate = null","Var<String> property = Var.of(\"Hello World\")","                            .onAct(it ->{","                                delegate = it","                            })"]},
 
         {"kind":"when","text":"We change the property and trigger the action.","code":["property.set(\"Tofu\").act()"]},
 
@@ -348,7 +348,7 @@
       "tags":{},"see":[],"extraInfo":["\n            You can query the history of a property for a previous state of the property\n            using the \"previous(int)\" method.\n            It returns an optional that contains the previous state if it is found.\n            Note that the index passed to the method is relative to the current state,\n            so a value of 0 will return the current state, a value of 1 will return the\n            previous state, and so on. \n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We create a reference to catch the action delegate and a property with an action to set the reference...","code":["var delegate = null","Var<String> property = Var.of(\"Apple\")","                            .withAction( it ->{","                                delegate = it","                            })"]},
+        {"kind":"given","text":"We create a reference to catch the action delegate and a property with an action to set the reference...","code":["var delegate = null","Var<String> property = Var.of(\"Apple\")","                            .onAct(it ->{","                                delegate = it","                            })"]},
 
         {"kind":"when","text":"We change the property a few times and trigger the action again.","code":["property","    .set(\"Banana\")","    .set(\"Cherry\")","    .act()"]},
 
@@ -364,12 +364,12 @@
     {
       "id":"The UI uses the \"act(T)\" method to change the property state to avoid feedback looping.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Unfortunately Swing does not allow us to implement models for all types of UI components.\n            A JButton for example does not have a model that we can use to bind to a property.\n            Instead Swing-Tree has to perform precise updates to the UI components without\n            triggering any events.\n            Therefore the UI uses the \"act(T)\" method to change the property state and triggers the\n            action of the property. On the contrary the \"set(T)\" method is used to change the state\n            of a property without triggering the action, but it will trigger the \"onShow\" actions / listeners\n            of the property. This is so that the UI can update itself when the user changes the\n            state of a property.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A simple property with a view and model actions.","code":["var showListener = []","var modelListener = []","var property = Var.of(\":)\")","                    .withAction( it ->{","                        modelListener << it.current().orElseThrow()","                    })","property.onShow( it -> showListener << it )"]},
+        {"kind":"given","text":"A simple property with a view and model actions.","code":["var showListener = []","var modelListener = []","var property = Var.of(\":)\")","                    .onAct(it ->{","                        modelListener << it.current().orElseThrow()","                    })","property.onShowItem(it -> showListener << it )"]},
 
         {"kind":"when","text":"We change the state of the property using the \"set(T)\" method.","code":["property.set(\":(\")"]},
 

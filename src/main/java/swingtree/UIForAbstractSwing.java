@@ -76,7 +76,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param <T> The type of the value.
      */
     protected final <T> void _onShow( Val<T> val, Consumer<T> displayAction ) {
-        val.onShowThis(new UIAction<ValDelegate<T>>() {
+        val.onShow(new UIAction<ValDelegate<T>>() {
             @Override
             public void accept(ValDelegate<T> delegate) {
                 _doUI(() ->

@@ -10,8 +10,8 @@ import java.awt.*;
  */
 public class LoginViewModel
 {
-    private final Var<String> username = Var.of( "" ).withAction( v -> validate() );
-    private final Var<String> password = Var.of( "" ).withAction( v -> validate() );
+    private final Var<String> username = Var.of( "" ).onAct(v -> validate() );
+    private final Var<String> password = Var.of( "" ).onAct(v -> validate() );
     private final Var<String> feedback = Var.of( "" );
     private final Var<Boolean> buttonEnabled = Var.of( false );
     private final Var<String> buttonText = Var.of( "Login" );

@@ -243,7 +243,7 @@ class Properties_List_Spec extends Specification
         and : 'A list where we are going to record changes.'
             var changes = []
         and : 'Now we register a "show" listeners on both objects.'
-            prop.onShowThis(new UIAction<ValDelegate<Integer>>() {
+            prop.onShow(new UIAction<ValDelegate<Integer>>() {
                 @Override
                 void accept(ValDelegate<Integer> delegate) {
                     changes << "Something happened to the property."

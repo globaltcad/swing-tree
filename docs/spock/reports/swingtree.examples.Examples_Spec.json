@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"1.003 seconds"
+    "duration":"1.192 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"The advanced UI define in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.566 seconds",
+      "duration":"0.687 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -37,7 +37,7 @@
     {
       "id":"The form UI define in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.129 seconds",
+      "duration":"0.143 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -54,7 +54,7 @@
     {
       "id":"The login example UI defined in the examples can be created.",
       "result":"PASS",
-      "duration":"0.011 seconds",
+      "duration":"0.012 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -67,7 +67,7 @@
     {
       "id":"The user registration example UI defined in the examples can be created.",
       "result":"PASS",
-      "duration":"0.078 seconds",
+      "duration":"0.095 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -80,7 +80,7 @@
     {
       "id":"The list examples UI defined in the examples can be created.",
       "result":"PASS",
-      "duration":"0.011 seconds",
+      "duration":"0.017 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -93,7 +93,7 @@
     {
       "id":"The settings example UI defined in the examples can be created.",
       "result":"PASS",
-      "duration":"0.012 seconds",
+      "duration":"0.013 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -106,7 +106,7 @@
     {
       "id":"The spinners example UI defined in the examples can be created.",
       "result":"PASS",
-      "duration":"0.057 seconds",
+      "duration":"0.069 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -119,7 +119,7 @@
     {
       "id":"The list rendering example UI defined in the examples can be created.",
       "result":"PASS",
-      "duration":"0.017 seconds",
+      "duration":"0.009 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -132,7 +132,7 @@
     {
       "id":"The calculator UI defined in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.035 seconds",
+      "duration":"0.049 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -147,7 +147,7 @@
     {
       "id":"The simple Table-UI example has the expected state.",
       "result":"PASS",
-      "duration":"0.059 seconds",
+      "duration":"0.066 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -172,7 +172,7 @@
     {
       "id":"The todo app UI defined in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.014 seconds",
+      "duration":"0.017 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

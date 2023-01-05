@@ -19,27 +19,27 @@ import java.util.function.Consumer;
 public abstract class AbstractVariable<T> extends AbstractValue<T> implements Var<T>
 {
 	static <T> Var<T> ofNullable( boolean immutable, Class<T> type, T value ) {
-		return new AbstractVariable<T>( immutable, type, value, UNNAMED, null, true ){};
+		return new AbstractVariable<T>( immutable, type, value, UNNAMED, Collections.emptyList(), true ){};
 	}
 
 	static <T> Var<T> of( boolean immutable, T iniValue ) {
 		Objects.requireNonNull(iniValue);
-		return new AbstractVariable<T>( immutable, (Class<T>) iniValue.getClass(), iniValue, UNNAMED, null, false ){};
+		return new AbstractVariable<T>( immutable, (Class<T>) iniValue.getClass(), iniValue, UNNAMED, Collections.emptyList(), false ){};
 	}
 
 	static Var<Viewable> of( boolean immutable, Viewable iniValue ) {
 		Objects.requireNonNull(iniValue);
-		return new AbstractVariable<Viewable>( immutable, Viewable.class, iniValue, UNNAMED, null, false ){};
+		return new AbstractVariable<Viewable>( immutable, Viewable.class, iniValue, UNNAMED, Collections.emptyList(), false ){};
 	}
 
 	static Var<Border> of( boolean immutable, Border iniValue ) {
 		Objects.requireNonNull(iniValue);
-		return new AbstractVariable<Border>( immutable, Border.class, iniValue, UNNAMED, null, false ){};
+		return new AbstractVariable<Border>( immutable, Border.class, iniValue, UNNAMED, Collections.emptyList(), false ){};
 	}
 
 	private final boolean _isImmutable;
 	private final List<Val<T>> _history = new ArrayList<>(17);
-	private final UIAction<ValDelegate<T>> _action;
+	protected final List<UIAction<ValDelegate<T>>> _actions = new ArrayList<>();
 	private final List<Consumer<T>> _viewers = new ArrayList<>(0);
 
 
@@ -49,10 +49,10 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 			Class<T> type,
 			T iniValue,
 			String name,
-			UIAction<ValDelegate<T>> action,
+			List<UIAction<ValDelegate<T>>> actions,
 			boolean allowsNull
 	) {
-		this( immutable, type, iniValue, name, action, Collections.emptyList(), allowsNull );
+		this( immutable, type, iniValue, name, actions, Collections.emptyList(), allowsNull );
 	}
 
 	protected AbstractVariable(
@@ -60,22 +60,23 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 		Class<T> type,
 		T iniValue,
 		String id,
-		UIAction<ValDelegate<T>> action,
+		List<UIAction<ValDelegate<T>>> actions,
 		List<UIAction<ValDelegate<T>>> viewActions,
 		boolean allowsNull
 	) {
 		super( type, id, allowsNull, iniValue );
 		Objects.requireNonNull(id);
+		Objects.requireNonNull(actions);
 		_isImmutable = immutable;
-		_action = ( action == null ? v -> {} : action );
 		_viewActions.addAll(viewActions);
+		_actions.addAll(actions);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override public Var<T> withId( String id ) {
-		AbstractVariable<T> newVar = new AbstractVariable<T>( _isImmutable, _type, _value, id, null, _allowsNull ){};
+		AbstractVariable<T> newVar = new AbstractVariable<T>( _isImmutable, _type, _value, id, _actions, _allowsNull ){};
 		newVar._viewActions.addAll(_viewActions);
 		return newVar;
 	}
@@ -83,18 +84,17 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override public Var<T> withAction( UIAction<ValDelegate<T>> action ) {
+	@Override public Var<T> onAct( UIAction<ValDelegate<T>> action ) {
 		Objects.requireNonNull(action);
-		AbstractVariable<T> newVar = new AbstractVariable<T>( _isImmutable, _type, _value, _id, action, _allowsNull ){};
-		newVar._viewActions.addAll(_viewActions);
-		return newVar;
+		_actions.add(action);
+		return this;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override public Var<T> act() {
-		_action.accept(_createDelegate());
+		_triggerActions( _actions, false );
 		_viewers.forEach( v -> v.accept(_value) );
 		return this;
 	}
@@ -105,6 +105,7 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 		// it might be accessed from a different thread! (e.g. Swing EDT or Application Thread)
 		AbstractVariable<T> clone = _clone();
 		clone._viewActions.addAll(_viewActions);
+		clone._viewers.addAll(_viewers);
 		List<Val<T>> reverseHistory = new ArrayList<>(AbstractVariable.this._history);
 		Collections.reverse(reverseHistory);
 		return new ValDelegate<T>() {
@@ -121,7 +122,7 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 	}
 
 	@Override protected AbstractVariable<T> _clone() {
-		return new AbstractVariable<T>( _isImmutable, _type, _value, _id, _action, _allowsNull ){};
+		return new AbstractVariable<T>( _isImmutable, _type, _value, _id, _actions, _allowsNull ){};
 	}
 
 	/**
@@ -173,7 +174,7 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 	@Override public final <U> Val<U> viewAs( Class<U> type, java.util.function.Function<T, U> mapper ) {
 		Var<U> var = mapTo(type, mapper);
 		// Now we register a live update listener to this property
-		this.onShow( v -> var.set( mapper.apply( v ) ));
+		this.onShowItem(v -> var.set( mapper.apply( v ) ));
 		_viewers.add( v -> var.act( mapper.apply( v ) ) );
 		return var;
 	}

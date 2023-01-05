@@ -112,19 +112,19 @@ public interface Var<T> extends Val<T>
 	@Override Var<T> withId( String id );
 
 	/**
-	 *  Use this method to create a new property with an action which is supposed to be triggered
+	 *  Use this method to add an action to this property which is supposed to be triggered
 	 *  when the UI changes the item of this property through
 	 *  the {@code Var::act(T)} method, or simply when it is explicitly
 	 *  triggered by the {@code Var::act(T)} method.
 	 *
 	 * @param action The action to be triggered when {@code Var::act()} or {@code Var::act(T)} is called.
-	 * @return A new {@link Var} instance which is identical to this one, except that it has the given action.
+	 * @return This very property instance, in order to enable method chaining.
 	 */
-	Var<T> withAction( UIAction<ValDelegate<T>> action );
+	Var<T> onAct( UIAction<ValDelegate<T>> action );
 
 	/**
 	 *  Triggers the action associated with this property, if one was
-	 *  set using {@link #withAction(UIAction)}.
+	 *  set using {@link #onAct(UIAction)}.
 	 *  This method is intended to be used in the UI
 	 *  to indicate that the user has changed the item of the property
 	 *  not your view model.

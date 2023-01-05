@@ -1,5 +1,6 @@
 package example;
 
+import swingtree.api.mvvm.Val;
 import swingtree.api.mvvm.Var;
 
 import java.awt.*;
@@ -10,16 +11,18 @@ public class UserRegistrationViewModel
         NOT_SELECTED, MALE, FEMALE, OTHER
     }
 
+    private final Var<String> username           = Var.of("").onAct(it -> validateAll() );
+    private final Var<String> password           = Var.of("").onAct(it -> validateAll() );
+    private final Var<String> email              = Var.of("").onAct(it -> validateAll() );
+    private final Var<Gender> gender             = Var.of(Gender.NOT_SELECTED).onAct(it -> validateAll() );
+    private final Var<Boolean> termsAccepted     = Var.of(false).onAct(it -> validateAll() );
+    private final Var<String> feedback           = Var.of("");
+    private final Var<Color> feedbackColor       = Var.of(Color.BLACK);
+    private final Var<Boolean> allInputsDisabled = Var.of(false);
+
+
     public UserRegistrationViewModel() { validateAll(); }
 
-    private final Var<String> username           = Var.of("").withAction( it -> validateAll() );
-    private final Var<String> password           = Var.of("").withAction( it -> validateAll() );
-    private final Var<String> email              = Var.of("").withAction( it -> validateAll() );
-    private final Var<String> feedback           = Var.of("").withAction( it -> validateAll() );
-    private final Var<Color> feedbackColor       = Var.of(Color.BLACK).withAction( it -> validateAll() );
-    private final Var<Gender> gender             = Var.of(Gender.NOT_SELECTED).withAction( it -> validateAll() );
-    private final Var<Boolean> termsAccepted     = Var.of(false).withAction( it -> validateAll() );
-    private final Var<Boolean> allInputsDisabled = Var.of(false).withAction( it -> validateAll() );
 
     public Var<String> username() { return username; }
     
@@ -27,17 +30,18 @@ public class UserRegistrationViewModel
     
     public Var<String> email() { return email; }
     
-    public Var<String> feedback() { return feedback; }
-    
-    public Var<Color> feedbackColor() { return feedbackColor; }
-    
     public Var<Gender> gender() { return gender; }
     
     public Var<Boolean> termsAccepted() { return termsAccepted; }
-    
-    public Var<Boolean> allInputsDisabled() { return allInputsDisabled; }
-    
-    private String valididatePassword() {
+
+    public Val<String> feedback() { return feedback; }
+
+    public Val<Color> feedbackColor() { return feedbackColor; }
+
+    public Val<Boolean> allInputsDisabled() { return allInputsDisabled; }
+
+
+    private String validatePassword() {
         if ( password.get().length() < 8 )
             return "Password must be at least 8 characters long";
         if ( !password.get().matches(".*[A-Z].*") )
@@ -71,7 +75,7 @@ public class UserRegistrationViewModel
     
     private String generateValidationMessage() {
         String username = validateUsername();
-        String password = valididatePassword();
+        String password = validatePassword();
         String email    = validateEmail();
         String terms    = validateTerms();
         String gender   = validateGender();

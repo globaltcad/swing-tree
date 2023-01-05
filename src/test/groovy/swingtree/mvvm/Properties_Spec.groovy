@@ -48,7 +48,7 @@ class Properties_Spec extends Specification
         given : 'A simple boolean property modelling a toggle state.'
             boolean userDidToggle = false
             Val<Boolean> toggled = Var.of(false)
-                                        .withAction({userDidToggle = true})
+                                        .onAct({userDidToggle = true})
 
         when : 'We create a toggle button using the "toggleButton" factory method and pass the property to it.'
             var ui = UI.toggleButton("Toggle Me!").isSelectedIf(toggled)
@@ -115,7 +115,7 @@ class Properties_Spec extends Specification
         and : 'Something we want to have a side effect on:'
             var list = []
         when : 'We subscribe to the property using the "onShow(..)" method.'
-            mutable.onShow { list.add(it) }
+            mutable.onShowItem { list.add(it) }
         and : 'We change the value of the property.'
             mutable.set("Tofu")
         and : 'Then we wait for the EDT to complete the UI modifications...'
@@ -154,12 +154,12 @@ class Properties_Spec extends Specification
             Var<String> property = Var.of("Hello World")
         and : 'we bind 1 subscriber to the property.'
             var list1 = []
-            property.onShow { list1.add(it) }
+            property.onShowItem { list1.add(it) }
         and : 'We create a new property with a different id.'
             Val<String> property2 = property.withId("XY")
         and : 'Another subscriber to the new property.'
             var list2 = []
-            property2.onShow { list2.add(it) }
+            property2.onShowItem { list2.add(it) }
 
         when : 'We change the value of the original property.'
             property.set("Tofu")
@@ -339,7 +339,7 @@ class Properties_Spec extends Specification
         given : 'We create a reference to catch the action delegate and a property with an action to set the reference...'
             var delegate = null
             Var<String> property = Var.of("Hello World")
-                                        .withAction( it ->{
+                                        .onAct(it ->{
                                             delegate = it
                                         })
         when : 'We change the property and trigger the action.'
@@ -362,7 +362,7 @@ class Properties_Spec extends Specification
         given : 'We create a reference to catch the action delegate and a property with an action to set the reference...'
             var delegate = null
             Var<String> property = Var.of("Hello World")
-                                        .withAction( it ->{
+                                        .onAct(it ->{
                                             delegate = it
                                         })
         when : 'We change the property and trigger the action.'
@@ -385,7 +385,7 @@ class Properties_Spec extends Specification
         given : 'We create a reference to catch the action delegate and a property with an action to set the reference...'
             var delegate = null
             Var<String> property = Var.of("Apple")
-                                        .withAction( it ->{
+                                        .onAct(it ->{
                                             delegate = it
                                         })
         when : 'We change the property a few times and trigger the action again.'
@@ -425,10 +425,10 @@ class Properties_Spec extends Specification
             var showListener = []
             var modelListener = []
             var property = Var.of(":)")
-                                .withAction( it ->{
+                                .onAct(it ->{
                                     modelListener << it.current().orElseThrow()
                                 })
-            property.onShow( it -> showListener << it )
+            property.onShowItem(it -> showListener << it )
 
         when : 'We change the state of the property using the "set(T)" method.'
             property.set(":(")

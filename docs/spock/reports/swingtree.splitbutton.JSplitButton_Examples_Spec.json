@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"1.142 seconds"
+    "duration":"1.130 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -35,7 +35,7 @@
     {
       "id":"We can easily build a split button whose text becomes the current user selection:",
       "result":"PASS",
-      "duration":"0.110 seconds",
+      "duration":"0.086 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -54,7 +54,7 @@
     {
       "id":"We can easily build a split button where only one item text will have its text displayed:",
       "result":"PASS",
-      "duration":"0.220 seconds",
+      "duration":"0.215 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -81,7 +81,7 @@
     {
       "id":"We can register button click events for button items as well as the split button as a whole.",
       "result":"PASS",
-      "duration":"0.423 seconds",
+      "duration":"0.420 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -108,7 +108,7 @@
     {
       "id":"We can specify which item should be initially selected.",
       "result":"PASS",
-      "duration":"0.078 seconds",
+      "duration":"0.077 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -125,7 +125,7 @@
     {
       "id":"It is possible to select more than 1 item.",
       "result":"PASS",
-      "duration":"0.074 seconds",
+      "duration":"0.080 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -142,7 +142,7 @@
     {
       "id":"A button item can undo any multi-selection.",
       "result":"PASS",
-      "duration":"0.216 seconds",
+      "duration":"0.223 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -167,7 +167,7 @@
     {
       "id":"We can build a JSplitButton and add components to it.",
       "result":"PASS",
-      "duration":"0.008 seconds",
+      "duration":"0.014 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that adding components to a JSplitButton is not the same as \n            in a normal JButton. The components are added to the popup menu\n            and not to the button itself.\n            This is because the JSplitButton is a composite component and\n            the button itself is not a container.\n        "]
       },

@@ -15,7 +15,7 @@ import java.util.function.Supplier;
  * 	to dynamically update UI components for you.
  * 	The API of this is very similar to the {@link Optional} API in the
  * 	sense that it is a wrapper around a single item, which may also be missing (null).
- * 	Use the {@link #onShow(UIAction)} method to register a callbacks which
+ * 	Use the {@link #onShowItem(UIAction)} method to register a callbacks which
  * 	will be called when the {@link #show()} method is called.
  * 	<p>
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
@@ -441,7 +441,7 @@ public interface Val<T>
 	 * @param displayAction The lambda which will be called whenever the item wrapped by this {@link Var} changes.
 	 * @return The {@link Val} instance itself.
 	 */
-	Val<T> onShowThis( UIAction<ValDelegate<T>> displayAction );
+	Val<T> onShow( UIAction<ValDelegate<T>> displayAction );
 
 	/**
 	 *  Use this to register an observer lambda which will be called whenever the item
@@ -451,8 +451,8 @@ public interface Val<T>
 	 * @param displayAction The lambda which will be called whenever the item wrapped by this {@link Var} changes.
 	 * @return The {@link Val} instance itself.
 	 */
-	default Val<T> onShow( UIAction<T> displayAction ) {
-		return onShowThis(new UIAction<ValDelegate<T>>() {
+	default Val<T> onShowItem( UIAction<T> displayAction ) {
+		return onShow(new UIAction<ValDelegate<T>>() {
 			@Override
 			public void accept(ValDelegate<T> delegate) {
 				displayAction.accept( delegate.current().orElseNullable(null));
@@ -462,8 +462,8 @@ public interface Val<T>
 	}
 
 	/**
-	 *  Triggers the observer lambdas registered through the {@link #onShow(UIAction)}
-	 *  as well as the {@link #onShowThis(swingtree.api.UIAction)} methods.
+	 *  Triggers the observer lambdas registered through the {@link #onShowItem(UIAction)}
+	 *  as well as the {@link #onShow(swingtree.api.UIAction)} methods.
 	 *  This method is called automatically by the {@code Var::set(T)} method,
 	 *  and it is supposed to be used by the UI to update the UI components.
 	 *  This is in essence how binding works in Swing-Tree.

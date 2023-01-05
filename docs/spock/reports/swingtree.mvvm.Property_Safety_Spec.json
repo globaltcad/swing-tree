@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.020 seconds"
+    "duration":"0.023 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -54,7 +54,7 @@
     {
       "id":"A \"Val\" instance is immutable.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            A \"Val\" instance is immutable because it is a wrapper around a\n            value that is not intended to be changed. If the value is\n            intended to be changed, then the developer should use a \"Var\"\n            type instead.\n            The \"Val\" interface is a supertype of the \"Var\" interface, so it is\n            mainly used as a way to protect mutable properties from\n            being accidentally changed outside of the intended scope.\n            Creating a Val from its factory method \"of\" will always return\n            an immutable instance.\n        ","\n            A \"Val\" instance is immutable because it is a wrapper around a\n            value that is not intended to be changed. If the value is\n            intended to be changed, then the developer should use a \"Var\"\n            type instead.\n            The \"Val\" interface is a supertype of the \"Var\" interface, so it is\n            mainly used as a way to protect mutable properties from\n            being accidentally changed outside of the intended scope.\n            Creating a Val from its factory method \"of\" will always return\n            an immutable instance.\n        "]
       },

@@ -64,12 +64,12 @@ abstract class AbstractValue<T> implements Val<T>
     /**
      * {@inheritDoc}
      */
-    public T orElseNullable(T other) { return _value != null ? _value : other; }
+    public T orElseNullable( T other ) { return _value != null ? _value : other; }
 
     /**
      * {@inheritDoc}
      */
-    @Override public Val<T> onShowThis( UIAction<ValDelegate<T>> displayAction ) {
+    @Override public Val<T> onShow( UIAction<ValDelegate<T>> displayAction ) {
         _viewActions.add(displayAction);
         return this;
     }
@@ -78,21 +78,25 @@ abstract class AbstractValue<T> implements Val<T>
      * {@inheritDoc}
      */
     @Override
-    public Val<T> show() {
+    public Val<T> show() { _triggerActions( _viewActions, true ); return this; }
+
+    protected void _triggerActions( List<UIAction<ValDelegate<T>>> actions, boolean runInGUIThread ) {
         List<UIAction<ValDelegate<T>>> removableActions = new ArrayList<>();
-        for ( UIAction<ValDelegate<T>> action : new ArrayList<>(_viewActions) ) // We copy the list to avoid concurrent modification
+        for ( UIAction<ValDelegate<T>> action : new ArrayList<>(actions) ) // We copy the list to avoid concurrent modification
             try {
                 if ( action.canBeRemoved() )
                     removableActions.add(action);
                 else {
                     ValDelegate<T> delegate = _createDelegate();
-                    UI.run( () -> action.accept(delegate) );
+                    if ( runInGUIThread )
+                        UI.run( () -> action.accept(delegate) );
+                    else
+                        action.accept(delegate);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        _viewActions.removeAll(removableActions);
-        return this;
+        actions.removeAll(removableActions);
     }
 
 

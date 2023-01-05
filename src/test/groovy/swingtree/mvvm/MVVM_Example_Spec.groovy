@@ -64,7 +64,7 @@ class MVVM_Example_Spec extends Specification
     {
         given : 'We instantiate the "view model" in the form of a single property.'
             var pressedStates = []
-            Var<Boolean> buttonPressed = Var.of(false).withAction({pressedStates.add(it.current().get()) })
+            Var<Boolean> buttonPressed = Var.of(false).onAct({pressedStates.add(it.current().get()) })
         when : 'We create a view for our view model...'
             var ui = UI.button("Press me!").isPressedIf(buttonPressed)
 
@@ -83,7 +83,7 @@ class MVVM_Example_Spec extends Specification
     {
         given : 'We instantiate the "view model" in the form of a single property.'
             boolean actionPerformed = false
-            Var<Boolean> buttonPressed = Var.of(false).withAction({actionPerformed = true})
+            Var<Boolean> buttonPressed = Var.of(false).onAct({actionPerformed = true})
         when : 'We create a view for our view model...'
             var ui = UI.button("Press me!").isSelectedIf(buttonPressed)
 
@@ -153,7 +153,7 @@ class MVVM_Example_Spec extends Specification
         """
         given : 'We instantiate the "view model" in the form of a single property holding an example enum.'
             boolean actionPerformed = false
-            Var<Size> selected = Var.of(Size.SMALL).withAction({actionPerformed = true})
+            Var<Size> selected = Var.of(Size.SMALL).onAct({actionPerformed = true})
         expect : 'The enum we use for demonstration has the following values.'
             Size.values() == [Size.SMALL, Size.MEDIUM, Size.LARGE]
 
@@ -183,7 +183,7 @@ class MVVM_Example_Spec extends Specification
         """
         given : 'We instantiate the "view model" in the form of a single property holding an example enum.'
             boolean actionPerformed = false
-            Var<Option> selected = Var.of(Option.YES).withAction({actionPerformed = true})
+            Var<Option> selected = Var.of(Option.YES).onAct({actionPerformed = true})
         expect : 'The enum we use for demonstration has the following values.'
             Option.values() == [Option.YES, Option.NO, Option.MAYBE]
 
@@ -216,7 +216,7 @@ class MVVM_Example_Spec extends Specification
         """
         given : 'We instantiate the "view model" in the form of a single property holding a string.'
             boolean actionPerformed = false
-            Var<String> selected = Var.of("Tofu").withAction({actionPerformed = true})
+            Var<String> selected = Var.of("Tofu").onAct({actionPerformed = true})
         when : 'We create a view for our view model...'
             var ui = UI.comboBox("Tofu", "Tempeh", "Seitan").withSelectedItem(selected)
 
