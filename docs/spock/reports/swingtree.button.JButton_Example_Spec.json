@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"3.206 seconds"
+    "duration":"0.341 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can easily create a button with an associated action:",
       "result":"PASS",
-      "duration":"1.838 seconds",
+      "duration":"0.093 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -37,7 +37,7 @@
     {
       "id":"A button will delegate its siblings within actions:",
       "result":"PASS",
-      "duration":"0.297 seconds",
+      "duration":"0.116 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -58,7 +58,7 @@
     {
       "id":"We can go through the entire siblinghood, including the current button!",
       "result":"PASS",
-      "duration":"0.752 seconds",
+      "duration":"0.123 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

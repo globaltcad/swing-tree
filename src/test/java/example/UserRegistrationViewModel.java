@@ -10,14 +10,16 @@ public class UserRegistrationViewModel
         NOT_SELECTED, MALE, FEMALE, OTHER
     }
 
-    private final Var<String> username = Var.of("");
-    private final Var<String> password = Var.of("");
-    private final Var<String> email = Var.of("");
-    private final Var<String> feedback = Var.of("");
-    private final Var<Color> feedbackColor = Var.of(Color.BLACK);
-    private final Var<Gender> gender = Var.of(Gender.NOT_SELECTED);
-    private final Var<Boolean> termsAccepted = Var.of(false);
-    private final Var<Boolean> allInputsDisabled = Var.of(false);
+    public UserRegistrationViewModel() { validateAll(); }
+
+    private final Var<String> username           = Var.of("").withAction( it -> validateAll() );
+    private final Var<String> password           = Var.of("").withAction( it -> validateAll() );
+    private final Var<String> email              = Var.of("").withAction( it -> validateAll() );
+    private final Var<String> feedback           = Var.of("").withAction( it -> validateAll() );
+    private final Var<Color> feedbackColor       = Var.of(Color.BLACK).withAction( it -> validateAll() );
+    private final Var<Gender> gender             = Var.of(Gender.NOT_SELECTED).withAction( it -> validateAll() );
+    private final Var<Boolean> termsAccepted     = Var.of(false).withAction( it -> validateAll() );
+    private final Var<Boolean> allInputsDisabled = Var.of(false).withAction( it -> validateAll() );
 
     public Var<String> username() { return username; }
     
@@ -125,6 +127,10 @@ public class UserRegistrationViewModel
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public boolean successfullyRegistered() {
+        return feedback.get().equals("Registration successful!");
     }
     
     public void reset() {

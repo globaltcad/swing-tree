@@ -22,12 +22,10 @@ public class UserRegistrationView extends JPanel
                 .add(label("Username"))
                 .add(GROW_X,
                     textField(vm.username()).isEnabledIfNot(vm.allInputsDisabled())
-                    .onKeyTyped( it -> vm.validateAll() )
                 )
                 .add(label("Password"))
                 .add(GROW_X,
                     passwordField(vm.password()).isEnabledIfNot(vm.allInputsDisabled())
-                    .onKeyTyped( it -> vm.validateAll() )
                 )
             )
             .add(GROW,
@@ -35,7 +33,6 @@ public class UserRegistrationView extends JPanel
                 .add(label("Email"))
                 .add(GROW_X,
                     textField(vm.email()).isEnabledIfNot(vm.allInputsDisabled())
-                    .onKeyTyped( it -> vm.validateAll() )
                 )
                 .add(label("Gender"))
                 .add(GROW_X,
@@ -50,7 +47,6 @@ public class UserRegistrationView extends JPanel
                               .toLowerCase()
                         )
                     )
-                    .onSelection( it -> vm.validateAll() )
                 )
             )
             .add(GROW_X,
@@ -58,7 +54,6 @@ public class UserRegistrationView extends JPanel
                  .add(GROW_X,
                      checkBox("I accept the terms of service!", vm.termsAccepted())
                      .isEnabledIfNot(vm.allInputsDisabled())
-                     .onClick( it -> vm.validateAll() )
                  )
                  .add(GROW_X,
                      button("Register").isEnabledIfNot(vm.allInputsDisabled())
@@ -77,7 +72,6 @@ public class UserRegistrationView extends JPanel
             )
             .add(GROW_X.and(SPAN), button("RESET").onClick( it -> vm.reset() ))
         );
-        vm.validateAll();
     }
 
     public static void main( String[] args ) {
