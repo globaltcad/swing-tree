@@ -3,7 +3,7 @@ package swingtree.threading
 import swingtree.SimpleDelegate
 import swingtree.EventProcessor
 import swingtree.UI
-import swingtree.api.UIAction
+import swingtree.api.mvvm.Action
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
@@ -82,9 +82,9 @@ class Thread_Mode_Spec extends Specification
     }
 
     def 'Inside an event lambda we can not access the UI from a background thread.'(
-        String problem,
-        UIAction<SimpleDelegate<JButton, ActionEvent>> unsafeAccess,
-        UIAction<SimpleDelegate<JButton, ActionEvent>> safeAccess
+            String problem,
+            Action<SimpleDelegate<JButton, ActionEvent>> unsafeAccess,
+            Action<SimpleDelegate<JButton, ActionEvent>> safeAccess
     ) {
         reportInfo """
                 The event delegate (which is passed to things like `onClick` actions) 

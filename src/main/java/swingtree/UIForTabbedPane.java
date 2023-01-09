@@ -1,6 +1,6 @@
 package swingtree;
 
-import swingtree.api.UIAction;
+import swingtree.api.mvvm.Action;
 import swingtree.api.mvvm.Val;
 import swingtree.api.mvvm.Var;
 
@@ -211,13 +211,13 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
         private final List<WeakReference<JComponent>> ownerRefs = new ArrayList<>();
         private final WeakReference<JTabbedPane> paneRef;
         private final Supplier<Integer> indexFinder;
-        private final UIAction<SimpleDelegate<JTabbedPane, MouseEvent>> mouseClickAction;
+        private final Action<SimpleDelegate<JTabbedPane, MouseEvent>> mouseClickAction;
 
 
         private TabMouseClickListener(
             JTabbedPane pane,
             Supplier<Integer> indexFinder,
-            UIAction<SimpleDelegate<JTabbedPane, MouseEvent>> mouseClickAction
+            Action<SimpleDelegate<JTabbedPane, MouseEvent>> mouseClickAction
         ) {
             this.paneRef = new WeakReference<>(pane);
             this.indexFinder = indexFinder;
@@ -264,16 +264,16 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
     }
 
     /**
-     * Adds an {@link UIAction} to the underlying {@link JTabbedPane}
+     * Adds an {@link Action} to the underlying {@link JTabbedPane}
      * through an {@link javax.swing.event.ChangeListener},
      * which will be called when the state of the tabbed pane changes.
      * For more information see {@link JTabbedPane#addChangeListener(javax.swing.event.ChangeListener)}.
      *
-     * @param onChange The {@link UIAction} that will be called through the underlying change event.
+     * @param onChange The {@link Action} that will be called through the underlying change event.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForTabbedPane<P> onChange( UIAction<SimpleDelegate<P, ChangeEvent>> onChange ) {
-        NullUtil.nullArgCheck(onChange, "onChange", UIAction.class);
+    public final UIForTabbedPane<P> onChange( Action<SimpleDelegate<P, ChangeEvent>> onChange ) {
+        NullUtil.nullArgCheck(onChange, "onChange", Action.class);
         P pane = getComponent();
         _onChange(e -> _doApp(()->onChange.accept(new SimpleDelegate<>(pane, e, this::getSiblinghood))));
         return this;

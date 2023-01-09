@@ -2,7 +2,7 @@ package swingtree;
 
 import swingtree.api.ListEntryDelegate;
 import swingtree.api.ListEntryRenderer;
-import swingtree.api.UIAction;
+import swingtree.api.mvvm.Action;
 import swingtree.api.mvvm.Vals;
 import swingtree.api.mvvm.ValsDelegate;
 
@@ -126,16 +126,16 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
     }
 
     /**
-     * Adds an {@link UIAction} to the underlying {@link JList}
+     * Adds an {@link Action} to the underlying {@link JList}
      * through an {@link javax.swing.event.ListSelectionListener},
      * which will be called when a list selection has been made.
      * {see JList#addListSelectionListener(ListSelectionListener)}.
      *
-     * @param action The {@link UIAction} that will be notified.
+     * @param action The {@link Action} that will be notified.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForList<E, L> onSelection( UIAction<SimpleDelegate<JList<E>, ListSelectionEvent>> action ) {
-        NullUtil.nullArgCheck(action, "action", UIAction.class);
+    public final UIForList<E, L> onSelection( Action<SimpleDelegate<JList<E>, ListSelectionEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", Action.class);
         L list = getComponent();
         list.addListSelectionListener(e -> _doApp(()->action.accept(new SimpleDelegate<>(list, e, ()->getSiblinghood()))) );
         return this;

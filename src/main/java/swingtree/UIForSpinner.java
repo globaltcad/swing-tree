@@ -1,6 +1,6 @@
 package swingtree;
 
-import swingtree.api.UIAction;
+import swingtree.api.mvvm.Action;
 import swingtree.api.mvvm.Val;
 import swingtree.api.mvvm.Var;
 
@@ -22,15 +22,15 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
     protected UIForSpinner( S component ) { super(component); }
 
     /**
-     * Adds an {@link UIAction} to the underlying {@link JSpinner}
+     * Adds an {@link Action} to the underlying {@link JSpinner}
      * through an {@link javax.swing.event.ChangeListener},
      * Use this to register an action to be performed when the spinner's value changes.
      *
      * @param action The action to be performed.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForSpinner<S> onChange( UIAction<SimpleDelegate<JSpinner, ChangeEvent>> action ) {
-        NullUtil.nullArgCheck(action, "action", UIAction.class);
+    public final UIForSpinner<S> onChange( Action<SimpleDelegate<JSpinner, ChangeEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", Action.class);
         S spinner = getComponent();
         _onChange(e -> _doApp(()->action.accept(new SimpleDelegate<>(spinner, e, this::getSiblinghood))) );
         return this;

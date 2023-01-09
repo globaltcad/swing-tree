@@ -1,7 +1,7 @@
 package swingtree;
 
 
-import swingtree.api.UIAction;
+import swingtree.api.mvvm.Action;
 import swingtree.api.mvvm.Val;
 import swingtree.api.mvvm.Var;
 
@@ -21,9 +21,9 @@ import java.util.function.Consumer;
  */
 public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> extends UIForAbstractSwing<I, C>
 {
-    private final java.util.List<UIAction<RemoveDelegate>>   removes = new ArrayList<>();
-    private final java.util.List<UIAction<InsertDelegate>>   inserts = new ArrayList<>();
-    private final java.util.List<UIAction<ReplaceDelegate>>  replaces = new ArrayList<>();
+    private final java.util.List<Action<RemoveDelegate>>   removes = new ArrayList<>();
+    private final java.util.List<Action<InsertDelegate>>   inserts = new ArrayList<>();
+    private final java.util.List<Action<ReplaceDelegate>>  replaces = new ArrayList<>();
 
     /**
      *  A custom document filter which is simply a lambda-rization wrapper which ought to make
@@ -227,34 +227,34 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
     }
 
     /**
-     * @param action A {@link UIAction} lambda which will be called when parts (or all) of the text in
+     * @param action A {@link Action} lambda which will be called when parts (or all) of the text in
      *               the underlying text component gets removed.
      *
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextRemove( UIAction<RemoveDelegate> action ) {
+    public final I onTextRemove( Action<RemoveDelegate> action ) {
         _ifFilterable( () -> this.removes.add(action) );
         return _this();
     }
 
     /**
-     * @param action A {@link UIAction} lambda which will be called when new text gets inserted
+     * @param action A {@link Action} lambda which will be called when new text gets inserted
      *               into the underlying text component.
      *
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextInsert( UIAction<InsertDelegate> action ) {
+    public final I onTextInsert( Action<InsertDelegate> action ) {
         _ifFilterable( () -> this.inserts.add(action) );
         return _this();
     }
 
     /**
-     * @param action A {@link UIAction} lambda which will be called when the text in
+     * @param action A {@link Action} lambda which will be called when the text in
      *               the underlying text component gets replaced.
      *
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextReplace( UIAction<ReplaceDelegate> action ) {
+    public final I onTextReplace( Action<ReplaceDelegate> action ) {
         _ifFilterable( () -> this.replaces.add(action) );
         return _this();
     }

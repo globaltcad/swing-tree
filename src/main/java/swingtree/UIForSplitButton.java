@@ -1,7 +1,7 @@
 package swingtree;
 
 import com.alexandriasoftware.swing.JSplitButton;
-import swingtree.api.UIAction;
+import swingtree.api.mvvm.Action;
 
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
@@ -17,9 +17,9 @@ import java.util.stream.Collectors;
 public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButton<UIForSplitButton<B>, B>
 {
     private final JPopupMenu _popupMenu = new JPopupMenu();
-    private final Map<JMenuItem, UIAction<SplitItem.Delegate<JMenuItem>>> _options = new LinkedHashMap<>(16);
+    private final Map<JMenuItem, Action<SplitItem.Delegate<JMenuItem>>> _options = new LinkedHashMap<>(16);
     private final JMenuItem[] _lastSelected = {null};
-    private final List<UIAction<SplitButtonDelegate<JMenuItem>>> _onSelections = new ArrayList<>();
+    private final List<Action<SplitButtonDelegate<JMenuItem>>> _onSelections = new ArrayList<>();
 
     protected UIForSplitButton( B component ) {
         super(component);
@@ -27,7 +27,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
         getComponent().addButtonClickedActionListener(e -> _doApp(()->{
             List<JMenuItem> selected = _getSelected();
             for ( JMenuItem item : selected ) {
-                UIAction<SplitItem.Delegate<JMenuItem>> action = _options.get(item);
+                Action<SplitItem.Delegate<JMenuItem>> action = _options.get(item);
                 if ( action != null )
                     action.accept(
                         new SplitItem.Delegate<>(
@@ -50,7 +50,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
     }
 
     /**
-     *  {@link UIAction}s registered here will be called when the split part of the
+     *  {@link Action}s registered here will be called when the split part of the
      *  {@link JSplitButton} was clicked.
      *  The provided lambda receives a delegate object with a rich API
      *  exposing a lot of context information including not
@@ -58,14 +58,14 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
      *  the currently selected {@link JMenuItem} and a list of
      *  all other items.
      *
-     * @param action The {@link UIAction} which will receive an {@link SimpleDelegate}
+     * @param action The {@link Action} which will receive an {@link SimpleDelegate}
      *               exposing all essential components making up this {@link JSplitButton}.
      * @return This very instance, which enables builder-style method chaining.
      */
     public UIForSplitButton<B> onSplitClick(
-        UIAction<SplitButtonDelegate<JMenuItem>> action
+        Action<SplitButtonDelegate<JMenuItem>> action
     ) {
-        NullUtil.nullArgCheck(action, "action", UIAction.class);
+        NullUtil.nullArgCheck(action, "action", Action.class);
         B button = getComponent();
         button.addSplitButtonClickedActionListener(
             e -> _doApp(()->action.accept(
@@ -86,7 +86,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
     }
 
     /**
-     * {@link UIAction}s registered here will be called when the
+     * {@link Action}s registered here will be called when the
      * user selects a {@link JMenuItem} from the popup menu
      * of this {@link JSplitButton}.
      * The delegate passed to the provided action
@@ -95,35 +95,35 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
      * the currently selected {@link JMenuItem} and a list of
      * all other items.
      *
-     * @param action The {@link UIAction} which will receive an {@link SplitItem.Delegate}
+     * @param action The {@link Action} which will receive an {@link SplitItem.Delegate}
      *              exposing all essential components making up this {@link JSplitButton}.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if the provided action is null.
      */
     public UIForSplitButton<B> onSelection(
-            UIAction<SplitButtonDelegate<JMenuItem>> action
+            Action<SplitButtonDelegate<JMenuItem>> action
     ) {
-        NullUtil.nullArgCheck(action, "action", UIAction.class);
+        NullUtil.nullArgCheck(action, "action", Action.class);
         _onSelections.add(action);
         return this;
     }
 
     /**
-     *  Use this as an alternative to {@link #onClick(UIAction)} to register
+     *  Use this as an alternative to {@link #onClick(Action)} to register
      *  a button click action with an action lambda having
      *  access to a delegate with more context information including not
      *  only the current {@link JSplitButton} instance, but also
      *  the currently selected {@link JMenuItem} and a list of
      *  all other items.
      *
-     * @param action The {@link UIAction} which will receive an {@link SimpleDelegate}
+     * @param action The {@link Action} which will receive an {@link SimpleDelegate}
      *               exposing all essential components making up this {@link JSplitButton}.
      * @return This very instance, which enables builder-style method chaining.
      */
     public UIForSplitButton<B> onButtonClick(
-        UIAction<SplitItem.Delegate<JMenuItem>> action
+        Action<SplitItem.Delegate<JMenuItem>> action
     ) {
-        NullUtil.nullArgCheck(action, "action", UIAction.class);
+        NullUtil.nullArgCheck(action, "action", Action.class);
         B button = getComponent();
         button.addButtonClickedActionListener(
             e -> _doApp(()->action.accept(
@@ -142,14 +142,14 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
      *  Use this to register a basic action for when the
      *  {@link JSplitButton} button is being clicked (not the split part).
      *  If you need more context information delegated to the action
-     *  then consider using {@link #onButtonClick(UIAction)}.
+     *  then consider using {@link #onButtonClick(Action)}.
      *
-     * @param action An {@link UIAction} instance which will be wrapped by an {@link SimpleDelegate} and passed to the button component.
+     * @param action An {@link Action} instance which will be wrapped by an {@link SimpleDelegate} and passed to the button component.
      * @return This very instance, which enables builder-style method chaining.
      */
     @Override
-    public UIForSplitButton<B> onClick( UIAction<SimpleDelegate<B, ActionEvent>> action ) {
-        NullUtil.nullArgCheck(action, "action", UIAction.class);
+    public UIForSplitButton<B> onClick( Action<SimpleDelegate<B, ActionEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", Action.class);
         B button = getComponent();
         button.addButtonClickedActionListener(
             e -> _doApp(()->action.accept(
@@ -167,8 +167,8 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
      * @param action the action to be executed when the split button is opened.
      * @return this very instance, which enables builder-style method chaining.
      */
-    public UIForSplitButton<B> onOpen( UIAction<SimpleDelegate<B, PopupMenuEvent>> action ) {
-        NullUtil.nullArgCheck(action, "action", UIAction.class);
+    public UIForSplitButton<B> onOpen( Action<SimpleDelegate<B, PopupMenuEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", Action.class);
         _onPopupOpen( e -> _doApp(()->action.accept(new SimpleDelegate<>( getComponent(), e, this::getSiblinghood )) ) );
         return this;
     }
@@ -192,8 +192,8 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
      * @param action the action to be executed when the split button is closed.
      * @return this very instance, which enables builder-style method chaining.
      */
-    public UIForSplitButton<B> onClose( UIAction<SimpleDelegate<B, PopupMenuEvent>> action ) {
-        NullUtil.nullArgCheck(action, "action", UIAction.class);
+    public UIForSplitButton<B> onClose( Action<SimpleDelegate<B, PopupMenuEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", Action.class);
         _onPopupClose( e -> _doApp(()->action.accept(new SimpleDelegate<>( getComponent(), e, this::getSiblinghood )) ) );
         return this;
     }
@@ -216,8 +216,8 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
      * @param action the action to be executed when the split button popup is canceled.
      * @return this very instance, which enables builder-style method chaining.
      */
-    public UIForSplitButton<B> onCancel( UIAction<SimpleDelegate<B, PopupMenuEvent>> action ) {
-        NullUtil.nullArgCheck(action, "action", UIAction.class);
+    public UIForSplitButton<B> onCancel( Action<SimpleDelegate<B, PopupMenuEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", Action.class);
         _onPopupCancel( e -> _doApp(()->action.accept(new SimpleDelegate<>( getComponent(), e, this::getSiblinghood )) ) );
         return this;
     }
@@ -253,7 +253,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
     }
 
     /**
-     * @param splitItem The {@link SplitItem} instance wrapping a {@link JMenuItem} as well as some associated {@link UIAction}s.
+     * @param splitItem The {@link SplitItem} instance wrapping a {@link JMenuItem} as well as some associated {@link Action}s.
      * @param <I> The {@link JMenuItem} type which should be added to this {@link JSplitButton} builder.
      * @return This very instance, which enables builder-style method chaining.
      */

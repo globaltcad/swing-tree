@@ -1,6 +1,6 @@
 package swingtree;
 
-import swingtree.api.UIAction;
+import swingtree.api.mvvm.Action;
 import swingtree.api.mvvm.Val;
 import swingtree.api.mvvm.Var;
 
@@ -33,9 +33,9 @@ public final class Tab
     private final Val<Boolean> _isEnabled;
     private final Val<Icon> _icon;
     private final Val<String> _tip;
-    private final UIAction<SimpleDelegate<JTabbedPane, ChangeEvent>> _onSelected;
+    private final Action<SimpleDelegate<JTabbedPane, ChangeEvent>> _onSelected;
 
-    private final UIAction<SimpleDelegate<JTabbedPane, MouseEvent>> _onMouseClick;
+    private final Action<SimpleDelegate<JTabbedPane, MouseEvent>> _onMouseClick;
 
     Tab(
             JComponent contents,
@@ -44,8 +44,8 @@ public final class Tab
             Var<Boolean> isSelected, Val<Boolean> isEnabled,
             Val<Icon> icon,
             Val<String> tip,
-            UIAction<SimpleDelegate<JTabbedPane, ChangeEvent>> onSelected,
-            UIAction<SimpleDelegate<JTabbedPane, MouseEvent>> onMouseClick
+            Action<SimpleDelegate<JTabbedPane, ChangeEvent>> onSelected,
+            Action<SimpleDelegate<JTabbedPane, MouseEvent>> onMouseClick
     ) {
         if ( headerComponent == null )
             NullUtil.nullArgCheck(title,"title",String.class);
@@ -174,7 +174,7 @@ public final class Tab
      * @param onSelected The action to be executed when the tab is selected.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
-    public final Tab onSelection( UIAction<SimpleDelegate<JTabbedPane, ChangeEvent>> onSelected ) {
+    public final Tab onSelection( Action<SimpleDelegate<JTabbedPane, ChangeEvent>> onSelected ) {
         if ( _onSelected != null ) throw new IllegalArgumentException("Selection event already specified!");
         return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, onSelected, _onMouseClick);
     }
@@ -186,7 +186,7 @@ public final class Tab
      * @param onClick The lambda instance which will be passed to the {@link JTabbedPane} as {@link MouseListener}.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
-    public final Tab onMouseClick( UIAction<SimpleDelegate<JTabbedPane, MouseEvent>> onClick ) {
+    public final Tab onMouseClick( Action<SimpleDelegate<JTabbedPane, MouseEvent>> onClick ) {
         if ( _onMouseClick != null ) throw new IllegalArgumentException("Mouse click event already specified!");
         return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, onClick);
     }
@@ -205,9 +205,9 @@ public final class Tab
 
     final Optional<JComponent> headerContents() { return Optional.ofNullable(_headerComponent); }
 
-    final Optional<UIAction<SimpleDelegate<JTabbedPane, ChangeEvent>>> onSelection() {
+    final Optional<Action<SimpleDelegate<JTabbedPane, ChangeEvent>>> onSelection() {
         return Optional.ofNullable(_onSelected);
     }
 
-    final Optional<UIAction<SimpleDelegate<JTabbedPane, MouseEvent>>> onMouseClick() { return Optional.ofNullable(_onMouseClick); }
+    final Optional<Action<SimpleDelegate<JTabbedPane, MouseEvent>>> onMouseClick() { return Optional.ofNullable(_onMouseClick); }
 }

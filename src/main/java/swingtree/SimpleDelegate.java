@@ -1,5 +1,7 @@
 package swingtree;
 
+import swingtree.api.mvvm.Action;
+
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +35,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
     }
 
     /**
-     * @return The component for which the current {@link swingtree.api.UIAction} originated.
+     * @return The component for which the current {@link Action} originated.
      */
     public C getComponent() {
         // We make sure that only the Swing thread can access the component:

@@ -1,7 +1,6 @@
 package swingtree.api.mvvm;
 
 import swingtree.UI;
-import swingtree.api.UIAction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +9,7 @@ import java.util.Objects;
 
 abstract class AbstractValue<T> implements Val<T>
 {
-    protected final List<UIAction<ValDelegate<T>>> _viewActions = new ArrayList<>();
+    protected final List<Action<ValDelegate<T>>> _viewActions = new ArrayList<>();
 
     protected T _value;
     protected final Class<T> _type;
@@ -69,7 +68,7 @@ abstract class AbstractValue<T> implements Val<T>
     /**
      * {@inheritDoc}
      */
-    @Override public Val<T> onShow( UIAction<ValDelegate<T>> displayAction ) {
+    @Override public Val<T> onShow( Action<ValDelegate<T>> displayAction ) {
         _viewActions.add(displayAction);
         return this;
     }
@@ -80,9 +79,9 @@ abstract class AbstractValue<T> implements Val<T>
     @Override
     public Val<T> show() { _triggerActions( _viewActions, true ); return this; }
 
-    protected void _triggerActions( List<UIAction<ValDelegate<T>>> actions, boolean runInGUIThread ) {
-        List<UIAction<ValDelegate<T>>> removableActions = new ArrayList<>();
-        for ( UIAction<ValDelegate<T>> action : new ArrayList<>(actions) ) // We copy the list to avoid concurrent modification
+    protected void _triggerActions(List<Action<ValDelegate<T>>> actions, boolean runInGUIThread ) {
+        List<Action<ValDelegate<T>>> removableActions = new ArrayList<>();
+        for ( Action<ValDelegate<T>> action : new ArrayList<>(actions) ) // We copy the list to avoid concurrent modification
             try {
                 if ( action.canBeRemoved() )
                     removableActions.add(action);

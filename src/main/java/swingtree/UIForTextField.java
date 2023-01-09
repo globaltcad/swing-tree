@@ -1,6 +1,6 @@
 package swingtree;
 
-import swingtree.api.UIAction;
+import swingtree.api.mvvm.Action;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -17,8 +17,8 @@ public class UIForTextField<F extends JTextField> extends UIForAbstractTextCompo
 {
     protected UIForTextField( F component ) { super(component); }
 
-    public UIForTextField<F> onEnter( UIAction<SimpleDelegate<F, ActionEvent>> action ) {
-        NullUtil.nullArgCheck(action, "action", UIAction.class);
+    public UIForTextField<F> onEnter( Action<SimpleDelegate<F, ActionEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", Action.class);
         F field = getComponent();
         _onEnter( e -> _doApp(()->action.accept(new SimpleDelegate<>( field, e, this::getSiblinghood )) ) );
         return this;

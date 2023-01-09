@@ -2,7 +2,7 @@ package swingtree;
 
 
 import com.alexandriasoftware.swing.JSplitButton;
-import swingtree.api.UIAction;
+import swingtree.api.mvvm.Action;
 import swingtree.api.mvvm.Val;
 import swingtree.api.mvvm.Var;
 
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
  *
- * @param <I> The type of the item which will be passed to the {@link UIAction}s.
+ * @param <I> The type of the item which will be passed to the {@link Action}s.
  */
 public final class SplitItem<I extends JMenuItem>
 {
@@ -68,8 +68,8 @@ public final class SplitItem<I extends JMenuItem>
     }
 
     private final I _item;
-    private final UIAction<Delegate<I>> _onButtonClick;
-    private final UIAction<Delegate<I>> _onItemSelected;
+    private final Action<Delegate<I>> _onButtonClick;
+    private final Action<Delegate<I>> _onItemSelected;
     private final Val<Boolean> _isEnabled;
 
     private SplitItem( I item ) {
@@ -78,8 +78,8 @@ public final class SplitItem<I extends JMenuItem>
 
     private SplitItem(
         I item,
-        UIAction<Delegate<I>> onClick,
-        UIAction<Delegate<I>> onSelected,
+        Action<Delegate<I>> onClick,
+        Action<Delegate<I>> onSelected,
         Val<Boolean> isEnabled
     ) {
         _item = item; _onButtonClick = onClick; _onItemSelected = onSelected; _isEnabled = isEnabled;
@@ -104,8 +104,8 @@ public final class SplitItem<I extends JMenuItem>
      *               and this {@link SplitItem} was selected.
      * @return An immutable copy of this with the provided lambda set.
      */
-    public SplitItem<I> onButtonClick(UIAction<Delegate<I>> action) {
-        NullUtil.nullArgCheck(action, "action", UIAction.class);
+    public SplitItem<I> onButtonClick(Action<Delegate<I>> action) {
+        NullUtil.nullArgCheck(action, "action", Action.class);
         if ( _onButtonClick != null )
             throw new IllegalArgumentException("Property already specified!");
         return new SplitItem<>(_item, action, _onItemSelected, _isEnabled);
@@ -128,8 +128,8 @@ public final class SplitItem<I extends JMenuItem>
      *               receive some context information in the form of a {@link Delegate} instance.
      * @return An immutable copy of this with the provided lambda set.
      */
-    public SplitItem<I> onSelection(UIAction<Delegate<I>> action) {
-        NullUtil.nullArgCheck(action, "action", UIAction.class);
+    public SplitItem<I> onSelection(Action<Delegate<I>> action) {
+        NullUtil.nullArgCheck(action, "action", Action.class);
         if ( _onItemSelected != null ) throw new IllegalArgumentException("Property already specified!");
         return new SplitItem<>(_item, _onButtonClick, action, _isEnabled);
     }
@@ -142,15 +142,15 @@ public final class SplitItem<I extends JMenuItem>
 
     I getItem() { return _item; }
 
-    UIAction<Delegate<I>> getOnClick() { return _onButtonClick == null ? it -> {} : _onButtonClick; }
+    Action<Delegate<I>> getOnClick() { return _onButtonClick == null ? it -> {} : _onButtonClick; }
 
-    UIAction<Delegate<I>> getOnSelected() { return _onItemSelected == null ? c -> {} : _onItemSelected; }
+    Action<Delegate<I>> getOnSelected() { return _onItemSelected == null ? c -> {} : _onItemSelected; }
 
     Val<Boolean> getIsEnabled(){ return _isEnabled; }
 
     /**
      *  Instances of this are exposed as delegates through the {@link SimpleDelegate} passed
-     *  to the actions supplied to {@link #onSelection(UIAction)} in order
+     *  to the actions supplied to {@link #onSelection(Action)} in order
      *  to give said actions all the necessary context they need to perform whatever action they so desire.
      *
      * @param <I> The {@link JMenuItem} subtype for which this context was created.

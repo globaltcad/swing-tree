@@ -1,6 +1,6 @@
 package swingtree;
 
-import swingtree.api.UIAction;
+import swingtree.api.mvvm.Action;
 import swingtree.api.mvvm.Val;
 import swingtree.api.mvvm.Var;
 
@@ -16,7 +16,7 @@ import java.util.function.Consumer;
  *  The following is a more specialized type of builder node based on the {@link UIForAbstractSwing} builder type,
  *  and provides additional features associated with the more specialized
  *  {@link AbstractButton}" Swing component type.
- *  One of such features is the {@link #onClick(UIAction)} method allowing for a more readable way of adding
+ *  One of such features is the {@link #onClick(Action)} method allowing for a more readable way of adding
  *  {@link ActionListener} instances to button types...
  * 	<p>
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
@@ -260,8 +260,8 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public final I onChange( UIAction<SimpleDelegate<B, ItemEvent>> action ) {
-        NullUtil.nullArgCheck(action, "action", UIAction.class);
+    public final I onChange( Action<SimpleDelegate<B, ItemEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", Action.class);
         _onChange( e -> _doApp(()->action.accept(new SimpleDelegate<>(getComponent(), e, this::getSiblinghood))) );
         return _this();
     }
@@ -305,12 +305,12 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  This is very useful for changing the state of the JComponent when the action is being triggered.
      *  <br><br>
      *
-     * @param action an {@link UIAction} instance which will receive an {@link SimpleDelegate} containing important context information.
+     * @param action an {@link Action} instance which will receive an {@link SimpleDelegate} containing important context information.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public I onClick( UIAction<SimpleDelegate<B, ActionEvent>> action ) {
-        NullUtil.nullArgCheck(action, "action", UIAction.class);
+    public I onClick( Action<SimpleDelegate<B, ActionEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", Action.class);
         B button = getComponent();
         _onClick(
            e -> _doApp(()->action.accept(

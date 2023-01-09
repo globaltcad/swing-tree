@@ -1,7 +1,5 @@
 package swingtree.api.mvvm;
 
-import swingtree.api.UIAction;
-
 import javax.swing.border.Border;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,12 +20,16 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 		return new AbstractVariable<T>( immutable, type, value, UNNAMED, Collections.emptyList(), true ){};
 	}
 
+	static <T> Var<T> of( boolean immutable, Class<T> type, T value ) {
+		return new AbstractVariable<T>( immutable, type, value, UNNAMED, Collections.emptyList(), false ){};
+	}
+
 	static <T> Var<T> of( boolean immutable, T iniValue ) {
 		Objects.requireNonNull(iniValue);
 		return new AbstractVariable<T>( immutable, (Class<T>) iniValue.getClass(), iniValue, UNNAMED, Collections.emptyList(), false ){};
 	}
 
-	static Var<Viewable> of( boolean immutable, Viewable iniValue ) {
+	static Var<Viewable> of(boolean immutable, Viewable iniValue ) {
 		Objects.requireNonNull(iniValue);
 		return new AbstractVariable<Viewable>( immutable, Viewable.class, iniValue, UNNAMED, Collections.emptyList(), false ){};
 	}
@@ -39,7 +41,7 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 
 	private final boolean _isImmutable;
 	private final List<Val<T>> _history = new ArrayList<>(17);
-	protected final List<UIAction<ValDelegate<T>>> _actions = new ArrayList<>();
+	protected final List<Action<ValDelegate<T>>> _actions = new ArrayList<>();
 	private final List<Consumer<T>> _viewers = new ArrayList<>(0);
 
 
@@ -49,7 +51,7 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 			Class<T> type,
 			T iniValue,
 			String name,
-			List<UIAction<ValDelegate<T>>> actions,
+			List<Action<ValDelegate<T>>> actions,
 			boolean allowsNull
 	) {
 		this( immutable, type, iniValue, name, actions, Collections.emptyList(), allowsNull );
@@ -60,8 +62,8 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 		Class<T> type,
 		T iniValue,
 		String id,
-		List<UIAction<ValDelegate<T>>> actions,
-		List<UIAction<ValDelegate<T>>> viewActions,
+		List<Action<ValDelegate<T>>> actions,
+		List<Action<ValDelegate<T>>> viewActions,
 		boolean allowsNull
 	) {
 		super( type, id, allowsNull, iniValue );
@@ -84,7 +86,7 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override public Var<T> onAct( UIAction<ValDelegate<T>> action ) {
+	@Override public Var<T> onAct( Action<ValDelegate<T>> action ) {
 		Objects.requireNonNull(action);
 		_actions.add(action);
 		return this;

@@ -1,6 +1,6 @@
 package swingtree;
 
-import swingtree.api.UIAction;
+import swingtree.api.mvvm.Action;
 import swingtree.api.mvvm.Val;
 import swingtree.api.mvvm.Var;
 
@@ -43,17 +43,17 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
     }
 
     /**
-     * Adds an {@link UIAction} to the underlying {@link JSlider}
+     * Adds an {@link Action} to the underlying {@link JSlider}
      * through an {@link javax.swing.event.ChangeListener},
      * which will be called when the state of the slider changes.
      * For more information see {@link JSlider#addChangeListener(javax.swing.event.ChangeListener)}.
      *
-     * @param action The {@link UIAction} that will be called through the underlying change event.
+     * @param action The {@link Action} that will be called through the underlying change event.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public final UIForSlider<S> onChange( UIAction<SimpleDelegate<JSlider, ChangeEvent>> action ) {
-        NullUtil.nullArgCheck( action, "action", UIAction.class );
+    public final UIForSlider<S> onChange( Action<SimpleDelegate<JSlider, ChangeEvent>> action ) {
+        NullUtil.nullArgCheck( action, "action", Action.class );
         S slider = getComponent();
         _onChange( e -> _doApp(()->action.accept(new SimpleDelegate<>(slider, e, this::getSiblinghood))) );
         return this;

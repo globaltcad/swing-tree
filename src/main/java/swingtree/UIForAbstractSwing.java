@@ -4,7 +4,7 @@ package swingtree;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 import swingtree.api.Peeker;
-import swingtree.api.UIAction;
+import swingtree.api.mvvm.Action;
 import swingtree.api.UIVerifier;
 import swingtree.api.mvvm.*;
 import swingtree.input.Keyboard;
@@ -76,7 +76,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param <T> The type of the value.
      */
     protected final <T> void _onShow( Val<T> val, Consumer<T> displayAction ) {
-        val.onShow(new UIAction<ValDelegate<T>>() {
+        val.onShow(new Action<ValDelegate<T>>() {
             @Override
             public void accept(ValDelegate<T> delegate) {
                 _doUI(() ->
@@ -101,7 +101,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param <T> The type of the value.
      */
     protected final <T> void _onShow( Vals<T> vals, Consumer<ValsDelegate<T>> displayAction ) {
-        vals.onShow(new UIAction<ValsDelegate<T>>() {
+        vals.onShow(new Action<ValsDelegate<T>>() {
             @Override
             public void accept(ValsDelegate<T> delegate) {
                 _doUI(() ->
@@ -119,10 +119,10 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         });
     }
     /**
-     *  This allows you to bind to a {@link swingtree.api.mvvm.Viewable}
+     *  This allows you to bind to a {@link Viewable}
      *  implementation and automatically update the view when the view model changes.
      *
-     * @param viewable A {@link swingtree.api.mvvm.Val} property which holds a {@link swingtree.api.mvvm.Viewable} instance
+     * @param viewable A {@link swingtree.api.mvvm.Val} property which holds a {@link Viewable} instance
      *        that will be used to generate the view.
      * @return This very instance, which enables builder-style method chaining.
      */
@@ -138,10 +138,10 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     *  This allows you to bind to a property list of {@link swingtree.api.mvvm.Viewable}s
+     *  This allows you to bind to a property list of {@link Viewable}s
      *  to automatically update the view when your view models change.
      *
-     * @param viewables A {@link swingtree.api.mvvm.Vals} list of {@link swingtree.api.mvvm.Viewable}s
+     * @param viewables A {@link swingtree.api.mvvm.Vals} list of {@link Viewable}s
      *                  wrapped in a {@link swingtree.api.mvvm.Val} properties.
      *                  The Viewables will be used to generate the view.
      * @return This very instance, which enables builder-style method chaining.
@@ -1615,8 +1615,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseClick( UIAction<SimpleDelegate<C, MouseEvent>> onClick ) {
-        NullUtil.nullArgCheck(onClick, "onClick", UIAction.class);
+    public final I onMouseClick( Action<SimpleDelegate<C, MouseEvent>> onClick ) {
+        NullUtil.nullArgCheck(onClick, "onClick", Action.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) { 
@@ -1636,8 +1636,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onRelease The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseRelease( UIAction<SimpleDelegate<C, MouseEvent>> onRelease ) {
-        NullUtil.nullArgCheck(onRelease, "onRelease", UIAction.class);
+    public final I onMouseRelease( Action<SimpleDelegate<C, MouseEvent>> onRelease ) {
+        NullUtil.nullArgCheck(onRelease, "onRelease", Action.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mouseReleased(MouseEvent e) {
@@ -1657,8 +1657,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onPress The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMousePress( UIAction<SimpleDelegate<C, MouseEvent>> onPress ) {
-        NullUtil.nullArgCheck(onPress, "onPress", UIAction.class);
+    public final I onMousePress( Action<SimpleDelegate<C, MouseEvent>> onPress ) {
+        NullUtil.nullArgCheck(onPress, "onPress", Action.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mousePressed(MouseEvent e) {
@@ -1678,8 +1678,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onEnter The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseEnter( UIAction<SimpleDelegate<C, MouseEvent>> onEnter ) {
-        NullUtil.nullArgCheck(onEnter, "onEnter", UIAction.class);
+    public final I onMouseEnter( Action<SimpleDelegate<C, MouseEvent>> onEnter ) {
+        NullUtil.nullArgCheck(onEnter, "onEnter", Action.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mouseEntered(MouseEvent e) {
@@ -1699,8 +1699,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onExit The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseExit( UIAction<SimpleDelegate<C, MouseEvent>> onExit ) {
-        NullUtil.nullArgCheck(onExit, "onExit", UIAction.class);
+    public final I onMouseExit( Action<SimpleDelegate<C, MouseEvent>> onExit ) {
+        NullUtil.nullArgCheck(onExit, "onExit", Action.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mouseExited(MouseEvent e) {
@@ -1720,8 +1720,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onDrag The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseDrag( UIAction<SimpleDelegate<C, MouseEvent>> onDrag ) {
-        NullUtil.nullArgCheck(onDrag, "onDrag", UIAction.class);
+    public final I onMouseDrag( Action<SimpleDelegate<C, MouseEvent>> onDrag ) {
+        NullUtil.nullArgCheck(onDrag, "onDrag", Action.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mouseDragged(MouseEvent e) {
@@ -1741,8 +1741,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onMove The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseMove( UIAction<SimpleDelegate<C, MouseEvent>> onMove ) {
-        NullUtil.nullArgCheck(onMove, "onMove", UIAction.class);
+    public final I onMouseMove( Action<SimpleDelegate<C, MouseEvent>> onMove ) {
+        NullUtil.nullArgCheck(onMove, "onMove", Action.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mouseMoved(MouseEvent e) {
@@ -1762,8 +1762,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onWheel The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseWheelMove( UIAction<SimpleDelegate<C, MouseWheelEvent>> onWheel ) {
-        NullUtil.nullArgCheck(onWheel, "onWheel", UIAction.class);
+    public final I onMouseWheelMove( Action<SimpleDelegate<C, MouseWheelEvent>> onWheel ) {
+        NullUtil.nullArgCheck(onWheel, "onWheel", Action.class);
         C component = getComponent();
         component.addMouseWheelListener(new MouseWheelListener() {
             @Override public void mouseWheelMoved(MouseWheelEvent e) {
@@ -1782,8 +1782,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onWheelUp The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseWheelUp( UIAction<SimpleDelegate<C, MouseWheelEvent>> onWheelUp ) {
-        NullUtil.nullArgCheck(onWheelUp, "onWheelUp", UIAction.class);
+    public final I onMouseWheelUp( Action<SimpleDelegate<C, MouseWheelEvent>> onWheelUp ) {
+        NullUtil.nullArgCheck(onWheelUp, "onWheelUp", Action.class);
         C component = getComponent();
         component.addMouseWheelListener(new MouseWheelListener() {
             @Override public void mouseWheelMoved(MouseWheelEvent e) {
@@ -1804,8 +1804,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onWheelDown The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseWheelDown( UIAction<SimpleDelegate<C, MouseWheelEvent>> onWheelDown ) {
-        NullUtil.nullArgCheck(onWheelDown, "onWheelDown", UIAction.class);
+    public final I onMouseWheelDown( Action<SimpleDelegate<C, MouseWheelEvent>> onWheelDown ) {
+        NullUtil.nullArgCheck(onWheelDown, "onWheelDown", Action.class);
         C component = getComponent();
         component.addMouseWheelListener(new MouseWheelListener() {
             @Override public void mouseWheelMoved(MouseWheelEvent e) {
@@ -1824,8 +1824,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onResize The resize action which will be called when the underlying component changes size.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onResize( UIAction<SimpleDelegate<C, ComponentEvent>> onResize ) {
-        NullUtil.nullArgCheck(onResize, "onResize", UIAction.class);
+    public final I onResize( Action<SimpleDelegate<C, ComponentEvent>> onResize ) {
+        NullUtil.nullArgCheck(onResize, "onResize", Action.class);
         C component = getComponent();
         component.addComponentListener(new ComponentAdapter() {
             @Override public void componentResized(ComponentEvent e) {
@@ -1842,8 +1842,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param onMoved The action lambda which will be executed once the component was moved / its position canged.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMoved( UIAction<SimpleDelegate<C, ComponentEvent>> onMoved ) {
-        NullUtil.nullArgCheck(onMoved, "onMoved", UIAction.class);
+    public final I onMoved( Action<SimpleDelegate<C, ComponentEvent>> onMoved ) {
+        NullUtil.nullArgCheck(onMoved, "onMoved", Action.class);
         C component = getComponent();
         component.addComponentListener(new ComponentAdapter() {
             @Override public void componentMoved(ComponentEvent e) {
@@ -1854,14 +1854,14 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     *  Adds the supplied {@link UIAction} wrapped in a {@link ComponentListener}
+     *  Adds the supplied {@link Action} wrapped in a {@link ComponentListener}
      *  to the component, to receive those component events where the wrapped component becomes visible.
      *
-     * @param onShown The {@link UIAction} which gets invoked when the component has been made visible.
+     * @param onShown The {@link Action} which gets invoked when the component has been made visible.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onShown( UIAction<SimpleDelegate<C, ComponentEvent>> onShown ) {
-        NullUtil.nullArgCheck(onShown, "onShown", UIAction.class);
+    public final I onShown( Action<SimpleDelegate<C, ComponentEvent>> onShown ) {
+        NullUtil.nullArgCheck(onShown, "onShown", Action.class);
         C component = getComponent();
         component.addComponentListener(new ComponentAdapter() {
             @Override public void componentShown(ComponentEvent e) {
@@ -1872,14 +1872,14 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     *  Adds the supplied {@link UIAction} wrapped in a {@link ComponentListener}
+     *  Adds the supplied {@link Action} wrapped in a {@link ComponentListener}
      *  to the component, to receive those component events where the wrapped component becomes invisible.
      *
-     * @param onHidden The {@link UIAction} which gets invoked when the component has been made invisible.
+     * @param onHidden The {@link Action} which gets invoked when the component has been made invisible.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onHidden( UIAction<SimpleDelegate<C, ComponentEvent>> onHidden ) {
-        NullUtil.nullArgCheck(onHidden, "onHidden", UIAction.class);
+    public final I onHidden( Action<SimpleDelegate<C, ComponentEvent>> onHidden ) {
+        NullUtil.nullArgCheck(onHidden, "onHidden", Action.class);
         C component = getComponent();
         component.addComponentListener(new ComponentAdapter() {
             @Override public void componentHidden(ComponentEvent e) {
@@ -1890,14 +1890,14 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     * Adds the supplied {@link UIAction} wrapped in a {@link FocusListener}
+     * Adds the supplied {@link Action} wrapped in a {@link FocusListener}
      * to the component, to receive those focus events where the wrapped component gains input focus.
      *
-     * @param onFocus The {@link UIAction} which should be executed once the input focus was gained on the wrapped component.
+     * @param onFocus The {@link Action} which should be executed once the input focus was gained on the wrapped component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onFocusGained( UIAction<SimpleDelegate<C, ComponentEvent>> onFocus ) {
-        NullUtil.nullArgCheck(onFocus, "onFocus", UIAction.class);
+    public final I onFocusGained( Action<SimpleDelegate<C, ComponentEvent>> onFocus ) {
+        NullUtil.nullArgCheck(onFocus, "onFocus", Action.class);
         C component = getComponent();
         component.addFocusListener(new FocusAdapter() {
             @Override public void focusGained(FocusEvent e) {
@@ -1908,14 +1908,14 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     * Adds the supplied {@link UIAction} wrapped in a focus listener
+     * Adds the supplied {@link Action} wrapped in a focus listener
      * to receive those focus events where the wrapped component loses input focus.
      *
-     * @param onFocus The {@link UIAction} which should be executed once the input focus was lost on the wrapped component.
+     * @param onFocus The {@link Action} which should be executed once the input focus was lost on the wrapped component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onFocusLost( UIAction<SimpleDelegate<C, ComponentEvent>> onFocus ) {
-        NullUtil.nullArgCheck(onFocus, "onFocus", UIAction.class);
+    public final I onFocusLost( Action<SimpleDelegate<C, ComponentEvent>> onFocus ) {
+        NullUtil.nullArgCheck(onFocus, "onFocus", Action.class);
         C component = getComponent();
         component.addFocusListener(new FocusAdapter() {
             @Override public void focusLost(FocusEvent e) {
@@ -1926,14 +1926,14 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     * Adds the supplied {@link UIAction} wrapped in a {@link KeyListener}
+     * Adds the supplied {@link Action} wrapped in a {@link KeyListener}
      * to the component, to receive key events triggered when the wrapped component receives keyboard input.
      * <br><br>
-     * @param onKeyPressed The {@link UIAction} which will be executed once the wrapped component received a key press.
+     * @param onKeyPressed The {@link Action} which will be executed once the wrapped component received a key press.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onKeyPressed( UIAction<SimpleDelegate<C, KeyEvent>> onKeyPressed ) {
-        NullUtil.nullArgCheck(onKeyPressed, "onKeyPressed", UIAction.class);
+    public final I onKeyPressed( Action<SimpleDelegate<C, KeyEvent>> onKeyPressed ) {
+        NullUtil.nullArgCheck(onKeyPressed, "onKeyPressed", Action.class);
         C component = getComponent();
         component.addKeyListener(new KeyAdapter() {
             @Override public void keyPressed(KeyEvent e) {
@@ -1944,17 +1944,17 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     * Adds the supplied {@link UIAction} wrapped in a {@link KeyListener} to the component,
+     * Adds the supplied {@link Action} wrapped in a {@link KeyListener} to the component,
      * to receive key events triggered when the wrapped component receives a particular
      * keyboard input matching the provided {@link swingtree.input.Keyboard.Key}.
      * <br><br>
      * @param key The {@link swingtree.input.Keyboard.Key} which should be matched to the key event.
-     * @param onKeyPressed The {@link UIAction} which will be executed once the wrapped component received the targeted key press.
+     * @param onKeyPressed The {@link Action} which will be executed once the wrapped component received the targeted key press.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onPressed( Keyboard.Key key, UIAction<SimpleDelegate<C, KeyEvent>> onKeyPressed ) {
+    public final I onPressed( Keyboard.Key key, Action<SimpleDelegate<C, KeyEvent>> onKeyPressed ) {
         NullUtil.nullArgCheck(key, "key", Keyboard.Key.class);
-        NullUtil.nullArgCheck(onKeyPressed, "onKeyPressed", UIAction.class);
+        NullUtil.nullArgCheck(onKeyPressed, "onKeyPressed", Action.class);
         C component = getComponent();
         component.addKeyListener(new KeyAdapter() {
             @Override public void keyPressed( KeyEvent e ) {
@@ -1966,15 +1966,15 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
                              /**
-     * Adds the supplied {@link UIAction} wrapped in a {@link KeyListener}
+     * Adds the supplied {@link Action} wrapped in a {@link KeyListener}
      * to the component, to receive key events triggered when the wrapped component receives keyboard input.
      * <br><br>
-     * @param onKeyReleased The {@link UIAction} which will be executed once the wrapped component received a key release.
+     * @param onKeyReleased The {@link Action} which will be executed once the wrapped component received a key release.
      * @return This very instance, which enables builder-style method chaining.
-     * @see #onKeyPressed(UIAction)
+     * @see #onKeyPressed(Action)
      */
-    public final I onKeyReleased( UIAction<SimpleDelegate<C, KeyEvent>> onKeyReleased ) {
-        NullUtil.nullArgCheck(onKeyReleased, "onKeyReleased", UIAction.class);
+    public final I onKeyReleased( Action<SimpleDelegate<C, KeyEvent>> onKeyReleased ) {
+        NullUtil.nullArgCheck(onKeyReleased, "onKeyReleased", Action.class);
         C component = getComponent();
         component.addKeyListener(new KeyAdapter() {
             @Override public void keyReleased(KeyEvent e) {
@@ -1984,19 +1984,19 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     * Adds the supplied {@link UIAction} wrapped in a {@link KeyListener} to the component,
+     * Adds the supplied {@link Action} wrapped in a {@link KeyListener} to the component,
      * to receive key events triggered when the wrapped component receives a particular
      * keyboard input matching the provided {@link swingtree.input.Keyboard.Key}.
      * <br><br>
      * @param key The {@link swingtree.input.Keyboard.Key} which should be matched to the key event.
-     * @param onKeyReleased The {@link UIAction} which will be executed once the wrapped component received the targeted key release.
+     * @param onKeyReleased The {@link Action} which will be executed once the wrapped component received the targeted key release.
      * @return This very instance, which enables builder-style method chaining.
-     * @see #onKeyPressed(UIAction)
-     * @see #onKeyReleased(UIAction)
+     * @see #onKeyPressed(Action)
+     * @see #onKeyReleased(Action)
      */
-    public final I onReleased( Keyboard.Key key, UIAction<SimpleDelegate<C, KeyEvent>> onKeyReleased ) {
+    public final I onReleased( Keyboard.Key key, Action<SimpleDelegate<C, KeyEvent>> onKeyReleased ) {
         NullUtil.nullArgCheck(key, "key", Keyboard.Key.class);
-        NullUtil.nullArgCheck(onKeyReleased, "onKeyReleased", UIAction.class);
+        NullUtil.nullArgCheck(onKeyReleased, "onKeyReleased", Action.class);
         C component = getComponent();
         component.addKeyListener(new KeyAdapter() {
             @Override public void keyReleased( KeyEvent e ) {
@@ -2008,16 +2008,16 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     * Adds the supplied {@link UIAction} wrapped in a {@link KeyListener}
+     * Adds the supplied {@link Action} wrapped in a {@link KeyListener}
      * to the component, to receive key events triggered when the wrapped component receives keyboard input.
      * <br><br>
-     * @param onKeyTyped The {@link UIAction} which will be executed once the wrapped component received a key typed.
+     * @param onKeyTyped The {@link Action} which will be executed once the wrapped component received a key typed.
      * @return This very instance, which enables builder-style method chaining.
-     * @see #onKeyPressed(UIAction)
-     * @see #onKeyReleased(UIAction)
+     * @see #onKeyPressed(Action)
+     * @see #onKeyReleased(Action)
      */
-    public final I onKeyTyped( UIAction<SimpleDelegate<C, KeyEvent>> onKeyTyped ) {
-        NullUtil.nullArgCheck(onKeyTyped, "onKeyTyped", UIAction.class);
+    public final I onKeyTyped( Action<SimpleDelegate<C, KeyEvent>> onKeyTyped ) {
+        NullUtil.nullArgCheck(onKeyTyped, "onKeyTyped", Action.class);
         C component = getComponent();
         _onKeyTyped( e ->
             _doApp(()->onKeyTyped.accept(new SimpleDelegate<>(component, e, this::getSiblinghood)))
@@ -2034,20 +2034,20 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     * Adds the supplied {@link UIAction} wrapped in a {@link KeyListener} to the component,
+     * Adds the supplied {@link Action} wrapped in a {@link KeyListener} to the component,
      * to receive key events triggered when the wrapped component receives a particular
      * keyboard input matching the provided {@link swingtree.input.Keyboard.Key}.
      * <br><br>
      * @param key The {@link swingtree.input.Keyboard.Key} which should be matched to the key event.
-     * @param onKeyTyped The {@link UIAction} which will be executed once the wrapped component received the targeted key typed.
+     * @param onKeyTyped The {@link Action} which will be executed once the wrapped component received the targeted key typed.
      * @return This very instance, which enables builder-style method chaining.
-     * @see #onKeyPressed(UIAction)
-     * @see #onKeyReleased(UIAction)
-     * @see #onKeyTyped(UIAction)
+     * @see #onKeyPressed(Action)
+     * @see #onKeyReleased(Action)
+     * @see #onKeyTyped(Action)
      */
-    public final I onTyped( Keyboard.Key key, UIAction<SimpleDelegate<C, KeyEvent>> onKeyTyped ) {
+    public final I onTyped( Keyboard.Key key, Action<SimpleDelegate<C, KeyEvent>> onKeyTyped ) {
         NullUtil.nullArgCheck(key, "key", Keyboard.Key.class);
-        NullUtil.nullArgCheck(onKeyTyped, "onKeyTyped", UIAction.class);
+        NullUtil.nullArgCheck(onKeyTyped, "onKeyTyped", Action.class);
         C component = getComponent();
         component.addKeyListener(new KeyAdapter() {
             @Override public void keyTyped( KeyEvent e ) {
@@ -2067,12 +2067,12 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *          .doUpdates( 100, it -> it.getComponent().setText(new Date().toString()) )
      *  }</pre>
      *
-     * @param delay The delay between calling the provided {@link UIAction}.
-     * @param onUpdate The {@link UIAction} which should be called periodically.
+     * @param delay The delay between calling the provided {@link Action}.
+     * @param onUpdate The {@link Action} which should be called periodically.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I doUpdates( int delay, UIAction<SimpleDelegate<C, ActionEvent>> onUpdate ) {
-        NullUtil.nullArgCheck(onUpdate, "onUpdate", UIAction.class);
+    public final I doUpdates( int delay, Action<SimpleDelegate<C, ActionEvent>> onUpdate ) {
+        NullUtil.nullArgCheck(onUpdate, "onUpdate", Action.class);
         Timer timer = new Timer(delay, e -> onUpdate.accept(new SimpleDelegate<>(getComponent(), e, this::getSiblinghood)));
         synchronized (_timers) {
             _timers.getOrDefault(getComponent(), new ArrayList<>()).add(timer);

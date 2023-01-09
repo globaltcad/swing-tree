@@ -1,8 +1,5 @@
 package swingtree.api.mvvm;
 
-import swingtree.api.UIAction;
-
-import javax.swing.border.Border;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -73,23 +70,26 @@ public interface Var<T> extends Val<T>
 
 	/**
 	 * 	This factory method returns a {@code Var} describing the given non-{@code null}
+	 * 	item similar to {@link Optional#of(Object)} and its type which
+	 * 	may also be a super type of the item.
+	 *
+	 * @param type The type of the item wrapped by the property.
+	 * @param item The initial item of the property which must not be null.
+	 * @param <T> The type of the item held by the {@link Var}!
+	 * @return A new {@link Var} instance wrapping the given item.
+	 */
+	static <T, V extends T> Var<T> of( Class<T> type, V item ) { return AbstractVariable.of( false, type, item ); }
+
+
+	/**
+	 * 	This factory method returns a {@code Var} describing the given non-{@code null}
 	 * 	{@link Viewable} type. A {@link Var} is similar to {@link Optional#of(Object)}, but specifically
 	 * 	designed for use with Swing-Tree.
 	 *
 	 * @param item The initial item of the property which must not be null.
 	 * @return A new {@link Var} instance wrapping the given {@link Viewable} type.
 	 */
-	static Var<Viewable> of( Viewable item ) { return AbstractVariable.of( false, item ); }
-
-	/**
-	 * 	This factory method returns a {@code Var} describing the given non-{@code null}
-	 * 	{@link Border} type. A {@link Var} is similar to {@link Optional#of(Object)}, but specifically
-	 * 	designed for use with Swing-Tree.
-	 *
-	 * @param iniValue The initial item of the property which must not be null.
-	 * @return A new {@link Var} instance wrapping the given {@link Border} item.
-	 */
-	static Var<Border> of( Border iniValue ) { return AbstractVariable.of( false, iniValue ); }
+	static Var<Viewable> of(Viewable item ) { return AbstractVariable.of( false, item ); }
 
 	/**
 	 *  This method provides the ability to change the state of the wrapper.
@@ -120,11 +120,11 @@ public interface Var<T> extends Val<T>
 	 * @param action The action to be triggered when {@code Var::act()} or {@code Var::act(T)} is called.
 	 * @return This very property instance, in order to enable method chaining.
 	 */
-	Var<T> onAct( UIAction<ValDelegate<T>> action );
+	Var<T> onAct( Action<ValDelegate<T>> action );
 
 	/**
 	 *  Triggers the action associated with this property, if one was
-	 *  set using {@link #onAct(UIAction)}.
+	 *  set using {@link #onAct(Action)}.
 	 *  This method is intended to be used in the UI
 	 *  to indicate that the user has changed the item of the property
 	 *  not your view model.

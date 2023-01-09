@@ -1,6 +1,6 @@
 package swingtree;
 
-import swingtree.api.UIAction;
+import swingtree.api.mvvm.Action;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -11,8 +11,8 @@ public class UIForFormattedTextField extends UIForAbstractTextComponent<UIForFor
 {
     protected UIForFormattedTextField( JFormattedTextField component ) { super(component); }
 
-    public UIForFormattedTextField onEnter( UIAction<SimpleDelegate<JFormattedTextField, ActionEvent>> action ) {
-        NullUtil.nullArgCheck(action, "action", UIAction.class);
+    public UIForFormattedTextField onEnter( Action<SimpleDelegate<JFormattedTextField, ActionEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", Action.class);
         JFormattedTextField field = getComponent();
         _onEnter( e -> _doApp(()->action.accept(new SimpleDelegate<>( field, e, this::getSiblinghood )) ) );
         return this;

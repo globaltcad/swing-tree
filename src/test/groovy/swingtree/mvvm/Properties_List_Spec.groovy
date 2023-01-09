@@ -4,7 +4,6 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
-import swingtree.api.UIAction
 import swingtree.api.mvvm.*
 
 @Title("Lists of Properties")
@@ -243,14 +242,14 @@ class Properties_List_Spec extends Specification
         and : 'A list where we are going to record changes.'
             var changes = []
         and : 'Now we register a "show" listeners on both objects.'
-            prop.onShow(new UIAction<ValDelegate<Integer>>() {
+            prop.onShow(new Action<ValDelegate<Integer>>() {
                 @Override
                 void accept(ValDelegate<Integer> delegate) {
                     changes << "Something happened to the property."
                 }
                 @Override boolean canBeRemoved() { return true }
             })
-            list.onShow(new UIAction<ValsDelegate<Integer>>() {
+            list.onShow(new Action<ValsDelegate<Integer>>() {
                 @Override
                 void accept(ValsDelegate<Integer> delegate) {
                     changes << "Something happened to the list."

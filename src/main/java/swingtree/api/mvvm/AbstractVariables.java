@@ -1,7 +1,5 @@
 package swingtree.api.mvvm;
 
-import swingtree.api.UIAction;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -72,7 +70,7 @@ public class AbstractVariables<T> implements Vars<T>
     private final boolean _allowsNull;
     private final Class<T> _type;
 
-    private final List<UIAction<ValsDelegate<T>>> _viewActions = new ArrayList<>();
+    private final List<Action<ValsDelegate<T>>> _viewActions = new ArrayList<>();
 
     @SafeVarargs
     protected AbstractVariables( boolean isImmutable, Class<T> type, boolean allowsNull, Var<T>... vals ) {
@@ -164,7 +162,7 @@ public class AbstractVariables<T> implements Vars<T>
 
     /** {@inheritDoc} */
     @Override
-    public Vals<T> onShow( UIAction<ValsDelegate<T>> action ) {
+    public Vals<T> onShow( Action<ValsDelegate<T>> action ) {
         _viewActions.add(action);
         return this;
     }
@@ -190,9 +188,9 @@ public class AbstractVariables<T> implements Vars<T>
     private void _triggerAction(
             Mutation type, int index, Var<T> newVal, Var<T> oldVal
     ) {
-        List<UIAction<ValsDelegate<T>>> removableActions = new ArrayList<>();
+        List<Action<ValsDelegate<T>>> removableActions = new ArrayList<>();
         ValsDelegate<T> showAction = _createDelegate(index, type, newVal, oldVal);
-        for ( UIAction<ValsDelegate<T>> action : _viewActions ) {
+        for ( Action<ValsDelegate<T>> action : _viewActions ) {
             try {
                 if ( action.canBeRemoved() )
                     removableActions.add(action);

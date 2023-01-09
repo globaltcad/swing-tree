@@ -24,8 +24,8 @@ public class ListSearchViewModel {
     private final Var<Integer> found = Var.of(0);
     private final Var<Boolean> searchEnabled = Var.of(true);
     private final Var<Boolean> searchRunning = Var.of(false);
-    private final Var<Border> listBorder = Var.of(BorderFactory.createEmptyBorder());
-    private final Var<Border> searchBorder = Var.of(BorderFactory.createEmptyBorder());
+    private final Var<Border> listBorder = Var.of(Border.class, BorderFactory.createEmptyBorder());
+    private final Var<Border> searchBorder = Var.of(Border.class, BorderFactory.createEmptyBorder());
 
     private final Var<String> searchButtonText = Var.of("Search");
 

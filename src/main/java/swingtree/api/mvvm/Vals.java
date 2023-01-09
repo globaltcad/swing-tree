@@ -1,7 +1,5 @@
 package swingtree.api.mvvm;
 
-import swingtree.api.UIAction;
-
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -198,12 +196,12 @@ public interface Vals<T> extends Iterable<T>
     }
 
     /**
-     *  Similar to {@link Var#onShowItem(UIAction)} but for a list of properties.
+     *  Similar to {@link Var#onShowItem(Action)} but for a list of properties.
      *
      * @param action The action to perform when the list of properties is shown (which is called when its state changes).
      * @return This list of properties.
      */
-    Vals<T> onShow( UIAction<ValsDelegate<T>> action );
+    Vals<T> onShow( Action<ValsDelegate<T>> action );
 
     /**
      *  Similar to {@link Var#show()} but for a list of properties.
