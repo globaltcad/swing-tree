@@ -12,7 +12,8 @@ import swingtree.api.mvvm.Viewable
 
 import javax.swing.*
 import javax.swing.border.TitledBorder
-import java.awt.Color
+import java.awt.*
+import java.util.List
 
 @Title("MVVM Introduction")
 @Narrative('''
@@ -333,26 +334,20 @@ class MVVM_Example_Spec extends Specification
             Var<String> name = Var.of("Tofu")
             Var<Integer> population = Var.of(4)
 
-            var vm1 = new Viewable() {
-                @Override
-                JComponent createView() {
-                    return UI.panel().id("sub-1")
-                            .add(UI.label("Name:"))
-                            .add(UI.textField(name))
-                            .add(UI.button("Update").onClick { name.set("Tempeh") })
-                            .component
-                }
-            }
-            var vm2 = new Viewable() {
-                @Override
-                JComponent createView() {
-                    return UI.panel().id("sub-2")
-                            .add(UI.label("Population:"))
-                            .add(UI.slider(UI.Align.HORIZONTAL).withValue(population))
-                            .add(UI.button("Update").onClick { population.set(5) })
-                            .component
-                }
-            }
+            var vm1 = (Viewable){
+                            return UI.panel().id("sub-1")
+                                    .add(UI.label("Name:"))
+                                    .add(UI.textField(name))
+                                    .add(UI.button("Update").onClick { name.set("Tempeh") })
+                                    .component
+                        }
+            var vm2 = (Viewable) {
+                            return UI.panel().id("sub-2")
+                                    .add(UI.label("Population:"))
+                                    .add(UI.slider(UI.Align.HORIZONTAL).withValue(population))
+                                    .add(UI.button("Update").onClick { population.set(5) })
+                                    .component
+                        }
         and : 'A property storing the first view model.'
             Var<Viewable> vm = Var.of(vm1)
         and : 'Finally a view which binds to the view model property.'
@@ -394,46 +389,34 @@ class MVVM_Example_Spec extends Specification
             Var<Option> option = Var.of(Option.YES)
 
         and : 'We create 4 view models with 4 locally created views:'
-            var vm1 = new Viewable() {
-                @Override
-                JComponent createView() {
-                    return UI.panel().id("sub-1")
-                            .add(UI.label("Address:"))
-                            .add(UI.textField(address))
-                            .add(UI.button("Update").onClick { address.set("456 Main Street") })
-                            .component
-                }
-            }
-            var vm2 = new Viewable() {
-                @Override
-                JComponent createView() {
-                    return UI.panel().id("sub-2")
-                            .add(UI.label("Title:"))
-                            .add(UI.textField(title))
-                            .add(UI.button("Update").onClick { title.set("Mrs.") })
-                            .component
-                }
-            }
-            var vm3 = new Viewable() {
-                @Override
-                JComponent createView() {
-                    return UI.panel().id("sub-3")
-                            .add(UI.label("Price:"))
-                            .add(UI.slider(UI.Align.HORIZONTAL).withValue(price))
-                            .add(UI.button("Update").onClick { price.set(2000000.0) })
-                            .component
-                }
-            }
-            var vm4 = new Viewable() {
-                @Override
-                JComponent createView() {
-                    return UI.panel().id("sub-4")
-                            .add(UI.label("Option:"))
-                            .add(UI.comboBox(option, Option.values()))
-                            .add(UI.button("Update").onClick { option.set(Option.NO) })
-                            .component
-                }
-            }
+            var vm1 = (Viewable) {
+                            return UI.panel().id("sub-1")
+                                    .add(UI.label("Address:"))
+                                    .add(UI.textField(address))
+                                    .add(UI.button("Update").onClick { address.set("456 Main Street") })
+                                    .component
+                        }
+            var vm2 = (Viewable) {
+                            return UI.panel().id("sub-2")
+                                    .add(UI.label("Title:"))
+                                    .add(UI.textField(title))
+                                    .add(UI.button("Update").onClick { title.set("Mrs.") })
+                                    .component
+                        }
+            var vm3 = (Viewable){
+                            return UI.panel().id("sub-3")
+                                    .add(UI.label("Price:"))
+                                    .add(UI.slider(UI.Align.HORIZONTAL).withValue(price))
+                                    .add(UI.button("Update").onClick { price.set(2000000.0) })
+                                    .component
+                        }
+            var vm4 = (Viewable){
+                                return UI.panel().id("sub-4")
+                                    .add(UI.label("Option:"))
+                                    .add(UI.comboBox(option, Option.values()))
+                                    .add(UI.button("Update").onClick { option.set(Option.NO) })
+                                    .component
+                            }
         and : 'A property list storing the view models.'
             var vms = Vars.of(vm1, vm2, vm3, vm4)
         and : 'Finally a view which binds to the view model property list.'

@@ -131,7 +131,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         // First we remember the index of the component which will be provided by the viewable dynamically.
         final int index = _childCount();
         // Then we add the component provided by the viewable to the list of children.
-        this.add(viewable.get().createView());
+        this.add(viewable.get().createView(JComponent.class));
         // Finally we add a listener to the viewable which will update the component when the viewable changes.
         _onShow( viewable, v -> _updateComponentAt(index, v) );
         return _this();
@@ -159,7 +159,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
                 default: throw new IllegalStateException("Unknown type: "+delegate.type());
             }
         });
-        viewables.forEach( v -> add(v.createView()) );
+        viewables.forEach( v -> add(v.createView(JComponent.class)) );
         return _this();
     }
 
@@ -168,7 +168,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
             // We remove the old component.
             c.remove(c.getComponent(index));
             // We add the new component.
-            c.add(v.createView(), index);
+            c.add(v.createView(JComponent.class), index);
             // We update the layout.
             c.revalidate();
             c.repaint();
@@ -178,7 +178,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     private void _addComponentAt( int index, Viewable v ) {
         component().ifPresent( c -> {
             // We add the new component.
-            c.add(v.createView(), index);
+            c.add(v.createView(JComponent.class), index);
             // We update the layout.
             c.revalidate();
             c.repaint();

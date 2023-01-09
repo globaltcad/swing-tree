@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.014 seconds"
+    "duration":"0.006 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can bind to the text of a button.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that for a binding to work, the property must be a `Var` or `Val`\n            implementation. All you have to do to then change the state of the UI component\n            is changing the state of the property by calling its \"set\" method.\n            Internally it will then call the \"show()\" method for you \n            which triggers the observers registered by the UI.\n        "]
       },
@@ -39,7 +39,7 @@
     {
       "id":"You can bind to the selection state of a button.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that this works with all kinds of buttons, not just the JButton.\n        "]
       },
@@ -62,7 +62,7 @@
     {
       "id":"You can bind to the enabled state of a button.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["  \n            Note that this works with all kinds of buttons, not just the JButton.\n        "]
       },
@@ -85,7 +85,7 @@
     {
       "id":"A button group will not only synchronize the selection state of radio buttons, but also bound properties.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Using a button group is a convenient way to synchronize the selection state of radio buttons.\n            When one radio button is selected, all other radio buttons in the same group will be deselected.\n            This is a very common pattern in UIs, and swing-tree makes it easy to implement\n            along with the binding of properties.\n            So the selection states of a radio buttons will also\n            translate to the selection state of all bound properties.\n        "]
       },
