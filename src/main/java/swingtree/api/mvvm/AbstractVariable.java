@@ -74,27 +74,21 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 		_actions.addAll(actions);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	/** {@inheritDoc} */
 	@Override public Var<T> withId( String id ) {
 		AbstractVariable<T> newVar = new AbstractVariable<T>( _isImmutable, _type, _value, id, _actions, _allowsNull ){};
 		newVar._viewActions.addAll(_viewActions);
 		return newVar;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	/** {@inheritDoc} */
 	@Override public Var<T> onAct( Action<ValDelegate<T>> action ) {
 		Objects.requireNonNull(action);
 		_actions.add(action);
 		return this;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	/** {@inheritDoc} */
 	@Override public Var<T> act() {
 		_triggerActions( _actions, false );
 		_viewers.forEach( v -> v.accept(_value) );
@@ -127,9 +121,7 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 		return new AbstractVariable<T>( _isImmutable, _type, _value, _id, _actions, _allowsNull ){};
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	/** {@inheritDoc} */
 	@Override public Var<T> act( T newValue ) {
 		if ( _isImmutable )
 			throw new UnsupportedOperationException("This variable is immutable!");
@@ -138,9 +130,7 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 		return this;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	/** {@inheritDoc} */
 	@Override
 	public Var<T> set( T newItem) {
 		if ( _isImmutable )
@@ -173,6 +163,7 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 		return false;
 	}
 
+	/** {@inheritDoc} */
 	@Override public final <U> Val<U> viewAs( Class<U> type, java.util.function.Function<T, U> mapper ) {
 		Var<U> var = mapTo(type, mapper);
 		// Now we register a live update listener to this property

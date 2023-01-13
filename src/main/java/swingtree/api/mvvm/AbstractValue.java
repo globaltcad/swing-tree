@@ -35,19 +35,13 @@ abstract class AbstractValue<T> implements Val<T>
             throw new IllegalArgumentException("The provided id '"+_id+"' is not valid!");
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override public final Class<T> type() { return _type; }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** @inheritDoc} */
     @Override public final String id() { return _id; }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public final T orElseThrow() {
         // This class is similar to optional, so if the value is null, we throw an exception!
@@ -57,29 +51,20 @@ abstract class AbstractValue<T> implements Val<T>
         return _value;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public boolean isPresent() { return _value != null; }
+    /** {@inheritDoc}*/
+    public final boolean isPresent() { return _value != null; }
 
-    /**
-     * {@inheritDoc}
-     */
-    public T orElseNullable( T other ) { return _value != null ? _value : other; }
+    /** {@inheritDoc} */
+    public final T orElseNullable( T other ) { return _value != null ? _value : other; }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override public Val<T> onShow( Action<ValDelegate<T>> displayAction ) {
         _viewActions.add(displayAction);
         return this;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Val<T> show() { _triggerActions( _viewActions, true ); return this; }
+    /** {@inheritDoc} */
+    @Override public Val<T> show() { _triggerActions( _viewActions, true ); return this; }
 
     protected void _triggerActions(List<Action<ValDelegate<T>>> actions, boolean runInGUIThread ) {
         List<Action<ValDelegate<T>>> removableActions = new ArrayList<>();
@@ -107,9 +92,7 @@ abstract class AbstractValue<T> implements Val<T>
     protected abstract AbstractValue<T> _clone();
 
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override public final boolean allowsNull() { return _allowsNull; }
 
     @Override
