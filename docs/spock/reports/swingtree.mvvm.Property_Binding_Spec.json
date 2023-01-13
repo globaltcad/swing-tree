@@ -1,0 +1,202 @@
+{
+  "className":"swingtree.mvvm.Property_Binding_Spec",
+  "title":"Property Binding",
+  "narrative":"This specification shows you how to bind properties to \n    the states of common types UI components.",
+  "subjects":[],
+  "statistics":{
+    "runs":"8",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"0.016 seconds"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"We can bind a property to the size of a swing component.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the binding of a Swing-Tree property will only have side effects\n            when it is deliberately triggered to execute its side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property representing the size of a component.","code":["Val<Dimension> size = Var.of(new Dimension(100, 100))"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var node = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Hello World\").withPreferredSize(size))","            .add(UI.button(\"Click Me\").withMinimumSize(size))","            .add(UI.textField(\"Hello World\").withMaximumSize(size))"]},
+
+        {"kind":"expect","text":"The components will have the size of the property.","code":["node.component.components[0].preferredSize == new Dimension(100, 100)","node.component.components[1].minimumSize == new Dimension(100, 100)","node.component.components[2].maximumSize == new Dimension(100, 100)"]},
+
+        {"kind":"when","text":"We change the value of the property.","code":["size.set(new Dimension(200, 200))"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The components will have the new sizes.","code":["node.component.components[0].preferredSize == new Dimension(200, 200)","node.component.components[1].minimumSize == new Dimension(200, 200)","node.component.components[2].maximumSize == new Dimension(200, 200)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Simple integer properties can be bound to the width or height of components.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create properties representing the width and heights of a components.","code":["Var<Integer> minWidth = Var.of(60)","Var<Integer> prefHeight = Var.of(40)","Var<Integer> maxWidth = Var.of(90)"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var node = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Hello World\").withMinimumWidth(minWidth))","            .add(UI.button(\"Click Me\").withPreferredHeight(prefHeight))","            .add(UI.textField(\"Hello World\").withMaximumWidth(maxWidth))"]},
+
+        {"kind":"expect","text":"The components will have the sizes of the properties.","code":["node.component.components[0].minimumSize.width == 60","node.component.components[1].preferredSize.height == 40","node.component.components[2].maximumSize.width == 90"]},
+
+        {"kind":"when","text":"We change the value of the properties.","code":["minWidth.set(100)","prefHeight.set(80)","maxWidth.set(120)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The components will have the new sizes.","code":["node.component.components[0].minimumSize.width == 100","node.component.components[1].preferredSize.height == 80","node.component.components[2].maximumSize.width == 120"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Bind to both width and height independently if you want to.",
+      "result":"PASS",
+      "duration":"0.002 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property representing the width of a component.","code":["Var<Integer> width = Var.of(60)","Var<Integer> height = Var.of(40)"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var node = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Hello World\").withMinimumSize(width, height))","            .add(UI.toggleButton(\"Click Me\").withPreferredSize(width, height))","            .add(UI.textArea(\"Hello World\").withMaximumSize(width, height))"]},
+
+        {"kind":"expect","text":"The components will have the sizes of the properties.","code":["node.component.components[0].minimumSize == new Dimension(60, 40)","node.component.components[1].preferredSize == new Dimension(60, 40)","node.component.components[2].maximumSize == new Dimension(60, 40)"]},
+
+        {"kind":"when","text":"We change the value of the properties.","code":["width.set(100)","height.set(80)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The components will have the new sizes.","code":["node.component.components[0].minimumSize == new Dimension(100, 80)","node.component.components[1].preferredSize == new Dimension(100, 80)","node.component.components[2].maximumSize == new Dimension(100, 80)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can bind to the color of a component.",
+      "result":"PASS",
+      "duration":"0",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property representing the color of a component.","code":["Val<Color> property = Var.of(Color.RED)"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var node = UI.panel(\"fill, wrap 1\")","            .add(UI.button(\"Click Me!\"))","            .add(UI.label(\"I have a Background\").withBackground(property))","            .add(UI.textField(\"Hello World\"))"]},
+
+        {"kind":"expect","text":"The label will have the background color of the property.","code":["node.component.components[1].background == Color.RED"]},
+
+        {"kind":"when","text":"We change the value of the property.","code":["property.set(Color.BLUE)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label will have the new color.","code":["node.component.components[1].background == Color.BLUE"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can bind to the text of a component.",
+      "result":"PASS",
+      "duration":"0",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property representing the text of a component.","code":["Val<String> property = Var.of(\"Hello World\")"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var node = UI.panel(\"fill, wrap 1\")","            .add(UI.button(\"Click Me!\"))","            .add(UI.textField(\"Hello World\").withText(property))","            .add(UI.checkBox(\"Hello World\"))"]},
+
+        {"kind":"expect","text":"The text field will have the text of the property.","code":["node.component.components[1].text == \"Hello World\""]},
+
+        {"kind":"when","text":"We change the value of the property.","code":["property.set(\"Goodbye World\")"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The text field will have the new text.","code":["node.component.components[1].text == \"Goodbye World\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can enable and disable a UI component dynamically through property binding.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property representing the enabled state of a component.","code":["Val<Boolean> property = Var.of(true)"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var node = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Below me is a spinner!\"))","            .add(UI.spinner().isEnabledIf(property))","            .add(UI.textArea(\"I am here for decoration...\"))"]},
+
+        {"kind":"expect","text":"The spinner will be enabled.","code":["node.component.components[1].enabled == true"]},
+
+        {"kind":"when","text":"We change the value of the property.","code":["property.set(false)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The spinner will be disabled.","code":["node.component.components[1].enabled == false"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can select or unselect a UI component dynamically through properties.",
+      "result":"PASS",
+      "duration":"0",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property representing the selected state of a component.","code":["Val<Boolean> property = Var.of(true)"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var node = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Below me is a checkbox!\"))","            .add(UI.checkBox(\"I am a checkbox\").isSelectedIf(property))","            .add(UI.textArea(\"I am here for decoration...\"))"]},
+
+        {"kind":"expect","text":"The checkbox will be selected.","code":["node.component.components[1].selected == true"]},
+
+        {"kind":"when","text":"We change the value of the property.","code":["property.set(false)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The checkbox will be unselected.","code":["node.component.components[1].selected == false"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Enable or disable the split items of a JSplitButton through properties.",
+      "result":"PASS",
+      "duration":"0.004 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property representing the enabled state of a component.","code":["Val<Boolean> property = Var.of(true)"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var node = UI.splitButton(\"I am a split button\")","                .add(UI.splitItem(\"I am a button\").isEnabledIf(property))","                .add(UI.splitItem(\"I am a button\"))","                .add(UI.splitItem(\"I am a button\"))"]},
+
+        {"kind":"expect","text":"The first split item will be enabled.","code":["Utility.getSplitButtonPopup(node).components[0].enabled == true"]},
+
+        {"kind":"when","text":"We change the value of the property.","code":["property.set(false)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The first split item will be disabled.","code":["Utility.getSplitButtonPopup(node).components[0].enabled == false"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}
