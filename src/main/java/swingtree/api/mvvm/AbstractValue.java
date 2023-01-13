@@ -31,6 +31,8 @@ abstract class AbstractValue<T> implements Val<T>
 						"The provided type of the initial value is not compatible with the actual type of the variable"
 					);
 		}
+        if ( !ID_PATTERN.matcher(_id).matches() )
+            throw new IllegalArgumentException("The provided id '"+_id+"' is not valid!");
     }
 
     /**

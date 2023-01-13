@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 /**
  * 	A read only view on an item which can be observed by the Swing-Tree UI
@@ -25,6 +26,7 @@ public interface Val<T>
 {
 	String NO_ID = ""; // This is the default id for properties
 	String EMPTY = "EMPTY"; // This is the default string for empty properties
+	Pattern ID_PATTERN = Pattern.compile("[a-zA-Z0-9_]*");
 
 	/**
 	 *  Use this factory method to create a new {@link Val} instance
