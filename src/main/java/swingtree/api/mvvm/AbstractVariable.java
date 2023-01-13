@@ -17,26 +17,26 @@ import java.util.function.Consumer;
 public abstract class AbstractVariable<T> extends AbstractValue<T> implements Var<T>
 {
 	static <T> Var<T> ofNullable( boolean immutable, Class<T> type, T value ) {
-		return new AbstractVariable<T>( immutable, type, value, UNNAMED, Collections.emptyList(), true ){};
+		return new AbstractVariable<T>( immutable, type, value, NO_ID, Collections.emptyList(), true ){};
 	}
 
 	static <T> Var<T> of( boolean immutable, Class<T> type, T value ) {
-		return new AbstractVariable<T>( immutable, type, value, UNNAMED, Collections.emptyList(), false ){};
+		return new AbstractVariable<T>( immutable, type, value, NO_ID, Collections.emptyList(), false ){};
 	}
 
 	static <T> Var<T> of( boolean immutable, T iniValue ) {
 		Objects.requireNonNull(iniValue);
-		return new AbstractVariable<T>( immutable, (Class<T>) iniValue.getClass(), iniValue, UNNAMED, Collections.emptyList(), false ){};
+		return new AbstractVariable<T>( immutable, (Class<T>) iniValue.getClass(), iniValue, NO_ID, Collections.emptyList(), false ){};
 	}
 
 	static Var<Viewable> of(boolean immutable, Viewable iniValue ) {
 		Objects.requireNonNull(iniValue);
-		return new AbstractVariable<Viewable>( immutable, Viewable.class, iniValue, UNNAMED, Collections.emptyList(), false ){};
+		return new AbstractVariable<Viewable>( immutable, Viewable.class, iniValue, NO_ID, Collections.emptyList(), false ){};
 	}
 
 	static Var<Border> of( boolean immutable, Border iniValue ) {
 		Objects.requireNonNull(iniValue);
-		return new AbstractVariable<Border>( immutable, Border.class, iniValue, UNNAMED, Collections.emptyList(), false ){};
+		return new AbstractVariable<Border>( immutable, Border.class, iniValue, NO_ID, Collections.emptyList(), false ){};
 	}
 
 	private final boolean _isImmutable;
