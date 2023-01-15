@@ -173,7 +173,7 @@ abstract class AbstractBuilder<I, C extends Component>
      * @param <T> The type parameter of the component which this builder wraps.
      * @return The result of the building process, namely: a type of JComponent.
      */
-    public <T extends C> T get(Class<T> type) {
+    public <T extends C> T get( Class<T> type ) {
         assert type == _type || type.isAssignableFrom(_type);
         return (T) _component.get();
     }

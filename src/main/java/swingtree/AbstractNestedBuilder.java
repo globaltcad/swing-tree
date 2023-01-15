@@ -123,9 +123,8 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I add( List<E> components ) {
-        final C[] array = (C[]) new Component[components.size()];
-        for ( int i = 0; i < array.length; i++ )
-            _doAdd(UI.of((JComponent) components.get(i)), null);
+        for ( E component : components )
+            _doAdd(UI.of((JComponent) component), null);
 
         return _this();
     }

@@ -118,92 +118,6 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
             @Override public boolean canBeRemoved() { return !component().isPresent(); }
         });
     }
-    /**
-     *  This allows you to bind to a {@link Viewable}
-     *  implementation and automatically update the view when the view model changes.
-     *
-     * @param viewable A {@link swingtree.api.mvvm.Val} property which holds a {@link Viewable} instance
-     *        that will be used to generate the view.
-     * @return This very instance, which enables builder-style method chaining.
-     */
-    public final I add( Val<Viewable> viewable ) {
-        NullUtil.nullArgCheck(viewable, "viewable", Val.class);
-        // First we remember the index of the component which will be provided by the viewable dynamically.
-        final int index = _childCount();
-        // Then we add the component provided by the viewable to the list of children.
-        this.add(viewable.get().createView(JComponent.class));
-        // Finally we add a listener to the viewable which will update the component when the viewable changes.
-        _onShow( viewable, v -> _updateComponentAt(index, v) );
-        return _this();
-    }
-
-    /**
-     *  This allows you to bind to a property list of {@link Viewable}s
-     *  to automatically update the view when your view models change.
-     *
-     * @param viewables A {@link swingtree.api.mvvm.Vals} list of {@link Viewable}s
-     *                  wrapped in a {@link swingtree.api.mvvm.Val} properties.
-     *                  The Viewables will be used to generate the view.
-     * @return This very instance, which enables builder-style method chaining.
-     */
-    public final I add( Vals<Viewable> viewables ) {
-        NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
-        _onShow( viewables, delegate -> {
-            // we simply redo all the components.
-            switch ( delegate.type() ) {
-                case SET: _updateComponentAt(delegate.index(), delegate.newValue().get()); break;
-                case ADD: _addComponentAt(delegate.index(), delegate.newValue().get()); break;
-                case REMOVE: _removeComponentAt(delegate.index()); break;
-                case CLEAR: _clearComponents(); break;
-                case NONE: break;
-                default: throw new IllegalStateException("Unknown type: "+delegate.type());
-            }
-        });
-        viewables.forEach( v -> add(v.createView(JComponent.class)) );
-        return _this();
-    }
-
-    private void _updateComponentAt( int index, Viewable v ) {
-        component().ifPresent( c -> {
-            // We remove the old component.
-            c.remove(c.getComponent(index));
-            // We add the new component.
-            c.add(v.createView(JComponent.class), index);
-            // We update the layout.
-            c.revalidate();
-            c.repaint();
-        });
-    }
-
-    private void _addComponentAt( int index, Viewable v ) {
-        component().ifPresent( c -> {
-            // We add the new component.
-            c.add(v.createView(JComponent.class), index);
-            // We update the layout.
-            c.revalidate();
-            c.repaint();
-        });
-    }
-
-    private void _removeComponentAt( int index ) {
-        component().ifPresent( c -> {
-            // We remove the old component.
-            c.remove(c.getComponent(index));
-            // We update the layout.
-            c.revalidate();
-            c.repaint();
-        });
-    }
-
-    private void _clearComponents() {
-        component().ifPresent( c -> {
-            // We remove all components.
-            c.removeAll();
-            // We update the layout.
-            c.revalidate();
-            c.repaint();
-        });
-    }
 
     /**
      *  This method exposes a concise way to set an identifier for the component
@@ -2264,6 +2178,178 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     @SafeVarargs
     public final <E extends JComponent> I add( CompAttr attr, E... components ) {
         return this.add(attr.toString(), components);
+    }
+
+    /**
+     *  This allows you to bind to a {@link Viewable}
+     *  implementation and automatically update the view when the view model changes.
+     *
+     * @param viewable A {@link swingtree.api.mvvm.Val} property which holds a {@link Viewable} instance
+     *        that will be used to generate the view.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I add( Val<? extends Viewable> viewable ) {
+        NullUtil.nullArgCheck(viewable, "viewable", Val.class);
+        _addViewableProp(viewable, null);
+        return _this();
+    }
+
+    /**
+     *  This allows you to bind to a property list of {@link Viewable}s
+     *  to automatically update the view when your view models change.
+     *
+     * @param viewables A {@link swingtree.api.mvvm.Vals} list of {@link Viewable}s
+     *                  wrapped in a {@link swingtree.api.mvvm.Val} properties.
+     *                  The Viewables will be used to generate the view.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I add( Vals<? extends Viewable> viewables ) {
+        NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
+        _addViewableProps( viewables, null );
+        return _this();
+    }
+
+    /**
+     *  This allows you to bind to a {@link Viewable}
+     *  implementation and automatically update the view when the view model changes.
+     *
+     * @param attr The layout information which should be passed to the UI tree.
+     * @param viewable A {@link swingtree.api.mvvm.Val} property which holds a {@link Viewable} instance
+     *        that will be used to generate the view.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I add( String attr, Val<? extends Viewable> viewable ) {
+        NullUtil.nullArgCheck(attr, "attr", Object.class);
+        NullUtil.nullArgCheck(viewable, "viewable", Val.class);
+        _addViewableProp(viewable, attr);
+        return _this();
+    }
+
+    /**
+     *  This allows you to bind to a property list of {@link Viewable}s
+     *  to automatically update the view when your view models change.
+     *
+     * @param attr The layout information which should be passed to the UI tree.
+     * @param viewables A {@link swingtree.api.mvvm.Vals} list of {@link Viewable}s
+     *                  wrapped in a {@link swingtree.api.mvvm.Val} properties.
+     *                  The Viewables will be used to generate the view.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I add( String attr, Vals<? extends Viewable> viewables ) {
+        NullUtil.nullArgCheck(attr, "attr", Object.class);
+        NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
+        _addViewableProps( viewables, attr );
+        return _this();
+    }
+
+    /**
+     *  This allows you to bind to a {@link Viewable}
+     *  implementation and automatically update the view when the view model changes.
+     *
+     * @param attr The layout information which should be passed to the UI tree.
+     * @param viewable A {@link swingtree.api.mvvm.Val} property which holds a {@link Viewable} instance
+     *        that will be used to generate the view.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I add( CompAttr attr, Val<? extends Viewable> viewable ) {
+        return this.add(attr.toString(), viewable);
+    }
+
+    /**
+     *  This allows you to bind to a property list of {@link Viewable}s
+     *  to automatically update the view when your view models change.
+     *
+     * @param attr The layout information which should be passed to the UI tree.
+     * @param viewables A {@link swingtree.api.mvvm.Vals} list of {@link Viewable}s
+     *                  wrapped in a {@link swingtree.api.mvvm.Val} properties.
+     *                  The Viewables will be used to generate the view.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I add( CompAttr attr, Vals<? extends Viewable> viewables ) {
+        return this.add(attr.toString(), viewables);
+    }
+
+    private void _addViewableProps( Vals<? extends Viewable> viewables, String attr ) {
+        _onShow( viewables, delegate -> {
+            // we simply redo all the components.
+            switch ( delegate.type() ) {
+                case SET: _updateComponentAt(delegate.index(), delegate.newValue().get(), attr); break;
+                case ADD: _addComponentAt(delegate.index(), delegate.newValue().get(), attr); break;
+                case REMOVE: _removeComponentAt(delegate.index()); break;
+                case CLEAR: _clearComponents(); break;
+                case NONE: break;
+                default: throw new IllegalStateException("Unknown type: "+delegate.type());
+            }
+        });
+        viewables.forEach( v -> add(v.createView(JComponent.class)) );
+    }
+
+    private void _addViewableProp( Val<? extends Viewable> viewable, String attr ) {
+        // First we remember the index of the component which will be provided by the viewable dynamically.
+        final int index = _childCount();
+        // Then we add the component provided by the viewable to the list of children.
+        if ( attr == null ) {
+            if ( viewable.isPresent() )
+                this.add(viewable.get().createView(JComponent.class));
+            else
+                this.add(new JPanel()); // We add a dummy component to the list of children.
+        } else {
+            if ( viewable.isPresent() )
+                this.add(attr, viewable.get().createView(JComponent.class));
+            else
+                this.add(attr, new JPanel()); // We add a dummy component to the list of children.
+        }
+        // Finally we add a listener to the viewable which will update the component when the viewable changes.
+        _onShow( viewable, v -> _updateComponentAt(index, v, attr) );
+    }
+
+    private void _updateComponentAt( int index, Viewable v, String attr ) {
+        component().ifPresent( c -> {
+            JComponent newComponent = v == null ? new JPanel() : v.createView(JComponent.class);
+            // We remove the old component.
+            c.remove(c.getComponent(index));
+            // We add the new component.
+            if ( attr == null )
+                c.add(newComponent, index);
+            else
+                c.add(newComponent, attr, index);
+            // We update the layout.
+            c.revalidate();
+            c.repaint();
+        });
+    }
+
+    private void _addComponentAt( int index, Viewable v, String attr ) {
+        component().ifPresent( c -> {
+            // We add the new component.
+            if ( attr == null )
+                c.add(v.createView(JComponent.class), index);
+            else
+                c.add(v.createView(JComponent.class), attr, index);
+            // We update the layout.
+            c.revalidate();
+            c.repaint();
+        });
+    }
+
+    private void _removeComponentAt( int index ) {
+        component().ifPresent( c -> {
+            // We remove the old component.
+            c.remove(c.getComponent(index));
+            // We update the layout.
+            c.revalidate();
+            c.repaint();
+        });
+    }
+
+    private void _clearComponents() {
+        component().ifPresent( c -> {
+            // We remove all components.
+            c.removeAll();
+            // We update the layout.
+            c.revalidate();
+            c.repaint();
+        });
     }
 
     private static boolean _isBorderLayout( Object o ) {

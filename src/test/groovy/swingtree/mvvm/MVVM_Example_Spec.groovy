@@ -468,6 +468,49 @@ class MVVM_Example_Spec extends Specification
             new Utility.Query(ui).find(JPanel, "super").isPresent()
     }
 
+    def 'A view model property may or may not exist, meaning its view may or may not be provided.'() {
+
+        reportInfo """
+            In larger GUIs usually consist views which themselves consist of multiple
+            sub views. This is also true for their view models which are usually
+            structured in the same tree like fashion. 
+            Often times however, your views are highly dynamic and you not only want to
+            be able to swap out but also enable or disable a sub view (and its underlying view model) at runtime. 
+            You can for example wrap your view model in a property and if it implements the "Viewable" interface
+            the view can bind to it to dynamically regenerate the view. 
+            If the property is empty, the view will not be provided.
+        """
+        given : 'We create a view model.'
+            Var<String> username = Var.of("123 Main Street")
+            Var<String> password = Var.of("Mr.")
+            Var<Viewable> moreUI = Var.ofNullable(Viewable, null)
+        and : 'A view which binds to the view model.'
+            var ui = UI.panel("fill, wrap 1")
+                    .add("shrink", UI.label("Dynamic Super View:"))
+                    .add("grow",
+                            UI.panel("fill").id("super")
+                            .add(UI.label("Username:"))
+                            .add(UI.textField(username))
+                            .add(UI.label("Password:"))
+                            .add(UI.textField(password))
+                            .add(moreUI)
+                    )
+        expect : 'We query the UI for the views and verify that the "super" and "sub-1" views are present.'
+            new Utility.Query(ui).find(JPanel, "super").isPresent()
+            !new Utility.Query(ui).find(JPanel, "sub-1").isPresent()
+        when : 'We set the "moreUI" property to a view model which implements the "Viewable" interface (a "view provider").'
+            moreUI.set((Viewable) {
+                    UI.panel().id("sub-1")
+                        .add(UI.label("Admin Status Code: xyz"))
+                        .add(UI.button("Do admin stuff!"))
+                        .component
+                })
+            UI.sync()
+        then : 'We expect all views to be present.'
+            new Utility.Query(ui).find(JPanel, "super").isPresent()
+            new Utility.Query(ui).find(JPanel, "sub-1").isPresent()
+    }
+
     def 'A boolean property can be used to switch between 2 foreground colors.'()
     {
         reportInfo """

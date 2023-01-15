@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForTabbedPane.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForTabbedPane.java</span></div><h1>UIForTabbedPane.java</h1><pre class="source lang-java linenums">package swingtree;
 
-import swingtree.api.UIAction;
+import swingtree.api.mvvm.Action;
 import swingtree.api.mvvm.Val;
 import swingtree.api.mvvm.Var;
 
@@ -211,13 +211,13 @@ public class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAbstractS
 <span class="fc" id="L211">        private final List&lt;WeakReference&lt;JComponent&gt;&gt; ownerRefs = new ArrayList&lt;&gt;();</span>
         private final WeakReference&lt;JTabbedPane&gt; paneRef;
         private final Supplier&lt;Integer&gt; indexFinder;
-        private final UIAction&lt;SimpleDelegate&lt;JTabbedPane, MouseEvent&gt;&gt; mouseClickAction;
+        private final Action&lt;SimpleDelegate&lt;JTabbedPane, MouseEvent&gt;&gt; mouseClickAction;
 
 
         private TabMouseClickListener(
             JTabbedPane pane,
             Supplier&lt;Integer&gt; indexFinder,
-            UIAction&lt;SimpleDelegate&lt;JTabbedPane, MouseEvent&gt;&gt; mouseClickAction
+            Action&lt;SimpleDelegate&lt;JTabbedPane, MouseEvent&gt;&gt; mouseClickAction
 <span class="fc" id="L221">        ) {</span>
 <span class="fc" id="L222">            this.paneRef = new WeakReference&lt;&gt;(pane);</span>
 <span class="fc" id="L223">            this.indexFinder = indexFinder;</span>
@@ -264,16 +264,16 @@ public class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAbstractS
     }
 
     /**
-     * Adds an {@link UIAction} to the underlying {@link JTabbedPane}
+     * Adds an {@link Action} to the underlying {@link JTabbedPane}
      * through an {@link javax.swing.event.ChangeListener},
      * which will be called when the state of the tabbed pane changes.
      * For more information see {@link JTabbedPane#addChangeListener(javax.swing.event.ChangeListener)}.
      *
-     * @param onChange The {@link UIAction} that will be called through the underlying change event.
+     * @param onChange The {@link Action} that will be called through the underlying change event.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForTabbedPane&lt;P&gt; onChange( UIAction&lt;SimpleDelegate&lt;P, ChangeEvent&gt;&gt; onChange ) {
-<span class="nc" id="L276">        NullUtil.nullArgCheck(onChange, &quot;onChange&quot;, UIAction.class);</span>
+    public final UIForTabbedPane&lt;P&gt; onChange( Action&lt;SimpleDelegate&lt;P, ChangeEvent&gt;&gt; onChange ) {
+<span class="nc" id="L276">        NullUtil.nullArgCheck(onChange, &quot;onChange&quot;, Action.class);</span>
 <span class="nc" id="L277">        P pane = getComponent();</span>
 <span class="nc" id="L278">        _onChange(e -&gt; _doApp(()-&gt;onChange.accept(new SimpleDelegate&lt;&gt;(pane, e, this::getSiblinghood))));</span>
 <span class="nc" id="L279">        return this;</span>

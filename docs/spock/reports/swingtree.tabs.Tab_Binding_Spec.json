@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.012 seconds"
+    "duration":"0.016 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"The selection state of tabs can be modelled through various properties.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can bind an integer property to the selected tab index, \n            and multiple boolean properties to the selected state of each tab.\n        "]
       },
@@ -68,7 +68,7 @@
     {
       "id":"Icons can be bound to tab headers dynamically.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can bind an icon property to the icon of a tab.\n        "]
       },

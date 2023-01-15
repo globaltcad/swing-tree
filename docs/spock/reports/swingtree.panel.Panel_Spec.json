@@ -33,7 +33,7 @@
     {
       "id":"A panel can be created with a layout manager.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

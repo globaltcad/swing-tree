@@ -89,7 +89,7 @@ public interface Var<T> extends Val<T>
 	 * @param item The initial item of the property which must not be null.
 	 * @return A new {@link Var} instance wrapping the given {@link Viewable} type.
 	 */
-	static Var<Viewable> of(Viewable item ) { return AbstractVariable.of( false, item ); }
+	static Var<Viewable> of( Viewable item ) { return AbstractVariable.of( false, item ); }
 
 	/**
 	 *  This method provides the ability to change the state of the wrapper.

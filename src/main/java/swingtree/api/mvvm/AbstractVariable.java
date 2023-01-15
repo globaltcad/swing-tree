@@ -29,7 +29,7 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 		return new AbstractVariable<T>( immutable, (Class<T>) iniValue.getClass(), iniValue, NO_ID, Collections.emptyList(), false ){};
 	}
 
-	static Var<Viewable> of(boolean immutable, Viewable iniValue ) {
+	static Var<Viewable> of( boolean immutable, Viewable iniValue ) {
 		Objects.requireNonNull(iniValue);
 		return new AbstractVariable<Viewable>( immutable, Viewable.class, iniValue, NO_ID, Collections.emptyList(), false ){};
 	}

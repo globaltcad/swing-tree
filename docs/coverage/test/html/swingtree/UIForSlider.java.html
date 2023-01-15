@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForSlider.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForSlider.java</span></div><h1>UIForSlider.java</h1><pre class="source lang-java linenums">package swingtree;
 
-import swingtree.api.UIAction;
+import swingtree.api.mvvm.Action;
 import swingtree.api.mvvm.Val;
 import swingtree.api.mvvm.Var;
 
@@ -43,17 +43,17 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;
     }
 
     /**
-     * Adds an {@link UIAction} to the underlying {@link JSlider}
+     * Adds an {@link Action} to the underlying {@link JSlider}
      * through an {@link javax.swing.event.ChangeListener},
      * which will be called when the state of the slider changes.
      * For more information see {@link JSlider#addChangeListener(javax.swing.event.ChangeListener)}.
      *
-     * @param action The {@link UIAction} that will be called through the underlying change event.
+     * @param action The {@link Action} that will be called through the underlying change event.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public final UIForSlider&lt;S&gt; onChange( UIAction&lt;SimpleDelegate&lt;JSlider, ChangeEvent&gt;&gt; action ) {
-<span class="fc" id="L56">        NullUtil.nullArgCheck( action, &quot;action&quot;, UIAction.class );</span>
+    public final UIForSlider&lt;S&gt; onChange( Action&lt;SimpleDelegate&lt;JSlider, ChangeEvent&gt;&gt; action ) {
+<span class="fc" id="L56">        NullUtil.nullArgCheck( action, &quot;action&quot;, Action.class );</span>
 <span class="fc" id="L57">        S slider = getComponent();</span>
 <span class="pc" id="L58">        _onChange( e -&gt; _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;(slider, e, this::getSiblinghood))) );</span>
 <span class="fc" id="L59">        return this;</span>

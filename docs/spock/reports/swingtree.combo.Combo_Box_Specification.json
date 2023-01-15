@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.041 seconds"
+    "duration":"0.045 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -132,7 +132,7 @@
     {
       "id":"You can model both the current selection state as well as options of your combo box using a property and an array.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n           In essence, the state of a combo box consists of the current selection, and\n           the options that are available for selection. You can model both of these\n           aspects using a property and a list. The property will be used to model\n           the current selection, and the list will be used to model the options.\n        "]
       },
@@ -202,7 +202,7 @@
     {
       "id":"You can model both the current selection state as well as options of your combo box using 2 properties.",
       "result":"PASS",
-      "duration":"0.020 seconds",
+      "duration":"0.021 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n           In essence, the state of a combo box consists of the current selection, and\n           the options that are available for selection. You can model both of these\n           aspects using 2 properties. One modelling the current selection, and another one\n           storing an array to model all available options. \n        "]
       },

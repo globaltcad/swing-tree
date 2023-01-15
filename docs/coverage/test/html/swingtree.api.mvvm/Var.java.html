@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Var.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.api.mvvm</a> &gt; <span class="el_source">Var.java</span></div><h1>Var.java</h1><pre class="source lang-java linenums">package swingtree.api.mvvm;
 
-import swingtree.api.UIAction;
-
-import javax.swing.border.Border;
 import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * 	A mutable wrapper for a value which can be observed by the Swing-Tree UI
+ * 	A mutable wrapper for an item which can be observed by the Swing-Tree UI
  * 	to dynamically update UI components for you, as well
  * 	as trigger an action inside your view model.
  *  &lt;p&gt;
@@ -25,8 +22,8 @@ import java.util.function.Function;
  * 	    .peek( ta -&gt; vm.getUsername().onShow( t -&gt; ta.setText(t) ) )
  * 	    .onKeyReleased( e -&gt; vm.getUsername().act( ta.getText() ) );
  * 	}&lt;/pre&gt;
- * 	Your view will automatically update the text field with the value of the property
- * 	and inside your view model you can also update the value of the property
+ * 	Your view will automatically update the text field with the item of the property
+ * 	and inside your view model you can also update the item of the property
  * 	to be shown in the UI:
  * 	&lt;pre&gt;{@code
  * 	    // Initially empty username:
@@ -36,69 +33,72 @@ import java.util.function.Function;
  * 	&lt;b&gt;Please take a look at the &lt;a href=&quot;https://globaltcad.github.io/swing-tree/&quot;&gt;living swing-tree documentation&lt;/a&gt;
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.&lt;/b&gt;
  *
- * @param &lt;T&gt; The type of the wrapped value.
+ * @param &lt;T&gt; The type of the wrapped item.
  */
 public interface Var&lt;T&gt; extends Val&lt;T&gt;
 {
 	/**
 	 *  Use this factory method to create a new {@link Var} instance
-	 *  whose value may or may not be null.
+	 *  whose item may or may not be null.
 	 *  &lt;p&gt;
 	 *  &lt;b&gt;Example:&lt;/b&gt;
 	 *  &lt;pre&gt;{@code
 	 *      Var.ofNullable(String.class, null);
 	 *  }&lt;/pre&gt;
 	 *  &lt;p&gt;
-	 * @param type The type of the value wrapped by the property.
-	 *             This is used to check if the value is of the correct type.
-	 * @param value The initial value of the property.
+	 * @param type The type of the item wrapped by the property.
+	 *             This is used to check if the item is of the correct type.
+	 * @param item The initial item of the property.
 	 *              This may be null.
-	 * @param &lt;T&gt; The type of the wrapped value.
+	 * @param &lt;T&gt; The type of the wrapped item.
 	 * @return A new {@link Var} instance.
 	 */
-	static &lt;T&gt; Var&lt;T&gt; ofNullable( Class&lt;T&gt; type, T value ) {
-<span class="fc" id="L60">		return AbstractVariable.ofNullable( false, type, value );</span>
+	static &lt;T&gt; Var&lt;T&gt; ofNullable( Class&lt;T&gt; type, T item ) {
+<span class="fc" id="L57">		return AbstractVariable.ofNullable( false, type, item );</span>
 	}
 
 	/**
 	 * 	This factory method returns a {@code Var} describing the given non-{@code null}
-	 * 	value similar to {@link Optional#of(Object)}, but specifically
+	 * 	item similar to {@link Optional#of(Object)}, but specifically
 	 * 	designed for use with Swing-Tree.
 	 *
-	 * @param iniValue The initial value of the property which must not be null.
-	 * @param &lt;T&gt; The type of the value held by the {@link Var}!
-	 * @return A new {@link Var} instance wrapping the given value.
+	 * @param item The initial item of the property which must not be null.
+	 * @param &lt;T&gt; The type of the item held by the {@link Var}!
+	 * @return A new {@link Var} instance wrapping the given item.
 	 */
-<span class="fc" id="L72">	static &lt;T&gt; Var&lt;T&gt; of( T iniValue ) { return AbstractVariable.of( false, iniValue ); }</span>
+<span class="fc" id="L69">	static &lt;T&gt; Var&lt;T&gt; of( T item ) { return AbstractVariable.of( false, item ); }</span>
+
+	/**
+	 * 	This factory method returns a {@code Var} describing the given non-{@code null}
+	 * 	item similar to {@link Optional#of(Object)} and its type which
+	 * 	may also be a super type of the item.
+	 *
+	 * @param type The type of the item wrapped by the property.
+	 * @param item The initial item of the property which must not be null.
+	 * @param &lt;T&gt; The type of the item held by the {@link Var}!
+	 * @return A new {@link Var} instance wrapping the given item.
+	 */
+<span class="fc" id="L81">	static &lt;T, V extends T&gt; Var&lt;T&gt; of( Class&lt;T&gt; type, V item ) { return AbstractVariable.of( false, type, item ); }</span>
+
 
 	/**
 	 * 	This factory method returns a {@code Var} describing the given non-{@code null}
 	 * 	{@link Viewable} type. A {@link Var} is similar to {@link Optional#of(Object)}, but specifically
 	 * 	designed for use with Swing-Tree.
 	 *
-	 * @param iniValue The initial value of the property which must not be null.
+	 * @param item The initial item of the property which must not be null.
 	 * @return A new {@link Var} instance wrapping the given {@link Viewable} type.
 	 */
-<span class="fc" id="L82">	static Var&lt;Viewable&gt; of( Viewable iniValue ) { return AbstractVariable.of( false, iniValue ); }</span>
-
-	/**
-	 * 	This factory method returns a {@code Var} describing the given non-{@code null}
-	 * 	{@link Border} type. A {@link Var} is similar to {@link Optional#of(Object)}, but specifically
-	 * 	designed for use with Swing-Tree.
-	 *
-	 * @param iniValue The initial value of the property which must not be null.
-	 * @return A new {@link Var} instance wrapping the given {@link Border} value.
-	 */
-<span class="fc" id="L92">	static Var&lt;Border&gt; of( Border iniValue ) { return AbstractVariable.of( false, iniValue ); }</span>
+<span class="fc" id="L92">	static Var&lt;Viewable&gt; of(Viewable item ) { return AbstractVariable.of( false, item ); }</span>
 
 	/**
 	 *  This method provides the ability to change the state of the wrapper.
 	 *  It might have several side effects depending on the implementation.
 	 *
-	 * @param newValue The new value which ought to replace the old one.
+	 * @param newItem The new item which ought to replace the old one.
 	 * @return This very wrapper instance, in order to enable method chaining.
 	 */
-	Var&lt;T&gt; set( T newValue );
+	Var&lt;T&gt; set( T newItem );
 
 	/**
 	 *  Use this method to create a new property with an id.
@@ -109,24 +109,24 @@ public interface Var&lt;T&gt; extends Val&lt;T&gt;
 	 * @param id The id of the property.
 	 * @return A new {@link Var} instance with the given id.
 	 */
-	@Override Var&lt;T&gt; withID( String id );
+	@Override Var&lt;T&gt; withId( String id );
 
 	/**
-	 *  Use this method to create a new property with an action which is supposed to be triggered
-	 *  when the UI changes the value of this property through
+	 *  Use this method to add an action to this property which is supposed to be triggered
+	 *  when the UI changes the item of this property through
 	 *  the {@code Var::act(T)} method, or simply when it is explicitly
 	 *  triggered by the {@code Var::act(T)} method.
 	 *
 	 * @param action The action to be triggered when {@code Var::act()} or {@code Var::act(T)} is called.
-	 * @return A new {@link Var} instance which is identical to this one, except that it has the given action.
+	 * @return This very property instance, in order to enable method chaining.
 	 */
-	Var&lt;T&gt; withAction( UIAction&lt;ValDelegate&lt;T&gt;&gt; action );
+	Var&lt;T&gt; onAct( Action&lt;ValDelegate&lt;T&gt;&gt; action );
 
 	/**
 	 *  Triggers the action associated with this property, if one was
-	 *  set using {@link #withAction(UIAction)}.
+	 *  set using {@link #onAct(Action)}.
 	 *  This method is intended to be used in the UI
-	 *  to indicate that the user has changed the value of the property
+	 *  to indicate that the user has changed the item of the property
 	 *  not your view model.
 	 *
 	 * @return This very wrapper instance, in order to enable method chaining.
@@ -140,7 +140,7 @@ public interface Var&lt;T&gt; extends Val&lt;T&gt;
 	 *  If you want to modify the state of the property from the view model,
 	 *  as part of your business logic, you should use the {@code Var::set(T)} method instead.
 	 *
-	 * @param newValue The new value which ought to replace the old one.
+	 * @param newValue The new item which ought to replace the old one.
 	 * @return This very wrapper instance, in order to enable method chaining.
 	 */
 	Var&lt;T&gt; act( T newValue );
@@ -148,29 +148,29 @@ public interface Var&lt;T&gt; extends Val&lt;T&gt;
 	/**
 	 *  Essentially the same as {@link Optional#map(Function)}. but with a {@link Val} as return type.
 	 *
-	 * @param mapper the mapping function to apply to a value, if present
+	 * @param mapper the mapping function to apply to an item, if present
 	 * @return the result of applying an {@code Optional}-bearing mapping
-	 * @param &lt;V&gt; The type of the value returned from the mapping function
 	 */
-	@Override default &lt;V&gt; Var&lt;V&gt; map( java.util.function.Function&lt;T, V&gt; mapper ) {
-<span class="fc bfc" id="L156" title="All 2 branches covered.">		if ( !isPresent() )</span>
-<span class="fc" id="L157">			return Var.ofNullable( (Class&lt;V&gt;) Void.class, null );</span>
+	@Override default Var&lt;T&gt; map( java.util.function.Function&lt;T, T&gt; mapper ) {
+<span class="nc bnc" id="L155" title="All 2 branches missed.">		if ( !isPresent() )</span>
+<span class="nc" id="L156">			return Var.ofNullable( type(), null );</span>
 
-<span class="fc" id="L159">		V newValue = mapper.apply( orElseNull() );</span>
-<span class="pc bpc" id="L160" title="1 of 2 branches missed.">		if ( newValue == null )</span>
-<span class="nc" id="L161">			return Var.ofNullable( (Class&lt;V&gt;) Void.class, null );</span>
-<span class="fc" id="L162">		return Var.of( newValue );</span>
+<span class="nc" id="L158">		T newValue = mapper.apply( orElseNull() );</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">		if ( newValue == null )</span>
+<span class="nc" id="L160">			return Var.ofNullable( type(), null );</span>
+
+<span class="nc" id="L162">		return Var.of( newValue );</span>
 	}
 
 	/**
-	 * @param type The type of the value returned from the mapping function
-	 * @param mapper the mapping function to apply to a value, if present
+	 * @param type The type of the item returned from the mapping function
+	 * @param mapper the mapping function to apply to an item, if present
 	 * @return the result of applying an {@code Optional}-bearing mapping
-	 * @param &lt;U&gt; The type of the value returned from the mapping function
+	 * @param &lt;U&gt; The type of the item returned from the mapping function
 	 */
 	@Override default &lt;U&gt; Var&lt;U&gt; mapTo( Class&lt;U&gt; type, java.util.function.Function&lt;T, U&gt; mapper ) {
-<span class="pc bpc" id="L172" title="1 of 2 branches missed.">		if ( !isPresent() )</span>
-<span class="nc" id="L173">			return Var.ofNullable( type, null );</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">		if ( !isPresent() )</span>
+<span class="fc" id="L173">			return Var.ofNullable( type, null );</span>
 
 <span class="fc" id="L175">		U newValue = mapper.apply( orElseNull() );</span>
 <span class="pc bpc" id="L176" title="1 of 2 branches missed.">		if ( newValue == null )</span>

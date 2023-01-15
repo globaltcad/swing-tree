@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Tab.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">Tab.java</span></div><h1>Tab.java</h1><pre class="source lang-java linenums">package swingtree;
 
-import swingtree.api.UIAction;
+import swingtree.api.mvvm.Action;
 import swingtree.api.mvvm.Val;
 import swingtree.api.mvvm.Var;
 
@@ -33,9 +33,9 @@ public final class Tab
     private final Val&lt;Boolean&gt; _isEnabled;
     private final Val&lt;Icon&gt; _icon;
     private final Val&lt;String&gt; _tip;
-    private final UIAction&lt;SimpleDelegate&lt;JTabbedPane, ChangeEvent&gt;&gt; _onSelected;
+    private final Action&lt;SimpleDelegate&lt;JTabbedPane, ChangeEvent&gt;&gt; _onSelected;
 
-    private final UIAction&lt;SimpleDelegate&lt;JTabbedPane, MouseEvent&gt;&gt; _onMouseClick;
+    private final Action&lt;SimpleDelegate&lt;JTabbedPane, MouseEvent&gt;&gt; _onMouseClick;
 
     Tab(
             JComponent contents,
@@ -44,8 +44,8 @@ public final class Tab
             Var&lt;Boolean&gt; isSelected, Val&lt;Boolean&gt; isEnabled,
             Val&lt;Icon&gt; icon,
             Val&lt;String&gt; tip,
-            UIAction&lt;SimpleDelegate&lt;JTabbedPane, ChangeEvent&gt;&gt; onSelected,
-            UIAction&lt;SimpleDelegate&lt;JTabbedPane, MouseEvent&gt;&gt; onMouseClick
+            Action&lt;SimpleDelegate&lt;JTabbedPane, ChangeEvent&gt;&gt; onSelected,
+            Action&lt;SimpleDelegate&lt;JTabbedPane, MouseEvent&gt;&gt; onMouseClick
 <span class="fc" id="L49">    ) {</span>
 <span class="fc bfc" id="L50" title="All 2 branches covered.">        if ( headerComponent == null )</span>
 <span class="fc" id="L51">            NullUtil.nullArgCheck(title,&quot;title&quot;,String.class);</span>
@@ -174,7 +174,7 @@ public final class Tab
      * @param onSelected The action to be executed when the tab is selected.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
-    public final Tab onSelection( UIAction&lt;SimpleDelegate&lt;JTabbedPane, ChangeEvent&gt;&gt; onSelected ) {
+    public final Tab onSelection( Action&lt;SimpleDelegate&lt;JTabbedPane, ChangeEvent&gt;&gt; onSelected ) {
 <span class="pc bpc" id="L178" title="1 of 2 branches missed.">        if ( _onSelected != null ) throw new IllegalArgumentException(&quot;Selection event already specified!&quot;);</span>
 <span class="fc" id="L179">        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, onSelected, _onMouseClick);</span>
     }
@@ -186,7 +186,7 @@ public final class Tab
      * @param onClick The lambda instance which will be passed to the {@link JTabbedPane} as {@link MouseListener}.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
-    public final Tab onMouseClick( UIAction&lt;SimpleDelegate&lt;JTabbedPane, MouseEvent&gt;&gt; onClick ) {
+    public final Tab onMouseClick( Action&lt;SimpleDelegate&lt;JTabbedPane, MouseEvent&gt;&gt; onClick ) {
 <span class="pc bpc" id="L190" title="1 of 2 branches missed.">        if ( _onMouseClick != null ) throw new IllegalArgumentException(&quot;Mouse click event already specified!&quot;);</span>
 <span class="fc" id="L191">        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, onClick);</span>
     }
@@ -205,10 +205,10 @@ public final class Tab
 
 <span class="fc" id="L206">    final Optional&lt;JComponent&gt; headerContents() { return Optional.ofNullable(_headerComponent); }</span>
 
-    final Optional&lt;UIAction&lt;SimpleDelegate&lt;JTabbedPane, ChangeEvent&gt;&gt;&gt; onSelection() {
+    final Optional&lt;Action&lt;SimpleDelegate&lt;JTabbedPane, ChangeEvent&gt;&gt;&gt; onSelection() {
 <span class="fc" id="L209">        return Optional.ofNullable(_onSelected);</span>
     }
 
-<span class="fc" id="L212">    final Optional&lt;UIAction&lt;SimpleDelegate&lt;JTabbedPane, MouseEvent&gt;&gt;&gt; onMouseClick() { return Optional.ofNullable(_onMouseClick); }</span>
+<span class="fc" id="L212">    final Optional&lt;Action&lt;SimpleDelegate&lt;JTabbedPane, MouseEvent&gt;&gt;&gt; onMouseClick() { return Optional.ofNullable(_onMouseClick); }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

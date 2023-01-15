@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.012 seconds"
+    "duration":"0.018 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -131,7 +131,7 @@
     {
       "id":"A property can define the horizontal and vertical alignment of a label.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
       },
@@ -154,7 +154,7 @@
     {
       "id":"A property can define the image relative horizontal and vertical alignment of a label.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
       },

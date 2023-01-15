@@ -34,8 +34,10 @@ class ArrayPropertyComboModel&lt;E&gt; extends AbstractComboModel&lt;E&gt;
 <span class="nc bnc" id="L34" title="All 2 branches missed.">				if ( _items instanceof Var ) ((Var&lt;E&gt;) _items).act();</span>
 <span class="nc" id="L35">			});</span>
 <span class="nc" id="L36">	}</span>
-<span class="fc" id="L37">	@Override public int getSize() { return _items.map(i -&gt; i.length ).orElse(0); }</span>
-<span class="fc" id="L38">	@Override public E getElementAt( int index ) { return _items.map(i -&gt; i[index] ).orElseNull(); }</span>
+<span class="fc" id="L37">	@Override public int getSize() { return _items.mapTo(Integer.class, i -&gt; i.length ).orElse(0); }</span>
+	@Override public E getElementAt( int index ) {
+<span class="fc" id="L39">		return (E) _items.mapTo(Object.class, i -&gt; i[index] ).orElseNull();</span>
+	}
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

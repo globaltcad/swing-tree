@@ -4,12 +4,12 @@
   "narrative":"Swing-Tree allows you to create a Model-View-ViewModel (MVVM) architecture\n    based on 2 simple property interfaces: `Val`, and `Var`!\n\n    `Val` is a read-only property, and `Var` is a read-write property.\n\n    The state of both properties can be observed by the view using simple listeners.\n    This happens automatically when you pass them to the Swing-Tree view.\n    If you want to trigger an action when the property changes, you \n    have to pass the `Var` property to the view and define a action\n    for it inside of your view model.",
   "subjects":[],
   "statistics":{
-    "runs":"23",
+    "runs":"24",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.423 seconds"
+    "duration":"0.500 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -33,7 +33,7 @@
     {
       "id":"We can bind a boolean property to a button, and when the user presses it, we notice it.",
       "result":"PASS",
-      "duration":"0.069 seconds",
+      "duration":"0.073 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -54,7 +54,7 @@
     {
       "id":"Binding to the selection state of a button does nothing, because a JButton can only be pressed.",
       "result":"PASS",
-      "duration":"0.068 seconds",
+      "duration":"0.069 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -117,7 +117,7 @@
     {
       "id":"We can bind a boolean property to a toggle button, and when the user presses it, we notice it.",
       "result":"PASS",
-      "duration":"0.069 seconds",
+      "duration":"0.071 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -138,7 +138,7 @@
     {
       "id":"We can bind a enum property to a combo box and when the user selects an item, we notice it.",
       "result":"PASS",
-      "duration":"0.027 seconds",
+      "duration":"0.030 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n        "]
       },
@@ -163,7 +163,7 @@
     {
       "id":"An enum based combo box can infer its possible states directly from the binding property.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n        "]
       },
@@ -188,7 +188,7 @@
     {
       "id":"A string property can be bound to a combo box holding string elements.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n            In the example below you can see how the usage of a string property\n            makes sense, because there might be requirements to add new food items\n            to the combo box at runtime.\n        "]
       },
@@ -211,7 +211,7 @@
     {
       "id":"A simple list of elements can be used as a data model for a combo box.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Always prefer Enums over Strings but if you have to model generic data\n            you can always bind a simple list of elements as a data model to a combo box.\n        "]
       },
@@ -290,7 +290,7 @@
     {
       "id":"View Models can be represented by properties.",
       "result":"PASS",
-      "duration":"0.007 seconds",
+      "duration":"0.008 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            In larger GUIs usually consist views which themselves consist of multiple\n            sub views. This is also true for their view models which are usually\n            structured in the same tree like fashion. \n            Often times however, your views are highly dynamic and you want to\n            be able to swap out sub views at runtime. In this case it is useful\n            to represent your view models as properties. \n            Simply implement the 'Viewable' interface in your view model and\n            you can bind it to a view.\n            When the property changes, the view will be updated automatically.\n        "]
       },
@@ -315,7 +315,7 @@
     {
       "id":"View Models can be represented by properties lists.",
       "result":"PASS",
-      "duration":"0.009 seconds",
+      "duration":"0.053 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            In larger GUIs usually consist views which themselves consist of multiple\n            sub views. This is also true for their view models which are usually\n            structured in the same tree like fashion. \n            Often times however, your views are highly dynamic and you want to\n            be able to swap out sub views at runtime. In this case it is useful\n            to represent your view models as property lists, especially if \n            one view consists of multiple sub views.\n            Simply implement the 'Viewable' interface in your view model and\n            you can bind it to a view using the \"Vars\" class wrapping your viewables.\n            When the property list changes, the view will be updated automatically.\n        "]
       },
@@ -350,9 +350,30 @@
     },
   
     {
+      "id":"A view model property may or may not exist, meaning its view may or may not be provided.",
+      "result":"PASS",
+      "duration":"0.004 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            In larger GUIs usually consist views which themselves consist of multiple\n            sub views. This is also true for their view models which are usually\n            structured in the same tree like fashion. \n            Often times however, your views are highly dynamic and you not only want to\n            be able to swap out but also enable or disable a sub view (and its underlying view model) at runtime. \n            You can for example wrap your view model in a property and if it implements the \"Viewable\" interface\n            the view can bind to it to dynamically regenerate the view. \n            If the property is empty, the view will not be provided.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a view model.","code":["Var<String> username = Var.of(\"123 Main Street\")","Var<String> password = Var.of(\"Mr.\")","Var<Viewable> moreUI = Var.ofNullable(Viewable, null)"]},
+
+        {"kind":"and","text":"A view which binds to the view model.","code":["var ui = UI.panel(\"fill, wrap 1\")","        .add(\"shrink\", UI.label(\"Dynamic Super View:\"))","        .add(\"grow\",","                UI.panel(\"fill\").id(\"super\")","                .add(UI.label(\"Username:\"))","                .add(UI.textField(username))","                .add(UI.label(\"Password:\"))","                .add(UI.textField(password))","                .add(moreUI)","        )"]},
+
+        {"kind":"expect","text":"We query the UI for the views and verify that the \"super\" and \"sub-1\" views are present.","code":["new Utility.Query(ui).find(JPanel, \"super\").isPresent()","!new Utility.Query(ui).find(JPanel, \"sub-1\").isPresent()"]},
+
+        {"kind":"when","text":"We set the \"moreUI\" property to a view model which implements the \"Viewable\" interface (a \"view provider\").","code":["moreUI.set((Viewable) {","        UI.panel().id(\"sub-1\")","            .add(UI.label(\"Admin Status Code: xyz\"))","            .add(UI.button(\"Do admin stuff!\"))","            .component","    })","UI.sync()"]},
+
+        {"kind":"then","text":"We expect all views to be present.","code":["new Utility.Query(ui).find(JPanel, \"super\").isPresent()","new Utility.Query(ui).find(JPanel, \"sub-1\").isPresent()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
       "id":"A boolean property can be used to switch between 2 foreground colors.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Using the 'withForegroundIf(Val<Boolean>, Color, Color)' method,\n            you can switch between 2 foreground colors of a Swing component set dynamically\n            if the boolean property is true or false.\n        "]
       },
@@ -375,7 +396,7 @@
     {
       "id":"A boolean property can be used to switch between 2 background colors.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Using the 'withBackgroundIf(Val<Boolean>, Color, Color)' method,\n            you can switch between 2 background colors of a Swing component set dynamically\n            if the boolean property is true or false.\n        "]
       },
@@ -398,7 +419,7 @@
     {
       "id":"A boolean property can be used to set or reset a foreground color.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Using the 'withForegroundIf(Val<Boolean>, Color)' method,\n            you can set or reset the foreground color of a Swing component dynamically\n            if the boolean property is true or false.\n        "]
       },
@@ -452,7 +473,7 @@
     {
       "id":"The foreground color of a Swing component can be modelled using a boolean and a Color property.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Using the 'withForegroundIf(Val<Boolean>, Val<Color>)' method,\n            the foreground color of a Swing component is set dynamically\n            if the boolean property is true.\n        "]
       },
@@ -483,7 +504,7 @@
     {
       "id":"The background color of a Swing component can be modelled using a boolean and a Color property.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Using the 'withBackgroundIf(Val<Boolean>, Val<Color>)' method,\n            the background color of a Swing component is set dynamically\n            if the boolean property is true.\n        "]
       },
@@ -514,7 +535,7 @@
     {
       "id":"The tooltip of a component can be modelled using a String property.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Using the 'withTooltip(Val<String>)' method,\n            the tooltip of a Swing component is set dynamically\n            if the String property changes.\n        "]
       },
@@ -539,7 +560,7 @@
     {
       "id":"A border title can be modelled using properties.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Using the 'withBorderTitle(Val<String>)' method,\n            the title of a Swing component's border is set dynamically\n            if the String property changes.\n        "]
       },
