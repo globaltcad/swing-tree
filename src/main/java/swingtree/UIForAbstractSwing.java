@@ -1574,6 +1574,82 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
+     *  Set the current {@link Dimension})/size (width and height) of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. <br>
+     * @param size The current {@link Dimension} of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withSize( Dimension size ) {
+        NullUtil.nullArgCheck(size, "size", Dimension.class);
+        getComponent().setSize(size);
+        return _this();
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the current {@link Dimension} of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. <br>
+     * @param size The current {@link Dimension} of the component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withSize( Val<Dimension> size ) {
+        NullUtil.nullArgCheck(size, "size", Val.class);
+        NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the size of this component!");
+        _onShow( size, v -> getComponent().setSize(v) );
+        return this.withSize( size.orElseNull() );
+    }
+
+    /**
+     *  Set the current width of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. <br>
+     * @param width The current width of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withWidth( int width ) {
+        getComponent().setSize(new Dimension(width, getComponent().getSize().height));
+        return _this();
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the current width of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. <br>
+     * @param width The current width of the component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withWidth( Val<Integer> width ) {
+        NullUtil.nullArgCheck(width, "width", Val.class);
+        NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the width of this component!");
+        _onShow( width, w -> getComponent().setSize(new Dimension(w, getComponent().getSize().height)) );
+        return this.withWidth( width.orElseThrow() );
+    }
+
+    /**
+     *  Set the current height of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. <br>
+     * @param height The current height of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withHeight( int height ) {
+        getComponent().setSize(new Dimension(getComponent().getSize().width, height));
+        return _this();
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the current height of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. <br>
+     * @param height The current height of the component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withHeight( Val<Integer> height ) {
+        NullUtil.nullArgCheck(height, "height", Val.class);
+        NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the height of this component!");
+        _onShow( height, h -> getComponent().setSize(new Dimension(getComponent().getSize().width, h)) );
+        return this.withHeight( height.orElseThrow() );
+    }
+
+    /**
      *  Use this to register and catch generic {@link MouseListener} based mouse click events on this UI component.
      *  This method adds the provided consumer lambda to
      *  an an{@link MouseListener} instance to the wrapped
