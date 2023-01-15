@@ -2,7 +2,7 @@
 
 import swingtree.api.ListEntryDelegate;
 import swingtree.api.ListEntryRenderer;
-import swingtree.api.UIAction;
+import swingtree.api.mvvm.Action;
 import swingtree.api.mvvm.Vals;
 import swingtree.api.mvvm.ValsDelegate;
 
@@ -126,16 +126,16 @@ public class UIForList&lt;E, L extends JList&lt;E&gt;&gt; extends UIForAbstractS
     }
 
     /**
-     * Adds an {@link UIAction} to the underlying {@link JList}
+     * Adds an {@link Action} to the underlying {@link JList}
      * through an {@link javax.swing.event.ListSelectionListener},
      * which will be called when a list selection has been made.
      * {see JList#addListSelectionListener(ListSelectionListener)}.
      *
-     * @param action The {@link UIAction} that will be notified.
+     * @param action The {@link Action} that will be notified.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForList&lt;E, L&gt; onSelection( UIAction&lt;SimpleDelegate&lt;JList&lt;E&gt;, ListSelectionEvent&gt;&gt; action ) {
-<span class="fc" id="L138">        NullUtil.nullArgCheck(action, &quot;action&quot;, UIAction.class);</span>
+    public final UIForList&lt;E, L&gt; onSelection( Action&lt;SimpleDelegate&lt;JList&lt;E&gt;, ListSelectionEvent&gt;&gt; action ) {
+<span class="fc" id="L138">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
 <span class="fc" id="L139">        L list = getComponent();</span>
 <span class="pc" id="L140">        list.addListSelectionListener(e -&gt; _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;(list, e, ()-&gt;getSiblinghood()))) );</span>
 <span class="fc" id="L141">        return this;</span>

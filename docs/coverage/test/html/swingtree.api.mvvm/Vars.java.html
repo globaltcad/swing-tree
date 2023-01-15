@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Vars.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.api.mvvm</a> &gt; <span class="el_source">Vars.java</span></div><h1>Vars.java</h1><pre class="source lang-java linenums">package swingtree.api.mvvm;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -23,7 +21,7 @@ public interface Vars&lt;T&gt; extends Vals&lt;T&gt;
      */
     @SuppressWarnings(&quot;unchecked&quot;)
     static &lt;T&gt; Vars&lt;T&gt; of( Class&lt;T&gt; type, Var&lt;T&gt;... vars ) {
-<span class="fc" id="L26">        return AbstractVariables.of( false, type, vars );</span>
+<span class="fc" id="L24">        return AbstractVariables.of( false, type, vars );</span>
     }
 
     /**
@@ -35,7 +33,7 @@ public interface Vars&lt;T&gt; extends Vals&lt;T&gt;
      */
     @SuppressWarnings(&quot;unchecked&quot;)
     static &lt;T&gt; Vars&lt;T&gt; of( Var&lt;T&gt; first, Var&lt;T&gt;... rest ) {
-<span class="fc" id="L38">        return AbstractVariables.of( false, first, rest );</span>
+<span class="fc" id="L36">        return AbstractVariables.of( false, first, rest );</span>
     }
 
     /**
@@ -47,7 +45,7 @@ public interface Vars&lt;T&gt; extends Vals&lt;T&gt;
      */
     @SuppressWarnings(&quot;unchecked&quot;)
     static &lt;T&gt; Vars&lt;T&gt; of( T first, T... rest ) {
-<span class="fc" id="L50">        return AbstractVariables.of( false, first, rest );</span>
+<span class="fc" id="L48">        return AbstractVariables.of( false, first, rest );</span>
     }
 
     /**
@@ -60,7 +58,7 @@ public interface Vars&lt;T&gt; extends Vals&lt;T&gt;
      *  @return A new Vars instance.
      */
     static &lt;T&gt; Vars&lt;T&gt; of( Class&lt;T&gt; type, Iterable&lt;Var&lt;T&gt;&gt; vars ) {
-<span class="fc" id="L63">        return AbstractVariables.of( false, type, vars );</span>
+<span class="fc" id="L61">        return AbstractVariables.of( false, type, vars );</span>
     }
 
     /**
@@ -75,7 +73,7 @@ public interface Vars&lt;T&gt; extends Vals&lt;T&gt;
      */
     @SuppressWarnings(&quot;unchecked&quot;)
     static &lt;T&gt; Vars&lt;T&gt; ofNullable( Class&lt;T&gt; type, Var&lt;T&gt;... vars ) {
-<span class="nc" id="L78">        return AbstractVariables.ofNullable( false, type, vars );</span>
+<span class="nc" id="L76">        return AbstractVariables.ofNullable( false, type, vars );</span>
     }
 
     /**
@@ -89,7 +87,7 @@ public interface Vars&lt;T&gt; extends Vals&lt;T&gt;
      */
     @SuppressWarnings(&quot;unchecked&quot;)
     static &lt;T&gt; Vars&lt;T&gt; ofNullable( Class&lt;T&gt; type, T... values ) {
-<span class="nc" id="L92">        return AbstractVariables.ofNullable( false, type, values );</span>
+<span class="nc" id="L90">        return AbstractVariables.ofNullable( false, type, values );</span>
     }
 
     /**
@@ -101,17 +99,17 @@ public interface Vars&lt;T&gt; extends Vals&lt;T&gt;
      */
     @SuppressWarnings(&quot;unchecked&quot;)
     static &lt;T&gt; Vars&lt;T&gt; ofNullable( Var&lt;T&gt; first, Var&lt;T&gt;... rest ) {
-<span class="nc" id="L104">        return AbstractVariables.ofNullable( false, first, rest );</span>
+<span class="nc" id="L102">        return AbstractVariables.ofNullable( false, first, rest );</span>
     }
 
     /** {@inheritDoc} */
     @Override Var&lt;T&gt; at( int index );
 
     /** {@inheritDoc} */
-<span class="fc" id="L111">    @Override default Var&lt;T&gt; first() { return at(0); }</span>
+<span class="fc" id="L109">    @Override default Var&lt;T&gt; first() { return at(0); }</span>
 
     /** {@inheritDoc} */
-<span class="fc" id="L114">    @Override default Var&lt;T&gt; last() { return at(size() - 1); }</span>
+<span class="fc" id="L112">    @Override default Var&lt;T&gt; last() { return at(size() - 1); }</span>
 
     /**
      *  Wraps the provided value in a {@link Var} property and adds it to the list.
@@ -119,7 +117,7 @@ public interface Vars&lt;T&gt; extends Vals&lt;T&gt;
      * @param value The value to add.
      * @return This list of properties.
      */
-<span class="fc" id="L122">    default Vars&lt;T&gt; add( T value ) { return add( Var.of(value) ); }</span>
+<span class="fc" id="L120">    default Vars&lt;T&gt; add( T value ) { return add( Var.of(value) ); }</span>
 
     /**
      *  Adds the provided property to the list.
@@ -127,7 +125,7 @@ public interface Vars&lt;T&gt; extends Vals&lt;T&gt;
      * @param var The property to add.
      * @return This list of properties.
      */
-<span class="fc" id="L130">    default Vars&lt;T&gt; add( Var&lt;T&gt; var ) { return addAt( size(), var ); }</span>
+<span class="fc" id="L128">    default Vars&lt;T&gt; add( Var&lt;T&gt; var ) { return addAt( size(), var ); }</span>
 
     /**
      *  Removes the property at the specified index.
@@ -143,7 +141,7 @@ public interface Vars&lt;T&gt; extends Vals&lt;T&gt;
      *  @param value The value to remove.
      *  @return This list of properties.
      */
-<span class="fc" id="L146">    default Vars&lt;T&gt; remove( T value ) { return removeAt( indexOf(Var.of(value)) ); }</span>
+<span class="fc" id="L144">    default Vars&lt;T&gt; remove( T value ) { return removeAt( indexOf(Var.of(value)) ); }</span>
 
     /**
      *  Removes the provided property from the list.
@@ -151,21 +149,21 @@ public interface Vars&lt;T&gt; extends Vals&lt;T&gt;
      *  @param var The property to remove.
      *  @return This list of properties.
      */
-<span class="nc" id="L154">    default Vars&lt;T&gt; remove( Var&lt;T&gt; var ) { return removeAt( indexOf(var) ); }</span>
+<span class="nc" id="L152">    default Vars&lt;T&gt; remove( Var&lt;T&gt; var ) { return removeAt( indexOf(var) ); }</span>
 
     /**
      *  Removes the first property from the list.
      *
      * @return This list of properties.
      */
-<span class="fc" id="L161">    default Vars&lt;T&gt; removeFirst() { return removeAt(0); }</span>
+<span class="fc" id="L159">    default Vars&lt;T&gt; removeFirst() { return removeAt(0); }</span>
 
     /**
      *  Removes the last property from the list.
      *
      * @return This list of properties.
      */
-<span class="fc" id="L168">    default Vars&lt;T&gt; removeLast() { return removeAt(size() - 1); }</span>
+<span class="fc" id="L166">    default Vars&lt;T&gt; removeLast() { return removeAt(size() - 1); }</span>
 
     /**
      *  Removes {@code count} number of properties from the end
@@ -175,8 +173,8 @@ public interface Vars&lt;T&gt; extends Vals&lt;T&gt;
      */
     default Vars&lt;T&gt; removeLast( int count )
     {
-<span class="fc bfc" id="L178" title="All 2 branches covered.">        for ( int i = 0; i &lt; count; i++ ) removeLast();</span>
-<span class="fc" id="L179">        return this;</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">        for ( int i = 0; i &lt; count; i++ ) removeLast();</span>
+<span class="fc" id="L177">        return this;</span>
     }
 
     /**
@@ -186,8 +184,8 @@ public interface Vars&lt;T&gt; extends Vals&lt;T&gt;
      */
     default Vars&lt;T&gt; removeFirst( int count )
     {
-<span class="fc bfc" id="L189" title="All 2 branches covered.">        for ( int i = 0; i &lt; count; i++ ) removeFirst();</span>
-<span class="fc" id="L190">        return this;</span>
+<span class="fc bfc" id="L187" title="All 2 branches covered.">        for ( int i = 0; i &lt; count; i++ ) removeFirst();</span>
+<span class="fc" id="L188">        return this;</span>
     }
 
     /**
@@ -197,7 +195,7 @@ public interface Vars&lt;T&gt; extends Vals&lt;T&gt;
      *  @param value The value to add.
      *  @return This list of properties.
      */
-<span class="fc" id="L200">    default Vars&lt;T&gt; addAt( int index, T value ) { return addAt(index, Var.of(value)); }</span>
+<span class="fc" id="L198">    default Vars&lt;T&gt; addAt( int index, T value ) { return addAt(index, Var.of(value)); }</span>
 
     /**
      *  Adds the provided property to the list at the specified index.
@@ -214,7 +212,7 @@ public interface Vars&lt;T&gt; extends Vals&lt;T&gt;
      *  @param value The value to set.
      *  @return This list of properties.
      */
-<span class="fc" id="L217">    default Vars&lt;T&gt; setAt( int index, T value ) { return setAt(index, Var.of(value)); }</span>
+<span class="fc" id="L215">    default Vars&lt;T&gt; setAt( int index, T value ) { return setAt(index, Var.of(value)); }</span>
 
     /**
      *  Places the provided property at the specified index, effectively replacing the property
@@ -234,8 +232,8 @@ public interface Vars&lt;T&gt; extends Vals&lt;T&gt;
     @SuppressWarnings(&quot;unchecked&quot;)
     default Vars&lt;T&gt; addAll( T... values )
     {
-<span class="fc bfc" id="L237" title="All 2 branches covered.">        for ( T v : values ) add(v);</span>
-<span class="fc" id="L238">        return this;</span>
+<span class="fc bfc" id="L235" title="All 2 branches covered.">        for ( T v : values ) add(v);</span>
+<span class="fc" id="L236">        return this;</span>
     }
 
 
@@ -247,8 +245,8 @@ public interface Vars&lt;T&gt; extends Vals&lt;T&gt;
      */
     default Vars&lt;T&gt; addAll( Iterable&lt;T&gt; values )
     {
-<span class="nc bnc" id="L250" title="All 2 branches missed.">        for ( T v : values ) add(v);</span>
-<span class="nc" id="L251">        return this;</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">        for ( T v : values ) add(v);</span>
+<span class="nc" id="L249">        return this;</span>
     }
 
     /**
@@ -259,8 +257,8 @@ public interface Vars&lt;T&gt; extends Vals&lt;T&gt;
      */
     default Vars&lt;T&gt; addAll( Vals&lt;T&gt; vals )
     {
-<span class="fc bfc" id="L262" title="All 2 branches covered.">        for ( T v : vals ) add(v);</span>
-<span class="fc" id="L263">        return this;</span>
+<span class="fc bfc" id="L260" title="All 2 branches covered.">        for ( T v : vals ) add(v);</span>
+<span class="fc" id="L261">        return this;</span>
     }
 
     /**
@@ -276,26 +274,28 @@ public interface Vars&lt;T&gt; extends Vals&lt;T&gt;
      *  Use this for mapping a list of properties to another list of properties.
      */
     @Override default Vars&lt;T&gt; map( Function&lt;T,T&gt; mapper ) {
-<span class="fc" id="L279">        Objects.requireNonNull(mapper);</span>
+<span class="fc" id="L277">        Objects.requireNonNull(mapper);</span>
         @SuppressWarnings(&quot;unchecked&quot;)
-<span class="fc" id="L281">        Var&lt;T&gt;[] vars = new Var[size()];</span>
-<span class="fc" id="L282">        int i = 0;</span>
-<span class="fc bfc" id="L283" title="All 2 branches covered.">        for ( T v : this ) vars[i++] = Var.of( mapper.apply(v) );</span>
-<span class="fc" id="L284">        return Vars.of( type(), vars );</span>
+<span class="fc" id="L279">        Var&lt;T&gt;[] vars = new Var[size()];</span>
+<span class="fc" id="L280">        int i = 0;</span>
+<span class="fc bfc" id="L281" title="All 2 branches covered.">        for ( T v : this ) vars[i++] = Var.of( mapper.apply(v) );</span>
+<span class="fc" id="L282">        return Vars.of( type(), vars );</span>
     }
 
     /**
      *  Use this for mapping a list of properties to another list of properties.
      */
     @Override default &lt;U&gt; Vars&lt;U&gt; mapTo( Class&lt;U&gt; type, Function&lt;T,U&gt; mapper ) {
-<span class="fc" id="L291">        Objects.requireNonNull(type);</span>
-<span class="fc" id="L292">        Objects.requireNonNull(mapper);</span>
+<span class="fc" id="L289">        Objects.requireNonNull(type);</span>
+<span class="fc" id="L290">        Objects.requireNonNull(mapper);</span>
         @SuppressWarnings(&quot;unchecked&quot;)
-<span class="fc" id="L294">        Var&lt;U&gt;[] vars = new Var[size()];</span>
-<span class="fc bfc" id="L295" title="All 2 branches covered.">        for ( int i = 0; i &lt; size(); i++ )</span>
-<span class="fc" id="L296">            vars[i] = this.at( i ).mapTo( type, mapper );</span>
-<span class="fc" id="L297">        return Vars.of( type, vars );</span>
+<span class="fc" id="L292">        Var&lt;U&gt;[] vars = new Var[size()];</span>
+<span class="fc bfc" id="L293" title="All 2 branches covered.">        for ( int i = 0; i &lt; size(); i++ )</span>
+<span class="fc" id="L294">            vars[i] = this.at( i ).mapTo( type, mapper );</span>
+<span class="fc" id="L295">        return Vars.of( type, vars );</span>
     }
+
+<span class="fc" id="L298">    default Vals&lt;T&gt; toVals() { return Vals.of( type(), this ); }</span>
 
     /**
      *  Use this for sorting the list of properties.
@@ -320,6 +320,11 @@ public interface Vars&lt;T&gt; extends Vals&lt;T&gt;
         else
 <span class="nc" id="L321">            throw new UnsupportedOperationException(&quot;Cannot sort a list of non-comparable types.&quot;);</span>
 <span class="fc" id="L322">    }</span>
+
+    /**
+     *  Removes all duplicate properties from this list of properties.
+     */
+    void makeDistinct();
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForAbstractTextComponent.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForAbstractTextComponent.java</span></div><h1>UIForAbstractTextComponent.java</h1><pre class="source lang-java linenums">package swingtree;
 
 
-import swingtree.api.UIAction;
+import swingtree.api.mvvm.Action;
 import swingtree.api.mvvm.Val;
 import swingtree.api.mvvm.Var;
 
@@ -21,9 +21,9 @@ import java.util.function.Consumer;
  */
 public abstract class UIForAbstractTextComponent&lt;I, C extends JTextComponent&gt; extends UIForAbstractSwing&lt;I, C&gt;
 {
-<span class="fc" id="L24">    private final java.util.List&lt;UIAction&lt;RemoveDelegate&gt;&gt;   removes = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L25">    private final java.util.List&lt;UIAction&lt;InsertDelegate&gt;&gt;   inserts = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L26">    private final java.util.List&lt;UIAction&lt;ReplaceDelegate&gt;&gt;  replaces = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L24">    private final java.util.List&lt;Action&lt;RemoveDelegate&gt;&gt;   removes = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L25">    private final java.util.List&lt;Action&lt;InsertDelegate&gt;&gt;   inserts = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L26">    private final java.util.List&lt;Action&lt;ReplaceDelegate&gt;&gt;  replaces = new ArrayList&lt;&gt;();</span>
 
     /**
      *  A custom document filter which is simply a lambda-rization wrapper which ought to make
@@ -227,34 +227,34 @@ public abstract class UIForAbstractTextComponent&lt;I, C extends JTextComponent&
 <span class="fc" id="L227">    }</span>
 
     /**
-     * @param action A {@link UIAction} lambda which will be called when parts (or all) of the text in
+     * @param action A {@link Action} lambda which will be called when parts (or all) of the text in
      *               the underlying text component gets removed.
      *
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextRemove( UIAction&lt;RemoveDelegate&gt; action ) {
+    public final I onTextRemove( Action&lt;RemoveDelegate&gt; action ) {
 <span class="fc" id="L236">        _ifFilterable( () -&gt; this.removes.add(action) );</span>
 <span class="fc" id="L237">        return _this();</span>
     }
 
     /**
-     * @param action A {@link UIAction} lambda which will be called when new text gets inserted
+     * @param action A {@link Action} lambda which will be called when new text gets inserted
      *               into the underlying text component.
      *
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextInsert( UIAction&lt;InsertDelegate&gt; action ) {
+    public final I onTextInsert( Action&lt;InsertDelegate&gt; action ) {
 <span class="fc" id="L247">        _ifFilterable( () -&gt; this.inserts.add(action) );</span>
 <span class="fc" id="L248">        return _this();</span>
     }
 
     /**
-     * @param action A {@link UIAction} lambda which will be called when the text in
+     * @param action A {@link Action} lambda which will be called when the text in
      *               the underlying text component gets replaced.
      *
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextReplace( UIAction&lt;ReplaceDelegate&gt; action ) {
+    public final I onTextReplace( Action&lt;ReplaceDelegate&gt; action ) {
 <span class="fc" id="L258">        _ifFilterable( () -&gt; this.replaces.add(action) );</span>
 <span class="fc" id="L259">        return _this();</span>
     }

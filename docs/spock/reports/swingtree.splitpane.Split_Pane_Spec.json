@@ -1,0 +1,238 @@
+{
+  "className":"swingtree.splitpane.Split_Pane_Spec",
+  "title":"Split Panes",
+  "narrative":"In this specification you can can not only see how to use the Swing-Tree API to \n   create and configure split panes but also how to bind them to your view model model.\n   The alignment of a split pane for example can be bound to a property in your view model.",
+  "subjects":[],
+  "statistics":{
+    "runs":"10",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"0.410 seconds"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A horizontally aligned split pane can be created through the \"splitPane\" factory method.",
+      "result":"PASS",
+      "duration":"0.281 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a horizontally aligned split pane UI node.","code":["var ui = UI.splitPane(UI.Align.HORIZONTAL)"]},
+
+        {"kind":"expect","text":"The split pane is not null.","code":["ui != null"]},
+
+        {"kind":"and","text":"The split pane is a JSplitPane.","code":["ui.component instanceof JSplitPane"]},
+
+        {"kind":"and","text":"The split pane is horizontally aligned b, meaning it splits vertically.","code":["ui.component.orientation == JSplitPane.VERTICAL_SPLIT"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A vertically aligned split pane can be created through the \"splitPane\" factory method.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a vertically aligned split pane UI node.","code":["var ui = UI.splitPane(UI.Align.VERTICAL)"]},
+
+        {"kind":"expect","text":"The split pane is not null.","code":["ui != null"]},
+
+        {"kind":"and","text":"The split pane is a JSplitPane.","code":["ui.component instanceof JSplitPane"]},
+
+        {"kind":"and","text":"The split pane is vertically aligned, meaning it splits horizontally.","code":["ui.component.orientation == JSplitPane.HORIZONTAL_SPLIT"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An alignment property can be used to dynamically model the alignment of your split pane.",
+      "result":"PASS",
+      "duration":"0.041 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the property shown in this example would be part of your view model.\n            So you can simply modify it as part of your business logic and the split pane\n            will automatically update its alignment.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple view model property holding the alignment of our split pane.","code":["var alignment = Var.of(UI.Align.HORIZONTAL)"]},
+
+        {"kind":"and","text":"We create a split pane UI node bound to the property.","code":["var ui = UI.splitPane(alignment)"]},
+
+        {"kind":"expect","text":"The split pane is not null.","code":["ui != null"]},
+
+        {"kind":"and","text":"The split pane is a JSplitPane.","code":["ui.component instanceof JSplitPane"]},
+
+        {"kind":"and","text":"The split pane is horizontally aligned, meaning it splits vertically.","code":["ui.component.orientation == JSplitPane.VERTICAL_SPLIT"]},
+
+        {"kind":"when","text":"We change the alignment property to \"VERTICAL\".","code":["alignment.set(UI.Align.VERTICAL)","UI.sync()"]},
+
+        {"kind":"then","text":"The split pane is vertically aligned, meaning it splits horizontally.","code":["ui.component.orientation == JSplitPane.HORIZONTAL_SPLIT"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A split pane can be configured with a divider size.",
+      "result":"PASS",
+      "duration":"0.002 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a split pane UI node with a divider size of 10.","code":["var ui = UI.splitPane(UI.Align.HORIZONTAL).withDividerSize(10)"]},
+
+        {"kind":"expect","text":"The split pane is not null.","code":["ui != null"]},
+
+        {"kind":"and","text":"The split pane is a JSplitPane.","code":["ui.component instanceof JSplitPane"]},
+
+        {"kind":"and","text":"The split pane is horizontally aligned, meaning it splits vertically.","code":["ui.component.orientation == JSplitPane.VERTICAL_SPLIT"]},
+
+        {"kind":"and","text":"The divider size is 10.","code":["ui.component.dividerSize == 10"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A split pane can be configured with a divider location.",
+      "result":"PASS",
+      "duration":"0.002 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a split pane UI node with a divider location of 10.","code":["var ui = UI.splitPane(UI.Align.HORIZONTAL).withDividerAt(10)"]},
+
+        {"kind":"expect","text":"The split pane is not null.","code":["ui != null"]},
+
+        {"kind":"and","text":"The split pane is a JSplitPane.","code":["ui.component instanceof JSplitPane"]},
+
+        {"kind":"and","text":"The split pane is horizontally aligned, meaning it splits vertically.","code":["ui.component.orientation == JSplitPane.VERTICAL_SPLIT"]},
+
+        {"kind":"and","text":"The divider location is 10.","code":["ui.component.dividerLocation == 10"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The divider location of a split pane can dynamically be modelled using an integer property.",
+      "result":"PASS",
+      "duration":"0.006 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the property shown in this example would be part of your view model.\n            So you can simply modify it as part of your business logic and the split pane\n            will automatically update its divider location based on an observer\n            registered on the property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple view model property holding the divider location of our split pane.","code":["var dividerLocation = Var.of(10)"]},
+
+        {"kind":"and","text":"We create a split pane UI node bound to the property.","code":["var ui = UI.splitPane(UI.Align.HORIZONTAL)","                .withDividerAt(dividerLocation)"]},
+
+        {"kind":"expect","text":"The split pane exists and it is indeed a horizontally aligned split pane splitting the vertical axis.","code":["ui != null","ui.component instanceof JSplitPane","ui.component.orientation == JSplitPane.VERTICAL_SPLIT"]},
+
+        {"kind":"and","text":"The divider location is 10.","code":["ui.component.dividerLocation == 10"]},
+
+        {"kind":"when","text":"We change the divider location property to 20.","code":["dividerLocation.set(20)","UI.sync()"]},
+
+        {"kind":"then","text":"The divider location is 20.","code":["ui.component.dividerLocation == 20"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A horizontally aligned split pane can be configured with a divider location as a percentage.",
+      "result":"PASS",
+      "duration":"0.005 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a split pane UI node with a division of 50%.","code":["var ui = UI.splitPane(UI.Align.HORIZONTAL)","            .withWidth(42)","            .withHeight(100)","            .withDivisionOf(0.5)"]},
+
+        {"kind":"expect","text":"The split pane is not null.","code":["ui != null"]},
+
+        {"kind":"and","text":"The split pane is a JSplitPane.","code":["ui.component instanceof JSplitPane"]},
+
+        {"kind":"and","text":"The split pane is horizontally aligned, meaning it splits vertically.","code":["ui.component.orientation == JSplitPane.VERTICAL_SPLIT"]},
+
+        {"kind":"and","text":"The divider location is 50.","code":["ui.component.dividerLocation == 50"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A vertically aligned split pane can be configured with a divider location as a percentage.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a split pane UI node with a division of 50%.","code":["var ui = UI.splitPane(UI.Align.VERTICAL)","            .withWidth(100)","            .withHeight(42)","            .withDivisionOf(0.5)"]},
+
+        {"kind":"expect","text":"The split pane is not null.","code":["ui != null"]},
+
+        {"kind":"and","text":"The split pane is a JSplitPane.","code":["ui.component instanceof JSplitPane"]},
+
+        {"kind":"and","text":"The split pane is vertically aligned, meaning it splits horizontally.","code":["ui.component.orientation == JSplitPane.HORIZONTAL_SPLIT"]},
+
+        {"kind":"and","text":"The divider location is 50.","code":["ui.component.dividerLocation == 50"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The division of a split pane can dynamically be configured through a double property.",
+      "result":"PASS",
+      "duration":"0.007 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple view model property holding the division of our split pane.","code":["var divisionPercentage = Var.of(0.5d)"]},
+
+        {"kind":"and","text":"We create a split pane UI node bound to the property.","code":["var ui = UI.splitPane(UI.Align.HORIZONTAL)","            .withWidth(42)","            .withHeight(100)","            .withDivisionOf(divisionPercentage)"]},
+
+        {"kind":"expect","text":"The split pane is not null.","code":["ui != null"]},
+
+        {"kind":"and","text":"The split pane exists and it is indeed a horizontally aligned split pane splitting the vertical axis.","code":["ui.component instanceof JSplitPane","ui.component.orientation == JSplitPane.VERTICAL_SPLIT","ui.component.dividerLocation == 50"]},
+
+        {"kind":"when","text":"We change the division property to 0.25.","code":["divisionPercentage.set(0.25d)","UI.sync()"]},
+
+        {"kind":"then","text":"The divider location is 25.","code":["ui.component.dividerLocation == 25"]},
+
+        {"kind":"when","text":"We change the division property to 0.75.","code":["divisionPercentage.set(0.75d)","UI.sync()"]},
+
+        {"kind":"then","text":"The divider location is 75.","code":["ui.component.dividerLocation == 75"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can dynamically model the divider size of a split pane in your view model.",
+      "result":"PASS",
+      "duration":"0.003 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            In a fully application, the divider size property in this example would be part of your view model\n            containing the state of the UI as well as the business logic. So you can simply modify it as part of\n            your business logic and the split pane will automatically update its divider size based on an observer\n            registered on the property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple view model property holding the divider size of our split pane.","code":["var dividerSize = Var.of(10)"]},
+
+        {"kind":"and","text":"We create a vertically aligned split pane UI node bound to the property.","code":["var ui = UI.splitPane(UI.Align.VERTICAL).withDividerSize(dividerSize)"]},
+
+        {"kind":"expect","text":"The split pane exists and it is indeed a vertically aligned split pane splitting the horizontal axis.","code":["ui != null","ui.component instanceof JSplitPane","ui.component.orientation == JSplitPane.HORIZONTAL_SPLIT"]},
+
+        {"kind":"and","text":"The divider size is 10.","code":["ui.component.dividerSize == 10"]},
+
+        {"kind":"when","text":"We change the divider size property to 42.","code":["dividerSize.set(42)","UI.sync()"]},
+
+        {"kind":"then","text":"The divider size is 42.","code":["ui.component.dividerSize == 42"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

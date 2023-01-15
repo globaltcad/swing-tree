@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForFormattedTextField.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForFormattedTextField.java</span></div><h1>UIForFormattedTextField.java</h1><pre class="source lang-java linenums">package swingtree;
 
-import swingtree.api.UIAction;
+import swingtree.api.mvvm.Action;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -11,8 +11,8 @@ public class UIForFormattedTextField extends UIForAbstractTextComponent&lt;UIFor
 {
 <span class="fc" id="L12">    protected UIForFormattedTextField( JFormattedTextField component ) { super(component); }</span>
 
-    public UIForFormattedTextField onEnter( UIAction&lt;SimpleDelegate&lt;JFormattedTextField, ActionEvent&gt;&gt; action ) {
-<span class="fc" id="L15">        NullUtil.nullArgCheck(action, &quot;action&quot;, UIAction.class);</span>
+    public UIForFormattedTextField onEnter( Action&lt;SimpleDelegate&lt;JFormattedTextField, ActionEvent&gt;&gt; action ) {
+<span class="fc" id="L15">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
 <span class="fc" id="L16">        JFormattedTextField field = getComponent();</span>
 <span class="fc" id="L17">        _onEnter( e -&gt; _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;( field, e, this::getSiblinghood )) ) );</span>
 <span class="fc" id="L18">        return this;</span>

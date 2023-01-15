@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForCombo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForCombo.java</span></div><h1>UIForCombo.java</h1><pre class="source lang-java linenums">package swingtree;
 
-import swingtree.api.UIAction;
+import swingtree.api.mvvm.Action;
 import swingtree.api.mvvm.Var;
 
 import javax.swing.*;
@@ -72,8 +72,8 @@ public class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIForAbstr
      * @param action the action to be executed when the combo box is opened.
      * @return this
      */
-    public UIForCombo&lt;E,C&gt; onOpen( UIAction&lt;SimpleDelegate&lt;C, PopupMenuEvent&gt;&gt; action ) {
-<span class="fc" id="L76">        NullUtil.nullArgCheck(action, &quot;action&quot;, UIAction.class);</span>
+    public UIForCombo&lt;E,C&gt; onOpen( Action&lt;SimpleDelegate&lt;C, PopupMenuEvent&gt;&gt; action ) {
+<span class="fc" id="L76">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
 <span class="pc" id="L77">        _onPopupOpen( e -&gt; _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;( (C) getComponent(), e, this::getSiblinghood )) ) );</span>
 <span class="fc" id="L78">        return this;</span>
     }
@@ -96,8 +96,8 @@ public class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIForAbstr
      * @param action the action to be executed when the combo box is closed.
      * @return this
      */
-    public UIForCombo&lt;E,C&gt; onClose( UIAction&lt;SimpleDelegate&lt;C, PopupMenuEvent&gt;&gt; action ) {
-<span class="fc" id="L100">        NullUtil.nullArgCheck(action, &quot;action&quot;, UIAction.class);</span>
+    public UIForCombo&lt;E,C&gt; onClose( Action&lt;SimpleDelegate&lt;C, PopupMenuEvent&gt;&gt; action ) {
+<span class="fc" id="L100">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
 <span class="pc" id="L101">        _onPopupClose( e -&gt; _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;( (C) getComponent(), e, this::getSiblinghood )) ) );</span>
 <span class="fc" id="L102">        return this;</span>
     }
@@ -120,8 +120,8 @@ public class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIForAbstr
      * @param action the action to be executed when the combo box is canceled.
      * @return this
      */
-    public UIForCombo&lt;E,C&gt; onCancel( UIAction&lt;SimpleDelegate&lt;C, PopupMenuEvent&gt;&gt; action ) {
-<span class="fc" id="L124">        NullUtil.nullArgCheck(action, &quot;action&quot;, UIAction.class);</span>
+    public UIForCombo&lt;E,C&gt; onCancel( Action&lt;SimpleDelegate&lt;C, PopupMenuEvent&gt;&gt; action ) {
+<span class="fc" id="L124">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
 <span class="pc" id="L125">        _onPopupCancel( e -&gt; _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;( (C) getComponent(), e, this::getSiblinghood )) ) );</span>
 <span class="fc" id="L126">        return this;</span>
     }
@@ -137,18 +137,18 @@ public class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIForAbstr
 <span class="fc" id="L137">    }</span>
 
     /**
-     * Adds an {@link UIAction} to the underlying {@link JComboBox}
+     * Adds an {@link Action} to the underlying {@link JComboBox}
      * through an {@link java.awt.event.ActionListener},
      * which will be called when a selection has been made. If the combo box is editable, then
      * an {@link ActionEvent} will be fired when editing has stopped.
      * For more information see {@link JComboBox#addActionListener(ActionListener)}.
      *
-     * @param action The {@link UIAction} that will be notified.
+     * @param action The {@link Action} that will be notified.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public UIForCombo&lt;E,C&gt; onSelection( UIAction&lt;SimpleDelegate&lt;JComboBox&lt;E&gt;, ActionEvent&gt;&gt; action ) {
-<span class="fc" id="L151">        NullUtil.nullArgCheck(action, &quot;action&quot;, UIAction.class);</span>
+    public UIForCombo&lt;E,C&gt; onSelection( Action&lt;SimpleDelegate&lt;JComboBox&lt;E&gt;, ActionEvent&gt;&gt; action ) {
+<span class="fc" id="L151">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
 <span class="fc" id="L152">        JComboBox&lt;E&gt; combo = getComponent();</span>
 <span class="fc" id="L153">        _onSelection(e -&gt; _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;( combo, e, this::getSiblinghood ))) );</span>
 <span class="fc" id="L154">        return this;</span>
@@ -182,10 +182,10 @@ public class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIForAbstr
      * an {@link ActionEvent} will be fired when editing has stopped.
      * For more information see {@link JComboBox#addActionListener(ActionListener)}.
      * &lt;p&gt;
-     * @param action The {@link UIAction} that will be notified.
+     * @param action The {@link Action} that will be notified.
      **/
-    public UIForCombo&lt;E,C&gt; onEnter( UIAction&lt;SimpleDelegate&lt;C, ActionEvent&gt;&gt; action ) {
-<span class="nc" id="L188">        NullUtil.nullArgCheck(action, &quot;action&quot;, UIAction.class);</span>
+    public UIForCombo&lt;E,C&gt; onEnter( Action&lt;SimpleDelegate&lt;C, ActionEvent&gt;&gt; action ) {
+<span class="nc" id="L188">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
 <span class="nc" id="L189">        C combo = (C) getComponent();</span>
 <span class="nc" id="L190">        _onEnter(e -&gt; _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;( combo, e, this::getSiblinghood ))) );</span>
 <span class="nc" id="L191">        return this;</span>
