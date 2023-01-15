@@ -17,26 +17,26 @@ import java.util.function.Consumer;
 public abstract class AbstractVariable<T> extends AbstractValue<T> implements Var<T>
 {
 	static <T> Var<T> ofNullable( boolean immutable, Class<T> type, T value ) {
-		return new AbstractVariable<T>( immutable, type, value, UNNAMED, Collections.emptyList(), true ){};
+		return new AbstractVariable<T>( immutable, type, value, NO_ID, Collections.emptyList(), true ){};
 	}
 
 	static <T> Var<T> of( boolean immutable, Class<T> type, T value ) {
-		return new AbstractVariable<T>( immutable, type, value, UNNAMED, Collections.emptyList(), false ){};
+		return new AbstractVariable<T>( immutable, type, value, NO_ID, Collections.emptyList(), false ){};
 	}
 
 	static <T> Var<T> of( boolean immutable, T iniValue ) {
 		Objects.requireNonNull(iniValue);
-		return new AbstractVariable<T>( immutable, (Class<T>) iniValue.getClass(), iniValue, UNNAMED, Collections.emptyList(), false ){};
+		return new AbstractVariable<T>( immutable, (Class<T>) iniValue.getClass(), iniValue, NO_ID, Collections.emptyList(), false ){};
 	}
 
 	static Var<Viewable> of(boolean immutable, Viewable iniValue ) {
 		Objects.requireNonNull(iniValue);
-		return new AbstractVariable<Viewable>( immutable, Viewable.class, iniValue, UNNAMED, Collections.emptyList(), false ){};
+		return new AbstractVariable<Viewable>( immutable, Viewable.class, iniValue, NO_ID, Collections.emptyList(), false ){};
 	}
 
 	static Var<Border> of( boolean immutable, Border iniValue ) {
 		Objects.requireNonNull(iniValue);
-		return new AbstractVariable<Border>( immutable, Border.class, iniValue, UNNAMED, Collections.emptyList(), false ){};
+		return new AbstractVariable<Border>( immutable, Border.class, iniValue, NO_ID, Collections.emptyList(), false ){};
 	}
 
 	private final boolean _isImmutable;
@@ -74,27 +74,21 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 		_actions.addAll(actions);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	/** {@inheritDoc} */
 	@Override public Var<T> withId( String id ) {
 		AbstractVariable<T> newVar = new AbstractVariable<T>( _isImmutable, _type, _value, id, _actions, _allowsNull ){};
 		newVar._viewActions.addAll(_viewActions);
 		return newVar;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	/** {@inheritDoc} */
 	@Override public Var<T> onAct( Action<ValDelegate<T>> action ) {
 		Objects.requireNonNull(action);
 		_actions.add(action);
 		return this;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	/** {@inheritDoc} */
 	@Override public Var<T> act() {
 		_triggerActions( _actions, false );
 		_viewers.forEach( v -> v.accept(_value) );
@@ -127,9 +121,7 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 		return new AbstractVariable<T>( _isImmutable, _type, _value, _id, _actions, _allowsNull ){};
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	/** {@inheritDoc} */
 	@Override public Var<T> act( T newValue ) {
 		if ( _isImmutable )
 			throw new UnsupportedOperationException("This variable is immutable!");
@@ -138,9 +130,7 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 		return this;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	/** {@inheritDoc} */
 	@Override
 	public Var<T> set( T newItem) {
 		if ( _isImmutable )
@@ -173,6 +163,7 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 		return false;
 	}
 
+	/** {@inheritDoc} */
 	@Override public final <U> Val<U> viewAs( Class<U> type, java.util.function.Function<T, U> mapper ) {
 		Var<U> var = mapTo(type, mapper);
 		// Now we register a live update listener to this property

@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 /**
  * 	A read only view on an item which can be observed by the Swing-Tree UI
@@ -23,8 +24,9 @@ import java.util.function.Supplier;
  */
 public interface Val<T>
 {
-	String UNNAMED = "UNNAMED"; // This is the default name for properties
+	String NO_ID = ""; // This is the default id for properties
 	String EMPTY = "EMPTY"; // This is the default string for empty properties
+	Pattern ID_PATTERN = Pattern.compile("[a-zA-Z0-9_]*");
 
 	/**
 	 *  Use this factory method to create a new {@link Val} instance
@@ -413,7 +415,7 @@ public interface Val<T>
 	/**
 	 * @return The truth value determining if this property has been assigned an id.
 	 */
-	default boolean hasID() { return !UNNAMED.equals(id()); }
+	default boolean hasID() { return !NO_ID.equals(id()); }
 
 	/**
 	 *  This returns the type of the item wrapped by this {@link Var}

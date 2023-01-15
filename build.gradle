@@ -48,7 +48,7 @@ dependencies {
 
     // if you don't already have slf4j-api and an implementation of it in the classpath, add this! (needed for reports)
     testImplementation 'org.slf4j:slf4j-api:1.7.30'
-    testRuntimeClasspath 'org.slf4j:slf4j-simple:1.7.30'
+    testCompileOnly 'org.slf4j:slf4j-simple:1.7.30'
 
     testRuntimeOnly group: 'net.bytebuddy', name: 'byte-buddy', version: '1.11.15' // allows mocking of classes (in addition to interfaces)
     testRuntimeOnly group: 'org.objenesis', name: 'objenesis', version: '3.2'      // allows mocking of classes without default constructor (together with ByteBuddy or CGLIB)

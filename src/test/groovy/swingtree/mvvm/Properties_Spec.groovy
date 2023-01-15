@@ -472,22 +472,22 @@ class Properties_Spec extends Specification
             var v2 = Var.of("Berry").withId("fruit")
             var v3 = Var.of(42)
             var v4 = Var.of(42).withId("number")
-            var v5 = Var.of(99f).withId("ninety-nine")
+            var v5 = Var.of(99f).withId("ninety_nine")
         and : 'Nullable properties:'
             var v6 = Var.ofNullable(String, null)
-            var v7 = Var.ofNullable(Long, 5L).withId("maybe long")
-            var v8 = Var.ofNullable(Integer, 7).withId("maybe int")
+            var v7 = Var.ofNullable(Long, 5L).withId("maybe_long")
+            var v8 = Var.ofNullable(Integer, 7).withId("maybe_int")
 
         expect :
             v1.toString() == '"Apple" ( type = String, id = "?" )'
             v2.toString() == '"Berry" ( type = String, id = "fruit" )'
             v3.toString() == '42 ( type = Integer, id = "?" )'
             v4.toString() == '42 ( type = Integer, id = "number" )'
-            v5.toString() == '99.0 ( type = Float, id = "ninety-nine" )'
+            v5.toString() == '99.0 ( type = Float, id = "ninety_nine" )'
         and : 'Nullable properties have a "?" in the type:'
             v6.toString() == 'null ( type = String?, id = "?" )'
-            v7.toString() == '5 ( type = Long?, id = "maybe long" )'
-            v8.toString() == '7 ( type = Integer?, id = "maybe int" )'
+            v7.toString() == '5 ( type = Long?, id = "maybe_long" )'
+            v8.toString() == '7 ( type = Integer?, id = "maybe_int" )'
 
     }
 

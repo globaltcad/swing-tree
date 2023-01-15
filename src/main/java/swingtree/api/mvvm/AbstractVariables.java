@@ -82,13 +82,13 @@ public class AbstractVariables<T> implements Vars<T>
     }
 
     /** {@inheritDoc} */
-    @Override public Var<T> at( int index ) { return _variables.get(index); }
+    @Override public final Var<T> at( int index ) { return _variables.get(index); }
 
     /** {@inheritDoc} */
-    @Override public Class<T> type() { return _type; }
+    @Override public final Class<T> type() { return _type; }
 
     /** {@inheritDoc} */
-    @Override public int size() { return _variables.size(); }
+    @Override public final int size() { return _variables.size(); }
 
     /** {@inheritDoc} */
     @Override
@@ -215,13 +215,13 @@ public class AbstractVariables<T> implements Vars<T>
 
     /** {@inheritDoc} */
     @Override
-    public String toString() {
+    public final String toString() {
         return "Vars[" + _variables.stream().map(Object::toString).collect(Collectors.joining(",")) + "]";
     }
 
     /** {@inheritDoc} */
     @Override
-    public boolean equals( Object obj ) {
+    public final boolean equals( Object obj ) {
         if( obj == null ) return false;
         if( obj == this ) return true;
         if( obj instanceof Vals ) {

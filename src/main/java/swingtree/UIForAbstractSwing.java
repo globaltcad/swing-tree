@@ -329,6 +329,60 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
+     *  Use this to make the wrapped UI component focusable.
+     *  @param isFocusable The truth value determining if the UI component should be focusable or not.
+     *  @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isFocusableIf( boolean isFocusable ) {
+        getComponent().setFocusable( isFocusable );
+        return _this();
+    }
+
+    /**
+     *  Use this to dynamically make the wrapped UI component focusable.
+     *  This is useful if you want to make a component focusable only if a certain condition is met.
+     *  <br>
+     *  <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     *
+     *  @param isFocusable The truth value determining if the UI component should be focusable or not wrapped in a {@link Val}.
+     *  @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isFocusableIf( Val<Boolean> isFocusable ) {
+        NullUtil.nullArgCheck(isFocusable, "isFocusable", Val.class);
+        NullUtil.nullPropertyCheck(isFocusable, "isFocusable", "Null value for isFocusable is not allowed!");
+        _onShow( isFocusable, v -> isFocusableIf(v) );
+        this.isFocusableIf( isFocusable.orElseThrow() );
+        return _this();
+    }
+
+    /**
+     *  Use this to make the wrapped UI component focusable.
+     *  @param isFocusable The truth value determining if the UI component should be focusable or not.
+     *  @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isFocusableIfNot( boolean isFocusable ) {
+        getComponent().setFocusable( !isFocusable );
+        return _this();
+    }
+
+    /**
+     *  Use this to dynamically make the wrapped UI component focusable.
+     *  This is useful if you want to make a component focusable only if a certain condition is met.
+     *  <br>
+     *  <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     *
+     *  @param isFocusable The truth value determining if the UI component should be focusable or not, wrapped in a {@link Val}.
+     *  @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isFocusableIfNot( Val<Boolean> isFocusable ) {
+        NullUtil.nullArgCheck(isFocusable, "isFocusable", Val.class);
+        NullUtil.nullPropertyCheck(isFocusable, "isFocusable", "Null value for isFocusable is not allowed!");
+        _onShow( isFocusable, v -> isFocusableIf(!v) );
+        this.isFocusableIf( !isFocusable.orElseThrow() );
+        return _this();
+    }
+
+    /**
      *  This allows you to register validation logic for the wrapped UI component.
      *  Although the delegate exposed to the {@link UIVerifier} lambda
      *  indirectly exposes you to the UIs state, you should not access the UI directly

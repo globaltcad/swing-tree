@@ -518,4 +518,13 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
         return _this();
     }
 
+    public final I withMargin( Insets insets ) {
+        NullUtil.nullArgCheck(insets, "insets", Insets.class);
+        getComponent().setMargin( insets );
+        return _this();
+    }
+
+    public final I withMargin( int top, int left, int bottom, int right ) {
+        return withMargin( new Insets(top, left, bottom, right) );
+    }
 }
