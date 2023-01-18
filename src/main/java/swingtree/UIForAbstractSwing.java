@@ -91,7 +91,6 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
                 );
             }
             @Override public boolean canBeRemoved() { return !component().isPresent(); }
-            @Override public boolean canBeExecutedAsynchronously() { return true; }
         });
     }
 
@@ -117,7 +116,6 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
                 );
             }
             @Override public boolean canBeRemoved() { return !component().isPresent(); }
-            @Override public boolean canBeExecutedAsynchronously() { return true; }
         });
     }
 
@@ -1853,13 +1851,10 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I onMouseWheelDown( Action<SimpleDelegate<C, MouseWheelEvent>> onWheelDown ) {
         NullUtil.nullArgCheck(onWheelDown, "onWheelDown", Action.class);
         C component = getComponent();
-        component.addMouseWheelListener(new MouseWheelListener() {
-            @Override public void mouseWheelMoved(MouseWheelEvent e) {
-                if( e.getWheelRotation() > 0 ) {
+        component.addMouseWheelListener( e -> {
+                if ( e.getWheelRotation() > 0 )
                     _doApp(() -> onWheelDown.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
-                }
-            }
-        });
+            });
         return _this();
     }
 

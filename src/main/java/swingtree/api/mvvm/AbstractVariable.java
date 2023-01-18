@@ -90,7 +90,7 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 
 	/** {@inheritDoc} */
 	@Override public Var<T> act() {
-		_triggerActions( _actions, false );
+		_triggerActions( _actions);
 		_viewers.forEach( v -> v.accept(_value) );
 		return this;
 	}

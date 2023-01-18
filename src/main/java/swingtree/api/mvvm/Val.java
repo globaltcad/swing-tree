@@ -457,7 +457,6 @@ public interface Val<T>
 				action.accept( delegate.current().orElseNullable(null));
 			}
 			@Override public boolean canBeRemoved() { return action.canBeRemoved(); }
-			@Override public boolean canBeExecutedAsynchronously() { return action.canBeExecutedAsynchronously(); }
 		});
 	}
 

@@ -1,7 +1,5 @@
 package swingtree.api.mvvm;
 
-import swingtree.UI;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -64,11 +62,10 @@ abstract class AbstractValue<T> implements Val<T>
     }
 
     /** {@inheritDoc} */
-    @Override public Val<T> show() { _triggerActions( _viewActions, true ); return this; }
+    @Override public Val<T> show() { _triggerActions( _viewActions); return this; }
 
     protected void _triggerActions(
-        List<Action<ValDelegate<T>>> actions,
-        boolean runInGUIThread
+        List<Action<ValDelegate<T>>> actions
     ) {
         List<Action<ValDelegate<T>>> removableActions = new ArrayList<>();
         for ( Action<ValDelegate<T>> action : new ArrayList<>(actions) ) // We copy the list to avoid concurrent modification
@@ -76,11 +73,7 @@ abstract class AbstractValue<T> implements Val<T>
                 if ( action.canBeRemoved() )
                     removableActions.add(action);
                 else {
-                    ValDelegate<T> delegate = _createDelegate();
-                    if ( runInGUIThread && action.canBeExecutedAsynchronously() )
-                        UI.run( () -> action.accept(delegate) );
-                    else
-                        action.accept(delegate);
+                    action.accept(_createDelegate());
                 }
             } catch ( Exception e ) {
                 e.printStackTrace();
