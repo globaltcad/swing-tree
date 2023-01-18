@@ -2,9 +2,8 @@ package swingtree;
 
 import swingtree.api.ListEntryDelegate;
 import swingtree.api.ListEntryRenderer;
+import swingtree.api.mvvm.*;
 import swingtree.api.mvvm.Action;
-import swingtree.api.mvvm.Vals;
-import swingtree.api.mvvm.ValsDelegate;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -83,6 +82,21 @@ public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForLi
         _onShow( entries, v -> model.fire(v) );
         return this;
     }
+
+    public final UIForList<E, L> withSelection( Var<E> selection ) {
+        getComponent().addListSelectionListener( e -> {
+            if ( !e.getValueIsAdjusting() )
+                selection.act( getComponent().getSelectedValue() );
+        });
+        _onShow( selection, v -> getComponent().setSelectedValue( v, true ) );
+        return this;
+    }
+
+    public final UIForList<E, L> withSelection( Val<E> selection ) {
+        _onShow( selection, v -> getComponent().setSelectedValue( v, true ) );
+        return this;
+    }
+
 
     private static class ValsListModel<E> extends AbstractListModel<E> {
 

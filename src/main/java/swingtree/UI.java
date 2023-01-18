@@ -2489,6 +2489,18 @@ public final class UI
         return of(new JList<E>()).withEntries( elements );
     }
 
+    public static <E> UIForList<E, JList<E>> list( Var<E> selection, Vals<E> elements ) {
+        NullUtil.nullArgCheck(selection, "selection", Var.class);
+        NullUtil.nullArgCheck(elements, "elements", Vals.class);
+        return of(new JList<E>()).withEntries( elements ).withSelection( selection );
+    }
+
+    public static <E> UIForList<E, JList<E>> list( Val<E> selection, Vals<E> elements ) {
+        NullUtil.nullArgCheck(selection, "selection", Val.class);
+        NullUtil.nullArgCheck(elements, "elements", Vals.class);
+        return of(new JList<E>()).withEntries( elements ).withSelection( selection );
+    }
+
     /**
      *  Creates a new {@link JList} instance with the provided array
      *  as data model.
