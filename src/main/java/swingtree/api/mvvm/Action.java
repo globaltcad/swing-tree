@@ -13,8 +13,21 @@ package swingtree.api.mvvm;
 @FunctionalInterface
 public interface Action<D>
 {
+    /**
+     *  Executes the action.
+     *
+     * @param delegate A delegate for providing relevant context to the action.
+     */
     void accept( D delegate );
 
+    /**
+     * @return True if this action is no longer needed and should be removed.
+     */
     default boolean canBeRemoved() { return false; }
 
+    /**
+     * @return True if the {@link #accept(Object)} method may be called by
+     *          another thread (like the AWT thread or a thread pool)
+     */
+    default boolean canBeExecutedAsynchronously() { return true; }
 }

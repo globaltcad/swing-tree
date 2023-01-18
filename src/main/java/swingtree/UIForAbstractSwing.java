@@ -91,6 +91,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
                 );
             }
             @Override public boolean canBeRemoved() { return !component().isPresent(); }
+            @Override public boolean canBeExecutedAsynchronously() { return true; }
         });
     }
 
@@ -116,6 +117,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
                 );
             }
             @Override public boolean canBeRemoved() { return !component().isPresent(); }
+            @Override public boolean canBeExecutedAsynchronously() { return true; }
         });
     }
 

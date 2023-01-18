@@ -66,7 +66,10 @@ abstract class AbstractValue<T> implements Val<T>
     /** {@inheritDoc} */
     @Override public Val<T> show() { _triggerActions( _viewActions, true ); return this; }
 
-    protected void _triggerActions(List<Action<ValDelegate<T>>> actions, boolean runInGUIThread ) {
+    protected void _triggerActions(
+        List<Action<ValDelegate<T>>> actions,
+        boolean runInGUIThread
+    ) {
         List<Action<ValDelegate<T>>> removableActions = new ArrayList<>();
         for ( Action<ValDelegate<T>> action : new ArrayList<>(actions) ) // We copy the list to avoid concurrent modification
             try {
@@ -74,12 +77,12 @@ abstract class AbstractValue<T> implements Val<T>
                     removableActions.add(action);
                 else {
                     ValDelegate<T> delegate = _createDelegate();
-                    if ( runInGUIThread )
+                    if ( runInGUIThread && action.canBeExecutedAsynchronously() )
                         UI.run( () -> action.accept(delegate) );
                     else
                         action.accept(delegate);
                 }
-            } catch (Exception e) {
+            } catch ( Exception e ) {
                 e.printStackTrace();
             }
         actions.removeAll(removableActions);

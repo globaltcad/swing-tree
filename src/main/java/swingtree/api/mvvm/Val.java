@@ -448,16 +448,16 @@ public interface Val<T>
 	 *  wrapped by this {@link Val} changes through the {@code Var::set(T)} method.
 	 *  The lambda will receive the current item of this property.
 	 *
-	 * @param displayAction The lambda which will be called whenever the item wrapped by this {@link Var} changes.
+	 * @param action The lambda which will be called whenever the item wrapped by this {@link Var} changes.
 	 * @return The {@link Val} instance itself.
 	 */
-	default Val<T> onShowItem( Action<T> displayAction ) {
+	default Val<T> onShowItem( Action<T> action ) {
 		return onShow(new Action<ValDelegate<T>>() {
-			@Override
-			public void accept(ValDelegate<T> delegate) {
-				displayAction.accept( delegate.current().orElseNullable(null));
+			@Override public void accept(ValDelegate<T> delegate) {
+				action.accept( delegate.current().orElseNullable(null));
 			}
-			@Override public boolean canBeRemoved() { return displayAction.canBeRemoved(); }
+			@Override public boolean canBeRemoved() { return action.canBeRemoved(); }
+			@Override public boolean canBeExecutedAsynchronously() { return action.canBeExecutedAsynchronously(); }
 		});
 	}
 
