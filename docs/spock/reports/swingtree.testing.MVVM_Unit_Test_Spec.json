@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.006 seconds"
+    "duration":"0.013 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"The registration view model will display feedback about invalid inputs.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.006 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that when changing the value of a property we\n            use the \"act\" method instead of the \"set\" method.\n            This is because the \"set\" method is used to set the\n            value of the property without triggering any\n            validation logic. The \"act\" method represents\n            a user action that triggers validation logic.\n        "]
       },
@@ -57,7 +57,7 @@
     {
       "id":"The register button does nothing if the inputs are not all valid.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

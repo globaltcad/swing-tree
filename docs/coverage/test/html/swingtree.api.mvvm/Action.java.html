@@ -13,9 +13,16 @@
 @FunctionalInterface
 public interface Action&lt;D&gt;
 {
+    /**
+     *  Executes the action.
+     *
+     * @param delegate A delegate for providing relevant context to the action.
+     */
     void accept( D delegate );
 
-<span class="fc" id="L18">    default boolean canBeRemoved() { return false; }</span>
-
+    /**
+     * @return True if this action is no longer needed and should be removed.
+     */
+<span class="fc" id="L26">    default boolean canBeRemoved() { return false; }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

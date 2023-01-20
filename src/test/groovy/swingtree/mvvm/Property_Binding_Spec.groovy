@@ -217,4 +217,118 @@ class Property_Binding_Spec extends Specification
             Utility.getSplitButtonPopup(node).components[0].enabled == false
     }
 
+    def 'The visibility of a UI component can be modelled dynamically using boolean properties.'()
+    {
+        given : 'We create a property representing the visibility state of a component.'
+            Val<Boolean> property = Var.of(true)
+        and : 'We create a UI to which we want to bind:'
+            var node = UI.panel("fill, wrap 1")
+                        .add(UI.label("Below me is a spinner!"))
+                        .add(UI.spinner().isVisibleIf(property))
+                        .add(UI.textArea("I am here for decoration..."))
+                        .add(UI.slider(UI.Align.VERTICAL).isVisibleIfNot(property))
+        expect : 'The spinner will be visible.'
+            node.component.components[1].visible == true
+        and : 'The slider will be invisible.'
+            node.component.components[3].visible == false
+
+        when : 'We change the value of the property.'
+            property.set(false)
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
+
+        then : 'The spinner will be invisible.'
+            node.component.components[1].visible == false
+        and : 'The slider will be visible.'
+            node.component.components[3].visible == true
+    }
+
+    def 'The focusability of a UI component can be modelled dynamically using boolean properties.'()
+    {
+        given : 'We create a property representing the focusability state of a component.'
+            Val<Boolean> property = Var.of(true)
+        and : 'We create a UI to which we want to bind:'
+            var node = UI.panel("fill, wrap 1")
+                        .add(UI.label("Below me is a spinner!"))
+                        .add(UI.spinner().isFocusableIf(property))
+                        .add(UI.textArea("I am here for decoration..."))
+                        .add(UI.slider(UI.Align.VERTICAL).isFocusableIfNot(property))
+        expect : 'The spinner will be focusable.'
+            node.component.components[1].focusable == true
+        and : 'The slider will be unfocusable.'
+            node.component.components[3].focusable == false
+
+        when : 'We change the value of the property.'
+            property.set(false)
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
+
+        then : 'The spinner will be unfocusable.'
+            node.component.components[1].focusable == false
+        and : 'The slider will be focusable.'
+            node.component.components[3].focusable == true
+    }
+
+    def 'Minimum as well as maximum height of UI components can be modelled using integer properties.'()
+    {
+        given : 'We create a property representing the minimum and maximum height.'
+            Val<Integer> property = Var.of(50)
+        and : 'We create a UI to which we want to bind:'
+            var node = UI.panel("fill, wrap 1")
+                        .add(UI.label("Below me is a text area!"))
+                        .add(UI.textArea("hi").withMinimumHeight(property))
+                        .add(UI.label("Below me is another text area!"))
+                        .add(UI.textArea("Hey").withMaximumHeight(property))
+
+        expect : 'The minimum height of the first text area will be 50.'
+            node.component.components[1].minimumSize.height == 50
+        and : 'The maximum height of the second text area will be 50.'
+            node.component.components[3].maximumSize.height == 50
+
+        when : 'We change the value of the property.'
+            property.set(100)
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
+
+        then : 'The minimum height of the first text area will be 100.'
+            node.component.components[1].minimumSize.height == 100
+        and : 'The maximum height of the second text area will be 100.'
+            node.component.components[3].maximumSize.height == 100
+    }
+
+
+    def 'The width and height of UI components can be modelled using integer properties.'()
+    {
+        given : 'We create a property representing the width and height.'
+            Val<Integer> widthProperty = Var.of(50)
+            Val<Integer> heightProperty = Var.of(100)
+        and : 'We create a UI to which we want to bind:'
+            var node = UI.panel("fill, wrap 1")
+                        .add(UI.label("Below me is a text area!"))
+                        .add(UI.textArea("hi").withWidth(widthProperty).withHeight(heightProperty))
+                        .add(UI.label("Below me is another text area!"))
+                        .add(UI.textArea("Hey").withWidth(heightProperty).withHeight(widthProperty))
+
+        expect : 'The width of the first text area will be 50.'
+            node.component.components[1].size.width == 50
+        and : 'The height of the first text area will be 100.'
+            node.component.components[1].size.height == 100
+        and : 'The width of the second text area will be 100.'
+            node.component.components[3].size.width == 100
+        and : 'The height of the second text area will be 50.'
+            node.component.components[3].size.height == 50
+
+        when : 'We change the value of the property.'
+            widthProperty.set(100)
+            heightProperty.set(50)
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
+
+        then : 'The dimensions of both UI components will be as expected.'
+            node.component.components[1].size.width == 100
+            node.component.components[1].size.height == 50
+            node.component.components[3].size.width == 50
+            node.component.components[3].size.height == 100
+    }
+
 }

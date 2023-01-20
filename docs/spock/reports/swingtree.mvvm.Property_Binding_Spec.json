@@ -4,19 +4,19 @@
   "narrative":"This specification shows you how to bind properties to \n    the states of common types UI components.",
   "subjects":[],
   "statistics":{
-    "runs":"8",
+    "runs":"12",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.017 seconds"
+    "duration":"0.081 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can bind a property to the size of a swing component.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that the binding of a Swing-Tree property will only have side effects\n            when it is deliberately triggered to execute its side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
       },
@@ -39,7 +39,7 @@
     {
       "id":"Simple integer properties can be bound to the width or height of components.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.006 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -62,7 +62,7 @@
     {
       "id":"Bind to both width and height independently if you want to.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.008 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -85,7 +85,7 @@
     {
       "id":"We can bind to the color of a component.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -108,7 +108,7 @@
     {
       "id":"We can bind to the text of a component.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -131,7 +131,7 @@
     {
       "id":"We can enable and disable a UI component dynamically through property binding.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -154,7 +154,7 @@
     {
       "id":"We can select or unselect a UI component dynamically through properties.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -177,7 +177,7 @@
     {
       "id":"Enable or disable the split items of a JSplitButton through properties.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.009 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -193,6 +193,116 @@
         {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 
         {"kind":"then","text":"The first split item will be disabled.","code":["Utility.getSplitButtonPopup(node).components[0].enabled == false"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The visibility of a UI component can be modelled dynamically using boolean properties.",
+      "result":"PASS",
+      "duration":"0.005 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property representing the visibility state of a component.","code":["Val<Boolean> property = Var.of(true)"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var node = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Below me is a spinner!\"))","            .add(UI.spinner().isVisibleIf(property))","            .add(UI.textArea(\"I am here for decoration...\"))","            .add(UI.slider(UI.Align.VERTICAL).isVisibleIfNot(property))"]},
+
+        {"kind":"expect","text":"The spinner will be visible.","code":["node.component.components[1].visible == true"]},
+
+        {"kind":"and","text":"The slider will be invisible.","code":["node.component.components[3].visible == false"]},
+
+        {"kind":"when","text":"We change the value of the property.","code":["property.set(false)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The spinner will be invisible.","code":["node.component.components[1].visible == false"]},
+
+        {"kind":"and","text":"The slider will be visible.","code":["node.component.components[3].visible == true"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The focusability of a UI component can be modelled dynamically using boolean properties.",
+      "result":"PASS",
+      "duration":"0.007 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property representing the focusability state of a component.","code":["Val<Boolean> property = Var.of(true)"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var node = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Below me is a spinner!\"))","            .add(UI.spinner().isFocusableIf(property))","            .add(UI.textArea(\"I am here for decoration...\"))","            .add(UI.slider(UI.Align.VERTICAL).isFocusableIfNot(property))"]},
+
+        {"kind":"expect","text":"The spinner will be focusable.","code":["node.component.components[1].focusable == true"]},
+
+        {"kind":"and","text":"The slider will be unfocusable.","code":["node.component.components[3].focusable == false"]},
+
+        {"kind":"when","text":"We change the value of the property.","code":["property.set(false)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The spinner will be unfocusable.","code":["node.component.components[1].focusable == false"]},
+
+        {"kind":"and","text":"The slider will be focusable.","code":["node.component.components[3].focusable == true"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Minimum as well as maximum height of UI components can be modelled using integer properties.",
+      "result":"PASS",
+      "duration":"0.006 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property representing the minimum and maximum height.","code":["Val<Integer> property = Var.of(50)"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var node = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Below me is a text area!\"))","            .add(UI.textArea(\"hi\").withMinimumHeight(property))","            .add(UI.label(\"Below me is another text area!\"))","            .add(UI.textArea(\"Hey\").withMaximumHeight(property))"]},
+
+        {"kind":"expect","text":"The minimum height of the first text area will be 50.","code":["node.component.components[1].minimumSize.height == 50"]},
+
+        {"kind":"and","text":"The maximum height of the second text area will be 50.","code":["node.component.components[3].maximumSize.height == 50"]},
+
+        {"kind":"when","text":"We change the value of the property.","code":["property.set(100)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The minimum height of the first text area will be 100.","code":["node.component.components[1].minimumSize.height == 100"]},
+
+        {"kind":"and","text":"The maximum height of the second text area will be 100.","code":["node.component.components[3].maximumSize.height == 100"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The width and height of UI components can be modelled using integer properties.",
+      "result":"PASS",
+      "duration":"0.007 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property representing the width and height.","code":["Val<Integer> widthProperty = Var.of(50)","Val<Integer> heightProperty = Var.of(100)"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var node = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Below me is a text area!\"))","            .add(UI.textArea(\"hi\").withWidth(widthProperty).withHeight(heightProperty))","            .add(UI.label(\"Below me is another text area!\"))","            .add(UI.textArea(\"Hey\").withWidth(heightProperty).withHeight(widthProperty))"]},
+
+        {"kind":"expect","text":"The width of the first text area will be 50.","code":["node.component.components[1].size.width == 50"]},
+
+        {"kind":"and","text":"The height of the first text area will be 100.","code":["node.component.components[1].size.height == 100"]},
+
+        {"kind":"and","text":"The width of the second text area will be 100.","code":["node.component.components[3].size.width == 100"]},
+
+        {"kind":"and","text":"The height of the second text area will be 50.","code":["node.component.components[3].size.height == 50"]},
+
+        {"kind":"when","text":"We change the value of the property.","code":["widthProperty.set(100)","heightProperty.set(50)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The dimensions of both UI components will be as expected.","code":["node.component.components[1].size.width == 100","node.component.components[1].size.height == 50","node.component.components[3].size.width == 50","node.component.components[3].size.height == 100"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

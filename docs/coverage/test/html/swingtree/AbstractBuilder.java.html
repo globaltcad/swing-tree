@@ -173,7 +173,7 @@ import java.util.function.Consumer;
      * @param &lt;T&gt; The type parameter of the component which this builder wraps.
      * @return The result of the building process, namely: a type of JComponent.
      */
-    public &lt;T extends C&gt; T get(Class&lt;T&gt; type) {
+    public &lt;T extends C&gt; T get( Class&lt;T&gt; type ) {
 <span class="pc bpc" id="L177" title="4 of 6 branches missed.">        assert type == _type || type.isAssignableFrom(_type);</span>
 <span class="fc" id="L178">        return (T) _component.get();</span>
     }

@@ -253,9 +253,9 @@ public final class UI
 <span class="fc" id="L253">        HORIZONTAL, VERTICAL;</span>
 
         int forSlider() {
-<span class="pc bpc" id="L256" title="2 of 3 branches missed.">            switch ( this ) {</span>
+<span class="pc bpc" id="L256" title="1 of 3 branches missed.">            switch ( this ) {</span>
 <span class="fc" id="L257">                case HORIZONTAL: return JSlider.HORIZONTAL;</span>
-<span class="nc" id="L258">                case VERTICAL  : return JSlider.VERTICAL;</span>
+<span class="fc" id="L258">                case VERTICAL  : return JSlider.VERTICAL;</span>
             }
 <span class="nc" id="L260">            throw new RuntimeException();</span>
         }
@@ -267,8 +267,8 @@ public final class UI
 <span class="nc" id="L267">            throw new RuntimeException();</span>
         }
         int forSplitPane() {
-<span class="pc bpc" id="L270" title="2 of 3 branches missed.">            switch ( this ) {</span>
-<span class="nc" id="L271">                case HORIZONTAL: return JSplitPane.VERTICAL_SPLIT;</span>
+<span class="pc bpc" id="L270" title="1 of 3 branches missed.">            switch ( this ) {</span>
+<span class="fc" id="L271">                case HORIZONTAL: return JSplitPane.VERTICAL_SPLIT;</span>
 <span class="fc" id="L272">                case VERTICAL:   return JSplitPane.HORIZONTAL_SPLIT;</span>
             }
 <span class="nc" id="L274">            throw new RuntimeException();</span>
@@ -1220,9 +1220,9 @@ public final class UI
      * @throws IllegalArgumentException if {@code align} is {@code null}.
      */
     public static UIForSplitPane&lt;JSplitPane&gt; splitPane( Val&lt;Align&gt; align ) {
-<span class="nc" id="L1223">        NullUtil.nullArgCheck(align, &quot;align&quot;, Val.class);</span>
-<span class="nc" id="L1224">        NullUtil.nullPropertyCheck(align, &quot;align&quot;, &quot;Null is not a valid alignment.&quot;);</span>
-<span class="nc" id="L1225">        return of(new JSplitPane(align.get().forSplitPane())).withAlignment(align);</span>
+<span class="fc" id="L1223">        NullUtil.nullArgCheck(align, &quot;align&quot;, Val.class);</span>
+<span class="fc" id="L1224">        NullUtil.nullPropertyCheck(align, &quot;align&quot;, &quot;Null is not a valid alignment.&quot;);</span>
+<span class="fc" id="L1225">        return of(new JSplitPane(align.get().forSplitPane())).withAlignment(align);</span>
     }
 
     /**
@@ -2489,6 +2489,18 @@ public final class UI
 <span class="fc" id="L2489">        return of(new JList&lt;E&gt;()).withEntries( elements );</span>
     }
 
+    public static &lt;E&gt; UIForList&lt;E, JList&lt;E&gt;&gt; list( Var&lt;E&gt; selection, Vals&lt;E&gt; elements ) {
+<span class="nc" id="L2493">        NullUtil.nullArgCheck(selection, &quot;selection&quot;, Var.class);</span>
+<span class="nc" id="L2494">        NullUtil.nullArgCheck(elements, &quot;elements&quot;, Vals.class);</span>
+<span class="nc" id="L2495">        return of(new JList&lt;E&gt;()).withEntries( elements ).withSelection( selection );</span>
+    }
+
+    public static &lt;E&gt; UIForList&lt;E, JList&lt;E&gt;&gt; list( Val&lt;E&gt; selection, Vals&lt;E&gt; elements ) {
+<span class="nc" id="L2499">        NullUtil.nullArgCheck(selection, &quot;selection&quot;, Val.class);</span>
+<span class="nc" id="L2500">        NullUtil.nullArgCheck(elements, &quot;elements&quot;, Vals.class);</span>
+<span class="nc" id="L2501">        return of(new JList&lt;E&gt;()).withEntries( elements ).withSelection( selection );</span>
+    }
+
     /**
      *  Creates a new {@link JList} instance with the provided array
      *  as data model.
@@ -2499,7 +2511,7 @@ public final class UI
      * @return A builder instance for a new {@link JList} with the provided array as data model.
      */
     @SafeVarargs
-<span class="fc" id="L2502">    public static &lt;E&gt; UIForList&lt;E, JList&lt;E&gt;&gt; listOf( E... elements ) { return list( elements ); }</span>
+<span class="fc" id="L2514">    public static &lt;E&gt; UIForList&lt;E, JList&lt;E&gt;&gt; listOf( E... elements ) { return list( elements ); }</span>
 
     /**
      *  Creates a new {@link JList} instance with the provided {@link List}
@@ -2509,7 +2521,7 @@ public final class UI
      * @return A builder instance for a new {@link JList} with the provided {@link List} as data model.
      */
     public static &lt;E&gt; UIForList&lt;E, JList&lt;E&gt;&gt; list( java.util.List&lt;E&gt; entries ) {
-<span class="fc" id="L2512">        return of(new JList&lt;E&gt;()).withEntries( entries );</span>
+<span class="fc" id="L2524">        return of(new JList&lt;E&gt;()).withEntries( entries );</span>
     }
 
     /**
@@ -2521,7 +2533,7 @@ public final class UI
      * @param &lt;E&gt; The type of the elements in the list.
      * @return A builder instance for a new {@link JList} with the provided {@link List} as data model.
      */
-<span class="fc" id="L2524">    public static &lt;E&gt; UIForList&lt;E, JList&lt;E&gt;&gt; listOf( java.util.List&lt;E&gt; entries ) { return list( entries ); }</span>
+<span class="fc" id="L2536">    public static &lt;E&gt; UIForList&lt;E, JList&lt;E&gt;&gt; listOf( java.util.List&lt;E&gt; entries ) { return list( entries ); }</span>
 
     /**
      * @param table The table which should be wrapped by the builder.
@@ -2529,32 +2541,32 @@ public final class UI
      * @return A builder instance for a new {@link JTable}.
      */
     public static &lt;T extends JTable&gt; UIForTable&lt;T&gt; of( T table ) {
-<span class="fc" id="L2532">        NullUtil.nullArgCheck(table, &quot;table&quot;, JTable.class);</span>
-<span class="fc" id="L2533">        return new UIForTable&lt;&gt;(table);</span>
+<span class="fc" id="L2544">        NullUtil.nullArgCheck(table, &quot;table&quot;, JTable.class);</span>
+<span class="fc" id="L2545">        return new UIForTable&lt;&gt;(table);</span>
     }
 
-<span class="fc" id="L2536">    public static UIForTable&lt;JTable&gt; table() { return of(new JTable()); }</span>
+<span class="fc" id="L2548">    public static UIForTable&lt;JTable&gt; table() { return of(new JTable()); }</span>
 
     public static &lt;E&gt; UIForTable&lt;JTable&gt; table( ListData dataFormat, TableListDataSource&lt;E&gt; dataSource ) {
-<span class="fc" id="L2539">        NullUtil.nullArgCheck(dataFormat, &quot;dataFormat&quot;, ListData.class);</span>
-<span class="fc" id="L2540">        NullUtil.nullArgCheck(dataSource, &quot;dataSource&quot;, TableListDataSource.class);</span>
-<span class="fc" id="L2541">        return of(new JTable()).with(dataFormat, dataSource);</span>
+<span class="fc" id="L2551">        NullUtil.nullArgCheck(dataFormat, &quot;dataFormat&quot;, ListData.class);</span>
+<span class="fc" id="L2552">        NullUtil.nullArgCheck(dataSource, &quot;dataSource&quot;, TableListDataSource.class);</span>
+<span class="fc" id="L2553">        return of(new JTable()).with(dataFormat, dataSource);</span>
     }
 
     public static &lt;E&gt; UIForTable&lt;JTable&gt; table( MapData dataFormat, TableMapDataSource&lt;E&gt; dataSource ) {
-<span class="fc" id="L2545">        NullUtil.nullArgCheck(dataFormat, &quot;dataFormat&quot;, ListData.class);</span>
-<span class="fc" id="L2546">        NullUtil.nullArgCheck(dataSource, &quot;dataSource&quot;, TableMapDataSource.class);</span>
-<span class="fc" id="L2547">        return of(new JTable()).with(dataFormat, dataSource);</span>
+<span class="fc" id="L2557">        NullUtil.nullArgCheck(dataFormat, &quot;dataFormat&quot;, ListData.class);</span>
+<span class="fc" id="L2558">        NullUtil.nullArgCheck(dataSource, &quot;dataSource&quot;, TableMapDataSource.class);</span>
+<span class="fc" id="L2559">        return of(new JTable()).with(dataFormat, dataSource);</span>
     }
 
     public static UIForTable&lt;JTable&gt; table( Buildable&lt;BasicTableModel&gt; tableModelBuildable ) {
-<span class="fc" id="L2551">        return of(new JTable()).withModel(tableModelBuildable);</span>
+<span class="fc" id="L2563">        return of(new JTable()).withModel(tableModelBuildable);</span>
     }
 
-<span class="fc" id="L2554">    public static BasicTableModel.Builder tableModel() { return new BasicTableModel.Builder(); }</span>
+<span class="fc" id="L2566">    public static BasicTableModel.Builder tableModel() { return new BasicTableModel.Builder(); }</span>
 
     public static Render.Builder&lt;JTable, Object&gt; renderTable() {
-<span class="fc" id="L2557">        return Render.forTable(Object.class, null).when(Object.class).asText(cell-&gt;cell.valueAsString().orElse(&quot;&quot;));</span>
+<span class="fc" id="L2569">        return Render.forTable(Object.class, null).when(Object.class).asText(cell-&gt;cell.valueAsString().orElse(&quot;&quot;));</span>
     }
 
     /**
@@ -2565,7 +2577,7 @@ public final class UI
      *  in a specific way depending on their actual type.
      *  This is done like so:
      *  &lt;pre&gt;{@code
-     *  UI.list(new Object[]{&quot;:-)&quot;, 42L, '§'})
+     *  UI.list(new Object[]{&quot;:-)&quot;, 42L, 'Â§'})
      *  .withRenderer(
      *      UI.renderList()
      *      .when(String.class).asText( cell -&gt; &quot;String: &quot;+cell.getValue() )
@@ -2578,7 +2590,7 @@ public final class UI
      *          configure how he passed item types should be rendered.
      */
     public static Render.Builder&lt;JList&lt;Object&gt;, Object&gt; renderList() {
-<span class="nc" id="L2581">        return Render.forList(Object.class, null).when(Object.class).asText(cell-&gt;cell.valueAsString().orElse(&quot;&quot;));</span>
+<span class="nc" id="L2593">        return Render.forList(Object.class, null).when(Object.class).asText(cell-&gt;cell.valueAsString().orElse(&quot;&quot;));</span>
     }
 
     /**
@@ -2602,7 +2614,7 @@ public final class UI
      * @param &lt;T&gt; The common super-type type of the items which should be rendered.
      */
     public static &lt;T&gt; Render.Builder&lt;JList&lt;T&gt;, T&gt; renderList( Class&lt;T&gt; commonType ) {
-<span class="pc" id="L2605">        return Render.forList(commonType, null).when(commonType).asText(cell-&gt;cell.valueAsString().orElse(&quot;&quot;));</span>
+<span class="pc" id="L2617">        return Render.forList(commonType, null).when(commonType).asText(cell-&gt;cell.valueAsString().orElse(&quot;&quot;));</span>
     }
 
     /**
@@ -2624,7 +2636,7 @@ public final class UI
      * @param &lt;T&gt; The type of the items which should be rendered.
      */
     public static &lt;T&gt; Render.As&lt;JList&lt;T&gt;, T, T&gt; renderListItem( Class&lt;T&gt; itemType ) {
-<span class="fc" id="L2627">        return Render.forList(itemType, null).when(itemType);</span>
+<span class="fc" id="L2639">        return Render.forList(itemType, null).when(itemType);</span>
     }
 
     /**
@@ -2635,7 +2647,7 @@ public final class UI
      *  in a specific way depending on their actual type.
      *  This is done like so:
      *  &lt;pre&gt;{@code
-     *  UI.comboBox(new Object[]{&quot;:-)&quot;, 42L, '§'})
+     *  UI.comboBox(new Object[]{&quot;:-)&quot;, 42L, 'Â§'})
      *  .withRenderer(
      *      UI.renderCombo()
      *      .when(String.class).asText( cell -&gt; &quot;String: &quot;+cell.getValue() )
@@ -2647,7 +2659,7 @@ public final class UI
      * @return A render builder exposing an API that allows you to configure how he passed item types should be rendered.
      */
     public static Render.Builder&lt;JComboBox&lt;Object&gt;, Object&gt; renderCombo() {
-<span class="nc" id="L2650">        return Render.forCombo(Object.class, null).when(Object.class).asText(cell-&gt;cell.valueAsString().orElse(&quot;&quot;));</span>
+<span class="nc" id="L2662">        return Render.forCombo(Object.class, null).when(Object.class).asText(cell-&gt;cell.valueAsString().orElse(&quot;&quot;));</span>
     }
 
     /**
@@ -2670,7 +2682,7 @@ public final class UI
      * @param &lt;T&gt; The common super-type type of the items which should be rendered.
      */
     public static &lt;T&gt; Render.Builder&lt;JComboBox&lt;T&gt;, T&gt; renderCombo( Class&lt;T&gt; commonType ) {
-<span class="nc" id="L2673">        return Render.forCombo(commonType, null).when(commonType).asText(cell-&gt;cell.valueAsString().orElse(&quot;&quot;));</span>
+<span class="nc" id="L2685">        return Render.forCombo(commonType, null).when(commonType).asText(cell-&gt;cell.valueAsString().orElse(&quot;&quot;));</span>
     }
 
     /**
@@ -2692,7 +2704,7 @@ public final class UI
      * @param &lt;T&gt; The type of the items which should be rendered.
      */
     public static &lt;T&gt; Render.As&lt;JComboBox&lt;T&gt;, T, T&gt; renderComboItem( Class&lt;T&gt; itemType ) {
-<span class="fc" id="L2695">        return Render.forCombo(itemType, null).when(itemType);</span>
+<span class="fc" id="L2707">        return Render.forCombo(itemType, null).when(itemType);</span>
     }
 
     /**
@@ -2700,7 +2712,7 @@ public final class UI
      * @return The builder API allowing method chaining.
      */
     public static Render.Builder&lt;JTable, Object&gt; renderTableWithBorder( Supplier&lt;Border&gt; borderSupplier ) {
-<span class="nc" id="L2703">        return Render.forTable(Object.class, borderSupplier).when(Object.class).as(cell-&gt;{});</span>
+<span class="nc" id="L2715">        return Render.forTable(Object.class, borderSupplier).when(Object.class).as(cell-&gt;{});</span>
     }
 
     /**
@@ -2708,7 +2720,7 @@ public final class UI
      * @return The builder API allowing method chaining.
      */
     public static Render.Builder&lt;JList&lt;Object&gt;, Object&gt; renderListWithBorder( Supplier&lt;Border&gt; borderSupplier ) {
-<span class="nc" id="L2711">        return Render.forList(Object.class, borderSupplier).when(Object.class).as(cell-&gt;{});</span>
+<span class="nc" id="L2723">        return Render.forList(Object.class, borderSupplier).when(Object.class).as(cell-&gt;{});</span>
     }
 
     /**
@@ -2716,7 +2728,7 @@ public final class UI
      * @return The builder API allowing method chaining.
      */
     public static Render.Builder&lt;JComboBox&lt;Object&gt;, Object&gt; renderComboWithBorder( Supplier&lt;Border&gt; borderSupplier ) {
-<span class="nc" id="L2719">        return Render.forCombo(Object.class, borderSupplier).when(Object.class).as(cell-&gt;{});</span>
+<span class="nc" id="L2731">        return Render.forCombo(Object.class, borderSupplier).when(Object.class).as(cell-&gt;{});</span>
     }
 
     /**
@@ -2724,7 +2736,7 @@ public final class UI
      * @return The builder API allowing method chaining.
      */
     public static Render.Builder&lt;JTable, Object&gt; renderTableWithBorder( Border border ) {
-<span class="nc" id="L2727">        return renderTableWithBorder(()-&gt;border);</span>
+<span class="nc" id="L2739">        return renderTableWithBorder(()-&gt;border);</span>
     }
 
     /**
@@ -2732,7 +2744,7 @@ public final class UI
      * @return The builder API allowing method chaining.
      */
     public static Render.Builder&lt;JTable, Object&gt; renderTableWithBorder( Val&lt;Border&gt; border ) {
-<span class="nc" id="L2735">        return renderTableWithBorder(border::orElseThrow);</span>
+<span class="nc" id="L2747">        return renderTableWithBorder(border::orElseThrow);</span>
     }
 
     /**
@@ -2740,7 +2752,7 @@ public final class UI
      * @return The builder API allowing method chaining.
      */
     public static Render.Builder&lt;JList&lt;Object&gt;, Object&gt; renderListWithBorder( Border border ) {
-<span class="nc" id="L2743">        return renderListWithBorder(()-&gt;border);</span>
+<span class="nc" id="L2755">        return renderListWithBorder(()-&gt;border);</span>
     }
 
     /**
@@ -2748,7 +2760,7 @@ public final class UI
      * @return The builder API allowing method chaining.
      */
     public static Render.Builder&lt;JList&lt;Object&gt;, Object&gt; renderListWithBorder( Var&lt;Border&gt; border ) {
-<span class="nc" id="L2751">        return renderListWithBorder(border::orElseThrow);</span>
+<span class="nc" id="L2763">        return renderListWithBorder(border::orElseThrow);</span>
     }
 
     /**
@@ -2756,7 +2768,7 @@ public final class UI
      * @return The builder API allowing method chaining.
      */
     public static Render.Builder&lt;JComboBox&lt;Object&gt;, Object&gt; renderComboWithBorder( Border border ) {
-<span class="nc" id="L2759">        return renderComboWithBorder(()-&gt;border);</span>
+<span class="nc" id="L2771">        return renderComboWithBorder(()-&gt;border);</span>
     }
 
     /**
@@ -2764,8 +2776,8 @@ public final class UI
      * @return The builder API allowing method chaining.
      */
     public static Render.Builder&lt;JComboBox&lt;Object&gt;, Object&gt; renderComboWithBorder( Val&lt;Border&gt; border ) {
-<span class="nc" id="L2767">        NullUtil.nullPropertyCheck(border, &quot;border&quot;, &quot;Null is not a valid border.&quot;);</span>
-<span class="nc" id="L2768">        return renderComboWithBorder(border::orElseThrow);</span>
+<span class="nc" id="L2779">        NullUtil.nullPropertyCheck(border, &quot;border&quot;, &quot;Null is not a valid border.&quot;);</span>
+<span class="nc" id="L2780">        return renderComboWithBorder(border::orElseThrow);</span>
     }
 
     /**
@@ -2774,8 +2786,8 @@ public final class UI
      * @return A builder instance for the provided object, which enables fluent method chaining.
      */
     public static &lt;T extends Component&gt; UIForAnything&lt;T&gt; of( T component ) {
-<span class="nc" id="L2777">        NullUtil.nullArgCheck(component, &quot;component&quot;, Component.class);</span>
-<span class="nc" id="L2778">        return new UIForAnything&lt;&gt;(component);</span>
+<span class="nc" id="L2789">        NullUtil.nullArgCheck(component, &quot;component&quot;, Component.class);</span>
+<span class="nc" id="L2790">        return new UIForAnything&lt;&gt;(component);</span>
     }
 
     /**
@@ -2796,12 +2808,12 @@ public final class UI
      * @see #runNow
      */
     public static void run( Runnable runnable ) {
-<span class="fc" id="L2799">        NullUtil.nullArgCheck(runnable, &quot;runnable&quot;, Runnable.class);</span>
-<span class="fc bfc" id="L2800" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
-<span class="fc" id="L2801">            SwingUtilities.invokeLater(runnable);</span>
+<span class="fc" id="L2811">        NullUtil.nullArgCheck(runnable, &quot;runnable&quot;, Runnable.class);</span>
+<span class="fc bfc" id="L2812" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
+<span class="fc" id="L2813">            SwingUtilities.invokeLater(runnable);</span>
         else
-<span class="fc" id="L2803">            runnable.run();</span>
-<span class="fc" id="L2804">    }</span>
+<span class="fc" id="L2815">            runnable.run();</span>
+<span class="fc" id="L2816">    }</span>
 
     /**
      * A convenience method for {@link SwingUtilities#invokeLater(Runnable)},
@@ -2827,9 +2839,9 @@ public final class UI
      * @see #runNow
      */
     public static void runLater( Runnable runnable ) {
-<span class="fc" id="L2830">        NullUtil.nullArgCheck(runnable, &quot;runnable&quot;, Runnable.class);</span>
-<span class="fc" id="L2831">        SwingUtilities.invokeLater(runnable);</span>
-<span class="fc" id="L2832">    }</span>
+<span class="fc" id="L2842">        NullUtil.nullArgCheck(runnable, &quot;runnable&quot;, Runnable.class);</span>
+<span class="fc" id="L2843">        SwingUtilities.invokeLater(runnable);</span>
+<span class="fc" id="L2844">    }</span>
 
     /**
      * Returns true if the current thread is an AWT event dispatching thread.
@@ -2842,7 +2854,7 @@ public final class UI
      * @return true if the current thread is an AWT event dispatching thread
      */
     public static boolean thisIsUIThread() {
-<span class="fc" id="L2845">        return SwingUtilities.isEventDispatchThread();</span>
+<span class="fc" id="L2857">        return SwingUtilities.isEventDispatchThread();</span>
     }
 
     /**
@@ -2887,9 +2899,9 @@ public final class UI
      * @see #run
      */
     public static void runNow( Runnable runnable ) throws InterruptedException, InvocationTargetException {
-<span class="fc" id="L2890">        NullUtil.nullArgCheck(runnable, &quot;runnable&quot;, Runnable.class);</span>
-<span class="fc" id="L2891">        SwingUtilities.invokeAndWait(runnable);</span>
-<span class="fc" id="L2892">    }</span>
+<span class="fc" id="L2902">        NullUtil.nullArgCheck(runnable, &quot;runnable&quot;, Runnable.class);</span>
+<span class="fc" id="L2903">        SwingUtilities.invokeAndWait(runnable);</span>
+<span class="fc" id="L2904">    }</span>
 
     /**
      * A convenience method for {@link SwingUtilities#invokeAndWait(Runnable)},
@@ -2922,10 +2934,10 @@ public final class UI
      *
      */
     public static &lt;T&gt; T runAndGet( Supplier&lt;T&gt; supplier ) throws InterruptedException, InvocationTargetException {
-<span class="fc" id="L2925">        NullUtil.nullArgCheck(supplier, &quot;callable&quot;, Supplier.class);</span>
-<span class="fc" id="L2926">        T[] ref = (T[]) new Object[1];</span>
-<span class="fc" id="L2927">        runNow( () -&gt; ref[0] = supplier.get() );</span>
-<span class="fc" id="L2928">        return ref[0];</span>
+<span class="fc" id="L2937">        NullUtil.nullArgCheck(supplier, &quot;callable&quot;, Supplier.class);</span>
+<span class="fc" id="L2938">        T[] ref = (T[]) new Object[1];</span>
+<span class="fc" id="L2939">        runNow( () -&gt; ref[0] = supplier.get() );</span>
+<span class="fc" id="L2940">        return ref[0];</span>
     }
 
     /**
@@ -2939,13 +2951,13 @@ public final class UI
      * @throws InvocationTargetException if the UI thread throws an exception
      */
     public static void sync() throws InterruptedException, InvocationTargetException {
-<span class="fc" id="L2942">        runNow( () -&gt; {/*</span>
+<span class="fc" id="L2954">        runNow( () -&gt; {/*</span>
             This is a no-op, but it forces the event dispatching thread to
             process all pending events before returning.
             So when we reach this point, we know that all pending events
             have been processed.
-<span class="fc" id="L2947">        */});</span>
-<span class="fc" id="L2948">    }</span>
+<span class="fc" id="L2959">        */});</span>
+<span class="fc" id="L2960">    }</span>
 
     /**
      *  Use this to quickly create and inspect a test window for a UI component.
@@ -2955,30 +2967,30 @@ public final class UI
         private final JFrame frame;
         private final Component component;
 
-<span class="nc" id="L2958">        public TestWindow( Supplier&lt;JFrame&gt; frameSupplier,Component component ) {</span>
-<span class="nc" id="L2959">            this.frame = frameSupplier.get();</span>
-<span class="nc" id="L2960">            this.component = component;</span>
-<span class="nc" id="L2961">            frame.add(component);</span>
-<span class="nc" id="L2962">            frame.setSize(1000, 1000);</span>
-<span class="nc" id="L2963">            frame.pack(); // Otherwise some components resize strangely or are not shown at all...</span>
-<span class="nc" id="L2964">            frame.setVisible(true);</span>
-<span class="nc" id="L2965">        }</span>
+<span class="nc" id="L2970">        public TestWindow( Supplier&lt;JFrame&gt; frameSupplier,Component component ) {</span>
+<span class="nc" id="L2971">            this.frame = frameSupplier.get();</span>
+<span class="nc" id="L2972">            this.component = component;</span>
+<span class="nc" id="L2973">            frame.add(component);</span>
+<span class="nc" id="L2974">            frame.setSize(1000, 1000);</span>
+<span class="nc" id="L2975">            frame.pack(); // Otherwise some components resize strangely or are not shown at all...</span>
+<span class="nc" id="L2976">            frame.setVisible(true);</span>
+<span class="nc" id="L2977">        }</span>
 
-<span class="nc" id="L2967">        public JFrame getFrame() { return this.frame; }</span>
+<span class="nc" id="L2979">        public JFrame getFrame() { return this.frame; }</span>
 
-<span class="nc" id="L2969">        public Component getComponent() { return this.component; }</span>
+<span class="nc" id="L2981">        public Component getComponent() { return this.component; }</span>
     }
 
     /**
      *  Use this to quickly create and inspect a test window for a UI component.
      */
     public static void show( Component component ) {
-<span class="nc" id="L2976">        JFrame frame = new JFrame();</span>
-<span class="nc" id="L2977">        new UI.TestWindow( () -&gt; frame,component );</span>
+<span class="nc" id="L2988">        JFrame frame = new JFrame();</span>
+<span class="nc" id="L2989">        new UI.TestWindow( () -&gt; frame,component );</span>
         // We set the size to fit the component:
-<span class="nc" id="L2979">        frame.setSize(component.getPreferredSize());</span>
-<span class="nc" id="L2980">        frame.setVisible(true);</span>
-<span class="nc" id="L2981">        while ( true ) { UI.processEvents(); }</span>
+<span class="nc" id="L2991">        frame.setSize(component.getPreferredSize());</span>
+<span class="nc" id="L2992">        frame.setVisible(true);</span>
+<span class="nc" id="L2993">        while ( true ) { UI.processEvents(); }</span>
     }
 
 }

@@ -123,14 +123,13 @@ abstract class AbstractNestedBuilder&lt;I, C extends E, E extends Component&gt; 
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I add( List&lt;E&gt; components ) {
-<span class="fc" id="L126">        final C[] array = (C[]) new Component[components.size()];</span>
-<span class="fc bfc" id="L127" title="All 2 branches covered.">        for ( int i = 0; i &lt; array.length; i++ )</span>
-<span class="fc" id="L128">            _doAdd(UI.of((JComponent) components.get(i)), null);</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">        for ( E component : components )</span>
+<span class="fc" id="L127">            _doAdd(UI.of((JComponent) component), null);</span>
 
-<span class="fc" id="L130">        return _this();</span>
+<span class="fc" id="L129">        return _this();</span>
     }
 
-<span class="fc" id="L133">    protected final int _childCount() { return _children.size(); }</span>
+<span class="fc" id="L132">    protected final int _childCount() { return _children.size(); }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.015 seconds"
+    "duration":"0.022 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -54,7 +54,7 @@
     {
       "id":"A \"Val\" instance is immutable.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            A \"Val\" instance is immutable because it is a wrapper around a\n            value that is not intended to be changed. If the value is\n            intended to be changed, then the developer should use a \"Var\"\n            type instead.\n            The \"Val\" interface is a supertype of the \"Var\" interface, so it is\n            mainly used as a way to protect mutable properties from\n            being accidentally changed outside of the intended scope.\n            Creating a Val from its factory method \"of\" will always return\n            an immutable instance.\n        ","\n            A \"Val\" instance is immutable because it is a wrapper around a\n            value that is not intended to be changed. If the value is\n            intended to be changed, then the developer should use a \"Var\"\n            type instead.\n            The \"Val\" interface is a supertype of the \"Var\" interface, so it is\n            mainly used as a way to protect mutable properties from\n            being accidentally changed outside of the intended scope.\n            Creating a Val from its factory method \"of\" will always return\n            an immutable instance.\n        "]
       },
@@ -153,7 +153,7 @@
     {
       "id":"Swing-Tree will not allow you to model certain UI state using nullable properties.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            When you try to bind a nullable property to the state of a UI component for which\n            null does not make sense, Swing-Tree will throw an exception.\n            For example, if you try to bind a nullable property to the \"selected\" state of a\n            \"JCheckBox\", then Swing-Tree will throw an exception because a \"JCheckBox\" cannot\n            be in a \"null\" state.\n        "]
       },

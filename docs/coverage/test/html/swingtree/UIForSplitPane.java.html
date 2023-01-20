@@ -115,11 +115,13 @@ public class UIForSplitPane&lt;P extends JSplitPane&gt; extends UIForAbstractSwi
 
     private void _calculateDividerLocationFrom( double percentage ) {
 <span class="fc" id="L117">        P p = getComponent();</span>
-<span class="fc bfc" id="L118" title="All 2 branches covered.">        int loc = (int) (p.getOrientation() == JSplitPane.HORIZONTAL_SPLIT</span>
-<span class="fc" id="L119">                            ? p.getWidth() * percentage</span>
-<span class="fc" id="L120">                            : p.getHeight() * percentage);</span>
-<span class="fc" id="L121">        p.setDividerLocation(loc);</span>
-<span class="fc" id="L122">    }</span>
+        int loc = (int) (
+<span class="fc bfc" id="L119" title="All 2 branches covered.">                        p.getOrientation() == JSplitPane.HORIZONTAL_SPLIT</span>
+<span class="fc" id="L120">                            ? p.getWidth()  * percentage</span>
+<span class="fc" id="L121">                            : p.getHeight() * percentage</span>
+                    );
+<span class="fc" id="L123">        p.setDividerLocation(loc);</span>
+<span class="fc" id="L124">    }</span>
 
     /**
      * Sets the location of the divider based on a percentage value.
@@ -138,8 +140,8 @@ public class UIForSplitPane&lt;P extends JSplitPane&gt; extends UIForAbstractSwi
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSplitPane&lt;P&gt; withDivisionOf( double percentage ) {
-<span class="fc" id="L141">        _calculateDividerLocationFrom(percentage);</span>
-<span class="fc" id="L142">        return this;</span>
+<span class="fc" id="L143">        _calculateDividerLocationFrom(percentage);</span>
+<span class="fc" id="L144">        return this;</span>
     }
 
     /**
@@ -163,18 +165,18 @@ public class UIForSplitPane&lt;P extends JSplitPane&gt; extends UIForAbstractSwi
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSplitPane&lt;P&gt; withDivisionOf( Val&lt;Double&gt; percentage ) {
-<span class="fc" id="L166">        NullUtil.nullArgCheck( percentage, &quot;percentage&quot;, Val.class );</span>
-<span class="fc" id="L167">        NullUtil.nullPropertyCheck( percentage, &quot;percentage&quot;, &quot;Null is not a valid percentage.&quot; );</span>
-<span class="fc" id="L168">        _onShow( percentage, this::withDivisionOf );</span>
+<span class="fc" id="L168">        NullUtil.nullArgCheck( percentage, &quot;percentage&quot;, Val.class );</span>
+<span class="fc" id="L169">        NullUtil.nullPropertyCheck( percentage, &quot;percentage&quot;, &quot;Null is not a valid percentage.&quot; );</span>
+<span class="fc" id="L170">        _onShow( percentage, this::withDivisionOf );</span>
         // Now we need to register a listener to the split pane's size, so that we can recalculate the divider location
         // when the split pane is resized:
-<span class="fc" id="L171">        getComponent().addComponentListener(new ComponentAdapter() {</span>
+<span class="fc" id="L173">        getComponent().addComponentListener(new ComponentAdapter() {</span>
             @Override
             public void componentResized( ComponentEvent e ) {
-<span class="nc" id="L174">                _calculateDividerLocationFrom(percentage.orElseThrow());</span>
-<span class="nc" id="L175">            }</span>
+<span class="nc" id="L176">                _calculateDividerLocationFrom(percentage.orElseThrow());</span>
+<span class="nc" id="L177">            }</span>
         });
-<span class="fc" id="L177">        return this.withDivisionOf(percentage.orElseThrow());</span>
+<span class="fc" id="L179">        return this.withDivisionOf(percentage.orElseThrow());</span>
     }
 
 }
