@@ -40,6 +40,11 @@ public class AbstractVariables<T> implements Vars<T>
         return new AbstractVariables<T>( immutable, type, false, list.toArray(array) ){};
     }
 
+    static <T> Vars<T> ofNullable( boolean immutable, Class<T> type ){
+        Objects.requireNonNull(type);
+        return new AbstractVariables<T>( immutable, type, true, new Var[0] ){};
+    }
+
     static <T> Vars<T> ofNullable( boolean immutable, Class<T> type, Var<T>... vars ) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(vars);

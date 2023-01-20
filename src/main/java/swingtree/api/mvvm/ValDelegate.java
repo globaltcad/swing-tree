@@ -24,6 +24,11 @@ public interface ValDelegate<T> {
     default Val<T> getCurrent() { return current(); }
 
     /**
+     * @return The item of the current property.
+     */
+    default T getCurrentItem() { return current().get(); }
+
+    /**
      * @return The previous property.
      */
     Val<T> previous();

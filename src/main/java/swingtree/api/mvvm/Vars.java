@@ -25,6 +25,19 @@ public interface Vars<T> extends Vals<T>
     }
 
     /**
+     *  Creates an empty list of non-nullable properties from the supplied type.
+     *  This factory method requires that the type be specified because the
+     *  compiler cannot infer the type from a potentially empty vararg array.
+     *  @param type The type of the properties.
+     *              This is used to check if the item is of the correct type.
+     *  @param <T> The type of the properties.
+     *  @return A new Vars instance.
+     */
+    static <T> Vars<T> of( Class<T> type ) {
+        return AbstractVariables.of( false, type );
+    }
+
+    /**
      *  Creates a list of non-nullable properties from one or more non-nullable properties.
      *  @param first The first property to add to the new Vars instance.
      *  @param rest The remaining properties to add to the new Vars instance.
@@ -74,6 +87,19 @@ public interface Vars<T> extends Vals<T>
     @SuppressWarnings("unchecked")
     static <T> Vars<T> ofNullable( Class<T> type, Var<T>... vars ) {
         return AbstractVariables.ofNullable( false, type, vars );
+    }
+
+    /**
+     *  Creates an empty list of nullable properties from the supplied type.
+     *  This factory method requires that the type be specified because the
+     *  compiler cannot infer the type from a potentially empty vararg array.
+     *  @param type The type of the properties.
+     *              This is used to check if the item is of the correct type.
+     *  @param <T> The type of the properties.
+     *  @return A new Vars instance.
+     */
+    static <T> Vars<T> ofNullable( Class<T> type ) {
+        return AbstractVariables.ofNullable( false, type );
     }
 
     /**
