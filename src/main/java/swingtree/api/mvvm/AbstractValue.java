@@ -41,19 +41,7 @@ abstract class AbstractValue<T> implements Val<T>
 
     /** {@inheritDoc} */
     @Override
-    public final T orElseThrow() {
-        // This class is similar to optional, so if the value is null, we throw an exception!
-        if ( _value == null )
-            throw new NoSuchElementException("No value present");
-
-        return _value;
-    }
-
-    /** {@inheritDoc}*/
-    public final boolean isPresent() { return _value != null; }
-
-    /** {@inheritDoc} */
-    public final T orElseNullable( T other ) { return _value != null ? _value : other; }
+    public final T orElseNull() { return _value; }
 
     /** {@inheritDoc} */
     @Override public Val<T> onShow( Action<ValDelegate<T>> displayAction ) {

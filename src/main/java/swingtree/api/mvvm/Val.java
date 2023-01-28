@@ -80,7 +80,7 @@ public interface Val<T>
 	 *        May be {@code null}.
 	 * @return the item, if present, otherwise {@code other}
 	 */
-	T orElseNullable( T other );
+	default T orElseNullable( T other ) { return orElseNull() != null ? orElseNull() : other; }
 
 	/**
 	 * If an item is present, returns the item, otherwise returns
@@ -110,7 +110,7 @@ public interface Val<T>
 	 *
 	 * @return the item, if present, otherwise {@code null}
 	 */
-	default T orElseNull() { return orElseNullable(null); }
+	T orElseNull();
 
 	/**
 	 * If an item is present, returns the item, otherwise throws
@@ -119,14 +119,20 @@ public interface Val<T>
 	 * @return the non-{@code null} item described by this {@code Val}
 	 * @throws NoSuchElementException if no item is present
 	 */
-	T orElseThrow();
+	default T orElseThrow() {
+		// This class is similar to optional, so if the value is null, we throw an exception!
+		if ( orElseNull() == null )
+			throw new NoSuchElementException("No value present");
+
+		return orElseNull();
+	}
 
 	/**
 	 * If an item is present, returns {@code true}, otherwise {@code false}.
 	 *
 	 * @return {@code true} if an item is present, otherwise {@code false}
 	 */
-	boolean isPresent();
+	default boolean isPresent() { return orElseNull() != null; }
 
 	/**
 	 * If an item is  not present, returns {@code true}, otherwise
