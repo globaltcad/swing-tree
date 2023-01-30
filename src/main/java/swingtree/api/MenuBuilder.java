@@ -11,7 +11,7 @@ import javax.swing.*;
  * 	<p>
  * 	<b>Consider taking a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of Swing-Tree in general.</b>
- *
+ * <p>
  *
  * @param <M> The UI component type build by implementations of this.
  */

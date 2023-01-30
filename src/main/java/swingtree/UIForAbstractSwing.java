@@ -2345,13 +2345,13 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     private void _addViewableProps( Vals<? extends Viewable> viewables, String attr ) {
         _onShow( viewables, delegate -> {
             // we simply redo all the components.
-            switch ( delegate.type() ) {
+            switch ( delegate.changeType() ) {
                 case SET: _updateComponentAt(delegate.index(), delegate.newValue().get(), attr); break;
                 case ADD: _addComponentAt(delegate.index(), delegate.newValue().get(), attr); break;
                 case REMOVE: _removeComponentAt(delegate.index()); break;
                 case CLEAR: _clearComponents(); break;
                 case NONE: break;
-                default: throw new IllegalStateException("Unknown type: "+delegate.type());
+                default: throw new IllegalStateException("Unknown type: "+delegate.changeType());
             }
         });
         viewables.forEach( v -> add(v.createView(JComponent.class)) );

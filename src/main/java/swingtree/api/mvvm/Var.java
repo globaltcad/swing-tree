@@ -19,7 +19,7 @@ import java.util.function.Function;
  * 	And the following Swing-Tree UI:
  * 	<pre>{@code
  * 	    UI.textField()
- * 	    .peek( ta -> vm.getUsername().onShow( t -> ta.setText(t) ) )
+ * 	    .peek( ta -> vm.getUsername().onShowItem( t -> ta.setText(t) ) )
  * 	    .onKeyReleased( e -> vm.getUsername().act( ta.getText() ) );
  * 	}</pre>
  * 	Your view will automatically update the text field with the item of the property

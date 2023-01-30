@@ -276,7 +276,7 @@ class Properties_List_Spec extends Specification
         and : 'A list where we are going to record changes.'
             var changes = []
         and : 'Now we register a "show" listener on the "Vars" class.'
-            vars.onShow{ changes << it.type() }
+            vars.onShow{ changes << it.changeType() }
 
         when : 'We modify the property in various ways...'
             vars.addAt(1, 1)
@@ -287,7 +287,7 @@ class Properties_List_Spec extends Specification
         then : 'The "show" listener has been called four times.'
             changes.size() == 4
         and : 'The "show" listener has been called with the correct indices.'
-            changes == [Mutation.ADD, Mutation.SET, Mutation.REMOVE, Mutation.ADD]
+            changes == [Change.ADD, Change.SET, Change.REMOVE, Change.ADD]
     }
 
     def 'Lists of properties can be sorted based on their natural order through the "sort" method.'()
@@ -319,7 +319,7 @@ class Properties_List_Spec extends Specification
         and : 'A regular list where we are going to record changes.'
             var changes = []
         and : 'Now we register a "show" change listener on the properties.'
-            vars.onShow({ changes << it.type() })
+            vars.onShow({ changes << it.changeType() })
 
         when : 'We sort the list.'
             vars.sort()
@@ -327,7 +327,7 @@ class Properties_List_Spec extends Specification
         then : 'The listener has been called once.'
             changes.size() == 1
         and : 'It reports the correct type of change/mutation.'
-            changes == [Mutation.SORT]
+            changes == [Change.SORT]
     }
 
     def 'You can create a "Vars" list from a regular List of properties.'()
@@ -410,7 +410,7 @@ class Properties_List_Spec extends Specification
                                             )
         and : 'We register a listener which will record changes for us.'
             var changes = []
-            vars.onShow({ changes << it.type() })
+            vars.onShow({ changes << it.changeType() })
 
         when : 'We call the "makeDistinct" method.'
             vars.makeDistinct()
@@ -418,7 +418,7 @@ class Properties_List_Spec extends Specification
             vars.size() == 3
             vars == Vars.of(Var.of(3.1415f), Var.of(2.7182f), Var.of(1.6180f))
         and : 'The "show" listeners have been called.'
-            changes == [Mutation.DISTINCT]
+            changes == [Change.DISTINCT]
     }
 
 }

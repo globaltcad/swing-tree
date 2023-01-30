@@ -100,7 +100,7 @@ public class AbstractVariables<T> implements Vars<T>
     public Vars<T> addAt( int index, Var<T> value ) {
         if ( _isImmutable ) throw new UnsupportedOperationException("This is an immutable list.");
         _checkNullSafetyOf(value);
-        _triggerAction( Mutation.ADD, index, value, null );
+        _triggerAction( Change.ADD, index, value, null );
         _variables.add(index, value);
         return this;
     }
@@ -111,7 +111,7 @@ public class AbstractVariables<T> implements Vars<T>
         if ( _isImmutable ) throw new UnsupportedOperationException("This is an immutable list.");
         if ( index < 0 || index >= _variables.size() )
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + _variables.size());
-        _triggerAction( Mutation.REMOVE, index, null, _variables.get(index) );
+        _triggerAction( Change.REMOVE, index, null, _variables.get(index) );
         _variables.remove(index);
         return this;
     }
@@ -128,7 +128,7 @@ public class AbstractVariables<T> implements Vars<T>
         Var<T> old = _variables.get(index);
 
         if ( !old.equals(value) ) {
-            _triggerAction(Mutation.SET, index, value, at(index));
+            _triggerAction(Change.SET, index, value, at(index));
             _variables.set(index, value);
         }
         return this;
@@ -138,7 +138,7 @@ public class AbstractVariables<T> implements Vars<T>
     @Override
     public Vars<T> clear() {
         if ( _isImmutable ) throw new UnsupportedOperationException("This is an immutable list.");
-        _triggerAction( Mutation.CLEAR, -1, null, null );
+        _triggerAction( Change.CLEAR, -1, null, null );
         _variables.clear();
         return this;
     }
@@ -148,7 +148,7 @@ public class AbstractVariables<T> implements Vars<T>
     public void sort( Comparator<T> comparator ) {
         if ( _isImmutable ) throw new UnsupportedOperationException("This is an immutable list.");
         _variables.sort( ( a, b ) -> comparator.compare( a.get(), b.get() ) );
-        _triggerAction( Mutation.SORT, -1, null, null );
+        _triggerAction( Change.SORT, -1, null, null );
     }
 
     /** {@inheritDoc} */
@@ -162,7 +162,7 @@ public class AbstractVariables<T> implements Vars<T>
 
         _variables.clear();
         _variables.addAll(list);
-        _triggerAction( Mutation.DISTINCT, -1, null, null );
+        _triggerAction( Change.DISTINCT, -1, null, null );
     }
 
     /** {@inheritDoc} */
@@ -175,23 +175,23 @@ public class AbstractVariables<T> implements Vars<T>
     /** {@inheritDoc} */
     @Override
     public Vals<T> show() {
-        _triggerAction( Mutation.NONE, -1, null, null );
+        _triggerAction( Change.NONE, -1, null, null );
         return this;
     }
 
     private ValsDelegate<T> _createDelegate(
-        int index, Mutation type, Var<T> newVal, Var<T> oldVal
+            int index, Change type, Var<T> newVal, Var<T> oldVal
     ) {
         return new ValsDelegate<T>() {
             @Override public int index() { return index; }
-            @Override public Mutation type() { return type; }
+            @Override public Change changeType() { return type; }
             @Override public Val<T> newValue() { return newVal != null ? newVal : Val.ofNullable(_type, null); }
             @Override public Val<T> oldValue() { return oldVal != null ? oldVal : Val.ofNullable(_type, null); }
         };
     }
 
     private void _triggerAction(
-            Mutation type, int index, Var<T> newVal, Var<T> oldVal
+            Change type, int index, Var<T> newVal, Var<T> oldVal
     ) {
         List<Action<ValsDelegate<T>>> removableActions = new ArrayList<>();
         ValsDelegate<T> showAction = _createDelegate(index, type, newVal, oldVal);

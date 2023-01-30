@@ -333,7 +333,7 @@ public interface Vars<T> extends Vals<T>
     /**
      * Sorts the list of properties using the natural ordering of the
      * properties.
-     * Note that this method expected the the wrapped values to be
+     * Note that this method expected the wrapped values to be
      * {@link Comparable}.
      */
     default void sort() {

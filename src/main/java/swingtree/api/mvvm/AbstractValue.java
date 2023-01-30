@@ -50,7 +50,7 @@ abstract class AbstractValue<T> implements Val<T>
     }
 
     /** {@inheritDoc} */
-    @Override public Val<T> show() { _triggerActions( _viewActions); return this; }
+    @Override public Val<T> show() { _triggerActions( _viewActions ); return this; }
 
     protected void _triggerActions(
         List<Action<ValDelegate<T>>> actions

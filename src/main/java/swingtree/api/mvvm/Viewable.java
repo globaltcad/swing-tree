@@ -11,5 +11,5 @@ public interface Viewable
      * @return the view of the given type.
      * @param <V> the type of the view to provide.
      */
-    <V> V createView(Class<V> viewType);
+    <V> V createView( Class<V> viewType );
 }
