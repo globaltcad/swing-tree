@@ -14,8 +14,8 @@ import java.util.regex.Pattern;
  * 	to dynamically update UI components for you.
  * 	The API of this is very similar to the {@link Optional} API in the
  * 	sense that it is a wrapper around a single item, which may also be missing (null).
- * 	Use the {@link #onShowItem(Action)} method to register a callbacks which
- * 	will be called when the {@link #show()} method is called.
+ * 	Use the {@link #onSet(Action)} method to register a callbacks which
+ * 	will be called when the {@link #fireSet()} method is called.
  * 	<p>
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
@@ -353,7 +353,7 @@ public interface Val<T>
 	 * @param other The other property of the same type as is wrapped by this.
 	 * @return The truth value determining if the item of the supplied property is equal to the wrapped item.
 	 */
-	default boolean is(  Val<T> other ) {
+	default boolean is( Val<T> other ) {
 		Objects.requireNonNull(other);
 		return this.is( other.orElseNullable(null) );
 	}
@@ -441,41 +441,22 @@ public interface Val<T>
 	/**
 	 *  Use this to register an observer lambda which will be called whenever the item
 	 *  wrapped by this {@link Val} changes through the {@code Var::set(T)} method.
-	 *  The lambda will receive a delegate which not only exposes the current
-	 *  item of this property, but also a fixed number of previous items.
-	 *
-	 * @param displayAction The lambda which will be called whenever the item wrapped by this {@link Var} changes.
-	 * @return The {@link Val} instance itself.
-	 */
-	Val<T> onShow( Action<ValDelegate<T>> displayAction );
-
-	/**
-	 *  Use this to register an observer lambda which will be called whenever the item
-	 *  wrapped by this {@link Val} changes through the {@code Var::set(T)} method.
 	 *  The lambda will receive the current item of this property.
 	 *
 	 * @param action The lambda which will be called whenever the item wrapped by this {@link Var} changes.
 	 * @return The {@link Val} instance itself.
 	 */
-	default Val<T> onShowItem( Action<T> action ) {
-		return onShow(new Action<ValDelegate<T>>() {
-			@Override public void accept(ValDelegate<T> delegate) {
-				action.accept( delegate.current().orElseNullable(null));
-			}
-			@Override public boolean canBeRemoved() { return action.canBeRemoved(); }
-		});
-	}
+	Val<T> onSet( Action<Val<T>> action );
 
 	/**
-	 *  Triggers the observer lambdas registered through the {@link #onShowItem(Action)}
-	 *  as well as the {@link #onShow(Action)} methods.
+	 *  Triggers the observer lambdas registered through the {@link #onSet(Action)} method.
 	 *  This method is called automatically by the {@code Var::set(T)} method,
 	 *  and it is supposed to be used by the UI to update the UI components.
 	 *  This is in essence how binding works in Swing-Tree.
 	 *
 	 * @return The {@link Val} instance itself.
 	 */
-	Val<T> show();
+	Val<T> fireSet();
 
 	/**
 	 * @return If this property can contain null.

@@ -100,7 +100,7 @@ public class AbstractVariables&lt;T&gt; implements Vars&lt;T&gt;
     public Vars&lt;T&gt; addAt( int index, Var&lt;T&gt; value ) {
 <span class="fc bfc" id="L101" title="All 2 branches covered.">        if ( _isImmutable ) throw new UnsupportedOperationException(&quot;This is an immutable list.&quot;);</span>
 <span class="fc" id="L102">        _checkNullSafetyOf(value);</span>
-<span class="fc" id="L103">        _triggerAction( Mutation.ADD, index, value, null );</span>
+<span class="fc" id="L103">        _triggerAction( Change.ADD, index, value, null );</span>
 <span class="fc" id="L104">        _variables.add(index, value);</span>
 <span class="fc" id="L105">        return this;</span>
     }
@@ -111,7 +111,7 @@ public class AbstractVariables&lt;T&gt; implements Vars&lt;T&gt;
 <span class="fc bfc" id="L111" title="All 2 branches covered.">        if ( _isImmutable ) throw new UnsupportedOperationException(&quot;This is an immutable list.&quot;);</span>
 <span class="pc bpc" id="L112" title="2 of 4 branches missed.">        if ( index &lt; 0 || index &gt;= _variables.size() )</span>
 <span class="nc" id="L113">            throw new IndexOutOfBoundsException(&quot;Index: &quot; + index + &quot;, Size: &quot; + _variables.size());</span>
-<span class="fc" id="L114">        _triggerAction( Mutation.REMOVE, index, null, _variables.get(index) );</span>
+<span class="fc" id="L114">        _triggerAction( Change.REMOVE, index, null, _variables.get(index) );</span>
 <span class="fc" id="L115">        _variables.remove(index);</span>
 <span class="fc" id="L116">        return this;</span>
     }
@@ -128,7 +128,7 @@ public class AbstractVariables&lt;T&gt; implements Vars&lt;T&gt;
 <span class="fc" id="L128">        Var&lt;T&gt; old = _variables.get(index);</span>
 
 <span class="pc bpc" id="L130" title="1 of 2 branches missed.">        if ( !old.equals(value) ) {</span>
-<span class="fc" id="L131">            _triggerAction(Mutation.SET, index, value, at(index));</span>
+<span class="fc" id="L131">            _triggerAction(Change.SET, index, value, at(index));</span>
 <span class="fc" id="L132">            _variables.set(index, value);</span>
         }
 <span class="fc" id="L134">        return this;</span>
@@ -138,7 +138,7 @@ public class AbstractVariables&lt;T&gt; implements Vars&lt;T&gt;
     @Override
     public Vars&lt;T&gt; clear() {
 <span class="fc bfc" id="L140" title="All 2 branches covered.">        if ( _isImmutable ) throw new UnsupportedOperationException(&quot;This is an immutable list.&quot;);</span>
-<span class="fc" id="L141">        _triggerAction( Mutation.CLEAR, -1, null, null );</span>
+<span class="fc" id="L141">        _triggerAction( Change.CLEAR, -1, null, null );</span>
 <span class="fc" id="L142">        _variables.clear();</span>
 <span class="fc" id="L143">        return this;</span>
     }
@@ -148,7 +148,7 @@ public class AbstractVariables&lt;T&gt; implements Vars&lt;T&gt;
     public void sort( Comparator&lt;T&gt; comparator ) {
 <span class="fc bfc" id="L149" title="All 2 branches covered.">        if ( _isImmutable ) throw new UnsupportedOperationException(&quot;This is an immutable list.&quot;);</span>
 <span class="fc" id="L150">        _variables.sort( ( a, b ) -&gt; comparator.compare( a.get(), b.get() ) );</span>
-<span class="fc" id="L151">        _triggerAction( Mutation.SORT, -1, null, null );</span>
+<span class="fc" id="L151">        _triggerAction( Change.SORT, -1, null, null );</span>
 <span class="fc" id="L152">    }</span>
 
     /** {@inheritDoc} */
@@ -162,36 +162,36 @@ public class AbstractVariables&lt;T&gt; implements Vars&lt;T&gt;
 
 <span class="fc" id="L163">        _variables.clear();</span>
 <span class="fc" id="L164">        _variables.addAll(list);</span>
-<span class="fc" id="L165">        _triggerAction( Mutation.DISTINCT, -1, null, null );</span>
+<span class="fc" id="L165">        _triggerAction( Change.DISTINCT, -1, null, null );</span>
 <span class="fc" id="L166">    }</span>
 
     /** {@inheritDoc} */
     @Override
-    public Vals&lt;T&gt; onShow( Action&lt;ValsDelegate&lt;T&gt;&gt; action ) {
+    public Vals&lt;T&gt; onChange( Action&lt;ValsDelegate&lt;T&gt;&gt; action ) {
 <span class="fc" id="L171">        _viewActions.add(action);</span>
 <span class="fc" id="L172">        return this;</span>
     }
 
     /** {@inheritDoc} */
     @Override
-    public Vals&lt;T&gt; show() {
-<span class="nc" id="L178">        _triggerAction( Mutation.NONE, -1, null, null );</span>
+    public Vals&lt;T&gt; fireChange() {
+<span class="nc" id="L178">        _triggerAction( Change.NONE, -1, null, null );</span>
 <span class="nc" id="L179">        return this;</span>
     }
 
     private ValsDelegate&lt;T&gt; _createDelegate(
-        int index, Mutation type, Var&lt;T&gt; newVal, Var&lt;T&gt; oldVal
+            int index, Change type, Var&lt;T&gt; newVal, Var&lt;T&gt; oldVal
     ) {
 <span class="fc" id="L185">        return new ValsDelegate&lt;T&gt;() {</span>
 <span class="fc" id="L186">            @Override public int index() { return index; }</span>
-<span class="fc" id="L187">            @Override public Mutation type() { return type; }</span>
+<span class="fc" id="L187">            @Override public Change changeType() { return type; }</span>
 <span class="pc bpc" id="L188" title="1 of 2 branches missed.">            @Override public Val&lt;T&gt; newValue() { return newVal != null ? newVal : Val.ofNullable(_type, null); }</span>
 <span class="nc bnc" id="L189" title="All 2 branches missed.">            @Override public Val&lt;T&gt; oldValue() { return oldVal != null ? oldVal : Val.ofNullable(_type, null); }</span>
         };
     }
 
     private void _triggerAction(
-            Mutation type, int index, Var&lt;T&gt; newVal, Var&lt;T&gt; oldVal
+            Change type, int index, Var&lt;T&gt; newVal, Var&lt;T&gt; oldVal
     ) {
 <span class="fc" id="L196">        List&lt;Action&lt;ValsDelegate&lt;T&gt;&gt;&gt; removableActions = new ArrayList&lt;&gt;();</span>
 <span class="fc" id="L197">        ValsDelegate&lt;T&gt; showAction = _createDelegate(index, type, newVal, oldVal);</span>

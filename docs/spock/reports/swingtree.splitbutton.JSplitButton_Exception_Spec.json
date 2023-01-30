@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.008 seconds"
+    "duration":"0.013 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"A JSplitButton does not accept null actions.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Here you can see that Swing-Tree tries to be as null-safe as possible.\n            Because a 'null-action' is an undefined state, which may mean\n            different things to different developers, so it is not allowed.\n        "]
       },
@@ -74,7 +74,7 @@
     {
       "id":"Split button items do not take null as an answer.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

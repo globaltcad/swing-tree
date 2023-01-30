@@ -39,7 +39,7 @@
     {
       "id":"Simple integer properties can be bound to the width or height of components.",
       "result":"PASS",
-      "duration":"0.006 seconds",
+      "duration":"0.007 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -108,7 +108,7 @@
     {
       "id":"We can bind to the text of a component.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -131,7 +131,7 @@
     {
       "id":"We can enable and disable a UI component dynamically through property binding.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -177,7 +177,7 @@
     {
       "id":"Enable or disable the split items of a JSplitButton through properties.",
       "result":"PASS",
-      "duration":"0.009 seconds",
+      "duration":"0.011 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -200,7 +200,7 @@
     {
       "id":"The visibility of a UI component can be modelled dynamically using boolean properties.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"0.006 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -254,7 +254,7 @@
     {
       "id":"Minimum as well as maximum height of UI components can be modelled using integer properties.",
       "result":"PASS",
-      "duration":"0.006 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -281,7 +281,7 @@
     {
       "id":"The width and height of UI components can be modelled using integer properties.",
       "result":"PASS",
-      "duration":"0.007 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

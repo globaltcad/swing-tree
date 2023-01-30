@@ -39,7 +39,7 @@ public class UIForRadioButton&lt;R extends JRadioButton&gt; extends UIForAbstrac
         // can be updated to reflect the new selection state.
 <span class="nc" id="L40">        _onChange( event -&gt; {</span>
 <span class="nc bnc" id="L41" title="All 2 branches missed.">            if ( component.isSelected() )</span>
-<span class="nc" id="L42">                selection.act( state ).show();</span>
+<span class="nc" id="L42">                selection.act( state ).fireSet();</span>
 <span class="nc" id="L43">        });</span>
 
 <span class="nc" id="L45">        return this;</span>

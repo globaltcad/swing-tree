@@ -19,7 +19,7 @@ import java.util.function.Function;
  * 	And the following Swing-Tree UI:
  * 	<pre>{@code
  * 	    UI.textField()
- * 	    .peek( ta -> vm.getUsername().onShowItem( t -> ta.setText(t) ) )
+ * 	    .peek( ta -> vm.getUsername().onSetItem( t -> ta.setText(t) ) )
  * 	    .onKeyReleased( e -> vm.getUsername().act( ta.getText() ) );
  * 	}</pre>
  * 	Your view will automatically update the text field with the item of the property
@@ -27,7 +27,7 @@ import java.util.function.Function;
  * 	to be shown in the UI:
  * 	<pre>{@code
  * 	    // Initially empty username:
- * 		username.set( "" ).show();
+ * 		username.set( "" ) // triggers 'fireSet()';
  * 	}</pre>
  * 	<p>
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
@@ -117,10 +117,10 @@ public interface Var<T> extends Val<T>
 	 *  the {@code Var::act(T)} method, or simply when it is explicitly
 	 *  triggered by the {@code Var::act(T)} method.
 	 *
-	 * @param action The action to be triggered when {@code Var::act()} or {@code Var::act(T)} is called.
+	 * @param action The action to be triggered when {@code Var::act(T)} or {@code Var::fireAct()} is called.
 	 * @return This very property instance, in order to enable method chaining.
 	 */
-	Var<T> onAct( Action<ValDelegate<T>> action );
+	Var<T> onAct( Action<Val<T>> action );
 
 	/**
 	 *  Triggers the action associated with this property, if one was
@@ -131,11 +131,12 @@ public interface Var<T> extends Val<T>
 	 *
 	 * @return This very wrapper instance, in order to enable method chaining.
 	 */
-	Var<T> act();
+	Var<T> fireAct();
 
 	/**
 	 *  Updates the state of this property and then, if the state has changed,
-	 *  trigger its action using the {@link #act()} method. <br>
+	 *  trigger its action using the {@link #fireAct()} method but not the {@link #fireSet()}.
+	 *  <br>
 	 *  This method is intended to be used in the UI.
 	 *  If you want to modify the state of the property from the view model,
 	 *  as part of your business logic, you should use the {@code Var::set(T)} method instead.

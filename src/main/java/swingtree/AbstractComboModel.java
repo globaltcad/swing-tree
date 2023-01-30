@@ -41,7 +41,7 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 	abstract AbstractComboModel<E> withVar( Var<E> newVar );
 
 	@Override public void setSelectedItem( Object anItem ) {
-		_selectedItem.act((E) anItem).show();
+		_selectedItem.act((E) anItem).fireSet();
 		_selectedIndex = _indexOf(anItem);
 	}
 	@Override public Object getSelectedItem() { return _selectedItem.orElseNull(); }
@@ -57,7 +57,7 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 				boolean stateChanged = _selectedItem.orElseNull() != e;
 				_selectedItem.act(e);
 				if ( stateChanged )
-					UI.runLater(_selectedItem::show);
+					UI.runLater(_selectedItem::fireSet);
 					/*
 						We run the "show" method later in case this method was triggered
 						by the combo editor which would cause an invalid feedback modification

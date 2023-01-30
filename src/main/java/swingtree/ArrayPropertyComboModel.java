@@ -31,7 +31,7 @@ class ArrayPropertyComboModel<E> extends AbstractComboModel<E>
 		if ( _mutable )
 			_items.ifPresent(i -> {
 				i[index] = element;
-				if ( _items instanceof Var ) ((Var<E>) _items).act();
+				if ( _items instanceof Var ) ((Var<E>) _items).fireAct();
 			});
 	}
 	@Override public int getSize() { return _items.mapTo(Integer.class, i -> i.length ).orElse(0); }

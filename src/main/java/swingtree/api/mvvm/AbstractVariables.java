@@ -167,14 +167,14 @@ public class AbstractVariables<T> implements Vars<T>
 
     /** {@inheritDoc} */
     @Override
-    public Vals<T> onShow( Action<ValsDelegate<T>> action ) {
+    public Vals<T> onChange( Action<ValsDelegate<T>> action ) {
         _viewActions.add(action);
         return this;
     }
 
     /** {@inheritDoc} */
     @Override
-    public Vals<T> show() {
+    public Vals<T> fireChange() {
         _triggerAction( Change.NONE, -1, null, null );
         return this;
     }

@@ -14,8 +14,8 @@ import java.util.regex.Pattern;
  * 	to dynamically update UI components for you.
  * 	The API of this is very similar to the {@link Optional} API in the
  * 	sense that it is a wrapper around a single item, which may also be missing (null).
- * 	Use the {@link #onShowItem(Action)} method to register a callbacks which
- * 	will be called when the {@link #show()} method is called.
+ * 	Use the {@link #onSet(Action)} method to register a callbacks which
+ * 	will be called when the {@link #fireSet()} method is called.
  * 	&lt;p&gt;
  * 	&lt;b&gt;Please take a look at the &lt;a href=&quot;https://globaltcad.github.io/swing-tree/&quot;&gt;living swing-tree documentation&lt;/a&gt;
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.&lt;/b&gt;
@@ -80,7 +80,7 @@ public interface Val&lt;T&gt;
 	 *        May be {@code null}.
 	 * @return the item, if present, otherwise {@code other}
 	 */
-	T orElseNullable( T other );
+<span class="fc bfc" id="L83" title="All 2 branches covered.">	default T orElseNullable( T other ) { return orElseNull() != null ? orElseNull() : other; }</span>
 
 	/**
 	 * If an item is present, returns the item, otherwise returns
@@ -110,7 +110,7 @@ public interface Val&lt;T&gt;
 	 *
 	 * @return the item, if present, otherwise {@code null}
 	 */
-<span class="fc" id="L113">	default T orElseNull() { return orElseNullable(null); }</span>
+	T orElseNull();
 
 	/**
 	 * If an item is present, returns the item, otherwise throws
@@ -119,14 +119,20 @@ public interface Val&lt;T&gt;
 	 * @return the non-{@code null} item described by this {@code Val}
 	 * @throws NoSuchElementException if no item is present
 	 */
-	T orElseThrow();
+	default T orElseThrow() {
+		// This class is similar to optional, so if the value is null, we throw an exception!
+<span class="fc bfc" id="L124" title="All 2 branches covered.">		if ( orElseNull() == null )</span>
+<span class="fc" id="L125">			throw new NoSuchElementException(&quot;No value present&quot;);</span>
+
+<span class="fc" id="L127">		return orElseNull();</span>
+	}
 
 	/**
 	 * If an item is present, returns {@code true}, otherwise {@code false}.
 	 *
 	 * @return {@code true} if an item is present, otherwise {@code false}
 	 */
-	boolean isPresent();
+<span class="fc bfc" id="L135" title="All 2 branches covered.">	default boolean isPresent() { return orElseNull() != null; }</span>
 
 	/**
 	 * If an item is  not present, returns {@code true}, otherwise
@@ -134,7 +140,7 @@ public interface Val&lt;T&gt;
 	 *
 	 * @return  {@code true} if an item is not present, otherwise {@code false}
 	 */
-<span class="fc bfc" id="L137" title="All 2 branches covered.">	default boolean isEmpty() { return !isPresent(); }</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">	default boolean isEmpty() { return !isPresent(); }</span>
 
 	/**
 	 * If an item is present, performs the given action with the item,
@@ -145,9 +151,9 @@ public interface Val&lt;T&gt;
 	 *         {@code null}
 	 */
 	default void ifPresent( Consumer&lt;T&gt; action ) {
-<span class="pc bpc" id="L148" title="1 of 2 branches missed.">		if ( this.isPresent() )</span>
-<span class="fc" id="L149">			action.accept( orElseThrow() );</span>
-<span class="fc" id="L150">	}</span>
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">		if ( this.isPresent() )</span>
+<span class="fc" id="L155">			action.accept( orElseThrow() );</span>
+<span class="fc" id="L156">	}</span>
 
 	/**
 	 * If an item is present, performs the given action with the item,
@@ -161,11 +167,11 @@ public interface Val&lt;T&gt;
 	 *         action is {@code null}.
 	 */
 	default void ifPresentOrElse( Consumer&lt;? super T&gt; action, Runnable emptyAction ) {
-<span class="nc bnc" id="L164" title="All 2 branches missed.">		if ( isPresent() )</span>
-<span class="nc" id="L165">			action.accept(orElseThrow());</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">		if ( isPresent() )</span>
+<span class="nc" id="L171">			action.accept(orElseThrow());</span>
 		else
-<span class="nc" id="L167">			emptyAction.run();</span>
-<span class="nc" id="L168">	}</span>
+<span class="nc" id="L173">			emptyAction.run();</span>
+<span class="nc" id="L174">	}</span>
 
 	/**
 	 * If an item is present, returns a {@code Val} describing the item,
@@ -180,12 +186,12 @@ public interface Val&lt;T&gt;
 	 *         produces a {@code null} result
 	 */
 	default Val&lt;T&gt; or( Supplier&lt;? extends Val&lt;? extends T&gt;&gt; supplier ) {
-<span class="nc" id="L183">		Objects.requireNonNull(supplier);</span>
-<span class="nc bnc" id="L184" title="All 2 branches missed.">		if ( isPresent() ) return this;</span>
+<span class="nc" id="L189">		Objects.requireNonNull(supplier);</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">		if ( isPresent() ) return this;</span>
 		else {
 			@SuppressWarnings(&quot;unchecked&quot;)
-<span class="nc" id="L187">			Val&lt;T&gt; r = (Val&lt;T&gt;) supplier.get();</span>
-<span class="nc" id="L188">			return Objects.requireNonNull(r);</span>
+<span class="nc" id="L193">			Val&lt;T&gt; r = (Val&lt;T&gt;) supplier.get();</span>
+<span class="nc" id="L194">			return Objects.requireNonNull(r);</span>
 		}
 	}
 
@@ -224,7 +230,7 @@ public interface Val&lt;T&gt;
 	 * @param mapper the mapping function to apply to an item, if present
 	 * @return A property that is a live view of this property based on the provided mapping function.
 	 */
-<span class="fc" id="L227">	default Val &lt;T&gt; view( java.util.function.Function&lt;T, T&gt; mapper ) { return viewAs( type(), mapper ); }</span>
+<span class="fc" id="L233">	default Val &lt;T&gt; view( java.util.function.Function&lt;T, T&gt; mapper ) { return viewAs( type(), mapper ); }</span>
 
 	/**
 	 * 	Use this to create a String based live view of this property
@@ -233,7 +239,7 @@ public interface Val&lt;T&gt;
 	 * @return A property that is a live view of this property based on the provided mapping function.
 	 */
 	default Val&lt;String&gt; viewAsString( Function&lt;T, String&gt; mapper ) {
-<span class="nc" id="L236">		return viewAs( String.class, mapper );</span>
+<span class="nc" id="L242">		return viewAs( String.class, mapper );</span>
 	}
 
 	/**
@@ -242,7 +248,7 @@ public interface Val&lt;T&gt;
 	 *
 	 * @return A String property that is a live view of this property.
 	 */
-<span class="nc" id="L245">	default Val&lt;String&gt; viewAsString() { return viewAsString( Objects::toString ); }</span>
+<span class="nc" id="L251">	default Val&lt;String&gt; viewAsString() { return viewAsString( Objects::toString ); }</span>
 
 	/**
 	 * 	Use this to create a Double based live view of this property
@@ -252,11 +258,11 @@ public interface Val&lt;T&gt;
 	 * @return A property that is a live view of this property based on the provided mapping function.
 	 */
 	default Val&lt;Double&gt; viewAsDouble( java.util.function.Function&lt;T, Double&gt; mapper ) {
-<span class="fc" id="L255">		return viewAs( Double.class, v -&gt; {</span>
+<span class="fc" id="L261">		return viewAs( Double.class, v -&gt; {</span>
 			try {
-<span class="fc" id="L257">				return mapper.apply(v);</span>
-<span class="nc" id="L258">			} catch (Exception e) {</span>
-<span class="nc" id="L259">				return Double.NaN;</span>
+<span class="fc" id="L263">				return mapper.apply(v);</span>
+<span class="nc" id="L264">			} catch (Exception e) {</span>
+<span class="nc" id="L265">				return Double.NaN;</span>
 			}
 		});
 	}
@@ -269,11 +275,11 @@ public interface Val&lt;T&gt;
 	 * @return A Double property that is a live view of this property.
 	 */
 	default Val&lt;Double&gt; viewAsDouble() {
-<span class="nc" id="L272">		return viewAsDouble( v -&gt; {</span>
+<span class="nc" id="L278">		return viewAsDouble( v -&gt; {</span>
 			try {
-<span class="nc" id="L274">				return Double.parseDouble( v.toString() );</span>
-<span class="nc" id="L275">			} catch ( NumberFormatException e ) {</span>
-<span class="nc" id="L276">				return Double.NaN;</span>
+<span class="nc" id="L280">				return Double.parseDouble( v.toString() );</span>
+<span class="nc" id="L281">			} catch ( NumberFormatException e ) {</span>
+<span class="nc" id="L282">				return Double.NaN;</span>
 			}
 		});
 	}
@@ -286,11 +292,11 @@ public interface Val&lt;T&gt;
 	 * @return A property that is a live view of this property based on the provided mapping function.
 	 */
 	default Val&lt;Integer&gt; viewAsInt( java.util.function.Function&lt;T, Integer&gt; mapper ) {
-<span class="fc" id="L289">		return viewAs( Integer.class, v -&gt; {</span>
+<span class="fc" id="L295">		return viewAs( Integer.class, v -&gt; {</span>
 			try {
-<span class="fc" id="L291">				return mapper.apply(v);</span>
-<span class="nc" id="L292">			} catch (Exception e) {</span>
-<span class="nc" id="L293">				return Integer.MIN_VALUE;</span>
+<span class="fc" id="L297">				return mapper.apply(v);</span>
+<span class="nc" id="L298">			} catch (Exception e) {</span>
+<span class="nc" id="L299">				return Integer.MIN_VALUE;</span>
 			}
 		});
 	}
@@ -303,11 +309,11 @@ public interface Val&lt;T&gt;
 	 * @return An Integer property that is a live view of this property.
 	 */
 	default Val&lt;Integer&gt; viewAsInt() {
-<span class="nc" id="L306">		return viewAsInt( v -&gt; {</span>
+<span class="nc" id="L312">		return viewAsInt( v -&gt; {</span>
 			try {
-<span class="nc" id="L308">				return Integer.parseInt( v.toString() );</span>
-<span class="nc" id="L309">			} catch ( NumberFormatException e ) {</span>
-<span class="nc" id="L310">				return Integer.MIN_VALUE;</span>
+<span class="nc" id="L314">				return Integer.parseInt( v.toString() );</span>
+<span class="nc" id="L315">			} catch ( NumberFormatException e ) {</span>
+<span class="nc" id="L316">				return Integer.MIN_VALUE;</span>
 			}
 		});
 	}
@@ -319,7 +325,7 @@ public interface Val&lt;T&gt;
 	 *
 	 * @return The {@link String} representation of the item wrapped by an implementation of this interface.
 	 */
-<span class="nc" id="L322">	default String itemAsString() { return this.mapTo(String.class, String::valueOf).orElseNullable(EMPTY); }</span>
+<span class="nc" id="L328">	default String itemAsString() { return this.mapTo(String.class, String::valueOf).orElseNullable(EMPTY); }</span>
 
 	/**
 	 *  This method returns a {@link String} representation of the type of the wrapped item.
@@ -327,7 +333,7 @@ public interface Val&lt;T&gt;
 	 *
 	 * @return A simple {@link String} representation of the type of the item wrapped by an implementation of this interface.
 	 */
-<span class="nc" id="L330">	default String typeAsString() { return this.type().getName(); }</span>
+<span class="nc" id="L336">	default String typeAsString() { return this.type().getName(); }</span>
 
 	/**
 	 *  This method check if the provided item is equal to the item wrapped by this {@link Var} instance.
@@ -336,8 +342,8 @@ public interface Val&lt;T&gt;
 	 * @return The truth value determining if the provided item is equal to the wrapped item.
 	 */
 	default boolean is( T otherItem ) {
-<span class="fc" id="L339">		T current = this.orElseNullable(null);</span>
-<span class="fc" id="L340">		return equals(current, otherItem);</span>
+<span class="fc" id="L345">		T current = this.orElseNullable(null);</span>
+<span class="fc" id="L346">		return equals(current, otherItem);</span>
 	}
 
 	/**
@@ -347,9 +353,9 @@ public interface Val&lt;T&gt;
 	 * @param other The other property of the same type as is wrapped by this.
 	 * @return The truth value determining if the item of the supplied property is equal to the wrapped item.
 	 */
-	default boolean is(  Val&lt;T&gt; other ) {
-<span class="nc" id="L351">		Objects.requireNonNull(other);</span>
-<span class="nc" id="L352">		return this.is( other.orElseNullable(null) );</span>
+	default boolean is( Val&lt;T&gt; other ) {
+<span class="nc" id="L357">		Objects.requireNonNull(other);</span>
+<span class="nc" id="L358">		return this.is( other.orElseNullable(null) );</span>
 	}
 
 	/**
@@ -359,7 +365,7 @@ public interface Val&lt;T&gt;
 	 * @param otherItem The other item of the same type as is wrapped by this.
 	 * @return The truth value determining if the provided item is not equal to the wrapped item.
 	 */
-<span class="fc bfc" id="L362" title="All 2 branches covered.">	default boolean isNot( T otherItem ) { return !this.is(otherItem); }</span>
+<span class="fc bfc" id="L368" title="All 2 branches covered.">	default boolean isNot( T otherItem ) { return !this.is(otherItem); }</span>
 
 	/**
 	 *  This method check if the item of the provided property
@@ -369,7 +375,7 @@ public interface Val&lt;T&gt;
 	 * @param other The other property of the same type as is wrapped by this.
 	 * @return The truth value determining if the item of the supplied property is not equal to the wrapped item.
 	 */
-<span class="nc bnc" id="L372" title="All 2 branches missed.">	default boolean isNot( Val&lt;T&gt; other ) { return !this.is(other); }</span>
+<span class="nc bnc" id="L378" title="All 2 branches missed.">	default boolean isNot( Val&lt;T&gt; other ) { return !this.is(other); }</span>
 
 	/**
 	 *  This method check if at least one of the provided items is equal to
@@ -381,11 +387,11 @@ public interface Val&lt;T&gt;
 	 * @return The truth value determining if the provided item is equal to the wrapped item.
 	 */
 	default boolean isOneOf( T first, T second, T... otherValues ) {
-<span class="fc bfc" id="L384" title="All 2 branches covered.">		if ( this.is(first) ) return true;</span>
-<span class="pc bpc" id="L385" title="1 of 2 branches missed.">		if ( this.is(second) ) return true;</span>
-<span class="pc bpc" id="L386" title="1 of 2 branches missed.">		for ( T otherValue : otherValues )</span>
-<span class="nc bnc" id="L387" title="All 2 branches missed.">			if ( this.is(otherValue) ) return true;</span>
-<span class="fc" id="L388">		return false;</span>
+<span class="fc bfc" id="L390" title="All 2 branches covered.">		if ( this.is(first) ) return true;</span>
+<span class="pc bpc" id="L391" title="1 of 2 branches missed.">		if ( this.is(second) ) return true;</span>
+<span class="pc bpc" id="L392" title="1 of 2 branches missed.">		for ( T otherValue : otherValues )</span>
+<span class="nc bnc" id="L393" title="All 2 branches missed.">			if ( this.is(otherValue) ) return true;</span>
+<span class="fc" id="L394">		return false;</span>
 	}
 
 	/**
@@ -410,12 +416,12 @@ public interface Val&lt;T&gt;
 	/**
 	 * @return True when this property has not been assigned an id.
 	 */
-<span class="pc bpc" id="L413" title="1 of 2 branches missed.">	default boolean hasNoID() { return !hasID(); }</span>
+<span class="pc bpc" id="L419" title="1 of 2 branches missed.">	default boolean hasNoID() { return !hasID(); }</span>
 
 	/**
 	 * @return The truth value determining if this property has been assigned an id.
 	 */
-<span class="pc bpc" id="L418" title="1 of 2 branches missed.">	default boolean hasID() { return !NO_ID.equals(id()); }</span>
+<span class="pc bpc" id="L424" title="1 of 2 branches missed.">	default boolean hasID() { return !NO_ID.equals(id()); }</span>
 
 	/**
 	 *  This returns the type of the item wrapped by this {@link Var}
@@ -430,18 +436,7 @@ public interface Val&lt;T&gt;
 	 *  interact with the item wrapped by this {@link Val} in a more functional way.
 	 * @return An {@link Optional} wrapping the item wrapped by this {@link Val}.
 	 */
-<span class="fc" id="L433">	default Optional&lt;T&gt; toOptional() { return Optional.ofNullable(this.orElseNull()); }</span>
-
-	/**
-	 *  Use this to register an observer lambda which will be called whenever the item
-	 *  wrapped by this {@link Val} changes through the {@code Var::set(T)} method.
-	 *  The lambda will receive a delegate which not only exposes the current
-	 *  item of this property, but also a fixed number of previous items.
-	 *
-	 * @param displayAction The lambda which will be called whenever the item wrapped by this {@link Var} changes.
-	 * @return The {@link Val} instance itself.
-	 */
-	Val&lt;T&gt; onShow( Action&lt;ValDelegate&lt;T&gt;&gt; displayAction );
+<span class="fc" id="L439">	default Optional&lt;T&gt; toOptional() { return Optional.ofNullable(this.orElseNull()); }</span>
 
 	/**
 	 *  Use this to register an observer lambda which will be called whenever the item
@@ -451,25 +446,17 @@ public interface Val&lt;T&gt;
 	 * @param action The lambda which will be called whenever the item wrapped by this {@link Var} changes.
 	 * @return The {@link Val} instance itself.
 	 */
-	default Val&lt;T&gt; onShowItem( Action&lt;T&gt; action ) {
-<span class="fc" id="L455">		return onShow(new Action&lt;ValDelegate&lt;T&gt;&gt;() {</span>
-			@Override public void accept(ValDelegate&lt;T&gt; delegate) {
-<span class="fc" id="L457">				action.accept( delegate.current().orElseNullable(null));</span>
-<span class="fc" id="L458">			}</span>
-<span class="fc" id="L459">			@Override public boolean canBeRemoved() { return action.canBeRemoved(); }</span>
-		});
-	}
+	Val&lt;T&gt; onSet( Action&lt;Val&lt;T&gt;&gt; action );
 
 	/**
-	 *  Triggers the observer lambdas registered through the {@link #onShowItem(Action)}
-	 *  as well as the {@link #onShow(Action)} methods.
+	 *  Triggers the observer lambdas registered through the {@link #onSet(Action)} method.
 	 *  This method is called automatically by the {@code Var::set(T)} method,
 	 *  and it is supposed to be used by the UI to update the UI components.
 	 *  This is in essence how binding works in Swing-Tree.
 	 *
 	 * @return The {@link Val} instance itself.
 	 */
-	Val&lt;T&gt; show();
+	Val&lt;T&gt; fireSet();
 
 	/**
 	 * @return If this property can contain null.
@@ -492,16 +479,16 @@ public interface Val&lt;T&gt;
 	 * @return The truth value determining if the objects are equal in terms of their state!
 	 */
 	static boolean equals( Object o1, Object o2 ) {
-<span class="pc bpc" id="L495" title="1 of 2 branches missed.">		if ( o1 instanceof float[]   ) return Arrays.equals( (float[] )  o1, (float[] )  o2 );</span>
-<span class="fc bfc" id="L496" title="All 2 branches covered.">		if ( o1 instanceof int[]     ) return Arrays.equals( (int[]   )  o1, (int[]   )  o2 );</span>
-<span class="pc bpc" id="L497" title="1 of 2 branches missed.">		if ( o1 instanceof char[]    ) return Arrays.equals( (char[]  )  o1, (char[]  )  o2 );</span>
-<span class="pc bpc" id="L498" title="1 of 2 branches missed.">		if ( o1 instanceof double[]  ) return Arrays.equals( (double[])  o1, (double[])  o2 );</span>
-<span class="pc bpc" id="L499" title="1 of 2 branches missed.">		if ( o1 instanceof long[]    ) return Arrays.equals( (long[]  )  o1, (long[]  )  o2 );</span>
-<span class="pc bpc" id="L500" title="1 of 2 branches missed.">		if ( o1 instanceof byte[]    ) return Arrays.equals( (byte[]  )  o1, (byte[]  )  o2 );</span>
-<span class="pc bpc" id="L501" title="1 of 2 branches missed.">		if ( o1 instanceof short[]   ) return Arrays.equals( (short[] )  o1, (short[] )  o2 );</span>
-<span class="pc bpc" id="L502" title="1 of 2 branches missed.">		if ( o1 instanceof boolean[] ) return Arrays.equals( (boolean[]) o1, (boolean[]) o2 );</span>
-<span class="pc bpc" id="L503" title="1 of 2 branches missed.">		if ( o1 instanceof Object[]  ) return Arrays.equals( (Object[])  o1, (Object[])  o2 );</span>
-<span class="fc" id="L504">		return Objects.equals( o1, o2 );</span>
+<span class="pc bpc" id="L482" title="1 of 2 branches missed.">		if ( o1 instanceof float[]   ) return Arrays.equals( (float[] )  o1, (float[] )  o2 );</span>
+<span class="fc bfc" id="L483" title="All 2 branches covered.">		if ( o1 instanceof int[]     ) return Arrays.equals( (int[]   )  o1, (int[]   )  o2 );</span>
+<span class="pc bpc" id="L484" title="1 of 2 branches missed.">		if ( o1 instanceof char[]    ) return Arrays.equals( (char[]  )  o1, (char[]  )  o2 );</span>
+<span class="pc bpc" id="L485" title="1 of 2 branches missed.">		if ( o1 instanceof double[]  ) return Arrays.equals( (double[])  o1, (double[])  o2 );</span>
+<span class="pc bpc" id="L486" title="1 of 2 branches missed.">		if ( o1 instanceof long[]    ) return Arrays.equals( (long[]  )  o1, (long[]  )  o2 );</span>
+<span class="pc bpc" id="L487" title="1 of 2 branches missed.">		if ( o1 instanceof byte[]    ) return Arrays.equals( (byte[]  )  o1, (byte[]  )  o2 );</span>
+<span class="pc bpc" id="L488" title="1 of 2 branches missed.">		if ( o1 instanceof short[]   ) return Arrays.equals( (short[] )  o1, (short[] )  o2 );</span>
+<span class="pc bpc" id="L489" title="1 of 2 branches missed.">		if ( o1 instanceof boolean[] ) return Arrays.equals( (boolean[]) o1, (boolean[]) o2 );</span>
+<span class="pc bpc" id="L490" title="1 of 2 branches missed.">		if ( o1 instanceof Object[]  ) return Arrays.equals( (Object[])  o1, (Object[])  o2 );</span>
+<span class="fc" id="L491">		return Objects.equals( o1, o2 );</span>
 	}
 
 	/**
@@ -515,16 +502,16 @@ public interface Val&lt;T&gt;
 	 * @return The hash code of the object.
 	 */
 	static int hashCode( Object o ) {
-<span class="pc bpc" id="L518" title="1 of 2 branches missed.">		if ( o instanceof float[]   ) return Arrays.hashCode( (float[] )  o );</span>
-<span class="fc bfc" id="L519" title="All 2 branches covered.">		if ( o instanceof int[]     ) return Arrays.hashCode( (int[]   )  o );</span>
-<span class="pc bpc" id="L520" title="1 of 2 branches missed.">		if ( o instanceof char[]    ) return Arrays.hashCode( (char[]  )  o );</span>
-<span class="pc bpc" id="L521" title="1 of 2 branches missed.">		if ( o instanceof double[]  ) return Arrays.hashCode( (double[])  o );</span>
-<span class="pc bpc" id="L522" title="1 of 2 branches missed.">		if ( o instanceof long[]    ) return Arrays.hashCode( (long[]  )  o );</span>
-<span class="pc bpc" id="L523" title="1 of 2 branches missed.">		if ( o instanceof byte[]    ) return Arrays.hashCode( (byte[]  )  o );</span>
-<span class="pc bpc" id="L524" title="1 of 2 branches missed.">		if ( o instanceof short[]   ) return Arrays.hashCode( (short[] )  o );</span>
-<span class="pc bpc" id="L525" title="1 of 2 branches missed.">		if ( o instanceof boolean[] ) return Arrays.hashCode( (boolean[]) o );</span>
-<span class="pc bpc" id="L526" title="1 of 2 branches missed.">		if ( o instanceof Object[]  ) return Arrays.hashCode( (Object[])  o );</span>
-<span class="fc" id="L527">		return Objects.hashCode( o );</span>
+<span class="pc bpc" id="L505" title="1 of 2 branches missed.">		if ( o instanceof float[]   ) return Arrays.hashCode( (float[] )  o );</span>
+<span class="fc bfc" id="L506" title="All 2 branches covered.">		if ( o instanceof int[]     ) return Arrays.hashCode( (int[]   )  o );</span>
+<span class="pc bpc" id="L507" title="1 of 2 branches missed.">		if ( o instanceof char[]    ) return Arrays.hashCode( (char[]  )  o );</span>
+<span class="pc bpc" id="L508" title="1 of 2 branches missed.">		if ( o instanceof double[]  ) return Arrays.hashCode( (double[])  o );</span>
+<span class="pc bpc" id="L509" title="1 of 2 branches missed.">		if ( o instanceof long[]    ) return Arrays.hashCode( (long[]  )  o );</span>
+<span class="pc bpc" id="L510" title="1 of 2 branches missed.">		if ( o instanceof byte[]    ) return Arrays.hashCode( (byte[]  )  o );</span>
+<span class="pc bpc" id="L511" title="1 of 2 branches missed.">		if ( o instanceof short[]   ) return Arrays.hashCode( (short[] )  o );</span>
+<span class="pc bpc" id="L512" title="1 of 2 branches missed.">		if ( o instanceof boolean[] ) return Arrays.hashCode( (boolean[]) o );</span>
+<span class="pc bpc" id="L513" title="1 of 2 branches missed.">		if ( o instanceof Object[]  ) return Arrays.hashCode( (Object[])  o );</span>
+<span class="fc" id="L514">		return Objects.hashCode( o );</span>
 	}
 
 }

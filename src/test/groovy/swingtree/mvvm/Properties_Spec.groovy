@@ -99,7 +99,7 @@ class Properties_Spec extends Specification
             immutable.orElseNull() == 69
     }
 
-    def 'Properties can be bound by subscribing to them using the "onShow(..)" method.'()
+    def 'Properties can be bound by subscribing to them using the "onSetItem(..)" method.'()
     {
         reportInfo"""
             Note that bound Swing-Tree properties have side effects
@@ -114,8 +114,8 @@ class Properties_Spec extends Specification
             Var<String> mutable = Var.of("Tempeh")
         and : 'Something we want to have a side effect on:'
             var list = []
-        when : 'We subscribe to the property using the "onShow(..)" method.'
-            mutable.onShowItem { list.add(it) }
+        when : 'We subscribe to the property using the "onSetItem(..)" method.'
+            mutable.onSet { list.add(it.orElseNull()) }
         and : 'We change the value of the property.'
             mutable.set("Tofu")
         and : 'Then we wait for the EDT to complete the UI modifications...'
@@ -123,7 +123,7 @@ class Properties_Spec extends Specification
         then : 'The side effect is executed.'
             list == ["Tofu"]
         when : 'We trigger the side effect manually.'
-            mutable.show()
+            mutable.fireSet()
             UI.sync()
         then : 'The side effect is executed again.'
             list.size() == 2
@@ -154,12 +154,12 @@ class Properties_Spec extends Specification
             Var<String> property = Var.of("Hello World")
         and : 'we bind 1 subscriber to the property.'
             var list1 = []
-            property.onShowItem { list1.add(it) }
+            property.onSet { list1.add(it.orElseNull()) }
         and : 'We create a new property with a different id.'
             Val<String> property2 = property.withId("XY")
         and : 'Another subscriber to the new property.'
             var list2 = []
-            property2.onShowItem { list2.add(it) }
+            property2.onSet { list2.add(it.orElseNull()) }
 
         when : 'We change the value of the original property.'
             property.set("Tofu")
@@ -328,86 +328,6 @@ class Properties_Spec extends Specification
             arr1.hashCode() == arr2.hashCode()
     }
 
-    def 'Properties expose a state history in their property actions.'()
-    {
-        reportInfo """
-            When the view changes the state of a property and then triggers a model action, 
-            the property will remember its previous state and store it in an internal history.
-            This history will be exposed to the property action, and it can be used to undo 
-            or redo changes to the property.
-        """
-        given : 'We create a reference to catch the action delegate and a property with an action to set the reference...'
-            var delegate = null
-            Var<String> property = Var.of("Hello World")
-                                        .onAct(it ->{
-                                            delegate = it
-                                        })
-        when : 'We change the property and trigger the action.'
-            property.set("Tofu").act()
-        then : 'The history contains the previous state of the property.'
-            delegate.history() == [Var.of("Hello World")]
-
-        when : 'We change the property a few times and trigger the action again.'
-            property
-                .set("Tempeh")
-                .set("Tempeh") // Duplicate "changes" will not be recorded in the history.
-                .set("Saitan")
-                .act()
-        then : 'The history contains the previous states of the property.'
-            delegate.history() == [Var.of("Tempeh"), Var.of("Tofu"), Var.of("Hello World")]
-    }
-
-    def 'The delegate of a property action exposes the current as well as the previous state of the property.'()
-    {
-        given : 'We create a reference to catch the action delegate and a property with an action to set the reference...'
-            var delegate = null
-            Var<String> property = Var.of("Hello World")
-                                        .onAct(it ->{
-                                            delegate = it
-                                        })
-        when : 'We change the property and trigger the action.'
-            property.set("Tofu").act()
-        then : 'The delegate exposes the current and previous state of the property.'
-            delegate.current() == Var.of("Tofu")
-            delegate.previous() == Var.of("Hello World")
-    }
-
-    def 'We can search for a previous state of a property in its history.'()
-    {
-        reportInfo """
-            You can query the history of a property for a previous state of the property
-            using the "previous(int)" method.
-            It returns an optional that contains the previous state if it is found.
-            Note that the index passed to the method is relative to the current state,
-            so a value of 0 will return the current state, a value of 1 will return the
-            previous state, and so on. 
-        """
-        given : 'We create a reference to catch the action delegate and a property with an action to set the reference...'
-            var delegate = null
-            Var<String> property = Var.of("Apple")
-                                        .onAct(it ->{
-                                            delegate = it
-                                        })
-        when : 'We change the property a few times and trigger the action again.'
-            property
-                .set("Banana")
-                .set("Cherry")
-                .act()
-        then : 'We can check the presents of previous states in the property history.'
-            delegate.previous(0).isPresent()
-            delegate.previous(1).isPresent()
-            delegate.previous(2).isPresent()
-            delegate.previous(3).isPresent() == false
-        and : 'We can check the value of previous states in the property history.'
-            delegate.previous(0).get() == Var.of("Cherry")
-            delegate.previous(1).get() == Var.of("Banana")
-            delegate.previous(2).get() == Var.of("Apple")
-        and : 'Alternatively we can use the "get(int)" method which takes negative indices.'
-            delegate.get(-0).get() == Var.of("Cherry")
-            delegate.get(-1).get() == Var.of("Banana")
-            delegate.get(-2).get() == Var.of("Apple")
-    }
-
     def 'The UI uses the "act(T)" method to change the property state to avoid feedback looping.'()
     {
         reportInfo """
@@ -417,7 +337,7 @@ class Properties_Spec extends Specification
             triggering any events.
             Therefore the UI uses the "act(T)" method to change the property state and triggers the
             action of the property. On the contrary the "set(T)" method is used to change the state
-            of a property without triggering the action, but it will trigger the "onShow" actions / listeners
+            of a property without triggering the action, but it will trigger the "onSet" actions / listeners
             of the property. This is so that the UI can update itself when the user changes the
             state of a property.
         """
@@ -426,22 +346,22 @@ class Properties_Spec extends Specification
             var modelListener = []
             var property = Var.of(":)")
                                 .onAct(it ->{
-                                    modelListener << it.current().orElseThrow()
+                                    modelListener << it.orElseThrow()
                                 })
-            property.onShowItem(it -> showListener << it )
+            property.onSet(it -> showListener << it.orElseNull() )
 
         when : 'We change the state of the property using the "set(T)" method.'
             property.set(":(")
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
-        then : 'The "onShow" actions are triggered.'
+        then : 'The "onSet" actions are triggered.'
             showListener == [":("]
         and : 'The view model actions are not triggered.'
             modelListener == []
 
         when : 'We change the state of the property using the "act(T)" method.'
             property.act(":|")
-        then : 'The "onShow" actions are NOT triggered, because the "act" method performs an "act on your view model"!'
+        then : 'The "onSet" actions are NOT triggered, because the "act" method performs an "act on your view model"!'
             showListener == [":("]
         and : 'The view model actions are triggered.'
             modelListener == [":|"]

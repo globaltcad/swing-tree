@@ -196,17 +196,17 @@ public interface Vals&lt;T&gt; extends Iterable&lt;T&gt;
     }
 
     /**
-     *  Similar to {@link Var#onShowItem(Action)} but for a list of properties.
+     *  Similar to {@link Var#onSet(Action)} but for a list of properties.
      *
      * @param action The action to perform when the list of properties is shown (which is called when its state changes).
      * @return This list of properties.
      */
-    Vals&lt;T&gt; onShow( Action&lt;ValsDelegate&lt;T&gt;&gt; action );
+    Vals&lt;T&gt; onChange( Action&lt;ValsDelegate&lt;T&gt;&gt; action );
 
     /**
-     *  Similar to {@link Var#show()} but for a list of properties.
+     *  Similar to {@link Var#fireSet()} but for a list of properties.
      */
-    Vals&lt;T&gt; show();
+    Vals&lt;T&gt; fireChange();
 
     /**
      *  Use this for mapping a list of properties to another list of properties.

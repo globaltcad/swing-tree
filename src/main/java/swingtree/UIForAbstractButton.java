@@ -44,7 +44,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     /**
      *  Binds the provided {@link Val} property to the wrapped button type
      *  and sets the text of the button to the value of the property.
-     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      * @param text The view model property which should be bound to this UI.
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code text} is {@code null}.
@@ -365,13 +365,13 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  <pre>{@code
      *     UI.button("Clickable!")
      *     .peek( button -> {
-     *          property.onShow(v->button.setHorizontalAlignment(v.forSwing()));
+     *          property.onSetItem(v->button.setHorizontalAlignment(v.forSwing()));
      *          button.setHorizontalAlignment(property.get().forSwing());
      *     });
      *  }</pre>
      * This sets the horizontal alignment of the icon and text
      * and also binds the provided property to the underlying component. <br>
-     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      * @param horizontalAlign The horizontal alignment property which should be bound to the underlying component.
      * @return This very builder to allow for method chaining.
@@ -406,13 +406,13 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  <pre>{@code
      *     UI.button("Clickable!")
      *     .peek( button -> {
-     *          property.onShow(v->button.setVerticalAlignment(v.forSwing()));
+     *          property.onSetItem(v->button.setVerticalAlignment(v.forSwing()));
      *          button.setVerticalAlignment(property.get().forSwing());
      *     });
      *  }</pre>
      * This sets the vertical alignment of the icon and text
      * and also binds the provided property to the underlying component. <br>
-     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      * @param verticalAlign The vertical alignment property which should be bound to the underlying component.
      * @return This very builder to allow for method chaining.
@@ -447,13 +447,13 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  <pre>{@code
      *     UI.button("Clickable!")
      *     .peek( button -> {
-     *          property.onShow(v->button.setHorizontalTextPosition(v.forSwing()));
+     *          property.onSetItem(v->button.setHorizontalTextPosition(v.forSwing()));
      *          button.setHorizontalTextPosition(property.get().forSwing());
      *     });
      *  }</pre>
      * This sets the horizontal position of the text relative to the icon
      * and also binds the provided property to the underlying component. <br>
-     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      * @param horizontalAlign The horizontal text alignment property relative to the icon which should be bound to the underlying component.
      * @return This very builder to allow for method chaining.
@@ -488,13 +488,13 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
      *  <pre>{@code
      *     UI.button("Clickable!")
      *     .peek( button -> {
-     *          property.onShow(v->button.setVerticalTextPosition(v.forSwing()));
+     *          property.onSetItem(v->button.setVerticalTextPosition(v.forSwing()));
      *          button.setVerticalTextPosition(property.get().forSwing());
      *     });
      *  }</pre>
      * This sets the vertical position of the text relative to the icon
      * and also binds the provided property to the underlying component. <br>
-     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      * @param verticalAlign The vertical text alignment property relative to the icon which should be bound to the underlying component.
      * @return This very builder to allow for method chaining.

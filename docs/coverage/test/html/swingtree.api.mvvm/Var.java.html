@@ -19,7 +19,7 @@ import java.util.function.Function;
  * 	And the following Swing-Tree UI:
  * 	&lt;pre&gt;{@code
  * 	    UI.textField()
- * 	    .peek( ta -&gt; vm.getUsername().onShow( t -&gt; ta.setText(t) ) )
+ * 	    .peek( ta -&gt; vm.getUsername().onSetItem( t -&gt; ta.setText(t) ) )
  * 	    .onKeyReleased( e -&gt; vm.getUsername().act( ta.getText() ) );
  * 	}&lt;/pre&gt;
  * 	Your view will automatically update the text field with the item of the property
@@ -27,7 +27,7 @@ import java.util.function.Function;
  * 	to be shown in the UI:
  * 	&lt;pre&gt;{@code
  * 	    // Initially empty username:
- * 		username.set( &quot;&quot; ).show();
+ * 		username.set( &quot;&quot; ) // triggers 'fireSet()';
  * 	}&lt;/pre&gt;
  * 	&lt;p&gt;
  * 	&lt;b&gt;Please take a look at the &lt;a href=&quot;https://globaltcad.github.io/swing-tree/&quot;&gt;living swing-tree documentation&lt;/a&gt;
@@ -117,10 +117,10 @@ public interface Var&lt;T&gt; extends Val&lt;T&gt;
 	 *  the {@code Var::act(T)} method, or simply when it is explicitly
 	 *  triggered by the {@code Var::act(T)} method.
 	 *
-	 * @param action The action to be triggered when {@code Var::act()} or {@code Var::act(T)} is called.
+	 * @param action The action to be triggered when {@code Var::act(T)} or {@code Var::fireAct()} is called.
 	 * @return This very property instance, in order to enable method chaining.
 	 */
-	Var&lt;T&gt; onAct( Action&lt;ValDelegate&lt;T&gt;&gt; action );
+	Var&lt;T&gt; onAct( Action&lt;Val&lt;T&gt;&gt; action );
 
 	/**
 	 *  Triggers the action associated with this property, if one was
@@ -131,11 +131,12 @@ public interface Var&lt;T&gt; extends Val&lt;T&gt;
 	 *
 	 * @return This very wrapper instance, in order to enable method chaining.
 	 */
-	Var&lt;T&gt; act();
+	Var&lt;T&gt; fireAct();
 
 	/**
 	 *  Updates the state of this property and then, if the state has changed,
-	 *  trigger its action using the {@link #act()} method. &lt;br&gt;
+	 *  trigger its action using the {@link #fireAct()} method but not the {@link #fireSet()}.
+	 *  &lt;br&gt;
 	 *  This method is intended to be used in the UI.
 	 *  If you want to modify the state of the property from the view model,
 	 *  as part of your business logic, you should use the {@code Var::set(T)} method instead.
@@ -152,14 +153,14 @@ public interface Var&lt;T&gt; extends Val&lt;T&gt;
 	 * @return the result of applying an {@code Optional}-bearing mapping
 	 */
 	@Override default Var&lt;T&gt; map( java.util.function.Function&lt;T, T&gt; mapper ) {
-<span class="nc bnc" id="L155" title="All 2 branches missed.">		if ( !isPresent() )</span>
-<span class="nc" id="L156">			return Var.ofNullable( type(), null );</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">		if ( !isPresent() )</span>
+<span class="nc" id="L157">			return Var.ofNullable( type(), null );</span>
 
-<span class="nc" id="L158">		T newValue = mapper.apply( orElseNull() );</span>
-<span class="nc bnc" id="L159" title="All 2 branches missed.">		if ( newValue == null )</span>
-<span class="nc" id="L160">			return Var.ofNullable( type(), null );</span>
+<span class="nc" id="L159">		T newValue = mapper.apply( orElseNull() );</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">		if ( newValue == null )</span>
+<span class="nc" id="L161">			return Var.ofNullable( type(), null );</span>
 
-<span class="nc" id="L162">		return Var.of( newValue );</span>
+<span class="nc" id="L163">		return Var.of( newValue );</span>
 	}
 
 	/**
@@ -169,13 +170,13 @@ public interface Var&lt;T&gt; extends Val&lt;T&gt;
 	 * @param &lt;U&gt; The type of the item returned from the mapping function
 	 */
 	@Override default &lt;U&gt; Var&lt;U&gt; mapTo( Class&lt;U&gt; type, java.util.function.Function&lt;T, U&gt; mapper ) {
-<span class="fc bfc" id="L172" title="All 2 branches covered.">		if ( !isPresent() )</span>
-<span class="fc" id="L173">			return Var.ofNullable( type, null );</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">		if ( !isPresent() )</span>
+<span class="fc" id="L174">			return Var.ofNullable( type, null );</span>
 
-<span class="fc" id="L175">		U newValue = mapper.apply( orElseNull() );</span>
-<span class="pc bpc" id="L176" title="1 of 2 branches missed.">		if ( newValue == null )</span>
-<span class="nc" id="L177">			return Var.ofNullable( type, null );</span>
-<span class="fc" id="L178">		return Var.of( newValue );</span>
+<span class="fc" id="L176">		U newValue = mapper.apply( orElseNull() );</span>
+<span class="pc bpc" id="L177" title="1 of 2 branches missed.">		if ( newValue == null )</span>
+<span class="nc" id="L178">			return Var.ofNullable( type, null );</span>
+<span class="fc" id="L179">		return Var.of( newValue );</span>
 	}
 
 }

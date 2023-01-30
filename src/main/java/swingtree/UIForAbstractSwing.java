@@ -76,12 +76,12 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param <T> The type of the value.
      */
     protected final <T> void _onShow( Val<T> val, Consumer<T> displayAction ) {
-        val.onShow(new Action<ValDelegate<T>>() {
+        val.onSet(new Action<Val<T>>() {
             @Override
-            public void accept(ValDelegate<T> delegate) {
+            public void accept(Val<T> v) {
                 _doUI(() ->
                     component().ifPresent(c -> {
-                        displayAction.accept(val.orElseNull());
+                        displayAction.accept(v.orElseNull());
                         /*
                             We make sure that the action is only executed if the component
                             is not disposed. This is important because the action may
@@ -101,7 +101,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param <T> The type of the value.
      */
     protected final <T> void _onShow( Vals<T> vals, Consumer<ValsDelegate<T>> displayAction ) {
-        vals.onShow(new Action<ValsDelegate<T>>() {
+        vals.onChange(new Action<ValsDelegate<T>>() {
             @Override
             public void accept(ValsDelegate<T> delegate) {
                 _doUI(() ->
@@ -163,7 +163,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
 
     /**
      *  Use this to make the wrapped UI component dynamically visible or invisible. <br>
-     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      * @param isVisible The truth value determining if the UI component should be visible or not wrapped in a {@link Val}.
      * @return This very instance, which enables builder-style method chaining.
@@ -256,7 +256,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  Use this to dynamically make the wrapped UI component focusable.
      *  This is useful if you want to make a component focusable only if a certain condition is met.
      *  <br>
-     *  <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     *  <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      *  @param isFocusable The truth value determining if the UI component should be focusable or not wrapped in a {@link Val}.
      *  @return This very instance, which enables builder-style method chaining.
@@ -283,7 +283,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  Use this to dynamically make the wrapped UI component focusable.
      *  This is useful if you want to make a component focusable only if a certain condition is met.
      *  <br>
-     *  <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     *  <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      *  @param isFocusable The truth value determining if the UI component should be focusable or not, wrapped in a {@link Val}.
      *  @return This very instance, which enables builder-style method chaining.
@@ -362,7 +362,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
 
     /**
      *  Use this to dynamically attach a border to the wrapped component. <br>
-     *  <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     *  <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      * @param border The {@link Border} which should be set for the wrapped component wrapped in a {@link Val}.
      * @return This very instance, which enables builder-style method chaining.
@@ -749,7 +749,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     /**
      *  Use this to dynamically set the cursor type which should be displayed
      *  when hovering over the UI component wrapped by this builder. <br>
-     *  <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     *  <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      * @param type The {@link UI.Cursor} type defined by a simple enum exposed by this API wrapped in a {@link Val}.
      * @return This very instance, which enables builder-style method chaining.
@@ -765,7 +765,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  Use this to set the cursor type which should be displayed
      *  when hovering over the UI component wrapped by this builder
      *  based on boolean property determining if the provided cursor should be set ot not. <br>
-     *  <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     *  <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      * @param condition The boolean property determining if the provided cursor should be set ot not.
      * @param type The {@link UI.Cursor} type defined by a simple enum exposed by this API wrapped in a {@link Val}.
@@ -783,7 +783,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  Use this to dynamically set the cursor type which should be displayed
      *  when hovering over the UI component wrapped by this builder
      *  based on boolean property determining if the provided cursor should be set ot not. <br>
-     *  <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     *  <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      * @param condition The boolean property determining if the provided cursor should be set ot not.
      * @param type The {@link UI.Cursor} type property defined by a simple enum exposed by this API.
@@ -795,7 +795,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the cursor selection state.");
         NullUtil.nullPropertyCheck(type, "type", "Null is not allowed to model a cursor type.");
         Cursor[] baseCursor = new Cursor[1];
-        _onShow( condition, c -> type.show() );
+        _onShow( condition, c -> type.fireSet() );
         _onShow( type, c ->{
             if (baseCursor[0] == null) baseCursor[0] = getComponent().getCursor();
             getComponent().setCursor( new java.awt.Cursor( condition.get() ? c.type : baseCursor[0].getType() ) );
@@ -968,11 +968,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  <pre>{@code
      *      UI.button("Click Me")
      *      .peek( button -> {
-     *          tip.onShow(JButton::setToolTipText);
+     *          tip.onSetItem(JButton::setToolTipText);
      *          button.setToolTipText(tip.get());
      *      });
      *  }</pre><br>
-     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      * @param tip The tooltip which should be displayed when hovering over the tab header.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
@@ -1011,11 +1011,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  <pre>{@code
      *      UI.button("Click Me")
      *      .peek( button -> {
-     *          bg.onShow(JButton::setBackground);
+     *          bg.onSetItem(JButton::setBackground);
      *          button.setBackground(bg.get());
      *      });
      *  }</pre><br>
-     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      * @param bg The background color which should be set for the UI component wrapped by a {@link Val}.
      * @return This very instance, which enables builder-style method chaining.
@@ -1030,7 +1030,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     /**
      *  Use this to bind to a background color
      *  which will be set dynamically based on a boolean property.
-     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      * @param colorIfTrue The background color which should be set for the UI component.
      * @param condition The condition property which determines whether the background color should be set or not.
@@ -1049,7 +1049,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     /**
      *  Use this to dynamically bind to a background color
      *  which will be set dynamically based on a boolean property.
-     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      * @param color The background color property which should be set for the UI component.
      * @param condition The condition property which determines whether the background color should be set or not.
@@ -1069,7 +1069,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     /**
      *  Use this to bind to 2 different background colors
      *  which will be set dynamically based on a boolean property.
-     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      * @param condition The condition property which determines whether the background color should be set or not.
      * @param colorIfTrue The background color which should be set for the UI component.
@@ -1083,7 +1083,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     /**
      *  Use this to bind to 2 different background colors
      *  which will be set dynamically based on a boolean property.
-     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      * @param condition The condition property which determines whether the background color should be set or not.
      * @param colorIfTrue The background color which should be set for the UI component.
@@ -1127,11 +1127,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  <pre>{@code
      *      UI.button("Click Me")
      *      .peek( button -> {
-     *          fg.onShow(JButton::setForeground);
+     *          fg.onSetItem(JButton::setForeground);
      *          button.setForeground(fg.get());
      *      });
      *  }</pre><br>
-     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      * @param fg The foreground color which should be set for the UI component wrapped by a {@link Val}.
      * @return This very instance, which enables builder-style method chaining.
@@ -1146,7 +1146,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     /**
      *  Use this to bind to a foreground color
      *  which will be set dynamically based on a boolean property.
-     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      * @param fg The foreground color which should be set for the UI component.
      * @param condition The condition property which determines whether the foreground color should be set or not.
@@ -1165,7 +1165,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     /**
      *  Use this to dynamically bind to a foreground color
      *  which will be set dynamically based on a boolean property.
-     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      * @param color The foreground color property which should be set for the UI component.
      * @param condition The condition property which determines whether the foreground color should be set or not.
@@ -1185,7 +1185,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     /**
      *  Use this to dynamically bind to a foreground color
      *  which will be set dynamically based on a boolean property.
-     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      * @param condition The condition property which determines whether the foreground color should be set or not.
      * @param colorIfTrue The foreground color which should be set for the UI component.
@@ -1204,7 +1204,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     /**
      *  Use this to dynamically bind to a foreground color
      *  which will be set dynamically based on a boolean property.
-     * <i>Hint: Use {@code myProperty.show()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      * @param condition The condition property which determines whether the foreground color should be set or not.
      * @param colorIfTrue The foreground color property which should be set for the UI component.
@@ -1267,7 +1267,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  <pre>{@code
      *    UI.button("Click Me")
      *    .peek( button -> {
-     *      size.onShow(JButton::setMinimumSize);
+     *      size.onSetItem(JButton::setMinimumSize);
      *      button.setMinimumSize(size.get());
      *    });
      *  }</pre>

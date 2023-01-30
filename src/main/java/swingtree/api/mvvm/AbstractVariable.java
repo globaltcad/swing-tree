@@ -41,7 +41,7 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 
 	private final boolean _isImmutable;
 	private final List<Val<T>> _history = new ArrayList<>(17);
-	protected final List<Action<ValDelegate<T>>> _actions = new ArrayList<>();
+	protected final List<Action<Val<T>>> _actions = new ArrayList<>();
 	private final List<Consumer<T>> _viewers = new ArrayList<>(0);
 
 
@@ -51,7 +51,7 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 			Class<T> type,
 			T iniValue,
 			String name,
-			List<Action<ValDelegate<T>>> actions,
+			List<Action<Val<T>>> actions,
 			boolean allowsNull
 	) {
 		this( immutable, type, iniValue, name, actions, Collections.emptyList(), allowsNull );
@@ -62,8 +62,8 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 		Class<T> type,
 		T iniValue,
 		String id,
-		List<Action<ValDelegate<T>>> actions,
-		List<Action<ValDelegate<T>>> viewActions,
+		List<Action<Val<T>>> actions,
+		List<Action<Val<T>>> viewActions,
 		boolean allowsNull
 	) {
 		super( type, id, allowsNull, iniValue );
@@ -82,43 +82,17 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 	}
 
 	/** {@inheritDoc} */
-	@Override public Var<T> onAct( Action<ValDelegate<T>> action ) {
+	@Override public Var<T> onAct( Action<Val<T>> action ) {
 		Objects.requireNonNull(action);
 		_actions.add(action);
 		return this;
 	}
 
 	/** {@inheritDoc} */
-	@Override public Var<T> act() {
+	@Override public Var<T> fireAct() {
 		_triggerActions( _actions);
 		_viewers.forEach( v -> v.accept(_value) );
 		return this;
-	}
-
-	@Override
-	protected ValDelegate<T> _createDelegate() {
-		// We clone the current state of the variable because
-		// it might be accessed from a different thread! (e.g. Swing EDT or Application Thread)
-		AbstractVariable<T> clone = _clone();
-		clone._viewActions.addAll(_viewActions);
-		clone._viewers.addAll(_viewers);
-		List<Val<T>> reverseHistory = new ArrayList<>(AbstractVariable.this._history);
-		Collections.reverse(reverseHistory);
-		return new ValDelegate<T>() {
-			@Override public Val<T> current() { return clone; }
-			@Override
-			public Val<T> previous() {
-				if ( reverseHistory.isEmpty() )
-					return Val.ofNullable(clone._type, null);
-				return reverseHistory.get(0);
-			}
-			@Override
-			public List<Val<T>> history() { return Collections.unmodifiableList(reverseHistory); }
-		};
-	}
-
-	@Override protected AbstractVariable<T> _clone() {
-		return new AbstractVariable<T>( _isImmutable, _type, _value, _id, _actions, _allowsNull ){};
 	}
 
 	/** {@inheritDoc} */
@@ -126,7 +100,7 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 		if ( _isImmutable )
 			throw new UnsupportedOperationException("This variable is immutable!");
 		if ( _setInternal(newValue) )
-			return act();
+			return fireAct();
 		return this;
 	}
 
@@ -135,7 +109,7 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 	public Var<T> set( T newItem) {
 		if ( _isImmutable )
 			throw new UnsupportedOperationException("This variable is immutable!");
-		if ( _setInternal(newItem) ) this.show();
+		if ( _setInternal(newItem) ) this.fireSet();
 		return this;
 	}
 
@@ -167,7 +141,7 @@ public abstract class AbstractVariable<T> extends AbstractValue<T> implements Va
 	@Override public final <U> Val<U> viewAs( Class<U> type, java.util.function.Function<T, U> mapper ) {
 		Var<U> var = mapTo(type, mapper);
 		// Now we register a live update listener to this property
-		this.onShowItem(v -> var.set( mapper.apply( v ) ));
+		this.onSet(v -> var.set( mapper.apply( v.orElseNull() ) ));
 		_viewers.add( v -> var.act( mapper.apply( v ) ) );
 		return var;
 	}

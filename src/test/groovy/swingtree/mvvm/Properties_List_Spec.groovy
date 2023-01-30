@@ -213,14 +213,14 @@ class Properties_List_Spec extends Specification
             vals.at(1).get() == "Papad"
     }
 
-    def 'Just like a regular "Var" property you can register "show" listeners on "Vars".'()
+    def 'Just like a regular "Var" property you can register change listeners on "Vars".'()
     {
         given : 'A "Vars" class with two properties.'
             var vars = Vars.of(42, 73)
         and : 'A list where we are going to record changes.'
             var changes = []
         and : 'Now we register a "show" listener on the "Vars" class.'
-            vars.onShow{ changes << it.index() }
+            vars.onChange{ changes << it.index() }
 
         when : 'We modify the property in various ways...'
             vars.addAt(1, 1)
@@ -242,14 +242,14 @@ class Properties_List_Spec extends Specification
         and : 'A list where we are going to record changes.'
             var changes = []
         and : 'Now we register a "show" listeners on both objects.'
-            prop.onShow(new Action<ValDelegate<Integer>>() {
+            prop.onSet(new Action<Integer>() {
                 @Override
-                void accept(ValDelegate<Integer> delegate) {
+                void accept(Integer delegate) {
                     changes << "Something happened to the property."
                 }
                 @Override boolean canBeRemoved() { return true }
             })
-            list.onShow(new Action<ValsDelegate<Integer>>() {
+            list.onChange(new Action<ValsDelegate<Integer>>() {
                 @Override
                 void accept(ValsDelegate<Integer> delegate) {
                     changes << "Something happened to the list."
@@ -276,7 +276,7 @@ class Properties_List_Spec extends Specification
         and : 'A list where we are going to record changes.'
             var changes = []
         and : 'Now we register a "show" listener on the "Vars" class.'
-            vars.onShow{ changes << it.changeType() }
+            vars.onChange{ changes << it.changeType() }
 
         when : 'We modify the property in various ways...'
             vars.addAt(1, 1)
@@ -319,7 +319,7 @@ class Properties_List_Spec extends Specification
         and : 'A regular list where we are going to record changes.'
             var changes = []
         and : 'Now we register a "show" change listener on the properties.'
-            vars.onShow({ changes << it.changeType() })
+            vars.onChange({ changes << it.changeType() })
 
         when : 'We sort the list.'
             vars.sort()
@@ -410,7 +410,7 @@ class Properties_List_Spec extends Specification
                                             )
         and : 'We register a listener which will record changes for us.'
             var changes = []
-            vars.onShow({ changes << it.changeType() })
+            vars.onChange({ changes << it.changeType() })
 
         when : 'We call the "makeDistinct" method.'
             vars.makeDistinct()

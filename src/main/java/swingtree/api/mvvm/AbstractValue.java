@@ -2,12 +2,11 @@ package swingtree.api.mvvm;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 
 abstract class AbstractValue<T> implements Val<T>
 {
-    protected final List<Action<ValDelegate<T>>> _viewActions = new ArrayList<>();
+    protected final List<Action<Val<T>>> _viewActions = new ArrayList<>();
 
     protected T _value;
     protected final Class<T> _type;
@@ -44,37 +43,30 @@ abstract class AbstractValue<T> implements Val<T>
     public final T orElseNull() { return _value; }
 
     /** {@inheritDoc} */
-    @Override public Val<T> onShow( Action<ValDelegate<T>> displayAction ) {
+    @Override public Val<T> onSet(Action<Val<T>> displayAction ) {
         _viewActions.add(displayAction);
         return this;
     }
 
     /** {@inheritDoc} */
-    @Override public Val<T> show() { _triggerActions( _viewActions ); return this; }
+    @Override public Val<T> fireSet() { _triggerActions( _viewActions ); return this; }
 
     protected void _triggerActions(
-        List<Action<ValDelegate<T>>> actions
+        List<Action<Val<T>>> actions
     ) {
-        List<Action<ValDelegate<T>>> removableActions = new ArrayList<>();
-        for ( Action<ValDelegate<T>> action : new ArrayList<>(actions) ) // We copy the list to avoid concurrent modification
+        List<Action<Val<T>>> removableActions = new ArrayList<>();
+        for ( Action<Val<T>> action : new ArrayList<>(actions) ) // We copy the list to avoid concurrent modification
             try {
                 if ( action.canBeRemoved() )
                     removableActions.add(action);
                 else {
-                    action.accept(_createDelegate());
+                    action.accept(this);
                 }
             } catch ( Exception e ) {
                 e.printStackTrace();
             }
         actions.removeAll(removableActions);
     }
-
-
-    protected abstract ValDelegate<T> _createDelegate();
-
-
-    protected abstract AbstractValue<T> _clone();
-
 
     /** {@inheritDoc} */
     @Override public final boolean allowsNull() { return _allowsNull; }

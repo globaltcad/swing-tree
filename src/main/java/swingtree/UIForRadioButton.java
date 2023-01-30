@@ -39,7 +39,7 @@ public class UIForRadioButton<R extends JRadioButton> extends UIForAbstractToggl
         // can be updated to reflect the new selection state.
         _onChange( event -> {
             if ( component.isSelected() )
-                selection.act( state ).show();
+                selection.act( state ).fireSet();
         });
 
         return this;

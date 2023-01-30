@@ -110,7 +110,7 @@ public class UIForList&lt;E, L extends JList&lt;E&gt;&gt; extends UIForAbstractS
 <span class="nc" id="L110">        @Override public E getElementAt( int i ) { return _entries.at( i ).orElseNull(); }</span>
 
         public void fire(ValsDelegate&lt;E&gt; v) {
-<span class="nc bnc" id="L113" title="All 4 branches missed.">            switch ( v.type() ) {</span>
+<span class="nc bnc" id="L113" title="All 4 branches missed.">            switch ( v.changeType() ) {</span>
 <span class="nc" id="L114">                case ADD:    fireIntervalAdded( this, v.index(), v.index() ); break;</span>
 <span class="nc" id="L115">                case REMOVE: fireIntervalRemoved( this, v.index(), v.index() ); break;</span>
 <span class="nc" id="L116">                case SET:    fireContentsChanged( this, v.index(), v.index() ); break;</span>
