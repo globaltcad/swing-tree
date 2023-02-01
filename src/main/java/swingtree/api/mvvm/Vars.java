@@ -2,6 +2,7 @@ package swingtree.api.mvvm;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  *  A list of mutable properties.
@@ -215,13 +216,41 @@ public interface Vars<T> extends Vals<T>
     }
 
     /**
+     *  Removes all properties from the list for which the provided predicate
+     *  returns true.
+     *
+     * @param predicate The predicate to test each property.
+     * @return This list of properties.
+     */
+    default Vars<T> removeIf( Predicate<Var<T>> predicate )
+    {
+        for ( int i = size() - 1; i >= 0; i-- )
+            if ( predicate.test(at(i)) ) removeAt(i);
+        return this;
+    }
+
+    /**
+     *  Removes all properties from the list for whose items the provided predicate
+     *  returns true.
+     *
+     *  @param predicate The predicate to test each property item.
+     *  @return This list of properties.
+     */
+    default Vars<T> removeIfItem( Predicate<T> predicate )
+    {
+        for ( int i = size() - 1; i >= 0; i-- )
+            if ( predicate.test(at(i).get()) ) removeAt(i);
+        return this;
+    }
+
+    /**
      *  Wraps the provided value in a {@link Var} property and adds it to the list
      *  at the specified index.
      *  @param index The index at which to add the property.
-     *  @param value The value to add.
+     *  @param item The value to add as a property item.
      *  @return This list of properties.
      */
-    default Vars<T> addAt( int index, T value ) { return addAt(index, Var.of(value)); }
+    default Vars<T> addAt( int index, T item ) { return addAt(index, Var.of(item)); }
 
     /**
      *  Adds the provided property to the list at the specified index.
@@ -235,10 +264,10 @@ public interface Vars<T> extends Vals<T>
      *  Wraps the provided value in a property and sets it at the specified index
      *  effectively replacing the property at that index.
      *  @param index The index at which to set the property.
-     *  @param value The value to set.
+     *  @param item The value to set.
      *  @return This list of properties.
      */
-    default Vars<T> setAt( int index, T value ) { return setAt(index, Var.of(value)); }
+    default Vars<T> setAt( int index, T item ) { return setAt(index, Var.of(item)); }
 
     /**
      *  Places the provided property at the specified index, effectively replacing the property
@@ -252,13 +281,13 @@ public interface Vars<T> extends Vals<T>
     /**
      *  Wraps each provided value in a property and appends it to this
      *  list of properties.
-     *  @param values The values to add.
+     *  @param items The array of values to add as property items.
      *  @return This list of properties.
      */
     @SuppressWarnings("unchecked")
-    default Vars<T> addAll( T... values )
+    default Vars<T> addAll( T... items )
     {
-        for ( T v : values ) add(v);
+        for ( T v : items ) add(v);
         return this;
     }
 
@@ -266,12 +295,12 @@ public interface Vars<T> extends Vals<T>
     /**
      *  Iterates over the supplied values, and appends
      *  them to this list as properties.
-     *  @param values The values to add.
+     *  @param items The values to add as property items.
      *  @return This list of properties.
      */
-    default Vars<T> addAll( Iterable<T> values )
+    default Vars<T> addAll( Iterable<T> items )
     {
-        for ( T v : values ) add(v);
+        for ( T v : items ) add(v);
         return this;
     }
 
