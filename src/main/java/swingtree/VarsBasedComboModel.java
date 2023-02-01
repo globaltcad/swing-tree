@@ -1,7 +1,7 @@
 package swingtree;
 
-import swingtree.api.mvvm.Var;
-import swingtree.api.mvvm.Vars;
+import sprouts.Var;
+import sprouts.Vars;
 
 class VarsBasedComboModel<E> extends AbstractComboModel<E>
 {

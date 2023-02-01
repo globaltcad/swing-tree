@@ -1,6 +1,6 @@
 package swingtree;
 
-import swingtree.api.mvvm.Val;
+import sprouts.Val;
 
 import javax.swing.*;
 import java.awt.event.ComponentAdapter;

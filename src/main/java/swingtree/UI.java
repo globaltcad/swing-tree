@@ -7,10 +7,10 @@ import swingtree.api.SwingBuilder;
 import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
-import swingtree.api.mvvm.Val;
-import swingtree.api.mvvm.Vals;
-import swingtree.api.mvvm.Var;
-import swingtree.api.mvvm.Vars;
+import sprouts.Val;
+import sprouts.Vals;
+import sprouts.Var;
+import sprouts.Vars;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
 import net.miginfocom.swing.MigLayout;
@@ -1524,7 +1524,7 @@ public final class UI
      *  with the provided properties list object as selectable (and immutable) items which
      *  may not be modified by the user.
      *
-     * @param items The {@link swingtree.api.mvvm.Vals} properties of elements to be selectable in the {@link JComboBox}.
+     * @param items The {@link sprouts.Vals} properties of elements to be selectable in the {@link JComboBox}.
      * @return A builder instance for the provided {@link JComboBox}, which enables fluent method chaining.
      * @param <E> The type of the elements in the list.
      */
@@ -1952,13 +1952,13 @@ public final class UI
 
     /**
      *  Creates a builder node wrapping a new {@link JRadioButton} instance
-     *  dynamically bound to an enum based {@link swingtree.api.mvvm.Var}
+     *  dynamically bound to an enum based {@link sprouts.Var}
      *  instance which will be used to dynamically model the selection state of the
      *  wrapped {@link JToggleButton} type by checking
      *  weather the property matches the provided enum or not.
      *
      * @param state The reference {@link Enum} which this {@link JToggleButton} should represent.
-     * @param selection The {@link swingtree.api.mvvm.Var} instance which will be used
+     * @param selection The {@link sprouts.Var} instance which will be used
      *                  to dynamically model the selection state of the wrapped {@link JToggleButton} type.
      * @return A builder instance for the radio button, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code selected} is {@code null}.

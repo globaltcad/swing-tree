@@ -1,7 +1,7 @@
 package example;
 
-import swingtree.api.mvvm.Val;
-import swingtree.api.mvvm.Var;
+import sprouts.Val;
+import sprouts.Var;
 
 import java.awt.*;
 

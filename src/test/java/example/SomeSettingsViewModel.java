@@ -1,6 +1,6 @@
 package example;
 
-import swingtree.api.mvvm.Var;
+import sprouts.Var;
 
 public class SomeSettingsViewModel
 {

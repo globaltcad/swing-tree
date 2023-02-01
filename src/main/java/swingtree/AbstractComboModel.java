@@ -1,6 +1,6 @@
 package swingtree;
 
-import swingtree.api.mvvm.Var;
+import sprouts.Var;
 
 import javax.swing.*;
 import javax.swing.event.ListDataListener;

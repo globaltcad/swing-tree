@@ -3,10 +3,11 @@ package swingtree;
 
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
+import sprouts.Action;
 import swingtree.api.Peeker;
-import swingtree.api.mvvm.Action;
 import swingtree.api.UIVerifier;
-import swingtree.api.mvvm.*;
+import sprouts.*;
+import swingtree.api.mvvm.Viewable;
 import swingtree.input.Keyboard;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
@@ -961,7 +962,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     *  Use this to bind to a {@link swingtree.api.mvvm.Val}
+     *  Use this to bind to a {@link sprouts.Val}
      *  containing a tooltip string.
      *  This is a convenience method, which would
      *  be equivalent to:
@@ -1004,7 +1005,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     *  Use this to bind to a {@link swingtree.api.mvvm.Val}
+     *  Use this to bind to a {@link sprouts.Val}
      *  containing a background color.
      *  This is a convenience method, which would
      *  be equivalent to:
@@ -1120,7 +1121,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     *  Use this to bind to a {@link swingtree.api.mvvm.Val}
+     *  Use this to bind to a {@link sprouts.Val}
      *  containing a foreground color.
      *  This is a convenience method, which would
      *  be equivalent to:
@@ -2254,10 +2255,10 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     *  This allows you to bind to a {@link Viewable}
+     *  This allows you to bind to a {@link swingtree.api.mvvm.Viewable}
      *  implementation and automatically update the view when the view model changes.
      *
-     * @param viewable A {@link swingtree.api.mvvm.Val} property which holds a {@link Viewable} instance
+     * @param viewable A {@link sprouts.Val} property which holds a {@link Viewable} instance
      *        that will be used to generate the view.
      * @return This very instance, which enables builder-style method chaining.
      */
@@ -2271,8 +2272,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  This allows you to bind to a property list of {@link Viewable}s
      *  to automatically update the view when your view models change.
      *
-     * @param viewables A {@link swingtree.api.mvvm.Vals} list of {@link Viewable}s
-     *                  wrapped in a {@link swingtree.api.mvvm.Val} properties.
+     * @param viewables A {@link sprouts.Vals} list of {@link Viewable}s
+     *                  wrapped in a {@link sprouts.Val} properties.
      *                  The Viewables will be used to generate the view.
      * @return This very instance, which enables builder-style method chaining.
      */
@@ -2287,7 +2288,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  implementation and automatically update the view when the view model changes.
      *
      * @param attr The layout information which should be passed to the UI tree.
-     * @param viewable A {@link swingtree.api.mvvm.Val} property which holds a {@link Viewable} instance
+     * @param viewable A {@link sprouts.Val} property which holds a {@link Viewable} instance
      *        that will be used to generate the view.
      * @return This very instance, which enables builder-style method chaining.
      */
@@ -2303,8 +2304,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  to automatically update the view when your view models change.
      *
      * @param attr The layout information which should be passed to the UI tree.
-     * @param viewables A {@link swingtree.api.mvvm.Vals} list of {@link Viewable}s
-     *                  wrapped in a {@link swingtree.api.mvvm.Val} properties.
+     * @param viewables A {@link sprouts.Vals} list of {@link Viewable}s
+     *                  wrapped in a {@link sprouts.Val} properties.
      *                  The Viewables will be used to generate the view.
      * @return This very instance, which enables builder-style method chaining.
      */
@@ -2320,7 +2321,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  implementation and automatically update the view when the view model changes.
      *
      * @param attr The layout information which should be passed to the UI tree.
-     * @param viewable A {@link swingtree.api.mvvm.Val} property which holds a {@link Viewable} instance
+     * @param viewable A {@link sprouts.Val} property which holds a {@link Viewable} instance
      *        that will be used to generate the view.
      * @return This very instance, which enables builder-style method chaining.
      */
@@ -2333,8 +2334,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  to automatically update the view when your view models change.
      *
      * @param attr The layout information which should be passed to the UI tree.
-     * @param viewables A {@link swingtree.api.mvvm.Vals} list of {@link Viewable}s
-     *                  wrapped in a {@link swingtree.api.mvvm.Val} properties.
+     * @param viewables A {@link sprouts.Vals} list of {@link Viewable}s
+     *                  wrapped in a {@link sprouts.Val} properties.
      *                  The Viewables will be used to generate the view.
      * @return This very instance, which enables builder-style method chaining.
      */

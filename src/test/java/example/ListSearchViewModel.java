@@ -1,7 +1,7 @@
 package example;
 
-import swingtree.api.mvvm.Var;
-import swingtree.api.mvvm.Vars;
+import sprouts.Var;
+import sprouts.Vars;
 
 import javax.swing.*;
 import javax.swing.border.Border;

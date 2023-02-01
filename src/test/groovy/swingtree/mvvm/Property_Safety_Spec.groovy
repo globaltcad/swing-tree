@@ -5,10 +5,10 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import swingtree.UI
-import swingtree.api.mvvm.Val
-import swingtree.api.mvvm.Vals
-import swingtree.api.mvvm.Var
-import swingtree.api.mvvm.Vars
+import sprouts.Val
+import sprouts.Vals
+import sprouts.Var
+import sprouts.Vars
 
 import java.util.function.Consumer
 

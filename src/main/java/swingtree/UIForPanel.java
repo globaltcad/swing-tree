@@ -1,6 +1,6 @@
 package swingtree;
 
-import swingtree.api.mvvm.Val;
+import sprouts.Val;
 import swingtree.layout.LayoutAttr;
 import net.miginfocom.swing.MigLayout;
 

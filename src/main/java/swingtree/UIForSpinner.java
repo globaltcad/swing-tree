@@ -1,8 +1,8 @@
 package swingtree;
 
-import swingtree.api.mvvm.Action;
-import swingtree.api.mvvm.Val;
-import swingtree.api.mvvm.Var;
+import sprouts.Action;
+import sprouts.Val;
+import sprouts.Var;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -56,7 +56,7 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
     /**
      * Sets the value of the spinner and also binds to said value.
      *
-     * @param value The {@link swingtree.api.mvvm.Val} wrapper whose value should be set.
+     * @param value The {@link sprouts.Val} wrapper whose value should be set.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code value} is {@code null}.
      */
@@ -70,7 +70,7 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
     /**
      * Sets the value of the spinner and also binds to the provided property.
      *
-     * @param value The {@link swingtree.api.mvvm.Var} wrapper whose value should be set.
+     * @param value The {@link sprouts.Var} wrapper whose value should be set.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code value} is {@code null}.
      */
@@ -128,7 +128,7 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
      * Sets the numeric step size of the value of the spinner and also binds to said value.
      * This expects your spinner to be based on the {@link SpinnerNumberModel}.
      *
-     * @param val The {@link swingtree.api.mvvm.Val} wrapper whose step size should be set.
+     * @param val The {@link sprouts.Val} wrapper whose step size should be set.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final <N extends Number> UIForSpinner<S> withStepSize( Val<N> val ) {

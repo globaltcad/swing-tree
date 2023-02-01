@@ -2,9 +2,9 @@ package swingtree;
 
 
 import com.alexandriasoftware.swing.JSplitButton;
-import swingtree.api.mvvm.Action;
-import swingtree.api.mvvm.Val;
-import swingtree.api.mvvm.Var;
+import sprouts.Action;
+import sprouts.Val;
+import sprouts.Var;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

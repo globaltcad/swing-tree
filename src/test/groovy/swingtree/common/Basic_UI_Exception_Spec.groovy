@@ -4,8 +4,8 @@ import com.alexandriasoftware.swing.JSplitButton
 import swingtree.UI
 import swingtree.api.MenuBuilder
 import swingtree.api.SwingBuilder
-import swingtree.api.mvvm.Val
-import swingtree.api.mvvm.Var
+import sprouts.Val
+import sprouts.Var
 import swingtree.layout.LayoutAttr
 import spock.lang.Narrative
 import spock.lang.Specification

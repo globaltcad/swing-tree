@@ -1,7 +1,7 @@
 package swingtree.common
 
 import swingtree.UI
-import swingtree.api.mvvm.Var
+import sprouts.Var
 import swingtree.input.Keyboard
 import spock.lang.Narrative
 import spock.lang.Specification

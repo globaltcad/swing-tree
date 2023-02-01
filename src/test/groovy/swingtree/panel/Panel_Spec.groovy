@@ -2,7 +2,7 @@ package swingtree.panel
 
 import swingtree.UI
 import swingtree.UIForPanel
-import swingtree.api.mvvm.Var
+import sprouts.Var
 import net.miginfocom.swing.MigLayout
 import spock.lang.Narrative
 import spock.lang.Specification

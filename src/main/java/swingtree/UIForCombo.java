@@ -1,7 +1,7 @@
 package swingtree;
 
-import swingtree.api.mvvm.Action;
-import swingtree.api.mvvm.Var;
+import sprouts.Action;
+import sprouts.Var;
 
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;

@@ -3,7 +3,7 @@ package swingtree.threading
 import swingtree.SimpleDelegate
 import swingtree.EventProcessor
 import swingtree.UI
-import swingtree.api.mvvm.Action
+import sprouts.Action
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title

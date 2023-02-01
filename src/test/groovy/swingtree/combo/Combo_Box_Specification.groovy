@@ -2,12 +2,12 @@ package swingtree.combo
 
 import swingtree.UI
 import swingtree.UIForCombo
-import swingtree.api.mvvm.Var
+import sprouts.Var
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
-import swingtree.api.mvvm.Vars
+import sprouts.Vars
 
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JComboBox

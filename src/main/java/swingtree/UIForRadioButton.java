@@ -1,6 +1,6 @@
 package swingtree;
 
-import swingtree.api.mvvm.Var;
+import sprouts.Var;
 
 import javax.swing.*;
 
@@ -12,13 +12,13 @@ public class UIForRadioButton<R extends JRadioButton> extends UIForAbstractToggl
     protected UIForRadioButton( R component ) { super(component); }
 
     /**
-     *  Use this to dynamically bind to an enum based {@link swingtree.api.mvvm.Var}
+     *  Use this to dynamically bind to an enum based {@link sprouts.Var}
      *  instance which will be used to dynamically model the selection state of the
      *  wrapped {@link JToggleButton} type by checking
      *  weather the property matches the provided enum or not.
      *
      * @param state The reference {@link Enum} which this {@link JToggleButton} should represent.
-     * @param selection The {@link swingtree.api.mvvm.Var} instance which will be used
+     * @param selection The {@link sprouts.Var} instance which will be used
      *                  to dynamically model the selection state of the wrapped {@link JToggleButton} type.
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */

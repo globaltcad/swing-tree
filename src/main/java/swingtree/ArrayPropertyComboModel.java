@@ -1,7 +1,7 @@
 package swingtree;
 
-import swingtree.api.mvvm.Val;
-import swingtree.api.mvvm.Var;
+import sprouts.Val;
+import sprouts.Var;
 
 class ArrayPropertyComboModel<E> extends AbstractComboModel<E>
 {

@@ -1,9 +1,9 @@
 package swingtree;
 
 
-import swingtree.api.mvvm.Action;
-import swingtree.api.mvvm.Val;
-import swingtree.api.mvvm.Var;
+import sprouts.Action;
+import sprouts.Val;
+import sprouts.Var;
 
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;

@@ -2,7 +2,7 @@ package example;
 
 import com.formdev.flatlaf.intellijthemes.FlatMaterialDesignDarkIJTheme;
 import swingtree.UI;
-import swingtree.api.mvvm.Var;
+import sprouts.Var;
 
 import javax.swing.*;
 

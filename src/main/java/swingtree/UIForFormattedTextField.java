@@ -1,6 +1,6 @@
 package swingtree;
 
-import swingtree.api.mvvm.Action;
+import sprouts.Action;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

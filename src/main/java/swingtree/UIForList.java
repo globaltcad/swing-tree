@@ -2,8 +2,8 @@ package swingtree;
 
 import swingtree.api.ListEntryDelegate;
 import swingtree.api.ListEntryRenderer;
-import swingtree.api.mvvm.*;
-import swingtree.api.mvvm.Action;
+import sprouts.*;
+import sprouts.Action;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;

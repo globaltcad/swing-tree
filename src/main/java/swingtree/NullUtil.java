@@ -1,6 +1,6 @@
 package swingtree;
 
-import swingtree.api.mvvm.Val;
+import sprouts.Val;
 import org.slf4j.helpers.MessageFormatter;
 
 import java.util.Arrays;

@@ -4,7 +4,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import swingtree.UI
-import swingtree.api.mvvm.Var
+import sprouts.Var
 
 import javax.swing.JSplitPane
 import java.awt.Dimension

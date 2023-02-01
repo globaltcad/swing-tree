@@ -1,7 +1,7 @@
 package swingtree;
 
 import com.alexandriasoftware.swing.JSplitButton;
-import swingtree.api.mvvm.Action;
+import sprouts.Action;
 
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;

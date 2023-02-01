@@ -1,8 +1,8 @@
 package swingtree.mvvm
 
 import swingtree.UI
-import swingtree.api.mvvm.Val
-import swingtree.api.mvvm.Var
+import sprouts.Val
+import sprouts.Var
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title

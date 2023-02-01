@@ -1,6 +1,6 @@
 package swingtree;
 
-import swingtree.api.mvvm.Var;
+import sprouts.Var;
 
 import java.util.List;
 

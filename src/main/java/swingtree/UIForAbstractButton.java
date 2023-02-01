@@ -1,8 +1,8 @@
 package swingtree;
 
-import swingtree.api.mvvm.Action;
-import swingtree.api.mvvm.Val;
-import swingtree.api.mvvm.Var;
+import sprouts.Action;
+import sprouts.Val;
+import sprouts.Var;
 
 import javax.swing.*;
 import java.awt.*;
@@ -143,7 +143,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     }
 
     /**
-     *  Use this to dynamically bind to a {@link swingtree.api.mvvm.Var}
+     *  Use this to dynamically bind to a {@link sprouts.Var}
      *  instance which will be used to dynamically model the selection state of the
      *  wrapped {@link AbstractButton} type.
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
@@ -156,11 +156,11 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     }
 
     /**
-     *  Use this to dynamically bind to a {@link swingtree.api.mvvm.Var}
+     *  Use this to dynamically bind to a {@link sprouts.Var}
      *  instance which will be used to dynamically model the inverse selection state of the
      *  wrapped {@link AbstractButton} type.
      *
-     * @param selected The {@link swingtree.api.mvvm.Var} instance which will be used to
+     * @param selected The {@link sprouts.Var} instance which will be used to
      *                 model the inverse selection state of the wrapped button type.
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
@@ -172,11 +172,11 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     }
 
     /**
-     *  Use this to dynamically bind to a {@link swingtree.api.mvvm.Var}
+     *  Use this to dynamically bind to a {@link sprouts.Var}
      *  instance which will be used to dynamically model the selection state of the
      *  wrapped {@link AbstractButton} type.
      *
-     * @param selected The {@link swingtree.api.mvvm.Var} instance which will be used to model the selection state of the wrapped button type.
+     * @param selected The {@link sprouts.Var} instance which will be used to model the selection state of the wrapped button type.
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final I isSelectedIf( Var<Boolean> selected ) {
@@ -193,11 +193,11 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     }
 
     /**
-     *  Use this to dynamically bind to a {@link swingtree.api.mvvm.Var}
+     *  Use this to dynamically bind to a {@link sprouts.Var}
      *  instance which will be used to dynamically model the inverse selection state of the
      *  wrapped {@link AbstractButton} type.
      *
-     * @param selected The {@link swingtree.api.mvvm.Var} instance which will be used to
+     * @param selected The {@link sprouts.Var} instance which will be used to
      *                 model the inverse selection state of the wrapped button type.
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
@@ -215,7 +215,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     }
 
     /**
-     *  Use this to dynamically bind to a {@link swingtree.api.mvvm.Var}
+     *  Use this to dynamically bind to a {@link sprouts.Var}
      *  instance which will be used to dynamically model the pressed state of the
      *  wrapped {@link AbstractButton} type.
      * @throws IllegalArgumentException if {@code var} is {@code null}.

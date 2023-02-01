@@ -6,8 +6,8 @@ import spock.lang.Specification
 import spock.lang.Title
 import swingtree.UI
 import swingtree.Utility
-import swingtree.api.mvvm.Var
-import swingtree.api.mvvm.Vars
+import sprouts.Var
+import sprouts.Vars
 import swingtree.api.mvvm.Viewable
 
 import javax.swing.*
