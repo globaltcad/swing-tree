@@ -13,12 +13,12 @@ public interface Noticeable
      * @param listener the listener to subscribe.
      * @return this {@link Noticeable} for chaining.
      */
-    Noticeable subscribe( Runnable listener );
+    Noticeable subscribe( Listener listener );
 
     /**
      * Unsubscribes the given listener from this {@link Noticeable}.
      * @param listener the listener to unsubscribe.
      * @return this {@link Noticeable} for chaining.
      */
-    Noticeable unsubscribe( Runnable listener );
+    Noticeable unsubscribe( Listener listener );
 }

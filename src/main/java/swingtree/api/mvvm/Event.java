@@ -21,7 +21,7 @@ public interface Event extends Noticeable
      * @param listener The first listener to subscribe to the new {@link Event}.
      * @return A new {@link Event}.
      */
-    static Event of( Runnable listener ) {
+    static Event of( Listener listener ) {
         Event event = of();
         event.subscribe( listener );
         return event;
@@ -33,17 +33,17 @@ public interface Event extends Noticeable
      */
     static Event of() {
         return new Event() {
-            private final List<Runnable> listeners = new ArrayList<>();
+            private final List<Listener> listeners = new ArrayList<>();
 
             @Override
-            public void fire() { listeners.forEach( Runnable::run ); }
+            public void fire() { listeners.forEach( Listener::run ); }
             @Override
-            public Noticeable subscribe( Runnable listener ) {
+            public Noticeable subscribe( Listener listener ) {
                 listeners.add( listener );
                 return this;
             }
             @Override
-            public Noticeable unsubscribe( Runnable listener ) {
+            public Noticeable unsubscribe( Listener listener ) {
                 listeners.remove( listener );
                 return this;
             }
