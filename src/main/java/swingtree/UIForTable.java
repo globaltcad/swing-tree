@@ -228,6 +228,10 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
             _doUI(()->{
                 TableModel model = getComponent().getModel();
                 if ( model instanceof AbstractTableModel ) {
+                    // We want the table model update to be as thorough as possible, so we
+                    // will fire a table structure changed event, followed by a table data
+                    // changed event.
+                    ((AbstractTableModel)model).fireTableStructureChanged();
                     ((AbstractTableModel)model).fireTableDataChanged();
                 }
                 else

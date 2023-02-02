@@ -161,7 +161,13 @@ public interface BasicTableModel extends TableModel
         @Override public BasicTableModel build() {
             FunTableModel tm = new FunTableModel();
             if ( updateEvent != null )
-                updateEvent.subscribe(()-> UI.run(tm::fireTableDataChanged));
+                updateEvent.subscribe(()-> UI.run(()->{
+                    // We want the table model update to be as thorough as possible, so we
+                    // will fire a table structure changed event, followed by a table data
+                    // changed event.
+                    tm.fireTableStructureChanged();
+                    tm.fireTableDataChanged();
+                }));
             return tm;
         }
 
