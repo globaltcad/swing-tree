@@ -92,23 +92,8 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
         NullUtil.nullPropertyCheck(text, "text", "Use an empty string instead of null!");
         _onShow( text, newText -> {
             C c = getComponent();
-            if ( _eventProcessor == EventProcessor.COUPLED )
-                UI.runLater(() -> {
-                    if ( !Objects.equals(c.getText(), newText) )
-                        c.setText(newText);
-                    /*
-                        Okay, so this looks really strange, I know, but this is important to prevent a tricky bug!
-                        The bug is that if this code here is triggered by the key type event below, then the
-                        text component will not yet be updated with the new text, because the text of the component
-                        will only be updated after the key type event has been processed.
-                        So if a property in a user view model rebroadcasts the newly typed text generated
-                        by the '_onKeyTyped' below, then user action (key typed, deletion, etc.) will be
-                        added to the 'newTex' string we have here in this lambda, which is not what we want!
-                    */
-                });
-            else
-                if ( !Objects.equals(c.getText(), newText) )
-                    c.setText(newText);
+            if ( !Objects.equals(c.getText(), newText) ) // avoid infinite recursion or some other Swing weirdness
+                c.setText(newText);
         });
         _onKeyTyped( (KeyEvent e) -> {
             String oldText = getComponent().getText();
@@ -123,7 +108,28 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
                 newText = part1 + ( part2.length() < 2 ? part2 : part2.substring(1) );
             else
                 newText = part1 + e.getKeyChar() + part2;
-            _doApp(newText, text::act);
+
+            UI.runLater(() -> {
+                _doApp(newText, text::act);
+                /*
+                    Okay, it looks really strange that we apply the text to the property in the next EDT cycle,
+                    but this is important to prevent a tricky bug!
+                    To understand the bug you need to know 2 things:
+                    1. Calling 'act' on a prop triggers user defined 'onAct' callbacks, usually inside the view model.
+                    2. When this code her is executed the text component is actually not yet updated with the new text!
+                       It is in a sort of intermediate state, where the text component has already received the key typed event,
+                       but the text has not yet been inserted into deleted from the text component.
+                       The modification will only apply to the text component after this method has returned.
+
+                    So if a user decides to rebroadcast the text property in the view model by calling the
+                    'set' method on the text property or 'fireSet' in one of their 'onAct' callbacks,
+                    then the text component will receive that new text and then apply the key typed event to it
+                    which is already outdated, because the text property has already been updated with the new text,
+                    the component however has not yet been updated with the new text.
+
+                    So this is why we call the 'act' method on the text property in the next EDT cycle!
+                */
+            });
         });
         return withText( text.orElseThrow() );
     }
