@@ -1,6 +1,7 @@
 package swingtree.api.model;
 
 import sprouts.Event;
+import swingtree.UI;
 import swingtree.api.Buildable;
 
 import javax.swing.event.TableModelListener;
@@ -160,7 +161,7 @@ public interface BasicTableModel extends TableModel
         @Override public BasicTableModel build() {
             FunTableModel tm = new FunTableModel();
             if ( updateEvent != null )
-                updateEvent.subscribe(tm::fireTableDataChanged);
+                updateEvent.subscribe(()-> UI.run(tm::fireTableDataChanged));
             return tm;
         }
 

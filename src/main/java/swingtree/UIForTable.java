@@ -224,14 +224,16 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      */
     public final UIForTable<T> updateTableOn( Event event ) {
         NullUtil.nullArgCheck(event, "event", Event.class);
-        event.subscribe(()->{
-            TableModel model = getComponent().getModel();
-            if ( model instanceof AbstractTableModel ) {
-                ((AbstractTableModel)model).fireTableDataChanged();
-            }
-            else
-                throw new IllegalStateException("The table model is not an AbstractTableModel instance.");
-        });
+        event.subscribe(()->
+            _doUI(()->{
+                TableModel model = getComponent().getModel();
+                if ( model instanceof AbstractTableModel ) {
+                    ((AbstractTableModel)model).fireTableDataChanged();
+                }
+                else
+                    throw new IllegalStateException("The table model is not an AbstractTableModel instance.");
+            })
+        );
         return this;
     }
 
