@@ -1,5 +1,6 @@
 package swingtree;
 
+import sprouts.Event;
 import swingtree.api.Buildable;
 import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
@@ -140,6 +141,10 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      *  either a row major {@link List} of {@link List}s of entry {@link Object}s (a list of rows)      <br>
      *  or a columns major {@link List} of {@link List}s of entry {@link Object}s (a list of columns).  <br>
      *  This method will automatically create a {@link AbstractTableModel} instance for you.
+     *  <p>
+     *      <b>Please note that when the data of the provided data source changes (i.e. when the data source
+     *      is a {@link List} and the list is modified), the table model will not be updated automatically!
+     *      Use {@link #updateTableOn(Event)} to bind an update {@link Event} to the table model.</b>
      *
      * @param model An enum which configures the layout as well as modifiability of the table in a readable fashion.
      * @param dataSource The {@link TableListDataSource} returning a list matrix which will be used to populate the table.
@@ -195,6 +200,10 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      *  Use this instead of {@link JTable#setModel(TableModel)} if your table data can be represented based
      *  on a map of column names to lists of table entries (basically a column major matrix).  <br>
      *  This method will automatically create a {@link AbstractTableModel} instance for you.
+     *  <p>
+     *      <b>Please note that when the data of the provided data source changes (i.e. when the data source
+     *      is a {@link Map} which gets modified), the table model will not be updated automatically!
+     *      Use {@link #updateTableOn(Event)} to bind an update {@link Event} to the table model.</b>
      *
      * @param model An enum which configures the modifiability of the table in a readable fashion.
      * @param dataSource The {@link TableMapDataSource} returning a column major map based matrix which will be used to populate the table.
@@ -205,6 +214,27 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
         getComponent().setModel(new MapBasedColumnMajorTableModel<>(model.isEditable(), dataSource));
         return this;
     }
+
+    /**
+     *  Use this to bind an {@link sprouts.Event} to the {@link TableModel} of this table
+     *  which will trigger the {@link AbstractTableModel#fireTableDataChanged()} method.
+     *  This is useful if you want to update the table when the data source changes.
+     *
+     * @param event The event to be bound.
+     */
+    public final UIForTable<T> updateTableOn( Event event ) {
+        NullUtil.nullArgCheck(event, "event", Event.class);
+        event.subscribe(()->{
+            TableModel model = getComponent().getModel();
+            if ( model instanceof AbstractTableModel ) {
+                ((AbstractTableModel)model).fireTableDataChanged();
+            }
+            else
+                throw new IllegalStateException("The table model is not an AbstractTableModel instance.");
+        });
+        return this;
+    }
+
 
     private static abstract class ListBasedTableModel<E> extends AbstractTableModel
     {

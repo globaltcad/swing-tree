@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.035 seconds"
+    "duration":"0.010 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"A horizontally aligned split pane can be created through the \"splitPane\" factory method.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -54,7 +54,7 @@
     {
       "id":"An alignment property can be used to dynamically model the alignment of your split pane.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that the property shown in this example would be part of your view model.\n            So you can simply modify it as part of your business logic and the split pane\n            will automatically update its alignment.\n        "]
       },
@@ -79,7 +79,7 @@
     {
       "id":"A split pane can be configured with a divider size.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -121,7 +121,7 @@
     {
       "id":"The divider location of a split pane can dynamically be modelled using an integer property.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that the property shown in this example would be part of your view model.\n            So you can simply modify it as part of your business logic and the split pane\n            will automatically update its divider location based on an observer\n            registered on the property.\n        "]
       },
@@ -144,7 +144,7 @@
     {
       "id":"A horizontally aligned split pane can be configured with a divider location as a percentage.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -165,7 +165,7 @@
     {
       "id":"A vertically aligned split pane can be configured with a divider location as a percentage.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -186,7 +186,7 @@
     {
       "id":"The division of a split pane can dynamically be configured through a double property.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -213,7 +213,7 @@
     {
       "id":"You can dynamically model the divider size of a split pane in your view model.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            In a fully application, the divider size property in this example would be part of your view model\n            containing the state of the UI as well as the business logic. So you can simply modify it as part of\n            your business logic and the split pane will automatically update its divider size based on an observer\n            registered on the property.\n        "]
       },

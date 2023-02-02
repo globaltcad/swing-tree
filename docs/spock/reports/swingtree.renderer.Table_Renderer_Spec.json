@@ -4,24 +4,24 @@
   "narrative":"Swing-Tree exposes a user friendly API for rendering table cells.\n    For simple table UIs none of this is necessary, but it\n    is important when you want to populate your table with more complex data.\n    The renderer is a simple function that takes a value and returns a UI node.\n    The UI node is then rendered as a table cell.",
   "subjects":[],
   "statistics":{
-    "runs":"5",
+    "runs":"7",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.096 seconds"
+    "duration":"0.052 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can attach a simple table cell renderer to a JTable in just a few lines of code.",
       "result":"PASS",
-      "duration":"0.060 seconds",
+      "duration":"0.032 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We create a table with a lambda based table model.","code":["var ui =","        UI.table().withModel(","            UI.tableModel()","            .colNames(\"A\", \"B\")","            .onColCount({2})","            .onGet({\"O\"})","        )"]},
+        {"kind":"given","text":"We create a table with a lambda based table model.","code":["var ui =","        UI.table().withModel(","            UI.tableModel()","            .colNames(\"A\", \"B\")","            .onColCount({2})","            .onRowCount({3})","            .onGet({\"O\"})","        )"]},
 
         {"kind":"and","text":"\n                A mocked cell interpreter which interprets the state of the table cell\n                and then defines how it should be rendered (by setting a UI component).\n            ","code":["var render = Mock(Render.Cell.Interpreter)"]},
 
@@ -37,9 +37,32 @@
     },
   
     {
+      "id":"We can pass an Event to the table model to trigger updates.",
+      "result":"PASS",
+      "duration":"0.003 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We have an update event and some data.","code":["var data = [1, 2, 3, 4]","var update = sprouts.Event.of()"]},
+
+        {"kind":"and","text":"We create a table with a lambda based table model.","code":["var ui =","        UI.table().withModel(","            UI.tableModel()","            .onColName( {[\"X\", \"Y\", \"Z\"][it]})","            .onColCount({3})","            .onRowCount({data.size()})","            .onGet({r,c ->data[r]})","            .updateOn(update)","        )"]},
+
+        {"kind":"expect","text":"The table has 4 rows and 3 columns.","code":["ui.get(JTable).rowCount == 4","ui.get(JTable).columnCount == 3"]},
+
+        {"kind":"and","text":"The table has the correct data.","code":["ui.get(JTable).getValueAt(0, 0) == 1","ui.get(JTable).getValueAt(1, 0) == 2","ui.get(JTable).getValueAt(2, 0) == 3","ui.get(JTable).getValueAt(3, 0) == 4"]},
+
+        {"kind":"when","text":"We update the data.","code":["data = [5, 6, 7, 8]","update.fire()"]},
+
+        {"kind":"then","text":"The table has the correct data.","code":["ui.get(JTable).getValueAt(0, 0) == 5","ui.get(JTable).getValueAt(1, 0) == 6","ui.get(JTable).getValueAt(2, 0) == 7","ui.get(JTable).getValueAt(3, 0) == 8"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
       "id":"We can create a simple table cell renderer through a UI factory method.",
       "result":"PASS",
-      "duration":"0.006 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that you can actually pass a simple list of lists provider to the table factory method\n            and it will create a table model for you.\n            In the table defined below we create a list data based row major table. \n        "]
       },
@@ -64,7 +87,7 @@
     {
       "id":"We can create a simple column major table cell renderer through a UI factory method.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that you can actually pass a simple list of lists provider to the table factory method\n            and it will create a table model for you.\n            In the table defined below we create a list data based column major table. \n        "]
       },
@@ -89,7 +112,7 @@
     {
       "id":"A map can be used as a data source for tables.",
       "result":"PASS",
-      "duration":"0.010 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that you can actually pass a provider lambda for a map of header names to column lists \n            to the table factory method and it will create a table model for you, which is based on the provided \n            map provider. This will always result in a column major table. \n        "]
       },
@@ -114,7 +137,7 @@
     {
       "id":"You can render the cells of a table as text by using the \"asText\" method.",
       "result":"PASS",
-      "duration":"0.008 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Usually you want to render the cells of a table as text, you don't have to\n            define a renderer component for that. Simply use the \"asText\" method to \n            define how a cell should be converted to a string, which will be rendered for you.\n            Also, note that you can actually pass a simple list of lists provider to the table factory method\n            and it will create a table model for you.\n            In the table defined below we create a list data based row major table. \n        "]
       },
@@ -126,6 +149,25 @@
         {"kind":"and","text":"Finally we access the component from the renderer (which is responsible for the actual rendering).","code":["var component = found.getTableCellRendererComponent(null, 1, false, false, 0, 0)"]},
 
         {"kind":"then","text":"The cell is rendered as text (based on a JLabel).","code":["component instanceof JLabel","component.text == \"1!\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We need to attach a update Event to our table when the table data is list based and its data changes.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Use the Event class in your view model to define an event you can fire when you modify the data\n            of your table. The event will be used to update the table UI  if you register it with the table UI.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A simple event and some data.","code":["var event = sprouts.Event.of()","var data = [[1, 2, 3], [7, 8, 9]]"]},
+
+        {"kind":"and","text":"A simple table UI with a nested list based data table model.","code":["var ui =","            UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data })","            .updateTableOn(event)"]},
+
+        {"kind":"when","text":"We fire the event.","code":["event.fire()"]},
+
+        {"kind":"then","text":"The table UI is updated.","code":["ui.component.getRowCount() == 2","ui.component.getValueAt(0, 0) == 1","ui.component.getValueAt(0, 1) == 2","ui.component.getValueAt(0, 2) == 3","ui.component.getValueAt(1, 0) == 7","ui.component.getValueAt(1, 1) == 8","ui.component.getValueAt(1, 2) == 9"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

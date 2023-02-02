@@ -1,5 +1,6 @@
 package swingtree.renderer
 
+import jdk.internal.event.Event
 import swingtree.Render
 import swingtree.UI
 import spock.lang.Narrative
@@ -30,6 +31,7 @@ class Table_Renderer_Spec extends Specification
                         UI.tableModel()
                         .colNames("A", "B")
                         .onColCount({2})
+                        .onRowCount({3})
                         .onGet({"O"})
                     )
         and : """
@@ -49,6 +51,39 @@ class Table_Renderer_Spec extends Specification
             1 * render.interpret(_)
     }
 
+    def 'We can pass an Event to the table model to trigger updates.'()
+    {
+        given : 'We have an update event and some data.'
+            var data = [1, 2, 3, 4]
+            var update = sprouts.Event.of()
+        and : 'We create a table with a lambda based table model.'
+            var ui =
+                    UI.table().withModel(
+                        UI.tableModel()
+                        .onColName( {["X", "Y", "Z"][it]})
+                        .onColCount({3})
+                        .onRowCount({data.size()})
+                        .onGet({r,c ->data[r]})
+                        .updateOn(update)
+                    )
+
+        expect : 'The table has 4 rows and 3 columns.'
+            ui.get(JTable).rowCount == 4
+            ui.get(JTable).columnCount == 3
+        and : 'The table has the correct data.'
+            ui.get(JTable).getValueAt(0, 0) == 1
+            ui.get(JTable).getValueAt(1, 0) == 2
+            ui.get(JTable).getValueAt(2, 0) == 3
+            ui.get(JTable).getValueAt(3, 0) == 4
+        when : 'We update the data.'
+            data = [5, 6, 7, 8]
+            update.fire()
+        then : 'The table has the correct data.'
+            ui.get(JTable).getValueAt(0, 0) == 5
+            ui.get(JTable).getValueAt(1, 0) == 6
+            ui.get(JTable).getValueAt(2, 0) == 7
+            ui.get(JTable).getValueAt(3, 0) == 8
+    }
 
     def 'We can create a simple table cell renderer through a UI factory method.'()
     {
@@ -190,6 +225,32 @@ class Table_Renderer_Spec extends Specification
         then : 'The cell is rendered as text (based on a JLabel).'
             component instanceof JLabel
             component.text == "1!"
+    }
+
+    def 'We need to attach a update Event to our table when the table data is list based and its data changes.'()
+    {
+        reportInfo """
+            Use the Event class in your view model to define an event you can fire when you modify the data
+            of your table. The event will be used to update the table UI  if you register it with the table UI.
+        """
+        given : 'A simple event and some data.'
+            var event = sprouts.Event.of()
+            var data = [[1, 2, 3], [7, 8, 9]]
+
+        and : 'A simple table UI with a nested list based data table model.'
+            var ui =
+                        UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data })
+                        .updateTableOn(event)
+        when : 'We fire the event.'
+            event.fire()
+        then : 'The table UI is updated.'
+            ui.component.getRowCount() == 2
+            ui.component.getValueAt(0, 0) == 1
+            ui.component.getValueAt(0, 1) == 2
+            ui.component.getValueAt(0, 2) == 3
+            ui.component.getValueAt(1, 0) == 7
+            ui.component.getValueAt(1, 1) == 8
+            ui.component.getValueAt(1, 2) == 9
     }
 
 }

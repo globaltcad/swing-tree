@@ -1,6 +1,7 @@
 package swingtree;
 
 import com.alexandriasoftware.swing.JSplitButton;
+import sprouts.Event;
 import swingtree.api.Buildable;
 import swingtree.api.MenuBuilder;
 import swingtree.api.SwingBuilder;
@@ -17,6 +18,8 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.io.File;
@@ -24,6 +27,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.Map;
 import java.util.function.Supplier;
 
 /**
@@ -2547,12 +2551,40 @@ public final class UI
 
     public static UIForTable<JTable> table() { return of(new JTable()); }
 
+    /**
+     *  Use this to create a new {@link JTable} with a table model whose data can be represented based
+     *  on a list of lists of entries.  <br>
+     *  This method will automatically create a {@link AbstractTableModel} instance for you.
+     *  <p>
+     *      <b>Please note that when the data of the provided data source changes (i.e. when the data source
+     *      is a {@link java.util.List} which gets modified), the table model will not be updated automatically!
+     *      Use {@link UIForTable#updateTableOn(sprouts.Event)} to bind an update {@link Event} to the table model.</b>
+     *
+     * @param dataFormat An enum which configures the modifiability of the table in a readable fashion.
+     * @param dataSource The {@link TableMapDataSource} returning a column major map based matrix which will be used to populate the table.
+     * @return This builder node.
+     * @param <E> The type of the table entry {@link Object}s.
+     */
     public static <E> UIForTable<JTable> table( ListData dataFormat, TableListDataSource<E> dataSource ) {
         NullUtil.nullArgCheck(dataFormat, "dataFormat", ListData.class);
         NullUtil.nullArgCheck(dataSource, "dataSource", TableListDataSource.class);
         return of(new JTable()).with(dataFormat, dataSource);
     }
 
+    /**
+     *  Use this to create a new {@link JTable} with a table model whose data can be represented based
+     *  on a map of column names to lists of table entries (basically a column major matrix).  <br>
+     *  This method will automatically create a {@link AbstractTableModel} instance for you.
+     *  <p>
+     *      <b>Please note that when the data of the provided data source changes (i.e. when the data source
+     *      is a {@link Map} which gets modified), the table model will not be updated automatically!
+     *      Use {@link UIForTable#updateTableOn(sprouts.Event)} to bind an update {@link Event} to the table model.</b>
+     *
+     * @param dataFormat An enum which configures the modifiability of the table in a readable fashion.
+     * @param dataSource The {@link TableMapDataSource} returning a column major map based matrix which will be used to populate the table.
+     * @return This builder node.
+     * @param <E> The type of the table entry {@link Object}s.
+     */
     public static <E> UIForTable<JTable> table( MapData dataFormat, TableMapDataSource<E> dataSource ) {
         NullUtil.nullArgCheck(dataFormat, "dataFormat", ListData.class);
         NullUtil.nullArgCheck(dataSource, "dataSource", TableMapDataSource.class);
@@ -2563,6 +2595,9 @@ public final class UI
         return of(new JTable()).withModel(tableModelBuildable);
     }
 
+    /**
+     * @return A functional API for building a {@link javax.swing.table.TableModel}.
+     */
     public static BasicTableModel.Builder tableModel() { return new BasicTableModel.Builder(); }
 
     public static Render.Builder<JTable, Object> renderTable() {
