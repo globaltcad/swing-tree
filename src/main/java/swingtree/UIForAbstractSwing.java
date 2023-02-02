@@ -2379,7 +2379,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
 
     private void _updateComponentAt( int index, Viewable v, String attr ) {
         component().ifPresent( c -> {
-            JComponent newComponent = v == null ? new JPanel() : v.createView(JComponent.class);
+
+            JComponent newComponent = v == null ? new JPanel() : UI.use(_eventProcessor, () -> v.createView(JComponent.class) );
             // We remove the old component.
             c.remove(c.getComponent(index));
             // We add the new component.
@@ -2397,9 +2398,9 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         component().ifPresent( c -> {
             // We add the new component.
             if ( attr == null )
-                c.add(v.createView(JComponent.class), index);
+                c.add(UI.use(_eventProcessor, () -> v.createView(JComponent.class)), index);
             else
-                c.add(v.createView(JComponent.class), attr, index);
+                c.add(UI.use(_eventProcessor, () -> v.createView(JComponent.class)), attr, index);
             // We update the layout.
             c.revalidate();
             c.repaint();
