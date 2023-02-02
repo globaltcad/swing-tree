@@ -92,8 +92,23 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
         NullUtil.nullPropertyCheck(text, "text", "Use an empty string instead of null!");
         _onShow( text, newText -> {
             C c = getComponent();
-            if ( !Objects.equals(c.getText(), newText) )
-                c.setText(newText);
+            if ( _eventProcessor == EventProcessor.COUPLED )
+                UI.runLater(() -> {
+                    if ( !Objects.equals(c.getText(), newText) )
+                        c.setText(newText);
+                    /*
+                        Okay, so this looks really strange, I know, but this is important to prevent a tricky bug!
+                        The bug is that if this code here is triggered by the key type event below, then the
+                        text component will not yet be updated with the new text, because the text of the component
+                        will only be updated after the key type event has been processed.
+                        So if a property in a user view model rebroadcasts the newly typed text generated
+                        by the '_onKeyTyped' below, then user action (key typed, deletion, etc.) will be
+                        added to the 'newTex' string we have here in this lambda, which is not what we want!
+                    */
+                });
+            else
+                if ( !Objects.equals(c.getText(), newText) )
+                    c.setText(newText);
         });
         _onKeyTyped( (KeyEvent e) -> {
             String oldText = getComponent().getText();
