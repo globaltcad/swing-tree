@@ -11,6 +11,7 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -89,7 +90,11 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
 
     public final I withText( Var<String> text ) {
         NullUtil.nullPropertyCheck(text, "text", "Use an empty string instead of null!");
-        _onShow( text, v-> getComponent().setText(v) );
+        _onShow( text, newText -> {
+            C c = getComponent();
+            if ( !Objects.equals(c.getText(), newText) )
+                c.setText(newText);
+        });
         _onKeyTyped( (KeyEvent e) -> {
             String oldText = getComponent().getText();
             // We need to add the now typed character to the old text, because the key typed event
@@ -98,7 +103,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
             String part2 = oldText.substring(getComponent().getCaretPosition());
             String newText;
             if ( e.getKeyChar() == '\b' ) // backspace
-                newText = part1 + part2; // The user has deleted a character, so we need to remove it from the text.
+                newText = part1 + part2; // The user has deleted a character(s), they will already be gone, we just need to set the text.
             else if ( e.getKeyChar() == '\u007f' ) // delete
                 newText = part1 + ( part2.length() < 2 ? part2 : part2.substring(1) );
             else
