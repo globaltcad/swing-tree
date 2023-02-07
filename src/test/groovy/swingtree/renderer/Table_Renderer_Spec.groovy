@@ -78,6 +78,7 @@ class Table_Renderer_Spec extends Specification
         when : 'We update the data.'
             data = [5, 6, 7, 8]
             update.fire()
+            UI.sync() // sync with the EDT
         then : 'The table has the correct data.'
             ui.get(JTable).getValueAt(0, 0) == 5
             ui.get(JTable).getValueAt(1, 0) == 6

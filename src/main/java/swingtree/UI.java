@@ -19,7 +19,6 @@ import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableModel;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.io.File;
@@ -59,18 +58,44 @@ public final class UI
         return settings;
     }
 
-    public static <T> T use(EventProcessor mode, Supplier<T> scope ) {
-
+    /**
+     *  Sets the {@link EventProcessor} to be used for all subsequent UI building operations.
+     *  This method allows to switch between different event processing strategies.
+     *  In particular, the {@link DecoupledEventProcessor} is recommended to be used for
+     *  proper decoupling of the UI thread from the application logic.
+     *  <p>
+     * 	You can switch to the decoupled event processor like so: <br>
+     * 	<pre>{@code
+     * 	use(EventProcessor.DECOUPLED, ()->
+     *      UI.panel("fill")
+     *      .add( "shrink", UI.label( "Username:" ) )
+     *      .add( "grow, pushx", UI.textField("User1234..42") )
+     *      .add( label( "Password:" ) )
+     *      .add( "grow, pushx", UI.passwordField("child-birthday") )
+     *      .add( "span",
+     *          UI.button("Login!").onClick( it -> {...} )
+     *      )
+     *  );
+     *  }</pre>
+     *
+     * @param processor The event processor to be used for all subsequent UI building operations
+     * @param scope The scope of the event processor to be used for all subsequent UI building operations.
+     *              The value returned by the given scope is returned by this method.
+     * @return The value returned by the given scope.
+     * @param <T> The type of the value returned by the given scope.
+     */
+    public static <T> T use(EventProcessor processor, Supplier<T> scope )
+    {
         if ( !UI.thisIsUIThread() )
             try {
-                return runAndGet(()-> use(mode, scope));
+                return runAndGet(()-> use(processor, scope));
             } catch (InvocationTargetException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
 
         Settings settings = SETTINGS();
         EventProcessor oldProcessor = settings.getEventProcessor();
-        settings.setEventProcessor(mode);
+        settings.setEventProcessor(processor);
         try {
             return scope.get();
         } finally {
@@ -80,14 +105,14 @@ public final class UI
 
     public static void processEvents() {
         try {
-            EventQueue.INSTANCE().processAll(false);
+            DecoupledEventProcessor.INSTANCE().processAll(false);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
     public static void processEventsUntilException() throws InterruptedException {
-        EventQueue.INSTANCE().processAll( true );
+        DecoupledEventProcessor.INSTANCE().processAll( true );
     }
 
     // Common Mig layout constants:
