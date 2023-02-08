@@ -96,23 +96,29 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
                 c.setText(newText);
         });
         _onKeyTyped( (KeyEvent e) -> {
-            String oldText = getComponent().getText();
+            C component = getComponent();
+            String oldText = component.getText();
             // We need to add the now typed character to the old text, because the key typed event
             // is fired before the text is actually inserted into the text component.
-            String part1 = oldText.substring(0, getComponent().getCaretPosition());
-            String part2 = oldText.substring(getComponent().getCaretPosition());
+            // The newly typed character needs to go at where the selection/caret.
+            // So what we do first is get the non-selected text parts, then we insert the new character...
+            int selectionStart = component.getSelectionStart();
+            int selectionEnd   = component.getSelectionEnd();
+            String part1 = oldText.substring(0, selectionStart);
+            String part2 = oldText.substring(selectionEnd);
             String newText;
             if ( e.getKeyChar() == '\b' ) // backspace
                 newText = part1 + part2; // The user has deleted a character(s), they will already be gone, we just need to set the text.
             else if ( e.getKeyChar() == '\u007f' ) // delete
                 newText = part1 + ( part2.length() < 2 ? part2 : part2.substring(1) );
             else
-                newText = part1 + e.getKeyChar() + part2;
+                newText = part1 + e.getKeyChar() + part2; // The user has typed a character, we need to add it to the text.
 
+            // So and now we can simply inform the property right? Not so fast, we need to do that later!
             UI.runLater(() -> {
                 _doApp(newText, text::act);
                 /*
-                    Okay, it looks really strange that we apply the text to the property in the next EDT cycle,
+                    Yes, it looks really strange that we apply the text to the property in the next EDT cycle,
                     but this is important to prevent a tricky bug!
                     To understand the bug you need to know 2 things:
                     1. Calling 'act' on a prop triggers user defined 'onAct' callbacks, usually inside the view model.
@@ -127,7 +133,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
                     which is already outdated, because the text property has already been updated with the new text,
                     the component however has not yet been updated with the new text.
 
-                    So this is why we call the 'act' method on the text property in the next EDT cycle!
+                    To prevent this madness we simply call the 'act' method of the text property in the next EDT cycle!
                 */
             });
         });
