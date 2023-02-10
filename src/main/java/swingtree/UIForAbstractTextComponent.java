@@ -79,15 +79,44 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      * @return This very builder to allow for method chaining.
      */
     public final I withText( String text ) {
+        NullUtil.nullArgCheck(text, "text", String.class, "Please use an empty string instead of null!");
         getComponent().setText(text);
         return _this();
     }
 
+    /**
+     * Binds the text of the wrapped <code>{@link TextComponent}</code> to
+     * the specified {@link Val} property instance so that the text of the wrapped
+     * text component is dynamically updated whenever the value of the property changes.
+     * <p>
+     *     Note that the text of the wrapped text component is only updated if the new value
+     *     is different from the old value. This is to avoid infinite feedback loops.
+     * <br>
+     * @param val The property instance to bind the text of the wrapped text component to.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if the specified property is <code>null</code>.
+     * @throws IllegalArgumentException if the specified property allows <code>null</code> values.
+     */
     public final I withText( Val<String> val ) {
+        NullUtil.nullArgCheck(val, "val", Val.class);
         _onShow(val, v -> getComponent().setText(v) );
         return withText( val.orElseThrow() );
     }
 
+    /**
+     *  Binds the text of the wrapped <code>{@link TextComponent}</code> to
+     *  the specified {@link Val} property instance so that the text of the wrapped
+     *  text component is dynamically updated whenever the value of the property changes.
+     *  <p>
+     *  This method is the same as {@link #withText(Val)} except that the {@link Var}
+     *  property is used instead of the {@link Val} property which allows for the
+     *  text of the wrapped text component to be changed by the user.
+     *
+     * @param text The property instance to bind the text of the wrapped text component to.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if the specified property is <code>null</code>.
+     * @throws IllegalArgumentException if the specified property allows <code>null</code> values.
+     */
     public final I withText( Var<String> text ) {
         NullUtil.nullPropertyCheck(text, "text", "Use an empty string instead of null!");
         _onShow( text, newText -> {
@@ -140,12 +169,29 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
         return withText( text.orElseThrow() );
     }
 
+    /**
+     *  Use this to set the font of the wrapped {@link JTextComponent}.
+     * @param font The font of the text which should be displayed on the text component.
+     * @return This builder instance, to allow for method chaining.
+     * @throws IllegalArgumentException if {@code font} is {@code null}.
+     */
     public final I withFont( Font font ) {
         NullUtil.nullArgCheck(font, "font", Font.class);
         this.getComponent().setFont( font );
         return _this();
     }
 
+    /**
+     *  Use this to dynamically set the font of the wrapped {@link JTextComponent}
+     *  through the provided view model property.
+     *  When the font wrapped by the provided property changes,
+     *  then so does the font of this text component.
+     *
+     * @param font The font property of the text which should be displayed on the text component.
+     * @return This builder instance, to allow for method chaining.
+     * @throws IllegalArgumentException if {@code font} is {@code null}.
+     * @throws IllegalArgumentException if {@code font} is a property which can wrap {@code null}.
+     */
     public final I withFont( Val<Font> font ) {
         NullUtil.nullArgCheck(font, "font", Val.class);
         NullUtil.nullPropertyCheck(font, "font", "Use the default font of this component instead of null!");
@@ -235,6 +281,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      * @return This very builder to allow for method chaining.
      */
     public final I onTextChange( Consumer<SimpleDelegate<JTextComponent, DocumentEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", Consumer.class);
         C component = getComponent();
         component.getDocument().addDocumentListener(new DocumentListener() {
             @Override public void insertUpdate(DocumentEvent e) {
@@ -265,6 +312,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      * @return This very builder to allow for method chaining.
      */
     public final I onTextRemove( Action<RemoveDelegate> action ) {
+        NullUtil.nullArgCheck(action, "action", Action.class);
         _ifFilterable( () -> this.removes.add(action) );
         return _this();
     }
@@ -287,6 +335,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
      * @return This very builder to allow for method chaining.
      */
     public final I onTextReplace( Action<ReplaceDelegate> action ) {
+        NullUtil.nullArgCheck(action, "action", Action.class);
         _ifFilterable( () -> this.replaces.add(action) );
         return _this();
     }
