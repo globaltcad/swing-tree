@@ -55,12 +55,12 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     /**
      * @param action An action which should be executed by the UI thread (EDT).
      */
-    protected final void _doUI( Runnable action ) { _eventProcessor.processUIEvent( action ); }
+    protected final void _doUI( Runnable action ) { _eventProcessor.registerUIEvent( action ); }
 
     /**
      * @param action An action which should be executed by the application thread.
      */
-    protected final void _doApp( Runnable action ) { _eventProcessor.processAppEvent(action); }
+    protected final void _doApp( Runnable action ) { _eventProcessor.registerAppEvent(action); }
 
     /**
      * @param value A value which should be captured.

@@ -48,7 +48,7 @@ public interface EventProcessor
 	 *
 	 * @param runnable The task to be executed in the application thread.
 	 */
-	void processAppEvent(Runnable runnable);
+	void registerAppEvent(Runnable runnable);
 
 	/**
 	 *   Adds the supplied task to an event queue for processing application events
@@ -59,7 +59,7 @@ public interface EventProcessor
 	 *
 	 * @param runnable The task to be executed in the application thread.
 	 */
-	void processAppEventNow(Runnable runnable);
+	void registerAndRunAppEventNow(Runnable runnable);
 
 	/**
 	 *   Adds the supplied task to an event queue for processing UI events.
@@ -68,7 +68,7 @@ public interface EventProcessor
 	 *
 	 * @param runnable The task to be executed in the GUI thread.
 	 */
-	void processUIEvent(Runnable runnable);
+	void registerUIEvent(Runnable runnable);
 
 	/**
 	 *   Adds the supplied task to an event queue for processing UI events
@@ -78,6 +78,6 @@ public interface EventProcessor
 	 *
 	 * @param runnable The task to be executed in the GUI thread.
 	 */
-	void processUIEventNow(Runnable runnable);
+	void registerAndRunUIEventNow(Runnable runnable);
 
 }

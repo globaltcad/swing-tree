@@ -103,16 +103,37 @@ public final class UI
         }
     }
 
-    public static void processEvents() {
-        try {
-            DecoupledEventProcessor.INSTANCE().processAll(false);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    /**
+     *  A fully blocking call to the decoupled thread event processor
+     *  causing this thread to join its event queue
+     *  so that it can continuously process events produced by the UI.
+     *  <p>
+     *  This method wither be called by the main thread of the application
+     *  after the UI has been built and shown to the user, or alternatively
+     *  a new thread dedicated to processing events. (things like button clicks, etc.)
+     *  @throws IllegalStateException If this method is called from the UI thread.
+     */
+    public static void joinDecoupledEventProcessor() {
+        if ( thisIsUIThread() )
+            throw new IllegalStateException("This method must not be called from the UI thread.");
+        DecoupledEventProcessor.INSTANCE().join();
     }
 
-    public static void processEventsUntilException() throws InterruptedException {
-        DecoupledEventProcessor.INSTANCE().processAll( true );
+    /**
+     *  A fully blocking call to the decoupled thread event processor
+     *  causing this thread to join its event queue
+     *  so that it can continuously process events produced by the UI.
+     *  <p>
+     *  This method wither be called by the main thread of the application
+     *  after the UI has been built and shown to the user, or alternatively
+     *  a new thread dedicated to processing events. (things like button clicks, etc.)
+     *  <p>
+     *  This method will block until an exception is thrown by the event processor.
+     *  This is useful for debugging purposes.
+     *  @throws InterruptedException If the thread is interrupted while waiting for the event processor to join.
+     */
+    public static void joinDecoupledEventProcessorUntilException() throws InterruptedException {
+        DecoupledEventProcessor.INSTANCE().joinUntilException();
     }
 
     // Common Mig layout constants:
@@ -3050,7 +3071,7 @@ public final class UI
         // We set the size to fit the component:
         frame.setSize(component.getPreferredSize());
         frame.setVisible(true);
-        while ( true ) { UI.processEvents(); }
+        while ( true ) { UI.joinDecoupledEventProcessor(); }
     }
 
 }

@@ -30,6 +30,6 @@ public class LoginView extends JPanel
 
     public static void main( String[] args ) {
         UI.show(new LoginView( new LoginViewModel() ));
-        while (true) { UI.processEvents(); }
+        while (true) { UI.joinDecoupledEventProcessor(); }
     }
 }

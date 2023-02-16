@@ -19,7 +19,7 @@ class DecoupledEventProcessor implements EventProcessor
 	private final BlockingQueue<Runnable> rendererQueue = new LinkedBlockingQueue<>();
 
 
-	@Override public void processAppEvent( Runnable task ) {
+	@Override public void registerAppEvent(Runnable task ) {
 		try {
 			rendererQueue.put(task);
 		} catch (Exception e) {
@@ -28,7 +28,7 @@ class DecoupledEventProcessor implements EventProcessor
 	}
 
 	@Override
-	public void processAppEventNow( Runnable runnable ) {
+	public void registerAndRunAppEventNow(Runnable runnable ) {
 		// We add the task to the queue and then wait for it to be processed.
 		// This is a blocking call.
 		boolean[] done = new boolean[1];
@@ -52,12 +52,12 @@ class DecoupledEventProcessor implements EventProcessor
 	}
 
 	@Override
-	public void processUIEvent(Runnable runnable) {
+	public void registerUIEvent(Runnable runnable) {
 		UI.run(runnable);
 	}
 
 	@Override
-	public void processUIEventNow(Runnable runnable) {
+	public void registerAndRunUIEventNow(Runnable runnable) {
 		try {
 			UI.runNow(runnable);
 		} catch (Exception e) {
@@ -65,26 +65,34 @@ class DecoupledEventProcessor implements EventProcessor
 		}
 	}
 
-	void processAll( boolean rethrow ) throws InterruptedException {
-		while ( !this.rendererQueue.isEmpty() )
-			_process(this.rendererQueue.size(), rethrow);
+	/**
+	 * This method is called by a thread to process all GUI events, this should be the application's main thread.
+	 * @param rethrow If true, any exception thrown by the event handler will be rethrown.
+	 * @throws InterruptedException If the thread is interrupted while waiting for the event to be processed.
+     *                              Only thrown if {@code rethrow} is true.
+	 */
+	void join( boolean rethrow ) throws InterruptedException {
+		try {
+			this.rendererQueue.take().run();
+		}
+		catch (Exception e) {
+			if ( rethrow )
+				throw e;
+			else
+				e.printStackTrace();
+		}
 	}
 
-	private void _process( int numberOfEventsToBeProcessed, boolean rethrow ) throws InterruptedException {
-		int processed = 0;
-		while ( processed < numberOfEventsToBeProcessed && !this.rendererQueue.isEmpty() ) {
-			try {
-				this.rendererQueue.take().run();
-			}
-			catch (Exception e) {
-				if ( rethrow )
-					throw e;
-				else
-					e.printStackTrace();
-				processed--;
-			}
-			processed++;
+	void join() {
+		try {
+			this.join(false);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
+	}
+
+	void joinUntilException() throws InterruptedException {
+		this.join(true);
 	}
 
 }
