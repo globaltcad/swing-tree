@@ -41,7 +41,7 @@ class AdvancedUI {
                                UI.scrollPane()
                                .with(UI.ScrollBarPolicy.NEVER)
                                .with(UI.ScrollBarPolicy.AS_NEEDED)
-                               .add(UI.editorPane().withForeground(Color.DARK_GRAY).withText((Data.explain.strip().replace("\n", " "))).isEditableIf(false)))
+                               .add(UI.editorPane().withForeground(Color.DARK_GRAY).withText((Data.explain.trim().replace("\n", " "))).isEditableIf(false)))
                         )
                         .add("width 480!, shrink, aligny bottom",
                             UI.of(new JSlider(SwingConstants.HORIZONTAL)).peek({

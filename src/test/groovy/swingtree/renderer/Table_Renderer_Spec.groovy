@@ -1,6 +1,5 @@
 package swingtree.renderer
 
-import jdk.internal.event.Event
 import swingtree.Render
 import swingtree.UI
 import spock.lang.Narrative

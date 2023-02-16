@@ -52,7 +52,7 @@ class OptionalUI_Spec extends Specification
         given:
             var optionalUI = UI.panel().component().map({ it -> null })
         when:
-            optionalUI.orElseThrow()
+            optionalUI.orElseThrow({new NoSuchElementException()})
         then:
             thrown(NoSuchElementException)
     }

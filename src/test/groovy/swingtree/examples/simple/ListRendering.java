@@ -1,9 +1,11 @@
 package swingtree.examples.simple;
 
 import swingtree.UI;
-import com.sun.tools.javac.util.List;
 
 import javax.swing.*;
+
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static swingtree.UI.*;
 
@@ -16,7 +18,7 @@ public class ListRendering extends JPanel
         .add(GROW.and(WRAP).and(SPAN), label("List Rendering Examples:"))
         .add(GROW,
             of(new JList<Test>()).id("my-test-list")
-            .withEntries(List.of(Test.A, Test.B, Test.C))
+            .withEntries(Stream.of(Test.A, Test.B, Test.C).collect(Collectors.toList()))
             .withRenderer(
                 renderListItem(Test.class).asText( cell -> cell.valueAsString().orElse("") )
             )
