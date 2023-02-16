@@ -54,7 +54,7 @@ class Thread_Mode_Spec extends Specification
                 application would be done by a custom thread, or the main thread
                 of your application (everything but your GUI thread really).
             """
-            UI.joinDecoupledEventProcessor()
+            UI.joinDecoupledEventProcessorFor(1)
         then: 'The event is handled.'
             eventWasHandled
     }
@@ -104,14 +104,14 @@ class Thread_Mode_Spec extends Specification
                         )
         when : 'We click the button and process the event queue (by this current non-swing thread).'
             UI.runNow( () -> ui1.component.doClick() )
-            UI.joinDecoupledEventProcessorUntilException() // This is done by a custom thread in a real world application.
+            UI.joinDecoupledEventProcessorUntilExceptionFor(1) // This is done by a custom thread in a real world application.
         then: 'The delegate throws an exception!'
             var e = thrown(Exception)
             e.message.contains(problem)
 
         when : 'We click the button second button and then process the event queue (by this current non-swing thread).'
             UI.runNow( () -> ui2.component.doClick() )
-            UI.joinDecoupledEventProcessorUntilException() // This is done by a custom thread in a real world application.
+            UI.joinDecoupledEventProcessorUntilExceptionFor(1) // This is done by a custom thread in a real world application.
         then: 'The delegate does not throw an exception!'
             noExceptionThrown()
 
@@ -136,7 +136,7 @@ class Thread_Mode_Spec extends Specification
                         )
         when : 'We check the check box and process the event queue (by this current non-swing thread).'
             UI.runNow( () -> ui.component.doClick() )
-            UI.joinDecoupledEventProcessorUntilException() // This is done by a custom thread in a real world application.
+            UI.joinDecoupledEventProcessorFor(1) // This is done by a custom thread in a real world application.
         then: 'The delegate does not throw an exception!'
             noExceptionThrown()
     }

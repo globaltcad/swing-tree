@@ -124,7 +124,7 @@ public final class UI
      *  causing this thread to join its event queue
      *  so that it can continuously process events produced by the UI.
      *  <p>
-     *  This method wither be called by the main thread of the application
+     *  This method should be called by the main thread of the application
      *  after the UI has been built and shown to the user, or alternatively
      *  a new thread dedicated to processing events. (things like button clicks, etc.)
      *  <p>
@@ -135,6 +135,42 @@ public final class UI
     public static void joinDecoupledEventProcessorUntilException() throws InterruptedException {
         DecoupledEventProcessor.INSTANCE().joinUntilException();
     }
+
+    /**
+     *  A fully blocking call to the decoupled thread event processor
+     *  causing this thread to join its event queue
+     *  so that it can process the given number of events produced by the UI.
+     *  <p>
+     *  This method should be called by the main thread of the application
+     *  after the UI has been built and shown to the user, or alternatively
+     *  a new thread dedicated to processing events. (things like button clicks, etc.)
+     *  <p>
+     *  This method will block until the given number of events have been processed.
+     *  @param numberOfEvents The number of events to wait for.
+     *  @throws InterruptedException If the thread is interrupted while waiting for the event processor to join.
+     */
+    public static void joinDecoupledEventProcessorFor(long numberOfEvents) {
+        DecoupledEventProcessor.INSTANCE().joinFor(numberOfEvents);
+    }
+
+    /**
+     *  A fully blocking call to the decoupled thread event processor
+     *  causing this thread to join its event queue
+     *  so that it can process the given number of events produced by the UI.
+     *  <p>
+     *  This method should be called by the main thread of the application
+     *  after the UI has been built and shown to the user, or alternatively
+     *  a new thread dedicated to processing events. (things like button clicks, etc.)
+     *  <p>
+     *  This method will block until the given number of events have been processed
+     *  or an exception is thrown by the event processor.
+     *  @param numberOfEvents The number of events to wait for.
+     *  @throws InterruptedException If the thread is interrupted while waiting for the event processor to join.
+     */
+    public static void joinDecoupledEventProcessorUntilExceptionFor(long numberOfEvents) throws InterruptedException {
+        DecoupledEventProcessor.INSTANCE().joinUntilExceptionFor(numberOfEvents);
+    }
+
 
     // Common Mig layout constants:
     public static LayoutAttr FILL     = LayoutAttr.of("fill");
@@ -3071,7 +3107,7 @@ public final class UI
         // We set the size to fit the component:
         frame.setSize(component.getPreferredSize());
         frame.setVisible(true);
-        while ( true ) { UI.joinDecoupledEventProcessor(); }
+        UI.joinDecoupledEventProcessor();
     }
 
 }

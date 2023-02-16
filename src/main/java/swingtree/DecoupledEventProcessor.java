@@ -72,14 +72,15 @@ class DecoupledEventProcessor implements EventProcessor
      *                              Only thrown if {@code rethrow} is true.
 	 */
 	void join( boolean rethrow ) throws InterruptedException {
-		try {
-			this.rendererQueue.take().run();
-		}
-		catch (Exception e) {
-			if ( rethrow )
-				throw e;
-			else
-				e.printStackTrace();
+		while ( true ) {
+			try {
+				this.rendererQueue.take().run();
+			} catch (Exception e) {
+				if (rethrow)
+					throw e;
+				else
+					e.printStackTrace();
+			}
 		}
 	}
 
@@ -93,6 +94,22 @@ class DecoupledEventProcessor implements EventProcessor
 
 	void joinUntilException() throws InterruptedException {
 		this.join(true);
+	}
+
+	void joinFor( long numberOfEvents ) {
+		for ( long i = 0; i < numberOfEvents; i++ ) {
+			try {
+				this.rendererQueue.take().run();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	void joinUntilExceptionFor( long numberOfEvents ) throws InterruptedException {
+		for ( long i = 0; i < numberOfEvents; i++ ) {
+			this.rendererQueue.take().run();
+		}
 	}
 
 }
