@@ -2343,7 +2343,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         return this.add(attr.toString(), viewables);
     }
 
-    private void _addViewableProps( Vals<? extends Viewable> viewables, String attr ) {
+    protected void _addViewableProps( Vals<? extends Viewable> viewables, String attr ) {
         _onShow( viewables, delegate -> {
             // we simply redo all the components.
             switch ( delegate.changeType() ) {

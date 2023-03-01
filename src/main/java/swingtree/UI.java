@@ -1,20 +1,17 @@
 package swingtree;
 
 import com.alexandriasoftware.swing.JSplitButton;
+import net.miginfocom.swing.MigLayout;
 import sprouts.Event;
+import sprouts.*;
 import swingtree.api.Buildable;
 import swingtree.api.MenuBuilder;
 import swingtree.api.SwingBuilder;
 import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
-import sprouts.Val;
-import sprouts.Vals;
-import sprouts.Var;
-import sprouts.Vars;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
-import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -1251,6 +1248,22 @@ public final class UI
      * @return A builder instance for a new {@link JScrollPane}, which enables fluent method chaining.
      */
     public static UIForScrollPane<JScrollPane> scrollPane() { return of(new JScrollPane()); }
+
+    public static <P extends JScrollPanels> UIForScrollPanels<P> of( P component ) {
+        NullUtil.nullArgCheck(component, "component", JScrollPane.class);
+        return new UIForScrollPanels<>(component);
+    }
+
+    public static UIForScrollPanels<JScrollPanels> scrollPanels() {
+        return of(JScrollPanels.of(true, new Dimension(100,100)));
+    }
+
+    public static UIForScrollPanels<JScrollPanels> scrollPanels(Align align) {
+        return of(JScrollPanels.of(
+                align == Align.VERTICAL,
+                new Dimension(100,100))
+            );
+    }
 
     /**
      *  Use this to create a builder for the provided {@link JSplitPane} instance.
