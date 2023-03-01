@@ -45,8 +45,6 @@ class TableUI
     }
 
     // Use this to test the UI!
-    static void main(String... args) {
-        new UI.TestWindow({new JFrame()}, create()).getFrame().setSize(new Dimension(350, 225))
-    }
+    static void main(String... args) { UI.show(create()) }
 
 }

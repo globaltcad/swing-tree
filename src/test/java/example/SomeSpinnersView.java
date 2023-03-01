@@ -106,6 +106,7 @@ public class SomeSpinnersView extends JPanel {
 
 	public static void main(String... args) {
 		UI.show(new SomeSpinnersView(new SomeSpinnersViewModel()));
+		UI.joinDecoupledEventProcessor();
 	}
 
 }

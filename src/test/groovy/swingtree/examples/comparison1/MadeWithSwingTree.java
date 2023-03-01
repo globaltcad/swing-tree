@@ -84,8 +84,6 @@ public class MadeWithSwingTree extends JPanel
     }
 
     // Use this to test the UI!
-    public static void main(String... args) {
-        new UI.TestWindow(JFrame::new,new MadeWithSwingTree()).getFrame().setSize(new Dimension(650, 550));
-    }
+    public static void main(String... args) { UI.show(new MadeWithSwingTree()); }
 
 }

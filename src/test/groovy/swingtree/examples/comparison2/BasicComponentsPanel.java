@@ -855,8 +855,6 @@ class BasicComponentsPanel extends JPanel
     }
 
     // Use this to test the UI!
-    public static void main(String... args) {
-        new UI.TestWindow(JFrame::new,new BasicComponentsPanel()).getFrame().setSize(new Dimension(800, 600));
-    }
+    public static void main(String... args) { UI.show(new BasicComponentsPanel()); }
 
 }

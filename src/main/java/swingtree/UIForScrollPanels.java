@@ -18,6 +18,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 	 */
 	public UIForScrollPanels( P component ) { super(component); }
 
+
 	@Override
 	protected void _add( JComponent component, Object conf ) {
 		Objects.requireNonNull(component);

@@ -55,6 +55,7 @@ class Thread_Mode_Spec extends Specification
                 of your application (everything but your GUI thread really).
             """
             UI.joinDecoupledEventProcessorFor(1)
+            UI.sync()
         then: 'The event is handled.'
             eventWasHandled
     }
@@ -105,6 +106,7 @@ class Thread_Mode_Spec extends Specification
         when : 'We click the button and process the event queue (by this current non-swing thread).'
             UI.runNow( () -> ui1.component.doClick() )
             UI.joinDecoupledEventProcessorUntilExceptionFor(1) // This is done by a custom thread in a real world application.
+            UI.sync()
         then: 'The delegate throws an exception!'
             var e = thrown(Exception)
             e.message.contains(problem)

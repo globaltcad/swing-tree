@@ -68,5 +68,6 @@ public class ListSearchView extends JPanel
     // Here you can test the UI:
     public static void main(String... args) {
         UI.show(new ListSearchView(new ListSearchViewModel()));
+        UI.joinDecoupledEventProcessor();
     }
 }

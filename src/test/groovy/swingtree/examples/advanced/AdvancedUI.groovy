@@ -338,6 +338,13 @@ class AdvancedUI {
 
     static void main(String... args) {
         var frame = new JFrame()
-        new UI.TestWindow(()->frame, of(frame)).getFrame().setSize(new Dimension(1100, 600))
+        var component = of(frame)
+        frame.add(component)
+        frame.pack() // Otherwise some components resize strangely or are not shown at all...
+        // Make sure that the window is centered on the screen:
+        frame.setLocationRelativeTo(null)
+        // We set the size to fit the component:
+        frame.setSize(component.getPreferredSize())
+        frame.setVisible(true)
     }
 }

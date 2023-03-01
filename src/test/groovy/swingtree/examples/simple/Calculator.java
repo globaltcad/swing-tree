@@ -62,9 +62,7 @@ public class Calculator extends JPanel
     }
 
     // Use this to test the UI!
-    public static void main(String... args) {
-        new UI.TestWindow(JFrame::new,new Calculator()).getFrame().setSize(new Dimension(240, 325));
-    }
+    public static void main(String... args) { UI.show(new Calculator()); }
 
 }
 

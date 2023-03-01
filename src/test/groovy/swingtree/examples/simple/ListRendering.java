@@ -39,6 +39,7 @@ public class ListRendering extends JPanel
 
     public static void main(String[] args) {
         UI.show(new ListRendering());
+        UI.joinDecoupledEventProcessor();
     }
 
 }

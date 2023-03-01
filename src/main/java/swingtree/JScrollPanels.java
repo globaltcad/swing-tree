@@ -25,12 +25,8 @@ import java.util.stream.IntStream;
  * 	Instances of this class manage {@link ViewableEntry} implementations which
  * 	will be called dynamically to update the UI.
  */
-public class JScrollPanels extends JScrollPane {
-
-	private enum Layout {
-		HORIZONTAL, VERTICAL
-	}
-
+public class JScrollPanels extends JScrollPane
+{
 	private final InternalPanel internal;
 
 	private JScrollPanels(InternalPanel listWrapper) {
@@ -46,7 +42,7 @@ public class JScrollPanels extends JScrollPane {
 	 * 	The {@link JScrollPanels} does not store components statically in the UI tree.
 	 * 	Instead, it is a hybrid of the traditional static approach
 	 * 	and a renderer based approach (as in the {@link JList}).
-	 * 	The lambda passed to this method is responsible of continously supplying a UI
+	 * 	The lambda passed to this method is responsible for continuously supplying a UI
 	 * 	which fits a certain context (which defines if the entry is selected or not among other things).
 	 *
 	 * @param entryProvider A provider lambda which ought to turn a context object into a fitting UI.
@@ -55,14 +51,24 @@ public class JScrollPanels extends JScrollPane {
 		addEntry( null, entryProvider );
 	}
 
+	/**
+	 * 	The {@link JScrollPanels} does not store components statically in the UI tree.
+	 * 	Instead, it is a hybrid of the traditional static approach
+	 * 	and a renderer based approach (as in the {@link JList}).
+	 * 	The lambda passed to this method is responsible for continuously supplying a UI
+	 * 	which fits a certain context (which defines if the entry is selected or not among other things).
+	 *
+	 * @param constraints The constraints which ought to be applied to the entry.
+	 * @param entryProvider A provider lambda which ought to turn a context object into a fitting UI.
+	 */
 	public void addEntry( String constraints, ViewableEntry entryProvider ) {
 		Objects.requireNonNull(entryProvider);
 		EntryPanel entryPanel = new EntryPanel(
-				()-> entriesIn(internal.getComponents()),
-				this.internal.getComponents().length,
-				entryProvider,
-				constraints
-		);
+												()-> entriesIn(internal.getComponents()),
+												this.internal.getComponents().length,
+												entryProvider,
+												constraints
+											);
 		this.internal.add(entryPanel);
 		this.validate();
 	}
@@ -105,7 +111,7 @@ public class JScrollPanels extends JScrollPane {
 	 * @param <T> The component type which ought to be found.
 	 * @return The found entry panel matching the provided type class and predicate lambda.
 	 */
-	public <T extends JComponent> Optional<T> getSelected(Class<T> type ) {
+	public <T extends JComponent> Optional<T> getSelected( Class<T> type ) {
 		Objects.requireNonNull(type);
 		return (Optional<T>) Optional.ofNullable(get(type, EntryPanel::isEntrySelected)).map(e -> e.getLastState() );
 	}
@@ -143,24 +149,26 @@ public class JScrollPanels extends JScrollPane {
 	 * 	It wraps {@link EntryPanel} instances which themselves
 	 * 	wrap user provided {@link JPanel} implementations rendering the actual content.
 	 */
-	private static class InternalPanel extends JPanel implements Scrollable {
-
+	private static class InternalPanel extends JPanel implements Scrollable
+	{
 		private final int W, H;
-		private final Layout type;
+		private final UI.Align type;
 		private final int hGap, vGap;
 		private final Dimension size;
+
 
 		private InternalPanel(
 				List<EntryPanel> entryPanels,
 				Dimension shape,
-				Layout type
+				UI.Align type
 		) {
+			shape = ( shape == null ? new Dimension(120, 100) : shape );
 			int n = entryPanels.size() / 2;
 			W = (int) shape.getWidth(); // 120
 			H = (int) shape.getHeight(); // 100
 			this.type = type;
 			LayoutManager layout;
-			if ( type == Layout.HORIZONTAL ) {
+			if ( type == UI.Align.HORIZONTAL ) {
 				FlowLayout flow = new FlowLayout();
 				hGap = flow.getHgap();
 				vGap = flow.getVgap();
@@ -174,7 +182,7 @@ public class JScrollPanels extends JScrollPane {
 			setLayout(layout);
 			for ( EntryPanel c : entryPanels ) this.add(c);
 
-			if ( type == Layout.HORIZONTAL )
+			if ( type == UI.Align.HORIZONTAL )
 				size = new Dimension(n * W + (n + 1) * hGap, H + 2 * vGap);
 			else
 				size = new Dimension(W + 2 * hGap, n * H + (n + 1) * vGap);
@@ -197,16 +205,16 @@ public class JScrollPanels extends JScrollPane {
 
 		@Override
 		public Dimension getPreferredSize() {
-			if ( type == Layout.VERTICAL )
+			if ( type == UI.Align.VERTICAL )
 				return new Dimension(
-						Math.max(W, getParent().getWidth()),
-						(int) super.getPreferredSize().getHeight()
-				);
+							Math.max(W, getParent().getWidth()),
+							(int) super.getPreferredSize().getHeight()
+						);
 			else
 				return new Dimension(
-						(int) super.getPreferredSize().getWidth(),
-						Math.max(H, getParent().getHeight())
-				);
+							(int) super.getPreferredSize().getWidth(),
+							Math.max(H, getParent().getHeight())
+						);
 		}
 
 		@Override
@@ -232,28 +240,27 @@ public class JScrollPanels extends JScrollPane {
 	}
 
 	public static JScrollPanels of(
-			boolean isVertical, Dimension size
+			UI.Align align, Dimension size
 	) {
-		return JScrollPanels.construct(isVertical, size, Collections.emptyList(), null);
+		return JScrollPanels.construct(align, size, Collections.emptyList(), null);
 	}
 
 	private static JScrollPanels construct(
-			boolean isVertical,
+			UI.Align align,
 			Dimension shape,
 			List<ViewableEntry> components,
 			String constraints
 	) {
-		Objects.requireNonNull(shape);
-		Layout type = ( isVertical ? Layout.VERTICAL : Layout.HORIZONTAL );
+		UI.Align type = align;
 		InternalPanel[] forwardReference = {null};
 		List<EntryPanel> entries =
 				IntStream.range(0,components.size())
 						.mapToObj( i ->
-								new EntryPanel(
-										()-> entriesIn(forwardReference[0].getComponents()),
-										i,
-										components.get(i),
-										constraints
+							new EntryPanel(
+									()-> entriesIn(forwardReference[0].getComponents()),
+									i,
+									components.get(i),
+									constraints
 								)
 						)
 						.collect(Collectors.toList());
@@ -263,7 +270,7 @@ public class JScrollPanels extends JScrollPane {
 		JScrollPanels newJScrollPanels = new JScrollPanels(internalWrapperPanel);
 		forwardReference[0] = internalWrapperPanel;
 
-		if ( type == Layout.HORIZONTAL )
+		if ( type == UI.Align.HORIZONTAL )
 			newJScrollPanels.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 		else
 			newJScrollPanels.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);

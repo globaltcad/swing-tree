@@ -35,8 +35,6 @@ class TodoApp extends JPanel
     }
 
     // Use this to test the above UI.
-    public static void main(String... args) {
-        new TestWindow(JFrame::new,new TodoApp()).getFrame().setSize(new Dimension(240, 325));
-    }
+    static void main(String... args) { show(new TodoApp())  }
 
 }

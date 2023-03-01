@@ -1238,7 +1238,7 @@ public final class UI
     /**
      *  Use this to create a builder for a new {@link JScrollPane} UI component.
      *  This is in essence a convenience method for {@code UI.of(new JScrollPane())}. <br>
-     *  Her is an example of a simple scroll panel with a text area inside:
+     *  Here is an example of a simple scroll panel with a text area inside:
      *  <pre>{@code
      *      UI.scrollPane()
      *      .withScrollBarPolicy(UI.Scroll.NEVER)
@@ -1249,20 +1249,73 @@ public final class UI
      */
     public static UIForScrollPane<JScrollPane> scrollPane() { return of(new JScrollPane()); }
 
+    /**
+     *  Use this to create a builder for the provided {@link JScrollPanels} component.
+     *
+     * @param component The {@link JScrollPanels} component which should be represented by the returned builder.
+     * @return A {@link UIForScrollPanels} builder representing the provided component.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
+     */
     public static <P extends JScrollPanels> UIForScrollPanels<P> of( P component ) {
         NullUtil.nullArgCheck(component, "component", JScrollPane.class);
         return new UIForScrollPanels<>(component);
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JScrollPanels} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JScrollPanels())}. <br>
+     *  Here is an example of a simple scroll panel with a text area inside:
+     *  <pre>{@code
+     *      UI.scrollPanels()
+     *      .withScrollBarPolicy(UI.Scroll.NEVER)
+     *      .add(UI.textArea("I am a text area with this text inside."))
+     *      .add(UI.label("I am a label!"))
+     *      .add(UI.button("I am a button! Click me!"))
+     *  }</pre>
+     *
+     * @return A builder instance for a new {@link JScrollPanels}, which enables fluent method chaining.
+     */
     public static UIForScrollPanels<JScrollPanels> scrollPanels() {
-        return of(JScrollPanels.of(true, new Dimension(100,100)));
+        return of(JScrollPanels.of(Align.VERTICAL, new Dimension(100,100)));
     }
 
+    /**
+     *  Use this to create a builder for a new {@link JScrollPanels} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JScrollPanels())}. <br>
+     *  Here is an example of a simple scroll panel with a text area inside:
+     *  <pre>{@code
+     *      UI.scrollPanels(Align.HORIZONTAL)
+     *      .withScrollBarPolicy(UI.Scroll.NEVER)
+     *      .add(UI.textArea("I am a text area with this text inside."))
+     *      .add(UI.label("I am a label!"))
+     *      .add(UI.button("I am a button! Click me!"))
+     *  }</pre>
+     *
+     * @param align The alignment of the scroll panels.
+     * @return A builder instance for a new {@link JScrollPanels}, which enables fluent method chaining.
+     */
     public static UIForScrollPanels<JScrollPanels> scrollPanels(Align align) {
-        return of(JScrollPanels.of(
-                align == Align.VERTICAL,
-                new Dimension(100,100))
-            );
+        return of(JScrollPanels.of(align, null));
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JScrollPanels} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JScrollPanels())}. <br>
+     *  Here is an example of a simple scroll panel with a text area inside:
+     *  <pre>{@code
+     *      UI.scrollPanels(Align.HORIZONTAL, new Dimension(100,100))
+     *      .withScrollBarPolicy(UI.Scroll.NEVER)
+     *      .add(UI.textArea("I am a text area with this text inside."))
+     *      .add(UI.label("I am a label!"))
+     *      .add(UI.button("I am a button! Click me!"))
+     *  }</pre>
+     *
+     * @param align The alignment of the scroll panels.
+     * @param size The size of the scroll panels.
+     * @return A builder instance for a new {@link JScrollPanels}, which enables fluent method chaining.
+     */
+    public static UIForScrollPanels<JScrollPanels> scrollPanels(Align align, Dimension size) {
+        return of(JScrollPanels.of(align, size));
     }
 
     /**
@@ -3092,35 +3145,34 @@ public final class UI
     /**
      *  Use this to quickly create and inspect a test window for a UI component.
      */
-    public static class TestWindow
+    public static void show( Component component ) {
+        JFrame frame = new JFrame();
+        new UI.TestWindow( () -> frame, component );
+    }
+
+    /**
+     *  Use this to quickly create and inspect a test window for a UI component.
+     */
+    private static class TestWindow
     {
         private final JFrame frame;
         private final Component component;
 
-        public TestWindow( Supplier<JFrame> frameSupplier,Component component ) {
+        private TestWindow( Supplier<JFrame> frameSupplier, Component component ) {
             this.frame = frameSupplier.get();
             this.component = component;
             frame.add(component);
-            frame.setSize(1000, 1000);
             frame.pack(); // Otherwise some components resize strangely or are not shown at all...
+            // Make sure that the window is centered on the screen:
+            frame.setLocationRelativeTo(null);
+            // We set the size to fit the component:
+            frame.setSize(component.getPreferredSize());
             frame.setVisible(true);
         }
 
         public JFrame getFrame() { return this.frame; }
 
         public Component getComponent() { return this.component; }
-    }
-
-    /**
-     *  Use this to quickly create and inspect a test window for a UI component.
-     */
-    public static void show( Component component ) {
-        JFrame frame = new JFrame();
-        new UI.TestWindow( () -> frame,component );
-        // We set the size to fit the component:
-        frame.setSize(component.getPreferredSize());
-        frame.setVisible(true);
-        UI.joinDecoupledEventProcessor();
     }
 
 }
