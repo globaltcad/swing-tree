@@ -204,7 +204,7 @@ class AdvancedUI {
                         )
                         .add("width 200:400:500, grow, push, span, alignx center",
                            UI.panel().withFlowLayout().withEmptyBorderTitled("Perri:", 1)
-                           .withMinimumSize(200, 100)
+                           .withMinSize(200, 100)
                            .apply( p -> {
                                ('A'..'Z').each {l ->  p.add(UI.button(l)) }
                            })

@@ -564,9 +564,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withRoundedLineBorder() {
-        return withRoundedLineBorder(Color.BLACK, 1);
-    }
+    public final I withRoundedLineBorder() { return withRoundedLineBorder(Color.BLACK, 1); }
 
     /**
      *  Use this to attach a titled rounded black line {@link Border} with
@@ -736,8 +734,13 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     *  Use this to conveniently set the cursor type which should be displayed
+     *  Use this set the cursor type which should be displayed
      *  when hovering over the UI component wrapped by this builder.
+     *  <br>
+     *  Here an example of how to use this method:
+     *  <pre>{@code
+     *      UI.button("Click me!").with(UI.Cursor.HAND);
+     *  }</pre>
      *
      * @param type The {@link UI.Cursor} type defined by a simple enum exposed by this API.
      * @return This very instance, which enables builder-style method chaining.
@@ -1253,7 +1256,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param size The minimum {@link Dimension} of the component.
      * @return This very builder to allow for method chaining.
      */
-    public final I withMinimumSize( Dimension size ) {
+    public final I withMinSize( Dimension size ) {
         NullUtil.nullArgCheck(size, "size", Dimension.class);
         getComponent().setMinimumSize(size);
         return _this();
@@ -1276,11 +1279,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param size The minimum {@link Dimension} of the component wrapped by a {@link Val}.
      * @return This very builder to allow for method chaining.
      */
-    public final I withMinimumSize( Val<Dimension> size ) {
+    public final I withMinSize( Val<Dimension> size ) {
         NullUtil.nullArgCheck(size, "size", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the minimum size of this component!");
         _onShow( size, v -> getComponent().setMinimumSize(v) );
-        return this.withMinimumSize( size.orElseThrow() );
+        return this.withMinSize( size.orElseThrow() );
     }
 
     /**
@@ -1290,7 +1293,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param height The minimum height of the component.
      * @return This very builder to allow for method chaining.
      */
-    public final I withMinimumSize( int width, int height ) {
+    public final I withMinSize( int width, int height ) {
         getComponent().setMinimumSize(new Dimension(width, height));
         return _this();
     }
@@ -1303,7 +1306,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param height The minimum height of the component.
      * @return This very builder to allow for method chaining.
      */
-    public final I withMinimumSize( Val<Integer> width, Val<Integer> height ) {
+    public final I withMinSize( Val<Integer> width, Val<Integer> height ) {
         NullUtil.nullArgCheck(width, "width", Val.class);
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the minimum width of this component!");
@@ -1314,7 +1317,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         _onShow( height, h ->
                 getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, h))
             );
-        return this.withMinimumSize( width.orElseThrow(), height.orElseThrow() );
+        return this.withMinSize( width.orElseThrow(), height.orElseThrow() );
     }
 
     /**
@@ -1323,7 +1326,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param width The minimum width which should be set for the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public final I withMinimumWidth( int width ) {
+    public final I withMinWidth( int width ) {
         getComponent().setMinimumSize(new Dimension(width, getComponent().getMinimumSize().height));
         return _this();
     }
@@ -1334,11 +1337,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param width The minimum width which should be set for the underlying component wrapped by a {@link Val}.
      * @return This very builder to allow for method chaining.
      */
-    public final I withMinimumWidth( Val<Integer> width ) {
+    public final I withMinWidth( Val<Integer> width ) {
         NullUtil.nullArgCheck(width, "width", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the minimum width of this component!");
         _onShow( width, w -> getComponent().setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height)) );
-        return this.withMinimumWidth( width.orElseThrow() );
+        return this.withMinWidth( width.orElseThrow() );
     }
 
 
@@ -1348,7 +1351,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param height The minimum height which should be set for the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public final I withMinimumHeight( int height ) {
+    public final I withMinHeight( int height ) {
         getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, height));
         return _this();
     }
@@ -1359,11 +1362,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param height The minimum height which should be set for the underlying component wrapped by a {@link Val}.
      * @return This very builder to allow for method chaining.
      */
-    public final I withMinimumHeight( Val<Integer> height ) {
+    public final I withMinHeight( Val<Integer> height ) {
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the minimum height of this component!");
-        _onShow( height, h -> getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, h)) );
-        return this.withMinimumHeight( height.orElseThrow() );
+        _onShow( height, h -> getComponent().setMinimumSize( new Dimension(getComponent().getMinimumSize().width, h)) );
+        return this.withMinHeight( height.orElseThrow() );
     }
 
     /**
@@ -1372,7 +1375,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param size The maximum {@link Dimension} of the component.
      * @return This very builder to allow for method chaining.
      */
-    public final I withMaximumSize( Dimension size ) {
+    public final I withMaxSize( Dimension size ) {
         NullUtil.nullArgCheck(size, "size", Dimension.class);
         getComponent().setMaximumSize(size);
         return _this();
@@ -1385,11 +1388,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param size The maximum {@link Dimension} of the component wrapped by a {@link Val}.
      * @return This very builder to allow for method chaining.
      */
-    public final I withMaximumSize( Val<Dimension> size ) {
+    public final I withMaxSize( Val<Dimension> size ) {
         NullUtil.nullArgCheck(size, "size", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the maximum size of this component!");
         _onShow( size, v -> getComponent().setMaximumSize(v) );
-        return this.withMaximumSize( size.orElseThrow() );
+        return this.withMaxSize( size.orElseThrow() );
     }
 
     /**
@@ -1399,7 +1402,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param height The maximum height of the component.
      * @return This very builder to allow for method chaining.
      */
-    public final I withMaximumSize( int width, int height ) {
+    public final I withMaxSize( int width, int height ) {
         getComponent().setMaximumSize(new Dimension(width, height));
         return _this();
     }
@@ -1412,14 +1415,14 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param height The maximum height of the component.
      * @return This very builder to allow for method chaining.
      */
-    public final I withMaximumSize( Val<Integer> width, Val<Integer> height ) {
+    public final I withMaxSize( Val<Integer> width, Val<Integer> height ) {
         NullUtil.nullArgCheck(width, "width", Val.class);
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the maximum width of this component!");
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the maximum height of this component!");
         _onShow( width, w -> getComponent().setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height)) );
         _onShow( height, h -> getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h)) );
-        return this.withMaximumSize( width.orElseThrow(), height.orElseThrow() );
+        return this.withMaxSize( width.orElseThrow(), height.orElseThrow() );
     }
 
     /**
@@ -1428,7 +1431,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param width The maximum width which should be set for the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public final I withMaximumWidth( int width ) {
+    public final I withMaxWidth( int width ) {
         getComponent().setMaximumSize(new Dimension(width, getComponent().getMaximumSize().height));
         return _this();
     }
@@ -1439,11 +1442,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param width The maximum width which should be set for the underlying component wrapped by a {@link Val}.
      * @return This very builder to allow for method chaining.
      */
-    public final I withMaximumWidth( Val<Integer> width ) {
+    public final I withMaxWidth( Val<Integer> width ) {
         NullUtil.nullArgCheck(width, "width", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the maximum width of this component!");
         _onShow( width, w -> getComponent().setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height)) );
-        return this.withMaximumWidth( width.orElseThrow() );
+        return this.withMaxWidth( width.orElseThrow() );
     }
 
     /**
@@ -1452,7 +1455,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param height The maximum height which should be set for the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public final I withMaximumHeight( int height ) {
+    public final I withMaxHeight( int height ) {
         getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, height));
         return _this();
     }
@@ -1463,11 +1466,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param height The maximum height which should be set for the underlying component wrapped by a {@link Val}.
      * @return This very builder to allow for method chaining.
      */
-    public final I withMaximumHeight( Val<Integer> height ) {
+    public final I withMaxHeight( Val<Integer> height ) {
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the maximum height of this component!");
         _onShow( height, h -> getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h)) );
-        return this.withMaximumHeight( height.orElseThrow() );
+        return this.withMaxHeight( height.orElseThrow() );
     }
 
     /**
@@ -1476,7 +1479,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param size The preferred {@link Dimension} of the component.
      * @return This very builder to allow for method chaining.
      */
-    public final I withPreferredSize( Dimension size ) {
+    public final I withPrefSize( Dimension size ) {
         NullUtil.nullArgCheck(size, "size", Dimension.class);
         getComponent().setPreferredSize(size);
         return _this();
@@ -1489,11 +1492,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param size The preferred {@link Dimension} of the component wrapped by a {@link Val}.
      * @return This very builder to allow for method chaining.
      */
-    public final I withPreferredSize( Val<Dimension> size ) {
+    public final I withPrefSize( Val<Dimension> size ) {
         NullUtil.nullArgCheck(size, "size", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the preferred size of this component!");
         _onShow( size, v -> getComponent().setPreferredSize(v) );
-        return this.withPreferredSize( size.orElseNull() );
+        return this.withPrefSize( size.orElseNull() );
     }
 
     /**
@@ -1503,7 +1506,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param height The preferred height of the component.
      * @return This very builder to allow for method chaining.
      */
-    public final I withPreferredSize( int width, int height ) {
+    public final I withPrefSize( int width, int height ) {
         getComponent().setPreferredSize(new Dimension(width, height));
         return _this();
     }
@@ -1516,14 +1519,14 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param height The preferred height of the component.
      * @return This very builder to allow for method chaining.
      */
-    public final I withPreferredSize( Val<Integer> width, Val<Integer> height ) {
+    public final I withPrefSize( Val<Integer> width, Val<Integer> height ) {
         NullUtil.nullArgCheck(width, "width", Val.class);
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the preferred width of this component!");
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the preferred height of this component!");
         _onShow( width, w -> getComponent().setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height)) );
         _onShow( height, h -> getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h)) );
-        return this.withPreferredSize( width.orElseThrow(), height.orElseThrow() );
+        return this.withPrefSize( width.orElseThrow(), height.orElseThrow() );
     }
 
     /**
@@ -1532,7 +1535,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param width The preferred width which should be set for the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public final I withPreferredWidth( int width ) {
+    public final I withPrefWidth( int width ) {
         getComponent().setPreferredSize(new Dimension(width, getComponent().getPreferredSize().height));
         return _this();
     }
@@ -1543,11 +1546,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param width The preferred width which should be set for the underlying component wrapped by a {@link Val}.
      * @return This very builder to allow for method chaining.
      */
-    public final I withPreferredWidth( Val<Integer> width ) {
+    public final I withPrefWidth( Val<Integer> width ) {
         NullUtil.nullArgCheck(width, "width", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the preferred width of this component!");
         _onShow( width, w -> getComponent().setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height)) );
-        return this.withPreferredWidth( width.orElseThrow() );
+        return this.withPrefWidth( width.orElseThrow() );
     }
 
     /**
@@ -1556,7 +1559,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param height The preferred height which should be set for the underlying component.
      * @return This very builder to allow for method chaining.
      */
-    public final I withPreferredHeight( int height ) {
+    public final I withPrefHeight( int height ) {
         getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, height));
         return _this();
     }
@@ -1567,11 +1570,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param height The preferred height which should be set for the underlying component wrapped by a {@link Val}.
      * @return This very builder to allow for method chaining.
      */
-    public final I withPreferredHeight( Val<Integer> height ) {
+    public final I withPrefHeight(Val<Integer> height ) {
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the preferred height of this component!");
         _onShow( height, h -> getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h)) );
-        return this.withPreferredHeight( height.orElseThrow() );
+        return this.withPrefHeight( height.orElseThrow() );
     }
 
     /**

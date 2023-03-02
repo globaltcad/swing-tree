@@ -16,7 +16,7 @@ public class UserRegistrationView extends JPanel
         FlatLightLaf.setup();
         UI.use(EventProcessor.DECOUPLED, ()->
             of(this).withLayout(FILL.and(WRAP(2)))
-            .withPreferredSize(500, 300)
+            .withPrefSize(500, 300)
             .add(GROW,
                 panel(FILL_X.and(WRAP(2)), "[shrink][grow]")
                 .add(label("Username"))

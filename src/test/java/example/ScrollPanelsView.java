@@ -10,7 +10,7 @@ public class ScrollPanelsView extends JPanel
 	public ScrollPanelsView( ScrollPanelsViewModel vm )
 	{
 		of(this).withLayout("fill, wrap 1")
-		.withPreferredSize(600, 400)
+		.withPrefSize(600, 400)
 		.add( "shrink", label("Something to scroll:") )
 		.add( "shrink", separator() )
 		.add( "grow, push", scrollPanels().add(vm.entries()) )

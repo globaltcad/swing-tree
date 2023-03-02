@@ -14,7 +14,7 @@ public class LoginView extends JPanel
 {
     public LoginView( LoginViewModel vm ) {
         use(EventProcessor.DECOUPLED, ()->
-            of(this).withPreferredSize(350,220)
+            of(this).withPrefSize(350,220)
             .withLayout(FILL.and(WRAP(2)))
             .add( SHRINK, label( "Username:" ) )
             .add( GROW.and(PUSH_X), textField(vm.username()).withBackground(vm.validityColor()) )

@@ -61,8 +61,8 @@ class Panel_Spec extends Specification
             var height = Var.of(200)
         and : 'A panel bound to both properties'
             def ui = UI.panel()
-                        .withPreferredWidth(width)
-                        .withPreferredHeight(height)
+                        .withPrefWidth(width)
+                        .withPrefHeight(height)
 
         expect : 'The panel has the correct width and height.'
             ui.component.preferredSize.width == 300

@@ -91,9 +91,9 @@ class Label_Binding_Spec extends Specification
         when : 'We create and bind to a label UI node...'
             var ui =
                     UI.label("")
-                    .withMinimumSize(minSize)
-                    .withMaximumSize(maxSize)
-                    .withPreferredSize(prefSize)
+                    .withMinSize(minSize)
+                    .withMaxSize(maxSize)
+                    .withPrefSize(prefSize)
 
         then : 'The label should be updated when the property changes.'
             ui.component.minimumSize == new Dimension(100, 100)

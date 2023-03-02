@@ -32,9 +32,9 @@ class Property_Binding_Spec extends Specification
             Val<Dimension> size = Var.of(new Dimension(100, 100))
         and : 'We create a UI to which we want to bind:'
             var node = UI.panel("fill, wrap 1")
-                        .add(UI.label("Hello World").withPreferredSize(size))
-                        .add(UI.button("Click Me").withMinimumSize(size))
-                        .add(UI.textField("Hello World").withMaximumSize(size))
+                        .add(UI.label("Hello World").withPrefSize(size))
+                        .add(UI.button("Click Me").withMinSize(size))
+                        .add(UI.textField("Hello World").withMaxSize(size))
 
         expect : 'The components will have the size of the property.'
             node.component.components[0].preferredSize == new Dimension(100, 100)
@@ -60,9 +60,9 @@ class Property_Binding_Spec extends Specification
             Var<Integer> maxWidth = Var.of(90)
         and : 'We create a UI to which we want to bind:'
             var node = UI.panel("fill, wrap 1")
-                        .add(UI.label("Hello World").withMinimumWidth(minWidth))
-                        .add(UI.button("Click Me").withPreferredHeight(prefHeight))
-                        .add(UI.textField("Hello World").withMaximumWidth(maxWidth))
+                        .add(UI.label("Hello World").withMinWidth(minWidth))
+                        .add(UI.button("Click Me").withPrefHeight(prefHeight))
+                        .add(UI.textField("Hello World").withMaxWidth(maxWidth))
         expect : 'The components will have the sizes of the properties.'
             node.component.components[0].minimumSize.width == 60
             node.component.components[1].preferredSize.height == 40
@@ -88,9 +88,9 @@ class Property_Binding_Spec extends Specification
             Var<Integer> height = Var.of(40)
         and : 'We create a UI to which we want to bind:'
             var node = UI.panel("fill, wrap 1")
-                        .add(UI.label("Hello World").withMinimumSize(width, height))
-                        .add(UI.toggleButton("Click Me").withPreferredSize(width, height))
-                        .add(UI.textArea("Hello World").withMaximumSize(width, height))
+                        .add(UI.label("Hello World").withMinSize(width, height))
+                        .add(UI.toggleButton("Click Me").withPrefSize(width, height))
+                        .add(UI.textArea("Hello World").withMaxSize(width, height))
         expect : 'The components will have the sizes of the properties.'
             node.component.components[0].minimumSize == new Dimension(60, 40)
             node.component.components[1].preferredSize == new Dimension(60, 40)
@@ -276,9 +276,9 @@ class Property_Binding_Spec extends Specification
         and : 'We create a UI to which we want to bind:'
             var node = UI.panel("fill, wrap 1")
                         .add(UI.label("Below me is a text area!"))
-                        .add(UI.textArea("hi").withMinimumHeight(property))
+                        .add(UI.textArea("hi").withMinHeight(property))
                         .add(UI.label("Below me is another text area!"))
-                        .add(UI.textArea("Hey").withMaximumHeight(property))
+                        .add(UI.textArea("Hey").withMaxHeight(property))
 
         expect : 'The minimum height of the first text area will be 50.'
             node.component.components[1].minimumSize.height == 50

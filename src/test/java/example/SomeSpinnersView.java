@@ -18,7 +18,7 @@ public class SomeSpinnersView extends JPanel {
 		UIManager.put("ComboBox.selectionBackground", Color.BLUE);
 		UIManager.put("List.selectionBackground", Color.GREEN);
 		of(this).withLayout(FILL.and(INS(0)).and(DEBUG))
-		.withPreferredSize(320, 140)
+		.withPrefSize(320, 140)
 		.add(GROW,
 			panel(FILL.and(INS(0)).and(WRAP(1)))
 			.add(GROW, label("Base Size:"))
@@ -81,7 +81,7 @@ public class SomeSpinnersView extends JPanel {
 			.onClose( it -> System.out.println("close") )
 			.onCancel( it -> System.out.println("cancel") )
 			.isEditableIf(true)
-			.withPreferredWidth(50)
+			.withPrefWidth(50)
 			.withSelectedItem(Var.of(4))
 		)
 		.add(SPAN.and(GROW),
