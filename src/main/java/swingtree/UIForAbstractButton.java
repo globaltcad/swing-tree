@@ -314,8 +314,8 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
         B button = getComponent();
         _onClick(
            e -> _doApp(()->action.accept(
-               new SimpleDelegate<>(button, e, this::getSiblinghood)
-           ))
+                           new SimpleDelegate<>(button, e, this::getSiblinghood)
+                       ))
         );
         return _this();
     }

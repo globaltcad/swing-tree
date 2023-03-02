@@ -14,7 +14,8 @@ public class ScrollPanelsView extends JPanel
 		.add( "shrink", label("Something to scroll:") )
 		.add( "shrink", separator() )
 		.add( "grow, push", scrollPanels().add(vm.entries()) )
-		.add( "shrink", separator() );
+		.add( "shrink", separator() )
+		.add( "shrink", button("Add entry").onClick(it -> vm.addEntryAt(0)) );
 	}
 
 	public static void main(String[] args)

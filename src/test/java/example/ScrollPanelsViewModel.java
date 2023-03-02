@@ -23,7 +23,12 @@ public class ScrollPanelsViewModel
 		entries.add(new Entry());
 	}
 
-	public static class Entry implements ViewableEntry
+	public void addEntryAt(int index)
+	{
+		entries.addAt(index, new Entry());
+	}
+
+	public class Entry implements ViewableEntry
 	{
 		private final Var<Boolean> selected = Var.of(false);
 		private final Var<Integer> position = Var.of(0);
@@ -31,8 +36,9 @@ public class ScrollPanelsViewModel
 		@Override
 		public <V> V createView(Class<V> viewType) {
 			return (V) UI.panel("fill")
-						.add(UI.label("Hello World!"))
-						.add(UI.button("Click me!"))
+						.add(UI.label(position.viewAs(String.class, s -> "Position: " + s)))
+						.add(UI.label(selected.viewAs(String.class, s -> "Selected: " + s)))
+						.add(UI.button("Delete me!").onClick(it -> entries.remove(this)))
 						.getComponent();
 		}
 

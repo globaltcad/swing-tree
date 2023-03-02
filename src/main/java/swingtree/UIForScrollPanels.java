@@ -43,12 +43,19 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 
 	@Override
 	protected void _addViewableProps( Vals<? extends Viewable> viewables, String attr ) {
-		Runnable addAll = ()-> viewables.forEach( v -> {
-									if ( attr == null )
-										add(v.createView(JComponent.class));
-									else
-										add(attr, v.createView(JComponent.class));
-								});
+		Runnable addAll = ()-> {
+			for ( int i = 0; i< viewables.size(); i++ ) {
+				Viewable v = viewables.at(i).get();
+				if ( v instanceof ViewableEntry ) {
+					ViewableEntry entry = (ViewableEntry) v;
+					entry.position().set(i);
+				}
+				if (attr == null)
+					add(v.createView(JComponent.class));
+				else
+					add(attr, v.createView(JComponent.class));
+			}
+		};
 
 		_onShow( viewables, delegate -> {
 			JScrollPanels panels = this.getComponent();
