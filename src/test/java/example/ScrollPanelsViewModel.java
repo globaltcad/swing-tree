@@ -36,9 +36,14 @@ public class ScrollPanelsViewModel
 		@Override
 		public <V> V createView(Class<V> viewType) {
 			return (V) UI.panel("fill")
+						.add(UI.label("#"+this.hashCode()))
 						.add(UI.label(position.viewAs(String.class, s -> "Position: " + s)))
 						.add(UI.label(selected.viewAs(String.class, s -> "Selected: " + s)))
-						.add(UI.button("Delete me!").onClick(it -> entries.remove(this)))
+						.add(UI.button("Delete me!").onClick(it -> {
+							int i = entries.indexOf(this);
+							int p = position.get();
+							entries.removeAt(i);
+						}))
 						.getComponent();
 		}
 

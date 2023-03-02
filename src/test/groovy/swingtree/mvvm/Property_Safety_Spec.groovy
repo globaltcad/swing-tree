@@ -145,7 +145,7 @@ class Property_Safety_Spec extends Specification
            code << [
                    { it.add(7)      },
                    { it.addAt(0, 7) },
-                   { it.remove(7)   },
+                   { it.removeAt(9) },
                    { it.sort()      },
                    { it.clear()     }
                 ]
