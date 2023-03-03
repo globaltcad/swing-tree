@@ -6,6 +6,7 @@ import swingtree.api.mvvm.Viewable;
 import swingtree.api.mvvm.ViewableEntry;
 
 import javax.swing.*;
+import java.util.List;
 import java.util.Objects;
 
 public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<P>
@@ -44,17 +45,24 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 	@Override
 	protected void _addViewableProps( Vals<? extends Viewable> viewables, String attr ) {
 		Runnable addAll = ()-> {
-			for ( int i = 0; i< viewables.size(); i++ ) {
-				Viewable v = viewables.at(i).get();
-				if ( v instanceof ViewableEntry ) {
-					ViewableEntry entry = (ViewableEntry) v;
-					entry.position().set(i);
-				}
-				if (attr == null)
-					add(v.createView(JComponent.class));
-				else
-					add(attr, v.createView(JComponent.class));
+			boolean allAreEntries = viewables.stream().allMatch( v -> v instanceof ViewableEntry );
+			if ( allAreEntries ) {
+				JScrollPanels panels = this.getComponent();
+				List<ViewableEntry> entries = (List<ViewableEntry>) viewables.toList();
+				panels.addAllEntries(attr, entries);
 			}
+			else
+				for ( int i = 0; i< viewables.size(); i++ ) {
+					Viewable v = viewables.at(i).get();
+					if ( v instanceof ViewableEntry ) {
+						ViewableEntry entry = (ViewableEntry) v;
+						entry.position().set(i);
+					}
+					if (attr == null)
+						add(v.createView(JComponent.class));
+					else
+						add(attr, v.createView(JComponent.class));
+				}
 		};
 
 		_onShow( viewables, delegate -> {

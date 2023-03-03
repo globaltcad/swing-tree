@@ -27,16 +27,17 @@ import java.util.stream.IntStream;
  */
 public class JScrollPanels extends JScrollPane
 {
-	private final InternalPanel internal;
+	private final InternalPanel internal; // Wrapper for the actual UI components
 
 	private JScrollPanels(InternalPanel listWrapper) {
 		super(listWrapper);
 		this.internal = listWrapper;
 	}
 
-	public int getNumberOfEntries() {
-		return internal.getComponents().length;
-	}
+	/**
+	 * @return The number of entries which are currently managed by this {@link JScrollPanels}.
+	 */
+	public int getNumberOfEntries() { return internal.getComponents().length; }
 
 	/**
 	 * 	The {@link JScrollPanels} does not store components statically in the UI tree.
@@ -45,11 +46,9 @@ public class JScrollPanels extends JScrollPane
 	 * 	The lambda passed to this method is responsible for continuously supplying a UI
 	 * 	which fits a certain context (which defines if the entry is selected or not among other things).
 	 *
-	 * @param entryProvider A provider lambda which ought to turn a context object into a fitting UI.
+	 * @param entryViewModel A provider lambda which ought to turn a context object into a fitting UI.
 	 */
-	public void addEntry( ViewableEntry entryProvider ) {
-		addEntry( null, entryProvider );
-	}
+	public void addEntry( ViewableEntry entryViewModel ) { addEntry( null, entryViewModel ); }
 
 	/**
 	 * 	The {@link JScrollPanels} does not store components statically in the UI tree.
@@ -59,17 +58,27 @@ public class JScrollPanels extends JScrollPane
 	 * 	which fits a certain context (which defines if the entry is selected or not among other things).
 	 *
 	 * @param constraints The constraints which ought to be applied to the entry.
-	 * @param entryProvider A provider lambda which ought to turn a context object into a fitting UI.
+	 * @param entryViewModel A provider lambda which ought to turn a context object into a fitting UI.
 	 */
-	public void addEntry( String constraints, ViewableEntry entryProvider ) {
-		Objects.requireNonNull(entryProvider);
-		EntryPanel entryPanel = new EntryPanel(
-												()-> entriesIn(internal.getComponents()),
-												this.internal.getComponents().length,
-												entryProvider,
-												constraints
-											);
+	public void addEntry( String constraints, ViewableEntry entryViewModel ) {
+		Objects.requireNonNull(entryViewModel);
+		EntryPanel entryPanel = _createEntryPanel(constraints, entryViewModel);
 		this.internal.add(entryPanel);
+		this.validate();
+	}
+
+	/**
+	 *  Adds multiple entries at once to this {@link JScrollPanels}.
+	 * @param constraints The constraints which ought to be applied to the entry.
+	 * @param entryViewModels A list of entry providers which ought to be added.
+	 */
+	public void addAllEntries( String constraints, List<ViewableEntry> entryViewModels ) {
+		Objects.requireNonNull(entryViewModels);
+		List<EntryPanel> entryPanels = entryViewModels.stream()
+													.map( p -> _createEntryPanel(constraints, p) )
+													.collect(Collectors.toList());
+
+		entryPanels.forEach(this.internal::add);
 		this.validate();
 	}
 
@@ -121,7 +130,7 @@ public class JScrollPanels extends JScrollPane
 	 *
 	 * @param action The action which ought to be applied to all {@link JScrollPanels} entries.
 	 */
-	public void forEachEntry(Consumer<EntryPanel> action) {
+	public void forEachEntry( Consumer<EntryPanel> action ) {
 		Arrays.stream(this.internal.getComponents())
 				.map( c -> (EntryPanel) c )
 				.forEach(action);
@@ -137,11 +146,27 @@ public class JScrollPanels extends JScrollPane
 				.forEach(action);
 	}
 
+	/**
+	 *  Use this to set entries as selected based on a condition lambda (predicate).
+	 * @param type The type of the entry which ought to be selected.
+	 * @param condition The condition which ought to be met for the entry to be selected.
+	 * @param <T> The type of the entry which ought to be selected.
+	 */
 	public <T extends JComponent> void setSelectedFor(Class<T> type, Predicate<T> condition) {
 		forEachEntry( e -> e.setEntrySelected(false) );
 		forEachEntry(type, e -> {
 			if ( condition.test((T) e.getLastState()) ) e.setEntrySelected(true);
 		});
+	}
+
+	private EntryPanel _createEntryPanel( String constraints, ViewableEntry entryProvider ) {
+		Objects.requireNonNull(entryProvider);
+		return new EntryPanel(
+				()-> entriesIn(internal.getComponents()),
+				this.internal.getComponents().length,
+				entryProvider,
+				constraints
+		);
 	}
 
 	/**
