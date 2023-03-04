@@ -728,7 +728,7 @@ public final class UI
             splitButton.add(
                 splitItem(e.toString())
                 .onButtonClick( it -> clickEvent.fire() )
-                .onSelection( it -> selection.set(e) )
+                .onSelection( it -> selection.act(e) )
             );
         return splitButton;
     }
@@ -747,7 +747,7 @@ public final class UI
         for ( E e : selection.type().getEnumConstants() )
             splitButton.add(
                 splitItem(e.toString())
-                .onSelection( it -> selection.set(e) )
+                .onSelection( it -> selection.act(e) )
             );
         return splitButton;
     }
