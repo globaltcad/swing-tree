@@ -62,7 +62,7 @@ public class JScrollPanels extends JScrollPane
 	 */
 	public void addEntry( String constraints, ViewableEntry entryViewModel ) {
 		Objects.requireNonNull(entryViewModel);
-		EntryPanel entryPanel = _createEntryPanel(constraints, entryViewModel);
+		EntryPanel entryPanel = _createEntryPanel(constraints, entryViewModel, this.internal.getComponents().length);
 		this.internal.add(entryPanel);
 		this.validate();
 	}
@@ -74,8 +74,14 @@ public class JScrollPanels extends JScrollPane
 	 */
 	public void addAllEntries( String constraints, List<ViewableEntry> entryViewModels ) {
 		Objects.requireNonNull(entryViewModels);
-		List<EntryPanel> entryPanels = entryViewModels.stream()
-													.map( p -> _createEntryPanel(constraints, p) )
+		List<EntryPanel> entryPanels = IntStream.range(0, entryViewModels.size())
+													.mapToObj(
+														i -> _createEntryPanel(
+																	constraints,
+																	entryViewModels.get(i),
+																	this.internal.getComponents().length + i
+																)
+													)
 													.collect(Collectors.toList());
 
 		entryPanels.forEach(this.internal::add);
@@ -159,11 +165,15 @@ public class JScrollPanels extends JScrollPane
 		});
 	}
 
-	private EntryPanel _createEntryPanel( String constraints, ViewableEntry entryProvider ) {
+	private EntryPanel _createEntryPanel(
+		String constraints,
+		ViewableEntry entryProvider,
+		int index
+	) {
 		Objects.requireNonNull(entryProvider);
 		return new EntryPanel(
 				()-> entriesIn(internal.getComponents()),
-				this.internal.getComponents().length,
+				index,
 				entryProvider,
 				constraints
 		);
@@ -349,7 +359,7 @@ public class JScrollPanels extends JScrollPane
 			viewable.isSelected().onSet( it -> {selectThis(components);});
 			if ( viewable.isSelected().is(true) )
 				selectThis(components);
-			viewable.position().set(position);
+			viewable.position().act(position);
 		}
 
 		private void selectThis(
