@@ -1,6 +1,7 @@
 package swingtree.splitbutton
 
 import com.alexandriasoftware.swing.JSplitButton
+import sprouts.Var
 import swingtree.UI
 import swingtree.Utility
 import groovy.transform.CompileDynamic
@@ -24,6 +25,17 @@ import javax.swing.*
 ''')
 class JSplitButton_Examples_Spec extends Specification
 {
+    enum Size {
+        S, M, L;
+        @Override String toString() {
+            switch (this) {
+                case S: return "Small"
+                case M: return "Medium"
+                case L: return "Large"
+            }
+            return "?"
+        }
+    }
 
     def 'The most simple kind of split button can be built like so:'()
     {
@@ -223,6 +235,41 @@ class JSplitButton_Examples_Spec extends Specification
         and :
             ui.popupMenu.components.findAll({it instanceof JRadioButtonMenuItem}).size() == 1
             ui.popupMenu.components.findAll({it instanceof JMenuItem}).size() == 4
+    }
+
+
+    def 'A JSplitButton and all of its options can be created from a simple enum property.'()
+    {
+        reportInfo """
+            For this example we use the following enum declaration:
+            ```
+                enum Size { 
+                    S, M, L;
+                    @Override String toString() {  
+                        switch (this) {
+                            case S: return "Small"
+                            case M: return "Medium"
+                            case L: return "Large"
+                        }
+                        return "?"
+                    }
+                }
+            ```
+        """
+
+        given : 'A Size enum based property.'
+            var selection = Var.of(Size.M)
+
+        and : 'We create a UI builder node for the enum states.'
+            var ui = UI.splitButton(selection)
+
+        expect : 'It wraps a JSplitButton.'
+            ui.component instanceof JSplitButton
+        and : 'There are 3 options.'
+            ui.popupMenu.components.length == 3
+            ui.popupMenu.components[0].text == "Small"
+            ui.popupMenu.components[1].text == "Medium"
+            ui.popupMenu.components[2].text == "Large"
     }
 
 }
