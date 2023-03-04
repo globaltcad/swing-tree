@@ -711,6 +711,48 @@ public final class UI
     }
 
     /**
+     *  Use this to build {@link JSplitButton}s where the selectable options
+     *  are represented by an {@link Enum} type, and the click event is
+     *  handles by an {@link Event} instance.
+     *
+     * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
+     *                  This will be updated when the user selects a new value.
+     * @param clickEvent The {@link Event} which will be fired when the user clicks on the button.
+     * @return A UI builder instance wrapping a {@link JSplitButton}.
+     */
+    public static <E extends Enum<E>> UIForSplitButton<JSplitButton> splitButton( Var<E> selection, Event clickEvent ) {
+        NullUtil.nullArgCheck(selection, "selection", Var.class);
+        NullUtil.nullArgCheck(clickEvent, "clickEvent", Event.class);
+        UIForSplitButton<JSplitButton> splitButton = splitButton(selection.get().toString());
+        for ( E e : selection.type().getEnumConstants() )
+            splitButton.add(
+                splitItem(e.toString())
+                .onButtonClick( it -> clickEvent.fire() )
+                .onSelection( it -> selection.set(e) )
+            );
+        return splitButton;
+    }
+
+    /**
+     *  Use this to build {@link JSplitButton}s where the selectable options
+     *  are represented by an {@link Enum} type.
+     *
+     * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
+     *                  This will be updated when the user selects a new value.
+     * @return A UI builder instance wrapping a {@link JSplitButton}.
+     */
+    public static <E extends Enum<E>> UIForSplitButton<JSplitButton> splitButton( Var<E> selection ) {
+        NullUtil.nullArgCheck(selection, "selection", Var.class);
+        UIForSplitButton<JSplitButton> splitButton = splitButton(selection.get().toString());
+        for ( E e : selection.type().getEnumConstants() )
+            splitButton.add(
+                splitItem(e.toString())
+                .onSelection( it -> selection.set(e) )
+            );
+        return splitButton;
+    }
+
+    /**
      *  Use this to add entries to the {@link JSplitButton} by
      *  passing {@link SplitItem} instances to {@link UIForSplitButton} builder like so: <br>
      *  <pre>{@code
