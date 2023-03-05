@@ -31,7 +31,11 @@ public class Utility {
     }
 
     public static <B extends JSplitButton> void click(UIForSplitButton<B> ui) {
-        ui.getComponent().doClick();
+        try {
+            UI.runNow(() -> ui.getComponent().doClick());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void setLaF(LaF lookAndFeel) {

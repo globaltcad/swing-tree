@@ -713,7 +713,28 @@ public final class UI
     /**
      *  Use this to build {@link JSplitButton}s where the selectable options
      *  are represented by an {@link Enum} type, and the click event is
-     *  handles by an {@link Event} instance.
+     *  handles by an {@link Event} instance. <br>
+     *  Here's an example of how to use this method: <br>
+     *  <pre>{@code
+     *      // In your view model:
+     *      enum Size { SMALL, MEDIUM, LARGE }
+     *      private Var<Size> selection = Var.of(Size.SMALL);
+     *      private Event clickEvent = Event.of(()->{ ... }
+     *
+     *      public Var<Size> selection() { return selection; }
+     *      public Event clickEvent() { return clickEvent; }
+     *
+     *      // In your view:
+     *      UI.splitButton(vm.selection(), vm.clickEvent())
+     * }</pre>
+     * <p>
+     * <b>Tip:</b><i>
+     *      For the text displayed on the split button, the selected enum state
+     *      will be converted to strings based on the {@link Object#toString()}
+     *      method. If you want to customize how they are displayed
+     *      (So that 'Size.LARGE' is displayed as 'Large' instead of 'LARGE')
+     *      simply override the {@link Object#toString()} method in your enum. </i>
+     *
      *
      * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
      *                  This will be updated when the user selects a new value.
@@ -721,35 +742,36 @@ public final class UI
      * @return A UI builder instance wrapping a {@link JSplitButton}.
      */
     public static <E extends Enum<E>> UIForSplitButton<JSplitButton> splitButton( Var<E> selection, Event clickEvent ) {
-        NullUtil.nullArgCheck(selection, "selection", Var.class);
-        NullUtil.nullArgCheck(clickEvent, "clickEvent", Event.class);
-        UIForSplitButton<JSplitButton> splitButton = splitButton(selection.get().toString());
-        for ( E e : selection.type().getEnumConstants() )
-            splitButton.add(
-                splitItem(e.toString())
-                .onButtonClick( it -> clickEvent.fire() )
-                .onSelection( it -> selection.act(e) )
-            );
-        return splitButton;
+        return splitButton("").withSelection(selection, clickEvent);
     }
 
     /**
      *  Use this to build {@link JSplitButton}s where the selectable options
-     *  are represented by an {@link Enum} type.
+     *  are represented by an {@link Enum} type. <br>
+     *  Here's an example of how to use this method: <br>
+     *  <pre>{@code
+     *      // In your view model:
+     *      enum Size { SMALL, MEDIUM, LARGE }
+     *      private Var<Size> selection = Var.of(Size.SMALL);
+     *
+     *      public Var<Size> selection() { return selection; }
+     *
+     *      // In your view:
+     *      UI.splitButton(vm.selection())
+     * }</pre>
+     * <p>
+     * <b>Tip:</b><i>
+     *      The text displayed on the button is based on the {@link Object#toString()}
+     *      method of the enum instances. If you want to customize how they are displayed
+     *      (So that 'Size.LARGE' is displayed as 'Large' instead of 'LARGE')
+     *      simply override the {@link Object#toString()} method in your enum. </i>
      *
      * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
      *                  This will be updated when the user selects a new value.
      * @return A UI builder instance wrapping a {@link JSplitButton}.
      */
     public static <E extends Enum<E>> UIForSplitButton<JSplitButton> splitButton( Var<E> selection ) {
-        NullUtil.nullArgCheck(selection, "selection", Var.class);
-        UIForSplitButton<JSplitButton> splitButton = splitButton(selection.get().toString());
-        for ( E e : selection.type().getEnumConstants() )
-            splitButton.add(
-                splitItem(e.toString())
-                .onSelection( it -> selection.act(e) )
-            );
-        return splitButton;
+        return splitButton("").withSelection(selection);
     }
 
     /**
@@ -1637,10 +1659,29 @@ public final class UI
 
     /**
      *  Use this to create a builder for a new {@link JComboBox} instance
-     *  where the provided property dynamically models the selected item.
-     *  This means that the property will be updated whenever the user
+     *  where the provided enum based property dynamically models the selected item
+     *  as well as all possible options (all the enum states).
+     *  The property will be updated whenever the user
      *  selects a new item in the {@link JComboBox} and the {@link JComboBox}
      *  will be updated whenever the property changes in your code (see {@link Var#set(Object)}).
+     *  <br>
+     *  Here's an example of how to use this method: <br>
+     *  <pre>{@code
+     *      // In your view model:
+     *      enum Size { SMALL, MEDIUM, LARGE }
+     *      private Var<Size> selection = Var.of(Size.SMALL);
+     *
+     *      public Var<Size> selection() { return selection; }
+     *
+     *      // In your view:
+     *      UI.comboBox(vm.selection())
+     * }</pre>
+     * <p>
+     * <b>Tip:</b><i>
+     *      The text displayed on the combo box is based on the {@link Object#toString()}
+     *      method of the enum instances. If you want to customize how they are displayed
+     *      (So that 'Size.LARGE' is displayed as 'Large' instead of 'LARGE')
+     *      simply override the {@link Object#toString()} method in your enum. </i>
      *
      * @param selectedItem A property modelling the selected item in the combo box.
      * @return A builder instance for the new {@link JComboBox}, which enables fluent method chaining.
@@ -2150,6 +2191,29 @@ public final class UI
      *  instance which will be used to dynamically model the selection state of the
      *  wrapped {@link JToggleButton} type by checking
      *  weather the property matches the provided enum or not.
+     *  <br>
+     *  Here's an example of how to use this method: <br>
+     *  <pre>{@code
+     *      // In your view model:
+     *      enum Size { SMALL, MEDIUM, LARGE }
+     *      private Var<Size> selection = Var.of(Size.SMALL);
+     *
+     *      public Var<Size> selection() { return selection; }
+     *
+     *      // In your view:
+     *      UI.panel()
+     *      .add(UI.radioButton(Size.SMALL,  vm.selection())
+     *      .add(UI.radioButton(Size.MEDIUM, vm.selection())
+     *      .add(UI.radioButton(Size.LARGE,  vm.selection())
+     * }</pre>
+     * <p>
+     * <b>Tip:</b><i>
+     *      For the text displayed on the radio buttons, the enums will be converted
+     *      to strings using {@link Object#toString()} method.
+     *      If you want to customize how they are displayed
+     *      (So that 'Size.LARGE' is displayed as 'Large' instead of 'LARGE')
+     *      simply override the {@link Object#toString()} method in your enum. </i>
+     *
      *
      * @param state The reference {@link Enum} which this {@link JToggleButton} should represent.
      * @param selection The {@link sprouts.Var} instance which will be used

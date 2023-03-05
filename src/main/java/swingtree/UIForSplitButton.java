@@ -2,6 +2,8 @@ package swingtree;
 
 import com.alexandriasoftware.swing.JSplitButton;
 import sprouts.Action;
+import sprouts.Event;
+import sprouts.Var;
 
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
@@ -21,6 +23,11 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
     private final JMenuItem[] _lastSelected = {null};
     private final List<Action<SplitButtonDelegate<JMenuItem>>> _onSelections = new ArrayList<>();
 
+    /**
+     *  Creates a new instance wrapping the given {@link JSplitButton} component.
+     *
+     * @param component The {@link JSplitButton} instance to wrap.
+     */
     protected UIForSplitButton( B component ) {
         super(component);
         getComponent().setPopupMenu(_popupMenu);
@@ -47,6 +54,56 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
                 .map( c -> (JMenuItem) c )
                 .filter(AbstractButton::isSelected)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     *  Use this to build {@link JSplitButton}s where the selectable options
+     *  are represented by an {@link Enum} type, and the click event is
+     *  handles by an {@link Event} instance.
+     *
+     * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
+     *                  This will be updated when the user selects a new value.
+     * @param clickEvent The {@link Event} which will be fired when the user clicks on the button.
+     * @return A UI builder instance wrapping a {@link JSplitButton}.
+     */
+    public <E extends Enum<E>> UIForSplitButton<B> withSelection( Var<E> selection, Event clickEvent ) {
+        NullUtil.nullArgCheck(selection, "selection", Var.class);
+        NullUtil.nullArgCheck(clickEvent, "clickEvent", Event.class);
+        for ( E e : selection.type().getEnumConstants() )
+            this.add(
+                UI.splitItem(e.toString())
+                .onButtonClick( it -> clickEvent.fire() )
+                .onSelection( it -> {
+                    it.selectOnlyCurrentItem();
+                    it.setButtonText(e.toString());
+                    selection.act(e);
+                })
+            );
+
+        return this.withText(selection.viewAsString());
+    }
+
+    /**
+     *  Use this to build {@link JSplitButton}s where the selectable options
+     *  are represented by an {@link Enum} type.
+     *
+     * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
+     *                  This will be updated when the user selects a new value.
+     * @return A UI builder instance wrapping a {@link JSplitButton}.
+     */
+    public <E extends Enum<E>> UIForSplitButton<B> withSelection( Var<E> selection ) {
+        NullUtil.nullArgCheck(selection, "selection", Var.class);
+        for ( E e : selection.type().getEnumConstants() )
+            this.add(
+                UI.splitItem(e.toString())
+                .onSelection( it -> {
+                    it.selectOnlyCurrentItem();
+                    it.setButtonText(e.toString());
+                    selection.act(e);
+                })
+            );
+
+        return this.withText(selection.viewAsString());
     }
 
     /**

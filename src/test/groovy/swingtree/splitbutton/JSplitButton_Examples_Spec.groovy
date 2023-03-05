@@ -1,6 +1,8 @@
 package swingtree.splitbutton
 
 import com.alexandriasoftware.swing.JSplitButton
+import sprouts.Event
+import sprouts.Listener
 import sprouts.Var
 import swingtree.UI
 import swingtree.Utility
@@ -32,6 +34,18 @@ class JSplitButton_Examples_Spec extends Specification
                 case S: return "Small"
                 case M: return "Medium"
                 case L: return "Large"
+            }
+            return "?"
+        }
+    }
+
+    enum Colour {
+        R, G, B;
+        @Override String toString() {
+            switch (this) {
+                case R: return "Red"
+                case G: return "Green"
+                case B: return "Blue"
             }
             return "?"
         }
@@ -71,6 +85,7 @@ class JSplitButton_Examples_Spec extends Specification
 
         when :
             ((JMenuItem)ui.popupMenu.getComponent(1)).doClick()
+            UI.sync()
         then :
             Utility.getSplitButtonText(ui) == "second"
     }
@@ -162,7 +177,7 @@ class JSplitButton_Examples_Spec extends Specification
                 .add(UI.splitItem("third").makeSelected().onButtonClick( it -> it.appendToButtonText(" 3") ))
 
         when : 'We click the button.'
-            UI.runNow(()->Utility.click(ui))
+            Utility.click(ui)
         then : 'The button text now indicates which items were selected and triggered!'
             Utility.getSplitButtonText(ui) == "triggered: 2 3"
     }
@@ -182,7 +197,7 @@ class JSplitButton_Examples_Spec extends Specification
                 .add(UI.splitItem("third").makeSelected().onButtonClick( it -> it.appendToButtonText(" 3") ))
 
         when : 'We click the button.'
-            UI.runNow(()->Utility.click(ui))
+            Utility.click(ui)
         then : 'The button text now indicates which items were selected and triggered!'
             Utility.getSplitButtonText(ui) == "triggered: 1 3"
 
@@ -192,7 +207,7 @@ class JSplitButton_Examples_Spec extends Specification
             Utility.getSplitButtonText(ui) == "triggered: 1 3"
 
         when : 'We now click the second button item.'
-            UI.runNow(()->Utility.click(ui))
+            Utility.click(ui)
         then : 'The split button text will indicate that now only the second split item button action was triggered!'
             Utility.getSplitButtonText(ui) == "triggered: 1 3 2"
     }
@@ -272,4 +287,49 @@ class JSplitButton_Examples_Spec extends Specification
             ui.popupMenu.components[2].text == "Large"
     }
 
+
+    def 'A JSplitButton and all of its options can be bound to and created from a simple enum property and bound to an event.'()
+    {
+        reportInfo """
+                For this example we use the following enum declaration:
+                ```
+                    enum Colour { 
+                        RED, GREEN, BLUE;
+                        @Override String toString() {  
+                            switch (this) {
+                                case RED: return "Red"
+                                case GREEN: return "Green"
+                                case BLUE: return "Blue"
+                            }
+                            return "?"
+                        }
+                    }
+                ```
+            """
+        given : 'A Colour enum based property and an event.'
+            var tracker = []
+            var selection = Var.of(Colour.B).onAct({tracker << "#"})
+            var event = Event.of((Listener){tracker << "!"})
+        and : 'We create a UI builder node for the enum states.'
+            var ui = UI.splitButton(selection, event)
+        expect : 'It wraps a JSplitButton.'
+            ui.component instanceof JSplitButton
+        and : 'There are 3 options.'
+            ui.popupMenu.components.length == 3
+            ui.popupMenu.components[0].text == "Red"
+            ui.popupMenu.components[1].text == "Green"
+            ui.popupMenu.components[2].text == "Blue"
+        and : 'The button text is initially set to the current selection.'
+            ui.component.text == "Blue"
+        when : 'We select the second option.'
+            UI.runNow(()->((JMenuItem)ui.popupMenu.getComponent(1)).doClick())
+        then : 'The tracker will have recorded a selection action event.'
+            tracker == ["#"]
+        and : 'The button text will have changed to the new selection.'
+            ui.component.text == "Green"
+        when : 'We click the button.'
+            Utility.click(ui)
+        then : 'The tracker will have recorded a button click event.'
+            tracker == ["#", "!"]
+    }
 }

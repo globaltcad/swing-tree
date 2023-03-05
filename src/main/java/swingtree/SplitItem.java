@@ -239,8 +239,10 @@ public final class SplitItem<I extends JMenuItem>
          */
         public Delegate<I> selectCurrentItem() {
             // We make sure that only the Swing thread can modify components:
-            if ( !UI.thisIsUIThread() )
+            if ( !UI.thisIsUIThread() ) {
                 UI.run(this::selectCurrentItem);
+                return this;
+            }
             this.getCurrentItem().setSelected(true);
             return this;
         }
@@ -254,8 +256,10 @@ public final class SplitItem<I extends JMenuItem>
          */
         public Delegate<I> selectOnlyCurrentItem() {
             // We make sure that only the Swing thread can modify components:
-            if ( !UI.thisIsUIThread() )
+            if ( !UI.thisIsUIThread() ) {
                 UI.run(this::selectOnlyCurrentItem);
+                return this;
+            }
             this.unselectAllItems();
             this.getCurrentItem().setSelected(true);
             return this;
@@ -269,8 +273,10 @@ public final class SplitItem<I extends JMenuItem>
          */
         public Delegate<I> unselectCurrentItem() {
             // We make sure that only the Swing thread can modify components:
-            if ( !UI.thisIsUIThread() )
+            if ( !UI.thisIsUIThread() ) {
                 UI.run(this::unselectCurrentItem);
+                return this;
+            }
             this.getCurrentItem().setSelected(false);
             return this;
         }
@@ -283,8 +289,10 @@ public final class SplitItem<I extends JMenuItem>
          */
         public Delegate<I> unselectAllItems() {
             // We make sure that only the Swing thread can modify components:
-            if ( !UI.thisIsUIThread() )
+            if ( !UI.thisIsUIThread() ) {
                 UI.run(this::unselectAllItems);
+                return this;
+            }
             getSiblinghood().forEach(it -> it.setSelected(false) );
             return this;
         }
@@ -297,8 +305,10 @@ public final class SplitItem<I extends JMenuItem>
          */
         public Delegate<I> selectAllItems() {
             // We make sure that only the Swing thread can modify components:
-            if ( !UI.thisIsUIThread() )
+            if ( !UI.thisIsUIThread() ) {
                 UI.run(this::selectAllItems);
+                return this;
+            }
             getSiblinghood().forEach(it -> it.setSelected(true) );
             return this;
         }
@@ -311,8 +321,10 @@ public final class SplitItem<I extends JMenuItem>
          */
         public Delegate<I> displayCurrentItemText() {
             // We make sure that only the Swing thread can modify components:
-            if ( !UI.thisIsUIThread() )
+            if ( !UI.thisIsUIThread() ) {
                 UI.run(this::displayCurrentItemText);
+                return this;
+            }
             if ( getCurrentItem() != null )
                 getSplitButton().setText(getCurrentItem().getText());
             return this;
@@ -324,8 +336,10 @@ public final class SplitItem<I extends JMenuItem>
          */
         public Delegate<I> setButtonText( String text ) {
             // We make sure that only the Swing thread can modify components:
-            if ( !UI.thisIsUIThread() )
-                UI.run(() -> setButtonText(text) );
+            if ( !UI.thisIsUIThread() ) {
+                UI.run(() -> setButtonText(text));
+                return this;
+            }
             NullUtil.nullArgCheck(text, "text", String.class);
             this.splitButton.setText(text);
             return this;
@@ -345,8 +359,10 @@ public final class SplitItem<I extends JMenuItem>
         public Delegate<I> appendToButtonText( String postfix ) {
             NullUtil.nullArgCheck(postfix, "postfix", String.class);
             // We make sure that only the Swing thread can modify components:
-            if ( !UI.thisIsUIThread() )
-                UI.run(() -> appendToButtonText(postfix) );
+            if ( !UI.thisIsUIThread() ) {
+                UI.run(() -> appendToButtonText(postfix));
+                return this;
+            }
             this.splitButton.setText(this.getButtonText()+postfix);
             return this;
         }
@@ -358,8 +374,10 @@ public final class SplitItem<I extends JMenuItem>
         public Delegate<I> prependToButtonText( String prefix ) {
             NullUtil.nullArgCheck(prefix, "postfix", String.class);
             // We make sure that only the Swing thread can modify components:
-            if ( !UI.thisIsUIThread() )
+            if ( !UI.thisIsUIThread() ) {
                 UI.run(() -> prependToButtonText(prefix) );
+                return this;
+            }
             this.splitButton.setText(prefix+this.getButtonText());
             return this;
         }
@@ -372,8 +390,10 @@ public final class SplitItem<I extends JMenuItem>
          */
         public Delegate<I> selectItem( int i ) {
             // We make sure that only the Swing thread can modify components:
-            if ( !UI.thisIsUIThread() )
-                UI.run(() -> selectItem(i) );
+            if ( !UI.thisIsUIThread() ) {
+                UI.run(() -> selectItem(i));
+                return this;
+            }
             getSiblinghood().get(i).setSelected(true);
             return this;
         }
@@ -386,8 +406,10 @@ public final class SplitItem<I extends JMenuItem>
          */
         public Delegate<I> selectOnlyItem( int i ) {
             // We make sure that only the Swing thread can modify components:
-            if ( !UI.thisIsUIThread() )
+            if ( !UI.thisIsUIThread() ) {
                 UI.run(() -> selectOnlyItem(i) );
+                return this;
+            }
             unselectAllItems().getSiblinghood().get(i).setSelected(true);
             return this;
         }
@@ -400,8 +422,10 @@ public final class SplitItem<I extends JMenuItem>
          */
         public Delegate<I> unselectItem( int i ) {
             // We make sure that only the Swing thread can modify components:
-            if ( !UI.thisIsUIThread() )
+            if ( !UI.thisIsUIThread() ) {
                 UI.run(() -> unselectItem(i) );
+                return this;
+            }
             getSiblinghood().get(i).setSelected(false);
             return this;
         }
