@@ -97,6 +97,51 @@ public class JScrollPanels extends JScrollPane
 	}
 
 	/**
+	 * 	Use this to remove an entry at a certain index.
+	 * @param index The index of the entry which ought to be removed.
+	 */
+	public void removeEntryAt( int index ) {
+		this.internal.remove(index);
+		this.validate();
+	}
+
+	/**
+	 * 	Use this to add an entry at a certain index.
+	 * 		Note: This method will replace an existing entry at the given index.
+	 *
+	 *  @param index The index at which the entry ought to be added.
+	 *  @param attr The constraints which ought to be applied to the entry.
+	 *  @param entryViewModel The entry provider which ought to be added.
+	 */
+	public void addEntryAt( int index, String attr, ViewableEntry entryViewModel ) {
+		Objects.requireNonNull(entryViewModel);
+		EntryPanel entryPanel = _createEntryPanel(attr, entryViewModel, index);
+		this.internal.add(entryPanel, index);
+		this.validate();
+	}
+
+	/**
+	 * 	Use this to replace an entry at a certain index.
+	 * 		Note: This method will replace an existing entry at the given index.
+	 *
+	 *  @param index The index at which the entry ought to be added.
+	 *  @param attr The constraints which ought to be applied to the entry.
+	 *  @param entryViewModel The entry provider which ought to be added.
+	 */
+	public void setEntryAt( int index, String attr, ViewableEntry entryViewModel ) {
+		Objects.requireNonNull(entryViewModel);
+		EntryPanel entryPanel = _createEntryPanel(attr, entryViewModel, index);
+		// We first remove the old entry panel and then add the new one.
+		// This is necessary because the layout manager does not allow to replace
+		// a component at a certain index.
+		this.internal.remove(index);
+		// We have to re-add the entry panel at the same index
+		// because the layout manager will otherwise add it at the end.
+		this.internal.add(entryPanel, index);
+		this.validate();
+	}
+
+	/**
 	 * 	Use this to find an entry component.
 	 *
 	 * @param type The component type which ought to be found.
@@ -388,6 +433,10 @@ public class JScrollPanels extends JScrollPane
 				this.viewable.isSelected().act(isHighlighted);
 			}
 			this.isSelected = isHighlighted;
+		}
+
+		@Override public String toString() {
+			return "EntryPanel[" + this.lastState + "]";
 		}
 	}
 

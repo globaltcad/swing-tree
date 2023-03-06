@@ -165,8 +165,33 @@ public class ScrollPanelsViewModel
 						.add(UI.label(position.viewAs(String.class, s -> "Position: " + s)))
 						.add(UI.label(selected.viewAs(String.class, s -> "Selected: " + s)))
 						.add(UI.button("Delete me!").onClick(it -> {
+							System.out.println("Deleting " + this.text.get());
 							int i = entries.indexOf(this);
 							entries.removeAt(i);
+							if ( i != this.position.get() )
+								throw new IllegalStateException("Index mismatch: " + i + " != " + this.position.get());
+						}))
+						.add(UI.button("Duplicate").onClick( it -> {
+							int i = entries.indexOf(this);
+							entries.addAt(i, new EntryViewModel(this.text.get() + " (copy)"));
+						}))
+					    .add(UI.button("up").onClick( it -> {
+							int i = entries.indexOf(this);
+							if ( i > 0 ) {
+								entries.removeAt(i);
+								entries.addAt(i - 1, this);
+							}
+						}))
+						.add(UI.button("down").onClick( it -> {
+							int i = entries.indexOf(this);
+							if ( i < entries.size() - 1 ) {
+								entries.removeAt(i);
+								entries.addAt(i + 1, this);
+							}
+						}))
+						.add(UI.button("replace").onClick( it -> {
+							int i = entries.indexOf(this);
+							entries.setAt(i, new EntryViewModel("Replaced!"));
 						}))
 						.getComponent();
 		}
@@ -176,6 +201,8 @@ public class ScrollPanelsViewModel
 		@Override public Var<Integer> position() { return position; }
 
 		public Var<String> text() { return text; }
+
+		@Override public String toString() { return "Entry@"+Integer.toHexString(this.hashCode())+"["+this.text.get()+"]"; }
 	}
 
 }
