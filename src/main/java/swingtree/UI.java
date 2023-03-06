@@ -1079,6 +1079,15 @@ public final class UI
     }
 
     /**
+     *  This factory method creates a {@link JMenu} with the provided text
+     *  displayed on the menu button. <br>
+     *  Here an example demonstrating the usage of this method: <br>
+     *  <pre>{@code
+     *    UI.popupMenu()
+     *    .add(UI.menuItem("Delete").onClick( it -> {..} ))
+     *    .add(UI.menuItem("Edit").onClick( it -> {..} ))
+     * }</pre>
+     *
      * @param text The text which should be displayed on the wrapped {@link JMenuItem}.
      * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
      */
@@ -1096,6 +1105,58 @@ public final class UI
         return new UIForMenuItem<>(new JMenuItem()).withText(text);
     }
 
+    /**
+     *  Use this factory method to create a {@link JMenuItem} with the
+     *  provided text and default icon. <br>
+     *  Here an example demonstrating the usage of this method: <br>
+     *  <pre>{@code
+     *    UI.menuItem("Hello", UI.icon("path/to/icon.png"))
+     *    .withTip("I give info!")
+     *    .onClick( it -> {...} )
+     *  }</pre>
+     *
+     * @param text The text which should be displayed on the wrapped {@link JMenuItem}.
+     * @param icon The icon which should be displayed on the wrapped {@link JMenuItem}.
+     * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
+     */
+    public static UIForMenuItem<JMenuItem> menuItem( String text, Icon icon ) {
+        NullUtil.nullArgCheck(text, "text", String.class);
+        NullUtil.nullArgCheck(icon, "icon", Icon.class);
+        return new UIForMenuItem<>(new JMenuItem(text, icon));
+    }
+
+    /**
+     * @param text The text property which should be displayed on the wrapped {@link JMenuItem} dynamically.
+     * @param icon The icon which should be displayed on the wrapped {@link JMenuItem}.
+     * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
+     */
+    public static UIForMenuItem<JMenuItem> menuItem( Val<String> text, Icon icon ) {
+        NullUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullArgCheck(icon, "icon", Icon.class);
+        return new UIForMenuItem<>(new JMenuItem(icon)).withText(text);
+    }
+
+    /**
+     * @param text The text which should be displayed on the wrapped {@link JMenuItem}.
+     * @param icon The icon which should be displayed on the wrapped {@link JMenuItem}.
+     * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
+     */
+    public static UIForMenuItem<JMenuItem> menuItem( String text, Val<Icon> icon ) {
+        NullUtil.nullArgCheck(text, "text", String.class);
+        NullUtil.nullArgCheck(icon, "icon", Val.class);
+        return new UIForMenuItem<>(new JMenuItem(text)).withIcon(icon);
+    }
+
+    /**
+     * @param text The text property which should be displayed on the wrapped {@link JMenuItem} dynamically.
+     * @param icon The icon which should be displayed on the wrapped {@link JMenuItem}.
+     * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
+     */
+    public static UIForMenuItem<JMenuItem> menuItem( Val<String> text, Val<Icon> icon ) {
+        NullUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullArgCheck(icon, "icon", Val.class);
+        return new UIForMenuItem<>(new JMenuItem()).withText(text).withIcon(icon);
+    }
 
     /**
      *  Use this to create a builder for the provided {@link JToolBar} instance.

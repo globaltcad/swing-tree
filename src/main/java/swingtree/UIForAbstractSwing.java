@@ -184,7 +184,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I isVisibleIfNot( Val<Boolean> isVisible ) {
         NullUtil.nullArgCheck(isVisible, "isVisible", Val.class);
-        NullUtil.nullPropertyCheck(isVisible, "isVisible", "Null is not allowed to model the visibility of a UI component!");
+        NullUtil.nullPropertyCheck(isVisible, "isVisible", "Null is not allowed to model the visibility of a UI component! A boolean should only be true or false!");
         _onShow( isVisible, v -> getComponent().setVisible(!v) );
         return isVisibleIf( !isVisible.orElseThrow() );
     }
@@ -271,12 +271,13 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     *  Use this to make the wrapped UI component focusable.
-     *  @param isFocusable The truth value determining if the UI component should be focusable or not.
+     *  Use this to make the wrapped UI component focusable if a certain condition is not met.
+     *  @param notFocusable The truth value determining if the UI component should be focusable or not.
+     *                     If {@code false}, the component will be focusable.
      *  @return This very instance, which enables builder-style method chaining.
      */
-    public final I isFocusableIfNot( boolean isFocusable ) {
-        getComponent().setFocusable( !isFocusable );
+    public final I isFocusableIfNot( boolean notFocusable ) {
+        getComponent().setFocusable( !notFocusable );
         return _this();
     }
 
@@ -294,6 +295,60 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullPropertyCheck(isFocusable, "isFocusable", "Null value for isFocusable is not allowed!");
         _onShow( isFocusable, v -> isFocusableIf(!v) );
         this.isFocusableIf( !isFocusable.orElseThrow() );
+        return _this();
+    }
+
+    /**
+     *  Use this to make the wrapped UI component opaque.
+     *  @param isOpaque The truth value determining if the UI component should be opaque or not.
+     *  @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isOpaqueIf( boolean isOpaque ) {
+        getComponent().setOpaque( isOpaque );
+        return _this();
+    }
+
+    /**
+     *  Use this to dynamically make the wrapped UI component opaque.
+     *  This is useful if you want to make a component opaque only if a certain condition is met.
+     *  <br>
+     *  <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
+     *
+     *  @param isOpaque The truth value determining if the UI component should be opaque or not wrapped in a {@link Val}.
+     *  @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isOpaqueIf( Val<Boolean> isOpaque ) {
+        NullUtil.nullArgCheck( isOpaque, "isOpaque", Val.class );
+        NullUtil.nullPropertyCheck(isOpaque, "isOpaque", "Null value for isOpaque is not allowed! A boolean should only have the values true or false!");
+        _onShow( isOpaque, v -> isOpaqueIf(v) );
+        this.isOpaqueIf( isOpaque.orElseThrow() );
+        return _this();
+    }
+
+    /**
+     *  Use this to make the wrapped UI component opaque if the given condition is not met.
+     *  @param notOpaque The truth value determining if the UI component should be opaque or not, where false means opaque.
+     *  @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isOpaqueIfNot( boolean notOpaque ) {
+        getComponent().setOpaque( !notOpaque );
+        return _this();
+    }
+
+    /**
+     *  Use this to dynamically make the wrapped UI component opaque if the boolean item of the given {@link Val} is false.
+     *  This is useful if you want to make a component opaque only if a certain condition is not met.
+     *  <br>
+     *  <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
+     *
+     *  @param notOpaque The truth value determining if the UI component should be opaque or not, wrapped in a {@link Val}, where false means opaque.
+     *  @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isOpaqueIfNot( Val<Boolean> notOpaque ) {
+        NullUtil.nullArgCheck( notOpaque, "notOpaque", Val.class );
+        NullUtil.nullPropertyCheck(notOpaque, "notOpaque", "Null value for isOpaque is not allowed! A boolean should only have the values true or false!");
+        _onShow( notOpaque, v -> isOpaqueIf(!v) );
+        this.isOpaqueIf( !notOpaque.orElseThrow() );
         return _this();
     }
 
@@ -370,7 +425,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I withBorder( Val<Border> border ) {
         NullUtil.nullArgCheck(border, "border", Val.class);
-        NullUtil.nullPropertyCheck(border, "border", "Null value for border is not allowed!");
+        NullUtil.nullPropertyCheck(border, "border", "Null value for border is not allowed! Use an empty border instead!");
         _onShow( border, v -> getComponent().setBorder(v) );
         return this.withBorder( border.orElseNull() );
     }
