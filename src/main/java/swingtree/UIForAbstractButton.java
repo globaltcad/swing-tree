@@ -120,6 +120,42 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
         return withFontSize(size.orElseThrow());
     }
 
+    /**
+     *  Use this to set the font of the wrapped button type.
+     * @param font The font of the text which should be displayed on the button.
+     * @return This builder instance, to allow for method chaining.
+     * @throws IllegalArgumentException if {@code font} is {@code null}.
+     */
+    public final I withFont( Font font ) {
+        NullUtil.nullArgCheck(font, "font", Font.class);
+        this.getComponent().setFont( font );
+        return _this();
+    }
+
+    /**
+     *  Use this to dynamically set the font of the wrapped button type
+     *  through the provided view model property.
+     *  When the font wrapped by the provided property changes,
+     *  then so does the font of the text displayed on this button.
+     *
+     * @param font The font property of the text which should be displayed on the button type.
+     * @return This builder instance, to allow for method chaining.
+     * @throws IllegalArgumentException if {@code font} is {@code null}.
+     * @throws IllegalArgumentException if {@code font} is a property which can wrap {@code null}.
+     */
+    public final I withFont( Val<Font> font ) {
+        NullUtil.nullArgCheck(font, "font", Val.class);
+        NullUtil.nullPropertyCheck(font, "font", "Use the default font of this component instead of null!");
+        _onShow( font, v -> withFont(v) );
+        return withFont( font.orElseThrow() );
+    }
+
+    /**
+     *  Use this to set the selection state of the wrapped button type.
+     *
+     * @param isSelected The selection state of the wrapped button type, which translates to {@link AbstractButton#setSelected(boolean)}.
+     * @return This builder instance, to allow for method chaining.
+     */
     public final I isSelectedIf( boolean isSelected ) {
         _setSelectedSilently(isSelected);
         return _this();
@@ -143,7 +179,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     }
 
     /**
-     *  Use this to dynamically bind to a {@link sprouts.Var}
+     *  Use this to bind to a {@link sprouts.Var}
      *  instance which will be used to dynamically model the selection state of the
      *  wrapped {@link AbstractButton} type.
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
@@ -156,7 +192,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     }
 
     /**
-     *  Use this to dynamically bind to a {@link sprouts.Var}
+     *  Use this to bind to a {@link sprouts.Var}
      *  instance which will be used to dynamically model the inverse selection state of the
      *  wrapped {@link AbstractButton} type.
      *
@@ -172,7 +208,7 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     }
 
     /**
-     *  Use this to dynamically bind to a {@link sprouts.Var}
+     *  Use this to bind to a {@link sprouts.Var}
      *  instance which will be used to dynamically model the selection state of the
      *  wrapped {@link AbstractButton} type.
      *
