@@ -31,7 +31,7 @@ public class UIForRadioButton<R extends JRadioButton> extends UIForAbstractToggl
         R component = getComponent();
         String currentText = component.getText();
         if ( currentText == null || currentText.isEmpty() )
-            component.setText( state.name() );
+            component.setText( state.toString() );
 
         // When the user clicks the button, we update the selection property!
         // But only if the button is selected, otherwise we'll ignore the click.
