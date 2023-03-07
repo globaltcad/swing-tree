@@ -17,27 +17,87 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * 	The {@link JScrollPanels} class is similar to the {@link JList} class
- * 	(which uses a {@link ListCellRenderer} to continuously fetch a live UI component
- * 	for dynamically rendering list entries).
- * 	Contrary to the {@link JList} however, entries of the {@link JScrollPanels}
- * 	will be able to receive user events like for example button clicks etc... <br>
+ * 	The {@link JScrollPanels} class is a container for a list of scrollable UI components.
+ *  It exists to compensate for the deficits of the {@link JList} and {@link JTable} components,
+ *  which are not able to receive user events like for example button clicks etc...
+ * 	<br>
  * 	Instances of this class manage {@link ViewableEntry} implementations which
  * 	will be called dynamically to update the UI.
+ * 	<br>
+ * 	A {@link JScrollPanels} instance can arrange its entries in a vertical or horizontal manner
+ * 	based on the {@link UI.Align} parameter.
+ * 	<br>
+ * 	Here a simple example demonstrating the usage of the {@link JScrollPanels} class
+ * 	through the Swing-Tree API:
+ * 	<pre>{@code
+ * 		UI.scrollPanels()
+ * 		.add(viewModel.entries())
+ * 	}</pre>
+ * 	...where {@code entries()} is a method returning a {@link sprouts.Vars} instance
+ * 	which contains a list of {@link ViewableEntry} implementations.
+ * 	Each {@link ViewableEntry} implementation is itself a view model responsible for
+ * 	supplying a UI which fits a certain context.
  */
 public class JScrollPanels extends JScrollPane
 {
-	private final InternalPanel internal; // Wrapper for the actual UI components
+	/**
+	 * 	Constructs a new {@link JScrollPanels} instance with the provided alignment and size.
+	 * 	@param align The alignment of the entries inside this {@link JScrollPanels} instance.
+	 * 				 The alignment can be either {@link UI.Align#HORIZONTAL} or {@link UI.Align#VERTICAL}.
+	 * @param size The size of the entries in this {@link JScrollPanels} instance.
+	 */
+	public static JScrollPanels of(
+		UI.Align align, Dimension size
+	) {
+		return _construct(align, size, Collections.emptyList(), null);
+	}
+
+	private static JScrollPanels _construct(
+		UI.Align align,
+		Dimension shape,
+		List<ViewableEntry> components,
+		String constraints
+	) {
+		UI.Align type = align;
+		InternalPanel[] forwardReference = {null};
+		List<EntryPanel> entries =
+				IntStream.range(0,components.size())
+						.mapToObj( i ->
+							new EntryPanel(
+									()-> _entriesIn(forwardReference[0].getComponents()),
+									i,
+									components.get(i),
+									constraints
+								)
+						)
+						.collect(Collectors.toList());
+
+
+		InternalPanel internalWrapperPanel = new InternalPanel(entries, shape, type);
+		JScrollPanels newJScrollPanels = new JScrollPanels(internalWrapperPanel);
+		forwardReference[0] = internalWrapperPanel;
+
+		if ( type == UI.Align.HORIZONTAL )
+			newJScrollPanels.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+		else
+			newJScrollPanels.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+		return newJScrollPanels;
+	}
+
+
+	private final InternalPanel _internal; // Wrapper for the actual UI components
+
 
 	private JScrollPanels(InternalPanel listWrapper) {
 		super(listWrapper);
-		this.internal = listWrapper;
+		_internal = listWrapper;
 	}
 
 	/**
 	 * @return The number of entries which are currently managed by this {@link JScrollPanels}.
 	 */
-	public int getNumberOfEntries() { return internal.getComponents().length; }
+	public int getNumberOfEntries() { return _internal.getComponents().length; }
 
 	/**
 	 * 	The {@link JScrollPanels} does not store components statically in the UI tree.
@@ -62,8 +122,8 @@ public class JScrollPanels extends JScrollPane
 	 */
 	public void addEntry( String constraints, ViewableEntry entryViewModel ) {
 		Objects.requireNonNull(entryViewModel);
-		EntryPanel entryPanel = _createEntryPanel(constraints, entryViewModel, this.internal.getComponents().length);
-		this.internal.add(entryPanel);
+		EntryPanel entryPanel = _createEntryPanel(constraints, entryViewModel, this._internal.getComponents().length);
+		this._internal.add(entryPanel);
 		this.validate();
 	}
 
@@ -79,12 +139,12 @@ public class JScrollPanels extends JScrollPane
 														i -> _createEntryPanel(
 																	constraints,
 																	entryViewModels.get(i),
-																	this.internal.getComponents().length + i
+																	this._internal.getComponents().length + i
 																)
 													)
 													.collect(Collectors.toList());
 
-		entryPanels.forEach(this.internal::add);
+		entryPanels.forEach(this._internal::add);
 		this.validate();
 	}
 
@@ -92,7 +152,7 @@ public class JScrollPanels extends JScrollPane
 	 * 	Use this to remove all entries.
 	 */
 	public void removeAllEntries() {
-		this.internal.removeAll();
+		this._internal.removeAll();
 		this.validate();
 	}
 
@@ -101,7 +161,7 @@ public class JScrollPanels extends JScrollPane
 	 * @param index The index of the entry which ought to be removed.
 	 */
 	public void removeEntryAt( int index ) {
-		this.internal.remove(index);
+		this._internal.remove(index);
 		this.validate();
 	}
 
@@ -110,13 +170,13 @@ public class JScrollPanels extends JScrollPane
 	 * 		Note: This method will replace an existing entry at the given index.
 	 *
 	 *  @param index The index at which the entry ought to be added.
-	 *  @param attr The constraints which ought to be applied to the entry.
+	 *  @param attr The constraints which ought to be applied to the entry, may be null.
 	 *  @param entryViewModel The entry provider which ought to be added.
 	 */
 	public void addEntryAt( int index, String attr, ViewableEntry entryViewModel ) {
 		Objects.requireNonNull(entryViewModel);
 		EntryPanel entryPanel = _createEntryPanel(attr, entryViewModel, index);
-		this.internal.add(entryPanel, index);
+		this._internal.add(entryPanel, index);
 		this.validate();
 	}
 
@@ -125,7 +185,7 @@ public class JScrollPanels extends JScrollPane
 	 * 		Note: This method will replace an existing entry at the given index.
 	 *
 	 *  @param index The index at which the entry ought to be added.
-	 *  @param attr The constraints which ought to be applied to the entry.
+	 *  @param attr The constraints which ought to be applied to the entry, may be null.
 	 *  @param entryViewModel The entry provider which ought to be added.
 	 */
 	public void setEntryAt( int index, String attr, ViewableEntry entryViewModel ) {
@@ -134,10 +194,10 @@ public class JScrollPanels extends JScrollPane
 		// We first remove the old entry panel and then add the new one.
 		// This is necessary because the layout manager does not allow to replace
 		// a component at a certain index.
-		this.internal.remove(index);
+		this._internal.remove(index);
 		// We have to re-add the entry panel at the same index
 		// because the layout manager will otherwise add it at the end.
-		this.internal.add(entryPanel, index);
+		this._internal.add(entryPanel, index);
 		this.validate();
 	}
 
@@ -155,7 +215,7 @@ public class JScrollPanels extends JScrollPane
 		Objects.requireNonNull(type);
 		Objects.requireNonNull(condition);
 		return
-			Arrays.stream(this.internal.getComponents())
+			Arrays.stream(this._internal.getComponents())
 					.filter( c -> c != null )
 					.map( c -> (EntryPanel) c )
 					.filter( c -> type.isAssignableFrom(c.getLastState().getClass()) )
@@ -173,6 +233,7 @@ public class JScrollPanels extends JScrollPane
 	 */
 	public <T extends JComponent> Optional<T> getSelected( Class<T> type ) {
 		Objects.requireNonNull(type);
+		Objects.requireNonNull(type);
 		return (Optional<T>) Optional.ofNullable(get(type, EntryPanel::isEntrySelected)).map(e -> e.getLastState() );
 	}
 
@@ -182,7 +243,8 @@ public class JScrollPanels extends JScrollPane
 	 * @param action The action which ought to be applied to all {@link JScrollPanels} entries.
 	 */
 	public void forEachEntry( Consumer<EntryPanel> action ) {
-		Arrays.stream(this.internal.getComponents())
+		Objects.requireNonNull(action);
+		Arrays.stream(this._internal.getComponents())
 				.map( c -> (EntryPanel) c )
 				.forEach(action);
 	}
@@ -191,7 +253,9 @@ public class JScrollPanels extends JScrollPane
 	 * @param <T> The entry value type parameter.
 	 */
 	public <T extends JComponent> void forEachEntry(Class<T> type, Consumer<EntryPanel> action) {
-		Arrays.stream(this.internal.getComponents())
+		Objects.requireNonNull(type);
+		Objects.requireNonNull(action);
+		Arrays.stream(this._internal.getComponents())
 				.map( c -> (EntryPanel) c )
 				.filter( e -> type.isAssignableFrom(e.getLastState().getClass()) )
 				.forEach(action);
@@ -217,11 +281,11 @@ public class JScrollPanels extends JScrollPane
 	) {
 		Objects.requireNonNull(entryProvider);
 		return new EntryPanel(
-				()-> entriesIn(internal.getComponents()),
-				index,
-				entryProvider,
-				constraints
-		);
+						()-> _entriesIn(_internal.getComponents()),
+						index,
+						entryProvider,
+						constraints
+					);
 	}
 
 	/**
@@ -280,8 +344,7 @@ public class JScrollPanels extends JScrollPane
 			}
 		}
 
-		@Override
-		public Dimension getPreferredScrollableViewportSize() { return size; }
+		@Override public Dimension getPreferredScrollableViewportSize() { return size; }
 
 		@Override
 		public Dimension getPreferredSize() {
@@ -301,67 +364,26 @@ public class JScrollPanels extends JScrollPane
 		public int getScrollableUnitIncrement(
 				Rectangle visibleRect, int orientation, int direction
 		) {
-			return getIncrement(orientation);
+			return _incrementFrom(orientation);
 		}
 
 		@Override
 		public int getScrollableBlockIncrement(
 				Rectangle visibleRect, int orientation, int direction
 		) {
-			return getIncrement(orientation) / 2;
+			return _incrementFrom(orientation) / 2;
 		}
 
-		private int getIncrement(int orientation) {
-			return orientation == JScrollBar.HORIZONTAL ? W + hGap : H + vGap;
-		}
+		private int _incrementFrom(int orientation) { return orientation == JScrollBar.HORIZONTAL ? W + hGap : H + vGap; }
 
 		@Override public boolean getScrollableTracksViewportWidth()  { return false; }
 		@Override public boolean getScrollableTracksViewportHeight() { return false; }
 	}
 
-	public static JScrollPanels of(
-			UI.Align align, Dimension size
-	) {
-		return JScrollPanels.construct(align, size, Collections.emptyList(), null);
-	}
-
-	private static JScrollPanels construct(
-			UI.Align align,
-			Dimension shape,
-			List<ViewableEntry> components,
-			String constraints
-	) {
-		UI.Align type = align;
-		InternalPanel[] forwardReference = {null};
-		List<EntryPanel> entries =
-				IntStream.range(0,components.size())
-						.mapToObj( i ->
-							new EntryPanel(
-									()-> entriesIn(forwardReference[0].getComponents()),
-									i,
-									components.get(i),
-									constraints
-								)
-						)
-						.collect(Collectors.toList());
-
-
-		InternalPanel internalWrapperPanel = new InternalPanel(entries, shape, type);
-		JScrollPanels newJScrollPanels = new JScrollPanels(internalWrapperPanel);
-		forwardReference[0] = internalWrapperPanel;
-
-		if ( type == UI.Align.HORIZONTAL )
-			newJScrollPanels.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-		else
-			newJScrollPanels.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
-		return newJScrollPanels;
-	}
-
 	/**
 	 * 	Filters the entry panels from the provided components array.
 	 */
-	private static List<EntryPanel> entriesIn(Component[] components) {
+	private static List<EntryPanel> _entriesIn(Component[] components) {
 		return Arrays.stream(components)
 				.filter( c -> c instanceof EntryPanel )
 				.map( c -> (EntryPanel) c )
@@ -395,19 +417,19 @@ public class JScrollPanels extends JScrollPane
 			this.setLayout(new MigLayout("fill, insets 0", "[grow]"));
 			this.viewable = provider;
 			this.provider = isSelected -> {
-				provider.position().act(position);
-				provider.isSelected().act(isSelected);
-				return (JComponent) provider.createView(javax.swing.JComponent.class);
-			};
+								provider.position().act(position);
+								provider.isSelected().act(isSelected);
+								return (JComponent) provider.createView(javax.swing.JComponent.class);
+							};
 			this.lastState = this.provider.apply(false);
 			this.add(lastState, constraints != null ? constraints : "grow" );
-			viewable.isSelected().onSet( it -> {selectThis(components);});
+			viewable.isSelected().onSet( it -> _selectThis(components) );
 			if ( viewable.isSelected().is(true) )
-				selectThis(components);
+				_selectThis(components);
 			viewable.position().act(position);
 		}
 
-		private void selectThis(
+		private void _selectThis(
 				Supplier<List<EntryPanel>> components
 		) {
 			SwingUtilities.invokeLater( () -> {
@@ -435,9 +457,7 @@ public class JScrollPanels extends JScrollPane
 			this.isSelected = isHighlighted;
 		}
 
-		@Override public String toString() {
-			return "EntryPanel[" + this.lastState + "]";
-		}
+		@Override public String toString() { return "EntryPanel[" + this.lastState + "]"; }
 	}
 
 }

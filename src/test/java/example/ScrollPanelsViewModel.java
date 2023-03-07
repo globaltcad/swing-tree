@@ -2,13 +2,25 @@ package example;
 
 import sprouts.Var;
 import sprouts.Vars;
+import swingtree.JScrollPanels;
 import swingtree.UI;
 import swingtree.api.mvvm.ViewableEntry;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ *  This is the view model of the {@link ScrollPanelsView} example UI,
+ *  which demonstrates the usage of the {@link swingtree.JScrollPanels} class.
+ *  The {@link swingtree.JScrollPanels} class is a custom Swing-Tree component which exists
+ *  to compensate for the deficits of the {@link JList} and {@link JTable} components.
+ *  Just like the former mentioned components, the {@link JScrollPanels} component is a
+ *  container for a list of scrollable components.
+ *  However, contrary to the {@link JList} and {@link JTable} components, the {@link JScrollPanels}
+ *  allows for user interaction with the contained components, e.g. mouse clicks.
+ */
 public class ScrollPanelsViewModel
 {
 	private final Var<String> searchKey = Var.of("").onAct( it -> search() );
@@ -20,121 +32,25 @@ public class ScrollPanelsViewModel
 
 	public ScrollPanelsViewModel()
 	{
-		allEntries.add(new EntryViewModel("Potatoes"));
-		allEntries.add(new EntryViewModel("Seitan"));
-		allEntries.add(new EntryViewModel("Garbanzo Bean Flour"));
-		allEntries.add(new EntryViewModel("Soybeans"));
-		allEntries.add(new EntryViewModel("Chickpeas"));
-		allEntries.add(new EntryViewModel("Legume Flour"));
-		allEntries.add(new EntryViewModel("Soy Sauce"));
-		allEntries.add(new EntryViewModel("Soybean Oil"));
-		allEntries.add(new EntryViewModel("Soybean Meal"));
-		allEntries.add(new EntryViewModel("Soybean Sprouts"));
-		allEntries.add(new EntryViewModel("Pea Protein Isolate"));
-		allEntries.add(new EntryViewModel("Tofu"));
-		allEntries.add(new EntryViewModel("Soybean Nuts"));
-		allEntries.add(new EntryViewModel("Soy Milk"));
-		allEntries.add(new EntryViewModel("Soybean Hulls"));
-		allEntries.add(new EntryViewModel("Lentils"));
-		allEntries.add(new EntryViewModel("Lentil Flour"));
-		allEntries.add(new EntryViewModel("Tempeh"));
-		allEntries.add(new EntryViewModel("Lentil Sprouts"));
-		allEntries.add(new EntryViewModel("Textured Vegetable Protein"));
-		allEntries.add(new EntryViewModel("Pea Protein"));
-		allEntries.add(new EntryViewModel("Tiny Peas"));
-		allEntries.add(new EntryViewModel("Pea Flour"));
-		allEntries.add(new EntryViewModel("Pea Sprouts"));
-		allEntries.add(new EntryViewModel("Lima Beans"));
-		allEntries.add(new EntryViewModel("Lima Bean Flour"));
-		allEntries.add(new EntryViewModel("White Beans"));
-		allEntries.add(new EntryViewModel("Zucchini"));
-		allEntries.add(new EntryViewModel("Yellow Squash"));
-		allEntries.add(new EntryViewModel("Fava Beans"));
-		allEntries.add(new EntryViewModel("Garbanzo Beans"));
-		allEntries.add(new EntryViewModel("Urad Beans"));
-		allEntries.add(new EntryViewModel("Mung Beans"));
-		allEntries.add(new EntryViewModel("Black Beans"));
-		allEntries.add(new EntryViewModel("Kidney Beans"));
-		allEntries.add(new EntryViewModel("Pinto Beans"));
-		allEntries.add(new EntryViewModel("Black-Eyed Peas"));
-		allEntries.add(new EntryViewModel("Red Beans"));
-		allEntries.add(new EntryViewModel("Cranberry Beans"));
-		allEntries.add(new EntryViewModel("Yangzhou Beans"));
-		allEntries.add(new EntryViewModel("Xinjiang Beans"));
-		allEntries.add(new EntryViewModel("Tepary Beans"));
-		allEntries.add(new EntryViewModel("Hungarian Wax Beans"));
-		allEntries.add(new EntryViewModel("Green Beans"));
-		allEntries.add(new EntryViewModel("Climbing Beans"));
-		allEntries.add(new EntryViewModel("Runner Beans"));
-		allEntries.add(new EntryViewModel("String Beans"));
-		allEntries.add(new EntryViewModel("Snap Beans"));
-		allEntries.add(new EntryViewModel("Butter Beans"));
-		allEntries.add(new EntryViewModel("Cannellini Beans"));
-		allEntries.add(new EntryViewModel("Edamame"));
-		allEntries.add(new EntryViewModel("Fava Beans"));
+		String[] colorAdjectives = {"Red", "Green", "Blue", "Yellow", "Orange", "Purple", "Pink", "Brown", "Black", "White"};
+		String[] otherAdjectives = {"Big", "Small", "Round", "Square", "Long", "Short", "Fat", "Thin", "Tall", "Short"};
+		String[] nouns = {
+							"Potatoes", "Chickpeas", "Soybeans", "Tofu", "Seitan", "Tempeh", "Lentils", "Garbanzo Beans",
+							"Lentils", "Soy Sauce", "Soybean Oil", "Soybean Meal", "Soybean Sprouts"
+						};
 
+		// Let's make use of the power of permutations to create a lot of entries
+		for ( String color : colorAdjectives )
+			for ( String adjective : otherAdjectives )
+				for ( String noun : nouns )
+					allEntries.add(new EntryViewModel(color + " " + adjective + " " + noun));
 
-		allEntries.add(new EntryViewModel("Potatoes"));
-		allEntries.add(new EntryViewModel("Seitan"));
-		allEntries.add(new EntryViewModel("Garbanzo Bean Flour"));
-		allEntries.add(new EntryViewModel("Soybeans"));
-		allEntries.add(new EntryViewModel("Chickpeas"));
-		allEntries.add(new EntryViewModel("Legume Flour"));
-		allEntries.add(new EntryViewModel("Soy Sauce"));
-		allEntries.add(new EntryViewModel("Soybean Oil"));
-		allEntries.add(new EntryViewModel("Soybean Meal"));
-		allEntries.add(new EntryViewModel("Soybean Sprouts"));
-		allEntries.add(new EntryViewModel("Pea Protein Isolate"));
-		allEntries.add(new EntryViewModel("Tofu"));
-		allEntries.add(new EntryViewModel("Soybean Nuts"));
-		allEntries.add(new EntryViewModel("Soy Milk"));
-		allEntries.add(new EntryViewModel("Soybean Hulls"));
-		allEntries.add(new EntryViewModel("Lentils"));
-		allEntries.add(new EntryViewModel("Lentil Flour"));
-		allEntries.add(new EntryViewModel("Tempeh"));
-		allEntries.add(new EntryViewModel("Lentil Sprouts"));
-		allEntries.add(new EntryViewModel("Textured Vegetable Protein"));
-		allEntries.add(new EntryViewModel("Pea Protein"));
-		allEntries.add(new EntryViewModel("Tiny Peas"));
-		allEntries.add(new EntryViewModel("Pea Flour"));
-		allEntries.add(new EntryViewModel("Pea Sprouts"));
-		allEntries.add(new EntryViewModel("Lima Beans"));
-		allEntries.add(new EntryViewModel("Lima Bean Flour"));
-		allEntries.add(new EntryViewModel("White Beans"));
-		allEntries.add(new EntryViewModel("Zucchini"));
-		allEntries.add(new EntryViewModel("Yellow Squash"));
-		allEntries.add(new EntryViewModel("Fava Beans"));
-		allEntries.add(new EntryViewModel("Garbanzo Beans"));
-		allEntries.add(new EntryViewModel("Urad Beans"));
-		allEntries.add(new EntryViewModel("Mung Beans"));
-		allEntries.add(new EntryViewModel("Black Beans"));
-		allEntries.add(new EntryViewModel("Kidney Beans"));
-		allEntries.add(new EntryViewModel("Pinto Beans"));
-		allEntries.add(new EntryViewModel("Black-Eyed Peas"));
-		allEntries.add(new EntryViewModel("Red Beans"));
-		allEntries.add(new EntryViewModel("Cranberry Beans"));
-		allEntries.add(new EntryViewModel("Yangzhou Beans"));
-		allEntries.add(new EntryViewModel("Xinjiang Beans"));
-		allEntries.add(new EntryViewModel("Tepary Beans"));
-		allEntries.add(new EntryViewModel("Hungarian Wax Beans"));
-		allEntries.add(new EntryViewModel("Green Beans"));
-		allEntries.add(new EntryViewModel("Climbing Beans"));
-		allEntries.add(new EntryViewModel("Runner Beans"));
-		allEntries.add(new EntryViewModel("String Beans"));
-		allEntries.add(new EntryViewModel("Snap Beans"));
-		allEntries.add(new EntryViewModel("Butter Beans"));
-		allEntries.add(new EntryViewModel("Cannellini Beans"));
-		allEntries.add(new EntryViewModel("Edamame"));
-		allEntries.add(new EntryViewModel("Fava Beans"));
 		entries.addAll(allEntries);
 	}
 
 	public Var<String> searchKey() { return searchKey; }
 
-	public void addEntryAt(int index)
-	{
-		entries.addAt(index, new EntryViewModel("New entry!"));
-	}
+	public void addEntryAt(int index) { entries.addAt(index, new EntryViewModel("New entry!")); }
 
 	private void search()
 	{

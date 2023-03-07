@@ -94,4 +94,25 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAbstractSwing<U
         return this;
     }
 
+    /**
+     *  Use this to set the vertical scroll increment.
+     *
+     * @param increment The scroll vertical increment to use.
+     * @return This builder instance, to allow for method chaining.
+     */
+    public final UIForScrollPane<P> withVerticalScrollIncrement( int increment ) {
+        getComponent().getVerticalScrollBar().setUnitIncrement(increment);
+        return this;
+    }
+
+    /**
+     *  Use this to set the horizontal scroll increment.
+     *
+     * @param increment The scroll horizontal increment to use.
+     * @return This builder instance, to allow for method chaining.
+     */
+    public final UIForScrollPane<P> withHorizontalScrollIncrement( int increment ) {
+        getComponent().getHorizontalScrollBar().setUnitIncrement(increment);
+        return this;
+    }
 }
