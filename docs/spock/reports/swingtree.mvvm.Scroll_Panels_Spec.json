@@ -1,0 +1,35 @@
+{
+  "className":"swingtree.mvvm.Scroll_Panels_Spec",
+  "title":"",
+  "narrative":"",
+  "subjects":[],
+  "statistics":{
+    "runs":"1",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"0.044 seconds"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"We can instantiate the scroll panels view model and build a view for it.",
+      "result":"PASS",
+      "duration":"0.043 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that we use a pre-made example view model here.\n            Feel free to look at the source code of the view model\n            to see what it is doing.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We instantiate the view model.","code":["var vm = new ScrollPanelsViewModel()"]},
+
+        {"kind":"when","text":"We create a view for our view model...","code":["var ui = UI.panel(\"fill, wrap 1\")","            .add( UI.label(\"Something to scroll:\") )","            .add( UI.separator() )","            .add( UI.scrollPanels().add(vm.entries()) )","            .add( UI.separator() )"]},
+
+        {"kind":"then","text":"The view was successfully created.","code":["ui != null"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

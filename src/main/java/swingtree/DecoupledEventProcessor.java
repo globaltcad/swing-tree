@@ -107,9 +107,13 @@ class DecoupledEventProcessor implements EventProcessor
 	}
 
 	void joinUntilExceptionFor( long numberOfEvents ) throws InterruptedException {
-		for ( long i = 0; i < numberOfEvents; i++ ) {
+		for ( long i = 0; i < numberOfEvents; i++ )
 			this.rendererQueue.take().run();
-		}
+	}
+
+	void joinUntilDoneOrException() throws InterruptedException {
+		while ( !this.rendererQueue.isEmpty() )
+			this.rendererQueue.take().run();
 	}
 
 }

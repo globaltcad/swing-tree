@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.012 seconds"
+    "duration":"0.008 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -120,7 +120,7 @@
 
         {"kind":"then","text":"...an exception is thrown.","code":["thrown(Exception)"]},
 
-        {"kind":"where","text":"The following ways of trying to modify the state of the property should fail:","code":{"code":["{ it.add(7)      }","{ it.addAt(0, 7) }","{ it.remove(7)   }","{ it.sort()      }","{ it.clear()     }"]}}
+        {"kind":"where","text":"The following ways of trying to modify the state of the property should fail:","code":{"code":["{ it.add(7)      }","{ it.addAt(0, 7) }","{ it.removeAt(9) }","{ it.sort()      }","{ it.clear()     }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

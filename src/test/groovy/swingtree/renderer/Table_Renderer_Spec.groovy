@@ -1,5 +1,6 @@
 package swingtree.renderer
 
+import sprouts.Event
 import swingtree.Render
 import swingtree.UI
 import spock.lang.Narrative
@@ -54,7 +55,7 @@ class Table_Renderer_Spec extends Specification
     {
         given : 'We have an update event and some data.'
             var data = [1, 2, 3, 4]
-            var update = sprouts.Event.of()
+            var update = Event.create()
         and : 'We create a table with a lambda based table model.'
             var ui =
                     UI.table().withModel(
@@ -234,7 +235,7 @@ class Table_Renderer_Spec extends Specification
             of your table. The event will be used to update the table UI  if you register it with the table UI.
         """
         given : 'A simple event and some data.'
-            var event = sprouts.Event.of()
+            var event = Event.create()
             var data = [[1, 2, 3], [7, 8, 9]]
 
         and : 'A simple table UI with a nested list based data table model.'

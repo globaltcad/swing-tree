@@ -16,7 +16,7 @@
     {
       "id":"A horizontally aligned split pane can be created through the \"splitPane\" factory method.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -186,7 +186,7 @@
     {
       "id":"The division of a split pane can dynamically be configured through a double property.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

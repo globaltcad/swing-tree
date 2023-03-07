@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.009 seconds"
+    "duration":"0.012 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -67,7 +67,7 @@
     {
       "id":"The dimensions of a panel can be bound to a property.",
       "result":"PASS",
-      "duration":"0.006 seconds",
+      "duration":"0.008 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -76,7 +76,7 @@
 
         {"kind":"and","text":"A simple property modelling the height of a panel.","code":["var height = Var.of(200)"]},
 
-        {"kind":"and","text":"A panel bound to both properties","code":["def ui = UI.panel()","            .withPreferredWidth(width)","            .withPreferredHeight(height)"]},
+        {"kind":"and","text":"A panel bound to both properties","code":["def ui = UI.panel()","            .withPrefWidth(width)","            .withPrefHeight(height)"]},
 
         {"kind":"expect","text":"The panel has the correct width and height.","code":["ui.component.preferredSize.width == 300","ui.component.preferredSize.height == 200"]},
 

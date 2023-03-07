@@ -45,7 +45,7 @@ class Thread_Mode_Spec extends Specification
                                 .onClick({ eventWasHandled = true })
                     )
         when: 'We click the button.'
-            UI.runAndGet(()->node.component).doClick()
+            UI.runNow(()->node.component.doClick())
         then: 'The event is queued up, waiting to be handled.'
             !eventWasHandled
 
@@ -54,7 +54,7 @@ class Thread_Mode_Spec extends Specification
                 application would be done by a custom thread, or the main thread
                 of your application (everything but your GUI thread really).
             """
-            UI.joinDecoupledEventProcessorFor(1)
+            UI.joinDecoupledEventProcessorUntilDoneOrException()
             UI.sync()
         then: 'The event is handled.'
             eventWasHandled
@@ -105,15 +105,15 @@ class Thread_Mode_Spec extends Specification
                         )
         when : 'We click the button and process the event queue (by this current non-swing thread).'
             UI.runNow( () -> ui1.component.doClick() )
-            UI.joinDecoupledEventProcessorUntilExceptionFor(1) // This is done by a custom thread in a real world application.
-            UI.sync()
+            UI.joinDecoupledEventProcessorUntilDoneOrException() // This is done by a custom thread in a real world application.
+
         then: 'The delegate throws an exception!'
             var e = thrown(Exception)
             e.message.contains(problem)
 
         when : 'We click the button second button and then process the event queue (by this current non-swing thread).'
             UI.runNow( () -> ui2.component.doClick() )
-            UI.joinDecoupledEventProcessorUntilExceptionFor(1) // This is done by a custom thread in a real world application.
+            UI.joinDecoupledEventProcessorUntilDoneOrException() // This is done by a custom thread in a real world application.
         then: 'The delegate does not throw an exception!'
             noExceptionThrown()
 

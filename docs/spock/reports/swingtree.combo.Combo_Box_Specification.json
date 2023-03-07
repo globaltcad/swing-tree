@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.042 seconds"
+    "duration":"0.041 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -86,7 +86,7 @@
     {
       "id":"A combo box can be made editable in a declarative way.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -97,7 +97,7 @@
 
         {"kind":"and","text":"The selected item is set.","code":["ui.component.getSelectedItem() == \"B\""]},
 
-        {"kind":"when","text":"We simulate the user typing \"XY\" into the combo box.","code":["ui.component.editor.item = \"XY\"","UI.sync()"]},
+        {"kind":"when","text":"We simulate the user typing \"XY\" into the combo box.","code":["UI.runNow( () -> ui.component.editor.item = \"XY\" )","UI.sync()"]},
 
         {"kind":"then","text":"The combo box is updated.","code":["ui.component.getSelectedItem() == \"XY\""]},
 
@@ -202,7 +202,7 @@
     {
       "id":"You can model both the current selection state as well as options of your combo box using 2 properties.",
       "result":"PASS",
-      "duration":"0.017 seconds",
+      "duration":"0.019 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n           In essence, the state of a combo box consists of the current selection, and\n           the options that are available for selection. You can model both of these\n           aspects using 2 properties. One modelling the current selection, and another one\n           storing an array to model all available options. \n        "]
       },

@@ -9,21 +9,21 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.033 seconds"
+    "duration":"0.031 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can bind a property to the size of a swing component.",
       "result":"PASS",
-      "duration":"0.008 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that the binding of a Swing-Tree property will only have side effects\n            when it is deliberately triggered to execute its side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a property representing the size of a component.","code":["Val<Dimension> size = Var.of(new Dimension(100, 100))"]},
 
-        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var node = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Hello World\").withPreferredSize(size))","            .add(UI.button(\"Click Me\").withMinimumSize(size))","            .add(UI.textField(\"Hello World\").withMaximumSize(size))"]},
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var node = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Hello World\").withPrefSize(size))","            .add(UI.button(\"Click Me\").withMinSize(size))","            .add(UI.textField(\"Hello World\").withMaxSize(size))"]},
 
         {"kind":"expect","text":"The components will have the size of the property.","code":["node.component.components[0].preferredSize == new Dimension(100, 100)","node.component.components[1].minimumSize == new Dimension(100, 100)","node.component.components[2].maximumSize == new Dimension(100, 100)"]},
 
@@ -39,14 +39,14 @@
     {
       "id":"Simple integer properties can be bound to the width or height of components.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
         {"kind":"given","text":"We create properties representing the width and heights of a components.","code":["Var<Integer> minWidth = Var.of(60)","Var<Integer> prefHeight = Var.of(40)","Var<Integer> maxWidth = Var.of(90)"]},
 
-        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var node = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Hello World\").withMinimumWidth(minWidth))","            .add(UI.button(\"Click Me\").withPreferredHeight(prefHeight))","            .add(UI.textField(\"Hello World\").withMaximumWidth(maxWidth))"]},
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var node = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Hello World\").withMinWidth(minWidth))","            .add(UI.button(\"Click Me\").withPrefHeight(prefHeight))","            .add(UI.textField(\"Hello World\").withMaxWidth(maxWidth))"]},
 
         {"kind":"expect","text":"The components will have the sizes of the properties.","code":["node.component.components[0].minimumSize.width == 60","node.component.components[1].preferredSize.height == 40","node.component.components[2].maximumSize.width == 90"]},
 
@@ -69,7 +69,7 @@
       "blocks":[
         {"kind":"given","text":"We create a property representing the width of a component.","code":["Var<Integer> width = Var.of(60)","Var<Integer> height = Var.of(40)"]},
 
-        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var node = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Hello World\").withMinimumSize(width, height))","            .add(UI.toggleButton(\"Click Me\").withPreferredSize(width, height))","            .add(UI.textArea(\"Hello World\").withMaximumSize(width, height))"]},
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var node = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Hello World\").withMinSize(width, height))","            .add(UI.toggleButton(\"Click Me\").withPrefSize(width, height))","            .add(UI.textArea(\"Hello World\").withMaxSize(width, height))"]},
 
         {"kind":"expect","text":"The components will have the sizes of the properties.","code":["node.component.components[0].minimumSize == new Dimension(60, 40)","node.component.components[1].preferredSize == new Dimension(60, 40)","node.component.components[2].maximumSize == new Dimension(60, 40)"]},
 
@@ -131,7 +131,7 @@
     {
       "id":"We can enable and disable a UI component dynamically through property binding.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -154,7 +154,7 @@
     {
       "id":"We can select or unselect a UI component dynamically through properties.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -177,7 +177,7 @@
     {
       "id":"Enable or disable the split items of a JSplitButton through properties.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -261,7 +261,7 @@
       "blocks":[
         {"kind":"given","text":"We create a property representing the minimum and maximum height.","code":["Val<Integer> property = Var.of(50)"]},
 
-        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var node = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Below me is a text area!\"))","            .add(UI.textArea(\"hi\").withMinimumHeight(property))","            .add(UI.label(\"Below me is another text area!\"))","            .add(UI.textArea(\"Hey\").withMaximumHeight(property))"]},
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var node = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Below me is a text area!\"))","            .add(UI.textArea(\"hi\").withMinHeight(property))","            .add(UI.label(\"Below me is another text area!\"))","            .add(UI.textArea(\"Hey\").withMaxHeight(property))"]},
 
         {"kind":"expect","text":"The minimum height of the first text area will be 50.","code":["node.component.components[1].minimumSize.height == 50"]},
 

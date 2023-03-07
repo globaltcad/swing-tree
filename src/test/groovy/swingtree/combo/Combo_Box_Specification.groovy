@@ -112,7 +112,7 @@ class Combo_Box_Specification extends Specification
             ui.component.getSelectedItem() == "B"
 
         when : 'We simulate the user typing "XY" into the combo box.'
-            ui.component.editor.item = "XY"
+            UI.runNow( () -> ui.component.editor.item = "XY" )
             UI.sync()
         then : 'The combo box is updated.'
             ui.component.getSelectedItem() == "XY"

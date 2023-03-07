@@ -91,7 +91,7 @@ public final class OptionalUI&lt;C extends Component&gt; {
     @SuppressWarnings(&quot;unchecked&quot;)
     static &lt;T extends Component&gt; OptionalUI&lt;T&gt; ofNullable(T component) {
 <span class="pc bpc" id="L93" title="1 of 2 branches missed.">        return component == null ? (OptionalUI&lt;T&gt;) EMPTY</span>
-<span class="fc" id="L94">                : new OptionalUI&lt;&gt;(component);</span>
+                : new OptionalUI&lt;&gt;(component);
     }
 
     /**
@@ -375,7 +375,7 @@ public final class OptionalUI&lt;C extends Component&gt; {
     public String toString() {
 <span class="nc bnc" id="L376" title="All 2 branches missed.">        return _component != null</span>
 <span class="nc" id="L377">                ? String.format(&quot;OptionalUI[%s]&quot;, _component)</span>
-<span class="nc" id="L378">                : &quot;OptionalUI.empty&quot;;</span>
+                : &quot;OptionalUI.empty&quot;;
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -151,7 +151,7 @@ public final class UI
     }
 
     /**
-     *  A fully blocking call to the decoupled thread event processor
+     *  A temporarily blocking call to the decoupled thread event processor
      *  causing this thread to join its event queue
      *  so that it can process the given number of events produced by the UI.
      *  <p>
@@ -168,6 +168,19 @@ public final class UI
         DecoupledEventProcessor.INSTANCE().joinUntilExceptionFor(numberOfEvents);
     }
 
+    /**
+     *  A temporarily blocking call to the decoupled thread event processor
+     *  causing this thread to join its event queue
+     *  so that it can continuously process events produced by the UI
+     *  until all events have been processed or an exception is thrown by the event processor.
+     *  <p>
+     *  This method should be called by the main thread of the application
+     *  after the UI has been built and shown to the user, or alternatively
+     *  a new thread dedicated to processing events. (things like button clicks, etc.)
+     */
+    public static void joinDecoupledEventProcessorUntilDoneOrException() throws InterruptedException {
+        DecoupledEventProcessor.INSTANCE().joinUntilDoneOrException();
+    }
 
     // Common Mig layout constants:
     public static LayoutAttr FILL     = LayoutAttr.of("fill");
@@ -3310,11 +3323,20 @@ public final class UI
     }
 
     /**
-     *  Use this to quickly create and inspect a test window for a UI component.
+     *  Use this to quickly launch a UI component in {@link JFrame} window
+     *  at the center of the screen.
      */
     public static void show( Component component ) {
         JFrame frame = new JFrame();
         new UI.TestWindow( () -> frame, component );
+    }
+
+    /**
+     *  Use this to quickly launch a UI component with a custom event processor
+     *  in {@link JFrame} window at the center of the screen.
+     */
+    public static void showUsing( EventProcessor eventProcessor, Supplier<Component> component ) {
+        show(use(eventProcessor, component));
     }
 
     /**

@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.086 seconds"
+    "duration":"0.087 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -204,7 +204,7 @@
     {
       "id":"There are various kinds of convenience methods for creating live view of properties.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.006 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -381,7 +381,7 @@
 
         {"kind":"when","text":"The try the same using a nullable property.","code":["property = Var.ofNullable(String, null)","optional = property.toOptional()"]},
 
-        {"kind":"then","text":"The Optional is empty.","code":["optional.isEmpty()"]}
+        {"kind":"then","text":"The Optional is empty.","code":["!optional.isPresent()"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

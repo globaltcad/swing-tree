@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.008 seconds"
+    "duration":"0.007 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"OptionalUI wraps AWT components exclusively.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -70,7 +70,7 @@
       "blocks":[
         {"kind":"given","text":"","code":["var optionalUI = UI.panel().component().map({ it -> null })"]},
 
-        {"kind":"when","text":"","code":["optionalUI.orElseThrow()"]},
+        {"kind":"when","text":"","code":["optionalUI.orElseThrow({new NoSuchElementException()})"]},
 
         {"kind":"then","text":"","code":["thrown(NoSuchElementException)"]}
       ],

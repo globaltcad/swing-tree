@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DecoupledEventProcessor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">DecoupledEventProcessor.java</span></div><h1>DecoupledEventProcessor.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+
+/**
+ * This is a synchronized singleton wrapping a {@link BlockingQueue}.
+ */
+<span class="fc" id="L9">class DecoupledEventProcessor implements EventProcessor</span>
+{
+<span class="fc" id="L11">	private static final DecoupledEventProcessor _INSTANCE = new DecoupledEventProcessor();</span>
+
+<span class="fc" id="L13">	static DecoupledEventProcessor INSTANCE() { return _INSTANCE; }</span>
+
+	/**
+	 * This is a simple queue for pending event calls which is thread safe and allows the
+	 * GUI thread to register application events.
+	 */
+<span class="fc" id="L19">	private final BlockingQueue&lt;Runnable&gt; rendererQueue = new LinkedBlockingQueue&lt;&gt;();</span>
+
+
+	@Override public void registerAppEvent(Runnable task ) {
+		try {
+<span class="fc" id="L24">			rendererQueue.put(task);</span>
+<span class="nc" id="L25">		} catch (Exception e) {</span>
+<span class="nc" id="L26">			e.printStackTrace();</span>
+<span class="fc" id="L27">		}</span>
+<span class="fc" id="L28">	}</span>
+
+	@Override
+	public void registerAndRunAppEventNow(Runnable runnable ) {
+		// We add the task to the queue and then wait for it to be processed.
+		// This is a blocking call.
+<span class="nc" id="L34">		boolean[] done = new boolean[1];</span>
+		try {
+<span class="nc" id="L36">			rendererQueue.put(() -&gt; {</span>
+<span class="nc" id="L37">				runnable.run();</span>
+<span class="nc" id="L38">				synchronized (done) {</span>
+<span class="nc" id="L39">					done[0] = true;</span>
+<span class="nc" id="L40">					done.notifyAll();</span>
+					// notify the waiting thread, meaning the GUI/frontend thread,
+					// which is waiting for the task to be processed.
+<span class="nc" id="L43">				}</span>
+<span class="nc" id="L44">			});</span>
+<span class="nc" id="L45">			synchronized (done) {</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">				while ( !done[0] ) done.wait();</span>
+				// wait for the task to be processed. The wait is released by the notifyAll() call in the task.
+<span class="nc" id="L48">			}</span>
+<span class="nc" id="L49">		} catch (Exception e) {</span>
+<span class="nc" id="L50">			e.printStackTrace();</span>
+<span class="nc" id="L51">		}</span>
+<span class="nc" id="L52">	}</span>
+
+	@Override
+	public void registerUIEvent(Runnable runnable) {
+<span class="nc" id="L56">		UI.run(runnable);</span>
+<span class="nc" id="L57">	}</span>
+
+	@Override
+	public void registerAndRunUIEventNow(Runnable runnable) {
+		try {
+<span class="nc" id="L62">			UI.runNow(runnable);</span>
+<span class="nc" id="L63">		} catch (Exception e) {</span>
+<span class="nc" id="L64">			e.printStackTrace();</span>
+<span class="nc" id="L65">		}</span>
+<span class="nc" id="L66">	}</span>
+
+	/**
+	 * This method is called by a thread to process all GUI events, this should be the application's main thread.
+	 * @param rethrow If true, any exception thrown by the event handler will be rethrown.
+	 * @throws InterruptedException If the thread is interrupted while waiting for the event to be processed.
+     *                              Only thrown if {@code rethrow} is true.
+	 */
+	void join( boolean rethrow ) throws InterruptedException {
+		while ( true ) {
+			try {
+<span class="nc" id="L77">				this.rendererQueue.take().run();</span>
+<span class="nc" id="L78">			} catch (Exception e) {</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">				if (rethrow)</span>
+<span class="nc" id="L80">					throw e;</span>
+				else
+<span class="nc" id="L82">					e.printStackTrace();</span>
+<span class="nc" id="L83">			}</span>
+		}
+	}
+
+	void join() {
+		try {
+<span class="nc" id="L89">			this.join(false);</span>
+<span class="nc" id="L90">		} catch (InterruptedException e) {</span>
+<span class="nc" id="L91">			e.printStackTrace();</span>
+<span class="nc" id="L92">		}</span>
+<span class="nc" id="L93">	}</span>
+
+	void joinUntilException() throws InterruptedException {
+<span class="nc" id="L96">		this.join(true);</span>
+<span class="nc" id="L97">	}</span>
+
+	void joinFor( long numberOfEvents ) {
+<span class="fc bfc" id="L100" title="All 2 branches covered.">		for ( long i = 0; i &lt; numberOfEvents; i++ ) {</span>
+			try {
+<span class="fc" id="L102">				this.rendererQueue.take().run();</span>
+<span class="nc" id="L103">			} catch (Exception e) {</span>
+<span class="nc" id="L104">				e.printStackTrace();</span>
+<span class="fc" id="L105">			}</span>
+		}
+<span class="fc" id="L107">	}</span>
+
+	void joinUntilExceptionFor( long numberOfEvents ) throws InterruptedException {
+<span class="nc bnc" id="L110" title="All 2 branches missed.">		for ( long i = 0; i &lt; numberOfEvents; i++ )</span>
+<span class="nc" id="L111">			this.rendererQueue.take().run();</span>
+<span class="nc" id="L112">	}</span>
+
+	void joinUntilDoneOrException() throws InterruptedException {
+<span class="fc bfc" id="L115" title="All 2 branches covered.">		while ( !this.rendererQueue.isEmpty() )</span>
+<span class="fc" id="L116">			this.rendererQueue.take().run();</span>
+<span class="fc" id="L117">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

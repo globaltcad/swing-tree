@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForSpinner.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForSpinner.java</span></div><h1>UIForSpinner.java</h1><pre class="source lang-java linenums">package swingtree;
 
-import swingtree.api.mvvm.Action;
-import swingtree.api.mvvm.Val;
-import swingtree.api.mvvm.Var;
+import sprouts.Action;
+import sprouts.Val;
+import sprouts.Var;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -56,7 +56,7 @@ public class UIForSpinner&lt;S extends JSpinner&gt; extends UIForAbstractSwing&l
     /**
      * Sets the value of the spinner and also binds to said value.
      *
-     * @param value The {@link swingtree.api.mvvm.Val} wrapper whose value should be set.
+     * @param value The {@link sprouts.Val} wrapper whose value should be set.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code value} is {@code null}.
      */
@@ -70,7 +70,7 @@ public class UIForSpinner&lt;S extends JSpinner&gt; extends UIForAbstractSwing&l
     /**
      * Sets the value of the spinner and also binds to the provided property.
      *
-     * @param value The {@link swingtree.api.mvvm.Var} wrapper whose value should be set.
+     * @param value The {@link sprouts.Var} wrapper whose value should be set.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code value} is {@code null}.
      */
@@ -128,7 +128,7 @@ public class UIForSpinner&lt;S extends JSpinner&gt; extends UIForAbstractSwing&l
      * Sets the numeric step size of the value of the spinner and also binds to said value.
      * This expects your spinner to be based on the {@link SpinnerNumberModel}.
      *
-     * @param val The {@link swingtree.api.mvvm.Val} wrapper whose step size should be set.
+     * @param val The {@link sprouts.Val} wrapper whose step size should be set.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final &lt;N extends Number&gt; UIForSpinner&lt;S&gt; withStepSize( Val&lt;N&gt; val ) {

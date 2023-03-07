@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForScrollPanels.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForScrollPanels.java</span></div><h1>UIForScrollPanels.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import sprouts.Change;
+import sprouts.Vals;
+import sprouts.Var;
+import swingtree.api.mvvm.Viewable;
+import swingtree.api.mvvm.ViewableEntry;
+
+import javax.swing.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+/**
+ *  A builder node for {@link JScrollPanels} a custom Swing-Tree component
+ *  which is similar to a {@link JList} but with the ability to interact with
+ *  the individual components in the list.
+ *  &lt;p&gt;
+ *
+ * @param &lt;P&gt; The type of the component which this builder node wraps.
+ */
+public class UIForScrollPanels&lt;P extends JScrollPanels&gt; extends UIForScrollPane&lt;P&gt;
+{
+	/**
+	 * Extensions of the {@link  UIForAbstractSwing} always wrap
+	 * a single component for which they are responsible.
+	 *
+	 * @param component The JComponent type which will be wrapped by this builder node.
+	 */
+<span class="fc" id="L31">	public UIForScrollPanels( P component ) { super(component); }</span>
+
+
+	@Override
+	protected void _add( JComponent component, Object conf ) {
+<span class="nc" id="L36">		Objects.requireNonNull(component);</span>
+<span class="nc" id="L37">		JScrollPanels panels = this.getComponent();</span>
+
+<span class="nc" id="L39">		ViewableEntry entry = _entryFrom(component);</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">		if ( conf == null )</span>
+<span class="nc" id="L41">			panels.addEntry(entry);</span>
+		else
+<span class="nc" id="L43">			panels.addEntry(conf.toString(), entry);</span>
+<span class="nc" id="L44">	}</span>
+
+	private ViewableEntry _entryFrom(JComponent component) {
+<span class="nc" id="L47">		Var&lt;Boolean&gt; selected = Var.of(false);</span>
+<span class="nc" id="L48">		Var&lt;Integer&gt; position = Var.of(0);</span>
+<span class="nc" id="L49">		return new ViewableEntry() {</span>
+<span class="nc" id="L50">			@Override public Var&lt;Boolean&gt; isSelected() { return selected; }</span>
+<span class="nc" id="L51">			@Override public Var&lt;Integer&gt; position() { return position; }</span>
+<span class="nc" id="L52">			@Override public &lt;V&gt; V createView(Class&lt;V&gt; viewType) { return (V) component; }</span>
+		};
+	}
+
+	@Override
+	protected void _addViewableProps( Vals&lt;? extends Viewable&gt; viewables, String attr )
+	{
+<span class="fc" id="L59">		Function&lt;Integer, Viewable&gt; viewableFetcher = i -&gt; {</span>
+<span class="nc" id="L60">			Viewable v = viewables.at(i).get();</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">			if ( v instanceof ViewableEntry ) ((ViewableEntry) v).position().set(i);</span>
+<span class="nc" id="L62">			return v;</span>
+		};
+<span class="fc" id="L64">		Function&lt;Integer, ViewableEntry&gt; entryFetcher = i -&gt; {</span>
+<span class="nc" id="L65">			Viewable v = viewableFetcher.apply(i);</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">			return ( v instanceof ViewableEntry ? (ViewableEntry) v : _entryFrom(v.createView(JComponent.class)) );</span>
+		};
+
+<span class="fc" id="L69">		Runnable addAll = () -&gt; {</span>
+<span class="fc" id="L70">			boolean allAreEntries = viewables.stream().allMatch( v -&gt; v instanceof ViewableEntry );</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">			if ( allAreEntries ) {</span>
+<span class="fc" id="L72">				List&lt;ViewableEntry&gt; entries = (List&lt;ViewableEntry&gt;) viewables.toList();</span>
+<span class="fc" id="L73">				this.getComponent().addAllEntries(attr, entries);</span>
+<span class="fc" id="L74">			}</span>
+			else
+<span class="nc bnc" id="L76" title="All 2 branches missed.">				for ( int i = 0; i&lt; viewables.size(); i++ )</span>
+<span class="nc" id="L77">					this.getComponent().addEntry(entryFetcher.apply(i));</span>
+<span class="fc" id="L78">		};</span>
+<span class="pc" id="L79">		Consumer&lt;Integer&gt; addAt    = i -&gt; getComponent().addEntryAt( i, null, entryFetcher.apply(i) );</span>
+<span class="pc" id="L80">		Consumer&lt;Integer&gt; removeAt = i -&gt; getComponent().removeEntryAt( i );</span>
+<span class="pc" id="L81">		Consumer&lt;Integer&gt; setAt    = i -&gt; getComponent().setEntryAt( i, null, entryFetcher.apply(i) );</span>
+
+<span class="fc" id="L83">		_onShow( viewables, delegate -&gt; {</span>
+<span class="nc" id="L84">			JScrollPanels panels = this.getComponent();</span>
+			// we simply redo all the components.
+<span class="nc bnc" id="L86" title="All 4 branches missed.">			switch ( delegate.changeType() ) {</span>
+				case SET:
+				case ADD:
+				case REMOVE:
+<span class="nc bnc" id="L90" title="All 2 branches missed.">					if ( delegate.index() &gt;= 0 ) {</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">						if ( delegate.changeType() == Change.ADD )</span>
+<span class="nc" id="L92">							addAt.accept(delegate.index());</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">						else if ( delegate.changeType() == Change.REMOVE )</span>
+<span class="nc" id="L94">							removeAt.accept(delegate.index());</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">						else if ( delegate.changeType() == Change.SET )</span>
+<span class="nc" id="L96">							setAt.accept(delegate.index());</span>
+
+						// Now we need to update the positions of all the entries
+<span class="nc bnc" id="L99" title="All 2 branches missed.">						for ( int i = delegate.index(); i &lt; viewables.size(); i++ )</span>
+<span class="nc" id="L100">							entryFetcher.apply(i).position().set(i);</span>
+					} else {
+<span class="nc" id="L102">						panels.removeAllEntries();</span>
+<span class="nc" id="L103">						addAll.run();</span>
+					}
+<span class="nc" id="L105">				break;</span>
+<span class="nc" id="L106">				case CLEAR: panels.removeAllEntries(); break;</span>
+<span class="nc" id="L107">				case NONE: break;</span>
+<span class="nc" id="L108">				default: throw new IllegalStateException(&quot;Unknown type: &quot;+delegate.changeType());</span>
+			}
+<span class="nc" id="L110">		});</span>
+<span class="fc" id="L111">		addAll.run();</span>
+<span class="fc" id="L112">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

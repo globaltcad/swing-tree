@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForLabel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForLabel.java</span></div><h1>UIForLabel.java</h1><pre class="source lang-java linenums">package swingtree;
 
-import swingtree.api.mvvm.Val;
+import sprouts.Val;
 
 import javax.swing.*;
 import java.awt.*;
@@ -363,6 +363,37 @@ public class UIForLabel&lt;L extends JLabel&gt; extends UIForAbstractSwing&lt;UI
 <span class="fc" id="L363">        _onShow( size, this::withFontSize );</span>
 <span class="fc" id="L364">        return withFontSize(size.orElseThrow());</span>
     }
+
+    /**
+     *  Use this to set the font of the wrapped {@link JLabel}.
+     * @param font The font of the text which should be displayed on the label.
+     * @return This builder instance, to allow for method chaining.
+     * @throws IllegalArgumentException if {@code font} is {@code null}.
+     */
+    public final UIForLabel&lt;L&gt; withFont( Font font ) {
+<span class="nc" id="L374">        NullUtil.nullArgCheck(font, &quot;font&quot;, Font.class);</span>
+<span class="nc" id="L375">        this.getComponent().setFont( font );</span>
+<span class="nc" id="L376">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically set the font of the wrapped {@link JLabel}
+     *  through the provided view model property.
+     *  When the font wrapped by the provided property changes,
+     *  then so does the font of this label.
+     *
+     * @param font The font property of the text which should be displayed on the label.
+     * @return This builder instance, to allow for method chaining.
+     * @throws IllegalArgumentException if {@code font} is {@code null}.
+     * @throws IllegalArgumentException if {@code font} is a property which can wrap {@code null}.
+     */
+    public final UIForLabel&lt;L&gt; withFont( Val&lt;Font&gt; font ) {
+<span class="nc" id="L391">        NullUtil.nullArgCheck(font, &quot;font&quot;, Val.class);</span>
+<span class="nc" id="L392">        NullUtil.nullPropertyCheck(font, &quot;font&quot;, &quot;Use the default font of this component instead of null!&quot;);</span>
+<span class="nc" id="L393">        _onShow( font, v -&gt; withFont(v) );</span>
+<span class="nc" id="L394">        return withFont( font.orElseThrow() );</span>
+    }
+
 }
 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

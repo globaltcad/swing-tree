@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.052 seconds"
+    "duration":"0.042 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can attach a simple table cell renderer to a JTable in just a few lines of code.",
       "result":"PASS",
-      "duration":"0.032 seconds",
+      "duration":"0.024 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -39,12 +39,12 @@
     {
       "id":"We can pass an Event to the table model to trigger updates.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.004 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We have an update event and some data.","code":["var data = [1, 2, 3, 4]","var update = sprouts.Event.of()"]},
+        {"kind":"given","text":"We have an update event and some data.","code":["var data = [1, 2, 3, 4]","var update = Event.create()"]},
 
         {"kind":"and","text":"We create a table with a lambda based table model.","code":["var ui =","        UI.table().withModel(","            UI.tableModel()","            .onColName( {[\"X\", \"Y\", \"Z\"][it]})","            .onColCount({3})","            .onRowCount({data.size()})","            .onGet({r,c ->data[r]})","            .updateOn(update)","        )"]},
 
@@ -52,7 +52,7 @@
 
         {"kind":"and","text":"The table has the correct data.","code":["ui.get(JTable).getValueAt(0, 0) == 1","ui.get(JTable).getValueAt(1, 0) == 2","ui.get(JTable).getValueAt(2, 0) == 3","ui.get(JTable).getValueAt(3, 0) == 4"]},
 
-        {"kind":"when","text":"We update the data.","code":["data = [5, 6, 7, 8]","update.fire()"]},
+        {"kind":"when","text":"We update the data.","code":["data = [5, 6, 7, 8]","update.fire()","UI.sync() // sync with the EDT"]},
 
         {"kind":"then","text":"The table has the correct data.","code":["ui.get(JTable).getValueAt(0, 0) == 5","ui.get(JTable).getValueAt(1, 0) == 6","ui.get(JTable).getValueAt(2, 0) == 7","ui.get(JTable).getValueAt(3, 0) == 8"]}
       ],
@@ -62,7 +62,7 @@
     {
       "id":"We can create a simple table cell renderer through a UI factory method.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that you can actually pass a simple list of lists provider to the table factory method\n            and it will create a table model for you.\n            In the table defined below we create a list data based row major table. \n        "]
       },
@@ -87,7 +87,7 @@
     {
       "id":"We can create a simple column major table cell renderer through a UI factory method.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that you can actually pass a simple list of lists provider to the table factory method\n            and it will create a table model for you.\n            In the table defined below we create a list data based column major table. \n        "]
       },
@@ -112,7 +112,7 @@
     {
       "id":"A map can be used as a data source for tables.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that you can actually pass a provider lambda for a map of header names to column lists \n            to the table factory method and it will create a table model for you, which is based on the provided \n            map provider. This will always result in a column major table. \n        "]
       },
@@ -161,7 +161,7 @@
       "tags":{},"see":[],"extraInfo":["\n            Use the Event class in your view model to define an event you can fire when you modify the data\n            of your table. The event will be used to update the table UI  if you register it with the table UI.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A simple event and some data.","code":["var event = sprouts.Event.of()","var data = [[1, 2, 3], [7, 8, 9]]"]},
+        {"kind":"given","text":"A simple event and some data.","code":["var event = Event.create()","var data = [[1, 2, 3], [7, 8, 9]]"]},
 
         {"kind":"and","text":"A simple table UI with a nested list based data table model.","code":["var ui =","            UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data })","            .updateTableOn(event)"]},
 
