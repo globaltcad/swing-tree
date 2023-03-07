@@ -300,6 +300,28 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
 
     /**
      *  Use this to make the wrapped UI component opaque.
+     *  This is the inverse of {@link #makeNonOpaque()}.
+     *
+     *  @return This very instance, which enables builder-style method chaining.
+     */
+    public final I makeOpaque() {
+        getComponent().setOpaque( true );
+        return _this();
+    }
+
+    /**
+     *  Use this to make the wrapped UI component transparent.
+     *  This is the inverse of {@link #makeOpaque()}.
+     *
+     *  @return This very instance, which enables builder-style method chaining.
+     */
+    public final I makeNonOpaque() {
+        getComponent().setOpaque( false );
+        return _this();
+    }
+
+    /**
+     *  Use this to make the wrapped UI component opaque.
      *  @param isOpaque The truth value determining if the UI component should be opaque or not.
      *  @return This very instance, which enables builder-style method chaining.
      */
@@ -462,6 +484,25 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
+     *  Use this to define a titled empty {@link Border} with the provided insets
+     *  and where the title is bound to a {@link Val}.
+     *
+     * @param title The title of the border wrapped in a {@link Val},
+     *              which will update the border title dynamically when changed.
+     * @param top The top inset.
+     * @param left The left inset.
+     * @param bottom The bottom inset.
+     * @param right The right inset.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorderTitled( Val<String> title, int top, int left, int bottom, int right ) {
+        NullUtil.nullArgCheck( title, "title", Val.class );
+        NullUtil.nullPropertyCheck( title, "title", "Null value for title is not allowed! Use an empty string instead!" );
+        _onShow( title, v -> getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(top, left, bottom, right), v)) );
+        return this.withEmptyBorderTitled( title.orElseNull(), top, left, bottom, right );
+    }
+
+    /**
      *  Use this to define an empty {@link Border} with the provided insets.
      *
      * @param topBottom The top and bottom insets.
@@ -486,6 +527,22 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
+     *  Use this to define a titled empty {@link Border} with the provided insets
+     *  and where the title is bound to a {@link Val}.
+     *
+     * @param title The title of the border wrapped in a {@link Val}. When the value changes, the border title will be updated.
+     * @param topBottom The top and bottom insets.
+     * @param leftRight The left and right insets.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorderTitled( Val<String> title, int topBottom, int leftRight ) {
+        NullUtil.nullArgCheck( title, "title", Val.class );
+        NullUtil.nullPropertyCheck(title, "title", "Null value for title is not allowed! Use an empty string instead!");
+        _onShow( title, v -> getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(topBottom, leftRight, topBottom, leftRight), v)) );
+        return this.withEmptyBorderTitled( title.orElseNull(), topBottom, leftRight );
+    }
+
+    /**
      *  Use this to define an empty {@link Border} with the provided insets.
      *
      * @param all The insets for all sides.
@@ -494,24 +551,67 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withEmptyBorder( int all ) { return withEmptyBorder(all, all, all, all); }
 
     /**
-     *  Use this to define a titled empty {@link Border} with the provided insets.
+     *  Creates an empty and un-titled {@link Border} with the provided insets
+     *  property bound to all insets of said border.
+     *  <p>
+     *  An empty and un-titled {@link Border} is basically just a way to add some
+     *  space around the component. It is not visible by default.
      *
-     * @param title The title of the border.
      * @param all The insets for all sides.
      * @return This very instance, which enables builder-style method chaining.
      */
+    public final I withEmptyBorder( Val<Integer> all ) {
+        NullUtil.nullArgCheck( all, "all", Val.class );
+        NullUtil.nullPropertyCheck(all, "all", "Null value for all is not allowed! Use an empty border instead!");
+        _onShow( all, v -> getComponent().setBorder(BorderFactory.createEmptyBorder(v, v, v, v)) );
+        return this.withEmptyBorder( all.get() );
+    }
+
+            /**
+			 *  Use this to define a titled empty {@link Border} with the provided insets.
+			 *
+			 * @param title The title of the border.
+			 * @param all The insets for all sides.
+			 * @return This very instance, which enables builder-style method chaining.
+			 */
     public final I withEmptyBorderTitled( String title, int all ) {
         NullUtil.nullArgCheck( title, "title", String.class );
         return withEmptyBorderTitled(title, all, all, all, all);
     }
 
     /**
-     *  Use this to define a line {@link Border} with the provided color and insets.
-     *
-     * @param color The color of the line border.
-     * @param thickness The thickness of the line border.
+     *  Creates a titled empty border bound to a {@link String} property and the provided insets.
+     * @param title The title of the border in the form of a {@link Val} property.
+     * @param all The insets size for all sides.
      * @return This very instance, which enables builder-style method chaining.
      */
+    public final I withEmptyBorderTitled( Val<String> title, int all ) {
+        NullUtil.nullArgCheck( title, "title", Val.class );
+        NullUtil.nullPropertyCheck(title, "title", "Null value for title is not allowed! Use an empty string instead!");
+        _onShow( title, v ->
+            getComponent().setBorder(
+                BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(all, all, all, all), v)
+            )
+        );
+        return this.withEmptyBorderTitled( title.orElseNull(), all );
+    }
+
+    /**
+     *  Creates a titled empty border bound to a {@link String} property.
+     * @param title The title of the border in the form of a {@link Val} property.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorderTitled( Val<String> title ) {
+        return withEmptyBorderTitled(title, 5);
+    }
+
+    /**
+	 *  Use this to define a line {@link Border} with the provided color and insets.
+	 *
+	 * @param color The color of the line border.
+	 * @param thickness The thickness of the line border.
+	 * @return This very instance, which enables builder-style method chaining.
+	 */
     public final I withLineBorder( Color color, int thickness ) {
         NullUtil.nullArgCheck( color, "color", Color.class );
         getComponent().setBorder(BorderFactory.createLineBorder(color, thickness));
@@ -519,18 +619,78 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     *  Use this to define a titled line {@link Border} with the provided color and insets.
-     *
-     * @param title The title of the border.
-     * @param color The color of the line border.
+     *  Creates a line border bound to a {@link Color} property.
+     *  When the color changes, the border will be updated with the new color.
+     * @param color The color of the border in the form of a {@link Val} property.
      * @param thickness The thickness of the line border.
      * @return This very instance, which enables builder-style method chaining.
      */
+    public final I withLineBorder( Val<Color> color, int thickness ) {
+        NullUtil.nullArgCheck( color, "color", Val.class );
+        NullUtil.nullPropertyCheck(color, "color", "Null value for color is not allowed! Use a transparent color or other default color instead!");
+        _onShow( color, v -> getComponent().setBorder(BorderFactory.createLineBorder(v, thickness)) );
+        return this.withLineBorder( color.get(), thickness );
+    }
+
+    /**
+	 *  Use this to define a titled line {@link Border} with the provided color and insets.
+	 *
+	 * @param title The title of the border.
+	 * @param color The color of the line border.
+	 * @param thickness The thickness of the line border.
+	 * @return This very instance, which enables builder-style method chaining.
+	 */
     public final I withLineBorderTitled( String title, Color color, int thickness ) {
         NullUtil.nullArgCheck( title, "title", String.class );
         NullUtil.nullArgCheck( color, "color", Color.class );
         getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color, thickness), title));
         return _this();
+    }
+
+    /**
+     * Creates a titled line border bound to a {@link String} property.
+     * @param title The title property of the border which will update the border when the value changes.
+     * @param color The color of the border.
+     * @param thickness The thickness of the line border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLineBorderTitled( Val<String> title, Color color, int thickness ) {
+        NullUtil.nullArgCheck( title, "title", Val.class );
+        NullUtil.nullPropertyCheck(title, "title", "Null value for title is not allowed! Use an empty string instead!");
+        _onShow( title, v ->
+            getComponent().setBorder(
+                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color, thickness), v)
+            )
+        );
+        return this.withLineBorderTitled( title.orElseNull(), color, thickness );
+    }
+
+    /**
+     * Creates a titled line border bound to a {@link String} property
+     * and a {@link Color} property.
+     * When any of the properties change, the border will be updated with the new values.
+     *
+     * @param title The title property of the border which will update the border when the value changes.
+     * @param color The color property of the border which will update the border when the value changes.
+     * @param thickness The thickness of the line border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLineBorderTitled( Val<String> title, Val<Color> color, int thickness ) {
+        NullUtil.nullArgCheck( title, "title", Val.class );
+        NullUtil.nullPropertyCheck(title, "title", "Null value for title is not allowed! Use an empty string instead!");
+        NullUtil.nullArgCheck( color, "color", Val.class );
+        NullUtil.nullPropertyCheck(color, "color", "Null value for color is not allowed! Use a transparent color or other default color instead!");
+        _onShow( title, v ->
+            getComponent().setBorder(
+                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color.get(), thickness), v)
+            )
+        );
+        _onShow( color, v ->
+            getComponent().setBorder(
+                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(v, thickness), title.get())
+            )
+        );
+        return this.withLineBorderTitled( title.orElseNull(), color.get(), thickness );
     }
 
     /**
@@ -588,6 +748,58 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
+     *  Creates a titled rounded line {@link Border} with the provided
+     *  color and insets for this {@link JComponent} and binds the border to the provided
+     *  title property.
+     *  When the title property changes, the border will be updated with the new value.
+     *
+     * @param title The title property of the border which will update the border when the value changes.
+     * @param color The color of the border.
+     * @param thickness The thickness of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorderTitled( Val<String> title, Color color, int thickness ) {
+        NullUtil.nullArgCheck( title, "title", Val.class );
+        NullUtil.nullPropertyCheck(title, "title", "Null value for title is not allowed! Use an empty string instead!");
+        _onShow( title, v ->
+            getComponent().setBorder(
+                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color, thickness, true), v)
+            )
+        );
+        return this.withRoundedLineBorderTitled( title.orElseNull(), color, thickness );
+    }
+
+    /**
+     *  Creates a titled rounded line {@link Border} with the provided
+     *  color and insets for this {@link JComponent} and binds the border to the provided
+     *  title and color properties.
+     *  When the title or color properties change, 
+     *  then the border will be updated with the new values.
+     *
+     * @param title The title property of the border which will update the border when the value changes.
+     * @param color The color property of the border which will update the border when the value changes.
+     * @param thickness The thickness of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorderTitled( Val<String> title, Val<Color> color, int thickness ) {
+        NullUtil.nullArgCheck( title, "title", Val.class );
+        NullUtil.nullPropertyCheck(title, "title", "Null value for title is not allowed! Use an empty string instead!");
+        NullUtil.nullArgCheck( color, "color", Val.class );
+        NullUtil.nullPropertyCheck(color, "color", "Null value for color is not allowed! Use a transparent color or other default color instead!");
+        _onShow( title, v ->
+            getComponent().setBorder(
+                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color.get(), thickness, true), v)
+            )
+        );
+        _onShow( color, v ->
+            getComponent().setBorder(
+                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(v, thickness, true), title.get())
+            )
+        );
+        return this.withRoundedLineBorderTitled( title.get(), color.get(), thickness );
+    }
+
+    /**
      *  Use this to attach a rounded line {@link Border} with the provided
      *  color and a default thickness of {@code 1} to the {@link JComponent}.
      *
@@ -601,7 +813,24 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
 
     /**
      *  Use this to attach a titled rounded line {@link Border} with the provided
-     *  color and a default thickness of {@code 1} to the {@link JComponent}.
+     *  color property and a custom thickness to the {@link JComponent}.
+     *
+     * @param color The color of the border.
+     * @param thickness The thickness of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorder( Val<Color> color, int thickness ) {
+        NullUtil.nullArgCheck( color, "color", Val.class );
+        NullUtil.nullPropertyCheck(color, "color", "Null value for color is not allowed! Use a transparent color or other default color instead!");
+        _onShow( color, v ->
+            getComponent().setBorder(BorderFactory.createLineBorder(v, thickness, true))
+        );
+        return this.withRoundedLineBorder( color.get(), thickness );
+    }
+
+    /**
+     *  Use this to attach a titled rounded line {@link Border} with the provided
+     *  title, color and a default thickness of {@code 1} to the {@link JComponent}.
      *
      * @param title The title of the border.
      * @param color The color of the border.
@@ -610,6 +839,21 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withRoundedLineBorderTitled( String title, Color color ) {
         NullUtil.nullArgCheck( title, "title", String.class );
         NullUtil.nullArgCheck( color, "color", Color.class );
+        return withRoundedLineBorderTitled( title, color, 1 );
+    }
+
+    /**
+     *  Use this to attach a titled rounded line {@link Border} with the provided
+     *  title and color to the {@link JComponent}, as well as a default thickness of {@code 1}.
+     *
+     * @param title The title property of the border, which will update the border when the property changes.
+     * @param color The color property of the border, which will update the border when the property changes.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorderTitled( Val<String> title, Val<Color> color ) {
+        NullUtil.nullArgCheck( title, "title", String.class );
+        NullUtil.nullArgCheck( color, "color", Color.class );
+        NullUtil.nullPropertyCheck(title, "title", "Null value for title is not allowed! Use an empty String instead!");
         return withRoundedLineBorderTitled( title, color, 1 );
     }
 
@@ -630,6 +874,21 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      */
     public final I withRoundedLineBorderTitled( String title ) {
         NullUtil.nullArgCheck( title, "title", String.class );
+        return withRoundedLineBorderTitled( title, Color.BLACK, 1 );
+    }
+
+    /**
+     *  Creates a titled rounded black line {@link Border} with
+     *  a thickness of {@code 1} to the {@link JComponent} and binds it to the provided 
+     *  title property.
+     *  When the property changes, the border will be updated.
+     *
+     * @param title The title property of the border, which will update the border when the property changes.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorderTitled( Val<String> title ) {
+        NullUtil.nullArgCheck( title, "title", String.class );
+        NullUtil.nullPropertyCheck(title, "title", "Null value for title is not allowed! Use an empty String instead!");
         return withRoundedLineBorderTitled( title, Color.BLACK, 1 );
     }
 
@@ -1126,8 +1385,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     *  Use this to bind to 2 different background colors
-     *  which will be set dynamically based on a boolean property.
+     *  Use this to bind to 2 colors to the background of the component
+     *  which sre set based on the value of a boolean property.
      * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      * @param condition The condition property which determines whether the background color should be set or not.
@@ -1140,8 +1399,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
-     *  Use this to bind to 2 different background colors
-     *  which will be set dynamically based on a boolean property.
+     *  Use this to bind to 2 color properties to the background of the component
+     *  which sre set based on the value of a boolean property.
      * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
      *
      * @param condition The condition property which determines whether the background color should be set or not.
