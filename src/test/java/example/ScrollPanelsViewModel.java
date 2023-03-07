@@ -160,7 +160,7 @@ public class ScrollPanelsViewModel
 
 		@Override
 		public <V> V createView(Class<V> viewType) {
-			return (V) UI.panel("fill")
+			return viewType.cast(UI.panel("fill")
 						.add("pushx", UI.label(text))
 						.add(UI.label(position.viewAs(String.class, s -> "Position: " + s)))
 						.add(UI.label(selected.viewAs(String.class, s -> "Selected: " + s)))
@@ -193,7 +193,7 @@ public class ScrollPanelsViewModel
 							int i = entries.indexOf(this);
 							entries.setAt(i, new EntryViewModel("Replaced!"));
 						}))
-						.getComponent();
+						.getComponent());
 		}
 
 		@Override public Var<Boolean> isSelected() { return selected; }

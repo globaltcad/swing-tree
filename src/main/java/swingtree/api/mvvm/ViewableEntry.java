@@ -6,19 +6,34 @@ import swingtree.JScrollPanels;
 import javax.swing.*;
 
 /**
- * The {@link JScrollPanels} class is similar to the {@link JList} class
- * which uses a {@link ListCellRenderer} to continuously fetch a live UI component
- * for dynamically rendering list entries.
- * Contrary to the {@link JList} however, entries of the {@link JScrollPanels}
- * will be able to receive user events like for example button clicks etc... <br>
- * This lambda defines the provider for the dynamically generated and rendered
- * list entries.
- *
- * @param <P> The panel type provided ba this provider.
+ *  A {@link ViewableEntry} is used to model an entry inside of the {@link JScrollPanels} component.
+ *  It is expected to be a view model with 2 default properties: <br>
+ *  - {@link #isSelected()} <br>
+ *  - {@link #position()} <br>
+ *  The {@link #isSelected()} method defines a boolean property determining whether
+ *  the entry is currently selected or not. <br>
+ *  The {@link #position()} method defines an integer property determining the position
+ *  of the entry in the list of all entries.
+ *  <p>
+ *  <b>Note that implementations of this are not supposed to be part of your UI code.
+ *  They are supposed to be part of your business logic code in the form of view models.
+ *  </b>
  */
-public interface ViewableEntry extends Viewable {
-
+public interface ViewableEntry extends Viewable
+{
+	/**
+	 *  This method implies the existence of a boolean property in this view model
+	 *  determining whether the entry is currently selected or not.
+	 *
+	 * @return A {@link Var} instance representing the selected state of the entry.
+	 */
 	Var<Boolean> isSelected();
 
+	/**
+	 *  This method implies the existence of an integer property in this view model
+	 *  determining the position of the entry in the list of all entries.
+	 *
+	 * @return A {@link Var} instance representing the position of the entry.
+	 */
 	Var<Integer> position();
 }
