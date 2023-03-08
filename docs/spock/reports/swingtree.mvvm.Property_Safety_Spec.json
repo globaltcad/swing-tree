@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.008 seconds"
+    "duration":"0.030 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"The \"get\" method of a property throws an exception if the property is null.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The \"get\" method of a property throws an exception if the property is null\n            for the same reason that the \"get\" method of the Optional class throws an\n            exception if the Optional is empty. It is a way to force the developer to\n            handle the case where the property is null. If the developer does not want\n            to handle the case where the property is null, then the developer should\n            use the \"orElse\" method instead.\n            The \"get\" method is only intended to be used in a context where\n            the property is expected to have a value or is fully non-nullable altogether. \n            Use the \"orElse\" or \"orElseNull\" method to clearly indicate that the property\n            may be null.\n        "]
       },
@@ -109,7 +109,7 @@
     {
       "id":"\"Vals\", a list of properties, is immutable.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"0.010 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

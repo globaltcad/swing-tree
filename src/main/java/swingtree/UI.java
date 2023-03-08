@@ -144,7 +144,6 @@ public final class UI
      *  <p>
      *  This method will block until the given number of events have been processed.
      *  @param numberOfEvents The number of events to wait for.
-     *  @throws InterruptedException If the thread is interrupted while waiting for the event processor to join.
      */
     public static void joinDecoupledEventProcessorFor(long numberOfEvents) {
         DecoupledEventProcessor.INSTANCE().joinFor(numberOfEvents);

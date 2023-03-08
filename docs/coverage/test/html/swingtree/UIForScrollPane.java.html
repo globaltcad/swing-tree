@@ -94,5 +94,26 @@ public class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAbstractS
 <span class="fc" id="L94">        return this;</span>
     }
 
+    /**
+     *  Use this to set the vertical scroll increment.
+     *
+     * @param increment The scroll vertical increment to use.
+     * @return This builder instance, to allow for method chaining.
+     */
+    public final UIForScrollPane&lt;P&gt; withVerticalScrollIncrement( int increment ) {
+<span class="nc" id="L104">        getComponent().getVerticalScrollBar().setUnitIncrement(increment);</span>
+<span class="nc" id="L105">        return this;</span>
+    }
+
+    /**
+     *  Use this to set the horizontal scroll increment.
+     *
+     * @param increment The scroll horizontal increment to use.
+     * @return This builder instance, to allow for method chaining.
+     */
+    public final UIForScrollPane&lt;P&gt; withHorizontalScrollIncrement( int increment ) {
+<span class="nc" id="L115">        getComponent().getHorizontalScrollBar().setUnitIncrement(increment);</span>
+<span class="nc" id="L116">        return this;</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

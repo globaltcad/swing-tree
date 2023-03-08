@@ -10,18 +10,18 @@ public interface Viewable
      *  Provides a view of the given type for this view model.
      *  <p>
      *  Here a simple example demonstrating how a typical implementation of this
-     *  method should look like in a pure swing application:
+     *  method should look like in a pure swing application: <br>
      *  <pre>{@code
-     *      @Override
+     *      //Override
      *      public <V> V createView(Class<V> viewType) {
      * 			return viewType.cast(new ViewOfMyViewModel(this));
      *      }
      * }</pre>
      * In an application with multiple view technologies, this method should
      * return the view of the given type, if it is supported by the view model. <br>
-     * Here an example for a view model which supports both Swing and JavaFX:
+     * Here an example for a view model which supports both Swing and JavaFX:   <br>
      * <pre>{@code
-     *    @Override
+     *    //Override
      *    public <V> V createView(Class<V> viewType) {
      *          if ( viewType == JComponent.class )
      *              return viewType.cast(new SwingViewOfMyViewModel(this));

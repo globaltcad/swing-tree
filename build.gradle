@@ -15,7 +15,7 @@ plugins {
 
 String GROUP_ID = "io.github.globaltcad"
 String PROJECT  = "swing-tree"
-String VERSION  = "0.3.0"
+String VERSION  = "0.4.0"
 
 group GROUP_ID
 version VERSION
@@ -33,7 +33,7 @@ dependencies {
     // Main dependencies:
     api group: 'com.miglayout', name: 'miglayout-swing', version: '5.3' // https://mvnrepository.com/artifact/com.miglayout/miglayout-swing
     api 'com.alexandriasoftware.swing:jsplitbutton:1.3.1' // JSplitButton
-    api 'io.github.globaltcad:sprouts:0.1.0'
+    api 'io.github.globaltcad:sprouts:0.1.1'
 
     // Logging :
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
@@ -190,22 +190,6 @@ nexusPublishing {
 publishing {
 
     repositories {
-    /*
-    // Possible alternatives:
-
-        maven {
-            name = "OSSRH"
-            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-            credentials {
-                username = findProperty('sonatypeUsername') ?: findProperty('ossrhUsername') ?: System.getenv('sonatypeUsername') ?: System.getenv('ossrhUsername')
-                password = findProperty('sonatypePassword') ?: findProperty('ossrhPassword') ?: System.getenv('sonatypePassword') ?: System.getenv('ossrhPassword')
-                // Expected to be in ~/.gradle/gradle.properties
-                // Or on windows in %USERPROFILE%\.gradle\gradle.properties
-                // Example: C:\Users\JohnDoe\.gradle\gradle.properties
-            }
-        }
-
-        */
         maven {
             name = "GitHubPackages"
             url = "https://maven.pkg.github.com/globaltcad/" + PROJECT
