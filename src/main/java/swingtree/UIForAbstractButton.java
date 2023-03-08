@@ -251,6 +251,51 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     }
 
     /**
+     *  Use this to make the wrapped UI component dynamically selected or deselected,
+     *  based on the equality between the supplied enum value and enum property. <br>
+     *  So to illustrate: <br>
+     *  <pre>{@code
+     *      // In your view model:
+     *      enum Step { ONE, TWO, THREE }
+     *      Var<Step> step = Var.of(Step.ONE);
+     *
+     *      // In your view:
+     *      UI.radioButton("Two").isSelectedIf(Step.TWO, vm.getStep());
+     *  }</pre>
+     *  As you can see, the radio button will be selected if the enum property is equal to the supplied enum value
+     *  and deselected otherwise. <br>
+     *  <br>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
+     *
+     * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component selected.
+     * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component selected.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final <E extends Enum<E>> I isSelectedIf( E enumValue, Val<E> enumProperty ) {
+        NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
+        NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
+        _onShow( enumProperty, v -> _setSelectedSilently(enumValue.equals(v)) );
+        return isSelectedIf( enumValue.equals(enumProperty.orElseThrow()) );
+    }
+
+    /**
+     *  This is the inverse of {@link #isSelectedIf(Enum, Val)}.
+     *  Use this to make the wrapped UI component dynamically deselected or selected,
+     *  based on the equality between the supplied enum value and enum property. <br>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
+     *
+     * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component deselected.
+     * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component deselected.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final <E extends Enum<E>> I isSelectedIfNot( E enumValue, Val<E> enumProperty ) {
+        NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
+        NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
+        _onShow( enumProperty, v -> _setSelectedSilently(!enumValue.equals(v)) );
+        return isSelectedIf( !enumValue.equals(enumProperty.orElseThrow()) );
+    }
+
+    /**
      *  Use this to dynamically bind to a {@link sprouts.Var}
      *  instance which will be used to dynamically model the pressed state of the
      *  wrapped {@link AbstractButton} type.

@@ -66,7 +66,7 @@ public final class Tab
      * @param isSelected The selected state of the tab.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
-    public final Tab isSelectedIf(boolean isSelected ) {
+    public final Tab isSelectedIf( boolean isSelected ) {
         if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
         if ( _isSelected != null ) throw new IllegalArgumentException("Selected state already specified!");
         return new Tab(_contents, _headerComponent, _title, Var.of(isSelected), _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
@@ -84,6 +84,40 @@ public final class Tab
     }
 
     /**
+     * @param isSelected The selected state property of the tab.
+     * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
+     */
+    public final Tab isSelectedIf( Val<Boolean> isSelected ) {
+        NullUtil.nullArgCheck(isSelected,"isSelected",Val.class);
+        if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
+        if ( _isSelected != null ) throw new IllegalArgumentException("Selected state already specified!");
+        Var<Boolean> isSelectedMut = Var.of(isSelected.get());
+        isSelected.onSet( it -> isSelectedMut.set(it.get()) );
+        return new Tab(_contents, _headerComponent, _title, isSelectedMut, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
+    }
+
+    /**
+     *  Binds the boolean selection state of the tab to a specific enum value
+     *  of a corresponding enum property.
+     *  When the enum property is set to the provided enum value, the tab will be selected.
+     *
+     * @param state The state of the tab.
+     * @param selectedState The selected state property of the tab.
+     * @param <E> The type of the state.
+     * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
+     */
+    public final <E extends Enum<E>> Tab isSelectedIf( E state, Var<E> selectedState ) {
+        NullUtil.nullArgCheck(state,"state",Enum.class);
+        NullUtil.nullArgCheck(selectedState,"selectedState",Var.class);
+        if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
+        if ( _isSelected != null ) throw new IllegalArgumentException("Selected state already specified!");
+        Var<Boolean> isSelected = Var.of(state == selectedState.get());
+        selectedState.onSet( it -> isSelected.set(state == it.get()) );
+        isSelected.onSet( it -> { if ( it.get() ) selectedState.set(state); });
+        return new Tab(_contents, _headerComponent, _title, isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
+    }
+
+    /**
      * @param isEnabled The enabled state of the tab.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
@@ -97,7 +131,7 @@ public final class Tab
      * @param isEnabled The enabled state property of the tab.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
-    public final Tab isEnabledIf(Val<Boolean> isEnabled ) {
+    public final Tab isEnabledIf( Val<Boolean> isEnabled ) {
         NullUtil.nullArgCheck(isEnabled,"isEnabled",Val.class);
         if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
         if ( _isEnabled != null ) throw new IllegalArgumentException("Enabled state already specified!");
@@ -105,10 +139,30 @@ public final class Tab
     }
 
     /**
+     *  Binds the boolean enabled state of the tab to a specific enum value
+     *  and a corresponding enum property.
+     *  When the enum property is set to the provided enum value, the tab will be selected.
+     *
+     * @param state The state of the tab.
+     * @param enabledState The enabled state property of the tab.
+     * @param <E> The type of the state.
+     * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
+     */
+    public final <E extends Enum<E>> Tab isEnabledIf( E state, Var<E> enabledState ) {
+        NullUtil.nullArgCheck(state,"state",Enum.class);
+        NullUtil.nullArgCheck(enabledState,"enabledState",Var.class);
+        if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
+        if ( _isEnabled != null ) throw new IllegalArgumentException("Enabled state already specified!");
+        Var<Boolean> isEnabled = Var.of(state == enabledState.get());
+        enabledState.onSet( it -> isEnabled.set(state == it.get()) );
+        return new Tab(_contents, _headerComponent, _title, _isSelected, isEnabled, _icon, _tip, _onSelected, _onMouseClick);
+    }
+
+    /**
      * @param icon The icon which should be displayed in the tab header.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
-    public final Tab withIcon(Icon icon) {
+    public final Tab withIcon( Icon icon ) {
         NullUtil.nullArgCheck(icon,"icon",Icon.class);
         if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
         if ( _icon != null ) throw new IllegalArgumentException("Icon already specified!");
@@ -119,7 +173,7 @@ public final class Tab
      * @param icon The icon property which should be displayed in the tab header.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
-    public final Tab withIcon(Val<Icon> icon) {
+    public final Tab withIcon( Val<Icon> icon ) {
         NullUtil.nullArgCheck(icon,"icon",Val.class);
         if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
         if ( _icon != null ) throw new IllegalArgumentException("Icon already specified!");
@@ -130,7 +184,7 @@ public final class Tab
      * @param tip The tooltip which should be displayed when hovering over the tab header.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
-    public final Tab withTip(String tip) {
+    public final Tab withTip( String tip ) {
         NullUtil.nullArgCheck(tip,"tip",String.class);
         if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
         if ( _tip != null ) throw new IllegalArgumentException("Tip already specified!");
@@ -141,7 +195,7 @@ public final class Tab
      * @param tip The tooltip property which should be displayed when hovering over the tab header.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
-    public final Tab withTip(Val<String> tip) {
+    public final Tab withTip( Val<String> tip ) {
         NullUtil.nullArgCheck(tip,"tip",String.class);
         if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
         if ( _tip != null ) throw new IllegalArgumentException("Tip already specified!");

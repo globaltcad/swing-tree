@@ -190,6 +190,39 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     }
 
     /**
+     *  Use this to make the wrapped UI component dynamically visible or invisible,
+     *  based on the equality between the supplied enum value and enum property. <br>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
+     *
+     * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component visible.
+     * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component visible.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final <E extends Enum<E>> I isVisibleIf( E enumValue, Val<E> enumProperty ) {
+        NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
+        NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
+        NullUtil.nullPropertyCheck(enumProperty, "enumProperty", "Null is not allowed to model the visibility of a UI component!");
+        _onShow( enumProperty, v -> getComponent().setVisible( v == enumValue ) );
+        return isVisibleIf( enumValue == enumProperty.orElseThrow() );
+    }
+
+    /**
+     *  This is the inverse of {@link #isVisibleIf(Enum, Val)}.
+     *  Use this to make the wrapped UI component dynamically invisible or visible,
+     *  based on the equality between the supplied enum value and enum property. <br>
+     * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component invisible.
+     * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component invisible.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final <E extends Enum<E>> I isVisibleIfNot( E enumValue, Val<E> enumProperty ) {
+        NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
+        NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
+        NullUtil.nullPropertyCheck(enumProperty, "enumProperty", "Null is not allowed to model the visibility of a UI component!");
+        _onShow( enumProperty, v -> getComponent().setVisible( v != enumValue ) );
+        return isVisibleIf( enumValue != enumProperty.orElseThrow() );
+    }
+
+    /**
      *  Use this to enable or disable the wrapped UI component.
      *
      * @param isEnabled The truth value determining if the UI component should be enabled or not.
@@ -210,10 +243,6 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I isEnabledIfNot( boolean isEnabled ) {
         _setEnabled( !isEnabled );
         return _this();
-    }
-
-    protected void _setEnabled( boolean isEnabled ) {
-        getComponent().setEnabled( isEnabled );
     }
 
     /**
@@ -242,6 +271,43 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         _onShow( isEnabled, v -> _setEnabled(!v) );
         return isEnabledIf( !isEnabled.orElseThrow() );
     }
+
+    /**
+     *  Use this to make the wrapped UI component dynamically enabled or disabled,
+     *  based on the equality between the supplied enum value and enum property. <br>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
+     *
+     * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component enabled.
+     * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component enabled.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final <E extends Enum<E>> I isEnabledIf( E enumValue, Val<E> enumProperty ) {
+        NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
+        NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
+        NullUtil.nullPropertyCheck(enumProperty, "enumProperty", "The enumProperty may not have null values!");
+        _onShow( enumProperty, v -> _setEnabled( v == enumValue ) );
+        return isEnabledIf( enumValue == enumProperty.orElseThrow() );
+    }
+
+    /**
+     *  This is the inverse of {@link #isEnabledIf(Enum, Val)}.
+     *  Use this to make the wrapped UI component dynamically disabled or enabled,
+     *  based on the equality between the supplied enum value and enum property. <br>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
+     *
+     * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component disabled.
+     * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component disabled.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final <E extends Enum<E>> I isEnabledIfNot( E enumValue, Val<E> enumProperty ) {
+        NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
+        NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
+        NullUtil.nullPropertyCheck(enumProperty, "enumProperty", "The enumProperty may not have null values!");
+        _onShow( enumProperty, v -> _setEnabled( v != enumValue ) );
+        return isEnabledIf( enumValue != enumProperty.orElseThrow() );
+    }
+
+    protected void _setEnabled( boolean isEnabled ) { getComponent().setEnabled( isEnabled ); }
 
     /**
      *  Use this to make the wrapped UI component focusable.
@@ -289,6 +355,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *
      *  @param isFocusable The truth value determining if the UI component should be focusable or not, wrapped in a {@link Val}.
      *  @return This very instance, which enables builder-style method chaining.
+     *  @throws IllegalArgumentException if the supplied {@code isFocusable} is {@code null}.
      */
     public final I isFocusableIfNot( Val<Boolean> isFocusable ) {
         NullUtil.nullArgCheck(isFocusable, "isFocusable", Val.class);
@@ -297,6 +364,44 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         this.isFocusableIf( !isFocusable.orElseThrow() );
         return _this();
     }
+
+    /**
+     *  Use this to make the wrapped UI component dynamically focusable or non-focusable
+     *  based on the equality between the supplied enum value and enum property. <br>
+     *  <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
+     *
+     *  @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component focusable.
+     *  @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component focusable.
+     *  @return This very instance, which enables builder-style method chaining.
+     *  @throws IllegalArgumentException if the supplied {@code enumValue} or {@code enumProperty} is {@code null}.
+     */
+    public final <E extends Enum<E>> I isFocusableIf( E enumValue, Val<E> enumProperty ) {
+        NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
+        NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
+        NullUtil.nullPropertyCheck(enumProperty, "enumProperty", "The enumProperty may not have null values!");
+        _onShow( enumProperty, v -> isFocusableIf( v == enumValue ) );
+        return isFocusableIf( enumValue == enumProperty.orElseThrow() );
+    }
+
+    /**
+     *  This is the inverse of {@link #isFocusableIf(Enum, Val)}.
+     *  Use this to make the wrapped UI component dynamically focusable or non-focusable
+     *  based on the equality between the supplied enum value and enum property. <br>
+     *  <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
+     *
+     *  @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component non-focusable.
+     *  @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component non-focusable.
+     *  @return This very instance, which enables builder-style method chaining.
+     *  @throws IllegalArgumentException if the supplied {@code enumValue} or {@code enumProperty} is {@code null}.
+     */
+    public final <E extends Enum<E>> I isFocusableIfNot( E enumValue, Val<E> enumProperty ) {
+        NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
+        NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
+        NullUtil.nullPropertyCheck(enumProperty, "enumProperty", "The enumProperty may not have null values!");
+        _onShow( enumProperty, v -> isFocusableIf( v != enumValue ) );
+        return isFocusableIf( enumValue != enumProperty.orElseThrow() );
+    }
+
 
     /**
      *  Use this to make the wrapped UI component opaque.
