@@ -79,14 +79,20 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     protected final <T> void _onShow( Val<T> val, Consumer<T> displayAction ) {
         val.onSet(new Action<Val<T>>() {
             @Override
-            public void accept(Val<T> v) {
+            public void accept( Val<T> val ) {
+                T v = val.orElseNull(); // IMPORTANT! We first capture the value and then execute the action in the app thread.
                 _doUI(() ->
+                    /*
+                        We make sure that the action is only executed if the component
+                        is not disposed. This is important because the action may
+                        access the component, and we don't want to get a NPE.
+                     */
                     component().ifPresent(c -> {
-                        displayAction.accept(v.orElseNull());
+                        displayAction.accept(v); // Here the captured value is used. This is extremely important!
                         /*
-                            We make sure that the action is only executed if the component
-                            is not disposed. This is important because the action may
-                            access the component, and we don't want to get a NPE.
+                             Since this is happening in another thread we are using the captured property item/value.
+                             The property might have changed in the meantime, but we don't care about that,
+                             we want things to happen in the order they were triggered.
                          */
                     })
                 );
