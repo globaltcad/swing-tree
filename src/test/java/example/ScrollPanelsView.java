@@ -1,5 +1,6 @@
 package example;
 
+import com.formdev.flatlaf.FlatLightLaf;
 import swingtree.EventProcessor;
 import swingtree.JScrollPanels;
 import swingtree.UI;
@@ -36,6 +37,7 @@ public class ScrollPanelsView extends JPanel
 
 	public static void main(String[] args)
 	{
+		FlatLightLaf.setup();
 		UI.showUsing(EventProcessor.DECOUPLED, ()->new ScrollPanelsView(new ScrollPanelsViewModel()));
 		UI.joinDecoupledEventProcessor();
 	}

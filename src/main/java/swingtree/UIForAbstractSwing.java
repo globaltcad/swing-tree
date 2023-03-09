@@ -2776,7 +2776,17 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
             // we simply redo all the components.
             switch ( delegate.changeType() ) {
                 case SET: _updateComponentAt(delegate.index(), delegate.newValue().get(), attr); break;
-                case ADD: _addComponentAt(delegate.index(), delegate.newValue().get(), attr); break;
+                case ADD:
+                    if ( delegate.index() < 0 && delegate.newValue().isEmpty() ) {
+                        // This is basically a add all operation, so we clear the components first.
+                        _clearComponents();
+                        // and then we add all the components.
+                        for ( int i = 0; i < delegate.vals().size(); i++ )
+                            _addComponentAt( i, delegate.vals().at(i).get(), attr );
+                    }
+                    else
+                        _addComponentAt(delegate.index(), delegate.newValue().get(), attr);
+                    break;
                 case REMOVE: _removeComponentAt(delegate.index()); break;
                 case CLEAR: _clearComponents(); break;
                 case NONE: break;
@@ -2807,7 +2817,6 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
 
     private void _updateComponentAt( int index, Viewable v, String attr ) {
         component().ifPresent( c -> {
-
             JComponent newComponent = v == null ? new JPanel() : UI.use(_eventProcessor, () -> v.createView(JComponent.class) );
             // We remove the old component.
             c.remove(c.getComponent(index));

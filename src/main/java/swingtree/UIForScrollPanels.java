@@ -9,8 +9,8 @@ import swingtree.api.mvvm.ViewableEntry;
 import javax.swing.*;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  *  A builder node for {@link JScrollPanels} a custom Swing-Tree component
@@ -56,51 +56,51 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 	@Override
 	protected void _addViewableProps( Vals<? extends Viewable> viewables, String attr )
 	{
-		Function<Integer, Viewable> viewableFetcher = i -> {
-			Viewable v = viewables.at(i).get();
+		BiFunction<Integer, Vals<Viewable>, Viewable> viewableFetcher = (i, vals) -> {
+			Viewable v = vals.at(i).get();
 			if ( v instanceof ViewableEntry ) ((ViewableEntry) v).position().set(i);
 			return v;
 		};
-		Function<Integer, ViewableEntry> entryFetcher = i -> {
-			Viewable v = viewableFetcher.apply(i);
+		BiFunction<Integer, Vals<Viewable>, ViewableEntry> entryFetcher = (i, vals) -> {
+			Viewable v = viewableFetcher.apply(i, vals);
 			return ( v instanceof ViewableEntry ? (ViewableEntry) v : _entryFrom(v.createView(JComponent.class)) );
 		};
 
-		Runnable addAll = () -> {
-			boolean allAreEntries = viewables.stream().allMatch( v -> v instanceof ViewableEntry );
+		Consumer<Vals<Viewable>> addAll = vals -> {
+			boolean allAreEntries = vals.stream().allMatch( v -> v instanceof ViewableEntry );
 			if ( allAreEntries ) {
-				List<ViewableEntry> entries = (List<ViewableEntry>) viewables.toList();
+				List<ViewableEntry> entries = (List) vals.toList();
 				this.getComponent().addAllEntries(attr, entries);
 			}
 			else
-				for ( int i = 0; i< viewables.size(); i++ )
-					this.getComponent().addEntry(entryFetcher.apply(i));
+				for ( int i = 0; i< vals.size(); i++ )
+					this.getComponent().addEntry(entryFetcher.apply(i,vals));
 		};
-		Consumer<Integer> addAt    = i -> getComponent().addEntryAt( i, null, entryFetcher.apply(i) );
-		Consumer<Integer> removeAt = i -> getComponent().removeEntryAt( i );
-		Consumer<Integer> setAt    = i -> getComponent().setEntryAt( i, null, entryFetcher.apply(i) );
 
 		_onShow( viewables, delegate -> {
 			JScrollPanels panels = this.getComponent();
+			Vals<Viewable> vals = (Vals<Viewable>) delegate.vals();
+			int delegateIndex = delegate.index();
+			Change changeType = delegate.changeType();
 			// we simply redo all the components.
-			switch ( delegate.changeType() ) {
+			switch ( changeType ) {
 				case SET:
 				case ADD:
 				case REMOVE:
-					if ( delegate.index() >= 0 ) {
-						if ( delegate.changeType() == Change.ADD )
-							addAt.accept(delegate.index());
-						else if ( delegate.changeType() == Change.REMOVE )
-							removeAt.accept(delegate.index());
-						else if ( delegate.changeType() == Change.SET )
-							setAt.accept(delegate.index());
+					if ( delegateIndex >= 0 ) {
+						if ( changeType == Change.ADD )
+							panels.addEntryAt( delegateIndex, null, entryFetcher.apply(delegateIndex, vals) );
+						else if ( changeType == Change.REMOVE )
+							panels.removeEntryAt( delegateIndex );
+						else if ( changeType == Change.SET )
+							panels.setEntryAt( delegateIndex, null, entryFetcher.apply(delegateIndex, vals) );
 
 						// Now we need to update the positions of all the entries
-						for ( int i = delegate.index(); i < viewables.size(); i++ )
-							entryFetcher.apply(i).position().set(i);
+						for ( int i = delegateIndex; i < vals.size(); i++ )
+							entryFetcher.apply(i, vals).position().set(i);
 					} else {
 						panels.removeAllEntries();
-						addAll.run();
+						addAll.accept(vals);
 					}
 				break;
 				case CLEAR: panels.removeAllEntries(); break;
@@ -108,6 +108,6 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 				default: throw new IllegalStateException("Unknown type: "+delegate.changeType());
 			}
 		});
-		addAll.run();
+		addAll.accept((Vals<Viewable>) viewables);
 	}
 }
