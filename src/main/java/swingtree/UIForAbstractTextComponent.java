@@ -139,7 +139,11 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
             if ( e.getKeyChar() == '\b' ) // backspace
                 newText = part1 + part2; // The user has deleted a character(s), they will already be gone, we just need to set the text.
             else if ( e.getKeyChar() == '\u007f' ) // delete
-                newText = part1 + ( part2.length() < 2 ? part2 : part2.substring(1) );
+                newText = part1 + part2; // The user has deleted a character(s), they will already be gone, we just need to set the text.
+            else if ( e.getKeyChar() == '\u001b' ) // escape
+                newText = oldText; // The user has pressed escape, we need to reset the text.
+            else if ( Character.isISOControl(e.getKeyChar()) ) // ctrl+c
+                newText = oldText; // The user has pressed a control character, we need to reset the text.
             else
                 newText = part1 + e.getKeyChar() + part2; // The user has typed a character, we need to add it to the text.
 
@@ -148,7 +152,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
                 _doApp(newText, text::act);
                 /*
                     Yes, it looks really strange that we apply the text to the property in the next EDT cycle,
-                    but this is important to prevent a tricky bug!
+                    which is important to prevent a tricky bug!
                     To understand the bug you need to know 2 things:
                     1. Calling 'act' on a prop triggers user defined 'onAct' callbacks, usually inside the view model.
                     2. When this code her is executed the text component is actually not yet updated with the new text!
