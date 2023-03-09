@@ -180,7 +180,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
         _selectionListeners.forEach(l -> l.accept(selectedIndex));
     }
 
-    private JComponent _buildTabHeader(Tab tab, TabMouseClickListener mouseListener )
+    private JComponent _buildTabHeader( Tab tab, TabMouseClickListener mouseListener )
     {
         return
             tab.title().map( title ->
@@ -227,13 +227,32 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
                     @Override
                     public void mouseClicked( MouseEvent e ) {
                         JTabbedPane currentPane = paneRef.get();
-                        int index = indexFinder.get();
-                        if ( index < 0 ) return;
-                        if ( currentPane != null && index == currentPane.getSelectedIndex() )
+                        if ( currentPane == null ) return;
+                        int indexOfThis = indexOfThisTab();
+                        if ( indexOfThis < 0 ) return;
+                        int indexClicked = indexOfClick(pane, e);
+                        if ( indexClicked < 0 ) return;
+                        if ( indexOfThis == indexClicked )
                             _doApp(()-> mouseClickAction.accept(new SimpleDelegate<>(currentPane, e, UIForTabbedPane.this::getSiblinghood)));
                     }
                 });
             }
+        }
+
+        private int indexOfThisTab() {
+            return indexFinder.get();
+        }
+
+        private int indexOfClick(JTabbedPane pane, MouseEvent e) {
+            List<Rectangle> tabBounds = new ArrayList<>();
+            for ( int i = 0; i < pane.getTabCount(); i++ )
+                tabBounds.add(pane.getBoundsAt(i));
+
+            for ( int i = 0; i < tabBounds.size(); i++ )
+                if ( tabBounds.get(i).contains(e.getPoint()) )
+                    return i;
+
+            return -1;
         }
 
         public void addOwner(JComponent c) { this.ownerRefs.add(new WeakReference<>(c)); }
@@ -253,12 +272,14 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<U
 
         private void doAction(JTabbedPane pane, MouseEvent e) {
             _doApp(()-> {
-                int index = indexFinder.get();
-                if ( index < 0 ) return;
-                if ( index == pane.getSelectedIndex() && mouseClickAction != null )
+                int indexOfThis = indexOfThisTab();
+                if ( indexOfThis < 0 ) return;
+                int indexClicked = indexOfClick(pane, e);
+                if ( indexClicked < 0 ) return;
+                if ( indexOfThis == indexClicked && mouseClickAction != null )
                     mouseClickAction.accept(new SimpleDelegate<>(pane, e, UIForTabbedPane.this::getSiblinghood));
-                if ( index < pane.getTabCount() )
-                    pane.setSelectedIndex(index);
+                if ( indexOfThis < pane.getTabCount() )
+                    pane.setSelectedIndex(indexOfThis);
             });
         }
     }
