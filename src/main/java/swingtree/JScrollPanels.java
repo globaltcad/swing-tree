@@ -45,6 +45,7 @@ public class JScrollPanels extends JScrollPane
 	 * 	@param align The alignment of the entries inside this {@link JScrollPanels} instance.
 	 * 				 The alignment can be either {@link UI.Align#HORIZONTAL} or {@link UI.Align#VERTICAL}.
 	 * @param size The size of the entries in this {@link JScrollPanels} instance.
+	 * @return A new {@link JScrollPanels} instance.
 	 */
 	public static JScrollPanels of(
 		UI.Align align, Dimension size
@@ -250,6 +251,8 @@ public class JScrollPanels extends JScrollPane
 	}
 
 	/**
+	 * @param type The type of the entry which ought to be iterated over.
+	 * @param action The action which ought to be applied to all {@link JScrollPanels} entries of the given type.
 	 * @param <T> The entry value type parameter.
 	 */
 	public <T extends JComponent> void forEachEntry(Class<T> type, Consumer<EntryPanel> action) {

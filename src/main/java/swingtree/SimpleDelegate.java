@@ -93,7 +93,8 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
     }
 
     /**
-     * @param type The type of the sibling components to return.
+     * @param type The type class of the sibling components to return.
+     * @param <T> The type of the sibling components to return.
      * @return A list of all siblings of the specified type, excluding the component from which this instance originated.
      */
     public <T extends JComponent> List<T> getSiblingsOfType(Class<T> type) {
@@ -116,7 +117,8 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
      *  This method will make sure that the passed lambda will
      *  be executed by the Swing thread.
      *  <br><br>
-     * @param type The type of the sibling components to return.
+     * @param type The type class of the sibling components to return.
+     * @param <T> The {@link JComponent} type of the sibling components to return.
      * @param action The action consuming a list of all siblings of the specified type,
      *               excluding the component from which this instance originated,
      *               which will be executed by the Swing thread.
@@ -161,6 +163,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
 
     /**
      * @param type The type of the sibling components to return.
+     * @param <T> The {@link JComponent} type of the sibling components to return.
      * @return A list of all siblings of the specified type, including the component from which this instance originated.
      */
     public <T extends JComponent> List<T> getSiblinghoodOfType(Class<T> type) {
@@ -184,6 +187,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
      *  be executed by the Swing thread.
      *  <br><br>
      * @param type The type of the sibling components to return.
+     * @param <T> The {@link JComponent} type of the sibling components to return.
      * @param action The action consuming a list of all siblings of the specified type,
      *               including the component from which this instance originated,
      *               which will be executed by the Swing thread.

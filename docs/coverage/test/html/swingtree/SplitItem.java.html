@@ -60,11 +60,12 @@ public final class SplitItem&lt;I extends JMenuItem&gt;
 
     /**
      * @param item The {@link UIForMenuItem} which wraps a {@link  JMenuItem} for which a {@link SplitItem} should be created.
+     * @param &lt;M&gt; The type parameter for the provided item type, a subtype of {@link JMenuItem}.
      * @return A {@link SplitItem} wrapping {@link JMenuItem} represented by the provided UI builder.
      */
     public static &lt;M extends JMenuItem&gt; SplitItem&lt;M&gt; of( UIForMenuItem&lt;M&gt; item ) {
-<span class="nc" id="L66">        NullUtil.nullArgCheck(item, &quot;item&quot;, UIForMenuItem.class);</span>
-<span class="nc" id="L67">        return new SplitItem&lt;&gt;(item.getComponent());</span>
+<span class="nc" id="L67">        NullUtil.nullArgCheck(item, &quot;item&quot;, UIForMenuItem.class);</span>
+<span class="nc" id="L68">        return new SplitItem&lt;&gt;(item.getComponent());</span>
     }
 
     private final I _item;
@@ -72,22 +73,22 @@ public final class SplitItem&lt;I extends JMenuItem&gt;
     private final Action&lt;Delegate&lt;I&gt;&gt; _onItemSelected;
     private final Val&lt;Boolean&gt; _isEnabled;
 
-<span class="fc" id="L75">    private SplitItem( I item ) {</span>
-<span class="fc" id="L76">        _item = item; _onButtonClick = null; _onItemSelected = null; _isEnabled = null;</span>
-<span class="fc" id="L77">    }</span>
+<span class="fc" id="L76">    private SplitItem( I item ) {</span>
+<span class="fc" id="L77">        _item = item; _onButtonClick = null; _onItemSelected = null; _isEnabled = null;</span>
+<span class="fc" id="L78">    }</span>
 
     private SplitItem(
         I item,
         Action&lt;Delegate&lt;I&gt;&gt; onClick,
         Action&lt;Delegate&lt;I&gt;&gt; onSelected,
         Val&lt;Boolean&gt; isEnabled
-<span class="fc" id="L84">    ) {</span>
-<span class="fc" id="L85">        _item = item; _onButtonClick = onClick; _onItemSelected = onSelected; _isEnabled = isEnabled;</span>
-<span class="fc" id="L86">    }</span>
+<span class="fc" id="L85">    ) {</span>
+<span class="fc" id="L86">        _item = item; _onButtonClick = onClick; _onItemSelected = onSelected; _isEnabled = isEnabled;</span>
+<span class="fc" id="L87">    }</span>
 
     public SplitItem&lt;I&gt; makeSelected() {
-<span class="fc" id="L89">        _item.setSelected(true);</span>
-<span class="fc" id="L90">        return this;</span>
+<span class="fc" id="L90">        _item.setSelected(true);</span>
+<span class="fc" id="L91">        return this;</span>
     }
 
     /**
@@ -105,10 +106,10 @@ public final class SplitItem&lt;I extends JMenuItem&gt;
      * @return An immutable copy of this with the provided lambda set.
      */
     public SplitItem&lt;I&gt; onButtonClick(Action&lt;Delegate&lt;I&gt;&gt; action) {
-<span class="fc" id="L108">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="pc bpc" id="L109" title="1 of 2 branches missed.">        if ( _onButtonClick != null )</span>
-<span class="nc" id="L110">            throw new IllegalArgumentException(&quot;Property already specified!&quot;);</span>
-<span class="fc" id="L111">        return new SplitItem&lt;&gt;(_item, action, _onItemSelected, _isEnabled);</span>
+<span class="fc" id="L109">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">        if ( _onButtonClick != null )</span>
+<span class="nc" id="L111">            throw new IllegalArgumentException(&quot;Property already specified!&quot;);</span>
+<span class="fc" id="L112">        return new SplitItem&lt;&gt;(_item, action, _onItemSelected, _isEnabled);</span>
     }
 
     /**
@@ -129,24 +130,24 @@ public final class SplitItem&lt;I extends JMenuItem&gt;
      * @return An immutable copy of this with the provided lambda set.
      */
     public SplitItem&lt;I&gt; onSelection(Action&lt;Delegate&lt;I&gt;&gt; action) {
-<span class="fc" id="L132">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="pc bpc" id="L133" title="1 of 2 branches missed.">        if ( _onItemSelected != null ) throw new IllegalArgumentException(&quot;Property already specified!&quot;);</span>
-<span class="fc" id="L134">        return new SplitItem&lt;&gt;(_item, _onButtonClick, action, _isEnabled);</span>
+<span class="fc" id="L133">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">        if ( _onItemSelected != null ) throw new IllegalArgumentException(&quot;Property already specified!&quot;);</span>
+<span class="fc" id="L135">        return new SplitItem&lt;&gt;(_item, _onButtonClick, action, _isEnabled);</span>
     }
 
     public SplitItem&lt;I&gt; isEnabledIf( Var&lt;Boolean&gt; isEnabled ) {
-<span class="fc" id="L138">        NullUtil.nullArgCheck(isEnabled, &quot;isEnabled&quot;, Var.class);</span>
-<span class="pc bpc" id="L139" title="1 of 2 branches missed.">        if ( _isEnabled != null ) throw new IllegalArgumentException(&quot;Property already specified!&quot;);</span>
-<span class="fc" id="L140">        return new SplitItem&lt;&gt;(_item, _onButtonClick, _onItemSelected, isEnabled);</span>
+<span class="fc" id="L139">        NullUtil.nullArgCheck(isEnabled, &quot;isEnabled&quot;, Var.class);</span>
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">        if ( _isEnabled != null ) throw new IllegalArgumentException(&quot;Property already specified!&quot;);</span>
+<span class="fc" id="L141">        return new SplitItem&lt;&gt;(_item, _onButtonClick, _onItemSelected, isEnabled);</span>
     }
 
-<span class="fc" id="L143">    I getItem() { return _item; }</span>
+<span class="fc" id="L144">    I getItem() { return _item; }</span>
 
-<span class="fc bfc" id="L145" title="All 2 branches covered.">    Action&lt;Delegate&lt;I&gt;&gt; getOnClick() { return _onButtonClick == null ? it -&gt; {} : _onButtonClick; }</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">    Action&lt;Delegate&lt;I&gt;&gt; getOnClick() { return _onButtonClick == null ? it -&gt; {} : _onButtonClick; }</span>
 
-<span class="fc bfc" id="L147" title="All 2 branches covered.">    Action&lt;Delegate&lt;I&gt;&gt; getOnSelected() { return _onItemSelected == null ? c -&gt; {} : _onItemSelected; }</span>
+<span class="fc bfc" id="L148" title="All 2 branches covered.">    Action&lt;Delegate&lt;I&gt;&gt; getOnSelected() { return _onItemSelected == null ? c -&gt; {} : _onItemSelected; }</span>
 
-<span class="fc" id="L149">    Val&lt;Boolean&gt; getIsEnabled(){ return _isEnabled; }</span>
+<span class="fc" id="L150">    Val&lt;Boolean&gt; getIsEnabled(){ return _isEnabled; }</span>
 
     /**
      *  Instances of this are exposed as delegates through the {@link SimpleDelegate} passed
@@ -168,23 +169,23 @@ public final class SplitItem&lt;I extends JMenuItem&gt;
                 Supplier&lt;List&lt;I&gt;&gt; siblingsSource,
                 I currentItem
         ) {
-<span class="fc" id="L171">            super(currentItem);</span>
-<span class="fc" id="L172">            this.event = event;</span>
-<span class="fc" id="L173">            this.splitButton = splitButton;</span>
-<span class="fc" id="L174">            this.siblingsSource = siblingsSource;</span>
-<span class="fc" id="L175">            this.currentItem = currentItem;</span>
-<span class="fc" id="L176">        }</span>
+<span class="fc" id="L172">            super(currentItem);</span>
+<span class="fc" id="L173">            this.event = event;</span>
+<span class="fc" id="L174">            this.splitButton = splitButton;</span>
+<span class="fc" id="L175">            this.siblingsSource = siblingsSource;</span>
+<span class="fc" id="L176">            this.currentItem = currentItem;</span>
+<span class="fc" id="L177">        }</span>
 
-<span class="nc" id="L178">        public ActionEvent getEvent() { return event; }</span>
+<span class="nc" id="L179">        public ActionEvent getEvent() { return event; }</span>
 
         /**
          * @return The {@link JSplitButton} to which this {@link SplitItem} (and its {@link JMenuItem}) belongs.
          */
         public JSplitButton getSplitButton() {
             // We make sure that only the Swing thread can access the component:
-<span class="pc bpc" id="L185" title="1 of 2 branches missed.">            if ( UI.thisIsUIThread() ) return splitButton;</span>
+<span class="pc bpc" id="L186" title="1 of 2 branches missed.">            if ( UI.thisIsUIThread() ) return splitButton;</span>
             else
-<span class="nc" id="L187">                throw new IllegalStateException(</span>
+<span class="nc" id="L188">                throw new IllegalStateException(</span>
                         &quot;Split button can only be accessed by the Swing thread.&quot;
                     );
         }
@@ -194,9 +195,9 @@ public final class SplitItem&lt;I extends JMenuItem&gt;
          */
         public final I getCurrentItem() {
             // We make sure that only the Swing thread can access the component:
-<span class="pc bpc" id="L197" title="1 of 2 branches missed.">            if ( UI.thisIsUIThread() ) return this.currentItem;</span>
+<span class="pc bpc" id="L198" title="1 of 2 branches missed.">            if ( UI.thisIsUIThread() ) return this.currentItem;</span>
             else
-<span class="nc" id="L199">                throw new IllegalStateException(</span>
+<span class="nc" id="L200">                throw new IllegalStateException(</span>
                         &quot;The current button item can only be accessed by the Swing thread.&quot;
                     );
         }
@@ -207,11 +208,11 @@ public final class SplitItem&lt;I extends JMenuItem&gt;
          */
         public List&lt;I&gt; getSiblinghood() {
             // We make sure that only the Swing thread can access the sibling components:
-<span class="pc bpc" id="L210" title="1 of 2 branches missed.">            if ( !UI.thisIsUIThread() )</span>
-<span class="nc" id="L211">                throw new IllegalStateException(</span>
+<span class="pc bpc" id="L211" title="1 of 2 branches missed.">            if ( !UI.thisIsUIThread() )</span>
+<span class="nc" id="L212">                throw new IllegalStateException(</span>
                         &quot;Sibling components can only be accessed by the Swing thread.&quot;
                     );
-<span class="fc" id="L214">            return this.siblingsSource.get();</span>
+<span class="fc" id="L215">            return this.siblingsSource.get();</span>
         }
 
         /**
@@ -221,14 +222,14 @@ public final class SplitItem&lt;I extends JMenuItem&gt;
          */
         public List&lt;I&gt; getSiblings() {
             // We make sure that only the Swing thread can access the sibling components:
-<span class="nc bnc" id="L224" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() )</span>
-<span class="nc" id="L225">                throw new IllegalStateException(</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() )</span>
+<span class="nc" id="L226">                throw new IllegalStateException(</span>
                         &quot;Sibling components can only be accessed by the Swing thread.&quot;
                     );
-<span class="nc" id="L228">            return this.siblingsSource.get()</span>
-<span class="nc" id="L229">                    .stream()</span>
-<span class="nc bnc" id="L230" title="All 2 branches missed.">                    .filter( s -&gt; s != getCurrentItem() )</span>
-<span class="nc" id="L231">                    .collect(Collectors.toList());</span>
+<span class="nc" id="L229">            return this.siblingsSource.get()</span>
+<span class="nc" id="L230">                    .stream()</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">                    .filter( s -&gt; s != getCurrentItem() )</span>
+<span class="nc" id="L232">                    .collect(Collectors.toList());</span>
         }
 
         /**
@@ -239,12 +240,12 @@ public final class SplitItem&lt;I extends JMenuItem&gt;
          */
         public Delegate&lt;I&gt; selectCurrentItem() {
             // We make sure that only the Swing thread can modify components:
-<span class="nc bnc" id="L242" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
-<span class="nc" id="L243">                UI.run(this::selectCurrentItem);</span>
-<span class="nc" id="L244">                return this;</span>
+<span class="nc bnc" id="L243" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
+<span class="nc" id="L244">                UI.run(this::selectCurrentItem);</span>
+<span class="nc" id="L245">                return this;</span>
             }
-<span class="nc" id="L246">            this.getCurrentItem().setSelected(true);</span>
-<span class="nc" id="L247">            return this;</span>
+<span class="nc" id="L247">            this.getCurrentItem().setSelected(true);</span>
+<span class="nc" id="L248">            return this;</span>
         }
 
         /**
@@ -256,13 +257,13 @@ public final class SplitItem&lt;I extends JMenuItem&gt;
          */
         public Delegate&lt;I&gt; selectOnlyCurrentItem() {
             // We make sure that only the Swing thread can modify components:
-<span class="pc bpc" id="L259" title="1 of 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
-<span class="nc" id="L260">                UI.run(this::selectOnlyCurrentItem);</span>
-<span class="nc" id="L261">                return this;</span>
+<span class="pc bpc" id="L260" title="1 of 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
+<span class="nc" id="L261">                UI.run(this::selectOnlyCurrentItem);</span>
+<span class="nc" id="L262">                return this;</span>
             }
-<span class="fc" id="L263">            this.unselectAllItems();</span>
-<span class="fc" id="L264">            this.getCurrentItem().setSelected(true);</span>
-<span class="fc" id="L265">            return this;</span>
+<span class="fc" id="L264">            this.unselectAllItems();</span>
+<span class="fc" id="L265">            this.getCurrentItem().setSelected(true);</span>
+<span class="fc" id="L266">            return this;</span>
         }
 
         /**
@@ -273,12 +274,12 @@ public final class SplitItem&lt;I extends JMenuItem&gt;
          */
         public Delegate&lt;I&gt; unselectCurrentItem() {
             // We make sure that only the Swing thread can modify components:
-<span class="nc bnc" id="L276" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
-<span class="nc" id="L277">                UI.run(this::unselectCurrentItem);</span>
-<span class="nc" id="L278">                return this;</span>
+<span class="nc bnc" id="L277" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
+<span class="nc" id="L278">                UI.run(this::unselectCurrentItem);</span>
+<span class="nc" id="L279">                return this;</span>
             }
-<span class="nc" id="L280">            this.getCurrentItem().setSelected(false);</span>
-<span class="nc" id="L281">            return this;</span>
+<span class="nc" id="L281">            this.getCurrentItem().setSelected(false);</span>
+<span class="nc" id="L282">            return this;</span>
         }
 
         /**
@@ -289,12 +290,12 @@ public final class SplitItem&lt;I extends JMenuItem&gt;
          */
         public Delegate&lt;I&gt; unselectAllItems() {
             // We make sure that only the Swing thread can modify components:
-<span class="pc bpc" id="L292" title="1 of 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
-<span class="nc" id="L293">                UI.run(this::unselectAllItems);</span>
-<span class="nc" id="L294">                return this;</span>
+<span class="pc bpc" id="L293" title="1 of 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
+<span class="nc" id="L294">                UI.run(this::unselectAllItems);</span>
+<span class="nc" id="L295">                return this;</span>
             }
-<span class="fc" id="L296">            getSiblinghood().forEach(it -&gt; it.setSelected(false) );</span>
-<span class="fc" id="L297">            return this;</span>
+<span class="fc" id="L297">            getSiblinghood().forEach(it -&gt; it.setSelected(false) );</span>
+<span class="fc" id="L298">            return this;</span>
         }
 
         /**
@@ -305,12 +306,12 @@ public final class SplitItem&lt;I extends JMenuItem&gt;
          */
         public Delegate&lt;I&gt; selectAllItems() {
             // We make sure that only the Swing thread can modify components:
-<span class="nc bnc" id="L308" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
-<span class="nc" id="L309">                UI.run(this::selectAllItems);</span>
-<span class="nc" id="L310">                return this;</span>
+<span class="nc bnc" id="L309" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
+<span class="nc" id="L310">                UI.run(this::selectAllItems);</span>
+<span class="nc" id="L311">                return this;</span>
             }
-<span class="nc" id="L312">            getSiblinghood().forEach(it -&gt; it.setSelected(true) );</span>
-<span class="nc" id="L313">            return this;</span>
+<span class="nc" id="L313">            getSiblinghood().forEach(it -&gt; it.setSelected(true) );</span>
+<span class="nc" id="L314">            return this;</span>
         }
 
         /**
@@ -321,13 +322,13 @@ public final class SplitItem&lt;I extends JMenuItem&gt;
          */
         public Delegate&lt;I&gt; displayCurrentItemText() {
             // We make sure that only the Swing thread can modify components:
-<span class="fc bfc" id="L324" title="All 2 branches covered.">            if ( !UI.thisIsUIThread() ) {</span>
-<span class="fc" id="L325">                UI.run(this::displayCurrentItemText);</span>
-<span class="fc" id="L326">                return this;</span>
+<span class="fc bfc" id="L325" title="All 2 branches covered.">            if ( !UI.thisIsUIThread() ) {</span>
+<span class="fc" id="L326">                UI.run(this::displayCurrentItemText);</span>
+<span class="fc" id="L327">                return this;</span>
             }
-<span class="pc bpc" id="L328" title="1 of 2 branches missed.">            if ( getCurrentItem() != null )</span>
-<span class="fc" id="L329">                getSplitButton().setText(getCurrentItem().getText());</span>
-<span class="fc" id="L330">            return this;</span>
+<span class="pc bpc" id="L329" title="1 of 2 branches missed.">            if ( getCurrentItem() != null )</span>
+<span class="fc" id="L330">                getSplitButton().setText(getCurrentItem().getText());</span>
+<span class="fc" id="L331">            return this;</span>
         }
 
         /**
@@ -336,20 +337,20 @@ public final class SplitItem&lt;I extends JMenuItem&gt;
          */
         public Delegate&lt;I&gt; setButtonText( String text ) {
             // We make sure that only the Swing thread can modify components:
-<span class="fc bfc" id="L339" title="All 2 branches covered.">            if ( !UI.thisIsUIThread() ) {</span>
-<span class="fc" id="L340">                UI.run(() -&gt; setButtonText(text));</span>
-<span class="fc" id="L341">                return this;</span>
+<span class="fc bfc" id="L340" title="All 2 branches covered.">            if ( !UI.thisIsUIThread() ) {</span>
+<span class="fc" id="L341">                UI.run(() -&gt; setButtonText(text));</span>
+<span class="fc" id="L342">                return this;</span>
             }
-<span class="fc" id="L343">            NullUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
-<span class="fc" id="L344">            this.splitButton.setText(text);</span>
-<span class="fc" id="L345">            return this;</span>
+<span class="fc" id="L344">            NullUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L345">            this.splitButton.setText(text);</span>
+<span class="fc" id="L346">            return this;</span>
         }
 
         /**
          * @return The text displayed on the {@link JSplitButton}.
          */
         public String getButtonText() {
-<span class="fc" id="L352">            return this.splitButton.getText();</span>
+<span class="fc" id="L353">            return this.splitButton.getText();</span>
         }
 
         /**
@@ -357,14 +358,14 @@ public final class SplitItem&lt;I extends JMenuItem&gt;
          * @return This {@link Delegate} instance to allow for method chaining.
          */
         public Delegate&lt;I&gt; appendToButtonText( String postfix ) {
-<span class="fc" id="L360">            NullUtil.nullArgCheck(postfix, &quot;postfix&quot;, String.class);</span>
+<span class="fc" id="L361">            NullUtil.nullArgCheck(postfix, &quot;postfix&quot;, String.class);</span>
             // We make sure that only the Swing thread can modify components:
-<span class="pc bpc" id="L362" title="1 of 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
-<span class="nc" id="L363">                UI.run(() -&gt; appendToButtonText(postfix));</span>
-<span class="nc" id="L364">                return this;</span>
+<span class="pc bpc" id="L363" title="1 of 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
+<span class="nc" id="L364">                UI.run(() -&gt; appendToButtonText(postfix));</span>
+<span class="nc" id="L365">                return this;</span>
             }
-<span class="fc" id="L366">            this.splitButton.setText(this.getButtonText()+postfix);</span>
-<span class="fc" id="L367">            return this;</span>
+<span class="fc" id="L367">            this.splitButton.setText(this.getButtonText()+postfix);</span>
+<span class="fc" id="L368">            return this;</span>
         }
 
         /**
@@ -372,14 +373,14 @@ public final class SplitItem&lt;I extends JMenuItem&gt;
          * @return This {@link Delegate} instance to allow for method chaining.
          */
         public Delegate&lt;I&gt; prependToButtonText( String prefix ) {
-<span class="nc" id="L375">            NullUtil.nullArgCheck(prefix, &quot;postfix&quot;, String.class);</span>
+<span class="nc" id="L376">            NullUtil.nullArgCheck(prefix, &quot;postfix&quot;, String.class);</span>
             // We make sure that only the Swing thread can modify components:
-<span class="nc bnc" id="L377" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
-<span class="nc" id="L378">                UI.run(() -&gt; prependToButtonText(prefix) );</span>
-<span class="nc" id="L379">                return this;</span>
+<span class="nc bnc" id="L378" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
+<span class="nc" id="L379">                UI.run(() -&gt; prependToButtonText(prefix) );</span>
+<span class="nc" id="L380">                return this;</span>
             }
-<span class="nc" id="L381">            this.splitButton.setText(prefix+this.getButtonText());</span>
-<span class="nc" id="L382">            return this;</span>
+<span class="nc" id="L382">            this.splitButton.setText(prefix+this.getButtonText());</span>
+<span class="nc" id="L383">            return this;</span>
         }
 
         /**
@@ -390,12 +391,12 @@ public final class SplitItem&lt;I extends JMenuItem&gt;
          */
         public Delegate&lt;I&gt; selectItem( int i ) {
             // We make sure that only the Swing thread can modify components:
-<span class="nc bnc" id="L393" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
-<span class="nc" id="L394">                UI.run(() -&gt; selectItem(i));</span>
-<span class="nc" id="L395">                return this;</span>
+<span class="nc bnc" id="L394" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
+<span class="nc" id="L395">                UI.run(() -&gt; selectItem(i));</span>
+<span class="nc" id="L396">                return this;</span>
             }
-<span class="nc" id="L397">            getSiblinghood().get(i).setSelected(true);</span>
-<span class="nc" id="L398">            return this;</span>
+<span class="nc" id="L398">            getSiblinghood().get(i).setSelected(true);</span>
+<span class="nc" id="L399">            return this;</span>
         }
 
         /**
@@ -406,12 +407,12 @@ public final class SplitItem&lt;I extends JMenuItem&gt;
          */
         public Delegate&lt;I&gt; selectOnlyItem( int i ) {
             // We make sure that only the Swing thread can modify components:
-<span class="nc bnc" id="L409" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
-<span class="nc" id="L410">                UI.run(() -&gt; selectOnlyItem(i) );</span>
-<span class="nc" id="L411">                return this;</span>
+<span class="nc bnc" id="L410" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
+<span class="nc" id="L411">                UI.run(() -&gt; selectOnlyItem(i) );</span>
+<span class="nc" id="L412">                return this;</span>
             }
-<span class="nc" id="L413">            unselectAllItems().getSiblinghood().get(i).setSelected(true);</span>
-<span class="nc" id="L414">            return this;</span>
+<span class="nc" id="L414">            unselectAllItems().getSiblinghood().get(i).setSelected(true);</span>
+<span class="nc" id="L415">            return this;</span>
         }
 
         /**
@@ -422,12 +423,12 @@ public final class SplitItem&lt;I extends JMenuItem&gt;
          */
         public Delegate&lt;I&gt; unselectItem( int i ) {
             // We make sure that only the Swing thread can modify components:
-<span class="nc bnc" id="L425" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
-<span class="nc" id="L426">                UI.run(() -&gt; unselectItem(i) );</span>
-<span class="nc" id="L427">                return this;</span>
+<span class="nc bnc" id="L426" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
+<span class="nc" id="L427">                UI.run(() -&gt; unselectItem(i) );</span>
+<span class="nc" id="L428">                return this;</span>
             }
-<span class="nc" id="L429">            getSiblinghood().get(i).setSelected(false);</span>
-<span class="nc" id="L430">            return this;</span>
+<span class="nc" id="L430">            getSiblinghood().get(i).setSelected(false);</span>
+<span class="nc" id="L431">            return this;</span>
         }
 
     }

@@ -71,6 +71,7 @@ abstract class AbstractBuilder<I, C extends Component>
     /**
      *  The type class of the component wrapped by this builder node.
      *  See documentation for method "build" for more information.
+     * @return The type class of the component wrapped by this builder node.
      */
     public final Class<C> getType() { return _type; }
 

@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.020 seconds"
+    "duration":"0.014 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -213,7 +213,7 @@
     {
       "id":"You can dynamically model the divider size of a split pane in your view model.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            In a fully application, the divider size property in this example would be part of your view model\n            containing the state of the UI as well as the business logic. So you can simply modify it as part of\n            your business logic and the split pane will automatically update its divider size based on an observer\n            registered on the property.\n        "]
       },

@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.098 seconds"
+    "duration":"0.096 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -248,7 +248,7 @@
     {
       "id":"The \"ifPresent\" method allows us to see if a property has a value or not.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

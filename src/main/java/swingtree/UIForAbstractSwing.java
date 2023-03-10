@@ -202,6 +202,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *
      * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component visible.
      * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component visible.
+     * @param <E> The enum type.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final <E extends Enum<E>> I isVisibleIf( E enumValue, Val<E> enumProperty ) {
@@ -218,6 +219,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *  based on the equality between the supplied enum value and enum property. <br>
      * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component invisible.
      * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component invisible.
+     * @param <E> The enum type for both the supplied enum value and enum property.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final <E extends Enum<E>> I isVisibleIfNot( E enumValue, Val<E> enumProperty ) {
@@ -285,6 +287,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *
      * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component enabled.
      * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component enabled.
+     * @param <E> The enum type for both the supplied enum value and enum property.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final <E extends Enum<E>> I isEnabledIf( E enumValue, Val<E> enumProperty ) {
@@ -303,6 +306,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *
      * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component disabled.
      * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component disabled.
+     * @param <E> The enum type for both the supplied enum value and enum property.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final <E extends Enum<E>> I isEnabledIfNot( E enumValue, Val<E> enumProperty ) {
@@ -378,6 +382,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *
      *  @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component focusable.
      *  @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component focusable.
+     *  @param <E> The enum type for both the supplied enum value and enum property.
      *  @return This very instance, which enables builder-style method chaining.
      *  @throws IllegalArgumentException if the supplied {@code enumValue} or {@code enumProperty} is {@code null}.
      */
@@ -397,6 +402,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *
      *  @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component non-focusable.
      *  @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component non-focusable.
+     *  @param <E> The enum type for both the supplied enum value and enum property.
      *  @return This very instance, which enables builder-style method chaining.
      *  @throws IllegalArgumentException if the supplied {@code enumValue} or {@code enumProperty} is {@code null}.
      */
@@ -532,6 +538,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *
      * @param key the new client property key which may be used for styles or layout managers.
      * @param value the new client property value.
+     * @return This very instance, which enables builder-style method chaining.
      */
     public final I withProperty( String key, String value ) {
         getComponent().putClientProperty(key, value);
@@ -1351,6 +1358,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *
      * @param constraints The constraints for the layout.
      * @param colConstrains The column layout for the {@link MigLayout} instance.
+     * @param rowConstraints The row layout for the {@link MigLayout} instance.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withLayout( String constraints, String colConstrains, String rowConstraints ) {
@@ -2562,6 +2570,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
 
     /**
      * @param builder A builder for another {@link JComponent} instance which ought to be added to the wrapped component type.
+     * @param <T> The type of the {@link JComponent} which is wrapped by the provided builder.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final <T extends JComponent> I add( UIForAbstractSwing<?, T> builder ) {
@@ -2579,6 +2588,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *
      * @param attr The additional mig-layout information which should be passed to the UI tree.
      * @param builder A builder for another {@link JComponent} instance which ought to be added to the wrapped component type.
+     * @param <T> The type of the {@link JComponent} which is wrapped by the provided builder.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final <T extends JComponent> I add( String attr, UIForAbstractSwing<?, T> builder ) {
@@ -2595,6 +2605,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *
      * @param attr The mig-layout attribute.
      * @param builder A builder for another {@link JComponent} instance which ought to be added to the wrapped component type.
+     * @param <T> The type of the {@link JComponent} which is wrapped by the provided builder.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final <T extends JComponent> I add( CompAttr attr, UIForAbstractSwing<?, T> builder ) {
@@ -2612,6 +2623,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param attr The additional mig-layout information which should be passed to the UI tree.
      * @param builders An array of builders for a corresponding number of {@link JComponent} 
      *                  type which ought to be added to the wrapped component type of this builder.
+     * @param <B> The builder type parameter, a subtype of {@link UIForAbstractSwing}.
      * @return This very instance, which enables builder-style method chaining.
      */
     @SafeVarargs
@@ -2637,6 +2649,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param attr The first mig-layout information which should be passed to the UI tree.
      * @param builders An array of builders for a corresponding number of {@link JComponent}
      *                  type which ought to be added to the wrapped component type of this builder.
+     * @param <B> The builder type parameter, a subtype of {@link UIForAbstractSwing}.
      * @return This very instance, which enables builder-style method chaining.
      */
     @SafeVarargs

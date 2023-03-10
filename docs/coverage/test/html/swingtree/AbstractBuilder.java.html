@@ -71,8 +71,9 @@ import java.util.function.Consumer;
     /**
      *  The type class of the component wrapped by this builder node.
      *  See documentation for method &quot;build&quot; for more information.
+     * @return The type class of the component wrapped by this builder node.
      */
-<span class="nc" id="L75">    public final Class&lt;C&gt; getType() { return _type; }</span>
+<span class="nc" id="L76">    public final Class&lt;C&gt; getType() { return _type; }</span>
 
     /**
      *  Use this if you wish to access the component wrapped by this builder directly.
@@ -94,8 +95,8 @@ import java.util.function.Consumer;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I peek( Peeker&lt;C&gt; action ) {
-<span class="fc" id="L97">        action.accept(getComponent());</span>
-<span class="fc" id="L98">        return _this();</span>
+<span class="fc" id="L98">        action.accept(getComponent());</span>
+<span class="fc" id="L99">        return _this();</span>
     }
 
     /**
@@ -113,10 +114,10 @@ import java.util.function.Consumer;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I applyIf( boolean condition, Consumer&lt;I&gt; building ) {
-<span class="fc" id="L116">        NullUtil.nullArgCheck(building, &quot;building&quot;, Consumer.class);</span>
-<span class="fc" id="L117">        I builder = _this();</span>
-<span class="fc bfc" id="L118" title="All 2 branches covered.">        if ( condition ) building.accept(builder);</span>
-<span class="fc" id="L119">        return builder;</span>
+<span class="fc" id="L117">        NullUtil.nullArgCheck(building, &quot;building&quot;, Consumer.class);</span>
+<span class="fc" id="L118">        I builder = _this();</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">        if ( condition ) building.accept(builder);</span>
+<span class="fc" id="L120">        return builder;</span>
     }
 
 
@@ -135,10 +136,10 @@ import java.util.function.Consumer;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I applyIfPresent( Optional&lt;Consumer&lt;I&gt;&gt; building ) {
-<span class="fc" id="L138">        NullUtil.nullArgCheck(building, &quot;building&quot;, Optional.class);</span>
-<span class="fc" id="L139">        I builder = _this();</span>
-<span class="pc" id="L140">        building.ifPresent( buildingLambda -&gt; buildingLambda.accept(builder) );</span>
-<span class="fc" id="L141">        return builder;</span>
+<span class="fc" id="L139">        NullUtil.nullArgCheck(building, &quot;building&quot;, Optional.class);</span>
+<span class="fc" id="L140">        I builder = _this();</span>
+<span class="pc" id="L141">        building.ifPresent( buildingLambda -&gt; buildingLambda.accept(builder) );</span>
+<span class="fc" id="L142">        return builder;</span>
     }
 
     /**
@@ -153,8 +154,8 @@ import java.util.function.Consumer;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I apply( Consumer&lt;I&gt; building ) {
-<span class="fc" id="L156">        NullUtil.nullArgCheck(building, &quot;building&quot;, Consumer.class);</span>
-<span class="fc" id="L157">        return applyIf(true, building);</span>
+<span class="fc" id="L157">        NullUtil.nullArgCheck(building, &quot;building&quot;, Consumer.class);</span>
+<span class="fc" id="L158">        return applyIf(true, building);</span>
     }
 
     /**
@@ -174,8 +175,8 @@ import java.util.function.Consumer;
      * @return The result of the building process, namely: a type of JComponent.
      */
     public &lt;T extends C&gt; T get( Class&lt;T&gt; type ) {
-<span class="pc bpc" id="L177" title="4 of 6 branches missed.">        assert type == _type || type.isAssignableFrom(_type);</span>
-<span class="fc" id="L178">        return (T) _component.get();</span>
+<span class="pc bpc" id="L178" title="4 of 6 branches missed.">        assert type == _type || type.isAssignableFrom(_type);</span>
+<span class="fc" id="L179">        return (T) _component.get();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -176,6 +176,7 @@ public final class UI
      *  This method should be called by the main thread of the application
      *  after the UI has been built and shown to the user, or alternatively
      *  a new thread dedicated to processing events. (things like button clicks, etc.)
+     * @throws InterruptedException If the thread is interrupted while waiting.
      */
     public static void joinDecoupledEventProcessorUntilDoneOrException() throws InterruptedException {
         DecoupledEventProcessor.INSTANCE().joinUntilDoneOrException();
@@ -515,6 +516,8 @@ public final class UI
     /**
      *  Use this to create a swing tree builder node for the {@link JPopupMenu} UI component.
      *
+     * @param popup The new {@link JPopupMenu} instance which ought to be part of the Swing UI.
+     * @param <P> The concrete type of this new component.
      * @return A builder instance for a {@link JPopupMenu}, which enables fluent method chaining.
      */
     public static <P extends JPopupMenu> UIForPopup<P> of( P popup )
@@ -602,6 +605,7 @@ public final class UI
      *  Use this to create a builder for the {@link JButton} UI component with the provided text displayed on top.
      *  This is in essence a convenience method for {@code UI.of(new JButton(String text))}.
      *
+     * @param text The text to be displayed on top of the button.
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
     public static UIForButton<JButton> button( String text ) { return of(new JButton(text)); }
@@ -1517,6 +1521,8 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JEditorPane} instance.
      *
+     * @param component The {@link JEditorPane} instance to create a builder for.
+     * @param <P> The type of the {@link JEditorPane} instance.
      * @return A builder instance for the provided {@link JEditorPane}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
@@ -1536,6 +1542,8 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JTextPane} instance.
      *
+     * @param component The {@link JTextPane} instance to create a builder for.
+     * @param <P> The type of the {@link JTextPane} instance.
      * @return A builder instance for the provided {@link JTextPane}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
@@ -1705,6 +1713,7 @@ public final class UI
      *  with the provided array of elements as selectable items.
      *
      * @param items The array of elements to be selectable in the {@link JComboBox}.
+     * @param <E> The type of the elements in the {@link JComboBox}.
      * @return A builder instance for the new {@link JComboBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
@@ -2012,6 +2021,7 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JLabel} instance.
      *
+     * @param component The {@link JLabel} instance to be used by the builder.
      * @return A builder instance for the provided {@link JLabel}, which enables fluent method chaining.
      */
     public static <L extends JLabel> UIForLabel<L> of( L component ) {
@@ -2306,6 +2316,7 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JRadioButton} instance.
      *
+     * @param component The {@link JRadioButton} instance which should be wrapped by the builder.
      * @return A builder instance for the provided {@link JRadioButton}, which enables fluent method chaining.
      */
     public static <R extends JRadioButton> UIForRadioButton<R> of( R component ) {
@@ -2324,6 +2335,7 @@ public final class UI
      *  Use this to create a builder for a new {@link JToggleButton} instance
      *  with the provided text displayed on it.
      *
+     * @param text The text which should be displayed on the toggle button.
      * @return A builder instance for a new {@link JToggleButton}, which enables fluent method chaining.
      */
     public static UIForToggleButton<JToggleButton> toggleButton( String text ) {
@@ -3333,6 +3345,9 @@ public final class UI
     /**
      *  Use this to quickly launch a UI component with a custom event processor
      *  in {@link JFrame} window at the center of the screen.
+     *
+     * @param eventProcessor the event processor to use for the UI built inside the {@link Supplier} lambda.
+     * @param component The component supplier which builds the UI and supplies the component to be shown.
      */
     public static void showUsing( EventProcessor eventProcessor, Supplier<Component> component ) {
         show(use(eventProcessor, component));

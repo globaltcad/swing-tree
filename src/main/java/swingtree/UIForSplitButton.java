@@ -89,6 +89,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
      *
      * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
      *                  This will be updated when the user selects a new value.
+     * @param <E> The {@link Enum} type defining the selectable options.
      * @return A UI builder instance wrapping a {@link JSplitButton}.
      */
     public <E extends Enum<E>> UIForSplitButton<B> withSelection( Var<E> selection ) {
@@ -291,8 +292,11 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButto
     }
 
     /**
+     *  Use this to add a {@link JMenuItem} to the {@link JSplitButton} popup menu.
+     *
      * @param forItem The builder whose wrapped {@link JMenuItem} will be added to and exposed
      *                by the {@link JSplitButton} once the split part was pressed.
+     * @param <M> The type of the {@link JMenuItem} wrapped by the given {@link UIForMenuItem} instance.
      * @return This very instance, which enables builder-style method chaining.
      */
     public <M extends JMenuItem> UIForSplitButton<B> add( UIForMenuItem<M> forItem ) {

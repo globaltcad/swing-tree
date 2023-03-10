@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.103 seconds"
+    "duration":"0.104 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -85,7 +85,7 @@
     {
       "id":"We can easily define the cursor on a wrapped UI component",
       "result":"PASS",
-      "duration":"0.006 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -104,7 +104,7 @@
     {
       "id":"An enum based combo box can have custom cell rendering.",
       "result":"PASS",
-      "duration":"0.024 seconds",
+      "duration":"0.022 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Swing tree exposes a builder API for creating combo box cell renderers.\n            This is a very powerful feature, because it allows you to customize\n            the look and feel of your combo box in a very flexible way.\n            So if the state of your combo box is based on a simple enum, whose\n            instance names are all written in capital letters, you can use\n            define a custom cell renderer to display the enum values in a more\n            readable way.\n        "]
       },
@@ -148,7 +148,7 @@
     {
       "id":"We can register various kinds of different keyboard event handlers to swing tree nodes.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The Swing-Tree API exposes various methods to register different kinds of Swing component\n            or keyboard events. \n            All such event registration methods can be identified by the 'on' prefix.\n        "]
       },
@@ -163,7 +163,7 @@
     {
       "id":"We can register different UI focus event handlers to swing tree nodes.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The Swing-Tree API exposes various methods to register different kinds of Swing component\n            events, like for example UI focus events. \n            All such event registration methods can be identified by the 'on' prefix.\n        "]
       },
@@ -178,7 +178,7 @@
     {
       "id":"We can register list selection events on a JList based swing tree node.",
       "result":"PASS",
-      "duration":"0.006 seconds",
+      "duration":"0.007 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The Swing-Tree API exposes various methods to register different kinds of Swing component\n            events, like for example list selection events. \n            All such event registration methods can be identified by the 'on' prefix.\n        "]
       },
@@ -208,7 +208,7 @@
     {
       "id":"A tabbed pane can be created and populated in a declarative way.",
       "result":"PASS",
-      "duration":"0.015 seconds",
+      "duration":"0.016 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Although Swing has the JTabbedPane component as a collection of tabs, \n            there is no abstraction defining a tab on its own.\n            The Swing-Tree API provides a Tab class that allows you to define\n            a tab and its content in a more intuitive as well as declarative manner\n            with tab specific properties and event handlers.\n        "]
       },
@@ -225,7 +225,7 @@
     {
       "id":"The tab buttons of a tabbed pane can have custom components.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.005 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Although Swing has the JTabbedPane component as a collection of tabs, \n            there is no abstraction defining a tab on its own.\n            The Swing-Tree API provides a Tab class that allows you to define\n            a tab and its content in a more intuitive as well as declarative manner\n            with tab specific properties and event handlers.\n        "]
       },
@@ -242,7 +242,7 @@
     {
       "id":"Tab header components can be passed to the \"tab\" factory method instead of the title.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Custom tab header components are often used to display icons or a tab close button. \n        "]
       },

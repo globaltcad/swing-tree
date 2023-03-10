@@ -29,6 +29,7 @@ public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<
      *
      * @param columnName The name of the column for which the cell renderer will be built.
      * @param renderBuilder The builder API for a cell renderer.
+     * @return This builder node.
      */
     public final UIForTable<T> withRendererForColumn( String columnName, Render.Builder<JTable, ?> renderBuilder ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);

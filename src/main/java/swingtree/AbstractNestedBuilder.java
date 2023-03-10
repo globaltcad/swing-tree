@@ -33,7 +33,10 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
     public AbstractNestedBuilder( C component ) { super(component); }
 
     /**
-     *  A list of all the siblings of the component wrapped by this builder.
+     *  A list of all the siblings of the component wrapped by this builder,
+     *  which includes the current component itself.
+     *
+     * @return A list of all the siblings of the component wrapped by this builder.
      */
     protected final List<E> getSiblinghood() {
         if ( _parent == null ) return new ArrayList<>();

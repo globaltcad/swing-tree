@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.030 seconds"
+    "duration":"0.028 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -109,7 +109,7 @@
     {
       "id":"\"Vals\", a list of properties, is immutable.",
       "result":"PASS",
-      "duration":"0.010 seconds",
+      "duration":"0.009 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
