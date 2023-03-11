@@ -2544,6 +2544,24 @@ public final class UI
     public static UIForTextField<JTextField> textField() { return of(new JTextField()); }
 
     /**
+     *  Use this to create a builder for a new {@link JTextField} instance with
+     *  the provided number property dynamically displaying its value on the text field.
+     *  The property is a {@link Var}, meaning that it can be modified by the user.
+     *  <p>
+     *  The number property will only receive values if the text field contains a valid number.
+     *
+     * @param number The number property which should be bound to the text field.
+     * @return A builder instance for the provided {@link JTextField}, which enables fluent method chaining.
+     */
+    public static <N extends Number> UIForTextField<JTextField> numericTextField( Var<N> number ) {
+        NullUtil.nullArgCheck(number, "number", Var.class);
+        NullUtil.nullPropertyCheck(number, "number", "Please use 0 instead of null!");
+        return of(new JTextField())
+                .applyIf( !number.hasNoID(), it -> it.id(number.id()) )
+                .withNumber(number);
+    }
+
+    /**
      *  Use this to create a builder for the provided {@link JFormattedTextField} instance.
      *
      * @return A builder instance for the provided {@link JFormattedTextField}, which enables fluent method chaining.

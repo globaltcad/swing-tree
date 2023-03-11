@@ -78,29 +78,34 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
         NullUtil.nullArgCheck(value, "value", Var.class);
         NullUtil.nullPropertyCheck(value, "value", "Null is not a valid spinner state!");
         _onShow( value, this::withValue );
-        _onChange( e -> _doApp(() -> {
-            Object current = getComponent().getValue();
-            if ( current != null && Number.class.isAssignableFrom(value.type()) ) {
-                if ( Number.class.isAssignableFrom(current.getClass()) ) {
-                    Number n = (Number) current;
-                    if      ( value.type() == Integer.class ) current = n.intValue();
-                    else if ( value.type() == Long.class    ) current = n.longValue();
-                    else if ( value.type() == Float.class   ) current = n.floatValue();
-                    else if ( value.type() == Double.class  ) current = n.doubleValue();
-                    else if ( value.type() == Short.class   ) current = n.shortValue();
-                    else if ( value.type() == Byte.class    ) current = n.byteValue();
+        _onChange( e -> {
+            // Get access the current component while still in the EDT. (getComponent() is only allowed in the EDT)
+            final Object current = getComponent().getValue();
+            // Now let's do the actual work in the application thread:
+            _doApp(() -> {
+                Object interpreted = current;
+                if (current != null && Number.class.isAssignableFrom(value.type())) {
+                    if (Number.class.isAssignableFrom(current.getClass())) {
+                        Number n = (Number) current;
+                        if      (value.type() == Integer.class) interpreted = n.intValue();
+                        else if (value.type() == Long.class   ) interpreted = n.longValue();
+                        else if (value.type() == Float.class  ) interpreted = n.floatValue();
+                        else if (value.type() == Double.class ) interpreted = n.doubleValue();
+                        else if (value.type() == Short.class  ) interpreted = n.shortValue();
+                        else if (value.type() == Byte.class   ) interpreted = n.byteValue();
+                    }
+                    if (current.getClass() == String.class) {
+                        if      (value.type() == Integer.class) interpreted = Integer.parseInt((String) current);
+                        else if (value.type() == Long.class   ) interpreted = Long.parseLong((String) current);
+                        else if (value.type() == Float.class  ) interpreted = Float.parseFloat((String) current);
+                        else if (value.type() == Double.class ) interpreted = Double.parseDouble((String) current);
+                        else if (value.type() == Short.class  ) interpreted = Short.parseShort((String) current);
+                        else if (value.type() == Byte.class   ) interpreted = Byte.parseByte((String) current);
+                    }
                 }
-                if ( current.getClass() == String.class ) {
-                    if      ( value.type() == Integer.class ) current = Integer.parseInt((String) current);
-                    else if ( value.type() == Long.class    ) current = Long.parseLong((String) current);
-                    else if ( value.type() == Float.class   ) current = Float.parseFloat((String) current);
-                    else if ( value.type() == Double.class  ) current = Double.parseDouble((String) current);
-                    else if ( value.type() == Short.class   ) current = Short.parseShort((String) current);
-                    else if ( value.type() == Byte.class    ) current = Byte.parseByte((String) current);
-                }
-            }
-            ((Var<Object>) value).act(current);
-        }));
+                ((Var<Object>) value).act( interpreted );
+            });
+        });
         getComponent().setValue(value.get());
         return withValue( value.get() );
     }
