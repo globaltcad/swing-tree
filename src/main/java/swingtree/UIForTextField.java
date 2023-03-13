@@ -83,7 +83,7 @@ public class UIForTextField<F extends JTextField> extends UIForAbstractTextCompo
         NullUtil.nullPropertyCheck(number, "number", "Null is not a valid value for a numeric property.");
         NullUtil.nullPropertyCheck(isValid, "isValid", "Null is not a valid value for a boolean property.");
         _onShow( number, n -> getComponent().setText( n.toString() ) );
-        Var<String> text = Var.of( getComponent().getText() );
+        Var<String> text = Var.of( number.get().toString() );
         text.onAct( s -> {
             try {
                 if ( number.type() == Integer.class )
