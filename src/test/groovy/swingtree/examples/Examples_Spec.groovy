@@ -5,6 +5,7 @@ import example.*
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
+import swingtree.UI
 import swingtree.Utility
 import swingtree.examples.advanced.AdvancedUI
 import swingtree.examples.simple.Calculator
@@ -76,7 +77,22 @@ class Examples_Spec extends Specification
 
     def 'The settings example UI defined in the examples can be created.'()
     {
-        expect : new SomeSettingsView(new SomeSettingsViewModel())
+        given :
+            var view = new SomeSettingsView(new SomeSettingsViewModel())
+            var speedTextField = new Utility.Query(view).find(JTextField, "speed-text-field").orElse(null)
+        expect :
+            view != null
+            speedTextField != null
+        and :
+            speedTextField.text == "42.0"
+            speedTextField.background == Color.WHITE
+
+        when : 'We simulate the user entering an invalid number:'
+            speedTextField.text = "§"
+            UI.sync()
+        then : 'The UI is updated to reflect the invalid value.'
+            speedTextField.text == "§"
+            speedTextField.background == Color.RED
     }
 
     def 'The spinners example UI defined in the examples can be created.'()

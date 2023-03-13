@@ -44,7 +44,7 @@ public class SomeSettingsView extends JPanel
             panel(FILL.and(WRAP(3)))
             .add(SHRINK, label("Speed:"))
             .add(GROW.and(PUSH),
-                numericTextField(vm.speed(), vm.speedIsValid())
+                numericTextField(vm.speed(), vm.speedIsValid()).id("speed-text-field")
                 .withBackground(
                     vm.speedIsValid().viewAs(Color.class, it->it?Color.WHITE:Color.RED)
                 )
