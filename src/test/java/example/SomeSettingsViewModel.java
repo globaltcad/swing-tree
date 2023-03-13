@@ -23,6 +23,8 @@ public class SomeSettingsViewModel
     private final Var<Boolean> flipped = Var.of(false);
 
     private final Var<Orientation> orientation = Var.of(Orientation.CLOCKWISE);
+    private final Var<Double> speed = Var.of(0.0);
+    private final Var<Boolean> speedIsValid = Var.of(true);
 
     public Var<Boolean> hasType() { return hasType; }
     public Var<Type> type() { return type; }
@@ -30,6 +32,8 @@ public class SomeSettingsViewModel
     public Var<Boolean> somethingVisible() { return somethingVisible; }
     public Var<Boolean> flipped() { return flipped; }
     public Var<Orientation> orientation() { return orientation; }
+    public Var<Double> speed() { return speed; }
+    public Var<Boolean> speedIsValid() { return speedIsValid; }
 
     public void verifyEnabled() {
         if ( hasType.get() )

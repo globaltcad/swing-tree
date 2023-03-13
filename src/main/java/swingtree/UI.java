@@ -24,6 +24,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -2562,6 +2563,29 @@ public final class UI
     }
 
     /**
+     *  Use this to create a builder for a new {@link JTextField} instance with
+     *  the provided number property dynamically displaying its value on the text field
+     *  and a boolean property which will be set to {@code true} if the text field contains a valid number,
+     *  and {@code false} otherwise.
+     *  <p>
+     *  The number property will only receive values if the text in the text field can be parsed as a number,
+     *  in which case the provided {@link Var} will be set to {@code true}, otherwise it will be set to {@code false}.
+     *
+     * @param number The number property which should be bound to the text field.
+     * @param isValid A {@link Var} which will be set to {@code true} if the text field contains a valid number,
+     *                and {@code false} otherwise.
+     * @return A builder instance for the provided {@link JTextField}, which enables fluent method chaining.
+     */
+    public static <N extends Number> UIForTextField<JTextField> numericTextField( Var<N> number, Var<Boolean> isValid ) {
+        NullUtil.nullArgCheck(number, "number", Var.class);
+        NullUtil.nullPropertyCheck(number, "number", "Please use 0 instead of null!");
+        return of(new JTextField())
+                .applyIf( !number.hasNoID(), it -> it.id(number.id()) )
+                .withNumber(number, isValid);
+    }
+
+
+    /**
      *  Use this to create a builder for the provided {@link JFormattedTextField} instance.
      *
      * @return A builder instance for the provided {@link JFormattedTextField}, which enables fluent method chaining.
@@ -3352,7 +3376,7 @@ public final class UI
     }
 
     /**
-     *  Use this to quickly launch a UI component in {@link JFrame} window
+     *  Use this to quickly launch a UI component in a {@link JFrame} window
      *  at the center of the screen.
      */
     public static void show( Component component ) {
@@ -3361,14 +3385,24 @@ public final class UI
     }
 
     /**
+     *  Use this to quickly launch a UI component in a {@link JFrame} window
+     *  at the center of the screen using a function receiving the {@link JFrame}
+     *  and returning the component to be shown.
+     */
+    public static void show( Function<JFrame, Component> uiSupplier ) {
+        JFrame frame = new JFrame();
+        new UI.TestWindow( () -> frame, uiSupplier.apply(frame) );
+    }
+
+    /**
      *  Use this to quickly launch a UI component with a custom event processor
      *  in {@link JFrame} window at the center of the screen.
      *
      * @param eventProcessor the event processor to use for the UI built inside the {@link Supplier} lambda.
-     * @param component The component supplier which builds the UI and supplies the component to be shown.
+     * @param uiSupplier The component supplier which builds the UI and supplies the component to be shown.
      */
-    public static void showUsing( EventProcessor eventProcessor, Supplier<Component> component ) {
-        show(use(eventProcessor, component));
+    public static void showUsing( EventProcessor eventProcessor, Function<JFrame, Component> uiSupplier ) {
+        show(frame -> use(eventProcessor, () -> uiSupplier.apply(frame)));
     }
 
     /**

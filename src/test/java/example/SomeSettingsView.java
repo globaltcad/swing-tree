@@ -1,6 +1,10 @@
 package example;
 
+import swingtree.UI;
+
 import javax.swing.*;
+
+import java.awt.*;
 
 import static swingtree.UI.*;
 
@@ -36,17 +40,22 @@ public class SomeSettingsView extends JPanel
             .add(GROW, checkBox("Visible", vm.somethingVisible()))
             .add(GROW, checkBox("Flipped", vm.flipped()))
         )
+        .add(GROW_X,
+            panel(FILL.and(WRAP(3)))
+            .add(SHRINK, label("Speed:"))
+            .add(GROW.and(PUSH),
+                numericTextField(vm.speed(), vm.speedIsValid())
+                .withBackground(
+                    vm.speedIsValid().viewAs(Color.class, it->it?Color.WHITE:Color.RED)
+                )
+            )
+            .add(SHRINK.and(ALIGN_LEFT),label("m/s"))
+        )
         .add(GROW_X, button("Apply").onClick(it->vm.apply()));
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame();
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.add(new SomeSettingsView(new SomeSettingsViewModel()));
-            frame.pack();
-            frame.setVisible(true);
-        });
+        UI.show(new SomeSettingsView(new SomeSettingsViewModel()));
     }
 
 }

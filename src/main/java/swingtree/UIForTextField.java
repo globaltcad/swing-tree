@@ -64,29 +64,55 @@ public class UIForTextField<F extends JTextField> extends UIForAbstractTextCompo
      * @param <N> The numeric type of the {@link Var} property.
      */
     public final <N extends Number> UIForTextField<F> withNumber( Var<N> number ) {
+        Var<Boolean> isValid = Var.of(true);
+        return this.withNumber( number, isValid );
+    }
+
+    /**
+     *  Effectively bind this text field to a numeric {@link Var} property
+     *  which will only accept numbers as input.
+     *
+     * @param number The numeric {@link Var} property to bind to.
+     * @param isValid A {@link Var} property which will be set to {@code true} if the input is valid, and {@code false} otherwise.
+     * @return This builder node.
+     * @param <N> The numeric type of the {@link Var} property.
+     */
+    public final <N extends Number> UIForTextField<F> withNumber( Var<N> number, Var<Boolean> isValid ) {
         NullUtil.nullArgCheck(number, "number", Var.class);
-        number.onSet( n -> _doUI(()->getComponent().setText( n.toString() )) );
+        NullUtil.nullArgCheck(isValid, "isValid", Var.class);
+        NullUtil.nullPropertyCheck(number, "number", "Null is not a valid value for a numeric property.");
+        NullUtil.nullPropertyCheck(isValid, "isValid", "Null is not a valid value for a boolean property.");
+        _onShow( number, n -> getComponent().setText( n.toString() ) );
         Var<String> text = Var.of( getComponent().getText() );
-        text.onSet( s -> {
+        text.onAct( s -> {
             try {
                 if ( number.type() == Integer.class )
-                    number.set( (N) Integer.valueOf(Integer.parseInt(s.get())) );
+                    number.act( (N) Integer.valueOf(Integer.parseInt(s.get())) );
                 else if ( number.type() == Long.class )
-                    number.set( (N) Long.valueOf(Long.parseLong(s.get())) );
+                    number.act( (N) Long.valueOf(Long.parseLong(s.get())) );
                 else if ( number.type() == Float.class )
-                    number.set( (N) Float.valueOf(Float.parseFloat(s.get())) );
+                    number.act( (N) Float.valueOf(Float.parseFloat(s.get())) );
                 else if ( number.type() == Double.class )
-                    number.set( (N) Double.valueOf(Double.parseDouble(s.get())) );
+                    number.act( (N) Double.valueOf(Double.parseDouble(s.get())) );
                 else if ( number.type() == Short.class )
-                    number.set( (N) Short.valueOf(Short.parseShort(s.get())) );
+                    number.act( (N) Short.valueOf(Short.parseShort(s.get())) );
                 else if ( number.type() == Byte.class )
-                    number.set( (N) Byte.valueOf(Byte.parseByte(s.get())) );
+                    number.act( (N) Byte.valueOf(Byte.parseByte(s.get())) );
                 else
                     throw new IllegalStateException("Unsupported number type: " + number.type());
+
+                if ( isValid.is(false) ) {
+                    isValid.set(true);
+                    isValid.fireAct();
+                }
             } catch (NumberFormatException e) {
                 // ignore
+                if ( isValid.is(true) ) {
+                    isValid.set(false);
+                    isValid.fireAct();
+                }
             }
-        } );
+        });
         return withText( text );
     }
 
