@@ -23,7 +23,7 @@ public class SomeSettingsViewModel
     private final Var<Boolean> flipped = Var.of(false);
 
     private final Var<Orientation> orientation = Var.of(Orientation.CLOCKWISE);
-    private final Var<Double> speed = Var.of(42.0);
+    private final Var<Double> speed = Var.of(42.0).onAct( it -> speed().fireSet() );
     private final Var<Boolean> speedIsValid = Var.of(true);
 
     public Var<Boolean> hasType() { return hasType; }

@@ -54,8 +54,6 @@ public class SomeSettingsView extends JPanel
         .add(GROW_X, button("Apply").onClick(it->vm.apply()));
     }
 
-    public static void main(String[] args) {
-        UI.show(new SomeSettingsView(new SomeSettingsViewModel()));
-    }
+    public static void main(String[] args) { UI.show(new SomeSettingsView(new SomeSettingsViewModel())); }
 
 }

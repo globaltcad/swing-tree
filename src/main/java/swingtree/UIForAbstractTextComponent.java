@@ -127,7 +127,19 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
         _onTextChange( e -> {
             try {
                 String newText = e.getDocument().getText(0, e.getDocument().getLength());
-                _doApp(newText, text::act);
+                _doApp(newText, t -> {
+                    if ( UI.thisIsUIThread() )
+                        UI.runLater( () -> text.act(t) ); // avoid attempt to mutate in notification
+                        /*
+                            We apply the text to the property in the next EDT cycle,
+                            which is important to avoid mutating the property in a notification.
+                            Because if a user decides to rebroadcast the text property in the 'onAct' callback,
+                            then the text component will receive that new text while it is still in the middle of
+                            document mutation, which is not allowed by Swing!
+                        */
+                    else
+                        text.act(t);
+                });
             } catch (BadLocationException ex) {
                 throw new RuntimeException(ex);
             }
