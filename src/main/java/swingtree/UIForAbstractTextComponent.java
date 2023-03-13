@@ -124,51 +124,13 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
             if ( !Objects.equals(c.getText(), newText) ) // avoid infinite recursion or some other Swing weirdness
                 c.setText(newText);
         });
-        _onKeyTyped( (KeyEvent e) -> {
-            C component = getComponent();
-            String oldText = component.getText();
-            // We need to add the now typed character to the old text, because the key typed event
-            // is fired before the text is actually inserted into the text component.
-            // The newly typed character needs to go at where the selection/caret.
-            // So what we do first is get the non-selected text parts, then we insert the new character...
-            int selectionStart = component.getSelectionStart();
-            int selectionEnd   = component.getSelectionEnd();
-            String part1 = oldText.substring(0, selectionStart);
-            String part2 = oldText.substring(selectionEnd);
-            String newText;
-            if ( e.getKeyChar() == '\b' ) // backspace
-                newText = part1 + part2; // The user has deleted a character(s), they will already be gone, we just need to set the text.
-            else if ( e.getKeyChar() == '\u007f' ) // delete
-                newText = part1 + part2; // The user has deleted a character(s), they will already be gone, we just need to set the text.
-            else if ( e.getKeyChar() == '\u001b' ) // escape
-                newText = oldText; // The user has pressed escape, we need to reset the text.
-            else if ( Character.isISOControl(e.getKeyChar()) ) // ctrl+c
-                newText = oldText; // The user has pressed a control character, we need to reset the text.
-            else
-                newText = part1 + e.getKeyChar() + part2; // The user has typed a character, we need to add it to the text.
-
-            // So and now we can simply inform the property right? Not so fast, we need to do that later!
-            UI.runLater(() -> {
+        _onTextChange( e -> {
+            try {
+                String newText = e.getDocument().getText(0, e.getDocument().getLength());
                 _doApp(newText, text::act);
-                /*
-                    Yes, it looks really strange that we apply the text to the property in the next EDT cycle,
-                    which is important to prevent a tricky bug!
-                    To understand the bug you need to know 2 things:
-                    1. Calling 'act' on a prop triggers user defined 'onAct' callbacks, usually inside the view model.
-                    2. When this code her is executed the text component is actually not yet updated with the new text!
-                       It is in a sort of intermediate state, where the text component has already received the key typed event,
-                       but the text has not yet been inserted into deleted from the text component.
-                       The modification will only apply to the text component after this method has returned.
-
-                    So if a user decides to rebroadcast the text property in the view model by calling the
-                    'set' method on the text property or 'fireSet' in one of their 'onAct' callbacks,
-                    then the text component will receive that new text and then apply the key typed event to it
-                    which is already outdated, because the text property has already been updated with the new text,
-                    the component however has not yet been updated with the new text.
-
-                    To prevent this madness we simply call the 'act' method of the text property in the next EDT cycle!
-                */
-            });
+            } catch (BadLocationException ex) {
+                throw new RuntimeException(ex);
+            }
         });
         return withText( text.orElseThrow() );
     }
@@ -287,14 +249,16 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
     public final I onTextChange( Consumer<SimpleDelegate<JTextComponent, DocumentEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Consumer.class);
         C component = getComponent();
-        component.getDocument().addDocumentListener(new DocumentListener() {
-            @Override public void insertUpdate(DocumentEvent e) {
-                _doApp(()->action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));}
-            @Override public void removeUpdate(DocumentEvent e) {
-                _doApp(()->action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));}
+        _onTextChange( e -> _doApp( () -> action.accept(new SimpleDelegate<>(component, e, () -> getSiblinghood() ))) );
+        return _this();
+    }
+
+    protected final void _onTextChange( Consumer<DocumentEvent> action ) {
+        getComponent().getDocument().addDocumentListener(new DocumentListener() {
+            @Override public void insertUpdate(DocumentEvent e) { action.accept(e); }
+            @Override public void removeUpdate(DocumentEvent e) { action.accept(e); }
             @Override public void changedUpdate(DocumentEvent e) {}
         });
-        return _this();
     }
 
     /**
