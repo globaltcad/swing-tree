@@ -6,6 +6,7 @@ Fluent and boilerplate free composition based Swing UI design!
 
 - [Motivation](docs/markdown/Motivation.md)
 - [Documentation](https://globaltcad.github.io/swing-tree/)
+- [Tutorial](docs/markdown/Climbing-Swing-Tree.md)
 
 <table>
 <tr>

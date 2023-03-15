@@ -3386,6 +3386,15 @@ public final class UI
 
     /**
      *  Use this to quickly launch a UI component in a {@link JFrame} window
+     *  at the center of the screen.
+     */
+    public static <C extends JComponent> void show( UIForAbstractSwing<?, C> ui ) {
+        JFrame frame = new JFrame();
+        new UI.TestWindow( () -> frame, ui.getComponent() );
+    }
+
+    /**
+     *  Use this to quickly launch a UI component in a {@link JFrame} window
      *  at the center of the screen using a function receiving the {@link JFrame}
      *  and returning the component to be shown.
      */
