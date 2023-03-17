@@ -3376,12 +3376,170 @@ public final class UI
     }
 
     /**
+     *  Shows a conformation dialog with the given message.
+     * @param message the message to show
+     * @return true if the user clicked "Yes", false otherwise
+     */
+    public static boolean confirm( String message ) {
+        return JOptionPane.showConfirmDialog( null, message, "Confirm", JOptionPane.YES_NO_OPTION ) == JOptionPane.YES_OPTION;
+    }
+
+    /**
+     *  Shows a conformation dialog with the given message.
+     * @param message the message to show
+     * @param title the title of the dialog
+     * @return true if the user clicked "Yes", false otherwise
+     */
+    public static boolean confirm( String message, String title ) {
+        return JOptionPane.showConfirmDialog( null, message, title, JOptionPane.YES_NO_OPTION ) == JOptionPane.YES_OPTION;
+    }
+
+    /**
+     *  Shows a conformation dialog with the given message.
+     * @param message the message to show
+     * @param title the title of the dialog
+     * @param icon the icon to show
+     * @return true if the user clicked "Yes", false otherwise
+     */
+    public static boolean confirm( String message, String title, Icon icon ) {
+        return JOptionPane.showConfirmDialog( null, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, icon ) == JOptionPane.YES_OPTION;
+    }
+
+    /**
+     *  Shows an error dialog with the given message.
+     * @param message The error message to show in the dialog.
+     */
+    public static void error( String message ) {
+        JOptionPane.showMessageDialog( null, message, "Error", JOptionPane.ERROR_MESSAGE );
+    }
+
+    /**
+     *  Shows an error dialog with the given message and dialog title.
+     * @param message The error message to show in the dialog.
+     * @param title The title of the dialog.
+     */
+    public static void error( String message, String title ) {
+        JOptionPane.showMessageDialog( null, message, title, JOptionPane.ERROR_MESSAGE );
+    }
+
+    /**
+     *  Shows an error dialog with the given message, dialog title and icon.
+     * @param message The error message to show in the dialog.
+     * @param title The title of the dialog.
+     * @param icon The icon to show in the dialog.
+     */
+    public static void error( String message, String title, Icon icon ) {
+        JOptionPane.showMessageDialog( null, message, title, JOptionPane.ERROR_MESSAGE, icon );
+    }
+
+    /**
+     *  Shows an info dialog with the given message.
+     * @param message The message to show in the dialog.
+     */
+    public static void info( String message ) {
+        JOptionPane.showMessageDialog( null, message, "Info", JOptionPane.INFORMATION_MESSAGE );
+    }
+
+    /**
+     *  Shows an info dialog with the given message and dialog title.
+     * @param message The message to show in the dialog.
+     * @param title The title of the dialog.
+     */
+    public static void info( String message, String title ) {
+        JOptionPane.showMessageDialog( null, message, title, JOptionPane.INFORMATION_MESSAGE );
+    }
+
+    /**
+     *  Shows an info dialog with the given message, dialog title and icon.
+     * @param message The message to show in the dialog.
+     * @param title The title of the dialog.
+     * @param icon The icon to show in the dialog.
+     */
+    public static void info( String message, String title, Icon icon ) {
+        JOptionPane.showMessageDialog( null, message, title, JOptionPane.INFORMATION_MESSAGE, icon );
+    }
+
+    /**
+     *  Shows a warning dialog with the given message.
+     * @param message The warning message to show in the dialog.
+     */
+        public static void warn( String message ) {
+        JOptionPane.showMessageDialog( null, message, "Warning", JOptionPane.WARNING_MESSAGE );
+    }
+
+    /**
+     *  Shows a warning dialog with the given message and dialog title.
+     * @param message The warning message to show in the dialog.
+     * @param title The title of the dialog.
+     */
+    public static void warn( String message, String title ) {
+        JOptionPane.showMessageDialog( null, message, title, JOptionPane.WARNING_MESSAGE );
+    }
+
+    /**
+     *  Shows a warning dialog with the given message, dialog title and icon.
+     * @param message The warning message to show in the dialog.
+     * @param title The title of the dialog.
+     * @param icon The icon to show in the dialog.
+     */
+    public static void warn( String message, String title, Icon icon ) {
+        JOptionPane.showMessageDialog( null, message, title, JOptionPane.WARNING_MESSAGE, icon );
+    }
+
+    /**
+     *  Shows a dialog where the user can select a value from a list of options
+     *  based on the enum type implicitly defined by the given enum based property.
+     *  The selected value will be stored in said property after the user has
+     *  selected a value.
+     *
+     * @param message The message to show in the dialog.
+     * @param selected The enum based property to store the selected value in.
+     */
+    public static <E extends Enum<E>> void select( String message, Var<E> selected ) {
+        select( message, "Select", selected );
+    }
+
+    /**
+     *  Shows a dialog where the user can select a value from a list of options
+     *  based on the enum type implicitly defined by the given enum based property.
+     *  The selected value will be stored in said property after the user has
+     *  selected a value.
+     *
+     * @param message The message to show in the dialog.
+     * @param title The title of the dialog.
+     * @param selected The enum based property to store the selected value in.
+     */
+    public static <E extends Enum<E>> void select( String message, String title, Var<E> selected ) {
+        select( message, title, null, selected );
+    }
+
+    /**
+     *  Shows a dialog where the user can select a value from a list of options
+     *  based on the enum type implicitly defined by the given enum based property.
+     *  The selected value will be stored in said property after the user has
+     *  selected a value.
+     *
+     * @param message The message to show in the dialog.
+     * @param title The title of the dialog.
+     * @param icon The icon to show in the dialog.
+     * @param selected The enum based property to store the selected value in.
+     */
+    public static <E extends Enum<E>> void select( String message, String title, Icon icon, Var<E> selected ) {
+        E[] options = selected.type().getEnumConstants();
+        String[] asStr = new String[options.length];
+        for ( int i = 0; i < options.length; i++ )
+            asStr[i] = options[i].toString();
+
+        int selectedIdx = JOptionPane.showOptionDialog( null, message, title, JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, icon, asStr, asStr[0] );
+        selected.act( options[selectedIdx] );
+    }
+
+    /**
      *  Use this to quickly launch a UI component in a {@link JFrame} window
      *  at the center of the screen.
      */
     public static void show( Component component ) {
-        JFrame frame = new JFrame();
-        new UI.TestWindow( () -> frame, component );
+        new UI.TestWindow( f -> component );
     }
 
     /**
@@ -3390,8 +3548,7 @@ public final class UI
      *  and returning the component to be shown.
      */
     public static void show( Function<JFrame, Component> uiSupplier ) {
-        JFrame frame = new JFrame();
-        new UI.TestWindow( () -> frame, uiSupplier.apply(frame) );
+        new UI.TestWindow( frame -> uiSupplier.apply(frame) );
     }
 
     /**
@@ -3413,12 +3570,13 @@ public final class UI
         private final JFrame frame;
         private final Component component;
 
-        private TestWindow( Supplier<JFrame> frameSupplier, Component component ) {
-            this.frame = frameSupplier.get();
-            this.component = component;
+        private TestWindow( Function<JFrame, Component> uiSupplier ) {
+            this.frame = new JFrame();
+            frame.setLocationRelativeTo(null); // Initial centering!
+            this.component = uiSupplier.apply(frame);
             frame.add(component);
             frame.pack(); // Otherwise some components resize strangely or are not shown at all...
-            // Make sure that the window is centered on the screen:
+            // Make sure that the window is centered on the screen again but with the component:
             frame.setLocationRelativeTo(null);
             // We set the size to fit the component:
             frame.setSize(component.getPreferredSize());
