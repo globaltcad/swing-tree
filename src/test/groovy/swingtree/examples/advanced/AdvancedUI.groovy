@@ -21,7 +21,7 @@ class AdvancedUI {
                             .add("align left, shrink",
                                 UI.button("Help").withProperty("JButton.buttonType", "help")
                                 .onClick({
-                                    JOptionPane.showMessageDialog(frame,
+                                    UI.info(
                                         "APIC, sot ron Atvan Protos ron Inficus Contri,\n" +
                                         "sini currentu activus widine ru regi!\n" +
                                         "Ple atice accoto to de APIC specifica bellos."
@@ -87,7 +87,7 @@ class AdvancedUI {
                                             .add("align right, shrink", UI.button(label).withProperty("JButton.buttonType", "roundRect").isEnabledIf(false))
                                             .add("align right, shrink, wrap",
                                                 UI.button("Help").withProperty("JButton.buttonType", "help")
-                                                .onClick({JOptionPane.showMessageDialog(frame, Data.descr[label])})
+                                                .onClick({UI.info(Data.descr[label])})
                                             )
                                         }}
                                     })
@@ -130,7 +130,7 @@ class AdvancedUI {
                         )
                         .add("aligny bottom, shrinky, growx, span 1",
                             UI.button("Help").withProperty("JButton.buttonType", "help").onClick({
-                                JOptionPane.showMessageDialog(frame, "NICP - Natio Intradi Contori Portalis, Enforticus Unice Acare Setjim ron NICS - Natio Intradi ContContorirol Setjim.")
+                                UI.info("NICP - Natio Intradi Contori Portalis, Enforticus Unice Acare Setjim ron NICS - Natio Intradi ContContorirol Setjim.")
                             })
                         )
                     )
@@ -229,15 +229,13 @@ class AdvancedUI {
                                 it.component.text = text
                             })
                             .onMouseClick({
-                                JOptionPane.showMessageDialog(frame,
-                                        "Atress deni! Permi laval (5-RXXC) insufficicus."
-                                )
+                                UI.info("Atress deni! Permi laval (5-RXXC) insufficicus.")
                             })
                         )
                     )
                     .add("aligny bottom, shrinky, span, growx, wrap",
                         UI.textField("(base)\$> loginctl unlock-session 3").isEditableIf(false).onMouseClick({
-                            JOptionPane.showMessageDialog(frame, "Atress deni! Permi laval (5-RXXC) insufficicus.")
+                            UI.info("Atress deni! Permi laval (5-RXXC) insufficicus.")
                         })
                     )
                     .add("align center, span",
