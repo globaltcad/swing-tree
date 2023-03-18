@@ -4,9 +4,9 @@ package swingtree;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 import sprouts.Action;
+import sprouts.*;
 import swingtree.api.Peeker;
 import swingtree.api.UIVerifier;
-import sprouts.*;
 import swingtree.api.mvvm.Viewable;
 import swingtree.input.Keyboard;
 import swingtree.layout.CompAttr;
@@ -1715,7 +1715,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withMinSize( Val<Dimension> size ) {
         NullUtil.nullArgCheck(size, "size", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the minimum size of this component!");
-        _onShow( size, v -> getComponent().setMinimumSize(v) );
+        _onShow( size, v -> {
+            C comp = getComponent();
+            comp.setMinimumSize(v);
+            comp.revalidate();
+        });
         return this.withMinSize( size.orElseThrow() );
     }
 
@@ -1744,12 +1748,16 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the minimum width of this component!");
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the minimum height of this component!");
-        _onShow( width, w ->
-                getComponent().setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height))
-            );
-        _onShow( height, h ->
-                getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, h))
-            );
+        _onShow( width, w -> {
+            C comp = getComponent();
+            comp.setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height));
+            comp.revalidate();
+        });
+        _onShow( height, h -> {
+            C comp = getComponent();
+            comp.setMinimumSize(new Dimension(getComponent().getMinimumSize().width, h));
+            comp.revalidate();
+        });
         return this.withMinSize( width.orElseThrow(), height.orElseThrow() );
     }
 
@@ -1773,7 +1781,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withMinWidth( Val<Integer> width ) {
         NullUtil.nullArgCheck(width, "width", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the minimum width of this component!");
-        _onShow( width, w -> getComponent().setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height)) );
+        _onShow( width, w -> {
+            C comp = getComponent();
+            comp.setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height));
+            comp.revalidate(); // Swing is not smart enough to do this automatically
+        });
         return this.withMinWidth( width.orElseThrow() );
     }
 
@@ -1798,7 +1810,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withMinHeight( Val<Integer> height ) {
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the minimum height of this component!");
-        _onShow( height, h -> getComponent().setMinimumSize( new Dimension(getComponent().getMinimumSize().width, h)) );
+        _onShow( height, h -> {
+            C comp = getComponent();
+            comp.setMinimumSize( new Dimension(getComponent().getMinimumSize().width, h));
+            comp.revalidate(); // The revalidate is necessary to make the change visible.
+        });
         return this.withMinHeight( height.orElseThrow() );
     }
 
@@ -1824,7 +1840,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withMaxSize( Val<Dimension> size ) {
         NullUtil.nullArgCheck(size, "size", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the maximum size of this component!");
-        _onShow( size, v -> getComponent().setMaximumSize(v) );
+        _onShow( size, v -> {
+            C comp = getComponent();
+            comp.setMaximumSize(v);
+            comp.revalidate(); // For some reason this is needed to make the change visible.
+        });
         return this.withMaxSize( size.orElseThrow() );
     }
 
@@ -1853,8 +1873,16 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the maximum width of this component!");
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the maximum height of this component!");
-        _onShow( width, w -> getComponent().setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height)) );
-        _onShow( height, h -> getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h)) );
+        _onShow( width, w -> {
+            C comp = getComponent();
+            comp.setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height));
+            comp.revalidate(); // Swing is not smart enough to do this automatically :(
+        });
+        _onShow( height, h -> {
+            C comp = getComponent();
+            comp.setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h));
+            comp.revalidate(); // Still not smart enough to do this automatically :(
+        });
         return this.withMaxSize( width.orElseThrow(), height.orElseThrow() );
     }
 
@@ -1878,7 +1906,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withMaxWidth( Val<Integer> width ) {
         NullUtil.nullArgCheck(width, "width", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the maximum width of this component!");
-        _onShow( width, w -> getComponent().setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height)) );
+        _onShow( width, w -> {
+            C comp = getComponent();
+            comp.setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height));
+            comp.revalidate(); // When the size changes, the layout manager needs to be informed.
+        });
         return this.withMaxWidth( width.orElseThrow() );
     }
 
@@ -1902,7 +1934,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withMaxHeight( Val<Integer> height ) {
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the maximum height of this component!");
-        _onShow( height, h -> getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h)) );
+        _onShow( height, h -> {
+            C comp = getComponent();
+            comp.setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h));
+            comp.revalidate(); // The revalidate is necessary to make the change visible, this makes sure the layout is recalculated.
+        });
         return this.withMaxHeight( height.orElseThrow() );
     }
 
@@ -1928,7 +1964,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withPrefSize( Val<Dimension> size ) {
         NullUtil.nullArgCheck(size, "size", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the preferred size of this component!");
-        _onShow( size, v -> getComponent().setPreferredSize(v) );
+        _onShow( size, v -> {
+            C comp = getComponent();
+            comp.setPreferredSize(v);
+            comp.revalidate();
+        });
         return this.withPrefSize( size.orElseNull() );
     }
 
@@ -1957,8 +1997,16 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the preferred width of this component!");
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the preferred height of this component!");
-        _onShow( width, w -> getComponent().setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height)) );
-        _onShow( height, h -> getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h)) );
+        _onShow( width, w -> {
+            C comp = getComponent();
+            comp.setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height));
+            comp.revalidate(); // We need to revalidate the component to make sure the layout manager is aware of the new size.
+        });
+        _onShow( height, h -> {
+            C comp = getComponent();
+            comp.setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h));
+            comp.revalidate(); // We need to revalidate the component to make sure the layout manager is aware of the new size.
+        });
         return this.withPrefSize( width.orElseThrow(), height.orElseThrow() );
     }
 
@@ -1982,7 +2030,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withPrefWidth( Val<Integer> width ) {
         NullUtil.nullArgCheck(width, "width", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the preferred width of this component!");
-        _onShow( width, w -> getComponent().setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height)) );
+        _onShow( width, w -> {
+            C comp = getComponent();
+            comp.setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height));
+            comp.revalidate(); // We need to revalidate the component to make sure the new preferred size is applied.
+        });
         return this.withPrefWidth( width.orElseThrow() );
     }
 
@@ -2006,7 +2058,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withPrefHeight(Val<Integer> height ) {
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the preferred height of this component!");
-        _onShow( height, h -> getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h)) );
+        _onShow( height, h -> {
+            C comp = getComponent();
+            comp.setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h));
+            comp.revalidate(); // We need to revalidate the component to make sure the new preferred size is applied.
+        });
         return this.withPrefHeight( height.orElseThrow() );
     }
 
@@ -2032,7 +2088,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withSize( Val<Dimension> size ) {
         NullUtil.nullArgCheck(size, "size", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the size of this component!");
-        _onShow( size, v -> getComponent().setSize(v) );
+        _onShow( size, v -> {
+            C comp = getComponent();
+            comp.setSize(v);
+            comp.revalidate(); // We need to revalidate the component to make sure the new size is applied.
+        });
         return this.withSize( size.orElseNull() );
     }
 
@@ -2057,7 +2117,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withWidth( Val<Integer> width ) {
         NullUtil.nullArgCheck(width, "width", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the width of this component!");
-        _onShow( width, w -> getComponent().setSize(new Dimension(w, getComponent().getSize().height)) );
+        _onShow( width, w -> {
+            C comp = getComponent();
+            comp.setSize(new Dimension(w, getComponent().getSize().height));
+            comp.revalidate(); // We need to revalidate the component to make sure the new size is applied.
+        });
         return this.withWidth( width.orElseThrow() );
     }
 
@@ -2082,7 +2146,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I withHeight( Val<Integer> height ) {
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the height of this component!");
-        _onShow( height, h -> getComponent().setSize(new Dimension(getComponent().getSize().width, h)) );
+        _onShow( height, h -> {
+            C comp = getComponent();
+            comp.setSize(new Dimension(getComponent().getSize().width, h));
+            comp.revalidate(); // We need to revalidate the component to make sure the new size is applied.
+        });
         return this.withHeight( height.orElseThrow() );
     }
 
@@ -2545,7 +2613,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      *          .doUpdates( 100, it -> it.getComponent().setText(new Date().toString()) )
      *  }</pre>
      *
-     * @param delay The delay between calling the provided {@link Action}.
+     * @param delay The delay in milliseconds between calling the provided {@link Action}.
      * @param onUpdate The {@link Action} which should be called periodically.
      * @return This very instance, which enables builder-style method chaining.
      */
