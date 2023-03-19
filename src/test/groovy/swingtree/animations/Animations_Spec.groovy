@@ -53,41 +53,60 @@ class Animations_Spec extends Specification
 
     def 'The event delegation object of a user event can be used to register animations.'()
     {
+        reportInfo """
+            This is useful if you want to animate a component when it is clicked,
+            or when the mouse enters or leaves it.
+            This specification shows you how to register an animation inside
+            of an action listener and also shows you what kind of information
+            you can get from the "AnimationState" object
+            inside of your "Animation" implementation.
+        """
         given :
-            var iterations = []
-            var progressAndCycleValues = []
+            var iterations = [] // An iteration is when the progress goes from 0 to 1
+            var progresses = [] // The progress of an animation iteration is always between 0 and 1
+            var cycles = []     // The cycle value reaches 1 when the progress reaches 0.5 and then decreases to 0
+            var cyclesPlus42 = [] // The cycle value can be offset by any value
+            var cyclesMinus42 = [] // ...
         when :
             var button =
-                    UI.button()
+                    UI.button("Click me! Or don't.")
                     .onClick({
                         it.animate(0.05, TimeUnit.SECONDS)
                             .asLongAs({ it.currentIteration() < 4 })
-                            .run({
-                                if ( !iterations.contains(it.currentIteration()) )
-                                    iterations << it.currentIteration()
-                                progressAndCycleValues << [
-                                        it.progress(),
-                                        it.cycle(),
-                                        it.cyclePlus(0.42),
-                                        it.cycleMinus(0.42)
-                                    ]
+                            .run(state -> {
+                                if ( !iterations.contains(state.currentIteration()) )
+                                    iterations << state.currentIteration()
+                                progresses    << state.progress()
+                                cycles        << state.cycle()
+                                cyclesPlus42  << state.cyclePlus(0.42)
+                                cyclesMinus42 << state.cycleMinus(0.42)
                             })
                     })
                     .getComponent()
         and :
             TimeUnit.MILLISECONDS.sleep(200)
-        then :
+        then : 'Initially the animation has not been executed yet.'
             iterations == []
-        and : 'The progress and cycle values are always between 0 and 1'
-            progressAndCycleValues.every { it >= 0 && it <= 1 }
-
         when : 'We simulate a click on the button'
             button.doClick()
 
-        and :
+        and : 'We wait for the animation to finish'
             TimeUnit.MILLISECONDS.sleep(200)
-        then :
+        then : 'The animation has been completed 4 times.'
             iterations == [0, 1, 2, 3]
+        and : 'The progress and cycle values are always between 0 and 1'
+            progresses.every { it >= 0 && it <= 1 }
+            cycles.every { it >= 0 && it <= 1 }
+            cyclesPlus42.every { it >= 0 && it <= 1 }
+            cyclesMinus42.every { it >= 0 && it <= 1 }
+        and : 'The cycles are calculated based on the progress like so:'
+            cycles == progresses.collect({ 1 - Math.abs(2 * it - 1) })
+            cyclesPlus42 == progresses.collect({ 1 - Math.abs(2 * ((it+0.42d)%1) - 1) })
+            cyclesMinus42 == progresses.collect({
+                                    double progress = ( it - 0.42 ) % 1;
+                                    if ( progress < 0 ) progress += 1;
+                                    return 1 - Math.abs(2 * progress - 1);
+                                })
     }
 
 

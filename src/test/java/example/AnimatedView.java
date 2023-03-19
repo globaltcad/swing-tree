@@ -1,5 +1,6 @@
 package example;
 
+import com.formdev.flatlaf.FlatLightLaf;
 import sprouts.Var;
 import swingtree.UI;
 
@@ -17,7 +18,7 @@ public class AnimatedView extends JPanel
     public AnimatedView(JFrame frame)
     {
         Var<Integer> w = Var.of(300);
-
+        FlatLightLaf.setup();
         of(this).withLayout(FILL.and(WRAP(3))).withPrefSize(800, 600)
         .add(SPAN,
             label(TEXT)

@@ -83,11 +83,6 @@ public interface AnimationState
     }
 
     /**
-     * @return Whether the animation cycle is halfway through.
-     */
-    default boolean isHalfway() { return progress() >= 0.5; }
-
-    /**
      * @return The number of times the animation has been repeated.
      */
     long currentIteration();
