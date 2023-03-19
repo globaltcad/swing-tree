@@ -4,6 +4,8 @@ import com.alexandriasoftware.swing.JSplitButton;
 import net.miginfocom.swing.MigLayout;
 import sprouts.Event;
 import sprouts.*;
+import swingtree.animation.Animate;
+import swingtree.animation.Schedule;
 import swingtree.api.Buildable;
 import swingtree.api.MenuBuilder;
 import swingtree.api.SwingBuilder;
@@ -24,6 +26,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -3269,9 +3273,7 @@ public final class UI
      *
      * @return true if the current thread is an AWT event dispatching thread
      */
-    public static boolean thisIsUIThread() {
-        return SwingUtilities.isEventDispatchThread();
-    }
+    public static boolean thisIsUIThread() { return SwingUtilities.isEventDispatchThread(); }
 
     /**
      * A convenience method for {@link SwingUtilities#invokeAndWait(Runnable)},
@@ -3376,32 +3378,71 @@ public final class UI
     }
 
     /**
-     *  Shows a conformation dialog with the given message.
-     * @param message the message to show
-     * @return true if the user clicked "Yes", false otherwise
+     *  Exposes an API for scheduling periodic animation updates.
+     *  This is a convenience method for {@link Animate#on(Schedule)}. <br>
+     *  A typical usage would be:
+     *  <pre>{@code
+     *    UI.schedule( 100, TimeUnit.MILLISECONDS )
+     *       .until( it -> it.progress() >= 0.75 && someOtherCondition() )
+     *       .run( it -> {
+     *          // do something
+     *          someComponent.setValue( it.progress() );
+     *          // ...
+     *          someComponent.repaint();
+     *       });
+     *  }</pre>
      */
-    public static boolean confirm( String message ) {
-        return JOptionPane.showConfirmDialog( null, message, "Confirm", JOptionPane.YES_NO_OPTION ) == JOptionPane.YES_OPTION;
+    public static Animate schedule( long duration, TimeUnit unit ) {
+        Objects.requireNonNull(unit, "unit");
+        return Animate.on( Schedule.of(duration, unit) );
+    }
+
+    /**
+     *  Exposes an API for scheduling periodic animation updates.
+     *  This is a convenience method for {@link Animate#on(Schedule)}. <br>
+     *  A typical usage would be:
+     *  <pre>{@code
+     *    UI.schedule( 0.1, TimeUnit.MINUTES )
+     *       .until( it -> it.progress() >= 0.75 && someOtherCondition() )
+     *       .run( it -> {
+     *          // do something
+     *          someComponent.setBackground( new Color( 0, 0, 0, (int)(it.progress()*255) ) );
+     *          // ...
+     *          someComponent.repaint();
+     *       });
+     *  }</pre>
+     */
+    public static Animate schedule( double duration, TimeUnit unit ) {
+        return Animate.on( Schedule.of(duration, unit) );
     }
 
     /**
      *  Shows a conformation dialog with the given message.
      * @param message the message to show
-     * @param title the title of the dialog
      * @return true if the user clicked "Yes", false otherwise
      */
-    public static boolean confirm( String message, String title ) {
-        return JOptionPane.showConfirmDialog( null, message, title, JOptionPane.YES_NO_OPTION ) == JOptionPane.YES_OPTION;
-    }
+    public static boolean confirm( String message ) { return confirm("Confirm", message); }
 
     /**
-     *  Shows a conformation dialog with the given message.
+     * Shows a conformation dialog with the given message.
+     *
+     * @param title   the title of the dialog
      * @param message the message to show
-     * @param title the title of the dialog
-     * @param icon the icon to show
      * @return true if the user clicked "Yes", false otherwise
      */
-    public static boolean confirm( String message, String title, Icon icon ) {
+    public static boolean confirm( String title, String message ) { return confirm(title, message, null ); }
+
+    /**
+     * Shows a conformation dialog with the given message.
+     *
+     * @param title   the title of the dialog
+     * @param message the message to show
+     * @param icon    the icon to show
+     * @return true if the user clicked "Yes", false otherwise
+     */
+    public static boolean confirm( String title, String message, Icon icon ) {
+        Objects.requireNonNull( message );
+        Objects.requireNonNull( title );
         return JOptionPane.showConfirmDialog( null, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, icon ) == JOptionPane.YES_OPTION;
     }
 
@@ -3409,26 +3450,26 @@ public final class UI
      *  Shows an error dialog with the given message.
      * @param message The error message to show in the dialog.
      */
-    public static void error( String message ) {
-        JOptionPane.showMessageDialog( null, message, "Error", JOptionPane.ERROR_MESSAGE );
-    }
+    public static void error( String message ) { error("Error", message); }
 
     /**
-     *  Shows an error dialog with the given message and dialog title.
+     * Shows an error dialog with the given message and dialog title.
+     *
+     * @param title   The title of the dialog.
      * @param message The error message to show in the dialog.
-     * @param title The title of the dialog.
      */
-    public static void error( String message, String title ) {
-        JOptionPane.showMessageDialog( null, message, title, JOptionPane.ERROR_MESSAGE );
-    }
+    public static void error( String title, String message ) { error(title, message, null ); }
 
     /**
-     *  Shows an error dialog with the given message, dialog title and icon.
+     * Shows an error dialog with the given message, dialog title and icon.
+     *
+     * @param title   The title of the dialog.
      * @param message The error message to show in the dialog.
-     * @param title The title of the dialog.
-     * @param icon The icon to show in the dialog.
+     * @param icon    The icon to show in the dialog.
      */
-    public static void error( String message, String title, Icon icon ) {
+    public static void error( String title, String message, Icon icon ) {
+        Objects.requireNonNull( message );
+        Objects.requireNonNull( title );
         JOptionPane.showMessageDialog( null, message, title, JOptionPane.ERROR_MESSAGE, icon );
     }
 
@@ -3436,26 +3477,30 @@ public final class UI
      *  Shows an info dialog with the given message.
      * @param message The message to show in the dialog.
      */
-    public static void info( String message ) {
-        JOptionPane.showMessageDialog( null, message, "Info", JOptionPane.INFORMATION_MESSAGE );
+    public static void info( String message ) { info("Info", message); }
+
+    /**
+     * Shows an info dialog with the given message and dialog title.
+     *
+     * @param title   The title of the dialog.
+     * @param message The message to show in the dialog.
+     */
+    public static void info( String title, String message ) {
+        Objects.requireNonNull( message );
+        Objects.requireNonNull( title );
+        info(title, message, null );
     }
 
     /**
-     *  Shows an info dialog with the given message and dialog title.
+     * Shows an info dialog with the given message, dialog title and icon.
+     *
+     * @param title   The title of the dialog.
      * @param message The message to show in the dialog.
-     * @param title The title of the dialog.
+     * @param icon    The icon to show in the dialog.
      */
-    public static void info( String message, String title ) {
-        JOptionPane.showMessageDialog( null, message, title, JOptionPane.INFORMATION_MESSAGE );
-    }
-
-    /**
-     *  Shows an info dialog with the given message, dialog title and icon.
-     * @param message The message to show in the dialog.
-     * @param title The title of the dialog.
-     * @param icon The icon to show in the dialog.
-     */
-    public static void info( String message, String title, Icon icon ) {
+    public static void info( String title, String message, Icon icon ) {
+        Objects.requireNonNull( message );
+        Objects.requireNonNull( title );
         JOptionPane.showMessageDialog( null, message, title, JOptionPane.INFORMATION_MESSAGE, icon );
     }
 
@@ -3463,26 +3508,26 @@ public final class UI
      *  Shows a warning dialog with the given message.
      * @param message The warning message to show in the dialog.
      */
-        public static void warn( String message ) {
-        JOptionPane.showMessageDialog( null, message, "Warning", JOptionPane.WARNING_MESSAGE );
-    }
+     public static void warn( String message ) { warn("Warning", message); }
 
     /**
-     *  Shows a warning dialog with the given message and dialog title.
+     * Shows a warning dialog with the given message and dialog title.
+     *
+     * @param title   The title of the dialog.
      * @param message The warning message to show in the dialog.
-     * @param title The title of the dialog.
      */
-    public static void warn( String message, String title ) {
-        JOptionPane.showMessageDialog( null, message, title, JOptionPane.WARNING_MESSAGE );
-    }
+    public static void warn( String title, String message ) { warn(title, message, null ); }
 
     /**
-     *  Shows a warning dialog with the given message, dialog title and icon.
+     * Shows a warning dialog with the given message, dialog title and icon.
+     *
+     * @param title   The title of the dialog.
      * @param message The warning message to show in the dialog.
-     * @param title The title of the dialog.
-     * @param icon The icon to show in the dialog.
+     * @param icon    The icon to show in the dialog.
      */
-    public static void warn( String message, String title, Icon icon ) {
+    public static void warn( String title, String message, Icon icon ) {
+        Objects.requireNonNull( message );
+        Objects.requireNonNull( title );
         JOptionPane.showMessageDialog( null, message, title, JOptionPane.WARNING_MESSAGE, icon );
     }
 
@@ -3496,35 +3541,38 @@ public final class UI
      * @param selected The enum based property to store the selected value in.
      */
     public static <E extends Enum<E>> void select( String message, Var<E> selected ) {
-        select( message, "Select", selected );
+        select("Select", message, selected );
     }
 
     /**
-     *  Shows a dialog where the user can select a value from a list of options
-     *  based on the enum type implicitly defined by the given enum based property.
-     *  The selected value will be stored in said property after the user has
-     *  selected a value.
+     * Shows a dialog where the user can select a value from a list of options
+     * based on the enum type implicitly defined by the given enum based property.
+     * The selected value will be stored in said property after the user has
+     * selected a value.
      *
-     * @param message The message to show in the dialog.
-     * @param title The title of the dialog.
+     * @param title    The title of the dialog.
+     * @param message  The message to show in the dialog.
      * @param selected The enum based property to store the selected value in.
      */
-    public static <E extends Enum<E>> void select( String message, String title, Var<E> selected ) {
-        select( message, title, null, selected );
+    public static <E extends Enum<E>> void select( String title, String message, Var<E> selected ) {
+        select(title, message, null, selected );
     }
 
     /**
-     *  Shows a dialog where the user can select a value from a list of options
-     *  based on the enum type implicitly defined by the given enum based property.
-     *  The selected value will be stored in said property after the user has
-     *  selected a value.
+     * Shows a dialog where the user can select a value from a list of options
+     * based on the enum type implicitly defined by the given enum based property.
+     * The selected value will be stored in said property after the user has
+     * selected a value.
      *
-     * @param message The message to show in the dialog.
-     * @param title The title of the dialog.
-     * @param icon The icon to show in the dialog.
+     * @param title    The title of the dialog.
+     * @param message  The message to show in the dialog.
+     * @param icon     The icon to show in the dialog.
      * @param selected The enum based property to store the selected value in.
      */
-    public static <E extends Enum<E>> void select( String message, String title, Icon icon, Var<E> selected ) {
+    public static <E extends Enum<E>> void select( String title, String message, Icon icon, Var<E> selected ) {
+        Objects.requireNonNull( message );
+        Objects.requireNonNull( title );
+        Objects.requireNonNull( selected );
         E[] options = selected.type().getEnumConstants();
         String[] asStr = new String[options.length];
         for ( int i = 0; i < options.length; i++ )
@@ -3539,6 +3587,7 @@ public final class UI
      *  at the center of the screen.
      */
     public static void show( Component component ) {
+        Objects.requireNonNull( component );
         new UI.TestWindow( f -> component );
     }
 
@@ -3548,6 +3597,7 @@ public final class UI
      *  and returning the component to be shown.
      */
     public static void show( Function<JFrame, Component> uiSupplier ) {
+        Objects.requireNonNull( uiSupplier );
         new UI.TestWindow( frame -> uiSupplier.apply(frame) );
     }
 
@@ -3559,6 +3609,8 @@ public final class UI
      * @param uiSupplier The component supplier which builds the UI and supplies the component to be shown.
      */
     public static void showUsing( EventProcessor eventProcessor, Function<JFrame, Component> uiSupplier ) {
+        Objects.requireNonNull( eventProcessor );
+        Objects.requireNonNull( uiSupplier );
         show(frame -> use(eventProcessor, () -> uiSupplier.apply(frame)));
     }
 

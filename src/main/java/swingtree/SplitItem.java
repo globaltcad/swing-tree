@@ -156,12 +156,11 @@ public final class SplitItem<I extends JMenuItem>
      *
      * @param <I> The {@link JMenuItem} subtype for which this context was created.
      */
-    public final static class Delegate<I extends JMenuItem> extends AbstractDelegate
+    public final static class Delegate<I extends JMenuItem> extends AbstractDelegate<I>
     {
         private final ActionEvent event;
         private final JSplitButton splitButton;
         private final Supplier<List<I>> siblingsSource;
-        private final I currentItem;
 
         Delegate(
                 ActionEvent event,
@@ -169,11 +168,10 @@ public final class SplitItem<I extends JMenuItem>
                 Supplier<List<I>> siblingsSource,
                 I currentItem
         ) {
-            super(currentItem);
+            super(currentItem, splitButton);
             this.event = event;
             this.splitButton = splitButton;
             this.siblingsSource = siblingsSource;
-            this.currentItem = currentItem;
         }
 
         public ActionEvent getEvent() { return event; }
@@ -195,7 +193,7 @@ public final class SplitItem<I extends JMenuItem>
          */
         public final I getCurrentItem() {
             // We make sure that only the Swing thread can access the component:
-            if ( UI.thisIsUIThread() ) return this.currentItem;
+            if ( UI.thisIsUIThread() ) return _component();
             else
                 throw new IllegalStateException(
                         "The current button item can only be accessed by the Swing thread."

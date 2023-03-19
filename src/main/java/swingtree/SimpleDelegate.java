@@ -19,17 +19,15 @@ import java.util.stream.Collectors;
  * @param <C> The delegate (in most cases origin UI component) type parameter stored by this.
  * @param <E> The event type parameter of the event stored by this.
  */
-public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelegate
+public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelegate<C>
 {
-    private final C component;
     private final E event;
     private final Supplier<List<JComponent>> siblingSource;
 
     public SimpleDelegate(
         C component, E event, Supplier<List<JComponent>> siblingSource
     ) {
-        super(component);
-        this.component = component;
+        super(component, component);
         this.event = event;
         this.siblingSource = siblingSource;
     }
@@ -39,7 +37,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
      */
     public C getComponent() {
         // We make sure that only the Swing thread can access the component:
-        if ( UI.thisIsUIThread() ) return component;
+        if ( UI.thisIsUIThread() ) return _component();
         else
             throw new IllegalStateException(
                     "Component can only be accessed by the Swing thread."
@@ -56,9 +54,9 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
      */
     public void forComponent( Consumer<C> action ) {
         if ( UI.thisIsUIThread() )
-            action.accept(component);
+            action.accept(_component());
         else
-            UI.run( () -> action.accept(component) );
+            UI.run( () -> action.accept(_component()) );
     }
 
     public E getEvent() { return event; }
@@ -73,7 +71,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
                     "Sibling components can only be accessed by the Swing thread. " +
                     "Please use 'forSiblings(..)' methods instead."
                 );
-        return siblingSource.get().stream().filter( s -> component != s ).collect(Collectors.toList());
+        return siblingSource.get().stream().filter( s -> _component() != s ).collect(Collectors.toList());
     }
     
     /**

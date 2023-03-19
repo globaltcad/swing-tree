@@ -1,15 +1,18 @@
 package swingtree;
 
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 final class Query
 {
     private final Component _current;
     private final Map<String, List<Component>> _tree = new LinkedHashMap<>();
 
-    Query(Component current) { _current = current; }
+    Query(Component current) {
+        Objects.requireNonNull(current);
+        _current = current;
+    }
 
     <C extends Component> OptionalUI<C> find(Class<C> type, String id) {
         if ( !_tree.containsKey(id) ) {
