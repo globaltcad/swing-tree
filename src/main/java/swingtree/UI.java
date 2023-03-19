@@ -3596,8 +3596,7 @@ public final class UI
      *  at the center of the screen.
      */
     public static <C extends JComponent> void show( UIForAbstractSwing<?, C> ui ) {
-        JFrame frame = new JFrame();
-        new UI.TestWindow( () -> frame, ui.getComponent() );
+        new UI.TestWindow( f -> ui.getComponent() );
     }
 
     /**
