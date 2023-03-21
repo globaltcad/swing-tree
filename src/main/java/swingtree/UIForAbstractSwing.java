@@ -2277,6 +2277,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
                 _doApp(() -> onDrag.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
+        component.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override public void mouseDragged(MouseEvent e) {
+                _doApp(() -> onDrag.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+            }
+        });
         return _this();
     }
 
@@ -2294,6 +2299,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
         NullUtil.nullArgCheck(onMove, "onMove", Action.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
+            @Override public void mouseMoved(MouseEvent e) {
+                _doApp(() -> onMove.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+            }
+        });
+        component.addMouseMotionListener(new MouseMotionAdapter() {
             @Override public void mouseMoved(MouseEvent e) {
                 _doApp(() -> onMove.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
             }
