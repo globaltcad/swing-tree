@@ -21,7 +21,35 @@ public interface AnimationState
      * @return The animation progress in terms of a number between 0 and 1, where 1 means the animation is halfway through.
      */
     default double pulse() {
-        return Math.sin(2 * Math.PI * progress()) / 2 + 0.5;
+        return Math.sin(Math.PI * progress());
+    }
+
+    /**
+     *   The animation progress in the form of peaking sine wave growing from 0 to 1
+     *   based on the equation {@code sin(PI * progress() / 2)}.
+     *   Just like the value returned by {@link #progress()}
+     *   the {@link #fadeIn()} value starts at 0 and ends at 1,
+     *   however the crucial difference is that the {@link #fadeIn()} value
+     *   grows according to a sine wave, which makes certain animations look more natural.
+     *
+     * @return The animation progress in the form of peaking sine wave growing from 0 to 1.
+     */
+    default double fadeIn() {
+        return Math.sin(Math.PI * progress() / 2);
+    }
+
+    /**
+     *   The animation progress in the form of peaking sine wave growing from 1 to 0
+     *   based on the equation {@code sin(PI * (1 - progress()) / 2)}.
+     *   Just like the value returned by {@link #progress()}
+     *   the {@link #fadeOut()} value starts at 1 and ends at 0,
+     *   however the crucial difference is that the {@link #fadeOut()} value
+     *   grows according to a sine wave, which makes certain animations look more natural.
+     *
+     * @return The animation progress in the form of peaking sine wave growing from 1 to 0.
+     */
+    default double fadeOut() {
+        return Math.sin(Math.PI * (1 - progress()) / 2);
     }
 
     /**

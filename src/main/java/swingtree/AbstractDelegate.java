@@ -8,6 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  *  Extensions of this class delegate a component event
@@ -810,6 +811,41 @@ abstract class AbstractDelegate<C extends JComponent>
      */
     public final <T extends JComponent> OptionalUI<T> find( Class<T> type, String id ) {
         return _query.find(type, id);
+    }
+
+    /**
+     *  A common use case is to render something on top of the component
+     *  using the {@link Graphics2D} instance of the component.
+     *  This method allows you to dispatch a rendering task to the EDT
+     *  at the end of the current event cycle, ensuring that custom rendering
+     *  is not erased by a potential repaint of the component after a user event.
+     *  <p>
+     *  Here is an example of how to use this method as part of a fancy button animation:
+     *  <pre>{@code
+     *      UI.button("Click me").withPrefSize(400, 400)
+     *      .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
+     *          double r = 300 * state.progress();
+     *          double x = it.getEvent().getX() - r / 2;
+     *          double y = it.getEvent().getY() - r / 2;
+     *          it.render( g -> {
+     *              g.setColor(new Color(1f, 1f, 0f, (float) (1 - state.progress())));
+     *              g.fillOval((int) x, (int) y, (int) r, (int) r);
+     *          });
+     *      }))
+     *  }</pre>
+     *
+     * @param renderer The rendering task which should be executed on the EDT at the end of the current event cycle.
+     */
+    public final void render( Consumer<Graphics2D> renderer ) {
+        UI.runLater(()->{
+            /*
+                We do this later because after any user event
+                it is very likely that the component gets repainted, meaning that anything rendered
+                will be erased. So we use invoke later to schedule the rendering
+                of the component to happen after the component is repainted (user event/repaint is over)
+            */
+            renderer.accept((Graphics2D) _component.getGraphics());
+        });
     }
 
     /**

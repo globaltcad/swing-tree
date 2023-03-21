@@ -53,17 +53,14 @@ public class AnimatedButtonsView extends JPanel
             )
             .add(
                 button("My text spreads when you hover over me")
-                .onMouseEnter(it -> {
+                .onMouseEnter( it ->
                     it.animateOnce(0.5, TimeUnit.SECONDS, state -> {
-                        // Let's increase the character spacing by max 10% of the cycle.
                         float spacing = (float) state.pulse() * 0.1f;
-                        // We do this by changing th affine transform of the font.
-                        Font f = it.getFont(); // Get the current font
                         AffineTransform at = it.getFont().getTransform();
                         at.setToScale(1 + spacing, 1);
-                        it.setFont(f.deriveFont(at));
-                    });
-                })
+                        it.setFont(it.getFont().deriveFont(at));
+                    })
+                )
             )
             .add(
                 button("I simply fade away when you hover over me").withBackground(Color.LIGHT_GRAY)
@@ -82,23 +79,21 @@ public class AnimatedButtonsView extends JPanel
                 }))
             )
             .add(
-                button("I spin when you hover over me").apply( ui -> {
+                button("I shake when you hover over me").apply( ui -> {
                     Dimension prefSize = ui.getComponent().getPreferredSize();
                     ui.onMouseEnter(it -> it.animateTwice(0.3, TimeUnit.SECONDS, new Animation() {
                         @Override public void run(AnimationState state) {
                             double centerX = it.getWidth() / 2.0;
                             double phase = (state.pulse()*2 - 1);
-                            int h = (int) ( prefSize.width * Math.abs(phase)/2 );
+                            int h = (int) ( prefSize.width * Math.abs(phase) / 2 );
                             AffineTransform at = AffineTransform.getRotateInstance(phase * Math.PI/12, centerX, 0);
                             at.translate(0, h/12d);
-                            Font f = it.getFont();
-                            it.setFont(f.deriveFont(at));
+                            it.setFont(it.getFont().deriveFont(at));
                             it.setPrefSize(prefSize.width, h + prefSize.height);
                         }
                         @Override public void finish(AnimationState state) {
-                            Font f = it.getFont();
                             AffineTransform at = AffineTransform.getRotateInstance(0, 0, 0);
-                            it.setFont(f.deriveFont(at));
+                            it.setFont(it.getFont().deriveFont(at));
                             it.setPrefSize(prefSize);
                         }
                     }));
@@ -163,7 +158,7 @@ public class AnimatedButtonsView extends JPanel
             .add(
                 button("My border grows when you hover over me").withLineBorder(Color.LIGHT_GRAY, 0)
                 .withPrefSize(300, 40)
-                .apply( ui -> {
+                .apply( ui ->
                     ui.onMouseEnter( it -> it.animateOnce(0.2, TimeUnit.SECONDS, state -> {
                         int bump = (int) (state.progress() * 15);
                         ui.withBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, bump));
@@ -171,22 +166,22 @@ public class AnimatedButtonsView extends JPanel
                     .onMouseExit( it -> it.animateOnce(0.2, TimeUnit.SECONDS, state -> {
                         int bump = (int) ((1-state.progress()) * 15);
                         ui.withBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, bump));
-                    }));
-                })
+                    }))
+                )
             )
         )
         .add(GROW.and(SPAN),
             button("I show a fancy explosion when you click me")
             .withPrefHeight(100)
-            .onClick(it -> it.animateOnce(0.25, TimeUnit.SECONDS, state -> {
-                Graphics g = it.getComponent().getGraphics();
-                double progress = state.progress();
-                double w = it.getWidth() * progress;
-                double h = it.getHeight() * progress;
-                double centerX = it.getWidth() / 2.0 - w / 2.0;
-                double centerY = it.getHeight() / 2.0 - h / 2.0;
-                g.setColor(new Color(1f, 1f, 0f, (float) (1-progress)));
-                g.fillRect((int) centerX, (int) centerY, (int) w, (int) h);
+            .onClick( it -> it.animateOnce(0.25, TimeUnit.SECONDS, state -> {
+                double w = it.getWidth()  * state.progress();
+                double h = it.getHeight() * state.progress();
+                double x = it.getWidth()  / 2.0 - w / 2.0;
+                double y = it.getHeight() / 2.0 - h / 2.0;
+                it.render( g -> {
+                    g.setColor(new Color(1f, 1f, 0f, (float) state.fadeOut()));
+                    g.fillRect((int) x, (int) y, (int) w, (int) h);
+                });
             }))
         )
         .add(GROW.and(SPAN),
@@ -194,38 +189,22 @@ public class AnimatedButtonsView extends JPanel
             .withPrefHeight(100)
             .onMouseMove( it -> {
                 it.animateOnce(1, TimeUnit.SECONDS, state -> {
-                    int x = it.getEvent().getX();
-                    int y = it.getEvent().getY();
-                    double progress = state.progress();
-                    double w = 30 * progress;
-                    double h = 30 * progress;
-                    double centerX = x - w / 2.0;
-                    double centerY = y - h / 2.0;
-                    SwingUtilities.invokeLater(() -> {
-                    /*
-                        We do this later because after the mouse move event
-                        the button gets repainted, meaning that the explosions
-                        will be erased. So we use invoke later to schedule the drawing
-                        of the explosion to happen after the button is repainted.
-                    */
-                        Graphics g = it.getComponent().getGraphics();
-                        g.setColor(new Color(1f, 1f, 0f, (float) (1 - progress)));
-                        g.fillOval((int) centerX, (int) centerY, (int) w, (int) h);
+                    double r = 30 * state.fadeIn();
+                    double x = it.getEvent().getX() - r / 2.0;
+                    double y = it.getEvent().getY() - r / 2.0;
+                    it.render( g -> {
+                        g.setColor(new Color(1f, 1f, 0f, (float) state.fadeOut()));
+                        g.fillOval((int) x, (int) y, (int) r, (int) r);
                     });
                 });
             })
-            .onMouseClick(it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
-                int x = it.getEvent().getX();
-                int y = it.getEvent().getY();
-                double progress = state.progress();
-                double w = 300 * progress;
-                double h = 300 * progress;
-                double centerX = x - w / 2.0;
-                double centerY = y - h / 2.0;
-                SwingUtilities.invokeLater(() -> {
-                    Graphics g = it.getComponent().getGraphics();
-                    g.setColor(new Color(1f, 1f, 0f, (float) (1 - progress)));
-                    g.fillOval((int) centerX, (int) centerY, (int) w, (int) h);
+            .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
+                double r = 300 * state.fadeIn();
+                double x = it.getEvent().getX() - r / 2;
+                double y = it.getEvent().getY() - r / 2;
+                it.render( g -> {
+                    g.setColor(new Color(1f, 1f, 0f, (float) state.fadeOut()));
+                    g.fillOval((int) x, (int) y, (int) r, (int) r);
                 });
             }))
         );

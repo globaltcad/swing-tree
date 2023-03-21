@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  *      .onMouseExit( it ->
  *          it.animateOnce(0.5, TimeUnit.SECONDS, state -> {
  *              double highlight = 0.5 + state.progress() * 0.5;
- *              it.setBackgroundColor(highlight, 1f, highlight);
+ *              it.setBackgroundColor(highlight, 1, highlight);
  *          })
  *      )
  *  }</pre>
