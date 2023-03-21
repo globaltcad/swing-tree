@@ -14,6 +14,17 @@ public interface AnimationState
     double progress();
 
     /**
+     *  A sine wave oscillating between 0 and 1 and back to 0 once per iteration.
+     *  At the beginning of the animation, the value is 0, at the end of the animation, the value is 0 again,
+     *  and when the animation is halfway through, the value is 1.
+     *
+     * @return The animation progress in terms of a number between 0 and 1, where 1 means the animation is halfway through.
+     */
+    default double pulse() {
+        return Math.sin(2 * Math.PI * progress()) / 2 + 0.5;
+    }
+
+    /**
      *  Defines the animation progress in terms of a number oscillating between 0, 1 and 0 once per iteration,
      *  meaning that when the animation starts, the value is 0, when it is halfway through, the value is 1,
      *  and when it is finished, the value is 0 again.
