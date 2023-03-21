@@ -75,6 +75,16 @@ class Examples_Spec extends Specification
         expect : new ListSearchView(new ListSearchViewModel())
     }
 
+    def 'The animated buttons view examples UI defined in the examples can be created.'()
+    {
+        expect : new AnimatedButtonsView()
+    }
+
+    def 'The animation example view can be created.'()
+    {
+        expect : new AnimatedView(Mock(JFrame))
+    }
+
     def 'The settings example UI defined in the examples can be created.'()
     {
         given :

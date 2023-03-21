@@ -78,11 +78,11 @@ public class AnimatedView extends JPanel
         int screenCenterY = frame.getY();
 
         schedule(1, TimeUnit.SECONDS)
-            .run( state -> { w.set((int) (100 * state.cycle())); } );
+            .go(state -> { w.set((int) (100 * state.cycle())); } );
 
         schedule(6, TimeUnit.SECONDS)
             .startingIn(14, TimeUnit.SECONDS)
-            .run( state -> {
+            .go(state -> {
                 int MAX_WIDTH = 200;
                 double progress = state.cycle();
                 int width  = 300 + (int) (MAX_WIDTH * progress);

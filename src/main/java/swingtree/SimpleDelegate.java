@@ -10,10 +10,34 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- *  Instances of this are passed to action lambdas for UI components
- *  to give an action more context information.
+ *  Instances of this are component delegates for a specific component and event that
+ *  are passed to user event action handler lambdas
+ *  to give the action handler more context information.
+ *  <br>
+ *  You would typically use this to access and change the state of the component, schedule animations
+ *  for the component or query the tree of neighboring components. <br>
+ *  Here a nice usage example where the delegate is used to animate a button:
+ *  <pre>{@code
+ *      button("I turn green when you hover over me")
+ *      .onMouseEnter( it ->
+ *          it.animateOnce(0.5, TimeUnit.SECONDS, state -> {
+ *              double highlight = 1 - state.progress() * 0.5;
+ *              it.setBackgroundColor(highlight, 1, highlight);
+ *          })
+ *      )
+ *      .onMouseExit( it ->
+ *          it.animateOnce(0.5, TimeUnit.SECONDS, state -> {
+ *              double highlight = 0.5 + state.progress() * 0.5;
+ *              it.setBackgroundColor(highlight, 1f, highlight);
+ *          })
+ *      )
+ *  }</pre>
+ *  In this example the {@code it} parameter is a {@code SimpleDelegate<JButton,MouseEvent>}
+ *  which can be used to access/modify the button, the event, the sibling components...
+ *  ...but also exposes a nice API to schedule animations for the button.
  * 	<p>
- * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
+ * 	For some more examples <b>please take a look at the
+ * 	<a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
  *
  * @param <C> The delegate (in most cases origin UI component) type parameter stored by this.

@@ -12,7 +12,7 @@ import java.util.function.Predicate;
  *  <pre>{@code
  *    UI.schedule( 100, TimeUnit.MILLISECONDS ) // returns an Animate instance
  *       .until( it -> it.progress() >= 0.75 && someOtherCondition() )
- *       .run( state -> {
+ *       .go( state -> {
  *          // do something
  *          someComponent.setValue( it.progress() );
  *          // ...
@@ -24,7 +24,7 @@ import java.util.function.Predicate;
  *       panel()
  *       .onMouseClick( it -> {
  *           it.animate( 100, TimeUnit.MILLISECONDS )
- *           .runOnce( state -> {
+ *           .goOnce( state -> {
  *               int width = (int) (100 * state.progress());
  *               it.getComponent().setSize( width, 100 );
  *           });
@@ -40,7 +40,7 @@ public class Animate
     /**
      * Creates an {@link Animate} instance which allows you to define the stop condition
      * for an animation as well as an {@link Animation} that will be executed
-     * when passed to the {@link #run(Animation)} or {@link #runOnce(Animation)} methods.
+     * when passed to the {@link #go(Animation)} or {@link #goOnce(Animation)} methods.
      *
      * @param schedule The schedule that defines when the animation should be executed and for how long.
      * @return An {@link Animate} instance that can be used to define how the animation should be executed.
@@ -52,7 +52,7 @@ public class Animate
     /**
      * Creates an {@link Animate} instance which allows you to define the stop condition
      * for an animation as well as an {@link Animation} that will be executed
-     * when passed to the {@link #run(Animation)} or {@link #runOnce(Animation)} methods.
+     * when passed to the {@link #go(Animation)} or {@link #goOnce(Animation)} methods.
      *
      * @param component The component that should be repainted after each animation step.
      * @param schedule The schedule that defines when the animation should be executed and for how long.
@@ -91,8 +91,18 @@ public class Animate
      *
      * @param animation The animation that should be executed.
      */
-    public void runOnce( Animation animation ) {
-        this.asLongAs( state -> state.currentIteration() == 0 ).run( animation );
+    public void goOnce( Animation animation ) {
+        this.asLongAs( state -> state.currentIteration() == 0 ).go( animation );
+    }
+
+    /**
+     *  Runs the given animation twice
+     *  based on the stop condition {@code state -> state.currentIteration() < 2}
+     *
+     * @param animation The animation that should be executed.
+     */
+    public void goTwice( Animation animation ) {
+        this.asLongAs( state -> state.currentIteration() < 2 ).go( animation );
     }
 
     /**
@@ -125,7 +135,7 @@ public class Animate
      *
      * @param animation The animation that should be executed.
      */
-    public void run( Animation animation ) {
+    public void go( Animation animation ) {
         AnimationScheduler.schedule( new Animator(_component, _schedule, _condition, animation ) );
     }
 

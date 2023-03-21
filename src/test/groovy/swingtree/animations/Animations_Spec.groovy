@@ -34,7 +34,7 @@ class Animations_Spec extends Specification
         when : 'We schedule an animation that will run 3 times and has a duration of 0.1 seconds.'
             UI.schedule(0.1, TimeUnit.SECONDS)
                 .asLongAs({ it.currentIteration() < 3 })
-                .run({
+                .go({
                     progressValues[(int)it.currentIteration()] << it.progress()
                 })
         and : 'We wait for the animation to finish'
@@ -73,7 +73,7 @@ class Animations_Spec extends Specification
                     .onClick({
                         it.animate(0.05, TimeUnit.SECONDS)
                             .asLongAs({ it.currentIteration() < 4 })
-                            .run(state -> {
+                            .go(state -> {
                                 if ( !iterations.contains(state.currentIteration()) )
                                     iterations << state.currentIteration()
                                 progresses    << state.progress()
@@ -131,7 +131,7 @@ class Animations_Spec extends Specification
         when :
             UI.schedule(1, TimeUnit.MILLISECONDS)
               .asLongAs({ it.currentIteration() < 4 })
-              .run(new Animation() {
+              .go(new Animation() {
                   @Override void run(AnimationState state) {}
                   @Override void finish(AnimationState state) { wasFinished++ }
               })

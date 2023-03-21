@@ -3384,7 +3384,7 @@ public final class UI
      *  <pre>{@code
      *    UI.schedule( 100, TimeUnit.MILLISECONDS )
      *       .until( it -> it.progress() >= 0.75 && someOtherCondition() )
-     *       .run( it -> {
+     *       .go( it -> {
      *          // do something
      *          someComponent.setValue( it.progress() );
      *          // ...
@@ -3404,7 +3404,7 @@ public final class UI
      *  <pre>{@code
      *    UI.schedule( 0.1, TimeUnit.MINUTES )
      *       .until( it -> it.progress() >= 0.75 && someOtherCondition() )
-     *       .run( it -> {
+     *       .go( it -> {
      *          // do something
      *          someComponent.setBackground( new Color( 0, 0, 0, (int)(it.progress()*255) ) );
      *          // ...
