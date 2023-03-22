@@ -21,7 +21,8 @@ with a valid version number:
  }
 ```
 
-Then inside your code you can import Swing-Tree by adding the following
+Then inside your code you can import 
+Swing-Tree by adding the following
 import statement:
 
 ```java
@@ -34,12 +35,14 @@ This is all you need to start building Swing UIs with the tree. :tada:
 
 No matter which UI framework you use, all UIs are built up from
 a tree of components. Swing is no different, which is why the Swing-Tree
-library allows you to build Swing UIs in a declarative as well as
-HTML-like fashion.
+library allows you to build Swing UIs in a declarative fashion,
+just like you would declare your UI structure in HTML or in other XML-based
+UI frameworks.
 
-This means that you can build your UI by describing and composing
-components in a nested tree-like fashion and then let Swing-Tree
-convert this tree into a Swing UI on the fly.
+So you build your UI by describing it
+using method chaining and nesting based composition 
+and then let Swing-Tree
+convert this component tree into a Swing UI on the fly.
 
 Here a little example UI that demonstrates this:
 
@@ -64,11 +67,13 @@ This code will create a Swing UI that looks like this:
 
 As you can see, building UIs with Swing-Tree feels very similar 
 to building HTML pages with HTML tags even though everything is
-done in plain old Java code. This is made possible based on 2 
-simple design patterns: 
-
-1. The Composite Pattern
-2. The Builder Pattern
+done in plain old Java code. 
+All of this is made possible by harnessing the power of 
+builder style method chaining
+and composition. 
+Swing Tree combines this to give you a quasi XML-based UI framework
+with compile time type safety, turing completeness and all the
+other good stuff that comes with Java.
 
 ## Growing Branches ##
 
@@ -79,7 +84,7 @@ which is set as the default layout manager if you do not specify
 a different one. 
 
 If you know Swing you may already have heard of it:
-**The one and only MigLayout**.
+**The one and only, all mighty, MigLayout**.
 
 MigLayout is a very powerful layout manager that allows you to
 specify the layout of your UI based on simple String keywords.
@@ -179,8 +184,8 @@ that Swing-Tree provides.
 Besides being able to build Swing UIs in a declarative fashion
 you can also do clean `MVVM`/`MVC` and `MVP` application development.
 These fancy `MVVM`/`MVC`/`MVP` shortcuts all stand for `Model`-`View`-`ViewModel/Controller/Presenter` 
-which are all different design patterns for achieving the same
-fundamental goal: 
+which are all different design patterns for achieving essentially
+the same fundamental goal: 
 
 **Separating the UI from the business logic!**
 
@@ -189,8 +194,8 @@ In Swing-Tree you can achieve this separation by using the
 Properties are a simple yet powerful concept that allow you to
 dynamically bind UI components to your business logic and vice versa.
 
-Let's consider the following business logic, we will call it "view model" 
-in accordance with the `MVVM` design and naming conventions:
+Let's consider the following business logic, which we will call "view model" 
+from now on in accordance with the `MVVM` design and naming conventions:
 
 ```java
 import sprouts.Var;
@@ -221,7 +226,7 @@ The `Val` type on the other hand is an immutable property / read-only view of a 
 which allows you to design your view model API in a way which does
 not leak mutable state to the outside world.
 
-Now let's consider the following Swing UI:
+Now let's consider the corresponding Swing UI:
 
 ```java
  var vm = new PersonViewModel();
@@ -261,5 +266,157 @@ implementation without having to change the business logic at all!
 
 How cool is that? :)
 
+## Growing Leaves ##
+
+The next step in mastering Swing-Tree is to learn how to
+register user events in your declarative Swing UIs.
+For different types of Swing components you can register
+different types of user events.
+But for all Swing components you can register the same
+basic set of events like for example:
+
+```java
+  UI.panel("fill").withPrefSize(400, 400)
+  .onMouseEnter( it -> System.out.println("Mouse entered panel") )
+  .onMouseExit( it -> System.out.println("Mouse exited panel") )
+  .onMousePress( it -> System.out.println("Mouse pressed panel") )
+  .onMouseRelease( it -> System.out.println("Mouse released panel") )
+  .onMouseClick( it -> System.out.println("Mouse clicked panel") )
+  .onMouseDrag( it -> System.out.println("Mouse dragged panel") )
+  .onFocusGained( it -> System.out.println("Panel gained focus") )
+  .onFocusLost( it -> System.out.println("Panel lost focus") )
+  ...
+``` 
+
+Note that every event handler receives a special `it` parameter!
+This is a delegate for both the Swing component and the current
+event state. Not only can you use this delegate to access the 
+Swing component, and the current event state, but you can also
+use it to query the whole UI tree for other components,
+schedule animations, and much much more!
+
+Just keep reading and you will see what I mean! :)
+
+
+## Harvesting Fruit ##
+
+The final step in mastering Swing-Tree are animations.
+Yes you heard me right, Swing-Tree supports animations
+and advanced custom rendering for all Swing components 
+out of the box!
+
+Check out this basic example:
+
+![Green Hover](../img/tutorial/green-hover.gif)
+
+Which is based on the following code:
+
+```java
+  button("I turn green when you hover over me")
+  .onMouseEnter( it ->
+      it.animateOnce(0.5, TimeUnit.SECONDS, state -> {
+          double highlight = 1 - state.progress() * 0.5;
+          it.setBackgroundColor(highlight, 1, highlight);
+      })
+  )
+  .onMouseExit( it ->
+      it.animateOnce(0.5, TimeUnit.SECONDS, state -> {
+          double highlight = 0.5 + state.progress() * 0.5;
+          it.setBackgroundColor(highlight, 1f, highlight);
+      })
+  )
+```
+
+As you can see, animations are very easy to create, 
+especially when you use the `animateOnce` method
+on the previously
+mentioned event/component delegate object, 
+which in the above example
+is the `it` variable.
+
+One thing that might confuses you is the fact that there are 
+2 nested lambdas in the 2 `onMouseEnter` and `onMouseExit` callbacks.
+The **outer lambda is the event handler** which is called once whenever
+the mouse enters or leaves the button. **The inner lambda is the actual
+animation** which is called repeatedly until the animation
+is finished (which happens after 0.5 seconds in this case).
+So the inner lambda is called any number of times 
+but usually not more than **~60 times per second**.
+
+Another confusing thing might be the `state` parameter
+of the animation callback. This is a `AnimationState` object
+which contains information about 
+**the state of the current animation update**.
+This object exists to tell you how far along the animation is,
+and to provide you with some useful methods for creating
+animations with smooth transitions.
+
+You might be wondering: How does all of this work? 
+Well, in essence it is based on a custom `Timer` implementation,
+some system time bookkeeping,
+and a nice API for creating and scheduling animation lambdas,
+that's all. :)
+
+The next example demonstrates how to do custom rendering
+in your animations:
+
+![Custom Rendering](../img/tutorial/click-ripples.gif)
+
+Which is based on this code:
+
+```java
+  button("I have a click ripple effect")
+  .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
+      it.render( g -> {
+          g.setColor(new Color(0.1f, 0.25f, 0.5f, (float) state.fadeOut()));
+          for ( int i = 0; i < 5; i++ ) {
+              double r = 300 * state.fadeIn() * ( 1 - i * 0.2 );
+              double x = it.getEvent().getX() - r / 2;
+              double y = it.getEvent().getY() - r / 2;
+              g.drawOval((int) x, (int) y, (int) r, (int) r);
+          }
+      });
+  }))
+```
+
+Note that the `render` method is called repeatedly
+until the animation is finished. The `render` method
+accepts a lambda which is called with a `Graphics2D` object
+that you can use to draw on the component.
+
+I hope you are starting to see the power of this.
+Just to give you an idea of what you can do with this,
+here is a more complex example:
+
+![Button Animation](../img/tutorial/fancy-animation.gif)
+
+```java
+  button("I show many little mouse move explosions when you move your mouse over me")
+  .withPrefHeight(100)
+  .onMouseMove( it -> it.animateOnce(1, TimeUnit.SECONDS, state -> {
+          double r = 30 * state.fadeIn();
+          double x = it.getEvent().getX() - r / 2.0;
+          double y = it.getEvent().getY() - r / 2.0;
+          it.render( g -> {
+              g.setColor(new Color(1f, 1f, 0f, (float) state.fadeOut()));
+              g.fillOval((int) x, (int) y, (int) r, (int) r);
+          });
+  }))
+  .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
+      double r = 300 * state.fadeIn();
+      double x = it.getEvent().getX() - r / 2;
+      double y = it.getEvent().getY() - r / 2;
+      it.render( g -> {
+          g.setColor(new Color(1f, 1f, 0f, (float) state.fadeOut()));
+          g.fillOval((int) x, (int) y, (int) r, (int) r);
+      });
+  }))
+```
+
+The above example shows how to create a button
+that has both a mouse move and a mouse click animation
+which are very similar to each other.
+The only difference is that the radius of the expanding circle
+is far larger when the user clicks the button.
 
 

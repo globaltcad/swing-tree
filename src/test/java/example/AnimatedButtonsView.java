@@ -16,7 +16,8 @@ public class AnimatedButtonsView extends JPanel
 {
     public AnimatedButtonsView() {
         FlatLightLaf.setup();
-        of(this).withLayout(FILL.and(WRAP(3))).withPrefSize(800, 600)
+        of(this).withLayout(FILL.and(WRAP(3)).and(INS(32)), "", "[][]24[]24[]")
+        .withPrefSize(800, 600)
         .add( SHRINK.and(SPAN).and(ALIGN_CENTER),
             label(
                 "<html>" +
@@ -98,6 +99,20 @@ public class AnimatedButtonsView extends JPanel
                         }
                     }));
                 })
+            )
+            .add(
+                button("I have a click ripple effect")
+                .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
+                    it.render( g -> {
+                        g.setColor(new Color(0.1f, 0.25f, 0.5f, (float) state.fadeOut()));
+                        for ( int i = 0; i < 5; i++ ) {
+                            double r = 300 * state.fadeIn() * ( 1 - i * 0.2 );
+                            double x = it.getEvent().getX() - r / 2;
+                            double y = it.getEvent().getY() - r / 2;
+                            g.drawOval((int) x, (int) y, (int) r, (int) r);
+                        }
+                    });
+                }))
             )
         )
         .add( GROW.and(SPAN),

@@ -1356,6 +1356,18 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     /**
      *  This creates a {@link MigLayout} for the component wrapped by this UI builder.
      *
+     * @param attr The constraints for the layout.
+     * @param colConstrains The column layout for the {@link MigLayout} instance.
+     * @param rowConstraints The row layout for the {@link MigLayout} instance.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLayout( LayoutAttr attr, String colConstrains, String rowConstraints ) {
+        return withLayout(attr.toString(), colConstrains, rowConstraints);
+    }
+
+    /**
+     *  This creates a {@link MigLayout} for the component wrapped by this UI builder.
+     *
      * @param constraints The constraints for the layout.
      * @param colConstrains The column layout for the {@link MigLayout} instance.
      * @param rowConstraints The row layout for the {@link MigLayout} instance.
