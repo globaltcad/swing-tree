@@ -22,7 +22,7 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAbstractSwing<U
         if ( conf != null ) {
             // The user wants to add a component to the scroll pane with a specific constraint.
             // Swing does not support any constraints for scroll panes, but we are not Swing, we are SwingTree!
-            component = UI.panel("fill").add(conf.toString(), component).getComponent();
+            component = UI.panel("fill, ins 0").add(conf.toString(), component).getComponent();
             //  ^ So we improve this situation by wrapping the component in a mig layout panel, supporting constraints.
         }
         getComponent().setViewportView(component);
