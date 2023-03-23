@@ -1,5 +1,6 @@
 package swingtree.animation;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Objects;
@@ -24,6 +25,8 @@ class Animator
         _condition = Objects.requireNonNull(condition);
         _animation = Objects.requireNonNull(animation);
     }
+
+    public JComponent component() { return _component instanceof JComponent ? (JComponent) _component : null; }
 
     private AnimationState _createState( long now, ActionEvent event ) {
         long duration = _schedule.getDurationIn(TimeUnit.MILLISECONDS);

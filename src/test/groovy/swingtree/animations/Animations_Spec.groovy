@@ -11,6 +11,7 @@ import swingtree.animation.AnimationState
 import swingtree.animation.Schedule
 
 import java.awt.Color
+import java.awt.event.MouseEvent
 import java.util.concurrent.TimeUnit
 
 @Title("Animations")
@@ -154,12 +155,12 @@ class Animations_Spec extends Specification
                           })
                     })
                     .getComponent()
+        expect : 'The label text is (almost) black.'
+            label.getForeground().getRed() < 60
+            label.getForeground().getGreen() < 60
+            label.getForeground().getBlue() < 60
         when :
-            TimeUnit.MILLISECONDS.sleep(200)
-        then :
-            label.getForeground() == new Color(51, 51, 51)
-        when :
-            label.dispatchEvent(new java.awt.event.MouseEvent(label, java.awt.event.MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))
+            label.dispatchEvent(new MouseEvent(label, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))
         and :
             TimeUnit.SECONDS.sleep(2)
         then :

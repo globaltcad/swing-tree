@@ -6,6 +6,8 @@ import swingtree.animation.Schedule;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -837,15 +839,38 @@ abstract class AbstractDelegate<C extends JComponent>
      * @param renderer The rendering task which should be executed on the EDT at the end of the current event cycle.
      */
     public final void render( Consumer<Graphics2D> renderer ) {
-        UI.runLater(()->{
-            /*
-                We do this later because after any user event
-                it is very likely that the component gets repainted, meaning that anything rendered
-                will be erased. So we use invoke later to schedule the rendering
-                of the component to happen after the component is repainted (user event/repaint is over)
-            */
-            renderer.accept((Graphics2D) _component.getGraphics());
-        });
+            // We check if the component is declared in the UI class
+            // as a nested class. If it is, it is one of ours, so we can safely assume that
+            // the paint method is overridden and that the component
+            // will pick up where we left off.
+            Class<?> enclosing = _component.getClass().getEnclosingClass();
+            boolean isCompClassNestedInUI = enclosing == UI.class;
+
+            if ( isCompClassNestedInUI )
+                UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
+                    // We do the rendering later in the paint method!
+                    List<Consumer<Graphics2D>> renderers = (List<Consumer<Graphics2D>>) _component.getClientProperty(Animate.class);
+                    if ( renderers == null ) {
+                        renderers = new ArrayList<>();
+                        _component.putClientProperty(Animate.class, renderers); // We store the renderers in the component
+                    }
+                    renderers.add(renderer);
+                    // Everything will be rendered in the paint method!
+                    // This is important because otherwise our rendering would be erased by a repaint
+                });
+            else
+                UI.runLater(()->{
+                    /*
+                        We do this later because after any user event
+                        it is very likely that the component gets repainted, meaning that anything rendered
+                        will be erased. So we use invoke later to schedule the rendering
+                        of the component to happen after the component is repainted (user event/repaint is over)
+                        Note that this is an unreliable way to do this, which is why the
+                        above code is preferred, but it is a fallback for when the component
+                        is not declared in the UI class (one of ours with a modified paint method).
+                    */
+                    renderer.accept((Graphics2D) _component.getGraphics());
+                });
     }
 
     /**

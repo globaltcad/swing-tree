@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -537,7 +538,7 @@ public final class UI
      *
      * @return A builder instance for a {@link JPopupMenu}, which enables fluent method chaining.
      */
-    public static UIForPopup<JPopupMenu> popupMenu() { return of(new JPopupMenu()); }
+    public static UIForPopup<JPopupMenu> popupMenu() { return of(new PopupMenu()); }
 
     /**
      *  This returns an instance of a {@link UIForSeparator} builder
@@ -604,7 +605,7 @@ public final class UI
      *
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
-    public static UIForButton<JButton> button() { return of(new JButton()); }
+    public static UIForButton<JButton> button() { return of(new Button()); }
 
     /**
      *  Use this to create a builder for the {@link JButton} UI component with the provided text displayed on top.
@@ -613,7 +614,7 @@ public final class UI
      * @param text The text to be displayed on top of the button.
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
-    public static UIForButton<JButton> button( String text ) { return of(new JButton(text)); }
+    public static UIForButton<JButton> button( String text ) { return button().withText(text); }
 
     /**
      *  Create a builder for the {@link JButton} UI component where the text of the provided
@@ -623,7 +624,7 @@ public final class UI
      */
     public static UIForButton<JButton> button( Val<String> text ) {
         NullUtil.nullArgCheck( text, "text", Val.class );
-        return of(new JButton()).withText(text);
+        return button().withText(text);
     }
 
     /**
@@ -1114,7 +1115,7 @@ public final class UI
      */
     public static UIForMenuItem<JMenuItem> menuItem( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return new UIForMenuItem<>(new JMenuItem(text));
+        return new UIForMenuItem<>((JMenuItem) new MenuItem()).withText(text);
     }
 
     /**
@@ -1123,7 +1124,7 @@ public final class UI
      */
     public static UIForMenuItem<JMenuItem> menuItem( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
-        return new UIForMenuItem<>(new JMenuItem()).withText(text);
+        return new UIForMenuItem<>((JMenuItem) new MenuItem()).withText(text);
     }
 
     /**
@@ -1143,7 +1144,9 @@ public final class UI
     public static UIForMenuItem<JMenuItem> menuItem( String text, Icon icon ) {
         NullUtil.nullArgCheck(text, "text", String.class);
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
-        return new UIForMenuItem<>(new JMenuItem(text, icon));
+        return new UIForMenuItem<>((JMenuItem) new MenuItem())
+                    .withText(text)
+                    .withIcon(icon);
     }
 
     /**
@@ -1154,7 +1157,9 @@ public final class UI
     public static UIForMenuItem<JMenuItem> menuItem( Val<String> text, Icon icon ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
-        return new UIForMenuItem<>(new JMenuItem(icon)).withText(text);
+        return new UIForMenuItem<>((JMenuItem) new MenuItem())
+                    .withText(text)
+                    .withIcon(icon);
     }
 
     /**
@@ -1165,7 +1170,7 @@ public final class UI
     public static UIForMenuItem<JMenuItem> menuItem( String text, Val<Icon> icon ) {
         NullUtil.nullArgCheck(text, "text", String.class);
         NullUtil.nullArgCheck(icon, "icon", Val.class);
-        return new UIForMenuItem<>(new JMenuItem(text)).withIcon(icon);
+        return new UIForMenuItem<>((JMenuItem) new MenuItem()).withText(text).withIcon(icon);
     }
 
     /**
@@ -1176,7 +1181,7 @@ public final class UI
     public static UIForMenuItem<JMenuItem> menuItem( Val<String> text, Val<Icon> icon ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullArgCheck(icon, "icon", Val.class);
-        return new UIForMenuItem<>(new JMenuItem()).withText(text).withIcon(icon);
+        return new UIForMenuItem<>((JMenuItem) new MenuItem()).withText(text).withIcon(icon);
     }
 
     /**
@@ -1266,7 +1271,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      */
-    public static UIForPanel<JPanel> panel() { return of(new JPanel()).withLayout(new MigLayout()); }
+    public static UIForPanel<JPanel> panel() { return of((JPanel) new Panel()).withLayout(new MigLayout()); }
 
     /**
      *  Use this to create a builder for a new {@link JPanel} UI component
@@ -1285,7 +1290,7 @@ public final class UI
         NullUtil.nullArgCheck(attr, "attr", String.class);
         NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
         NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class);
-        return of(new JPanel()).withLayout(attr, colConstraints, rowConstraints);
+        return of((JPanel) new Panel()).withLayout(attr, colConstraints, rowConstraints);
     }
 
     /**
@@ -1303,7 +1308,7 @@ public final class UI
     public static UIForPanel<JPanel> panel( String attr, String colConstraints ) {
         NullUtil.nullArgCheck(attr, "attr", String.class);
         NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
-        return of(new JPanel()).withLayout(attr, colConstraints);
+        return of((JPanel) new Panel()).withLayout(attr, colConstraints);
     }
 
     /**
@@ -1321,7 +1326,7 @@ public final class UI
     public static UIForPanel<JPanel> panel( LayoutAttr attr, String colConstraints ) {
         NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
         NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
-        return of(new JPanel()).withLayout(attr, colConstraints);
+        return of((JPanel)new Panel()).withLayout(attr, colConstraints);
     }
 
     /**
@@ -1338,7 +1343,7 @@ public final class UI
      */
     public static UIForPanel<JPanel> panel( String attr ) {
         NullUtil.nullArgCheck(attr, "attr", String.class);
-        return of(new JPanel()).withLayout(attr);
+        return of((JPanel) new Panel()).withLayout(attr);
     }
 
     /**
@@ -1589,7 +1594,7 @@ public final class UI
      */
     public static UIForSlider<JSlider> slider( Align align ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
-        return of(new JSlider()).with(align);
+        return of((JSlider) new Slider()).with(align);
     }
 
     /**
@@ -1605,7 +1610,7 @@ public final class UI
      */
     public static UIForSlider<JSlider> slider( Val<Align> align ) {
         NullUtil.nullArgCheck( align, "align", Val.class );
-        return of(new JSlider()).withAlignment(align);
+        return of((JSlider) new Slider()).withAlignment(align);
     }
 
     /**
@@ -1625,7 +1630,11 @@ public final class UI
      */
     public static UIForSlider<JSlider> slider( Align align, int min, int max ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
-        return of(new JSlider(align.forSlider(), min, max, (min + max) / 2));
+        return of((JSlider) new Slider())
+                    .with(align)
+                    .withMin(min)
+                    .withMax(max)
+                    .withValue((min + max) / 2);
     }
 
     /**
@@ -1646,7 +1655,11 @@ public final class UI
      */
     public static UIForSlider<JSlider> slider( Align align, int min, int max, int value ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
-        return of(new JSlider(align.forSlider(), min, max, value));
+        return of((JSlider) new Slider())
+                .with(align)
+                .withMin(min)
+                .withMax(max)
+                .withValue(value);
     }
 
     /**
@@ -1668,7 +1681,10 @@ public final class UI
     public static UIForSlider<JSlider> slider( Align align, int min, int max, Val<Integer> value ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
         NullUtil.nullPropertyCheck(value, "value", "The state of the slider should not be null!");
-        return of(new JSlider(align.forSlider(), min, max, value.orElseThrow()))
+        return of((JSlider) new Slider())
+                .with(align)
+                .withMin(min)
+                .withMax(max)
                 .withValue(value);
     }
 
@@ -1691,7 +1707,10 @@ public final class UI
     public static UIForSlider<JSlider> slider( Align align, int min, int max, Var<Integer> value ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
         NullUtil.nullPropertyCheck(value, "value", "The state of the slider should not be null!");
-        return of(new JSlider(align.forSlider(), min, max, value.orElseThrow()))
+        return of((JSlider) new Slider())
+                .with(align)
+                .withMin(min)
+                .withMax(max)
                 .withValue(value);
     }
 
@@ -1711,7 +1730,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JComboBox}, which enables fluent method chaining.
      */
-    public static UIForCombo<Object,JComboBox<Object>> comboBox() { return of(new JComboBox<>()); }
+    public static UIForCombo<Object,JComboBox<Object>> comboBox() { return of(new ComboBox<>()); }
 
     /**
      *  Use this to create a builder for a new {@link JComboBox} instance
@@ -1725,7 +1744,7 @@ public final class UI
     @SafeVarargs
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( E... items ) {
         NullUtil.nullArgCheck(items, "items", Object[].class);
-        return of(new JComboBox<E>()).withModel(new ArrayBasedComboModel<>(items));
+        return of((JComboBox<E>) new ComboBox<E>()).withModel(new ArrayBasedComboModel<>(items));
     }
 
     /**
@@ -1790,7 +1809,7 @@ public final class UI
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( java.util.List<E> items ) {
         NullUtil.nullArgCheck(items, "items", List.class);
-        return of(new JComboBox<E>()).withModel(new ListBasedComboModel<>(items));
+        return of((JComboBox<E>) new ComboBox<E>()).withModel(new ListBasedComboModel<>(items));
     }
 
     /**
@@ -1823,7 +1842,7 @@ public final class UI
      public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selection, java.util.List<E> items ) {
         NullUtil.nullArgCheck(items, "items", List.class);
         NullUtil.nullArgCheck(selection, "selection", Var.class);
-        return of(new JComboBox<E>()).withModel(new ListBasedComboModel<>(selection, items));
+        return of((JComboBox<E>) new ComboBox<E>()).withModel(new ListBasedComboModel<>(selection, items));
     }
 
     //___
@@ -1838,7 +1857,7 @@ public final class UI
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( Vars<E> items ) {
         NullUtil.nullArgCheck(items, "items", Vars.class);
-        return of(new JComboBox<E>()).withModel(new VarsBasedComboModel<>(items));
+        return of((JComboBox<E>) new ComboBox<E>()).withModel(new VarsBasedComboModel<>(items));
     }
 
     /**
@@ -1852,7 +1871,7 @@ public final class UI
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( Vals<E> items ) {
         NullUtil.nullArgCheck(items, "items", Vals.class);
-        return of(new JComboBox<E>()).withModel(new ValsBasedComboModel<>(items));
+        return of((JComboBox<E>) new ComboBox<E>()).withModel(new ValsBasedComboModel<>(items));
     }
 
     /**
@@ -1870,7 +1889,7 @@ public final class UI
      public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selection, Vars<E> items ) {
         NullUtil.nullArgCheck(items, "items", Vars.class);
         NullUtil.nullArgCheck(selection, "selection", Var.class);
-        return of(new JComboBox<E>()).withModel(new VarsBasedComboModel<>(selection, items));
+        return of((JComboBox<E>) new ComboBox<E>()).withModel(new VarsBasedComboModel<>(selection, items));
     }
 
     /**
@@ -1886,7 +1905,7 @@ public final class UI
      public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selection, Vals<E> items ) {
         NullUtil.nullArgCheck(items, "items", Vals.class);
         NullUtil.nullArgCheck(selection, "selection", Var.class);
-        return of(new JComboBox<E>()).withModel(new ValsBasedComboModel<>(selection, items));
+        return of((JComboBox<E>) new ComboBox<E>()).withModel(new ValsBasedComboModel<>(selection, items));
     }
 
     /**
@@ -1903,7 +1922,7 @@ public final class UI
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var, E... items ) {
         NullUtil.nullArgCheck(items, "items", List.class);
-        return of(new JComboBox<E>()).withModel(new ArrayBasedComboModel<>(var, items));
+        return of((JComboBox<E>) new ComboBox<E>()).withModel(new ArrayBasedComboModel<>(var, items));
     }
 
     /**
@@ -1920,7 +1939,7 @@ public final class UI
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var, Var<E[]> items ) {
         NullUtil.nullArgCheck(items, "items", List.class);
-        return of(new JComboBox<E>()).withModel(new ArrayPropertyComboModel<>(var, items));
+        return of((JComboBox<E>) new ComboBox<E>()).withModel(new ArrayPropertyComboModel<>(var, items));
     }
 
     /**
@@ -1938,7 +1957,7 @@ public final class UI
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selectedItem, Val<E[]> items ) {
         NullUtil.nullArgCheck(items, "items", List.class);
         NullUtil.nullArgCheck(selectedItem, "selectedItem", Var.class);
-        return of(new JComboBox<E>()).withModel(new ArrayPropertyComboModel<>(selectedItem, items));
+        return of((JComboBox<E>) new ComboBox<E>()).withModel(new ArrayPropertyComboModel<>(selectedItem, items));
     }
 
     /**
@@ -1950,7 +1969,9 @@ public final class UI
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( ComboBoxModel<E> model ) {
         NullUtil.nullArgCheck(model, "model", ComboBoxModel.class);
-        return of(new JComboBox<>(model));
+        JComboBox<E> c = new ComboBox<E>();
+        c.setModel(model);
+        return of(c);
     }
 
     /**
@@ -2043,7 +2064,7 @@ public final class UI
      */
     public static UIForLabel<JLabel> label( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return of(new JLabel(text));
+        return of((JLabel) new Label()).withText(text);
     }
 
     /**
@@ -2056,7 +2077,7 @@ public final class UI
     public static UIForLabel<JLabel> label( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of(new JLabel())
+        return of((JLabel) new Label())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
@@ -2069,7 +2090,7 @@ public final class UI
      */
     public static UIForLabel<JLabel> label( Icon icon ) {
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
-        return of(new JLabel()).with(icon);
+        return of((JLabel) new Label()).with(icon);
     }
 
     /**
@@ -2081,7 +2102,7 @@ public final class UI
     public static UIForLabel<JLabel> labelWithIcon( Val<Icon> icon ) {
         NullUtil.nullArgCheck(icon, "icon", Val.class);
         NullUtil.nullPropertyCheck(icon, "icon", "Null icons are not allowed!");
-        return of(new JLabel()).withIcon(icon);
+        return of((JLabel) new Label()).withIcon(icon);
     }
 
     /**
@@ -2094,7 +2115,7 @@ public final class UI
      */
     public static UIForLabel<JLabel> label( int width, int height, ImageIcon icon ) {
         NullUtil.nullArgCheck(icon, "icon", ImageIcon.class);
-        return of(new JLabel())
+        return of((JLabel) new Label())
                 .with(new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT)));
     }
 
@@ -2105,7 +2126,7 @@ public final class UI
      *  @return A builder instance for the label, which enables fluent method chaining.
      */
     public static UIForLabel<JLabel> boldLabel( String text ) {
-        return of(new JLabel(text)).makeBold();
+        return of((JLabel) new Label()).withText(text).makeBold();
     }
 
     /**
@@ -2117,7 +2138,7 @@ public final class UI
     public static UIForLabel<JLabel> boldLabel( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of(new JLabel()).withText(text).makeBold();
+        return of((JLabel) new Label()).withText(text).makeBold();
     }
 
     /**
@@ -2130,7 +2151,7 @@ public final class UI
      */
     public static UIForCheckBox<JCheckBox> checkBox( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return of(new JCheckBox(text));
+        return of((JCheckBox) new CheckBox()).withText(text);
     }
 
     /**
@@ -2144,7 +2165,7 @@ public final class UI
     public static UIForCheckBox<JCheckBox> checkBox( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of(new JCheckBox())
+        return of((JCheckBox) new CheckBox())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
@@ -2166,7 +2187,7 @@ public final class UI
         NullUtil.nullArgCheck(isChecked, "isChecked", Var.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         NullUtil.nullPropertyCheck(isChecked, "isChecked", "The selection state of a check box may not be modelled using null!");
-        return of(new JCheckBox())
+        return of((JCheckBox) new CheckBox())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .applyIf(!isChecked.hasNoID(), it -> it.id(isChecked.id()))
                 .withText(text)
@@ -2186,7 +2207,7 @@ public final class UI
         NullUtil.nullArgCheck(text, "text", String.class);
         NullUtil.nullArgCheck(isChecked, "isChecked", Var.class);
         NullUtil.nullPropertyCheck(isChecked, "isChecked", "The selection state of a check box may not be modelled using null!");
-        return of(new JCheckBox())
+        return of((JCheckBox) new CheckBox())
                 .applyIf(!isChecked.hasNoID(), it -> it.id(isChecked.id()))
                 .withText(text)
                 .isSelectedIf(isChecked);
@@ -2213,7 +2234,7 @@ public final class UI
      */
     public static UIForRadioButton<JRadioButton> radioButton( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return of(new JRadioButton(text));
+        return of((JRadioButton) new RadioButton()).withText(text);
     }
 
     /**
@@ -2226,7 +2247,7 @@ public final class UI
     public static UIForRadioButton<JRadioButton> radioButton( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of(new JRadioButton())
+        return of((JRadioButton) new RadioButton())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
@@ -2248,7 +2269,7 @@ public final class UI
         NullUtil.nullArgCheck(text, "selected", Var.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         NullUtil.nullPropertyCheck(selected, "selected", "The selection state of a radio button may not be modelled using null!");
-        return of(new JRadioButton())
+        return of((JRadioButton) new RadioButton())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .applyIf(!selected.hasNoID(), it -> it.id(selected.id()))
                 .withText(text)
@@ -2268,7 +2289,7 @@ public final class UI
         NullUtil.nullArgCheck(text, "text", String.class);
         NullUtil.nullArgCheck(text, "selected", Var.class);
         NullUtil.nullPropertyCheck(selected, "selected", "The selection state of a radio button may not be modelled using null!");
-        return of(new JRadioButton())
+        return of((JRadioButton) new RadioButton())
                 .withText(text)
                 .isSelectedIf(selected);
     }
@@ -2313,7 +2334,7 @@ public final class UI
         NullUtil.nullArgCheck(state, "state", Enum.class);
         NullUtil.nullArgCheck(selection, "selection", Var.class);
         NullUtil.nullPropertyCheck(selection, "selection", "The selection state of a radio button may not be modelled using null!");
-        return of(new JRadioButton())
+        return of((JRadioButton) new RadioButton())
                 .applyIf(!selection.hasNoID(), it -> it.id(selection.id()))
                 .isSelectedIf( state, selection );
     }
@@ -2504,7 +2525,7 @@ public final class UI
      */
     public static UIForTextField<JTextField> textField( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return of(new JTextField(text));
+        return of((JTextField) new TextField()).withText(text);
     }
 
     /**
@@ -2519,7 +2540,7 @@ public final class UI
     public static UIForTextField<JTextField> textField( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of(new JTextField())
+        return of((JTextField) new TextField())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
@@ -2535,7 +2556,7 @@ public final class UI
     public static UIForTextField<JTextField> textField( Var<String> text ) {
         NullUtil.nullArgCheck(text, "text", Var.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of(new JTextField())
+        return of((JTextField) new TextField())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
@@ -2546,7 +2567,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JTextField}, which enables fluent method chaining.
      */
-    public static UIForTextField<JTextField> textField() { return of(new JTextField()); }
+    public static UIForTextField<JTextField> textField() { return of((JTextField) new TextField()); }
 
     /**
      *  Use this to create a builder for a new {@link JTextField} instance with
@@ -2561,7 +2582,7 @@ public final class UI
     public static <N extends Number> UIForTextField<JTextField> numericTextField( Var<N> number ) {
         NullUtil.nullArgCheck(number, "number", Var.class);
         NullUtil.nullPropertyCheck(number, "number", "Please use 0 instead of null!");
-        return of(new JTextField())
+        return of((JTextField) new TextField())
                 .applyIf( !number.hasNoID(), it -> it.id(number.id()) )
                 .withNumber(number);
     }
@@ -2583,7 +2604,7 @@ public final class UI
     public static <N extends Number> UIForTextField<JTextField> numericTextField( Var<N> number, Var<Boolean> isValid ) {
         NullUtil.nullArgCheck(number, "number", Var.class);
         NullUtil.nullPropertyCheck(number, "number", "Please use 0 instead of null!");
-        return of(new JTextField())
+        return of((JTextField) new TextField())
                 .applyIf( !number.hasNoID(), it -> it.id(number.id()) )
                 .withNumber(number, isValid);
     }
@@ -2734,7 +2755,7 @@ public final class UI
      */
     public static UIForTextArea<JTextArea> textArea( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return of(new JTextArea(text));
+        return of((JTextArea) new TextArea()).withText(text);
     }
 
     /**
@@ -2749,7 +2770,7 @@ public final class UI
     public static UIForTextArea<JTextArea> textArea( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of(new JTextArea())
+        return of((JTextArea) new TextArea())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
@@ -2765,7 +2786,7 @@ public final class UI
     public static UIForTextArea<JTextArea> textArea( Var<String> text ) {
         NullUtil.nullArgCheck(text, "text", Var.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of(new JTextArea())
+        return of((JTextArea) new TextArea())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
@@ -2788,7 +2809,7 @@ public final class UI
      */
     public static UIForTextArea<JTextArea> textArea( UI.HorizontalDirection direction ) {
         NullUtil.nullArgCheck(direction, "direction", HorizontalDirection.class);
-        return of(new JTextArea()).withTextOrientation(direction);
+        return of((JTextArea) new TextArea()).withTextOrientation(direction);
     }
 
     /**
@@ -2811,14 +2832,14 @@ public final class UI
      */
     public static UIForTextArea<JTextArea> textArea( UI.HorizontalDirection direction, String text ) {
         NullUtil.nullArgCheck(direction, "direction", HorizontalDirection.class);
-        return of(new JTextArea()).withTextOrientation(direction).withText(text);
+        return of((JTextArea) new TextArea()).withTextOrientation(direction).withText(text);
     }
 
     public static UIForTextArea<JTextArea> textArea( UI.HorizontalDirection direction, Val<String> text ) {
         NullUtil.nullArgCheck(direction, "direction", HorizontalDirection.class);
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of(new JTextArea())
+        return of((JTextArea) new TextArea())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withTextOrientation(direction)
                 .withText(text);
@@ -2828,7 +2849,7 @@ public final class UI
         NullUtil.nullArgCheck(direction, "direction", HorizontalDirection.class);
         NullUtil.nullArgCheck(text, "text", Var.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of(new JTextArea())
+        return of((JTextArea) new TextArea())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withTextOrientation(direction)
                 .withText(text);
@@ -2846,7 +2867,7 @@ public final class UI
     /**
      * @return A builder instance for a new {@link JList}.
      */
-    public static <E> UIForList<E, JList<E>> list() { return of(new JList<>()); }
+    public static <E> UIForList<E, JList<E>> list() { return of(new List<>()); }
 
     /**
      * @param model The model which should be used for the new {@link JList}.
@@ -2855,7 +2876,9 @@ public final class UI
      */
     public static <E> UIForList<E, JList<E>> list( ListModel<E> model ) {
         NullUtil.nullArgCheck(model, "model", ListModel.class);
-        return of(new JList<>(model));
+        JList<E> list = new List<>();
+        list.setModel(model);
+        return of(list);
     }
 
     /**
@@ -2870,24 +2893,24 @@ public final class UI
     @SafeVarargs
     public static <E> UIForList<E, JList<E>> list( E... elements ) {
         NullUtil.nullArgCheck(elements, "elements", Object[].class);
-        return of(new JList<E>()).withEntries( elements );
+        return of(new List<E>()).withEntries( elements );
     }
 
     public static <E> UIForList<E, JList<E>> list( Vals<E> elements ) {
         NullUtil.nullArgCheck(elements, "elements", Vals.class);
-        return of(new JList<E>()).withEntries( elements );
+        return of(new List<E>()).withEntries( elements );
     }
 
     public static <E> UIForList<E, JList<E>> list( Var<E> selection, Vals<E> elements ) {
         NullUtil.nullArgCheck(selection, "selection", Var.class);
         NullUtil.nullArgCheck(elements, "elements", Vals.class);
-        return of(new JList<E>()).withEntries( elements ).withSelection( selection );
+        return of(new List<E>()).withEntries( elements ).withSelection( selection );
     }
 
     public static <E> UIForList<E, JList<E>> list( Val<E> selection, Vals<E> elements ) {
         NullUtil.nullArgCheck(selection, "selection", Val.class);
         NullUtil.nullArgCheck(elements, "elements", Vals.class);
-        return of(new JList<E>()).withEntries( elements ).withSelection( selection );
+        return of(new List<E>()).withEntries( elements ).withSelection( selection );
     }
 
     /**
@@ -2910,7 +2933,7 @@ public final class UI
      * @return A builder instance for a new {@link JList} with the provided {@link List} as data model.
      */
     public static <E> UIForList<E, JList<E>> list( java.util.List<E> entries ) {
-        return of(new JList<E>()).withEntries( entries );
+        return of(new List<E>()).withEntries( entries );
     }
 
     /**
@@ -2934,7 +2957,7 @@ public final class UI
         return new UIForTable<>(table);
     }
 
-    public static UIForTable<JTable> table() { return of(new JTable()); }
+    public static UIForTable<JTable> table() { return of(new Table()); }
 
     /**
      *  Use this to create a new {@link JTable} with a table model whose data can be represented based
@@ -2953,7 +2976,7 @@ public final class UI
     public static <E> UIForTable<JTable> table( ListData dataFormat, TableListDataSource<E> dataSource ) {
         NullUtil.nullArgCheck(dataFormat, "dataFormat", ListData.class);
         NullUtil.nullArgCheck(dataSource, "dataSource", TableListDataSource.class);
-        return of(new JTable()).with(dataFormat, dataSource);
+        return of((JTable) new Table()).with(dataFormat, dataSource);
     }
 
     /**
@@ -2973,11 +2996,11 @@ public final class UI
     public static <E> UIForTable<JTable> table( MapData dataFormat, TableMapDataSource<E> dataSource ) {
         NullUtil.nullArgCheck(dataFormat, "dataFormat", ListData.class);
         NullUtil.nullArgCheck(dataSource, "dataSource", TableMapDataSource.class);
-        return of(new JTable()).with(dataFormat, dataSource);
+        return of((JTable) new Table()).with(dataFormat, dataSource);
     }
 
     public static UIForTable<JTable> table( Buildable<BasicTableModel> tableModelBuildable ) {
-        return of(new JTable()).withModel(tableModelBuildable);
+        return of((JTable) new Table()).withModel(tableModelBuildable);
     }
 
     /**
@@ -3646,6 +3669,60 @@ public final class UI
         public JFrame getFrame() { return this.frame; }
 
         public Component getComponent() { return this.component; }
+    }
+
+
+    /*
+        The following method and subsequent classes are used to smoothly render
+        custom graphics on top of Swing components without requiring
+        the user to override the paint method of the component.
+        This is especially important to allow for declarative UI.
+    */
+
+    private static void _render( JComponent comp, Graphics g ) {
+        java.util.List<Consumer<Graphics2D>> renderer = (java.util.List<Consumer<Graphics2D>>) comp.getClientProperty(Animate.class);
+        if ( renderer != null )
+            renderer.forEach( r -> r.accept((Graphics2D)g) );
+    }
+
+    private static class Button extends JButton {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    private static class Panel extends JPanel {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    private static class Label extends JLabel {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    private static class TextField extends JTextField {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    private static class TextArea extends JTextArea {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    private static class CheckBox extends JCheckBox {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    private static class RadioButton extends JRadioButton {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    private static class ComboBox<E> extends JComboBox<E> {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    private static class List<E> extends JList<E> {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    private static class Table extends JTable {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    private static class Slider extends JSlider {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    private static class PopupMenu extends JPopupMenu {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    private static class MenuItem extends JMenuItem {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
     }
 
 }

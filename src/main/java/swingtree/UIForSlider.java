@@ -128,7 +128,8 @@ public class UIForSlider<S extends JSlider> extends UIForAbstractSwing<UIForSlid
      */
     public final UIForSlider<S> withValue( Val<Integer> val ) {
         NullUtil.nullArgCheck( val, "val", Val.class );
-        _onShow( val, this::withValue);
+        _onShow( val, this::withValue );
+        getComponent().setValue( val.orElseThrow() );
         return this;
     }
 

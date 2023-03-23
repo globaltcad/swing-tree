@@ -76,6 +76,25 @@ public abstract class UIForAbstractButton<I, B extends AbstractButton> extends U
     }
 
     /**
+     *  Use this to set the icon for the wrapped button type.
+     *  This is in essence a convenience method to avoid peeking into this builder like so:
+     *  <pre>{@code
+     *     UI.button("Something")
+     *         .peek( button -> button.setIcon(...) );
+     *  }</pre>
+     *
+     *
+     * @param icon The {@link Icon} which should be displayed on the button.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code icon} is {@code null}.
+     */
+    public I withIcon( Icon icon ) {
+        NullUtil.nullArgCheck(icon,"icon",Icon.class);
+        getComponent().setIcon(icon);
+        return _this();
+    }
+
+    /**
      *  Use this to dynamically set the icon property for the wrapped button type.
      *  When the icon wrapped by the provided property changes,
      *  then so does the icon displayed on this button.

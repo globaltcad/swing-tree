@@ -1252,7 +1252,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withLayout( LayoutManager layout ) {
-        if (_migAlreadySet)
+        if ( _migAlreadySet )
             throw new IllegalArgumentException("The mig layout has already been specified for this component!");
         getComponent().setLayout(layout);
         return _this();

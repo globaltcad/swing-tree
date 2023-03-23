@@ -385,7 +385,7 @@ class MVVM_Example_Spec extends Specification
         given : 'We create a view model.'
             Var<String> address = Var.of("123 Main Street")
             Var<String> title = Var.of("Mr.")
-            Var<Double> price = Var.of(1000000.0d)
+            Var<Integer> price = Var.of(1000000)
             Var<Option> option = Var.of(Option.YES)
 
         and : 'We create 4 view models with 4 locally created views:'
