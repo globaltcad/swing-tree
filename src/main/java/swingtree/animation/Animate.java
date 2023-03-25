@@ -136,7 +136,7 @@ public class Animate
      * @param animation The animation that should be executed.
      */
     public void go( Animation animation ) {
-        AnimationScheduler.schedule( new Animator(_component, _schedule, _condition, animation ) );
+        AnimationScheduler.schedule( new Animator( _component, _schedule, _condition, animation ) );
     }
 
 }

@@ -3,30 +3,35 @@ package swingtree.animation;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 class Animator
 {
-    private final Component _component;
+    private final WeakReference<Component> _compRef;
     private final Schedule _schedule;
     private final StopCondition _condition;
     private final Animation _animation;
 
 
     Animator(
-            Component component,
-            Schedule schedule,
-            StopCondition condition,
-            Animation animation
+        Component component,
+        Schedule schedule,
+        StopCondition condition,
+        Animation animation
     ) {
-        _component = component;
+        _compRef   = component == null ? null : new WeakReference<>(component);
         _schedule  = Objects.requireNonNull(schedule);
         _condition = Objects.requireNonNull(condition);
         _animation = Objects.requireNonNull(animation);
     }
 
-    public JComponent component() { return _component instanceof JComponent ? (JComponent) _component : null; }
+    public JComponent component() {
+        if ( _compRef == null ) return null;
+        Component _component = this._compRef.get();
+        return _component instanceof JComponent ? (JComponent) _component : null;
+    }
 
     private AnimationState _createState( long now, ActionEvent event ) {
         long duration = _schedule.getDurationIn(TimeUnit.MILLISECONDS);
@@ -48,7 +53,6 @@ class Animator
             return true;
 
         AnimationState state = _createState(now, event);
-
         boolean shouldContinue = false;
 
         try {
@@ -56,6 +60,11 @@ class Animator
         } catch ( Exception e ) {
             e.printStackTrace();
         }
+
+        Component component = _compRef == null ? null : _compRef.get();
+
+        if ( _compRef != null && component == null )
+            return false; // There was a component but it has been garbage collected.
 
         if ( !shouldContinue ) {
             try {
@@ -72,9 +81,9 @@ class Animator
             e.printStackTrace();
         }
 
-        if ( _component != null ) {
-            _component.revalidate();
-            _component.repaint();
+        if ( component != null ) {
+            component.revalidate();
+            component.repaint();
         }
 
         return true;
