@@ -237,6 +237,17 @@ public final class UI
     public static CompAttr ALIGN_CENTER = CompAttr.of("align center");
     public static CompAttr ALIGN_LEFT = CompAttr.of("align left");
     public static CompAttr ALIGN_RIGHT = CompAttr.of("align right");
+    public static CompAttr ALIGN_X_CENTER = CompAttr.of("alignx center");
+    public static CompAttr ALIGN_X_LEFT = CompAttr.of("alignx left");
+    public static CompAttr ALIGN_X_RIGHT = CompAttr.of("alignx right");
+    public static CompAttr ALIGN_Y_CENTER = CompAttr.of("aligny center");
+    public static CompAttr ALIGN_Y_BOTTOM = CompAttr.of("aligny bottom");
+    public static CompAttr ALIGN_Y_TOP = CompAttr.of("aligny top");
+    public static CompAttr ALIGN( Position pos ) { return CompAttr.of(pos.toMigAlign()); }
+    public static CompAttr TOP = CompAttr.of("top");
+    public static CompAttr BOTTOM = CompAttr.of("bottom");
+    public static CompAttr LEFT = CompAttr.of("left");
+    public static CompAttr RIGHT = CompAttr.of("right");
     public static CompAttr GAP_LEFT_PUSH = CompAttr.of("gapleft push");
     public static CompAttr GAP_RIGHT_PUSH = CompAttr.of("gapright push");
     public static CompAttr GAP_TOP_PUSH = CompAttr.of("gaptop push");
@@ -328,6 +339,16 @@ public final class UI
                 case LEFT  : return "west";
                 case BOTTOM: return "south";
                 case RIGHT : return "east";
+            }
+            throw new RuntimeException();
+        }
+
+        String toMigAlign() {
+            switch ( this ) {
+                case TOP   : return "top";
+                case LEFT  : return "left";
+                case BOTTOM: return "bottom";
+                case RIGHT : return "right";
             }
             throw new RuntimeException();
         }

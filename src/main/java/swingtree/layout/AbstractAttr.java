@@ -13,12 +13,12 @@ abstract class AbstractAttr
     private final Set<String> _constraints;
 
 
-    AbstractAttr(String... constraint ) {
+    AbstractAttr( String... constraint ) {
         _constraints = new HashSet<>();
         _constraints.addAll(Arrays.asList(constraint));
     }
 
-    protected AbstractAttr _and(AbstractAttr attr, AbstractAttr newAttr ) {
+    protected AbstractAttr _and( AbstractAttr attr, AbstractAttr newAttr ) {
         newAttr._constraints.addAll(_constraints);
         newAttr._constraints.addAll(attr._constraints);
         return newAttr;
