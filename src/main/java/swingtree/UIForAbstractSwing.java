@@ -18,8 +18,6 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.function.Consumer;
 
 
@@ -39,7 +37,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(UI.class);
 
-    private final static Map<JComponent, java.util.List<Timer>> _timers = new WeakHashMap<>(); // We attach garbage collectable timers to components this way!
+    private final static String _TIMERS_KEY = "_swing-tree.timers";
 
     private boolean _idAlreadySet = false; // The id translates to the 'name' property of swing components.
     private boolean _migAlreadySet = false;
@@ -2642,8 +2640,13 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     public final I doUpdates( int delay, Action<SimpleDelegate<C, ActionEvent>> onUpdate ) {
         NullUtil.nullArgCheck(onUpdate, "onUpdate", Action.class);
         Timer timer = new Timer(delay, e -> onUpdate.accept(new SimpleDelegate<>(getComponent(), e, this::getSiblinghood)));
-        synchronized (_timers) {
-            _timers.getOrDefault(getComponent(), new ArrayList<>()).add(timer);
+        {
+            java.util.List<Timer> timers = (java.util.List<Timer>) getComponent().getClientProperty(_TIMERS_KEY);
+            if ( timers == null ) {
+                timers = new ArrayList<>();
+                getComponent().putClientProperty(_TIMERS_KEY, timers);
+            }
+            timers.add(timer);
         }
         timer.start();
         return _this();
