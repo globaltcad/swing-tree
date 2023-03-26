@@ -19,7 +19,59 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    protected UIForSpinner( S component ) { super(component); }
+    protected UIForSpinner( S component ) {
+        super(component);
+        if ( component.getModel() == null || component.getModel().getClass() == SpinnerNumberModel.class ) {
+            /*
+                So it turns out that the default SpinnerNumberModel implementation
+                is not very good. It does not support floating point step sizes...
+                So we have to replace it with our own implementation, where the incrementation logic
+                is a bit more flexible.
+             */
+            SpinnerNumberModel model = (SpinnerNumberModel) component.getModel();
+            component.setModel(
+                new SpinnerNumberModel(
+                    model.getNumber().doubleValue(),
+                    model.getMinimum(),
+                    model.getMaximum(),
+                    model.getStepSize().doubleValue()
+                ) {
+                    private Number incrValue(int dir)
+                    {
+                        Number newValue;
+                        Number value = this.getNumber();
+                        Number stepSize = this.getStepSize();
+                        Comparable<Number> maximum = this.getMaximum();
+                        Comparable<Number> minimum = this.getMinimum();
+                        boolean valueIsRational = (value instanceof Float) || (value instanceof Double);
+                        boolean stepIsRational = (stepSize instanceof Float) || (stepSize instanceof Double);
+                        if ( valueIsRational || stepIsRational ) {
+                            double v = value.doubleValue() + (stepSize.doubleValue() * (double)dir);
+                            if ( value instanceof Double || stepSize instanceof Double )
+                                newValue = v;
+                            else
+                                newValue = (float) v;
+                        }
+                        else {
+                            long v = value.longValue() + (stepSize.longValue() * (long)dir);
+
+                            if      ( value instanceof Long    ) newValue = v;
+                            else if ( value instanceof Integer ) newValue = (int) v;
+                            else if ( value instanceof Short   ) newValue = (short) v;
+                            else
+                                newValue = (byte) v;
+                        }
+                        if ( (maximum != null) && (maximum.compareTo(newValue) < 0) ) return null;
+                        if ( (minimum != null) && (minimum.compareTo(newValue) > 0) ) return null;
+                        else
+                            return newValue;
+                    }
+                    @Override public Object getNextValue() { return incrValue(+1); }
+                    @Override public Object getPreviousValue() { return incrValue(-1); }
+                }
+            );
+        }
+    }
 
     /**
      * Adds an {@link Action} to the underlying {@link JSpinner}

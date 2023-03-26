@@ -39,7 +39,7 @@ public class SomeSpinnersView extends JPanel {
 				)
 				.add(WIDTH(10, 12, 15), label("x"))
 				.add(WIDTH(30, 52, 75).and(GROW).and(PUSH_Y),
-					spinner(vm.getPercent())
+					spinner(vm.getPercent()).withStepSize(0.1)
 				)
 				.add(WIDTH(10, 60, 15), label("%"))
 			)

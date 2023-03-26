@@ -6,7 +6,7 @@ public class SomeSpinnersViewModel {
 
 	private final Var<BaseSize> baseSize = Var.of(BaseSize.FACTOR).onAct(it->baseSizeChanged());
 	private final Var<Integer> x = Var.of(100);
-	private final Var<Integer> percent = Var.of(100);
+	private final Var<Double> percent = Var.of(100.0);
 
     public Var<BaseSize> getBaseSize() {
         return baseSize;
@@ -16,7 +16,7 @@ public class SomeSpinnersViewModel {
 		return x;
 	}
 
-	public Var<Integer> getPercent() {
+	public Var<Double> getPercent() {
 		return percent;
 	}
 
