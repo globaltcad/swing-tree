@@ -31,10 +31,10 @@ public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSp
             SpinnerNumberModel model = (SpinnerNumberModel) component.getModel();
             component.setModel(
                 new SpinnerNumberModel(
-                    model.getNumber().doubleValue(),
+                    model.getNumber(),
                     model.getMinimum(),
                     model.getMaximum(),
-                    model.getStepSize().doubleValue()
+                    model.getStepSize()
                 ) {
                     private Number incrValue(int dir)
                     {
