@@ -13,10 +13,10 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import java.util.*;
 
-public class UIForTable<T extends JTable> extends UIForAbstractSwing<UIForTable<T>, T>
+public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T>
 {
     /**
-     * Extensions of the {@link  UIForAbstractSwing} always wrap
+     * Extensions of the {@link  UIForAnySwing} always wrap
      * a single component for which they are responsible.
      *
      * @param component The JComponent type which will be wrapped by this builder node.

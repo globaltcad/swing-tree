@@ -1,10 +1,10 @@
 package swingtree.api;
 
-import swingtree.UIForAbstractSwing;
+import swingtree.UIForAnySwing;
 
 /**
  *  Applies an action to the current component.
- *  See {@link UIForAbstractSwing#peek(Peeker)}.
+ *  See {@link UIForAnySwing#peek(Peeker)}.
  * 	<p>
  * 	<b>Consider taking a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of Swing-Tree in general.</b>

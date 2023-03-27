@@ -1,9 +1,9 @@
 package swingtree;
 
+import sprouts.Action;
+import sprouts.*;
 import swingtree.api.ListEntryDelegate;
 import swingtree.api.ListEntryRenderer;
-import sprouts.*;
-import sprouts.Action;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -19,11 +19,11 @@ import java.util.Optional;
  *
  * @param <L> The type of the {@link JList} instance which will be wrapped by this builder node.
  */
-public class UIForList<E, L extends JList<E>> extends UIForAbstractSwing<UIForList<E, L>, L>
+public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E, L>, L>
 {
 
     /**
-     * Extensions of the {@link  UIForAbstractSwing} always wrap
+     * Extensions of the {@link  UIForAnySwing} always wrap
      * a single component for which they are responsible.
      *
      * @param component The JComponent type which will be wrapped by this builder node.

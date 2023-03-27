@@ -4,9 +4,9 @@ import sprouts.Var;
 
 import javax.swing.*;
 
-public abstract class UIForAbstractToggleButton<I, B extends JToggleButton> extends UIForAbstractButton<I, B>
+public abstract class UIForAnyToggleButton<I, B extends JToggleButton> extends UIForAnyButton<I, B>
 {
-    protected UIForAbstractToggleButton( B component ) { super(component); }
+    protected UIForAnyToggleButton(B component ) { super(component); }
 
     /**
      *  Use this to dynamically bind to an enum based {@link sprouts.Var}

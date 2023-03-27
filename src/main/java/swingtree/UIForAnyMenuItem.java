@@ -4,9 +4,9 @@ import sprouts.Val;
 
 import javax.swing.*;
 
-public class UIForAbstractMenuItem<I, M extends JMenuItem> extends UIForAbstractButton<I, M>
+public class UIForAnyMenuItem<I, M extends JMenuItem> extends UIForAnyButton<I, M>
 {
-    protected UIForAbstractMenuItem( M component ) { super(component); }
+    protected UIForAnyMenuItem(M component ) { super(component); }
 
     /**
      * Sets the key combination which invokes the wrapped {@link JMenuItem}'s

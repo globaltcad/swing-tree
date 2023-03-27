@@ -7,10 +7,10 @@ import javax.swing.*;
 /**
  *  A swing tree builder node for {@link JScrollPane} instances.
  */
-public class UIForScrollPane<P extends JScrollPane> extends UIForAbstractSwing<UIForScrollPane<P>, P>
+public class UIForScrollPane<P extends JScrollPane> extends UIForAnySwing<UIForScrollPane<P>, P>
 {
     /**
-     * {@link UIForAbstractSwing} (sub)types always wrap
+     * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.

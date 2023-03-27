@@ -2,15 +2,11 @@ package swingtree;
 
 import com.alexandriasoftware.swing.JSplitButton;
 import com.formdev.flatlaf.FlatLightLaf;
-import swingtree.UIForSplitButton;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class Utility {
 
@@ -65,7 +61,7 @@ public class Utility {
 
         public Query(Component current) { _current = current; }
 
-        public Query(UIForAbstractSwing ui) {
+        public Query(UIForAnySwing ui) {
             this(ui.getComponent());
         }
 

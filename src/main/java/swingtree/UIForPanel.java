@@ -1,8 +1,8 @@
 package swingtree;
 
+import net.miginfocom.swing.MigLayout;
 import sprouts.Val;
 import swingtree.layout.LayoutAttr;
-import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,7 +10,7 @@ import java.awt.*;
 /**
  *  A swing tree builder node for {@link JPanel} instances.
  */
-public class UIForPanel<P extends JPanel> extends UIForAbstractSwing<UIForPanel<P>, P>
+public class UIForPanel<P extends JPanel> extends UIForAnySwing<UIForPanel<P>, P>
 {
     protected UIForPanel( P component ) { super(component); }
 

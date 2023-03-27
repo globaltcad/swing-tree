@@ -11,10 +11,10 @@ import java.util.function.Consumer;
 /**
  *  A swing tree builder node for {@link JSpinner} instances.
  */
-public class UIForSpinner<S extends JSpinner> extends UIForAbstractSwing<UIForSpinner<S>, S>
+public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner<S>, S>
 {
     /**
-     * {@link UIForAbstractSwing} (sub)types always wrap
+     * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.

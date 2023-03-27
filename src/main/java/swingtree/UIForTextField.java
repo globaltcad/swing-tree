@@ -3,7 +3,6 @@ package swingtree;
 import sprouts.Action;
 import sprouts.Val;
 import sprouts.Var;
-import sprouts.Vars;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -16,7 +15,7 @@ import java.util.function.Consumer;
  * 	<b>Take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class or other classes.</b>
  */
-public class UIForTextField<F extends JTextField> extends UIForAbstractTextComponent<UIForTextField<F>, F>
+public class UIForTextField<F extends JTextField> extends UIForAnyTextComponent<UIForTextField<F>, F>
 {
     protected UIForTextField( F component ) { super( component ); }
 

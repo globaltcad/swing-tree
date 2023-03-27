@@ -4,10 +4,10 @@ import sprouts.Val;
 
 import javax.swing.*;
 
-public class UIForToolBar<T extends JToolBar> extends UIForAbstractSwing<UIForToolBar<T>, T>
+public class UIForToolBar<T extends JToolBar> extends UIForAnySwing<UIForToolBar<T>, T>
 {
     /**
-     * {@link UIForAbstractSwing} (sub)types always wrap
+     * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.

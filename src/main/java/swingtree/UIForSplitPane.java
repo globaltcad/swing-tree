@@ -9,10 +9,10 @@ import java.awt.event.ComponentEvent;
 /**
  *  A swing tree builder node for {@link JSplitPane} instances.
  */
-public class UIForSplitPane<P extends JSplitPane> extends UIForAbstractSwing<UIForSplitPane<P>, P>
+public class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSplitPane<P>, P>
 {
     /**
-     * {@link UIForAbstractSwing} (sub)types always wrap
+     * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.

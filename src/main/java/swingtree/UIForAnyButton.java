@@ -13,7 +13,7 @@ import java.awt.event.ItemListener;
 import java.util.function.Consumer;
 
 /**
- *  The following is a more specialized type of builder node based on the {@link UIForAbstractSwing} builder type,
+ *  The following is a more specialized type of builder node based on the {@link UIForAnySwing} builder type,
  *  and provides additional features associated with the more specialized
  *  {@link AbstractButton}" Swing component type.
  *  One of such features is the {@link #onClick(Action)} method allowing for a more readable way of adding
@@ -25,9 +25,9 @@ import java.util.function.Consumer;
  *
  * @param <B> The type parameter for the component wrapped by an instance of this class.
  */
-public abstract class UIForAbstractButton<I, B extends AbstractButton> extends UIForAbstractSwing<I, B>
+public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForAnySwing<I, B>
 {
-    protected UIForAbstractButton( B component ) { super(component); }
+    protected UIForAnyButton(B component ) { super(component); }
 
     /**
      * Defines the single line of text the wrapped button type will display.

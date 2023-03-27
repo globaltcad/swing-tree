@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 /**
  *  A swing tree builder node for {@link JSplitButton} instances.
  */
-public class UIForSplitButton<B extends JSplitButton> extends UIForAbstractButton<UIForSplitButton<B>, B>
+public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIForSplitButton<B>, B>
 {
     private final JPopupMenu _popupMenu = new JPopupMenu();
     private final Map<JMenuItem, Action<SplitItem.Delegate<JMenuItem>>> _options = new LinkedHashMap<>(16);

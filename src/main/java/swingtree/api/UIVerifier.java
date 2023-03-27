@@ -1,13 +1,14 @@
 package swingtree.api;
 
 import swingtree.SimpleDelegate;
+import swingtree.UIForAnySwing;
 
 import javax.swing.*;
 import java.awt.event.ComponentEvent;
 
 /**
  *  A functional interface for doing swing component validity verification.
- *  Passing this to the {@link swingtree.UIForAbstractSwing#isValidIf(UIVerifier)} method will
+ *  Passing this to the {@link UIForAnySwing#isValidIf(UIVerifier)} method will
  *  lead to the creation and attachment of a {@link InputVerifier} to the component, which will
  *  be called when the component is validated.
  *

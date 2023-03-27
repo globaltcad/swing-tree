@@ -41,8 +41,8 @@ import java.util.function.Supplier;
  *  by peeking into the underlying swing components or registering user actions through lambdas.
  *  Swing tree works especially well alongside {@link MigLayout}s,
  *  which is why this general purpose {@link LayoutManager} is integrated into this library.
- *  Simply pass {@link String} constraints to the {@link UIForAbstractSwing#withLayout(String, String)}
- *  and any given {@link UIForAbstractSwing#add(String, UIForAbstractSwing[])} method
+ *  Simply pass {@link String} constraints to the {@link UIForAnySwing#withLayout(String, String)}
+ *  and any given {@link UIForAnySwing#add(String, UIForAnySwing[])} method
  *  or variant of, to make use of mig layouts.
  * 	<p>
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
@@ -1094,8 +1094,8 @@ public final class UI
      * @return A {@link Tab} instance containing everything needed to be added to a {@link JTabbedPane}.
      * @throws IllegalArgumentException if {@code builder} is {@code null}.
      */
-    public static Tab tab( UIForAbstractSwing<?, ?> builder ) {
-        NullUtil.nullArgCheck(builder, "builder", UIForAbstractSwing.class);
+    public static Tab tab( UIForAnySwing<?, ?> builder ) {
+        NullUtil.nullArgCheck(builder, "builder", UIForAnySwing.class);
         return new Tab(null, builder.getComponent(), null, null, null, null, null, null, null);
     }
 
@@ -3639,7 +3639,7 @@ public final class UI
      *  Use this to quickly launch a UI component in a {@link JFrame} window
      *  at the center of the screen.
      */
-    public static <C extends JComponent> void show( UIForAbstractSwing<?, C> ui ) {
+    public static <C extends JComponent> void show( UIForAnySwing<?, C> ui ) {
         new UI.TestWindow( f -> ui.getComponent() );
     }
 

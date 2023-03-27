@@ -2,10 +2,7 @@ package swingtree;
 
 import javax.swing.*;
 
-/**
- *  A swing tree builder node for {@link JComponent} types.
- */
-public class UIForSwing<C extends JComponent> extends UIForAnySwing<UIForSwing<C>, C>
+public class UIForAnyEditorPane<I, C extends JEditorPane> extends UIForAnyTextComponent<I, C>
 {
     /**
      * {@link UIForAnySwing} (sub)types always wrap
@@ -13,5 +10,7 @@ public class UIForSwing<C extends JComponent> extends UIForAnySwing<UIForSwing<C
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    public UIForSwing( C component ) { super(component); }
+    public UIForAnyEditorPane(C component) { super(component); }
+
+
 }

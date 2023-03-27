@@ -11,7 +11,7 @@ import java.awt.*;
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
  */
-public class UIForSeparator<S extends JSeparator> extends UIForAbstractSwing<UIForSeparator<S>, S>
+public class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UIForSeparator<S>, S>
 {
     /**
      * Instances of ths {@link UIForSeparator} always wrap

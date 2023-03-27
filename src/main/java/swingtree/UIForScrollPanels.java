@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<P>
 {
 	/**
-	 * Extensions of the {@link  UIForAbstractSwing} always wrap
+	 * Extensions of the {@link  UIForAnySwing} always wrap
 	 * a single component for which they are responsible.
 	 *
 	 * @param component The JComponent type which will be wrapped by this builder node.

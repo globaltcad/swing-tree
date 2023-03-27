@@ -7,7 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.function.Consumer;
 
-public class UIForFormattedTextField extends UIForAbstractTextComponent<UIForFormattedTextField, JFormattedTextField>
+public class UIForFormattedTextField extends UIForAnyTextComponent<UIForFormattedTextField, JFormattedTextField>
 {
     protected UIForFormattedTextField( JFormattedTextField component ) { super(component); }
 

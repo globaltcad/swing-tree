@@ -38,14 +38,14 @@ public final class Tab
     private final Action<SimpleDelegate<JTabbedPane, MouseEvent>> _onMouseClick;
 
     Tab(
-            JComponent contents,
-            JComponent headerComponent,
-            Val<String> title,
-            Var<Boolean> isSelected, Val<Boolean> isEnabled,
-            Val<Icon> icon,
-            Val<String> tip,
-            Action<SimpleDelegate<JTabbedPane, ChangeEvent>> onSelected,
-            Action<SimpleDelegate<JTabbedPane, MouseEvent>> onMouseClick
+        JComponent contents,
+        JComponent headerComponent,
+        Val<String> title,
+        Var<Boolean> isSelected, Val<Boolean> isEnabled,
+        Val<Icon> icon,
+        Val<String> tip,
+        Action<SimpleDelegate<JTabbedPane, ChangeEvent>> onSelected,
+        Action<SimpleDelegate<JTabbedPane, MouseEvent>> onMouseClick
     ) {
         if ( headerComponent == null )
             NullUtil.nullArgCheck(title,"title",String.class);
@@ -209,16 +209,35 @@ public final class Tab
         return new Tab(_contents, headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
     }
 
-    public final Tab withHeader( UIForAbstractSwing<?,?> headerComponent ) {
-        NullUtil.nullArgCheck(headerComponent,"headerComponent",UIForAbstractSwing.class);
+    /**
+     *  Use this to add custom components to the tab header like buttons,
+     *  or labels with icons.
+     *
+     * @param headerComponent The component which should be displayed in the tab header.
+     * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
+     */
+    public final Tab withHeader( UIForAnySwing<?,?> headerComponent ) {
+        NullUtil.nullArgCheck(headerComponent,"headerComponent", UIForAnySwing.class);
         return this.withHeader( headerComponent.getComponent() );
     }
 
-    public final Tab add(UIForAbstractSwing<?,?> contents) {
+    /**
+     *  Use this to add the contents UI to the tab.
+     *
+     * @param contents The contents which should be displayed in the tab.
+     * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
+     */
+    public final Tab add(UIForAnySwing<?,?> contents) {
         if ( _contents != null ) throw new IllegalArgumentException("Contents already specified!");
         return new Tab(contents.getComponent(), _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
     }
 
+    /**
+     *  Use this to add the contents UI to the tab.
+     *
+     * @param contents The contents which should be displayed in the tab.
+     * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
+     */
     public final Tab add(JComponent contents) {
         if ( _contents != null ) throw new IllegalArgumentException("Contents already specified!");
         return new Tab(contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
@@ -259,9 +278,7 @@ public final class Tab
 
     final Optional<JComponent> headerContents() { return Optional.ofNullable(_headerComponent); }
 
-    final Optional<Action<SimpleDelegate<JTabbedPane, ChangeEvent>>> onSelection() {
-        return Optional.ofNullable(_onSelected);
-    }
+    final Optional<Action<SimpleDelegate<JTabbedPane, ChangeEvent>>> onSelection() { return Optional.ofNullable(_onSelected); }
 
     final Optional<Action<SimpleDelegate<JTabbedPane, MouseEvent>>> onMouseClick() { return Optional.ofNullable(_onMouseClick); }
 }

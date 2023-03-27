@@ -20,13 +20,13 @@ import java.util.function.Supplier;
 /**
  *  A swing tree builder node for {@link JTabbedPane} instances.
  */
-public class UIForTabbedPane<P extends JTabbedPane> extends UIForAbstractSwing<UIForTabbedPane<P>, P>
+public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForTabbedPane<P>, P>
 {
     private final List<Consumer<Integer>> _selectionListeners = new ArrayList<>();
     private Var<Integer> _selectedTabIndex = null;
 
     /**
-     * {@link UIForAbstractSwing} (sub)types always wrap
+     * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.

@@ -18,6 +18,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 
@@ -33,7 +34,7 @@ import java.util.function.Consumer;
  * @param <I> The concrete extension of the {@link AbstractNestedBuilder}.
  * @param <C> The type parameter for the component type wrapped by an instance of this class.
  */
-public abstract class UIForAbstractSwing<I, C extends JComponent> extends AbstractNestedBuilder<I, C, JComponent>
+public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNestedBuilder<I, C, JComponent>
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(UI.class);
 
@@ -43,12 +44,12 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
     private boolean _migAlreadySet = false;
 
     /**
-     *  Extensions of the {@link  UIForAbstractSwing} always wrap
+     *  Extensions of the {@link  UIForAnySwing} always wrap
      *  a single component for which they are responsible.
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    public UIForAbstractSwing( C component ) { super(component); }
+    public UIForAnySwing(C component ) { super(component); }
 
     /**
      * @param action An action which should be executed by the UI thread (EDT).
@@ -550,6 +551,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withBorder( Border border ) {
+        Objects.requireNonNull(border, "Null value for border is not allowed! Use an empty border instead!");
         getComponent().setBorder( border );
         return _this();
     }
@@ -2666,7 +2668,7 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param <T> The type of the {@link JComponent} which is wrapped by the provided builder.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final <T extends JComponent> I add( UIForAbstractSwing<?, T> builder ) {
+    public final <T extends JComponent> I add( UIForAnySwing<?, T> builder ) {
         this.add(new AbstractNestedBuilder[]{builder});
         return _this();
     }
@@ -2684,8 +2686,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param <T> The type of the {@link JComponent} which is wrapped by the provided builder.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final <T extends JComponent> I add( String attr, UIForAbstractSwing<?, T> builder ) {
-        return this.add(attr, new UIForAbstractSwing[]{builder});
+    public final <T extends JComponent> I add( String attr, UIForAnySwing<?, T> builder ) {
+        return this.add(attr, new UIForAnySwing[]{builder});
     }
 
     /**
@@ -2701,8 +2703,8 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param <T> The type of the {@link JComponent} which is wrapped by the provided builder.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final <T extends JComponent> I add( CompAttr attr, UIForAbstractSwing<?, T> builder ) {
-        return this.add(attr.toString(), new UIForAbstractSwing[]{builder});
+    public final <T extends JComponent> I add( CompAttr attr, UIForAnySwing<?, T> builder ) {
+        return this.add(attr.toString(), new UIForAnySwing[]{builder});
     }
 
     /**
@@ -2716,18 +2718,18 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param attr The additional mig-layout information which should be passed to the UI tree.
      * @param builders An array of builders for a corresponding number of {@link JComponent} 
      *                  type which ought to be added to the wrapped component type of this builder.
-     * @param <B> The builder type parameter, a subtype of {@link UIForAbstractSwing}.
+     * @param <B> The builder type parameter, a subtype of {@link UIForAnySwing}.
      * @return This very instance, which enables builder-style method chaining.
      */
     @SafeVarargs
-    public final <B extends UIForAbstractSwing<?, ?>> I add( String attr, B... builders ) {
+    public final <B extends UIForAnySwing<?, ?>> I add(String attr, B... builders ) {
         LayoutManager layout = getComponent().getLayout();
         if ( _isBorderLayout(attr) && !(layout instanceof BorderLayout) ) {
             if ( layout instanceof MigLayout )
                 log.warn("Layout ambiguity detected! Border layout constraint cannot be added to 'MigLayout'.");
             getComponent().setLayout(new BorderLayout()); // The UI Maker tries to fill in the blanks!
         }
-        for ( UIForAbstractSwing<?, ?> b : builders ) _doAdd(b, attr);
+        for ( UIForAnySwing<?, ?> b : builders ) _doAdd(b, attr);
         return _this();
     }
 
@@ -2742,11 +2744,11 @@ public abstract class UIForAbstractSwing<I, C extends JComponent> extends Abstra
      * @param attr The first mig-layout information which should be passed to the UI tree.
      * @param builders An array of builders for a corresponding number of {@link JComponent}
      *                  type which ought to be added to the wrapped component type of this builder.
-     * @param <B> The builder type parameter, a subtype of {@link UIForAbstractSwing}.
+     * @param <B> The builder type parameter, a subtype of {@link UIForAnySwing}.
      * @return This very instance, which enables builder-style method chaining.
      */
     @SafeVarargs
-    public final <B extends UIForAbstractSwing<?, ?>> I add( CompAttr attr, B... builders ) {
+    public final <B extends UIForAnySwing<?, ?>> I add(CompAttr attr, B... builders ) {
         return this.add(attr.toString(), builders);
     }
 

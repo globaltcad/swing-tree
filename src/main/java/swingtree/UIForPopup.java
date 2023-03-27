@@ -10,7 +10,7 @@ import javax.swing.*;
  * 	<b>Take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class or other classes.</b>
  */
-public class UIForPopup<P extends JPopupMenu> extends UIForAbstractSwing<UIForPopup<P>, P>
+public class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForPopup<P>, P>
 {
     protected UIForPopup( P component ) { super(component); }
 

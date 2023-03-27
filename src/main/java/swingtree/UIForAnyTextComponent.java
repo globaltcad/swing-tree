@@ -9,7 +9,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -20,7 +19,7 @@ import java.util.function.Consumer;
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
  */
-public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> extends UIForAbstractSwing<I, C>
+public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends UIForAnySwing<I, C>
 {
     private final java.util.List<Action<RemoveDelegate>>   removes = new ArrayList<>();
     private final java.util.List<Action<InsertDelegate>>   inserts = new ArrayList<>();
@@ -59,7 +58,7 @@ public abstract class UIForAbstractTextComponent<I, C extends JTextComponent> ex
         }
     };
 
-    protected UIForAbstractTextComponent(C component) { super(component); }
+    protected UIForAnyTextComponent(C component) { super(component); }
 
     /**
      * Sets the text of the wrapped <code>{@link TextComponent}</code>

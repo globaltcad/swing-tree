@@ -7,7 +7,7 @@ import javax.swing.*;
 /**
  *  A swing tree builder node for {@link JPasswordField} instances.
  */
-public class UIForPasswordField<F extends JPasswordField> extends UIForAbstractTextComponent<UIForPasswordField<F>, F>
+public class UIForPasswordField<F extends JPasswordField> extends UIForAnyTextComponent<UIForPasswordField<F>, F>
 {
     protected UIForPasswordField(F component) { super(component); }
 
