@@ -24,6 +24,11 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAbstractSwing<U
             // Swing does not support any constraints for scroll panes, but we are not Swing, we are SwingTree!
             component = UI.panel("fill, ins 0").add(conf.toString(), component).getComponent();
             //  ^ So we improve this situation by wrapping the component in a mig layout panel, supporting constraints.
+
+            // Let's strip it of any visible properties, since it should serve merely as a container.
+            component.setBorder(null);
+            component.setOpaque(false);
+            component.setBackground(null);
         }
         getComponent().setViewportView(component);
     }
@@ -118,5 +123,56 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAbstractSwing<U
     public final UIForScrollPane<P> withHorizontalScrollIncrement( int increment ) {
         getComponent().getHorizontalScrollBar().setUnitIncrement(increment);
         return this;
+    }
+
+    /**
+     * Use this to set the vertical and horizontal scroll increment.
+     * @param increment The scroll increment to use.
+     * @return This builder instance, to allow for method chaining.
+     */
+    public final UIForScrollPane<P> withScrollIncrement( int increment ) {
+        return this.withVerticalScrollIncrement(increment)
+                   .withHorizontalScrollIncrement(increment);
+    }
+
+    /**
+     *  Use this to set the vertical scroll block increment.
+     *
+     * @param increment The scroll vertical block increment to use.
+     * @return This builder instance, to allow for method chaining.
+     */
+    public final UIForScrollPane<P> withVerticalBlockScrollIncrement(int increment ) {
+        getComponent().getVerticalScrollBar().setBlockIncrement(increment);
+        return this;
+    }
+
+    /**
+     *  Use this to set the horizontal scroll block increment.
+     *  It is the amount to change the scrollbar's value by,
+     *  given a block (usually "page") up/down request or when the user clicks
+     *  above or below the scrollbar "knob" to change the value
+     *  up or down by large amount.
+     *
+     * @param increment The scroll horizontal block increment to use.
+     * @return This builder instance, to allow for method chaining.
+     */
+    public final UIForScrollPane<P> withHorizontalBlockScrollIncrement(int increment ) {
+        getComponent().getHorizontalScrollBar().setBlockIncrement(increment);
+        return this;
+    }
+
+    /**
+     * Use this to set the vertical and horizontal scroll block increment.
+     * The block increment is the amount to change the scrollbar's value by,
+     * given a block (usually "page") up/down request or when the user clicks
+     * above or below the scrollbar "knob" to change the value
+     * up or down by large amount.
+     *
+     * @param increment The scroll block increment to use.
+     * @return This builder instance, to allow for method chaining.
+     */
+    public final UIForScrollPane<P> withBlockScrollIncrement( int increment ) {
+        return this.withVerticalBlockScrollIncrement(increment)
+                   .withHorizontalBlockScrollIncrement(increment);
     }
 }
