@@ -13,12 +13,12 @@ abstract class AbstractAttr
     private final Set&lt;String&gt; _constraints;
 
 
-<span class="fc" id="L16">    AbstractAttr(String... constraint ) {</span>
+<span class="fc" id="L16">    AbstractAttr( String... constraint ) {</span>
 <span class="fc" id="L17">        _constraints = new HashSet&lt;&gt;();</span>
 <span class="fc" id="L18">        _constraints.addAll(Arrays.asList(constraint));</span>
 <span class="fc" id="L19">    }</span>
 
-    protected AbstractAttr _and(AbstractAttr attr, AbstractAttr newAttr ) {
+    protected AbstractAttr _and( AbstractAttr attr, AbstractAttr newAttr ) {
 <span class="fc" id="L22">        newAttr._constraints.addAll(_constraints);</span>
 <span class="fc" id="L23">        newAttr._constraints.addAll(attr._constraints);</span>
 <span class="fc" id="L24">        return newAttr;</span>

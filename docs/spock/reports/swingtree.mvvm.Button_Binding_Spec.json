@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.007 seconds"
+    "duration":"0.010 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -85,7 +85,7 @@
     {
       "id":"A button group will not only synchronize the selection state of radio buttons, but also bound properties.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Using a button group is a convenient way to synchronize the selection state of radio buttons.\n            When one radio button is selected, all other radio buttons in the same group will be deselected.\n            This is a very common pattern in UIs, and swing-tree makes it easy to implement\n            along with the binding of properties.\n            So the selection states of a radio buttons will also\n            translate to the selection state of all bound properties.\n        "]
       },

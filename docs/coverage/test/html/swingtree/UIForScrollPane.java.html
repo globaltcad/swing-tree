@@ -19,10 +19,19 @@ public class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAbstractS
 
     @Override
     protected void _add( JComponent component, Object conf ) {
-<span class="pc bpc" id="L22" title="1 of 2 branches missed.">        if ( conf != null )</span>
-<span class="nc" id="L23">            throw new IllegalArgumentException(&quot;Unknown constraint '&quot;+conf+&quot;'! (scroll pane does not support any constraint)&quot;);</span>
-<span class="fc" id="L24">        getComponent().setViewportView(component);</span>
-<span class="fc" id="L25">    }</span>
+<span class="pc bpc" id="L22" title="1 of 2 branches missed.">        if ( conf != null ) {</span>
+            // The user wants to add a component to the scroll pane with a specific constraint.
+            // Swing does not support any constraints for scroll panes, but we are not Swing, we are SwingTree!
+<span class="nc" id="L25">            component = UI.panel(&quot;fill, ins 0&quot;).add(conf.toString(), component).getComponent();</span>
+            //  ^ So we improve this situation by wrapping the component in a mig layout panel, supporting constraints.
+
+            // Let's strip it of any visible properties, since it should serve merely as a container.
+<span class="nc" id="L29">            component.setBorder(null);</span>
+<span class="nc" id="L30">            component.setOpaque(false);</span>
+<span class="nc" id="L31">            component.setBackground(null);</span>
+        }
+<span class="fc" id="L33">        getComponent().setViewportView(component);</span>
+<span class="fc" id="L34">    }</span>
 
     /**
      *  Use this to set the scroll bars policy for both horizontal and vertical scroll bars.
@@ -31,9 +40,9 @@ public class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAbstractS
      * @return This builder node.
      */
     public final UIForScrollPane&lt;P&gt; with( UI.ScrollBarPolicy scrollPolicy ) {
-<span class="fc" id="L34">        this.withVertical(scrollPolicy);</span>
-<span class="fc" id="L35">        this.withHorizontal(scrollPolicy);</span>
-<span class="fc" id="L36">        return this;</span>
+<span class="fc" id="L43">        this.withVertical(scrollPolicy);</span>
+<span class="fc" id="L44">        this.withHorizontal(scrollPolicy);</span>
+<span class="fc" id="L45">        return this;</span>
     }
 
     /**
@@ -43,14 +52,14 @@ public class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAbstractS
      * @return This builder node.
      */
     public final UIForScrollPane&lt;P&gt; withVertical( UI.ScrollBarPolicy scrollBarPolicy ) {
-<span class="fc" id="L46">        P pane = getComponent();</span>
-<span class="pc bpc" id="L47" title="1 of 4 branches missed.">        switch ( scrollBarPolicy )</span>
+<span class="fc" id="L55">        P pane = getComponent();</span>
+<span class="pc bpc" id="L56" title="1 of 4 branches missed.">        switch ( scrollBarPolicy )</span>
         {
-<span class="fc" id="L49">            case NEVER: pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER); break;</span>
-<span class="fc" id="L50">            case ALWAYS: pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS); break;</span>
-<span class="fc" id="L51">            case AS_NEEDED: pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED); break;</span>
+<span class="fc" id="L58">            case NEVER: pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER); break;</span>
+<span class="fc" id="L59">            case ALWAYS: pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS); break;</span>
+<span class="fc" id="L60">            case AS_NEEDED: pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED); break;</span>
         }
-<span class="fc" id="L53">        return this;</span>
+<span class="fc" id="L62">        return this;</span>
     }
 
     /**
@@ -60,9 +69,9 @@ public class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAbstractS
      * @return This builder node.
      */
     public final UIForScrollPane&lt;P&gt; withVerticalScrollBarPolicy( Val&lt;UI.ScrollBarPolicy&gt; scrollBarPolicy ) {
-<span class="fc" id="L63">        NullUtil.nullArgCheck(scrollBarPolicy, &quot;scrollBarPolicy&quot;, Val.class);</span>
-<span class="fc" id="L64">        _onShow(scrollBarPolicy, v -&gt; withVertical(v));</span>
-<span class="fc" id="L65">        return this;</span>
+<span class="fc" id="L72">        NullUtil.nullArgCheck(scrollBarPolicy, &quot;scrollBarPolicy&quot;, Val.class);</span>
+<span class="fc" id="L73">        _onShow(scrollBarPolicy, v -&gt; withVertical(v));</span>
+<span class="fc" id="L74">        return this;</span>
     }
 
     /**
@@ -72,14 +81,14 @@ public class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAbstractS
      * @return This builder node.
      */
     public final UIForScrollPane&lt;P&gt; withHorizontal( UI.ScrollBarPolicy scrollBarPolicy ) {
-<span class="fc" id="L75">        P pane = getComponent();</span>
-<span class="pc bpc" id="L76" title="2 of 4 branches missed.">        switch ( scrollBarPolicy )</span>
+<span class="fc" id="L84">        P pane = getComponent();</span>
+<span class="pc bpc" id="L85" title="2 of 4 branches missed.">        switch ( scrollBarPolicy )</span>
         {
-<span class="fc" id="L78">            case NEVER: pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); break;</span>
-<span class="nc" id="L79">            case ALWAYS: pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS); break;</span>
-<span class="fc" id="L80">            case AS_NEEDED: pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED); break;</span>
+<span class="fc" id="L87">            case NEVER: pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); break;</span>
+<span class="nc" id="L88">            case ALWAYS: pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS); break;</span>
+<span class="fc" id="L89">            case AS_NEEDED: pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED); break;</span>
         }
-<span class="fc" id="L82">        return this;</span>
+<span class="fc" id="L91">        return this;</span>
     }
 
     /**
@@ -89,9 +98,9 @@ public class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAbstractS
      * @return This builder node.
      */
     public final UIForScrollPane&lt;P&gt; withHorizontalScrollBarPolicy( Val&lt;UI.ScrollBarPolicy&gt; scrollBarPolicy ) {
-<span class="fc" id="L92">        NullUtil.nullArgCheck(scrollBarPolicy, &quot;scrollBarPolicy&quot;, Val.class);</span>
-<span class="fc" id="L93">        _onShow(scrollBarPolicy, v -&gt; withHorizontal(v) );</span>
-<span class="fc" id="L94">        return this;</span>
+<span class="fc" id="L101">        NullUtil.nullArgCheck(scrollBarPolicy, &quot;scrollBarPolicy&quot;, Val.class);</span>
+<span class="fc" id="L102">        _onShow(scrollBarPolicy, v -&gt; withHorizontal(v) );</span>
+<span class="fc" id="L103">        return this;</span>
     }
 
     /**
@@ -101,8 +110,8 @@ public class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAbstractS
      * @return This builder instance, to allow for method chaining.
      */
     public final UIForScrollPane&lt;P&gt; withVerticalScrollIncrement( int increment ) {
-<span class="nc" id="L104">        getComponent().getVerticalScrollBar().setUnitIncrement(increment);</span>
-<span class="nc" id="L105">        return this;</span>
+<span class="fc" id="L113">        getComponent().getVerticalScrollBar().setUnitIncrement(increment);</span>
+<span class="fc" id="L114">        return this;</span>
     }
 
     /**
@@ -112,8 +121,59 @@ public class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAbstractS
      * @return This builder instance, to allow for method chaining.
      */
     public final UIForScrollPane&lt;P&gt; withHorizontalScrollIncrement( int increment ) {
-<span class="nc" id="L115">        getComponent().getHorizontalScrollBar().setUnitIncrement(increment);</span>
-<span class="nc" id="L116">        return this;</span>
+<span class="fc" id="L124">        getComponent().getHorizontalScrollBar().setUnitIncrement(increment);</span>
+<span class="fc" id="L125">        return this;</span>
+    }
+
+    /**
+     * Use this to set the vertical and horizontal scroll increment.
+     * @param increment The scroll increment to use.
+     * @return This builder instance, to allow for method chaining.
+     */
+    public final UIForScrollPane&lt;P&gt; withScrollIncrement( int increment ) {
+<span class="fc" id="L134">        return this.withVerticalScrollIncrement(increment)</span>
+<span class="fc" id="L135">                   .withHorizontalScrollIncrement(increment);</span>
+    }
+
+    /**
+     *  Use this to set the vertical scroll block increment.
+     *
+     * @param increment The scroll vertical block increment to use.
+     * @return This builder instance, to allow for method chaining.
+     */
+    public final UIForScrollPane&lt;P&gt; withVerticalBlockScrollIncrement(int increment ) {
+<span class="fc" id="L145">        getComponent().getVerticalScrollBar().setBlockIncrement(increment);</span>
+<span class="fc" id="L146">        return this;</span>
+    }
+
+    /**
+     *  Use this to set the horizontal scroll block increment.
+     *  It is the amount to change the scrollbar's value by,
+     *  given a block (usually &quot;page&quot;) up/down request or when the user clicks
+     *  above or below the scrollbar &quot;knob&quot; to change the value
+     *  up or down by large amount.
+     *
+     * @param increment The scroll horizontal block increment to use.
+     * @return This builder instance, to allow for method chaining.
+     */
+    public final UIForScrollPane&lt;P&gt; withHorizontalBlockScrollIncrement(int increment ) {
+<span class="fc" id="L160">        getComponent().getHorizontalScrollBar().setBlockIncrement(increment);</span>
+<span class="fc" id="L161">        return this;</span>
+    }
+
+    /**
+     * Use this to set the vertical and horizontal scroll block increment.
+     * The block increment is the amount to change the scrollbar's value by,
+     * given a block (usually &quot;page&quot;) up/down request or when the user clicks
+     * above or below the scrollbar &quot;knob&quot; to change the value
+     * up or down by large amount.
+     *
+     * @param increment The scroll block increment to use.
+     * @return This builder instance, to allow for method chaining.
+     */
+    public final UIForScrollPane&lt;P&gt; withBlockScrollIncrement( int increment ) {
+<span class="fc" id="L175">        return this.withVerticalBlockScrollIncrement(increment)</span>
+<span class="fc" id="L176">                   .withHorizontalBlockScrollIncrement(increment);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

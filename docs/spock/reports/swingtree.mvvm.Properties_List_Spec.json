@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.045 seconds"
+    "duration":"0.046 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"Multiple properties can be modelled through the \"Vars\" and \"Vals\" classes.",
       "result":"PASS",
-      "duration":"0.011 seconds",
+      "duration":"0.013 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -134,7 +134,7 @@
     {
       "id":"Both the \"Vars\" and immutable \"Vals\" types can be used for functional programming.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"0",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends AbstractDelegate
+public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends AbstractDelegate&lt;JSplitButton&gt;
 {
         private final Supplier&lt;List&lt;JComponent&gt;&gt; _siblingsSource;
         private final SplitItem.Delegate&lt;I&gt; _itemsDelegate;
@@ -18,7 +18,7 @@ public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends Abstra
                 SplitItem.Delegate&lt;I&gt; itemsDelegate,
                 Supplier&lt;List&lt;JComponent&gt;&gt; siblingsSource
         ) {
-<span class="fc" id="L21">            super(button);</span>
+<span class="fc" id="L21">            super(button, button);</span>
 <span class="fc" id="L22">            _itemsDelegate = itemsDelegate;</span>
 <span class="fc" id="L23">            _siblingsSource = siblingsSource;</span>
 <span class="fc" id="L24">        }</span>

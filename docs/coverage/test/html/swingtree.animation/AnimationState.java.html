@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AnimationState.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.animation</a> &gt; <span class="el_source">AnimationState.java</span></div><h1>AnimationState.java</h1><pre class="source lang-java linenums">package swingtree.animation;
+
+import java.awt.event.ActionEvent;
+
+/**
+ * The state of an animation at a given point in time.
+ */
+public interface AnimationState
+{
+    /**
+     * @return The animation progress in terms of a number between 0 and 1,
+     *         where 1 means the animation completed.
+     */
+    double progress();
+
+    /**
+     *  A sine wave oscillating between 0 and 1 and back to 0 once per iteration.
+     *  At the beginning of the animation, the value is 0, at the end of the animation, the value is 0 again,
+     *  and when the animation is halfway through, the value is 1.
+     *
+     * @return The animation progress in terms of a number between 0 and 1, where 1 means the animation is halfway through.
+     */
+    default double pulse() {
+<span class="nc" id="L24">        return Math.sin(Math.PI * progress());</span>
+    }
+
+    /**
+     *   The animation progress in the form of peaking sine wave growing from 0 to 1
+     *   based on the equation {@code sin(PI * progress() / 2)}.
+     *   Just like the value returned by {@link #progress()}
+     *   the {@link #fadeIn()} value starts at 0 and ends at 1,
+     *   however the crucial difference is that the {@link #fadeIn()} value
+     *   grows according to a sine wave, which makes certain animations look more natural.
+     *
+     * @return The animation progress in the form of peaking sine wave growing from 0 to 1.
+     */
+    default double fadeIn() {
+<span class="nc" id="L38">        return Math.sin(Math.PI * progress() / 2);</span>
+    }
+
+    /**
+     *   The animation progress in the form of peaking sine wave growing from 1 to 0
+     *   based on the equation {@code sin(PI * (1 - progress()) / 2)}.
+     *   Just like the value returned by {@link #progress()}
+     *   the {@link #fadeOut()} value starts at 1 and ends at 0,
+     *   however the crucial difference is that the {@link #fadeOut()} value
+     *   grows according to a sine wave, which makes certain animations look more natural.
+     *
+     * @return The animation progress in the form of peaking sine wave growing from 1 to 0.
+     */
+    default double fadeOut() {
+<span class="nc" id="L52">        return Math.sin(Math.PI * (1 - progress()) / 2);</span>
+    }
+
+    /**
+     *  Defines the animation progress in terms of a number oscillating between 0, 1 and 0 once per iteration,
+     *  meaning that when the animation starts, the value is 0, when it is halfway through, the value is 1,
+     *  and when it is finished, the value is 0 again.
+     *  &lt;p&gt;
+     *  This is especially useful for animations that are supposed to be repeated
+     *  or whose start and end values are the same (e.g. a fade-in and fade-out animation).
+     *
+     *  @return The animation progress in terms of a number between 0 and 1,
+     *          where 1 means the animation is halfway through and 0 means the animation started or finished.
+     */
+    default double cycle() {
+        // progress() is guaranteed to be between 0 and 1, where 1 means the animation completed.
+<span class="fc" id="L68">        return 1 - Math.abs(2 * progress() - 1);</span>
+        // The result is guaranteed to be between 0 and 1, where 1 means the animation is
+        // halfway through and 0 means the animation started or finished.
+    }
+
+    /**
+     *  Defines the animation progress in terms of a number oscillating between 0, 1 and 0 once per iteration,
+     *  meaning that when the animation starts, the value is 0, when it is halfway through, the value is 1,
+     *  and when it is finished, the value is 0 again.
+     *  &lt;p&gt;
+     *  This is especially useful for animations that are supposed to be repeated
+     *  or whose start and end values are the same (e.g. a fade-in and fade-out animation).
+     *  &lt;p&gt;
+     *  This method is similar to {@link #cycle()}, but it allows to offset the animation progress.
+     *  This is useful for animations that are supposed to be repeated and whose start and end values are different
+     *  (e.g. a fade-in and fade-out animation).
+     *
+     *  @param offset The offset of the animation progress which may be any number.
+     *                The modulo operator is used to offset the animation progress
+     *                in a way that it is always between 0 and 1.
+     *  @return The animation progress in terms of a number between 0 and 1,
+     *          where 1 means the animation is halfway through and 0 means the animation started or finished.
+     */
+    default double cyclePlus( double offset ) {
+<span class="fc" id="L92">        double progress = (progress() + offset) % 1;</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        if ( progress &lt; 0 ) progress += 1;</span>
+<span class="fc" id="L94">        return 1 - Math.abs(2 * progress - 1);</span>
+    }
+
+    /**
+     *  Defines the animation progress in terms of a number oscillating between 0, 1 and 0 once per iteration,
+     *  meaning that when the animation starts, the value is 0, when it is halfway through, the value is 1,
+     *  and when it is finished, the value is 0 again.
+     *  &lt;p&gt;
+     *  This is especially useful for animations that are supposed to be repeated
+     *  or whose start and end values are the same (e.g. a fade-in and fade-out animation).
+     *  &lt;p&gt;
+     *  This method is similar to the of {@link #cyclePlus(double)} but
+     *  with the offset being subtracted instead of added.
+     *  The returned values is similar to the one returned by {@link #cycle()},
+     *  with the simple difference to offset the animation progress.
+     *  This is useful for animations that are supposed to be repeated and whose start and end values are different
+     *  (e.g. a fade-in and fade-out animation).
+     *
+     *  @param offset The offset of the animation progress which may be any number.
+     *                The modulo operator is used to offset the animation progress
+     *                in a way that it is always between 0 and 1.
+     *  @return The animation progress in terms of a number between 0 and 1,
+     *          where 1 means the animation is halfway through and 0 means the animation started or finished.
+     */
+    default double cycleMinus( double offset ) {
+<span class="fc" id="L119">        double progress = ( progress() - offset ) % 1;</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">        if ( progress &lt; 0 ) progress += 1;</span>
+<span class="fc" id="L121">        return 1 - Math.abs(2 * progress - 1);</span>
+    }
+
+    /**
+     * @return The number of times the animation has been repeated.
+     */
+    long currentIteration();
+    /**
+     * @return The schedule of the animation, i.e. the time when the animation started and how long it should run.
+     */
+    Schedule schedule();
+    /**
+     * @return The timer event that triggered the animation.
+     */
+    ActionEvent event();
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

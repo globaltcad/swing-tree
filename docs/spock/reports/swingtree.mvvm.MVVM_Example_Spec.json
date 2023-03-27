@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.471 seconds"
+    "duration":"0.507 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can create a property based view model and build a view for it.",
       "result":"PASS",
-      "duration":"0.011 seconds",
+      "duration":"0.009 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that we use a pre-made example view model here.\n            Feel free to look at the source code of the view model\n            to see what it is doing.\n        "]
       },
@@ -75,7 +75,7 @@
     {
       "id":"We can bind a boolean property to a checkbox, and when the user presses it, we notice it.",
       "result":"PASS",
-      "duration":"0.073 seconds",
+      "duration":"0.074 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -117,7 +117,7 @@
     {
       "id":"We can bind a boolean property to a toggle button, and when the user presses it, we notice it.",
       "result":"PASS",
-      "duration":"0.072 seconds",
+      "duration":"0.071 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -138,7 +138,7 @@
     {
       "id":"We can bind a enum property to a combo box and when the user selects an item, we notice it.",
       "result":"PASS",
-      "duration":"0.020 seconds",
+      "duration":"0.054 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n        "]
       },
@@ -163,7 +163,7 @@
     {
       "id":"An enum based combo box can infer its possible states directly from the binding property.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"0.008 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n        "]
       },
@@ -211,7 +211,7 @@
     {
       "id":"A simple list of elements can be used as a data model for a combo box.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"0.002 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Always prefer Enums over Strings but if you have to model generic data\n            you can always bind a simple list of elements as a data model to a combo box.\n        "]
       },
@@ -290,7 +290,7 @@
     {
       "id":"View Models can be represented by properties.",
       "result":"PASS",
-      "duration":"0.011 seconds",
+      "duration":"0.013 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            In larger GUIs usually consist views which themselves consist of multiple\n            sub views. This is also true for their view models which are usually\n            structured in the same tree like fashion. \n            Often times however, your views are highly dynamic and you want to\n            be able to swap out sub views at runtime. In this case it is useful\n            to represent your view models as properties. \n            Simply implement the 'Viewable' interface in your view model and\n            you can bind it to a view.\n            When the property changes, the view will be updated automatically.\n        "]
       },
@@ -315,12 +315,12 @@
     {
       "id":"View Models can be represented by properties lists.",
       "result":"PASS",
-      "duration":"0.014 seconds",
+      "duration":"0.017 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            In larger GUIs usually consist views which themselves consist of multiple\n            sub views. This is also true for their view models which are usually\n            structured in the same tree like fashion. \n            Often times however, your views are highly dynamic and you want to\n            be able to swap out sub views at runtime. In this case it is useful\n            to represent your view models as property lists, especially if \n            one view consists of multiple sub views.\n            Simply implement the 'Viewable' interface in your view model and\n            you can bind it to a view using the \"Vars\" class wrapping your viewables.\n            When the property list changes, the view will be updated automatically.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We create a view model.","code":["Var<String> address = Var.of(\"123 Main Street\")","Var<String> title = Var.of(\"Mr.\")","Var<Double> price = Var.of(1000000.0d)","Var<Option> option = Var.of(Option.YES)"]},
+        {"kind":"given","text":"We create a view model.","code":["Var<String> address = Var.of(\"123 Main Street\")","Var<String> title = Var.of(\"Mr.\")","Var<Integer> price = Var.of(1000000)","Var<Option> option = Var.of(Option.YES)"]},
 
         {"kind":"and","text":"We create 4 view models with 4 locally created views:","code":["var vm1 = (Viewable) {","                return UI.panel().id(\"sub-1\")","                        .add(UI.label(\"Address:\"))","                        .add(UI.textField(address))","                        .add(UI.button(\"Update\").onClick { address.set(\"456 Main Street\") })","                        .component","            }","var vm2 = (Viewable) {","                return UI.panel().id(\"sub-2\")","                        .add(UI.label(\"Title:\"))","                        .add(UI.textField(title))","                        .add(UI.button(\"Update\").onClick { title.set(\"Mrs.\") })","                        .component","            }","var vm3 = (Viewable){","                return UI.panel().id(\"sub-3\")","                        .add(UI.label(\"Price:\"))","                        .add(UI.slider(UI.Align.HORIZONTAL).withValue(price))","                        .add(UI.button(\"Update\").onClick { price.set(2000000.0) })","                        .component","            }","var vm4 = (Viewable){","                    return UI.panel().id(\"sub-4\")","                        .add(UI.label(\"Option:\"))","                        .add(UI.comboBox(option, Option.values()))","                        .add(UI.button(\"Update\").onClick { option.set(Option.NO) })","                        .component","                }"]},
 
@@ -535,7 +535,7 @@
     {
       "id":"The tooltip of a component can be modelled using a String property.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"0.001 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Using the 'withTooltip(Val<String>)' method,\n            the tooltip of a Swing component is set dynamically\n            if the String property changes.\n        "]
       },

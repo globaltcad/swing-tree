@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForTextField.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForTextField.java</span></div><h1>UIForTextField.java</h1><pre class="source lang-java linenums">package swingtree;
 
 import sprouts.Action;
+import sprouts.Val;
+import sprouts.Var;
+import sprouts.Vars;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -10,18 +13,24 @@ import java.util.function.Consumer;
 /**
  *  A swing tree builder node for {@link JTextField} instances.
  * 	&lt;p&gt;
- * 	&lt;b&gt;Please take a look at the &lt;a href=&quot;https://globaltcad.github.io/swing-tree/&quot;&gt;living swing-tree documentation&lt;/a&gt;
+ * 	&lt;b&gt;Take a look at the &lt;a href=&quot;https://globaltcad.github.io/swing-tree/&quot;&gt;living swing-tree documentation&lt;/a&gt;
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class or other classes.&lt;/b&gt;
  */
 public class UIForTextField&lt;F extends JTextField&gt; extends UIForAbstractTextComponent&lt;UIForTextField&lt;F&gt;, F&gt;
 {
-<span class="fc" id="L18">    protected UIForTextField( F component ) { super(component); }</span>
+<span class="fc" id="L21">    protected UIForTextField( F component ) { super( component ); }</span>
 
+    /**
+     *  Allows you to register an action to be performed when the user presses the enter key.
+     *
+     * @param action The action to be performed.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public UIForTextField&lt;F&gt; onEnter( Action&lt;SimpleDelegate&lt;F, ActionEvent&gt;&gt; action ) {
-<span class="fc" id="L21">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L22">        F field = getComponent();</span>
-<span class="fc" id="L23">        _onEnter( e -&gt; _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;( field, e, this::getSiblinghood )) ) );</span>
-<span class="fc" id="L24">        return this;</span>
+<span class="fc" id="L30">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L31">        F field = getComponent();</span>
+<span class="fc" id="L32">        _onEnter( e -&gt; _doApp( () -&gt; action.accept(new SimpleDelegate&lt;&gt;( field, e, this::getSiblinghood )) ) );</span>
+<span class="fc" id="L33">        return this;</span>
     }
 
     private void _onEnter( Consumer&lt;ActionEvent&gt; action ) {
@@ -36,15 +45,93 @@ public class UIForTextField&lt;F extends JTextField&gt; extends UIForAbstractTex
             simply because it was added first.
             This is especially true in the context of declarative UI design.
         */
-<span class="fc" id="L39">        ActionListener[] listeners = getComponent().getActionListeners();</span>
-<span class="fc bfc" id="L40" title="All 2 branches covered.">        for (ActionListener listener : listeners)</span>
-<span class="fc" id="L41">            getComponent().removeActionListener(listener);</span>
+<span class="fc" id="L48">        ActionListener[] listeners = getComponent().getActionListeners();</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        for (ActionListener listener : listeners)</span>
+<span class="fc" id="L50">            getComponent().removeActionListener(listener);</span>
 
-<span class="fc" id="L43">        getComponent().addActionListener(action::accept);</span>
+<span class="fc" id="L52">        getComponent().addActionListener(action::accept);</span>
 
-<span class="fc bfc" id="L45" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
-<span class="fc" id="L46">            getComponent().addActionListener(listeners[i]);</span>
-<span class="fc" id="L47">    }</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
+<span class="fc" id="L55">            getComponent().addActionListener(listeners[i]);</span>
+<span class="fc" id="L56">    }</span>
+
+    /**
+     *  Effectively bind this text field to a numeric {@link Var} property
+     *  which will only accept numbers as input.
+     *
+     * @param number The numeric {@link Var} property to bind to.
+     * @return This builder node.
+     * @param &lt;N&gt; The numeric type of the {@link Var} property.
+     */
+    public final &lt;N extends Number&gt; UIForTextField&lt;F&gt; withNumber( Var&lt;N&gt; number ) {
+<span class="nc" id="L67">        Var&lt;Boolean&gt; isValid = Var.of(true);</span>
+<span class="nc" id="L68">        return this.withNumber( number, isValid );</span>
+    }
+
+    /**
+     *  Effectively bind this text field to a numeric {@link Var} property
+     *  which will only accept numbers as input.
+     *
+     * @param number The numeric {@link Var} property to bind to.
+     * @param isValid A {@link Var} property which will be set to {@code true} if the input is valid, and {@code false} otherwise.
+     * @return This builder node.
+     * @param &lt;N&gt; The numeric type of the {@link Var} property.
+     */
+    public final &lt;N extends Number&gt; UIForTextField&lt;F&gt; withNumber( Var&lt;N&gt; number, Var&lt;Boolean&gt; isValid ) {
+<span class="fc" id="L81">        NullUtil.nullArgCheck(number, &quot;number&quot;, Var.class);</span>
+<span class="fc" id="L82">        NullUtil.nullArgCheck(isValid, &quot;isValid&quot;, Var.class);</span>
+<span class="fc" id="L83">        NullUtil.nullPropertyCheck(number, &quot;number&quot;, &quot;Null is not a valid value for a numeric property.&quot;);</span>
+<span class="fc" id="L84">        NullUtil.nullPropertyCheck(isValid, &quot;isValid&quot;, &quot;Null is not a valid value for a boolean property.&quot;);</span>
+<span class="pc" id="L85">        _onShow( number, n -&gt; getComponent().setText( n.toString() ) );</span>
+<span class="fc" id="L86">        Var&lt;String&gt; text = Var.of( number.get().toString() );</span>
+<span class="fc" id="L87">        text.onAct( s -&gt; {</span>
+            try {
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">                if ( number.type() == Integer.class )</span>
+<span class="nc" id="L90">                    number.act( (N) Integer.valueOf(Integer.parseInt(s.get())) );</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">                else if ( number.type() == Long.class )</span>
+<span class="nc" id="L92">                    number.act( (N) Long.valueOf(Long.parseLong(s.get())) );</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">                else if ( number.type() == Float.class )</span>
+<span class="nc" id="L94">                    number.act( (N) Float.valueOf(Float.parseFloat(s.get())) );</span>
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">                else if ( number.type() == Double.class )</span>
+<span class="nc" id="L96">                    number.act( (N) Double.valueOf(Double.parseDouble(s.get())) );</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">                else if ( number.type() == Short.class )</span>
+<span class="nc" id="L98">                    number.act( (N) Short.valueOf(Short.parseShort(s.get())) );</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">                else if ( number.type() == Byte.class )</span>
+<span class="nc" id="L100">                    number.act( (N) Byte.valueOf(Byte.parseByte(s.get())) );</span>
+                else
+<span class="nc" id="L102">                    throw new IllegalStateException(&quot;Unsupported number type: &quot; + number.type());</span>
+
+<span class="nc bnc" id="L104" title="All 2 branches missed.">                if ( isValid.is(false) ) {</span>
+<span class="nc" id="L105">                    isValid.set(true);</span>
+<span class="nc" id="L106">                    isValid.fireAct();</span>
+                }
+<span class="fc" id="L108">            } catch (NumberFormatException e) {</span>
+                // ignore
+<span class="fc bfc" id="L110" title="All 2 branches covered.">                if ( isValid.is(true) ) {</span>
+<span class="fc" id="L111">                    isValid.set(false);</span>
+<span class="fc" id="L112">                    isValid.fireAct();</span>
+                }
+<span class="nc" id="L114">            }</span>
+<span class="fc" id="L115">        });</span>
+<span class="fc" id="L116">        return withText( text );</span>
+    }
+
+    /**
+     *  Effectively bind this text field to a numeric {@link Val} property
+     *  but only for reading purposes.
+     *  So the text field will be updated when the {@link Val} property changes
+     *  but the user will not be able to change the {@link Val} property
+     *  since the {@link Val} property is read-only.
+     *
+     * @param number The numeric {@link Val} property to bind to.
+     * @return This builder node.
+     * @param &lt;N&gt; The numeric type of the {@link Val} property.
+     */
+    public final &lt;N extends Number&gt; UIForTextField&lt;F&gt; withNumber( Val&lt;N&gt; number ) {
+<span class="nc" id="L131">        NullUtil.nullArgCheck(number, &quot;number&quot;, Var.class);</span>
+<span class="nc" id="L132">        number.onSet( n -&gt; _doUI(()-&gt;getComponent().setText( n.toString() )) );</span>
+<span class="nc" id="L133">        return this;</span>
+    }
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

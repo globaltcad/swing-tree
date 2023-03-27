@@ -1,0 +1,108 @@
+{
+  "className":"swingtree.scrollpane.Scroll_Pane_Spec",
+  "title":"The Scroll Pane",
+  "narrative":"Just like for any other main component in Swing,\n    Swing-Tree also supports a nice API for \n    building UIs with scroll panes.\n\n    A scroll pane is a component that allows\n    the user to scroll through a larger view\n    of a component. It is a container that\n    contains a single component, called the\n    viewport. The viewport is the area that\n    is actually visible to the user. \n\n    The scroll pane also contains a set of\n    scrollbars that allow the user to scroll\n    the viewport. \n\n    In this specification, we will see how\n    to build a scroll pane with Swing-Tree.",
+  "subjects":["swingtree.UIForScrollPane","javax.swing.JScrollPane"],
+  "statistics":{
+    "runs":"6",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"0.021 seconds"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"Use the `UI.ScrollBarPolicy` enum to configure the scroll pane scroll bars.",
+      "result":"PASS",
+      "duration":"0.005 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that this is based on the rather non-desciptive `with` method.\n            We are using it because the type and name of the enum instance\n            already describe the scroll bar policy.\n            You will find this pattern in other places in Swing-Tree,\n            where the `with` method is used to configure a component\n            using an enum instance. \n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a scroll pane with a custom scroll bar policy.","code":["var ui =","        UI.scrollPane()","        .with(UI.ScrollBarPolicy.NEVER)"]},
+
+        {"kind":"expect","text":"The scroll pane has the expected scroll bar policies.","code":["ui.component.getHorizontalScrollBarPolicy() == JScrollPane.HORIZONTAL_SCROLLBAR_NEVER","ui.component.getVerticalScrollBarPolicy() == JScrollPane.VERTICAL_SCROLLBAR_NEVER"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Configure both the horizontal and vertical scroll policy individually.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that this is based on the rather non-desciptive `withHorizontal` \n            and `withVertical` methods.\n            We are using them because the type and name of the enum instance\n            already describe the scroll bar policy.\n            You will find this pattern in other places in Swing-Tree,\n            where the `with` method, or variations of it, are used to configure a component\n            in a fluent way.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a scroll pane with a custom scroll bar policy.","code":["var ui =","        UI.scrollPane()","        .withHorizontal(UI.ScrollBarPolicy.NEVER)","        .withVertical(UI.ScrollBarPolicy.ALWAYS)"]},
+
+        {"kind":"expect","text":"The scroll pane has the expected scroll bar policies.","code":["ui.component.getHorizontalScrollBarPolicy() == JScrollPane.HORIZONTAL_SCROLLBAR_NEVER","ui.component.getVerticalScrollBarPolicy() == JScrollPane.VERTICAL_SCROLLBAR_ALWAYS"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can configure the vertical and horizontal scroll bar scroll increment of a scroll pane.",
+      "result":"PASS",
+      "duration":"0.004 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a scroll pane with a custom scroll increment.","code":["var ui =","        UI.scrollPane()","        .withHorizontalScrollIncrement(42)","        .withVerticalScrollIncrement(24)"]},
+
+        {"kind":"expect","text":"The scroll pane has the expected scroll increments.","code":["ui.component.getHorizontalScrollBar().getUnitIncrement() == 42","ui.component.getVerticalScrollBar().getUnitIncrement() == 24"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can configure the general scroll increment of the scroll pane scroll bars.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that this sets the scroll increment unit for both\n            the vertical and horizontal scroll bars.\n            So any previously set scroll increment unit for the\n            vertical or horizontal scroll bar will be overwritten.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a scroll pane with a custom scroll increment.","code":["var ui =","        UI.scrollPane()","        .withScrollIncrement(42)"]},
+
+        {"kind":"expect","text":"The scroll pane has the expected scroll increments, both vertical and horizontally.","code":["ui.component.getHorizontalScrollBar().getUnitIncrement() == 42","ui.component.getVerticalScrollBar().getUnitIncrement() == 42"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The horizontal as well as vertical block scroll increment can be configured easily.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a scroll pane with a custom block scroll increment.","code":["var ui =","        UI.scrollPane()","        .withHorizontalBlockScrollIncrement(42)","        .withVerticalBlockScrollIncrement(24)"]},
+
+        {"kind":"expect","text":"The scroll pane has the expected block scroll increments.","code":["ui.component.getHorizontalScrollBar().getBlockIncrement() == 42","ui.component.getVerticalScrollBar().getBlockIncrement() == 24"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Configure the block scroll increment for both scroll bars in one line.",
+      "result":"PASS",
+      "duration":"0.001 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that this sets the block scroll increment unit for both\n            the vertical and horizontal scroll bars.\n            So any previously set block scroll increment unit for the\n            vertical or horizontal scroll bar will be overwritten.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a scroll pane with a custom block scroll increment.","code":["var ui =","        UI.scrollPane()","        .withBlockScrollIncrement(42)"]},
+
+        {"kind":"expect","text":"The scroll pane has the expected block scroll increments, both vertical and horizontally.","code":["ui.component.getHorizontalScrollBar().getBlockIncrement() == 42","ui.component.getVerticalScrollBar().getBlockIncrement() == 42"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

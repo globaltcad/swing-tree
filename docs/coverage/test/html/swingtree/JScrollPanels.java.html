@@ -109,7 +109,7 @@ public class JScrollPanels extends JScrollPane
 	 *
 	 * @param entryViewModel A provider lambda which ought to turn a context object into a fitting UI.
 	 */
-<span class="nc" id="L112">	public void addEntry( ViewableEntry entryViewModel ) { addEntry( null, entryViewModel ); }</span>
+<span class="fc" id="L112">	public void addEntry( ViewableEntry entryViewModel ) { addEntry( null, entryViewModel ); }</span>
 
 	/**
 	 * 	The {@link JScrollPanels} does not store components statically in the UI tree.
@@ -122,11 +122,11 @@ public class JScrollPanels extends JScrollPane
 	 * @param entryViewModel A provider lambda which ought to turn a context object into a fitting UI.
 	 */
 	public void addEntry( String constraints, ViewableEntry entryViewModel ) {
-<span class="nc" id="L125">		Objects.requireNonNull(entryViewModel);</span>
-<span class="nc" id="L126">		EntryPanel entryPanel = _createEntryPanel(constraints, entryViewModel, this._internal.getComponents().length);</span>
-<span class="nc" id="L127">		this._internal.add(entryPanel);</span>
-<span class="nc" id="L128">		this.validate();</span>
-<span class="nc" id="L129">	}</span>
+<span class="fc" id="L125">		Objects.requireNonNull(entryViewModel);</span>
+<span class="fc" id="L126">		EntryPanel entryPanel = _createEntryPanel(constraints, entryViewModel, this._internal.getComponents().length);</span>
+<span class="fc" id="L127">		this._internal.add(entryPanel);</span>
+<span class="fc" id="L128">		this.validate();</span>
+<span class="fc" id="L129">	}</span>
 
 	/**
 	 *  Adds multiple entries at once to this {@link JScrollPanels}.

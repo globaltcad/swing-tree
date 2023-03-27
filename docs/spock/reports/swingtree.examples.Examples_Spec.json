@@ -4,19 +4,19 @@
   "narrative":"This specification ensures that the\n    various UI examples in the test suite, \n    run successfully and also produce\n    UIs with expected states.",
   "subjects":[],
   "statistics":{
-    "runs":"11",
+    "runs":"13",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.807 seconds"
+    "duration":"1.581 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"The advanced UI define in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.394 seconds",
+      "duration":"0.381 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -37,7 +37,7 @@
     {
       "id":"The form UI define in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.042 seconds",
+      "duration":"0.046 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -54,7 +54,7 @@
     {
       "id":"The login example UI defined in the examples can be created.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"0.007 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -80,7 +80,7 @@
     {
       "id":"The list examples UI defined in the examples can be created.",
       "result":"PASS",
-      "duration":"0.010 seconds",
+      "duration":"0.183 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -91,14 +91,48 @@
     },
   
     {
-      "id":"The settings example UI defined in the examples can be created.",
+      "id":"The animated buttons view examples UI defined in the examples can be created.",
       "result":"PASS",
-      "duration":"0.007 seconds",
+      "duration":"0.022 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"expect","text":"","code":["expect : new SomeSettingsView(new SomeSettingsViewModel())"]}
+        {"kind":"expect","text":"","code":["expect : new AnimatedButtonsView()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The animation example view can be created.",
+      "result":"PASS",
+      "duration":"0.759 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["expect : new AnimatedView(Mock(JFrame))"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The settings example UI defined in the examples can be created.",
+      "result":"PASS",
+      "duration":"0.010 seconds",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var view = new SomeSettingsView(new SomeSettingsViewModel())","var speedTextField = new Utility.Query(view).find(JTextField, \"speed-text-field\").orElse(null)"]},
+
+        {"kind":"expect","text":"","code":["view != null","speedTextField != null"]},
+
+        {"kind":"and","text":"","code":["speedTextField.text == \"42.0\"","speedTextField.background == Color.WHITE"]},
+
+        {"kind":"when","text":"We simulate the user entering an invalid number:","code":["speedTextField.text = \"§\"","UI.sync()"]},
+
+        {"kind":"then","text":"The UI is updated to reflect the invalid value.","code":["speedTextField.text == \"§\"","speedTextField.background == Color.RED"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -106,7 +140,7 @@
     {
       "id":"The spinners example UI defined in the examples can be created.",
       "result":"PASS",
-      "duration":"0.038 seconds",
+      "duration":"0.039 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -119,7 +153,7 @@
     {
       "id":"The list rendering example UI defined in the examples can be created.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"0.003 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -132,7 +166,7 @@
     {
       "id":"The calculator UI defined in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.215 seconds",
+      "duration":"0.026 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -147,7 +181,7 @@
     {
       "id":"The simple Table-UI example has the expected state.",
       "result":"PASS",
-      "duration":"0.028 seconds",
+      "duration":"0.036 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -172,7 +206,7 @@
     {
       "id":"The todo app UI defined in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.007 seconds",
+      "duration":"0.011 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

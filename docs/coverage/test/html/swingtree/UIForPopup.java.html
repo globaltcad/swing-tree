@@ -6,27 +6,43 @@ import javax.swing.*;
 
 /**
  *  A swing tree builder node for {@link JPopupMenu} instances.
+ * 	&lt;p&gt;
+ * 	&lt;b&gt;Take a look at the &lt;a href=&quot;https://globaltcad.github.io/swing-tree/&quot;&gt;living swing-tree documentation&lt;/a&gt;
+ * 	where you can browse a large collection of examples demonstrating how to use the API of this class or other classes.&lt;/b&gt;
  */
 public class UIForPopup&lt;P extends JPopupMenu&gt; extends UIForAbstractSwing&lt;UIForPopup&lt;P&gt;, P&gt;
 {
-<span class="fc" id="L12">    protected UIForPopup( P component ) { super(component); }</span>
+<span class="fc" id="L15">    protected UIForPopup( P component ) { super(component); }</span>
 
-
+    /**
+     *  Determines if the border is painted or not.
+     *
+     * @param borderPainted True if the border is painted, false otherwise
+     * @return This builder node, to qllow for method chaining.
+     */
     public UIForPopup&lt;P&gt; borderIsPaintedIf( boolean borderPainted ) {
-<span class="nc" id="L16">        getComponent().setBorderPainted(borderPainted);</span>
-<span class="nc" id="L17">        return this;</span>
+<span class="nc" id="L24">        getComponent().setBorderPainted(borderPainted);</span>
+<span class="nc" id="L25">        return this;</span>
     }
 
+    /**
+     *  Determines if the border is painted or not
+     *  based on the value of the given {@link Val}.
+     *  If the value of the {@link Val} changes, the border will be painted or not.
+     *
+     * @param val A {@link Val} which will be used to determine if the border is painted or not.
+     * @return This builder node, to qllow for method chaining.
+     */
     public UIForPopup&lt;P&gt; borderIsPaintedIf( Val&lt;Boolean&gt; val ) {
-<span class="nc" id="L21">        _onShow(val, v -&gt; borderIsPaintedIf(v) );</span>
-<span class="nc" id="L22">        return borderIsPaintedIf( val.get() );</span>
+<span class="nc" id="L37">        _onShow(val, v -&gt; borderIsPaintedIf(v) );</span>
+<span class="nc" id="L38">        return borderIsPaintedIf( val.get() );</span>
     }
 
-<span class="nc" id="L25">    public UIForPopup&lt;P&gt; add(JMenuItem item) { return this.add(UI.of(item)); }</span>
+<span class="nc" id="L41">    public UIForPopup&lt;P&gt; add(JMenuItem item) { return this.add(UI.of(item)); }</span>
 
-<span class="nc" id="L27">    public UIForPopup&lt;P&gt; add(JSeparator separator) { return this.add(UI.of(separator)); }</span>
+<span class="nc" id="L43">    public UIForPopup&lt;P&gt; add(JSeparator separator) { return this.add(UI.of(separator)); }</span>
 
-<span class="nc" id="L29">    public UIForPopup&lt;P&gt; add(JPanel panel) { return this.add(UI.of(panel)); }</span>
+<span class="nc" id="L45">    public UIForPopup&lt;P&gt; add(JPanel panel) { return this.add(UI.of(panel)); }</span>
 }
 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -33,23 +33,23 @@ public class UIForScrollPanels&lt;P extends JScrollPanels&gt; extends UIForScrol
 
 	@Override
 	protected void _add( JComponent component, Object conf ) {
-<span class="nc" id="L36">		Objects.requireNonNull(component);</span>
-<span class="nc" id="L37">		JScrollPanels panels = this.getComponent();</span>
+<span class="fc" id="L36">		Objects.requireNonNull(component);</span>
+<span class="fc" id="L37">		JScrollPanels panels = this.getComponent();</span>
 
-<span class="nc" id="L39">		ViewableEntry entry = _entryFrom(component);</span>
-<span class="nc bnc" id="L40" title="All 2 branches missed.">		if ( conf == null )</span>
-<span class="nc" id="L41">			panels.addEntry(entry);</span>
+<span class="fc" id="L39">		ViewableEntry entry = _entryFrom(component);</span>
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">		if ( conf == null )</span>
+<span class="fc" id="L41">			panels.addEntry(entry);</span>
 		else
 <span class="nc" id="L43">			panels.addEntry(conf.toString(), entry);</span>
-<span class="nc" id="L44">	}</span>
+<span class="fc" id="L44">	}</span>
 
 	private ViewableEntry _entryFrom(JComponent component) {
-<span class="nc" id="L47">		Var&lt;Boolean&gt; selected = Var.of(false);</span>
-<span class="nc" id="L48">		Var&lt;Integer&gt; position = Var.of(0);</span>
-<span class="nc" id="L49">		return new ViewableEntry() {</span>
-<span class="nc" id="L50">			@Override public Var&lt;Boolean&gt; isSelected() { return selected; }</span>
-<span class="nc" id="L51">			@Override public Var&lt;Integer&gt; position() { return position; }</span>
-<span class="nc" id="L52">			@Override public &lt;V&gt; V createView(Class&lt;V&gt; viewType) { return (V) component; }</span>
+<span class="fc" id="L47">		Var&lt;Boolean&gt; selected = Var.of(false);</span>
+<span class="fc" id="L48">		Var&lt;Integer&gt; position = Var.of(0);</span>
+<span class="fc" id="L49">		return new ViewableEntry() {</span>
+<span class="fc" id="L50">			@Override public Var&lt;Boolean&gt; isSelected() { return selected; }</span>
+<span class="fc" id="L51">			@Override public Var&lt;Integer&gt; position() { return position; }</span>
+<span class="fc" id="L52">			@Override public &lt;V&gt; V createView(Class&lt;V&gt; viewType) { return (V) component; }</span>
 		};
 	}
 

@@ -2,22 +2,53 @@
 
 /**
  *  A wrapper for mig layout constraint string to avoid the inherent brittleness of strings...
+ *  which can be merged with other instances of this class through the {@link #and(LayoutAttr)} method,
+ *  which is in essence a wither method.
+ *  &lt;br&gt;
+ *  Here how this class would typically be used in a swing-tree UI:
+ *  &lt;pre&gt;{@code
+ *  	import static swingtree.UI.*;
+ *
+ *      public class MyView extends JPanel {
+ *          public MyView() {
+ *          	of(this).withLayout(FILL.and(GROW).and(WRAP(3)))
+ *          	.add(LEFT, label(&quot;Name:&quot;) )
+ *          	.add(GROW.and(SPAN), textField(&quot;name&quot;) )
+ *          	.add(LEFT, label(&quot;Address:&quot;) )
+ *          	.add(GROW.and(SPAN), textField(&quot;address&quot;) )
+ *           }
+ *      }
+ *  }&lt;/pre&gt;
+ *  As you can see this class is not used directly, but rather in the form of static constants
+ *  as part of the UI class.
+ *  You can define your own mig layout constraints as static constants in your own code
+ *  by using the {@link #of(String...)} method.
  */
 public final class LayoutAttr extends AbstractAttr
 {
-<span class="fc" id="L8">	public static LayoutAttr of(String... layoutConstraints ) { return new LayoutAttr(layoutConstraints); }</span>
+<span class="fc" id="L29">	public static LayoutAttr of( String... layoutConstraints ) { return new LayoutAttr(layoutConstraints); }</span>
 
-	private LayoutAttr(String[] layoutConstraints) {
-<span class="fc" id="L11">		super(layoutConstraints);</span>
-<span class="fc" id="L12">	}</span>
+<span class="fc" id="L31">	private LayoutAttr( String[] layoutConstraints ) { super(layoutConstraints); }</span>
 
-	private LayoutAttr() {
-<span class="fc" id="L15">		super();</span>
-<span class="fc" id="L16">	}</span>
+<span class="fc" id="L33">	private LayoutAttr() { super(); }</span>
 
-	public LayoutAttr and( LayoutAttr attr ) {
-<span class="fc" id="L19">		return (LayoutAttr) _and( attr, new LayoutAttr() );</span>
+	/**
+	 *  Create a new {@link LayoutAttr} with the provided {@link LayoutAttr} merged with this one.
+	 *
+	 * @param attr the {@link LayoutAttr} to merge with this one
+	 * @return a new {@link LayoutAttr} with the provided {@link LayoutAttr} merged with this one
+	 */
+<span class="fc" id="L41">	public LayoutAttr and( LayoutAttr attr ) { return (LayoutAttr) _and( attr, new LayoutAttr() ); }</span>
+
+	/**
+	 *  Create a new {@link LayoutAttr} with the provided layout constraints merged with this one.
+	 *
+	 * @param layoutConstraints the string layout constraints to merge with this one
+	 * @return a new {@link LayoutAttr} with the provided layout constraints merged with this one
+	 */
+	public LayoutAttr and( String... layoutConstraints ) {
+<span class="nc" id="L50">		LayoutAttr attr = new LayoutAttr( layoutConstraints );</span>
+<span class="nc" id="L51">		return (LayoutAttr) _and( attr, new LayoutAttr() );</span>
 	}
-
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

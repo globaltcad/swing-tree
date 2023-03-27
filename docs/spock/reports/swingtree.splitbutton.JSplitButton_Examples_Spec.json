@@ -9,7 +9,7 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"1.281 seconds"
+    "duration":"1.322 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
@@ -35,7 +35,7 @@
     {
       "id":"We can easily build a split button whose text becomes the current user selection:",
       "result":"PASS",
-      "duration":"0.076 seconds",
+      "duration":"0.078 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -81,7 +81,7 @@
     {
       "id":"We can register button click events for button items as well as the split button as a whole.",
       "result":"PASS",
-      "duration":"0.422 seconds",
+      "duration":"0.425 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -142,7 +142,7 @@
     {
       "id":"A button item can undo any multi-selection.",
       "result":"PASS",
-      "duration":"0.221 seconds",
+      "duration":"0.217 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -167,7 +167,7 @@
     {
       "id":"We can build a JSplitButton and add components to it.",
       "result":"PASS",
-      "duration":"0.007 seconds",
+      "duration":"0.009 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that adding components to a JSplitButton is not the same as \n            in a normal JButton. The components are added to the popup menu\n            and not to the button itself.\n            This is because the JSplitButton is a composite component and\n            the button itself is not a container.\n        "]
       },
@@ -200,7 +200,7 @@
     {
       "id":"A JSplitButton and all of its options can be created from a simple enum property.",
       "result":"PASS",
-      "duration":"0.006 seconds",
+      "duration":"0.007 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            For this example we use the following enum declaration:\n            ```\n                enum Size { \n                    S, M, L;\n                    @Override String toString() {  \n                        switch (this) {\n                            case S: return \"Small\"\n                            case M: return \"Medium\"\n                            case L: return \"Large\"\n                        }\n                        return \"?\"\n                    }\n                }\n            ```\n        "]
       },
@@ -219,7 +219,7 @@
     {
       "id":"A JSplitButton and all of its options can be bound to and created from a simple enum property and bound to an event.",
       "result":"PASS",
-      "duration":"0.170 seconds",
+      "duration":"0.173 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n                For this example we use the following enum declaration:\n                ```\n                    enum Colour { \n                        RED, GREEN, BLUE;\n                        @Override String toString() {  \n                            switch (this) {\n                                case RED: return \"Red\"\n                                case GREEN: return \"Green\"\n                                case BLUE: return \"Blue\"\n                            }\n                            return \"?\"\n                        }\n                    }\n                ```\n            "]
       },

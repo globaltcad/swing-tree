@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.758 seconds"
+    "duration":"0.240 seconds"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"The order in which the states of properties change is preserved when applied to the UI.",
       "result":"PASS",
-      "duration":"0.754 seconds",
+      "duration":"0.238 seconds",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            MVVM in Swing-Tree is based on the observability built into the Sprouts property objects.\n            However, in a multi-threaded/asynchronous environment, the order in which the states of properties\n            change is not guaranteed to be preserved when applied to the UI.\n\n            Here a little explanation is in order:\n            Consider a property that is bound to a UI component, and that property is changed by the application thread.\n            This causes the property to notify its observers so that they can update the state of the UI component.\n            Because Swing-tree is asynchronous, the app thread will put the change procedure \n            in the event queue of the EDT, and the EDT will ultimately apply the change to the UI.\n            However, it might take a while before the EDT gets around to processing the event\n            and until then the property might have changed again!\n            In fact, the state of the property can change multiple times before the EDT\n            gets a chance to apply them to the UI. \n            The problem that might arise is that the sequence of changes in the UI is not the same as the sequence\n            in which the changes were made to the property.\n\n            Swing-Tree provides a mechanism for ensuring that the order in which the states of properties\n            change is preserved when applied to the UI.\n        "]
       },

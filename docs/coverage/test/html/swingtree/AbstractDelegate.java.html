@@ -1,14 +1,807 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractDelegate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">AbstractDelegate.java</span></div><h1>AbstractDelegate.java</h1><pre class="source lang-java linenums">package swingtree;
 
+import swingtree.animation.Animate;
+import swingtree.animation.Animation;
+import swingtree.animation.Schedule;
+
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
-class AbstractDelegate
+/**
+ *  Extensions of this class delegate a component event
+ *  the component itself and the component tree of the component
+ *  in which the component is contained.
+ *  Instances of this class are passed to various user event {@link Action} handlers.
+ *  You can use this to change the state of the component, schedule animations
+ *  for the component or query the tree of the components.
+ *
+ * @param &lt;C&gt; The type of the component that is delegated.
+ */
+abstract class AbstractDelegate&lt;C extends JComponent&gt;
 {
-    private final Query _query;
+    private final Query _query; // the query object that allows us to query the component tree
+    private final C _component;
 
-<span class="fc" id="L11">    AbstractDelegate(Component component) { _query = new Query(component); }</span>
+<span class="fc" id="L30">    AbstractDelegate(C component, JComponent handle) {</span>
+<span class="fc" id="L31">        _query = new Query(handle);</span>
+<span class="fc" id="L32">        _component = component;</span>
+<span class="fc" id="L33">    }</span>
+
+<span class="fc" id="L35">    protected C _component() { return (C) _component; }</span>
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the background color of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  &lt;p&gt;
+     *  See {@link Component#setBackground(Color)} for more information.
+     *  &lt;/p&gt;
+     *
+     * @param color The color that should be used to paint the background of the component.
+     *              If this parameter is &lt;code&gt;null&lt;/code&gt; then this component will inherit
+     *              the background color of its parent.
+     * @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setBackground( Color color ) {
+<span class="nc" id="L51">        _component().setBackground(color);</span>
+<span class="nc" id="L52">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the background color of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  &lt;p&gt;
+     *  See {@link Component#setBackground(Color)} for more information.
+     *  &lt;/p&gt;
+     *
+     * @param r The red component of the color as a double between 0 and 1.
+     * @param g The green component of the color as a double between 0 and 1.
+     * @param b The blue component of the color as a double between 0 and 1.
+     * @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setBackgroundColor( double r, double g, double b ) {
+<span class="nc" id="L69">        return setBackgroundColor(r, g, b, 1.0);</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the background color of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  &lt;p&gt;
+     *  See {@link Component#setBackground(Color)} for more information.
+     *  &lt;/p&gt;
+     *
+     * @param r The red component of the color as a double between 0 and 1.
+     * @param g The green component of the color as a double between 0 and 1.
+     * @param b The blue component of the color as a double between 0 and 1.
+     * @param a The alpha component of the color as a double between 0 and 1.
+     * @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setBackgroundColor( double r, double g, double b, double a ) {
+<span class="nc" id="L87">        return setBackground(new Color((float) r, (float) g, (float) b, (float) a));</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the background color of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  &lt;p&gt;
+     *  See {@link Component#setBackground(Color)} for more information.
+     *  &lt;/p&gt;
+     *
+     * @param r The red component of the color as an integer between 0 and 255.
+     * @param g The green component of the color as an integer between 0 and 255.
+     * @param b The blue component of the color as an integer between 0 and 255.
+     * @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setBackgroundColor( int r, int g, int b ) {
+<span class="nc" id="L104">        return setBackgroundColor(r, g, b, 255);</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the background color of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  &lt;p&gt;
+     *  See {@link Component#setBackground(Color)} for more information.
+     *  &lt;/p&gt;
+     *
+     * @param r The red component of the color as an integer between 0 and 255.
+     * @param g The green component of the color as an integer between 0 and 255.
+     * @param b The blue component of the color as an integer between 0 and 255.
+     * @param a The alpha component of the color as an integer between 0 and 255.
+     * @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setBackgroundColor( int r, int g, int b, int a ) {
+<span class="nc" id="L122">        return setBackground(new Color(r, g, b, a));</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently get the background color of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#getBackground()} for more information.
+     *  &lt;/p&gt;
+     *
+     * @return The background color of the component.
+     */
+    public final Color getBackground() {
+<span class="nc" id="L135">        return _component().getBackground();</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the foreground color of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  &lt;p&gt;
+     *  See {@link Component#setForeground(Color)} for more information.
+     *  &lt;/p&gt;
+     *
+     * @param color The color that should be used to paint the foreground of the component.
+     *              If this parameter is &lt;code&gt;null&lt;/code&gt; then this component will inherit
+     *              the foreground color of its parent.
+     * @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setForeground( Color color ) {
+<span class="nc" id="L152">        _component().setForeground(color);</span>
+<span class="nc" id="L153">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently get the foreground color of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#getForeground()} for more information.
+     *  &lt;/p&gt;
+     *
+     * @return The foreground color of the component.
+     */
+    public final Color getForeground() {
+<span class="nc" id="L166">        return _component().getForeground();</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the foreground color of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  &lt;p&gt;
+     *  See {@link Component#setForeground(Color)} for more information.
+     *  &lt;/p&gt;
+     *
+     * @param r The red component of the color as a double between 0 and 1.
+     * @param g The green component of the color as a double between 0 and 1.
+     * @param b The blue component of the color as a double between 0 and 1.
+     * @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setForegroundColor( double r, double g, double b ) {
+<span class="nc" id="L183">        return setForegroundColor(r, g, b, 1.0);</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the foreground color of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  &lt;p&gt;
+     *  See {@link Component#setForeground(Color)} for more information.
+     *  &lt;/p&gt;
+     *
+     * @param r The red component of the color as a double between 0 and 1.
+     * @param g The green component of the color as a double between 0 and 1.
+     * @param b The blue component of the color as a double between 0 and 1.
+     * @param a The alpha component of the color as a double between 0 and 1.
+     * @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setForegroundColor( double r, double g, double b, double a ) {
+<span class="nc" id="L201">        return setForeground(new Color((float) r, (float) g, (float) b, (float) a));</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the foreground color of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  &lt;p&gt;
+     *  See {@link Component#setForeground(Color)} for more information.
+     *  &lt;/p&gt;
+     *
+     * @param r The red component of the color as an integer between 0 and 255.
+     * @param g The green component of the color as an integer between 0 and 255.
+     * @param b The blue component of the color as an integer between 0 and 255.
+     * @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setForegroundColor( int r, int g, int b ) {
+<span class="nc" id="L218">        return setForegroundColor(r, g, b, 255);</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the foreground color of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  &lt;p&gt;
+     *  See {@link Component#setForeground(Color)} for more information.
+     *  &lt;/p&gt;
+     *
+     * @param r The red component of the color as an integer between 0 and 255.
+     * @param g The green component of the color as an integer between 0 and 255.
+     * @param b The blue component of the color as an integer between 0 and 255.
+     * @param a The alpha component of the color as an integer between 0 and 255.
+     * @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setForegroundColor( int r, int g, int b, int a ) {
+<span class="nc" id="L236">        return setForeground(new Color(r, g, b, a));</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the font of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  &lt;p&gt;
+     *  See {@link Component#setFont(Font)} for more information.
+     *  &lt;/p&gt;
+     *
+     * @param font The font that should be used to paint the text of the component.
+     *             If this parameter is &lt;code&gt;null&lt;/code&gt; then this component will inherit
+     *             the font of its parent.
+     * @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setFont( Font font ) {
+<span class="nc" id="L253">        _component().setFont(font);</span>
+<span class="nc" id="L254">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently get the font of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#getFont()} for more information.
+     *  &lt;/p&gt;
+     *
+     * @return The font of the component.
+     */
+    public final Font getFont() {
+<span class="nc" id="L267">        return _component().getFont();</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the bounds of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  &lt;p&gt;
+     *  See {@link Component#setBounds(int, int, int, int)} for more information.
+     *  &lt;/p&gt;
+     *
+     *  @param x The x coordinate of the new location of the component.
+     *           This is relative to the component's parent.
+     *  @param y The y coordinate of the new location of the component.
+     *           This is relative to the component's parent.
+     *  @param width The new width of the component.
+     *  @param height The new height of the component.
+     */
+    public final AbstractDelegate&lt;C&gt; setBounds( int x, int y, int width, int height ) {
+<span class="nc" id="L286">        _component().setBounds(x, y, width, height);</span>
+<span class="nc" id="L287">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the bounds of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  &lt;p&gt;
+     *  See {@link Component#setBounds(Rectangle)} for more information.
+     *  &lt;/p&gt;
+     *
+     *  @param bounds The new bounds of the component.
+     *                  This is relative to the component's parent.
+     */
+    public final AbstractDelegate&lt;C&gt; setBounds( Rectangle bounds ) {
+<span class="nc" id="L302">        _component().setBounds(bounds);</span>
+<span class="nc" id="L303">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently get the bounds of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#getBounds()} for more information.
+     *  &lt;/p&gt;
+     *
+     *  @return The bounds of the component.
+     *          This is relative to the component's parent.
+     */
+    public final Rectangle getBounds() {
+<span class="nc" id="L317">        return _component().getBounds();</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the preferred size of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  The preferred size is used by the layout manager to determine the size of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#setPreferredSize(Dimension)} for more information.
+     *  &lt;/p&gt;
+     *  @param size The preferred size of the component.
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setPrefSize( Dimension size ) {
+<span class="nc" id="L332">        _component().setPreferredSize(size);</span>
+<span class="nc" id="L333">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the preferred size of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  The preferred size is used by the layout manager to determine the size of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#setPreferredSize(Dimension)} for more information.
+     *  &lt;/p&gt;
+     *  @param width The preferred width of the component.
+     *  @param height The preferred height of the component.
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setPrefSize( int width, int height ) {
+<span class="nc" id="L349">        _component().setPreferredSize(new Dimension(width, height));</span>
+<span class="nc" id="L350">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the preferred width of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  The preferred size is used by the layout manager to determine the size of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#setPreferredSize(Dimension)} for more information.
+     *  &lt;/p&gt;
+     *  @param width The preferred width of the component.
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setPrefWidth( int width ) {
+<span class="nc" id="L365">        Dimension size = _component().getPreferredSize();</span>
+<span class="nc" id="L366">        _component().setPreferredSize(new Dimension(width, size.height));</span>
+<span class="nc" id="L367">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the preferred height of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  The preferred size is used by the layout manager to determine the size of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#setPreferredSize(Dimension)} for more information.
+     *  &lt;/p&gt;
+     *  @param height The preferred height of the component.
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setPrefHeight( int height ) {
+<span class="nc" id="L382">        Dimension size = _component().getPreferredSize();</span>
+<span class="nc" id="L383">        _component().setPreferredSize(new Dimension(size.width, height));</span>
+<span class="nc" id="L384">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently get the preferred size of the component.
+     *  The preferred size is used by the layout manager to determine the size of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#getPreferredSize()} for more information.
+     *  &lt;/p&gt;
+     *  @return The preferred size of the component.
+     */
+    public final Dimension getPrefSize() {
+<span class="nc" id="L397">        return _component().getPreferredSize();</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the minimum size of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  The minimum size is used by the layout manager to determine the size of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#setMinimumSize(Dimension)} for more information.
+     *  &lt;/p&gt;
+     *  @param size The minimum size of the component.
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setMinSize( Dimension size ) {
+<span class="nc" id="L412">        _component().setMinimumSize(size);</span>
+<span class="nc" id="L413">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the minimum size of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  The minimum size is used by the layout manager to determine the size of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#setMinimumSize(Dimension)} for more information.
+     *  &lt;/p&gt;
+     *  @param width The minimum width of the component.
+     *  @param height The minimum height of the component.
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setMinSize( int width, int height ) {
+<span class="nc" id="L429">        _component().setMinimumSize(new Dimension(width, height));</span>
+<span class="nc" id="L430">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the minimum width of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  The minimum size is used by the layout manager to determine the size of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#setMinimumSize(Dimension)} for more information.
+     *  &lt;/p&gt;
+     *  @param width The minimum width of the component.
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setMinWidth( int width ) {
+<span class="nc" id="L445">        Dimension size = _component().getMinimumSize();</span>
+<span class="nc" id="L446">        _component().setMinimumSize(new Dimension(width, size.height));</span>
+<span class="nc" id="L447">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the minimum height of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  The minimum size is used by the layout manager to determine the size of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#setMinimumSize(Dimension)} for more information.
+     *  &lt;/p&gt;
+     *  @param height The minimum height of the component.
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setMinHeight( int height ) {
+<span class="nc" id="L462">        Dimension size = _component().getMinimumSize();</span>
+<span class="nc" id="L463">        _component().setMinimumSize(new Dimension(size.width, height));</span>
+<span class="nc" id="L464">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently get the minimum size of the component.
+     *  The minimum size is used by the layout manager to determine the size of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#getMinimumSize()} for more information.
+     *  &lt;/p&gt;
+     *  @return The minimum size of the component.
+     */
+    public final Dimension getMinSize() {
+<span class="nc" id="L477">        return _component().getMinimumSize();</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the maximum size of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  The maximum size is used by the layout manager to determine the size of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#setMaximumSize(Dimension)} for more information.
+     *  &lt;/p&gt;
+     *  @param size The maximum size of the component.
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setMaxSize( Dimension size ) {
+<span class="nc" id="L492">        _component().setMaximumSize(size);</span>
+<span class="nc" id="L493">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the maximum size of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  The maximum size is used by the layout manager to determine the size of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#setMaximumSize(Dimension)} for more information.
+     *  &lt;/p&gt;
+     *  @param width The maximum width of the component.
+     *  @param height The maximum height of the component.
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setMaxSize( int width, int height ) {
+<span class="nc" id="L509">        _component().setMaximumSize(new Dimension(width, height));</span>
+<span class="nc" id="L510">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the maximum width of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  The maximum size is used by the layout manager to determine the size of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#setMaximumSize(Dimension)} for more information.
+     *  &lt;/p&gt;
+     *  @param width The maximum width of the component.
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setMaxWidth( int width ) {
+<span class="nc" id="L525">        Dimension size = _component().getMaximumSize();</span>
+<span class="nc" id="L526">        _component().setMaximumSize(new Dimension(width, size.height));</span>
+<span class="nc" id="L527">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the maximum height of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  The maximum size is used by the layout manager to determine the size of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#setMaximumSize(Dimension)} for more information.
+     *  &lt;/p&gt;
+     *  @param height The maximum height of the component.
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setMaxHeight( int height ) {
+<span class="nc" id="L542">        Dimension size = _component().getMaximumSize();</span>
+<span class="nc" id="L543">        _component().setMaximumSize(new Dimension(size.width, height));</span>
+<span class="nc" id="L544">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently get the maximum size of the component.
+     *  The maximum size is used by the layout manager to determine the size of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#getMaximumSize()} for more information.
+     *  &lt;/p&gt;
+     *  @return The maximum size of the component.
+     */
+    public final Dimension getMaxSize() {
+<span class="nc" id="L557">        return _component().getMaximumSize();</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the size of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  The size is used by the layout manager to determine the size of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#setSize(Dimension)} for more information.
+     *  &lt;/p&gt;
+     *  @param size The size of the component.
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setSize( Dimension size ) {
+<span class="nc" id="L572">        _component().setSize(size);</span>
+<span class="nc" id="L573">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the size of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  The size is used by the layout manager to determine the size of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#setSize(Dimension)} for more information.
+     *  &lt;/p&gt;
+     *  @param width The width of the component.
+     *  @param height The height of the component.
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setSize( int width, int height ) {
+<span class="nc" id="L589">        _component().setSize(new Dimension(width, height));</span>
+<span class="nc" id="L590">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the width of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  The size is used by the layout manager to determine the size of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#setSize(Dimension)} for more information.
+     *  &lt;/p&gt;
+     *  @param width The width of the component.
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setWidth( int width ) {
+<span class="nc" id="L605">        Dimension size = _component().getSize();</span>
+<span class="nc" id="L606">        _component().setSize(new Dimension(width, size.height));</span>
+<span class="nc" id="L607">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the height of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  The size is used by the layout manager to determine the size of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#setSize(Dimension)} for more information.
+     *  &lt;/p&gt;
+     *  @param height The height of the component.
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setHeight( int height ) {
+<span class="nc" id="L622">        Dimension size = _component().getSize();</span>
+<span class="nc" id="L623">        _component().setSize(new Dimension(size.width, height));</span>
+<span class="nc" id="L624">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently get the size of the component.
+     *  The size is used by the layout manager to determine the size of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#getSize()} for more information.
+     *  &lt;/p&gt;
+     *  @return The size of the component.
+     */
+    public final Dimension getSize() {
+<span class="nc" id="L637">        return _component().getSize();</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently get the width of the component.
+     *  The size is used by the layout manager to determine the size of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#getSize()} for more information.
+     *  &lt;/p&gt;
+     *  @return The width of the component.
+     */
+    public final int getWidth() {
+<span class="nc" id="L650">        return _component().getSize().width;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently get the height of the component.
+     *  The size is used by the layout manager to determine the size of the component.
+     *  &lt;p&gt;
+     *  See {@link Component#getSize()} for more information.
+     *  &lt;/p&gt;
+     *  @return The height of the component.
+     */
+    public final int getHeight() {
+<span class="nc" id="L663">        return _component().getSize().height;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the {@link UI.Cursor} of the component.
+     *
+     * @param cursor The {@link UI.Cursor} which should be set.
+     * @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setCursor( UI.Cursor cursor ) {
+<span class="nc" id="L674">        _component().setCursor(Cursor.getPredefinedCursor(cursor.type));</span>
+<span class="nc" id="L675">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the {@link Cursor} of the component.
+     * @param cursor The {@link Cursor} which should be set.
+     * @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setCursor( Cursor cursor ) {
+<span class="nc" id="L685">        _component().setCursor(cursor);</span>
+<span class="nc" id="L686">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently get the {@link Cursor} of the component.
+     * @return The {@link Cursor} of the component.
+     */
+    public final Cursor getCursor() {
+<span class="nc" id="L695">        return _component().getCursor();</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the tooltip of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  &lt;p&gt;
+     *  See {@link JComponent#setToolTipText(String)} for more information.
+     *  &lt;/p&gt;
+     * @param text  The tooltip text.
+     * @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setTooltip( String text ) {
+<span class="nc" id="L709">        _component().setToolTipText(text);</span>
+<span class="nc" id="L710">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently get the tooltip of the component.
+     *  &lt;p&gt;
+     *  See {@link JComponent#getToolTipText()} for more information.
+     *  &lt;/p&gt;
+     * @return The tooltip text.
+     */
+    public final String getTooltip() {
+<span class="nc" id="L722">        return _component().getToolTipText();</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently enable or disable the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  &lt;p&gt;
+     *  See {@link JComponent#setEnabled(boolean)} for more information.
+     *  &lt;/p&gt;
+     *  @param enabled True if the component should be enabled, false otherwise.
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setEnabled( boolean enabled ) {
+<span class="nc" id="L736">        _component().setEnabled(enabled);</span>
+<span class="nc" id="L737">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently check if the component is enabled.
+     *  &lt;p&gt;
+     *  See {@link JComponent#isEnabled()} for more information.
+     *  &lt;/p&gt;
+     *  @return True if the component is enabled, false otherwise.
+     */
+    public final boolean isEnabled() {
+<span class="nc" id="L749">        return _component().isEnabled();</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently enable or disable the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  &lt;p&gt;
+     *  See {@link JComponent#setVisible(boolean)} for more information.
+     *  &lt;/p&gt;
+     *  @param visible True if the component should be visible, false otherwise.
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setVisible( boolean visible ) {
+<span class="nc" id="L763">        _component().setVisible(visible);</span>
+<span class="nc" id="L764">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently check if the component is visible.
+     *  &lt;p&gt;
+     *  See {@link JComponent#isVisible()} for more information.
+     *  &lt;/p&gt;
+     *  @return True if the component is visible, false otherwise.
+     */
+    public final boolean isVisible() {
+<span class="nc" id="L776">        return _component().isVisible();</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently make the component opaque or transparent.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  &lt;p&gt;
+     *  See {@link JComponent#setOpaque(boolean)} for more information.
+     *  &lt;/p&gt;
+     * @param opaque True if the component should be opaque, false otherwise.
+     * @return The delegate itself.
+     */
+    public final AbstractDelegate&lt;C&gt; setOpaque( boolean opaque ) {
+<span class="nc" id="L790">        _component().setOpaque(opaque);</span>
+<span class="nc" id="L791">        return this;</span>
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently check if the component is opaque.
+     *  &lt;p&gt;
+     *  See {@link JComponent#isOpaque()} for more information.
+     *  &lt;/p&gt;
+     * @return True if the component is opaque, false otherwise.
+     */
+    public final boolean isOpaque() {
+<span class="nc" id="L803">        return _component().isOpaque();</span>
+    }
 
     /**
      *  Use this to query the UI tree and find any {@link JComponent}.
@@ -19,8 +812,100 @@ class AbstractDelegate
      * @param &lt;T&gt; The type parameter of the component which should be found.
      */
     public final &lt;T extends JComponent&gt; OptionalUI&lt;T&gt; find( Class&lt;T&gt; type, String id ) {
-<span class="fc" id="L22">        return _query.find(type, id);</span>
+<span class="fc" id="L815">        return _query.find(type, id);</span>
     }
 
+    /**
+     *  A common use case is to render something on top of the component
+     *  using the {@link Graphics2D} instance of the component.
+     *  This method allows you to dispatch a rendering task to the EDT
+     *  at the end of the current event cycle, ensuring that custom rendering
+     *  is not erased by a potential repaint of the component after a user event.
+     *  &lt;p&gt;
+     *  Here is an example of how to use this method as part of a fancy button animation:
+     *  &lt;pre&gt;{@code
+     *      UI.button(&quot;Click me&quot;).withPrefSize(400, 400)
+     *      .onMouseClick( it -&gt; it.animateOnce(2, TimeUnit.SECONDS, state -&gt; {
+     *          double r = 300 * state.progress();
+     *          double x = it.getEvent().getX() - r / 2;
+     *          double y = it.getEvent().getY() - r / 2;
+     *          it.render( g -&gt; {
+     *              g.setColor(new Color(1f, 1f, 0f, (float) (1 - state.progress())));
+     *              g.fillOval((int) x, (int) y, (int) r, (int) r);
+     *          });
+     *      }))
+     *  }&lt;/pre&gt;
+     *
+     * @param renderer The rendering task which should be executed on the EDT at the end of the current event cycle.
+     */
+    public final void render( Consumer&lt;Graphics2D&gt; renderer ) {
+            // We check if the component is declared in the UI class
+            // as a nested class. If it is, it is one of ours, so we can safely assume that
+            // the paint method is overridden and that the component
+            // will pick up where we left off.
+<span class="nc" id="L846">            Class&lt;?&gt; enclosing = _component.getClass().getEnclosingClass();</span>
+<span class="nc bnc" id="L847" title="All 2 branches missed.">            boolean isCompClassNestedInUI = enclosing == UI.class;</span>
+
+<span class="nc bnc" id="L849" title="All 2 branches missed.">            if ( isCompClassNestedInUI )</span>
+<span class="nc" id="L850">                UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
+                    // We do the rendering later in the paint method!
+<span class="nc" id="L852">                    List&lt;Consumer&lt;Graphics2D&gt;&gt; renderers = (List&lt;Consumer&lt;Graphics2D&gt;&gt;) _component.getClientProperty(Animate.class);</span>
+<span class="nc bnc" id="L853" title="All 2 branches missed.">                    if ( renderers == null ) {</span>
+<span class="nc" id="L854">                        renderers = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L855">                        _component.putClientProperty(Animate.class, renderers); // We store the renderers in the component</span>
+                    }
+<span class="nc" id="L857">                    renderers.add(renderer);</span>
+                    // Everything will be rendered in the paint method!
+                    // This is important because otherwise our rendering would be erased by a repaint
+<span class="nc" id="L860">                });</span>
+            else
+<span class="nc" id="L862">                UI.runLater(()-&gt;{</span>
+                    /*
+                        We do this later because after any user event
+                        it is very likely that the component gets repainted, meaning that anything rendered
+                        will be erased. So we use invoke later to schedule the rendering
+                        of the component to happen after the component is repainted (user event/repaint is over)
+                        Note that this is an unreliable way to do this, which is why the
+                        above code is preferred, but it is a fallback for when the component
+                        is not declared in the UI class (one of ours with a modified paint method).
+                    */
+<span class="nc" id="L872">                    renderer.accept((Graphics2D) _component.getGraphics());</span>
+<span class="nc" id="L873">                });</span>
+<span class="nc" id="L874">    }</span>
+
+    /**
+     *  Use this to access the animation API and schedule an animation.
+     *  The animation will be executed on the EDT.
+     *  @param duration The duration of the animation.
+     *  @param unit The time unit of the duration.
+     *  @return An {@link Animate} instance which can be used to define how the animation should be executed.
+     */
+    public final Animate animate( double duration, TimeUnit unit ) {
+<span class="fc" id="L884">        return Animate.on( _component(), Schedule.of(duration, unit) );</span>
+    }
+
+    /**
+     *  Use this to schedule a single animation iteration
+     *  that will be executed on the EDT multiple times for the given duration.
+     *
+     *  @param duration The duration of the animation.
+     *  @param unit The time unit of the duration.
+     *  @param animation The animation that should be executed.
+     */
+    public final void animateOnce( double duration, TimeUnit unit, Animation animation ) {
+<span class="fc" id="L896">        this.animate(duration, unit).goOnce(animation);</span>
+<span class="fc" id="L897">    }</span>
+
+    /**
+     *  Use this to schedule 2 animation iterations
+     *  that will be executed on the EDT multiple times for the given duration.
+     *
+     *  @param duration The duration of the animation.
+     *  @param unit The time unit of the duration.
+     *  @param animation The animation that should be executed.
+     */
+    public final void animateTwice( double duration, TimeUnit unit, Animation animation ) {
+<span class="nc" id="L908">        this.animate(duration, unit).goTwice(animation);</span>
+<span class="nc" id="L909">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
