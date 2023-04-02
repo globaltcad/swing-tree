@@ -191,8 +191,9 @@ the same fundamental goal:
 
 In Swing-Tree you can achieve this separation by using the 
 **Sprouts property collection API**.
-Properties are a simple yet powerful concept that allow you to
-dynamically bind UI components to your business logic and vice versa.
+Properties are a simple yet powerful concept, they are just wrapper types
+for the field variables of you view model which allow you register change listener on them.
+These listener make it possible to dynamically bind UI components to your business logic and vice versa.
 
 Let's consider the following business logic, which we will call "view model" 
 from now on in accordance with the `MVVM` design and naming conventions:
@@ -218,12 +219,13 @@ public class PersonViewModel {
 ```
 
 Properties are represented by the `sprouts.Var` and `sprouts.Val` classes.
-They are wrapper objects for any kind of value whose
-type you can specify using the generic type parameter.
-The most important property type is `Var` type.
-Which has both getters and setters for the wrapped value. 
-The `Val` type on the other hand is an immutable property / read-only view of a `Var`
-which allows you to design your view model API in a way which does
+They any kind of value whose type you can specify using the generic 
+type parameter, in this example we have 3 properties wrapping a String each.
+The most important property type is the `Var` type.
+It has both getters and setters for the wrapped value. 
+The `Val` type on the other hand is an immutable property / read-only view of a `Var`.
+Note that `Val` is a subtype of `Var`, which allows you to 
+design your view model API in a way which does
 not leak mutable state to the outside world.
 
 Now let's consider the corresponding Swing UI:
@@ -231,14 +233,14 @@ Now let's consider the corresponding Swing UI:
 ```java
  var vm = new PersonViewModel();
  UI.show(
-	UI.panel("wrap 2")
-	.add(UI.label("First Name:"))
-	.add("grow", UI.textField(vm.firstName()))
-	.add(UI.label("Last Name:"))
-	.add("grow", UI.textField(vm.lastName()))
-	.add("span", UI.separator())
-	.add("wrap", UI.label("Full Name:"))
-	.add("span, grow", UI.textField(vm.fullName()))
+    UI.panel("wrap 2")
+    .add(UI.label("First Name:"))
+    .add("grow", UI.textField(vm.firstName()))
+    .add(UI.label("Last Name:"))
+    .add("grow", UI.textField(vm.lastName()))
+    .add("span", UI.separator())
+    .add("wrap", UI.label("Full Name:"))
+    .add("span, grow", UI.textField(vm.fullName()))
  );
 ```
 
@@ -249,19 +251,21 @@ This will look like this:
 Swing-Tree will bind the `firstName` and `lastName` properties
 of the `PersonViewModel` to the `JTextField` components
 and will automatically update the `JTextField` components
-whenever the `firstName` or `lastName` properties change.
+whenever the `firstName` or `lastName` properties change (their `set` methods are called).
 Conversely, whenever the user changes the text in the `JTextField`
 components the `firstName` and `lastName` properties will be updated
 as well, which will in turn trigger the `onAct` callbacks!
+In this example the `onAct` change listener will set the `fullName` property,
+which will automatically translate to the corresponding `JTextField` component in the UI.
 
 The powerful thing about this example is that we managed 
 to affect the state of the UI (the full name) without
 actually depending on the UI at all,
-meaning there is not even a single reference to a Swing component
+meaning that there is not even a single reference to a Swing component
 in the `PersonViewModel` class!
 
 Not only does this allow us to write unit tests for our business logic
-you can also easily swap out the Swing UI for a different UI
+we can now also easily swap out the Swing UI for a different UI
 implementation without having to change the business logic at all!
 
 How cool is that? :)
@@ -344,14 +348,14 @@ So the inner lambda is called any number of times
 but usually not more than **~60 times per second**.
 
 Another confusing thing might be the `state` parameter
-of the animation callback. This is a `AnimationState` object
+of the animation callback. This is an `AnimationState` object
 which contains information about 
 **the state of the current animation update**.
 This object exists to tell you how far along the animation is,
-and to provide you with some useful methods for creating
-animations with smooth transitions.
+and to provide you with some useful methods for designing
+animations with seemless and controlled transitions.
 
-You might be wondering: How does all of this work? 
+You might be wondering: How does all of this work under the hood? 
 Well, in essence it is based on a custom `Timer` implementation,
 some system time bookkeeping,
 and a nice API for creating and scheduling animation lambdas,
