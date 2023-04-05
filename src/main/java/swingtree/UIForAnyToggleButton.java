@@ -39,7 +39,7 @@ public abstract class UIForAnyToggleButton<I, B extends JToggleButton> extends U
 
         // When the user clicks the button, we update the selection property!
         // But only if the button is selected, otherwise we'll ignore the click.
-        // And we also trigger "show" events for the button, so that other buttons
+        // And we also trigger "set" events for the button, so that other buttons
         // can be updated to reflect the new selection state.
         _onChange( event -> {
             if ( component.isSelected() )

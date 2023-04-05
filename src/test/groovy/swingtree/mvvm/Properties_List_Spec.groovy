@@ -228,9 +228,9 @@ class Properties_List_Spec extends Specification
             vars.removeAt(1)
             vars.add(3)
 
-        then : 'The "show" listener has been called four times.'
+        then : 'The change listener has been called four times.'
             changes.size() == 4
-        and : 'The "show" listener has been called with the correct indices.'
+        and : 'The change listener has been called with the correct indices.'
             changes == [1, 0, 1, 2]
     }
 
@@ -241,7 +241,7 @@ class Properties_List_Spec extends Specification
             var list = Vars.of(42, 73)
         and : 'A list where we are going to record changes.'
             var changes = []
-        and : 'Now we register a "show" listeners on both objects.'
+        and : 'Now we register a "set" listeners on both objects.'
             prop.onSet(new Action<Integer>() {
                 @Override
                 void accept(Integer delegate) {
@@ -265,7 +265,7 @@ class Properties_List_Spec extends Specification
             list.addAt(1, 3)
             list.remove(3)
 
-        then : 'The "show" listener has been called zero times.'
+        then : 'The change listener has been called zero times.'
             changes.size() == 0
     }
 
@@ -275,7 +275,7 @@ class Properties_List_Spec extends Specification
             var vars = Vars.of(42, 73)
         and : 'A list where we are going to record changes.'
             var changes = []
-        and : 'Now we register a "show" listener on the "Vars" class.'
+        and : 'Now we register a change listener on the "Vars" class.'
             vars.onChange{ changes << it.changeType() }
 
         when : 'We modify the property in various ways...'
@@ -284,9 +284,9 @@ class Properties_List_Spec extends Specification
             vars.removeAt(1)
             vars.add(3)
 
-        then : 'The "show" listener has been called four times.'
+        then : 'The change listener has been called four times.'
             changes.size() == 4
-        and : 'The "show" listener has been called with the correct indices.'
+        and : 'The change listener has been called with the correct indices.'
             changes == [Change.ADD, Change.SET, Change.REMOVE, Change.ADD]
     }
 
@@ -318,7 +318,7 @@ class Properties_List_Spec extends Specification
             var vars = Vars.of(42, 73)
         and : 'A regular list where we are going to record changes.'
             var changes = []
-        and : 'Now we register a "show" change listener on the properties.'
+        and : 'Now we register a change listener on the properties.'
             vars.onChange({ changes << it.changeType() })
 
         when : 'We sort the list.'
@@ -398,7 +398,7 @@ class Properties_List_Spec extends Specification
             It does this by removing all duplicates from the list.
             This is especially useful when you use the properties to model 
             combo box or radio button selections.
-            This modification will be reported to all "show" listeners,
+            This modification will be reported to all change listeners,
             which are usually used to update the UI.
         """
         given : 'A "Vars" class with 4 properties that have unique ids.'
@@ -417,7 +417,7 @@ class Properties_List_Spec extends Specification
         then : 'The list has been modified in-place.'
             vars.size() == 3
             vars == Vars.of(Var.of(3.1415f), Var.of(2.7182f), Var.of(1.6180f))
-        and : 'The "show" listeners have been called.'
+        and : 'The change listeners have been called.'
             changes == [Change.DISTINCT]
     }
 

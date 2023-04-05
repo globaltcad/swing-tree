@@ -50,12 +50,10 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
                     // This method is called before the popup menu becomes visible.
                     comboIsOpen[0] = true;
                 }
-
                 public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                     // This method is called before the popup menu becomes invisible
                     comboIsOpen[0] = false;
                 }
-
                 public void popupMenuCanceled(PopupMenuEvent e) {
                     // This method is called when the popup menu is canceled
                     comboIsOpen[0] = false;

@@ -320,4 +320,73 @@ class Combo_Box_Specification extends Specification
             ui.component.getItemAt(2) == 16
             ui.component.getItemAt(3) == 42
     }
+
+    def 'An editable combo box will try to parse user input to match bound properties.'()
+    {
+        reportInfo """
+            When you bind a selection property to an editable combo box, the combo box
+            will try to parse user input so that it can be converted to the type of the
+            selection property. 
+            If the String can be parsed, the combo box will update the selection property
+            to the parsed value.
+            On the other hand, if the String cannot be parsed, the combo box will not
+            update the selection property.
+        """
+        given : 'We create a property of type Integer.'
+            var selection = Var.of(42)
+        and : 'We create a combo box that is bound to the property.'
+            var ui =
+                        UI.comboBox(selection, 73, 42, 17)
+                        .isEditableIf(true)
+        expect : 'The combo box is initialized with the current selection.'
+            ui.component.getSelectedItem() == 42
+        and : 'It also reports the correct selection index.'
+            ui.component.getSelectedIndex() == 1
+
+        when : 'We simulate the user editing the combo box.'
+            ui.component.setSelectedItem('99')
+        then : 'The combo box updates the selection property to the parsed value.'
+            selection.get() == 99
+    }
+
+
+    def 'An editable combo box will try to parse any kind of user input to match bound properties.'(
+        String input, Var<Object> selection, Object[] items, Object expectedSelection
+    ) {
+        reportInfo """
+            When you bind a selection property to an editable combo box, the combo box
+            will try to parse user input so that it can be converted to the type of the
+            selection property. 
+            If the String can be parsed, the combo box will update the selection property
+            to the parsed value.
+            On the other hand, if the String cannot be parsed, the combo box will not
+            update the selection property.
+        """
+        given : 'We create a combo box that is bound to the property.'
+            var ui =
+                        UI.comboBox(selection, items)
+                        .isEditableIf(true)
+        expect : 'The combo box is initialized with the current selection.'
+            ui.component.getSelectedItem() == selection.get()
+
+        when : 'We simulate the user editing the combo box.'
+            ui.component.setSelectedItem(input)
+        then : 'The combo box updates the selection property to the parsed value.'
+            selection.get() == expectedSelection
+
+        where : 'We use the following data table to populate the used variables:'
+            input   |   selection      |  items           | expectedSelection
+            '99'    |   Var.of(42)     |  [73, 42, 17]    | 99
+            '42'    |   Var.of(42)     |  [73, 42, 17]    | 42
+            'true'  |   Var.of(false)  |  [true, false]   | true
+            'false' |   Var.of(false)  |  [true, false]   | false
+            'yes'   |   Var.of(false)  |  [true, false]   | true
+            'no'    |   Var.of(false)  |  [true, false]   | false
+            '3.14'  |   Var.of(3.14)   |  [3.14, 2.71]    | 3.14
+            '2.71'  |   Var.of(3.14)   |  [3.14, 2.71]    | 2.71
+            'foo'   |   Var.of('foo')  |  ['foo', 'bar']  | 'foo'
+            'bar'   |   Var.of('foo')  |  ['foo', 'bar']  | 'bar'
+            '666L'  |   Var.of(666L)   |  [666L, 777L]    | 666L
+            '777L'  |   Var.of(666L)   |  [666L, 777L]    | 777L
+    }
 }
