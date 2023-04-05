@@ -2078,7 +2078,7 @@ public final class UI
 
     /**
      *  Use this to create a builder for the {@link JLabel} UI component.
-     *  This is in essence a convenience method for {@code UI.of(new JLabel(String text)}.
+     *  This is in essence a convenience method for {@code UI.of(new JLabel(text)}.
      *
      * @param text The text which should be displayed on the label.
      * @return A builder instance for the label, which enables fluent method chaining.
@@ -2160,6 +2160,33 @@ public final class UI
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         return of((JLabel) new Label()).withText(text).makeBold();
+    }
+
+    /**
+     *  Use this to create a builder for a {@link JLabel} displaying HTML.
+     *  This is in essence a convenience method for {@code UI.of(new JLabel("<html>" + text + "</html>"))}.
+     *
+     * @param text The html text which should be displayed on the label.
+     * @return A builder instance for the label, which enables fluent method chaining.
+     */
+    public static UIForLabel<JLabel> html( String text ) {
+        NullUtil.nullArgCheck(text, "text", String.class);
+        return of((JLabel) new Label()).withText("<html>" + text + "</html>");
+    }
+
+    /**
+     *  Use this to create a builder for a {@link JLabel} displaying HTML.
+     *  This is in essence a convenience method for {@code UI.of(new JLabel("<html>" + text + "</html>"))}.
+     *
+     * @param text The html text property which should be bound to the label.
+     * @return A builder instance for the label, which enables fluent method chaining.
+     */
+    public static UIForLabel<JLabel> html( Val<String> text ) {
+        NullUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
+        return of((JLabel) new Label())
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
+                .withText(text.view( it -> "<html>" + it + "</html>"));
     }
 
     /**
@@ -3629,28 +3656,74 @@ public final class UI
     /**
      *  Use this to quickly launch a UI component in a {@link JFrame} window
      *  at the center of the screen.
+     *
+     * @param component The component to show in the window.
      */
     public static void show( Component component ) {
         Objects.requireNonNull( component );
-        new UI.TestWindow( f -> component );
+        new UI.TestWindow( "", f -> component );
+    }
+
+    /**
+     *  Use this to quickly launch a UI component in a titled {@link JFrame} window
+     *  at the center of the screen.
+     *
+     * @param title The title of the window.
+     * @param component The component to show in the window.
+     */
+    public static void show( String title, Component component ) {
+        Objects.requireNonNull( component );
+        new UI.TestWindow( title, f -> component );
     }
 
     /**
      *  Use this to quickly launch a UI component in a {@link JFrame} window
      *  at the center of the screen.
+     *
+     * @param ui The Swing-Tree UI to show in the window.
+     * @param <C> The type of the component to show in the window.
      */
     public static <C extends JComponent> void show( UIForAnySwing<?, C> ui ) {
-        new UI.TestWindow( f -> ui.getComponent() );
+        new UI.TestWindow( "", f -> ui.getComponent() );
+    }
+
+    /**
+     *  Use this to quickly launch a UI component in a titled {@link JFrame} window
+     *  at the center of the screen.
+     *
+     * @param title The title of the window.
+     * @param ui The Swing-Tree UI to show in the window.
+     * @param <C> The type of the component to show in the window.
+     */
+    public static <C extends JComponent> void show( String title, UIForAnySwing<?, C> ui ) {
+        new UI.TestWindow( title, f -> ui.getComponent() );
     }
 
     /**
      *  Use this to quickly launch a UI component in a {@link JFrame} window
      *  at the center of the screen using a function receiving the {@link JFrame}
      *  and returning the component to be shown.
+     *
+     * @param uiSupplier The component supplier which receives the current {@link JFrame}
+     *                   and returns the component to be shown.
      */
     public static void show( Function<JFrame, Component> uiSupplier ) {
         Objects.requireNonNull( uiSupplier );
-        new UI.TestWindow( frame -> uiSupplier.apply(frame) );
+        new UI.TestWindow( "", frame -> uiSupplier.apply(frame) );
+    }
+
+    /**
+     *  Use this to quickly launch a UI component in a titled {@link JFrame} window
+     *  at the center of the screen using a function receiving the {@link JFrame}
+     *  and returning the component to be shown.
+     *
+     * @param title The title of the window.
+     * @param uiSupplier The component supplier which receives the current {@link JFrame}
+     *                   and returns the component to be shown.
+     */
+    public static void show( String title, Function<JFrame, Component> uiSupplier ) {
+        Objects.requireNonNull( uiSupplier );
+        new UI.TestWindow( title, frame -> uiSupplier.apply(frame) );
     }
 
     /**
@@ -3667,6 +3740,20 @@ public final class UI
     }
 
     /**
+     *  Use this to quickly launch a UI component with a custom event processor
+     *  in a titled {@link JFrame} window at the center of the screen.
+     *
+     * @param eventProcessor the event processor to use for the UI built inside the {@link Supplier} lambda.
+     * @param title The title of the window.
+     * @param uiSupplier The component supplier which builds the UI and supplies the component to be shown.
+     */
+    public static void showUsing( EventProcessor eventProcessor, String title, Function<JFrame, Component> uiSupplier ) {
+        Objects.requireNonNull( eventProcessor );
+        Objects.requireNonNull( uiSupplier );
+        show(title, frame -> use(eventProcessor, () -> uiSupplier.apply(frame)));
+    }
+
+    /**
      *  Use this to quickly create and inspect a test window for a UI component.
      */
     private static class TestWindow
@@ -3674,8 +3761,11 @@ public final class UI
         private final JFrame frame;
         private final Component component;
 
-        private TestWindow( Function<JFrame, Component> uiSupplier ) {
+        private TestWindow( String title, Function<JFrame, Component> uiSupplier ) {
+            Objects.requireNonNull( title );
+            Objects.requireNonNull( uiSupplier );
             this.frame = new JFrame();
+            if ( !title.isEmpty() ) this.frame.setTitle(title);
             frame.setLocationRelativeTo(null); // Initial centering!
             this.component = uiSupplier.apply(frame);
             frame.add(component);
@@ -3686,10 +3776,6 @@ public final class UI
             frame.setSize(component.getPreferredSize());
             frame.setVisible(true);
         }
-
-        public JFrame getFrame() { return this.frame; }
-
-        public Component getComponent() { return this.component; }
     }
 
 

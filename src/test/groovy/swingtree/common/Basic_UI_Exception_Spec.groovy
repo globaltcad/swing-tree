@@ -41,6 +41,8 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.label((Val<String>)null)},
                     {UI.label(300,200,null)},
                     {UI.label((Icon)null)},
+                    {UI.html((String)null)},
+                    {UI.html((Val<String>)null)},
                     {UI.labelWithIcon((Val<Icon>)null)},
                     {UI.button(null, null,null)},
                     {UI.button().onClick(null)},
@@ -113,6 +115,8 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.panel((String)null, (String)null, (String)null)},
                     {UI.panel((LayoutAttr)null)},
                     {UI.panel((Val<LayoutAttr>)null)},
+                    {UI.spinner((Var<?>)null)},
+                    {UI.spinner((SpinnerModel)null)},
                     {UI.toolBar((UI.Align)null)},
                     {UI.toolBar((Val)null)}
             ]
