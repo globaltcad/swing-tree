@@ -11,9 +11,7 @@ public class UIForJDialog<D extends JDialog> extends UIForAnyWindow<UIForJDialog
 	 *
 	 * @param component The component type which will be wrapped by this builder node.
 	 */
-	public UIForJDialog(D component) {
-		super(component);
-	}
+	public UIForJDialog(D component) { super(component); }
 
 	@Override
 	protected void _add(Component component, Object conf) {

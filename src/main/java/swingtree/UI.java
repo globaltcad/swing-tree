@@ -559,12 +559,31 @@ public final class UI
     }
 
     /**
+     *  Use this to create a builder for the supplied {@link JDialog} with the supplied owner. <br>
+     * @param owner The owner for the new dialog.
+     * @return A basic UI builder instance wrapping a {@link JDialog}.
+     */
+    public static UIForJDialog<JDialog> dialog( Window owner ) {
+        return new UIForJDialog<>(new JDialog(owner));
+    }
+
+    /**
      *  Use this to create a builder for the supplied {@link JDialog} with the supplied title. <br>
      * @param title The title for the new dialog.
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      */
     public static UIForJDialog<JDialog> dialog( String title ) {
         return new UIForJDialog<>(new JDialog()).withTitle(title);
+    }
+
+    /**
+     *  Use this to create a builder for the supplied {@link JDialog} with the supplied owner and title. <br>
+     * @param owner The owner for the new dialog.
+     * @param title The title for the new dialog.
+     * @return A basic UI builder instance wrapping a {@link JDialog}.
+     */
+    public static UIForJDialog<JDialog> dialog( Window owner, String title ) {
+        return new UIForJDialog<>(new JDialog(owner)).withTitle(title);
     }
 
     /**
