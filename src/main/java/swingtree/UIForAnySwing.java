@@ -4,7 +4,9 @@ package swingtree;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 import sprouts.Action;
-import sprouts.*;
+import sprouts.Val;
+import sprouts.Vals;
+import sprouts.Var;
 import swingtree.api.Peeker;
 import swingtree.api.UIVerifier;
 import swingtree.api.mvvm.Viewable;
@@ -50,80 +52,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param component The JComponent type which will be wrapped by this builder node.
      */
     public UIForAnySwing(C component ) { super(component); }
-
-    /**
-     * @param action An action which should be executed by the UI thread (EDT).
-     */
-    protected final void _doUI( Runnable action ) { _eventProcessor.registerUIEvent( action ); }
-
-    /**
-     * @param action An action which should be executed by the application thread.
-     */
-    protected final void _doApp( Runnable action ) { _eventProcessor.registerAppEvent(action); }
-
-    /**
-     * @param value A value which should be captured.
-     * @param action A consumer lambda receiving the provided value and
-     *               is then executed by the application thread.
-     * @param <T> The type of the value.
-     */
-    protected final <T> void _doApp( T value, Consumer<T> action ) { _doApp(()->action.accept(value)); }
-
-    /**
-     * @param val A property which should be captured.
-     * @param displayAction A consumer lambda receiving the provided value and
-     *                      is then executed by the UI thread.
-     * @param <T> The type of the value.
-     */
-    protected final <T> void _onShow( Val<T> val, Consumer<T> displayAction ) {
-        val.onSet(new Action<Val<T>>() {
-            @Override
-            public void accept( Val<T> val ) {
-                T v = val.orElseNull(); // IMPORTANT! We first capture the value and then execute the action in the app thread.
-                _doUI(() ->
-                    /*
-                        We make sure that the action is only executed if the component
-                        is not disposed. This is important because the action may
-                        access the component, and we don't want to get a NPE.
-                     */
-                    component().ifPresent(c -> {
-                        displayAction.accept(v); // Here the captured value is used. This is extremely important!
-                        /*
-                             Since this is happening in another thread we are using the captured property item/value.
-                             The property might have changed in the meantime, but we don't care about that,
-                             we want things to happen in the order they were triggered.
-                         */
-                    })
-                );
-            }
-            @Override public boolean canBeRemoved() { return !component().isPresent(); }
-        });
-    }
-
-    /**
-     * @param vals A property list which should be captured.
-     * @param displayAction A consumer lambda receiving the action delegate and
-     *                      is then executed by the UI thread.
-     * @param <T> The type of the value.
-     */
-    protected final <T> void _onShow( Vals<T> vals, Consumer<ValsDelegate<T>> displayAction ) {
-        vals.onChange(new Action<ValsDelegate<T>>() {
-            @Override
-            public void accept(ValsDelegate<T> delegate) {
-                _doUI(() ->
-                    component().ifPresent(c -> {
-                        displayAction.accept(delegate);
-                        /*
-                            We make sure that the action is only executed if the component
-                            is not disposed. This is important because the action may
-                            access the component, and we don't want to get a NPE.
-                         */
-                    })
-                );
-            }
-            @Override public boolean canBeRemoved() { return !component().isPresent(); }
-        });
-    }
 
     /**
      *  This method exposes a concise way to set an identifier for the component
@@ -2593,14 +2521,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _this();
     }
 
-    protected void _onKeyTyped( Consumer<KeyEvent> action ) {
-        getComponent().addKeyListener(new KeyAdapter() {
-            @Override public void keyTyped(KeyEvent e) {
-                action.accept(e);
-            }
-        });
-    }
-
     /**
      * Adds the supplied {@link Action} wrapped in a {@link KeyListener} to the component,
      * to receive key events triggered when the wrapped component receives a particular
@@ -2617,13 +2537,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(key, "key", Keyboard.Key.class);
         NullUtil.nullArgCheck(onKeyTyped, "onKeyTyped", Action.class);
         C component = getComponent();
-        component.addKeyListener(new KeyAdapter() {
-            @Override public void keyTyped( KeyEvent e ) {
-                if ( e.getKeyCode() == key.code )
-                    _doApp(()->onKeyTyped.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
-            }
+        _onKeyTyped( e -> {
+            if ( e.getKeyCode() == key.code )
+                _doApp(()->onKeyTyped.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
         });
         return _this();
+    }
+
+    protected void _onKeyTyped( Consumer<KeyEvent> action ) {
+        getComponent().addKeyListener(new KeyAdapter() {
+            @Override public void keyTyped(KeyEvent e) {
+                action.accept(e);
+            }
+        });
     }
 
     /**
