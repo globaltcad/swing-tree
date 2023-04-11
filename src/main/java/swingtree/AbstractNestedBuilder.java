@@ -60,6 +60,16 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
     }
 
     /**
+     * @param builder A builder for another {@link JComponent} instance which ought to be added to the wrapped component type.
+     * @param <T> The type of the {@link JComponent} which is wrapped by the provided builder.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final <T extends JComponent> I add( UIForAnySwing<?, T> builder ) {
+        this.add(new AbstractNestedBuilder[]{builder});
+        return _this();
+    }
+
+    /**
      *  This builder class expects its implementations to be builder types
      *  for anything which can be built in a nested tree-like structure.
      *  Implementations of this abstract method ought to enable support for nested building.

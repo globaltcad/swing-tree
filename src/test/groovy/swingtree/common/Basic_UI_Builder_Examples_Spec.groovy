@@ -217,6 +217,26 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             tree['B5'  ].startsWith('swingtree.UI$Button')
     }
 
+    def 'We can register various kinds of different keyboard event handlers to swing tree frame builder.'()
+    {
+        reportInfo """
+            The Swing-Tree API exposes various methods to register different kinds of Swing component
+            or keyboard events. 
+            All such event registration methods can be identified by the 'on' prefix.
+        """
+        when : 'We create a JFrame UI builder and attach various kinds of actions to it.'
+            def frame =
+                    UI.frame("Test Frame")
+                    .onPressed(Keyboard.Key.H, it -> {/*something*/})
+                    .onFocusGained(it -> {/*something*/})
+                    .onFocusLost(it -> {/*something*/})
+                    .get(JFrame)
+
+        then :
+            frame.title == "Test Frame"
+            frame.focusable == true
+    }
+
     def 'We can register various kinds of different keyboard event handlers to swing tree nodes.'()
     {
         reportInfo """

@@ -509,6 +509,63 @@ public final class UI
         return new UIForSwing<>(component);
     }
 
+    /**
+     *  This returns an instance of a Swing-Tree builder for a {@link JFrame} type.
+     * @param frame The new frame instance which ought to be part of the Swing UI.
+     * @return A basic UI builder instance wrapping a {@link JFrame}.
+     * @param <F> The concrete type of this new frame.
+     */
+    public static <F extends JFrame> UIForJFrame<F> of( F frame ) {
+        return new UIForJFrame<>(frame);
+    }
+
+    /**
+     *  Use this to create a builder for the supplied {@link JFrame}. <br>
+     *  This is in essence a convenience method for {@code UI.of(new JFrame()) )}.
+     *
+     * @return A basic UI builder instance wrapping a {@link JFrame}.
+     */
+    public static UIForJFrame<JFrame> frame() {
+        return new UIForJFrame<>(new JFrame());
+    }
+
+    /**
+     *  Use this to create a builder for the supplied {@link JFrame} with the supplied title. <br>
+     * @param title The title for the new frame.
+     * @return A basic UI builder instance wrapping a {@link JFrame}.
+     */
+    public static UIForJFrame<JFrame> frame( String title ) {
+        return new UIForJFrame<>(new JFrame()).withTitle(title);
+    }
+
+    /**
+     *  This returns an instance of a Swing-Tree builder for a {@link JDialog} type.
+     * @param dialog The new dialog instance which ought to be part of the Swing UI.
+     * @return A basic UI builder instance wrapping a {@link JDialog}.
+     * @param <D> The concrete type of this new dialog.
+     */
+    public static <D extends JDialog> UIForJDialog<D> of( D dialog ) {
+        return new UIForJDialog<>(dialog);
+    }
+
+    /**
+     *  Use this to create a builder for the supplied {@link JDialog}. <br>
+     *  This is in essence a convenience method for {@code UI.of(new JDialog()) )}.
+     *
+     * @return A basic UI builder instance wrapping a {@link JDialog}.
+     */
+    public static UIForJDialog<JDialog> dialog() {
+        return new UIForJDialog<>(new JDialog());
+    }
+
+    /**
+     *  Use this to create a builder for the supplied {@link JDialog} with the supplied title. <br>
+     * @param title The title for the new dialog.
+     * @return A basic UI builder instance wrapping a {@link JDialog}.
+     */
+    public static UIForJDialog<JDialog> dialog( String title ) {
+        return new UIForJDialog<>(new JDialog()).withTitle(title);
+    }
 
     /**
      *  If you are using builders for your custom {@link JComponent},

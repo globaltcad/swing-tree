@@ -52,7 +52,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I withText( Val<String> text ) {
         NullUtil.nullArgCheck(text, "val", Val.class);
         NullUtil.nullPropertyCheck(text, "text");
-        _onShow(text, v -> getComponent().setText(v) );
+        _onShow( text, v -> getComponent().setText(v) );
         return withText( text.orElseThrow() );
     }
     

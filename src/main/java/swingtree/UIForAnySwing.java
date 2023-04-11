@@ -2590,16 +2590,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-     * @param builder A builder for another {@link JComponent} instance which ought to be added to the wrapped component type.
-     * @param <T> The type of the {@link JComponent} which is wrapped by the provided builder.
-     * @return This very instance, which enables builder-style method chaining.
-     */
-    public final <T extends JComponent> I add( UIForAnySwing<?, T> builder ) {
-        this.add(new AbstractNestedBuilder[]{builder});
-        return _this();
-    }
-
-    /**
      *  Use this to nest builder nodes into this builder to effectively plug the wrapped {@link JComponent}s
      *  into the {@link JComponent} type wrapped by this builder instance.
      *  The first argument is expected to contain layout information for the layout manager of the wrapped {@link JComponent},
