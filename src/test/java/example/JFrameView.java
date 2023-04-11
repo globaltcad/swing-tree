@@ -20,7 +20,6 @@ public class JFrameView extends JFrame
 			panel("fill")
 			.add(
 				button("Hello")
-				.onClick( it -> System.out.println("Hello") )
 				.onFocusGained( it -> System.out.println("Button focus gained") )
 				.onFocusLost( it -> System.out.println("Button focus lost") )
 				.onKeyPressed( it -> System.out.println("Button key pressed: " + it.getEvent().getKeyChar() ) )
@@ -28,6 +27,11 @@ public class JFrameView extends JFrame
 				.onKeyTyped( it -> System.out.println("Button key typed: " + it.getEvent().getKeyChar()) )
 				.onTyped( Keyboard.Key.ENTER, it -> System.out.println("Button enter key typed") )
 				.onTyped( Keyboard.Key.ESCAPE, it -> System.out.println("Button escape key typed") )
+				.onClick( it -> {
+					dialog(this, "I am a dialog!")
+					.add(label("Something you might need to know."))
+					.show();
+				})
 			)
 		)
 		.show();

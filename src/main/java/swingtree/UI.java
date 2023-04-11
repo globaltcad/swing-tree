@@ -3849,8 +3849,21 @@ public final class UI
             // Make sure that the window is centered on the screen again but with the component:
             frame.setLocationRelativeTo(null);
             // We set the size to fit the component:
-            frame.setSize(component.getPreferredSize());
+            _determineSize();
             frame.setVisible(true);
+        }
+        private void _determineSize() {
+            Dimension size = frame.getSize();
+            if ( size == null ) // The frame has no size! It is best to set the size to the preferred size of the component:
+                size = component.getPreferredSize();
+
+            if ( size == null ) // The component has no preferred size! It is best to set the size to the minimum size of the component:
+                size = component.getMinimumSize();
+
+            if ( size == null ) // The component has no minimum size! Let's just look up the size of the component:
+                size = component.getSize();
+
+            frame.setSize(size);
         }
     }
 

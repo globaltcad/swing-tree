@@ -26,8 +26,19 @@ public class UIForJFrame<F extends JFrame> extends UIForAnyWindow<UIForJFrame<F>
 		// Make sure that the window is centered on the screen again but with the component:
 		frame.setLocationRelativeTo(null);
 		// We set the size to fit the component:
-		if ( components.length > 0 )
-			frame.setSize(components[0].getPreferredSize());
+		if ( components.length > 0 ) {
+			Dimension size = frame.getSize();
+			if ( size == null ) // The frame has no size! It is best to set the size to the preferred size of the component:
+				size = components[0].getPreferredSize();
+
+			if ( size == null ) // The component has no preferred size! It is best to set the size to the minimum size of the component:
+				size = components[0].getMinimumSize();
+
+			if ( size == null ) // The component has no minimum size! Let's just look up the size of the component:
+				size = components[0].getSize();
+
+			frame.setSize(size);
+		}
 
 		frame.setVisible(true);
 	}
