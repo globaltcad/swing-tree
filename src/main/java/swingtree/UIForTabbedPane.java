@@ -226,30 +226,46 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
                 pane.addMouseListener(new java.awt.event.MouseAdapter() {
                     @Override
                     public void mouseClicked( MouseEvent e ) {
-                        JTabbedPane currentPane = paneRef.get();
-                        if ( currentPane == null ) return;
+                        JTabbedPane pane = paneRef.get();
+                        if ( pane == null ) return;
                         int indexOfThis = indexOfThisTab();
                         if ( indexOfThis < 0 ) return;
-                        int indexClicked = indexOfClick(pane, e);
+                        int indexClicked = indexOfClick(pane, e.getPoint());
                         if ( indexClicked < 0 ) return;
                         if ( indexOfThis == indexClicked )
-                            _doApp(()-> mouseClickAction.accept(new SimpleDelegate<>(currentPane, e, UIForTabbedPane.this::getSiblinghood)));
+                            _doApp(()-> mouseClickAction.accept(new SimpleDelegate<>(pane, e, UIForTabbedPane.this::getSiblinghood)));
                     }
                 });
             }
+        }
+
+        private void doAction(JTabbedPane pane, MouseEvent e) {
+            Point p = e.getPoint();
+            if ( e.getSource() != pane ) {
+               // We need to find the point relative to the tabbed pane:
+                p = traversePosition((Component) e.getSource(), pane, p);
+            }
+            int indexOfThis = indexOfThisTab();
+            if ( indexOfThis < 0 ) return;
+            int indexClicked = indexOfClick( pane, p );
+            if ( indexClicked < 0 ) return;
+            if ( indexOfThis == indexClicked && mouseClickAction != null )
+                _doApp(()-> { mouseClickAction.accept(new SimpleDelegate<>(pane, e, UIForTabbedPane.this::getSiblinghood)); });
+            if ( indexOfThis < pane.getTabCount() )
+                pane.setSelectedIndex(indexOfThis);
         }
 
         private int indexOfThisTab() {
             return indexFinder.get();
         }
 
-        private int indexOfClick(JTabbedPane pane, MouseEvent e) {
+        private int indexOfClick(JTabbedPane pane, Point p) {
             List<Rectangle> tabBounds = new ArrayList<>();
             for ( int i = 0; i < pane.getTabCount(); i++ )
                 tabBounds.add(pane.getBoundsAt(i));
 
             for ( int i = 0; i < tabBounds.size(); i++ )
-                if ( tabBounds.get(i).contains(e.getPoint()) )
+                if ( tabBounds.get(i).contains(p) )
                     return i;
 
             return -1;
@@ -270,18 +286,23 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
             else doAction( pane, e );
         }
 
-        private void doAction(JTabbedPane pane, MouseEvent e) {
-            _doApp(()-> {
-                int indexOfThis = indexOfThisTab();
-                if ( indexOfThis < 0 ) return;
-                int indexClicked = indexOfClick(pane, e);
-                if ( indexClicked < 0 ) return;
-                if ( indexOfThis == indexClicked && mouseClickAction != null )
-                    mouseClickAction.accept(new SimpleDelegate<>(pane, e, UIForTabbedPane.this::getSiblinghood));
-                if ( indexOfThis < pane.getTabCount() )
-                    pane.setSelectedIndex(indexOfThis);
-            });
-        }
+    }
+
+    /**
+     *  If we click on a subcomponent on the header we need to traverse
+     *  upwards to find the click position relative to the tabbed pane!
+     *  Otherwise we don't know where the click went.
+     *
+     * @param current The component where we currently have the relative position {@code p}.
+     * @param end The component at which we end traversal when it is the same as the current.
+     * @param p The relative position to the current component.
+     * @return The relative position to the end component!
+     */
+    private static Point traversePosition( Component current, Component end, Point p ) {
+        if ( current == end ) return p;
+        Component parent = current.getParent();
+        Point relativeToParent = SwingUtilities.convertPoint(current, p, parent);
+        return traversePosition(parent, end, relativeToParent);
     }
 
     /**
