@@ -8,6 +8,7 @@ import spock.lang.Title
 import swingtree.UI
 import swingtree.Utility
 import swingtree.examples.advanced.AdvancedUI
+import swingtree.examples.comparison1.MadeWithSwingTree
 import swingtree.examples.simple.Calculator
 import swingtree.examples.simple.ListRendering
 import swingtree.examples.simple.TableUI
@@ -113,6 +114,11 @@ class Examples_Spec extends Specification
     def 'The list rendering example UI defined in the examples can be created.'()
     {
         expect : new ListRendering()
+    }
+
+    def 'The "MadeWithSwingTree" example UI defined in the examples can be created.'()
+    {
+        expect : new MadeWithSwingTree()
     }
 
     def 'The calculator UI defined in the examples has the expected state.'()

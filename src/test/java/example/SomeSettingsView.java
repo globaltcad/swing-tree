@@ -2,13 +2,12 @@ package example;
 
 import swingtree.UI;
 
-import javax.swing.*;
 
-import java.awt.*;
+import java.awt.Color;
 
 import static swingtree.UI.*;
 
-public class SomeSettingsView extends JPanel
+public class SomeSettingsView extends Panel
 {
     public SomeSettingsView(SomeSettingsViewModel vm) {
         /*

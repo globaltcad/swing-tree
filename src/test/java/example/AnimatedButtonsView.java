@@ -6,13 +6,15 @@ import swingtree.animation.Animation;
 import swingtree.animation.AnimationState;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.geom.AffineTransform;
 import java.util.concurrent.TimeUnit;
 
 import static swingtree.UI.*;
 
-public class AnimatedButtonsView extends JPanel
+public class AnimatedButtonsView extends Panel
 {
     public AnimatedButtonsView() {
         FlatLightLaf.setup();

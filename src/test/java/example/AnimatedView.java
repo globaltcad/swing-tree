@@ -6,12 +6,12 @@ import swingtree.UI;
 
 import javax.swing.*;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.concurrent.TimeUnit;
 
 import static swingtree.UI.*;
 
-public class AnimatedView extends JPanel
+public class AnimatedView extends Panel
 {
     private static final String TEXT = "This is a chaotic example of a view with lot's of components and animations.";
 

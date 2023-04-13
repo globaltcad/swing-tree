@@ -6,11 +6,11 @@ import sprouts.Var;
 
 import javax.swing.*;
 
-import java.awt.*;
+import java.awt.Color;
 
 import static swingtree.UI.*;
 
-public class SomeSpinnersView extends JPanel {
+public class SomeSpinnersView extends Panel {
 
 	public SomeSpinnersView(SomeSpinnersViewModel vm) {
 		try { UIManager.setLookAndFeel(new FlatMaterialDesignDarkIJTheme()); }

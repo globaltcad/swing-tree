@@ -10,7 +10,7 @@ import static swingtree.UI.*;
 /**
  *  An example login view with property based binding to a view model (see {@link LoginViewModel}).
  */
-public class LoginView extends JPanel
+public class LoginView extends Panel
 {
     public LoginView( LoginViewModel vm ) {
         use(EventProcessor.DECOUPLED, ()->

@@ -12,12 +12,12 @@ import javax.swing.*;
  *
  * @author pp
  */
-public class MadeWithoutNetBeansEditor extends javax.swing.JPanel {
+public class MadeWithNetBeansEditor extends javax.swing.JPanel {
 
     public static void main(String... args) throws InterruptedException {
         Utility.setLaF(Utility.LaF.NIMBUS);
         JFrame frame = new JFrame();
-        JComponent component = new MadeWithoutNetBeansEditor();
+        JComponent component = new MadeWithNetBeansEditor();
         frame.add(component);
         frame.setSize(650, 550);
         frame.setVisible(true);
@@ -27,7 +27,7 @@ public class MadeWithoutNetBeansEditor extends javax.swing.JPanel {
 	/**
 	 * Creates new form UiExampleForm
 	 */
-	public MadeWithoutNetBeansEditor() {
+	public MadeWithNetBeansEditor() {
 		initComponents();
 	}
 

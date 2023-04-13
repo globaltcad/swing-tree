@@ -19,7 +19,7 @@ import static swingtree.UI.*;
  *  The entries inside {@link JList} and {@link JTable} components
  *  unfortunately cannot be interacted with by the user.
  */
-public class ScrollPanelsView extends JPanel
+public class ScrollPanelsView extends Panel
 {
 	public ScrollPanelsView( ScrollPanelsViewModel vm )
 	{

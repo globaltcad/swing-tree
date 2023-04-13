@@ -981,7 +981,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JTabbedPane}, which enables fluent method chaining.
      */
-    public static UIForTabbedPane<JTabbedPane> tabbedPane() { return of(new JTabbedPane()); }
+    public static UIForTabbedPane<JTabbedPane> tabbedPane() { return of(new TabbedPane()); }
 
     /**
      *  Use this to create a builder for a new {@link JTabbedPane} UI component
@@ -1320,7 +1320,7 @@ public final class UI
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static UIForToolBar<JToolBar> toolBar() {
-        return new UIForToolBar<>(new JToolBar());
+        return new UIForToolBar<>(new ToolBar());
     }
 
     /**
@@ -1333,7 +1333,7 @@ public final class UI
      */
     public static UIForToolBar<JToolBar> toolBar( Align align ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
-        return new UIForToolBar<>(new JToolBar()).with(align);
+        return new UIForToolBar<>((JToolBar) new ToolBar()).with(align);
     }
 
     /**
@@ -1347,7 +1347,7 @@ public final class UI
      */
     public static UIForToolBar<JToolBar> toolBar( Val<Align> align ) {
         NullUtil.nullArgCheck(align, "align", Val.class);
-        return new UIForToolBar<>(new JToolBar()).withAlignment(align);
+        return new UIForToolBar<>((JToolBar) new ToolBar()).withAlignment(align);
     }
 
     /**
@@ -1495,7 +1495,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JScrollPane}, which enables fluent method chaining.
      */
-    public static UIForScrollPane<JScrollPane> scrollPane() { return of(new JScrollPane()); }
+    public static UIForScrollPane<JScrollPane> scrollPane() { return of(new ScrollPane()); }
 
     /**
      *  Use this to create a builder for the provided {@link JScrollPanels} component.
@@ -1622,7 +1622,8 @@ public final class UI
     public static UIForSplitPane<JSplitPane> splitPane( Val<Align> align ) {
         NullUtil.nullArgCheck(align, "align", Val.class);
         NullUtil.nullPropertyCheck(align, "align", "Null is not a valid alignment.");
-        return of(new JSplitPane(align.get().forSplitPane())).withAlignment(align);
+        return of(new JSplitPane(align.get().forSplitPane()))
+                .withAlignment(align);
     }
 
     /**
@@ -1644,7 +1645,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JEditorPane}, which enables fluent method chaining.
      */
-    public static UIForEditorPane<JEditorPane> editorPane() { return of(new JEditorPane()); }
+    public static UIForEditorPane<JEditorPane> editorPane() { return of(new EditorPane()); }
 
     /**
      *  Use this to create a builder for the provided {@link JTextPane} instance.
@@ -1665,7 +1666,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JTextPane}, which enables fluent method chaining.
      */
-    public static UIForTextPane<JTextPane> textPane() { return of(new JTextPane()); }
+    public static UIForTextPane<JTextPane> textPane() { return of(new TextPane()); }
 
     /**
      *  Use this to create a builder for the provided {@link JSlider} instance.
@@ -2087,7 +2088,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JSpinner}, which enables fluent method chaining.
      */
-    public static UIForSpinner<JSpinner> spinner() { return of(new JSpinner()); }
+    public static UIForSpinner<JSpinner> spinner() { return of(new Spinner()); }
 
     /**
      * Use this to create a builder for the provided {@link JSpinner} instance
@@ -2098,7 +2099,7 @@ public final class UI
      */
     public static UIForSpinner<javax.swing.JSpinner> spinner( SpinnerModel model ) {
         NullUtil.nullArgCheck(model, "model", SpinnerModel.class);
-        return of(new JSpinner(model));
+        return of((JSpinner) new Spinner()).peek( s -> s.setModel(model) );
     }
 
     /**
@@ -2125,7 +2126,7 @@ public final class UI
      * @return A builder instance for the provided {@link JSpinner}, which enables fluent method chaining.
      */
     public static UIForSpinner<javax.swing.JSpinner> spinner( int value, int min, int max, int step ) {
-        return of(new JSpinner(new SpinnerNumberModel(value, min, max, step)));
+        return of((JSpinner) new Spinner()).peek( s -> s.setModel(new SpinnerNumberModel(value, min, max, step)) );
     }
 
     /**
@@ -2138,7 +2139,7 @@ public final class UI
      * @return A builder instance for the provided {@link JSpinner}, which enables fluent method chaining.
      */
     public static UIForSpinner<javax.swing.JSpinner> spinner( int value, int min, int max ) {
-        return of(new JSpinner(new SpinnerNumberModel(value, min, max, 1)));
+        return of((JSpinner) new Spinner()).peek( s -> s.setModel(new SpinnerNumberModel(value, min, max, 1)) );
     }
 
     /**
@@ -2816,7 +2817,7 @@ public final class UI
      */
     public static UIForPasswordField<JPasswordField> passwordField( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return of(new JPasswordField(text));
+        return of((JPasswordField) new PasswordField()).withText(text);
     }
 
     /**
@@ -3881,44 +3882,108 @@ public final class UI
             renderer.forEach( r -> r.accept((Graphics2D)g) );
     }
 
-    private static class Button extends JButton {
+    /** {inheritDoc} */
+    public static class Button extends JButton {
         @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
     }
-    private static class Panel extends JPanel {
+    /** {inheritDoc} */
+    public static class Panel extends JPanel {
         @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
     }
-    private static class Label extends JLabel {
+    /** {inheritDoc} */
+    public static class Label extends JLabel {
         @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
     }
-    private static class TextField extends JTextField {
+    /** {inheritDoc} */
+    public static class TextField extends JTextField {
         @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
     }
-    private static class TextArea extends JTextArea {
+    /** {inheritDoc} */
+    public static class TextArea extends JTextArea {
         @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
     }
-    private static class CheckBox extends JCheckBox {
+    /** {inheritDoc} */
+    public static class CheckBox extends JCheckBox {
         @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
     }
-    private static class RadioButton extends JRadioButton {
+    /** {inheritDoc} */
+    public static class RadioButton extends JRadioButton {
         @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
     }
-    private static class ComboBox<E> extends JComboBox<E> {
+    /** {inheritDoc} */
+    public static class ComboBox<E> extends JComboBox<E> {
         @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
     }
-    private static class List<E> extends JList<E> {
+    /** {inheritDoc} */
+    public static class List<E> extends JList<E> {
         @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
     }
-    private static class Table extends JTable {
+    /** {inheritDoc} */
+    public static class Table extends JTable {
         @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
     }
-    private static class Slider extends JSlider {
+    /** {inheritDoc} */
+    public static class Slider extends JSlider {
         @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
     }
-    private static class PopupMenu extends JPopupMenu {
+    /** {inheritDoc} */
+    public static class PopupMenu extends JPopupMenu {
         @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
     }
-    private static class MenuItem extends JMenuItem {
+    /** {inheritDoc} */
+    public static class MenuItem extends JMenuItem {
         @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
     }
-
+    /** {inheritDoc} */
+    public static class Menu extends JMenu {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    /** {inheritDoc} */
+    public static class MenuBar extends JMenuBar {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    /** {inheritDoc} */
+    public static class ScrollPane extends JScrollPane {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    /** {inheritDoc} */
+    public static class TabbedPane extends JTabbedPane {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    /** {inheritDoc} */
+    public static class ToolBar extends JToolBar {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    /** {inheritDoc} */
+    public static class ToolTip extends JToolTip {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    /** {inheritDoc} */
+    public static class Tree extends JTree {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    /** {inheritDoc} */
+    public static class ProgressBar extends JProgressBar {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    /** {inheritDoc} */
+    public static class Spinner extends JSpinner {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    /** {inheritDoc} */
+    public static class SplitPane extends JSplitPane {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    /** {inheritDoc} */
+    public static class TextPane extends JTextPane {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    /** {inheritDoc} */
+    public static class EditorPane extends JEditorPane {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
+    /** {inheritDoc} */
+    public static class PasswordField extends JPasswordField {
+        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+    }
 }

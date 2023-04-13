@@ -4,13 +4,11 @@ import com.formdev.flatlaf.FlatLightLaf;
 import swingtree.EventProcessor;
 import swingtree.UI;
 
-import javax.swing.*;
-
 import java.util.Objects;
 
 import static swingtree.UI.*;
 
-public class UserRegistrationView extends JPanel
+public class UserRegistrationView extends Panel
 {
     public UserRegistrationView( UserRegistrationViewModel vm ) {
         FlatLightLaf.setup();

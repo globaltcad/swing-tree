@@ -2,14 +2,12 @@ package swingtree.examples.simple;
 
 import swingtree.UI;
 
-import javax.swing.*;
-
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static swingtree.UI.*;
 
-public class ListRendering extends JPanel
+public class ListRendering extends Panel
 {
     enum Test { A, B, C }
 
@@ -17,7 +15,7 @@ public class ListRendering extends JPanel
         of(this).withLayout(FILL)
         .add(GROW.and(WRAP).and(SPAN), label("List Rendering Examples:"))
         .add(GROW,
-            of(new JList<Test>()).id("my-test-list")
+            of(new List<Test>()).id("my-test-list")
             .withEntries(Stream.of(Test.A, Test.B, Test.C).collect(Collectors.toList()))
             .withRenderer(
                 renderListItem(Test.class).asText( cell -> cell.valueAsString().orElse("") )

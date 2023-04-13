@@ -4,14 +4,14 @@ package example;
 import swingtree.EventProcessor;
 import swingtree.UI;
 
-import javax.swing.*;
-
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Graphics;
 import java.time.LocalDateTime;
 
 import static swingtree.UI.*;
 
-public class ListSearchView extends JPanel
+public class ListSearchView extends Panel
 {
     public ListSearchView(ListSearchViewModel vm) {
         UI.use(EventProcessor.DECOUPLED, ()->

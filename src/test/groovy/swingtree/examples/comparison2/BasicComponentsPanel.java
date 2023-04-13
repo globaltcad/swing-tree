@@ -9,7 +9,6 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import javax.swing.text.DefaultEditorKit;
-import java.awt.*;
 
 /**
  * Modified version of "BasicComponentPanel" found

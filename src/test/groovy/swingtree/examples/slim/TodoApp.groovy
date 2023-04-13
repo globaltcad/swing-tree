@@ -1,16 +1,13 @@
 package swingtree.examples.slim
 
 
-import javax.swing.*
-import java.awt.*
-
 import static swingtree.UI.*
 
 // We import the "UI" class from the "swingtree" package statically:
 
 // This allows us to omit the "UI." prefix when using the methods of the "UI" class.
 
-class TodoApp extends JPanel
+class TodoApp extends Panel
 {
     TodoApp() {
         of(this).withLayout(FILL)

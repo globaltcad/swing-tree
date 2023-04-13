@@ -4,20 +4,21 @@ import swingtree.UI
 
 import javax.swing.*
 import java.awt.*
+import java.util.function.Function
 
 class AdvancedUI {
     static JPanel of(JFrame frame) {
         UIManager.setLookAndFeel(new FlatMaterialDesignDarkIJTheme())
-        UI.panel("fill, insets 0")
+        UI.panel("fill, ins 5")
         .add("grow",
             UI.splitPane(UI.Align.VERTICAL).withDividerAt(565)
             .add(
-                UI.panel("fill, insets 0")
+                UI.panel("fill, ins 0")
                 .add("push, grow, span, wrap",
                     UI.scrollPane().add(
                         UI.panel("fill, insets 2")
                         .add("span, shrinky, growx, wrap",
-                            UI.panel("fill, insets 0, ")
+                            UI.panel("fill, ins 10, ")
                             .add("align left, shrink",
                                 UI.button("Help").withProperty("JButton.buttonType", "help")
                                 .onClick({
@@ -335,14 +336,6 @@ class AdvancedUI {
     }
 
     static void main(String... args) {
-        var frame = new JFrame()
-        var component = of(frame)
-        frame.add(component)
-        frame.pack() // Otherwise some components resize strangely or are not shown at all...
-        // Make sure that the window is centered on the screen:
-        frame.setLocationRelativeTo(null)
-        // We set the size to fit the component:
-        frame.setSize(component.getPreferredSize())
-        frame.setVisible(true)
+        UI.show("Ukba om Unitos", (Function){ frame -> of(frame) })
     }
 }
