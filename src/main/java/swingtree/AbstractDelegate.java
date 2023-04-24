@@ -32,7 +32,27 @@ abstract class AbstractDelegate<C extends JComponent>
         _component = component;
     }
 
-    protected C _component() { return (C) _component; }
+    protected C _component() { return _component; }
+
+    /**
+     *  This is a delegate to the underlying component, but not every method of the component
+     *  is delegated. This method allows you to access the underlying component directly.
+     *  <p>
+     *  Note that this method expects that the accessing thread is the event dispatch thread,
+     *  not the application thread.
+     *  If you want to access the component from the application thread, you should use <br>
+     *  {@code UI.run(() -> delegate.component())}.
+     *
+     * @return The underlying component.
+     */
+    public final C get() {
+        if ( !UI.thisIsUIThread() )
+            throw new IllegalStateException(
+                    "You can only access the component from the GUI thread. " +
+                    "Use 'UI.run(() -> delegate.component())' to access the component from the application thread."
+                );
+        return _component();
+    }
 
     /**
      *  As a delegate to the underlying component, you can use this method to
