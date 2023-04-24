@@ -247,6 +247,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     protected void _setEnabled( boolean isEnabled ) { getComponent().setEnabled( isEnabled ); }
 
     /**
+     *  Use this to make the wrapped UI component grab the input focus.
+     *  @return This very instance, which enables builder-style method chaining.
+     */
+    public final I makeFocused() {
+        UI.runLater(() -> {
+            getComponent().grabFocus();
+            // We do this later because in this point in time the UI is probably not
+            // yet fully built (swing-tree is using the builder-pattern).
+        });
+        return _this();
+    }
+
+    /**
      *  Use this to make the wrapped UI component focusable.
      *  @param isFocusable The truth value determining if the UI component should be focusable or not.
      *  @return This very instance, which enables builder-style method chaining.

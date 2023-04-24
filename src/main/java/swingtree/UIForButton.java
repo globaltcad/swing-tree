@@ -25,12 +25,18 @@ public class UIForButton<B extends AbstractButton> extends UIForAnyButton<UIForB
         return isBorderPaintedIf( val.get() );
     }
 
+    /**
+     * Make this button the default button for the root pane it is in.
+     * @return this
+     */
     public final UIForButton<B> makeDefaultButton() {
         if ( !(getComponent() instanceof JButton) ) {
             log.warn("Method 'makeDefaultButton()' called on a non JButton component.");
             return this;
         }
         UI.runLater(()->{
+            // We do this later because in this point in time the UI is probably not
+            // yet fully built (swing-tree is using the builder-pattern).
             JButton button = (JButton) getComponent();
             JRootPane rootPane = SwingUtilities.getRootPane(button);
             if ( rootPane != null )
