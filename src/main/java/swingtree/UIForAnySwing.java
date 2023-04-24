@@ -538,8 +538,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withEmptyBorderTitled( String title, int top, int left, int bottom, int right ) {
         NullUtil.nullArgCheck( title, "title", String.class );
-    	getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(top, left, bottom, right), title));
-    	return _this();
+        getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(top, left, bottom, right), title));
+        return _this();
     }
 
     /**
@@ -627,12 +627,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
             /**
-			 *  Use this to define a titled empty {@link Border} with the provided insets.
-			 *
-			 * @param title The title of the border.
-			 * @param all The insets for all sides.
-			 * @return This very instance, which enables builder-style method chaining.
-			 */
+             *  Use this to define a titled empty {@link Border} with the provided insets.
+             *
+             * @param title The title of the border.
+             * @param all The insets for all sides.
+             * @return This very instance, which enables builder-style method chaining.
+             */
     public final I withEmptyBorderTitled( String title, int all ) {
         NullUtil.nullArgCheck( title, "title", String.class );
         return withEmptyBorderTitled(title, all, all, all, all);
@@ -665,12 +665,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-	 *  Use this to define a line {@link Border} with the provided color and insets.
-	 *
-	 * @param color The color of the line border.
-	 * @param thickness The thickness of the line border.
-	 * @return This very instance, which enables builder-style method chaining.
-	 */
+     *  Use this to define a line {@link Border} with the provided color and insets.
+     *
+     * @param color The color of the line border.
+     * @param thickness The thickness of the line border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public final I withLineBorder( Color color, int thickness ) {
         NullUtil.nullArgCheck( color, "color", Color.class );
         getComponent().setBorder(BorderFactory.createLineBorder(color, thickness));
@@ -692,13 +692,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-	 *  Use this to define a titled line {@link Border} with the provided color and insets.
-	 *
-	 * @param title The title of the border.
-	 * @param color The color of the line border.
-	 * @param thickness The thickness of the line border.
-	 * @return This very instance, which enables builder-style method chaining.
-	 */
+     *  Use this to define a titled line {@link Border} with the provided color and insets.
+     *
+     * @param title The title of the border.
+     * @param color The color of the line border.
+     * @param thickness The thickness of the line border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public final I withLineBorderTitled( String title, Color color, int thickness ) {
         NullUtil.nullArgCheck( title, "title", String.class );
         NullUtil.nullArgCheck( color, "color", Color.class );

@@ -10,6 +10,8 @@ import swingtree.animation.Animation
 import swingtree.animation.AnimationState
 import swingtree.animation.Schedule
 
+import javax.swing.JButton
+import javax.swing.JLabel
 import java.awt.Color
 import java.awt.event.MouseEvent
 import java.util.concurrent.TimeUnit
@@ -83,7 +85,7 @@ class Animations_Spec extends Specification
                                 cyclesMinus42 << state.cycleMinus(0.42)
                             })
                     })
-                    .getComponent()
+                    .get(JButton)
         and :
             TimeUnit.MILLISECONDS.sleep(200)
         then : 'Initially the animation has not been executed yet.'
@@ -154,7 +156,7 @@ class Animations_Spec extends Specification
                             it.component.setForeground(new Color(highlight, 1, highlight))
                           })
                     })
-                    .getComponent()
+                    .get(JLabel)
         expect : 'The label text is (almost) black.'
             label.getForeground().getRed() < 60
             label.getForeground().getGreen() < 60

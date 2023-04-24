@@ -34,33 +34,33 @@ public class MadeWithSwingTree extends Panel
                 panel("insets 0, fill, gap rel 2")
                 .add("span, wrap", radioButton("radio button 1")
                     .onClick( it -> {
-                        it.getComponent().setSelected(true);
+                        it.get().setSelected(true);
                         it.getSiblingsOfType(RadioButton.class).forEach(s -> s.setSelected(false) );
                     })
                     .onChange( it -> {
-                        it.find(Label.class, "indent-label-1").ifPresent( l -> l.setEnabled(it.getComponent().isSelected()) );
-                        it.find(CheckBox.class, "indent-checkbox-1").ifPresent( c -> c.setEnabled(it.getComponent().isSelected()) );
+                        it.find(Label.class, "indent-label-1").ifPresent( l -> l.setEnabled(it.get().isSelected()) );
+                        it.find(CheckBox.class, "indent-checkbox-1").ifPresent( c -> c.setEnabled(it.get().isSelected()) );
                     })
                 )
                 .add("gapx "+INDENT+" 0, span, wrap", label("indented one step (because depends on radio button, inactive if rb not selected))").id("indent-label-1"))
                 .add("gapx "+INDENT+" 0, gapy 0 "+SM+", span, wrap", checkBox("indented checkbox").id("indent-checkbox-1"))
                 .add("span, wrap", radioButton("radio button 2 (medium space above)")
                    .onClick( it -> {
-                       it.getComponent().setSelected(true);
+                       it.get().setSelected(true);
                        it.getSiblingsOfType(RadioButton.class).forEach( s -> s.setSelected(false) );
                    })
                    .onChange( it ->
-                      it.find(TextField.class, "indent-field-2").ifPresent(f -> f.setEnabled(it.getComponent().isSelected()) )
+                      it.find(TextField.class, "indent-field-2").ifPresent(f -> f.setEnabled(it.get().isSelected()) )
                    )
                 )
                 .add("growx, gapx "+INDENT+" 260, gapy 0 "+S+", span, wrap", textField("jTextField6 (indented)").id("indent-field-2"))
                 .add("span, wrap", radioButton("radio button 3 (medium space above)")
                     .onClick( it -> {
-                        it.getComponent().setSelected(true);
+                        it.get().setSelected(true);
                         it.getSiblingsOfType(RadioButton.class).forEach( s -> s.setSelected(false) );
                     })
                     .onChange( it ->
-                        it.find(TextField.class, "indent-field-3").ifPresent(f -> f.setEnabled(it.getComponent().isSelected()) )
+                        it.find(TextField.class, "indent-field-3").ifPresent(f -> f.setEnabled(it.get().isSelected()) )
                     )
                 )
                 .add("growx, span, wrap",

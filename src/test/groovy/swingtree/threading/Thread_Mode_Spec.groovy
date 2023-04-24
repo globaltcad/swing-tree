@@ -120,6 +120,7 @@ class Thread_Mode_Spec extends Specification
         where : 'We can use safe, as well as unsafe, ways to access the UI.'
             problem                                    | unsafeAccess                         | safeAccess
             "can only be accessed by the Swing thread" | { it.getComponent() }                | { it.forComponent(c -> {}) }
+            "can only access the component from the"   | { it.get() }                         | { it.forComponent(c -> {}) }
             "can only be accessed by the Swing thread" | { it.getSiblings() }                 | { it.forSiblings(s -> {}) }
             "can only be accessed by the Swing thread" | { it.getSiblinghood() }              | { it.forSiblinghood(c -> {}) }
             "can only be accessed by the Swing thread" | { it.getSiblingsOfType(JButton) }    | { it.forSiblingsOfType(JButton, c -> {}) }
@@ -132,8 +133,8 @@ class Thread_Mode_Spec extends Specification
             var ui =
                     UI.use(EventProcessor.DECOUPLED,
                             ()-> UI.checkBox("X").onClick( it ->{
-                                UI.run(()-> it.getComponent() )
-                                // it.getComponent() // This would throw an exception!
+                                UI.run(()-> it.get() )
+                                // it.get() // This would throw an exception!
                             })
                         )
         when : 'We check the check box and process the event queue (by this current non-swing thread).'
