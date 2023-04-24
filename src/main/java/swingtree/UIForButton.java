@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.slf4j.Logger;
 import sprouts.Val;
 
 import javax.swing.*;
@@ -10,6 +11,8 @@ import javax.swing.*;
  */
 public class UIForButton<B extends AbstractButton> extends UIForAnyButton<UIForButton<B>, B>
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(UIForButton.class);
+
     protected UIForButton( B component ) { super(component); }
 
     public UIForButton<B> isBorderPaintedIf( boolean borderPainted ) {
@@ -22,4 +25,19 @@ public class UIForButton<B extends AbstractButton> extends UIForAnyButton<UIForB
         return isBorderPaintedIf( val.get() );
     }
 
+    public final UIForButton<B> makeDefaultButton() {
+        if ( !(getComponent() instanceof JButton) ) {
+            log.warn("Method 'makeDefaultButton()' called on a non JButton component.");
+            return this;
+        }
+        UI.runLater(()->{
+            JButton button = (JButton) getComponent();
+            JRootPane rootPane = SwingUtilities.getRootPane(button);
+            if ( rootPane != null )
+                rootPane.setDefaultButton(button);
+            else
+                log.warn("Method 'makeDefaultButton()' called on a JButton component that is not in a JRootPane.");
+        });
+        return this;
+    }
 }
