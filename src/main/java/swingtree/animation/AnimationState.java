@@ -14,43 +14,142 @@ public interface AnimationState
     double progress();
 
     /**
+     *  The animation progress in the form of a value linearly growing from {@code min} to {@code max}
+     *  based on the equation {@code min + (max - min) * progress()}.
+     *  At the beginning of the animation, the value is {@code min}, at the end of the animation, the value is {@code max}.
+     *
+     * @param min The minimum value of the animation.
+     * @param max The maximum value of the animation.
+     * @return The animation progress in terms of a number between {@code min} and {@code max}.
+     */
+    default double progress(double min, double max) { return min + (max - min) * progress(); }
+
+    /**
      *  A sine wave oscillating between 0 and 1 and back to 0 once per iteration.
      *  At the beginning of the animation, the value is 0, at the end of the animation, the value is 0 again,
      *  and when the animation is halfway through, the value is 1.
      *
      * @return The animation progress in terms of a number between 0 and 1, where 1 means the animation is halfway through.
      */
-    default double pulse() {
-        return Math.sin(Math.PI * progress());
-    }
+    default double pulse() { return Math.sin(Math.PI * progress()); }
+
+    /**
+     *  A sine wave oscillating between {@code min} and {@code max} and back to {@code min} once per iteration.
+     *  At the beginning of the animation, the value is {@code min}, at the end of the animation, the value is {@code min} again,
+     *  and when the animation is halfway through, the value is {@code max}.
+     *
+     *  @param min The minimum value of the sine wave.
+     *  @param max The maximum value of the sine wave.
+     *  @return The animation progress in terms of a number between {@code min} and {@code max}, where {@code max} means the animation is halfway through.
+     */
+    default double pulse( double min, double max ) { return min + (max - min) * pulse(); }
 
     /**
      *   The animation progress in the form of peaking sine wave growing from 0 to 1
      *   based on the equation {@code sin(PI * progress() / 2)}.
      *   Just like the value returned by {@link #progress()}
-     *   the {@link #fadeIn()} value starts at 0 and ends at 1,
-     *   however the crucial difference is that the {@link #fadeIn()} value
-     *   grows according to a sine wave, which makes certain animations look more natural.
+     *   the {@link #jumpIn()} value starts at 0 and ends at 1,
+     *   however the crucial difference is that the {@link #jumpIn()} value
+     *   grows according to a sine wave, which makes certain animations look more natural. <br>
+     *   The returned value will grow quickly at the beginning and slowly at the end, hence the name.
      *
      * @return The animation progress in the form of peaking sine wave growing from 0 to 1.
      */
-    default double fadeIn() {
-        return Math.sin(Math.PI * progress() / 2);
-    }
+    default double jumpIn() { return Math.sin(Math.PI * progress() / 2); }
+
+    /**
+     *   The animation progress in the form of peaking sine wave growing from {@code min} to {@code max}
+     *   based on the equation {@code min + (max - min) * jumpIn()}.
+     *   Just like the value returned by {@link #progress()}
+     *   the {@link #jumpIn()} value starts at {@code min} and ends at {@code max},
+     *   however the crucial difference is that the {@link #jumpIn()} value
+     *   grows according to a sine wave, which makes certain animations look more natural. <br>
+     *   The returned value will grow quickly at the beginning and slowly at the end, hence the name.
+     *
+     * @return The animation progress in the form of peaking sine wave growing from {@code min} to {@code max}.
+     */
+    default double jumpIn( double min, double max ) { return min + (max - min) * jumpIn(); }
 
     /**
      *   The animation progress in the form of peaking sine wave growing from 1 to 0
      *   based on the equation {@code sin(PI * (1 - progress()) / 2)}.
      *   Just like the value returned by {@link #progress()}
-     *   the {@link #fadeOut()} value starts at 1 and ends at 0,
+     *   the {@link #jumpOut()} value starts at 1 and ends at 0,
      *   however the crucial difference is that the {@link #fadeOut()} value
      *   grows according to a sine wave, which makes certain animations look more natural.
      *
      * @return The animation progress in the form of peaking sine wave growing from 1 to 0.
      */
-    default double fadeOut() {
-        return Math.sin(Math.PI * (1 - progress()) / 2);
-    }
+    default double jumpOut() { return Math.sin(Math.PI * (1 - progress()) / 2); }
+
+    /**
+     *   The animation progress in the form of peaking sine wave growing from {@code max} to {@code min}
+     *   based on the equation {@code min + (max - min) * jumpOut()}.
+     *   Just like the value returned by {@link #progress()}
+     *   the {@link #jumpOut()} value starts at {@code max} and ends at {@code min},
+     *   however the crucial difference is that the {@link #jumpOut()} value
+     *   grows according to a sine wave, which makes certain animations look more natural.
+     *
+     * @return The animation progress in the form of peaking sine wave growing from {@code max} to {@code min}.
+     */
+    default double jumpOut( double min, double max ) { return min + (max - min) * jumpOut(); }
+
+    /**
+     *   The animation progress in the form of peaking sine wave growing from 0 to 1
+     *   based on the equation
+     *   {@code 0.5 + (1 + Math.sin( Math.PI * (progress() - 0.5) ) )}
+     *   Just like the value returned by {@link #progress()}
+     *   the {@link #fadeIn()} value starts at 0 and ends at 1,
+     *   however the crucial difference is that the {@link #fadeIn()} value
+     *   grows according to a sine wave, which makes certain animations look more natural. <br>
+     *   The difference between this method and {@link #jumpIn()} is that the returned
+     *   value grows slower at the beginning, where {@link #jumpIn()} grows faster initially.
+     *
+     * @return The animation progress in the form of peaking sine wave growing from 0 to 1.
+     */
+    default double fadeIn() { return Math.sin(Math.PI * progress() / 2); }
+
+    /**
+     *   The animation progress in the form of peaking sine wave growing from {@code min} to {@code max}
+     *   based on the equation {@code min + (max - min) * fadeIn()}.
+     *   Just like the value returned by {@link #progress()}
+     *   the {@link #fadeIn()} value starts at {@code min} and ends at {@code max},
+     *   however the crucial difference is that the {@link #fadeIn()} value
+     *   grows according to a sine wave, which makes certain animations look more natural. <br>
+     *   The difference between this method and {@link #jumpIn()} is that the returned
+     *   value grows slower at the beginning, where {@link #jumpIn()} grows faster initially.
+     *
+     * @return The animation progress in the form of a wave growing from {@code min} to {@code max}.
+     */
+    default double fadeIn( double min, double max ) { return min + (max - min) * fadeIn(); }
+
+    /**
+     *   The animation progress in the form of peaking sine wave growing from 1 to 0
+     *   based on the equation {@code 1 - fadeIn()}.
+     *   Just like the value returned by {@link #progress()}
+     *   the {@link #fadeOut()} value starts at 1 and ends at 0,
+     *   however the crucial difference is that the {@link #fadeOut()} value
+     *   grows according to a sine wave, which makes certain animations look more natural. <br>
+     *   The difference between this method and {@link #jumpOut()} is that the returned
+     *   value grows slower at the beginning, where {@link #jumpOut()} grows faster initially.
+     *
+     * @return The animation progress in the form of wave growing from 1 to 0.
+     */
+    default double fadeOut() { return 1 - fadeIn(); }
+
+    /**
+     *   The animation progress in the form of peaking sine wave growing from {@code max} to {@code min}
+     *   based on the equation {@code min + (max - min) * fadeOut()}.
+     *   Just like the value returned by {@link #progress()}
+     *   the {@link #fadeOut()} value starts at {@code max} and ends at {@code min},
+     *   however the crucial difference is that the {@link #fadeOut()} value
+     *   grows according to a sine wave, which makes certain animations look more natural. <br>
+     *   The difference between this method and {@link #jumpOut()} is that the returned
+     *   value grows slower at the beginning, where {@link #jumpOut()} grows faster initially.
+     *
+     * @return The animation progress in the form of wave growing from {@code max} to {@code min}.
+     */
+    default double fadeOut( double min, double max ) { return min + (max - min) * fadeOut(); }
 
     /**
      *  Defines the animation progress in terms of a number oscillating between 0, 1 and 0 once per iteration,
