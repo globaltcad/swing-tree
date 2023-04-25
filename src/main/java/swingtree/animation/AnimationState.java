@@ -9,20 +9,39 @@ public interface AnimationState
 {
     /**
      * @return The animation progress in terms of a number between 0 and 1,
-     *         where 1 means the animation completed.
+     *         where 0.5 means the animation is halfway through, and 1 means the animation completed.
      */
     double progress();
 
     /**
-     *  The animation progress in the form of a value linearly growing from {@code min} to {@code max}
-     *  based on the equation {@code min + (max - min) * progress()}.
-     *  At the beginning of the animation, the value is {@code min}, at the end of the animation, the value is {@code max}.
+     *  The animation progress in the form of a value linearly growing from {@code start} to {@code end}
+     *  based on the equation {@code start + (end - start) * progress()}.
+     *  At the beginning of the animation, the value is {@code start}, at the end of the animation, the value is {@code end}.
      *
-     * @param min The minimum value of the animation.
-     * @param max The maximum value of the animation.
-     * @return The animation progress in terms of a number between {@code min} and {@code max}.
+     * @param start The start value of the animation.
+     * @param end The end value of the animation.
+     * @return The animation progress in terms of a number between {@code start} and {@code end}.
      */
-    default double progress(double min, double max) { return min + (max - min) * progress(); }
+    default double progress( double start, double end ) { return start + (end - start) * progress(); }
+
+    /**
+     *  The animation progress in the form of a value linearly growing from 1 to 0
+     *  based on the equation {@code 1 - progress()}.
+     *  At the beginning of the animation, the value is 1, at the end of the animation, the value is 0.
+     *
+     * @return The animation progress in terms of a number between 0 and 1, where 0.5 means the animation is halfway through.
+     */
+    default double regress() { return 1 - progress(); }
+
+    /**
+     *  The animation regression in the form of a value linearly growing from {@code start} to {@code end}.
+     *  This method is equivalent to {@code progress(end, start)}.
+     *
+     * @param end The end value of the animation.
+     * @param start The start value of the animation.
+     * @return The animation progress in terms of a number between {@code start} and {@code end}.
+     */
+    default double regress( double end, double start ) { return return start + (end - start) * regress(); }
 
     /**
      *  A sine wave oscillating between 0 and 1 and back to 0 once per iteration.
@@ -34,18 +53,19 @@ public interface AnimationState
     default double pulse() { return Math.sin(Math.PI * progress()); }
 
     /**
-     *  A sine wave oscillating between {@code min} and {@code max} and back to {@code min} once per iteration.
-     *  At the beginning of the animation, the value is {@code min}, at the end of the animation, the value is {@code min} again,
-     *  and when the animation is halfway through, the value is {@code max}.
+     *  A sine wave oscillating between {@code start} and {@code peak} and back to {@code start} once per iteration.
+     *  At the beginning of the animation, the value is {@code start}, at the end of the animation,
+     *  the value is {@code start} again,
+     *  and when the animation is halfway through, the value is {@code peak}.
      *
-     *  @param min The minimum value of the sine wave.
-     *  @param max The maximum value of the sine wave.
-     *  @return The animation progress in terms of a number between {@code min} and {@code max}, where {@code max} means the animation is halfway through.
+     *  @param start The start value of the sine wave.
+     *  @param peak The peak value of the sine wave.
+     *  @return The animation progress in terms of a number between {@code start} and {@code end}, where {@code end} means the animation is halfway through.
      */
-    default double pulse( double min, double max ) { return min + (max - min) * pulse(); }
+    default double pulse( double start, double peak ) { return start + (peak - start) * pulse(); }
 
     /**
-     *   The animation progress in the form of peaking sine wave growing from 0 to 1
+     *   The animation progress in the form of quickly growing sine wave front going from 0 to 1
      *   based on the equation {@code sin(PI * progress() / 2)}.
      *   Just like the value returned by {@link #progress()}
      *   the {@link #jumpIn()} value starts at 0 and ends at 1,
@@ -58,17 +78,19 @@ public interface AnimationState
     default double jumpIn() { return Math.sin(Math.PI * progress() / 2); }
 
     /**
-     *   The animation progress in the form of peaking sine wave growing from {@code min} to {@code max}
-     *   based on the equation {@code min + (max - min) * jumpIn()}.
+     *   The animation progress in the form of peaking sine wave growing from {@code start} to {@code end}
+     *   based on the equation {@code start + (end - start) * jumpIn()}.
      *   Just like the value returned by {@link #progress()}
-     *   the {@link #jumpIn()} value starts at {@code min} and ends at {@code max},
+     *   the {@link #jumpIn()} value starts at {@code start} and ends at {@code end},
      *   however the crucial difference is that the {@link #jumpIn()} value
      *   grows according to a sine wave, which makes certain animations look more natural. <br>
      *   The returned value will grow quickly at the beginning and slowly at the end, hence the name.
      *
-     * @return The animation progress in the form of peaking sine wave growing from {@code min} to {@code max}.
+     * @param start The start value of the animation.
+     * @param end The end value of the animation.
+     * @return The animation progress in the form of peaking sine wave growing from {@code start} to {@code end}.
      */
-    default double jumpIn( double min, double max ) { return min + (max - min) * jumpIn(); }
+    default double jumpIn( double start, double end ) { return start + (end - start) * jumpIn(); }
 
     /**
      *   The animation progress in the form of peaking sine wave growing from 1 to 0
@@ -83,16 +105,19 @@ public interface AnimationState
     default double jumpOut() { return Math.sin(Math.PI * (1 - progress()) / 2); }
 
     /**
-     *   The animation progress in the form of peaking sine wave growing from {@code max} to {@code min}
-     *   based on the equation {@code min + (max - min) * jumpOut()}.
-     *   Just like the value returned by {@link #progress()}
-     *   the {@link #jumpOut()} value starts at {@code max} and ends at {@code min},
-     *   however the crucial difference is that the {@link #jumpOut()} value
-     *   grows according to a sine wave, which makes certain animations look more natural.
+     *   The animation progress in the form of a initially quickly changing sine wave
+     *   going from {@code start} to {@code end}
+     *   based on the equation {@code end + (start - end) * jumpOut()}.
+     *   Just like the value returned by {@link #progress(double, double)}
+     *   the {@link #jumpOut(double, double)} value starts at {@code start} and ends at {@code end},
+     *   however the crucial difference is that the {@link #jumpOut(double, double)} value
+     *   changes according to a sine wave, which makes certain animations look more natural.
      *
-     * @return The animation progress in the form of peaking sine wave growing from {@code max} to {@code min}.
+     * @param end The end value of the animation,
+     * @param start The start value of the animation.
+     * @return The animation progress in the form of peaking sine wave growing from {@code start} to {@code end}.
      */
-    default double jumpOut( double min, double max ) { return min + (max - min) * jumpOut(); }
+    default double jumpOut( double end, double start ) { return end + (start - end) * jumpOut(); }
 
     /**
      *   The animation progress in the form of peaking sine wave growing from 0 to 1
@@ -110,18 +135,20 @@ public interface AnimationState
     default double fadeIn() { return Math.sin(Math.PI * progress() / 2); }
 
     /**
-     *   The animation progress in the form of peaking sine wave growing from {@code min} to {@code max}
-     *   based on the equation {@code min + (max - min) * fadeIn()}.
+     *   The animation progress in the form of peaking sine wave growing from {@code start} to {@code end}
+     *   based on the equation {@code start + (end - start) * fadeIn()}.
      *   Just like the value returned by {@link #progress()}
-     *   the {@link #fadeIn()} value starts at {@code min} and ends at {@code max},
+     *   the {@link #fadeIn()} value starts at {@code start} and ends at {@code end},
      *   however the crucial difference is that the {@link #fadeIn()} value
      *   grows according to a sine wave, which makes certain animations look more natural. <br>
      *   The difference between this method and {@link #jumpIn()} is that the returned
      *   value grows slower at the beginning, where {@link #jumpIn()} grows faster initially.
      *
-     * @return The animation progress in the form of a wave growing from {@code min} to {@code max}.
+     * @param start The start value of the animation.
+     * @param end The end value of the animation.
+     * @return The animation progress in the form of a wave growing from {@code start} to {@code end}.
      */
-    default double fadeIn( double min, double max ) { return min + (max - min) * fadeIn(); }
+    default double fadeIn( double start, double end ) { return start + (end - start) * fadeIn(); }
 
     /**
      *   The animation progress in the form of peaking sine wave growing from 1 to 0
@@ -138,18 +165,20 @@ public interface AnimationState
     default double fadeOut() { return 1 - fadeIn(); }
 
     /**
-     *   The animation progress in the form of peaking sine wave growing from {@code max} to {@code min}
-     *   based on the equation {@code min + (max - min) * fadeOut()}.
-     *   Just like the value returned by {@link #progress()}
-     *   the {@link #fadeOut()} value starts at {@code max} and ends at {@code min},
-     *   however the crucial difference is that the {@link #fadeOut()} value
+     *   The animation progress in the form of a sine wave going from {@code start} to {@code end}
+     *   based on the equation {@code end + (start - end) * fadeOut()}.
+     *   Just like the value returned by {@link #progress(double, double)}
+     *   the {@link #fadeOut(double, double)} value starts at {@code start} and ends at {@code end},
+     *   however the crucial difference is that the {@link #fadeOut(double, double)} value
      *   grows according to a sine wave, which makes certain animations look more natural. <br>
      *   The difference between this method and {@link #jumpOut()} is that the returned
-     *   value grows slower at the beginning, where {@link #jumpOut()} grows faster initially.
+     *   value grows slower at the beginning, whereas {@link #jumpOut()} grows faster initially.
      *
-     * @return The animation progress in the form of wave growing from {@code max} to {@code min}.
+     * @param end The end value of the animation,
+     * @param start The start value of the animation,
+     * @return The animation progress in the form a sine wave going from {@code start} to {@code end}.
      */
-    default double fadeOut( double min, double max ) { return min + (max - min) * fadeOut(); }
+    default double fadeOut( double end, double start ) { return end + (start - end) * fadeOut(); }
 
     /**
      *  Defines the animation progress in terms of a number oscillating between 0, 1 and 0 once per iteration,
