@@ -331,4 +331,47 @@ class Property_Binding_Spec extends Specification
             node.component.components[3].size.height == 100
     }
 
+    def 'Bind the foreground of a component to a conditional property and 2 color properties.'()
+    {
+        reportInfo """
+            A common use case is to have a foreground color switching between two colors depending on a condition.
+            This can be achieved by using properties for the condition and the colors.
+            If any of these change in the view model, the UI component will be updated accordingly.
+        """
+        given : 'We create 3 properties, 1 boolean one and 2 color properties.'
+            Val<Boolean> conditionProperty = Var.of(true)
+            Val<Color>   color1Property    = Var.of(Color.RED)
+            Val<Color>   color2Property    = Var.of(Color.BLUE)
+        and : 'We create a UI to which we want to bind:'
+            var ui =
+                        UI.panel("fill, wrap 1")
+                        .add(UI.label("Below me is a text area!"))
+                        .add(UI.textArea("hi").withForegroundIf(conditionProperty, color1Property, color2Property))
+
+        expect : """
+                The foreground of the text area will be red, because the condition is true, 
+                meaning the first color is selected!
+            """
+            ui.component.components[1].foreground == Color.RED
+
+        when : 'We change the value of the condition property.'
+            conditionProperty.set(false)
+            UI.sync() // Wait for the EDT to complete the UI modifications...
+        then : 'The foreground of the text area will now switch to blue, because the condition is false.'
+            ui.component.components[1].foreground == Color.BLUE
+
+        when : 'We change the value of the color properties.'
+            color1Property.set(Color.GREEN)
+            color2Property.set(Color.YELLOW)
+            UI.sync() // Wait for the EDT to complete the UI modifications...
+        then : 'The foreground of the text area will be yellow, because the condition is false.'
+            ui.component.components[1].foreground == Color.YELLOW
+
+        when : 'We change the value of the condition property.'
+            conditionProperty.set(true)
+            UI.sync() // Wait for the EDT to complete the UI modifications...
+        then : 'The foreground of the text area will be green, because the condition is true.'
+            ui.component.components[1].foreground == Color.GREEN
+    }
+
 }

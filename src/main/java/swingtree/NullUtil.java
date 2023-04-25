@@ -42,7 +42,7 @@ final class NullUtil
         nullArgCheck( property, thing, Val.class, "Properties are not supposed to be null, they may wrap null values though." );
         if ( property.allowsNull() ) {
             Class<T> type = property.type();
-            String message = "Property '{}' of type '{}' is not allowed to contain null!";
+            String message = "Property '{}' of type '{}' may not be null, but it was.";
             if ( notes.length > 0 )
                 message += " " + String.join(" ", notes);
 
