@@ -62,7 +62,7 @@ class Configuring_UI_Components_Spec extends Specification
             Swing-Tree does this for you automatically when you call the
             "makeDefaultButton()" method on a button.
         """
-        given : 'We create a UI with a button that grabs the focus and some other components.'
+        given : 'We create a UI with a button that is made the default button.'
             var ui =
                 UI.runAndGet( () -> // For technical reasons we execute this in the GUI thread.
                     UI.frame()
@@ -86,7 +86,7 @@ class Configuring_UI_Components_Spec extends Specification
 
     def 'The visibility of a component can be configured using various methods.'()
     {
-        given : 'We create a UI with a button that grabs the focus and some other components.'
+        given : 'We create a UI with a button which may or may not be visible.'
             var ui =
                 UI.panel()
                 .add(
@@ -100,6 +100,22 @@ class Configuring_UI_Components_Spec extends Specification
             new Utility.Query(ui.component).find(JEditorPane, "C2").get().isVisible() == false
             new Utility.Query(ui.component).find(JSplitButton, "C3").get().isVisible() == false
             new Utility.Query(ui.component).find(JToggleButton, "C4").get().isVisible() == true
+    }
+
+    def 'We can configure a button to have no border.'()
+    {
+        given : 'We create a UI with buttons that may or may not have borders.'
+            var ui =
+                UI.panel()
+                .add(
+                    UI.button("Button").id("C1").isBorderPaintedIf(false),
+                    UI.toggleButton("Toggle").id("C2").isBorderPaintedIf(true),
+                    UI.splitButton("Split").id("C3").isBorderPaintedIf(false),
+                )
+        expect : 'The components have borders or not depending on the configuration.'
+            new Utility.Query(ui.component).find(JButton, "C1").get().isBorderPainted() == false
+            new Utility.Query(ui.component).find(JToggleButton, "C2").get().isBorderPainted() == true
+            new Utility.Query(ui.component).find(JSplitButton, "C3").get().isBorderPainted() == false
     }
 }
 

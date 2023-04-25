@@ -333,6 +333,16 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         return isSelectedIf( var.orElseThrow() );
     }
 
+    public I isBorderPaintedIf( boolean borderPainted ) {
+        getComponent().setBorderPainted(borderPainted);
+        return _this();
+    }
+
+    public I isBorderPaintedIf( Val<Boolean> val ) {
+        _onShow(val, v -> isBorderPaintedIf(v) );
+        return isBorderPaintedIf( val.get() );
+    }
+
     /**
      *  Effectively removes the native style of this button.
      *  Without an icon or text, one will not be able to recognize the button.

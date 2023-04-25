@@ -15,16 +15,6 @@ public class UIForButton<B extends AbstractButton> extends UIForAnyButton<UIForB
 
     protected UIForButton( B component ) { super(component); }
 
-    public UIForButton<B> isBorderPaintedIf( boolean borderPainted ) {
-        getComponent().setBorderPainted(borderPainted);
-        return this;
-    }
-
-    public UIForButton<B> isBorderPaintedIf( Val<Boolean> val ) {
-        _onShow(val, v -> isBorderPaintedIf(v) );
-        return isBorderPaintedIf( val.get() );
-    }
-
     /**
      * Make this button the default button for the root pane it is in.
      * @return this

@@ -23,6 +23,8 @@ import javax.swing.ButtonGroup
 ''')
 class Button_Binding_Spec extends Specification
 {
+    enum SelectionState { SELECTED, NOT_SELECTED }
+
     def 'We can bind to the text of a button.'()
     {
         reportInfo """
@@ -151,5 +153,60 @@ class Button_Binding_Spec extends Specification
             selected2.get() == false
             selected3.get() == true
     }
-    
+
+    def 'Bind the "isSelected" flag of a button to the equality between an enum and a enum property'()
+    {
+        reportInfo """
+            This feature makes it so that the provided property will cause the button
+            to be selected if its value is equal to the enum value passed to the method.
+           
+            This feature is especially useful for radio buttons.
+            Here we are going to use the following enum:
+            ```
+            enum SelectionState { SELECTED, NOT_SELECTED }
+            ```
+        """
+        given : 'We create a simple swing-tree property for modelling the selection state.'
+            Val<SelectionState> selectionState = Var.of(SelectionState.NOT_SELECTED)
+
+        when : 'We create and bind to a button UI node...'
+            var ui = UI.button("").isSelectedIf(SelectionState.SELECTED, selectionState)
+
+        then : 'The button should be updated when the property is changed and shown.'
+            ui.component.selected == false
+
+        when : 'We change the property value...'
+            selectionState.set(SelectionState.SELECTED)
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
+        then : 'The button should be updated.'
+            ui.component.selected == true
+    }
+
+    def 'Bind the "isSelected" flag of a button to the inequality between an enum and a enum property'()
+    {
+        reportInfo """
+            This feature makes it so that the provided property will cause the button
+            to be selected if its value is NOT equal to the enum value passed to the method.
+           
+            Here we are going to use the following enum:
+            ```
+            enum SelectionState { SELECTED, NOT_SELECTED }
+            ```
+        """
+        given : 'We create a simple swing-tree property for modelling the selection state.'
+            Val<SelectionState> selectionState = Var.of(SelectionState.NOT_SELECTED)
+
+        when : 'We create and bind to a button UI node...'
+            var ui = UI.button("").isSelectedIfNot(SelectionState.SELECTED, selectionState)
+
+        then : 'The button should be updated when the property is changed and shown.'
+            ui.component.selected == true
+
+        when : 'We change the property value...'
+            selectionState.set(SelectionState.SELECTED)
+            UI.sync()
+        then : 'The button should be updated.'
+            ui.component.selected == false
+    }
 }
