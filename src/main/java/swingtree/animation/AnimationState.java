@@ -132,7 +132,9 @@ public interface AnimationState
      *
      * @return The animation progress in the form of peaking sine wave growing from 0 to 1.
      */
-    default double fadeIn() { return Math.sin(Math.PI * progress() / 2); }
+    default double fadeIn() {
+        return 0.5 + (1 + Math.sin( Math.PI * (progress() - 0.5) )) / 2;
+    }
 
     /**
      *   The animation progress in the form of peaking sine wave growing from {@code start} to {@code end}
