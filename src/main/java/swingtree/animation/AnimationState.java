@@ -41,7 +41,7 @@ public interface AnimationState
      * @param start The start value of the animation.
      * @return The animation progress in terms of a number between {@code start} and {@code end}.
      */
-    default double regress( double end, double start ) { return return start + (end - start) * regress(); }
+    default double regress( double end, double start ) { return start + (end - start) * regress(); }
 
     /**
      *  A sine wave oscillating between 0 and 1 and back to 0 once per iteration.
