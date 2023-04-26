@@ -192,10 +192,14 @@ the same fundamental goal:
 In Swing-Tree you can achieve this separation by using the 
 **Sprouts property collection API**.
 Properties are a simple yet powerful concept, they are just wrapper types
-for the field variables of you view model which allow you register change listener on them.
-These listener make it possible to dynamically bind UI components to your business logic and vice versa.
+for the field variables of you view model which allow you register change listeners on them.
+These listeners make it possible to dynamically update UI components 
+when your business logic mutates the properties, and also to
+update the properties when the user interacts with the UI.
+This **bidirectional observer/listener pattern** is called **data binding**,
+and it is the fundamental building block of `MVVM` application development.
 
-Let's consider the following business logic, which we will call "view model" 
+Let's consider the following business logic, which we will call "**view model**" 
 from now on in accordance with the `MVVM` design and naming conventions:
 
 ```java
@@ -219,14 +223,15 @@ public class PersonViewModel {
 ```
 
 Properties are represented by the `sprouts.Var` and `sprouts.Val` classes.
-They any kind of value whose type you can specify using the generic 
-type parameter, in this example we have 3 properties wrapping a String each.
+They can wrap any kind of value whose type you can specify using the generic 
+type parameter. 
+In this example we have 3 properties wrapping a String each.
 The most important property type is the `Var` type.
 It has both getters and setters for the wrapped value. 
 The `Val` type on the other hand is an immutable property / read-only view of a `Var`.
 Note that `Val` is a subtype of `Var`, which allows you to 
 design your view model API in a way which does
-not leak mutable state to the outside world.
+not leak mutable state to the outside world. :partying_face:
 
 Now let's consider the corresponding Swing UI:
 
@@ -261,14 +266,17 @@ which will automatically translate to the corresponding `JTextField` component i
 The powerful thing about this example is that we managed 
 to affect the state of the UI (the full name) without
 actually depending on the UI at all,
-meaning that there is not even a single reference to a Swing component
+meaning that **there is not even a single reference to a Swing component**
 in the `PersonViewModel` class!
 
-Not only does this allow us to write unit tests for our business logic
-we can now also easily swap out the Swing UI for a different UI
+Not only does this allow us to write **unit tests** for our business logic
+we can now also **easily swap out the Swing UI for a different UI**
 implementation without having to change the business logic at all!
 
 How cool is that? :)
+
+If you want to dive deeper into doing MVVM in Swing-Tree,
+check out the [MVVM tutorial](./Advanced-MVVM.md).
 
 ## Growing Leaves ##
 

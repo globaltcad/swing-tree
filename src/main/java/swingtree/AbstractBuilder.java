@@ -15,7 +15,7 @@ import java.util.function.Consumer;
  *  This is the root builder type for all other builder subtypes.
  *  It is a generic builder which may wrap anything to allow for method chaining based building!
  *
- * @param <I> The concrete implementation type of this builder.
+ * @param <I> The concrete implementation type of this builder, "I" stands for "Implementation".
  * @param <C> The component type parameter.
  */
 abstract class AbstractBuilder<I, C extends Component>

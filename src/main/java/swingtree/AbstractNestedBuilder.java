@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- *  This class is a conceptual extension of the AbstractBuilder which expects implementations
- *  to be builder for nested / tree like data structures.
- *  This is primarily expressed by the "add" method which takes an arbitrary number of
- *  builder instances to form this nested / tree like structure.
+ *  This class is a conceptual extension of the {@link AbstractBuilder} which expects
+ *  implementations to define how to compose {@link Component}s into a GUI tree.
+ *  This is primarily expressed by the "{@link #add(AbstractNestedBuilder[])}" method which takes an arbitrary number of
+ *  builder instances to form said GUI tree structure...
  *
- * @param <I> The concrete implementation type of this abstract class.
+ * @param <I> The concrete implementation type of this abstract class, "I" stands for "Implementation".
  * @param <C> The component type parameter which ought to be built in some way.
  */
 abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extends AbstractBuilder<I, C>
