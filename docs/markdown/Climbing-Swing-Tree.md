@@ -229,7 +229,7 @@ In this example we have 3 properties wrapping a String each.
 The most important property type is the `Var` type.
 It has both getters and setters for the wrapped value. 
 The `Val` type on the other hand is an immutable property / read-only view of a `Var`.
-Note that `Val` is a subtype of `Var`, which allows you to 
+Note that `Var` is a subtype of `Val`, which allows you to 
 design your view model API in a way which does
 not leak mutable state to the outside world. :partying_face:
 
