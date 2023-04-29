@@ -1,12 +1,12 @@
 package swingtree.animation;
 
+import swingtree.ComponentExtension;
+
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 /**
  *  This class is responsible for scheduling and running animations.
@@ -59,11 +59,8 @@ class AnimationScheduler
     }
 
     private void clearRenderers( JComponent comp ) {
-        if ( comp == null )
-            return;
-        List<Consumer<Graphics2D>> renderer = (List<Consumer<Graphics2D>>) comp.getClientProperty(Animate.class);
-        if ( renderer != null )
-            renderer.clear();
+        if ( comp == null ) return;
+        ComponentExtension.from(comp).clearAnimationRenderer();
     }
 
     private void _schedule( Animator animator ) {

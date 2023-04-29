@@ -869,14 +869,9 @@ abstract class AbstractDelegate<C extends JComponent>
             if ( isCompClassNestedInUI )
                 UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
                     // We do the rendering later in the paint method!
-                    List<Consumer<Graphics2D>> renderers = (List<Consumer<Graphics2D>>) _component.getClientProperty(Animate.class);
-                    if ( renderers == null ) {
-                        renderers = new ArrayList<>();
-                        _component.putClientProperty(Animate.class, renderers); // We store the renderers in the component
-                    }
-                    renderers.add(renderer);
+                    ComponentExtension.from(_component).addAnimationRenderer(renderer);
                     // Everything will be rendered in the paint method!
-                    // This is important because otherwise our rendering would be erased by a repaint
+                    // This is important because otherwise our rendering can be erased by a repaint
                 });
             else
                 UI.runLater(()->{

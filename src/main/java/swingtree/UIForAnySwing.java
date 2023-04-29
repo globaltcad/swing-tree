@@ -4,6 +4,7 @@ package swingtree;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 import sprouts.Action;
+import sprouts.Event;
 import sprouts.Val;
 import sprouts.Vals;
 import sprouts.Var;
@@ -52,6 +53,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param component The JComponent type which will be wrapped by this builder node.
      */
     public UIForAnySwing(C component ) { super(component); }
+
+    /**
+     *  This method exposes a concise way to bind a {@link Event} to the
+     *  {@link JComponent#repaint()} method of the component wrapped by this {@link UI}!
+     *  This means that the component will be repainted whenever the event is fired.
+     *  <p>
+     * @param event The event to which the repaint method of the component will be bound.
+     * @return The JComponent type which will be wrapped by this builder node.
+     */
+    public final I withRepaintIf( Event event ) {
+        event.subscribe( () -> _doUI( () -> getComponent().repaint() ) );
+        return _this();
+    }
 
     /**
      *  This method exposes a concise way to set an identifier for the component
@@ -1492,6 +1506,28 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
+     *  Use this to attach a custom background renderer to the UI component.
+     *  The renderer will be called every time the UI component is repainted.
+     *  This is in essence a convenience method, which avoids the need to extend the UI component
+     *  and override the {@link JComponent#paint(Graphics)} method.
+     *  <br>
+     *  This would be equivalent to:
+     *  <pre>{@code
+     *      class MyJComponent extends JComponent {
+     *          @Override public void paint( Graphics g ) { renderer.accept(g); super.paint(g); }
+     *      }
+     *  }</pre><br>
+     *
+     * @param renderer The renderer which should be called every time the UI component is repainted.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBackground( Consumer<RenderDelegate<C>> renderer ) {
+        NullUtil.nullArgCheck(renderer, "renderer", Consumer.class);
+        UI._registerBackgroundRenderingFor( getComponent(), renderer );
+        return _this();
+    }
+
+    /**
      *  Set the color of this {@link JComponent}. (This is usually the font color for components displaying text) <br>
      *  This is in essence a convenience method, which avoid having to expose the underlying component
      *  through the {@link #peek(Peeker)} method like so: <br>
@@ -1623,6 +1659,28 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
             getComponent().setForeground(color.get());
         else
             getComponent().setForeground(baseColor.get());
+    }
+
+    /**
+     *  Use this to attach a custom foreground renderer to the UI component.
+     *  The renderer will be called every time the UI component is repainted.
+     *  This is in essence a convenience method, which avoids the need to extend the UI component
+     *  and override the {@link JComponent#paint(Graphics)} method.
+     *  <br>
+     *  This would be equivalent to:
+     *  <pre>{@code
+     *    class MyJComponent extends JComponent {
+     *      @Override public void paint( Graphics g ) { renderer.accept(g); super.paint(g); }
+     *    }
+     *  }</pre><br>
+     *
+     * @param renderer The renderer which should be called every time the UI component is repainted.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withForeground( Consumer<RenderDelegate<C>> renderer ) {
+        NullUtil.nullArgCheck(renderer, "renderer", Consumer.class);
+        UI._registerForegroundRenderingFor( getComponent(), renderer );
+        return _this();
     }
 
     private void _updateBackground(

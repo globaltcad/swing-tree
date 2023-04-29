@@ -3876,114 +3876,120 @@ public final class UI
         This is especially important to allow for declarative UI.
     */
 
-    private static void _render( JComponent comp, Graphics g ) {
-        java.util.List<Consumer<Graphics2D>> renderer = (java.util.List<Consumer<Graphics2D>>) comp.getClientProperty(Animate.class);
-        if ( renderer != null )
-            renderer.forEach( r -> r.accept((Graphics2D)g) );
+    static <C extends JComponent> void _registerBackgroundRenderingFor( C comp, Consumer<RenderDelegate<C>> renderer ) {
+        ComponentExtension.from(comp).setBackgroundRenderer( renderer );
+    }
+
+    static <C extends JComponent> void _registerForegroundRenderingFor( C comp, Consumer<RenderDelegate<C>> renderer ) {
+        ComponentExtension.from(comp).setForegroundRenderer( renderer );
+    }
+
+    private static <C extends JComponent> void _render( C comp, Graphics g, Runnable superPaint ) {
+        ComponentExtension.from(comp).render( comp, g, superPaint );
     }
 
     /** {inheritDoc} */
     public static class Button extends JButton {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class Panel extends JPanel {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class Label extends JLabel {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class TextField extends JTextField {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class TextArea extends JTextArea {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class CheckBox extends JCheckBox {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class RadioButton extends JRadioButton {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class ComboBox<E> extends JComboBox<E> {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class List<E> extends JList<E> {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class Table extends JTable {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class Slider extends JSlider {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class PopupMenu extends JPopupMenu {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class MenuItem extends JMenuItem {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class Menu extends JMenu {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class MenuBar extends JMenuBar {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class ScrollPane extends JScrollPane {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class TabbedPane extends JTabbedPane {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class ToolBar extends JToolBar {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class ToolTip extends JToolTip {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class Tree extends JTree {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class ProgressBar extends JProgressBar {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class Spinner extends JSpinner {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class SplitPane extends JSplitPane {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class TextPane extends JTextPane {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class EditorPane extends JEditorPane {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
     /** {inheritDoc} */
     public static class PasswordField extends JPasswordField {
-        @Override public void paint(Graphics g){ super.paint(g); _render(this, g); }
+        @Override public void paint(Graphics g){ _render(this, g, ()->super.paint(g)); }
     }
 }

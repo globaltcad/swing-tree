@@ -45,7 +45,7 @@ public class SomeSettingsView extends Panel
             .add(GROW.and(PUSH),
                 numericTextField(vm.speed(), vm.speedIsValid()).id("speed-text-field")
                 .withBackground(
-                    vm.speedIsValid().viewAs(Color.class, it->it?Color.WHITE:Color.RED)
+                    vm.speedIsValid().viewAs(Color.class, it -> it ? Color.WHITE : Color.RED )
                 )
             )
             .add(SHRINK.and(ALIGN_LEFT),label("m/s"))
