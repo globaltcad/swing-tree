@@ -3,7 +3,7 @@ package swingtree;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Area;
-import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.Objects;
 
@@ -98,7 +98,7 @@ public class RenderDelegate<C extends JComponent>
         return this;
     }
 
-    public RenderDelegate<C> border(int thickness ) {
+    public RenderDelegate<C> border( int thickness ) {
         this.borderThickness = thickness;
         return this;
     }
@@ -166,8 +166,8 @@ public class RenderDelegate<C extends JComponent>
         return this;
     }
 
-    public void drawBorder( Color color ) {
-        g2d.setColor(color);
+    public void drawBorder() {
+        g2d.setColor(borderColor);
         g2d.setStroke(new BasicStroke(borderThickness));
         g2d.drawRoundRect(
                 paddingLeft, paddingTop,
@@ -215,104 +215,193 @@ public class RenderDelegate<C extends JComponent>
                                     );
 
         // Create the shadow shape based on the box bounds and corner arc widths/heights
-        RoundRectangle2D.Float boxShape = new RoundRectangle2D.Float(
-                x, y, w, h,
-                borderArcWidth, borderArcHeight);
+        RoundRectangle2D.Float boxShape = new RoundRectangle2D.Float(x, y, w, h, borderArcWidth, borderArcHeight);
 
         // Apply the clipping to avoid overlapping the shadow and the box
         Area boxArea = new Area(boxShape);
         savedG2d.setClip(boxArea);
 
         // Draw the corner shadows
-        _renderCornerShadow(Corner.TOP_LEFT, boxArea, x, y);
-        _renderCornerShadow(Corner.TOP_RIGHT, boxArea, x + w, y);
-        _renderCornerShadow(Corner.BOTTOM_LEFT, boxArea, x, y + h);
-        _renderCornerShadow(Corner.BOTTOM_RIGHT, boxArea, x + w, y + h);
+        _renderCornerShadow(Corner.TOP_LEFT, boxArea, innerShadowRect, outerShadowRect);
+        _renderCornerShadow(Corner.TOP_RIGHT, boxArea, innerShadowRect, outerShadowRect);
+        _renderCornerShadow(Corner.BOTTOM_LEFT, boxArea, innerShadowRect, outerShadowRect);
+        _renderCornerShadow(Corner.BOTTOM_RIGHT, boxArea, innerShadowRect, outerShadowRect);
 
         // Draw the edge shadows
-        _renderEdgeShadow(Side.TOP, boxArea, x, y, w, h);
-        _renderEdgeShadow(Side.RIGHT, boxArea, x, y, w, h);
-        _renderEdgeShadow(Side.BOTTOM, boxArea, x, y, w, h);
-        _renderEdgeShadow(Side.LEFT, boxArea, x, y, w, h);
+        _renderEdgeShadow(Side.TOP, boxArea, innerShadowRect, outerShadowRect);
+        _renderEdgeShadow(Side.RIGHT, boxArea, innerShadowRect, outerShadowRect);
+        _renderEdgeShadow(Side.BOTTOM, boxArea, innerShadowRect, outerShadowRect);
+        _renderEdgeShadow(Side.LEFT, boxArea, innerShadowRect, outerShadowRect);
 
         // Restore the original graphics state
         savedG2d.dispose();
     }
 
-    private void _renderCornerShadow( Corner corner, Area boxArea, int x, int y ) {
+    private void _renderCornerShadow( Corner corner, Area boxArea, Rectangle innerShadowRect, Rectangle outerShadowRect ) {
         // Draw the corner shadows
-        if (borderArcWidth > 0 && borderArcHeight > 0) {
-            // Create the corner paint for the shadow
-            float blur = shadowBlurRadius * 10f;
-            boolean isOnRightEdge = corner == Corner.TOP_RIGHT || corner == Corner.BOTTOM_RIGHT;
-            boolean isOnBottomEdge = corner == Corner.BOTTOM_LEFT || corner == Corner.BOTTOM_RIGHT;
-            float cx = 28f  * (shadowInset ? -1 : 1) * (isOnRightEdge  ? 1 : -1);
-            float cy = 28f  * (shadowInset ? -1 : 1) * (isOnBottomEdge ? 1 : -1);
-            cx += x - (borderArcWidth  / 4f)  * (shadowInset ? -1 : 1) * (isOnRightEdge  ? 1 : -1) + blur * (isOnRightEdge ? 1 : -1);
-            cy += y - (borderArcHeight / 4f) * (shadowInset ? -1 : 1) * (isOnBottomEdge ? 1 : -1) + blur * (isOnBottomEdge ? 1 : -1);
-            float cr = (borderArcWidth + borderArcHeight) / 2f * shadowSpreadRadius + 2f * blur;
-            Color innerColor;
-            Color outerColor;
-            Color shadowBackgroundColor = new Color(0,0,0,0);
-            if (shadowInset) {
-                innerColor = shadowBackgroundColor;
-                outerColor = shadowColor;
-            } else {
-                innerColor = shadowColor;
-                outerColor = shadowBackgroundColor;
-            }
-            RadialGradientPaint cornerPaint = new RadialGradientPaint(
-                                                cx, cy, cr,
-                                                new float[] {0f, 1f},
-                                                new Color[] {innerColor, outerColor});
-
-            Graphics2D cornerG2d = (Graphics2D) g2d.create();
-            cornerG2d.setPaint(cornerPaint);
-            cornerG2d.fill(boxArea);
-            cornerG2d.dispose();
+        Rectangle2D.Float cornerBox;
+        float cx;
+        float cy;
+        float cr; // depending on the corner, this is either the corner box width or height
+        switch (corner) {
+            case TOP_LEFT:
+                cornerBox = new Rectangle2D.Float(
+                            outerShadowRect.x,
+                            outerShadowRect.y,
+                            innerShadowRect.x - outerShadowRect.x,
+                            innerShadowRect.y - outerShadowRect.y
+                            );
+                cx = cornerBox.x + cornerBox.width;
+                cy = cornerBox.y + cornerBox.height;
+                cr = cornerBox.width;
+                break;
+            case TOP_RIGHT:
+                cornerBox = new Rectangle2D.Float(
+                                innerShadowRect.x + innerShadowRect.width,
+                                outerShadowRect.y,
+                            outerShadowRect.x + outerShadowRect.width - innerShadowRect.x - innerShadowRect.width,
+                            innerShadowRect.y - outerShadowRect.y
+                            );
+                cx = cornerBox.x;
+                cy = cornerBox.y + cornerBox.height;
+                cr = cornerBox.width;
+                break;
+            case BOTTOM_LEFT:
+                cornerBox = new Rectangle2D.Float(
+                            outerShadowRect.x,
+                            innerShadowRect.y + innerShadowRect.height,
+                            innerShadowRect.x - outerShadowRect.x,
+                            outerShadowRect.y + outerShadowRect.height - innerShadowRect.y - innerShadowRect.height
+                            );
+                cx = cornerBox.x + cornerBox.width;
+                cy = cornerBox.y;
+                cr = cornerBox.width;
+                break;
+            case BOTTOM_RIGHT:
+                cornerBox = new Rectangle2D.Float(
+                            innerShadowRect.x + innerShadowRect.width,
+                            innerShadowRect.y + innerShadowRect.height,
+                            outerShadowRect.x + outerShadowRect.width - innerShadowRect.x - innerShadowRect.width,
+                            outerShadowRect.y + outerShadowRect.height - innerShadowRect.y - innerShadowRect.height
+                            );
+                cx = cornerBox.x;
+                cy = cornerBox.y;
+                cr = cornerBox.width;
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid corner: " + corner);
         }
+
+        Color innerColor;
+        Color outerColor;
+        Color shadowBackgroundColor = new Color(0,0,0,0);
+        if (shadowInset) {
+            innerColor = shadowColor;
+            outerColor = shadowBackgroundColor;
+        } else {
+            innerColor = shadowBackgroundColor;
+            outerColor = shadowColor;
+        }
+        RadialGradientPaint cornerPaint = new RadialGradientPaint(
+                                                    cx, cy, cr,
+                                                    new float[] {0f, 1f},
+                                                    new Color[] {innerColor, outerColor}
+                                                );
+
+        // We need to clip the corner paint to the corner box
+        Area cornerArea = new Area(cornerBox);
+        cornerArea.intersect(boxArea);
+
+        Graphics2D cornerG2d = (Graphics2D) g2d.create();
+        cornerG2d.setPaint(cornerPaint);
+        cornerG2d.fill(cornerArea);
+        cornerG2d.dispose();
     }
 
-    private void _renderEdgeShadow(Side side, Area boxArea, int x, int y, int w, int h) {
-        float shadowBlurRadius = this.shadowBlurRadius * shadowSpreadRadius * 10f;
-        if (shadowBlurRadius > 0) {
-            // Create the edge paint for the shadow
-            Point2D shadowStart;
-            Point2D shadowEnd;
-            float gradientStartHideOffset = this.shadowBlurRadius * (shadowInset ? 1 : -1);
-            switch (side) {
-                case TOP:
-                    shadowStart = new Point2D.Float(x, y + gradientStartHideOffset);
-                    shadowEnd = new Point2D.Float(x, y + shadowBlurRadius);
-                    break;
-                case RIGHT:
-                    shadowStart = new Point2D.Float(x + w - gradientStartHideOffset, y);
-                    shadowEnd = new Point2D.Float(x + w - shadowBlurRadius, y);
-                    break;
-                case BOTTOM:
-                    shadowStart = new Point2D.Float(x, y + h - gradientStartHideOffset);
-                    shadowEnd = new Point2D.Float(x, y + h - shadowBlurRadius);
-                    break;
-                case LEFT:
-                    shadowStart = new Point2D.Float(x + gradientStartHideOffset, y);
-                    shadowEnd = new Point2D.Float(x + shadowBlurRadius, y);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Invalid side: " + side);
-            }
-            // We flip the colors if the shadow is inset:
-            Color shadowBackgroundColor = new Color(0,0,0,0);
-            Color innerColor = shadowInset ? shadowBackgroundColor : shadowColor;
-            Color outerColor = shadowInset ? shadowColor : shadowBackgroundColor;
-            LinearGradientPaint edgePaint = new LinearGradientPaint(shadowStart, shadowEnd,
-                                                    new float[] {0f, 1f},
-                                                    new Color[] {innerColor, outerColor});
-
-            Graphics2D edgeG2d = (Graphics2D) g2d.create();
-            edgeG2d.setPaint(edgePaint);
-            edgeG2d.fill(boxArea);
-            edgeG2d.dispose();
+    private void _renderEdgeShadow( Side side, Area boxArea, Rectangle innerShadowRect, Rectangle outerShadowRect ) {
+        Rectangle2D.Float edgeBox;
+        float gradEndX;
+        float gradEndY;
+        float gradStartX;
+        float gradStartY;
+        switch (side) {
+            case TOP:
+                edgeBox = new Rectangle2D.Float(
+                            innerShadowRect.x,
+                            outerShadowRect.y,
+                            innerShadowRect.width,
+                            innerShadowRect.y - outerShadowRect.y
+                            );
+                gradEndX = edgeBox.x;
+                gradEndY = edgeBox.y;
+                gradStartX = edgeBox.x;
+                gradStartY = edgeBox.y + edgeBox.height;
+                break;
+            case RIGHT:
+                edgeBox = new Rectangle2D.Float(
+                            innerShadowRect.x + innerShadowRect.width,
+                            innerShadowRect.y,
+                            outerShadowRect.x + outerShadowRect.width - innerShadowRect.x - innerShadowRect.width,
+                            innerShadowRect.height
+                            );
+                gradEndX = edgeBox.x + edgeBox.width;
+                gradEndY = edgeBox.y;
+                gradStartX = edgeBox.x;
+                gradStartY = edgeBox.y;
+                break;
+            case BOTTOM:
+                edgeBox = new Rectangle2D.Float(
+                            innerShadowRect.x,
+                            innerShadowRect.y + innerShadowRect.height,
+                            innerShadowRect.width,
+                            outerShadowRect.y + outerShadowRect.height - innerShadowRect.y - innerShadowRect.height
+                            );
+                gradEndX = edgeBox.x;
+                gradEndY = edgeBox.y + edgeBox.height;
+                gradStartX = edgeBox.x;
+                gradStartY = edgeBox.y;
+                break;
+            case LEFT:
+                edgeBox = new Rectangle2D.Float(
+                            outerShadowRect.x,
+                            innerShadowRect.y,
+                            innerShadowRect.x - outerShadowRect.x,
+                            innerShadowRect.height
+                            );
+                gradEndX = edgeBox.x;
+                gradEndY = edgeBox.y;
+                gradStartX = edgeBox.x + edgeBox.width;
+                gradStartY = edgeBox.y;
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid side: " + side);
         }
+
+        Color innerColor;
+        Color outerColor;
+        Color shadowBackgroundColor = new Color(0,0,0,0);
+        if (shadowInset) {
+            innerColor = shadowColor;
+            outerColor = shadowBackgroundColor;
+        } else {
+            innerColor = shadowBackgroundColor;
+            outerColor = shadowColor;
+        }
+        LinearGradientPaint edgePaint = new LinearGradientPaint(
+                                                    gradStartX, gradStartY,
+                                                    gradEndX, gradEndY,
+                                                    new float[] {0f, 1f},
+                                                    new Color[] {innerColor, outerColor}
+                                                );
+
+        // We need to clip the edge paint to the edge box
+        Area edgeArea = new Area(edgeBox);
+        edgeArea.intersect(boxArea);
+
+        Graphics2D edgeG2d = (Graphics2D) g2d.create();
+        edgeG2d.setPaint(edgePaint);
+        edgeG2d.fill(edgeArea);
+        edgeG2d.dispose();
     }
 
 }
