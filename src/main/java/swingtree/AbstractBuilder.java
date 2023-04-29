@@ -1,9 +1,6 @@
 package swingtree;
 
-import sprouts.Action;
-import sprouts.Val;
-import sprouts.Vals;
-import sprouts.ValsDelegate;
+import sprouts.*;
 import swingtree.api.Peeker;
 
 import java.awt.*;
@@ -75,7 +72,7 @@ abstract class AbstractBuilder<I, C extends Component>
      * @param <T> The type of the value.
      */
     protected final <T> void _onShow(Val<T> val, Consumer<T> displayAction ) {
-        val.onSet(new Action<Val<T>>() {
+        Action<Val<T>> action = new Action<Val<T>>() {
             @Override
             public void accept( Val<T> val ) {
                 T v = val.orElseNull(); // IMPORTANT! We first capture the value and then execute the action in the app thread.
@@ -96,7 +93,10 @@ abstract class AbstractBuilder<I, C extends Component>
                 );
             }
             @Override public boolean canBeRemoved() { return !component().isPresent(); }
-        });
+        };
+        val.onSet(action);
+        if ( val instanceof Var )
+            ((Var)val).onAct(action);
     }
 
     /**

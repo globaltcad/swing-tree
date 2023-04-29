@@ -128,7 +128,13 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                 String newText = e.getDocument().getText(0, e.getDocument().getLength());
                 _doApp(newText, t -> {
                     if ( UI.thisIsUIThread() )
-                        UI.runLater( () -> text.act(t) ); // avoid attempt to mutate in notification
+                        UI.runLater( () -> {
+                            try {
+                                text.act(e.getDocument().getText(0, e.getDocument().getLength()));
+                            } catch (BadLocationException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        }); // avoid attempt to mutate in notification
                         /*
                             We apply the text to the property in the next EDT cycle,
                             which is important to avoid mutating the property in a notification.
