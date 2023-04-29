@@ -371,6 +371,7 @@ class Combo_Box_Specification extends Specification
 
         when : 'We simulate the user editing the combo box.'
             ui.component.setSelectedItem(input)
+            UI.sync()
         then : 'The combo box updates the selection property to the parsed value.'
             selection.get() == expectedSelection
 
