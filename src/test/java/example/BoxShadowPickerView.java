@@ -71,14 +71,22 @@ public class BoxShadowPickerView extends UI.Panel
                 })
             )
             .add(panel(FILL).withBackground(vm.shadowColor()))
-            .add(label("Shadow Background Color:"))
+            .add(label("Background Color:"))
             .add(ALIGN_CENTER,
-                textField(vm.shadowBackgroundColor().mapTo(Integer.class, Color::getRGB).itemAsString())
+                textField(vm.backgroundColor().mapTo(Integer.class, Color::getRGB).itemAsString())
                 .onContentChange(it -> {
-                    parseColor(it.get().getText()).ifPresent(color -> {vm.shadowBackgroundColor().act(color);});
+                    parseColor(it.get().getText()).ifPresent(color -> {vm.backgroundColor().act(color);});
                 })
             )
-            .add(panel(FILL).withBackground(vm.shadowBackgroundColor()))
+            .add(panel(FILL).withBackground(vm.backgroundColor()))
+            .add(label("Outer Background Color:"))
+            .add(ALIGN_CENTER,
+                textField(vm.outerBackgroundColor().mapTo(Integer.class, Color::getRGB).itemAsString())
+                .onContentChange(it -> {
+                    parseColor(it.get().getText()).ifPresent(color -> {vm.outerBackgroundColor().act(color);});
+                })
+            )
+            .add(panel(FILL).withBackground(vm.outerBackgroundColor()))
             .add(checkBox("Inset", vm.shadowInset()))
         )
         .add(
@@ -87,7 +95,8 @@ public class BoxShadowPickerView extends UI.Panel
             .withForeground( p -> {
                 p.render(
                      style()
-                     .shadowBackgroundColor(vm.shadowBackgroundColor().get())
+                     .background(vm.backgroundColor().get())
+                     .outerBackground(vm.outerBackgroundColor().get())
                      .padTop(vm.paddingTop().get())
                      .padLeft(vm.paddingLeft().get())
                      .padRight(vm.paddingRight().get())
@@ -99,7 +108,6 @@ public class BoxShadowPickerView extends UI.Panel
                      .shadowBlurRadius(vm.shadowBlurRadius().get())
                      .shadowSpreadRadius(vm.shadowSpreadRadius().get())
                      .shadowInset(vm.shadowInset().get())
-                     .background(vm.backgroundColor().get())
                      .border(vm.borderThickness().get())
                      .border(vm.borderColor().get())
                 );

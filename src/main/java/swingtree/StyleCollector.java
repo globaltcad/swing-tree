@@ -18,7 +18,8 @@ public class StyleCollector
     private Color borderColor = Color.BLACK;
 
     // Background
-    private Color backgroundColor = Color.WHITE;
+    private Color backgroundColor = new Color(0,0,0,0);
+    private Color outerBackgroundColor = null;
 
     // Box Shadow
     private int horizontalShadowOffset = 0;
@@ -101,6 +102,11 @@ public class StyleCollector
         return this;
     }
 
+    public StyleCollector outerBackground(Color color ) {
+        this.outerBackgroundColor = color;
+        return this;
+    }
+
     public StyleCollector shadowHorizontalOffset(int offset ) {
         this.horizontalShadowOffset = offset;
         return this;
@@ -176,6 +182,10 @@ public class StyleCollector
 
     Color getBackgroundColor() {
         return backgroundColor;
+    }
+
+    Color getOuterBackgroundColor() {
+        return outerBackgroundColor;
     }
 
     int getHorizontalShadowOffset() {

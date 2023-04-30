@@ -52,7 +52,11 @@ public class RenderDelegate<C extends JComponent>
         }
     }
 
-    public void fill( StyleCollector style, Color color ) {
+    private void _fillBackground(StyleCollector style, Color color ) {
+        // Check if the color is transparent
+        if ( color.getAlpha() == 0 )
+            return;
+
         g2d.setColor(color);
         g2d.fillRoundRect(
                 style.getPaddingLeft(), style.getPaddingTop(),
@@ -62,7 +66,35 @@ public class RenderDelegate<C extends JComponent>
             );
     }
 
+    private void _fillOuterBackground( StyleCollector style, Color color ) {
+        // Check if the color is transparent
+        if ( color.getAlpha() == 0 )
+            return;
+
+        Rectangle2D.Float outerRect = new Rectangle2D.Float(
+                                            0, 0,
+                                            comp.getWidth(),
+                                            comp.getHeight()
+                                        );
+        RoundRectangle2D.Float innerRect = new RoundRectangle2D.Float(
+                                            style.getPaddingLeft(), style.getPaddingTop(),
+                                            comp.getWidth() - style.getPaddingLeft() - style.getPaddingRight(),
+                                            comp.getHeight() - style.getPaddingTop() - style.getPaddingBottom(),
+                                            style.getBorderArcWidth(), style.getBorderArcHeight()
+                                        );
+
+        Area outer = new Area(outerRect);
+        Area inner = new Area(innerRect);
+        outer.subtract(inner);
+
+        g2d.setColor(color);
+        g2d.fill(outer);
+
+    }
+
     public void render(StyleCollector style){
+        _fillOuterBackground(style, style.getOuterBackgroundColor());
+        _fillBackground(style, style.getBackgroundColor());
         _renderShadows(style, comp, g2d);
         this._drawBorder(style);
     }
@@ -84,7 +116,7 @@ public class RenderDelegate<C extends JComponent>
         int h = comp.getHeight() - style.getPaddingTop() - style.getPaddingBottom() - style.getBorderThickness();
 
         int blurRadius = style.getShadowBlurRadius();
-        int spreadRadius = style.getShadowSpreadRadius();
+        int spreadRadius = !style.isShadowInset() ? style.getShadowSpreadRadius() : -style.getShadowSpreadRadius();
 
         RoundRectangle2D.Float baseRect = new RoundRectangle2D.Float(
                                                         style.getPaddingLeft() + (float) style.getBorderThickness() /2,
@@ -130,7 +162,8 @@ public class RenderDelegate<C extends JComponent>
         else
             shadowArea.subtract(baseArea);
 
-        if ( blurRadius != 0 || spreadRadius != 0 ) {
+        //if ( blurRadius != 0 || spreadRadius != 0 )
+        {
             // Draw the corner shadows
             _renderCornerShadow(style, Corner.TOP_LEFT,     shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
             _renderCornerShadow(style, Corner.TOP_RIGHT,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
