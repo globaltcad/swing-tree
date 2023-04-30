@@ -31,7 +31,7 @@ public class RenderDelegate<C extends JComponent>
 
     public C component() { return comp; }
 
-    public void drawBorder(StyleCollector style) {
+    private void _drawBorder(StyleCollector style) {
         if ( style.getBorderThickness() > 0 ) {
             g2d.setColor(style.getBorderColor());
             g2d.setStroke(new BasicStroke(style.getBorderThickness()));
@@ -64,7 +64,7 @@ public class RenderDelegate<C extends JComponent>
 
     public void render(StyleCollector style){
         _renderShadows(style, comp, g2d);
-        this.drawBorder(style);
+        this._drawBorder(style);
     }
 
     private static void _renderShadows(
@@ -83,6 +83,9 @@ public class RenderDelegate<C extends JComponent>
         int w = comp.getWidth() - style.getPaddingLeft() - style.getPaddingRight() - style.getBorderThickness();
         int h = comp.getHeight() - style.getPaddingTop() - style.getPaddingBottom() - style.getBorderThickness();
 
+        int blurRadius = style.getShadowBlurRadius();
+        int spreadRadius = style.getShadowSpreadRadius();
+
         RoundRectangle2D.Float baseRect = new RoundRectangle2D.Float(
                                                         style.getPaddingLeft() + (float) style.getBorderThickness() /2,
                                                         style.getPaddingTop() + (float) style.getBorderThickness() /2,
@@ -90,23 +93,23 @@ public class RenderDelegate<C extends JComponent>
                                                             style.getBorderArcWidth(), style.getBorderArcHeight()
                                                     );
 
-        int shadowInset = style.isShadowInset() ? style.getShadowBlurRadius() : style.getShadowSpreadRadius();
-        int shadowOutset = style.isShadowInset() ? style.getShadowSpreadRadius() : style.getShadowBlurRadius();
+        int shadowInset  = blurRadius;
+        int shadowOutset = blurRadius;
 
         int gradientStartOffset = ( style.getBorderArcWidth() + style.getBorderArcHeight() ) / 5;
 
         Rectangle innerShadowRect = new Rectangle(
-                                        x + shadowInset + gradientStartOffset,
-                                        y + shadowInset + gradientStartOffset,
-                                        w - shadowInset * 2 - gradientStartOffset * 2,
-                                        h - shadowInset * 2 - gradientStartOffset * 2
+                                        x + shadowInset + gradientStartOffset + spreadRadius,
+                                        y + shadowInset + gradientStartOffset + spreadRadius,
+                                        w - shadowInset * 2 - gradientStartOffset * 2 - spreadRadius * 2,
+                                        h - shadowInset * 2 - gradientStartOffset * 2 - spreadRadius * 2
                                     );
 
         Rectangle outerShadowRect = new Rectangle(
-                                        x - shadowOutset,
-                                        y - shadowOutset,
-                                        w + shadowOutset * 2,
-                                        h + shadowOutset * 2
+                                        x - shadowOutset - gradientStartOffset + spreadRadius,
+                                        y - shadowOutset - gradientStartOffset + spreadRadius,
+                                        w + shadowOutset * 2 + gradientStartOffset * 2 - spreadRadius * 2,
+                                        h + shadowOutset * 2 + gradientStartOffset * 2 - spreadRadius * 2
                                     );
 
         // Create the shadow shape based on the box bounds and corner arc widths/heights
@@ -127,7 +130,7 @@ public class RenderDelegate<C extends JComponent>
         else
             shadowArea.subtract(baseArea);
 
-        if ( style.getShadowSpreadRadius() != 0  ) {
+        if ( blurRadius != 0 || spreadRadius != 0 ) {
             // Draw the corner shadows
             _renderCornerShadow(style, Corner.TOP_LEFT,     shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
             _renderCornerShadow(style, Corner.TOP_RIGHT,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
