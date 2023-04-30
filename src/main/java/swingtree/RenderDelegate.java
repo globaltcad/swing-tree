@@ -252,17 +252,19 @@ public class RenderDelegate<C extends JComponent>
 
         savedG2d.setClip(shadowArea);
 
+        int gradientStartOffset = ( borderArcWidth + borderArcHeight ) / 2;
+
         // Draw the corner shadows
-        _renderCornerShadow(Corner.TOP_LEFT, shadowArea, innerShadowRect, outerShadowRect);
-        _renderCornerShadow(Corner.TOP_RIGHT, shadowArea, innerShadowRect, outerShadowRect);
-        _renderCornerShadow(Corner.BOTTOM_LEFT, shadowArea, innerShadowRect, outerShadowRect);
-        _renderCornerShadow(Corner.BOTTOM_RIGHT, shadowArea, innerShadowRect, outerShadowRect);
+        _renderCornerShadow(Corner.TOP_LEFT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
+        _renderCornerShadow(Corner.TOP_RIGHT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
+        _renderCornerShadow(Corner.BOTTOM_LEFT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
+        _renderCornerShadow(Corner.BOTTOM_RIGHT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
 
         // Draw the edge shadows
-        _renderEdgeShadow(Side.TOP, shadowArea, innerShadowRect, outerShadowRect);
-        _renderEdgeShadow(Side.RIGHT, shadowArea, innerShadowRect, outerShadowRect);
-        _renderEdgeShadow(Side.BOTTOM, shadowArea, innerShadowRect, outerShadowRect);
-        _renderEdgeShadow(Side.LEFT, shadowArea, innerShadowRect, outerShadowRect);
+        _renderEdgeShadow(Side.TOP, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
+        _renderEdgeShadow(Side.RIGHT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
+        _renderEdgeShadow(Side.BOTTOM, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
+        _renderEdgeShadow(Side.LEFT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
 
         // If the base rectangle and the outer shadow box are not equal, then we need to fill the area of the base rectangle that is not covered by the outer shadow box!
         {
@@ -284,7 +286,13 @@ public class RenderDelegate<C extends JComponent>
         savedG2d.dispose();
     }
 
-    private void _renderCornerShadow( Corner corner, Area boxArea, Rectangle innerShadowRect, Rectangle outerShadowRect ) {
+    private void _renderCornerShadow(
+        Corner corner,
+        Area boxArea,
+        Rectangle innerShadowRect,
+        Rectangle outerShadowRect,
+        int gradientStartOffset
+    ) {
         // Draw the corner shadows
         Rectangle2D.Float cornerBox;
         float cx;
@@ -351,11 +359,21 @@ public class RenderDelegate<C extends JComponent>
             innerColor = shadowBackgroundColor;
             outerColor = shadowColor;
         }
-        RadialGradientPaint cornerPaint = new RadialGradientPaint(
-                                                    cx, cy, cr,
-                                                    new float[] {0f, 1f},
-                                                    new Color[] {innerColor, outerColor}
-                                                );
+        RadialGradientPaint cornerPaint;
+        float gradientStart = (float) gradientStartOffset / cr;
+        if ( gradientStart >= 1f || gradientStart <= 0f )
+            cornerPaint = new RadialGradientPaint(
+                             cx, cy, cr,
+                             new float[] {0f, 1f},
+                             new Color[] {innerColor, outerColor}
+                         );
+        else {
+            cornerPaint = new RadialGradientPaint(
+                             cx, cy, cr,
+                             new float[] {0f, gradientStart, 1f},
+                             new Color[] {innerColor, innerColor, outerColor}
+                         );
+        }
 
         // We need to clip the corner paint to the corner box
         Area cornerArea = new Area(cornerBox);
@@ -367,7 +385,13 @@ public class RenderDelegate<C extends JComponent>
         cornerG2d.dispose();
     }
 
-    private void _renderEdgeShadow( Side side, Area boxArea, Rectangle innerShadowRect, Rectangle outerShadowRect ) {
+    private void _renderEdgeShadow(
+            Side side,
+            Area boxArea,
+            Rectangle innerShadowRect,
+            Rectangle outerShadowRect,
+            int gradientStartOffset
+    ) {
         Rectangle2D.Float edgeBox;
         float gradEndX;
         float gradEndY;
@@ -438,12 +462,28 @@ public class RenderDelegate<C extends JComponent>
             innerColor = shadowBackgroundColor;
             outerColor = shadowColor;
         }
-        LinearGradientPaint edgePaint = new LinearGradientPaint(
-                                                    gradStartX, gradStartY,
-                                                    gradEndX, gradEndY,
-                                                    new float[] {0f, 1f},
-                                                    new Color[] {innerColor, outerColor}
-                                                );
+        LinearGradientPaint edgePaint;
+        // distance between start and end of gradient
+        float dist = (float) Math.sqrt(
+                                    (gradEndX - gradStartX) * (gradEndX - gradStartX) +
+                                    (gradEndY - gradStartY) * (gradEndY - gradStartY)
+                                );
+        float gradientStart = (float) gradientStartOffset / dist;
+        if ( gradientStart >= 1f || gradientStart <= 0f )
+            edgePaint = new LinearGradientPaint(
+                               gradStartX, gradStartY,
+                               gradEndX, gradEndY,
+                               new float[] {0f, 1f},
+                               new Color[] {innerColor, outerColor}
+                           );
+        else {
+            edgePaint = new LinearGradientPaint(
+                             gradStartX, gradStartY,
+                             gradEndX, gradEndY,
+                             new float[] {0f, gradientStart, 1f},
+                             new Color[] {innerColor, innerColor, outerColor}
+                         );
+        }
 
         // We need to clip the edge paint to the edge box
         Area edgeArea = new Area(edgeBox);
