@@ -86,7 +86,8 @@ public class RenderDelegate<C extends JComponent>
         RoundRectangle2D.Float baseRect = new RoundRectangle2D.Float(
                                                         style.getPaddingLeft() + (float) style.getBorderThickness() /2,
                                                         style.getPaddingTop() + (float) style.getBorderThickness() /2,
-                                                            w, h, style.getBorderArcWidth(), style.getBorderArcHeight()
+                                                            w, h,
+                                                            style.getBorderArcWidth(), style.getBorderArcHeight()
                                                     );
 
         int shadowInset = style.isShadowInset() ? style.getShadowBlurRadius() : style.getShadowSpreadRadius();
@@ -141,24 +142,24 @@ public class RenderDelegate<C extends JComponent>
         }
 
         // If the base rectangle and the outer shadow box are not equal, then we need to fill the area of the base rectangle that is not covered by the outer shadow box!
-        _renderShadowBody(style, baseArea, innerShadowRect, outerShadowRect, g2d);
+        _renderShadowBody(style, baseArea, innerShadowRect, outerShadowBox, g2d);
     }
 
     private static void _renderShadowBody(
             StyleCollector style,
-            Area baseRectArea,
+            Area baseArea,
             Rectangle innerShadowRect,
-            Rectangle outerShadowRect,
+            RoundRectangle2D.Float outerShadowBox,
             Graphics2D g2d
     ) {
         Graphics2D g2d2 = (Graphics2D) g2d.create();
         g2d2.setColor(style.getShadowColor());
         if ( !style.isShadowInset() ) {
-            baseRectArea.subtract(new Area(outerShadowRect));
-            g2d2.fill(baseRectArea);
-        }else {
+            baseArea.subtract(new Area(outerShadowBox));
+            g2d2.fill(baseArea);
+        } else {
             Area innerShadowArea = new Area(innerShadowRect);
-            innerShadowArea.subtract(baseRectArea);
+            innerShadowArea.subtract(baseArea);
             g2d2.fill(innerShadowArea);
         }
         g2d2.dispose();
