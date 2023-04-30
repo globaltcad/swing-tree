@@ -174,8 +174,16 @@ public class RenderDelegate<C extends JComponent>
                     paddingLeft, paddingTop,
                     comp.getWidth() - paddingLeft - paddingRight,
                     comp.getHeight() - paddingTop - paddingBottom,
-                    borderArcWidth, borderArcHeight
+                    (borderArcWidth  + (borderThickness == 1 ? 0 : borderThickness+1)),
+                    (borderArcHeight + (borderThickness == 1 ? 0 : borderThickness+1))
                 );
+            g2d.drawRoundRect(
+                    paddingLeft, paddingTop,
+                    comp.getWidth() - paddingLeft - paddingRight,
+                    comp.getHeight() - paddingTop - paddingBottom,
+                    (borderArcWidth +2),
+                    (borderArcHeight+2)
+            );
         }
     }
 
@@ -192,9 +200,6 @@ public class RenderDelegate<C extends JComponent>
     public void renderShadows() {
 
         // First let's check if we need to render any shadows at all
-        if ( shadowBlurRadius == 0 && shadowSpreadRadius == 0 )
-            return;
-
         // Is the shadow color transparent?
         if ( shadowColor.getAlpha() == 0 )
             return;
@@ -203,25 +208,27 @@ public class RenderDelegate<C extends JComponent>
         Graphics2D savedG2d = (Graphics2D) g2d.create();
 
         // Calculate the shadow box bounds based on the padding and border thickness
-        int x = paddingLeft + borderThickness + horizontalShadowOffset;
-        int y = paddingTop + borderThickness + verticalShadowOffset;
-        int w = comp.getWidth() - paddingLeft - paddingRight - borderThickness * 2;
-        int h = comp.getHeight() - paddingTop - paddingBottom - borderThickness * 2;
+        int x = paddingLeft + borderThickness/2 + horizontalShadowOffset;
+        int y = paddingTop + borderThickness/2 + verticalShadowOffset;
+        int w = comp.getWidth() - paddingLeft - paddingRight - borderThickness;
+        int h = comp.getHeight() - paddingTop - paddingBottom - borderThickness;
 
         RoundRectangle2D.Float baseRect = new RoundRectangle2D.Float(
-                                                    paddingLeft + borderThickness,
-                                                    paddingTop + borderThickness,
+                                                    paddingLeft + (float) borderThickness /2,
+                                                    paddingTop + (float) borderThickness /2,
                                                         w, h, borderArcWidth, borderArcHeight
                                                     );
 
         int shadowInset = this.shadowInset ? this.shadowBlurRadius : this.shadowSpreadRadius;
         int shadowOutset = this.shadowInset ? this.shadowSpreadRadius : this.shadowBlurRadius;
 
+        int gradientStartOffset = ( borderArcWidth + borderArcHeight ) / 5;
+
         Rectangle innerShadowRect = new Rectangle(
-                                        x + shadowInset,
-                                        y + shadowInset,
-                                        w - shadowInset * 2,
-                                        h - shadowInset * 2
+                                        x + shadowInset + gradientStartOffset,
+                                        y + shadowInset + gradientStartOffset,
+                                        w - shadowInset * 2 - gradientStartOffset * 2,
+                                        h - shadowInset * 2 - gradientStartOffset * 2
                                     );
 
         Rectangle outerShadowRect = new Rectangle(
@@ -252,19 +259,19 @@ public class RenderDelegate<C extends JComponent>
 
         savedG2d.setClip(shadowArea);
 
-        int gradientStartOffset = ( borderArcWidth + borderArcHeight ) / 2;
+        if ( shadowSpreadRadius != 0  ) {
+            // Draw the corner shadows
+            _renderCornerShadow(Corner.TOP_LEFT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
+            _renderCornerShadow(Corner.TOP_RIGHT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
+            _renderCornerShadow(Corner.BOTTOM_LEFT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
+            _renderCornerShadow(Corner.BOTTOM_RIGHT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
 
-        // Draw the corner shadows
-        _renderCornerShadow(Corner.TOP_LEFT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
-        _renderCornerShadow(Corner.TOP_RIGHT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
-        _renderCornerShadow(Corner.BOTTOM_LEFT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
-        _renderCornerShadow(Corner.BOTTOM_RIGHT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
-
-        // Draw the edge shadows
-        _renderEdgeShadow(Side.TOP, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
-        _renderEdgeShadow(Side.RIGHT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
-        _renderEdgeShadow(Side.BOTTOM, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
-        _renderEdgeShadow(Side.LEFT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
+            // Draw the edge shadows
+            _renderEdgeShadow(Side.TOP, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
+            _renderEdgeShadow(Side.RIGHT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
+            _renderEdgeShadow(Side.BOTTOM, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
+            _renderEdgeShadow(Side.LEFT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset);
+        }
 
         // If the base rectangle and the outer shadow box are not equal, then we need to fill the area of the base rectangle that is not covered by the outer shadow box!
         {

@@ -98,10 +98,10 @@ public class BoxShadowPickerView extends UI.Panel
                 .shadowSpreadRadius(vm.shadowSpreadRadius().get())
                 .shadowInset(vm.shadowInset().get())
                 .background(vm.backgroundColor().get())
+                .border(vm.borderThickness().get())
                 .renderShadows();
 
                 p.border(vm.borderColor().get())
-                        .border(vm.borderThickness().get())
                         .drawBorder();
             })
         );
