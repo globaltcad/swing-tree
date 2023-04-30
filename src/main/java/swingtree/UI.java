@@ -258,6 +258,8 @@ public final class UI
     public static CompAttr DOCK_WEST  = CompAttr.of("dock west");
     public static CompAttr DOCK( Position pos ) { return CompAttr.of("dock " + pos.toDirectionString()); }
 
+    public static StyleCollector style() { return new StyleCollector(); }
+
     /**
      * Loads an icon from the classpath or from a file.
      * @param path The path to the icon. It can be a classpath resource or a file path.

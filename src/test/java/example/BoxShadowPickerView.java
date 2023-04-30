@@ -13,7 +13,7 @@ public class BoxShadowPickerView extends UI.Panel
     BoxShadowPickerView(BockShadowPickerViewModel vm) {
         FlatLightLaf.setup();
         of(this)
-        .withLayout(FILL_X.and(WRAP(2)))
+        .withLayout(WRAP(2))
         .add(
             panel(FILL.and(WRAP(3)), "[shrink][grow][grow]")
             .add(label("Padding Top:"))
@@ -82,27 +82,27 @@ public class BoxShadowPickerView extends UI.Panel
             .add(checkBox("Inset", vm.shadowInset()))
         )
         .add(
-            panel(FILL).withPrefSize(1450, 600)
+            panel(FILL).withPrefSize(650, 300)
             .withRepaintIf(vm.repaint())
             .withForeground( p -> {
-                p.shadowBackgroundColor(vm.shadowBackgroundColor().get())
-                .padTop(vm.paddingTop().get())
-                .padLeft(vm.paddingLeft().get())
-                .padRight(vm.paddingRight().get())
-                .padBottom(vm.paddingBottom().get())
-                .borderRadius(vm.borderArcWidth().get(), vm.borderArcHeight().get())
-                .shadowColor(vm.shadowColor().get())
-                .shadowHorizontalOffset(vm.horizontalShadowOffset().get())
-                .shadowVerticalOffset(vm.verticalShadowOffset().get())
-                .shadowBlurRadius(vm.shadowBlurRadius().get())
-                .shadowSpreadRadius(vm.shadowSpreadRadius().get())
-                .shadowInset(vm.shadowInset().get())
-                .background(vm.backgroundColor().get())
-                .border(vm.borderThickness().get())
-                .renderShadows();
-
-                p.border(vm.borderColor().get())
-                        .drawBorder();
+                p.render(
+                     style()
+                     .shadowBackgroundColor(vm.shadowBackgroundColor().get())
+                     .padTop(vm.paddingTop().get())
+                     .padLeft(vm.paddingLeft().get())
+                     .padRight(vm.paddingRight().get())
+                     .padBottom(vm.paddingBottom().get())
+                     .borderRadius(vm.borderArcWidth().get(), vm.borderArcHeight().get())
+                     .shadowColor(vm.shadowColor().get())
+                     .shadowHorizontalOffset(vm.horizontalShadowOffset().get())
+                     .shadowVerticalOffset(vm.verticalShadowOffset().get())
+                     .shadowBlurRadius(vm.shadowBlurRadius().get())
+                     .shadowSpreadRadius(vm.shadowSpreadRadius().get())
+                     .shadowInset(vm.shadowInset().get())
+                     .background(vm.backgroundColor().get())
+                     .border(vm.borderThickness().get())
+                     .border(vm.borderColor().get())
+                );
             })
         );
 
