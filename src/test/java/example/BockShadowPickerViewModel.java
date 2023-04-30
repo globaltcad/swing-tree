@@ -27,8 +27,8 @@ public class BockShadowPickerViewModel
     // Box Shadow
     private final Var<Integer> horizontalShadowOffset = Var.of(0).onAct( it -> repaint.fire() );
     private final Var<Integer> verticalShadowOffset = Var.of(0).onAct( it -> repaint.fire() );
-    private final Var<Float> shadowBlurRadius = Var.of(10f).onAct( it -> repaint.fire() );
-    private final Var<Float> shadowSpreadRadius = Var.of(10f).onAct( it -> repaint.fire() );
+    private final Var<Integer> shadowBlurRadius = Var.of(60).onAct( it -> repaint.fire() );
+    private final Var<Integer> shadowSpreadRadius = Var.of(10).onAct( it -> repaint.fire() );
     private final Var<Color> shadowColor = Var.of(Color.BLACK).onAct( it -> repaint.fire() );
     private final Var<Color> shadowBackgroundColor = Var.of(Color.RED).onAct( it -> repaint.fire() );
     private final Var<Boolean> shadowInset = Var.of(false).onAct( it -> repaint.fire() );
@@ -80,11 +80,11 @@ public class BockShadowPickerViewModel
         return verticalShadowOffset;
     }
 
-    public Var<Float> shadowBlurRadius() {
+    public Var<Integer> shadowBlurRadius() {
         return shadowBlurRadius;
     }
 
-    public Var<Float> shadowSpreadRadius() {
+    public Var<Integer> shadowSpreadRadius() {
         return shadowSpreadRadius;
     }
 

@@ -38,7 +38,7 @@ public class RenderDelegate<C extends JComponent>
     // Box Shadow
     private int horizontalShadowOffset = 0;
     private int verticalShadowOffset = 0;
-    private float shadowBlurRadius = 5;
+    private int shadowBlurRadius = 5;
     private int shadowSpreadRadius = 5;
     private Color shadowColor = Color.BLACK;
     private Color shadowBackgroundColor = null;
@@ -141,8 +141,8 @@ public class RenderDelegate<C extends JComponent>
         return this;
     }
 
-    public RenderDelegate<C> shadowBlurRadius(float radius ) {
-        this.shadowBlurRadius = radius / 10;
+    public RenderDelegate<C> shadowBlurRadius(int radius) {
+        this.shadowBlurRadius = radius;
         return this;
     }
 
@@ -167,14 +167,16 @@ public class RenderDelegate<C extends JComponent>
     }
 
     public void drawBorder() {
-        g2d.setColor(borderColor);
-        g2d.setStroke(new BasicStroke(borderThickness));
-        g2d.drawRoundRect(
-                paddingLeft, paddingTop,
-                comp.getWidth() - paddingLeft - paddingRight,
-                comp.getHeight() - paddingTop - paddingBottom,
-                borderArcWidth, borderArcHeight
-            );
+        if ( borderThickness > 0 ) {
+            g2d.setColor(borderColor);
+            g2d.setStroke(new BasicStroke(borderThickness));
+            g2d.drawRoundRect(
+                    paddingLeft, paddingTop,
+                    comp.getWidth() - paddingLeft - paddingRight,
+                    comp.getHeight() - paddingTop - paddingBottom,
+                    borderArcWidth, borderArcHeight
+                );
+        }
     }
 
     public void fill( Color color ) {
@@ -187,7 +189,16 @@ public class RenderDelegate<C extends JComponent>
             );
     }
 
-    public void renderBoxShadow3() {
+    public void renderShadows() {
+
+        // First let's check if we need to render any shadows at all
+        if ( shadowBlurRadius == 0 && shadowSpreadRadius == 0 )
+            return;
+
+        // Is the shadow color transparent?
+        if ( shadowColor.getAlpha() == 0 )
+            return;
+
         // Save the current graphics state
         Graphics2D savedG2d = (Graphics2D) g2d.create();
 
@@ -197,8 +208,14 @@ public class RenderDelegate<C extends JComponent>
         int w = comp.getWidth() - paddingLeft - paddingRight - borderThickness * 2;
         int h = comp.getHeight() - paddingTop - paddingBottom - borderThickness * 2;
 
-        int shadowInset = this.shadowSpreadRadius;
-        int shadowOffset = 0; // TODO
+        RoundRectangle2D.Float baseRect = new RoundRectangle2D.Float(
+                                                    paddingLeft + borderThickness,
+                                                    paddingTop + borderThickness,
+                                                        w, h, borderArcWidth, borderArcHeight
+                                                    );
+
+        int shadowInset = this.shadowInset ? this.shadowBlurRadius : this.shadowSpreadRadius;
+        int shadowOutset = this.shadowInset ? this.shadowSpreadRadius : this.shadowBlurRadius;
 
         Rectangle innerShadowRect = new Rectangle(
                                         x + shadowInset,
@@ -208,30 +225,60 @@ public class RenderDelegate<C extends JComponent>
                                     );
 
         Rectangle outerShadowRect = new Rectangle(
-                                        x - shadowOffset,
-                                        y - shadowOffset,
-                                        w + shadowOffset * 2,
-                                        h + shadowOffset * 2
+                                        x - shadowOutset,
+                                        y - shadowOutset,
+                                        w + shadowOutset * 2,
+                                        h + shadowOutset * 2
                                     );
 
         // Create the shadow shape based on the box bounds and corner arc widths/heights
-        RoundRectangle2D.Float boxShape = new RoundRectangle2D.Float(x, y, w, h, borderArcWidth, borderArcHeight);
+        RoundRectangle2D.Float outerShadowBox = new RoundRectangle2D.Float(
+                                                            outerShadowRect.x,
+                                                            outerShadowRect.y,
+                                                            outerShadowRect.width,
+                                                            outerShadowRect.height,
+                                                            borderArcWidth, borderArcHeight);
 
         // Apply the clipping to avoid overlapping the shadow and the box
-        Area boxArea = new Area(boxShape);
-        savedG2d.setClip(boxArea);
+        Area shadowArea = new Area(outerShadowBox);
+        Area baseArea = new Area(baseRect);
+
+
+        if ( !this.shadowInset )
+            shadowArea.intersect(baseArea);
+        else
+            shadowArea.subtract(baseArea);
+
+
+        savedG2d.setClip(shadowArea);
 
         // Draw the corner shadows
-        _renderCornerShadow(Corner.TOP_LEFT, boxArea, innerShadowRect, outerShadowRect);
-        _renderCornerShadow(Corner.TOP_RIGHT, boxArea, innerShadowRect, outerShadowRect);
-        _renderCornerShadow(Corner.BOTTOM_LEFT, boxArea, innerShadowRect, outerShadowRect);
-        _renderCornerShadow(Corner.BOTTOM_RIGHT, boxArea, innerShadowRect, outerShadowRect);
+        _renderCornerShadow(Corner.TOP_LEFT, shadowArea, innerShadowRect, outerShadowRect);
+        _renderCornerShadow(Corner.TOP_RIGHT, shadowArea, innerShadowRect, outerShadowRect);
+        _renderCornerShadow(Corner.BOTTOM_LEFT, shadowArea, innerShadowRect, outerShadowRect);
+        _renderCornerShadow(Corner.BOTTOM_RIGHT, shadowArea, innerShadowRect, outerShadowRect);
 
         // Draw the edge shadows
-        _renderEdgeShadow(Side.TOP, boxArea, innerShadowRect, outerShadowRect);
-        _renderEdgeShadow(Side.RIGHT, boxArea, innerShadowRect, outerShadowRect);
-        _renderEdgeShadow(Side.BOTTOM, boxArea, innerShadowRect, outerShadowRect);
-        _renderEdgeShadow(Side.LEFT, boxArea, innerShadowRect, outerShadowRect);
+        _renderEdgeShadow(Side.TOP, shadowArea, innerShadowRect, outerShadowRect);
+        _renderEdgeShadow(Side.RIGHT, shadowArea, innerShadowRect, outerShadowRect);
+        _renderEdgeShadow(Side.BOTTOM, shadowArea, innerShadowRect, outerShadowRect);
+        _renderEdgeShadow(Side.LEFT, shadowArea, innerShadowRect, outerShadowRect);
+
+        // If the base rectangle and the outer shadow box are not equal, then we need to fill the area of the base rectangle that is not covered by the outer shadow box!
+        {
+            Graphics2D g2d2 = (Graphics2D) g2d.create();
+            g2d2.setColor(shadowColor);
+            Area baseRectArea = new Area(baseRect);
+            if ( !this.shadowInset ) {
+                baseRectArea.subtract(new Area(outerShadowBox));
+                g2d2.fill(baseRectArea);
+            }else {
+                Area innerShadowArea = new Area(innerShadowRect);
+                innerShadowArea.subtract(baseRectArea);
+                g2d2.fill(innerShadowArea);
+            }
+            g2d2.dispose();
+        }
 
         // Restore the original graphics state
         savedG2d.dispose();
@@ -292,6 +339,8 @@ public class RenderDelegate<C extends JComponent>
                 throw new IllegalArgumentException("Invalid corner: " + corner);
         }
 
+        if (cr <= 0) return;
+
         Color innerColor;
         Color outerColor;
         Color shadowBackgroundColor = new Color(0,0,0,0);
@@ -327,10 +376,10 @@ public class RenderDelegate<C extends JComponent>
         switch (side) {
             case TOP:
                 edgeBox = new Rectangle2D.Float(
-                            innerShadowRect.x,
-                            outerShadowRect.y,
-                            innerShadowRect.width,
-                            innerShadowRect.y - outerShadowRect.y
+                                innerShadowRect.x,
+                                outerShadowRect.y,
+                                innerShadowRect.width,
+                                innerShadowRect.y - outerShadowRect.y
                             );
                 gradEndX = edgeBox.x;
                 gradEndY = edgeBox.y;
@@ -351,10 +400,10 @@ public class RenderDelegate<C extends JComponent>
                 break;
             case BOTTOM:
                 edgeBox = new Rectangle2D.Float(
-                            innerShadowRect.x,
-                            innerShadowRect.y + innerShadowRect.height,
-                            innerShadowRect.width,
-                            outerShadowRect.y + outerShadowRect.height - innerShadowRect.y - innerShadowRect.height
+                                innerShadowRect.x,
+                                innerShadowRect.y + innerShadowRect.height,
+                                innerShadowRect.width,
+                                outerShadowRect.y + outerShadowRect.height - innerShadowRect.y - innerShadowRect.height
                             );
                 gradEndX = edgeBox.x;
                 gradEndY = edgeBox.y + edgeBox.height;
@@ -376,6 +425,8 @@ public class RenderDelegate<C extends JComponent>
             default:
                 throw new IllegalArgumentException("Invalid side: " + side);
         }
+
+        if ( gradStartX == gradEndX && gradStartY == gradEndY ) return;
 
         Color innerColor;
         Color outerColor;

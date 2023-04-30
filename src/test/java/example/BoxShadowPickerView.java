@@ -13,7 +13,7 @@ public class BoxShadowPickerView extends UI.Panel
     BoxShadowPickerView(BockShadowPickerViewModel vm) {
         FlatLightLaf.setup();
         of(this)
-        .withLayout(FILL_X.and(WRAP(2)).and(DEBUG))
+        .withLayout(FILL_X.and(WRAP(2)))
         .add(
             panel(FILL.and(WRAP(3)), "[shrink][grow][grow]")
             .add(label("Padding Top:"))
@@ -52,16 +52,16 @@ public class BoxShadowPickerView extends UI.Panel
         .add(
             panel(FILL.and(WRAP(3)), "[shrink][grow][grow]")
             .add(label("Horizontal Shadow Offset:"))
-            .add(slider(Align.HORIZONTAL, 0, 100, vm.horizontalShadowOffset()))
+            .add(slider(Align.HORIZONTAL, -50, 50, vm.horizontalShadowOffset()))
             .add(label(vm.horizontalShadowOffset().viewAsString()))
             .add(label("Vertical Shadow Offset:"))
-            .add(slider(Align.HORIZONTAL, 0, 100, vm.verticalShadowOffset()))
+            .add(slider(Align.HORIZONTAL, -50, 50, vm.verticalShadowOffset()))
             .add(label(vm.verticalShadowOffset().viewAsString()))
             .add(label("Shadow Blur Radius:"))
-            .add(ALIGN_CENTER, numericTextField(vm.shadowBlurRadius()))
+            .add(slider(Align.HORIZONTAL, 0, 100, vm.shadowBlurRadius()))
             .add(label(vm.shadowBlurRadius().viewAsString()))
             .add(label("Shadow Spread Radius:"))
-            .add(ALIGN_CENTER, numericTextField(vm.shadowSpreadRadius()))
+            .add(slider(Align.HORIZONTAL, 0, 100, vm.shadowSpreadRadius()))
             .add(label(vm.shadowSpreadRadius().viewAsString()))
             .add(label("Shadow Color:"))
             .add(ALIGN_CENTER,
@@ -95,10 +95,10 @@ public class BoxShadowPickerView extends UI.Panel
                 .shadowHorizontalOffset(vm.horizontalShadowOffset().get())
                 .shadowVerticalOffset(vm.verticalShadowOffset().get())
                 .shadowBlurRadius(vm.shadowBlurRadius().get())
-                .shadowSpreadRadius(vm.shadowSpreadRadius().get().intValue())
+                .shadowSpreadRadius(vm.shadowSpreadRadius().get())
                 .shadowInset(vm.shadowInset().get())
                 .background(vm.backgroundColor().get())
-                .renderBoxShadow3();
+                .renderShadows();
 
                 p.border(vm.borderColor().get())
                         .border(vm.borderThickness().get())
