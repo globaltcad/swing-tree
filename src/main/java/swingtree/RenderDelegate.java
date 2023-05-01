@@ -182,11 +182,11 @@ public class RenderDelegate<C extends JComponent>
     }
 
     private static void _renderShadowBody(
-            StyleCollector style,
-            Area baseArea,
-            Rectangle innerShadowRect,
-            RoundRectangle2D.Float outerShadowBox,
-            Graphics2D g2d
+        StyleCollector style,
+        Area baseArea,
+        Rectangle innerShadowRect,
+        RoundRectangle2D.Float outerShadowBox,
+        Graphics2D g2d
     ) {
         Graphics2D g2d2 = (Graphics2D) g2d.create();
         g2d2.setColor(style.getShadowColor());
@@ -346,6 +346,11 @@ public class RenderDelegate<C extends JComponent>
             int gradientStartOffset,
             Graphics2D g2d
     ) {
+        // We define a boundary center point and a clipping box so that edges don't overlap
+        float clipBoundaryX = outerShadowRect.x + outerShadowRect.width / 2f;
+        float clipBoundaryY = outerShadowRect.y + outerShadowRect.height / 2f;
+        Rectangle2D.Float edgeClipBox = null;
+
         Rectangle2D.Float edgeBox;
         float gradEndX;
         float gradEndY;
@@ -359,6 +364,15 @@ public class RenderDelegate<C extends JComponent>
                                 innerShadowRect.width,
                                 innerShadowRect.y - outerShadowRect.y
                             );
+
+                if ( (edgeBox.y + edgeBox.height) > clipBoundaryY )
+                    edgeClipBox = new Rectangle2D.Float(
+                            edgeBox.x,
+                            edgeBox.y,
+                            edgeBox.width,
+                            clipBoundaryY - edgeBox.y
+                    );
+
                 gradEndX = edgeBox.x;
                 gradEndY = edgeBox.y;
                 gradStartX = edgeBox.x;
@@ -371,6 +385,13 @@ public class RenderDelegate<C extends JComponent>
                             outerShadowRect.x + outerShadowRect.width - innerShadowRect.x - innerShadowRect.width,
                             innerShadowRect.height
                             );
+                if ( edgeBox.x < clipBoundaryX )
+                    edgeClipBox = new Rectangle2D.Float(
+                            clipBoundaryX,
+                            edgeBox.y,
+                            edgeBox.x + edgeBox.width - clipBoundaryX,
+                            edgeBox.height
+                    );
                 gradEndX = edgeBox.x + edgeBox.width;
                 gradEndY = edgeBox.y;
                 gradStartX = edgeBox.x;
@@ -378,11 +399,19 @@ public class RenderDelegate<C extends JComponent>
                 break;
             case BOTTOM:
                 edgeBox = new Rectangle2D.Float(
-                                innerShadowRect.x,
-                                innerShadowRect.y + innerShadowRect.height,
-                                innerShadowRect.width,
-                                outerShadowRect.y + outerShadowRect.height - innerShadowRect.y - innerShadowRect.height
-                            );
+                        innerShadowRect.x,
+                        innerShadowRect.y + innerShadowRect.height,
+                        innerShadowRect.width,
+                        outerShadowRect.y + outerShadowRect.height - innerShadowRect.y - innerShadowRect.height
+                );
+                if ( edgeBox.y < clipBoundaryY )
+                    edgeClipBox = new Rectangle2D.Float(
+                            edgeBox.x,
+                            clipBoundaryY,
+                            edgeBox.width,
+                            edgeBox.y + edgeBox.height - clipBoundaryY
+                    );
+
                 gradEndX = edgeBox.x;
                 gradEndY = edgeBox.y + edgeBox.height;
                 gradStartX = edgeBox.x;
@@ -395,6 +424,13 @@ public class RenderDelegate<C extends JComponent>
                             innerShadowRect.x - outerShadowRect.x,
                             innerShadowRect.height
                             );
+                if ( (edgeBox.x + edgeBox.width) > clipBoundaryX )
+                    edgeClipBox = new Rectangle2D.Float(
+                            edgeBox.x,
+                            edgeBox.y,
+                            clipBoundaryX - edgeBox.x,
+                            edgeBox.height
+                    );
                 gradEndX = edgeBox.x;
                 gradEndY = edgeBox.y;
                 gradStartX = edgeBox.x + edgeBox.width;
@@ -442,6 +478,8 @@ public class RenderDelegate<C extends JComponent>
         // We need to clip the edge paint to the edge box
         Area edgeArea = new Area(edgeBox);
         edgeArea.intersect(boxArea);
+        if ( edgeClipBox != null )
+            edgeArea.intersect(new Area(edgeClipBox));
 
         Graphics2D edgeG2d = (Graphics2D) g2d.create();
         edgeG2d.setPaint(edgePaint);
