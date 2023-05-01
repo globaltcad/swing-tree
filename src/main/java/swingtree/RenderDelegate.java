@@ -31,6 +31,13 @@ public class RenderDelegate<C extends JComponent>
 
     public C component() { return comp; }
 
+    public void render(StyleCollector style){
+        _fillOuterBackground(style, style.getOuterBackgroundColor());
+        _fillBackground(style, style.getBackgroundColor());
+        _renderShadows(style, comp, g2d);
+        _drawBorder(style);
+    }
+
     private void _drawBorder(StyleCollector style) {
         if ( style.getBorderThickness() > 0 ) {
             g2d.setColor(style.getBorderColor());
@@ -41,7 +48,7 @@ public class RenderDelegate<C extends JComponent>
                     comp.getHeight() - style.getPaddingTop() - style.getPaddingBottom(),
                     (style.getBorderArcWidth()  + (style.getBorderThickness() == 1 ? 0 : style.getBorderThickness()+1)),
                     (style.getBorderArcHeight() + (style.getBorderThickness() == 1 ? 0 : style.getBorderThickness()+1))
-                );
+            );
             g2d.drawRoundRect(
                     style.getPaddingLeft(), style.getPaddingTop(),
                     comp.getWidth() - style.getPaddingLeft() - style.getPaddingRight(),
@@ -63,7 +70,7 @@ public class RenderDelegate<C extends JComponent>
                 comp.getWidth() - style.getPaddingLeft() - style.getPaddingRight(),
                 comp.getHeight() - style.getPaddingTop() - style.getPaddingBottom(),
                 style.getBorderArcWidth(), style.getBorderArcHeight()
-            );
+        );
     }
 
     private void _fillOuterBackground( StyleCollector style, Color color ) {
@@ -72,16 +79,16 @@ public class RenderDelegate<C extends JComponent>
             return;
 
         Rectangle2D.Float outerRect = new Rectangle2D.Float(
-                                            0, 0,
-                                            comp.getWidth(),
-                                            comp.getHeight()
-                                        );
+                0, 0,
+                comp.getWidth(),
+                comp.getHeight()
+        );
         RoundRectangle2D.Float innerRect = new RoundRectangle2D.Float(
-                                            style.getPaddingLeft(), style.getPaddingTop(),
-                                            comp.getWidth() - style.getPaddingLeft() - style.getPaddingRight(),
-                                            comp.getHeight() - style.getPaddingTop() - style.getPaddingBottom(),
-                                            style.getBorderArcWidth(), style.getBorderArcHeight()
-                                        );
+                style.getPaddingLeft(), style.getPaddingTop(),
+                comp.getWidth() - style.getPaddingLeft() - style.getPaddingRight(),
+                comp.getHeight() - style.getPaddingTop() - style.getPaddingBottom(),
+                style.getBorderArcWidth(), style.getBorderArcHeight()
+        );
 
         Area outer = new Area(outerRect);
         Area inner = new Area(innerRect);
@@ -90,13 +97,6 @@ public class RenderDelegate<C extends JComponent>
         g2d.setColor(color);
         g2d.fill(outer);
 
-    }
-
-    public void render(StyleCollector style){
-        _fillOuterBackground(style, style.getOuterBackgroundColor());
-        _fillBackground(style, style.getBackgroundColor());
-        _renderShadows(style, comp, g2d);
-        this._drawBorder(style);
     }
 
     private static void _renderShadows(
@@ -210,7 +210,14 @@ public class RenderDelegate<C extends JComponent>
         int gradientStartOffset,
         Graphics2D g2d
     ) {
-        // Draw the corner shadows
+        // We define a clipping box so that corners don't overlap
+        float clipBoxWidth   = outerShadowRect.width / 2f;
+        float clipBoxHeight  = outerShadowRect.height / 2f;
+        float clipBoxCenterX = outerShadowRect.x + clipBoxWidth;
+        float clipBoxCenterY = outerShadowRect.y + clipBoxHeight;
+        Rectangle2D.Float cornerClipBox;
+
+        // The defining the corner shadow bound (where it starts and ends
         Rectangle2D.Float cornerBox;
         float cx;
         float cy;
@@ -218,11 +225,17 @@ public class RenderDelegate<C extends JComponent>
         switch (corner) {
             case TOP_LEFT:
                 cornerBox = new Rectangle2D.Float(
-                            outerShadowRect.x,
-                            outerShadowRect.y,
+                            outerShadowRect.x, outerShadowRect.y,
                             innerShadowRect.x - outerShadowRect.x,
                             innerShadowRect.y - outerShadowRect.y
                             );
+                cornerClipBox = new Rectangle2D.Float(
+                                    clipBoxCenterX - clipBoxWidth,
+                                    clipBoxCenterY - clipBoxHeight,
+                                    clipBoxWidth,
+                                    clipBoxHeight
+                                );
+
                 cx = cornerBox.x + cornerBox.width;
                 cy = cornerBox.y + cornerBox.height;
                 cr = cornerBox.width;
@@ -234,6 +247,13 @@ public class RenderDelegate<C extends JComponent>
                             outerShadowRect.x + outerShadowRect.width - innerShadowRect.x - innerShadowRect.width,
                             innerShadowRect.y - outerShadowRect.y
                             );
+                cornerClipBox = new Rectangle2D.Float(
+                                    clipBoxCenterX,
+                                    clipBoxCenterY - clipBoxHeight,
+                                    clipBoxWidth,
+                                    clipBoxHeight
+                                );
+
                 cx = cornerBox.x;
                 cy = cornerBox.y + cornerBox.height;
                 cr = cornerBox.width;
@@ -245,6 +265,13 @@ public class RenderDelegate<C extends JComponent>
                             innerShadowRect.x - outerShadowRect.x,
                             outerShadowRect.y + outerShadowRect.height - innerShadowRect.y - innerShadowRect.height
                             );
+                cornerClipBox = new Rectangle2D.Float(
+                                    clipBoxCenterX - clipBoxWidth,
+                                    clipBoxCenterY,
+                                    clipBoxWidth,
+                                    clipBoxHeight
+                                );
+
                 cx = cornerBox.x + cornerBox.width;
                 cy = cornerBox.y;
                 cr = cornerBox.width;
@@ -256,6 +283,13 @@ public class RenderDelegate<C extends JComponent>
                             outerShadowRect.x + outerShadowRect.width - innerShadowRect.x - innerShadowRect.width,
                             outerShadowRect.y + outerShadowRect.height - innerShadowRect.y - innerShadowRect.height
                             );
+                cornerClipBox = new Rectangle2D.Float(
+                                    clipBoxCenterX,
+                                    clipBoxCenterY,
+                                    clipBoxWidth,
+                                    clipBoxHeight
+                                );
+
                 cx = cornerBox.x;
                 cy = cornerBox.y;
                 cr = cornerBox.width;
@@ -295,6 +329,7 @@ public class RenderDelegate<C extends JComponent>
         // We need to clip the corner paint to the corner box
         Area cornerArea = new Area(cornerBox);
         cornerArea.intersect(boxArea);
+        cornerArea.intersect(new Area(cornerClipBox));
 
         Graphics2D cornerG2d = (Graphics2D) g2d.create();
         cornerG2d.setPaint(cornerPaint);
