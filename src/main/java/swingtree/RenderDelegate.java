@@ -145,13 +145,12 @@ public class RenderDelegate<C extends JComponent>
                                     );
 
         // Create the shadow shape based on the box bounds and corner arc widths/heights
-        RoundRectangle2D.Float outerShadowBox = new RoundRectangle2D.Float(
-                                                            outerShadowRect.x,
-                                                            outerShadowRect.y,
-                                                            outerShadowRect.width,
-                                                            outerShadowRect.height,
-                                                            style.getBorderArcWidth(), style.getBorderArcHeight()
-                                                        );
+        Rectangle outerShadowBox = new Rectangle(
+                                        outerShadowRect.x,
+                                        outerShadowRect.y,
+                                        outerShadowRect.width,
+                                        outerShadowRect.height
+                                    );
 
         // Apply the clipping to avoid overlapping the shadow and the box
         Area shadowArea = new Area(outerShadowBox);
@@ -185,7 +184,7 @@ public class RenderDelegate<C extends JComponent>
         StyleCollector style,
         Area baseArea,
         Rectangle innerShadowRect,
-        RoundRectangle2D.Float outerShadowBox,
+        Rectangle outerShadowBox,
         Graphics2D g2d
     ) {
         Graphics2D g2d2 = (Graphics2D) g2d.create();
@@ -225,15 +224,13 @@ public class RenderDelegate<C extends JComponent>
         switch (corner) {
             case TOP_LEFT:
                 cornerBox = new Rectangle2D.Float(
-                            outerShadowRect.x, outerShadowRect.y,
-                            innerShadowRect.x - outerShadowRect.x,
-                            innerShadowRect.y - outerShadowRect.y
-                            );
+                                    outerShadowRect.x, outerShadowRect.y,
+                                    innerShadowRect.x - outerShadowRect.x,
+                                    innerShadowRect.y - outerShadowRect.y
+                                );
                 cornerClipBox = new Rectangle2D.Float(
-                                    clipBoxCenterX - clipBoxWidth,
-                                    clipBoxCenterY - clipBoxHeight,
-                                    clipBoxWidth,
-                                    clipBoxHeight
+                                    clipBoxCenterX - clipBoxWidth, clipBoxCenterY - clipBoxHeight,
+                                    clipBoxWidth, clipBoxHeight
                                 );
 
                 cx = cornerBox.x + cornerBox.width;
@@ -242,16 +239,13 @@ public class RenderDelegate<C extends JComponent>
                 break;
             case TOP_RIGHT:
                 cornerBox = new Rectangle2D.Float(
-                                innerShadowRect.x + innerShadowRect.width,
-                                outerShadowRect.y,
-                            outerShadowRect.x + outerShadowRect.width - innerShadowRect.x - innerShadowRect.width,
-                            innerShadowRect.y - outerShadowRect.y
+                                innerShadowRect.x + innerShadowRect.width, outerShadowRect.y,
+                                outerShadowRect.x + outerShadowRect.width - innerShadowRect.x - innerShadowRect.width,
+                                innerShadowRect.y - outerShadowRect.y
                             );
                 cornerClipBox = new Rectangle2D.Float(
-                                    clipBoxCenterX,
-                                    clipBoxCenterY - clipBoxHeight,
-                                    clipBoxWidth,
-                                    clipBoxHeight
+                                    clipBoxCenterX, clipBoxCenterY - clipBoxHeight,
+                                    clipBoxWidth, clipBoxHeight
                                 );
 
                 cx = cornerBox.x;
@@ -260,16 +254,14 @@ public class RenderDelegate<C extends JComponent>
                 break;
             case BOTTOM_LEFT:
                 cornerBox = new Rectangle2D.Float(
-                            outerShadowRect.x,
-                            innerShadowRect.y + innerShadowRect.height,
-                            innerShadowRect.x - outerShadowRect.x,
-                            outerShadowRect.y + outerShadowRect.height - innerShadowRect.y - innerShadowRect.height
+                                outerShadowRect.x,
+                                innerShadowRect.y + innerShadowRect.height,
+                                innerShadowRect.x - outerShadowRect.x,
+                                outerShadowRect.y + outerShadowRect.height - innerShadowRect.y - innerShadowRect.height
                             );
                 cornerClipBox = new Rectangle2D.Float(
-                                    clipBoxCenterX - clipBoxWidth,
-                                    clipBoxCenterY,
-                                    clipBoxWidth,
-                                    clipBoxHeight
+                                    clipBoxCenterX - clipBoxWidth, clipBoxCenterY,
+                                    clipBoxWidth, clipBoxHeight
                                 );
 
                 cx = cornerBox.x + cornerBox.width;
@@ -278,16 +270,13 @@ public class RenderDelegate<C extends JComponent>
                 break;
             case BOTTOM_RIGHT:
                 cornerBox = new Rectangle2D.Float(
-                            innerShadowRect.x + innerShadowRect.width,
-                            innerShadowRect.y + innerShadowRect.height,
+                            innerShadowRect.x + innerShadowRect.width, innerShadowRect.y + innerShadowRect.height,
                             outerShadowRect.x + outerShadowRect.width - innerShadowRect.x - innerShadowRect.width,
                             outerShadowRect.y + outerShadowRect.height - innerShadowRect.y - innerShadowRect.height
                             );
                 cornerClipBox = new Rectangle2D.Float(
-                                    clipBoxCenterX,
-                                    clipBoxCenterY,
-                                    clipBoxWidth,
-                                    clipBoxHeight
+                                    clipBoxCenterX, clipBoxCenterY,
+                                    clipBoxWidth, clipBoxHeight
                                 );
 
                 cx = cornerBox.x;
@@ -359,18 +348,14 @@ public class RenderDelegate<C extends JComponent>
         switch (side) {
             case TOP:
                 edgeBox = new Rectangle2D.Float(
-                                innerShadowRect.x,
-                                outerShadowRect.y,
-                                innerShadowRect.width,
-                                innerShadowRect.y - outerShadowRect.y
+                                innerShadowRect.x, outerShadowRect.y,
+                                innerShadowRect.width, innerShadowRect.y - outerShadowRect.y
                             );
 
                 if ( (edgeBox.y + edgeBox.height) > clipBoundaryY )
                     edgeClipBox = new Rectangle2D.Float(
-                            edgeBox.x,
-                            edgeBox.y,
-                            edgeBox.width,
-                            clipBoundaryY - edgeBox.y
+                            edgeBox.x, edgeBox.y,
+                            edgeBox.width, clipBoundaryY - edgeBox.y
                     );
 
                 gradEndX = edgeBox.x;
@@ -380,18 +365,15 @@ public class RenderDelegate<C extends JComponent>
                 break;
             case RIGHT:
                 edgeBox = new Rectangle2D.Float(
-                            innerShadowRect.x + innerShadowRect.width,
-                            innerShadowRect.y,
-                            outerShadowRect.x + outerShadowRect.width - innerShadowRect.x - innerShadowRect.width,
-                            innerShadowRect.height
+                                innerShadowRect.x + innerShadowRect.width, innerShadowRect.y,
+                                outerShadowRect.x + outerShadowRect.width - innerShadowRect.x - innerShadowRect.width,
+                                innerShadowRect.height
                             );
                 if ( edgeBox.x < clipBoundaryX )
                     edgeClipBox = new Rectangle2D.Float(
-                            clipBoundaryX,
-                            edgeBox.y,
-                            edgeBox.x + edgeBox.width - clipBoundaryX,
-                            edgeBox.height
-                    );
+                                        clipBoundaryX, edgeBox.y,
+                                        edgeBox.x + edgeBox.width - clipBoundaryX, edgeBox.height
+                                    );
                 gradEndX = edgeBox.x + edgeBox.width;
                 gradEndY = edgeBox.y;
                 gradStartX = edgeBox.x;
@@ -399,11 +381,9 @@ public class RenderDelegate<C extends JComponent>
                 break;
             case BOTTOM:
                 edgeBox = new Rectangle2D.Float(
-                        innerShadowRect.x,
-                        innerShadowRect.y + innerShadowRect.height,
-                        innerShadowRect.width,
-                        outerShadowRect.y + outerShadowRect.height - innerShadowRect.y - innerShadowRect.height
-                );
+                        innerShadowRect.x, innerShadowRect.y + innerShadowRect.height,
+                        innerShadowRect.width, outerShadowRect.y + outerShadowRect.height - innerShadowRect.y - innerShadowRect.height
+                    );
                 if ( edgeBox.y < clipBoundaryY )
                     edgeClipBox = new Rectangle2D.Float(
                             edgeBox.x,
