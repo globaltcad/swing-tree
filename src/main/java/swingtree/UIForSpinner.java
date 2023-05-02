@@ -41,8 +41,8 @@ public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner
                         Number newValue;
                         Number value = this.getNumber();
                         Number stepSize = this.getStepSize();
-                        Comparable<Number> maximum = this.getMaximum();
-                        Comparable<Number> minimum = this.getMinimum();
+                        Comparable<Number> maximum = (Comparable<Number>) this.getMaximum();
+                        Comparable<Number> minimum = (Comparable<Number>) this.getMinimum();
                         boolean valueIsRational = (value instanceof Float) || (value instanceof Double);
                         boolean stepIsRational = (stepSize instanceof Float) || (stepSize instanceof Double);
                         if ( valueIsRational || stepIsRational ) {

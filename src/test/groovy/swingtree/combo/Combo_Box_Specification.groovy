@@ -12,6 +12,8 @@ import sprouts.Vars
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JComboBox
 
+import static swingtree.UI.comboBox
+
 @Title("Drop Downs, aka Combo Boxes")
 @Narrative("""
 
@@ -390,4 +392,41 @@ class Combo_Box_Specification extends Specification
             '666L'  |   Var.of(666L)   |  [666L, 777L]    | 666L
             '777L'  |   Var.of(666L)   |  [666L, 777L]    | 777L
     }
+
+    def 'Changing properties in you view model automatically updates the combo box.'()
+    {
+        given :
+            var selected = Var.of(4);
+            var options = Vars.of(1, 2, 4, 6, 8, 12, 16)
+        and :
+            var ui =
+                comboBox(options)
+				.withSelectedItem(selected)
+
+		when : 'We change the selected property to 1...'
+		    selected.set(1)
+            UI.sync()
+		then : 'The combo box has been updated as expected!'
+		    ui.component.selectedItem == 1
+		    ui.component.editor.item == 1
+    }
+
+    def 'Changing properties in you view model automatically updates an editable combo box.'()
+    {
+        given :
+            var selected = Var.of(4);
+            var options = Vars.of(1, 2, 4, 6, 8, 12, 16)
+        and :
+            var ui =
+                comboBox(options).isEditableIf(true)
+				.withSelectedItem(selected)
+
+		when : 'We change the selected property to 1...'
+		    selected.set(1)
+            UI.sync()
+		then : 'The combo box has been updated as expected!'
+		    ui.component.selectedItem == 1
+		    ui.component.editor.item == 1
+    }
+
 }

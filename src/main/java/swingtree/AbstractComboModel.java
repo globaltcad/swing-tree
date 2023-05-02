@@ -3,6 +3,7 @@ package swingtree;
 import sprouts.Var;
 
 import javax.swing.*;
+import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -20,6 +21,8 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 	protected int _selectedIndex = -1;
 	final Var<E> _selectedItem;
 	protected java.util.List<ListDataListener> listeners = new ArrayList<>();
+
+	private boolean _acceptsEditorChanges = true; // This is important to prevent getting feedback loops!
 
 	protected static <E> Class<E> _findCommonType( E[] items ) {
 		Iterable<E> iterable = () -> java.util.Arrays.stream(items).iterator();
@@ -51,15 +54,53 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 	@Override public void setSelectedItem( Object anItem ) {
 		if ( anItem != null && !_selectedItem.type().isAssignableFrom(anItem.getClass()) )
 			anItem = _convert(anItem.toString());
-		_selectedItem.act((E) anItem).fireSet();
-		_selectedIndex = _indexOf(anItem);
+        E old = _selectedItem.orElseNull();
+		Object finalAnItem = anItem;
+		doQuietly(()-> {
+			_selectedItem.act((E) finalAnItem);
+			_selectedIndex = _indexOf(finalAnItem);
+			if ( !Objects.equals(old, finalAnItem) )
+				fireListeners();
+		});
 	}
+
 	@Override public Object getSelectedItem() { return _selectedItem.orElseNull(); }
+
 	@Override public void addListDataListener( ListDataListener l ) { listeners.add(l); }
+
 	@Override public void removeListDataListener( ListDataListener l ) { listeners.remove(l); }
+
+    void fireListeners() {
+		try {
+			for ( ListDataListener l : listeners )
+				l.contentsChanged(
+					new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, getSize())
+				);
+		} catch ( Exception e ) {
+			e.printStackTrace();
+		}
+    }
+
+    void doQuietly( Runnable task ) {
+    	boolean alreadyWithinQuietTask = !_acceptsEditorChanges;
+		_acceptsEditorChanges = false;
+		try { task.run(); } catch ( Exception e ) { e.printStackTrace(); }
+		if ( !alreadyWithinQuietTask )
+			_acceptsEditorChanges = true;
+    }
+
 	abstract protected void setAt( int index, E element );
 
+    void updateSelectedIndex() {
+        if ( _selectedIndex >= 0 && !_selectedItem.is(getElementAt(_selectedIndex)) )
+            _selectedIndex = _indexOf(_selectedItem.orElseNull());
+    }
+
 	void setFromEditor( String o ) {
+		if ( !_acceptsEditorChanges )
+			return; // The editor of a combo box can have very strange behaviour when it is updated by listeners
+
+		updateSelectedIndex();
 		if ( _selectedIndex != -1 ) {
 			try {
 				E e = _convert(o);
@@ -67,12 +108,8 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 				boolean stateChanged = _selectedItem.orElseNull() != e;
 				_selectedItem.act(e);
 				if ( stateChanged )
-					UI.runLater(_selectedItem::fireSet);
-					/*
-						We run the "fireSet" method later in case this method was triggered
-						by the combo editor which would cause an invalid feedback modification
-						in the combo box editor!
-					*/
+					doQuietly( ()-> fireListeners() );
+
 			} catch (Exception ignored) {
 				// It looks like conversion was not successful
 				// So this means the editor input could not be converted to the type of the combo box
