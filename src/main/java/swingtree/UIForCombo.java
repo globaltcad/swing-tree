@@ -38,8 +38,10 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
 
             _onShow( model._getSelectedItemVar(), v ->
                 component().ifPresent( combo -> {
-                    if ( combo.isEditable() )
+                    model.doQuietly(()->{
                         combo.getEditor().setItem(v);
+                        model.fireListeners();
+                    });
                 })
             );
 
