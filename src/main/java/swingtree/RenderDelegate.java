@@ -1,6 +1,6 @@
 package swingtree;
 
-import swingtree.style.StyleCollector;
+import swingtree.style.Style;
 
 import javax.swing.*;
 import java.awt.*;
@@ -33,14 +33,14 @@ public class RenderDelegate<C extends JComponent>
 
     public C component() { return comp; }
 
-    public void render(StyleCollector style){
+    public void render(Style style){
         _fillOuterBackground(style, style.background().outerColor());
         _fillBackground(style, style.background().color());
         _renderShadows(style, comp, g2d);
         _drawBorder(style);
     }
 
-    private void _drawBorder(StyleCollector style) {
+    private void _drawBorder(Style style) {
         if ( style.border().thickness() > 0 ) {
             g2d.setColor(style.border().color());
             g2d.setStroke(new BasicStroke(style.border().thickness()));
@@ -61,7 +61,7 @@ public class RenderDelegate<C extends JComponent>
         }
     }
 
-    private void _fillBackground(StyleCollector style, Color color ) {
+    private void _fillBackground(Style style, Color color ) {
         // Check if the color is transparent
         if ( color.getAlpha() == 0 )
             return;
@@ -75,7 +75,7 @@ public class RenderDelegate<C extends JComponent>
         );
     }
 
-    private void _fillOuterBackground( StyleCollector style, Color color ) {
+    private void _fillOuterBackground(Style style, Color color ) {
         // Check if the color is transparent
         if ( color.getAlpha() == 0 )
             return;
@@ -102,7 +102,7 @@ public class RenderDelegate<C extends JComponent>
     }
 
     private static void _renderShadows(
-            StyleCollector style,
+            Style style,
             JComponent comp,
             Graphics2D g2d
     ) {
@@ -183,7 +183,7 @@ public class RenderDelegate<C extends JComponent>
     }
 
     private static void _renderShadowBody(
-        StyleCollector style,
+        Style style,
         Area baseArea,
         Rectangle innerShadowRect,
         Rectangle outerShadowBox,
@@ -203,7 +203,7 @@ public class RenderDelegate<C extends JComponent>
     }
 
     private static void _renderCornerShadow(
-        StyleCollector style,
+        Style style,
         Corner corner,
         Area boxArea,
         Rectangle innerShadowRect,
@@ -329,7 +329,7 @@ public class RenderDelegate<C extends JComponent>
     }
 
     private static void _renderEdgeShadow(
-            StyleCollector style,
+            Style style,
             Side side,
             Area boxArea,
             Rectangle innerShadowRect,

@@ -14,6 +14,7 @@ import swingtree.api.mvvm.Viewable;
 import swingtree.input.Keyboard;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
+import swingtree.style.Style;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -1527,6 +1528,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _this();
     }
 
+    public final I withBackground( Style... styles ) {
+        NullUtil.nullArgCheck(styles, "styles", Style.class);
+        // We check that the array does not contain null values
+        for ( Style style : styles )
+            NullUtil.nullArgCheck(style, "styles", Style.class);
+
+        return this.withBackground( it -> {
+            for ( Style style : styles ) it.render( style );
+        });
+    }
+
     /**
      *  Set the color of this {@link JComponent}. (This is usually the font color for components displaying text) <br>
      *  This is in essence a convenience method, which avoid having to expose the underlying component
@@ -1681,6 +1693,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(renderer, "renderer", Consumer.class);
         UI._registerForegroundRenderingFor( getComponent(), renderer );
         return _this();
+    }
+
+    public final I withForeground( Style... styles ) {
+        NullUtil.nullArgCheck(styles, "styles", Style.class);
+        // We check that the array does not contain null values
+        for ( Style style : styles )
+            NullUtil.nullArgCheck(style, "styles", Style.class);
+
+        return this.withForeground( it -> {
+                    for ( Style style : styles ) it.render( style );
+                });
     }
 
     private void _updateBackground(
