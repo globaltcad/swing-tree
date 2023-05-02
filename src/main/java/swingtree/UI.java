@@ -14,6 +14,7 @@ import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
+import swingtree.style.StyleCollector;
 
 import javax.swing.*;
 import javax.swing.border.Border;

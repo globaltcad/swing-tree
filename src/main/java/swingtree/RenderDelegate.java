@@ -1,5 +1,7 @@
 package swingtree;
 
+import swingtree.style.StyleCollector;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Area;
@@ -32,29 +34,29 @@ public class RenderDelegate<C extends JComponent>
     public C component() { return comp; }
 
     public void render(StyleCollector style){
-        _fillOuterBackground(style, style.getOuterBackgroundColor());
-        _fillBackground(style, style.getBackgroundColor());
+        _fillOuterBackground(style, style.background().outerColor());
+        _fillBackground(style, style.background().color());
         _renderShadows(style, comp, g2d);
         _drawBorder(style);
     }
 
     private void _drawBorder(StyleCollector style) {
-        if ( style.getBorderThickness() > 0 ) {
-            g2d.setColor(style.getBorderColor());
-            g2d.setStroke(new BasicStroke(style.getBorderThickness()));
+        if ( style.border().thickness() > 0 ) {
+            g2d.setColor(style.border().color());
+            g2d.setStroke(new BasicStroke(style.border().thickness()));
             g2d.drawRoundRect(
-                    style.getPaddingLeft(), style.getPaddingTop(),
-                    comp.getWidth() - style.getPaddingLeft() - style.getPaddingRight(),
-                    comp.getHeight() - style.getPaddingTop() - style.getPaddingBottom(),
-                    (style.getBorderArcWidth()  + (style.getBorderThickness() == 1 ? 0 : style.getBorderThickness()+1)),
-                    (style.getBorderArcHeight() + (style.getBorderThickness() == 1 ? 0 : style.getBorderThickness()+1))
+                    style.padding().left(), style.padding().top(),
+                    comp.getWidth() - style.padding().left() - style.padding().right(),
+                    comp.getHeight() - style.padding().top() - style.padding().bottom(),
+                    (style.border().arcWidth()  + (style.border().thickness() == 1 ? 0 : style.border().thickness()+1)),
+                    (style.border().arcHeight() + (style.border().thickness() == 1 ? 0 : style.border().thickness()+1))
             );
             g2d.drawRoundRect(
-                    style.getPaddingLeft(), style.getPaddingTop(),
-                    comp.getWidth() - style.getPaddingLeft() - style.getPaddingRight(),
-                    comp.getHeight() - style.getPaddingTop() - style.getPaddingBottom(),
-                    (style.getBorderArcWidth() +2),
-                    (style.getBorderArcHeight()+2)
+                    style.padding().left(), style.padding().top(),
+                    comp.getWidth() - style.padding().left() - style.padding().right(),
+                    comp.getHeight() - style.padding().top() - style.padding().bottom(),
+                    (style.border().arcWidth() +2),
+                    (style.border().arcHeight()+2)
             );
         }
     }
@@ -66,10 +68,10 @@ public class RenderDelegate<C extends JComponent>
 
         g2d.setColor(color);
         g2d.fillRoundRect(
-                style.getPaddingLeft(), style.getPaddingTop(),
-                comp.getWidth() - style.getPaddingLeft() - style.getPaddingRight(),
-                comp.getHeight() - style.getPaddingTop() - style.getPaddingBottom(),
-                style.getBorderArcWidth(), style.getBorderArcHeight()
+                style.padding().left(), style.padding().top(),
+                comp.getWidth() - style.padding().left() - style.padding().right(),
+                comp.getHeight() - style.padding().top() - style.padding().bottom(),
+                style.border().arcWidth(), style.border().arcHeight()
         );
     }
 
@@ -84,10 +86,10 @@ public class RenderDelegate<C extends JComponent>
                 comp.getHeight()
         );
         RoundRectangle2D.Float innerRect = new RoundRectangle2D.Float(
-                style.getPaddingLeft(), style.getPaddingTop(),
-                comp.getWidth() - style.getPaddingLeft() - style.getPaddingRight(),
-                comp.getHeight() - style.getPaddingTop() - style.getPaddingBottom(),
-                style.getBorderArcWidth(), style.getBorderArcHeight()
+                style.padding().left(), style.padding().top(),
+                comp.getWidth() - style.padding().left() - style.padding().right(),
+                comp.getHeight() - style.padding().top() - style.padding().bottom(),
+                style.border().arcWidth(), style.border().arcHeight()
         );
 
         Area outer = new Area(outerRect);
@@ -106,29 +108,29 @@ public class RenderDelegate<C extends JComponent>
     ) {
         // First let's check if we need to render any shadows at all
         // Is the shadow color transparent?
-        if ( style.getShadowColor().getAlpha() == 0 )
+        if ( style.shadow().color().getAlpha() == 0 )
             return;
 
         // Calculate the shadow box bounds based on the padding and border thickness
-        int x = style.getPaddingLeft() + style.getBorderThickness()/2 + style.getHorizontalShadowOffset();
-        int y = style.getPaddingTop() + style.getBorderThickness()/2 + style.getVerticalShadowOffset();
-        int w = comp.getWidth() - style.getPaddingLeft() - style.getPaddingRight() - style.getBorderThickness();
-        int h = comp.getHeight() - style.getPaddingTop() - style.getPaddingBottom() - style.getBorderThickness();
+        int x = style.padding().left() + style.border().thickness()/2 + style.shadow().horizontalOffset();
+        int y = style.padding().top() + style.border().thickness()/2 + style.shadow().verticalOffset();
+        int w = comp.getWidth() - style.padding().left() - style.padding().right() - style.border().thickness();
+        int h = comp.getHeight() - style.padding().top() - style.padding().bottom() - style.border().thickness();
 
-        int blurRadius = style.getShadowBlurRadius();
-        int spreadRadius = !style.isShadowInset() ? style.getShadowSpreadRadius() : -style.getShadowSpreadRadius();
+        int blurRadius = style.shadow().blurRadius();
+        int spreadRadius = !style.shadow().inset() ? style.shadow().spreadRadius() : -style.shadow().spreadRadius();
 
         RoundRectangle2D.Float baseRect = new RoundRectangle2D.Float(
-                                                        style.getPaddingLeft() + (float) style.getBorderThickness() /2,
-                                                        style.getPaddingTop() + (float) style.getBorderThickness() /2,
+                                                        style.padding().left() + (float) style.border().thickness() /2,
+                                                        style.padding().top() + (float) style.border().thickness() /2,
                                                             w, h,
-                                                            style.getBorderArcWidth(), style.getBorderArcHeight()
+                                                            style.border().arcWidth(), style.border().arcHeight()
                                                     );
 
         int shadowInset  = blurRadius;
         int shadowOutset = blurRadius;
 
-        int gradientStartOffset = ( style.getBorderArcWidth() + style.getBorderArcHeight() ) / 5;
+        int gradientStartOffset = ( style.border().arcWidth() + style.border().arcHeight() ) / 5;
 
         Rectangle innerShadowRect = new Rectangle(
                                         x + shadowInset + gradientStartOffset + spreadRadius,
@@ -156,7 +158,7 @@ public class RenderDelegate<C extends JComponent>
         Area shadowArea = new Area(outerShadowBox);
         Area baseArea = new Area(baseRect);
 
-        if ( !style.isShadowInset() )
+        if ( !style.shadow().inset() )
             shadowArea.intersect(baseArea);
         else
             shadowArea.subtract(baseArea);
@@ -188,8 +190,8 @@ public class RenderDelegate<C extends JComponent>
         Graphics2D g2d
     ) {
         Graphics2D g2d2 = (Graphics2D) g2d.create();
-        g2d2.setColor(style.getShadowColor());
-        if ( !style.isShadowInset() ) {
+        g2d2.setColor(style.shadow().color());
+        if ( !style.shadow().inset() ) {
             baseArea.subtract(new Area(outerShadowBox));
             g2d2.fill(baseArea);
         } else {
@@ -292,12 +294,12 @@ public class RenderDelegate<C extends JComponent>
         Color innerColor;
         Color outerColor;
         Color shadowBackgroundColor = new Color(0,0,0,0);
-        if (style.isShadowInset()) {
-            innerColor = style.getShadowColor();
+        if (style.shadow().inset()) {
+            innerColor = style.shadow().color();
             outerColor = shadowBackgroundColor;
         } else {
             innerColor = shadowBackgroundColor;
-            outerColor = style.getShadowColor();
+            outerColor = style.shadow().color();
         }
         RadialGradientPaint cornerPaint;
         float gradientStart = (float) gradientStartOffset / cr;
@@ -425,12 +427,12 @@ public class RenderDelegate<C extends JComponent>
         Color innerColor;
         Color outerColor;
         Color shadowBackgroundColor = new Color(0,0,0,0);
-        if (style.isShadowInset()) {
-            innerColor = style.getShadowColor();
+        if (style.shadow().inset()) {
+            innerColor = style.shadow().color();
             outerColor = shadowBackgroundColor;
         } else {
             innerColor = shadowBackgroundColor;
-            outerColor = style.getShadowColor();
+            outerColor = style.shadow().color();
         }
         LinearGradientPaint edgePaint;
         // distance between start and end of gradient
