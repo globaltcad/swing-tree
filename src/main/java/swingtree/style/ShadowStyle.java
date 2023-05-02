@@ -12,7 +12,7 @@ public class ShadowStyle
     private final Color shadowBackgroundColor;
     private final boolean shadowInset;
 
-    ShadowStyle(int horizontalShadowOffset, int verticalShadowOffset, int shadowBlurRadius, int shadowSpreadRadius, Color shadowColor, Color shadowBackgroundColor, boolean shadowInset) {
+    public ShadowStyle(int horizontalShadowOffset, int verticalShadowOffset, int shadowBlurRadius, int shadowSpreadRadius, Color shadowColor, Color shadowBackgroundColor, boolean shadowInset) {
         this.horizontalShadowOffset = horizontalShadowOffset;
         this.verticalShadowOffset = verticalShadowOffset;
         this.shadowBlurRadius = shadowBlurRadius;

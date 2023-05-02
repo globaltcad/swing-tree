@@ -8,7 +8,7 @@ public class BackgroundStyle
     private final Color backgroundColor;
     private final Color outerBackgroundColor;
 
-    BackgroundStyle(Color backgroundColor, Color outerBackgroundColor) {
+    public BackgroundStyle(Color backgroundColor, Color outerBackgroundColor) {
         this.backgroundColor = backgroundColor;
         this.outerBackgroundColor = outerBackgroundColor;
     }

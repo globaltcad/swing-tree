@@ -14,7 +14,7 @@ import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
-import swingtree.style.StyleCollector;
+import swingtree.style.*;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -259,7 +259,14 @@ public final class UI
     public static CompAttr DOCK_WEST  = CompAttr.of("dock west");
     public static CompAttr DOCK( Position pos ) { return CompAttr.of("dock " + pos.toDirectionString()); }
 
-    public static StyleCollector style() { return new StyleCollector(); }
+    public static StyleCollector style() {
+        return new StyleCollector(
+                    new PaddingStyle(0,0,0,0),
+                    new BorderStyle(0,0,0, Color.BLACK),
+                    new BackgroundStyle(Color.WHITE, null),
+                    new ShadowStyle(0,0,5,5, Color.BLACK, null, false)
+                );
+    }
 
     /**
      * Loads an icon from the classpath or from a file.

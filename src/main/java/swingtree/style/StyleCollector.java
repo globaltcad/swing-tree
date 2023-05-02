@@ -4,124 +4,122 @@ import java.awt.*;
 
 public class StyleCollector 
 {
-    // Padding
-    private PaddingStyle padding = new PaddingStyle(0,0,0,0);
-
-    // Border
-    private BorderStyle border = new BorderStyle(0,0,0, Color.BLACK);
-
-    // Background
-    private BackgroundStyle background = new BackgroundStyle(Color.WHITE, null);
-
-    // Box Shadow
-    private ShadowStyle shadow = new ShadowStyle(0,0,5,5, Color.BLACK, null, false);
+    private final PaddingStyle padding;
+    private final BorderStyle border;
+    private final BackgroundStyle background;
+    private final ShadowStyle shadow;
 
 
-    public StyleCollector() {}
+    public StyleCollector(
+        PaddingStyle padding,
+        BorderStyle border,
+        BackgroundStyle background,
+        ShadowStyle shadow
+    ) {
+        this.padding = padding;
+        this.border = border;
+        this.background = background;
+        this.shadow = shadow;
+    }
+
+    private StyleCollector _withPadding( PaddingStyle padding ) {
+        return new StyleCollector(padding, border, background, shadow);
+    }
+
+    private StyleCollector _withBorder( BorderStyle border ) {
+        return new StyleCollector(padding, border, background, shadow);
+    }
+
+    private StyleCollector _withBackground( BackgroundStyle background ) {
+        return new StyleCollector(padding, border, background, shadow);
+    }
+
+    private StyleCollector _withShadow( ShadowStyle shadow ) {
+        return new StyleCollector(padding, border, background, shadow);
+    }
 
     public StyleCollector pad( int top, int left, int right, int bottom ) {
-        this.padding = new PaddingStyle(top, left, right, bottom);
-        return this;
+        return this._withPadding(padding.withTop(top).withLeft(left).withRight(right).withBottom(bottom));
     }
 
     public StyleCollector pad( int padding ) {
-        this.padding = new PaddingStyle(padding, padding, padding, padding);
-        return this;
+        return this._withPadding(this.padding.withTop(padding).withLeft(padding).withRight(padding).withBottom(padding));
     }
 
     public StyleCollector padTop( int padding ) {
-        this.padding = this.padding.withTop(padding);
-        return this;
+        return this._withPadding(this.padding.withTop(padding));
     }
 
     public StyleCollector padLeft( int padding ) {
-        this.padding = this.padding.withLeft(padding);
-        return this;
+        return this._withPadding(this.padding.withLeft(padding));
     }
 
     public StyleCollector padRight( int padding ) {
-        this.padding = this.padding.withRight(padding);
-        return this;
+        return this._withPadding(this.padding.withRight(padding));
     }
 
     public StyleCollector padBottom( int padding ) {
-        this.padding = this.padding.withBottom(padding);
-        return this;
+        return this._withPadding(this.padding.withBottom(padding));
     }
 
     public StyleCollector border( int thickness, Color color ) {
-        this.border = border.withThickness(thickness).withColor(color);
-        return this;
+        return this._withBorder(border.withThickness(thickness).withColor(color));
     }
 
     public StyleCollector border( int thickness ) {
-        this.border = border.withThickness(thickness);
-        return this;
+        return this._withBorder(border.withThickness(thickness));
     }
 
     public StyleCollector border( Color color ) {
-        this.border = border.withColor(color);
-        return this;
+        return this._withBorder(border.withColor(color));
     }
 
     public StyleCollector borderRadius(int radius ) {
-        this.border = border.withArcWidth(radius).withArcHeight(radius);
-        return this;
+        return this._withBorder(border.withArcWidth(radius).withArcHeight(radius));
     }
 
     public StyleCollector borderRadius(int arcWidth, int arcHeight ) {
-        this.border = border.withArcWidth(arcWidth).withArcHeight(arcHeight);
-        return this;
+        return this._withBorder(border.withArcWidth(arcWidth).withArcHeight(arcHeight));
     }
 
     public StyleCollector background( Color color ) {
-        this.background = background.withColor(color);
-        return this;
+        return this._withBackground(background.withColor(color));
     }
 
     public StyleCollector outerBackground( Color color ) {
-        this.background = background.withOuterColor(color);
-        return this;
+        return this._withBackground(background.withOuterColor(color));
     }
 
     public StyleCollector shadowHorizontalOffset( int offset ) {
-        this.shadow = shadow.withHorizontalOffset(offset);
-        return this;
+        return this._withShadow(shadow.withHorizontalOffset(offset));
     }
 
     public StyleCollector shadowVerticalOffset(int offset ) {
-        this.shadow = shadow.withVerticalOffset(offset);
-        return this;
+        return this._withShadow(shadow.withVerticalOffset(offset));
     }
 
     public StyleCollector shadowOffset(int horizontalOffset, int verticalOffset ) {
-        this.shadow = shadow.withHorizontalOffset(horizontalOffset).withVerticalOffset(verticalOffset);
-        return this;
+        return this._withShadow(shadow.withHorizontalOffset(horizontalOffset).withVerticalOffset(verticalOffset));
     }
 
     public StyleCollector shadowBlurRadius(int radius) {
-        this.shadow = shadow.withBlurRadius(radius);
-        return this;
+        return this._withShadow(shadow.withBlurRadius(radius));
     }
 
     public StyleCollector shadowSpreadRadius(int radius ) {
-        this.shadow = shadow.withSpreadRadius(radius);
-        return this;
+        return this._withShadow(shadow.withSpreadRadius(radius));
     }
 
     public StyleCollector shadowColor(Color color ) {
-        this.shadow = shadow.withColor(color);
-        return this;
+        return this._withShadow(shadow.withColor(color));
     }
 
     public StyleCollector shadowBackgroundColor(Color color ) {
-        this.shadow = shadow.withBackgroundColor(color);
-        return this;
+        return this._withShadow(shadow.withBackgroundColor(color));
     }
 
     public StyleCollector shadowInset(boolean b) {
-        this.shadow = shadow.withInset(b);
-        return this;
+        return this._withShadow(shadow.withInset(b));
     }
 
     public PaddingStyle padding() { return this.padding; }

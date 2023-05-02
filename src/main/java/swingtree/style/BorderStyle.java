@@ -8,7 +8,7 @@ public class BorderStyle {
     private final int borderThickness;
     private final Color borderColor;
 
-    BorderStyle(int borderArcWidth, int borderArcHeight, int borderThickness, Color borderColor) {
+    public BorderStyle(int borderArcWidth, int borderArcHeight, int borderThickness, Color borderColor) {
         this.borderArcWidth = borderArcWidth;
         this.borderArcHeight = borderArcHeight;
         this.borderThickness = borderThickness;

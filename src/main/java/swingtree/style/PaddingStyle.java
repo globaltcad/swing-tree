@@ -7,7 +7,7 @@ public class PaddingStyle
     private final int bottom;
     private final int left;
 
-    PaddingStyle(int top, int left, int right, int bottom) {
+    public PaddingStyle(int top, int left, int right, int bottom) {
         this.top = top;
         this.left = left;
         this.right = right;
