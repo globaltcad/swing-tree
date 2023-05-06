@@ -86,7 +86,7 @@ public final class StyleTrait
                     this + " is an extension of " + other + " but is not a subclass of it."
                 );
 
-        return thisIsExtensionOfOther && thisIsSubclassOfOther;
+        return (thisIsExtensionOfOther || other.group().isEmpty()) && thisIsSubclassOfOther;
     }
 
     @Override

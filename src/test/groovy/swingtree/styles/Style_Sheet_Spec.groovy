@@ -9,6 +9,7 @@ import swingtree.style.Style
 import swingtree.style.StyleSheet
 
 import javax.swing.*
+import javax.swing.text.JTextComponent
 import java.awt.*
 
 @Title("Creating Style Sheets")
@@ -32,15 +33,15 @@ class Style_Sheet_Spec extends Specification
             var ss = new StyleSheet() {
                         @Override
                         protected void declaration() {
-                             apply(id("unique id!"), style ->{
-                                 return style.borderRadius(3)
-                             });
-                             apply(type(JButton.class), style ->{
-                                 return style.border(7)
-                             });
-                             apply(type(JPanel.class), style ->{
-                                return style.border(Color.GREEN)
-                             });
+                             apply(id("unique id!"), style ->
+                                 style.borderRadius(3)
+                             );
+                             apply(type(JButton.class), style ->
+                                 style.border(7)
+                             );
+                             apply(type(JPanel.class), style ->
+                                style.border(Color.GREEN)
+                             );
                          }
                      }
         and : 'A few components we are going to style'
@@ -59,6 +60,65 @@ class Style_Sheet_Spec extends Specification
             s3.border().color() == Color.GREEN
     }
 
+    def 'The `type` style trait allows you to specify how a style trait applies to a component types.'()
+    {
+        reportInfo """
+            Passing a `Class` object to the `type` style trait will cause the style trait to apply 
+            to all components of that type.
+        """
+        given :
+            var ss = new StyleSheet() {
+                        @Override
+                        protected void declaration() {
+                            apply(type(JTextField.class), style ->
+                                    style.shadowBlurRadius(9)
+                                );
+                             apply(type(JPanel.class), style ->
+                                    style.shadowSpreadRadius(33)
+                                );
+                            apply(type(JTextComponent.class), style ->
+                                    style.shadowOffset(42, 24)
+                                            .shadowColor(Color.BLUE)
+                                );
+                            apply(type(JComponent.class), style ->
+                                    style.shadowColor(Color.RED)
+                                            .shadowBlurRadius(17)
+                            );
+                         }
+                     }
+        and : 'A few components we are going to style'
+            var button = UI.button("click me!")
+            var panel = UI.panel()
+            var textField = UI.textField("type something")
+            var textArea = UI.textArea("type some more!")
+        when : 'We run the style sheet on the components and access the shadow style for each component.'
+            var buttonStyle = ss.run(button.component).shadow()
+            var panelStyle  = ss.run(panel.component).shadow()
+            var fieldStyle  = ss.run(textField.component).shadow()
+            var areaStyle   = ss.run(textArea.component).shadow()
+        then :
+            buttonStyle.color() == Color.RED
+            buttonStyle.blurRadius() == 17
+            buttonStyle.spreadRadius() != 33 // a button is not a panel
+            buttonStyle.verticalOffset() != 42 // a button is not a text component
+            buttonStyle.horizontalOffset() != 24 // a button is not a text component
+            panelStyle.color() == Color.RED
+            panelStyle.blurRadius() == 17
+            panelStyle.spreadRadius() == 33
+            panelStyle.verticalOffset() != 42 // a panel is not a text component
+            panelStyle.horizontalOffset() != 24 // a panel is not a text component
+            fieldStyle.color() == Color.BLUE // The text component trait overrides the component trait!
+            fieldStyle.blurRadius() == 9 // The text field trait overrides the component trait!
+            fieldStyle.spreadRadius() != 33 // a text field is not a panel
+            fieldStyle.verticalOffset() == 24
+            fieldStyle.horizontalOffset() == 42
+            areaStyle.color() == Color.BLUE // The text component trait overrides the component trait!
+            areaStyle.blurRadius() == 17
+            areaStyle.spreadRadius() != 33 // a text area is not a panel
+            areaStyle.verticalOffset() == 24
+            areaStyle.horizontalOffset() == 42
+    }
+
     def 'Use the `group` style trait to classify components.'()
     {
         reportInfo """
@@ -69,12 +129,12 @@ class Style_Sheet_Spec extends Specification
             var ss = new StyleSheet() {
                         @Override
                         protected void declaration() {
-                             apply(group("group1"), style ->{
-                                 return style.background(Color.BLUE)
-                             });
-                             apply(group("group2"), style ->{
-                                 return style.outerBackground(Color.CYAN)
-                             });
+                             apply(group("group1"), style ->
+                                 style.background(Color.BLUE)
+                             );
+                             apply(group("group2"), style ->
+                                 style.outerBackground(Color.CYAN)
+                             );
                          }
                      }
         and : 'A few components we are going to style'
@@ -104,12 +164,12 @@ class Style_Sheet_Spec extends Specification
             var ss = new StyleSheet() {
                         @Override
                         protected void declaration() {
-                             apply(group("group1"), style ->{
-                                 return style.pad(1, 2, 3, 4)
-                             });
-                             apply(group("group2").inherits("group1"), style ->{
-                                 return style.outerBackground(Color.CYAN)
-                             });
+                             apply(group("group1"), style ->
+                                 style.pad(1, 2, 3, 4)
+                             );
+                             apply(group("group2").inherits("group1"), style ->
+                                 style.outerBackground(Color.CYAN)
+                             );
                          }
                      }
         and : 'A few components we are going to style'
@@ -144,12 +204,12 @@ class Style_Sheet_Spec extends Specification
             new StyleSheet() {
                @Override
                protected void declaration() {
-                    apply(group("A").type(JButton.class), style ->{
-                        return style.borderRadius(3)
-                    });
-                    apply(group("B").inherits("A").type(JPanel.class), style ->{
-                        return style.border(Color.GREEN)
-                    });
+                    apply(group("A").type(JButton.class), style ->
+                        style.borderRadius(3)
+                    );
+                    apply(group("B").inherits("A").type(JPanel.class), style ->
+                        style.border(Color.GREEN)
+                    );
                 }
             }
         then :
@@ -165,12 +225,12 @@ class Style_Sheet_Spec extends Specification
             new StyleSheet() {
                @Override
                protected void declaration() {
-                    apply(group("A"), style ->{
-                        return style.borderRadius(3)
-                    });
-                    apply(group("A"), style ->{
-                        return style.border(Color.GREEN)
-                    });
+                    apply(group("A"), style ->
+                        style.borderRadius(3)
+                    );
+                    apply(group("A"), style ->
+                        style.border(Color.GREEN)
+                    );
                 }
             }
         then :
