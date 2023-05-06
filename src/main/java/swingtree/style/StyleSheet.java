@@ -5,18 +5,24 @@ import swingtree.UI;
 import javax.swing.*;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public abstract class StyleSheet
 {
+    private final Supplier<Style> _defaultStyle;
     private final Map<StyleTrait, List<StyleTrait>> _traitGraph = new LinkedHashMap<>();
     private final Map<StyleTrait, Function<Style, Style>> _traitStylers = new LinkedHashMap<>();
     private final List<StyleTrait> _rootTraits = new java.util.ArrayList<>();
-    private final List<StyleTrait> _leafTraits = new java.util.ArrayList<>();
     private final List<List<StyleTrait>> _traitPaths = new java.util.ArrayList<>();
 
     private boolean _traitGraphBuilt = false;
 
     protected StyleSheet() {
+        this( () -> UI.style() );
+    }
+
+    protected StyleSheet(Supplier<Style> defaultStyle) {
+        _defaultStyle = defaultStyle;
         declaration();
         _buildTraitGraph();
     }
@@ -41,7 +47,7 @@ public abstract class StyleSheet
     protected abstract void declaration();
 
     public Style run( JComponent toBeStyled ) {
-        return run(toBeStyled, UI.style());
+        return run(toBeStyled, _defaultStyle.get());
     }
 
     public Style run( JComponent toBeStyled, Style startingStyle ) {
@@ -135,15 +141,7 @@ public abstract class StyleSheet
 
     private void _findRootAndLeaveTraits() {
         /*
-            We find the root traits by finding the traits, which are the head of the graph
-            or the traits that have no extensions.
-        */
-        for ( StyleTrait trait : _traitGraph.keySet() )
-            if ( _traitGraph.get(trait).isEmpty() )
-                _rootTraits.add(trait);
-
-        /*
-            We find the leaf traits by finding the traits, which have extensions,
+            We find the root traits by finding the traits, which have extensions,
             but are not referenced by any other trait as an extension.
          */
         for ( StyleTrait trait : _traitGraph.keySet() ) {
@@ -154,7 +152,7 @@ public abstract class StyleSheet
                     break;
                 }
             if ( isLeaf )
-                _leafTraits.add(trait);
+                _rootTraits.add(trait);
         }
         /*
             Finally we can calculate all the possible paths from the root traits to the leaf traits.
@@ -164,7 +162,7 @@ public abstract class StyleSheet
 
     private List<List<StyleTrait>> _findPaths() {
         List<List<StyleTrait>> paths = new java.util.ArrayList<>();
-        for ( StyleTrait root : _leafTraits ) {
+        for ( StyleTrait root : _rootTraits ) {
             List<StyleTrait> stack = new java.util.ArrayList<>();
             _traverse(root, paths, stack);
         }

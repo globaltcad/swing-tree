@@ -236,4 +236,115 @@ class Style_Sheet_Spec extends Specification
         then :
             thrown(IllegalArgumentException)
     }
+
+    def 'A StyleSheet can be created with a default style.'()
+    {
+        reportInfo """
+            The default styles always apply if they are not overridden by
+            any style traits defined in the style sheet class.
+            Note that we pass the default style as a supplier to the
+            `StyleSheet` constructor.
+            This constructor is protected, so you should always declare
+            a dedicated style sheet class that extends `StyleSheet`.
+            
+            In the code below we can call the constructor as part of an anonymous class
+            because we are in a Groovy script :)
+        """
+        given :
+            var ss = new StyleSheet({
+                        UI.style().outerBackground(Color.RED)
+                                  .border(11, Color.GREEN)
+                                  .borderRadius(3)
+                                  .pad(42)
+                                  .shadowInset(false)
+                                  .shadowBlurRadius(22)
+                                  .shadowSpreadRadius(6)
+                     }) {
+                        @Override
+                        protected void declaration() {
+                             apply(group("A"), style ->
+                                 style.borderRadius(19)
+                             );
+                            apply(group("B").type(JSlider.class), style ->
+                                 style.outerBackground(Color.BLUE)
+                             );
+                            apply(group("B").type(JComponent.class), style ->
+                                    style.shadowInset(true)
+                             );
+                         }
+                     }
+        when : 'We create a few UI components:'
+            var slider1 = UI.slider(UI.Align.HORIZONTAL).groups("A", "B")
+            var slider2 = UI.slider(UI.Align.HORIZONTAL).groups("A")
+            var slider3 = UI.slider(UI.Align.HORIZONTAL).groups("B")
+            var label1 = UI.label(":)").groups("A")
+            var label2 = UI.label(":D").groups("B")
+        and : 'We run them through the style sheet...'
+            var s1 = ss.run(slider1.component)
+            var s2 = ss.run(slider2.component)
+            var s3 = ss.run(slider3.component)
+            var s4 = ss.run(label1.component)
+            var s5 = ss.run(label2.component)
+        then : '...and we check the results'
+            s1.background().outerColor() == Color.BLUE
+            s1.border().thickness() == 11
+            s1.border().color() == Color.GREEN
+            s1.border().arcHeight() == 19
+            s1.border().arcWidth() == 19
+            s1.padding().top() == 42
+            s1.padding().right() == 42
+            s1.padding().bottom() == 42
+            s1.padding().left() == 42
+            s1.shadow().inset() == true
+            s1.shadow().blurRadius() == 22
+            s1.shadow().spreadRadius() == 6
+            s2.background().outerColor() == Color.RED
+            s2.border().thickness() == 11
+            s2.border().color() == Color.GREEN
+            s2.border().arcHeight() == 19
+            s2.border().arcWidth() == 19
+            s2.padding().top() == 42
+            s2.padding().right() == 42
+            s2.padding().bottom() == 42
+            s2.padding().left() == 42
+            s2.shadow().inset() == false
+            s2.shadow().blurRadius() == 22
+            s2.shadow().spreadRadius() == 6
+            s3.background().outerColor() == Color.BLUE
+            s3.border().thickness() == 11
+            s3.border().color() == Color.GREEN
+            s3.border().arcHeight() == 3
+            s3.border().arcWidth() == 3
+            s3.padding().top() == 42
+            s3.padding().right() == 42
+            s3.padding().bottom() == 42
+            s3.padding().left() == 42
+            s3.shadow().inset() == true
+            s3.shadow().blurRadius() == 22
+            s3.shadow().spreadRadius() == 6
+            s4.background().outerColor() == Color.RED
+            s4.border().thickness() == 11
+            s4.border().color() == Color.GREEN
+            s4.border().arcHeight() == 19
+            s4.border().arcWidth() == 19
+            s4.padding().top() == 42
+            s4.padding().right() == 42
+            s4.padding().bottom() == 42
+            s4.padding().left() == 42
+            s4.shadow().inset() == false
+            s4.shadow().blurRadius() == 22
+            s4.shadow().spreadRadius() == 6
+            s5.background().outerColor() == Color.RED
+            s5.border().thickness() == 11
+            s5.border().color() == Color.GREEN
+            s5.border().arcHeight() == 3
+            s5.border().arcWidth() == 3
+            s5.padding().top() == 42
+            s5.padding().right() == 42
+            s5.padding().bottom() == 42
+            s5.padding().left() == 42
+            s5.shadow().inset() == true
+            s5.shadow().blurRadius() == 22
+            s5.shadow().spreadRadius() == 6
+    }
 }

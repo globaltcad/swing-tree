@@ -1,8 +1,10 @@
 package swingtree;
 
 import sprouts.*;
+import sprouts.Action;
 import swingtree.api.Peeker;
 
+import javax.swing.*;
 import java.awt.*;
 import java.lang.ref.WeakReference;
 import java.util.Optional;
@@ -45,6 +47,14 @@ abstract class AbstractBuilder<I, C extends Component>
         _type = (Class<C>) component.getClass();
         _component = new WeakReference<>(component);
         _componentStrongRef = component;
+        UI.SETTINGS().getStyleSheet().ifPresent( styleSheet -> {
+            if ( component instanceof JComponent ) {
+                ComponentExtension<?> extension = ComponentExtension.from((JComponent) component);
+                extension.setForegroundRenderer( delegate -> {
+                    delegate.render( styleSheet.run(delegate.component()) );
+                });
+            }
+        });
     }
 
     /**

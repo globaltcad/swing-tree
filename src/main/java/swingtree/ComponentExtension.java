@@ -26,7 +26,7 @@ public class ComponentExtension<C extends JComponent>
         return ext;
     }
 
-    private final JComponent _owner;
+    private final C _owner;
 
     private Consumer<RenderDelegate<C>> _backgroundRenderer;
     private Consumer<RenderDelegate<C>> _foregroundRenderer;
@@ -36,18 +36,24 @@ public class ComponentExtension<C extends JComponent>
     private String[] _styleGroup = new String[0];
 
 
-    private ComponentExtension( JComponent owner ) {
+    private ComponentExtension( C owner ) {
         _owner = Objects.requireNonNull(owner);
     }
 
     void setBackgroundRenderer( Consumer<RenderDelegate<C>> renderer ) {
         checkIfIsDeclaredInUI();
-        _backgroundRenderer = Objects.requireNonNull(renderer);
+        if ( _backgroundRenderer != null )
+            _backgroundRenderer = _backgroundRenderer.andThen(Objects.requireNonNull(renderer));
+        else
+            _backgroundRenderer = Objects.requireNonNull(renderer);
     }
 
     void setForegroundRenderer( Consumer<RenderDelegate<C>> renderer ) {
         checkIfIsDeclaredInUI();
-        _foregroundRenderer = Objects.requireNonNull(renderer);
+        if ( _foregroundRenderer != null )
+            _foregroundRenderer = _foregroundRenderer.andThen(Objects.requireNonNull(renderer));
+        else
+            _foregroundRenderer = Objects.requireNonNull(renderer);
     }
 
     public void setStyleGroups( String... styleName ) {
@@ -70,20 +76,19 @@ public class ComponentExtension<C extends JComponent>
         _animationRenderers.add(renderer);
     }
 
-    void render( C comp, Graphics g, Runnable superPaint ) {
-        Objects.requireNonNull(comp);
+    void render( Graphics g, Runnable superPaint ) {
         Objects.requireNonNull(g);
         Objects.requireNonNull(superPaint);
 
         Graphics2D g2d = (Graphics2D) g;
 
         if ( _backgroundRenderer != null )
-            _backgroundRenderer.accept( new RenderDelegate<>(g2d, comp) );
+            _backgroundRenderer.accept( new RenderDelegate<>(g2d, _owner) );
 
         superPaint.run();
 
         if ( _foregroundRenderer != null )
-            _foregroundRenderer.accept( new RenderDelegate<>(g2d, comp) );
+            _foregroundRenderer.accept( new RenderDelegate<>(g2d, _owner) );
 
         // Animations are last: they are rendered on top of everything else:
         if ( _animationRenderers != null )
@@ -96,7 +101,7 @@ public class ComponentExtension<C extends JComponent>
         if ( !isSwingTreeComponent ) // We throw an exception if the component is not a sub-type of any of the classes declared in UI.
             throw new RuntimeException(
                     "Custom (declarative) rendering is only allowed/supported for Swing-Tree components declared in UI."
-            );
+                );
     }
 
     static boolean _checkIfIsDeclaredInUI( JComponent comp ) {

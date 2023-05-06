@@ -63,6 +63,44 @@ public final class UI
     }
 
     /**
+     *  Sets a {@link StyleSheet} which will be applied to all SwingTree UIs defined in the subsequent lambda scope.
+     *  This method allows to switch between different style sheets.
+     *  <p>
+     * 	You can switch to a style sheet like so: <br>
+     * 	<pre>{@code
+     * 	use(new MyCustomStyeSheet(), ()->
+     *      UI.panel("fill")
+     *      .add( "shrink", UI.label( "Username:" ) )
+     *      .add( "grow, pushx", UI.textField("User1234..42") )
+     *      .add( label( "Password:" ) )
+     *      .add( "grow, pushx", UI.passwordField("child-birthday") )
+     *      .add( "span",
+     *          UI.button("Login!").onClick( it -> {...} )
+     *      )
+     *  );
+     *  }</pre>
+     *
+     * @return the result of the given scope, usually a {@link JComponent} or SwingTree UI.
+     */
+    public static <T> T use( StyleSheet styleSheet, Supplier<T> scope ) {
+        if ( !UI.thisIsUIThread() )
+            try {
+                return runAndGet(()-> use(styleSheet, scope));
+            } catch (InvocationTargetException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+        Settings settings = SETTINGS();
+        StyleSheet oldStyleSheet = settings.getStyleSheet().orElse(null);
+        settings.setStyleSheet(styleSheet);
+        try {
+            return scope.get();
+        } finally {
+            settings.setStyleSheet(oldStyleSheet);
+        }
+    }
+
+    /**
      *  Sets the {@link EventProcessor} to be used for all subsequent UI building operations.
      *  This method allows to switch between different event processing strategies.
      *  In particular, the {@link DecoupledEventProcessor} is recommended to be used for
@@ -88,7 +126,7 @@ public final class UI
      * @return The value returned by the given scope.
      * @param <T> The type of the value returned by the given scope.
      */
-    public static <T> T use(EventProcessor processor, Supplier<T> scope )
+    public static <T> T use( EventProcessor processor, Supplier<T> scope )
     {
         if ( !UI.thisIsUIThread() )
             try {
@@ -3895,7 +3933,7 @@ public final class UI
     }
 
     private static <C extends JComponent> void _render( C comp, Graphics g, Runnable superPaint ) {
-        ComponentExtension.from(comp).render( comp, g, superPaint );
+        ComponentExtension.from(comp).render( g, superPaint );
     }
 
     /** {inheritDoc} */
