@@ -2,7 +2,7 @@ package swingtree.style;
 
 import java.awt.*;
 
-public class Style
+public final class Style
 {
     private final PaddingStyle padding;
     private final BorderStyle border;
@@ -38,7 +38,7 @@ public class Style
         return new Style(padding, border, background, shadow);
     }
 
-    public Style pad(int top, int left, int right, int bottom ) {
+    public Style pad( int top, int right, int bottom, int left ) {
         return this._withPadding(padding.withTop(top).withLeft(left).withRight(right).withBottom(bottom));
     }
 

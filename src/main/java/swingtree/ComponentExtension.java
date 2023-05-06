@@ -33,6 +33,8 @@ public class ComponentExtension<C extends JComponent>
 
     private List<Consumer<Graphics2D>> _animationRenderers;
 
+    private String[] _styleGroup = new String[0];
+
 
     private ComponentExtension( JComponent owner ) {
         _owner = Objects.requireNonNull(owner);
@@ -46,6 +48,14 @@ public class ComponentExtension<C extends JComponent>
     void setForegroundRenderer( Consumer<RenderDelegate<C>> renderer ) {
         checkIfIsDeclaredInUI();
         _foregroundRenderer = Objects.requireNonNull(renderer);
+    }
+
+    public void setStyleGroups( String... styleName ) {
+        _styleGroup = Objects.requireNonNull(styleName);
+    }
+
+    public List<String> getStyleGroups() {
+        return java.util.Arrays.asList(_styleGroup);
     }
 
     public void clearAnimationRenderer() {

@@ -88,6 +88,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _this();
     }
 
+    public final I groups( String... groupName ) {
+        ComponentExtension.from(getComponent()).setStyleGroups(groupName);
+        return _this();
+    }
+
     /**
      *  Use this to make the wrapped UI component visible or invisible.
      *

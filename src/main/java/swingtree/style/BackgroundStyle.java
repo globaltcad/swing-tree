@@ -4,7 +4,6 @@ import java.awt.*;
 
 public class BackgroundStyle
 {
-
     private final Color backgroundColor;
     private final Color outerBackgroundColor;
 
