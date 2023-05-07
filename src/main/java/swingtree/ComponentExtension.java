@@ -85,11 +85,21 @@ public class ComponentExtension<C extends JComponent>
         Objects.requireNonNull(superPaint);
 
         Graphics2D g2d = (Graphics2D) g;
+        // We remember if antialiasing was enabled before we render:
+        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
 
+        // We enable antialiasing:
+        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
         if ( _backgroundRenderer != null )
             _backgroundRenderer.accept( new RenderDelegate<>( g2d, _owner, RenderDelegate.Layer.BACKGROUND ) );
 
+        // Reset antialiasing to its previous state:
+        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
+
         superPaint.run();
+
+        // Enable antialiasing again:
+        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         if ( _foregroundRenderer != null )
             _foregroundRenderer.accept( new RenderDelegate<>(g2d, _owner, RenderDelegate.Layer.FOREGROUND ) );
@@ -98,6 +108,9 @@ public class ComponentExtension<C extends JComponent>
         if ( _animationRenderers != null )
             for ( Consumer<Graphics2D> renderer : _animationRenderers)
                 renderer.accept(g2d);
+
+        // Reset antialiasing to its previous state:
+        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
     private void checkIfIsDeclaredInUI() {

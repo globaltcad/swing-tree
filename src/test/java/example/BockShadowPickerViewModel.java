@@ -11,28 +11,31 @@ public class BockShadowPickerViewModel
 
     // Padding
     private final Var<Integer> paddingTop = Var.of(30).onAct( it -> repaint.fire() );
-    private final Var<Integer> paddingLeft = Var.of(30).onAct( it -> repaint.fire() );
-    private final Var<Integer> paddingRight = Var.of(30).onAct( it -> repaint.fire() );
+    private final Var<Integer> paddingLeft = Var.of(35).onAct( it -> repaint.fire() );
+    private final Var<Integer> paddingRight = Var.of(35).onAct( it -> repaint.fire() );
     private final Var<Integer> paddingBottom = Var.of(30).onAct( it -> repaint.fire() );
 
     // Border
-    private final Var<Integer> borderArcWidth = Var.of(20).onAct( it -> repaint.fire() );
-    private final Var<Integer> borderArcHeight = Var.of(20).onAct( it -> repaint.fire() );
-    private final Var<Integer> borderThickness = Var.of(1).onAct( it -> repaint.fire() );
-    private final Var<Color> borderColor = Var.of(Color.YELLOW).onAct( it -> repaint.fire() );
+    private final Var<Integer> borderArcWidth = Var.of(25).onAct( it -> repaint.fire() );
+    private final Var<Integer> borderArcHeight = Var.of(25).onAct( it -> repaint.fire() );
+    private final Var<Integer> borderThickness = Var.of(3).onAct( it -> repaint.fire() );
+    private final Var<Color> borderColor = Var.of(new Color(0,0.4f,1)).onAct( it -> repaint.fire() );
 
     // Background
-    private final Var<Color> backgroundColor = Var.of(Color.GREEN).onAct( it -> repaint.fire() );
-    private final Var<Color> outerBackgroundColor = Var.of(Color.RED).onAct(it -> repaint.fire() );
+    private final Var<Color> backgroundColor = Var.of(new Color(0.1f, 0.75f, 0.9f)).onAct( it -> repaint.fire() );
+    private final Var<Color> outerBackgroundColor = Var.of(new Color(1f,1f,1f)).onAct(it -> repaint.fire() );
 
     // Box Shadow
     private final Var<Integer> horizontalShadowOffset = Var.of(0).onAct( it -> repaint.fire() );
     private final Var<Integer> verticalShadowOffset = Var.of(0).onAct( it -> repaint.fire() );
-    private final Var<Integer> shadowBlurRadius = Var.of(60).onAct( it -> repaint.fire() );
-    private final Var<Integer> shadowSpreadRadius = Var.of(10).onAct( it -> repaint.fire() );
-    private final Var<Color> shadowColor = Var.of(Color.BLACK).onAct( it -> repaint.fire() );
+    private final Var<Integer> shadowBlurRadius = Var.of(6).onAct( it -> repaint.fire() );
+    private final Var<Integer> shadowSpreadRadius = Var.of(5).onAct( it -> repaint.fire() );
+    private final Var<Color> shadowColor = Var.of(Color.DARK_GRAY).onAct( it -> repaint.fire() );
     private final Var<Boolean> shadowInset = Var.of(false).onAct( it -> repaint.fire() );
 
+    // Smiley (For fun)
+
+    private final Var<Boolean> drawSmiley = Var.of(false).onAct( it -> repaint.fire() );
 
     public Event repaint() { return repaint; }
 
@@ -100,6 +103,6 @@ public class BockShadowPickerViewModel
         return shadowInset;
     }
 
-
+    public Var<Boolean> drawSmiley() { return drawSmiley; }
 
 }

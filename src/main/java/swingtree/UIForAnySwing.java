@@ -15,6 +15,7 @@ import swingtree.input.Keyboard;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
 import swingtree.style.Style;
+import swingtree.style.StyleDelegate;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -1534,9 +1535,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _this();
     }
 
-    public final I withStyle( Function<Style, Style> styler ) {
+    public final I withStyle( Function<StyleDelegate<C>, Style> styler ) {
         NullUtil.nullArgCheck(styler, "styler", Function.class);
-        return this.withBackground( renderer -> renderer.renderStyle(styler) );
+        return this.withBackground( renderer -> renderer.renderStyle( s -> styler.apply(new StyleDelegate<>(getComponent(), s) )) );
     }
 
     /**

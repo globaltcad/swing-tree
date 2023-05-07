@@ -148,10 +148,10 @@ class Style_Sheet_Spec extends Specification
             var s2 = ss.run(toggle.component)
             var s3 = ss.run(panel.component)
         then :
-            s1.background().color().get() == Color.BLUE
-            s2.background().outerColor().get() == Color.CYAN
-            s3.background().color().get() == Color.BLUE
-            s3.background().outerColor().get() == Color.CYAN
+            s1.background().innerColor().get() == Color.BLUE
+            s2.background().color().get() == Color.CYAN
+            s3.background().innerColor().get() == Color.BLUE
+            s3.background().color().get() == Color.CYAN
     }
 
     def 'The `group` style trait allows for inheritance, meaning a group can inherit from other ones.'()
@@ -189,7 +189,7 @@ class Style_Sheet_Spec extends Specification
             s2.padding().right() == 2
             s2.padding().bottom() == 3
             s2.padding().left() == 4
-            s2.background().outerColor().get() == Color.CYAN
+            s2.background().color().get() == Color.CYAN
     }
 
     def 'Nonsensical style trait group inheritance rules will throw an exception!'()
@@ -288,7 +288,7 @@ class Style_Sheet_Spec extends Specification
             var s4 = ss.run(label1.component)
             var s5 = ss.run(label2.component)
         then : '...and we check the results'
-            s1.background().outerColor().get() == Color.BLUE
+            s1.background().color().get() == Color.BLUE
             s1.border().thickness() == 11
             s1.border().color().get() == Color.GREEN
             s1.border().arcHeight() == 19
@@ -300,7 +300,7 @@ class Style_Sheet_Spec extends Specification
             s1.shadow().inset() == true
             s1.shadow().blurRadius() == 22
             s1.shadow().spreadRadius() == 6
-            s2.background().outerColor().get() == Color.RED
+            s2.background().color().get() == Color.RED
             s2.border().thickness() == 11
             s2.border().color().get() == Color.GREEN
             s2.border().arcHeight() == 19
@@ -312,7 +312,7 @@ class Style_Sheet_Spec extends Specification
             s2.shadow().inset() == false
             s2.shadow().blurRadius() == 22
             s2.shadow().spreadRadius() == 6
-            s3.background().outerColor().get() == Color.BLUE
+            s3.background().color().get() == Color.BLUE
             s3.border().thickness() == 11
             s3.border().color().get() == Color.GREEN
             s3.border().arcHeight() == 3
@@ -324,7 +324,7 @@ class Style_Sheet_Spec extends Specification
             s3.shadow().inset() == true
             s3.shadow().blurRadius() == 22
             s3.shadow().spreadRadius() == 6
-            s4.background().outerColor().get() == Color.RED
+            s4.background().color().get() == Color.RED
             s4.border().thickness() == 11
             s4.border().color().get() == Color.GREEN
             s4.border().arcHeight() == 19
@@ -336,7 +336,7 @@ class Style_Sheet_Spec extends Specification
             s4.shadow().inset() == false
             s4.shadow().blurRadius() == 22
             s4.shadow().spreadRadius() == 6
-            s5.background().outerColor().get() == Color.RED
+            s5.background().color().get() == Color.RED
             s5.border().thickness() == 11
             s5.border().color().get() == Color.GREEN
             s5.border().arcHeight() == 3

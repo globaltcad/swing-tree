@@ -56,21 +56,27 @@ public class RenderDelegate<C extends JComponent>
             if ( style.border().color().isPresent() && style.border().thickness() > 0 )
                 _comp.setBorder( BorderFactory.createEmptyBorder() );
 
+            if ( style.background().innerColor().isPresent() )
+                _comp.setOpaque( false );
+
             if ( style.background().color().isPresent() )
                 _comp.setOpaque( false );
 
-            if ( style.background().outerColor().isPresent() )
+            if ( style.background().renderer().isPresent() )
                 _comp.setOpaque( false );
 
             if ( style.shadow().color().isPresent() )
                 _comp.setOpaque( false );
         }
 
-        style.background().outerColor().ifPresent(outerColor -> {
+        style.background().color().ifPresent(outerColor -> {
             _fillOuterBackground(style, outerColor);
         });
-        style.background().color().ifPresent(color -> {
+        style.background().innerColor().ifPresent(color -> {
             _fillBackground(style, color);
+        });
+        style.background().renderer().ifPresent(renderer -> {
+            renderer.accept(_g2d);
         });
         style.shadow().color().ifPresent(color -> {
             _renderShadows(style, _comp, _g2d, color);

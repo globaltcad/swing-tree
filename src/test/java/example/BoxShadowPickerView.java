@@ -88,29 +88,54 @@ public class BoxShadowPickerView extends UI.Panel
             )
             .add(panel(FILL).withBackground(vm.outerBackgroundColor()))
             .add(checkBox("Inset", vm.shadowInset()))
+            .add(checkBox("Draw Smiley", vm.drawSmiley()))
         )
         .add(
             panel(FILL).withPrefSize(650, 300)
             .withRepaintIf(vm.repaint())
-            .withBackground( p -> {
-                p.renderStyle( s ->
-                    s.innerBackground(vm.backgroundColor().get())
-                     .background(vm.outerBackgroundColor().get())
-                     .padTop(vm.paddingTop().get())
-                     .padLeft(vm.paddingLeft().get())
-                     .padRight(vm.paddingRight().get())
-                     .padBottom(vm.paddingBottom().get())
-                     .borderRadius(vm.borderArcWidth().get(), vm.borderArcHeight().get())
-                     .shadowColor(vm.shadowColor().get())
-                     .shadowHorizontalOffset(vm.horizontalShadowOffset().get())
-                     .shadowVerticalOffset(vm.verticalShadowOffset().get())
-                     .shadowBlurRadius(vm.shadowBlurRadius().get())
-                     .shadowSpreadRadius(vm.shadowSpreadRadius().get())
-                     .shadowInset(vm.shadowInset().get())
-                     .border(vm.borderThickness().get())
-                     .border(vm.borderColor().get())
-                );
-            })
+            .withStyle( it ->
+                it.style()
+                 .innerBackground(vm.backgroundColor().get())
+                 .background(vm.outerBackgroundColor().get())
+                 .background( g2d -> {
+                     if ( vm.drawSmiley().is(false) ) return;
+                     // We paint a cute little tree with a swing (the swing tree logo :) )
+                     int w = it.component().getWidth() - vm.paddingLeft().get() - vm.paddingRight().get() - 100;
+                     int h = it.component().getHeight() - vm.paddingTop().get() - vm.paddingBottom().get() - 100;
+                     int x = vm.paddingLeft().get() + 50;
+                     int y = vm.paddingTop().get() + 50;
+                     // We crop the rectangle so that t is centered and squared:
+                     int crop = Math.abs(w - h)/2;
+                     if (w > h) {
+                         x += crop;
+                         w = h;
+                     } else {
+                         y += crop;
+                         h = w;
+                     }
+                     g2d.setColor(Color.YELLOW);
+                     g2d.fillOval(x, y, w, h);
+                     g2d.setColor(Color.BLACK);
+                     g2d.drawOval(x, y, w, h);
+                     g2d.fillOval(x + w/4, y + h/4, w/8, h/8);
+                     g2d.fillOval((int) (x + 2.5*w/4), y + h/4, w/8, h/8);
+                     // Now a smile:
+                     g2d.drawArc(x + w/4, y + 2*h/4, w/2, h/4, 0, -180);
+                 })
+                 .padTop(vm.paddingTop().get())
+                 .padLeft(vm.paddingLeft().get())
+                 .padRight(vm.paddingRight().get())
+                 .padBottom(vm.paddingBottom().get())
+                 .borderRadius(vm.borderArcWidth().get(), vm.borderArcHeight().get())
+                 .shadowColor(vm.shadowColor().get())
+                 .shadowHorizontalOffset(vm.horizontalShadowOffset().get())
+                 .shadowVerticalOffset(vm.verticalShadowOffset().get())
+                 .shadowBlurRadius(vm.shadowBlurRadius().get())
+                 .shadowSpreadRadius(vm.shadowSpreadRadius().get())
+                 .shadowInset(vm.shadowInset().get())
+                 .border(vm.borderThickness().get())
+                 .border(vm.borderColor().get())
+            )
         );
 
     }

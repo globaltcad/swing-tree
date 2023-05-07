@@ -6,29 +6,29 @@ import java.util.function.Consumer;
 
 public class BackgroundStyle
 {
-    private final Color backgroundColor;
-    private final Color outerBackgroundColor;
-    private final Consumer<Graphics2D> renderer;
+    private final Color _innerColor;
+    private final Color _color;
+    private final Consumer<Graphics2D> _renderer;
 
     public BackgroundStyle(
-        Color backgroundColor,
-        Color outerBackgroundColor,
+        Color innerColor,
+        Color color,
         Consumer<Graphics2D> renderer
     ) {
-        this.backgroundColor = backgroundColor;
-        this.outerBackgroundColor = outerBackgroundColor;
-        this.renderer =renderer;
+        _innerColor = innerColor;
+        _color      = color;
+        _renderer   = renderer;
     }
 
-    public Optional<Color> color() { return Optional.ofNullable(backgroundColor); }
+    public Optional<Color> innerColor() { return Optional.ofNullable(_innerColor); }
 
-    public Optional<Color> outerColor() { return Optional.ofNullable(outerBackgroundColor); }
+    public Optional<Color> color() { return Optional.ofNullable(_color); }
 
-    public Optional<Consumer<Graphics2D>> renderer() { return Optional.ofNullable(renderer); }
+    public Optional<Consumer<Graphics2D>> renderer() { return Optional.ofNullable(_renderer); }
 
-    public BackgroundStyle withColor(Color backgroundColor) { return new BackgroundStyle(backgroundColor, outerBackgroundColor, renderer); }
+    public BackgroundStyle withInnerColor( Color backgroundColor ) { return new BackgroundStyle(backgroundColor, _color, _renderer); }
 
-    public BackgroundStyle withOuterColor(Color outerBackgroundColor) { return new BackgroundStyle(backgroundColor, outerBackgroundColor, renderer); }
+    public BackgroundStyle withColor( Color outerBackgroundColor ) { return new BackgroundStyle(_innerColor, outerBackgroundColor, _renderer); }
 
-    public BackgroundStyle withBackgroundRenderer(Consumer<Graphics2D> renderer) { return new BackgroundStyle(backgroundColor, outerBackgroundColor, renderer); }
+    public BackgroundStyle withBackgroundRenderer(Consumer<Graphics2D> renderer) { return new BackgroundStyle(_innerColor, _color, renderer); }
 }

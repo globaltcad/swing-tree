@@ -94,11 +94,11 @@ public final class Style
     }
 
     public Style innerBackground( Color color ) {
-        return _withBackground(_background.withColor(color));
+        return _withBackground(_background.withInnerColor(color));
     }
 
     public Style background( Color color ) {
-        return _withBackground(_background.withOuterColor(color));
+        return _withBackground(_background.withColor(color));
     }
 
     public Style background( Consumer<Graphics2D> renderer ) {
