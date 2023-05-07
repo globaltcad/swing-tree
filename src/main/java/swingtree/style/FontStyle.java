@@ -70,6 +70,19 @@ public class FontStyle
 
     FontStyle withBackgroundColor( Color backgroundColor ) { return new FontStyle(_name, _size, _style, _weight, _attributes, _color, backgroundColor); }
 
+    FontStyle withFont( Font font ) {
+        Objects.requireNonNull(font);
+        return new FontStyle(
+                    font.getFamily(),
+                    font.getSize(),
+                    font.getStyle(),
+                    font.isBold() ? Font.BOLD : font.isItalic() ? Font.ITALIC : Font.PLAIN,
+                    Collections.emptyList(),
+                    _color,
+                    _backgroundColor
+                );
+    }
+
     public Font createDerivedFrom(Font existingFont )
     {
         if ( existingFont == null )

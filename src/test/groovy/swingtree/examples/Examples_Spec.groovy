@@ -76,6 +76,11 @@ class Examples_Spec extends Specification
         expect : new ListSearchView(new ListSearchViewModel())
     }
 
+    def 'The box shadow picker example UI defined in the examples can be created.'()
+    {
+        expect : new BoxShadowPickerView(new BoxShadowPickerViewModel())
+    }
+
     def 'The animated buttons view examples UI defined in the examples can be created.'()
     {
         expect : new AnimatedButtonsView()

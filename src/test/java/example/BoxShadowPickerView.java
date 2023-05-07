@@ -10,134 +10,150 @@ import static swingtree.UI.*;
 
 public class BoxShadowPickerView extends UI.Panel
 {
-    BoxShadowPickerView(BockShadowPickerViewModel vm) {
+    public BoxShadowPickerView(BoxShadowPickerViewModel vm) {
         FlatLightLaf.setup();
-        of(this)
-        .withLayout(WRAP(2))
-        .add(
-            panel(FILL.and(WRAP(3)), "[shrink][grow][grow]")
-            .add(label("Padding Top:"))
-            .add(slider(Align.HORIZONTAL, 0, 100, vm.paddingTop()))
-            .add(label(vm.paddingTop().viewAsString()))
-            .add(label("Padding Left:"))
-            .add(slider(Align.HORIZONTAL, 0, 100, vm.paddingLeft()))
-            .add(label(vm.paddingLeft().viewAsString()))
-            .add(label("Padding Right:"))
-            .add(slider(Align.HORIZONTAL, 0, 100, vm.paddingRight()))
-            .add(label(vm.paddingRight().viewAsString()))
-            .add(label("Padding Bottom:"))
-            .add(slider(Align.HORIZONTAL, 0, 100, vm.paddingBottom()))
-            .add(label(vm.paddingBottom().viewAsString()))
+        of(this).withLayout(WRAP(2).and(INS(12)), "[]12[]")
+        .add(panel(WRAP(2), "[grow]12[grow]", "[]12[]")
+            .add(GROW_X,
+                panel(FILL.and(WRAP(3)), "[shrink][grow][shrink]").withBorderTitled("Padding")
+                .add(label("Top:"))
+                .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.paddingTop()))
+                .add(label(vm.paddingTop().viewAsString()))
+                .add(label("Left:"))
+                .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.paddingLeft()))
+                .add(label(vm.paddingLeft().viewAsString()))
+                .add(label("Right:"))
+                .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.paddingRight()))
+                .add(label(vm.paddingRight().viewAsString()))
+                .add(label("Bottom:"))
+                .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.paddingBottom()))
+                .add(label(vm.paddingBottom().viewAsString()))
+            )
+            .add(GROW_X,
+                panel(FILL.and(WRAP(3)), "[shrink][grow][shrink]").withBorderTitled("Border")
+                .add(label("Arc Width:"))
+                .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.borderArcWidth()))
+                .add(label(vm.borderArcWidth().viewAsString()))
+                .add(label("Arc Height:"))
+                .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.borderArcHeight()))
+                .add(label(vm.borderArcHeight().viewAsString()))
+                .add(label("Thickness:"))
+                .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.borderThickness()))
+                .add(label(vm.borderThickness().viewAsString()))
+                .add(label("Color:"))
+                .add(GROW_X.and(PUSH_X),
+                    textField(vm.shadowColor().mapTo(Integer.class, Color::getRGB).itemAsString())
+                    .onContentChange( it -> {
+                        parseColor(it.get().getText()).ifPresent(color -> {vm.borderColor().act(color);});
+                    })
+                )
+                .add(panel(FILL).withBackground(vm.borderColor()))
+            )
+            .add(GROW_X,
+                panel(FILL.and(WRAP(3)), "[shrink][grow][shrink]").withBorderTitled("Shadow")
+                .add(label("Horizontal Offset:"))
+                .add(GROW_X, slider(Align.HORIZONTAL, -50, 50, vm.horizontalShadowOffset()))
+                .add(label(vm.horizontalShadowOffset().viewAsString()))
+                .add(label("Vertical Offset:"))
+                .add(GROW_X, slider(Align.HORIZONTAL, -50, 50, vm.verticalShadowOffset()))
+                .add(label(vm.verticalShadowOffset().viewAsString()))
+                .add(label("Blur Radius:"))
+                .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.shadowBlurRadius()))
+                .add(label(vm.shadowBlurRadius().viewAsString()))
+                .add(label("Spread Radius:"))
+                .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.shadowSpreadRadius()))
+                .add(label(vm.shadowSpreadRadius().viewAsString()))
+                .add(label("Color:"))
+                .add(GROW_X.and(PUSH_X),
+                    textField(vm.shadowColor().mapTo(Integer.class, Color::getRGB).itemAsString())
+                    .onContentChange(it -> {
+                        parseColor(it.get().getText()).ifPresent(color -> {vm.shadowColor().act(color);});
+                    })
+                )
+                .add(panel(FILL).withBackground(vm.shadowColor()))
+                .add(label("Background Color:"))
+                .add(GROW_X.and(PUSH_X),
+                    textField(vm.backgroundColor().mapTo(Integer.class, Color::getRGB).itemAsString())
+                    .onContentChange(it -> {
+                        parseColor(it.get().getText()).ifPresent(color -> {vm.backgroundColor().act(color);});
+                    })
+                )
+                .add(panel(FILL).withBackground(vm.backgroundColor()))
+                .add(label("Outer Background Color:"))
+                .add(GROW_X.and(PUSH_X),
+                    textField(vm.outerBackgroundColor().mapTo(Integer.class, Color::getRGB).itemAsString())
+                    .onContentChange(it -> {
+                        parseColor(it.get().getText()).ifPresent(color -> {vm.outerBackgroundColor().act(color);});
+                    })
+                )
+                .add(panel(FILL).withBackground(vm.outerBackgroundColor()))
+                .add(checkBox("Inset", vm.shadowInset()))
+                .add(checkBox("Draw Smiley", vm.drawSmiley()))
+            )
+            .add(GROW,
+                panel(FILL).withBorderTitled("Preview")
+                .add(GROW,
+                    panel(FILL)
+                    .withRepaintIf(vm.repaint())
+                    .withStyle( it ->
+                        it.style()
+                         .innerBackground(vm.backgroundColor().get())
+                         .background(vm.outerBackgroundColor().get())
+                         .background( g2d -> {
+                             if ( vm.drawSmiley().is(false) ) return;
+                             int w = it.component().getWidth() - vm.paddingLeft().get() - vm.paddingRight().get() - 100;
+                             int h = it.component().getHeight() - vm.paddingTop().get() - vm.paddingBottom().get() - 100;
+                             int x = vm.paddingLeft().get() + 50;
+                             int y = vm.paddingTop().get() + 50;
+                             drawASmiley(g2d, x, y, w, h);
+                         })
+                         .padTop(vm.paddingTop().get())
+                         .padLeft(vm.paddingLeft().get())
+                         .padRight(vm.paddingRight().get())
+                         .padBottom(vm.paddingBottom().get())
+                         .borderRadius(vm.borderArcWidth().get(), vm.borderArcHeight().get())
+                         .shadowColor(vm.shadowColor().get())
+                         .shadowHorizontalOffset(vm.horizontalShadowOffset().get())
+                         .shadowVerticalOffset(vm.verticalShadowOffset().get())
+                         .shadowBlurRadius(vm.shadowBlurRadius().get())
+                         .shadowSpreadRadius(vm.shadowSpreadRadius().get())
+                         .shadowInset(vm.shadowInset().get())
+                         .border(vm.borderThickness().get())
+                         .border(vm.borderColor().get())
+                    )
+                )
+            )
         )
-        .add(
-            panel(FILL.and(WRAP(3)), "[shrink][grow][grow]")
-            .add(label("Border Arc Width:"))
-            .add(slider(Align.HORIZONTAL, 0, 100, vm.borderArcWidth()))
-            .add(label(vm.borderArcWidth().viewAsString()))
-            .add(label("Border Arc Height:"))
-            .add(slider(Align.HORIZONTAL, 0, 100, vm.borderArcHeight()))
-            .add(label(vm.borderArcHeight().viewAsString()))
-            .add(label("Border Thickness:"))
-            .add(slider(Align.HORIZONTAL, 0, 100, vm.borderThickness()))
-            .add(label(vm.borderThickness().viewAsString()))
-            .add(label("Border Color:"))
-            .add(ALIGN_CENTER,
-                textField(vm.shadowColor().mapTo(Integer.class, Color::getRGB).itemAsString())
-                .onContentChange( it -> {
-                    parseColor(it.get().getText()).ifPresent(color -> {vm.borderColor().act(color);});
-                })
-            )
-            .add(panel(FILL).withBackground(vm.borderColor()))
-        )
-        .add(
-            panel(FILL.and(WRAP(3)), "[shrink][grow][grow]")
-            .add(label("Horizontal Shadow Offset:"))
-            .add(slider(Align.HORIZONTAL, -50, 50, vm.horizontalShadowOffset()))
-            .add(label(vm.horizontalShadowOffset().viewAsString()))
-            .add(label("Vertical Shadow Offset:"))
-            .add(slider(Align.HORIZONTAL, -50, 50, vm.verticalShadowOffset()))
-            .add(label(vm.verticalShadowOffset().viewAsString()))
-            .add(label("Shadow Blur Radius:"))
-            .add(slider(Align.HORIZONTAL, 0, 100, vm.shadowBlurRadius()))
-            .add(label(vm.shadowBlurRadius().viewAsString()))
-            .add(label("Shadow Spread Radius:"))
-            .add(slider(Align.HORIZONTAL, 0, 100, vm.shadowSpreadRadius()))
-            .add(label(vm.shadowSpreadRadius().viewAsString()))
-            .add(label("Shadow Color:"))
-            .add(ALIGN_CENTER,
-                textField(vm.shadowColor().mapTo(Integer.class, Color::getRGB).itemAsString())
-                .onContentChange(it -> {
-                    parseColor(it.get().getText()).ifPresent(color -> {vm.shadowColor().act(color);});
-                })
-            )
-            .add(panel(FILL).withBackground(vm.shadowColor()))
-            .add(label("Background Color:"))
-            .add(ALIGN_CENTER,
-                textField(vm.backgroundColor().mapTo(Integer.class, Color::getRGB).itemAsString())
-                .onContentChange(it -> {
-                    parseColor(it.get().getText()).ifPresent(color -> {vm.backgroundColor().act(color);});
-                })
-            )
-            .add(panel(FILL).withBackground(vm.backgroundColor()))
-            .add(label("Outer Background Color:"))
-            .add(ALIGN_CENTER,
-                textField(vm.outerBackgroundColor().mapTo(Integer.class, Color::getRGB).itemAsString())
-                .onContentChange(it -> {
-                    parseColor(it.get().getText()).ifPresent(color -> {vm.outerBackgroundColor().act(color);});
-                })
-            )
-            .add(panel(FILL).withBackground(vm.outerBackgroundColor()))
-            .add(checkBox("Inset", vm.shadowInset()))
-            .add(checkBox("Draw Smiley", vm.drawSmiley()))
-        )
-        .add(
-            panel(FILL).withPrefSize(650, 300)
-            .withRepaintIf(vm.repaint())
-            .withStyle( it ->
-                it.style()
-                 .innerBackground(vm.backgroundColor().get())
-                 .background(vm.outerBackgroundColor().get())
-                 .background( g2d -> {
-                     if ( vm.drawSmiley().is(false) ) return;
-                     // We paint a cute little tree with a swing (the swing tree logo :) )
-                     int w = it.component().getWidth() - vm.paddingLeft().get() - vm.paddingRight().get() - 100;
-                     int h = it.component().getHeight() - vm.paddingTop().get() - vm.paddingBottom().get() - 100;
-                     int x = vm.paddingLeft().get() + 50;
-                     int y = vm.paddingTop().get() + 50;
-                     // We crop the rectangle so that t is centered and squared:
-                     int crop = Math.abs(w - h)/2;
-                     if (w > h) {
-                         x += crop;
-                         w = h;
-                     } else {
-                         y += crop;
-                         h = w;
-                     }
-                     g2d.setColor(Color.YELLOW);
-                     g2d.fillOval(x, y, w, h);
-                     g2d.setColor(Color.BLACK);
-                     g2d.drawOval(x, y, w, h);
-                     g2d.fillOval(x + w/4, y + h/4, w/8, h/8);
-                     g2d.fillOval((int) (x + 2.5*w/4), y + h/4, w/8, h/8);
-                     // Now a smile:
-                     g2d.drawArc(x + w/4, y + 2*h/4, w/2, h/4, 0, -180);
-                 })
-                 .padTop(vm.paddingTop().get())
-                 .padLeft(vm.paddingLeft().get())
-                 .padRight(vm.paddingRight().get())
-                 .padBottom(vm.paddingBottom().get())
-                 .borderRadius(vm.borderArcWidth().get(), vm.borderArcHeight().get())
-                 .shadowColor(vm.shadowColor().get())
-                 .shadowHorizontalOffset(vm.horizontalShadowOffset().get())
-                 .shadowVerticalOffset(vm.verticalShadowOffset().get())
-                 .shadowBlurRadius(vm.shadowBlurRadius().get())
-                 .shadowSpreadRadius(vm.shadowSpreadRadius().get())
-                 .shadowInset(vm.shadowInset().get())
-                 .border(vm.borderThickness().get())
-                 .border(vm.borderColor().get())
+        .add(GROW,
+            panel(FILL).withBorderTitled("Code")
+            .add(GROW,
+                scrollPane()
+                .add(
+                    textArea(vm.code())
+                    .withStyle( it -> it.style().font(new Font("Monospaced", Font.PLAIN, 15)) )
+                )
             )
         );
+    }
 
+    private void drawASmiley(Graphics2D g2d, int x, int y, int w, int h) {
+        // We crop the rectangle so that t is centered and squared:
+        int crop = Math.abs(w - h)/2;
+        if (w > h) {
+            x += crop;
+            w = h;
+        } else {
+            y += crop;
+            h = w;
+        }
+        g2d.setColor(Color.YELLOW);
+        g2d.fillOval(x, y, w, h);
+        g2d.setColor(Color.BLACK);
+        g2d.drawOval(x, y, w, h);
+        g2d.fillOval(x + w/4, y + h/4, w/8, h/8);
+        g2d.fillOval((int) (x + 2.5*w/4), y + h/4, w/8, h/8);
+        // Now a smile:
+        g2d.drawArc(x + w/4, y + 2*h/4, w/2, h/4, 0, -180);
     }
 
     private static Optional<Color> parseColor(String text) {
@@ -222,5 +238,5 @@ public class BoxShadowPickerView extends UI.Panel
         return Optional.empty();
     }
 
-    public static void main( String... args ) { UI.show(f ->new BoxShadowPickerView(new BockShadowPickerViewModel())); }
+    public static void main( String... args ) { UI.show(f ->new BoxShadowPickerView(new BoxShadowPickerViewModel())); }
 }

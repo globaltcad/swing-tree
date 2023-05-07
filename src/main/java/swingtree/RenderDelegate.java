@@ -94,17 +94,10 @@ public class RenderDelegate<C extends JComponent>
             _g2d.setStroke(new BasicStroke(style.border().thickness()));
             _g2d.drawRoundRect(
                     style.padding().left(), style.padding().top(),
-                    _comp.getWidth() - style.padding().left() - style.padding().right(),
-                    _comp.getHeight() - style.padding().top() - style.padding().bottom(),
+                    _comp.getWidth() - style.padding().left() - style.padding().right()-1,
+                    _comp.getHeight() - style.padding().top() - style.padding().bottom()-1,
                     (style.border().arcWidth()  + (style.border().thickness() == 1 ? 0 : style.border().thickness()+1)),
                     (style.border().arcHeight() + (style.border().thickness() == 1 ? 0 : style.border().thickness()+1))
-                );
-            _g2d.drawRoundRect(
-                    style.padding().left(), style.padding().top(),
-                    _comp.getWidth() - style.padding().left() - style.padding().right(),
-                    _comp.getHeight() - style.padding().top() - style.padding().bottom(),
-                    (style.border().arcWidth() +2),
-                    (style.border().arcHeight()+2)
                 );
         }
     }
@@ -146,14 +139,13 @@ public class RenderDelegate<C extends JComponent>
 
         _g2d.setColor(color);
         _g2d.fill(outer);
-
     }
 
     private static void _renderShadows(
-            Style style,
-            JComponent comp,
-            Graphics2D g2d,
-            Color shadowColor
+        Style style,
+        JComponent comp,
+        Graphics2D g2d,
+        Color shadowColor
     ) {
         // First let's check if we need to render any shadows at all
         // Is the shadow color transparent?
