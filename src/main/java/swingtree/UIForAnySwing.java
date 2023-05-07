@@ -24,6 +24,7 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 
 /**
@@ -1533,15 +1534,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _this();
     }
 
-    public final I withBackground( Style... styles ) {
-        NullUtil.nullArgCheck(styles, "styles", Style.class);
-        // We check that the array does not contain null values
-        for ( Style style : styles )
-            NullUtil.nullArgCheck(style, "styles", Style.class);
-
-        return this.withBackground( it -> {
-            for ( Style style : styles ) it.render( style );
-        });
+    public final I withStyle( Function<Style, Style> styler ) {
+        NullUtil.nullArgCheck(styler, "styler", Function.class);
+        return this.withBackground( renderer -> renderer.renderStyle(styler) );
     }
 
     /**
@@ -1698,17 +1693,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(renderer, "renderer", Consumer.class);
         UI._registerForegroundRenderingFor( getComponent(), renderer );
         return _this();
-    }
-
-    public final I withForeground( Style... styles ) {
-        NullUtil.nullArgCheck(styles, "styles", Style.class);
-        // We check that the array does not contain null values
-        for ( Style style : styles )
-            NullUtil.nullArgCheck(style, "styles", Style.class);
-
-        return this.withForeground( it -> {
-                    for ( Style style : styles ) it.render( style );
-                });
     }
 
     private void _updateBackground(

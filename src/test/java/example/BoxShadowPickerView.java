@@ -92,11 +92,10 @@ public class BoxShadowPickerView extends UI.Panel
         .add(
             panel(FILL).withPrefSize(650, 300)
             .withRepaintIf(vm.repaint())
-            .withForeground( p -> {
-                p.render(
-                     style()
-                     .background(vm.backgroundColor().get())
-                     .outerBackground(vm.outerBackgroundColor().get())
+            .withBackground( p -> {
+                p.renderStyle( s ->
+                    s.innerBackground(vm.backgroundColor().get())
+                     .background(vm.outerBackgroundColor().get())
                      .padTop(vm.paddingTop().get())
                      .padLeft(vm.paddingLeft().get())
                      .padRight(vm.paddingRight().get())

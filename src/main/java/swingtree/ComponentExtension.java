@@ -26,6 +26,8 @@ public class ComponentExtension<C extends JComponent>
         return ext;
     }
 
+    static void makeSureComponentHasExtension(JComponent comp ) { from(comp); }
+
     private final C _owner;
 
     private Consumer<RenderDelegate<C>> _backgroundRenderer;
@@ -38,6 +40,8 @@ public class ComponentExtension<C extends JComponent>
 
     private ComponentExtension( C owner ) {
         _owner = Objects.requireNonNull(owner);
+        if ( _componentIsDeclaredInUI(_owner) )
+            this.setBackgroundRenderer(RenderDelegate::renderStyle);
     }
 
     void setBackgroundRenderer( Consumer<RenderDelegate<C>> renderer ) {
@@ -83,12 +87,12 @@ public class ComponentExtension<C extends JComponent>
         Graphics2D g2d = (Graphics2D) g;
 
         if ( _backgroundRenderer != null )
-            _backgroundRenderer.accept( new RenderDelegate<>(g2d, _owner) );
+            _backgroundRenderer.accept( new RenderDelegate<>( g2d, _owner, RenderDelegate.Layer.BACKGROUND ) );
 
         superPaint.run();
 
         if ( _foregroundRenderer != null )
-            _foregroundRenderer.accept( new RenderDelegate<>(g2d, _owner) );
+            _foregroundRenderer.accept( new RenderDelegate<>(g2d, _owner, RenderDelegate.Layer.FOREGROUND ) );
 
         // Animations are last: they are rendered on top of everything else:
         if ( _animationRenderers != null )
@@ -97,14 +101,14 @@ public class ComponentExtension<C extends JComponent>
     }
 
     private void checkIfIsDeclaredInUI() {
-        boolean isSwingTreeComponent = _checkIfIsDeclaredInUI(_owner);
+        boolean isSwingTreeComponent = _componentIsDeclaredInUI(_owner);
         if ( !isSwingTreeComponent ) // We throw an exception if the component is not a sub-type of any of the classes declared in UI.
             throw new RuntimeException(
                     "Custom (declarative) rendering is only allowed/supported for Swing-Tree components declared in UI."
                 );
     }
 
-    static boolean _checkIfIsDeclaredInUI( JComponent comp ) {
+    static boolean _componentIsDeclaredInUI(JComponent comp ) {
         // The component must be a subtype of one of the classes enclosed in this UI class!
         // Let's get all the classes declared in UI:
         Class<?>[] declaredInUI = UI.class.getDeclaredClasses();

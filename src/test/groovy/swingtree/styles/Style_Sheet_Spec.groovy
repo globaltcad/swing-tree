@@ -33,14 +33,14 @@ class Style_Sheet_Spec extends Specification
             var ss = new StyleSheet() {
                         @Override
                         protected void declaration() {
-                             apply(id("unique id!"), style ->
-                                 style.borderRadius(3)
+                             apply(id("unique id!"), it ->
+                                 it.style().borderRadius(3)
                              );
-                             apply(type(JButton.class), style ->
-                                 style.border(7)
+                             apply(type(JButton.class), it ->
+                                 it.style().border(7)
                              );
-                             apply(type(JPanel.class), style ->
-                                style.border(Color.GREEN)
+                             apply(type(JPanel.class), it ->
+                                it.style().border(Color.GREEN)
                              );
                          }
                      }
@@ -70,19 +70,21 @@ class Style_Sheet_Spec extends Specification
             var ss = new StyleSheet() {
                         @Override
                         protected void declaration() {
-                            apply(type(JTextField.class), style ->
-                                    style.shadowBlurRadius(9)
+                            apply(type(JTextField.class), it ->
+                                    it.style().shadowBlurRadius(9)
                                 );
-                             apply(type(JPanel.class), style ->
-                                    style.shadowSpreadRadius(33)
+                             apply(type(JPanel.class), it ->
+                                    it.style().shadowSpreadRadius(33)
                                 );
-                            apply(type(JTextComponent.class), style ->
-                                    style.shadowOffset(42, 24)
-                                            .shadowColor(Color.BLUE)
+                            apply(type(JTextComponent.class), it ->
+                                    it.style()
+                                        .shadowOffset(42, 24)
+                                        .shadowColor(Color.BLUE)
                                 );
-                            apply(type(JComponent.class), style ->
-                                    style.shadowColor(Color.RED)
-                                            .shadowBlurRadius(17)
+                            apply(type(JComponent.class), it ->
+                                    it.style()
+                                        .shadowColor(Color.RED)
+                                        .shadowBlurRadius(17)
                             );
                          }
                      }
@@ -129,11 +131,11 @@ class Style_Sheet_Spec extends Specification
             var ss = new StyleSheet() {
                         @Override
                         protected void declaration() {
-                             apply(group("group1"), style ->
-                                 style.background(Color.BLUE)
+                             apply(group("group1"), it ->
+                                 it.style().innerBackground(Color.BLUE)
                              );
-                             apply(group("group2"), style ->
-                                 style.outerBackground(Color.CYAN)
+                             apply(group("group2"), it ->
+                                 it.style().background(Color.CYAN)
                              );
                          }
                      }
@@ -164,11 +166,11 @@ class Style_Sheet_Spec extends Specification
             var ss = new StyleSheet() {
                         @Override
                         protected void declaration() {
-                             apply(group("group1"), style ->
-                                 style.pad(1, 2, 3, 4)
+                             apply(group("group1"), it ->
+                                 it.style().pad(1, 2, 3, 4)
                              );
-                             apply(group("group2").inherits("group1"), style ->
-                                 style.outerBackground(Color.CYAN)
+                             apply(group("group2").inherits("group1"), it ->
+                                 it.style().background(Color.CYAN)
                              );
                          }
                      }
@@ -204,11 +206,11 @@ class Style_Sheet_Spec extends Specification
             new StyleSheet() {
                @Override
                protected void declaration() {
-                    apply(group("A").type(JButton.class), style ->
-                        style.borderRadius(3)
+                    apply(group("A").type(JButton.class), it ->
+                        it.style().borderRadius(3)
                     );
-                    apply(group("B").inherits("A").type(JPanel.class), style ->
-                        style.border(Color.GREEN)
+                    apply(group("B").inherits("A").type(JPanel.class), it ->
+                        it.style().border(Color.GREEN)
                     );
                 }
             }
@@ -225,11 +227,11 @@ class Style_Sheet_Spec extends Specification
             new StyleSheet() {
                @Override
                protected void declaration() {
-                    apply(group("A"), style ->
-                        style.borderRadius(3)
+                    apply(group("A"), it ->
+                        it.style().borderRadius(3)
                     );
-                    apply(group("A"), style ->
-                        style.border(Color.GREEN)
+                    apply(group("A"), it ->
+                        it.style().border(Color.GREEN)
                     );
                 }
             }
@@ -252,7 +254,7 @@ class Style_Sheet_Spec extends Specification
         """
         given :
             var ss = new StyleSheet({
-                        UI.style().outerBackground(Color.RED)
+                        UI.style().background(Color.RED)
                                   .border(11, Color.GREEN)
                                   .borderRadius(3)
                                   .pad(42)
@@ -262,14 +264,14 @@ class Style_Sheet_Spec extends Specification
                      }) {
                         @Override
                         protected void declaration() {
-                             apply(group("A"), style ->
-                                 style.borderRadius(19)
+                             apply(group("A"), it ->
+                                 it.style().borderRadius(19)
                              );
-                            apply(group("B").type(JSlider.class), style ->
-                                 style.outerBackground(Color.BLUE)
+                            apply(group("B").type(JSlider.class), it ->
+                                 it.style().background(Color.BLUE)
                              );
-                            apply(group("B").type(JComponent.class), style ->
-                                    style.shadowInset(true)
+                            apply(group("B").type(JComponent.class), it ->
+                                    it.style().shadowInset(true)
                              );
                          }
                      }
@@ -346,5 +348,94 @@ class Style_Sheet_Spec extends Specification
             s5.shadow().inset() == true
             s5.shadow().blurRadius() == 22
             s5.shadow().spreadRadius() == 6
+    }
+
+    def 'You can style the font of a component inside your style sheet.'()
+    {
+        reportInfo """
+            If you specify font information using the styling API then it will
+            be used to create a font for the component.
+        """
+        given :
+            var ss = new StyleSheet() {
+                @Override
+                protected void declaration() {
+                    apply(group("A"), it ->
+                        it.style().font("Arial", 12)
+                    );
+                    apply(group("B"), it ->
+                        it.style().font("Sans", 14)
+                    );
+                    apply(type(JLabel.class), it ->
+                        it.style().font("Papyrus", 15)
+                    );
+                }
+            }
+        when : 'We create a few UI components:'
+            var label1 = UI.label(":)").groups("A")
+            var label2 = UI.label(":D").groups("B")
+            var textField = UI.textField().groups("A")
+            var textArea = UI.textArea("").groups("B")
+        and : 'We run them through the style sheet...'
+            var s1 = ss.run(label1.component)
+            var s2 = ss.run(label2.component)
+            var s3 = ss.run(textField.component)
+            var s4 = ss.run(textArea.component)
+        then : '...and we check the results'
+            s1.font().name() == "Papyrus"
+            s1.font().size() == 15
+            s2.font().name() == "Papyrus"
+            s2.font().size() == 15
+            s3.font().name() == "Arial"
+            s3.font().size() == 12
+            s4.font().name() == "Sans"
+            s4.font().size() == 14
+    }
+
+    def 'Use the power of `Graphics2D` to render custom backgrounds inside you styles.'()
+    {
+        reportInfo """
+            You can use the `Graphics2D` object to render custom backgrounds
+            inside your styles.
+        """
+        given :
+            var ss = new StyleSheet() {
+                @Override
+                protected void declaration() {
+                    apply(group("Gradient"), it ->
+                        it.style().background(g2d -> {
+                            // Let's render a gradient:
+                            var gradient = new GradientPaint(0, 0, Color.RED, 0, 100, Color.BLUE);
+                            g2d.setPaint(gradient);
+                            g2d.fillRect(0, 0, g2d.getClipBounds().width, g2d.getClipBounds().height);
+                        })
+                    );
+                    apply(group("ChessBoard"), it ->
+                        it.style().background(g2d -> {
+                            var w = it.component().getWidth() / 8;// We render a checkerboard pattern!
+                            var h = it.component().getHeight() / 8;
+                            for (var i = 0; i < 8; i++) {
+                                for (var j = 0; j < 8; j++) {
+                                    if ((i + j) % 2 == 0) {
+                                        g2d.setColor(Color.RED);
+                                    } else {
+                                        g2d.setColor(Color.BLUE);
+                                    }
+                                    g2d.fillRect(i * w, j * h, w, h);
+                                }
+                            }
+                        })
+                    );
+                }
+            }
+        when : 'We create a few UI components:'
+            var label1 = UI.label(":)").groups("Gradient")
+            var label2 = UI.label(":D").groups("ChessBoard")
+        and : 'We run them through the style sheet...'
+            var s1 = ss.run(label1.component)
+            var s2 = ss.run(label2.component)
+        then : '...and we check the results'
+            s1.background().renderer().isPresent()
+            s2.background().renderer().isPresent()
     }
 }

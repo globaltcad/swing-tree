@@ -11,7 +11,7 @@ public abstract class StyleSheet
 {
     private final Supplier<Style> _defaultStyle;
     private final Map<StyleTrait, List<StyleTrait>> _traitGraph = new LinkedHashMap<>();
-    private final Map<StyleTrait, Function<Style, Style>> _traitStylers = new LinkedHashMap<>();
+    private final Map<StyleTrait, Function<StyleDelegate<?>, Style>> _traitStylers = new LinkedHashMap<>();
     private final List<StyleTrait> _rootTraits = new java.util.ArrayList<>();
     private final List<List<StyleTrait>> _traitPaths = new java.util.ArrayList<>();
 
@@ -27,19 +27,19 @@ public abstract class StyleSheet
         _buildTraitGraph();
     }
 
-    protected StyleTrait id( String id ) { return new StyleTrait().id(id); }
+    protected StyleTrait<JComponent> id( String id ) { return new StyleTrait<>().id(id); }
 
-    protected StyleTrait group( String name ) { return new StyleTrait().group(name); }
+    protected StyleTrait<JComponent> group( String name ) { return new StyleTrait<>().group(name); }
 
-    protected StyleTrait type( Class<?> type ) { return new StyleTrait().type(type); }
+    protected <C extends JComponent> StyleTrait<C> type( Class<C> type ) { return new StyleTrait<>().type(type); }
 
-    protected void apply(StyleTrait rule, Function<Style, Style> traitStyler ) {
+    protected <C extends JComponent> void apply( StyleTrait<C> rule, Function<StyleDelegate<C>, Style> traitStyler ) {
         // First let's make sure the trait does not already exist.
         if ( _traitStylers.containsKey(rule) )
             throw new IllegalArgumentException("The trait " + rule.group() + " already exists in this style sheet.");
 
         // Now let's add the trait to the style sheet.
-        _traitStylers.put(rule, traitStyler);
+        _traitStylers.put(rule, (Function) traitStyler);
         // And let's add the trait to the trait graph.
         _traitGraph.put(rule, new java.util.ArrayList<>());
     }
@@ -89,7 +89,7 @@ public abstract class StyleSheet
 
         // Now we apply the valid traits to the starting style.
         for ( StyleTrait trait : commonPath )
-            startingStyle = _traitStylers.get(trait).apply(startingStyle);
+            startingStyle = _traitStylers.get(trait).apply(new StyleDelegate<>(toBeStyled, startingStyle));
 
         return startingStyle;
     }

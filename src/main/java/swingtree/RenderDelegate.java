@@ -8,6 +8,7 @@ import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  *  This is a simple wrapper as well as delegate for a Graphics2D object and
@@ -15,25 +16,56 @@ import java.util.Objects;
  */
 public class RenderDelegate<C extends JComponent>
 {
-
     private enum Corner { TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT }
     private enum Side { TOP, RIGHT, BOTTOM, LEFT }
+    enum Layer { BACKGROUND, FOREGROUND }
 
-    private final Graphics2D g2d;
-    private final C comp;
+    private final Graphics2D _g2d;
+    private final C _comp;
+    private final Layer _layer;
 
-    RenderDelegate(Graphics2D g2d, C comp ) {
-        Objects.requireNonNull(g2d);
-        Objects.requireNonNull(comp);
-        this.g2d = g2d;
-        this.comp = comp;
+
+    RenderDelegate( Graphics2D g2d, C comp, Layer layer ) {
+        _g2d = Objects.requireNonNull(g2d);
+        _comp = Objects.requireNonNull(comp);
+        _layer = Objects.requireNonNull(layer);
     }
 
-    public Graphics2D graphics2D() { return g2d; }
+    public Graphics2D graphics() { return _g2d; }
 
-    public C component() { return comp; }
+    public C component() { return _comp; }
 
-    public void render(Style style){
+    public void renderStyle() {
+        this.renderStyle( s -> s );
+    }
+
+    public void renderStyle( Function<Style,Style> styler ){
+        Style style = styler.apply(UI.SETTINGS().getStyleSheet().map( ss -> ss.run(_comp) ).orElse(UI.style()));
+
+        if ( _layer == Layer.BACKGROUND ) {
+            /*
+                Note that in SwingTree we do not override the UI classes of Swing to apply styles.
+                Instead, we use the "ComponentExtension" class to render styles on components.
+                This is because we don't want to means with the current LaF of the application
+                and instead simply allow users to carefully replace the LaF with a custom one.
+                So when the user has set a border style, we remove the border of the component!
+                And if the user has set a background color, we make sure that the component
+                is not opaque, so that the background color is visible.
+                ... and so on.
+            */
+            if ( style.border().color().isPresent() && style.border().thickness() > 0 )
+                _comp.setBorder( BorderFactory.createEmptyBorder() );
+
+            if ( style.background().color().isPresent() )
+                _comp.setOpaque( false );
+
+            if ( style.background().outerColor().isPresent() )
+                _comp.setOpaque( false );
+
+            if ( style.shadow().color().isPresent() )
+                _comp.setOpaque( false );
+        }
+
         style.background().outerColor().ifPresent(outerColor -> {
             _fillOuterBackground(style, outerColor);
         });
@@ -41,28 +73,30 @@ public class RenderDelegate<C extends JComponent>
             _fillBackground(style, color);
         });
         style.shadow().color().ifPresent(color -> {
-            _renderShadows(style, comp, g2d, color);
+            _renderShadows(style, _comp, _g2d, color);
         });
         style.border().color().ifPresent( color -> {
             _drawBorder(style, color);
         });
+
+        _comp.setFont( style.font().createDerivedFrom(_comp.getFont()) );
     }
 
     private void _drawBorder(Style style, Color color) {
         if ( style.border().thickness() > 0 ) {
-            g2d.setColor(color);
-            g2d.setStroke(new BasicStroke(style.border().thickness()));
-            g2d.drawRoundRect(
+            _g2d.setColor(color);
+            _g2d.setStroke(new BasicStroke(style.border().thickness()));
+            _g2d.drawRoundRect(
                     style.padding().left(), style.padding().top(),
-                    comp.getWidth() - style.padding().left() - style.padding().right(),
-                    comp.getHeight() - style.padding().top() - style.padding().bottom(),
+                    _comp.getWidth() - style.padding().left() - style.padding().right(),
+                    _comp.getHeight() - style.padding().top() - style.padding().bottom(),
                     (style.border().arcWidth()  + (style.border().thickness() == 1 ? 0 : style.border().thickness()+1)),
                     (style.border().arcHeight() + (style.border().thickness() == 1 ? 0 : style.border().thickness()+1))
                 );
-            g2d.drawRoundRect(
+            _g2d.drawRoundRect(
                     style.padding().left(), style.padding().top(),
-                    comp.getWidth() - style.padding().left() - style.padding().right(),
-                    comp.getHeight() - style.padding().top() - style.padding().bottom(),
+                    _comp.getWidth() - style.padding().left() - style.padding().right(),
+                    _comp.getHeight() - style.padding().top() - style.padding().bottom(),
                     (style.border().arcWidth() +2),
                     (style.border().arcHeight()+2)
                 );
@@ -74,11 +108,11 @@ public class RenderDelegate<C extends JComponent>
         if ( color.getAlpha() == 0 )
             return;
 
-        g2d.setColor(color);
-        g2d.fillRoundRect(
+        _g2d.setColor(color);
+        _g2d.fillRoundRect(
                 style.padding().left(), style.padding().top(),
-                comp.getWidth() - style.padding().left() - style.padding().right(),
-                comp.getHeight() - style.padding().top() - style.padding().bottom(),
+                _comp.getWidth() - style.padding().left() - style.padding().right(),
+                _comp.getHeight() - style.padding().top() - style.padding().bottom(),
                 style.border().arcWidth(), style.border().arcHeight()
         );
     }
@@ -90,13 +124,13 @@ public class RenderDelegate<C extends JComponent>
 
         Rectangle2D.Float outerRect = new Rectangle2D.Float(
                 0, 0,
-                comp.getWidth(),
-                comp.getHeight()
+                _comp.getWidth(),
+                _comp.getHeight()
         );
         RoundRectangle2D.Float innerRect = new RoundRectangle2D.Float(
                 style.padding().left(), style.padding().top(),
-                comp.getWidth() - style.padding().left() - style.padding().right(),
-                comp.getHeight() - style.padding().top() - style.padding().bottom(),
+                _comp.getWidth() - style.padding().left() - style.padding().right(),
+                _comp.getHeight() - style.padding().top() - style.padding().bottom(),
                 style.border().arcWidth(), style.border().arcHeight()
         );
 
@@ -104,8 +138,8 @@ public class RenderDelegate<C extends JComponent>
         Area inner = new Area(innerRect);
         outer.subtract(inner);
 
-        g2d.setColor(color);
-        g2d.fill(outer);
+        _g2d.setColor(color);
+        _g2d.fill(outer);
 
     }
 

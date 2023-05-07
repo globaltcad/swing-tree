@@ -6,14 +6,14 @@ import javax.swing.*;
 import java.util.List;
 import java.util.Objects;
 
-public final class StyleTrait
+public final class StyleTrait<C extends JComponent>
 {
     private final String _group;
     private final String _id;
     private final String[] _toInherit;
-    private final Class<?> _type;
+    private final Class<C> _type;
 
-    private StyleTrait( String name, String id, String[] inherits, Class<?> type ) {
+    private StyleTrait( String name, String id, String[] inherits, Class<C> type ) {
         _group = Objects.requireNonNull(name);
         _id = Objects.requireNonNull(id);
         _toInherit = Objects.requireNonNull(inherits).clone();
@@ -28,23 +28,23 @@ public final class StyleTrait
                 );
     }
 
-    StyleTrait() { this( "", "", new String[0], Object.class ); }
+    StyleTrait() { this( "", "", new String[0], (Class<C>) JComponent.class); }
 
     public String group() { return _group; }
 
-    public StyleTrait group( String group ) { return new StyleTrait(group, _id, _toInherit, _type); }
+    public StyleTrait<C> group( String group ) { return new StyleTrait<>(group, _id, _toInherit, _type); }
 
-    public StyleTrait id( String id ) { return new StyleTrait(_group, id, _toInherit, _type); }
+    public StyleTrait<C> id( String id ) { return new StyleTrait<>(_group, id, _toInherit, _type); }
 
     public String id() { return _id; }
 
     public String[] inheritance() { return _toInherit; }
 
-    public StyleTrait inherits( String... superGroups ) { return new StyleTrait(_group, _id, superGroups, _type ); }
+    public StyleTrait<C> inherits( String... superGroups ) { return new StyleTrait<>(_group, _id, superGroups, _type ); }
 
     public Class<?> type() { return _type; }
 
-    public StyleTrait type(Class<?> type ) { return new StyleTrait(_group, _id, _toInherit, type ); }
+    public <T extends JComponent> StyleTrait<T> type( Class<T> type ) { return new StyleTrait<>(_group, _id, _toInherit, type ); }
 
     public boolean isApplicableTo( JComponent component, List<String> inheritedNames ) {
         boolean typeIsCompatible = _type.isAssignableFrom(component.getClass());
@@ -67,7 +67,7 @@ public final class StyleTrait
         return typeIsCompatible && idIsCompatible && nameIsCompatible;
     }
 
-    public boolean thisInherits( StyleTrait other ) {
+    public boolean thisInherits( StyleTrait<?> other ) {
 
         if ( !this.id().isEmpty() || !other.id().isEmpty() )
             return false;
