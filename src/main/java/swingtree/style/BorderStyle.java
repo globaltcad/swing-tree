@@ -1,6 +1,7 @@
 package swingtree.style;
 
 import java.awt.*;
+import java.util.Optional;
 
 public class BorderStyle {
     private final int borderArcWidth;
@@ -21,7 +22,7 @@ public class BorderStyle {
 
     public int thickness() { return borderThickness; }
 
-    public Color color() { return borderColor; }
+    public Optional<Color> color() { return Optional.ofNullable(borderColor); }
 
     public BorderStyle withArcWidth(int borderArcWidth) { return new BorderStyle(borderArcWidth, borderArcHeight, borderThickness, borderColor); }
 

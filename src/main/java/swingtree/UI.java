@@ -300,9 +300,9 @@ public final class UI
     public static Style style() {
         return new Style(
                     new PaddingStyle(0,0,0,0),
-                    new BorderStyle(0,0,0, Color.BLACK),
-                    new BackgroundStyle(Color.WHITE, null),
-                    new ShadowStyle(0,0,5,5, Color.BLACK, null, false)
+                    new BorderStyle(0,0,0, null),
+                    new BackgroundStyle(null, null),
+                    new ShadowStyle(0,0,0,0, null, null, true)
                 );
     }
 

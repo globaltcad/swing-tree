@@ -1,6 +1,7 @@
 package swingtree.style;
 
 import java.awt.*;
+import java.util.Optional;
 
 public class BackgroundStyle
 {
@@ -12,9 +13,9 @@ public class BackgroundStyle
         this.outerBackgroundColor = outerBackgroundColor;
     }
 
-    public Color color() { return backgroundColor; }
+    public Optional<Color> color() { return Optional.ofNullable(backgroundColor); }
 
-    public Color outerColor() { return outerBackgroundColor; }
+    public Optional<Color> outerColor() { return Optional.ofNullable(outerBackgroundColor); }
 
     public BackgroundStyle withColor(Color backgroundColor) { return new BackgroundStyle(backgroundColor, outerBackgroundColor); }
 

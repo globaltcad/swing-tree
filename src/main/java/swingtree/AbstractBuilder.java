@@ -50,9 +50,13 @@ abstract class AbstractBuilder<I, C extends Component>
         UI.SETTINGS().getStyleSheet().ifPresent( styleSheet -> {
             if ( component instanceof JComponent ) {
                 ComponentExtension<?> extension = ComponentExtension.from((JComponent) component);
-                extension.setForegroundRenderer( delegate -> {
-                    delegate.render( styleSheet.run(delegate.component()) );
-                });
+                try {
+                    extension.setForegroundRenderer(delegate -> {
+                        delegate.render(styleSheet.run(delegate.component()));
+                    });
+                } catch ( Exception e ) {
+                    e.printStackTrace();
+                }
             }
         });
     }

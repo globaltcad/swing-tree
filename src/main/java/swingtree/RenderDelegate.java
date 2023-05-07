@@ -34,15 +34,23 @@ public class RenderDelegate<C extends JComponent>
     public C component() { return comp; }
 
     public void render(Style style){
-        _fillOuterBackground(style, style.background().outerColor());
-        _fillBackground(style, style.background().color());
-        _renderShadows(style, comp, g2d);
-        _drawBorder(style);
+        style.background().outerColor().ifPresent(outerColor -> {
+            _fillOuterBackground(style, outerColor);
+        });
+        style.background().color().ifPresent(color -> {
+            _fillBackground(style, color);
+        });
+        style.shadow().color().ifPresent(color -> {
+            _renderShadows(style, comp, g2d, color);
+        });
+        style.border().color().ifPresent( color -> {
+            _drawBorder(style, color);
+        });
     }
 
-    private void _drawBorder(Style style) {
+    private void _drawBorder(Style style, Color color) {
         if ( style.border().thickness() > 0 ) {
-            g2d.setColor(style.border().color());
+            g2d.setColor(color);
             g2d.setStroke(new BasicStroke(style.border().thickness()));
             g2d.drawRoundRect(
                     style.padding().left(), style.padding().top(),
@@ -50,18 +58,18 @@ public class RenderDelegate<C extends JComponent>
                     comp.getHeight() - style.padding().top() - style.padding().bottom(),
                     (style.border().arcWidth()  + (style.border().thickness() == 1 ? 0 : style.border().thickness()+1)),
                     (style.border().arcHeight() + (style.border().thickness() == 1 ? 0 : style.border().thickness()+1))
-            );
+                );
             g2d.drawRoundRect(
                     style.padding().left(), style.padding().top(),
                     comp.getWidth() - style.padding().left() - style.padding().right(),
                     comp.getHeight() - style.padding().top() - style.padding().bottom(),
                     (style.border().arcWidth() +2),
                     (style.border().arcHeight()+2)
-            );
+                );
         }
     }
 
-    private void _fillBackground(Style style, Color color ) {
+    private void _fillBackground( Style style, Color color ) {
         // Check if the color is transparent
         if ( color.getAlpha() == 0 )
             return;
@@ -75,7 +83,7 @@ public class RenderDelegate<C extends JComponent>
         );
     }
 
-    private void _fillOuterBackground(Style style, Color color ) {
+    private void _fillOuterBackground( Style style, Color color ) {
         // Check if the color is transparent
         if ( color.getAlpha() == 0 )
             return;
@@ -104,11 +112,12 @@ public class RenderDelegate<C extends JComponent>
     private static void _renderShadows(
             Style style,
             JComponent comp,
-            Graphics2D g2d
+            Graphics2D g2d,
+            Color shadowColor
     ) {
         // First let's check if we need to render any shadows at all
         // Is the shadow color transparent?
-        if ( style.shadow().color().getAlpha() == 0 )
+        if ( shadowColor.getAlpha() == 0 )
             return;
 
         // Calculate the shadow box bounds based on the padding and border thickness
@@ -190,7 +199,7 @@ public class RenderDelegate<C extends JComponent>
         Graphics2D g2d
     ) {
         Graphics2D g2d2 = (Graphics2D) g2d.create();
-        g2d2.setColor(style.shadow().color());
+        g2d2.setColor(style.shadow().color().orElse(Color.BLACK));
         if ( !style.shadow().inset() ) {
             baseArea.subtract(new Area(outerShadowBox));
             g2d2.fill(baseArea);
@@ -295,11 +304,11 @@ public class RenderDelegate<C extends JComponent>
         Color outerColor;
         Color shadowBackgroundColor = new Color(0,0,0,0);
         if (style.shadow().inset()) {
-            innerColor = style.shadow().color();
+            innerColor = style.shadow().color().orElse(Color.BLACK);
             outerColor = shadowBackgroundColor;
         } else {
             innerColor = shadowBackgroundColor;
-            outerColor = style.shadow().color();
+            outerColor = style.shadow().color().orElse(Color.BLACK);
         }
         RadialGradientPaint cornerPaint;
         float gradientStart = (float) gradientStartOffset / cr;
@@ -428,11 +437,11 @@ public class RenderDelegate<C extends JComponent>
         Color outerColor;
         Color shadowBackgroundColor = new Color(0,0,0,0);
         if (style.shadow().inset()) {
-            innerColor = style.shadow().color();
+            innerColor = style.shadow().color().orElse(Color.BLACK);
             outerColor = shadowBackgroundColor;
         } else {
             innerColor = shadowBackgroundColor;
-            outerColor = style.shadow().color();
+            outerColor = style.shadow().color().orElse(Color.BLACK);
         }
         LinearGradientPaint edgePaint;
         // distance between start and end of gradient

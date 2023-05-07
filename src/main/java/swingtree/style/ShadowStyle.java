@@ -1,6 +1,7 @@
 package swingtree.style;
 
 import java.awt.*;
+import java.util.Optional;
 
 public class ShadowStyle
 {
@@ -30,9 +31,9 @@ public class ShadowStyle
 
     public int spreadRadius() { return shadowSpreadRadius; }
 
-    public Color color() { return shadowColor; }
+    public Optional<Color> color() { return Optional.ofNullable(shadowColor); }
 
-    public Color backgroundColor() { return shadowBackgroundColor; }
+    public Optional<Color> backgroundColor() { return Optional.ofNullable(shadowBackgroundColor); }
 
     public boolean inset() { return shadowInset; }
 
