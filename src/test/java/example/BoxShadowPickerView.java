@@ -99,7 +99,7 @@ public class BoxShadowPickerView extends UI.Panel
                         it.style()
                          .innerBackground(vm.backgroundColor().get())
                          .background(vm.outerBackgroundColor().get())
-                         .background( g2d -> {
+                         .backgroundRenderer(g2d -> {
                              if ( vm.drawSmiley().is(false) ) return;
                              int w = it.component().getWidth() - vm.paddingLeft().get() - vm.paddingRight().get() - 100;
                              int h = it.component().getHeight() - vm.paddingTop().get() - vm.paddingBottom().get() - 100;
@@ -118,8 +118,8 @@ public class BoxShadowPickerView extends UI.Panel
                          .shadowBlurRadius(vm.shadowBlurRadius().get())
                          .shadowSpreadRadius(vm.shadowSpreadRadius().get())
                          .shadowInset(vm.shadowInset().get())
-                         .border(vm.borderThickness().get())
-                         .border(vm.borderColor().get())
+                         .borderWidth(vm.borderThickness().get())
+                         .borderColor(vm.borderColor().get())
                     )
                 )
             )
@@ -129,8 +129,13 @@ public class BoxShadowPickerView extends UI.Panel
             .add(GROW,
                 scrollPane()
                 .add(
-                    textArea(vm.code())
-                    .withStyle( it -> it.style().font(new Font("Monospaced", Font.PLAIN, 15)) )
+                    textArea(vm.code()).isEditableIf(false)
+                    .withStyle( it ->
+                        it.style()
+                            .font(new Font("Monospaced", Font.PLAIN, 15))
+                            .fontColor(Color.BLUE.darker())
+                            .fontSelectionColor(Color.CYAN)
+                    )
                 )
             )
         );

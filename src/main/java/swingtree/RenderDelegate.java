@@ -3,6 +3,7 @@ package swingtree;
 import swingtree.style.Style;
 
 import javax.swing.*;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
@@ -67,6 +68,11 @@ public class RenderDelegate<C extends JComponent>
 
             if ( style.shadow().color().isPresent() )
                 _comp.setOpaque( false );
+
+            if ( _comp instanceof JTextComponent ) {
+                if (style.font().selectionColor().isPresent())
+                    ((JTextComponent) _comp).setSelectionColor(style.font().selectionColor().get());
+            }
         }
 
         style.background().color().ifPresent(outerColor -> {

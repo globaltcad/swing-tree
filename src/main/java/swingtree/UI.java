@@ -303,7 +303,7 @@ public final class UI
                     new BorderStyle(0,0,0, null),
                     new BackgroundStyle(null, null, null),
                     new ShadowStyle(0,0,0,0, null, true),
-                    new FontStyle("", 0, 0, 0, Collections.emptyList(), null, null)
+                    new FontStyle("", 0, 0, 0, Collections.emptyList(), null, null, null)
                 );
     }
 

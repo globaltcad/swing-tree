@@ -37,10 +37,10 @@ class Style_Sheet_Spec extends Specification
                                  it.style().borderRadius(3)
                              );
                              apply(type(JButton.class), it ->
-                                 it.style().border(7)
+                                 it.style().borderWidth(7)
                              );
                              apply(type(JPanel.class), it ->
-                                it.style().border(Color.GREEN)
+                                it.style().borderColor(Color.GREEN)
                              );
                          }
                      }
@@ -210,7 +210,7 @@ class Style_Sheet_Spec extends Specification
                         it.style().borderRadius(3)
                     );
                     apply(group("B").inherits("A").type(JPanel.class), it ->
-                        it.style().border(Color.GREEN)
+                        it.style().borderColor(Color.GREEN)
                     );
                 }
             }
@@ -231,7 +231,7 @@ class Style_Sheet_Spec extends Specification
                         it.style().borderRadius(3)
                     );
                     apply(group("A"), it ->
-                        it.style().border(Color.GREEN)
+                        it.style().borderColor(Color.GREEN)
                     );
                 }
             }
@@ -403,7 +403,7 @@ class Style_Sheet_Spec extends Specification
                 @Override
                 protected void declaration() {
                     apply(group("Gradient"), it ->
-                        it.style().background(g2d -> {
+                        it.style().backgroundRenderer(g2d -> {
                             // Let's render a gradient:
                             var gradient = new GradientPaint(0, 0, Color.RED, 0, 100, Color.BLUE);
                             g2d.setPaint(gradient);
@@ -411,7 +411,7 @@ class Style_Sheet_Spec extends Specification
                         })
                     );
                     apply(group("ChessBoard"), it ->
-                        it.style().background(g2d -> {
+                        it.style().backgroundRenderer(g2d -> {
                             var w = it.component().getWidth() / 8;// We render a checkerboard pattern!
                             var h = it.component().getHeight() / 8;
                             for (var i = 0; i < 8; i++) {

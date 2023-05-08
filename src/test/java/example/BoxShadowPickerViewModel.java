@@ -86,38 +86,36 @@ public class BoxShadowPickerViewModel
 
     private void createCode() {
         code.set(
-            "panel(FILL).withBorderTitled(\"Preview\")\n" +
-            ".add(GROW,\n" +
-            "    panel(FILL)\n" +
-            "    .withStyle( it ->\n" +
-            "        it.style()\n" +
-            "         .innerBackground("+ str(backgroundColor) + ")\n" +
-            "         .background(" + str(outerBackgroundColor) + ")\n" +
+            "panel(FILL)\n" +
+            ".withStyle( it ->\n" +
+            "    it.style()\n" +
+            "     .innerBackground("+ str(backgroundColor) + ")\n" +
+            "     .background(" + str(outerBackgroundColor) + ")\n" +
             ( drawSmiley().is(false) ? "" :
-            "         .background( g2d -> {\n" +
-            "             if ( vm.drawSmiley().is(false) ) return;\n" +
-            "             int w = it.component().getWidth() - " + str(paddingLeft) + " - " + str(paddingRight) + " - 100;\n" +
-            "             int h = it.component().getHeight() - " + str(paddingTop) + " - " + str(paddingBottom) + " - 100;\n" +
-            "             int x = " + str(paddingLeft) + " + 50;\n" +
-            "             int y = " + str(paddingTop) + " + 50;\n" +
-            "             drawASmiley(g2d, x, y, w, h);\n" +
-            "         })\n"
+            "     .background( g2d -> {\n" +
+            "         if ( vm.drawSmiley().is(false) ) return;\n" +
+            "         int w = it.component().getWidth() - " + str(paddingLeft) + " - " + str(paddingRight) + " - 100;\n" +
+            "         int h = it.component().getHeight() - " + str(paddingTop) + " - " + str(paddingBottom) + " - 100;\n" +
+            "         int x = " + str(paddingLeft) + " + 50;\n" +
+            "         int y = " + str(paddingTop) + " + 50;\n" +
+            "         drawASmiley(g2d, x, y, w, h);\n" +
+            "     })\n"
             ) +
-            ( paddingTop.is(0) ? "" : "         .padTop(" + str(paddingTop) + ")\n" ) +
-            ( paddingLeft.is(0) ? "" : "         .padLeft(" + str(paddingLeft) + ")\n" ) +
-            ( paddingRight.is(0) ? "" : "         .padRight(" + str(paddingRight) + ")\n" ) +
-            ( paddingBottom.is(0) ? "" : "         .padBottom(" + str(paddingBottom) + ")\n" ) +
-            ( borderArcWidth.is(0) && borderArcHeight.is(0) ? "" : "         .borderRadius(" + str(borderArcWidth) + ", " + str(borderArcHeight) + ")\n" ) +
-            ( borderThickness.is(0) ? "" : "         .border(" + str(borderThickness) + ")\n" ) +
-            "         .border(" + str(borderColor) + ")\n" +
-            "         .shadowColor(" + str(shadowColor) + ")\n" +
-            ( horizontalShadowOffset.is(0) ? "" : "         .shadowHorizontalOffset(" + str(horizontalShadowOffset) + ")\n" ) +
-            ( verticalShadowOffset.is(0) ? "" : "         .shadowVerticalOffset(" + str(verticalShadowOffset) + ")\n" ) +
-            ( shadowBlurRadius.is(0) ? "" : "         .shadowBlurRadius(" + str(shadowBlurRadius) + ")\n" ) +
-            ( shadowSpreadRadius.is(0) ? "" : "         .shadowSpreadRadius(" + str(shadowSpreadRadius) + ")\n" ) +
-            "         .shadowInset(" + str(shadowInset) + ")\n" +
-            "    )\n" +
-            ")" + ( drawSmiley.is(false) ? "" : "\n\n...\n\n" +
+            ( paddingTop.is(0) ? "" : "     .padTop(" + str(paddingTop) + ")\n" ) +
+            ( paddingLeft.is(0) ? "" : "     .padLeft(" + str(paddingLeft) + ")\n" ) +
+            ( paddingRight.is(0) ? "" : "     .padRight(" + str(paddingRight) + ")\n" ) +
+            ( paddingBottom.is(0) ? "" : "     .padBottom(" + str(paddingBottom) + ")\n" ) +
+            ( borderArcWidth.is(0) && borderArcHeight.is(0) ? "" : "     .borderRadius(" + str(borderArcWidth) + ", " + str(borderArcHeight) + ")\n" ) +
+            ( borderThickness.is(0) ? "" : "     .borderWidth(" + str(borderThickness) + ")\n" ) +
+            "     .borderColor(" + str(borderColor) + ")\n" +
+            "     .shadowColor(" + str(shadowColor) + ")\n" +
+            ( horizontalShadowOffset.is(0) ? "" : "     .shadowHorizontalOffset(" + str(horizontalShadowOffset) + ")\n" ) +
+            ( verticalShadowOffset.is(0) ? "" : "     .shadowVerticalOffset(" + str(verticalShadowOffset) + ")\n" ) +
+            ( shadowBlurRadius.is(0) ? "" : "     .shadowBlurRadius(" + str(shadowBlurRadius) + ")\n" ) +
+            ( shadowSpreadRadius.is(0) ? "" : "     .shadowSpreadRadius(" + str(shadowSpreadRadius) + ")\n" ) +
+            "     .shadowInset(" + str(shadowInset) + ")\n" +
+            ")\n" +
+            ( drawSmiley.is(false) ? "" : "\n\n...\n\n" +
                     "void drawASmiley(Graphics2D g2d, int x, int y, int w, int h) {\n" +
                     "    // We crop the rectangle so that t is centered and squared:\n" +
                     "    int crop = Math.abs( w - h ) / 2;\n" +

@@ -28,7 +28,7 @@ public class BorderStyle {
 
     public BorderStyle withArcHeight(int borderArcHeight) { return new BorderStyle(borderArcWidth, borderArcHeight, borderThickness, borderColor); }
 
-    public BorderStyle withThickness(int borderThickness) { return new BorderStyle(borderArcWidth, borderArcHeight, borderThickness, borderColor); }
+    public BorderStyle withWidth(int borderThickness) { return new BorderStyle(borderArcWidth, borderArcHeight, borderThickness, borderColor); }
 
     public BorderStyle withColor(Color borderColor) { return new BorderStyle(borderArcWidth, borderArcHeight, borderThickness, borderColor); }
 

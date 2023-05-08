@@ -15,7 +15,6 @@ public class SimpleStyleSheet extends StyleSheet
                 .shadowColor(new Color(0, 0.5f, 0, 0.75f))
                 .shadowBlurRadius(3)
                 .shadowSpreadRadius(2)
-                .shadowBackgroundColor(new Color(0, 0, 0, 0.25f))
                 .shadowInset(false)
                 .pad(0)
         );
