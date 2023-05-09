@@ -11,7 +11,7 @@ public class SimpleStyleSheet extends StyleSheet
     protected void declaration() {
         apply(type(JComponent.class), it ->
             it.style()
-                .innerBackground(new Color(0, 1, 1, 0.25f))
+                .innerBackgroundColor(new Color(0, 1, 1, 0.25f))
                 .shadowColor(new Color(0, 0.5f, 0, 0.75f))
                 .shadowBlurRadius(3)
                 .shadowSpreadRadius(2)

@@ -3,6 +3,7 @@ package swingtree.style;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.font.TextAttribute;
+import java.text.AttributedCharacterIterator;
 import java.util.*;
 import java.util.List;
 
@@ -113,5 +114,62 @@ public class FontStyle
             attributes.put(TextAttribute.BACKGROUND, _backgroundColor);
 
         return existingFont.deriveFont(attributes);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int hash = 7;
+        hash = 97 * hash + Objects.hashCode(_name);
+        hash = 97 * hash + _size;
+        hash = 97 * hash + _style;
+        hash = 97 * hash + _weight;
+        hash = 97 * hash + Objects.hashCode(_attributes);
+        hash = 97 * hash + Objects.hashCode(_color);
+        hash = 97 * hash + Objects.hashCode(_backgroundColor);
+        hash = 97 * hash + Objects.hashCode(_selectionColor);
+        return hash;
+    }
+
+    @Override
+    public boolean equals( Object obj )
+    {
+        if ( obj == null )
+            return false;
+        if ( getClass() != obj.getClass() )
+            return false;
+        final FontStyle other = (FontStyle)obj;
+        if ( !Objects.equals(_name, other._name) )
+            return false;
+        if ( _size != other._size )
+            return false;
+        if ( _style != other._style )
+            return false;
+        if ( _weight != other._weight )
+            return false;
+        if ( !Objects.equals(_attributes, other._attributes) )
+            return false;
+        if ( !Objects.equals(_color, other._color) )
+            return false;
+        if ( !Objects.equals(_backgroundColor, other._backgroundColor) )
+            return false;
+        if ( !Objects.equals(_selectionColor, other._selectionColor) )
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "FontStyle[" +
+                    "name="            + _name + ", " +
+                    "size="            + _size + ", " +
+                    "style="           + _style + ", " +
+                    "weight="          + _weight + ", " +
+                    "attributes=["     + _attributes.stream().map(AttributedCharacterIterator.Attribute::toString).reduce( (a, b) -> a + "," + b ).orElse("") + "], " +
+                    "color="           + StyleUtility.toString(_color) + ", " +
+                    "backgroundColor=" + StyleUtility.toString(_backgroundColor) + ", " +
+                    "selectionColor="  + StyleUtility.toString(_selectionColor) +
+                "]";
     }
 }

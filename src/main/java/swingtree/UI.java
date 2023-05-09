@@ -300,7 +300,7 @@ public final class UI
     public static Style style() {
         return new Style(
                     new PaddingStyle(0,0,0,0),
-                    new BorderStyle(0,0,0, null),
+                    new BorderStyle(0,0,-1, null),
                     new BackgroundStyle(null, null, null),
                     new ShadowStyle(0,0,0,0, null, true),
                     new FontStyle("", 0, 0, 0, Collections.emptyList(), null, null, null)

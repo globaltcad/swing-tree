@@ -1,6 +1,7 @@
 package swingtree.style;
 
 import java.awt.*;
+import java.util.Objects;
 import java.util.Optional;
 
 public class ShadowStyle
@@ -51,5 +52,43 @@ public class ShadowStyle
     ShadowStyle withColor(Color shadowColor) { return new ShadowStyle(horizontalShadowOffset, verticalShadowOffset, shadowBlurRadius, shadowSpreadRadius, shadowColor, shadowInset); }
 
     ShadowStyle withInset(boolean shadowInset) { return new ShadowStyle(horizontalShadowOffset, verticalShadowOffset, shadowBlurRadius, shadowSpreadRadius, shadowColor, shadowInset); }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + horizontalShadowOffset;
+        hash = 31 * hash + verticalShadowOffset;
+        hash = 31 * hash + shadowBlurRadius;
+        hash = 31 * hash + shadowSpreadRadius;
+        hash = 31 * hash + Objects.hashCode(shadowColor);
+        hash = 31 * hash + (shadowInset ? 1 : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if ( obj == null ) return false;
+        if ( obj == this ) return true;
+        if ( obj.getClass() != getClass() ) return false;
+        ShadowStyle rhs = (ShadowStyle) obj;
+        return horizontalShadowOffset == rhs.horizontalShadowOffset &&
+               verticalShadowOffset   == rhs.verticalShadowOffset   &&
+               shadowBlurRadius       == rhs.shadowBlurRadius       &&
+               shadowSpreadRadius     == rhs.shadowSpreadRadius     &&
+               Objects.equals(shadowColor, rhs.shadowColor)         &&
+               shadowInset            == rhs.shadowInset;
+    }
+
+    @Override
+    public String toString() {
+        return "ShadowStyle[" +
+            "horizontalOffset=" + horizontalShadowOffset + ", " +
+            "verticalOffset="   + verticalShadowOffset + ", " +
+            "blurRadius="       + shadowBlurRadius + ", " +
+            "spreadRadius="     + shadowSpreadRadius + ", " +
+            "color="            + StyleUtility.toString(shadowColor) + ", " +
+            "shadowInset="            + shadowInset +
+        "]";
+    }
 
 }

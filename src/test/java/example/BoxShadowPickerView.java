@@ -97,8 +97,8 @@ public class BoxShadowPickerView extends UI.Panel
                     .withRepaintIf(vm.repaint())
                     .withStyle( it ->
                         it.style()
-                         .innerBackground(vm.backgroundColor().get())
-                         .background(vm.outerBackgroundColor().get())
+                         .innerBackgroundColor(vm.backgroundColor().get())
+                         .backgroundColor(vm.outerBackgroundColor().get())
                          .backgroundRenderer(g2d -> {
                              if ( vm.drawSmiley().is(false) ) return;
                              int w = it.component().getWidth() - vm.paddingLeft().get() - vm.paddingRight().get() - 100;
@@ -124,17 +124,20 @@ public class BoxShadowPickerView extends UI.Panel
                 )
             )
         )
-        .add(GROW,
-            panel(FILL).withBorderTitled("Code")
+        .add(GROW.and(PUSH_X),
+            panel(FILL.and(INS(16))).withBorderTitled("Code")
             .add(GROW,
-                scrollPane()
+                scrollPane().withStyle( it -> it.style().borderWidth(0) )
+                .withStyle( s -> s.style().borderWidth(0).borderColor(Color.BLUE) )
                 .add(
                     textArea(vm.code()).isEditableIf(false)
                     .withStyle( it ->
                         it.style()
                             .font(new Font("Monospaced", Font.PLAIN, 15))
                             .fontColor(Color.BLUE.darker())
-                            .fontSelectionColor(Color.CYAN)
+                            .fontSelectionColor(new Color(20, 200, 100, 100))
+                            .borderWidth(0)
+                            .borderColor(Color.GREEN)
                     )
                 )
             )

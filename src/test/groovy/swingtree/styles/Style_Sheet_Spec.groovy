@@ -132,10 +132,10 @@ class Style_Sheet_Spec extends Specification
                         @Override
                         protected void declaration() {
                              apply(group("group1"), it ->
-                                 it.style().innerBackground(Color.BLUE)
+                                 it.style().innerBackgroundColor(Color.BLUE)
                              );
                              apply(group("group2"), it ->
-                                 it.style().background(Color.CYAN)
+                                 it.style().backgroundColor(Color.CYAN)
                              );
                          }
                      }
@@ -170,7 +170,7 @@ class Style_Sheet_Spec extends Specification
                                  it.style().pad(1, 2, 3, 4)
                              );
                              apply(group("group2").inherits("group1"), it ->
-                                 it.style().background(Color.CYAN)
+                                 it.style().backgroundColor(Color.CYAN)
                              );
                          }
                      }
@@ -254,7 +254,7 @@ class Style_Sheet_Spec extends Specification
         """
         given :
             var ss = new StyleSheet({
-                        UI.style().background(Color.RED)
+                        UI.style().backgroundColor(Color.RED)
                                   .border(11, Color.GREEN)
                                   .borderRadius(3)
                                   .pad(42)
@@ -268,7 +268,7 @@ class Style_Sheet_Spec extends Specification
                                  it.style().borderRadius(19)
                              );
                             apply(group("B").type(JSlider.class), it ->
-                                 it.style().background(Color.BLUE)
+                                 it.style().backgroundColor(Color.BLUE)
                              );
                             apply(group("B").type(JComponent.class), it ->
                                     it.style().shadowInset(true)

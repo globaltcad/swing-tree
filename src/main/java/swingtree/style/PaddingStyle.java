@@ -30,4 +30,37 @@ public class PaddingStyle
 
     PaddingStyle withBottom(int bottom) { return new PaddingStyle(top, left, right, bottom); }
 
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + top;
+        hash = 31 * hash + right;
+        hash = 31 * hash + bottom;
+        hash = 31 * hash + left;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if ( obj == null ) return false;
+        if ( obj == this ) return true;
+        if ( obj.getClass() != getClass() ) return false;
+        PaddingStyle rhs = (PaddingStyle) obj;
+        return top    == rhs.top    &&
+               right  == rhs.right  &&
+               bottom == rhs.bottom &&
+               left   == rhs.left;
+    }
+
+    @Override
+    public String toString() {
+        return "PaddingStyle[" +
+                    "top="    + top    + ", " +
+                    "right="  + right  + ", " +
+                    "bottom=" + bottom + ", " +
+                    "left="   + left   +
+                "]";
+    }
+
 }

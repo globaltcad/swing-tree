@@ -54,8 +54,13 @@ public class RenderDelegate<C extends JComponent>
                 is not opaque, so that the background color is visible.
                 ... and so on.
             */
-            if ( style.border().color().isPresent() && style.border().thickness() > 0 )
+            if ( style.border().thickness() >= 0 )
                 _comp.setBorder( BorderFactory.createEmptyBorder() );
+
+            if ( style.border().color().isPresent() && style.border().thickness() > 0 ) {
+                if ( !style.background().color().isPresent() )
+                    style = style.backgroundColor( _comp.getBackground() );
+            }
 
             if ( style.background().innerColor().isPresent() )
                 _comp.setOpaque( false );
@@ -75,6 +80,13 @@ public class RenderDelegate<C extends JComponent>
             }
         }
 
+        _comp.setFont( style.font().createDerivedFrom(_comp.getFont()) );
+
+        _render( style );
+    }
+
+    private void _render(Style style) {
+
         style.background().color().ifPresent(outerColor -> {
             _fillOuterBackground(style, outerColor);
         });
@@ -90,8 +102,6 @@ public class RenderDelegate<C extends JComponent>
         style.border().color().ifPresent( color -> {
             _drawBorder(style, color);
         });
-
-        _comp.setFont( style.font().createDerivedFrom(_comp.getFont()) );
     }
 
     private void _drawBorder(Style style, Color color) {

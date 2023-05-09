@@ -89,8 +89,8 @@ public class BoxShadowPickerViewModel
             "panel(FILL)\n" +
             ".withStyle( it ->\n" +
             "    it.style()\n" +
-            "     .innerBackground("+ str(backgroundColor) + ")\n" +
-            "     .background(" + str(outerBackgroundColor) + ")\n" +
+            "     .innerBackgroundColor("+ str(backgroundColor) + ")\n" +
+            "     .backgroundColor(" + str(outerBackgroundColor) + ")\n" +
             ( drawSmiley().is(false) ? "" :
             "     .background( g2d -> {\n" +
             "         if ( vm.drawSmiley().is(false) ) return;\n" +
