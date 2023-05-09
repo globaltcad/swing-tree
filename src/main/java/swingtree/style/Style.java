@@ -389,7 +389,7 @@ public final class Style
      */
     public Style shadowColor( String colorString ) { return _withShadow(_shadow.withColor(_colorFrom(colorString))); }
 
-    public Style shadowInset( boolean b ) { return _withShadow(_shadow.withInset(b)); }
+    public Style shadowIsInset(boolean b ) { return _withShadow(_shadow.withIsInset(b)); }
 
     /**
      *  Returns a new {@link Style} with the provided font name and size.

@@ -113,7 +113,7 @@ public class BoxShadowPickerViewModel
             ( verticalShadowOffset.is(0) ? "" : "     .shadowVerticalOffset(" + str(verticalShadowOffset) + ")\n" ) +
             ( shadowBlurRadius.is(0) ? "" : "     .shadowBlurRadius(" + str(shadowBlurRadius) + ")\n" ) +
             ( shadowSpreadRadius.is(0) ? "" : "     .shadowSpreadRadius(" + str(shadowSpreadRadius) + ")\n" ) +
-            "     .shadowInset(" + str(shadowInset) + ")\n" +
+            "     .shadowIsInset(" + str(shadowInset) + ")\n" +
             ")\n" +
             ( drawSmiley.is(false) ? "" : "\n\n...\n\n" +
                     "void drawASmiley(Graphics2D g2d, int x, int y, int w, int h) {\n" +

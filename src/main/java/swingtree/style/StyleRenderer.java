@@ -117,7 +117,7 @@ public class StyleRenderer<C extends JComponent>
         int h = comp.getHeight() - style.padding().top() - style.padding().bottom() - style.border().thickness();
 
         int blurRadius = style.shadow().blurRadius();
-        int spreadRadius = !style.shadow().inset() ? style.shadow().spreadRadius() : -style.shadow().spreadRadius();
+        int spreadRadius = !style.shadow().isOutset() ? style.shadow().spreadRadius() : -style.shadow().spreadRadius();
 
         RoundRectangle2D.Float baseRect = new RoundRectangle2D.Float(
                                                         style.padding().left() + (float) style.border().thickness() /2,
@@ -157,7 +157,7 @@ public class StyleRenderer<C extends JComponent>
         Area shadowArea = new Area(outerShadowBox);
         Area baseArea = new Area(baseRect);
 
-        if ( !style.shadow().inset() )
+        if ( !style.shadow().isOutset() )
             shadowArea.intersect(baseArea);
         else
             shadowArea.subtract(baseArea);
@@ -190,7 +190,7 @@ public class StyleRenderer<C extends JComponent>
     ) {
         Graphics2D g2d2 = (Graphics2D) g2d.create();
         g2d2.setColor(style.shadow().color().orElse(Color.BLACK));
-        if ( !style.shadow().inset() ) {
+        if ( !style.shadow().isOutset() ) {
             baseArea.subtract(new Area(outerShadowBox));
             g2d2.fill(baseArea);
         } else {
@@ -293,7 +293,7 @@ public class StyleRenderer<C extends JComponent>
         Color innerColor;
         Color outerColor;
         Color shadowBackgroundColor = new Color(0,0,0,0);
-        if (style.shadow().inset()) {
+        if (style.shadow().isOutset()) {
             innerColor = style.shadow().color().orElse(Color.BLACK);
             outerColor = shadowBackgroundColor;
         } else {
@@ -426,7 +426,7 @@ public class StyleRenderer<C extends JComponent>
         Color innerColor;
         Color outerColor;
         Color shadowBackgroundColor = new Color(0,0,0,0);
-        if (style.shadow().inset()) {
+        if (style.shadow().isOutset()) {
             innerColor = style.shadow().color().orElse(Color.BLACK);
             outerColor = shadowBackgroundColor;
         } else {

@@ -258,7 +258,7 @@ class Style_Sheet_Spec extends Specification
                                   .border(11, Color.GREEN)
                                   .borderRadius(3)
                                   .pad(42)
-                                  .shadowInset(false)
+                                  .shadowIsInset(false)
                                   .shadowBlurRadius(22)
                                   .shadowSpreadRadius(6)
                      }) {
@@ -271,7 +271,7 @@ class Style_Sheet_Spec extends Specification
                                  it.style().backgroundColor(Color.BLUE)
                              );
                             apply(group("B").type(JComponent.class), it ->
-                                    it.style().shadowInset(true)
+                                    it.style().shadowIsInset(true)
                              );
                          }
                      }
@@ -297,7 +297,7 @@ class Style_Sheet_Spec extends Specification
             s1.padding().right() == 42
             s1.padding().bottom() == 42
             s1.padding().left() == 42
-            s1.shadow().inset() == true
+            s1.shadow().isInset() == true
             s1.shadow().blurRadius() == 22
             s1.shadow().spreadRadius() == 6
             s2.background().color().get() == Color.RED
@@ -309,7 +309,7 @@ class Style_Sheet_Spec extends Specification
             s2.padding().right() == 42
             s2.padding().bottom() == 42
             s2.padding().left() == 42
-            s2.shadow().inset() == false
+            s2.shadow().isInset() == false
             s2.shadow().blurRadius() == 22
             s2.shadow().spreadRadius() == 6
             s3.background().color().get() == Color.BLUE
@@ -321,7 +321,7 @@ class Style_Sheet_Spec extends Specification
             s3.padding().right() == 42
             s3.padding().bottom() == 42
             s3.padding().left() == 42
-            s3.shadow().inset() == true
+            s3.shadow().isInset() == true
             s3.shadow().blurRadius() == 22
             s3.shadow().spreadRadius() == 6
             s4.background().color().get() == Color.RED
@@ -333,7 +333,7 @@ class Style_Sheet_Spec extends Specification
             s4.padding().right() == 42
             s4.padding().bottom() == 42
             s4.padding().left() == 42
-            s4.shadow().inset() == false
+            s4.shadow().isInset() == false
             s4.shadow().blurRadius() == 22
             s4.shadow().spreadRadius() == 6
             s5.background().color().get() == Color.RED
@@ -345,7 +345,7 @@ class Style_Sheet_Spec extends Specification
             s5.padding().right() == 42
             s5.padding().bottom() == 42
             s5.padding().left() == 42
-            s5.shadow().inset() == true
+            s5.shadow().isInset() == true
             s5.shadow().blurRadius() == 22
             s5.shadow().spreadRadius() == 6
     }

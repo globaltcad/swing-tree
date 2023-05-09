@@ -102,7 +102,7 @@ class Styles_Spec extends Specification
                                             "blurRadius=0, " +
                                             "spreadRadius=0, " +
                                             "color=rgba(255,255,0,255), " +
-                                            "shadowInset=true" +
+                                            "isInset=false" +
                                         "], " +
                                         "FontStyle[" +
                                             "name=Times New Roman, " +
