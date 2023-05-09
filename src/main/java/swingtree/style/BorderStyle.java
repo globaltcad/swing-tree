@@ -58,7 +58,7 @@ public class BorderStyle
         return _borderArcWidth  == rhs._borderArcWidth  &&
                _borderArcHeight == rhs._borderArcHeight &&
                _borderWidth     == rhs._borderWidth     &&
-               _borderColor.equals(rhs._borderColor);
+               Objects.equals(_borderColor, rhs._borderColor);
     }
 
     @Override

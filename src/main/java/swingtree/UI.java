@@ -3945,14 +3945,6 @@ public final class UI
         This is especially important to allow for declarative UI.
     */
 
-    static <C extends JComponent> void _registerBackgroundRenderingFor( C comp, Consumer<RenderDelegate<C>> renderer ) {
-        ComponentExtension.from(comp).setBackgroundRenderer( renderer );
-    }
-
-    static <C extends JComponent> void _registerForegroundRenderingFor( C comp, Consumer<RenderDelegate<C>> renderer ) {
-        ComponentExtension.from(comp).setForegroundRenderer( renderer );
-    }
-
     private static <C extends JComponent> void _render( C comp, Graphics g, Runnable superPaint ) {
         ComponentExtension.from(comp).render( g, superPaint );
     }

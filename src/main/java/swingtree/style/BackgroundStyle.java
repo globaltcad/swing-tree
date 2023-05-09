@@ -1,6 +1,7 @@
 package swingtree.style;
 
 import java.awt.*;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -33,9 +34,7 @@ public class BackgroundStyle
     public BackgroundStyle withBackgroundRenderer(Consumer<Graphics2D> renderer) { return new BackgroundStyle(_innerColor, _color, renderer); }
 
     @Override
-    public int hashCode() {
-        return _innerColor.hashCode() + _color.hashCode() + _renderer.hashCode();
-    }
+    public int hashCode() { return Objects.hash( _innerColor, _color, _renderer ); }
 
     @Override
     public boolean equals(Object obj) {
@@ -43,9 +42,9 @@ public class BackgroundStyle
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
         BackgroundStyle rhs = (BackgroundStyle) obj;
-        return _innerColor.equals(rhs._innerColor) &&
-               _color.equals(rhs._color) &&
-               _renderer.equals(rhs._renderer);
+        return Objects.equals(_innerColor, rhs._innerColor) &&
+               Objects.equals(_color, rhs._color) &&
+               Objects.equals(_renderer, rhs._renderer);
     }
 
     @Override

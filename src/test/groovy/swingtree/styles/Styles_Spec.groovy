@@ -114,4 +114,58 @@ class Styles_Spec extends Specification
                                         "]" +
                                     "]"
     }
+
+    def 'Style objects are value based (with respect to equality and hash code).'()
+    {
+        given : 'We first create a style with various properties:'
+            var style1 = UI.style()
+                                    .backgroundColor("red")
+                                    .innerBackgroundColor("green")
+                                    .borderColor("blue")
+                                    .borderRadius(12, 18)
+                                    .shadowColor("yellow")
+                                    .fontSelectionColor("cyan")
+                                    .fontColor("magenta")
+                                    .fontName("Times New Roman")
+                                    .fontSize(12)
+                                    .fontBold(true)
+                                    .fontUnderline(true)
+                                    .fontStrikeThrough(true)
+                                    .shadowSpreadRadius(12)
+                                    .shadowBlurRadius(42)
+
+        and : 'We then create a second style with the same properties:'
+            var style2 = UI.style()
+                                    .backgroundColor("red")
+                                    .innerBackgroundColor("green")
+                                    .borderColor("blue")
+                                    .borderRadius(12, 18)
+                                    .shadowColor("yellow")
+                                    .fontSelectionColor("cyan")
+                                    .fontColor("magenta")
+                                    .fontName("Times New Roman")
+                                    .fontSize(12)
+                                    .fontBold(true)
+                                    .fontUnderline(true)
+                                    .fontStrikeThrough(true)
+                                    .shadowSpreadRadius(12)
+                                    .shadowBlurRadius(42)
+        expect :
+                style1 == style2
+                style1.hashCode() == style2.hashCode()
+        and : 'Changing a property and then comparing the styles should return false:'
+                style1 != style2.fontBold(false)
+                style1.hashCode() != style2.fontBold(false).hashCode()
+                style1 != style2.shadowSpreadRadius(1)
+                style1.hashCode() != style2.shadowSpreadRadius(1).hashCode()
+                style1 != style2.shadowBlurRadius(1)
+                style1.hashCode() != style2.shadowBlurRadius(1).hashCode()
+        and : 'If we transform them both the same way then they will be equal:'
+                style1.fontBold(false) == style2.fontBold(false)
+                style1.fontBold(false).hashCode() == style2.fontBold(false).hashCode()
+                style1.shadowSpreadRadius(1) == style2.shadowSpreadRadius(1)
+                style1.shadowSpreadRadius(1).hashCode() == style2.shadowSpreadRadius(1).hashCode()
+                style1.shadowBlurRadius(1) == style2.shadowBlurRadius(1)
+                style1.shadowBlurRadius(1).hashCode() == style2.shadowBlurRadius(1).hashCode()
+    }
 }

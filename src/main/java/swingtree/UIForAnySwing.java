@@ -1513,31 +1513,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return this.withBackground( condition.get() ? colorIfTrue.orElseNull() : colorIfFalse.orElseNull() );
     }
 
-    /**
-     *  Use this to attach a custom background renderer to the UI component.
-     *  The renderer will be called every time the UI component is repainted.
-     *  This is in essence a convenience method, which avoids the need to extend the UI component
-     *  and override the {@link JComponent#paint(Graphics)} method.
-     *  <br>
-     *  This would be equivalent to:
-     *  <pre>{@code
-     *      class MyJComponent extends JComponent {
-     *          @Override public void paint( Graphics g ) { renderer.accept(g); super.paint(g); }
-     *      }
-     *  }</pre><br>
-     *
-     * @param renderer The renderer which should be called every time the UI component is repainted.
-     * @return This very instance, which enables builder-style method chaining.
-     */
-    public final I withBackground( Consumer<RenderDelegate<C>> renderer ) {
-        NullUtil.nullArgCheck(renderer, "renderer", Consumer.class);
-        UI._registerBackgroundRenderingFor( getComponent(), renderer );
-        return _this();
-    }
-
     public final I withStyle( Function<StyleDelegate<C>, Style> styler ) {
         NullUtil.nullArgCheck(styler, "styler", Function.class);
-        return this.withBackground( renderer -> renderer.renderStyle( s -> styler.apply(new StyleDelegate<>(getComponent(), s) )) );
+        ComponentExtension.from(getComponent()).addStyling(styler);
+        return _this();
     }
 
     /**
@@ -1672,28 +1651,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
             getComponent().setForeground(color.get());
         else
             getComponent().setForeground(baseColor.get());
-    }
-
-    /**
-     *  Use this to attach a custom foreground renderer to the UI component.
-     *  The renderer will be called every time the UI component is repainted.
-     *  This is in essence a convenience method, which avoids the need to extend the UI component
-     *  and override the {@link JComponent#paint(Graphics)} method.
-     *  <br>
-     *  This would be equivalent to:
-     *  <pre>{@code
-     *    class MyJComponent extends JComponent {
-     *      @Override public void paint( Graphics g ) { renderer.accept(g); super.paint(g); }
-     *    }
-     *  }</pre><br>
-     *
-     * @param renderer The renderer which should be called every time the UI component is repainted.
-     * @return This very instance, which enables builder-style method chaining.
-     */
-    public final I withForeground( Consumer<RenderDelegate<C>> renderer ) {
-        NullUtil.nullArgCheck(renderer, "renderer", Consumer.class);
-        UI._registerForegroundRenderingFor( getComponent(), renderer );
-        return _this();
     }
 
     private void _updateBackground(

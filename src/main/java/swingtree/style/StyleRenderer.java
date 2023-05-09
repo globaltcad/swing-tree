@@ -1,92 +1,34 @@
-package swingtree;
-
-import swingtree.style.Style;
+package swingtree.style;
 
 import javax.swing.*;
-import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.Objects;
-import java.util.function.Function;
 
 /**
- *  This is a simple wrapper as well as delegate for a Graphics2D object and
- *  a JComponent. It provides a fluent API for painting a component.
+ *  This used to smoothly render
+ *  custom graphics on top of Swing components without requiring
+ *  the user to override the paint method of the component.
+ *  This is especially important to allow for declarative UI.
  */
-public class RenderDelegate<C extends JComponent>
+public class StyleRenderer<C extends JComponent>
 {
     private enum Corner { TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT }
     private enum Side { TOP, RIGHT, BOTTOM, LEFT }
-    enum Layer { BACKGROUND, FOREGROUND }
 
     private final Graphics2D _g2d;
     private final C _comp;
-    private final Layer _layer;
 
 
-    RenderDelegate( Graphics2D g2d, C comp, Layer layer ) {
+    public StyleRenderer(Graphics2D g2d, C comp) {
         _g2d = Objects.requireNonNull(g2d);
         _comp = Objects.requireNonNull(comp);
-        _layer = Objects.requireNonNull(layer);
     }
 
-    public Graphics2D graphics() { return _g2d; }
-
-    public C component() { return _comp; }
-
-    public void renderStyle() {
-        this.renderStyle( s -> s );
-    }
-
-    public void renderStyle( Function<Style,Style> styler ){
-        Style style = styler.apply(UI.SETTINGS().getStyleSheet().map( ss -> ss.run(_comp) ).orElse(UI.style()));
-
-        if ( _layer == Layer.BACKGROUND ) {
-            /*
-                Note that in SwingTree we do not override the UI classes of Swing to apply styles.
-                Instead, we use the "ComponentExtension" class to render styles on components.
-                This is because we don't want to means with the current LaF of the application
-                and instead simply allow users to carefully replace the LaF with a custom one.
-                So when the user has set a border style, we remove the border of the component!
-                And if the user has set a background color, we make sure that the component
-                is not opaque, so that the background color is visible.
-                ... and so on.
-            */
-            if ( style.border().thickness() >= 0 )
-                _comp.setBorder( BorderFactory.createEmptyBorder() );
-
-            if ( style.border().color().isPresent() && style.border().thickness() > 0 ) {
-                if ( !style.background().color().isPresent() )
-                    style = style.backgroundColor( _comp.getBackground() );
-            }
-
-            if ( style.background().innerColor().isPresent() )
-                _comp.setOpaque( false );
-
-            if ( style.background().color().isPresent() )
-                _comp.setOpaque( false );
-
-            if ( style.background().renderer().isPresent() )
-                _comp.setOpaque( false );
-
-            if ( style.shadow().color().isPresent() )
-                _comp.setOpaque( false );
-
-            if ( _comp instanceof JTextComponent ) {
-                if (style.font().selectionColor().isPresent())
-                    ((JTextComponent) _comp).setSelectionColor(style.font().selectionColor().get());
-            }
-        }
-
-        _comp.setFont( style.font().createDerivedFrom(_comp.getFont()) );
-
-        _render( style );
-    }
-
-    private void _render(Style style) {
-
+    public void renderStyle( Style style )
+    {
         style.background().color().ifPresent(outerColor -> {
             _fillOuterBackground(style, outerColor);
         });

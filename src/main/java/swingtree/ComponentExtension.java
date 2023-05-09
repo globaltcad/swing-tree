@@ -1,10 +1,16 @@
 package swingtree;
 
+import swingtree.style.StyleRenderer;
+import swingtree.style.Style;
+import swingtree.style.StyleDelegate;
+
 import javax.swing.*;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  *  Is attached to UI components in the form of a client property.
@@ -26,46 +32,34 @@ public class ComponentExtension<C extends JComponent>
         return ext;
     }
 
-    static void makeSureComponentHasExtension(JComponent comp ) { from(comp); }
+    static void makeSureComponentHasExtension( JComponent comp ) { from(comp); }
 
     private final C _owner;
 
-    private Consumer<RenderDelegate<C>> _backgroundRenderer;
-    private Consumer<RenderDelegate<C>> _foregroundRenderer;
+    private Function<StyleDelegate<C>, Style> _styling = StyleDelegate::style;
 
     private List<Consumer<Graphics2D>> _animationRenderers;
 
-    private String[] _styleGroup = new String[0];
+    private String[] _styleGroups = new String[0];
 
 
     private ComponentExtension( C owner ) {
         _owner = Objects.requireNonNull(owner);
-        if ( _componentIsDeclaredInUI(_owner) )
-            this.setBackgroundRenderer(RenderDelegate::renderStyle);
     }
 
-    void setBackgroundRenderer( Consumer<RenderDelegate<C>> renderer ) {
+    void addStyling( Function<StyleDelegate<C>, Style> styler ) {
         checkIfIsDeclaredInUI();
-        if ( _backgroundRenderer != null )
-            _backgroundRenderer = _backgroundRenderer.andThen(Objects.requireNonNull(renderer));
-        else
-            _backgroundRenderer = Objects.requireNonNull(renderer);
-    }
-
-    void setForegroundRenderer( Consumer<RenderDelegate<C>> renderer ) {
-        checkIfIsDeclaredInUI();
-        if ( _foregroundRenderer != null )
-            _foregroundRenderer = _foregroundRenderer.andThen(Objects.requireNonNull(renderer));
-        else
-            _foregroundRenderer = Objects.requireNonNull(renderer);
+        _styling = _styling.andThen(s -> Objects.requireNonNull(styler).apply(new StyleDelegate<>(_owner, s)));
+        Style style = _calculateStyle();
+        _applyStyleToComponentState( style );
     }
 
     public void setStyleGroups( String... styleName ) {
-        _styleGroup = Objects.requireNonNull(styleName);
+        _styleGroups = Objects.requireNonNull(styleName);
     }
 
     public List<String> getStyleGroups() {
-        return java.util.Arrays.asList(_styleGroup);
+        return java.util.Arrays.asList(_styleGroups);
     }
 
     public void clearAnimationRenderer() {
@@ -90,9 +84,12 @@ public class ComponentExtension<C extends JComponent>
 
         // We enable antialiasing:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
-        if ( _backgroundRenderer != null )
-            _backgroundRenderer.accept( new RenderDelegate<>( g2d, _owner, RenderDelegate.Layer.BACKGROUND ) );
-
+        {
+            Style style = _calculateStyle();
+            _applyStyleToComponentState( style );
+            if ( _componentIsDeclaredInUI(_owner) )
+                new StyleRenderer<>( g2d, _owner ).renderStyle( style );
+        }
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
 
@@ -101,9 +98,6 @@ public class ComponentExtension<C extends JComponent>
         // Enable antialiasing again:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
-        if ( _foregroundRenderer != null )
-            _foregroundRenderer.accept( new RenderDelegate<>(g2d, _owner, RenderDelegate.Layer.FOREGROUND ) );
-
         // Animations are last: they are rendered on top of everything else:
         if ( _animationRenderers != null )
             for ( Consumer<Graphics2D> renderer : _animationRenderers)
@@ -111,6 +105,51 @@ public class ComponentExtension<C extends JComponent>
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
+    }
+
+    private Style _calculateStyle() {
+        Style style = UI.SETTINGS().getStyleSheet().map( ss -> ss.run(_owner) ).orElse(UI.style());
+        return _styling.apply(new StyleDelegate<>(_owner, style));
+    }
+
+    private void _applyStyleToComponentState( Style style ) {
+
+        /*
+            Note that in SwingTree we do not override the UI classes of Swing to apply styles.
+            Instead, we use the "ComponentExtension" class to render styles on components.
+            This is because we don't want to means with the current LaF of the application
+            and instead simply allow users to carefully replace the LaF with a custom one.
+            So when the user has set a border style, we remove the border of the component!
+            And if the user has set a background color, we make sure that the component
+            is not opaque, so that the background color is visible.
+            ... and so on.
+        */
+        if ( style.border().thickness() >= 0 )
+            _owner.setBorder( BorderFactory.createEmptyBorder() );
+
+        if ( style.border().color().isPresent() && style.border().thickness() > 0 ) {
+            if ( !style.background().color().isPresent() )
+                style = style.backgroundColor( _owner.getBackground() );
+        }
+
+        if ( style.background().innerColor().isPresent() )
+            _owner.setOpaque( false );
+
+        if ( style.background().color().isPresent() )
+            _owner.setOpaque( false );
+
+        if ( style.background().renderer().isPresent() )
+            _owner.setOpaque( false );
+
+        if ( style.shadow().color().isPresent() )
+            _owner.setOpaque( false );
+
+        if ( _owner instanceof JTextComponent) {
+            if (style.font().selectionColor().isPresent())
+                ((JTextComponent) _owner).setSelectionColor(style.font().selectionColor().get());
+        }
+
+        _owner.setFont( style.font().createDerivedFrom(_owner.getFont()) );
     }
 
     private void checkIfIsDeclaredInUI() {
