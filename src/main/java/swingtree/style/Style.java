@@ -3,6 +3,7 @@ package swingtree.style;
 import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -18,8 +19,8 @@ import java.util.function.Consumer;
  *  panel(FILL)
  *  .withStyle( it ->
  *      it.style()
- *       .innerBackground(new Color(26,191,230))
- *       .background(new Color(255,255,255))
+ *       .foundationColor(new Color(26,191,230))
+ *       .backgroundColor(new Color(255,255,255))
  *       .padTop(30)
  *       .padLeft(35)
  *       .padRight(35)
@@ -36,6 +37,16 @@ import java.util.function.Consumer;
  */
 public final class Style
 {
+    private static final Style _BLANK = new Style(
+                                            new PaddingStyle(0,0,0,0),
+                                            new BorderStyle(0,0,-1, null),
+                                            new BackgroundStyle(null, null, null),
+                                            new ShadowStyle(0,0,0,0, null, true),
+                                            new FontStyle("", 0, 0, 0, Collections.emptyList(), null, null, null)
+                                        );
+
+    public static Style blank() { return _BLANK; }
+
     private final PaddingStyle    _padding;
     private final BorderStyle     _border;
     private final BackgroundStyle _background;
@@ -43,7 +54,7 @@ public final class Style
     private final FontStyle       _font;
 
 
-    public Style(
+    private Style(
         PaddingStyle padding,
         BorderStyle border,
         BackgroundStyle background,
@@ -68,7 +79,7 @@ public final class Style
      *  The padding does not affect the size or layout of the component, it
      *  simply determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
-     *  (see {@link #borderWidth(int)}, {@link #innerBackgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
      * <p>
      * @param top The top padding distance in pixels.
      * @param right The right padding distance in pixels.
@@ -85,7 +96,7 @@ public final class Style
      *  The padding does not affect the size or layout of the component, it
      *  simply determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
-     *  (see {@link #borderWidth(int)}, {@link #innerBackgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
      * <p>
      * @param padding The padding distance in pixels.
      * @return A new {@link Style} with the provided padding distance.
@@ -99,7 +110,7 @@ public final class Style
      *  The padding does not affect the size or layout of the component, it
      *  simply determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
-     *  (see {@link #borderWidth(int)}, {@link #innerBackgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
      * <p>
      * @param padding The padding distance in pixels.
      * @return A new {@link Style} with the provided padding distance.
@@ -113,7 +124,7 @@ public final class Style
      *  The padding does not affect the size or layout of the component, it
      *  simply determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
-     *  (see {@link #borderWidth(int)}, {@link #innerBackgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
      * <p>
      * @param padding The padding distance in pixels.
      * @return A new {@link Style} with the provided padding distance.
@@ -127,7 +138,7 @@ public final class Style
      *  The padding does not affect the size or layout of the component, it
      *  simply determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
-     *  (see {@link #borderWidth(int)}, {@link #innerBackgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
      * <p>
      * @param padding The padding distance in pixels.
      * @return A new {@link Style} with the provided padding distance.
@@ -141,7 +152,7 @@ public final class Style
      *  The padding does not affect the size or layout of the component, it
      *  simply determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
-     *  (see {@link #borderWidth(int)}, {@link #innerBackgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
      * <p>
      * @param padding The padding distance in pixels.
      * @return A new {@link Style} with the provided padding distance.
@@ -155,7 +166,7 @@ public final class Style
      *  The padding does not affect the size or layout of the component, it
      *  simply determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
-     *  (see {@link #borderWidth(int)}, {@link #innerBackgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
      * <p>
      * @param padding The padding distance in pixels.
      * @return A new {@link Style} with the provided padding distance.
@@ -169,7 +180,7 @@ public final class Style
      *  The padding does not affect the size or layout of the component, it
      *  simply determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
-     *  (see {@link #borderWidth(int)}, {@link #innerBackgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
      * <p>
      * @param padding The padding distance in pixels.
      * @return A new {@link Style} with the provided padding distance.
@@ -268,7 +279,7 @@ public final class Style
      * @param color The inner background color.
      * @return A new {@link Style} with the provided inner background color.
      */
-    public Style innerBackgroundColor( Color color ) { return _withBackground(_background.withInnerColor(color)); }
+    public Style backgroundColor( Color color ) { return _withBackground(_background.withColor(color)); }
 
     /**
      *  Returns a new {@link Style} with the provided inner Background color in the form of a string.
@@ -278,26 +289,26 @@ public final class Style
      * @param colorString The inner background color.
      * @return A new {@link Style} with the provided inner background color.
      */
-    public Style innerBackgroundColor( String colorString ) { return _withBackground(_background.withInnerColor(_colorFrom(colorString))); }
+    public Style backgroundColor( String colorString ) { return _withBackground(_background.withColor(_colorFrom(colorString))); }
 
     /**
-     *  Returns a new {@link Style} with the provided background color.
+     *  Returns a new {@link Style} with the provided background foundation color.
      *  The background color covers the entire component area, including the padding spaces.
      *
      * @param color The background color.
      * @return A new {@link Style} with the provided background color.
      */
-    public Style backgroundColor( Color color ) { return _withBackground(_background.withColor(color)); }
+    public Style foundationColor( Color color ) { return _withBackground(_background.withFoundationColor(color)); }
 
     /**
-     *  Returns a new {@link Style} with the provided background color in the form of a string.
+     *  Returns a new {@link Style} with the provided background foundation color in the form of a string.
      *  The string can be either a hex color string, a color name or a color constant from the system properties.
      *  The background color covers the entire component area, including the padding spaces.
      *
      * @param colorString The background color.
      * @return A new {@link Style} with the provided background color.
      */
-    public Style backgroundColor( String colorString ) { return _withBackground(_background.withColor(_colorFrom(colorString))); }
+    public Style foundationColor( String colorString ) { return _withBackground(_background.withFoundationColor(_colorFrom(colorString))); }
 
     /**
      *  Returns a new {@link Style} with the provided background renderer, a {@link Consumer} that
@@ -342,6 +353,10 @@ public final class Style
      */
     public Style shadowOffset( int horizontalOffset, int verticalOffset ) {
         return _withShadow(_shadow.withHorizontalOffset(horizontalOffset).withVerticalOffset(verticalOffset));
+    }
+
+    public Style shadowOffset( int horizontalAndVerticalOffset ) {
+        return _withShadow(_shadow.withHorizontalOffset(horizontalAndVerticalOffset).withVerticalOffset(horizontalAndVerticalOffset));
     }
 
     /**

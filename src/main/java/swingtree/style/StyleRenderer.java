@@ -29,10 +29,10 @@ public class StyleRenderer<C extends JComponent>
 
     public void renderStyle( Style style )
     {
-        style.background().color().ifPresent(outerColor -> {
+        style.background().foundationColor().ifPresent(outerColor -> {
             _fillOuterBackground(style, outerColor);
         });
-        style.background().innerColor().ifPresent(color -> {
+        style.background().color().ifPresent(color -> {
             _fillBackground(style, color);
         });
         style.background().renderer().ifPresent(renderer -> {

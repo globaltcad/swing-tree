@@ -24,7 +24,7 @@ public class BoxShadowPickerViewModel
 
     // Background
     private final Var<Color> backgroundColor = Var.of(new Color(0.1f, 0.75f, 0.9f)).onAct( it -> repaint.fire() );
-    private final Var<Color> outerBackgroundColor = Var.of(new Color(1f,1f,1f)).onAct(it -> repaint.fire() );
+    private final Var<Color> foundationColor = Var.of(new Color(1f,1f,1f)).onAct(it -> repaint.fire() );
 
     // Box Shadow
     private final Var<Integer> horizontalShadowOffset = Var.of(0).onAct( it -> repaint.fire() );
@@ -66,7 +66,7 @@ public class BoxShadowPickerViewModel
 
     public Var<Color> backgroundColor() { return backgroundColor; }
 
-    public Var<Color> outerBackgroundColor() { return outerBackgroundColor; }
+    public Var<Color> foundationColor() { return foundationColor; }
 
     public Var<Integer> horizontalShadowOffset() { return horizontalShadowOffset; }
 
@@ -89,8 +89,8 @@ public class BoxShadowPickerViewModel
             "panel(FILL)\n" +
             ".withStyle( it ->\n" +
             "    it.style()\n" +
-            "     .innerBackgroundColor("+ str(backgroundColor) + ")\n" +
-            "     .backgroundColor(" + str(outerBackgroundColor) + ")\n" +
+            "     .backgroundColor("+ str(backgroundColor) + ")\n" +
+            "     .foundationColor(" + str(foundationColor) + ")\n" +
             ( drawSmiley().is(false) ? "" :
             "     .background( g2d -> {\n" +
             "         if ( vm.drawSmiley().is(false) ) return;\n" +

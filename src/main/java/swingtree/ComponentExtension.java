@@ -108,7 +108,7 @@ public class ComponentExtension<C extends JComponent>
     }
 
     private Style _calculateStyle() {
-        Style style = UI.SETTINGS().getStyleSheet().map( ss -> ss.run(_owner) ).orElse(UI.style());
+        Style style = UI.SETTINGS().getStyleSheet().map( ss -> ss.run(_owner) ).orElse(Style.blank());
         return _styling.apply(new StyleDelegate<>(_owner, style));
     }
 
@@ -128,14 +128,14 @@ public class ComponentExtension<C extends JComponent>
             _owner.setBorder( BorderFactory.createEmptyBorder() );
 
         if ( style.border().color().isPresent() && style.border().thickness() > 0 ) {
-            if ( !style.background().color().isPresent() )
-                style = style.backgroundColor( _owner.getBackground() );
+            if ( !style.background().foundationColor().isPresent() )
+                style = style.foundationColor( _owner.getBackground() );
         }
 
-        if ( style.background().innerColor().isPresent() )
+        if ( style.background().color().isPresent() )
             _owner.setOpaque( false );
 
-        if ( style.background().color().isPresent() )
+        if ( style.background().foundationColor().isPresent() )
             _owner.setOpaque( false );
 
         if ( style.background().renderer().isPresent() )

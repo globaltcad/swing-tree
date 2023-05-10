@@ -4,10 +4,9 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
-import swingtree.UI
 import swingtree.style.Style
 
-import java.awt.Color
+import java.awt.*
 
 @Title("Style Properties")
 @Narrative('''
@@ -24,16 +23,16 @@ class Styles_Spec extends Specification
         String colorString, Color expectedColor
     ) {
         given : 'We use method chaining to build a colorful style:'
-            var style = UI.style()
+            var style = Style.blank()
+                                .foundationColor(colorString)
                                 .backgroundColor(colorString)
-                                .innerBackgroundColor(colorString)
                                 .borderColor(colorString)
                                 .shadowColor(colorString)
                                 .fontSelectionColor(colorString)
                                 .fontColor(colorString)
         expect :
+            style.background().foundationColor().get() == expectedColor
             style.background().color().get() == expectedColor
-            style.background().innerColor().get() == expectedColor
             style.border().color().get() == expectedColor
             style.shadow().color().get() == expectedColor
             style.font().selectionColor().get() == expectedColor
@@ -73,27 +72,27 @@ class Styles_Spec extends Specification
     def 'The String representation of a Style will tell you everything about it!'()
     {
         given : 'We first create a style with various properties:'
-            var style = UI.style()
-                                    .backgroundColor("red")
-                                    .innerBackgroundColor("green")
-                                    .borderColor("blue")
-                                    .borderRadius(12, 18)
-                                    .shadowColor("yellow")
-                                    .fontSelectionColor("cyan")
-                                    .fontColor("magenta")
-                                    .fontName("Times New Roman")
-                                    .fontSize(12)
-                                    .fontBold(true)
-                                    .fontUnderline(true)
-                                    .fontStrikeThrough(true)
+            var style = Style.blank()
+                                .foundationColor("red")
+                                .backgroundColor("green")
+                                .borderColor("blue")
+                                .borderRadius(12, 18)
+                                .shadowColor("yellow")
+                                .fontSelectionColor("cyan")
+                                .fontColor("magenta")
+                                .fontName("Times New Roman")
+                                .fontSize(12)
+                                .fontBold(true)
+                                .fontUnderline(true)
+                                .fontStrikeThrough(true)
 
         expect :
                 style.toString() == "Style[" +
                                         "PaddingStyle[top=0, right=0, bottom=0, left=0], " +
                                         "BorderStyle[arcWidth=12, arcHeight=18, width=-1, color=rgba(0,0,255,255)], " +
                                         "BackgroundStyle[" +
-                                            "innerColor=rgba(0,255,0,255), " +
-                                            "color=rgba(255,0,0,255), " +
+                                            "color=rgba(0,255,0,255), " +
+                                            "foundationColor=rgba(255,0,0,255), " +
                                             "renderer=null" +
                                         "], " +
                                         "ShadowStyle[" +
@@ -118,38 +117,38 @@ class Styles_Spec extends Specification
     def 'Style objects are value based (with respect to equality and hash code).'()
     {
         given : 'We first create a style with various properties:'
-            var style1 = UI.style()
-                                    .backgroundColor("red")
-                                    .innerBackgroundColor("green")
-                                    .borderColor("blue")
-                                    .borderRadius(12, 18)
-                                    .shadowColor("yellow")
-                                    .fontSelectionColor("cyan")
-                                    .fontColor("magenta")
-                                    .fontName("Times New Roman")
-                                    .fontSize(12)
-                                    .fontBold(true)
-                                    .fontUnderline(true)
-                                    .fontStrikeThrough(true)
-                                    .shadowSpreadRadius(12)
-                                    .shadowBlurRadius(42)
+            var style1 = Style.blank()
+                                 .foundationColor("red")
+                                 .backgroundColor("green")
+                                 .borderColor("blue")
+                                 .borderRadius(12, 18)
+                                 .shadowColor("yellow")
+                                 .fontSelectionColor("cyan")
+                                 .fontColor("magenta")
+                                 .fontName("Times New Roman")
+                                 .fontSize(12)
+                                 .fontBold(true)
+                                 .fontUnderline(true)
+                                 .fontStrikeThrough(true)
+                                 .shadowSpreadRadius(12)
+                                 .shadowBlurRadius(42)
 
         and : 'We then create a second style with the same properties:'
-            var style2 = UI.style()
-                                    .backgroundColor("red")
-                                    .innerBackgroundColor("green")
-                                    .borderColor("blue")
-                                    .borderRadius(12, 18)
-                                    .shadowColor("yellow")
-                                    .fontSelectionColor("cyan")
-                                    .fontColor("magenta")
-                                    .fontName("Times New Roman")
-                                    .fontSize(12)
-                                    .fontBold(true)
-                                    .fontUnderline(true)
-                                    .fontStrikeThrough(true)
-                                    .shadowSpreadRadius(12)
-                                    .shadowBlurRadius(42)
+            var style2 = Style.blank()
+                                 .foundationColor("red")
+                                 .backgroundColor("green")
+                                 .borderColor("blue")
+                                 .borderRadius(12, 18)
+                                 .shadowColor("yellow")
+                                 .fontSelectionColor("cyan")
+                                 .fontColor("magenta")
+                                 .fontName("Times New Roman")
+                                 .fontSize(12)
+                                 .fontBold(true)
+                                 .fontUnderline(true)
+                                 .fontStrikeThrough(true)
+                                 .shadowSpreadRadius(12)
+                                 .shadowBlurRadius(42)
         expect :
                 style1 == style2
                 style1.hashCode() == style2.hashCode()

@@ -79,14 +79,14 @@ public class BoxShadowPickerView extends UI.Panel
                     })
                 )
                 .add(panel(FILL).withBackground(vm.backgroundColor()))
-                .add(label("Outer Background Color:"))
+                .add(label("Foundation Color:"))
                 .add(GROW_X.and(PUSH_X),
-                    textField(vm.outerBackgroundColor().mapTo(Integer.class, Color::getRGB).itemAsString())
+                    textField(vm.foundationColor().mapTo(Integer.class, Color::getRGB).itemAsString())
                     .onContentChange(it -> {
-                        parseColor(it.get().getText()).ifPresent(color -> {vm.outerBackgroundColor().act(color);});
+                        parseColor(it.get().getText()).ifPresent(color -> {vm.foundationColor().act(color);});
                     })
                 )
-                .add(panel(FILL).withBackground(vm.outerBackgroundColor()))
+                .add(panel(FILL).withBackground(vm.foundationColor()))
                 .add(checkBox("Inset", vm.shadowInset()))
                 .add(checkBox("Draw Smiley", vm.drawSmiley()))
             )
@@ -97,8 +97,8 @@ public class BoxShadowPickerView extends UI.Panel
                     .withRepaintIf(vm.repaint())
                     .withStyle( it ->
                         it.style()
-                         .innerBackgroundColor(vm.backgroundColor().get())
-                         .backgroundColor(vm.outerBackgroundColor().get())
+                         .backgroundColor(vm.backgroundColor().get())
+                         .foundationColor(vm.foundationColor().get())
                          .backgroundRenderer(g2d -> {
                              if ( vm.drawSmiley().is(false) ) return;
                              int w = it.component().getWidth() - vm.paddingLeft().get() - vm.paddingRight().get() - 100;

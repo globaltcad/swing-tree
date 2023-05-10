@@ -1,7 +1,5 @@
 package swingtree.style;
 
-import swingtree.UI;
-
 import javax.swing.*;
 import java.util.*;
 import java.util.function.Function;
@@ -18,11 +16,11 @@ public abstract class StyleSheet
     private boolean _traitGraphBuilt = false;
 
     protected StyleSheet() {
-        this( () -> UI.style() );
+        this( s -> s );
     }
 
-    protected StyleSheet(Supplier<Style> defaultStyle) {
-        _defaultStyle = defaultStyle;
+    protected StyleSheet( Function<Style, Style> defaultStyle ) {
+        _defaultStyle = () -> defaultStyle.apply(Style.blank());
         declaration();
         _buildTraitGraph();
     }
