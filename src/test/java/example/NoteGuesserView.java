@@ -3,6 +3,7 @@ package example;
 import com.formdev.flatlaf.FlatLightLaf;
 import swingtree.UI;
 
+import javax.swing.*;
 import java.awt.*;
 
 import static swingtree.UI.Panel;
@@ -12,6 +13,7 @@ public class NoteGuesserView extends Panel
 {
     public NoteGuesserView(NoteGuesserViewModel vm) {
         FlatLightLaf.setup();
+        UIManager.put( "Button.arc", 25 );
         of(this)
         .withLayout(FILL.and(INS(15)).and(WRAP(1)))
         .withPrefSize( 900, 700 )
@@ -26,15 +28,15 @@ public class NoteGuesserView extends Panel
                  .backgroundColor(new Color(229, 218, 188,255))
                  .foundationColor(new Color(255,255,255, 0))
                  .padTop(10)
-                 .padLeft(15)
-                 .padRight(15)
+                 .padLeft(25)
+                 .padRight(25)
                  .padBottom(10)
                  .borderRadius(25, 25)
                  .borderWidth(3)
                  .borderColor(new Color(0, 0, 0,255))
                  .shadowColor(new Color(64,64,64,255))
                  .shadowBlurRadius(6)
-                 .shadowSpreadRadius(5)
+                 .shadowSpreadRadius(3)
                  .shadowIsInset(true)
                  .backgroundRenderer( g2d -> {
                      int w = it.component().getWidth() - 25 - 25 - 100;
@@ -69,9 +71,10 @@ public class NoteGuesserView extends Panel
                             if ( oi == 1 && ni % 7 == 0 ) p.add(label("Small Octave:"));
                             if ( oi == 2 && ni % 7 == 0 ) p.add(label("One-line Octave:"));
                             if ( oi == 3 && ni % 7 == 0 ) p.add(label("Two-line Octave:"));
-                            p.add("grow, " + ( (ni+1)%7 == 0 ? ", wrap" : "" ),
-                                button(note.name())
+                            p.add("push, grow, " + ( (ni+1)%7 == 0 ? ", wrap" : "" ),
+                                button(note.name()).withMinSize(35,35)
                                 .withFontSize(18)
+                                .withBackground(new Color(229, 218, 188,255))
                                 .onClick( e -> {
                                     vm.selectNoteIndex(note.index());
                                 })
