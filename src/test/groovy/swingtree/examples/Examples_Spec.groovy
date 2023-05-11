@@ -81,6 +81,11 @@ class Examples_Spec extends Specification
         expect : new BoxShadowPickerView(new BoxShadowPickerViewModel())
     }
 
+    def 'The note guesser example UI defined in the examples can be created.'()
+    {
+        expect : new NoteGuesserView(new NoteGuesserViewModel())
+    }
+
     def 'The animated buttons view examples UI defined in the examples can be created.'()
     {
         expect : new AnimatedButtonsView()

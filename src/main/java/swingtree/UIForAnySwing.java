@@ -2078,6 +2078,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
+     *  Set the current width and height of this {@link JComponent}. <br>
+     *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. <br>
+     * @param width The current width of the component.
+     * @param height The current height of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withSize( int width, int height ) {
+        return this.withSize( new Dimension(width, height) );
+    }
+
+    /**
      *  Set the current width of this {@link JComponent}. <br>
      *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. <br>
      * @param width The current width of the component.

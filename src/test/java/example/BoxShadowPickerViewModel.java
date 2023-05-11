@@ -92,7 +92,7 @@ public class BoxShadowPickerViewModel
             "     .backgroundColor("+ str(backgroundColor) + ")\n" +
             "     .foundationColor(" + str(foundationColor) + ")\n" +
             ( drawSmiley().is(false) ? "" :
-            "     .background( g2d -> {\n" +
+            "     .backgroundRenderer( g2d -> {\n" +
             "         if ( vm.drawSmiley().is(false) ) return;\n" +
             "         int w = it.component().getWidth() - " + str(paddingLeft) + " - " + str(paddingRight) + " - 100;\n" +
             "         int h = it.component().getHeight() - " + str(paddingTop) + " - " + str(paddingBottom) + " - 100;\n" +
