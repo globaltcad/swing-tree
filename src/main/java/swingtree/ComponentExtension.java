@@ -9,6 +9,7 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -36,7 +37,7 @@ public class ComponentExtension<C extends JComponent>
 
     private final C _owner;
 
-    private Function<StyleDelegate<C>, Style> _styling = StyleDelegate::style;
+    private Function<StyleDelegate<C>, Style> _styling = null;
 
     private List<Consumer<Graphics2D>> _animationRenderers;
 
@@ -48,10 +49,14 @@ public class ComponentExtension<C extends JComponent>
     }
 
     void addStyling( Function<StyleDelegate<C>, Style> styler ) {
+        Objects.requireNonNull(styler);
         checkIfIsDeclaredInUI();
-        _styling = _styling.andThen(s -> Objects.requireNonNull(styler).apply(new StyleDelegate<>(_owner, s)));
-        Style style = _calculateStyle();
-        _applyStyleToComponentState( style );
+        if ( _styling == null )
+            _styling = styler;
+        else
+            _styling = _styling.andThen(s -> styler.apply(new StyleDelegate<>(_owner, s)));
+
+        _calculateStyle().ifPresent(this::_applyStyleToComponentState);
     }
 
     public void setStyleGroups( String... styleName ) {
@@ -85,10 +90,11 @@ public class ComponentExtension<C extends JComponent>
         // We enable antialiasing:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
         {
-            Style style = _calculateStyle();
-            _applyStyleToComponentState( style );
-            if ( _componentIsDeclaredInUI(_owner) )
-                new StyleRenderer<>( g2d, _owner ).renderStyle( style );
+            _calculateStyle().ifPresent( style -> {
+                _applyStyleToComponentState( style );
+                if ( _componentIsDeclaredInUI(_owner) )
+                    new StyleRenderer<>( g2d, _owner ).renderStyle( style );
+            });
         }
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
@@ -107,13 +113,18 @@ public class ComponentExtension<C extends JComponent>
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    private Style _calculateStyle() {
-        Style style = UI.SETTINGS().getStyleSheet().map( ss -> ss.run(_owner) ).orElse(Style.blank());
-        return _styling.apply(new StyleDelegate<>(_owner, style));
+    private Optional<Style> _calculateStyle() {
+        Optional<Style> style = UI.SETTINGS()
+                                    .getStyleSheet()
+                                    .map( ss -> ss.run(_owner) );
+        if ( _styling == null )
+            return style;
+        else
+            return Optional.of( _styling.apply(new StyleDelegate<>(_owner, style.orElse(Style.blank()))) );
     }
 
-    private void _applyStyleToComponentState( Style style ) {
-
+    private void _applyStyleToComponentState( Style style )
+    {
         /*
             Note that in SwingTree we do not override the UI classes of Swing to apply styles.
             Instead, we use the "ComponentExtension" class to render styles on components.
@@ -124,7 +135,7 @@ public class ComponentExtension<C extends JComponent>
             is not opaque, so that the background color is visible.
             ... and so on.
         */
-        if ( style.border().thickness() >= 0 )
+        if ( style.border().thickness() >= 0 && !BorderFactory.createEmptyBorder().equals(_owner.getBorder()) )
             _owner.setBorder( BorderFactory.createEmptyBorder() );
 
         if ( style.border().color().isPresent() && style.border().thickness() > 0 ) {
@@ -132,24 +143,30 @@ public class ComponentExtension<C extends JComponent>
                 style = style.foundationColor( _owner.getBackground() );
         }
 
-        if ( style.background().color().isPresent() )
+        if ( style.background().color().isPresent() && _owner.isOpaque() )
             _owner.setOpaque( false );
 
-        if ( style.background().foundationColor().isPresent() )
+        if ( style.background().foundationColor().isPresent() && _owner.isOpaque() )
             _owner.setOpaque( false );
 
-        if ( style.background().renderer().isPresent() )
+        if ( style.background().renderer().isPresent() && _owner.isOpaque() )
             _owner.setOpaque( false );
 
-        if ( style.shadow().color().isPresent() )
+        if ( style.shadow().color().isPresent() && _owner.isOpaque() )
             _owner.setOpaque( false );
 
         if ( _owner instanceof JTextComponent) {
-            if (style.font().selectionColor().isPresent())
-                ((JTextComponent) _owner).setSelectionColor(style.font().selectionColor().get());
+            JTextComponent tc = (JTextComponent) _owner;
+            if ( style.font().selectionColor().isPresent() && ! Objects.equals( tc.getSelectionColor(), style.font().selectionColor().get() ) )
+                tc.setSelectionColor(style.font().selectionColor().get());
         }
 
-        _owner.setFont( style.font().createDerivedFrom(_owner.getFont()) );
+        style.font()
+             .createDerivedFrom(_owner.getFont())
+             .ifPresent( newFont -> {
+                    if ( !newFont.equals(_owner.getFont()) )
+                        _owner.setFont( newFont );
+                });
     }
 
     private void checkIfIsDeclaredInUI() {

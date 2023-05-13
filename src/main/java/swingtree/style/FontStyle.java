@@ -92,28 +92,49 @@ public class FontStyle
                 );
     }
 
-    public Font createDerivedFrom(Font existingFont )
+    public Optional<Font> createDerivedFrom( Font existingFont )
     {
+        boolean isChange = false;
+
         if ( existingFont == null )
             existingFont = new JLabel().getFont();
 
+        Map<TextAttribute, Object> currentAttributes = (Map<TextAttribute, Object>) existingFont.getAttributes();
         Map<TextAttribute, Object> attributes = new HashMap<>();
-        if ( _size > 0 )
-            attributes.put(TextAttribute.SIZE, _size);
-        if ( _style > 0 )
-            attributes.put(TextAttribute.POSTURE, _style);
-        if ( _weight > 0 )
-            attributes.put(TextAttribute.WEIGHT, _weight);
-        if ( _attributes != null )
-            _attributes.forEach( attr -> attributes.put(attr, attr));
-        if ( !_name.isEmpty() )
-            attributes.put(TextAttribute.FAMILY, _name);
-        if ( _color != null )
-            attributes.put(TextAttribute.FOREGROUND, _color);
-        if ( _backgroundColor != null )
-            attributes.put(TextAttribute.BACKGROUND, _backgroundColor);
 
-        return existingFont.deriveFont(attributes);
+        if ( _size > 0 ) {
+            isChange = isChange || !Integer.valueOf(_size).equals(currentAttributes.get(TextAttribute.SIZE));
+            attributes.put(TextAttribute.SIZE, _size);
+        }
+        if ( _style > 0 ) {
+            isChange = isChange || !Integer.valueOf(_style).equals(currentAttributes.get(TextAttribute.POSTURE));
+            attributes.put(TextAttribute.POSTURE, _style);
+        }
+        if ( _weight > 0 ) {
+            isChange = isChange || !Integer.valueOf(_weight).equals(currentAttributes.get(TextAttribute.WEIGHT));
+            attributes.put(TextAttribute.WEIGHT, _weight);
+        }
+        if ( !_name.isEmpty() ) {
+            isChange = isChange || !Objects.equals(_name, currentAttributes.get(TextAttribute.FAMILY));
+            attributes.put(TextAttribute.FAMILY, _name);
+        }
+        if ( _color != null ) {
+            isChange = isChange || !Objects.equals(_color, currentAttributes.get(TextAttribute.FOREGROUND));
+            attributes.put(TextAttribute.FOREGROUND, _color);
+        }
+        if ( _backgroundColor != null ) {
+            isChange = isChange || !Objects.equals(_backgroundColor, currentAttributes.get(TextAttribute.BACKGROUND));
+            attributes.put(TextAttribute.BACKGROUND, _backgroundColor);
+        }
+
+        if ( _attributes != null ) {
+            _attributes.forEach( attr -> attributes.put(attr, attr));
+        }
+
+        if ( isChange )
+            return Optional.of(existingFont.deriveFont(attributes));
+        else
+            return Optional.empty();
     }
 
     @Override
