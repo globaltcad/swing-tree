@@ -1,5 +1,7 @@
 package example;
 
+import sprouts.Event;
+import sprouts.Val;
 import sprouts.Var;
 import swingtree.UI;
 import swingtree.animation.Animation;
@@ -12,11 +14,17 @@ import java.util.concurrent.TimeUnit;
 
 public class NoteGuesserViewModel
 {
+    private final Event repaint = Event.create();
     private final Var<String> feedback = Var.of("Choose:");
     private final Var<Color>  feedbackColor = Var.of(Color.BLACK);
     private final Var<Integer> feedbackFontSize = Var.of(24);
     private final Var<Integer> currentNoteIndex = Var.of(0);
-    private final Var<Boolean> cheatMode = Var.of(false);
+    private final Var<Boolean> cheatMode = Var.of(false).onAct( it -> cheated() );
+
+    private final Var<Integer> score = Var.of(0);
+    private final Val<Integer> level = score.view( s -> s / 10 );
+
+    public Event getRepaintEvent() { return repaint; }
 
     public Var<String> feedback() { return feedback; }
 
@@ -28,17 +36,29 @@ public class NoteGuesserViewModel
 
     public Var<Boolean> cheatMode() { return cheatMode; }
 
+    public Val<Integer> score() { return score; }
+
+    public Val<Integer> level() { return level; }
+
+    private void cheated() {
+        feedback.set( "Cheater!" );
+        feedbackColor.set( Color.RED );
+        score.set(0);
+        animateFeedbackAndThen( () -> {} );
+    }
+
     public void selectNoteIndex( int ni ) {
         if ( currentNoteIndex.is(ni) ) {
             feedback.set( "Yes. Correct!" );
             feedbackColor.set( new Color(30, 128, 0) );
-            animateFeedbackAndThen( () -> {
-                newRandomNoteIndex();
-            });
+            if ( cheatMode.is(false) )
+                score.set(score.get() + 1);
+            animateFeedbackAndThen( () -> newRandomNoteIndex() );
         }
         else {
             feedback.set( "Try again!" );
             feedbackColor.set( Color.RED );
+            score.set(0);
             animateFeedbackAndThen( () -> {} );
         }
     }
@@ -75,6 +95,16 @@ public class NoteGuesserViewModel
 
     public boolean isVisibleLine( int ni ) { return ni > 3 && ni < 13 || ni > 15 && ni < 25; }
 
+    public boolean shouldDrawSupportLine( int ni ) {
+        int currentNi = currentNoteIndex.get();
+        if ( isVisibleLine(currentNi) ) return false;
+        if ( isVisibleLine(ni) ) return false;
+        if ( ni == currentNi ) return true;
+        if ( ni > currentNi && ni < 4 ) return true;
+        if ( ni < currentNi && ni > 24 ) return true;
+        return false;
+    }
+
     public void newRandomNoteIndex() {
         int newNi = -1;
         while ( newNi == -1 || newNi == currentNoteIndex.get() )
@@ -83,6 +113,7 @@ public class NoteGuesserViewModel
         feedback.set( "Choose:" );
         feedbackColor.set( Color.BLACK );
         currentNoteIndex.set( newNi );
+        repaint.fire();
     }
 
     public String noteNameOf( int ni ) {

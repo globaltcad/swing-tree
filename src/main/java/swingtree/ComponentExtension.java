@@ -1,8 +1,8 @@
 package swingtree;
 
-import swingtree.style.StyleRenderer;
 import swingtree.style.Style;
 import swingtree.style.StyleDelegate;
+import swingtree.style.StyleRenderer;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
@@ -91,7 +91,7 @@ public class ComponentExtension<C extends JComponent>
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
         {
             _calculateStyle().ifPresent( style -> {
-                _applyStyleToComponentState( style );
+                style = _applyStyleToComponentState( style );
                 if ( _componentIsDeclaredInUI(_owner) )
                     new StyleRenderer<>( g2d, _owner ).renderStyle( style );
             });
@@ -123,7 +123,7 @@ public class ComponentExtension<C extends JComponent>
             return Optional.of( _styling.apply(new StyleDelegate<>(_owner, style.orElse(Style.blank()))) );
     }
 
-    private void _applyStyleToComponentState( Style style )
+    private Style _applyStyleToComponentState( Style style )
     {
         /*
             Note that in SwingTree we do not override the UI classes of Swing to apply styles.
@@ -135,6 +135,11 @@ public class ComponentExtension<C extends JComponent>
             is not opaque, so that the background color is visible.
             ... and so on.
         */
+        boolean hasBorderRadius = style.border().arcWidth() > 0 || style.border().arcHeight() > 0;
+        // If the style has a border radius set we need to make sure that we have a background color:
+        if ( hasBorderRadius && !style.background().color().isPresent() )
+            style = style.backgroundColor( _owner.getBackground() );
+
         if ( style.border().thickness() >= 0 && !BorderFactory.createEmptyBorder().equals(_owner.getBorder()) )
             _owner.setBorder( BorderFactory.createEmptyBorder() );
 
@@ -143,18 +148,19 @@ public class ComponentExtension<C extends JComponent>
                 style = style.foundationColor( _owner.getBackground() );
         }
 
-        if ( style.background().color().isPresent() && _owner.isOpaque() )
-            _owner.setOpaque( false );
+        if ( _owner.isOpaque() ) {
+            if ( style.background().color().isPresent() )
+                _owner.setOpaque(false);
 
-        if ( style.background().foundationColor().isPresent() && _owner.isOpaque() )
-            _owner.setOpaque( false );
+            if ( style.background().foundationColor().isPresent() )
+                _owner.setOpaque(false);
 
-        if ( style.background().renderer().isPresent() && _owner.isOpaque() )
-            _owner.setOpaque( false );
+            if ( style.background().renderer().isPresent() )
+                _owner.setOpaque(false);
 
-        if ( style.shadow().color().isPresent() && _owner.isOpaque() )
-            _owner.setOpaque( false );
-
+            if ( style.shadow().color().isPresent() )
+                _owner.setOpaque(false);
+        }
         if ( _owner instanceof JTextComponent) {
             JTextComponent tc = (JTextComponent) _owner;
             if ( style.font().selectionColor().isPresent() && ! Objects.equals( tc.getSelectionColor(), style.font().selectionColor().get() ) )
@@ -167,6 +173,8 @@ public class ComponentExtension<C extends JComponent>
                     if ( !newFont.equals(_owner.getFont()) )
                         _owner.setFont( newFont );
                 });
+
+        return style;
     }
 
     private void checkIfIsDeclaredInUI() {
