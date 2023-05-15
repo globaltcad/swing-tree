@@ -210,7 +210,9 @@ public class SymbolGuesserViewModel
 
     public void newRandomSymbol() {
         Alphabet randomAlphabet = alphabets.get( (int) (Math.random() * alphabets.size()) );
-        Symbol randomSymbol = randomAlphabet.symbols().get( (int) (Math.random() * randomAlphabet.symbols().size()) );
+        Symbol randomSymbol = null;
+        while ( randomSymbol == null || randomSymbol.symbol() == '?' )
+            randomSymbol = randomAlphabet.symbols().get( (int) (Math.random() * randomAlphabet.symbols().size()) );
         feedback.set( "Choose:" );
         feedbackColor.set( Color.BLACK );
         currentSymbol.set( randomSymbol );
