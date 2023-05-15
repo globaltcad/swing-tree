@@ -86,6 +86,11 @@ class Examples_Spec extends Specification
         expect : new NoteGuesserView(new NoteGuesserViewModel())
     }
 
+    def 'The symbol guesser example UI defined in the examples can be created.'()
+    {
+        expect : new SymbolGuesserView(new SymbolGuesserViewModel())
+    }
+
     def 'The animated buttons view examples UI defined in the examples can be created.'()
     {
         expect : new AnimatedButtonsView()
