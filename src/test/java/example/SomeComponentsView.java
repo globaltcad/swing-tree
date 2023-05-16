@@ -7,13 +7,15 @@ import swingtree.UI;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import static swingtree.UI.Panel;
 import static swingtree.UI.*;
 
-public class SomeSpinnersView extends Panel
+public class SomeComponentsView extends Panel
 {
-	public SomeSpinnersView(SomeSpinnersViewModel vm) {
+	public SomeComponentsView(SomeComponentsViewModel vm) {
 		try { UIManager.setLookAndFeel(new FlatMaterialDesignDarkIJTheme()); }
 		catch (Exception e) {e.printStackTrace();}
 		UIManager.put("ComboBox.selectionBackground", Color.BLUE);
@@ -21,12 +23,22 @@ public class SomeSpinnersView extends Panel
 		of(this).withLayout(FILL.and(INS(12)))
 		.add(GROW,
 			panel(FILL.and(INS(0)).and(WRAP(1)))
-			.add(GROW, label("Base Size:"))
+			.add(GROW,
+				label("Base Size:").peek( p -> {
+					JPopupMenu popup = new JPopupMenu();
+					popup.add("I");
+					popup.add("am");
+					popup.add("a");
+					popup.add("popup");
+					popup.add("!");
+					p.setComponentPopupMenu(popup);
+				})
+			)
 			.add(GROW,
 				comboBox(vm.getBaseSize())
 				.withRenderer(
-					renderComboItem(SomeSpinnersViewModel.BaseSize.class)
-					.asText( cell -> cell.value().map(SomeSpinnersViewModel.BaseSize::title).orElse("") )
+					renderComboItem(SomeComponentsViewModel.BaseSize.class)
+					.asText( cell -> cell.value().map(SomeComponentsViewModel.BaseSize::title).orElse("") )
 				)
 			)
 		)
@@ -78,7 +90,19 @@ public class SomeSpinnersView extends Panel
 				.withSelectedItem(Var.of(4))
 			)
 			.add(GROW,
-				comboBox(1, 2, 4, 6, 8, 12, 16)
+				comboBox(1, 2, 4, 6, 8, 12, 16).peek( cb -> {
+					cb.setSelectedIndex(0);
+					cb.setComponentPopupMenu(new JPopupMenu());
+					for (String currentDeviceFile : new String[]{"A", "B", "C"})
+						cb.getComponentPopupMenu().add(
+							UI.radioButton(currentDeviceFile)
+							.onClick(it -> {
+
+							})
+							.getComponent()
+						);
+					makeComboBoxStayOpen(cb);
+				})
 				.onOpen( it -> System.out.println("open") )
 				.onClose( it -> System.out.println("close") )
 				.onCancel( it -> System.out.println("cancel") )
@@ -112,8 +136,37 @@ public class SomeSpinnersView extends Panel
 	}
 
 	public static void main(String... args) {
-		UI.show(new SomeSpinnersView(new SomeSpinnersViewModel()));
+		UI.show(new SomeComponentsView(new SomeComponentsViewModel()));
 		UI.joinDecoupledEventProcessor();
+	}
+
+
+	public static void makeComboBoxStayOpen(
+			JComboBox dropdown
+	) {
+		int offset = 0;
+		JPopupMenu popup = dropdown.getComponentPopupMenu();
+		MouseAdapter comboHideOwnPopupMouseAdapter = new MouseAdapter() {
+			@Override public void mousePressed(MouseEvent e) { dropdown.setPopupVisible(false); }
+		};
+		dropdown.addMouseListener(comboHideOwnPopupMouseAdapter);
+		for ( Component c : dropdown.getComponents() )
+			c.addMouseListener(comboHideOwnPopupMouseAdapter);
+
+		dropdown.addPopupMenuListener(new javax.swing.event.PopupMenuListener() {
+			@Override
+			public void popupMenuWillBecomeVisible(javax.swing.event.PopupMenuEvent evt) {
+				boolean wasOpen = popup.isVisible();
+				SwingUtilities.invokeLater(() -> {
+					if (!wasOpen) // avoid opening popup again if user clicked on the dropdown button to close it while it was open
+						popup.show(dropdown, offset, dropdown.getHeight());
+				});
+				throw new UnsupportedOperationException("This method should never be called. "
+						+ "It is a workaround for a bug in the JDK: https://bugs.openjdk.java.net/browse/JDK-4503845");
+			}
+			@Override public void popupMenuWillBecomeInvisible(javax.swing.event.PopupMenuEvent evt) { }
+			@Override public void popupMenuCanceled(javax.swing.event.PopupMenuEvent evt) { }
+		});
 	}
 
 }

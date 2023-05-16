@@ -123,7 +123,7 @@ class Examples_Spec extends Specification
 
     def 'The spinners example UI defined in the examples can be created.'()
     {
-        expect : new SomeSpinnersView(new SomeSpinnersViewModel())
+        expect : new SomeComponentsView(new SomeComponentsViewModel())
     }
 
     def 'The list rendering example UI defined in the examples can be created.'()

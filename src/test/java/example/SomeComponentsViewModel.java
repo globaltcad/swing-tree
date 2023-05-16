@@ -2,7 +2,7 @@ package example;
 
 import sprouts.Var;
 
-public class SomeSpinnersViewModel {
+public class SomeComponentsViewModel {
 
 	private final Var<BaseSize> baseSize = Var.of(BaseSize.FACTOR).onAct(it->baseSizeChanged());
 	private final Var<Integer> x = Var.of(100);
