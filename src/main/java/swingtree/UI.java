@@ -14,7 +14,7 @@ import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
-import swingtree.style.*;
+import swingtree.style.StyleSheet;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -1407,7 +1406,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      */
-    public static UIForPanel<JPanel> panel() { return of((JPanel) new Panel()).withLayout(new MigLayout()); }
+    public static UIForPanel<JPanel> panel() { return of((JPanel) new Panel()).withLayout(new MigLayout("hidemode 2")); }
 
     /**
      *  Use this to create a builder for a new {@link JPanel} UI component
@@ -1528,6 +1527,143 @@ public final class UI
         NullUtil.nullArgCheck(attr, "attr", Val.class);
         NullUtil.nullPropertyCheck(attr, "attr", "Null is not a valid layout attribute.");
         return panel(attr.get().toString()).withLayout(attr);
+    }
+
+    /**
+     *  Use this to create a builder for a transparent {@link JPanel} without any insets
+     *  based on a {@link MigLayout} as its layout manager.
+     *  This factory method is especially useful for when you simply want to nest components
+     *  in a {@link JPanel} without having to worry about the layout manager or the background
+     *  color of the panel as it will be transparent and thus show the background of its parent.
+     *  This is in essence a convenience method for {@code UI.panel("ins 0").makeNonOpaque()}.
+     *
+     * @return A builder instance for a transparent {@link JPanel}, which enables fluent method chaining.
+     */
+    public static UIForPanel<JPanel> box() { return panel().withLayout(new MigLayout("ins 0, hidemode 2")).makeNonOpaque(); }
+
+    /**
+     *  Use this to create a builder for a transparent {@link JPanel} without any insets
+     *  and a {@link MigLayout} based on the provided constraints.
+     *  This is essentially a convenience method for the following: <br>
+     *  <pre>{@code
+     *      UI.of(new JPanel(new MigLayout(attr, colConstraints, rowConstraints))).makeNonOpaque()
+     *  }</pre>
+     *  <br>
+     * @param attr The layout attributes.
+     * @param colConstraints The column constraints.
+     * @param rowConstraints The row constraints.
+     * @return A builder instance for a transparent {@link JPanel}, which enables fluent method chaining.
+     */
+    public static UIForPanel<JPanel> box( String attr, String colConstraints, String rowConstraints ) {
+        NullUtil.nullArgCheck(attr, "attr", String.class);
+        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
+        NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class);
+        if (attr.isEmpty()) attr = "ins 0";
+        else if (!attr.contains("ins")) attr += ", ins 0";
+        return panel(attr, colConstraints, rowConstraints).makeNonOpaque();
+    }
+
+    /**
+     *  Use this to create a builder for a transparent {@link JPanel} without any insets
+     *  and a {@link MigLayout} based on the provided constraints.
+     *  This is essentially a convenience method for the following: <br>
+     *  <pre>{@code
+     *      UI.of(new JPanel(new MigLayout(attr, colConstraints, rowConstraints))).makeNonOpaque()
+     *  }</pre>
+     *  <br>
+     * @param attr The layout attributes in the form of a {@link LayoutAttr} constants.
+     * @param colConstraints The column constraints.
+     * @param rowConstraints The row constraints.
+     * @return A builder instance for a transparent {@link JPanel}, which enables fluent method chaining.
+     */
+    public static UIForPanel<JPanel> box( LayoutAttr attr, String colConstraints, String rowConstraints ) {
+        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
+        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
+        NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class);
+        return box(attr.toString(), colConstraints, rowConstraints);
+    }
+
+    /**
+     *  Use this to create a builder for a transparent {@link JPanel} without any insets.
+     *  This is essentially a convenience method for the following: <br>
+     *  <pre>{@code
+     *      UI.of(new JPanel(new MigLayout(attr+", ins 0", colConstraints))).makeNonOpaque()
+     *  }</pre>
+     *  <br>
+     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
+     * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
+     * @return A builder instance for a transparent {@link JPanel}, which enables fluent method chaining.
+     */
+    public static UIForPanel<JPanel> box( String attr, String colConstraints ) {
+        NullUtil.nullArgCheck(attr, "attr", String.class);
+        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
+        if (attr.isEmpty()) attr = "ins 0";
+        else if (!attr.contains("ins")) attr += ", ins 0";
+        return panel(attr, colConstraints).makeNonOpaque();
+    }
+
+    /**
+     *  Use this to create a builder for a transparent {@link JPanel} without any insets.
+     *  This is essentially a convenience method for the following: <br>
+     *  <pre>{@code
+     *      UI.of(new JPanel(new MigLayout(attr+", ins 0", colConstraints))).makeNonOpaque()
+     *  }</pre>
+     *  <br>
+     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
+     * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
+     * @return A builder instance for a transparent {@link JPanel}, which enables fluent method chaining.
+     */
+    public static UIForPanel<JPanel> box( LayoutAttr attr, String colConstraints ) {
+        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
+        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
+        return box(attr.toString(), colConstraints);
+    }
+
+    /**
+     *  Use this to create a builder for a transparent {@link JPanel} without any insets.
+     *  This is essentially a convenience method for the following: <br>
+     *  <pre>{@code
+     *      UI.of(new JPanel(new MigLayout(attr+", ins 0"))).makeNonOpaque()
+     *  }</pre>
+     *  <br>
+     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
+     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code attr} is {@code null}.
+     */
+    public static UIForPanel<JPanel> box( String attr ) {
+        NullUtil.nullArgCheck(attr, "attr", String.class);
+        if (attr.isEmpty()) attr = "ins 0";
+        else if (!attr.contains("ins")) attr += ", ins 0";
+        return panel(attr).makeNonOpaque();
+    }
+
+    /**
+     *  Use this to create a builder for a transparent {@link JPanel} without any insets.
+     *  This is in essence a convenience method for {@code UI.box(attr.toString()+", ins 0").makeNonOpaque()}.
+     *
+     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
+     * @return A builder instance for a transparent {@link JPanel}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code attr} is {@code null}.
+     */
+    public static UIForPanel<JPanel> box( LayoutAttr attr ) {
+        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
+        return box(attr.toString());
+    }
+
+    /**
+     *  Use this to create a builder for a transparent {@link JPanel} without any insets and a
+     *  dynamically updated set of {@link MigLayout} attributes.
+     *  This is in essence a convenience method for
+     *  {@code UI.of(new JPanel()).withLayout(attr.viewAsString( it -> it+", ins 0"))}.
+     *
+     * @param attr The layout attributes property which will be passed to the {@link MigLayout} constructor as first argument.
+     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code attr} is {@code null}.
+     */
+    public static UIForPanel<JPanel> box( Val<LayoutAttr> attr ) {
+        NullUtil.nullArgCheck(attr, "attr", Val.class);
+        NullUtil.nullPropertyCheck(attr, "attr", "Null is not a valid layout attribute.");
+        return box().withLayout(attr.view( it -> it.and("ins 0")));
     }
 
     /**

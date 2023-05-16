@@ -1341,7 +1341,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
             throw new IllegalArgumentException("The mig layout has already been specified for this component!");
 
         // We make sure the default hidemode is 2 instead of 3 (which sucks because it takes up too much space)
-        if ( constraints == null )
+        if ( constraints == null || constraints.isEmpty() )
             constraints = "hidemode 2";
         else if ( !constraints.contains("hidemode") )
             constraints += ", hidemode 2";

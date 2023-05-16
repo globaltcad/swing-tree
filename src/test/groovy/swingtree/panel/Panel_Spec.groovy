@@ -45,6 +45,17 @@ class Panel_Spec extends Specification
             ui.component.layout instanceof FlowLayout
     }
 
+    def 'A transparent panel can be created with a custom flow layout manager.'() {
+        when : 'We create a panel with a layout manager...'
+            def ui = UI.box().withLayout(new FlowLayout())
+        then : 'The panel UI is not null.'
+            ui != null
+        and : 'The UI node wraps a JPanel.'
+            ui.component instanceof JPanel
+        and : 'The panel has a FlowLayout.'
+            ui.component.layout instanceof FlowLayout
+    }
+
     def 'The default layout manager is always a MigLayout'()
     {
         given : 'We create a panel...'

@@ -1,11 +1,12 @@
 package swingtree.common
 
-import swingtree.UI
-import sprouts.Var
-import swingtree.input.Keyboard
+
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
+import sprouts.Var
+import swingtree.UI
+import swingtree.input.Keyboard
 
 import javax.swing.*
 import javax.swing.event.ListSelectionListener
@@ -57,6 +58,53 @@ class Basic_UI_Builder_Examples_Spec extends Specification
         and : 'We can also traverse the tree to find the children of the children.'
             ui.component.components[1].components[0] instanceof JPanel
             ui.component.components[1].components[1] instanceof JPanel
+    }
+
+    def 'We can use the `box()` factory to group UIs seemlesly.'()
+    {
+        reportInfo """
+            A regular JPanel will be opaque by default and also have 
+            a small padding/inset around it's content.
+            One of the most versatile factory methods is `UI.box()`
+            which creates a transparent JPanel with no padding/inset. 
+            Don't hesitate to use as the main tool for grouping and structuring
+            your UI, just like you would use the 'div' tag in HTML.
+        """
+        given : 'We create a simple swing tree of JPanel instances.'
+            var ui =
+                    UI.box()
+                    .add(UI.box())
+                    .add(
+                        UI.box()
+                        .add(UI.panel())
+                        .add(UI.panel())
+                    )
+                    .add(UI.box())
+
+        expect : 'The UI node contains a root JPanel with 3 children.'
+            ui.component instanceof JPanel
+            ui.component.components.length == 3
+        and : 'Because this is a regular Swing UI, we traverse the tree and find the children.'
+            ui.component.components[0] instanceof JPanel
+            ui.component.components[1] instanceof JPanel
+            ui.component.components[2] instanceof JPanel
+        and : 'We can also traverse the tree to find the children of the children.'
+            ui.component.components[1].components[0] instanceof JPanel
+            ui.component.components[1].components[1] instanceof JPanel
+        and : 'All the JPanel instances created with the `box()` factory methods are non-opacque and without insets!'
+            ui.component.isOpaque() == false
+            ui.component.components[0].isOpaque() == false
+            ui.component.components[1].isOpaque() == false
+            ui.component.components[2].isOpaque() == false
+            ui.component.layout.layoutConstraints == "ins 0, hidemode 2"
+            ui.component.components[0].layout.layoutConstraints == "ins 0, hidemode 2"
+            ui.component.components[1].layout.layoutConstraints == "ins 0, hidemode 2"
+            ui.component.components[2].layout.layoutConstraints == "ins 0, hidemode 2"
+        and : 'The 2 innermost panels are opaque and have insets:'
+            ui.component.components[1].components[0].isOpaque() == true
+            ui.component.components[1].components[1].isOpaque() == true
+            ui.component.components[1].components[0].layout.layoutConstraints == "hidemode 2"
+            ui.component.components[1].components[1].layout.layoutConstraints == "hidemode 2"
     }
 
     def 'We can add a list of components to the swing tree API and get a builder node in return.'()
