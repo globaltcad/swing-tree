@@ -1,50 +1,47 @@
 package swingtree.style;
 
-import java.awt.*;
+import java.util.Objects;
+import java.util.Optional;
 
 public final class Outline
 {
-    private final int top;
-    private final int right;
-    private final int bottom;
-    private final int left;
+    private final Integer top;
+    private final Integer right;
+    private final Integer bottom;
+    private final Integer left;
 
-    public Outline( int top, int left, int right, int bottom ) {
-        this.top = top;
-        this.left = left;
-        this.right = right;
+    public Outline( Integer top, Integer right, Integer bottom, Integer left ) {
+        this.top    = top;
+        this.right  = right;
         this.bottom = bottom;
+        this.left   = left;
     }
 
-    public int top() { return top; }
+    public Optional<Integer> top() { return Optional.ofNullable(top); }
 
-    public int right() { return right; }
+    public Optional<Integer> right() { return Optional.ofNullable(right); }
 
-    public int bottom() { return bottom; }
+    public Optional<Integer> bottom() { return Optional.ofNullable(bottom); }
 
-    public int left() { return left; }
+    public Optional<Integer> left() { return Optional.ofNullable(left); }
 
-    Outline withTop(int top) { return new Outline(top, left, right, bottom); }
+    Outline withTop(int top) { return new Outline(top, right, bottom, left); }
 
-    Outline withLeft(int left) { return new Outline(top, left, right, bottom); }
+    Outline withLeft(int left) { return new Outline(top, right, bottom, left); }
 
-    Outline withRight(int right) { return new Outline(top, left, right, bottom); }
+    Outline withRight(int right) { return new Outline(top, right, bottom, left); }
 
-    Outline withBottom(int bottom) { return new Outline(top, left, right, bottom); }
+    Outline withBottom(int bottom) { return new Outline(top, right, bottom, left); }
 
 
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 31 * hash + top;
-        hash = 31 * hash + right;
-        hash = 31 * hash + bottom;
-        hash = 31 * hash + left;
+        hash = 31 * hash + ( top    == null ? 1 : top    );
+        hash = 31 * hash + ( right  == null ? 2 : right  );
+        hash = 31 * hash + ( bottom == null ? 3 : bottom );
+        hash = 31 * hash + ( left   == null ? 4 : left   );
         return hash;
-    }
-
-    public Insets toInsets() {
-        return new Insets(top, left, bottom, right);
     }
 
     @Override
@@ -53,19 +50,19 @@ public final class Outline
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
         Outline rhs = (Outline) obj;
-        return top    == rhs.top    &&
-               right  == rhs.right  &&
-               bottom == rhs.bottom &&
-               left   == rhs.left;
+        return Objects.equals(top,    rhs.top   ) &&
+               Objects.equals(right,  rhs.right ) &&
+               Objects.equals(bottom, rhs.bottom) &&
+               Objects.equals(left,   rhs.left  );
     }
 
     @Override
     public String toString() {
         return "Outline[" +
-                    "top="    + top    + ", " +
-                    "right="  + right  + ", " +
-                    "bottom=" + bottom + ", " +
-                    "left="   + left   +
+                    "top="    + ( top    == null ? "?" : top    ) + ", " +
+                    "right="  + ( right  == null ? "?" : right  ) + ", " +
+                    "bottom=" + ( bottom == null ? "?" : bottom ) + ", " +
+                    "left="   + ( left   == null ? "?" : left   ) +
                 "]";
     }
 

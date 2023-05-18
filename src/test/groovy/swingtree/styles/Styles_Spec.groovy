@@ -89,8 +89,8 @@ class Styles_Spec extends Specification
         expect :
                 style.toString() == "Style[" +
                                         "LayoutStyle[" +
-                                            "margin=Outline[top=0, right=0, bottom=0, left=0], " +
-                                            "padding=Outline[top=0, right=0, bottom=0, left=0]" +
+                                            "margin=Outline[top=?, right=?, bottom=?, left=?], " +
+                                            "padding=Outline[top=?, right=?, bottom=?, left=?]" +
                                         "], " +
                                         "BorderStyle[arcWidth=12, arcHeight=18, width=-1, color=rgba(0,0,255,255)], " +
                                         "BackgroundStyle[" +

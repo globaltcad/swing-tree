@@ -39,8 +39,8 @@ public final class Style
 {
     private static final Style _BLANK = new Style(
                                             new LayoutStyle(
-                                                new Outline(0,0,0,0), // margin
-                                                new Outline(0,0,0,0)  // padding
+                                                new Outline(null, null, null, null), // margin
+                                                new Outline(null, null, null, null)  // padding
                                             ),
                                             new BorderStyle(0,0,-1, null),
                                             new BackgroundStyle(null, null, null),

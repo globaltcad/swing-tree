@@ -183,34 +183,38 @@ public class ComponentExtension<C extends JComponent>
     }
 
     private void _applyPadding(Style style ) {
-        int insTop    = style.margin().top()    + style.padding().top();
-        int insLeft   = style.margin().left()   + style.padding().left();
-        int insBottom = style.margin().bottom() + style.padding().bottom();
-        int insRight  = style.margin().right()  + style.padding().right();
-        boolean anyPadding = insTop >= 0 || insLeft >= 0 || insBottom >= 0 || insRight >= 0;
+        boolean insTopPresent    = style.margin().top().isPresent()    && style.padding().top().isPresent();
+        boolean insLeftPresent   = style.margin().left().isPresent()   && style.padding().left().isPresent();
+        boolean insBottomPresent = style.margin().bottom().isPresent() && style.padding().bottom().isPresent();
+        boolean insRightPresent  = style.margin().right().isPresent()  && style.padding().right().isPresent();
+        int insTop    = Math.max(style.margin().top().orElse(0),    0) + style.padding().top().orElse(0);
+        int insLeft   = Math.max(style.margin().left().orElse(0),   0) + style.padding().left().orElse(0);
+        int insBottom = Math.max(style.margin().bottom().orElse(0), 0) + style.padding().bottom().orElse(0);
+        int insRight  = Math.max(style.margin().right().orElse(0),  0) + style.padding().right().orElse(0);
+        boolean anyPadding = insTopPresent || insLeftPresent || insBottomPresent || insRightPresent;
         if ( anyPadding ) {
             // Let's adjust for border width:
             if ( style.border().width() > 0 ) {
                 int borderWidth = style.border().width();
-                if ( insTop >= 0 )
+                if ( insTopPresent )
                     insTop += borderWidth;
-                if ( insLeft >= 0 )
+                if ( insLeftPresent )
                     insLeft += borderWidth;
-                if ( insBottom >= 0 )
+                if ( insBottomPresent )
                     insBottom += borderWidth;
-                if ( insRight >= 0 )
+                if ( insRightPresent )
                     insRight += borderWidth;
             }
-            Insets insets = _owner.getInsets();
+            Insets insets = Optional.ofNullable(_owner.getInsets()).orElse( new Insets(0,0,0,0) );
             boolean alreadyEqual = insets.top == insTop && insets.left == insLeft && insets.bottom == insBottom && insets.right == insRight;
             if ( !alreadyEqual ) {
-                if ( insTop >= 0 )
+                if ( insTopPresent )
                     insets.top = insTop;
-                if ( insLeft >= 0 )
+                if ( insLeftPresent )
                     insets.left = insLeft;
-                if ( insBottom >= 0 )
+                if ( insBottomPresent )
                     insets.bottom = insBottom;
-                if ( insRight >= 0 )
+                if ( insRightPresent )
                     insets.right = insRight;
 
                 // We have to let the layout manager know about the new insets,
@@ -257,6 +261,7 @@ public class ComponentExtension<C extends JComponent>
 
                     gbc.insets = insets;
                     gridBagLayout.setConstraints( _owner, gbc );
+                    _owner.revalidate();
                 } else {
                     /*
                         One hacky way to set the insets is to set the border!
@@ -272,7 +277,10 @@ public class ComponentExtension<C extends JComponent>
                             if ( emptyBorder.getBorderInsets().equals(insets) )
                                 return;
                         }
-                        _owner.setBorder( BorderFactory.createEmptyBorder( insets.top, insets.left, insets.bottom, insets.right ) );
+                        _owner.setBorder(
+                                BorderFactory.createEmptyBorder( insets.top, insets.left, insets.bottom, insets.right )
+                            );
+                        _owner.revalidate();
                     }
                 }
             }

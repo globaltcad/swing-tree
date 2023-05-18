@@ -48,14 +48,23 @@ public class StyleRenderer<C extends JComponent>
 
     private void _drawBorder(Style style, Color color) {
         if ( style.border().width() > 0 ) {
+            // The background box is calculated from the margins and border radius:
+            int left      = Math.max(style.margin().left().orElse(0),     0);
+            int top       = Math.max(style.margin().top().orElse(0),      0);
+            int right     = Math.max(style.margin().right().orElse(0),    0);
+            int bottom    = Math.max(style.margin().bottom().orElse(0),   0);
+            int arcWidth  = Math.max(style.border().arcWidth(), 0);
+            int arcHeight = Math.max(style.border().arcHeight(),0);
+            int width     = _comp.getWidth();
+            int height    = _comp.getHeight();
             _g2d.setColor(color);
             _g2d.setStroke(new BasicStroke(style.border().width()));
             _g2d.drawRoundRect(
-                    style.margin().left(), style.margin().top(),
-                    _comp.getWidth() - style.margin().left() - style.margin().right()-1,
-                    _comp.getHeight() - style.margin().top() - style.margin().bottom()-1,
-                    (style.border().arcWidth()  + (style.border().width() == 1 ? 0 : style.border().width()+1)),
-                    (style.border().arcHeight() + (style.border().width() == 1 ? 0 : style.border().width()+1))
+                    left, top,
+                    width  - left - right - 1,
+                    height - top - bottom - 1,
+                    (arcWidth  + (style.border().width() == 1 ? 0 : style.border().width()+1)),
+                    (arcHeight + (style.border().width() == 1 ? 0 : style.border().width()+1))
                 );
         }
     }
@@ -65,13 +74,21 @@ public class StyleRenderer<C extends JComponent>
         if ( color.getAlpha() == 0 )
             return;
 
+        // The background box is calculated from the margins and border radius:
+        int left      = Math.max(style.margin().left().orElse(0),     0);
+        int top       = Math.max(style.margin().top().orElse(0),      0);
+        int right     = Math.max(style.margin().right().orElse(0),    0);
+        int bottom    = Math.max(style.margin().bottom().orElse(0),   0);
+        int arcWidth  = Math.max(style.border().arcWidth(), 0);
+        int arcHeight = Math.max(style.border().arcHeight(),0);
+        int width     = _comp.getWidth();
+        int height    = _comp.getHeight();
+
         _g2d.setColor(color);
         _g2d.fillRoundRect(
-            style.margin().left(), style.margin().top(),
-            _comp.getWidth() - style.margin().left() - style.margin().right(),
-            _comp.getHeight() - style.margin().top() - style.margin().bottom(),
-            style.border().arcWidth(), style.border().arcHeight()
-        );
+                left, top, width - left - right, height - top - bottom,
+                arcWidth, arcHeight
+            );
     }
 
     private void _fillOuterBackground( Style style, Color color ) {
@@ -79,17 +96,23 @@ public class StyleRenderer<C extends JComponent>
         if ( color.getAlpha() == 0 )
             return;
 
-        Rectangle2D.Float outerRect = new Rectangle2D.Float(
-                0, 0,
-                _comp.getWidth(),
-                _comp.getHeight()
-        );
+        // The background box is calculated from the margins and border radius:
+        int left      = Math.max(style.margin().left().orElse(0),   0);
+        int top       = Math.max(style.margin().top().orElse(0),    0);
+        int right     = Math.max(style.margin().right().orElse(0),  0);
+        int bottom    = Math.max(style.margin().bottom().orElse(0), 0);
+        int arcWidth  = Math.max(style.border().arcWidth(), 0);
+        int arcHeight = Math.max(style.border().arcHeight(),0);
+        int width     = _comp.getWidth();
+        int height    = _comp.getHeight();
+
+        Rectangle2D.Float outerRect = new Rectangle2D.Float(0, 0, width, height);
         RoundRectangle2D.Float innerRect = new RoundRectangle2D.Float(
-                style.margin().left(), style.margin().top(),
-                _comp.getWidth() - style.margin().left() - style.margin().right(),
-                _comp.getHeight() - style.margin().top() - style.margin().bottom(),
-                style.border().arcWidth(), style.border().arcHeight()
-        );
+                                                        left, top,
+                                                        width - left - right,
+                                                        height - top - bottom,
+                                                        arcWidth, arcHeight
+                                                    );
 
         Area outer = new Area(outerRect);
         Area inner = new Area(innerRect);
@@ -110,20 +133,30 @@ public class StyleRenderer<C extends JComponent>
         if ( shadowColor.getAlpha() == 0 )
             return;
 
-        // Calculate the shadow box bounds based on the padding and border thickness
-        int x = style.margin().left() + style.border().width()/2 + style.shadow().horizontalOffset();
-        int y = style.margin().top() + style.border().width()/2 + style.shadow().verticalOffset();
-        int w = comp.getWidth() - style.margin().left() - style.margin().right() - style.border().width();
-        int h = comp.getHeight() - style.margin().top() - style.margin().bottom() - style.border().width();
+        // The background box is calculated from the margins and border radius:
+        int left      = Math.max(style.margin().left().orElse(0),   0);
+        int top       = Math.max(style.margin().top().orElse(0),    0);
+        int right     = Math.max(style.margin().right().orElse(0),  0);
+        int bottom    = Math.max(style.margin().bottom().orElse(0), 0);
+        int arcWidth  = Math.max(style.border().arcWidth(), 0);
+        int arcHeight = Math.max(style.border().arcHeight(),0);
+        int width     = comp.getWidth();
+        int height    = comp.getHeight();
 
-        int blurRadius = style.shadow().blurRadius();
+        // Calculate the shadow box bounds based on the padding and border thickness
+        int x = left   + style.border().width() / 2 + style.shadow().horizontalOffset();
+        int y = top    + style.border().width() / 2 + style.shadow().verticalOffset();
+        int w = width  - left - right  - style.border().width();
+        int h = height - top  - bottom - style.border().width();
+
+        int blurRadius   = style.shadow().blurRadius();
         int spreadRadius = !style.shadow().isOutset() ? style.shadow().spreadRadius() : -style.shadow().spreadRadius();
 
         RoundRectangle2D.Float baseRect = new RoundRectangle2D.Float(
-                                                        style.margin().left() + (float) style.border().width() /2,
-                                                        style.margin().top() + (float) style.border().width() /2,
+                                                        left + (float) style.border().width() / 2,
+                                                        top  + (float) style.border().width() / 2,
                                                             w, h,
-                                                            style.border().arcWidth(), style.border().arcHeight()
+                                                            arcWidth, arcHeight
                                                     );
 
         int shadowInset  = blurRadius;
@@ -293,7 +326,7 @@ public class StyleRenderer<C extends JComponent>
         Color innerColor;
         Color outerColor;
         Color shadowBackgroundColor = new Color(0,0,0,0);
-        if (style.shadow().isOutset()) {
+        if ( style.shadow().isOutset() ) {
             innerColor = style.shadow().color().orElse(Color.BLACK);
             outerColor = shadowBackgroundColor;
         } else {
