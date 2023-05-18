@@ -162,6 +162,12 @@ public class StyleRenderer<C extends JComponent>
         int shadowInset  = blurRadius;
         int shadowOutset = blurRadius;
 
+        Rectangle outerShadowRect = new Rectangle(
+                                        x - shadowOutset + spreadRadius,
+                                        y - shadowOutset + spreadRadius,
+                                        w + shadowOutset * 2 - spreadRadius * 2,
+                                        h + shadowOutset * 2 - spreadRadius * 2
+                                    );
         int gradientStartOffset = ( style.border().arcWidth() + style.border().arcHeight() ) / 5;
 
         Rectangle innerShadowRect = new Rectangle(
@@ -169,13 +175,6 @@ public class StyleRenderer<C extends JComponent>
                                         y + shadowInset + gradientStartOffset + spreadRadius,
                                         w - shadowInset * 2 - gradientStartOffset * 2 - spreadRadius * 2,
                                         h - shadowInset * 2 - gradientStartOffset * 2 - spreadRadius * 2
-                                    );
-
-        Rectangle outerShadowRect = new Rectangle(
-                                        x - shadowOutset - gradientStartOffset + spreadRadius,
-                                        y - shadowOutset - gradientStartOffset + spreadRadius,
-                                        w + shadowOutset * 2 + gradientStartOffset * 2 - spreadRadius * 2,
-                                        h + shadowOutset * 2 + gradientStartOffset * 2 - spreadRadius * 2
                                     );
 
         // Create the shadow shape based on the box bounds and corner arc widths/heights
