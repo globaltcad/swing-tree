@@ -161,7 +161,7 @@ public class StyleRenderer<C extends JComponent>
 
         int shadowInset  = blurRadius;
         int shadowOutset = blurRadius;
-        int borderWidthOffset = style.border().width() * ( style.shadow().isOutset() ? -1 : 1 );
+        int borderWidthOffset = style.border().width() * ( style.shadow().isOutset() ? -1 : 0 );
 
         Rectangle outerShadowRect = new Rectangle(
                                         x - shadowOutset + spreadRadius + borderWidthOffset,
