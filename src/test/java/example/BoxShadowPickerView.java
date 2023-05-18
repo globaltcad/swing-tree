@@ -75,10 +75,10 @@ public class BoxShadowPickerView extends UI.Panel
                     .add(GROW_X, slider(Align.HORIZONTAL, -50, 50, vm.verticalShadowOffset()))
                     .add(label(vm.verticalShadowOffset().viewAsString()))
                     .add(label("Blur Radius:"))
-                    .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.shadowBlurRadius()))
+                    .add(GROW_X, slider(Align.HORIZONTAL, -10, 100, vm.shadowBlurRadius()))
                     .add(label(vm.shadowBlurRadius().viewAsString()))
                     .add(label("Spread Radius:"))
-                    .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.shadowSpreadRadius()))
+                    .add(GROW_X, slider(Align.HORIZONTAL, -10, 100, vm.shadowSpreadRadius()))
                     .add(label(vm.shadowSpreadRadius().viewAsString()))
                 )
                 .add(

@@ -149,7 +149,7 @@ public class StyleRenderer<C extends JComponent>
         int w = width  - left - right  - style.border().width();
         int h = height - top  - bottom - style.border().width();
 
-        int blurRadius   = style.shadow().blurRadius();
+        int blurRadius   = Math.max(style.shadow().blurRadius(), 0);
         int spreadRadius = !style.shadow().isOutset() ? style.shadow().spreadRadius() : -style.shadow().spreadRadius();
 
         RoundRectangle2D.Float baseRect = new RoundRectangle2D.Float(
@@ -161,41 +161,45 @@ public class StyleRenderer<C extends JComponent>
 
         int shadowInset  = blurRadius;
         int shadowOutset = blurRadius;
+        int borderWidthOffset = style.border().width() * ( style.shadow().isOutset() ? -1 : 1 );
 
         Rectangle outerShadowRect = new Rectangle(
-                                        x - shadowOutset + spreadRadius,
-                                        y - shadowOutset + spreadRadius,
-                                        w + shadowOutset * 2 - spreadRadius * 2,
-                                        h + shadowOutset * 2 - spreadRadius * 2
+                                        x - shadowOutset + spreadRadius + borderWidthOffset,
+                                        y - shadowOutset + spreadRadius + borderWidthOffset,
+                                        w + shadowOutset * 2 - spreadRadius * 2 - borderWidthOffset * 2,
+                                        h + shadowOutset * 2 - spreadRadius * 2 - borderWidthOffset * 2
                                     );
         int gradientStartOffset = ( style.border().arcWidth() + style.border().arcHeight() ) / 5;
 
         Rectangle innerShadowRect = new Rectangle(
-                                        x + shadowInset + gradientStartOffset + spreadRadius,
-                                        y + shadowInset + gradientStartOffset + spreadRadius,
-                                        w - shadowInset * 2 - gradientStartOffset * 2 - spreadRadius * 2,
-                                        h - shadowInset * 2 - gradientStartOffset * 2 - spreadRadius * 2
+                                        x + shadowInset + gradientStartOffset + spreadRadius + borderWidthOffset,
+                                        y + shadowInset + gradientStartOffset + spreadRadius + borderWidthOffset,
+                                        w - shadowInset * 2 - gradientStartOffset * 2 - spreadRadius * 2 - borderWidthOffset * 2,
+                                        h - shadowInset * 2 - gradientStartOffset * 2 - spreadRadius * 2 - borderWidthOffset * 2
                                     );
 
-        // Create the shadow shape based on the box bounds and corner arc widths/heights
-        Rectangle outerShadowBox = new Rectangle(
-                                        outerShadowRect.x,
-                                        outerShadowRect.y,
-                                        outerShadowRect.width,
-                                        outerShadowRect.height
-                                    );
+        Area baseArea;
+        Area outerMostArea;
 
-        // Apply the clipping to avoid overlapping the shadow and the box
-        Area shadowArea = new Area(outerShadowBox);
-        Area baseArea = new Area(baseRect);
-
-        if ( !style.shadow().isOutset() )
-            shadowArea.intersect(baseArea);
-        else
-            shadowArea.subtract(baseArea);
-
-        //if ( blurRadius != 0 || spreadRadius != 0 )
+        if ( blurRadius > 0 )
         {
+            // Create the shadow shape based on the box bounds and corner arc widths/heights
+            Rectangle outerShadowBox = new Rectangle(
+                                            outerShadowRect.x,
+                                            outerShadowRect.y,
+                                            outerShadowRect.width,
+                                            outerShadowRect.height
+                                        );
+
+            // Apply the clipping to avoid overlapping the shadow and the box
+            Area shadowArea = new Area(outerShadowBox);
+            baseArea = new Area(baseRect);
+
+            if ( !style.shadow().isOutset() )
+                shadowArea.intersect(baseArea);
+            else
+                shadowArea.subtract(baseArea);
+
             // Draw the corner shadows
             _renderCornerShadow(style, Corner.TOP_LEFT,     shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
             _renderCornerShadow(style, Corner.TOP_RIGHT,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
@@ -207,23 +211,51 @@ public class StyleRenderer<C extends JComponent>
             _renderEdgeShadow(style, Side.RIGHT,  shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
             _renderEdgeShadow(style, Side.BOTTOM, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
             _renderEdgeShadow(style, Side.LEFT,   shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
-        }
 
+            outerMostArea = new Area(outerShadowBox);
+        }
+        else // Easy, we simply fill a round rectangle with the shadow color
+        {
+            // Create the shadow shape based on the box bounds and corner arc widths/heights
+            RoundRectangle2D.Float outerShadowBox = new RoundRectangle2D.Float(
+                                                        outerShadowRect.x,
+                                                        outerShadowRect.y,
+                                                        outerShadowRect.width,
+                                                        outerShadowRect.height,
+                                                        arcWidth, arcHeight
+                                                    );
+
+            // Apply the clipping to avoid overlapping the shadow and the box
+            Area shadowArea = new Area(outerShadowBox);
+            baseArea = new Area(baseRect);
+
+            g2d.setColor(shadowColor);
+
+            if ( !style.shadow().isOutset() ) {
+                shadowArea.intersect(baseArea);
+            } else {
+                shadowArea.subtract(baseArea);
+                g2d.fill(shadowArea);
+            }
+
+            outerMostArea = new Area(outerShadowBox);
+        }
         // If the base rectangle and the outer shadow box are not equal, then we need to fill the area of the base rectangle that is not covered by the outer shadow box!
-        _renderShadowBody(style, baseArea, innerShadowRect, outerShadowBox, g2d);
+        _renderShadowBody(style, baseArea, innerShadowRect, outerMostArea, g2d);
+
     }
 
     private static void _renderShadowBody(
         Style style,
         Area baseArea,
         Rectangle innerShadowRect,
-        Rectangle outerShadowBox,
+        Area outerShadowBox,
         Graphics2D g2d
     ) {
         Graphics2D g2d2 = (Graphics2D) g2d.create();
         g2d2.setColor(style.shadow().color().orElse(Color.BLACK));
         if ( !style.shadow().isOutset() ) {
-            baseArea.subtract(new Area(outerShadowBox));
+            baseArea.subtract(outerShadowBox);
             g2d2.fill(baseArea);
         } else {
             Area innerShadowArea = new Area(innerShadowRect);
