@@ -4,14 +4,14 @@ import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
 
-public class BorderStyle
+public final class BorderStyle
 {
     private final int   _borderArcWidth;
     private final int   _borderArcHeight;
     private final int   _borderWidth;
     private final Color _borderColor;
 
-    public BorderStyle(
+    BorderStyle(
         int borderArcWidth,
         int borderArcHeight,
         int borderWidth,

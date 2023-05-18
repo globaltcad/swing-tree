@@ -4,7 +4,7 @@ import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
 
-public class ShadowStyle
+public final class ShadowStyle
 {
     private final int _horizontalOffset;
     private final int _verticalOffset;
@@ -13,7 +13,7 @@ public class ShadowStyle
     private final Color _color;
     private final boolean _isOutset;
 
-    public ShadowStyle(
+    ShadowStyle(
         int horizontalShadowOffset,
         int verticalShadowOffset,
         int shadowBlurRadius,
@@ -84,13 +84,13 @@ public class ShadowStyle
     @Override
     public String toString() {
         return "ShadowStyle[" +
-            "horizontalOffset=" + _horizontalOffset + ", " +
-            "verticalOffset="   + _verticalOffset + ", " +
-            "blurRadius="       + _blurRadius + ", " +
-            "spreadRadius="     + _spreadRadius + ", " +
-            "color="            + StyleUtility.toString(_color) + ", " +
-            "isInset="          + !_isOutset +
-        "]";
+                    "horizontalOffset=" + _horizontalOffset + ", " +
+                    "verticalOffset="   + _verticalOffset   + ", " +
+                    "blurRadius="       + _blurRadius       + ", " +
+                    "spreadRadius="     + _spreadRadius     + ", " +
+                    "color="            + StyleUtility.toString(_color) + ", " +
+                    "isInset="          + !_isOutset +
+                "]";
     }
 
 }

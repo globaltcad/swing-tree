@@ -6,10 +6,20 @@ import javax.swing.*;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ *  A {@link StyleTrait} is a set of properties that will be used to
+ *  target specific {@link JComponent}s matching said properties, so that
+ *  you can apply custom {@link Style}a to them. <br>
+ *  Instances of this are supposed to be created and registered inside
+ *  custom {@link StyleSheet} extensions which you can use to apply
+ *  custom styles to your UIs. <br>
+ *
+ * @param <C> The type of {@link JComponent} this {@link StyleTrait} is for.
+ */
 public final class StyleTrait<C extends JComponent>
 {
-    private final String _group;
-    private final String _id;
+    private final String   _group;
+    private final String   _id;
     private final String[] _toInherit;
     private final Class<C> _type;
 
@@ -113,7 +123,7 @@ public final class StyleTrait<C extends JComponent>
         if ( !( other instanceof StyleTrait ) )
             return false;
 
-        StyleTrait that = (StyleTrait) other;
+        StyleTrait<?> that = (StyleTrait<?>) other;
         return this._group.equals(that._group) &&
                 this._id.equals(that._id) &&
                 this._type.equals(that._type) &&

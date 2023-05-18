@@ -3,6 +3,15 @@ package swingtree.style;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ *  Outline is an immutable value object that represents the outline of a UI component
+ *  where every side of the outline can have varying thicknesses and even be completely
+ *  optional (null).
+ *  <p>
+ *  The values of this object are optional in order to determine if the outline
+ *  was specified through the styling API or not so that the default properties of a component
+ *  can be preserved (the insets of a layout manager, for example).
+ */
 public final class Outline
 {
     private final Integer top;

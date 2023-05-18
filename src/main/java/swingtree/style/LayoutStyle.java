@@ -1,11 +1,11 @@
 package swingtree.style;
 
-public final class LayoutStyle
+final class LayoutStyle
 {
     private final Outline margin;
     private final Outline padding;
 
-    public LayoutStyle( Outline margin, Outline padding ) {
+    LayoutStyle( Outline margin, Outline padding ) {
         this.margin = margin;
         this.padding = padding;
     }

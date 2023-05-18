@@ -7,7 +7,7 @@ import java.text.AttributedCharacterIterator;
 import java.util.*;
 import java.util.List;
 
-public class FontStyle
+public final class FontStyle
 {
     private final String _name;
     private final int _size;
@@ -18,7 +18,7 @@ public class FontStyle
     private final Color _backgroundColor;
     private final Color _selectionColor;
 
-    public FontStyle(
+    FontStyle(
         String name,
         int fontSize,
         int fontStyle,

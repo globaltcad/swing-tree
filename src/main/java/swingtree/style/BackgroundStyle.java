@@ -5,13 +5,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class BackgroundStyle
+public final class BackgroundStyle
 {
     private final Color _color;
     private final Color _foundationColor;
     private final Consumer<Graphics2D> _renderer;
 
-    public BackgroundStyle(
+    BackgroundStyle(
         Color color,
         Color foundation,
         Consumer<Graphics2D> renderer
