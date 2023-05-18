@@ -67,10 +67,10 @@ public class StyleRenderer<C extends JComponent>
 
         _g2d.setColor(color);
         _g2d.fillRoundRect(
-                style.padding().left(), style.padding().top(),
-                _comp.getWidth() - style.padding().left() - style.padding().right(),
-                _comp.getHeight() - style.padding().top() - style.padding().bottom(),
-                style.border().arcWidth(), style.border().arcHeight()
+            style.padding().left(), style.padding().top(),
+            _comp.getWidth() - style.padding().left() - style.padding().right(),
+            _comp.getHeight() - style.padding().top() - style.padding().bottom(),
+            style.border().arcWidth(), style.border().arcHeight()
         );
     }
 

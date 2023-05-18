@@ -38,7 +38,10 @@ import java.util.function.Consumer;
 public final class Style
 {
     private static final Style _BLANK = new Style(
-                                            new PaddingStyle(0,0,0,0),
+                                            new LayoutStyle(
+                                                new Outline(0,0,0,0), // margin
+                                                new Outline(0,0,0,0)  // padding
+                                            ),
                                             new BorderStyle(0,0,-1, null),
                                             new BackgroundStyle(null, null, null),
                                             new ShadowStyle(0,0,0,0, null, true),
@@ -47,7 +50,7 @@ public final class Style
 
     public static Style blank() { return _BLANK; }
 
-    private final PaddingStyle    _padding;
+    private final LayoutStyle    _layout;
     private final BorderStyle     _border;
     private final BackgroundStyle _background;
     private final ShadowStyle     _shadow;
@@ -55,24 +58,24 @@ public final class Style
 
 
     private Style(
-        PaddingStyle padding,
+            LayoutStyle layout,
         BorderStyle border,
         BackgroundStyle background,
         ShadowStyle shadow,
         FontStyle font
     ) {
-        _padding = padding;
+        _layout = layout;
         _border = border;
         _background = background;
         _shadow = shadow;
         _font = font;
     }
 
-    private Style _withPadding( PaddingStyle padding ) { return new Style(padding, _border, _background, _shadow, _font); }
-    private Style _withBorder( BorderStyle border ) { return new Style(_padding, border, _background, _shadow, _font); }
-    private Style _withBackground( BackgroundStyle background ) { return new Style(_padding, _border, background, _shadow, _font); }
-    private Style _withShadow( ShadowStyle shadow ) { return new Style(_padding, _border, _background, shadow, _font); }
-    private Style _withFont( FontStyle font ) { return new Style(_padding, _border, _background, _shadow, font); }
+    private Style _withLayout( LayoutStyle layout ) { return new Style(layout, _border, _background, _shadow, _font); }
+    private Style _withBorder( BorderStyle border ) { return new Style(_layout, border, _background, _shadow, _font); }
+    private Style _withBackground( BackgroundStyle background ) { return new Style(_layout, _border, background, _shadow, _font); }
+    private Style _withShadow( ShadowStyle shadow ) { return new Style(_layout, _border, _background, shadow, _font); }
+    private Style _withFont( FontStyle font ) { return new Style(_layout, _border, _background, _shadow, font); }
 
     /**
      *  Creates a new {@link Style} with the provided top, right, left and bottom pad distances.
@@ -88,7 +91,7 @@ public final class Style
      * @return A new {@link Style} with the provided padding distances.
      */
     public Style pad( int top, int right, int bottom, int left ) {
-        return _withPadding(_padding.withTop(top).withLeft(left).withRight(right).withBottom(bottom));
+        return _withLayout(_layout.withPadding(_layout.padding().withTop(top).withLeft(left).withRight(right).withBottom(bottom)));
     }
 
     /**
@@ -102,7 +105,7 @@ public final class Style
      * @return A new {@link Style} with the provided padding distance.
      */
     public Style pad( int padding ) {
-        return _withPadding(this._padding.withTop(padding).withLeft(padding).withRight(padding).withBottom(padding));
+        return _withLayout(_layout.withPadding(_layout.padding().withTop(padding).withLeft(padding).withRight(padding).withBottom(padding)));
     }
 
     /**
@@ -116,7 +119,7 @@ public final class Style
      * @return A new {@link Style} with the provided padding distance.
      */
     public Style padTop(int padding ) {
-        return _withPadding(this._padding.withTop(padding));
+        return _withLayout(_layout.withPadding(_layout.padding().withTop(padding)));
     }
 
     /**
@@ -130,7 +133,7 @@ public final class Style
      * @return A new {@link Style} with the provided padding distance.
      */
     public Style padRight( int padding ) {
-        return _withPadding(this._padding.withRight(padding));
+        return _withLayout(_layout.withPadding(_layout.padding().withRight(padding)));
     }
 
     /**
@@ -144,7 +147,7 @@ public final class Style
      * @return A new {@link Style} with the provided padding distance.
      */
     public Style padBottom(int padding ) {
-        return _withPadding(this._padding.withBottom(padding));
+        return _withLayout(_layout.withPadding(_layout.padding().withBottom(padding)));
     }
 
     /**
@@ -158,7 +161,7 @@ public final class Style
      * @return A new {@link Style} with the provided padding distance.
      */
     public Style padLeft( int padding ) {
-        return _withPadding(this._padding.withLeft(padding));
+        return _withLayout(_layout.withPadding(_layout.padding().withLeft(padding)));
     }
 
     /**
@@ -172,7 +175,7 @@ public final class Style
      * @return A new {@link Style} with the provided padding distance.
      */
     public Style padVertical( int padding ) {
-        return _withPadding(this._padding.withTop(padding).withBottom(padding));
+        return _withLayout(_layout.withPadding(_layout.padding().withTop(padding).withBottom(padding)));
     }
 
     /**
@@ -186,7 +189,7 @@ public final class Style
      * @return A new {@link Style} with the provided padding distance.
      */
     public Style padHorizontal( int padding ) {
-        return _withPadding(this._padding.withLeft(padding).withRight(padding));
+        return _withLayout(_layout.withPadding(_layout.padding().withLeft(padding).withRight(padding)));
     }
 
     /**
@@ -573,7 +576,7 @@ public final class Style
         return _withFont(_font.withSelectionColor(_colorFrom(colorString)));
     }
 
-    public PaddingStyle padding() { return this._padding; }
+    public Outline padding() { return _layout.padding(); }
 
     public BorderStyle border() { return _border; }
 
@@ -585,7 +588,7 @@ public final class Style
 
     @Override
     public int hashCode() {
-        return Objects.hash(_padding, _border, _background, _shadow, _font);
+        return Objects.hash(_layout, _border, _background, _shadow, _font);
     }
 
     @Override
@@ -594,7 +597,7 @@ public final class Style
         if ( obj == null ) return false;
         if ( !(obj instanceof Style) ) return false;
         Style other = (Style) obj;
-        return Objects.equals(_padding,    other._padding   ) &&
+        return Objects.equals(_layout,     other._layout   ) &&
                Objects.equals(_border,     other._border    ) &&
                Objects.equals(_background, other._background) &&
                Objects.equals(_shadow,     other._shadow    ) &&
@@ -604,7 +607,7 @@ public final class Style
     @Override
     public String toString() {
         return "Style[" +
-                    _padding    + ", " +
+                    _layout     + ", " +
                     _border     + ", " +
                     _background + ", " +
                     _shadow     + ", " +

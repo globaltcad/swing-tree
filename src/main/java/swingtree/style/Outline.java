@@ -1,13 +1,15 @@
 package swingtree.style;
 
-public class PaddingStyle
+import java.awt.*;
+
+public final class Outline
 {
     private final int top;
     private final int right;
     private final int bottom;
     private final int left;
 
-    public PaddingStyle(int top, int left, int right, int bottom) {
+    public Outline( int top, int left, int right, int bottom ) {
         this.top = top;
         this.left = left;
         this.right = right;
@@ -22,13 +24,13 @@ public class PaddingStyle
 
     public int left() { return left; }
 
-    PaddingStyle withTop(int top) { return new PaddingStyle(top, left, right, bottom); }
+    Outline withTop(int top) { return new Outline(top, left, right, bottom); }
 
-    PaddingStyle withLeft(int left) { return new PaddingStyle(top, left, right, bottom); }
+    Outline withLeft(int left) { return new Outline(top, left, right, bottom); }
 
-    PaddingStyle withRight(int right) { return new PaddingStyle(top, left, right, bottom); }
+    Outline withRight(int right) { return new Outline(top, left, right, bottom); }
 
-    PaddingStyle withBottom(int bottom) { return new PaddingStyle(top, left, right, bottom); }
+    Outline withBottom(int bottom) { return new Outline(top, left, right, bottom); }
 
 
     @Override
@@ -41,12 +43,16 @@ public class PaddingStyle
         return hash;
     }
 
+    public Insets toInsets() {
+        return new Insets(top, left, bottom, right);
+    }
+
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals( Object obj ) {
         if ( obj == null ) return false;
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
-        PaddingStyle rhs = (PaddingStyle) obj;
+        Outline rhs = (Outline) obj;
         return top    == rhs.top    &&
                right  == rhs.right  &&
                bottom == rhs.bottom &&
@@ -55,7 +61,7 @@ public class PaddingStyle
 
     @Override
     public String toString() {
-        return "PaddingStyle[" +
+        return "Outline[" +
                     "top="    + top    + ", " +
                     "right="  + right  + ", " +
                     "bottom=" + bottom + ", " +
