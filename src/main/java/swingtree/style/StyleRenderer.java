@@ -169,7 +169,10 @@ public class StyleRenderer<C extends JComponent>
                                         w + shadowOutset * 2 - spreadRadius * 2 - borderWidthOffset * 2,
                                         h + shadowOutset * 2 - spreadRadius * 2 - borderWidthOffset * 2
                                     );
-        int gradientStartOffset = ( style.border().arcWidth() + style.border().arcHeight() ) / 5;
+
+        int gradientStartOffset = (int)(( arcWidth + arcHeight ) / ( style.shadow().isInset() ? 4.5 : 3.79) );
+        gradientStartOffset += ( style.shadow().isInset() ? 0 : style.border().width() );
+
 
         Rectangle innerShadowRect = new Rectangle(
                                         x + shadowInset + gradientStartOffset + spreadRadius + borderWidthOffset,
@@ -222,7 +225,8 @@ public class StyleRenderer<C extends JComponent>
                                                         outerShadowRect.y,
                                                         outerShadowRect.width,
                                                         outerShadowRect.height,
-                                                        arcWidth, arcHeight
+                                                        (float)(arcWidth  + gradientStartOffset / 4),
+                                                        (float)(arcHeight + gradientStartOffset / 4)
                                                     );
 
             // Apply the clipping to avoid overlapping the shadow and the box
