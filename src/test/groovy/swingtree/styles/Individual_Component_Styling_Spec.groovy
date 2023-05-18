@@ -1,9 +1,12 @@
 package swingtree.styles
 
+import net.miginfocom.swing.MigLayout
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import swingtree.UI
+
+import javax.swing.*
 
 @Title("Styling Components")
 @Narrative('''
@@ -43,5 +46,83 @@ class Individual_Component_Styling_Spec extends Specification
                         )
         expect :
             panel != null
+    }
+
+    def 'The margins defined in the style API will be applied to the layout manager.'()
+    {
+        reportInfo """
+            The default layout manager for SwingTree is MigLayout.
+            It is a very powerful layout manager which is also supported by the styling API.
+        """
+        given : 'We create a panel with some custom styling!'
+            var panel =
+                        UI.panel()
+                        .withStyle( it ->
+                            it.style()
+                              .marginRight(42)
+                              .marginLeft(64)
+                        )
+                        .get(JPanel)
+        expect :
+            panel != null
+            panel.layout != null
+            panel.layout instanceof MigLayout
+            ((MigLayout)panel.layout).getLayoutConstraints().contains("insets 0 64 0 42")
+    }
+
+
+    def 'The insets of the layout manager are based on the sum of the margin and padding for a given edge of the component bounds.'()
+    {
+        reportInfo """
+            Swing does not have a concept of padding and margin.
+            Without a proper layout manager it does not even support the configuration of insets.
+            However, because we are using MigLayout, we can model the padding and margin of a component
+            by using the layout constraints of the layout manager
+            and some custom rendering code.
+        """
+        given : 'We create a panel with some custom styling!'
+            var panel =
+                        UI.panel()
+                        .withStyle( it ->
+                            it.style()
+                              .marginTop(11)
+                              .marginRight(42)
+                              .marginLeft(64)
+                              .padRight(10)
+                              .padLeft(20)
+                              .padBottom(30)
+                        )
+                        .get(JPanel)
+        expect :
+            panel != null
+            panel.layout != null
+            panel.layout instanceof MigLayout
+            ((MigLayout)panel.layout).getLayoutConstraints().contains("insets 11 84 30 52")
+    }
+
+    def 'The Styling API will make sure that the layout manager accounts for the border width!'()
+    {
+        reportInfo """
+            A border is a very common feature of Swing components and when it comes to styling
+            your UI elements should not overlap with the border.
+            This is why the styling API will make sure that the layout manager accounts for the border width,
+            meaning that the insets of the layout manager will be increased by the border width.
+        """
+        given : 'We create a panel with some custom styling!'
+            var panel =
+                        UI.panel()
+                        .withStyle( it ->
+                            it.style()
+                              .marginTop(7)
+                              .marginRight(2)
+                              .padLeft(14)
+                              .borderWidth(5)
+                        )
+                        .get(JPanel)
+        expect :
+            panel != null
+            panel.layout != null
+            panel.layout instanceof MigLayout
+            ((MigLayout)panel.layout).getLayoutConstraints().contains("insets 12 19 5 7")
     }
 }

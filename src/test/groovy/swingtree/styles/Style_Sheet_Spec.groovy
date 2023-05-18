@@ -267,7 +267,7 @@ class Style_Sheet_Spec extends Specification
                                  it.style().foundationColor(Color.BLUE)
                              );
                             apply(group("B").type(JComponent.class), it ->
-                                    it.style().shadowIsInset(true)
+                                 it.style().shadowIsInset(true)
                              );
                          }
                      }

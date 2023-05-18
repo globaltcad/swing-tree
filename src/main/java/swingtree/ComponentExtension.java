@@ -183,10 +183,11 @@ public class ComponentExtension<C extends JComponent>
     }
 
     private void _applyPadding(Style style ) {
-        boolean insTopPresent    = style.margin().top().isPresent()    && style.padding().top().isPresent();
-        boolean insLeftPresent   = style.margin().left().isPresent()   && style.padding().left().isPresent();
-        boolean insBottomPresent = style.margin().bottom().isPresent() && style.padding().bottom().isPresent();
-        boolean insRightPresent  = style.margin().right().isPresent()  && style.padding().right().isPresent();
+        boolean hasBorder        = style.border().width() > 0;
+        boolean insTopPresent    = style.margin().top().isPresent()    || style.padding().top().isPresent();
+        boolean insLeftPresent   = style.margin().left().isPresent()   || style.padding().left().isPresent();
+        boolean insBottomPresent = style.margin().bottom().isPresent() || style.padding().bottom().isPresent();
+        boolean insRightPresent  = style.margin().right().isPresent()  || style.padding().right().isPresent();
         int insTop    = Math.max(style.margin().top().orElse(0),    0) + style.padding().top().orElse(0);
         int insLeft   = Math.max(style.margin().left().orElse(0),   0) + style.padding().left().orElse(0);
         int insBottom = Math.max(style.margin().bottom().orElse(0), 0) + style.padding().bottom().orElse(0);
@@ -194,27 +195,23 @@ public class ComponentExtension<C extends JComponent>
         boolean anyPadding = insTopPresent || insLeftPresent || insBottomPresent || insRightPresent;
         if ( anyPadding ) {
             // Let's adjust for border width:
-            if ( style.border().width() > 0 ) {
+            if ( hasBorder ) {
                 int borderWidth = style.border().width();
-                if ( insTopPresent )
-                    insTop += borderWidth;
-                if ( insLeftPresent )
-                    insLeft += borderWidth;
-                if ( insBottomPresent )
-                    insBottom += borderWidth;
-                if ( insRightPresent )
-                    insRight += borderWidth;
+                insTop    += borderWidth;
+                insLeft   += borderWidth;
+                insBottom += borderWidth;
+                insRight  += borderWidth;
             }
             Insets insets = Optional.ofNullable(_owner.getInsets()).orElse( new Insets(0,0,0,0) );
             boolean alreadyEqual = insets.top == insTop && insets.left == insLeft && insets.bottom == insBottom && insets.right == insRight;
             if ( !alreadyEqual ) {
-                if ( insTopPresent )
+                if ( insTopPresent || hasBorder )
                     insets.top = insTop;
-                if ( insLeftPresent )
+                if ( insLeftPresent || hasBorder )
                     insets.left = insLeft;
-                if ( insBottomPresent )
+                if ( insBottomPresent || hasBorder )
                     insets.bottom = insBottom;
-                if ( insRightPresent )
+                if ( insRightPresent || hasBorder )
                     insets.right = insRight;
 
                 // We have to let the layout manager know about the new insets,
