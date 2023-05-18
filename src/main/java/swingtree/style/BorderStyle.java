@@ -27,7 +27,7 @@ public class BorderStyle
 
     public int arcHeight() { return _borderArcHeight; }
 
-    public int thickness() { return _borderWidth; }
+    public int width() { return _borderWidth; }
 
     public Optional<Color> color() { return Optional.ofNullable(_borderColor); }
 

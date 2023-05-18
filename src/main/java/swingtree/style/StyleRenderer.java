@@ -47,15 +47,15 @@ public class StyleRenderer<C extends JComponent>
     }
 
     private void _drawBorder(Style style, Color color) {
-        if ( style.border().thickness() > 0 ) {
+        if ( style.border().width() > 0 ) {
             _g2d.setColor(color);
-            _g2d.setStroke(new BasicStroke(style.border().thickness()));
+            _g2d.setStroke(new BasicStroke(style.border().width()));
             _g2d.drawRoundRect(
                     style.padding().left(), style.padding().top(),
                     _comp.getWidth() - style.padding().left() - style.padding().right()-1,
                     _comp.getHeight() - style.padding().top() - style.padding().bottom()-1,
-                    (style.border().arcWidth()  + (style.border().thickness() == 1 ? 0 : style.border().thickness()+1)),
-                    (style.border().arcHeight() + (style.border().thickness() == 1 ? 0 : style.border().thickness()+1))
+                    (style.border().arcWidth()  + (style.border().width() == 1 ? 0 : style.border().width()+1)),
+                    (style.border().arcHeight() + (style.border().width() == 1 ? 0 : style.border().width()+1))
                 );
         }
     }
@@ -111,17 +111,17 @@ public class StyleRenderer<C extends JComponent>
             return;
 
         // Calculate the shadow box bounds based on the padding and border thickness
-        int x = style.padding().left() + style.border().thickness()/2 + style.shadow().horizontalOffset();
-        int y = style.padding().top() + style.border().thickness()/2 + style.shadow().verticalOffset();
-        int w = comp.getWidth() - style.padding().left() - style.padding().right() - style.border().thickness();
-        int h = comp.getHeight() - style.padding().top() - style.padding().bottom() - style.border().thickness();
+        int x = style.padding().left() + style.border().width()/2 + style.shadow().horizontalOffset();
+        int y = style.padding().top() + style.border().width()/2 + style.shadow().verticalOffset();
+        int w = comp.getWidth() - style.padding().left() - style.padding().right() - style.border().width();
+        int h = comp.getHeight() - style.padding().top() - style.padding().bottom() - style.border().width();
 
         int blurRadius = style.shadow().blurRadius();
         int spreadRadius = !style.shadow().isOutset() ? style.shadow().spreadRadius() : -style.shadow().spreadRadius();
 
         RoundRectangle2D.Float baseRect = new RoundRectangle2D.Float(
-                                                        style.padding().left() + (float) style.border().thickness() /2,
-                                                        style.padding().top() + (float) style.border().thickness() /2,
+                                                        style.padding().left() + (float) style.border().width() /2,
+                                                        style.padding().top() + (float) style.border().width() /2,
                                                             w, h,
                                                             style.border().arcWidth(), style.border().arcHeight()
                                                     );

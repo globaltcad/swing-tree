@@ -1,10 +1,13 @@
 package swingtree;
 
+import net.miginfocom.swing.MigLayout;
 import swingtree.style.Style;
 import swingtree.style.StyleDelegate;
 import swingtree.style.StyleRenderer;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.List;
@@ -140,10 +143,10 @@ public class ComponentExtension<C extends JComponent>
         if ( hasBorderRadius && !style.background().color().isPresent() )
             style = style.backgroundColor( _owner.getBackground() );
 
-        if ( style.border().thickness() >= 0 && !BorderFactory.createEmptyBorder().equals(_owner.getBorder()) )
+        if ( style.border().width() >= 0 && !BorderFactory.createEmptyBorder().equals(_owner.getBorder()) )
             _owner.setBorder( BorderFactory.createEmptyBorder() );
 
-        if ( style.border().color().isPresent() && style.border().thickness() > 0 ) {
+        if ( style.border().color().isPresent() && style.border().width() > 0 ) {
             if ( !style.background().foundationColor().isPresent() )
                 style = style.foundationColor( _owner.getBackground() );
         }
@@ -174,7 +177,126 @@ public class ComponentExtension<C extends JComponent>
                         _owner.setFont( newFont );
                 });
 
+        _applyPadding( style );
+
         return style;
+    }
+
+    private void _applyPadding(Style style ) {
+        int paddingTop = style.padding().top();
+        int paddingLeft = style.padding().left();
+        int paddingBottom = style.padding().bottom();
+        int paddingRight = style.padding().right();
+        boolean anyPadding = paddingTop >= 0 || paddingLeft >= 0 || paddingBottom >= 0 || paddingRight >= 0;
+        if ( anyPadding ) {
+            // Let's adjust for border width:
+            if ( style.border().width() > 0 ) {
+                int borderWidth = style.border().width();
+                if ( paddingTop >= 0 )
+                    paddingTop += borderWidth;
+                if ( paddingLeft >= 0 )
+                    paddingLeft += borderWidth;
+                if ( paddingBottom >= 0 )
+                    paddingBottom += borderWidth;
+                if ( paddingRight >= 0 )
+                    paddingRight += borderWidth;
+            }
+            Insets insets = _owner.getInsets();
+            boolean alreadyEqual = insets.top == paddingTop && insets.left == paddingLeft && insets.bottom == paddingBottom && insets.right == paddingRight;
+            if ( !alreadyEqual ) {
+                if ( paddingTop >= 0 )
+                    insets.top = paddingTop;
+                if ( paddingLeft >= 0 )
+                    insets.left = paddingLeft;
+                if ( paddingBottom >= 0 )
+                    insets.bottom = paddingBottom;
+                if ( paddingRight >= 0 )
+                    insets.right = paddingRight;
+
+                // We have to let the layout manager know about the new insets,
+                // let's go through the various layout managers:
+                LayoutManager lm = _owner.getLayout();
+                if ( lm instanceof MigLayout ) {
+                    MigLayout migLayout = (MigLayout) lm;
+                    String lc = Optional.ofNullable(migLayout.getLayoutConstraints()).map(Object::toString).orElse("");
+                    Optional<Insets> found = _parseInsets( lc );
+                    if ( found.isPresent() ) {
+                        if ( found.get().equals(insets) )
+                            return;
+
+                        Insets old = found.get();
+                        if ( paddingTop < 0 )
+                            insets.top = old.top;
+                        if ( paddingLeft < 0 )
+                            insets.left = old.left;
+                        if ( paddingBottom < 0 )
+                            insets.bottom = old.bottom;
+                        if ( paddingRight < 0 )
+                            insets.right = old.right;
+                    }
+
+                    String newConstr = "insets " + insets.top + " " + insets.left + " " + insets.bottom + " " + insets.right;
+                    if ( lc.isEmpty() )
+                        migLayout.setLayoutConstraints( newConstr );
+                    else if ( !lc.contains("ins") )
+                        migLayout.setLayoutConstraints( lc + ", " + newConstr );
+                    else {
+                        lc = lc.replace("insets", "ins");
+                        String newLayoutConstraints = lc.replaceAll("ins [0-9]+", newConstr);
+                        migLayout.setLayoutConstraints( newLayoutConstraints );
+                    }
+                    // Now we need to make sure the layout manager is updated:
+                    _owner.revalidate();
+                }
+                else if ( lm instanceof GridBagLayout ) {
+                    GridBagLayout gridBagLayout = (GridBagLayout) lm;
+                    GridBagConstraints gbc = gridBagLayout.getConstraints( _owner );
+                    // First let's check if the insets are already equal:
+                    if ( gbc.insets.equals(insets) )
+                        return;
+
+                    gbc.insets = insets;
+                    gridBagLayout.setConstraints( _owner, gbc );
+                } else {
+                    /*
+                        One hacky way to set the insets is to set the border!
+                        But we don't want to do this if the user has set their own border.
+                        So we are going to check if the current border is null or an empty border,
+                        and then we are going to set the border to an empty border with the insets.
+                     */
+                    Border border = _owner.getBorder();
+                    if ( border == null || border instanceof EmptyBorder ) {
+                        // First let's check if the insets are already equal:
+                        if ( border != null ) {
+                            EmptyBorder emptyBorder = (EmptyBorder) border;
+                            if ( emptyBorder.getBorderInsets().equals(insets) )
+                                return;
+                        }
+                        _owner.setBorder( BorderFactory.createEmptyBorder( insets.top, insets.left, insets.bottom, insets.right ) );
+                    }
+                }
+            }
+        }
+    }
+
+    private Optional<Insets> _parseInsets( String layoutConstraints ) {
+        if ( layoutConstraints == null || layoutConstraints.isEmpty() )
+            return Optional.empty();
+
+        // Now we tokenize the layout constraints:
+        String[] tokens = layoutConstraints.split(",");
+        for ( String token : tokens ) {
+            token = token.trim();
+            if ( token.startsWith("ins") ) {
+                String[] insets = token.split(" ");
+                int[] insetsInt = new int[4];
+                for ( int i = 0; i < insetsInt.length; i++ )
+                    insetsInt[i] = Integer.parseInt( insets[ 1 + ( i % ( insets.length - 1 ) ) ] );
+
+                return Optional.of( new Insets( insetsInt[0], insetsInt[1], insetsInt[2], insetsInt[3] ) );
+            }
+        }
+        return Optional.empty();
     }
 
     private void checkIfIsDeclaredInUI() {
