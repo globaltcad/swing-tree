@@ -183,35 +183,35 @@ public class ComponentExtension<C extends JComponent>
     }
 
     private void _applyPadding(Style style ) {
-        int paddingTop = style.padding().top();
-        int paddingLeft = style.padding().left();
-        int paddingBottom = style.padding().bottom();
-        int paddingRight = style.padding().right();
-        boolean anyPadding = paddingTop >= 0 || paddingLeft >= 0 || paddingBottom >= 0 || paddingRight >= 0;
+        int insTop    = style.margin().top()    + style.padding().top();
+        int insLeft   = style.margin().left()   + style.padding().left();
+        int insBottom = style.margin().bottom() + style.padding().bottom();
+        int insRight  = style.margin().right()  + style.padding().right();
+        boolean anyPadding = insTop >= 0 || insLeft >= 0 || insBottom >= 0 || insRight >= 0;
         if ( anyPadding ) {
             // Let's adjust for border width:
             if ( style.border().width() > 0 ) {
                 int borderWidth = style.border().width();
-                if ( paddingTop >= 0 )
-                    paddingTop += borderWidth;
-                if ( paddingLeft >= 0 )
-                    paddingLeft += borderWidth;
-                if ( paddingBottom >= 0 )
-                    paddingBottom += borderWidth;
-                if ( paddingRight >= 0 )
-                    paddingRight += borderWidth;
+                if ( insTop >= 0 )
+                    insTop += borderWidth;
+                if ( insLeft >= 0 )
+                    insLeft += borderWidth;
+                if ( insBottom >= 0 )
+                    insBottom += borderWidth;
+                if ( insRight >= 0 )
+                    insRight += borderWidth;
             }
             Insets insets = _owner.getInsets();
-            boolean alreadyEqual = insets.top == paddingTop && insets.left == paddingLeft && insets.bottom == paddingBottom && insets.right == paddingRight;
+            boolean alreadyEqual = insets.top == insTop && insets.left == insLeft && insets.bottom == insBottom && insets.right == insRight;
             if ( !alreadyEqual ) {
-                if ( paddingTop >= 0 )
-                    insets.top = paddingTop;
-                if ( paddingLeft >= 0 )
-                    insets.left = paddingLeft;
-                if ( paddingBottom >= 0 )
-                    insets.bottom = paddingBottom;
-                if ( paddingRight >= 0 )
-                    insets.right = paddingRight;
+                if ( insTop >= 0 )
+                    insets.top = insTop;
+                if ( insLeft >= 0 )
+                    insets.left = insLeft;
+                if ( insBottom >= 0 )
+                    insets.bottom = insBottom;
+                if ( insRight >= 0 )
+                    insets.right = insRight;
 
                 // We have to let the layout manager know about the new insets,
                 // let's go through the various layout managers:
@@ -225,13 +225,13 @@ public class ComponentExtension<C extends JComponent>
                             return;
 
                         Insets old = found.get();
-                        if ( paddingTop < 0 )
+                        if ( insTop < 0 )
                             insets.top = old.top;
-                        if ( paddingLeft < 0 )
+                        if ( insLeft < 0 )
                             insets.left = old.left;
-                        if ( paddingBottom < 0 )
+                        if ( insBottom < 0 )
                             insets.bottom = old.bottom;
-                        if ( paddingRight < 0 )
+                        if ( insRight < 0 )
                             insets.right = old.right;
                     }
 

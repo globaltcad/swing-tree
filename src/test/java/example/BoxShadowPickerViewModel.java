@@ -11,10 +11,16 @@ public class BoxShadowPickerViewModel
     private final Event repaint = Event.create();
 
     // Padding
-    private final Var<Integer> paddingTop = Var.of(30).onAct( it -> repaint.fire() );
-    private final Var<Integer> paddingLeft = Var.of(35).onAct( it -> repaint.fire() );
-    private final Var<Integer> paddingRight = Var.of(35).onAct( it -> repaint.fire() );
-    private final Var<Integer> paddingBottom = Var.of(30).onAct( it -> repaint.fire() );
+    private final Var<Integer> paddingTop = Var.of(5).onAct( it -> repaint.fire() );
+    private final Var<Integer> paddingLeft = Var.of(5).onAct( it -> repaint.fire() );
+    private final Var<Integer> paddingRight = Var.of(5).onAct( it -> repaint.fire() );
+    private final Var<Integer> paddingBottom = Var.of(5).onAct( it -> repaint.fire() );
+
+    // Margin
+    private final Var<Integer> marginTop = Var.of(30).onAct( it -> repaint.fire() );
+    private final Var<Integer> marginLeft = Var.of(35).onAct( it -> repaint.fire() );
+    private final Var<Integer> marginRight = Var.of(35).onAct( it -> repaint.fire() );
+    private final Var<Integer> marginBottom = Var.of(30).onAct( it -> repaint.fire() );
 
     // Border
     private final Var<Integer> borderArcWidth = Var.of(25).onAct( it -> repaint.fire() );
@@ -53,6 +59,14 @@ public class BoxShadowPickerViewModel
     public Var<Integer> paddingRight() { return paddingRight; }
 
     public Var<Integer> paddingBottom() { return paddingBottom; }
+
+    public Var<Integer> marginTop() { return marginTop; }
+
+    public Var<Integer> marginLeft() { return marginLeft; }
+
+    public Var<Integer> marginRight() { return marginRight; }
+
+    public Var<Integer> marginBottom() { return marginBottom; }
 
     public Var<Integer> borderArcWidth() { return borderArcWidth; }
 
@@ -101,10 +115,8 @@ public class BoxShadowPickerViewModel
             "         drawASmiley(g2d, x, y, w, h);\n" +
             "     })\n"
             ) +
-            ( paddingTop.is(0) ? "" : "     .padTop(" + str(paddingTop) + ")\n" ) +
-            ( paddingLeft.is(0) ? "" : "     .padLeft(" + str(paddingLeft) + ")\n" ) +
-            ( paddingRight.is(0) ? "" : "     .padRight(" + str(paddingRight) + ")\n" ) +
-            ( paddingBottom.is(0) ? "" : "     .padBottom(" + str(paddingBottom) + ")\n" ) +
+            "     .pad(" + str(paddingTop) + ", " + str(paddingRight) + ", " + str(paddingBottom) + ", " + str(paddingLeft) + ")\n" +
+            "     .margin(" + str(marginTop) + ", " + str(marginRight) + ", " + str(marginBottom) + ", " + str(marginLeft) + ")\n" +
             ( borderArcWidth.is(0) && borderArcHeight.is(0) ? "" : "     .borderRadius(" + str(borderArcWidth) + ", " + str(borderArcHeight) + ")\n" ) +
             ( borderThickness.is(0) ? "" : "     .borderWidth(" + str(borderThickness) + ")\n" ) +
             "     .borderColor(" + str(borderColor) + ")\n" +

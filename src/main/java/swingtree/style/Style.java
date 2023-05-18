@@ -58,7 +58,7 @@ public final class Style
 
 
     private Style(
-            LayoutStyle layout,
+        LayoutStyle layout,
         BorderStyle border,
         BackgroundStyle background,
         ShadowStyle shadow,
@@ -78,10 +78,116 @@ public final class Style
     private Style _withFont( FontStyle font ) { return new Style(_layout, _border, _background, _shadow, font); }
 
     /**
-     *  Creates a new {@link Style} with the provided top, right, left and bottom pad distances.
-     *  The padding does not affect the size or layout of the component, it
-     *  simply determines the amount of space between the component's outer bounds and the beginning
+     *  Creates a new {@link Style} with the provided top, right, left and bottom margin distances.
+     *  It determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * <p>
+     * @param top The top padding distance in pixels.
+     * @param right The right padding distance in pixels.
+     * @param bottom The bottom padding distance in pixels.
+     * @param left The left padding distance in pixels.
+     * @return A new {@link Style} with the provided padding distances.
+     */
+    public Style margin( int top, int right, int bottom, int left ) {
+        return _withLayout(_layout.withMargin(_layout.margin().withTop(top).withLeft(left).withRight(right).withBottom(bottom)));
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided margin distance for all sides of the component.
+     *  The margin determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * <p>
+     * @param margin The margin distance in pixels.
+     * @return A new {@link Style} with the provided margin distance.
+     */
+    public Style margin( int margin ) {
+        return _withLayout(_layout.withMargin(_layout.margin().withTop(margin).withLeft(margin).withRight(margin).withBottom(margin)));
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided margin distance for the top side of the component.
+     *  The margin determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * <p>
+     * @param margin The margin distance in pixels.
+     * @return A new {@link Style} with the provided margin distance.
+     */
+    public Style marginTop( int margin ) {
+        return _withLayout(_layout.withMargin(_layout.margin().withTop(margin)));
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided margin distance for the right side of the component.
+     *  The margin determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * <p>
+     * @param margin The margin distance in pixels.
+     * @return A new {@link Style} with the provided margin distance.
+     */
+    public Style marginRight( int margin ) {
+        return _withLayout(_layout.withMargin(_layout.margin().withRight(margin)));
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided margin distance for the bottom side of the component.
+     *  The margin determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * <p>
+     * @param margin The margin distance in pixels.
+     * @return A new {@link Style} with the provided margin distance.
+     */
+    public Style marginBottom( int margin ) {
+        return _withLayout(_layout.withMargin(_layout.margin().withBottom(margin)));
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided margin distance for the left side of the component.
+     *  The margin determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * <p>
+     * @param margin The margin distance in pixels.
+     * @return A new {@link Style} with the provided margin distance.
+     */
+    public Style marginLeft( int margin ) {
+        return _withLayout(_layout.withMargin(_layout.margin().withLeft(margin)));
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided margin distance for the top and bottom sides of the component.
+     *  The margin determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * <p>
+     * @param margin The margin distance in pixels.
+     * @return A new {@link Style} with the provided margin distance.
+     */
+    public Style marginVertical( int margin ) {
+        return _withLayout(_layout.withMargin(_layout.margin().withTop(margin).withBottom(margin)));
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided margin distance for the left and right sides of the component.
+     *  The margin determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * <p>
+     * @param margin The margin distance in pixels.
+     * @return A new {@link Style} with the provided margin distance.
+     */
+    public Style marginHorizontal( int margin ) {
+        return _withLayout(_layout.withMargin(_layout.margin().withLeft(margin).withRight(margin)));
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided top, right, left and bottom pad distances.
+     *  It determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
      *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
      * <p>
      * @param top The top padding distance in pixels.
@@ -96,9 +202,8 @@ public final class Style
 
     /**
      *  Creates a new {@link Style} with the provided padding distance for all sides of the component.
-     *  The padding does not affect the size or layout of the component, it
-     *  simply determines the amount of space between the component's outer bounds and the beginning
-     *  of the inner border, background region and shadow frame
+     *  It determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
      *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
      * <p>
      * @param padding The padding distance in pixels.
@@ -110,22 +215,21 @@ public final class Style
 
     /**
      *  Creates a new {@link Style} with the provided padding distance for the top side of the component.
-     *  The padding does not affect the size or layout of the component, it
-     *  simply determines the amount of space between the component's outer bounds and the beginning
-     *  of the inner border, background region and shadow frame
+     *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
      *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
      * <p>
      * @param padding The padding distance in pixels.
      * @return A new {@link Style} with the provided padding distance.
      */
-    public Style padTop(int padding ) {
+    public Style padTop( int padding ) {
         return _withLayout(_layout.withPadding(_layout.padding().withTop(padding)));
     }
 
     /**
      *  Creates a new {@link Style} with the provided padding distance for the right side of the component.
-     *  The padding does not affect the size or layout of the component, it
-     *  simply determines the amount of space between the component's outer bounds and the beginning
+     *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
      *  of the inner border, background region and shadow frame
      *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
      * <p>
@@ -138,9 +242,8 @@ public final class Style
 
     /**
      *  Creates a new {@link Style} with the provided padding distance for the bottom side of the component.
-     *  The padding does not affect the size or layout of the component, it
-     *  simply determines the amount of space between the component's outer bounds and the beginning
-     *  of the inner border, background region and shadow frame
+     *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
      *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
      * <p>
      * @param padding The padding distance in pixels.
@@ -152,9 +255,8 @@ public final class Style
 
     /**
      *  Creates a new {@link Style} with the provided padding distance for the left side of the component.
-     *  The padding does not affect the size or layout of the component, it
-     *  simply determines the amount of space between the component's outer bounds and the beginning
-     *  of the inner border, background region and shadow frame
+     *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
      *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
      * <p>
      * @param padding The padding distance in pixels.
@@ -166,9 +268,8 @@ public final class Style
 
     /**
      *  Creates a new {@link Style} with the provided padding distance for the top and bottom sides of the component.
-     *  The padding does not affect the size or layout of the component, it
-     *  simply determines the amount of space between the component's outer bounds and the beginning
-     *  of the inner border, background region and shadow frame
+     *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
      *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
      * <p>
      * @param padding The padding distance in pixels.
@@ -180,9 +281,8 @@ public final class Style
 
     /**
      *  Creates a new {@link Style} with the provided padding distance for the left and right sides of the component.
-     *  The padding does not affect the size or layout of the component, it
-     *  simply determines the amount of space between the component's outer bounds and the beginning
-     *  of the inner border, background region and shadow frame
+     *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
      *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
      * <p>
      * @param padding The padding distance in pixels.
@@ -194,7 +294,7 @@ public final class Style
 
     /**
      *  Returns a new {@link Style} with the provided border width and border color.
-     *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
+     *  The border will be rendered with an inset space based on the margin defined by the {@link Style}.
      *
      * @param width The border width in pixels.
      * @param color The border color.
@@ -577,6 +677,8 @@ public final class Style
     }
 
     public Outline padding() { return _layout.padding(); }
+
+    public Outline margin() { return _layout.margin(); }
 
     public BorderStyle border() { return _border; }
 

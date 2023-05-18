@@ -17,33 +17,34 @@ public class SymbolGuesserView extends Panel
         FlatLightLaf.setup();
         UIManager.put( "Button.arc", 25 );
         of(this).withBackground(BACKGROUND)
-        .withLayout(FILL.and(INS(16)).and(WRAP(2)), "[]16[]")
+        .withLayout(FILL.and(INS(24)).and(WRAP(2)), "[]16[]")
         .add(TOP,
-            panel(INS(12).and(WRAP(1))).withStyle( it -> it.style().borderRadius(24) )
-            .add(ALIGN_X_CENTER,
-                label("Which symbol is this?").withFont(new Font("Arial", Font.BOLD, 24))
-            )
-            .add(ALIGN_CENTER,
-                panel(FILL.and(INS(48))).withRepaintIf(vm.getRepaintEvent())
-                .withStyle( it ->
-                    it.style()
-                      .backgroundColor(BACKGROUND.brighter())
-                      .foundationColor(new Color(255,255,255, 0))
-                      .padTop(22)
-                      .padLeft(22)
-                      .padRight(22)
-                      .padBottom(22)
-                      .borderRadius(37)
-                      .borderWidth(1)
-                      .borderColor(new Color(0, 0, 0,255))
-                      .shadowColor(new Color(64,64,64,255))
-                      .shadowBlurRadius(7)
-                      .shadowSpreadRadius(2)
-                      .shadowIsInset(false)
+            box(WRAP(1))
+            .add(ALIGN_X_CENTER.and(GROW_X),
+                panel(INS(12).and(WRAP(1)), "[grow]").withStyle( it -> it.style().borderRadius(24) )
+                .add(ALIGN_X_CENTER,
+                    label("Which symbol is this?").withFont(new Font("Arial", Font.BOLD, 24))
                 )
-                .add(ALIGN_CENTER,
-                    label(vm.currentSymbol().viewAsString( s -> "<html>"+s+"</html>" ))
-                    .withFontSize(68)
+                .add(ALIGN_X_CENTER,
+                    panel(FILL.and(INS(48))).withRepaintIf(vm.getRepaintEvent())
+                    .withStyle( it ->
+                        it.style()
+                          .backgroundColor(BACKGROUND.brighter())
+                          .foundationColor(new Color(255,255,255, 0))
+                          .margin(22)
+                          .pad(22)
+                          .borderRadius(37)
+                          .borderWidth(1)
+                          .borderColor(new Color(0, 0, 0,255))
+                          .shadowColor(new Color(64,64,64,255))
+                          .shadowBlurRadius(7)
+                          .shadowSpreadRadius(2)
+                          .shadowIsInset(false)
+                    )
+                    .add(ALIGN_CENTER,
+                        label(vm.currentSymbol().viewAsString( s -> "<html>"+s+"</html>" ))
+                        .withFontSize(68)
+                    )
                 )
             )
             .add(PUSH_X.and(GROW_X), separator())

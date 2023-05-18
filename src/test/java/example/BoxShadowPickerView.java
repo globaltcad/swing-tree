@@ -30,6 +30,21 @@ public class BoxShadowPickerView extends UI.Panel
                 .add(label(vm.paddingBottom().viewAsString()))
             )
             .add(GROW_X,
+                panel(FILL.and(WRAP(3)), "[shrink][grow][shrink]").withBorderTitled("Margin")
+                .add(label("Top:"))
+                .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.marginTop()))
+                .add(label(vm.marginTop().viewAsString()))
+                .add(label("Left:"))
+                .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.marginLeft()))
+                .add(label(vm.marginLeft().viewAsString()))
+                .add(label("Right:"))
+                .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.marginRight()))
+                .add(label(vm.marginRight().viewAsString()))
+                .add(label("Bottom:"))
+                .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.marginBottom()))
+                .add(label(vm.marginBottom().viewAsString()))
+            )
+            .add(GROW_X,
                 panel(FILL.and(WRAP(3)), "[shrink][grow][shrink]").withBorderTitled("Border")
                 .add(label("Arc Width:"))
                 .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.borderArcWidth()))
@@ -50,47 +65,53 @@ public class BoxShadowPickerView extends UI.Panel
                 .add(panel(FILL).withBackground(vm.borderColor()))
             )
             .add(GROW_X,
-                panel(FILL.and(WRAP(3)), "[shrink][grow][shrink]").withBorderTitled("Shadow")
-                .add(label("Horizontal Offset:"))
-                .add(GROW_X, slider(Align.HORIZONTAL, -50, 50, vm.horizontalShadowOffset()))
-                .add(label(vm.horizontalShadowOffset().viewAsString()))
-                .add(label("Vertical Offset:"))
-                .add(GROW_X, slider(Align.HORIZONTAL, -50, 50, vm.verticalShadowOffset()))
-                .add(label(vm.verticalShadowOffset().viewAsString()))
-                .add(label("Blur Radius:"))
-                .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.shadowBlurRadius()))
-                .add(label(vm.shadowBlurRadius().viewAsString()))
-                .add(label("Spread Radius:"))
-                .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.shadowSpreadRadius()))
-                .add(label(vm.shadowSpreadRadius().viewAsString()))
-                .add(label("Color:"))
-                .add(GROW_X.and(PUSH_X),
-                    textField(vm.shadowColor().mapTo(Integer.class, Color::getRGB).itemAsString())
-                    .onContentChange(it -> {
-                        parseColor(it.get().getText()).ifPresent(color -> {vm.shadowColor().act(color);});
-                    })
+                panel(FILL.and(INS(0))).withBorderTitled("Shadow")
+                .add(
+                    panel(FILL.and(WRAP(3)), "[shrink][grow][shrink]")
+                    .add(label("Horizontal Offset:"))
+                    .add(GROW_X, slider(Align.HORIZONTAL, -50, 50, vm.horizontalShadowOffset()))
+                    .add(label(vm.horizontalShadowOffset().viewAsString()))
+                    .add(label("Vertical Offset:"))
+                    .add(GROW_X, slider(Align.HORIZONTAL, -50, 50, vm.verticalShadowOffset()))
+                    .add(label(vm.verticalShadowOffset().viewAsString()))
+                    .add(label("Blur Radius:"))
+                    .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.shadowBlurRadius()))
+                    .add(label(vm.shadowBlurRadius().viewAsString()))
+                    .add(label("Spread Radius:"))
+                    .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.shadowSpreadRadius()))
+                    .add(label(vm.shadowSpreadRadius().viewAsString()))
                 )
-                .add(panel(FILL).withBackground(vm.shadowColor()))
-                .add(label("Background Color:"))
-                .add(GROW_X.and(PUSH_X),
-                    textField(vm.backgroundColor().mapTo(Integer.class, Color::getRGB).itemAsString())
-                    .onContentChange(it -> {
-                        parseColor(it.get().getText()).ifPresent(color -> {vm.backgroundColor().act(color);});
-                    })
+                .add(
+                    panel(FILL.and(WRAP(3)), "[shrink][grow][shrink]")
+                    .add(label("Color:"))
+                    .add(GROW_X.and(PUSH_X),
+                        textField(vm.shadowColor().mapTo(Integer.class, Color::getRGB).itemAsString())
+                        .onContentChange(it -> {
+                            parseColor(it.get().getText()).ifPresent(color -> {vm.shadowColor().act(color);});
+                        })
+                    )
+                    .add(panel(FILL).withBackground(vm.shadowColor()))
+                    .add(label("Background Color:"))
+                    .add(GROW_X.and(PUSH_X),
+                        textField(vm.backgroundColor().mapTo(Integer.class, Color::getRGB).itemAsString())
+                        .onContentChange(it -> {
+                            parseColor(it.get().getText()).ifPresent(color -> {vm.backgroundColor().act(color);});
+                        })
+                    )
+                    .add(panel(FILL).withBackground(vm.backgroundColor()))
+                    .add(label("Foundation Color:"))
+                    .add(GROW_X.and(PUSH_X),
+                        textField(vm.foundationColor().mapTo(Integer.class, Color::getRGB).itemAsString())
+                        .onContentChange(it -> {
+                            parseColor(it.get().getText()).ifPresent(color -> {vm.foundationColor().act(color);});
+                        })
+                    )
+                    .add(panel(FILL).withBackground(vm.foundationColor()))
+                    .add(checkBox("Inset", vm.shadowInset()))
+                    .add(checkBox("Draw Smiley", vm.drawSmiley()))
                 )
-                .add(panel(FILL).withBackground(vm.backgroundColor()))
-                .add(label("Foundation Color:"))
-                .add(GROW_X.and(PUSH_X),
-                    textField(vm.foundationColor().mapTo(Integer.class, Color::getRGB).itemAsString())
-                    .onContentChange(it -> {
-                        parseColor(it.get().getText()).ifPresent(color -> {vm.foundationColor().act(color);});
-                    })
-                )
-                .add(panel(FILL).withBackground(vm.foundationColor()))
-                .add(checkBox("Inset", vm.shadowInset()))
-                .add(checkBox("Draw Smiley", vm.drawSmiley()))
             )
-            .add(GROW,
+            .add(GROW.and(SPAN),
                 panel(FILL).withBorderTitled("Preview")
                 .add(GROW,
                     panel(FILL)
@@ -101,16 +122,14 @@ public class BoxShadowPickerView extends UI.Panel
                          .foundationColor(vm.foundationColor().get())
                          .backgroundRenderer(g2d -> {
                              if ( vm.drawSmiley().is(false) ) return;
-                             int w = it.component().getWidth() - vm.paddingLeft().get() - vm.paddingRight().get() - 100;
-                             int h = it.component().getHeight() - vm.paddingTop().get() - vm.paddingBottom().get() - 100;
-                             int x = vm.paddingLeft().get() + 50;
-                             int y = vm.paddingTop().get() + 50;
+                             int w = it.component().getWidth() - vm.marginLeft().get() - vm.marginRight().get() - 100;
+                             int h = it.component().getHeight() - vm.marginTop().get() - vm.marginBottom().get() - 100;
+                             int x = vm.marginLeft().get() + 50;
+                             int y = vm.marginTop().get() + 50;
                              drawASmiley(g2d, x, y, w, h);
                          })
-                         .padTop(vm.paddingTop().get())
-                         .padLeft(vm.paddingLeft().get())
-                         .padRight(vm.paddingRight().get())
-                         .padBottom(vm.paddingBottom().get())
+                         .pad(vm.paddingTop().get(), vm.paddingRight().get(), vm.paddingBottom().get(), vm.paddingLeft().get())
+                         .margin(vm.marginTop().get(), vm.marginRight().get(), vm.marginBottom().get(), vm.marginLeft().get())
                          .borderRadius(vm.borderArcWidth().get(), vm.borderArcHeight().get())
                          .shadowColor(vm.shadowColor().get())
                          .shadowHorizontalOffset(vm.horizontalShadowOffset().get())
