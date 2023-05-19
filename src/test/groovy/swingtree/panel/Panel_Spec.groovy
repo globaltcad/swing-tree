@@ -56,6 +56,26 @@ class Panel_Spec extends Specification
             ui.component.layout instanceof FlowLayout
     }
 
+    def 'All of the "box(..)" factory methods will create transparent panels without insets.'(
+        UIForPanel<JPanel> ui
+    ) {
+        expect : 'The panel is transparent.'
+            ui.component.isOpaque() == false
+        and : 'The panel has no insets.'
+            ui.component.layout.layoutConstraints.contains("ins 0")
+
+        where : 'The following UI nodes are created using the "box(..)" factory methods.'
+            ui << [
+                    UI.box(),
+                    UI.box("fill"),
+                    UI.box("fill", "[grow]12[shrink]"),
+                    UI.box("fill", "[grow]12[shrink]", "[grow]12[shrink]"),
+                    UI.box(UI.FILL & UI.FLOW_X),
+                    UI.box(UI.FILL & UI.FLOW_X, "[grow]12[shrink]"),
+                    UI.box(UI.FILL & UI.FLOW_X, "[grow]12[shrink]", "[grow]12[shrink]"),
+                ]
+    }
+
     def 'The default layout manager is always a MigLayout'()
     {
         given : 'We create a panel...'

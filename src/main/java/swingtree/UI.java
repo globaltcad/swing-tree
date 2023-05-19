@@ -1450,7 +1450,6 @@ public final class UI
 
     /**
      *  Use this to create a builder for the {@link JPanel} UI component.
-     *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr, layout)}.
      *  This is essentially a convenience method for the following: <br>
      *  <pre>{@code
      *      UI.of(new JPanel(new MigLayout(attr, colConstraints)))
@@ -1468,7 +1467,6 @@ public final class UI
 
     /**
      *  Use this to create a builder for the {@link JPanel} UI component.
-     *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr, layout)}.
      *  This is essentially a convenience method for the following: <br>
      *  <pre>{@code
      *      UI.of(new JPanel(new MigLayout(attr, colConstraints)))
@@ -1486,7 +1484,6 @@ public final class UI
 
     /**
      *  Use this to create a builder for the {@link JPanel} UI component.
-     *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr)}.
      *  This is essentially a convenience method for the following: <br>
      *  <pre>{@code
      *      UI.of(new JPanel(new MigLayout(attr)))
