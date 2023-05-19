@@ -20,6 +20,8 @@ import java.awt.Dimension
 ''')
 class Property_Binding_Spec extends Specification
 {
+    enum Accept { YES, NO, MAYBE }
+
     def 'We can bind a property to the size of a swing component.'()
     {
         reportInfo"""
@@ -241,6 +243,111 @@ class Property_Binding_Spec extends Specification
             node.component.components[1].visible == false
         and : 'The slider will be visible.'
             node.component.components[3].visible == true
+    }
+
+    def 'The visibility of a UI component can be modelled using an enum property.'()
+    {
+        reportInfo """
+            Enums are a common tool for modelling user choices and settings in you view models
+            because they are type safe and descriptive. 
+            A common use case is to have certain UI components only visible if a certain enum value
+            in your view model is selected.
+            For this example, we will use the following enum:
+            ```
+                enum Accept { YES, NO, MAYBE }
+            ``
+        """
+        given : 'We create a property representing the visibility state of a component.'
+            Var<Accept> property = Var.of(Accept.YES)
+        and : 'We create a UI with the enum property based binding.'
+            var ui = UI.panel("fill, wrap 1")
+                        .add(UI.label("If you accept the terms we can proceed!"))
+                        .add(UI.button("Yes proceed!").isVisibleIf(Accept.YES, property))
+                        .add(UI.label("Maybe or No is not enough :/").isVisibleIfNot(Accept.YES, property))
+        expect : 'Initially the bound button will be visible.'
+            ui.component.components[1].visible == true
+        and : 'The bound label will be invisible.'
+            ui.component.components[2].visible == false
+
+        when : 'We change the value of the property.'
+            property.set(Accept.NO)
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
+
+        then : 'The bound button will be invisible.'
+            ui.component.components[1].visible == false
+        and : 'The bound label will be visible.'
+            ui.component.components[2].visible == true
+    }
+
+    def 'The enabled/disabled state of a UI component can be modelled using an enum property.'()
+    {
+        reportInfo """
+            Enums are a common tool for modelling user choices and settings in you view models
+            because they are type safe and descriptive. 
+            A common use case is to have certain UI components only enabled if a certain enum value
+            in your view model is selected.
+            For this example, we will use the following enum:
+            ```
+                enum Accept { YES, NO, MAYBE }
+            ``
+        """
+        given : 'We create a property representing the enabled state of a component.'
+            Var<Accept> property = Var.of(Accept.YES)
+        and : 'We create a UI with the enum property based binding.'
+            var ui = UI.panel("fill, wrap 1")
+                        .add(UI.label("If you accept the terms we can proceed!"))
+                        .add(UI.button("Yes proceed!").isEnabledIf(Accept.YES, property))
+                        .add(UI.label("Maybe or No is not enough :/").isEnabledIfNot(Accept.YES, property))
+        expect : 'Initially the bound button will be enabled.'
+            ui.component.components[1].enabled == true
+        and : 'The bound label will be disabled.'
+            ui.component.components[2].enabled == false
+
+        when : 'We change the value of the property.'
+            property.set(Accept.NO)
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
+
+        then : 'The bound button will be disabled.'
+            ui.component.components[1].enabled == false
+        and : 'The bound label will be enabled.'
+            ui.component.components[2].enabled == true
+    }
+
+    def 'The focusability of a UI component can be modelled using an enum property.'()
+    {
+        reportInfo """
+            Enums are a common tool for modelling user choices and settings in you view models
+            because they are descriptive and type safe (not like string values). 
+            A common use case is to have certain UI components only focused if a certain enum value
+            in your view model is selected.
+            For this example, we will use the following enum:
+            ```
+                enum Accept { YES, NO, MAYBE }
+            ``
+        """
+        given : 'We create a property representing the focusability state of a component.'
+            Var<Accept> property = Var.of(Accept.YES)
+        and : 'We create a UI with the enum property based binding.'
+            var ui = UI.panel("fill, wrap 1")
+                        .add(UI.label("If you accept the terms we can proceed!"))
+                        .add(UI.button("Yes proceed!").isFocusableIf(Accept.YES, property))
+                        .add(UI.label("Maybe or No is not enough :/").isFocusableIfNot(Accept.YES, property))
+        expect : 'Initially the bound button will be focusable.'
+            ui.component.components[1].focusable == true
+        and : 'The bound label will be unfocusable.'
+            ui.component.components[2].focusable == false
+
+        when : 'We change the value of the property.'
+            property.set(Accept.NO)
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
+
+        then : 'The bound button will be unfocusable.'
+            ui.component.components[1].focusable == false
+        and : 'The bound label will be focusable.'
+            ui.component.components[2].focusable == true
     }
 
     def 'The focusability of a UI component can be modelled dynamically using boolean properties.'()
