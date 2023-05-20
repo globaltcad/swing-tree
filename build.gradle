@@ -81,35 +81,19 @@ check.dependsOn jacocoTestReport
 
 // CUSTOM DEPLOYMENT TASKS :
 
-def deleteFilesIn(String path) {
-    var file = new File(path)
-    if ( file.exists() && file.listFiles() != null && file.listFiles().length > 0 )
-        delete file
-}
-
-// 1: Cleanup
-task cleanForDeployment(type: Delete) {
-    delete "$rootDir/build"
-    deleteFilesIn("$rootDir/docs/jdocs")
-    deleteFilesIn("$rootDir/docs/spock/reports" )
-}
-
-// 2:
+// 1:
 task deploy() {
-
-    // Expected before : dependsOn 'cleanForDeployment'
-
     dependsOn 'check'
     dependsOn 'jar'
     dependsOn 'javadoc'
     dependsOn 'releaseJDocs'
-
 }
-// 3:
-//     execute publishToSonatype
-//     go to https://s01.oss.sonatype.org/#stagingRepositories
-//     close and release the repository
-
+/*
+    2:
+       execute publishToSonatype
+       go to https://s01.oss.sonatype.org/#stagingRepositories
+       close and release the repository
+*/
 
 task releaseJDocs(type: Copy) {
     from "$rootDir/build/docs/javadoc"

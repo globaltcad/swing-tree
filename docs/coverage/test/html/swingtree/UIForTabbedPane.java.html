@@ -20,13 +20,13 @@ import java.util.function.Supplier;
 /**
  *  A swing tree builder node for {@link JTabbedPane} instances.
  */
-public class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAbstractSwing&lt;UIForTabbedPane&lt;P&gt;, P&gt;
+public class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAnySwing&lt;UIForTabbedPane&lt;P&gt;, P&gt;
 {
 <span class="fc" id="L25">    private final List&lt;Consumer&lt;Integer&gt;&gt; _selectionListeners = new ArrayList&lt;&gt;();</span>
 <span class="fc" id="L26">    private Var&lt;Integer&gt; _selectedTabIndex = null;</span>
 
     /**
-     * {@link UIForAbstractSwing} (sub)types always wrap
+     * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
@@ -226,62 +226,83 @@ public class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAbstractS
 <span class="fc" id="L226">                pane.addMouseListener(new java.awt.event.MouseAdapter() {</span>
                     @Override
                     public void mouseClicked( MouseEvent e ) {
-<span class="nc" id="L229">                        JTabbedPane currentPane = paneRef.get();</span>
-<span class="nc bnc" id="L230" title="All 2 branches missed.">                        if ( currentPane == null ) return;</span>
+<span class="nc" id="L229">                        JTabbedPane pane = paneRef.get();</span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">                        if ( pane == null ) return;</span>
 <span class="nc" id="L231">                        int indexOfThis = indexOfThisTab();</span>
 <span class="nc bnc" id="L232" title="All 2 branches missed.">                        if ( indexOfThis &lt; 0 ) return;</span>
-<span class="nc" id="L233">                        int indexClicked = indexOfClick(pane, e);</span>
+<span class="nc" id="L233">                        int indexClicked = indexOfClick(pane, e.getPoint());</span>
 <span class="nc bnc" id="L234" title="All 2 branches missed.">                        if ( indexClicked &lt; 0 ) return;</span>
 <span class="nc bnc" id="L235" title="All 2 branches missed.">                        if ( indexOfThis == indexClicked )</span>
-<span class="nc" id="L236">                            _doApp(()-&gt; mouseClickAction.accept(new SimpleDelegate&lt;&gt;(currentPane, e, UIForTabbedPane.this::getSiblinghood)));</span>
+<span class="nc" id="L236">                            _doApp(()-&gt; mouseClickAction.accept(new SimpleDelegate&lt;&gt;(pane, e, UIForTabbedPane.this::getSiblinghood)));</span>
 <span class="nc" id="L237">                    }</span>
                 });
             }
 <span class="fc" id="L240">        }</span>
 
+        private void doAction(JTabbedPane pane, MouseEvent e) {
+<span class="nc" id="L243">            Point p = e.getPoint();</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">            if ( e.getSource() != pane ) {</span>
+               // We need to find the point relative to the tabbed pane:
+<span class="nc" id="L246">                p = traversePosition((Component) e.getSource(), pane, p);</span>
+            }
+<span class="nc" id="L248">            int indexOfThis = indexOfThisTab();</span>
+<span class="nc bnc" id="L249" title="All 2 branches missed.">            if ( indexOfThis &lt; 0 ) return;</span>
+<span class="nc" id="L250">            int indexClicked = indexOfClick( pane, p );</span>
+<span class="nc bnc" id="L251" title="All 2 branches missed.">            if ( indexClicked &lt; 0 ) return;</span>
+<span class="nc bnc" id="L252" title="All 4 branches missed.">            if ( indexOfThis == indexClicked &amp;&amp; mouseClickAction != null )</span>
+<span class="nc" id="L253">                _doApp(()-&gt; { mouseClickAction.accept(new SimpleDelegate&lt;&gt;(pane, e, UIForTabbedPane.this::getSiblinghood)); });</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">            if ( indexOfThis &lt; pane.getTabCount() )</span>
+<span class="nc" id="L255">                pane.setSelectedIndex(indexOfThis);</span>
+<span class="nc" id="L256">        }</span>
+
         private int indexOfThisTab() {
-<span class="nc" id="L243">            return indexFinder.get();</span>
+<span class="nc" id="L259">            return indexFinder.get();</span>
         }
 
-        private int indexOfClick(JTabbedPane pane, MouseEvent e) {
-<span class="nc" id="L247">            List&lt;Rectangle&gt; tabBounds = new ArrayList&lt;&gt;();</span>
-<span class="nc bnc" id="L248" title="All 2 branches missed.">            for ( int i = 0; i &lt; pane.getTabCount(); i++ )</span>
-<span class="nc" id="L249">                tabBounds.add(pane.getBoundsAt(i));</span>
+        private int indexOfClick(JTabbedPane pane, Point p) {
+<span class="nc" id="L263">            List&lt;Rectangle&gt; tabBounds = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L264" title="All 2 branches missed.">            for ( int i = 0; i &lt; pane.getTabCount(); i++ )</span>
+<span class="nc" id="L265">                tabBounds.add(pane.getBoundsAt(i));</span>
 
-<span class="nc bnc" id="L251" title="All 2 branches missed.">            for ( int i = 0; i &lt; tabBounds.size(); i++ )</span>
-<span class="nc bnc" id="L252" title="All 2 branches missed.">                if ( tabBounds.get(i).contains(e.getPoint()) )</span>
-<span class="nc" id="L253">                    return i;</span>
+<span class="nc bnc" id="L267" title="All 2 branches missed.">            for ( int i = 0; i &lt; tabBounds.size(); i++ )</span>
+<span class="nc bnc" id="L268" title="All 2 branches missed.">                if ( tabBounds.get(i).contains(p) )</span>
+<span class="nc" id="L269">                    return i;</span>
 
-<span class="nc" id="L255">            return -1;</span>
+<span class="nc" id="L271">            return -1;</span>
         }
 
-<span class="fc" id="L258">        public void addOwner(JComponent c) { this.ownerRefs.add(new WeakReference&lt;&gt;(c)); }</span>
+<span class="fc" id="L274">        public void addOwner(JComponent c) { this.ownerRefs.add(new WeakReference&lt;&gt;(c)); }</span>
 
         @Override
         public void mouseClicked( MouseEvent e ) {
-<span class="nc" id="L262">            JTabbedPane pane = this.paneRef.get();</span>
-<span class="nc bnc" id="L263" title="All 2 branches missed.">            if ( pane == null ) {</span>
-<span class="nc bnc" id="L264" title="All 2 branches missed.">                for ( WeakReference&lt;JComponent&gt; compRef : this.ownerRefs) {</span>
-<span class="nc" id="L265">                    JComponent owner = compRef.get();</span>
-<span class="nc bnc" id="L266" title="All 2 branches missed.">                    if ( owner != null )</span>
-<span class="nc" id="L267">                        owner.removeMouseListener(this);</span>
-<span class="nc" id="L268">                }</span>
+<span class="nc" id="L278">            JTabbedPane pane = this.paneRef.get();</span>
+<span class="nc bnc" id="L279" title="All 2 branches missed.">            if ( pane == null ) {</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">                for ( WeakReference&lt;JComponent&gt; compRef : this.ownerRefs) {</span>
+<span class="nc" id="L281">                    JComponent owner = compRef.get();</span>
+<span class="nc bnc" id="L282" title="All 2 branches missed.">                    if ( owner != null )</span>
+<span class="nc" id="L283">                        owner.removeMouseListener(this);</span>
+<span class="nc" id="L284">                }</span>
             }
-<span class="nc" id="L270">            else doAction( pane, e );</span>
-<span class="nc" id="L271">        }</span>
+<span class="nc" id="L286">            else doAction( pane, e );</span>
+<span class="nc" id="L287">        }</span>
 
-        private void doAction(JTabbedPane pane, MouseEvent e) {
-<span class="nc" id="L274">            _doApp(()-&gt; {</span>
-<span class="nc" id="L275">                int indexOfThis = indexOfThisTab();</span>
-<span class="nc bnc" id="L276" title="All 2 branches missed.">                if ( indexOfThis &lt; 0 ) return;</span>
-<span class="nc" id="L277">                int indexClicked = indexOfClick(pane, e);</span>
-<span class="nc bnc" id="L278" title="All 2 branches missed.">                if ( indexClicked &lt; 0 ) return;</span>
-<span class="nc bnc" id="L279" title="All 4 branches missed.">                if ( indexOfThis == indexClicked &amp;&amp; mouseClickAction != null )</span>
-<span class="nc" id="L280">                    mouseClickAction.accept(new SimpleDelegate&lt;&gt;(pane, e, UIForTabbedPane.this::getSiblinghood));</span>
-<span class="nc bnc" id="L281" title="All 2 branches missed.">                if ( indexOfThis &lt; pane.getTabCount() )</span>
-<span class="nc" id="L282">                    pane.setSelectedIndex(indexOfThis);</span>
-<span class="nc" id="L283">            });</span>
-<span class="nc" id="L284">        }</span>
+    }
+
+    /**
+     *  If we click on a subcomponent on the header we need to traverse
+     *  upwards to find the click position relative to the tabbed pane!
+     *  Otherwise we don't know where the click went.
+     *
+     * @param current The component where we currently have the relative position {@code p}.
+     * @param end The component at which we end traversal when it is the same as the current.
+     * @param p The relative position to the current component.
+     * @return The relative position to the end component!
+     */
+    private static Point traversePosition( Component current, Component end, Point p ) {
+<span class="nc bnc" id="L302" title="All 2 branches missed.">        if ( current == end ) return p;</span>
+<span class="nc" id="L303">        Component parent = current.getParent();</span>
+<span class="nc" id="L304">        Point relativeToParent = SwingUtilities.convertPoint(current, p, parent);</span>
+<span class="nc" id="L305">        return traversePosition(parent, end, relativeToParent);</span>
     }
 
     /**
@@ -294,15 +315,15 @@ public class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAbstractS
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForTabbedPane&lt;P&gt; onChange( Action&lt;SimpleDelegate&lt;P, ChangeEvent&gt;&gt; onChange ) {
-<span class="nc" id="L297">        NullUtil.nullArgCheck(onChange, &quot;onChange&quot;, Action.class);</span>
-<span class="nc" id="L298">        P pane = getComponent();</span>
-<span class="nc" id="L299">        _onChange(e -&gt; _doApp(()-&gt;onChange.accept(new SimpleDelegate&lt;&gt;(pane, e, this::getSiblinghood))));</span>
-<span class="nc" id="L300">        return this;</span>
+<span class="nc" id="L318">        NullUtil.nullArgCheck(onChange, &quot;onChange&quot;, Action.class);</span>
+<span class="nc" id="L319">        P pane = getComponent();</span>
+<span class="nc" id="L320">        _onChange(e -&gt; _doApp(()-&gt;onChange.accept(new SimpleDelegate&lt;&gt;(pane, e, this::getSiblinghood))));</span>
+<span class="nc" id="L321">        return this;</span>
     }
 
     private void _onChange( Consumer&lt;ChangeEvent&gt; action ) {
-<span class="fc" id="L304">        getComponent().addChangeListener(action::accept);</span>
-<span class="fc" id="L305">    }</span>
+<span class="fc" id="L325">        getComponent().addChangeListener(action::accept);</span>
+<span class="fc" id="L326">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

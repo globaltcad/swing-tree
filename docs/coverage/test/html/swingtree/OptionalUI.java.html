@@ -196,7 +196,7 @@ public final class OptionalUI&lt;C extends Component&gt; {
             else {
                 try {
 <span class="fc" id="L198">                    Optional&lt;U&gt; opt = UI.runAndGet(() -&gt; map(mapper));</span>
-<span class="pc bpc" id="L199" title="5 of 6 branches missed.">                    if ( opt.isPresent() &amp;&amp; (opt.get() instanceof Component || opt.get() instanceof UIForAbstractSwing) )</span>
+<span class="pc bpc" id="L199" title="5 of 6 branches missed.">                    if ( opt.isPresent() &amp;&amp; (opt.get() instanceof Component || opt.get() instanceof UIForAnySwing) )</span>
 <span class="nc" id="L200">                        throw new RuntimeException(&quot;A Swing component may not leak to another thread!&quot;);</span>
 <span class="fc" id="L201">                    else return opt;</span>
 <span class="nc" id="L202">                } catch (Exception ex) {</span>

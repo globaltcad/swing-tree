@@ -42,7 +42,7 @@ final class NullUtil
 <span class="fc" id="L42">        nullArgCheck( property, thing, Val.class, &quot;Properties are not supposed to be null, they may wrap null values though.&quot; );</span>
 <span class="fc bfc" id="L43" title="All 2 branches covered.">        if ( property.allowsNull() ) {</span>
 <span class="fc" id="L44">            Class&lt;T&gt; type = property.type();</span>
-<span class="fc" id="L45">            String message = &quot;Property '{}' of type '{}' is not allowed to contain null!&quot;;</span>
+<span class="fc" id="L45">            String message = &quot;Property '{}' of type '{}' may not be null, but it was.&quot;;</span>
 <span class="fc bfc" id="L46" title="All 2 branches covered.">            if ( notes.length &gt; 0 )</span>
 <span class="fc" id="L47">                message += &quot; &quot; + String.join(&quot; &quot;, notes);</span>
 

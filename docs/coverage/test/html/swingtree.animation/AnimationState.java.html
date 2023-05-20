@@ -9,9 +9,39 @@ public interface AnimationState
 {
     /**
      * @return The animation progress in terms of a number between 0 and 1,
-     *         where 1 means the animation completed.
+     *         where 0.5 means the animation is halfway through, and 1 means the animation completed.
      */
     double progress();
+
+    /**
+     *  The animation progress in the form of a value linearly growing from {@code start} to {@code end}
+     *  based on the equation {@code start + (end - start) * progress()}.
+     *  At the beginning of the animation, the value is {@code start}, at the end of the animation, the value is {@code end}.
+     *
+     * @param start The start value of the animation.
+     * @param end The end value of the animation.
+     * @return The animation progress in terms of a number between {@code start} and {@code end}.
+     */
+<span class="nc" id="L25">    default double progress( double start, double end ) { return start + (end - start) * progress(); }</span>
+
+    /**
+     *  The animation progress in the form of a value linearly growing from 1 to 0
+     *  based on the equation {@code 1 - progress()}.
+     *  At the beginning of the animation, the value is 1, at the end of the animation, the value is 0.
+     *
+     * @return The animation progress in terms of a number between 0 and 1, where 0.5 means the animation is halfway through.
+     */
+<span class="nc" id="L34">    default double regress() { return 1 - progress(); }</span>
+
+    /**
+     *  The animation regression in the form of a value linearly growing from {@code start} to {@code end}.
+     *  This method is equivalent to {@code progress(end, start)}.
+     *
+     * @param end The end value of the animation.
+     * @param start The start value of the animation.
+     * @return The animation progress in terms of a number between {@code start} and {@code end}.
+     */
+<span class="nc" id="L44">    default double regress( double end, double start ) { return start + (end - start) * regress(); }</span>
 
     /**
      *  A sine wave oscillating between 0 and 1 and back to 0 once per iteration.
@@ -20,37 +50,137 @@ public interface AnimationState
      *
      * @return The animation progress in terms of a number between 0 and 1, where 1 means the animation is halfway through.
      */
-    default double pulse() {
-<span class="nc" id="L24">        return Math.sin(Math.PI * progress());</span>
-    }
+<span class="nc" id="L53">    default double pulse() { return Math.sin(Math.PI * progress()); }</span>
 
     /**
-     *   The animation progress in the form of peaking sine wave growing from 0 to 1
+     *  A sine wave oscillating between {@code start} and {@code peak} and back to {@code start} once per iteration.
+     *  At the beginning of the animation, the value is {@code start}, at the end of the animation,
+     *  the value is {@code start} again,
+     *  and when the animation is halfway through, the value is {@code peak}.
+     *
+     *  @param start The start value of the sine wave.
+     *  @param peak The peak value of the sine wave.
+     *  @return The animation progress in terms of a number between {@code start} and {@code end}, where {@code end} means the animation is halfway through.
+     */
+<span class="nc" id="L65">    default double pulse( double start, double peak ) { return start + (peak - start) * pulse(); }</span>
+
+    /**
+     *   The animation progress in the form of quickly growing sine wave front going from 0 to 1
      *   based on the equation {@code sin(PI * progress() / 2)}.
      *   Just like the value returned by {@link #progress()}
-     *   the {@link #fadeIn()} value starts at 0 and ends at 1,
-     *   however the crucial difference is that the {@link #fadeIn()} value
-     *   grows according to a sine wave, which makes certain animations look more natural.
+     *   the {@link #jumpIn()} value starts at 0 and ends at 1,
+     *   however the crucial difference is that the {@link #jumpIn()} value
+     *   grows according to a sine wave, which makes certain animations look more natural. &lt;br&gt;
+     *   The returned value will grow quickly at the beginning and slowly at the end, hence the name.
      *
      * @return The animation progress in the form of peaking sine wave growing from 0 to 1.
      */
-    default double fadeIn() {
-<span class="nc" id="L38">        return Math.sin(Math.PI * progress() / 2);</span>
-    }
+<span class="nc" id="L78">    default double jumpIn() { return Math.sin(Math.PI * progress() / 2); }</span>
+
+    /**
+     *   The animation progress in the form of peaking sine wave growing from {@code start} to {@code end}
+     *   based on the equation {@code start + (end - start) * jumpIn()}.
+     *   Just like the value returned by {@link #progress()}
+     *   the {@link #jumpIn()} value starts at {@code start} and ends at {@code end},
+     *   however the crucial difference is that the {@link #jumpIn()} value
+     *   grows according to a sine wave, which makes certain animations look more natural. &lt;br&gt;
+     *   The returned value will grow quickly at the beginning and slowly at the end, hence the name.
+     *
+     * @param start The start value of the animation.
+     * @param end The end value of the animation.
+     * @return The animation progress in the form of peaking sine wave growing from {@code start} to {@code end}.
+     */
+<span class="nc" id="L93">    default double jumpIn( double start, double end ) { return start + (end - start) * jumpIn(); }</span>
 
     /**
      *   The animation progress in the form of peaking sine wave growing from 1 to 0
      *   based on the equation {@code sin(PI * (1 - progress()) / 2)}.
      *   Just like the value returned by {@link #progress()}
-     *   the {@link #fadeOut()} value starts at 1 and ends at 0,
+     *   the {@link #jumpOut()} value starts at 1 and ends at 0,
      *   however the crucial difference is that the {@link #fadeOut()} value
      *   grows according to a sine wave, which makes certain animations look more natural.
      *
      * @return The animation progress in the form of peaking sine wave growing from 1 to 0.
      */
-    default double fadeOut() {
-<span class="nc" id="L52">        return Math.sin(Math.PI * (1 - progress()) / 2);</span>
+<span class="nc" id="L105">    default double jumpOut() { return Math.sin(Math.PI * (1 - progress()) / 2); }</span>
+
+    /**
+     *   The animation progress in the form of a initially quickly changing sine wave
+     *   going from {@code start} to {@code end}
+     *   based on the equation {@code end + (start - end) * jumpOut()}.
+     *   Just like the value returned by {@link #progress(double, double)}
+     *   the {@link #jumpOut(double, double)} value starts at {@code start} and ends at {@code end},
+     *   however the crucial difference is that the {@link #jumpOut(double, double)} value
+     *   changes according to a sine wave, which makes certain animations look more natural.
+     *
+     * @param end The end value of the animation,
+     * @param start The start value of the animation.
+     * @return The animation progress in the form of peaking sine wave growing from {@code start} to {@code end}.
+     */
+<span class="nc" id="L120">    default double jumpOut( double end, double start ) { return end + (start - end) * jumpOut(); }</span>
+
+    /**
+     *   The animation progress in the form of peaking sine wave growing from 0 to 1
+     *   based on the equation
+     *   {@code 0.5 * (1 + Math.sin( Math.PI * (progress() - 0.5) ) )}
+     *   Just like the value returned by {@link #progress()}
+     *   the {@link #fadeIn()} value starts at 0 and ends at 1,
+     *   however the crucial difference is that the {@link #fadeIn()} value
+     *   grows according to a sine wave, which makes certain animations look more natural. &lt;br&gt;
+     *   The difference between this method and {@link #jumpIn()} is that the returned
+     *   value grows slower at the beginning, where {@link #jumpIn()} grows faster initially.
+     *
+     * @return The animation progress in the form of peaking sine wave growing from 0 to 1.
+     */
+    default double fadeIn() {
+<span class="nc" id="L136">        return 0.5 * (1 + Math.sin( Math.PI * (progress() - 0.5) ));</span>
     }
+
+    /**
+     *   The animation progress in the form of peaking sine wave growing from {@code start} to {@code end}
+     *   based on the equation {@code start + (end - start) * fadeIn()}.
+     *   Just like the value returned by {@link #progress()}
+     *   the {@link #fadeIn()} value starts at {@code start} and ends at {@code end},
+     *   however the crucial difference is that the {@link #fadeIn()} value
+     *   grows according to a sine wave, which makes certain animations look more natural. &lt;br&gt;
+     *   The difference between this method and {@link #jumpIn()} is that the returned
+     *   value grows slower at the beginning, where {@link #jumpIn()} grows faster initially.
+     *
+     * @param start The start value of the animation.
+     * @param end The end value of the animation.
+     * @return The animation progress in the form of a wave growing from {@code start} to {@code end}.
+     */
+<span class="nc" id="L153">    default double fadeIn( double start, double end ) { return start + (end - start) * fadeIn(); }</span>
+
+    /**
+     *   The animation progress in the form of peaking sine wave growing from 1 to 0
+     *   based on the equation {@code 1 - fadeIn()}.
+     *   Just like the value returned by {@link #progress()}
+     *   the {@link #fadeOut()} value starts at 1 and ends at 0,
+     *   however the crucial difference is that the {@link #fadeOut()} value
+     *   grows according to a sine wave, which makes certain animations look more natural. &lt;br&gt;
+     *   The difference between this method and {@link #jumpOut()} is that the returned
+     *   value grows slower at the beginning, where {@link #jumpOut()} grows faster initially.
+     *
+     * @return The animation progress in the form of wave growing from 1 to 0.
+     */
+<span class="nc" id="L167">    default double fadeOut() { return 1 - fadeIn(); }</span>
+
+    /**
+     *   The animation progress in the form of a sine wave going from {@code start} to {@code end}
+     *   based on the equation {@code end + (start - end) * fadeOut()}.
+     *   Just like the value returned by {@link #progress(double, double)}
+     *   the {@link #fadeOut(double, double)} value starts at {@code start} and ends at {@code end},
+     *   however the crucial difference is that the {@link #fadeOut(double, double)} value
+     *   grows according to a sine wave, which makes certain animations look more natural. &lt;br&gt;
+     *   The difference between this method and {@link #jumpOut()} is that the returned
+     *   value grows slower at the beginning, whereas {@link #jumpOut()} grows faster initially.
+     *
+     * @param end The end value of the animation,
+     * @param start The start value of the animation,
+     * @return The animation progress in the form a sine wave going from {@code start} to {@code end}.
+     */
+<span class="nc" id="L183">    default double fadeOut( double end, double start ) { return end + (start - end) * fadeOut(); }</span>
 
     /**
      *  Defines the animation progress in terms of a number oscillating between 0, 1 and 0 once per iteration,
@@ -65,7 +195,7 @@ public interface AnimationState
      */
     default double cycle() {
         // progress() is guaranteed to be between 0 and 1, where 1 means the animation completed.
-<span class="fc" id="L68">        return 1 - Math.abs(2 * progress() - 1);</span>
+<span class="fc" id="L198">        return 1 - Math.abs(2 * progress() - 1);</span>
         // The result is guaranteed to be between 0 and 1, where 1 means the animation is
         // halfway through and 0 means the animation started or finished.
     }
@@ -89,9 +219,9 @@ public interface AnimationState
      *          where 1 means the animation is halfway through and 0 means the animation started or finished.
      */
     default double cyclePlus( double offset ) {
-<span class="fc" id="L92">        double progress = (progress() + offset) % 1;</span>
-<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        if ( progress &lt; 0 ) progress += 1;</span>
-<span class="fc" id="L94">        return 1 - Math.abs(2 * progress - 1);</span>
+<span class="fc" id="L222">        double progress = (progress() + offset) % 1;</span>
+<span class="pc bpc" id="L223" title="1 of 2 branches missed.">        if ( progress &lt; 0 ) progress += 1;</span>
+<span class="fc" id="L224">        return 1 - Math.abs(2 * progress - 1);</span>
     }
 
     /**
@@ -116,9 +246,9 @@ public interface AnimationState
      *          where 1 means the animation is halfway through and 0 means the animation started or finished.
      */
     default double cycleMinus( double offset ) {
-<span class="fc" id="L119">        double progress = ( progress() - offset ) % 1;</span>
-<span class="fc bfc" id="L120" title="All 2 branches covered.">        if ( progress &lt; 0 ) progress += 1;</span>
-<span class="fc" id="L121">        return 1 - Math.abs(2 * progress - 1);</span>
+<span class="fc" id="L249">        double progress = ( progress() - offset ) % 1;</span>
+<span class="fc bfc" id="L250" title="All 2 branches covered.">        if ( progress &lt; 0 ) progress += 1;</span>
+<span class="fc" id="L251">        return 1 - Math.abs(2 * progress - 1);</span>
     }
 
     /**

@@ -5,10 +5,10 @@ import javax.swing.*;
 /**
  *  A swing tree builder node for {@link JComponent} types.
  */
-public class UIForSwing&lt;C extends JComponent&gt; extends UIForAbstractSwing&lt;UIForSwing&lt;C&gt;, C&gt;
+public class UIForSwing&lt;C extends JComponent&gt; extends UIForAnySwing&lt;UIForSwing&lt;C&gt;, C&gt;
 {
     /**
-     * {@link UIForAbstractSwing} (sub)types always wrap
+     * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.

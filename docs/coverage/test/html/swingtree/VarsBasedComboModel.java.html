@@ -8,10 +8,10 @@ class VarsBasedComboModel&lt;E&gt; extends AbstractComboModel&lt;E&gt;
     private final Vars&lt;E&gt; _items;
 
     VarsBasedComboModel(Vars&lt;E&gt; items) {
-<span class="nc" id="L11">        super(Var.ofNullable(_findCommonType(items), null));</span>
-<span class="nc" id="L12">        _items = items;</span>
-<span class="nc" id="L13">        _selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
-<span class="nc" id="L14">    }</span>
+<span class="fc" id="L11">        super(Var.ofNullable(_findCommonType(items), null));</span>
+<span class="fc" id="L12">        _items = items;</span>
+<span class="fc" id="L13">        _selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
+<span class="fc" id="L14">    }</span>
 
     VarsBasedComboModel(Var&lt;E&gt; var, Vars&lt;E&gt; items) {
 <span class="fc" id="L17">        super(var);</span>
@@ -24,7 +24,7 @@ class VarsBasedComboModel&lt;E&gt; extends AbstractComboModel&lt;E&gt;
 <span class="fc" id="L24">    @Override public E getElementAt( int index ) { return _items.at(index).orElseNull(); }</span>
 
     @Override public AbstractComboModel&lt;E&gt; withVar(Var&lt;E&gt; newVar) {
-<span class="nc" id="L27">        return new VarsBasedComboModel&lt;&gt;(newVar, _items);</span>
+<span class="fc" id="L27">        return new VarsBasedComboModel&lt;&gt;(newVar, _items);</span>
     }
 
     @Override
@@ -41,10 +41,10 @@ class VarsBasedComboModel&lt;E&gt; extends AbstractComboModel&lt;E&gt;
             So we'll just try to modify it, and if it fails, we'll just ignore it.
          */
         try {
-<span class="nc" id="L44">            _items.at(index).set(element);</span>
+<span class="fc" id="L44">            _items.at(index).set(element);</span>
 <span class="nc" id="L45">        } catch (UnsupportedOperationException ignored) {</span>
             // ignore, the user of this library doesn't want us to modify the list
-<span class="nc" id="L47">        }</span>
-<span class="nc" id="L48">    }</span>
+<span class="fc" id="L47">        }</span>
+<span class="fc" id="L48">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

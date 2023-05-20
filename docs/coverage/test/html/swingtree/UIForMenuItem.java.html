@@ -6,7 +6,7 @@ import javax.swing.*;
 /**
  *  A swing tree builder node for {@link JMenuItem} instances.
  */
-public class UIForMenuItem&lt;M extends JMenuItem&gt; extends UIForAbstractMenuItem&lt;UIForMenuItem&lt;M&gt;, M&gt;
+public class UIForMenuItem&lt;M extends JMenuItem&gt; extends UIForAnyMenuItem&lt;UIForMenuItem&lt;M&gt;, M&gt;
 {
 <span class="fc" id="L11">    protected UIForMenuItem(M component) { super(component); }</span>
 }

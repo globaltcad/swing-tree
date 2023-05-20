@@ -15,7 +15,7 @@ import java.util.function.Consumer;
  * 	&lt;b&gt;Please take a look at the &lt;a href=&quot;https://globaltcad.github.io/swing-tree/&quot;&gt;living swing-tree documentation&lt;/a&gt;
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.&lt;/b&gt;
  */
-public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;UIForSlider&lt;S&gt;, S&gt;
+public class UIForSlider&lt;S extends JSlider&gt; extends UIForAnySwing&lt;UIForSlider&lt;S&gt;, S&gt;
 {
 <span class="fc" id="L20">    protected UIForSlider( S component ) { super(component); }</span>
 
@@ -71,8 +71,8 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSlider&lt;S&gt; withMin( int min ) {
-<span class="nc" id="L74">        _doWithoutListeners(()-&gt;getComponent().setMinimum( min ));</span>
-<span class="nc" id="L75">        return this;</span>
+<span class="fc" id="L74">        _doWithoutListeners(()-&gt;getComponent().setMinimum( min ));</span>
+<span class="fc" id="L75">        return this;</span>
     }
 
     /**
@@ -94,8 +94,8 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSlider&lt;S&gt; withMax( int max ) {
-<span class="nc" id="L97">        _doWithoutListeners(()-&gt;getComponent().setMaximum( max ));</span>
-<span class="nc" id="L98">        return this;</span>
+<span class="fc" id="L97">        _doWithoutListeners(()-&gt;getComponent().setMaximum( max ));</span>
+<span class="fc" id="L98">        return this;</span>
     }
 
     /**
@@ -117,8 +117,8 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSlider&lt;S&gt; withValue( int value ) {
-<span class="nc" id="L120">        _doWithoutListeners(()-&gt;getComponent().setValue( value ));</span>
-<span class="nc" id="L121">        return this;</span>
+<span class="fc" id="L120">        _doWithoutListeners(()-&gt;getComponent().setValue( value ));</span>
+<span class="fc" id="L121">        return this;</span>
     }
 
     /**
@@ -200,14 +200,14 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAbstractSwing&lt;
     private void _doWithoutListeners(Runnable someTask) {
         // We need to first remove the change listener, otherwise we might trigger unwanted events.
 <span class="fc" id="L202">        ChangeListener[] listeners = getComponent().getChangeListeners();</span>
-<span class="pc bpc" id="L203" title="1 of 2 branches missed.">        for ( ChangeListener listener : listeners )</span>
-<span class="nc" id="L204">            getComponent().removeChangeListener( listener );</span>
+<span class="fc bfc" id="L203" title="All 2 branches covered.">        for ( ChangeListener listener : listeners )</span>
+<span class="fc" id="L204">            getComponent().removeChangeListener( listener );</span>
 
 <span class="fc" id="L206">        someTask.run();</span>
 
         // Now we can add the listeners back.
-<span class="pc bpc" id="L209" title="1 of 2 branches missed.">        for ( ChangeListener listener : listeners )</span>
-<span class="nc" id="L210">            getComponent().addChangeListener( listener );</span>
+<span class="fc bfc" id="L209" title="All 2 branches covered.">        for ( ChangeListener listener : listeners )</span>
+<span class="fc" id="L210">            getComponent().addChangeListener( listener );</span>
 <span class="fc" id="L211">    }</span>
 
 }

@@ -11,10 +11,10 @@ import java.util.function.Consumer;
 /**
  *  A swing tree builder node for {@link JSpinner} instances.
  */
-public class UIForSpinner&lt;S extends JSpinner&gt; extends UIForAbstractSwing&lt;UIForSpinner&lt;S&gt;, S&gt;
+public class UIForSpinner&lt;S extends JSpinner&gt; extends UIForAnySwing&lt;UIForSpinner&lt;S&gt;, S&gt;
 {
     /**
-     * {@link UIForAbstractSwing} (sub)types always wrap
+     * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
@@ -41,8 +41,8 @@ public class UIForSpinner&lt;S extends JSpinner&gt; extends UIForAbstractSwing&l
                         Number newValue;
 <span class="nc" id="L42">                        Number value = this.getNumber();</span>
 <span class="nc" id="L43">                        Number stepSize = this.getStepSize();</span>
-<span class="nc" id="L44">                        Comparable&lt;Number&gt; maximum = this.getMaximum();</span>
-<span class="nc" id="L45">                        Comparable&lt;Number&gt; minimum = this.getMinimum();</span>
+<span class="nc" id="L44">                        Comparable&lt;Number&gt; maximum = (Comparable&lt;Number&gt;) this.getMaximum();</span>
+<span class="nc" id="L45">                        Comparable&lt;Number&gt; minimum = (Comparable&lt;Number&gt;) this.getMinimum();</span>
 <span class="nc bnc" id="L46" title="All 4 branches missed.">                        boolean valueIsRational = (value instanceof Float) || (value instanceof Double);</span>
 <span class="nc bnc" id="L47" title="All 4 branches missed.">                        boolean stepIsRational = (stepSize instanceof Float) || (stepSize instanceof Double);</span>
 <span class="nc bnc" id="L48" title="All 4 branches missed.">                        if ( valueIsRational || stepIsRational ) {</span>

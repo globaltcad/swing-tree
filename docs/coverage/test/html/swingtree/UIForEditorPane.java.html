@@ -8,10 +8,10 @@ import javax.swing.*;
  * 	&lt;b&gt;Take a look at the &lt;a href=&quot;https://globaltcad.github.io/swing-tree/&quot;&gt;living swing-tree documentation&lt;/a&gt;
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class or other classes.&lt;/b&gt;
  */
-public class UIForEditorPane&lt;P extends JEditorPane&gt; extends UIForAbstractEditorPane&lt;UIForEditorPane&lt;P&gt;, P&gt;
+public class UIForEditorPane&lt;P extends JEditorPane&gt; extends UIForAnyEditorPane&lt;UIForEditorPane&lt;P&gt;, P&gt;
 {
     /**
-     * {@link UIForAbstractSwing} (sub)types always wrap
+     * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.

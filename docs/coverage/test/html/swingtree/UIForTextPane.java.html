@@ -5,10 +5,10 @@ import javax.swing.*;
 /**
  *  A swing tree builder node for {@link UIForTextPane} instances.
  */
-public class UIForTextPane&lt;P extends JTextPane&gt; extends UIForAbstractEditorPane&lt;UIForTextPane&lt;P&gt;, P&gt;
+public class UIForTextPane&lt;P extends JTextPane&gt; extends UIForAnyEditorPane&lt;UIForTextPane&lt;P&gt;, P&gt;
 {
     /**
-     * {@link UIForAbstractSwing} (sub)types always wrap
+     * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.

@@ -18,7 +18,7 @@ import java.util.function.Consumer;
  * 	&lt;b&gt;Please take a look at the &lt;a href=&quot;https://globaltcad.github.io/swing-tree/&quot;&gt;living swing-tree documentation&lt;/a&gt;
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.&lt;/b&gt;
  */
-public class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIForAbstractSwing&lt;UIForCombo&lt;E,C&gt;, JComboBox&lt;E&gt;&gt;
+public class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIForAnySwing&lt;UIForCombo&lt;E,C&gt;, JComboBox&lt;E&gt;&gt;
 {
     protected UIForCombo( JComboBox&lt;E&gt; component ) {
 <span class="fc" id="L24">        super(component);</span>
@@ -38,24 +38,24 @@ public class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIForAbstr
 
 <span class="fc" id="L39">            _onShow( model._getSelectedItemVar(), v -&gt;</span>
 <span class="fc" id="L40">                component().ifPresent( combo -&gt; {</span>
-<span class="fc bfc" id="L41" title="All 2 branches covered.">                    if ( combo.isEditable() )</span>
+<span class="fc" id="L41">                    model.doQuietly(()-&gt;{</span>
 <span class="fc" id="L42">                        combo.getEditor().setItem(v);</span>
-<span class="fc" id="L43">                })</span>
+<span class="fc" id="L43">                        model.fireListeners();</span>
+<span class="fc" id="L44">                    });</span>
+<span class="fc" id="L45">                })</span>
             );
 
             // Adds a PopupMenu listener which will listen to notification
             // messages from the popup portion of the combo box.
-<span class="fc" id="L48">            getComponent().addPopupMenuListener(new PopupMenuListener() {</span>
+<span class="fc" id="L50">            getComponent().addPopupMenuListener(new PopupMenuListener() {</span>
                 public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
                     // This method is called before the popup menu becomes visible.
-<span class="nc" id="L51">                    comboIsOpen[0] = true;</span>
-<span class="nc" id="L52">                }</span>
-
+<span class="nc" id="L53">                    comboIsOpen[0] = true;</span>
+<span class="nc" id="L54">                }</span>
                 public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                     // This method is called before the popup menu becomes invisible
-<span class="nc" id="L56">                    comboIsOpen[0] = false;</span>
-<span class="nc" id="L57">                }</span>
-
+<span class="nc" id="L57">                    comboIsOpen[0] = false;</span>
+<span class="nc" id="L58">                }</span>
                 public void popupMenuCanceled(PopupMenuEvent e) {
                     // This method is called when the popup menu is canceled
 <span class="nc" id="L61">                    comboIsOpen[0] = false;</span>

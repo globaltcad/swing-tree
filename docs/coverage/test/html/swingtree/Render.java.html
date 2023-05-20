@@ -200,13 +200,13 @@ public final class Render&lt;C extends JComponent,E&gt; {
 <span class="fc" id="L200">				Color bg = null;</span>
 <span class="fc" id="L201">				Color fg = null;</span>
 
-<span class="pc bpc" id="L203" title="1 of 2 branches missed.">				if ( cell.getComponent() instanceof JList ) {</span>
-<span class="nc" id="L204">					JList&lt;?&gt; jList = (JList&lt;?&gt;) cell.getComponent();</span>
-<span class="nc" id="L205">					bg = jList.getSelectionBackground();</span>
-<span class="nc" id="L206">					fg = jList.getSelectionForeground();</span>
-<span class="nc bnc" id="L207" title="All 2 branches missed.">					if ( bg == null )</span>
+<span class="fc bfc" id="L203" title="All 2 branches covered.">				if ( cell.getComponent() instanceof JList ) {</span>
+<span class="fc" id="L204">					JList&lt;?&gt; jList = (JList&lt;?&gt;) cell.getComponent();</span>
+<span class="fc" id="L205">					bg = jList.getSelectionBackground();</span>
+<span class="fc" id="L206">					fg = jList.getSelectionForeground();</span>
+<span class="pc bpc" id="L207" title="1 of 2 branches missed.">					if ( bg == null )</span>
 <span class="nc" id="L208">						bg = UIManager.getColor(&quot;List.selectionBackground&quot;);</span>
-<span class="nc bnc" id="L209" title="All 2 branches missed.">					if ( fg == null )</span>
+<span class="pc bpc" id="L209" title="1 of 2 branches missed.">					if ( fg == null )</span>
 <span class="nc" id="L210">						fg = UIManager.getColor(&quot;List.selectionForeground&quot;);</span>
 				}
 
@@ -220,14 +220,14 @@ public final class Render&lt;C extends JComponent,E&gt; {
 <span class="nc" id="L220">						fg = UIManager.getColor(&quot;Table.selectionForeground&quot;);</span>
 				}
 
-<span class="pc bpc" id="L223" title="2 of 4 branches missed.">				if ( bg == null &amp;&amp; cell.getComponent() != null )</span>
+<span class="pc bpc" id="L223" title="1 of 4 branches missed.">				if ( bg == null &amp;&amp; cell.getComponent() != null )</span>
 <span class="nc" id="L224">					bg = cell.getComponent().getBackground();</span>
-<span class="pc bpc" id="L225" title="2 of 4 branches missed.">				if ( fg == null &amp;&amp; cell.getComponent() != null )</span>
+<span class="pc bpc" id="L225" title="1 of 4 branches missed.">				if ( fg == null &amp;&amp; cell.getComponent() != null )</span>
 <span class="nc" id="L226">					fg = cell.getComponent().getForeground();</span>
 
-<span class="pc bpc" id="L228" title="1 of 2 branches missed.">				if ( bg == null )</span>
+<span class="fc bfc" id="L228" title="All 2 branches covered.">				if ( bg == null )</span>
 <span class="fc" id="L229">					bg = UIManager.getColor( &quot;ComboBox.selectionBackground&quot; );</span>
-<span class="pc bpc" id="L230" title="1 of 2 branches missed.">				if ( fg == null )</span>
+<span class="fc bfc" id="L230" title="All 2 branches covered.">				if ( fg == null )</span>
 <span class="fc" id="L231">					fg = UIManager.getColor( &quot;ComboBox.selectionForeground&quot; );</span>
 
 <span class="pc bpc" id="L233" title="1 of 2 branches missed.">				if ( bg == null )</span>
@@ -246,10 +246,10 @@ public final class Render&lt;C extends JComponent,E&gt; {
 				}
 				else {
 <span class="fc" id="L248">					Color normalBg = Color.WHITE;</span>
-<span class="pc bpc" id="L249" title="1 of 2 branches missed.">					if (  cell.getComponent() != null )</span>
-<span class="nc" id="L250">						normalBg = cell.getComponent().getBackground();</span>
+<span class="fc bfc" id="L249" title="All 2 branches covered.">					if (  cell.getComponent() != null )</span>
+<span class="fc" id="L250">						normalBg = cell.getComponent().getBackground();</span>
 
-<span class="pc bpc" id="L252" title="1 of 2 branches missed.">					if ( cell.getRow() % 2 == 0 ) {</span>
+<span class="fc bfc" id="L252" title="All 2 branches covered.">					if ( cell.getRow() % 2 == 0 ) {</span>
 						// We determine if the base color is more bright or dark,
 						// and then we set the foreground color accordingly
 <span class="fc" id="L255">						double brightness = 1 - (0.299 * normalBg.getRed() + 0.587 * normalBg.getGreen() + 0.114 * normalBg.getBlue()) / 255;</span>
@@ -259,8 +259,8 @@ public final class Render&lt;C extends JComponent,E&gt; {
 <span class="nc" id="L259">							normalBg = normalBg.darker();</span>
 					}
 <span class="pc bpc" id="L261" title="1 of 2 branches missed.">					if ( bg != null ) l.setBackground( normalBg );</span>
-<span class="pc bpc" id="L262" title="2 of 4 branches missed.">					if ( fg != null &amp;&amp; cell.getComponent() != null )</span>
-<span class="nc" id="L263">						l.setForeground( cell.getComponent().getForeground() );</span>
+<span class="pc bpc" id="L262" title="1 of 4 branches missed.">					if ( fg != null &amp;&amp; cell.getComponent() != null )</span>
+<span class="fc" id="L263">						l.setForeground( cell.getComponent().getForeground() );</span>
 				}
 
 				// TODO:

@@ -3,7 +3,6 @@
 import sprouts.Action;
 import sprouts.Val;
 import sprouts.Var;
-import sprouts.Vars;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -16,9 +15,9 @@ import java.util.function.Consumer;
  * 	&lt;b&gt;Take a look at the &lt;a href=&quot;https://globaltcad.github.io/swing-tree/&quot;&gt;living swing-tree documentation&lt;/a&gt;
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class or other classes.&lt;/b&gt;
  */
-public class UIForTextField&lt;F extends JTextField&gt; extends UIForAbstractTextComponent&lt;UIForTextField&lt;F&gt;, F&gt;
+public class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTextComponent&lt;UIForTextField&lt;F&gt;, F&gt;
 {
-<span class="fc" id="L21">    protected UIForTextField( F component ) { super( component ); }</span>
+<span class="fc" id="L20">    protected UIForTextField( F component ) { super( component ); }</span>
 
     /**
      *  Allows you to register an action to be performed when the user presses the enter key.
@@ -27,10 +26,10 @@ public class UIForTextField&lt;F extends JTextField&gt; extends UIForAbstractTex
      * @return This very instance, which enables builder-style method chaining.
      */
     public UIForTextField&lt;F&gt; onEnter( Action&lt;SimpleDelegate&lt;F, ActionEvent&gt;&gt; action ) {
-<span class="fc" id="L30">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L31">        F field = getComponent();</span>
-<span class="fc" id="L32">        _onEnter( e -&gt; _doApp( () -&gt; action.accept(new SimpleDelegate&lt;&gt;( field, e, this::getSiblinghood )) ) );</span>
-<span class="fc" id="L33">        return this;</span>
+<span class="fc" id="L29">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L30">        F field = getComponent();</span>
+<span class="fc" id="L31">        _onEnter( e -&gt; _doApp( () -&gt; action.accept(new SimpleDelegate&lt;&gt;( field, e, this::getSiblinghood )) ) );</span>
+<span class="fc" id="L32">        return this;</span>
     }
 
     private void _onEnter( Consumer&lt;ActionEvent&gt; action ) {
@@ -45,15 +44,15 @@ public class UIForTextField&lt;F extends JTextField&gt; extends UIForAbstractTex
             simply because it was added first.
             This is especially true in the context of declarative UI design.
         */
-<span class="fc" id="L48">        ActionListener[] listeners = getComponent().getActionListeners();</span>
-<span class="fc bfc" id="L49" title="All 2 branches covered.">        for (ActionListener listener : listeners)</span>
-<span class="fc" id="L50">            getComponent().removeActionListener(listener);</span>
+<span class="fc" id="L47">        ActionListener[] listeners = getComponent().getActionListeners();</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        for (ActionListener listener : listeners)</span>
+<span class="fc" id="L49">            getComponent().removeActionListener(listener);</span>
 
-<span class="fc" id="L52">        getComponent().addActionListener(action::accept);</span>
+<span class="fc" id="L51">        getComponent().addActionListener(action::accept);</span>
 
-<span class="fc bfc" id="L54" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
-<span class="fc" id="L55">            getComponent().addActionListener(listeners[i]);</span>
-<span class="fc" id="L56">    }</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
+<span class="fc" id="L54">            getComponent().addActionListener(listeners[i]);</span>
+<span class="fc" id="L55">    }</span>
 
     /**
      *  Effectively bind this text field to a numeric {@link Var} property
@@ -64,8 +63,8 @@ public class UIForTextField&lt;F extends JTextField&gt; extends UIForAbstractTex
      * @param &lt;N&gt; The numeric type of the {@link Var} property.
      */
     public final &lt;N extends Number&gt; UIForTextField&lt;F&gt; withNumber( Var&lt;N&gt; number ) {
-<span class="nc" id="L67">        Var&lt;Boolean&gt; isValid = Var.of(true);</span>
-<span class="nc" id="L68">        return this.withNumber( number, isValid );</span>
+<span class="nc" id="L66">        Var&lt;Boolean&gt; isValid = Var.of(true);</span>
+<span class="nc" id="L67">        return this.withNumber( number, isValid );</span>
     }
 
     /**
@@ -78,42 +77,42 @@ public class UIForTextField&lt;F extends JTextField&gt; extends UIForAbstractTex
      * @param &lt;N&gt; The numeric type of the {@link Var} property.
      */
     public final &lt;N extends Number&gt; UIForTextField&lt;F&gt; withNumber( Var&lt;N&gt; number, Var&lt;Boolean&gt; isValid ) {
-<span class="fc" id="L81">        NullUtil.nullArgCheck(number, &quot;number&quot;, Var.class);</span>
-<span class="fc" id="L82">        NullUtil.nullArgCheck(isValid, &quot;isValid&quot;, Var.class);</span>
-<span class="fc" id="L83">        NullUtil.nullPropertyCheck(number, &quot;number&quot;, &quot;Null is not a valid value for a numeric property.&quot;);</span>
-<span class="fc" id="L84">        NullUtil.nullPropertyCheck(isValid, &quot;isValid&quot;, &quot;Null is not a valid value for a boolean property.&quot;);</span>
-<span class="pc" id="L85">        _onShow( number, n -&gt; getComponent().setText( n.toString() ) );</span>
-<span class="fc" id="L86">        Var&lt;String&gt; text = Var.of( number.get().toString() );</span>
-<span class="fc" id="L87">        text.onAct( s -&gt; {</span>
+<span class="fc" id="L80">        NullUtil.nullArgCheck(number, &quot;number&quot;, Var.class);</span>
+<span class="fc" id="L81">        NullUtil.nullArgCheck(isValid, &quot;isValid&quot;, Var.class);</span>
+<span class="fc" id="L82">        NullUtil.nullPropertyCheck(number, &quot;number&quot;, &quot;Null is not a valid value for a numeric property.&quot;);</span>
+<span class="fc" id="L83">        NullUtil.nullPropertyCheck(isValid, &quot;isValid&quot;, &quot;Null is not a valid value for a boolean property.&quot;);</span>
+<span class="pc" id="L84">        _onShow( number, n -&gt; getComponent().setText( n.toString() ) );</span>
+<span class="fc" id="L85">        Var&lt;String&gt; text = Var.of( number.get().toString() );</span>
+<span class="fc" id="L86">        text.onAct( s -&gt; {</span>
             try {
-<span class="pc bpc" id="L89" title="1 of 2 branches missed.">                if ( number.type() == Integer.class )</span>
-<span class="nc" id="L90">                    number.act( (N) Integer.valueOf(Integer.parseInt(s.get())) );</span>
-<span class="pc bpc" id="L91" title="1 of 2 branches missed.">                else if ( number.type() == Long.class )</span>
-<span class="nc" id="L92">                    number.act( (N) Long.valueOf(Long.parseLong(s.get())) );</span>
-<span class="pc bpc" id="L93" title="1 of 2 branches missed.">                else if ( number.type() == Float.class )</span>
-<span class="nc" id="L94">                    number.act( (N) Float.valueOf(Float.parseFloat(s.get())) );</span>
-<span class="pc bpc" id="L95" title="1 of 2 branches missed.">                else if ( number.type() == Double.class )</span>
-<span class="nc" id="L96">                    number.act( (N) Double.valueOf(Double.parseDouble(s.get())) );</span>
-<span class="nc bnc" id="L97" title="All 2 branches missed.">                else if ( number.type() == Short.class )</span>
-<span class="nc" id="L98">                    number.act( (N) Short.valueOf(Short.parseShort(s.get())) );</span>
-<span class="nc bnc" id="L99" title="All 2 branches missed.">                else if ( number.type() == Byte.class )</span>
-<span class="nc" id="L100">                    number.act( (N) Byte.valueOf(Byte.parseByte(s.get())) );</span>
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">                if ( number.type() == Integer.class )</span>
+<span class="nc" id="L89">                    number.act( (N) Integer.valueOf(Integer.parseInt(s.get())) );</span>
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">                else if ( number.type() == Long.class )</span>
+<span class="nc" id="L91">                    number.act( (N) Long.valueOf(Long.parseLong(s.get())) );</span>
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">                else if ( number.type() == Float.class )</span>
+<span class="nc" id="L93">                    number.act( (N) Float.valueOf(Float.parseFloat(s.get())) );</span>
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">                else if ( number.type() == Double.class )</span>
+<span class="nc" id="L95">                    number.act( (N) Double.valueOf(Double.parseDouble(s.get())) );</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">                else if ( number.type() == Short.class )</span>
+<span class="nc" id="L97">                    number.act( (N) Short.valueOf(Short.parseShort(s.get())) );</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">                else if ( number.type() == Byte.class )</span>
+<span class="nc" id="L99">                    number.act( (N) Byte.valueOf(Byte.parseByte(s.get())) );</span>
                 else
-<span class="nc" id="L102">                    throw new IllegalStateException(&quot;Unsupported number type: &quot; + number.type());</span>
+<span class="nc" id="L101">                    throw new IllegalStateException(&quot;Unsupported number type: &quot; + number.type());</span>
 
-<span class="nc bnc" id="L104" title="All 2 branches missed.">                if ( isValid.is(false) ) {</span>
-<span class="nc" id="L105">                    isValid.set(true);</span>
-<span class="nc" id="L106">                    isValid.fireAct();</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">                if ( isValid.is(false) ) {</span>
+<span class="nc" id="L104">                    isValid.set(true);</span>
+<span class="nc" id="L105">                    isValid.fireAct();</span>
                 }
-<span class="fc" id="L108">            } catch (NumberFormatException e) {</span>
+<span class="fc" id="L107">            } catch (NumberFormatException e) {</span>
                 // ignore
-<span class="fc bfc" id="L110" title="All 2 branches covered.">                if ( isValid.is(true) ) {</span>
-<span class="fc" id="L111">                    isValid.set(false);</span>
-<span class="fc" id="L112">                    isValid.fireAct();</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">                if ( isValid.is(true) ) {</span>
+<span class="fc" id="L110">                    isValid.set(false);</span>
+<span class="fc" id="L111">                    isValid.fireAct();</span>
                 }
-<span class="nc" id="L114">            }</span>
-<span class="fc" id="L115">        });</span>
-<span class="fc" id="L116">        return withText( text );</span>
+<span class="nc" id="L113">            }</span>
+<span class="fc" id="L114">        });</span>
+<span class="fc" id="L115">        return withText( text );</span>
     }
 
     /**
@@ -128,9 +127,9 @@ public class UIForTextField&lt;F extends JTextField&gt; extends UIForAbstractTex
      * @param &lt;N&gt; The numeric type of the {@link Val} property.
      */
     public final &lt;N extends Number&gt; UIForTextField&lt;F&gt; withNumber( Val&lt;N&gt; number ) {
-<span class="nc" id="L131">        NullUtil.nullArgCheck(number, &quot;number&quot;, Var.class);</span>
-<span class="nc" id="L132">        number.onSet( n -&gt; _doUI(()-&gt;getComponent().setText( n.toString() )) );</span>
-<span class="nc" id="L133">        return this;</span>
+<span class="nc" id="L130">        NullUtil.nullArgCheck(number, &quot;number&quot;, Var.class);</span>
+<span class="nc" id="L131">        number.onSet( n -&gt; _doUI(()-&gt;getComponent().setText( n.toString() )) );</span>
+<span class="nc" id="L132">        return this;</span>
     }
 
 }
