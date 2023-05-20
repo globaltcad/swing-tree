@@ -1,0 +1,2955 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForAnySwing.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForAnySwing.java</span></div><h1>UIForAnySwing.java</h1><pre class="source lang-java linenums">package swingtree;
+
+
+import net.miginfocom.swing.MigLayout;
+import org.slf4j.Logger;
+import sprouts.Action;
+import sprouts.Event;
+import sprouts.Val;
+import sprouts.Vals;
+import sprouts.Var;
+import swingtree.api.Peeker;
+import swingtree.api.UIVerifier;
+import swingtree.api.mvvm.Viewable;
+import swingtree.input.Keyboard;
+import swingtree.layout.CompAttr;
+import swingtree.layout.LayoutAttr;
+import swingtree.style.Style;
+import swingtree.style.StyleDelegate;
+
+import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+
+/**
+ *  A swing tree builder node for any kind {@link JComponent} instance.
+ *  This is the most generic builder type and therefore abstract super-type for almost all other builders.
+ *  This builder defines nested building for anything extending the {@link JComponent} class.
+ * 	&lt;p&gt;
+ * 	&lt;b&gt;Please take a look at the &lt;a href=&quot;https://globaltcad.github.io/swing-tree/&quot;&gt;living swing-tree documentation&lt;/a&gt;
+ * 	where you can browse a large collection of examples demonstrating how to use the API of this class.&lt;/b&gt;
+ *  &lt;br&gt;&lt;br&gt;
+ *
+ * @param &lt;I&gt; The concrete extension of the {@link AbstractNestedBuilder}.
+ * @param &lt;C&gt; The type parameter for the component type wrapped by an instance of this class.
+ */
+public abstract class UIForAnySwing&lt;I, C extends JComponent&gt; extends AbstractNestedBuilder&lt;I, C, JComponent&gt;
+{
+<span class="fc" id="L45">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(UI.class);</span>
+
+    private final static String _TIMERS_KEY = &quot;_swing-tree.timers&quot;;
+
+<span class="fc" id="L49">    private boolean _idAlreadySet = false; // The id translates to the 'name' property of swing components.</span>
+<span class="fc" id="L50">    private boolean _migAlreadySet = false;</span>
+
+    /**
+     *  Extensions of the {@link  UIForAnySwing} always wrap
+     *  a single component for which they are responsible.
+     *
+     * @param component The JComponent type which will be wrapped by this builder node.
+     */
+<span class="fc" id="L58">    public UIForAnySwing(C component ) { super(component); }</span>
+
+    /**
+     *  This method exposes a concise way to bind a {@link Event} to the
+     *  {@link JComponent#repaint()} method of the component wrapped by this {@link UI}!
+     *  This means that the component will be repainted whenever the event is fired.
+     *  &lt;p&gt;
+     * @param event The event to which the repaint method of the component will be bound.
+     * @return The JComponent type which will be wrapped by this builder node.
+     */
+    public final I withRepaintIf( Event event ) {
+<span class="pc" id="L69">        event.subscribe( () -&gt; _doUI( () -&gt; getComponent().repaint() ) );</span>
+<span class="fc" id="L70">        return _this();</span>
+    }
+
+    /**
+     *  This method exposes a concise way to set an identifier for the component
+     *  wrapped by this {@link UI}!
+     *  In essence this is simply a delegate for the {@link JComponent#setName(String)} method
+     *  to make it more expressive and widely recognized what is meant
+     *  (&quot;id&quot; is shorter and makes more sense than &quot;name&quot; which could be confused with &quot;title&quot;).
+     *
+     * @param id The identifier for this {@link JComponent} which will
+     *           simply translate to {@link JComponent#setName(String)}
+     *
+     * @return The JComponent type which will be wrapped by this builder node.
+     */
+    public final I id( String id ) {
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">        if ( _idAlreadySet )</span>
+<span class="nc" id="L87">            throw new IllegalArgumentException(&quot;The id has already been specified for this component!&quot;);</span>
+<span class="fc" id="L88">        getComponent().setName(id);</span>
+<span class="fc" id="L89">        _idAlreadySet = true;</span>
+<span class="fc" id="L90">        return _this();</span>
+    }
+
+    public final I groups( String... groupName ) {
+<span class="fc" id="L94">        ComponentExtension.from(getComponent()).setStyleGroups(groupName);</span>
+<span class="fc" id="L95">        return _this();</span>
+    }
+
+    /**
+     *  Use this to make the wrapped UI component visible or invisible.
+     *
+     * @param isVisible The truth value determining if the UI component should be visible or not.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isVisibleIf( boolean isVisible ) {
+<span class="fc" id="L105">        getComponent().setVisible( isVisible );</span>
+<span class="fc" id="L106">        return _this();</span>
+    }
+
+    /**
+     *  This is the inverse of {@link #isVisibleIf(boolean)}.
+     *  Use this to make the wrapped UI component invisible or visible.
+     * @param isVisible The truth value determining if the UI component should be visible or not.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isVisibleIfNot( boolean isVisible ) {
+<span class="fc bfc" id="L116" title="All 2 branches covered.">        getComponent().setVisible(!isVisible);</span>
+<span class="fc" id="L117">        return _this();</span>
+    }
+
+    /**
+     *  Use this to make the wrapped UI component dynamically visible or invisible. &lt;br&gt;
+     * &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param isVisible The truth value determining if the UI component should be visible or not wrapped in a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isVisibleIf( Val&lt;Boolean&gt; isVisible ) {
+<span class="fc" id="L128">        NullUtil.nullArgCheck(isVisible, &quot;isVisible&quot;, Val.class);</span>
+<span class="fc" id="L129">        NullUtil.nullPropertyCheck(isVisible, &quot;isVisible&quot;, &quot;Null is not allowed to model the visibility of a UI component!&quot;);</span>
+<span class="fc" id="L130">        _onShow( isVisible, v -&gt; getComponent().setVisible(v) );</span>
+<span class="fc" id="L131">        return isVisibleIf( isVisible.orElseThrow() );</span>
+    }
+
+    /**
+     *  This is the inverse of {@link #isVisibleIf(Val)}.
+     *  Use this to make the wrapped UI component dynamically invisible or visible. &lt;br&gt;
+     * @param isVisible The truth value determining if the UI component should be visible or not wrapped in a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isVisibleIfNot( Val&lt;Boolean&gt; isVisible ) {
+<span class="fc" id="L141">        NullUtil.nullArgCheck(isVisible, &quot;isVisible&quot;, Val.class);</span>
+<span class="fc" id="L142">        NullUtil.nullPropertyCheck(isVisible, &quot;isVisible&quot;, &quot;Null is not allowed to model the visibility of a UI component! A boolean should only be true or false!&quot;);</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">        _onShow( isVisible, v -&gt; getComponent().setVisible(!v) );</span>
+<span class="pc bpc" id="L144" title="1 of 2 branches missed.">        return isVisibleIf( !isVisible.orElseThrow() );</span>
+    }
+
+    /**
+     *  Use this to make the wrapped UI component dynamically visible or invisible,
+     *  based on the equality between the supplied enum value and enum property. &lt;br&gt;
+     * &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component visible.
+     * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component visible.
+     * @param &lt;E&gt; The enum type.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final &lt;E extends Enum&lt;E&gt;&gt; I isVisibleIf( E enumValue, Val&lt;E&gt; enumProperty ) {
+<span class="fc" id="L158">        NullUtil.nullArgCheck(enumValue, &quot;enumValue&quot;, Enum.class);</span>
+<span class="fc" id="L159">        NullUtil.nullArgCheck(enumProperty, &quot;enumProperty&quot;, Val.class);</span>
+<span class="fc" id="L160">        NullUtil.nullPropertyCheck(enumProperty, &quot;enumProperty&quot;, &quot;Null is not allowed to model the visibility of a UI component!&quot;);</span>
+<span class="pc bpc" id="L161" title="1 of 2 branches missed.">        _onShow( enumProperty, v -&gt; getComponent().setVisible( v == enumValue ) );</span>
+<span class="pc bpc" id="L162" title="1 of 2 branches missed.">        return isVisibleIf( enumValue == enumProperty.orElseThrow() );</span>
+    }
+
+    /**
+     *  This is the inverse of {@link #isVisibleIf(Enum, Val)}.
+     *  Use this to make the wrapped UI component dynamically invisible or visible,
+     *  based on the equality between the supplied enum value and enum property. &lt;br&gt;
+     * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component invisible.
+     * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component invisible.
+     * @param &lt;E&gt; The enum type for both the supplied enum value and enum property.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final &lt;E extends Enum&lt;E&gt;&gt; I isVisibleIfNot( E enumValue, Val&lt;E&gt; enumProperty ) {
+<span class="fc" id="L175">        NullUtil.nullArgCheck(enumValue, &quot;enumValue&quot;, Enum.class);</span>
+<span class="fc" id="L176">        NullUtil.nullArgCheck(enumProperty, &quot;enumProperty&quot;, Val.class);</span>
+<span class="fc" id="L177">        NullUtil.nullPropertyCheck(enumProperty, &quot;enumProperty&quot;, &quot;Null is not allowed to model the visibility of a UI component!&quot;);</span>
+<span class="pc bpc" id="L178" title="1 of 2 branches missed.">        _onShow( enumProperty, v -&gt; getComponent().setVisible( v != enumValue ) );</span>
+<span class="pc bpc" id="L179" title="1 of 2 branches missed.">        return isVisibleIf( enumValue != enumProperty.orElseThrow() );</span>
+    }
+
+    /**
+     *  Use this to enable or disable the wrapped UI component.
+     *
+     * @param isEnabled The truth value determining if the UI component should be enabled or not.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isEnabledIf( boolean isEnabled ) {
+<span class="fc" id="L189">        _setEnabled( isEnabled );</span>
+<span class="fc" id="L190">        return _this();</span>
+    }
+
+    /**
+     *  This is the inverse of {@link #isEnabledIf(boolean)}.
+     *  Use this to disable or enable the wrapped UI component.
+     *
+     * @param isEnabled The truth value determining if the UI component should be enabled or not.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isEnabledIfNot( boolean isEnabled ) {
+<span class="nc bnc" id="L201" title="All 2 branches missed.">        _setEnabled( !isEnabled );</span>
+<span class="nc" id="L202">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically enable or disable the wrapped UI component.
+     *
+     * @param isEnabled The truth value determining if the UI component should be enabled or not wrapped in a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isEnabledIf( Val&lt;Boolean&gt; isEnabled ) {
+<span class="fc" id="L212">        NullUtil.nullArgCheck(isEnabled, &quot;isEnabled&quot;, Val.class);</span>
+<span class="fc" id="L213">        NullUtil.nullPropertyCheck(isEnabled, &quot;isEnabled&quot;, &quot;Null value for isEnabled is not allowed!&quot;);</span>
+<span class="fc" id="L214">        _onShow( isEnabled, v -&gt; _setEnabled(v) );</span>
+<span class="fc" id="L215">        return isEnabledIf( isEnabled.orElseThrow() );</span>
+    }
+
+    /**
+     *  This is the inverse of {@link #isEnabledIf(Val)}.
+     *  Use this to dynamically disable or enable the wrapped UI component.
+     *
+     * @param isEnabled The truth value determining if the UI component should be enabled or not wrapped in a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isEnabledIfNot( Val&lt;Boolean&gt; isEnabled ) {
+<span class="fc" id="L226">        NullUtil.nullArgCheck(isEnabled, &quot;isEnabled&quot;, Val.class);</span>
+<span class="fc" id="L227">        NullUtil.nullPropertyCheck(isEnabled, &quot;isEnabled&quot;, &quot;Null value for isEnabled is not allowed!&quot;);</span>
+<span class="pc bnc" id="L228" title="All 2 branches missed.">        _onShow( isEnabled, v -&gt; _setEnabled(!v) );</span>
+<span class="pc bpc" id="L229" title="1 of 2 branches missed.">        return isEnabledIf( !isEnabled.orElseThrow() );</span>
+    }
+
+    /**
+     *  Use this to make the wrapped UI component dynamically enabled or disabled,
+     *  based on the equality between the supplied enum value and enum property. &lt;br&gt;
+     * &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component enabled.
+     * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component enabled.
+     * @param &lt;E&gt; The enum type for both the supplied enum value and enum property.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final &lt;E extends Enum&lt;E&gt;&gt; I isEnabledIf( E enumValue, Val&lt;E&gt; enumProperty ) {
+<span class="fc" id="L243">        NullUtil.nullArgCheck(enumValue, &quot;enumValue&quot;, Enum.class);</span>
+<span class="fc" id="L244">        NullUtil.nullArgCheck(enumProperty, &quot;enumProperty&quot;, Val.class);</span>
+<span class="fc" id="L245">        NullUtil.nullPropertyCheck(enumProperty, &quot;enumProperty&quot;, &quot;The enumProperty may not have null values!&quot;);</span>
+<span class="pc bpc" id="L246" title="1 of 2 branches missed.">        _onShow( enumProperty, v -&gt; _setEnabled( v == enumValue ) );</span>
+<span class="pc bpc" id="L247" title="1 of 2 branches missed.">        return isEnabledIf( enumValue == enumProperty.orElseThrow() );</span>
+    }
+
+    /**
+     *  This is the inverse of {@link #isEnabledIf(Enum, Val)}.
+     *  Use this to make the wrapped UI component dynamically disabled or enabled,
+     *  based on the equality between the supplied enum value and enum property. &lt;br&gt;
+     * &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component disabled.
+     * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component disabled.
+     * @param &lt;E&gt; The enum type for both the supplied enum value and enum property.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final &lt;E extends Enum&lt;E&gt;&gt; I isEnabledIfNot( E enumValue, Val&lt;E&gt; enumProperty ) {
+<span class="fc" id="L262">        NullUtil.nullArgCheck(enumValue, &quot;enumValue&quot;, Enum.class);</span>
+<span class="fc" id="L263">        NullUtil.nullArgCheck(enumProperty, &quot;enumProperty&quot;, Val.class);</span>
+<span class="fc" id="L264">        NullUtil.nullPropertyCheck(enumProperty, &quot;enumProperty&quot;, &quot;The enumProperty may not have null values!&quot;);</span>
+<span class="pc bpc" id="L265" title="1 of 2 branches missed.">        _onShow( enumProperty, v -&gt; _setEnabled( v != enumValue ) );</span>
+<span class="pc bpc" id="L266" title="1 of 2 branches missed.">        return isEnabledIf( enumValue != enumProperty.orElseThrow() );</span>
+    }
+
+<span class="fc" id="L269">    protected void _setEnabled( boolean isEnabled ) { getComponent().setEnabled( isEnabled ); }</span>
+
+    /**
+     *  Use this to make the wrapped UI component grab the input focus.
+     *  @return This very instance, which enables builder-style method chaining.
+     */
+    public final I makeFocused() {
+<span class="fc" id="L276">        UI.runLater(() -&gt; {</span>
+<span class="fc" id="L277">            getComponent().grabFocus();</span>
+            // We do this later because in this point in time the UI is probably not
+            // yet fully built (swing-tree is using the builder-pattern).
+<span class="fc" id="L280">        });</span>
+<span class="fc" id="L281">        return _this();</span>
+    }
+
+    /**
+     *  Use this to make the wrapped UI component focusable.
+     *  @param isFocusable The truth value determining if the UI component should be focusable or not.
+     *  @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isFocusableIf( boolean isFocusable ) {
+<span class="fc" id="L290">        getComponent().setFocusable( isFocusable );</span>
+<span class="fc" id="L291">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically make the wrapped UI component focusable.
+     *  This is useful if you want to make a component focusable only if a certain condition is met.
+     *  &lt;br&gt;
+     *  &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     *  @param isFocusable The truth value determining if the UI component should be focusable or not wrapped in a {@link Val}.
+     *  @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isFocusableIf( Val&lt;Boolean&gt; isFocusable ) {
+<span class="fc" id="L304">        NullUtil.nullArgCheck(isFocusable, &quot;isFocusable&quot;, Val.class);</span>
+<span class="fc" id="L305">        NullUtil.nullPropertyCheck(isFocusable, &quot;isFocusable&quot;, &quot;Null value for isFocusable is not allowed!&quot;);</span>
+<span class="fc" id="L306">        _onShow( isFocusable, v -&gt; isFocusableIf(v) );</span>
+<span class="fc" id="L307">        this.isFocusableIf( isFocusable.orElseThrow() );</span>
+<span class="fc" id="L308">        return _this();</span>
+    }
+
+    /**
+     *  Use this to make the wrapped UI component focusable if a certain condition is not met.
+     *  @param notFocusable The truth value determining if the UI component should be focusable or not.
+     *                     If {@code false}, the component will be focusable.
+     *  @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isFocusableIfNot( boolean notFocusable ) {
+<span class="nc bnc" id="L318" title="All 2 branches missed.">        getComponent().setFocusable( !notFocusable );</span>
+<span class="nc" id="L319">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically make the wrapped UI component focusable.
+     *  This is useful if you want to make a component focusable only if a certain condition is met.
+     *  &lt;br&gt;
+     *  &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     *  @param isFocusable The truth value determining if the UI component should be focusable or not, wrapped in a {@link Val}.
+     *  @return This very instance, which enables builder-style method chaining.
+     *  @throws IllegalArgumentException if the supplied {@code isFocusable} is {@code null}.
+     */
+    public final I isFocusableIfNot( Val&lt;Boolean&gt; isFocusable ) {
+<span class="fc" id="L333">        NullUtil.nullArgCheck(isFocusable, &quot;isFocusable&quot;, Val.class);</span>
+<span class="fc" id="L334">        NullUtil.nullPropertyCheck(isFocusable, &quot;isFocusable&quot;, &quot;Null value for isFocusable is not allowed!&quot;);</span>
+<span class="pc bpc" id="L335" title="1 of 2 branches missed.">        _onShow( isFocusable, v -&gt; isFocusableIf(!v) );</span>
+<span class="pc bpc" id="L336" title="1 of 2 branches missed.">        this.isFocusableIf( !isFocusable.orElseThrow() );</span>
+<span class="fc" id="L337">        return _this();</span>
+    }
+
+    /**
+     *  Use this to make the wrapped UI component dynamically focusable or non-focusable
+     *  based on the equality between the supplied enum value and enum property. &lt;br&gt;
+     *  &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     *  @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component focusable.
+     *  @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component focusable.
+     *  @param &lt;E&gt; The enum type for both the supplied enum value and enum property.
+     *  @return This very instance, which enables builder-style method chaining.
+     *  @throws IllegalArgumentException if the supplied {@code enumValue} or {@code enumProperty} is {@code null}.
+     */
+    public final &lt;E extends Enum&lt;E&gt;&gt; I isFocusableIf( E enumValue, Val&lt;E&gt; enumProperty ) {
+<span class="fc" id="L352">        NullUtil.nullArgCheck(enumValue, &quot;enumValue&quot;, Enum.class);</span>
+<span class="fc" id="L353">        NullUtil.nullArgCheck(enumProperty, &quot;enumProperty&quot;, Val.class);</span>
+<span class="fc" id="L354">        NullUtil.nullPropertyCheck(enumProperty, &quot;enumProperty&quot;, &quot;The enumProperty may not have null values!&quot;);</span>
+<span class="pc bpc" id="L355" title="1 of 2 branches missed.">        _onShow( enumProperty, v -&gt; isFocusableIf( v == enumValue ) );</span>
+<span class="pc bpc" id="L356" title="1 of 2 branches missed.">        return isFocusableIf( enumValue == enumProperty.orElseThrow() );</span>
+    }
+
+    /**
+     *  This is the inverse of {@link #isFocusableIf(Enum, Val)}.
+     *  Use this to make the wrapped UI component dynamically focusable or non-focusable
+     *  based on the equality between the supplied enum value and enum property. &lt;br&gt;
+     *  &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     *  @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component non-focusable.
+     *  @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component non-focusable.
+     *  @param &lt;E&gt; The enum type for both the supplied enum value and enum property.
+     *  @return This very instance, which enables builder-style method chaining.
+     *  @throws IllegalArgumentException if the supplied {@code enumValue} or {@code enumProperty} is {@code null}.
+     */
+    public final &lt;E extends Enum&lt;E&gt;&gt; I isFocusableIfNot( E enumValue, Val&lt;E&gt; enumProperty ) {
+<span class="fc" id="L372">        NullUtil.nullArgCheck(enumValue, &quot;enumValue&quot;, Enum.class);</span>
+<span class="fc" id="L373">        NullUtil.nullArgCheck(enumProperty, &quot;enumProperty&quot;, Val.class);</span>
+<span class="fc" id="L374">        NullUtil.nullPropertyCheck(enumProperty, &quot;enumProperty&quot;, &quot;The enumProperty may not have null values!&quot;);</span>
+<span class="pc bpc" id="L375" title="1 of 2 branches missed.">        _onShow( enumProperty, v -&gt; isFocusableIf( v != enumValue ) );</span>
+<span class="pc bpc" id="L376" title="1 of 2 branches missed.">        return isFocusableIf( enumValue != enumProperty.orElseThrow() );</span>
+    }
+
+
+    /**
+     *  Use this to make the wrapped UI component opaque.
+     *  This is the inverse of {@link #makeNonOpaque()}.
+     *
+     *  @return This very instance, which enables builder-style method chaining.
+     */
+    public final I makeOpaque() {
+<span class="nc" id="L387">        getComponent().setOpaque( true );</span>
+<span class="nc" id="L388">        return _this();</span>
+    }
+
+    /**
+     *  Use this to make the wrapped UI component transparent.
+     *  This is the inverse of {@link #makeOpaque()}.
+     *
+     *  @return This very instance, which enables builder-style method chaining.
+     */
+    public final I makeNonOpaque() {
+<span class="fc" id="L398">        getComponent().setOpaque( false );</span>
+<span class="fc" id="L399">        return _this();</span>
+    }
+
+    /**
+     *  Use this to make the wrapped UI component opaque.
+     *  @param isOpaque The truth value determining if the UI component should be opaque or not.
+     *  @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isOpaqueIf( boolean isOpaque ) {
+<span class="nc" id="L408">        getComponent().setOpaque( isOpaque );</span>
+<span class="nc" id="L409">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically make the wrapped UI component opaque.
+     *  This is useful if you want to make a component opaque only if a certain condition is met.
+     *  &lt;br&gt;
+     *  &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     *  @param isOpaque The truth value determining if the UI component should be opaque or not wrapped in a {@link Val}.
+     *  @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isOpaqueIf( Val&lt;Boolean&gt; isOpaque ) {
+<span class="nc" id="L422">        NullUtil.nullArgCheck( isOpaque, &quot;isOpaque&quot;, Val.class );</span>
+<span class="nc" id="L423">        NullUtil.nullPropertyCheck(isOpaque, &quot;isOpaque&quot;, &quot;Null value for isOpaque is not allowed! A boolean should only have the values true or false!&quot;);</span>
+<span class="nc" id="L424">        _onShow( isOpaque, v -&gt; isOpaqueIf(v) );</span>
+<span class="nc" id="L425">        this.isOpaqueIf( isOpaque.orElseThrow() );</span>
+<span class="nc" id="L426">        return _this();</span>
+    }
+
+    /**
+     *  Use this to make the wrapped UI component opaque if the given condition is not met.
+     *  @param notOpaque The truth value determining if the UI component should be opaque or not, where false means opaque.
+     *  @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isOpaqueIfNot( boolean notOpaque ) {
+<span class="nc bnc" id="L435" title="All 2 branches missed.">        getComponent().setOpaque( !notOpaque );</span>
+<span class="nc" id="L436">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically make the wrapped UI component opaque if the boolean item of the given {@link Val} is false.
+     *  This is useful if you want to make a component opaque only if a certain condition is not met.
+     *  &lt;br&gt;
+     *  &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     *  @param notOpaque The truth value determining if the UI component should be opaque or not, wrapped in a {@link Val}, where false means opaque.
+     *  @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isOpaqueIfNot( Val&lt;Boolean&gt; notOpaque ) {
+<span class="nc" id="L449">        NullUtil.nullArgCheck( notOpaque, &quot;notOpaque&quot;, Val.class );</span>
+<span class="nc" id="L450">        NullUtil.nullPropertyCheck(notOpaque, &quot;notOpaque&quot;, &quot;Null value for isOpaque is not allowed! A boolean should only have the values true or false!&quot;);</span>
+<span class="nc bnc" id="L451" title="All 2 branches missed.">        _onShow( notOpaque, v -&gt; isOpaqueIf(!v) );</span>
+<span class="nc bnc" id="L452" title="All 2 branches missed.">        this.isOpaqueIf( !notOpaque.orElseThrow() );</span>
+<span class="nc" id="L453">        return _this();</span>
+    }
+
+    /**
+     *  This allows you to register validation logic for the wrapped UI component.
+     *  Although the delegate exposed to the {@link UIVerifier} lambda
+     *  indirectly exposes you to the UIs state, you should not access the UI directly
+     *  from within the lambda, but modify the properties inside your view model instead.
+     *
+     * @param verifier The validation logic provided by your view model.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I isValidIf( UIVerifier&lt;C&gt; verifier ) {
+<span class="fc" id="L466">        getComponent().setInputVerifier(new InputVerifier() {</span>
+            @Override
+            public boolean verify( JComponent input ) {
+<span class="nc" id="L469">                return verifier.isValid(</span>
+                        new SimpleDelegate&lt;&gt;(
+<span class="nc" id="L471">                                getComponent(),</span>
+<span class="nc" id="L472">                                new ComponentEvent(getComponent(), 0),</span>
+<span class="nc" id="L473">                                () -&gt; getSiblinghood()</span>
+                            )
+                        );
+                /*
+                    We expect the user to model the state of the UI components
+                    using properties in the view model.
+                 */
+            }
+        });
+<span class="fc" id="L482">        return _this();</span>
+    }
+
+    /**
+     * Adds {@link String} key/value &quot;client property&quot; pairs to the wrapped component.
+     * &lt;p&gt;
+     * The arguments will be passed to {@link JComponent#putClientProperty(Object, Object)}
+     * which accesses
+     * a small per-instance hashtable. Callers can use get/putClientProperty
+     * to annotate components that were created by another module.
+     * For example, a
+     * layout manager might store per child constraints this way. &lt;br&gt;
+     * This is in essence a more convenient way than the alternative usage pattern involving
+     * the {@link #peek(Peeker)} method to peek into the builder's component like so: &lt;br&gt;
+     * &lt;pre&gt;{@code
+     *     UI.button()
+     *     .peek( button -&gt; button.putClientProperty(&quot;key&quot;, &quot;value&quot;) );
+     * }&lt;/pre&gt;
+     *
+     * @param key the new client property key which may be used for styles or layout managers.
+     * @param value the new client property value.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withProperty( String key, String value ) {
+<span class="fc" id="L506">        getComponent().putClientProperty(key, value);</span>
+<span class="fc" id="L507">        return _this();</span>
+    }
+
+    /**
+     *  Use this to attach a border to the wrapped component.
+     *
+     * @param border The {@link Border} which should be set for the wrapped component.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBorder( Border border ) {
+<span class="fc" id="L517">        Objects.requireNonNull(border, &quot;Null value for border is not allowed! Use an empty border instead!&quot;);</span>
+<span class="fc" id="L518">        getComponent().setBorder( border );</span>
+<span class="fc" id="L519">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically attach a border to the wrapped component. &lt;br&gt;
+     *  &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param border The {@link Border} which should be set for the wrapped component wrapped in a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBorder( Val&lt;Border&gt; border ) {
+<span class="fc" id="L530">        NullUtil.nullArgCheck(border, &quot;border&quot;, Val.class);</span>
+<span class="fc" id="L531">        NullUtil.nullPropertyCheck(border, &quot;border&quot;, &quot;Null value for border is not allowed! Use an empty border instead!&quot;);</span>
+<span class="pc" id="L532">        _onShow( border, v -&gt; getComponent().setBorder(v) );</span>
+<span class="fc" id="L533">        return this.withBorder( border.orElseNull() );</span>
+    }
+
+
+    /**
+     *  Use this to define an empty {@link Border} with the provided insets.
+     *
+     * @param top The top inset.
+     * @param left The left inset.
+     * @param bottom The bottom inset.
+     * @param right The right inset.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorder( int top, int left, int bottom, int right ) {
+<span class="nc" id="L547">        getComponent().setBorder(BorderFactory.createEmptyBorder(top, left, bottom, right));</span>
+<span class="nc" id="L548">        return _this();</span>
+    }
+
+    /**
+     *  Use this to define a titled empty {@link Border} with the provided insets.
+     *
+     * @param title The title of the border.
+     * @param top The top inset.
+     * @param left The left inset.
+     * @param bottom The bottom inset.
+     * @param right The right inset.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorderTitled( String title, int top, int left, int bottom, int right ) {
+<span class="fc" id="L562">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="fc" id="L563">        getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(top, left, bottom, right), title));</span>
+<span class="fc" id="L564">        return _this();</span>
+    }
+
+    /**
+     *  Use this to define a titled empty {@link Border} with the provided insets
+     *  and where the title is bound to a {@link Val}.
+     *
+     * @param title The title of the border wrapped in a {@link Val},
+     *              which will update the border title dynamically when changed.
+     * @param top The top inset.
+     * @param left The left inset.
+     * @param bottom The bottom inset.
+     * @param right The right inset.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorderTitled( Val&lt;String&gt; title, int top, int left, int bottom, int right ) {
+<span class="nc" id="L580">        NullUtil.nullArgCheck( title, &quot;title&quot;, Val.class );</span>
+<span class="nc" id="L581">        NullUtil.nullPropertyCheck( title, &quot;title&quot;, &quot;Null value for title is not allowed! Use an empty string instead!&quot; );</span>
+<span class="nc" id="L582">        _onShow( title, v -&gt; getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(top, left, bottom, right), v)) );</span>
+<span class="nc" id="L583">        return this.withEmptyBorderTitled( title.orElseNull(), top, left, bottom, right );</span>
+    }
+
+    /**
+     *  Use this to define an empty {@link Border} with the provided insets.
+     *
+     * @param topBottom The top and bottom insets.
+     * @param leftRight The left and right insets.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorder( int topBottom, int leftRight ) {
+<span class="nc" id="L594">        return withEmptyBorder(topBottom, leftRight, topBottom, leftRight);</span>
+    }
+
+    /**
+     *  Use this to define a titled empty {@link Border} with the provided insets.
+     *
+     * @param title The title of the border.
+     * @param topBottom The top and bottom insets.
+     * @param leftRight The left and right insets.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorderTitled( String title, int topBottom, int leftRight ) {
+<span class="nc" id="L606">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="nc" id="L607">        return withEmptyBorderTitled( title, topBottom, leftRight, topBottom, leftRight );</span>
+    }
+
+    /**
+     *  Use this to define a titled empty {@link Border} with the provided insets
+     *  and where the title is bound to a {@link Val}.
+     *
+     * @param title The title of the border wrapped in a {@link Val}. When the value changes, the border title will be updated.
+     * @param topBottom The top and bottom insets.
+     * @param leftRight The left and right insets.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorderTitled( Val&lt;String&gt; title, int topBottom, int leftRight ) {
+<span class="nc" id="L620">        NullUtil.nullArgCheck( title, &quot;title&quot;, Val.class );</span>
+<span class="nc" id="L621">        NullUtil.nullPropertyCheck(title, &quot;title&quot;, &quot;Null value for title is not allowed! Use an empty string instead!&quot;);</span>
+<span class="nc" id="L622">        _onShow( title, v -&gt; getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(topBottom, leftRight, topBottom, leftRight), v)) );</span>
+<span class="nc" id="L623">        return this.withEmptyBorderTitled( title.orElseNull(), topBottom, leftRight );</span>
+    }
+
+    /**
+     *  Use this to define an empty {@link Border} with the provided insets.
+     *
+     * @param all The insets for all sides.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+<span class="nc" id="L632">    public final I withEmptyBorder( int all ) { return withEmptyBorder(all, all, all, all); }</span>
+
+    /**
+     *  Creates an empty and un-titled {@link Border} with the provided insets
+     *  property bound to all insets of said border.
+     *  &lt;p&gt;
+     *  An empty and un-titled {@link Border} is basically just a way to add some
+     *  space around the component. It is not visible by default.
+     *
+     * @param all The insets for all sides.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorder( Val&lt;Integer&gt; all ) {
+<span class="nc" id="L645">        NullUtil.nullArgCheck( all, &quot;all&quot;, Val.class );</span>
+<span class="nc" id="L646">        NullUtil.nullPropertyCheck(all, &quot;all&quot;, &quot;Null value for all is not allowed! Use an empty border instead!&quot;);</span>
+<span class="nc" id="L647">        _onShow( all, v -&gt; getComponent().setBorder(BorderFactory.createEmptyBorder(v, v, v, v)) );</span>
+<span class="nc" id="L648">        return this.withEmptyBorder( all.get() );</span>
+    }
+
+            /**
+             *  Use this to define a titled empty {@link Border} with the provided insets.
+             *
+             * @param title The title of the border.
+             * @param all The insets for all sides.
+             * @return This very instance, which enables builder-style method chaining.
+             */
+    public final I withEmptyBorderTitled( String title, int all ) {
+<span class="fc" id="L659">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="fc" id="L660">        return withEmptyBorderTitled(title, all, all, all, all);</span>
+    }
+
+    /**
+     *  Creates a titled empty border bound to a {@link String} property and the provided insets.
+     * @param title The title of the border in the form of a {@link Val} property.
+     * @param all The insets size for all sides.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorderTitled( Val&lt;String&gt; title, int all ) {
+<span class="nc" id="L670">        NullUtil.nullArgCheck( title, &quot;title&quot;, Val.class );</span>
+<span class="nc" id="L671">        NullUtil.nullPropertyCheck(title, &quot;title&quot;, &quot;Null value for title is not allowed! Use an empty string instead!&quot;);</span>
+<span class="nc" id="L672">        _onShow( title, v -&gt;</span>
+<span class="nc" id="L673">            getComponent().setBorder(</span>
+<span class="nc" id="L674">                BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(all, all, all, all), v)</span>
+            )
+        );
+<span class="nc" id="L677">        return this.withEmptyBorderTitled( title.orElseNull(), all );</span>
+    }
+
+    /**
+     *  Creates a titled empty border bound to a {@link String} property.
+     * @param title The title of the border in the form of a {@link Val} property.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorderTitled( Val&lt;String&gt; title ) {
+<span class="nc" id="L686">        return withEmptyBorderTitled(title, 5);</span>
+    }
+
+    /**
+     *  Use this to define a line {@link Border} with the provided color and insets.
+     *
+     * @param color The color of the line border.
+     * @param thickness The thickness of the line border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLineBorder( Color color, int thickness ) {
+<span class="fc" id="L697">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="fc" id="L698">        getComponent().setBorder(BorderFactory.createLineBorder(color, thickness));</span>
+<span class="fc" id="L699">        return _this();</span>
+    }
+
+    /**
+     *  Creates a line border bound to a {@link Color} property.
+     *  When the color changes, the border will be updated with the new color.
+     * @param color The color of the border in the form of a {@link Val} property.
+     * @param thickness The thickness of the line border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLineBorder( Val&lt;Color&gt; color, int thickness ) {
+<span class="nc" id="L710">        NullUtil.nullArgCheck( color, &quot;color&quot;, Val.class );</span>
+<span class="nc" id="L711">        NullUtil.nullPropertyCheck(color, &quot;color&quot;, &quot;Null value for color is not allowed! Use a transparent color or other default color instead!&quot;);</span>
+<span class="nc" id="L712">        _onShow( color, v -&gt; getComponent().setBorder(BorderFactory.createLineBorder(v, thickness)) );</span>
+<span class="nc" id="L713">        return this.withLineBorder( color.get(), thickness );</span>
+    }
+
+    /**
+     *  Use this to define a titled line {@link Border} with the provided color and insets.
+     *
+     * @param title The title of the border.
+     * @param color The color of the line border.
+     * @param thickness The thickness of the line border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLineBorderTitled( String title, Color color, int thickness ) {
+<span class="nc" id="L725">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="nc" id="L726">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L727">        getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color, thickness), title));</span>
+<span class="nc" id="L728">        return _this();</span>
+    }
+
+    /**
+     * Creates a titled line border bound to a {@link String} property.
+     * @param title The title property of the border which will update the border when the value changes.
+     * @param color The color of the border.
+     * @param thickness The thickness of the line border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLineBorderTitled( Val&lt;String&gt; title, Color color, int thickness ) {
+<span class="nc" id="L739">        NullUtil.nullArgCheck( title, &quot;title&quot;, Val.class );</span>
+<span class="nc" id="L740">        NullUtil.nullPropertyCheck(title, &quot;title&quot;, &quot;Null value for title is not allowed! Use an empty string instead!&quot;);</span>
+<span class="nc" id="L741">        _onShow( title, v -&gt;</span>
+<span class="nc" id="L742">            getComponent().setBorder(</span>
+<span class="nc" id="L743">                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color, thickness), v)</span>
+            )
+        );
+<span class="nc" id="L746">        return this.withLineBorderTitled( title.orElseNull(), color, thickness );</span>
+    }
+
+    /**
+     * Creates a titled line border bound to a {@link String} property
+     * and a {@link Color} property.
+     * When any of the properties change, the border will be updated with the new values.
+     *
+     * @param title The title property of the border which will update the border when the value changes.
+     * @param color The color property of the border which will update the border when the value changes.
+     * @param thickness The thickness of the line border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLineBorderTitled( Val&lt;String&gt; title, Val&lt;Color&gt; color, int thickness ) {
+<span class="nc" id="L760">        NullUtil.nullArgCheck( title, &quot;title&quot;, Val.class );</span>
+<span class="nc" id="L761">        NullUtil.nullPropertyCheck(title, &quot;title&quot;, &quot;Null value for title is not allowed! Use an empty string instead!&quot;);</span>
+<span class="nc" id="L762">        NullUtil.nullArgCheck( color, &quot;color&quot;, Val.class );</span>
+<span class="nc" id="L763">        NullUtil.nullPropertyCheck(color, &quot;color&quot;, &quot;Null value for color is not allowed! Use a transparent color or other default color instead!&quot;);</span>
+<span class="nc" id="L764">        _onShow( title, v -&gt;</span>
+<span class="nc" id="L765">            getComponent().setBorder(</span>
+<span class="nc" id="L766">                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color.get(), thickness), v)</span>
+            )
+        );
+<span class="nc" id="L769">        _onShow( color, v -&gt;</span>
+<span class="nc" id="L770">            getComponent().setBorder(</span>
+<span class="nc" id="L771">                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(v, thickness), title.get())</span>
+            )
+        );
+<span class="nc" id="L774">        return this.withLineBorderTitled( title.orElseNull(), color.get(), thickness );</span>
+    }
+
+    /**
+     *  Use this to define a line {@link Border} with the provided color and a default thickness of {@code 1}.
+     *
+     * @param color The color of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLineBorder( Color color ) {
+<span class="nc" id="L784">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L785">        return withLineBorder(color, 1);</span>
+    }
+
+    /**
+     *  Use this to define a titled line {@link Border} with the provided color and a default thickness of {@code 1}.
+     *
+     * @param title The title of the border.
+     * @param color The color of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLineBorderTitled( String title, Color color ) {
+<span class="nc" id="L796">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="nc" id="L797">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L798">        return withLineBorderTitled( title, color, 1 );</span>
+    }
+
+    /**
+     *  Use this to attach a rounded line {@link Border} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param color The color of the border.
+     * @param thickness The thickness of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorder( Color color, int thickness ) {
+<span class="nc" id="L810">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L811">        getComponent().setBorder(BorderFactory.createLineBorder(color, thickness, true));</span>
+<span class="nc" id="L812">        return _this();</span>
+    }
+
+    /**
+     *  Use this to attach a titled rounded line {@link Border} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param title The title of the border.
+     * @param color The color of the border.
+     * @param thickness The thickness of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorderTitled( String title, Color color, int thickness ) {
+<span class="nc" id="L825">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="nc" id="L826">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L827">        getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color, thickness, true), title));</span>
+<span class="nc" id="L828">        return _this();</span>
+    }
+
+    /**
+     *  Creates a titled rounded line {@link Border} with the provided
+     *  color and insets for this {@link JComponent} and binds the border to the provided
+     *  title property.
+     *  When the title property changes, the border will be updated with the new value.
+     *
+     * @param title The title property of the border which will update the border when the value changes.
+     * @param color The color of the border.
+     * @param thickness The thickness of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorderTitled( Val&lt;String&gt; title, Color color, int thickness ) {
+<span class="nc" id="L843">        NullUtil.nullArgCheck( title, &quot;title&quot;, Val.class );</span>
+<span class="nc" id="L844">        NullUtil.nullPropertyCheck(title, &quot;title&quot;, &quot;Null value for title is not allowed! Use an empty string instead!&quot;);</span>
+<span class="nc" id="L845">        _onShow( title, v -&gt;</span>
+<span class="nc" id="L846">            getComponent().setBorder(</span>
+<span class="nc" id="L847">                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color, thickness, true), v)</span>
+            )
+        );
+<span class="nc" id="L850">        return this.withRoundedLineBorderTitled( title.orElseNull(), color, thickness );</span>
+    }
+
+    /**
+     *  Creates a titled rounded line {@link Border} with the provided
+     *  color and insets for this {@link JComponent} and binds the border to the provided
+     *  title and color properties.
+     *  When the title or color properties change, 
+     *  then the border will be updated with the new values.
+     *
+     * @param title The title property of the border which will update the border when the value changes.
+     * @param color The color property of the border which will update the border when the value changes.
+     * @param thickness The thickness of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorderTitled( Val&lt;String&gt; title, Val&lt;Color&gt; color, int thickness ) {
+<span class="nc" id="L866">        NullUtil.nullArgCheck( title, &quot;title&quot;, Val.class );</span>
+<span class="nc" id="L867">        NullUtil.nullPropertyCheck(title, &quot;title&quot;, &quot;Null value for title is not allowed! Use an empty string instead!&quot;);</span>
+<span class="nc" id="L868">        NullUtil.nullArgCheck( color, &quot;color&quot;, Val.class );</span>
+<span class="nc" id="L869">        NullUtil.nullPropertyCheck(color, &quot;color&quot;, &quot;Null value for color is not allowed! Use a transparent color or other default color instead!&quot;);</span>
+<span class="nc" id="L870">        _onShow( title, v -&gt;</span>
+<span class="nc" id="L871">            getComponent().setBorder(</span>
+<span class="nc" id="L872">                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color.get(), thickness, true), v)</span>
+            )
+        );
+<span class="nc" id="L875">        _onShow( color, v -&gt;</span>
+<span class="nc" id="L876">            getComponent().setBorder(</span>
+<span class="nc" id="L877">                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(v, thickness, true), title.get())</span>
+            )
+        );
+<span class="nc" id="L880">        return this.withRoundedLineBorderTitled( title.get(), color.get(), thickness );</span>
+    }
+
+    /**
+     *  Use this to attach a rounded line {@link Border} with the provided
+     *  color and a default thickness of {@code 1} to the {@link JComponent}.
+     *
+     * @param color The color of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorder( Color color ) {
+<span class="nc" id="L891">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L892">        return withRoundedLineBorder(color, 1);</span>
+    }
+
+    /**
+     *  Use this to attach a titled rounded line {@link Border} with the provided
+     *  color property and a custom thickness to the {@link JComponent}.
+     *
+     * @param color The color of the border.
+     * @param thickness The thickness of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorder( Val&lt;Color&gt; color, int thickness ) {
+<span class="nc" id="L904">        NullUtil.nullArgCheck( color, &quot;color&quot;, Val.class );</span>
+<span class="nc" id="L905">        NullUtil.nullPropertyCheck(color, &quot;color&quot;, &quot;Null value for color is not allowed! Use a transparent color or other default color instead!&quot;);</span>
+<span class="nc" id="L906">        _onShow( color, v -&gt;</span>
+<span class="nc" id="L907">            getComponent().setBorder(BorderFactory.createLineBorder(v, thickness, true))</span>
+        );
+<span class="nc" id="L909">        return this.withRoundedLineBorder( color.get(), thickness );</span>
+    }
+
+    /**
+     *  Use this to attach a titled rounded line {@link Border} with the provided
+     *  title, color and a default thickness of {@code 1} to the {@link JComponent}.
+     *
+     * @param title The title of the border.
+     * @param color The color of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorderTitled( String title, Color color ) {
+<span class="nc" id="L921">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="nc" id="L922">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L923">        return withRoundedLineBorderTitled( title, color, 1 );</span>
+    }
+
+    /**
+     *  Use this to attach a titled rounded line {@link Border} with the provided
+     *  title and color to the {@link JComponent}, as well as a default thickness of {@code 1}.
+     *
+     * @param title The title property of the border, which will update the border when the property changes.
+     * @param color The color property of the border, which will update the border when the property changes.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorderTitled( Val&lt;String&gt; title, Val&lt;Color&gt; color ) {
+<span class="nc" id="L935">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="nc" id="L936">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L937">        NullUtil.nullPropertyCheck(title, &quot;title&quot;, &quot;Null value for title is not allowed! Use an empty String instead!&quot;);</span>
+<span class="nc" id="L938">        return withRoundedLineBorderTitled( title, color, 1 );</span>
+    }
+
+    /**
+     *  Use this to attach a rounded black line {@link Border} with
+     *  a thickness of {@code 1} to the {@link JComponent}.
+     *
+     * @return This very instance, which enables builder-style method chaining.
+     */
+<span class="nc" id="L947">    public final I withRoundedLineBorder() { return withRoundedLineBorder(Color.BLACK, 1); }</span>
+
+    /**
+     *  Use this to attach a titled rounded black line {@link Border} with
+     *  a thickness of {@code 1} to the {@link JComponent}.
+     *
+     * @param title The title of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorderTitled( String title ) {
+<span class="nc" id="L957">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="nc" id="L958">        return withRoundedLineBorderTitled( title, Color.BLACK, 1 );</span>
+    }
+
+    /**
+     *  Creates a titled rounded black line {@link Border} with
+     *  a thickness of {@code 1} to the {@link JComponent} and binds it to the provided 
+     *  title property.
+     *  When the property changes, the border will be updated.
+     *
+     * @param title The title property of the border, which will update the border when the property changes.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withRoundedLineBorderTitled( Val&lt;String&gt; title ) {
+<span class="nc" id="L971">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="nc" id="L972">        NullUtil.nullPropertyCheck(title, &quot;title&quot;, &quot;Null value for title is not allowed! Use an empty String instead!&quot;);</span>
+<span class="nc" id="L973">        return withRoundedLineBorderTitled( title, Color.BLACK, 1 );</span>
+    }
+
+    /**
+     *  Use this to attach a {@link javax.swing.border.MatteBorder} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param color The color of the border.
+     * @param top The top inset.
+     * @param left The left inset.
+     * @param bottom The bottom inset.
+     * @param right The right inset.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withMatteBorder( Color color, int top, int left, int bottom, int right ) {
+<span class="nc" id="L988">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L989">        getComponent().setBorder(BorderFactory.createMatteBorder(top, left, bottom, right, color));</span>
+<span class="nc" id="L990">        return _this();</span>
+    }
+
+    /**
+     *  Use this to attach a titled {@link javax.swing.border.MatteBorder} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param title The title of the border.
+     * @param color The color of the border.
+     * @param top The top inset.
+     * @param left The left inset.
+     * @param bottom The bottom inset.
+     * @param right The right inset.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withMatteBorderTitled( String title, Color color, int top, int left, int bottom, int right ) {
+<span class="nc" id="L1006">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="nc" id="L1007">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L1008">        getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createMatteBorder(top, left, bottom, right, color), title));</span>
+<span class="nc" id="L1009">        return _this();</span>
+    }
+
+    /**
+     *  Use this to attach a {@link javax.swing.border.MatteBorder} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param color The color of the border.
+     * @param topBottom The top and bottom insets.
+     * @param leftRight The left and right insets.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withMatteBorder( Color color, int topBottom, int leftRight ) {
+<span class="nc" id="L1022">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L1023">        return withMatteBorder(color, topBottom, leftRight, topBottom, leftRight);</span>
+    }
+
+    /**
+     *  Use this to attach a titled {@link javax.swing.border.MatteBorder} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param title The title of the border.
+     * @param color The color of the border.
+     * @param topBottom The top and bottom insets.
+     * @param leftRight The left and right insets.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withMatteBorderTitled( String title, Color color, int topBottom, int leftRight ) {
+<span class="nc" id="L1037">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="nc" id="L1038">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L1039">        return withMatteBorderTitled(title, color, topBottom, leftRight, topBottom, leftRight);</span>
+    }
+
+    /**
+     *  Use this to attach a {@link javax.swing.border.MatteBorder} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param color The color of the border.
+     * @param all The insets for all sides.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withMatteBorder( Color color, int all ) {
+<span class="nc" id="L1051">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L1052">        return withMatteBorder(color, all, all, all, all);</span>
+    }
+
+    /**
+     *  Use this to attach a titled {@link javax.swing.border.MatteBorder} with the provided
+     *  color and insets to the {@link JComponent}.
+     *
+     * @param title The title of the border.
+     * @param color The color of the border.
+     * @param all The insets for all sides.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withMatteBorderTitled( String title, Color color, int all ) {
+<span class="nc" id="L1065">        NullUtil.nullArgCheck( title, &quot;title&quot;, String.class );</span>
+<span class="nc" id="L1066">        NullUtil.nullArgCheck( color, &quot;color&quot;, Color.class );</span>
+<span class="nc" id="L1067">        return withMatteBorderTitled(title, color, all, all, all, all);</span>
+    }
+
+    /**
+     *  Use this to attach a {@link javax.swing.border.CompoundBorder} with the provided
+     *  borders to the {@link JComponent}.
+     *
+     * @param first The first border.
+     * @param second The second border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withCompoundBorder( Border first, Border second ) {
+<span class="nc" id="L1079">        NullUtil.nullArgCheck( first, &quot;first&quot;, Border.class );</span>
+<span class="nc" id="L1080">        NullUtil.nullArgCheck( second, &quot;second&quot;, Border.class );</span>
+<span class="nc" id="L1081">        getComponent().setBorder(BorderFactory.createCompoundBorder(first, second));</span>
+<span class="nc" id="L1082">        return _this();</span>
+    }
+
+    /**
+     *  Use this to attach a titled {@link javax.swing.border.CompoundBorder} with the
+     *  provided borders to the {@link JComponent}.
+     *
+     * @param title The title of the border.
+     * @param first The first border.
+     * @param second The second border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withCompoundBorderTitled( String title, Border first, Border second ) {
+<span class="nc" id="L1095">        getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createCompoundBorder(first, second), title));</span>
+<span class="nc" id="L1096">        return _this();</span>
+    }
+
+    /**
+     *  Use this to attach a {@link javax.swing.border.TitledBorder} with the provided title.
+     *
+     * @param title The title of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBorderTitled( String title ) {
+<span class="fc" id="L1106">        NullUtil.nullArgCheck(title, &quot;title&quot;, String.class);</span>
+<span class="fc" id="L1107">        getComponent().setBorder(BorderFactory.createTitledBorder(title));</span>
+<span class="fc" id="L1108">        return _this();</span>
+    }
+
+    /**
+     *  Use this to attach a {@link javax.swing.border.TitledBorder} with the
+     *  provided title property dynamically setting the title String.
+     *
+     * @param title The title property for the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBorderTitled( Val&lt;String&gt; title ) {
+<span class="fc" id="L1119">        NullUtil.nullArgCheck(title, &quot;title&quot;, Val.class);</span>
+<span class="fc" id="L1120">        getComponent().setBorder(BorderFactory.createTitledBorder(title.get()));</span>
+<span class="fc" id="L1121">        _onShow( title, t -&gt; {</span>
+<span class="fc" id="L1122">            Border foundBorder = getComponent().getBorder();</span>
+<span class="pc bpc" id="L1123" title="1 of 2 branches missed.">            if ( foundBorder instanceof TitledBorder)</span>
+<span class="fc" id="L1124">                ((TitledBorder)foundBorder).setTitle(t);</span>
+            else
+<span class="nc" id="L1126">                getComponent().setBorder(BorderFactory.createTitledBorder(t));</span>
+<span class="fc" id="L1127">        });</span>
+<span class="fc" id="L1128">        return _this();</span>
+    }
+
+    /**
+     *  Use this set the cursor type which should be displayed
+     *  when hovering over the UI component wrapped by this builder.
+     *  &lt;br&gt;
+     *  Here an example of how to use this method:
+     *  &lt;pre&gt;{@code
+     *      UI.button(&quot;Click me!&quot;).with(UI.Cursor.HAND);
+     *  }&lt;/pre&gt;
+     *
+     * @param type The {@link UI.Cursor} type defined by a simple enum exposed by this API.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I with( UI.Cursor type ) {
+<span class="fc" id="L1144">        getComponent().setCursor( new java.awt.Cursor( type.type ) );</span>
+<span class="fc" id="L1145">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically set the cursor type which should be displayed
+     *  when hovering over the UI component wrapped by this builder. &lt;br&gt;
+     *  &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param type The {@link UI.Cursor} type defined by a simple enum exposed by this API wrapped in a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withCursor( Val&lt;UI.Cursor&gt; type ) {
+<span class="fc" id="L1157">        NullUtil.nullArgCheck( type, &quot;type&quot;, Val.class );</span>
+<span class="fc" id="L1158">        NullUtil.nullPropertyCheck(type, &quot;type&quot;, &quot;Null is not allowed to model a cursor type.&quot;);</span>
+<span class="fc" id="L1159">        _onShow( type, t -&gt; getComponent().setCursor( new java.awt.Cursor( t.type ) ) );</span>
+<span class="fc" id="L1160">        return with( type.orElseThrow() );</span>
+    }
+
+    /**
+     *  Use this to set the cursor type which should be displayed
+     *  when hovering over the UI component wrapped by this builder
+     *  based on boolean property determining if the provided cursor should be set ot not. &lt;br&gt;
+     *  &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param condition The boolean property determining if the provided cursor should be set ot not.
+     * @param type The {@link UI.Cursor} type defined by a simple enum exposed by this API wrapped in a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withCursorIf( Val&lt;Boolean&gt; condition, UI.Cursor type ) {
+<span class="nc" id="L1174">        NullUtil.nullArgCheck( condition, &quot;condition&quot;, Val.class );</span>
+<span class="nc" id="L1175">        NullUtil.nullArgCheck( type, &quot;type&quot;, UI.Cursor.class );</span>
+<span class="nc" id="L1176">        NullUtil.nullPropertyCheck(condition, &quot;condition&quot;, &quot;Null is not allowed to model the cursor selection state.&quot;);</span>
+<span class="nc bnc" id="L1177" title="All 2 branches missed.">        _onShow( condition, c -&gt; getComponent().setCursor( new java.awt.Cursor( c ? type.type : UI.Cursor.DEFAULT.type ) ) );</span>
+<span class="nc bnc" id="L1178" title="All 2 branches missed.">        return with( condition.orElseThrow() ? type : UI.Cursor.DEFAULT );</span>
+    }
+
+    /**
+     *  Use this to dynamically set the cursor type which should be displayed
+     *  when hovering over the UI component wrapped by this builder
+     *  based on boolean property determining if the provided cursor should be set ot not. &lt;br&gt;
+     *  &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param condition The boolean property determining if the provided cursor should be set ot not.
+     * @param type The {@link UI.Cursor} type property defined by a simple enum exposed by this API.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withCursorIf( Val&lt;Boolean&gt; condition, Val&lt;UI.Cursor&gt; type ) {
+<span class="nc" id="L1192">        NullUtil.nullArgCheck( condition, &quot;condition&quot;, Val.class );</span>
+<span class="nc" id="L1193">        NullUtil.nullArgCheck( type, &quot;type&quot;, Val.class );</span>
+<span class="nc" id="L1194">        NullUtil.nullPropertyCheck(condition, &quot;condition&quot;, &quot;Null is not allowed to model the cursor selection state.&quot;);</span>
+<span class="nc" id="L1195">        NullUtil.nullPropertyCheck(type, &quot;type&quot;, &quot;Null is not allowed to model a cursor type.&quot;);</span>
+<span class="nc" id="L1196">        Cursor[] baseCursor = new Cursor[1];</span>
+<span class="nc" id="L1197">        _onShow( condition, c -&gt; type.fireSet() );</span>
+<span class="nc" id="L1198">        _onShow( type, c -&gt;{</span>
+<span class="nc bnc" id="L1199" title="All 2 branches missed.">            if (baseCursor[0] == null) baseCursor[0] = getComponent().getCursor();</span>
+<span class="nc bnc" id="L1200" title="All 2 branches missed.">            getComponent().setCursor( new java.awt.Cursor( condition.get() ? c.type : baseCursor[0].getType() ) );</span>
+<span class="nc" id="L1201">        });</span>
+<span class="nc bnc" id="L1202" title="All 2 branches missed.">        return with( condition.orElseThrow() ? type.orElseThrow() : UI.Cursor.DEFAULT );</span>
+    }
+
+    /**
+     *  Use this to set the {@link LayoutManager} of the component wrapped by this builder. &lt;br&gt;
+     *  This is in essence a more convenient way than the alternative usage pattern involving
+     *  the {@link #peek(Peeker)} method to peek into the builder's component like so: &lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *      UI.panel()
+     *      .peek( panel -&gt; panel.setLayout(new FavouriteLayoutManager()) );
+     *  }&lt;/pre&gt;
+     *
+     * @param layout The {@link LayoutManager} which should be supplied to the wrapped component.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLayout( LayoutManager layout ) {
+<span class="pc bpc" id="L1218" title="1 of 2 branches missed.">        if ( _migAlreadySet )</span>
+<span class="nc" id="L1219">            throw new IllegalArgumentException(&quot;The mig layout has already been specified for this component!&quot;);</span>
+<span class="fc" id="L1220">        getComponent().setLayout(layout);</span>
+<span class="fc" id="L1221">        return _this();</span>
+    }
+
+    /**
+     *  Use this to set a {@link FlowLayout} for the component wrapped by this builder. &lt;br&gt;
+     *  This is in essence a more convenient way than the alternative usage pattern involving
+     *  the {@link #peek(Peeker)} method to peek into the builder's component like so: &lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *      UI.panel()
+     *      .peek( panel -&gt; panel.setLayout(new FlowLayout()) );
+     *  }&lt;/pre&gt;
+     *
+     * @return This very instance, which enables builder-style method chaining.
+     */
+<span class="fc" id="L1235">    public final I withFlowLayout() { return this.withLayout(new FlowLayout()); }</span>
+
+    /**
+     *  Use this to set a {@link GridLayout} for the component wrapped by this builder. &lt;br&gt;
+     *  This is in essence a more convenient way than the alternative usage pattern involving
+     *  the {@link #peek(Peeker)} method to peek into the builder's component like so: &lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *      UI.panel()
+     *      .peek( panel -&gt; panel.setLayout(new GridLayout()) );
+     *  }&lt;/pre&gt;
+     *
+     * @return This very instance, which enables builder-style method chaining.
+     */
+<span class="nc" id="L1248">    public final I withGridLayout() { return this.withLayout(new GridLayout()); }</span>
+
+    /**
+     *  Use this to set a new {@link GridBagLayout} for the component wrapped by this builder. &lt;br&gt;
+     *  This is in essence a more convenient way than the alternative usage pattern involving
+     *  the {@link #peek(Peeker)} method to peek into the builder's component like so: &lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *      UI.panel()
+     *      .peek( panel -&gt; panel.setLayout(new GridBagLayout()) );
+     *  }&lt;/pre&gt;
+     *  ...or specifying the layout manager like so: &lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *    UI.panel().withLayout( new GridBagLayout() );
+     *  }&lt;/pre&gt;
+     *
+     * @return This very instance, which enables builder-style method chaining.
+     */
+<span class="nc" id="L1265">    public final I withGridBagLayout() { return this.withLayout(new GridBagLayout()); }</span>
+
+    /**
+     *  Use this to set a {@link GridLayout} for the component wrapped by this builder. &lt;br&gt;
+     *  This is in essence a more convenient way than the alternative usage pattern involving
+     *  the {@link #peek(Peeker)} method to peek into the builder's component like so: &lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *      UI.panel()
+     *      .peek( panel -&gt; panel.setLayout(new GridLayout(rows, cols)) );
+     *  }&lt;/pre&gt;
+     *
+     * @param rows The number of rows in the grid.
+     * @param cols The number of columns in the grid.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+<span class="nc" id="L1280">    public final I withGridLayout( int rows, int cols ) { return this.withLayout(new GridLayout(rows, cols)); }</span>
+
+    /**
+     *  Passes the provided string to the layout manager of the wrapped component.
+     *  By default, a {@link MigLayout} is used for the component wrapped by this UI builder.
+     *
+     * @param attr A string defining the layout (usually mig layout).
+     * @return This very instance, which enables builder-style method chaining.
+     */
+<span class="fc" id="L1289">    public final I withLayout( String attr ) { return withLayout(attr, null); }</span>
+
+    /**
+     *  Passes the provided string to the {@link MigLayout} manager of the wrapped component.
+     *
+     * @param attr Essentially an immutable string wrapper defining the mig layout.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+<span class="fc" id="L1297">    public final I withLayout( LayoutAttr attr ) { return withLayout(attr.toString(), null); }</span>
+
+    /**
+     *  This creates a {@link MigLayout} for the component wrapped by this UI builder.
+     *
+     * @param attr The constraints for the layout.
+     * @param colConstrains The column layout for the {@link MigLayout} instance.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLayout( String attr, String colConstrains ) {
+<span class="fc" id="L1307">        return withLayout(attr, colConstrains, null);</span>
+    }
+
+    /**
+     * @param attr The constraints for the layout.
+     * @param colConstrains The column layout for the {@link MigLayout} instance.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLayout( LayoutAttr attr, String colConstrains ) {
+<span class="fc" id="L1316">        return withLayout(attr.toString(), colConstrains, null);</span>
+    }
+
+    /**
+     *  This creates a {@link MigLayout} for the component wrapped by this UI builder.
+     *
+     * @param attr The constraints for the layout.
+     * @param colConstrains The column layout for the {@link MigLayout} instance.
+     * @param rowConstraints The row layout for the {@link MigLayout} instance.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLayout( LayoutAttr attr, String colConstrains, String rowConstraints ) {
+<span class="fc" id="L1328">        return withLayout(attr.toString(), colConstrains, rowConstraints);</span>
+    }
+
+    /**
+     *  This creates a {@link MigLayout} for the component wrapped by this UI builder.
+     *
+     * @param constraints The constraints for the layout.
+     * @param colConstrains The column layout for the {@link MigLayout} instance.
+     * @param rowConstraints The row layout for the {@link MigLayout} instance.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLayout( String constraints, String colConstrains, String rowConstraints ) {
+<span class="pc bpc" id="L1340" title="1 of 2 branches missed.">        if (_migAlreadySet)</span>
+<span class="nc" id="L1341">            throw new IllegalArgumentException(&quot;The mig layout has already been specified for this component!&quot;);</span>
+
+        // We make sure the default hidemode is 2 instead of 3 (which sucks because it takes up too much space)
+<span class="pc bpc" id="L1344" title="2 of 4 branches missed.">        if ( constraints == null || constraints.isEmpty() )</span>
+<span class="nc" id="L1345">            constraints = &quot;hidemode 2&quot;;</span>
+<span class="pc bpc" id="L1346" title="1 of 2 branches missed.">        else if ( !constraints.contains(&quot;hidemode&quot;) )</span>
+<span class="fc" id="L1347">            constraints += &quot;, hidemode 2&quot;;</span>
+
+<span class="fc" id="L1349">        MigLayout migLayout = new MigLayout(constraints, colConstrains, rowConstraints);</span>
+<span class="fc" id="L1350">        getComponent().setLayout(migLayout);</span>
+<span class="fc" id="L1351">        _migAlreadySet = true;</span>
+<span class="fc" id="L1352">        return _this();</span>
+    }
+
+    /**
+     *  Use this to set a helpful tool tip text for this UI component.
+     *  The tool tip text will be displayed when the mouse hovers on the
+     *  UI component for some time. &lt;br&gt;
+     *  This is in essence a convenience method, which avoid having to expose the underlying component
+     *  through the {@link #peek(Peeker)} method like so: &lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *      UI.button(&quot;Click Me&quot;)
+     *      .peek( button -&gt; button.setToolTipText(&quot;Can be clicked!&quot;) );
+     *  }&lt;/pre&gt;
+     *
+     * @param tooltip The tool tip text which should be set for the UI component.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withTooltip( String tooltip ) {
+<span class="fc" id="L1370">        NullUtil.nullArgCheck(tooltip, &quot;tooltip&quot;, String.class, &quot;Use the empty string to clear the tooltip text!&quot;);</span>
+<span class="pc bpc" id="L1371" title="1 of 2 branches missed.">        getComponent().setToolTipText(tooltip.isEmpty() ? null : tooltip);</span>
+<span class="fc" id="L1372">        return _this();</span>
+    }
+
+    /**
+     *  Use this to bind to a {@link sprouts.Val}
+     *  containing a tooltip string.
+     *  This is a convenience method, which would
+     *  be equivalent to:
+     *  &lt;pre&gt;{@code
+     *      UI.button(&quot;Click Me&quot;)
+     *      .peek( button -&gt; {
+     *          tip.onSetItem(JButton::setToolTipText);
+     *          button.setToolTipText(tip.get());
+     *      });
+     *  }&lt;/pre&gt;&lt;br&gt;
+     * &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param tip The tooltip which should be displayed when hovering over the tab header.
+     * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
+     */
+    public final I withTooltip( Val&lt;String&gt; tip ) {
+<span class="fc" id="L1393">        NullUtil.nullArgCheck(tip, &quot;tip&quot;, Val.class);</span>
+<span class="fc" id="L1394">        NullUtil.nullPropertyCheck(tip, &quot;tip&quot;, &quot;Please use an empty string instead of null!&quot;);</span>
+<span class="fc bfc" id="L1395" title="All 2 branches covered.">        _onShow( tip, v -&gt; getComponent().setToolTipText(v.isEmpty() ? null : v) );</span>
+<span class="fc" id="L1396">        return this.withTooltip( tip.orElseThrow() );</span>
+    }
+
+    /**
+     *  Use this to set the background color of the UI component
+     *  wrapped by this builder.&lt;br&gt;
+     *  This is in essence a convenience method, which avoid having to expose the underlying component
+     *  through the {@link #peek(Peeker)} method like so: &lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *      UI.label(&quot;Something&quot;)
+     *      .peek( label -&gt; label.setBackground(Color.CYAN) );
+     *  }&lt;/pre&gt;
+     *
+     * @param color The background color which should be set for the UI component.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBackground( Color color ) {
+<span class="fc" id="L1413">        NullUtil.nullArgCheck(color, &quot;color&quot;, Color.class);</span>
+<span class="fc" id="L1414">        getComponent().setBackground(color);</span>
+<span class="fc" id="L1415">        return _this();</span>
+    }
+
+    /**
+     *  Use this to bind to a {@link sprouts.Val}
+     *  containing a background color.
+     *  This is a convenience method, which would
+     *  be equivalent to:
+     *  &lt;pre&gt;{@code
+     *      UI.button(&quot;Click Me&quot;)
+     *      .peek( button -&gt; {
+     *          bg.onSetItem(JButton::setBackground);
+     *          button.setBackground(bg.get());
+     *      });
+     *  }&lt;/pre&gt;&lt;br&gt;
+     * &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param bg The background color which should be set for the UI component wrapped by a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBackground( Val&lt;Color&gt; bg ) {
+<span class="fc" id="L1436">        NullUtil.nullArgCheck(bg, &quot;bg&quot;, Val.class);</span>
+<span class="fc" id="L1437">        NullUtil.nullPropertyCheck(bg, &quot;bg&quot;, &quot;Please use the default color of this component instead of null!&quot;);</span>
+<span class="fc" id="L1438">        _onShow( bg, v -&gt; getComponent().setBackground(v) );</span>
+<span class="fc" id="L1439">        return this.withBackground( bg.orElseNull() );</span>
+    }
+
+    /**
+     *  Use this to bind to a background color
+     *  which will be set dynamically based on a boolean property.
+     * &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param colorIfTrue The background color which should be set for the UI component.
+     * @param condition The condition property which determines whether the background color should be set or not.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBackgroundIf( Val&lt;Boolean&gt; condition, Color colorIfTrue ) {
+<span class="fc" id="L1452">        NullUtil.nullArgCheck(condition, &quot;condition&quot;, Val.class);</span>
+<span class="fc" id="L1453">        NullUtil.nullArgCheck(colorIfTrue, &quot;bg&quot;, Color.class);</span>
+<span class="fc" id="L1454">        NullUtil.nullPropertyCheck(condition, &quot;condition&quot;, &quot;Null is not allowed to model the usage of the provided background color!&quot;);</span>
+<span class="fc" id="L1455">        Var&lt;Color&gt; baseColor = Var.of( getComponent().getBackground() );</span>
+<span class="fc" id="L1456">        Var&lt;Color&gt; color = Var.of( colorIfTrue );</span>
+<span class="fc" id="L1457">        _onShow( condition, v -&gt; _updateBackground( condition, color, baseColor ) );</span>
+<span class="pc bpc" id="L1458" title="1 of 2 branches missed.">        return this.withBackground( condition.orElse(false) ? colorIfTrue : getComponent().getBackground() );</span>
+    }
+
+    /**
+     *  Use this to dynamically bind to a background color
+     *  which will be set dynamically based on a boolean property.
+     * &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param color The background color property which should be set for the UI component.
+     * @param condition The condition property which determines whether the background color should be set or not.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBackgroundIf( Val&lt;Boolean&gt; condition, Val&lt;Color&gt; color ) {
+<span class="fc" id="L1471">        NullUtil.nullArgCheck(condition, &quot;condition&quot;, Val.class);</span>
+<span class="fc" id="L1472">        NullUtil.nullArgCheck(color, &quot;color&quot;, Val.class);</span>
+<span class="fc" id="L1473">        NullUtil.nullPropertyCheck(condition, &quot;condition&quot;, &quot;Null is not allowed to model the usage of the provided background color!&quot;);</span>
+<span class="fc" id="L1474">        NullUtil.nullPropertyCheck(color, &quot;color&quot;, &quot;Null is not allowed to model the the provided background color! Please use the default color of this component instead.&quot;);</span>
+<span class="fc" id="L1475">        Var&lt;Color&gt; baseColor = Var.of(getComponent().getBackground());</span>
+<span class="fc" id="L1476">        _onShow( condition, setColor -&gt; _updateBackground(condition, color, baseColor) );</span>
+<span class="fc" id="L1477">        _onShow( color, v -&gt; _updateBackground(condition, color, baseColor) );</span>
+<span class="pc bpc" id="L1478" title="1 of 2 branches missed.">        return this.withBackground(condition.orElse(false) ? color.orElseThrow() : getComponent().getBackground());</span>
+    }
+
+    /**
+     *  Use this to bind to 2 colors to the background of the component
+     *  which sre set based on the value of a boolean property.
+     * &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param condition The condition property which determines whether the background color should be set or not.
+     * @param colorIfTrue The background color which should be set for the UI component.
+     * @param colorIfFalse The background color which should be set for the UI component.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBackgroundIf( Val&lt;Boolean&gt; condition, Color colorIfTrue, Color colorIfFalse ) {
+<span class="fc" id="L1492">        return this.withBackgroundIf( condition, Var.of(colorIfTrue), Var.of(colorIfFalse) );</span>
+    }
+
+    /**
+     *  Use this to bind to 2 color properties to the background of the component
+     *  which sre set based on the value of a boolean property.
+     * &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param condition The condition property which determines whether the background color should be set or not.
+     * @param colorIfTrue The background color which should be set for the UI component.
+     * @param colorIfFalse The background color which should be set for the UI component.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withBackgroundIf( Val&lt;Boolean&gt; condition, Val&lt;Color&gt; colorIfTrue, Val&lt;Color&gt; colorIfFalse ) {
+<span class="fc" id="L1506">        NullUtil.nullArgCheck(condition, &quot;condition&quot;, Val.class);</span>
+<span class="fc" id="L1507">        NullUtil.nullArgCheck(colorIfTrue, &quot;colorIfTrue&quot;, Val.class);</span>
+<span class="fc" id="L1508">        NullUtil.nullArgCheck(colorIfFalse, &quot;colorIfFalse&quot;, Val.class);</span>
+<span class="fc" id="L1509">        NullUtil.nullPropertyCheck(condition, &quot;condition&quot;, &quot;Null is not allowed to model the usage of the provided background color!&quot;);</span>
+<span class="fc" id="L1510">        _onShow( condition, v -&gt; _updateBackground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );</span>
+<span class="pc" id="L1511">        _onShow( colorIfTrue, v -&gt; _updateBackground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );</span>
+<span class="pc" id="L1512">        _onShow( colorIfFalse, v -&gt; _updateBackground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );</span>
+<span class="pc bpc" id="L1513" title="1 of 2 branches missed.">        return this.withBackground( condition.get() ? colorIfTrue.orElseNull() : colorIfFalse.orElseNull() );</span>
+    }
+
+    public final I withStyle( Function&lt;StyleDelegate&lt;C&gt;, Style&gt; styler ) {
+<span class="fc" id="L1517">        NullUtil.nullArgCheck(styler, &quot;styler&quot;, Function.class);</span>
+<span class="fc" id="L1518">        ComponentExtension.from(getComponent()).addStyling(styler);</span>
+<span class="fc" id="L1519">        return _this();</span>
+    }
+
+    /**
+     *  Set the color of this {@link JComponent}. (This is usually the font color for components displaying text) &lt;br&gt;
+     *  This is in essence a convenience method, which avoid having to expose the underlying component
+     *  through the {@link #peek(Peeker)} method like so: &lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *      UI.label(&quot;Something&quot;)
+     *      .peek( label -&gt; label.setForeground(Color.GRAY) );
+     *  }&lt;/pre&gt;
+     *
+     * @param color The color of the foreground (usually text).
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withForeground( Color color ) {
+<span class="fc" id="L1535">        NullUtil.nullArgCheck(color, &quot;color&quot;, Color.class);</span>
+<span class="fc" id="L1536">        getComponent().setForeground(color);</span>
+<span class="fc" id="L1537">        return _this();</span>
+    }
+
+    /**
+     *  Use this to bind to a {@link sprouts.Val}
+     *  containing a foreground color.
+     *  This is a convenience method, which would
+     *  be equivalent to:
+     *  &lt;pre&gt;{@code
+     *      UI.button(&quot;Click Me&quot;)
+     *      .peek( button -&gt; {
+     *          fg.onSetItem(JButton::setForeground);
+     *          button.setForeground(fg.get());
+     *      });
+     *  }&lt;/pre&gt;&lt;br&gt;
+     * &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param fg The foreground color which should be set for the UI component wrapped by a {@link Val}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withForeground( Val&lt;Color&gt; fg ) {
+<span class="fc" id="L1558">        NullUtil.nullArgCheck(fg, &quot;fg&quot;, Val.class);</span>
+<span class="fc" id="L1559">        NullUtil.nullPropertyCheck(fg, &quot;fg&quot;, &quot;Please use the default color of this component instead of null!&quot;);</span>
+<span class="fc" id="L1560">        _onShow( fg, v -&gt; getComponent().setForeground(v) );</span>
+<span class="fc" id="L1561">        return this.withForeground( fg.orElseNull() );</span>
+    }
+    
+    /**
+     *  Use this to bind to a foreground color
+     *  which will be set dynamically based on a boolean property.
+     * &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param fg The foreground color which should be set for the UI component.
+     * @param condition The condition property which determines whether the foreground color should be set or not.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withForegroundIf( Val&lt;Boolean&gt; condition, Color fg ) {
+<span class="fc" id="L1574">        NullUtil.nullArgCheck(condition, &quot;condition&quot;, Val.class);</span>
+<span class="fc" id="L1575">        NullUtil.nullArgCheck(fg, &quot;fg&quot;, Color.class);</span>
+<span class="fc" id="L1576">        NullUtil.nullPropertyCheck(condition, &quot;condition&quot;, &quot;Null is not allowed to model the usage of the provided foreground color!&quot;);</span>
+<span class="fc" id="L1577">        Var&lt;Color&gt; baseColor = Var.of(getComponent().getForeground());</span>
+<span class="fc" id="L1578">        Var&lt;Color&gt; newColor = Var.of(fg);</span>
+<span class="fc" id="L1579">        _onShow( condition, v -&gt; _updateForeground( condition, newColor, baseColor ) );</span>
+<span class="pc bpc" id="L1580" title="1 of 2 branches missed.">        return this.withForeground( condition.orElse(false) ? fg : getComponent().getForeground() );</span>
+    }
+    
+    /**
+     *  Use this to dynamically bind to a foreground color
+     *  which will be set dynamically based on a boolean property.
+     * &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param color The foreground color property which should be set for the UI component.
+     * @param condition The condition property which determines whether the foreground color should be set or not.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withForegroundIf( Val&lt;Boolean&gt; condition, Val&lt;Color&gt; color ) {
+<span class="fc" id="L1593">        NullUtil.nullArgCheck(condition, &quot;condition&quot;, Val.class);</span>
+<span class="fc" id="L1594">        NullUtil.nullArgCheck(color, &quot;color&quot;, Val.class);</span>
+<span class="fc" id="L1595">        NullUtil.nullPropertyCheck(condition, &quot;condition&quot;, &quot;Null is not allowed to model the usage of the provided foreground color!&quot;);</span>
+<span class="fc" id="L1596">        NullUtil.nullPropertyCheck(color, &quot;color&quot;, &quot;Null is not allowed to model the the provided foreground color! Please use the default color of this component instead.&quot;);</span>
+<span class="fc" id="L1597">        Var&lt;Color&gt; baseColor = Var.of(getComponent().getForeground());</span>
+<span class="fc" id="L1598">        _onShow( condition, setColor -&gt; _updateForeground(condition, color, baseColor) );</span>
+<span class="fc" id="L1599">        _onShow( color, v -&gt; _updateForeground(condition, color, baseColor) );</span>
+<span class="pc bpc" id="L1600" title="1 of 2 branches missed.">        return this.withForeground(condition.orElse(false) ? color.orElseThrow() : getComponent().getForeground());</span>
+    }
+
+    /**
+     *  Use this to dynamically bind to a foreground color
+     *  which will be set dynamically based on a boolean property.
+     * &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param condition The condition property which determines whether the foreground color should be set or not.
+     * @param colorIfTrue The foreground color which should be set for the UI component.
+     * @param colorIfFalse The foreground color which should be set for the UI component.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withForegroundIf( Val&lt;Boolean&gt; condition, Color colorIfTrue, Color colorIfFalse ) {
+<span class="fc" id="L1614">        NullUtil.nullArgCheck(condition, &quot;condition&quot;, Val.class);</span>
+<span class="fc" id="L1615">        NullUtil.nullArgCheck(colorIfTrue, &quot;colorIfTrue&quot;, Color.class);</span>
+<span class="fc" id="L1616">        NullUtil.nullArgCheck(colorIfFalse, &quot;colorIfFalse&quot;, Color.class);</span>
+<span class="fc" id="L1617">        NullUtil.nullPropertyCheck(condition, &quot;condition&quot;, &quot;Null is not allowed to model the usage of the provided foreground color!&quot;);</span>
+<span class="fc" id="L1618">        _onShow( condition, v -&gt; _updateForeground( condition, Var.of(colorIfTrue), Var.of(colorIfFalse) ) );</span>
+<span class="pc bpc" id="L1619" title="1 of 2 branches missed.">        return this.withForeground( condition.get() ? colorIfTrue : colorIfFalse );</span>
+    }
+
+    /**
+     *  Use this to dynamically bind to a foreground color
+     *  which will be set dynamically based on a boolean property.
+     * &lt;i&gt;Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param condition The condition property which determines whether the foreground color should be set or not.
+     * @param colorIfTrue The foreground color property which should be set for the UI component.
+     * @param colorIfFalse The foreground color property which should be set for the UI component.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withForegroundIf( Val&lt;Boolean&gt; condition, Val&lt;Color&gt; colorIfTrue, Val&lt;Color&gt; colorIfFalse ) {
+<span class="fc" id="L1633">        NullUtil.nullArgCheck(condition, &quot;condition&quot;, Val.class);</span>
+<span class="fc" id="L1634">        NullUtil.nullArgCheck(colorIfTrue, &quot;colorIfTrue&quot;, Val.class);</span>
+<span class="fc" id="L1635">        NullUtil.nullArgCheck(colorIfFalse, &quot;colorIfFalse&quot;, Val.class);</span>
+<span class="fc" id="L1636">        NullUtil.nullPropertyCheck(condition, &quot;condition&quot;, &quot;Null is not allowed to model the usage of the provided foreground color!&quot;);</span>
+<span class="fc" id="L1637">        NullUtil.nullPropertyCheck(colorIfTrue, &quot;colorIfTrue&quot;, &quot;Null is not allowed to model the the provided foreground color! Please use the default color of this component instead.&quot;);</span>
+<span class="fc" id="L1638">        NullUtil.nullPropertyCheck(colorIfFalse, &quot;colorIfFalse&quot;, &quot;Null is not allowed to model the the provided foreground color! Please use the default color of this component instead.&quot;);</span>
+<span class="fc" id="L1639">        _onShow( condition, v -&gt; _updateForeground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );</span>
+<span class="fc" id="L1640">        _onShow( colorIfTrue, v -&gt; _updateForeground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );</span>
+<span class="fc" id="L1641">        _onShow( colorIfFalse, v -&gt; _updateForeground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );</span>
+<span class="pc bpc" id="L1642" title="1 of 2 branches missed.">        return this.withForeground( condition.get() ? colorIfTrue.get() : colorIfFalse.get() );</span>
+    }
+
+    private void _updateForeground(
+        Val&lt;Boolean&gt; condition,
+        Val&lt;Color&gt; color,
+        Val&lt;Color&gt; baseColor
+    ) {
+<span class="fc bfc" id="L1650" title="All 2 branches covered.">        if ( condition.get() )</span>
+<span class="fc" id="L1651">            getComponent().setForeground(color.get());</span>
+        else
+<span class="fc" id="L1653">            getComponent().setForeground(baseColor.get());</span>
+<span class="fc" id="L1654">    }</span>
+
+    private void _updateBackground(
+            Val&lt;Boolean&gt; condition,
+            Val&lt;Color&gt; color,
+            Val&lt;Color&gt; baseColor
+    ) {
+<span class="fc bfc" id="L1661" title="All 2 branches covered.">        if ( condition.get() )</span>
+<span class="fc" id="L1662">            getComponent().setBackground(color.get());</span>
+        else
+<span class="fc" id="L1664">            getComponent().setBackground(baseColor.get());</span>
+<span class="fc" id="L1665">    }</span>
+
+    /**
+     *  Set the minimum {@link Dimension} of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param size The minimum {@link Dimension} of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMinSize( Dimension size ) {
+<span class="fc" id="L1674">        NullUtil.nullArgCheck(size, &quot;size&quot;, Dimension.class);</span>
+<span class="fc" id="L1675">        getComponent().setMinimumSize(size);</span>
+<span class="fc" id="L1676">        return _this();</span>
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the maximum {@link Dimension} of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMinimumSize(Dimension)} (Dimension)} on the underlying component. &lt;br&gt;
+     *  This is a convenience method, which would
+     *  be equivalent to:
+     *  &lt;pre&gt;{@code
+     *    UI.button(&quot;Click Me&quot;)
+     *    .peek( button -&gt; {
+     *      size.onSetItem(JButton::setMinimumSize);
+     *      button.setMinimumSize(size.get());
+     *    });
+     *  }&lt;/pre&gt;
+     *
+     * @param size The minimum {@link Dimension} of the component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMinSize( Val&lt;Dimension&gt; size ) {
+<span class="fc" id="L1697">        NullUtil.nullArgCheck(size, &quot;size&quot;, Val.class);</span>
+<span class="fc" id="L1698">        NullUtil.nullPropertyCheck(size, &quot;size&quot;, &quot;Null is not allowed to model the minimum size of this component!&quot;);</span>
+<span class="fc" id="L1699">        _onShow( size, v -&gt; {</span>
+<span class="fc" id="L1700">            C comp = getComponent();</span>
+<span class="fc" id="L1701">            comp.setMinimumSize(v);</span>
+<span class="fc" id="L1702">            comp.revalidate();</span>
+<span class="fc" id="L1703">        });</span>
+<span class="fc" id="L1704">        return this.withMinSize( size.orElseThrow() );</span>
+    }
+
+    /**
+     *  Set the minimum width and heigh ({@link Dimension}) of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param width The minimum width of the component.
+     * @param height The minimum height of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMinSize( int width, int height ) {
+<span class="fc" id="L1715">        getComponent().setMinimumSize(new Dimension(width, height));</span>
+<span class="fc" id="L1716">        return _this();</span>
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the minimum {@link Dimension} of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param width The minimum width of the component.
+     * @param height The minimum height of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMinSize( Val&lt;Integer&gt; width, Val&lt;Integer&gt; height ) {
+<span class="fc" id="L1728">        NullUtil.nullArgCheck(width, &quot;width&quot;, Val.class);</span>
+<span class="fc" id="L1729">        NullUtil.nullArgCheck(height, &quot;height&quot;, Val.class);</span>
+<span class="fc" id="L1730">        NullUtil.nullPropertyCheck(width, &quot;width&quot;, &quot;Null is not allowed to model the minimum width of this component!&quot;);</span>
+<span class="fc" id="L1731">        NullUtil.nullPropertyCheck(height, &quot;height&quot;, &quot;Null is not allowed to model the minimum height of this component!&quot;);</span>
+<span class="fc" id="L1732">        _onShow( width, w -&gt; {</span>
+<span class="fc" id="L1733">            C comp = getComponent();</span>
+<span class="fc" id="L1734">            comp.setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height));</span>
+<span class="fc" id="L1735">            comp.revalidate();</span>
+<span class="fc" id="L1736">        });</span>
+<span class="fc" id="L1737">        _onShow( height, h -&gt; {</span>
+<span class="fc" id="L1738">            C comp = getComponent();</span>
+<span class="fc" id="L1739">            comp.setMinimumSize(new Dimension(getComponent().getMinimumSize().width, h));</span>
+<span class="fc" id="L1740">            comp.revalidate();</span>
+<span class="fc" id="L1741">        });</span>
+<span class="fc" id="L1742">        return this.withMinSize( width.orElseThrow(), height.orElseThrow() );</span>
+    }
+
+    /**
+     *  Use this to only set the minimum width of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component for you. &lt;br&gt;
+     * @param width The minimum width which should be set for the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMinWidth( int width ) {
+<span class="fc" id="L1752">        getComponent().setMinimumSize(new Dimension(width, getComponent().getMinimumSize().height));</span>
+<span class="fc" id="L1753">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically set only the minimum width of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component for you. &lt;br&gt;
+     * @param width The minimum width which should be set for the underlying component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMinWidth( Val&lt;Integer&gt; width ) {
+<span class="fc" id="L1763">        NullUtil.nullArgCheck(width, &quot;width&quot;, Val.class);</span>
+<span class="fc" id="L1764">        NullUtil.nullPropertyCheck(width, &quot;width&quot;, &quot;Null is not allowed to model the minimum width of this component!&quot;);</span>
+<span class="fc" id="L1765">        _onShow( width, w -&gt; {</span>
+<span class="fc" id="L1766">            C comp = getComponent();</span>
+<span class="fc" id="L1767">            comp.setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height));</span>
+<span class="fc" id="L1768">            comp.revalidate(); // Swing is not smart enough to do this automatically</span>
+<span class="fc" id="L1769">        });</span>
+<span class="fc" id="L1770">        return this.withMinWidth( width.orElseThrow() );</span>
+    }
+
+
+    /**
+     *  Use this to only set the minimum height of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component for you. &lt;br&gt;
+     * @param height The minimum height which should be set for the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMinHeight( int height ) {
+<span class="fc" id="L1781">        getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, height));</span>
+<span class="fc" id="L1782">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically set only the minimum height of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMinimumSize(Dimension)} on the underlying component for you. &lt;br&gt;
+     * @param height The minimum height which should be set for the underlying component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMinHeight( Val&lt;Integer&gt; height ) {
+<span class="fc" id="L1792">        NullUtil.nullArgCheck(height, &quot;height&quot;, Val.class);</span>
+<span class="fc" id="L1793">        NullUtil.nullPropertyCheck(height, &quot;height&quot;, &quot;Null is not allowed to model the minimum height of this component!&quot;);</span>
+<span class="fc" id="L1794">        _onShow( height, h -&gt; {</span>
+<span class="fc" id="L1795">            C comp = getComponent();</span>
+<span class="fc" id="L1796">            comp.setMinimumSize( new Dimension(getComponent().getMinimumSize().width, h));</span>
+<span class="fc" id="L1797">            comp.revalidate(); // The revalidate is necessary to make the change visible.</span>
+<span class="fc" id="L1798">        });</span>
+<span class="fc" id="L1799">        return this.withMinHeight( height.orElseThrow() );</span>
+    }
+
+    /**
+     *  Set the maximum {@link Dimension} of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param size The maximum {@link Dimension} of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMaxSize( Dimension size ) {
+<span class="fc" id="L1809">        NullUtil.nullArgCheck(size, &quot;size&quot;, Dimension.class);</span>
+<span class="fc" id="L1810">        getComponent().setMaximumSize(size);</span>
+<span class="fc" id="L1811">        return _this();</span>
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the maximum {@link Dimension} of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param size The maximum {@link Dimension} of the component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMaxSize( Val&lt;Dimension&gt; size ) {
+<span class="fc" id="L1822">        NullUtil.nullArgCheck(size, &quot;size&quot;, Val.class);</span>
+<span class="fc" id="L1823">        NullUtil.nullPropertyCheck(size, &quot;size&quot;, &quot;Null is not allowed to model the maximum size of this component!&quot;);</span>
+<span class="fc" id="L1824">        _onShow( size, v -&gt; {</span>
+<span class="fc" id="L1825">            C comp = getComponent();</span>
+<span class="fc" id="L1826">            comp.setMaximumSize(v);</span>
+<span class="fc" id="L1827">            comp.revalidate(); // For some reason this is needed to make the change visible.</span>
+<span class="fc" id="L1828">        });</span>
+<span class="fc" id="L1829">        return this.withMaxSize( size.orElseThrow() );</span>
+    }
+
+    /**
+     *  Set the maximum width and height ({@link Dimension}) of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param width The maximum width of the component.
+     * @param height The maximum height of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMaxSize( int width, int height ) {
+<span class="fc" id="L1840">        getComponent().setMaximumSize(new Dimension(width, height));</span>
+<span class="fc" id="L1841">        return _this();</span>
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the maximum {@link Dimension} of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param width The maximum width of the component.
+     * @param height The maximum height of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMaxSize( Val&lt;Integer&gt; width, Val&lt;Integer&gt; height ) {
+<span class="fc" id="L1853">        NullUtil.nullArgCheck(width, &quot;width&quot;, Val.class);</span>
+<span class="fc" id="L1854">        NullUtil.nullArgCheck(height, &quot;height&quot;, Val.class);</span>
+<span class="fc" id="L1855">        NullUtil.nullPropertyCheck(width, &quot;width&quot;, &quot;Null is not allowed to model the maximum width of this component!&quot;);</span>
+<span class="fc" id="L1856">        NullUtil.nullPropertyCheck(height, &quot;height&quot;, &quot;Null is not allowed to model the maximum height of this component!&quot;);</span>
+<span class="fc" id="L1857">        _onShow( width, w -&gt; {</span>
+<span class="fc" id="L1858">            C comp = getComponent();</span>
+<span class="fc" id="L1859">            comp.setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height));</span>
+<span class="fc" id="L1860">            comp.revalidate(); // Swing is not smart enough to do this automatically :(</span>
+<span class="fc" id="L1861">        });</span>
+<span class="fc" id="L1862">        _onShow( height, h -&gt; {</span>
+<span class="fc" id="L1863">            C comp = getComponent();</span>
+<span class="fc" id="L1864">            comp.setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h));</span>
+<span class="fc" id="L1865">            comp.revalidate(); // Still not smart enough to do this automatically :(</span>
+<span class="fc" id="L1866">        });</span>
+<span class="fc" id="L1867">        return this.withMaxSize( width.orElseThrow(), height.orElseThrow() );</span>
+    }
+
+    /**
+     *  Use this to only set the maximum width of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component for you. &lt;br&gt;
+     * @param width The maximum width which should be set for the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMaxWidth( int width ) {
+<span class="fc" id="L1877">        getComponent().setMaximumSize(new Dimension(width, getComponent().getMaximumSize().height));</span>
+<span class="fc" id="L1878">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically set only the maximum width of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component for you. &lt;br&gt;
+     * @param width The maximum width which should be set for the underlying component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMaxWidth( Val&lt;Integer&gt; width ) {
+<span class="fc" id="L1888">        NullUtil.nullArgCheck(width, &quot;width&quot;, Val.class);</span>
+<span class="fc" id="L1889">        NullUtil.nullPropertyCheck(width, &quot;width&quot;, &quot;Null is not allowed to model the maximum width of this component!&quot;);</span>
+<span class="fc" id="L1890">        _onShow( width, w -&gt; {</span>
+<span class="fc" id="L1891">            C comp = getComponent();</span>
+<span class="fc" id="L1892">            comp.setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height));</span>
+<span class="fc" id="L1893">            comp.revalidate(); // When the size changes, the layout manager needs to be informed.</span>
+<span class="fc" id="L1894">        });</span>
+<span class="fc" id="L1895">        return this.withMaxWidth( width.orElseThrow() );</span>
+    }
+
+    /**
+     *  Use this to only set the maximum height of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component for you. &lt;br&gt;
+     * @param height The maximum height which should be set for the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMaxHeight( int height ) {
+<span class="fc" id="L1905">        getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, height));</span>
+<span class="fc" id="L1906">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically set only the maximum height of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setMaximumSize(Dimension)} on the underlying component for you. &lt;br&gt;
+     * @param height The maximum height which should be set for the underlying component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withMaxHeight( Val&lt;Integer&gt; height ) {
+<span class="fc" id="L1916">        NullUtil.nullArgCheck(height, &quot;height&quot;, Val.class);</span>
+<span class="fc" id="L1917">        NullUtil.nullPropertyCheck(height, &quot;height&quot;, &quot;Null is not allowed to model the maximum height of this component!&quot;);</span>
+<span class="fc" id="L1918">        _onShow( height, h -&gt; {</span>
+<span class="fc" id="L1919">            C comp = getComponent();</span>
+<span class="fc" id="L1920">            comp.setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h));</span>
+<span class="fc" id="L1921">            comp.revalidate(); // The revalidate is necessary to make the change visible, this makes sure the layout is recalculated.</span>
+<span class="fc" id="L1922">        });</span>
+<span class="fc" id="L1923">        return this.withMaxHeight( height.orElseThrow() );</span>
+    }
+
+    /**
+     *  Set the preferred {@link Dimension} of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param size The preferred {@link Dimension} of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withPrefSize( Dimension size ) {
+<span class="fc" id="L1933">        NullUtil.nullArgCheck(size, &quot;size&quot;, Dimension.class);</span>
+<span class="fc" id="L1934">        getComponent().setPreferredSize(size);</span>
+<span class="fc" id="L1935">        return _this();</span>
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the preferred {@link Dimension} of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param size The preferred {@link Dimension} of the component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withPrefSize( Val&lt;Dimension&gt; size ) {
+<span class="fc" id="L1946">        NullUtil.nullArgCheck(size, &quot;size&quot;, Val.class);</span>
+<span class="fc" id="L1947">        NullUtil.nullPropertyCheck(size, &quot;size&quot;, &quot;Null is not allowed to model the preferred size of this component!&quot;);</span>
+<span class="fc" id="L1948">        _onShow( size, v -&gt; {</span>
+<span class="fc" id="L1949">            C comp = getComponent();</span>
+<span class="fc" id="L1950">            comp.setPreferredSize(v);</span>
+<span class="fc" id="L1951">            comp.revalidate();</span>
+<span class="fc" id="L1952">        });</span>
+<span class="fc" id="L1953">        return this.withPrefSize( size.orElseNull() );</span>
+    }
+
+    /**
+     *  Set the preferred width and height ({@link Dimension}) of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param width The preferred width of the component.
+     * @param height The preferred height of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withPrefSize( int width, int height ) {
+<span class="fc" id="L1964">        getComponent().setPreferredSize(new Dimension(width, height));</span>
+<span class="fc" id="L1965">        return _this();</span>
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the preferred {@link Dimension} of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param width The preferred width of the component.
+     * @param height The preferred height of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withPrefSize( Val&lt;Integer&gt; width, Val&lt;Integer&gt; height ) {
+<span class="fc" id="L1977">        NullUtil.nullArgCheck(width, &quot;width&quot;, Val.class);</span>
+<span class="fc" id="L1978">        NullUtil.nullArgCheck(height, &quot;height&quot;, Val.class);</span>
+<span class="fc" id="L1979">        NullUtil.nullPropertyCheck(width, &quot;width&quot;, &quot;Null is not allowed to model the preferred width of this component!&quot;);</span>
+<span class="fc" id="L1980">        NullUtil.nullPropertyCheck(height, &quot;height&quot;, &quot;Null is not allowed to model the preferred height of this component!&quot;);</span>
+<span class="fc" id="L1981">        _onShow( width, w -&gt; {</span>
+<span class="fc" id="L1982">            C comp = getComponent();</span>
+<span class="fc" id="L1983">            comp.setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height));</span>
+<span class="fc" id="L1984">            comp.revalidate(); // We need to revalidate the component to make sure the layout manager is aware of the new size.</span>
+<span class="fc" id="L1985">        });</span>
+<span class="fc" id="L1986">        _onShow( height, h -&gt; {</span>
+<span class="fc" id="L1987">            C comp = getComponent();</span>
+<span class="fc" id="L1988">            comp.setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h));</span>
+<span class="fc" id="L1989">            comp.revalidate(); // We need to revalidate the component to make sure the layout manager is aware of the new size.</span>
+<span class="fc" id="L1990">        });</span>
+<span class="fc" id="L1991">        return this.withPrefSize( width.orElseThrow(), height.orElseThrow() );</span>
+    }
+
+    /**
+     *  Use this to only set the preferred width of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component for you. &lt;br&gt;
+     * @param width The preferred width which should be set for the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withPrefWidth( int width ) {
+<span class="fc" id="L2001">        getComponent().setPreferredSize(new Dimension(width, getComponent().getPreferredSize().height));</span>
+<span class="fc" id="L2002">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically set only the preferred width of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component for you. &lt;br&gt;
+     * @param width The preferred width which should be set for the underlying component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withPrefWidth( Val&lt;Integer&gt; width ) {
+<span class="fc" id="L2012">        NullUtil.nullArgCheck(width, &quot;width&quot;, Val.class);</span>
+<span class="fc" id="L2013">        NullUtil.nullPropertyCheck(width, &quot;width&quot;, &quot;Null is not allowed to model the preferred width of this component!&quot;);</span>
+<span class="fc" id="L2014">        _onShow( width, w -&gt; {</span>
+<span class="fc" id="L2015">            C comp = getComponent();</span>
+<span class="fc" id="L2016">            comp.setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height));</span>
+<span class="fc" id="L2017">            comp.revalidate(); // We need to revalidate the component to make sure the new preferred size is applied.</span>
+<span class="fc" id="L2018">        });</span>
+<span class="fc" id="L2019">        return this.withPrefWidth( width.orElseThrow() );</span>
+    }
+
+    /**
+     *  Use this to only set the preferred height of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component for you. &lt;br&gt;
+     * @param height The preferred height which should be set for the underlying component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withPrefHeight( int height ) {
+<span class="fc" id="L2029">        getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, height));</span>
+<span class="fc" id="L2030">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically set only the preferred height of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setPreferredSize(Dimension)} on the underlying component for you. &lt;br&gt;
+     * @param height The preferred height which should be set for the underlying component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withPrefHeight(Val&lt;Integer&gt; height ) {
+<span class="fc" id="L2040">        NullUtil.nullArgCheck(height, &quot;height&quot;, Val.class);</span>
+<span class="fc" id="L2041">        NullUtil.nullPropertyCheck(height, &quot;height&quot;, &quot;Null is not allowed to model the preferred height of this component!&quot;);</span>
+<span class="fc" id="L2042">        _onShow( height, h -&gt; {</span>
+<span class="fc" id="L2043">            C comp = getComponent();</span>
+<span class="fc" id="L2044">            comp.setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h));</span>
+<span class="fc" id="L2045">            comp.revalidate(); // We need to revalidate the component to make sure the new preferred size is applied.</span>
+<span class="fc" id="L2046">        });</span>
+<span class="fc" id="L2047">        return this.withPrefHeight( height.orElseThrow() );</span>
+    }
+
+    /**
+     *  Set the current {@link Dimension})/size (width and height) of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param size The current {@link Dimension} of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withSize( Dimension size ) {
+<span class="nc" id="L2057">        NullUtil.nullArgCheck(size, &quot;size&quot;, Dimension.class);</span>
+<span class="nc" id="L2058">        getComponent().setSize(size);</span>
+<span class="nc" id="L2059">        return _this();</span>
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the current {@link Dimension} of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param size The current {@link Dimension} of the component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withSize( Val&lt;Dimension&gt; size ) {
+<span class="nc" id="L2070">        NullUtil.nullArgCheck(size, &quot;size&quot;, Val.class);</span>
+<span class="nc" id="L2071">        NullUtil.nullPropertyCheck(size, &quot;size&quot;, &quot;Null is not allowed to model the size of this component!&quot;);</span>
+<span class="nc" id="L2072">        _onShow( size, v -&gt; {</span>
+<span class="nc" id="L2073">            C comp = getComponent();</span>
+<span class="nc" id="L2074">            comp.setSize(v);</span>
+<span class="nc" id="L2075">            comp.revalidate(); // We need to revalidate the component to make sure the new size is applied.</span>
+<span class="nc" id="L2076">        });</span>
+<span class="nc" id="L2077">        return this.withSize( size.orElseNull() );</span>
+    }
+
+    /**
+     *  Set the current width and height of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param width The current width of the component.
+     * @param height The current height of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withSize( int width, int height ) {
+<span class="nc" id="L2088">        return this.withSize( new Dimension(width, height) );</span>
+    }
+
+    /**
+     *  Set the current width of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param width The current width of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withWidth( int width ) {
+<span class="fc" id="L2098">        getComponent().setSize(new Dimension(width, getComponent().getSize().height));</span>
+<span class="fc" id="L2099">        return _this();</span>
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the current width of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param width The current width of the component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withWidth( Val&lt;Integer&gt; width ) {
+<span class="fc" id="L2110">        NullUtil.nullArgCheck(width, &quot;width&quot;, Val.class);</span>
+<span class="fc" id="L2111">        NullUtil.nullPropertyCheck(width, &quot;width&quot;, &quot;Null is not allowed to model the width of this component!&quot;);</span>
+<span class="fc" id="L2112">        _onShow( width, w -&gt; {</span>
+<span class="fc" id="L2113">            C comp = getComponent();</span>
+<span class="fc" id="L2114">            comp.setSize(new Dimension(w, getComponent().getSize().height));</span>
+<span class="fc" id="L2115">            comp.revalidate(); // We need to revalidate the component to make sure the new size is applied.</span>
+<span class="fc" id="L2116">        });</span>
+<span class="fc" id="L2117">        return this.withWidth( width.orElseThrow() );</span>
+    }
+
+    /**
+     *  Set the current height of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param height The current height of the component.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withHeight( int height ) {
+<span class="fc" id="L2127">        getComponent().setSize(new Dimension(getComponent().getSize().width, height));</span>
+<span class="fc" id="L2128">        return _this();</span>
+    }
+
+    /**
+     *  Bind to a {@link Val} object to
+     *  dynamically set the current height of this {@link JComponent}. &lt;br&gt;
+     *  This calls {@link JComponent#setSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param height The current height of the component wrapped by a {@link Val}.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withHeight( Val&lt;Integer&gt; height ) {
+<span class="fc" id="L2139">        NullUtil.nullArgCheck(height, &quot;height&quot;, Val.class);</span>
+<span class="fc" id="L2140">        NullUtil.nullPropertyCheck(height, &quot;height&quot;, &quot;Null is not allowed to model the height of this component!&quot;);</span>
+<span class="fc" id="L2141">        _onShow( height, h -&gt; {</span>
+<span class="fc" id="L2142">            C comp = getComponent();</span>
+<span class="fc" id="L2143">            comp.setSize(new Dimension(getComponent().getSize().width, h));</span>
+<span class="fc" id="L2144">            comp.revalidate(); // We need to revalidate the component to make sure the new size is applied.</span>
+<span class="fc" id="L2145">        });</span>
+<span class="fc" id="L2146">        return this.withHeight( height.orElseThrow() );</span>
+    }
+
+    /**
+     *  Use this to register and catch generic {@link MouseListener} based mouse click events on this UI component.
+     *  This method adds the provided consumer lambda to
+     *  an an{@link MouseListener} instance to the wrapped
+     *  button component.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMouseClick( Action&lt;SimpleDelegate&lt;C, MouseEvent&gt;&gt; onClick ) {
+<span class="fc" id="L2160">        NullUtil.nullArgCheck(onClick, &quot;onClick&quot;, Action.class);</span>
+<span class="fc" id="L2161">        C component = getComponent();</span>
+<span class="fc" id="L2162">        component.addMouseListener(new MouseAdapter() {</span>
+            @Override public void mouseClicked(MouseEvent e) { 
+<span class="pc" id="L2164">                _doApp(() -&gt; onClick.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="fc" id="L2165">            }</span>
+        });
+<span class="fc" id="L2167">        return _this();</span>
+    }
+
+    /**
+     *  Use this to register and catch generic {@link MouseListener} based mouse release events on this UI component.
+     *  This method adds the provided consumer lambda to
+     *  an an{@link MouseListener} instance to the wrapped
+     *  button component.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param onRelease The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMouseRelease( Action&lt;SimpleDelegate&lt;C, MouseEvent&gt;&gt; onRelease ) {
+<span class="nc" id="L2181">        NullUtil.nullArgCheck(onRelease, &quot;onRelease&quot;, Action.class);</span>
+<span class="nc" id="L2182">        C component = getComponent();</span>
+<span class="nc" id="L2183">        component.addMouseListener(new MouseAdapter() {</span>
+            @Override public void mouseReleased(MouseEvent e) {
+<span class="nc" id="L2185">                _doApp(() -&gt; onRelease.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L2186">            }</span>
+        });
+<span class="nc" id="L2188">        return _this();</span>
+    }
+
+    /**
+     *  Use this to register and catch generic {@link MouseListener} based mouse press events on this UI component.
+     *  This method adds the provided consumer lambda to
+     *  an an{@link MouseListener} instance to the wrapped
+     *  button component.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param onPress The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMousePress( Action&lt;SimpleDelegate&lt;C, MouseEvent&gt;&gt; onPress ) {
+<span class="nc" id="L2202">        NullUtil.nullArgCheck(onPress, &quot;onPress&quot;, Action.class);</span>
+<span class="nc" id="L2203">        C component = getComponent();</span>
+<span class="nc" id="L2204">        component.addMouseListener(new MouseAdapter() {</span>
+            @Override public void mousePressed(MouseEvent e) {
+<span class="nc" id="L2206">                _doApp(() -&gt; onPress.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L2207">            }</span>
+        });
+<span class="nc" id="L2209">        return _this();</span>
+    }
+
+    /**
+     *  Use this to register and catch generic {@link MouseListener} based mouse enter events on this UI component.
+     *  This method adds the provided consumer lambda to
+     *  an an{@link MouseListener} instance to the wrapped
+     *  button component.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param onEnter The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMouseEnter( Action&lt;SimpleDelegate&lt;C, MouseEvent&gt;&gt; onEnter ) {
+<span class="fc" id="L2223">        NullUtil.nullArgCheck(onEnter, &quot;onEnter&quot;, Action.class);</span>
+<span class="fc" id="L2224">        C component = getComponent();</span>
+<span class="fc" id="L2225">        component.addMouseListener(new MouseAdapter() {</span>
+            @Override public void mouseEntered(MouseEvent e) {
+<span class="nc" id="L2227">                _doApp(() -&gt; onEnter.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L2228">            }</span>
+        });
+<span class="fc" id="L2230">        return _this();</span>
+    }
+
+    /**
+     *  Use this to register and catch generic {@link MouseListener} based mouse exit events on this UI component.
+     *  This method adds the provided consumer lambda to
+     *  an an{@link MouseListener} instance to the wrapped
+     *  button component.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param onExit The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMouseExit( Action&lt;SimpleDelegate&lt;C, MouseEvent&gt;&gt; onExit ) {
+<span class="fc" id="L2244">        NullUtil.nullArgCheck(onExit, &quot;onExit&quot;, Action.class);</span>
+<span class="fc" id="L2245">        C component = getComponent();</span>
+<span class="fc" id="L2246">        component.addMouseListener(new MouseAdapter() {</span>
+            @Override public void mouseExited(MouseEvent e) {
+<span class="nc" id="L2248">                _doApp(() -&gt; onExit.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L2249">            }</span>
+        });
+<span class="fc" id="L2251">        return _this();</span>
+    }
+
+    /**
+     *  Use this to register and catch generic {@link MouseListener} based mouse drag events on this UI component.
+     *  This method adds the provided consumer lambda to
+     *  an an{@link MouseListener} instance to the wrapped
+     *  button component.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param onDrag The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMouseDrag( Action&lt;SimpleDelegate&lt;C, MouseEvent&gt;&gt; onDrag ) {
+<span class="nc" id="L2265">        NullUtil.nullArgCheck(onDrag, &quot;onDrag&quot;, Action.class);</span>
+<span class="nc" id="L2266">        C component = getComponent();</span>
+<span class="nc" id="L2267">        component.addMouseListener(new MouseAdapter() {</span>
+            @Override public void mouseDragged(MouseEvent e) {
+<span class="nc" id="L2269">                _doApp(() -&gt; onDrag.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L2270">            }</span>
+        });
+<span class="nc" id="L2272">        component.addMouseMotionListener(new MouseMotionAdapter() {</span>
+            @Override public void mouseDragged(MouseEvent e) {
+<span class="nc" id="L2274">                _doApp(() -&gt; onDrag.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L2275">            }</span>
+        });
+<span class="nc" id="L2277">        return _this();</span>
+    }
+
+    /**
+     *  Use this to register and catch generic {@link MouseListener} based mouse move events on this UI component.
+     *  This method adds the provided consumer lambda to
+     *  an an{@link MouseListener} instance to the wrapped
+     *  button component.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param onMove The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMouseMove( Action&lt;SimpleDelegate&lt;C, MouseEvent&gt;&gt; onMove ) {
+<span class="fc" id="L2291">        NullUtil.nullArgCheck(onMove, &quot;onMove&quot;, Action.class);</span>
+<span class="fc" id="L2292">        C component = getComponent();</span>
+<span class="fc" id="L2293">        component.addMouseListener(new MouseAdapter() {</span>
+            @Override public void mouseMoved(MouseEvent e) {
+<span class="nc" id="L2295">                _doApp(() -&gt; onMove.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L2296">            }</span>
+        });
+<span class="fc" id="L2298">        component.addMouseMotionListener(new MouseMotionAdapter() {</span>
+            @Override public void mouseMoved(MouseEvent e) {
+<span class="nc" id="L2300">                _doApp(() -&gt; onMove.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L2301">            }</span>
+        });
+<span class="fc" id="L2303">        return _this();</span>
+    }
+
+    /**
+     *  Use this to register and catch generic {@link MouseListener} based mouse wheel events on this UI component.
+     *  This method adds the provided consumer lambda to
+     *  an an{@link MouseListener} instance to the wrapped
+     *  button component.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param onWheel The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMouseWheelMove( Action&lt;SimpleDelegate&lt;C, MouseWheelEvent&gt;&gt; onWheel ) {
+<span class="nc" id="L2317">        NullUtil.nullArgCheck(onWheel, &quot;onWheel&quot;, Action.class);</span>
+<span class="nc" id="L2318">        C component = getComponent();</span>
+<span class="nc" id="L2319">        component.addMouseWheelListener(new MouseWheelListener() {</span>
+            @Override public void mouseWheelMoved(MouseWheelEvent e) {
+<span class="nc" id="L2321">                _doApp(() -&gt; onWheel.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L2322">            }</span>
+        });
+<span class="nc" id="L2324">        return _this();</span>
+    }
+
+    /**
+     *  Use this to register and catch mouse wheel up movement events on this UI component.
+     *  This method adds the provided consumer lambda to
+     *  an an{@link MouseListener} instance to the wrapped
+     *  button component.
+     *  &lt;br&gt;&lt;br&gt;
+     * @param onWheelUp The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMouseWheelUp( Action&lt;SimpleDelegate&lt;C, MouseWheelEvent&gt;&gt; onWheelUp ) {
+<span class="nc" id="L2337">        NullUtil.nullArgCheck(onWheelUp, &quot;onWheelUp&quot;, Action.class);</span>
+<span class="nc" id="L2338">        C component = getComponent();</span>
+<span class="nc" id="L2339">        component.addMouseWheelListener(new MouseWheelListener() {</span>
+            @Override public void mouseWheelMoved(MouseWheelEvent e) {
+<span class="nc bnc" id="L2341" title="All 2 branches missed.">                if( e.getWheelRotation() &lt; 0 ) {</span>
+<span class="nc" id="L2342">                    _doApp(() -&gt; onWheelUp.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+                }
+<span class="nc" id="L2344">            }</span>
+        });
+<span class="nc" id="L2346">        return _this();</span>
+    }
+
+    /**
+     *  Use this to register and catch mouse wheel down movement events on this UI component.
+     *  This method adds the provided consumer lambda to
+     *  an an{@link MouseListener} instance to the wrapped
+     *  button component.
+     *  &lt;br&gt;&lt;br&gt;
+     * @param onWheelDown The lambda instance which will be passed to the button component as {@link MouseListener}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMouseWheelDown( Action&lt;SimpleDelegate&lt;C, MouseWheelEvent&gt;&gt; onWheelDown ) {
+<span class="nc" id="L2359">        NullUtil.nullArgCheck(onWheelDown, &quot;onWheelDown&quot;, Action.class);</span>
+<span class="nc" id="L2360">        C component = getComponent();</span>
+<span class="nc" id="L2361">        component.addMouseWheelListener( e -&gt; {</span>
+<span class="nc bnc" id="L2362" title="All 2 branches missed.">                if ( e.getWheelRotation() &gt; 0 )</span>
+<span class="nc" id="L2363">                    _doApp(() -&gt; onWheelDown.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L2364">            });</span>
+<span class="nc" id="L2365">        return _this();</span>
+    }
+
+    /**
+     *  The provided lambda will be invoked when the component's size changes.
+     *  This will internally translate to a {@link ComponentListener} implementation.
+     *
+     * @param onResize The resize action which will be called when the underlying component changes size.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onResize( Action&lt;SimpleDelegate&lt;C, ComponentEvent&gt;&gt; onResize ) {
+<span class="fc" id="L2376">        NullUtil.nullArgCheck(onResize, &quot;onResize&quot;, Action.class);</span>
+<span class="fc" id="L2377">        C component = getComponent();</span>
+<span class="fc" id="L2378">        component.addComponentListener(new ComponentAdapter() {</span>
+            @Override public void componentResized(ComponentEvent e) {
+<span class="pc" id="L2380">                _doApp(()-&gt;onResize.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="fc" id="L2381">            }</span>
+        });
+<span class="fc" id="L2383">        return _this();</span>
+    }
+
+    /**
+     *  The provided lambda will be invoked when the component was moved.
+     *  This will internally translate to a {@link ComponentListener} implementation.
+     *
+     * @param onMoved The action lambda which will be executed once the component was moved / its position canged.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onMoved( Action&lt;SimpleDelegate&lt;C, ComponentEvent&gt;&gt; onMoved ) {
+<span class="fc" id="L2394">        NullUtil.nullArgCheck(onMoved, &quot;onMoved&quot;, Action.class);</span>
+<span class="fc" id="L2395">        C component = getComponent();</span>
+<span class="fc" id="L2396">        component.addComponentListener(new ComponentAdapter() {</span>
+            @Override public void componentMoved(ComponentEvent e) {
+<span class="nc" id="L2398">                _doApp(()-&gt;onMoved.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L2399">            }</span>
+        });
+<span class="fc" id="L2401">        return _this();</span>
+    }
+
+    /**
+     *  Adds the supplied {@link Action} wrapped in a {@link ComponentListener}
+     *  to the component, to receive those component events where the wrapped component becomes visible.
+     *
+     * @param onShown The {@link Action} which gets invoked when the component has been made visible.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onShown( Action&lt;SimpleDelegate&lt;C, ComponentEvent&gt;&gt; onShown ) {
+<span class="fc" id="L2412">        NullUtil.nullArgCheck(onShown, &quot;onShown&quot;, Action.class);</span>
+<span class="fc" id="L2413">        C component = getComponent();</span>
+<span class="fc" id="L2414">        component.addComponentListener(new ComponentAdapter() {</span>
+            @Override public void componentShown(ComponentEvent e) {
+<span class="pc" id="L2416">                _doApp(()-&gt;onShown.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="fc" id="L2417">            }</span>
+        });
+<span class="fc" id="L2419">        return _this();</span>
+    }
+
+    /**
+     *  Adds the supplied {@link Action} wrapped in a {@link ComponentListener}
+     *  to the component, to receive those component events where the wrapped component becomes invisible.
+     *
+     * @param onHidden The {@link Action} which gets invoked when the component has been made invisible.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onHidden( Action&lt;SimpleDelegate&lt;C, ComponentEvent&gt;&gt; onHidden ) {
+<span class="fc" id="L2430">        NullUtil.nullArgCheck(onHidden, &quot;onHidden&quot;, Action.class);</span>
+<span class="fc" id="L2431">        C component = getComponent();</span>
+<span class="fc" id="L2432">        component.addComponentListener(new ComponentAdapter() {</span>
+            @Override public void componentHidden(ComponentEvent e) {
+<span class="nc" id="L2434">                _doApp(()-&gt;onHidden.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L2435">            }</span>
+        });
+<span class="fc" id="L2437">        return _this();</span>
+    }
+
+    /**
+     * Adds the supplied {@link Action} wrapped in a {@link FocusListener}
+     * to the component, to receive those focus events where the wrapped component gains input focus.
+     *
+     * @param onFocus The {@link Action} which should be executed once the input focus was gained on the wrapped component.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onFocusGained( Action&lt;SimpleDelegate&lt;C, ComponentEvent&gt;&gt; onFocus ) {
+<span class="fc" id="L2448">        NullUtil.nullArgCheck(onFocus, &quot;onFocus&quot;, Action.class);</span>
+<span class="fc" id="L2449">        C component = getComponent();</span>
+<span class="fc" id="L2450">        component.addFocusListener(new FocusAdapter() {</span>
+            @Override public void focusGained(FocusEvent e) {
+<span class="nc" id="L2452">                _doApp(()-&gt;onFocus.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L2453">            }</span>
+        });
+<span class="fc" id="L2455">        return _this();</span>
+    }
+
+    /**
+     * Adds the supplied {@link Action} wrapped in a focus listener
+     * to receive those focus events where the wrapped component loses input focus.
+     *
+     * @param onFocus The {@link Action} which should be executed once the input focus was lost on the wrapped component.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onFocusLost( Action&lt;SimpleDelegate&lt;C, ComponentEvent&gt;&gt; onFocus ) {
+<span class="fc" id="L2466">        NullUtil.nullArgCheck(onFocus, &quot;onFocus&quot;, Action.class);</span>
+<span class="fc" id="L2467">        C component = getComponent();</span>
+<span class="fc" id="L2468">        component.addFocusListener(new FocusAdapter() {</span>
+            @Override public void focusLost(FocusEvent e) {
+<span class="nc" id="L2470">                _doApp(()-&gt;onFocus.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L2471">            }</span>
+        });
+<span class="fc" id="L2473">        return _this();</span>
+    }
+
+    /**
+     * Adds the supplied {@link Action} wrapped in a {@link KeyListener}
+     * to the component, to receive key events triggered when the wrapped component receives keyboard input.
+     * &lt;br&gt;&lt;br&gt;
+     * @param onKeyPressed The {@link Action} which will be executed once the wrapped component received a key press.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onKeyPressed( Action&lt;SimpleDelegate&lt;C, KeyEvent&gt;&gt; onKeyPressed ) {
+<span class="fc" id="L2484">        NullUtil.nullArgCheck(onKeyPressed, &quot;onKeyPressed&quot;, Action.class);</span>
+<span class="fc" id="L2485">        C component = getComponent();</span>
+<span class="fc" id="L2486">        component.addKeyListener(new KeyAdapter() {</span>
+            @Override public void keyPressed(KeyEvent e) {
+<span class="nc" id="L2488">                _doApp(()-&gt;onKeyPressed.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L2489">            }</span>
+        });
+<span class="fc" id="L2491">        return _this();</span>
+    }
+
+    /**
+     * Adds the supplied {@link Action} wrapped in a {@link KeyListener} to the component,
+     * to receive key events triggered when the wrapped component receives a particular
+     * keyboard input matching the provided {@link swingtree.input.Keyboard.Key}.
+     * &lt;br&gt;&lt;br&gt;
+     * @param key The {@link swingtree.input.Keyboard.Key} which should be matched to the key event.
+     * @param onKeyPressed The {@link Action} which will be executed once the wrapped component received the targeted key press.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I onPressed( Keyboard.Key key, Action&lt;SimpleDelegate&lt;C, KeyEvent&gt;&gt; onKeyPressed ) {
+<span class="fc" id="L2504">        NullUtil.nullArgCheck(key, &quot;key&quot;, Keyboard.Key.class);</span>
+<span class="fc" id="L2505">        NullUtil.nullArgCheck(onKeyPressed, &quot;onKeyPressed&quot;, Action.class);</span>
+<span class="fc" id="L2506">        C component = getComponent();</span>
+<span class="fc" id="L2507">        component.addKeyListener(new KeyAdapter() {</span>
+            @Override public void keyPressed( KeyEvent e ) {
+<span class="nc bnc" id="L2509" title="All 2 branches missed.">                if ( e.getKeyCode() == key.code )</span>
+<span class="nc" id="L2510">                    _doApp(()-&gt;onKeyPressed.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L2511">            }</span>
+        });
+<span class="fc" id="L2513">        return _this();</span>
+    }
+
+                             /**
+     * Adds the supplied {@link Action} wrapped in a {@link KeyListener}
+     * to the component, to receive key events triggered when the wrapped component receives keyboard input.
+     * &lt;br&gt;&lt;br&gt;
+     * @param onKeyReleased The {@link Action} which will be executed once the wrapped component received a key release.
+     * @return This very instance, which enables builder-style method chaining.
+     * @see #onKeyPressed(Action)
+     */
+    public final I onKeyReleased( Action&lt;SimpleDelegate&lt;C, KeyEvent&gt;&gt; onKeyReleased ) {
+<span class="fc" id="L2525">        NullUtil.nullArgCheck(onKeyReleased, &quot;onKeyReleased&quot;, Action.class);</span>
+<span class="fc" id="L2526">        C component = getComponent();</span>
+<span class="fc" id="L2527">        component.addKeyListener(new KeyAdapter() {</span>
+            @Override public void keyReleased(KeyEvent e) {
+<span class="nc" id="L2529">                _doApp(()-&gt;onKeyReleased.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood()))); }</span>
+        });
+<span class="fc" id="L2531">        return _this();</span>
+    }
+
+    /**
+     * Adds the supplied {@link Action} wrapped in a {@link KeyListener} to the component,
+     * to receive key events triggered when the wrapped component receives a particular
+     * keyboard input matching the provided {@link swingtree.input.Keyboard.Key}.
+     * &lt;br&gt;&lt;br&gt;
+     * @param key The {@link swingtree.input.Keyboard.Key} which should be matched to the key event.
+     * @param onKeyReleased The {@link Action} which will be executed once the wrapped component received the targeted key release.
+     * @return This very instance, which enables builder-style method chaining.
+     * @see #onKeyPressed(Action)
+     * @see #onKeyReleased(Action)
+     */
+    public final I onReleased( Keyboard.Key key, Action&lt;SimpleDelegate&lt;C, KeyEvent&gt;&gt; onKeyReleased ) {
+<span class="fc" id="L2546">        NullUtil.nullArgCheck(key, &quot;key&quot;, Keyboard.Key.class);</span>
+<span class="fc" id="L2547">        NullUtil.nullArgCheck(onKeyReleased, &quot;onKeyReleased&quot;, Action.class);</span>
+<span class="fc" id="L2548">        C component = getComponent();</span>
+<span class="fc" id="L2549">        component.addKeyListener(new KeyAdapter() {</span>
+            @Override public void keyReleased( KeyEvent e ) {
+<span class="nc bnc" id="L2551" title="All 2 branches missed.">                if ( e.getKeyCode() == key.code )</span>
+<span class="nc" id="L2552">                    _doApp(()-&gt;onKeyReleased.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L2553">            }</span>
+        });
+<span class="fc" id="L2555">        return _this();</span>
+    }
+
+    /**
+     * Adds the supplied {@link Action} wrapped in a {@link KeyListener}
+     * to the component, to receive key events triggered when the wrapped component receives keyboard input.
+     * &lt;br&gt;&lt;br&gt;
+     * @param onKeyTyped The {@link Action} which will be executed once the wrapped component received a key typed.
+     * @return This very instance, which enables builder-style method chaining.
+     * @see #onKeyPressed(Action)
+     * @see #onKeyReleased(Action)
+     */
+    public final I onKeyTyped( Action&lt;SimpleDelegate&lt;C, KeyEvent&gt;&gt; onKeyTyped ) {
+<span class="fc" id="L2568">        NullUtil.nullArgCheck(onKeyTyped, &quot;onKeyTyped&quot;, Action.class);</span>
+<span class="fc" id="L2569">        C component = getComponent();</span>
+<span class="fc" id="L2570">        _onKeyTyped( e -&gt;</span>
+<span class="nc" id="L2571">            _doApp(()-&gt;onKeyTyped.accept(new SimpleDelegate&lt;&gt;(component, e, this::getSiblinghood)))</span>
+        );
+<span class="fc" id="L2573">        return _this();</span>
+    }
+
+    /**
+     * Adds the supplied {@link Action} wrapped in a {@link KeyListener} to the component,
+     * to receive key events triggered when the wrapped component receives a particular
+     * keyboard input matching the provided {@link swingtree.input.Keyboard.Key}.
+     * &lt;br&gt;&lt;br&gt;
+     * @param key The {@link swingtree.input.Keyboard.Key} which should be matched to the key event.
+     * @param onKeyTyped The {@link Action} which will be executed once the wrapped component received the targeted key typed.
+     * @return This very instance, which enables builder-style method chaining.
+     * @see #onKeyPressed(Action)
+     * @see #onKeyReleased(Action)
+     * @see #onKeyTyped(Action)
+     */
+    public final I onTyped( Keyboard.Key key, Action&lt;SimpleDelegate&lt;C, KeyEvent&gt;&gt; onKeyTyped ) {
+<span class="fc" id="L2589">        NullUtil.nullArgCheck(key, &quot;key&quot;, Keyboard.Key.class);</span>
+<span class="fc" id="L2590">        NullUtil.nullArgCheck(onKeyTyped, &quot;onKeyTyped&quot;, Action.class);</span>
+<span class="fc" id="L2591">        C component = getComponent();</span>
+<span class="fc" id="L2592">        _onKeyTyped( e -&gt; {</span>
+<span class="nc bnc" id="L2593" title="All 2 branches missed.">            if ( e.getKeyCode() == key.code )</span>
+<span class="nc" id="L2594">                _doApp(()-&gt;onKeyTyped.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));</span>
+<span class="nc" id="L2595">        });</span>
+<span class="fc" id="L2596">        return _this();</span>
+    }
+
+    protected void _onKeyTyped( Consumer&lt;KeyEvent&gt; action ) {
+<span class="fc" id="L2600">        getComponent().addKeyListener(new KeyAdapter() {</span>
+            @Override public void keyTyped(KeyEvent e) {
+<span class="nc" id="L2602">                action.accept(e);</span>
+<span class="nc" id="L2603">            }</span>
+        });
+<span class="fc" id="L2605">    }</span>
+
+    /**
+     *  Use this to register periodic update actions which should be called
+     *  based on the provided {@code delay}! &lt;br&gt;
+     *  The following example produces a label which will display the current date.
+     *  &lt;pre&gt;{@code
+     *      UI.label(&quot;&quot;)
+     *          .doUpdates( 100, it -&gt; it.getComponent().setText(new Date().toString()) )
+     *  }&lt;/pre&gt;
+     *
+     * @param delay The delay in milliseconds between calling the provided {@link Action}.
+     * @param onUpdate The {@link Action} which should be called periodically.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I doUpdates( int delay, Action&lt;SimpleDelegate&lt;C, ActionEvent&gt;&gt; onUpdate ) {
+<span class="fc" id="L2621">        NullUtil.nullArgCheck(onUpdate, &quot;onUpdate&quot;, Action.class);</span>
+<span class="fc" id="L2622">        Timer timer = new Timer(delay, e -&gt; onUpdate.accept(new SimpleDelegate&lt;&gt;(getComponent(), e, this::getSiblinghood)));</span>
+        {
+<span class="fc" id="L2624">            java.util.List&lt;Timer&gt; timers = (java.util.List&lt;Timer&gt;) getComponent().getClientProperty(_TIMERS_KEY);</span>
+<span class="pc bpc" id="L2625" title="1 of 2 branches missed.">            if ( timers == null ) {</span>
+<span class="fc" id="L2626">                timers = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L2627">                getComponent().putClientProperty(_TIMERS_KEY, timers);</span>
+            }
+<span class="fc" id="L2629">            timers.add(timer);</span>
+        }
+<span class="fc" id="L2631">        timer.start();</span>
+<span class="fc" id="L2632">        return _this();</span>
+    }
+
+    @Override
+    protected void _add( JComponent component, Object conf ) {
+<span class="fc" id="L2637">        NullUtil.nullArgCheck(component, &quot;component&quot;, JComponent.class);</span>
+<span class="fc bfc" id="L2638" title="All 2 branches covered.">        if ( conf == null )</span>
+<span class="fc" id="L2639">            getComponent().add(component);</span>
+        else
+<span class="fc" id="L2641">            getComponent().add(component, conf);</span>
+<span class="fc" id="L2642">    }</span>
+
+    /**
+     *  Use this to nest builder nodes into this builder to effectively plug the wrapped {@link JComponent}s
+     *  into the {@link JComponent} type wrapped by this builder instance.
+     *  The first argument is expected to contain layout information for the layout manager of the wrapped {@link JComponent},
+     *  through the {@link JComponent#add(Component, Object)} method.
+     *  By default, the {@link MigLayout} is used.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param attr The additional mig-layout information which should be passed to the UI tree.
+     * @param builder A builder for another {@link JComponent} instance which ought to be added to the wrapped component type.
+     * @param &lt;T&gt; The type of the {@link JComponent} which is wrapped by the provided builder.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final &lt;T extends JComponent&gt; I add( String attr, UIForAnySwing&lt;?, T&gt; builder ) {
+<span class="fc" id="L2658">        return this.add(attr, new UIForAnySwing[]{builder});</span>
+    }
+
+    /**
+     *  Use this to nest builder nodes into this builder to effectively plug the wrapped {@link JComponent}s
+     *  into the {@link JComponent} type wrapped by this builder instance.
+     *  The first argument will be passed to the layout manager of the wrapped {@link JComponent},
+     *  through the {@link JComponent#add(Component, Object)} method.
+     *  By default, the {@link MigLayout} is used.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param attr The mig-layout attribute.
+     * @param builder A builder for another {@link JComponent} instance which ought to be added to the wrapped component type.
+     * @param &lt;T&gt; The type of the {@link JComponent} which is wrapped by the provided builder.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final &lt;T extends JComponent&gt; I add( CompAttr attr, UIForAnySwing&lt;?, T&gt; builder ) {
+<span class="fc" id="L2675">        return this.add(attr.toString(), new UIForAnySwing[]{builder});</span>
+    }
+
+    /**
+     *  Use this to nest builder types into this builder to effectively plug the wrapped {@link JComponent}s 
+     *  into the {@link JComponent} type wrapped by this builder instance.
+     *  The first argument represents layout attributes/constraints which will
+     *  be passed to the {@link LayoutManager} of the underlying {@link JComponent}.
+     *  through the {@link JComponent#add(Component, Object)} method.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param attr The additional mig-layout information which should be passed to the UI tree.
+     * @param builders An array of builders for a corresponding number of {@link JComponent} 
+     *                  type which ought to be added to the wrapped component type of this builder.
+     * @param &lt;B&gt; The builder type parameter, a subtype of {@link UIForAnySwing}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    @SafeVarargs
+    public final &lt;B extends UIForAnySwing&lt;?, ?&gt;&gt; I add(String attr, B... builders ) {
+<span class="fc" id="L2694">        LayoutManager layout = getComponent().getLayout();</span>
+<span class="fc bfc" id="L2695" title="All 4 branches covered.">        if ( _isBorderLayout(attr) &amp;&amp; !(layout instanceof BorderLayout) ) {</span>
+<span class="pc bpc" id="L2696" title="1 of 2 branches missed.">            if ( layout instanceof MigLayout )</span>
+<span class="fc" id="L2697">                log.warn(&quot;Layout ambiguity detected! Border layout constraint cannot be added to 'MigLayout'.&quot;);</span>
+<span class="fc" id="L2698">            getComponent().setLayout(new BorderLayout()); // The UI Maker tries to fill in the blanks!</span>
+        }
+<span class="fc bfc" id="L2700" title="All 2 branches covered.">        for ( UIForAnySwing&lt;?, ?&gt; b : builders ) _doAdd(b, attr);</span>
+<span class="fc" id="L2701">        return _this();</span>
+    }
+
+    /**
+     *  Use this to nest builder types into this builder to effectively plug the wrapped {@link JComponent}s
+     *  into the {@link JComponent} type wrapped by this builder instance.
+     *  The first argument will be passed to the {@link LayoutManager}
+     *  of the underlying {@link JComponent} to serve as layout constraints.
+     *  through the {@link JComponent#add(Component, Object)} method.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param attr The first mig-layout information which should be passed to the UI tree.
+     * @param builders An array of builders for a corresponding number of {@link JComponent}
+     *                  type which ought to be added to the wrapped component type of this builder.
+     * @param &lt;B&gt; The builder type parameter, a subtype of {@link UIForAnySwing}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    @SafeVarargs
+    public final &lt;B extends UIForAnySwing&lt;?, ?&gt;&gt; I add(CompAttr attr, B... builders ) {
+<span class="fc" id="L2720">        return this.add(attr.toString(), builders);</span>
+    }
+
+    /**
+     *  Use this to nest {@link JComponent} types into this builder to effectively plug the provided {@link JComponent}s
+     *  into the {@link JComponent} type wrapped by this builder instance.
+     *  The first argument represents layout attributes/constraints which will
+     *  be applied to the subsequently provided {@link JComponent} types.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param attr The additional layout information which should be passed to the UI tree.
+     * @param components A {@link JComponent}s array which ought to be added to the wrapped component type.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    @SafeVarargs
+    public final &lt;E extends JComponent&gt; I add( String attr, E... components ) {
+<span class="fc" id="L2736">        NullUtil.nullArgCheck(attr, &quot;conf&quot;, Object.class);</span>
+<span class="fc" id="L2737">        NullUtil.nullArgCheck(components, &quot;components&quot;, Object[].class);</span>
+<span class="fc bfc" id="L2738" title="All 2 branches covered.">        for( E component : components ) {</span>
+<span class="fc" id="L2739">            NullUtil.nullArgCheck(component, &quot;component&quot;, JComponent.class);</span>
+<span class="fc" id="L2740">            this.add(attr, UI.of(component));</span>
+        }
+<span class="fc" id="L2742">        return _this();</span>
+    }
+
+    /**
+     *  Use this to nest {@link JComponent} types into this builder to effectively plug the provided {@link JComponent}s
+     *  into the {@link JComponent} type wrapped by this builder instance.
+     *  The first 2 arguments will be joined by a comma and passed to the {@link LayoutManager}
+     *  of the underlying {@link JComponent} to serve as layout constraints.
+     *  &lt;br&gt;&lt;br&gt;
+     *
+     * @param attr The first layout information which should be passed to the UI tree.
+     * @param components A {@link JComponent}s array which ought to be added to the wrapped component type.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    @SafeVarargs
+    public final &lt;E extends JComponent&gt; I add( CompAttr attr, E... components ) {
+<span class="nc" id="L2758">        return this.add(attr.toString(), components);</span>
+    }
+
+    /**
+     *  This allows you to bind to a {@link swingtree.api.mvvm.Viewable}
+     *  implementation and automatically update the view when the view model changes.
+     *
+     * @param viewable A {@link sprouts.Val} property which holds a {@link Viewable} instance
+     *        that will be used to generate the view.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I add( Val&lt;? extends Viewable&gt; viewable ) {
+<span class="fc" id="L2770">        NullUtil.nullArgCheck(viewable, &quot;viewable&quot;, Val.class);</span>
+<span class="fc" id="L2771">        _addViewableProp(viewable, null);</span>
+<span class="fc" id="L2772">        return _this();</span>
+    }
+
+    /**
+     *  This allows you to bind to a property list of {@link Viewable}s
+     *  to automatically update the view when your view models change.
+     *
+     * @param viewables A {@link sprouts.Vals} list of {@link Viewable}s
+     *                  wrapped in a {@link sprouts.Val} properties.
+     *                  The Viewables will be used to generate the view.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I add( Vals&lt;? extends Viewable&gt; viewables ) {
+<span class="fc" id="L2785">        NullUtil.nullArgCheck(viewables, &quot;viewables&quot;, Vals.class);</span>
+<span class="fc" id="L2786">        _addViewableProps( viewables, null );</span>
+<span class="fc" id="L2787">        return _this();</span>
+    }
+
+    /**
+     *  This allows you to bind to a {@link Viewable}
+     *  implementation and automatically update the view when the view model changes.
+     *
+     * @param attr The layout information which should be passed to the UI tree.
+     * @param viewable A {@link sprouts.Val} property which holds a {@link Viewable} instance
+     *        that will be used to generate the view.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I add( String attr, Val&lt;? extends Viewable&gt; viewable ) {
+<span class="nc" id="L2800">        NullUtil.nullArgCheck(attr, &quot;attr&quot;, Object.class);</span>
+<span class="nc" id="L2801">        NullUtil.nullArgCheck(viewable, &quot;viewable&quot;, Val.class);</span>
+<span class="nc" id="L2802">        _addViewableProp(viewable, attr);</span>
+<span class="nc" id="L2803">        return _this();</span>
+    }
+
+    /**
+     *  This allows you to bind to a property list of {@link Viewable}s
+     *  to automatically update the view when your view models change.
+     *
+     * @param attr The layout information which should be passed to the UI tree.
+     * @param viewables A {@link sprouts.Vals} list of {@link Viewable}s
+     *                  wrapped in a {@link sprouts.Val} properties.
+     *                  The Viewables will be used to generate the view.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I add( String attr, Vals&lt;? extends Viewable&gt; viewables ) {
+<span class="nc" id="L2817">        NullUtil.nullArgCheck(attr, &quot;attr&quot;, Object.class);</span>
+<span class="nc" id="L2818">        NullUtil.nullArgCheck(viewables, &quot;viewables&quot;, Vals.class);</span>
+<span class="nc" id="L2819">        _addViewableProps( viewables, attr );</span>
+<span class="nc" id="L2820">        return _this();</span>
+    }
+
+    /**
+     *  This allows you to bind to a {@link Viewable}
+     *  implementation and automatically update the view when the view model changes.
+     *
+     * @param attr The layout information which should be passed to the UI tree.
+     * @param viewable A {@link sprouts.Val} property which holds a {@link Viewable} instance
+     *        that will be used to generate the view.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I add( CompAttr attr, Val&lt;? extends Viewable&gt; viewable ) {
+<span class="nc" id="L2833">        return this.add(attr.toString(), viewable);</span>
+    }
+
+    /**
+     *  This allows you to bind to a property list of {@link Viewable}s
+     *  to automatically update the view when your view models change.
+     *
+     * @param attr The layout information which should be passed to the UI tree.
+     * @param viewables A {@link sprouts.Vals} list of {@link Viewable}s
+     *                  wrapped in a {@link sprouts.Val} properties.
+     *                  The Viewables will be used to generate the view.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I add( CompAttr attr, Vals&lt;? extends Viewable&gt; viewables ) {
+<span class="nc" id="L2847">        return this.add(attr.toString(), viewables);</span>
+    }
+
+    protected void _addViewableProps( Vals&lt;? extends Viewable&gt; viewables, String attr ) {
+<span class="fc" id="L2851">        _onShow( viewables, delegate -&gt; {</span>
+            // we simply redo all the components.
+<span class="pc bpc" id="L2853" title="3 of 6 branches missed.">            switch ( delegate.changeType() ) {</span>
+<span class="nc" id="L2854">                case SET: _updateComponentAt(delegate.index(), delegate.newValue().get(), attr); break;</span>
+                case ADD:
+<span class="pc bpc" id="L2856" title="3 of 4 branches missed.">                    if ( delegate.index() &lt; 0 &amp;&amp; delegate.newValue().isEmpty() ) {</span>
+                        // This is basically a add all operation, so we clear the components first.
+<span class="nc" id="L2858">                        _clearComponents();</span>
+                        // and then we add all the components.
+<span class="nc bnc" id="L2860" title="All 2 branches missed.">                        for ( int i = 0; i &lt; delegate.vals().size(); i++ )</span>
+<span class="nc" id="L2861">                            _addComponentAt( i, delegate.vals().at(i).get(), attr );</span>
+                    }
+                    else
+<span class="fc" id="L2864">                        _addComponentAt(delegate.index(), delegate.newValue().get(), attr);</span>
+<span class="fc" id="L2865">                    break;</span>
+<span class="fc" id="L2866">                case REMOVE: _removeComponentAt(delegate.index()); break;</span>
+<span class="fc" id="L2867">                case CLEAR: _clearComponents(); break;</span>
+<span class="nc" id="L2868">                case NONE: break;</span>
+<span class="nc" id="L2869">                default: throw new IllegalStateException(&quot;Unknown type: &quot;+delegate.changeType());</span>
+            }
+<span class="fc" id="L2871">        });</span>
+<span class="fc" id="L2872">        viewables.forEach( v -&gt; add(v.createView(JComponent.class)) );</span>
+<span class="fc" id="L2873">    }</span>
+
+    private void _addViewableProp( Val&lt;? extends Viewable&gt; viewable, String attr ) {
+        // First we remember the index of the component which will be provided by the viewable dynamically.
+<span class="fc" id="L2877">        final int index = _childCount();</span>
+        // Then we add the component provided by the viewable to the list of children.
+<span class="pc bpc" id="L2879" title="1 of 2 branches missed.">        if ( attr == null ) {</span>
+<span class="fc bfc" id="L2880" title="All 2 branches covered.">            if ( viewable.isPresent() )</span>
+<span class="fc" id="L2881">                this.add(viewable.get().createView(JComponent.class));</span>
+            else
+<span class="fc" id="L2883">                this.add(new JPanel()); // We add a dummy component to the list of children.</span>
+        } else {
+<span class="nc bnc" id="L2885" title="All 2 branches missed.">            if ( viewable.isPresent() )</span>
+<span class="nc" id="L2886">                this.add(attr, viewable.get().createView(JComponent.class));</span>
+            else
+<span class="nc" id="L2888">                this.add(attr, new JPanel()); // We add a dummy component to the list of children.</span>
+        }
+        // Finally we add a listener to the viewable which will update the component when the viewable changes.
+<span class="fc" id="L2891">        _onShow( viewable, v -&gt; _updateComponentAt(index, v, attr) );</span>
+<span class="fc" id="L2892">    }</span>
+
+    private void _updateComponentAt( int index, Viewable v, String attr ) {
+<span class="fc" id="L2895">        component().ifPresent( c -&gt; {</span>
+<span class="pc bpc" id="L2896" title="1 of 2 branches missed.">            JComponent newComponent = v == null ? new JPanel() : UI.use(_eventProcessor, () -&gt; v.createView(JComponent.class) );</span>
+            // We remove the old component.
+<span class="fc" id="L2898">            c.remove(c.getComponent(index));</span>
+            // We add the new component.
+<span class="pc bpc" id="L2900" title="1 of 2 branches missed.">            if ( attr == null )</span>
+<span class="fc" id="L2901">                c.add(newComponent, index);</span>
+            else
+<span class="nc" id="L2903">                c.add(newComponent, attr, index);</span>
+            // We update the layout.
+<span class="fc" id="L2905">            c.revalidate();</span>
+<span class="fc" id="L2906">            c.repaint();</span>
+<span class="fc" id="L2907">        });</span>
+<span class="fc" id="L2908">    }</span>
+
+    private void _addComponentAt( int index, Viewable v, String attr ) {
+<span class="fc" id="L2911">        component().ifPresent( c -&gt; {</span>
+            // We add the new component.
+<span class="pc bpc" id="L2913" title="1 of 2 branches missed.">            if ( attr == null )</span>
+<span class="fc" id="L2914">                c.add(UI.use(_eventProcessor, () -&gt; v.createView(JComponent.class)), index);</span>
+            else
+<span class="nc" id="L2916">                c.add(UI.use(_eventProcessor, () -&gt; v.createView(JComponent.class)), attr, index);</span>
+            // We update the layout.
+<span class="fc" id="L2918">            c.revalidate();</span>
+<span class="fc" id="L2919">            c.repaint();</span>
+<span class="fc" id="L2920">        });</span>
+<span class="fc" id="L2921">    }</span>
+
+    private void _removeComponentAt( int index ) {
+<span class="fc" id="L2924">        component().ifPresent( c -&gt; {</span>
+            // We remove the old component.
+<span class="fc" id="L2926">            c.remove(c.getComponent(index));</span>
+            // We update the layout.
+<span class="fc" id="L2928">            c.revalidate();</span>
+<span class="fc" id="L2929">            c.repaint();</span>
+<span class="fc" id="L2930">        });</span>
+<span class="fc" id="L2931">    }</span>
+
+    private void _clearComponents() {
+<span class="fc" id="L2934">        component().ifPresent( c -&gt; {</span>
+            // We remove all components.
+<span class="fc" id="L2936">            c.removeAll();</span>
+            // We update the layout.
+<span class="fc" id="L2938">            c.revalidate();</span>
+<span class="fc" id="L2939">            c.repaint();</span>
+<span class="fc" id="L2940">        });</span>
+<span class="fc" id="L2941">    }</span>
+
+    private static boolean _isBorderLayout( Object o ) {
+<span class="fc bfc" id="L2944" title="All 2 branches covered.">        return BorderLayout.CENTER.equals(o) ||</span>
+<span class="fc bfc" id="L2945" title="All 2 branches covered.">                BorderLayout.PAGE_START.equals(o) ||</span>
+<span class="fc bfc" id="L2946" title="All 2 branches covered.">                BorderLayout.PAGE_END.equals(o) ||</span>
+<span class="fc bfc" id="L2947" title="All 2 branches covered.">                BorderLayout.LINE_END.equals(o) ||</span>
+<span class="fc bfc" id="L2948" title="All 2 branches covered.">                BorderLayout.LINE_START.equals(o) ||</span>
+<span class="pc bpc" id="L2949" title="1 of 2 branches missed.">                BorderLayout.EAST.equals(o)  ||</span>
+<span class="pc bpc" id="L2950" title="1 of 2 branches missed.">                BorderLayout.WEST.equals(o)  ||</span>
+<span class="pc bpc" id="L2951" title="1 of 2 branches missed.">                BorderLayout.NORTH.equals(o) ||</span>
+<span class="pc bpc" id="L2952" title="1 of 2 branches missed.">                BorderLayout.SOUTH.equals(o);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

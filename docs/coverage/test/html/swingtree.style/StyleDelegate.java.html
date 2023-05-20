@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StyleDelegate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">StyleDelegate.java</span></div><h1>StyleDelegate.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import javax.swing.*;
+import java.util.function.Function;
+
+/**
+ *  A {@link StyleDelegate} is a delegate for a {@link JComponent} and its {@link Style} configuration
+ *  used to apply further specify the style of said {@link JComponent}.
+ *  Instances of this will be exposed to you via the {@link swingtree.UIForAnySwing#withStyle(Function)}
+ *  method, where you can specify a lambda that takes a {@link StyleDelegate} and returns a
+ *  transformed {@link Style} object, as well as inside of {@link StyleSheet} extensions
+ *  where you can declare similar styling lambdas for {@link StyleTrait}s, which are
+ *  styling rules... &lt;br&gt;
+ *
+ * @param &lt;C&gt; The type of {@link JComponent} this {@link StyleDelegate} is for.
+ */
+public final class StyleDelegate&lt;C extends JComponent&gt;
+{
+    private final C _component;
+    private final Style _style;
+
+<span class="fc" id="L22">    public StyleDelegate( C component, Style style ) {</span>
+<span class="fc" id="L23">        _component = component;</span>
+<span class="fc" id="L24">        _style = style;</span>
+<span class="fc" id="L25">    }</span>
+
+<span class="nc" id="L27">    public C component() { return _component; }</span>
+
+<span class="fc" id="L29">    public Style style() { return _style; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

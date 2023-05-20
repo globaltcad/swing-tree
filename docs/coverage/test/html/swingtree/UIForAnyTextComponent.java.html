@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForAnyTextComponent.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForAnyTextComponent.java</span></div><h1>UIForAnyTextComponent.java</h1><pre class="source lang-java linenums">package swingtree;
+
+
+import sprouts.Action;
+import sprouts.Val;
+import sprouts.Var;
+
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.*;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.function.Consumer;
+
+/**
+ *  A swing tree builder node for {@link JTextComponent} instances.
+ * 	&lt;p&gt;
+ * 	&lt;b&gt;Please take a look at the &lt;a href=&quot;https://globaltcad.github.io/swing-tree/&quot;&gt;living swing-tree documentation&lt;/a&gt;
+ * 	where you can browse a large collection of examples demonstrating how to use the API of this class.&lt;/b&gt;
+ */
+public abstract class UIForAnyTextComponent&lt;I, C extends JTextComponent&gt; extends UIForAnySwing&lt;I, C&gt;
+{
+<span class="fc" id="L24">    private final java.util.List&lt;Action&lt;RemoveDelegate&gt;&gt;   removes = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L25">    private final java.util.List&lt;Action&lt;InsertDelegate&gt;&gt;   inserts = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L26">    private final java.util.List&lt;Action&lt;ReplaceDelegate&gt;&gt;  replaces = new ArrayList&lt;&gt;();</span>
+
+    /**
+     *  A custom document filter which is simply a lambda-rization wrapper which ought to make
+     *  the implementation of custom callbacks more convenient, because the user does not have to implement
+     *  all the methods provided by the {@link DocumentFilter}, but can simply pass a lambda for either one
+     *  of them.
+     */
+<span class="fc" id="L34">    private final DocumentFilter filter = new DocumentFilter()</span>
+<span class="fc" id="L35">    {</span>
+<span class="fc" id="L36">        private final C _component = getComponent();</span>
+
+        /**
+         * See documentation in {@link DocumentFilter}!
+         */
+        public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
+<span class="fc" id="L42">            removes.forEach(action -&gt; action.accept( new RemoveDelegate(_component, fb, offset, length) ) );</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">            if ( removes.isEmpty() ) fb.remove(offset, length);</span>
+<span class="fc" id="L44">        }</span>
+        /**
+         * See documentation in {@link DocumentFilter}!
+         */
+        public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+<span class="fc" id="L49">            inserts.forEach(action -&gt; action.accept( new InsertDelegate(_component, fb, offset, string.length(), string, attr) ) );</span>
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">            if ( inserts.isEmpty() ) fb.insertString(offset, string, attr);</span>
+<span class="fc" id="L51">        }</span>
+        /**
+         * See documentation in {@link DocumentFilter}!
+         */
+        public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+<span class="fc" id="L56">            replaces.forEach(action -&gt; action.accept(new ReplaceDelegate(_component, fb, offset, length, text, attrs)) );</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">            if ( replaces.isEmpty() ) fb.replace(offset, length, text, attrs);</span>
+<span class="fc" id="L58">        }</span>
+    };
+
+<span class="fc" id="L61">    protected UIForAnyTextComponent(C component) { super(component); }</span>
+
+    /**
+     * Sets the text of the wrapped &lt;code&gt;{@link TextComponent}&lt;/code&gt;
+     * to the specified text. If the text is &lt;code&gt;null&lt;/code&gt;
+     * or empty, has the effect of simply deleting the old text.
+     * When text has been inserted, the resulting caret location
+     * is determined by the implementation of the caret class.
+     *
+     * &lt;p&gt;
+     * Note that text is not a bound property, so no {@link java.beans.PropertyChangeEvent}
+     * is fired when it changes. To listen for changes to the text,
+     * register action lambdas through {@link #onTextChange(Consumer)} or
+     * use {@link DocumentListener} directly.
+     * &lt;/p&gt;
+     *
+     * @param text The new text to be set for the wrapped text component type.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withText( String text ) {
+<span class="fc" id="L81">        NullUtil.nullArgCheck(text, &quot;text&quot;, String.class, &quot;Please use an empty string instead of null!&quot;);</span>
+<span class="fc" id="L82">        getComponent().setText(text);</span>
+<span class="fc" id="L83">        return _this();</span>
+    }
+
+    /**
+     * Binds the text of the wrapped &lt;code&gt;{@link TextComponent}&lt;/code&gt; to
+     * the specified {@link Val} property instance so that the text of the wrapped
+     * text component is dynamically updated whenever the value of the property changes.
+     * &lt;p&gt;
+     *     Note that the text of the wrapped text component is only updated if the new value
+     *     is different from the old value. This is to avoid infinite feedback loops.
+     * &lt;br&gt;
+     * @param val The property instance to bind the text of the wrapped text component to.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if the specified property is &lt;code&gt;null&lt;/code&gt;.
+     * @throws IllegalArgumentException if the specified property allows &lt;code&gt;null&lt;/code&gt; values.
+     */
+    public final I withText( Val&lt;String&gt; val ) {
+<span class="nc" id="L100">        NullUtil.nullArgCheck(val, &quot;val&quot;, Val.class);</span>
+<span class="nc" id="L101">        _onShow(val, v -&gt; getComponent().setText(v) );</span>
+<span class="nc" id="L102">        return withText( val.orElseThrow() );</span>
+    }
+
+    /**
+     *  Binds the text of the wrapped &lt;code&gt;{@link TextComponent}&lt;/code&gt; to
+     *  the specified {@link Val} property instance so that the text of the wrapped
+     *  text component is dynamically updated whenever the value of the property changes.
+     *  &lt;p&gt;
+     *  This method is the same as {@link #withText(Val)} except that the {@link Var}
+     *  property is used instead of the {@link Val} property which allows for the
+     *  text of the wrapped text component to be changed by the user.
+     *
+     * @param text The property instance to bind the text of the wrapped text component to.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if the specified property is &lt;code&gt;null&lt;/code&gt;.
+     * @throws IllegalArgumentException if the specified property allows &lt;code&gt;null&lt;/code&gt; values.
+     */
+    public final I withText( Var&lt;String&gt; text ) {
+<span class="fc" id="L120">        NullUtil.nullPropertyCheck(text, &quot;text&quot;, &quot;Use an empty string instead of null!&quot;);</span>
+<span class="fc" id="L121">        _onShow( text, newText -&gt; {</span>
+<span class="fc" id="L122">            C c = getComponent();</span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">            if ( !Objects.equals(c.getText(), newText) ) // avoid infinite recursion or some other Swing weirdness</span>
+<span class="fc" id="L124">                c.setText(newText);</span>
+<span class="fc" id="L125">        });</span>
+<span class="fc" id="L126">        _onTextChange( e -&gt; {</span>
+            try {
+<span class="fc" id="L128">                String newText = e.getDocument().getText(0, e.getDocument().getLength());</span>
+<span class="fc" id="L129">                _doApp(newText, t -&gt; {</span>
+<span class="fc bfc" id="L130" title="All 2 branches covered.">                    if ( UI.thisIsUIThread() )</span>
+<span class="fc" id="L131">                        UI.runLater( () -&gt; {</span>
+                            try {
+<span class="fc" id="L133">                                text.act(e.getDocument().getText(0, e.getDocument().getLength()));</span>
+<span class="nc" id="L134">                            } catch (BadLocationException ex) {</span>
+<span class="nc" id="L135">                                throw new RuntimeException(ex);</span>
+<span class="fc" id="L136">                            }</span>
+<span class="fc" id="L137">                        }); // avoid attempt to mutate in notification</span>
+                        /*
+                            We apply the text to the property in the next EDT cycle,
+                            which is important to avoid mutating the property in a notification.
+                            Because if a user decides to rebroadcast the text property in the 'onAct' callback,
+                            then the text component will receive that new text while it is still in the middle of
+                            document mutation, which is not allowed by Swing!
+                        */
+                    else
+<span class="fc" id="L146">                        text.act(t);</span>
+<span class="fc" id="L147">                });</span>
+<span class="nc" id="L148">            } catch (BadLocationException ex) {</span>
+<span class="nc" id="L149">                throw new RuntimeException(ex);</span>
+<span class="fc" id="L150">            }</span>
+<span class="fc" id="L151">        });</span>
+<span class="fc" id="L152">        return withText( text.orElseThrow() );</span>
+    }
+
+    /**
+     *  Use this to set the font of the wrapped {@link JTextComponent}.
+     * @param font The font of the text which should be displayed on the text component.
+     * @return This builder instance, to allow for method chaining.
+     * @throws IllegalArgumentException if {@code font} is {@code null}.
+     */
+    public final I withFont( Font font ) {
+<span class="nc" id="L162">        NullUtil.nullArgCheck(font, &quot;font&quot;, Font.class);</span>
+<span class="nc" id="L163">        this.getComponent().setFont( font );</span>
+<span class="nc" id="L164">        return _this();</span>
+    }
+
+    /**
+     *  Use this to dynamically set the font of the wrapped {@link JTextComponent}
+     *  through the provided view model property.
+     *  When the font wrapped by the provided property changes,
+     *  then so does the font of this text component.
+     *
+     * @param font The font property of the text which should be displayed on the text component.
+     * @return This builder instance, to allow for method chaining.
+     * @throws IllegalArgumentException if {@code font} is {@code null}.
+     * @throws IllegalArgumentException if {@code font} is a property which can wrap {@code null}.
+     */
+    public final I withFont( Val&lt;Font&gt; font ) {
+<span class="nc" id="L179">        NullUtil.nullArgCheck(font, &quot;font&quot;, Val.class);</span>
+<span class="nc" id="L180">        NullUtil.nullPropertyCheck(font, &quot;font&quot;, &quot;Use the default font of this component instead of null!&quot;);</span>
+<span class="nc" id="L181">        _onShow( font, v -&gt; withFont(v) );</span>
+<span class="nc" id="L182">        return withFont( font.orElseThrow() );</span>
+    }
+
+    /**
+     * The provided {@link UI.HorizontalDirection} translates to {@link ComponentOrientation}
+     * instances which are used to align the elements or text within the wrapped {@link JTextComponent}.
+     * {@link LayoutManager} and {@link Component}
+     * subclasses will use this property to
+     * determine how to lay out and draw components.
+     * &lt;p&gt;
+     * Note: This method indirectly changes layout-related information, and therefore,
+     * invalidates the component hierarchy.
+     *
+     * @param direction The text orientation type which should be used.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withTextOrientation( UI.HorizontalDirection direction ) {
+<span class="fc" id="L199">        NullUtil.nullArgCheck(direction, &quot;direction&quot;, UI.HorizontalDirection.class);</span>
+<span class="fc" id="L200">        getComponent().setComponentOrientation(direction.forTextOrientation());</span>
+<span class="fc" id="L201">        return _this();</span>
+    }
+
+    /**
+     * The provided {@link UI.HorizontalDirection} property translates to {@link ComponentOrientation}
+     * instances which are used to align the elements or text within the wrapped {@link JTextComponent}.
+     * {@link LayoutManager} and {@link Component}
+     * subclasses will use this property to
+     * determine how to lay out and draw components.
+     * &lt;p&gt;
+     * Note: This method indirectly changes layout-related information, and therefore,
+     * invalidates the component hierarchy.
+     *
+     * @param direction The text orientation type which should be used.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I withHorizontalTextOrientation( Val&lt;UI.HorizontalDirection&gt; direction ) {
+<span class="nc" id="L218">        NullUtil.nullArgCheck( direction, &quot;direction&quot;, Val.class );</span>
+<span class="nc" id="L219">        NullUtil.nullPropertyCheck(direction, &quot;direction&quot;, &quot;Null is not a valid value for the text orientation!&quot;);</span>
+<span class="nc" id="L220">        _onShow( direction, v -&gt; {</span>
+<span class="nc" id="L221">            withTextOrientation(v);</span>
+<span class="nc" id="L222">            getComponent().validate();</span>
+<span class="nc" id="L223">        });</span>
+<span class="nc" id="L224">        return withTextOrientation(direction.orElseThrow());</span>
+    }
+
+    /**
+     *  Use this to modify the components' modifiability.
+     *
+     * @param isEditable The flag determining if the underlying {@link JTextComponent} should be editable or not.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I isEditableIf( boolean isEditable ) {
+<span class="fc" id="L234">        getComponent().setEditable(isEditable);</span>
+<span class="fc" id="L235">        return _this();</span>
+    }
+
+
+    /**
+     *  Use this to register any change in the contents of the text component including both
+     *  the displayed text and its attributes.
+     *
+     * @param action An action which will be executed when the text or its attributes in the underlying {@link JTextComponent} changes.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I onContentChange( Consumer&lt;SimpleDelegate&lt;JTextComponent, DocumentEvent&gt;&gt; action ) {
+<span class="fc" id="L247">        C component = getComponent();</span>
+<span class="fc" id="L248">        component.getDocument().addDocumentListener(new DocumentListener() {</span>
+            @Override public void insertUpdate(DocumentEvent e)  {
+<span class="pc" id="L250">                _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));}</span>
+            @Override public void removeUpdate(DocumentEvent e)  {
+<span class="pc" id="L252">                _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));}</span>
+            @Override public void changedUpdate(DocumentEvent e) {
+<span class="nc" id="L254">                _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;(component, e, ()-&gt;getSiblinghood())));}</span>
+        });
+<span class="fc" id="L256">        return _this();</span>
+    }
+
+    /**
+     *  Use this to register if the text in this text component changes.
+     *  This does not include style attributes like font size.
+     *
+     * @param action An action which will be executed when the text string in the underlying {@link JTextComponent} changes.
+     * @return This very builder to allow for method chaining.
+     */
+    public final I onTextChange( Consumer&lt;SimpleDelegate&lt;JTextComponent, DocumentEvent&gt;&gt; action ) {
+<span class="fc" id="L267">        NullUtil.nullArgCheck(action, &quot;action&quot;, Consumer.class);</span>
+<span class="fc" id="L268">        C component = getComponent();</span>
+<span class="pc" id="L269">        _onTextChange( e -&gt; _doApp( () -&gt; action.accept(new SimpleDelegate&lt;&gt;(component, e, () -&gt; getSiblinghood() ))) );</span>
+<span class="fc" id="L270">        return _this();</span>
+    }
+
+    protected final void _onTextChange( Consumer&lt;DocumentEvent&gt; action ) {
+<span class="fc" id="L274">        getComponent().getDocument().addDocumentListener(new DocumentListener() {</span>
+<span class="fc" id="L275">            @Override public void insertUpdate(DocumentEvent e) { action.accept(e); }</span>
+<span class="fc" id="L276">            @Override public void removeUpdate(DocumentEvent e) { action.accept(e); }</span>
+<span class="nc" id="L277">            @Override public void changedUpdate(DocumentEvent e) {}</span>
+        });
+<span class="fc" id="L279">    }</span>
+
+    /**
+     * @param action An action which will be executed in case the underlying
+     *               component supports text filtering (The underlying document is an {@link AbstractDocument}).
+     */
+    private void _ifFilterable( Runnable action ) {
+<span class="pc bpc" id="L286" title="1 of 2 branches missed.">        if ( getComponent().getDocument() instanceof AbstractDocument ) {</span>
+<span class="fc" id="L287">            action.run();</span>
+<span class="fc" id="L288">            AbstractDocument doc = (AbstractDocument)getComponent().getDocument();</span>
+<span class="fc" id="L289">            doc.setDocumentFilter(filter);</span>
+        }
+<span class="fc" id="L291">    }</span>
+
+    /**
+     * @param action A {@link Action} lambda which will be called when parts (or all) of the text in
+     *               the underlying text component gets removed.
+     *
+     * @return This very builder to allow for method chaining.
+     */
+    public final I onTextRemove( Action&lt;RemoveDelegate&gt; action ) {
+<span class="fc" id="L300">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L301">        _ifFilterable( () -&gt; this.removes.add(action) );</span>
+<span class="fc" id="L302">        return _this();</span>
+    }
+
+    /**
+     * @param action A {@link Action} lambda which will be called when new text gets inserted
+     *               into the underlying text component.
+     *
+     * @return This very builder to allow for method chaining.
+     */
+    public final I onTextInsert( Action&lt;InsertDelegate&gt; action ) {
+<span class="fc" id="L312">        _ifFilterable( () -&gt; this.inserts.add(action) );</span>
+<span class="fc" id="L313">        return _this();</span>
+    }
+
+    /**
+     * @param action A {@link Action} lambda which will be called when the text in
+     *               the underlying text component gets replaced.
+     *
+     * @return This very builder to allow for method chaining.
+     */
+    public final I onTextReplace( Action&lt;ReplaceDelegate&gt; action ) {
+<span class="fc" id="L323">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L324">        _ifFilterable( () -&gt; this.replaces.add(action) );</span>
+<span class="fc" id="L325">        return _this();</span>
+    }
+
+
+    public static abstract class AbstractDelegate
+    {
+        private final JTextComponent textComponent;
+        private final DocumentFilter.FilterBypass filterBypass;
+        private final int offset;
+        private final int length;
+
+<span class="fc" id="L336">        protected AbstractDelegate(JTextComponent textComponent, DocumentFilter.FilterBypass filterBypass, int offset, int length) {</span>
+<span class="fc" id="L337">            this.textComponent = textComponent;</span>
+<span class="fc" id="L338">            this.filterBypass = filterBypass;</span>
+<span class="fc" id="L339">            this.offset = offset;</span>
+<span class="fc" id="L340">            this.length = length;</span>
+<span class="fc" id="L341">        }</span>
+
+        public JTextComponent getComponent() {
+            // We make sure that only the Swing thread can access the component:
+<span class="pc bpc" id="L345" title="1 of 2 branches missed.">            if ( UI.thisIsUIThread() ) return textComponent;</span>
+            else
+<span class="nc" id="L347">                throw new IllegalStateException(</span>
+                        &quot;Text component can only be accessed by the Swing thread.&quot;
+                    );
+        }
+<span class="nc" id="L351">        public DocumentFilter.FilterBypass getFilterBypass() { return filterBypass; }</span>
+<span class="fc" id="L352">        public int getOffset() { return offset; }</span>
+<span class="fc" id="L353">        public int getLength() { return length; }</span>
+
+    }
+
+    public static final class RemoveDelegate extends AbstractDelegate
+    {
+        private RemoveDelegate(JTextComponent textComponent, DocumentFilter.FilterBypass filterBypass, int offset, int length) {
+<span class="fc" id="L360">            super(textComponent, filterBypass, offset, length);</span>
+<span class="fc" id="L361">        }</span>
+
+        public String getTextToBeRemoved() {
+            try {
+<span class="fc" id="L365">                return getComponent().getDocument().getText(getOffset(), getLength());</span>
+<span class="nc" id="L366">            } catch (BadLocationException e) {</span>
+<span class="nc" id="L367">                throw new IllegalStateException(&quot;Could not get text to be removed!&quot;, e);</span>
+            }
+        }
+    }
+
+    public static final class InsertDelegate extends AbstractDelegate
+    {
+        private final String text;
+        private final AttributeSet attributeSet;
+
+        private InsertDelegate(JTextComponent textComponent, DocumentFilter.FilterBypass filterBypass, int offset, int length, String text, AttributeSet attributeSet) {
+<span class="fc" id="L378">            super(textComponent, filterBypass, offset, length);</span>
+<span class="fc" id="L379">            this.text = text;</span>
+<span class="fc" id="L380">            this.attributeSet = attributeSet;</span>
+<span class="fc" id="L381">        }</span>
+<span class="fc" id="L382">        public String getTextToBeInserted() { return text; }</span>
+<span class="nc" id="L383">        public AttributeSet attributeSet() { return attributeSet; }</span>
+    }
+
+    public static final class ReplaceDelegate extends AbstractDelegate
+    {
+        private final String text;
+        private final AttributeSet attributeSet;
+
+        private ReplaceDelegate(JTextComponent textComponent, DocumentFilter.FilterBypass filterBypass, int offset, int length, String text, AttributeSet attributeSet) {
+<span class="fc" id="L392">            super(textComponent, filterBypass, offset, length);</span>
+<span class="fc" id="L393">            this.text = text;</span>
+<span class="fc" id="L394">            this.attributeSet = attributeSet;</span>
+<span class="fc" id="L395">        }</span>
+<span class="nc" id="L396">        public String getText() { return text; }</span>
+        public String getReplacementText() {
+            try {
+<span class="fc" id="L399">                return getComponent().getDocument().getText(getOffset(), getLength());</span>
+<span class="nc" id="L400">            } catch (BadLocationException e) {</span>
+<span class="nc" id="L401">                throw new IllegalStateException(&quot;Could not get text to be removed!&quot;, e);</span>
+            }
+        }
+<span class="nc" id="L404">        public AttributeSet getAttributeSet() { return attributeSet; }</span>
+    }
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForAnyToggleButton.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForAnyToggleButton.java</span></div><h1>UIForAnyToggleButton.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import sprouts.Var;
+
+import javax.swing.*;
+
+/**
+ *  An abstract precursor for swing tree builder nodes for {@link JToggleButton} instances.
+ *  Extend this class to create a builder node for a custom {@link JToggleButton} subtype.
+ *
+ * @param &lt;I&gt; The type of this builder node.
+ * @param &lt;B&gt; The type of the {@link JToggleButton} subtype which will be wrapped by this builder node.
+ */
+public abstract class UIForAnyToggleButton&lt;I, B extends JToggleButton&gt; extends UIForAnyButton&lt;I, B&gt;
+{
+<span class="fc" id="L16">    protected UIForAnyToggleButton(B component ) { super(component); }</span>
+
+    /**
+     *  Use this to dynamically bind to an enum based {@link sprouts.Var}
+     *  instance which will be used to dynamically model the selection state of the
+     *  wrapped {@link JToggleButton} type by checking
+     *  weather the property matches the provided enum or not.
+     *
+     * @param state The reference {@link Enum} which this {@link JToggleButton} should represent.
+     * @param selection The {@link sprouts.Var} instance which will be used
+     *                  to dynamically model the selection state of the wrapped {@link JToggleButton} type.
+     * @throws IllegalArgumentException if {@code selected} is {@code null}.
+     */
+    public final &lt;E extends Enum&lt;E&gt;&gt; I isSelectedIf( E state, Var&lt;E&gt; selection ) {
+<span class="nc" id="L30">        NullUtil.nullArgCheck(state, &quot;state&quot;, Enum.class);</span>
+<span class="nc" id="L31">        NullUtil.nullArgCheck(selection, &quot;selection&quot;, Var.class);</span>
+<span class="nc" id="L32">        NullUtil.nullPropertyCheck(selection, &quot;selection&quot;, &quot;Null is not a valid selection state.&quot;);</span>
+<span class="nc" id="L33">        this.isSelectedIf( state.equals(selection.get()) );</span>
+<span class="nc" id="L34">        _onShow( selection, s -&gt; isSelectedIf( state.equals(selection.get()) ) );</span>
+<span class="nc" id="L35">        B component = getComponent();</span>
+<span class="nc" id="L36">        String currentText = component.getText();</span>
+<span class="nc bnc" id="L37" title="All 4 branches missed.">        if ( currentText == null || currentText.isEmpty() )</span>
+<span class="nc" id="L38">            component.setText( state.toString() );</span>
+
+        // When the user clicks the button, we update the selection property!
+        // But only if the button is selected, otherwise we'll ignore the click.
+        // And we also trigger &quot;set&quot; events for the button, so that other buttons
+        // can be updated to reflect the new selection state.
+<span class="nc" id="L44">        _onChange( event -&gt; {</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">            if ( component.isSelected() )</span>
+<span class="nc" id="L46">                selection.act( state ).fireSet();</span>
+<span class="nc" id="L47">        });</span>
+
+<span class="nc" id="L49">        return (I) this;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

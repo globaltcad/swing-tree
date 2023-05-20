@@ -1,0 +1,540 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StyleRenderer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">StyleRenderer.java</span></div><h1>StyleRenderer.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.geom.Area;
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.RoundRectangle2D;
+import java.util.Objects;
+
+/**
+ *  This used to smoothly render
+ *  custom graphics on top of Swing components without requiring
+ *  the user to override the paint method of the component.
+ *  This is especially important to allow for declarative UI.
+ */
+public class StyleRenderer&lt;C extends JComponent&gt;
+{
+<span class="nc" id="L18">    private enum Corner { TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT }</span>
+<span class="nc" id="L19">    private enum Side { TOP, RIGHT, BOTTOM, LEFT }</span>
+
+    private final Graphics2D _g2d;
+    private final C _comp;
+
+
+<span class="nc" id="L25">    public StyleRenderer(Graphics2D g2d, C comp) {</span>
+<span class="nc" id="L26">        _g2d = Objects.requireNonNull(g2d);</span>
+<span class="nc" id="L27">        _comp = Objects.requireNonNull(comp);</span>
+<span class="nc" id="L28">    }</span>
+
+    public void renderStyle( Style style )
+    {
+<span class="nc" id="L32">        style.background().foundationColor().ifPresent(outerColor -&gt; {</span>
+<span class="nc" id="L33">            _fillOuterBackground(style, outerColor);</span>
+<span class="nc" id="L34">        });</span>
+<span class="nc" id="L35">        style.background().color().ifPresent(color -&gt; {</span>
+<span class="nc" id="L36">            _fillBackground(style, color);</span>
+<span class="nc" id="L37">        });</span>
+<span class="nc" id="L38">        style.background().renderer().ifPresent(renderer -&gt; {</span>
+<span class="nc" id="L39">            renderer.accept(_g2d);</span>
+<span class="nc" id="L40">        });</span>
+<span class="nc" id="L41">        style.shadow().color().ifPresent(color -&gt; {</span>
+<span class="nc" id="L42">            _renderShadows(style, _comp, _g2d, color);</span>
+<span class="nc" id="L43">        });</span>
+<span class="nc" id="L44">        style.border().color().ifPresent( color -&gt; {</span>
+<span class="nc" id="L45">            _drawBorder(style, color);</span>
+<span class="nc" id="L46">        });</span>
+<span class="nc" id="L47">    }</span>
+
+    private void _drawBorder(Style style, Color color) {
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        if ( style.border().width() &gt; 0 ) {</span>
+            // The background box is calculated from the margins and border radius:
+<span class="nc" id="L52">            int left      = Math.max(style.margin().left().orElse(0),     0);</span>
+<span class="nc" id="L53">            int top       = Math.max(style.margin().top().orElse(0),      0);</span>
+<span class="nc" id="L54">            int right     = Math.max(style.margin().right().orElse(0),    0);</span>
+<span class="nc" id="L55">            int bottom    = Math.max(style.margin().bottom().orElse(0),   0);</span>
+<span class="nc" id="L56">            int arcWidth  = Math.max(style.border().arcWidth(), 0);</span>
+<span class="nc" id="L57">            int arcHeight = Math.max(style.border().arcHeight(),0);</span>
+<span class="nc" id="L58">            int width     = _comp.getWidth();</span>
+<span class="nc" id="L59">            int height    = _comp.getHeight();</span>
+<span class="nc" id="L60">            _g2d.setColor(color);</span>
+<span class="nc" id="L61">            _g2d.setStroke(new BasicStroke(style.border().width()));</span>
+<span class="nc" id="L62">            _g2d.drawRoundRect(</span>
+                    left, top,
+                    width  - left - right - 1,
+                    height - top - bottom - 1,
+<span class="nc bnc" id="L66" title="All 2 branches missed.">                    (arcWidth  + (style.border().width() == 1 ? 0 : style.border().width()+1)),</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">                    (arcHeight + (style.border().width() == 1 ? 0 : style.border().width()+1))</span>
+                );
+        }
+<span class="nc" id="L70">    }</span>
+
+    private void _fillBackground( Style style, Color color ) {
+        // Check if the color is transparent
+<span class="nc bnc" id="L74" title="All 2 branches missed.">        if ( color.getAlpha() == 0 )</span>
+<span class="nc" id="L75">            return;</span>
+
+        // The background box is calculated from the margins and border radius:
+<span class="nc" id="L78">        int left      = Math.max(style.margin().left().orElse(0),     0);</span>
+<span class="nc" id="L79">        int top       = Math.max(style.margin().top().orElse(0),      0);</span>
+<span class="nc" id="L80">        int right     = Math.max(style.margin().right().orElse(0),    0);</span>
+<span class="nc" id="L81">        int bottom    = Math.max(style.margin().bottom().orElse(0),   0);</span>
+<span class="nc" id="L82">        int arcWidth  = Math.max(style.border().arcWidth(), 0);</span>
+<span class="nc" id="L83">        int arcHeight = Math.max(style.border().arcHeight(),0);</span>
+<span class="nc" id="L84">        int width     = _comp.getWidth();</span>
+<span class="nc" id="L85">        int height    = _comp.getHeight();</span>
+
+<span class="nc" id="L87">        _g2d.setColor(color);</span>
+<span class="nc" id="L88">        _g2d.fillRoundRect(</span>
+                left, top, width - left - right, height - top - bottom,
+                arcWidth, arcHeight
+            );
+<span class="nc" id="L92">    }</span>
+
+    private void _fillOuterBackground( Style style, Color color ) {
+        // Check if the color is transparent
+<span class="nc bnc" id="L96" title="All 2 branches missed.">        if ( color.getAlpha() == 0 )</span>
+<span class="nc" id="L97">            return;</span>
+
+        // The background box is calculated from the margins and border radius:
+<span class="nc" id="L100">        int left      = Math.max(style.margin().left().orElse(0),   0);</span>
+<span class="nc" id="L101">        int top       = Math.max(style.margin().top().orElse(0),    0);</span>
+<span class="nc" id="L102">        int right     = Math.max(style.margin().right().orElse(0),  0);</span>
+<span class="nc" id="L103">        int bottom    = Math.max(style.margin().bottom().orElse(0), 0);</span>
+<span class="nc" id="L104">        int arcWidth  = Math.max(style.border().arcWidth(), 0);</span>
+<span class="nc" id="L105">        int arcHeight = Math.max(style.border().arcHeight(),0);</span>
+<span class="nc" id="L106">        int width     = _comp.getWidth();</span>
+<span class="nc" id="L107">        int height    = _comp.getHeight();</span>
+
+<span class="nc" id="L109">        Rectangle2D.Float outerRect = new Rectangle2D.Float(0, 0, width, height);</span>
+<span class="nc" id="L110">        RoundRectangle2D.Float innerRect = new RoundRectangle2D.Float(</span>
+                                                        left, top,
+                                                        width - left - right,
+                                                        height - top - bottom,
+                                                        arcWidth, arcHeight
+                                                    );
+
+<span class="nc" id="L117">        Area outer = new Area(outerRect);</span>
+<span class="nc" id="L118">        Area inner = new Area(innerRect);</span>
+<span class="nc" id="L119">        outer.subtract(inner);</span>
+
+<span class="nc" id="L121">        _g2d.setColor(color);</span>
+<span class="nc" id="L122">        _g2d.fill(outer);</span>
+<span class="nc" id="L123">    }</span>
+
+    private static void _renderShadows(
+        Style style,
+        JComponent comp,
+        Graphics2D g2d,
+        Color shadowColor
+    ) {
+        // First let's check if we need to render any shadows at all
+        // Is the shadow color transparent?
+<span class="nc bnc" id="L133" title="All 2 branches missed.">        if ( shadowColor.getAlpha() == 0 )</span>
+<span class="nc" id="L134">            return;</span>
+
+        // The background box is calculated from the margins and border radius:
+<span class="nc" id="L137">        int left      = Math.max(style.margin().left().orElse(0),   0);</span>
+<span class="nc" id="L138">        int top       = Math.max(style.margin().top().orElse(0),    0);</span>
+<span class="nc" id="L139">        int right     = Math.max(style.margin().right().orElse(0),  0);</span>
+<span class="nc" id="L140">        int bottom    = Math.max(style.margin().bottom().orElse(0), 0);</span>
+<span class="nc" id="L141">        int arcWidth  = Math.max(style.border().arcWidth(), 0);</span>
+<span class="nc" id="L142">        int arcHeight = Math.max(style.border().arcHeight(),0);</span>
+<span class="nc" id="L143">        int width     = comp.getWidth();</span>
+<span class="nc" id="L144">        int height    = comp.getHeight();</span>
+
+        // Calculate the shadow box bounds based on the padding and border thickness
+<span class="nc" id="L147">        int x = left   + style.border().width() / 2 + style.shadow().horizontalOffset();</span>
+<span class="nc" id="L148">        int y = top    + style.border().width() / 2 + style.shadow().verticalOffset();</span>
+<span class="nc" id="L149">        int w = width  - left - right  - style.border().width();</span>
+<span class="nc" id="L150">        int h = height - top  - bottom - style.border().width();</span>
+
+<span class="nc" id="L152">        int blurRadius   = Math.max(style.shadow().blurRadius(), 0);</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">        int spreadRadius = !style.shadow().isOutset() ? style.shadow().spreadRadius() : -style.shadow().spreadRadius();</span>
+
+<span class="nc" id="L155">        RoundRectangle2D.Float baseRect = new RoundRectangle2D.Float(</span>
+<span class="nc" id="L156">                                                        left + (float) style.border().width() / 2,</span>
+<span class="nc" id="L157">                                                        top  + (float) style.border().width() / 2,</span>
+                                                            w, h,
+                                                            arcWidth, arcHeight
+                                                    );
+
+<span class="nc" id="L162">        int shadowInset  = blurRadius;</span>
+<span class="nc" id="L163">        int shadowOutset = blurRadius;</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">        int borderWidthOffset = style.border().width() * ( style.shadow().isOutset() ? -1 : 0 );</span>
+
+<span class="nc" id="L166">        Rectangle outerShadowRect = new Rectangle(</span>
+                                        x - shadowOutset + spreadRadius + borderWidthOffset,
+                                        y - shadowOutset + spreadRadius + borderWidthOffset,
+                                        w + shadowOutset * 2 - spreadRadius * 2 - borderWidthOffset * 2,
+                                        h + shadowOutset * 2 - spreadRadius * 2 - borderWidthOffset * 2
+                                    );
+
+<span class="nc bnc" id="L173" title="All 2 branches missed.">        int gradientStartOffset = (int)(( arcWidth + arcHeight ) / ( style.shadow().isInset() ? 4.5 : 3.79) );</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">        gradientStartOffset += ( style.shadow().isInset() ? 0 : style.border().width() );</span>
+
+
+<span class="nc" id="L177">        Rectangle innerShadowRect = new Rectangle(</span>
+                                        x + shadowInset + gradientStartOffset + spreadRadius + borderWidthOffset,
+                                        y + shadowInset + gradientStartOffset + spreadRadius + borderWidthOffset,
+                                        w - shadowInset * 2 - gradientStartOffset * 2 - spreadRadius * 2 - borderWidthOffset * 2,
+                                        h - shadowInset * 2 - gradientStartOffset * 2 - spreadRadius * 2 - borderWidthOffset * 2
+                                    );
+
+        Area baseArea;
+        Area outerMostArea;
+
+<span class="nc bnc" id="L187" title="All 2 branches missed.">        if ( blurRadius &gt; 0 )</span>
+        {
+            // Create the shadow shape based on the box bounds and corner arc widths/heights
+<span class="nc" id="L190">            Rectangle outerShadowBox = new Rectangle(</span>
+                                            outerShadowRect.x,
+                                            outerShadowRect.y,
+                                            outerShadowRect.width,
+                                            outerShadowRect.height
+                                        );
+
+            // Apply the clipping to avoid overlapping the shadow and the box
+<span class="nc" id="L198">            Area shadowArea = new Area(outerShadowBox);</span>
+<span class="nc" id="L199">            baseArea = new Area(baseRect);</span>
+
+<span class="nc bnc" id="L201" title="All 2 branches missed.">            if ( !style.shadow().isOutset() )</span>
+<span class="nc" id="L202">                shadowArea.intersect(baseArea);</span>
+            else
+<span class="nc" id="L204">                shadowArea.subtract(baseArea);</span>
+
+            // Draw the corner shadows
+<span class="nc" id="L207">            _renderCornerShadow(style, Corner.TOP_LEFT,     shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
+<span class="nc" id="L208">            _renderCornerShadow(style, Corner.TOP_RIGHT,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
+<span class="nc" id="L209">            _renderCornerShadow(style, Corner.BOTTOM_LEFT,  shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
+<span class="nc" id="L210">            _renderCornerShadow(style, Corner.BOTTOM_RIGHT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
+
+            // Draw the edge shadows
+<span class="nc" id="L213">            _renderEdgeShadow(style, Side.TOP,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
+<span class="nc" id="L214">            _renderEdgeShadow(style, Side.RIGHT,  shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
+<span class="nc" id="L215">            _renderEdgeShadow(style, Side.BOTTOM, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
+<span class="nc" id="L216">            _renderEdgeShadow(style, Side.LEFT,   shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
+
+<span class="nc" id="L218">            outerMostArea = new Area(outerShadowBox);</span>
+<span class="nc" id="L219">        }</span>
+        else // Easy, we simply fill a round rectangle with the shadow color
+        {
+            // Create the shadow shape based on the box bounds and corner arc widths/heights
+<span class="nc" id="L223">            RoundRectangle2D.Float outerShadowBox = new RoundRectangle2D.Float(</span>
+                                                        outerShadowRect.x,
+                                                        outerShadowRect.y,
+                                                        outerShadowRect.width,
+                                                        outerShadowRect.height,
+                                                        (float)(arcWidth  + gradientStartOffset / 4),
+                                                        (float)(arcHeight + gradientStartOffset / 4)
+                                                    );
+
+            // Apply the clipping to avoid overlapping the shadow and the box
+<span class="nc" id="L233">            Area shadowArea = new Area(outerShadowBox);</span>
+<span class="nc" id="L234">            baseArea = new Area(baseRect);</span>
+
+<span class="nc" id="L236">            g2d.setColor(shadowColor);</span>
+
+<span class="nc bnc" id="L238" title="All 2 branches missed.">            if ( !style.shadow().isOutset() ) {</span>
+<span class="nc" id="L239">                shadowArea.intersect(baseArea);</span>
+            } else {
+<span class="nc" id="L241">                shadowArea.subtract(baseArea);</span>
+<span class="nc" id="L242">                g2d.fill(shadowArea);</span>
+            }
+
+<span class="nc" id="L245">            outerMostArea = new Area(outerShadowBox);</span>
+        }
+        // If the base rectangle and the outer shadow box are not equal, then we need to fill the area of the base rectangle that is not covered by the outer shadow box!
+<span class="nc" id="L248">        _renderShadowBody(style, baseArea, innerShadowRect, outerMostArea, g2d);</span>
+
+<span class="nc" id="L250">    }</span>
+
+    private static void _renderShadowBody(
+        Style style,
+        Area baseArea,
+        Rectangle innerShadowRect,
+        Area outerShadowBox,
+        Graphics2D g2d
+    ) {
+<span class="nc" id="L259">        Graphics2D g2d2 = (Graphics2D) g2d.create();</span>
+<span class="nc" id="L260">        g2d2.setColor(style.shadow().color().orElse(Color.BLACK));</span>
+<span class="nc bnc" id="L261" title="All 2 branches missed.">        if ( !style.shadow().isOutset() ) {</span>
+<span class="nc" id="L262">            baseArea.subtract(outerShadowBox);</span>
+<span class="nc" id="L263">            g2d2.fill(baseArea);</span>
+        } else {
+<span class="nc" id="L265">            Area innerShadowArea = new Area(innerShadowRect);</span>
+<span class="nc" id="L266">            innerShadowArea.subtract(baseArea);</span>
+<span class="nc" id="L267">            g2d2.fill(innerShadowArea);</span>
+        }
+<span class="nc" id="L269">        g2d2.dispose();</span>
+<span class="nc" id="L270">    }</span>
+
+    private static void _renderCornerShadow(
+        Style style,
+        Corner corner,
+        Area boxArea,
+        Rectangle innerShadowRect,
+        Rectangle outerShadowRect,
+        int gradientStartOffset,
+        Graphics2D g2d
+    ) {
+        // We define a clipping box so that corners don't overlap
+<span class="nc" id="L282">        float clipBoxWidth   = outerShadowRect.width / 2f;</span>
+<span class="nc" id="L283">        float clipBoxHeight  = outerShadowRect.height / 2f;</span>
+<span class="nc" id="L284">        float clipBoxCenterX = outerShadowRect.x + clipBoxWidth;</span>
+<span class="nc" id="L285">        float clipBoxCenterY = outerShadowRect.y + clipBoxHeight;</span>
+        Rectangle2D.Float cornerClipBox;
+
+        // The defining the corner shadow bound (where it starts and ends
+        Rectangle2D.Float cornerBox;
+        float cx;
+        float cy;
+        float cr; // depending on the corner, this is either the corner box width or height
+<span class="nc bnc" id="L293" title="All 5 branches missed.">        switch (corner) {</span>
+            case TOP_LEFT:
+<span class="nc" id="L295">                cornerBox = new Rectangle2D.Float(</span>
+                                    outerShadowRect.x, outerShadowRect.y,
+                                    innerShadowRect.x - outerShadowRect.x,
+                                    innerShadowRect.y - outerShadowRect.y
+                                );
+<span class="nc" id="L300">                cornerClipBox = new Rectangle2D.Float(</span>
+                                    clipBoxCenterX - clipBoxWidth, clipBoxCenterY - clipBoxHeight,
+                                    clipBoxWidth, clipBoxHeight
+                                );
+
+<span class="nc" id="L305">                cx = cornerBox.x + cornerBox.width;</span>
+<span class="nc" id="L306">                cy = cornerBox.y + cornerBox.height;</span>
+<span class="nc" id="L307">                cr = cornerBox.width;</span>
+<span class="nc" id="L308">                break;</span>
+            case TOP_RIGHT:
+<span class="nc" id="L310">                cornerBox = new Rectangle2D.Float(</span>
+                                innerShadowRect.x + innerShadowRect.width, outerShadowRect.y,
+                                outerShadowRect.x + outerShadowRect.width - innerShadowRect.x - innerShadowRect.width,
+                                innerShadowRect.y - outerShadowRect.y
+                            );
+<span class="nc" id="L315">                cornerClipBox = new Rectangle2D.Float(</span>
+                                    clipBoxCenterX, clipBoxCenterY - clipBoxHeight,
+                                    clipBoxWidth, clipBoxHeight
+                                );
+
+<span class="nc" id="L320">                cx = cornerBox.x;</span>
+<span class="nc" id="L321">                cy = cornerBox.y + cornerBox.height;</span>
+<span class="nc" id="L322">                cr = cornerBox.width;</span>
+<span class="nc" id="L323">                break;</span>
+            case BOTTOM_LEFT:
+<span class="nc" id="L325">                cornerBox = new Rectangle2D.Float(</span>
+                                outerShadowRect.x,
+                                innerShadowRect.y + innerShadowRect.height,
+                                innerShadowRect.x - outerShadowRect.x,
+                                outerShadowRect.y + outerShadowRect.height - innerShadowRect.y - innerShadowRect.height
+                            );
+<span class="nc" id="L331">                cornerClipBox = new Rectangle2D.Float(</span>
+                                    clipBoxCenterX - clipBoxWidth, clipBoxCenterY,
+                                    clipBoxWidth, clipBoxHeight
+                                );
+
+<span class="nc" id="L336">                cx = cornerBox.x + cornerBox.width;</span>
+<span class="nc" id="L337">                cy = cornerBox.y;</span>
+<span class="nc" id="L338">                cr = cornerBox.width;</span>
+<span class="nc" id="L339">                break;</span>
+            case BOTTOM_RIGHT:
+<span class="nc" id="L341">                cornerBox = new Rectangle2D.Float(</span>
+                            innerShadowRect.x + innerShadowRect.width, innerShadowRect.y + innerShadowRect.height,
+                            outerShadowRect.x + outerShadowRect.width - innerShadowRect.x - innerShadowRect.width,
+                            outerShadowRect.y + outerShadowRect.height - innerShadowRect.y - innerShadowRect.height
+                            );
+<span class="nc" id="L346">                cornerClipBox = new Rectangle2D.Float(</span>
+                                    clipBoxCenterX, clipBoxCenterY,
+                                    clipBoxWidth, clipBoxHeight
+                                );
+
+<span class="nc" id="L351">                cx = cornerBox.x;</span>
+<span class="nc" id="L352">                cy = cornerBox.y;</span>
+<span class="nc" id="L353">                cr = cornerBox.width;</span>
+<span class="nc" id="L354">                break;</span>
+            default:
+<span class="nc" id="L356">                throw new IllegalArgumentException(&quot;Invalid corner: &quot; + corner);</span>
+        }
+
+<span class="nc bnc" id="L359" title="All 2 branches missed.">        if (cr &lt;= 0) return;</span>
+
+        Color innerColor;
+        Color outerColor;
+<span class="nc" id="L363">        Color shadowBackgroundColor = new Color(0,0,0,0);</span>
+<span class="nc bnc" id="L364" title="All 2 branches missed.">        if ( style.shadow().isOutset() ) {</span>
+<span class="nc" id="L365">            innerColor = style.shadow().color().orElse(Color.BLACK);</span>
+<span class="nc" id="L366">            outerColor = shadowBackgroundColor;</span>
+        } else {
+<span class="nc" id="L368">            innerColor = shadowBackgroundColor;</span>
+<span class="nc" id="L369">            outerColor = style.shadow().color().orElse(Color.BLACK);</span>
+        }
+        RadialGradientPaint cornerPaint;
+<span class="nc" id="L372">        float gradientStart = (float) gradientStartOffset / cr;</span>
+<span class="nc bnc" id="L373" title="All 4 branches missed.">        if ( gradientStart &gt;= 1f || gradientStart &lt;= 0f )</span>
+<span class="nc" id="L374">            cornerPaint = new RadialGradientPaint(</span>
+                             cx, cy, cr,
+                             new float[] {0f, 1f},
+                             new Color[] {innerColor, outerColor}
+                         );
+        else {
+<span class="nc" id="L380">            cornerPaint = new RadialGradientPaint(</span>
+                             cx, cy, cr,
+                             new float[] {0f, gradientStart, 1f},
+                             new Color[] {innerColor, innerColor, outerColor}
+                         );
+        }
+
+        // We need to clip the corner paint to the corner box
+<span class="nc" id="L388">        Area cornerArea = new Area(cornerBox);</span>
+<span class="nc" id="L389">        cornerArea.intersect(boxArea);</span>
+<span class="nc" id="L390">        cornerArea.intersect(new Area(cornerClipBox));</span>
+
+<span class="nc" id="L392">        Graphics2D cornerG2d = (Graphics2D) g2d.create();</span>
+<span class="nc" id="L393">        cornerG2d.setPaint(cornerPaint);</span>
+<span class="nc" id="L394">        cornerG2d.fill(cornerArea);</span>
+<span class="nc" id="L395">        cornerG2d.dispose();</span>
+<span class="nc" id="L396">    }</span>
+
+    private static void _renderEdgeShadow(
+            Style style,
+            Side side,
+            Area boxArea,
+            Rectangle innerShadowRect,
+            Rectangle outerShadowRect,
+            int gradientStartOffset,
+            Graphics2D g2d
+    ) {
+        // We define a boundary center point and a clipping box so that edges don't overlap
+<span class="nc" id="L408">        float clipBoundaryX = outerShadowRect.x + outerShadowRect.width / 2f;</span>
+<span class="nc" id="L409">        float clipBoundaryY = outerShadowRect.y + outerShadowRect.height / 2f;</span>
+<span class="nc" id="L410">        Rectangle2D.Float edgeClipBox = null;</span>
+
+        Rectangle2D.Float edgeBox;
+        float gradEndX;
+        float gradEndY;
+        float gradStartX;
+        float gradStartY;
+<span class="nc bnc" id="L417" title="All 5 branches missed.">        switch (side) {</span>
+            case TOP:
+<span class="nc" id="L419">                edgeBox = new Rectangle2D.Float(</span>
+                                innerShadowRect.x, outerShadowRect.y,
+                                innerShadowRect.width, innerShadowRect.y - outerShadowRect.y
+                            );
+
+<span class="nc bnc" id="L424" title="All 2 branches missed.">                if ( (edgeBox.y + edgeBox.height) &gt; clipBoundaryY )</span>
+<span class="nc" id="L425">                    edgeClipBox = new Rectangle2D.Float(</span>
+                            edgeBox.x, edgeBox.y,
+                            edgeBox.width, clipBoundaryY - edgeBox.y
+                    );
+
+<span class="nc" id="L430">                gradEndX = edgeBox.x;</span>
+<span class="nc" id="L431">                gradEndY = edgeBox.y;</span>
+<span class="nc" id="L432">                gradStartX = edgeBox.x;</span>
+<span class="nc" id="L433">                gradStartY = edgeBox.y + edgeBox.height;</span>
+<span class="nc" id="L434">                break;</span>
+            case RIGHT:
+<span class="nc" id="L436">                edgeBox = new Rectangle2D.Float(</span>
+                                innerShadowRect.x + innerShadowRect.width, innerShadowRect.y,
+                                outerShadowRect.x + outerShadowRect.width - innerShadowRect.x - innerShadowRect.width,
+                                innerShadowRect.height
+                            );
+<span class="nc bnc" id="L441" title="All 2 branches missed.">                if ( edgeBox.x &lt; clipBoundaryX )</span>
+<span class="nc" id="L442">                    edgeClipBox = new Rectangle2D.Float(</span>
+                                        clipBoundaryX, edgeBox.y,
+                                        edgeBox.x + edgeBox.width - clipBoundaryX, edgeBox.height
+                                    );
+<span class="nc" id="L446">                gradEndX = edgeBox.x + edgeBox.width;</span>
+<span class="nc" id="L447">                gradEndY = edgeBox.y;</span>
+<span class="nc" id="L448">                gradStartX = edgeBox.x;</span>
+<span class="nc" id="L449">                gradStartY = edgeBox.y;</span>
+<span class="nc" id="L450">                break;</span>
+            case BOTTOM:
+<span class="nc" id="L452">                edgeBox = new Rectangle2D.Float(</span>
+                        innerShadowRect.x, innerShadowRect.y + innerShadowRect.height,
+                        innerShadowRect.width, outerShadowRect.y + outerShadowRect.height - innerShadowRect.y - innerShadowRect.height
+                    );
+<span class="nc bnc" id="L456" title="All 2 branches missed.">                if ( edgeBox.y &lt; clipBoundaryY )</span>
+<span class="nc" id="L457">                    edgeClipBox = new Rectangle2D.Float(</span>
+                            edgeBox.x,
+                            clipBoundaryY,
+                            edgeBox.width,
+                            edgeBox.y + edgeBox.height - clipBoundaryY
+                    );
+
+<span class="nc" id="L464">                gradEndX = edgeBox.x;</span>
+<span class="nc" id="L465">                gradEndY = edgeBox.y + edgeBox.height;</span>
+<span class="nc" id="L466">                gradStartX = edgeBox.x;</span>
+<span class="nc" id="L467">                gradStartY = edgeBox.y;</span>
+<span class="nc" id="L468">                break;</span>
+            case LEFT:
+<span class="nc" id="L470">                edgeBox = new Rectangle2D.Float(</span>
+                            outerShadowRect.x,
+                            innerShadowRect.y,
+                            innerShadowRect.x - outerShadowRect.x,
+                            innerShadowRect.height
+                            );
+<span class="nc bnc" id="L476" title="All 2 branches missed.">                if ( (edgeBox.x + edgeBox.width) &gt; clipBoundaryX )</span>
+<span class="nc" id="L477">                    edgeClipBox = new Rectangle2D.Float(</span>
+                            edgeBox.x,
+                            edgeBox.y,
+                            clipBoundaryX - edgeBox.x,
+                            edgeBox.height
+                    );
+<span class="nc" id="L483">                gradEndX = edgeBox.x;</span>
+<span class="nc" id="L484">                gradEndY = edgeBox.y;</span>
+<span class="nc" id="L485">                gradStartX = edgeBox.x + edgeBox.width;</span>
+<span class="nc" id="L486">                gradStartY = edgeBox.y;</span>
+<span class="nc" id="L487">                break;</span>
+            default:
+<span class="nc" id="L489">                throw new IllegalArgumentException(&quot;Invalid side: &quot; + side);</span>
+        }
+
+<span class="nc bnc" id="L492" title="All 4 branches missed.">        if ( gradStartX == gradEndX &amp;&amp; gradStartY == gradEndY ) return;</span>
+
+        Color innerColor;
+        Color outerColor;
+<span class="nc" id="L496">        Color shadowBackgroundColor = new Color(0,0,0,0);</span>
+<span class="nc bnc" id="L497" title="All 2 branches missed.">        if (style.shadow().isOutset()) {</span>
+<span class="nc" id="L498">            innerColor = style.shadow().color().orElse(Color.BLACK);</span>
+<span class="nc" id="L499">            outerColor = shadowBackgroundColor;</span>
+        } else {
+<span class="nc" id="L501">            innerColor = shadowBackgroundColor;</span>
+<span class="nc" id="L502">            outerColor = style.shadow().color().orElse(Color.BLACK);</span>
+        }
+        LinearGradientPaint edgePaint;
+        // distance between start and end of gradient
+<span class="nc" id="L506">        float dist = (float) Math.sqrt(</span>
+                                    (gradEndX - gradStartX) * (gradEndX - gradStartX) +
+                                    (gradEndY - gradStartY) * (gradEndY - gradStartY)
+                                );
+<span class="nc" id="L510">        float gradientStart = (float) gradientStartOffset / dist;</span>
+<span class="nc bnc" id="L511" title="All 4 branches missed.">        if ( gradientStart &gt;= 1f || gradientStart &lt;= 0f )</span>
+<span class="nc" id="L512">            edgePaint = new LinearGradientPaint(</span>
+                               gradStartX, gradStartY,
+                               gradEndX, gradEndY,
+                               new float[] {0f, 1f},
+                               new Color[] {innerColor, outerColor}
+                           );
+        else {
+<span class="nc" id="L519">            edgePaint = new LinearGradientPaint(</span>
+                             gradStartX, gradStartY,
+                             gradEndX, gradEndY,
+                             new float[] {0f, gradientStart, 1f},
+                             new Color[] {innerColor, innerColor, outerColor}
+                         );
+        }
+
+        // We need to clip the edge paint to the edge box
+<span class="nc" id="L528">        Area edgeArea = new Area(edgeBox);</span>
+<span class="nc" id="L529">        edgeArea.intersect(boxArea);</span>
+<span class="nc bnc" id="L530" title="All 2 branches missed.">        if ( edgeClipBox != null )</span>
+<span class="nc" id="L531">            edgeArea.intersect(new Area(edgeClipBox));</span>
+
+<span class="nc" id="L533">        Graphics2D edgeG2d = (Graphics2D) g2d.create();</span>
+<span class="nc" id="L534">        edgeG2d.setPaint(edgePaint);</span>
+<span class="nc" id="L535">        edgeG2d.fill(edgeArea);</span>
+<span class="nc" id="L536">        edgeG2d.dispose();</span>
+<span class="nc" id="L537">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForJFrame.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForJFrame.java</span></div><h1>UIForJFrame.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import javax.swing.*;
+import java.awt.*;
+
+public class UIForJFrame&lt;F extends JFrame&gt; extends UIForAnyWindow&lt;UIForJFrame&lt;F&gt;, F&gt;
+{
+	/**
+	 * @param component The component type which will be wrapped by this builder node.
+	 */
+	public UIForJFrame( F component ) {
+<span class="fc" id="L12">		super(component);</span>
+<span class="fc" id="L13">	}</span>
+
+	@Override
+	protected void _add(Component component, Object conf) {
+<span class="pc bpc" id="L17" title="1 of 2 branches missed.">		getComponent().add(conf == null ? null : conf.toString(), component);</span>
+<span class="fc" id="L18">	}</span>
+
+	@Override
+	public void show() {
+<span class="fc" id="L22">		JFrame frame = getComponent();</span>
+<span class="fc" id="L23">		Component[] components = frame.getComponents();</span>
+<span class="fc" id="L24">		frame.setLocationRelativeTo(null); // Initial centering!v</span>
+<span class="fc" id="L25">		frame.pack(); // Otherwise some components resize strangely or are not shown at all...</span>
+		// Make sure that the window is centered on the screen again but with the component:
+<span class="fc" id="L27">		frame.setLocationRelativeTo(null);</span>
+		// We set the size to fit the component:
+<span class="pc bpc" id="L29" title="1 of 2 branches missed.">		if ( components.length &gt; 0 ) {</span>
+<span class="nc" id="L30">			Dimension size = frame.getSize();</span>
+<span class="nc bnc" id="L31" title="All 2 branches missed.">			if ( size == null ) // The frame has no size! It is best to set the size to the preferred size of the component:</span>
+<span class="nc" id="L32">				size = components[0].getPreferredSize();</span>
+
+<span class="nc bnc" id="L34" title="All 2 branches missed.">			if ( size == null ) // The component has no preferred size! It is best to set the size to the minimum size of the component:</span>
+<span class="nc" id="L35">				size = components[0].getMinimumSize();</span>
+
+<span class="nc bnc" id="L37" title="All 2 branches missed.">			if ( size == null ) // The component has no minimum size! Let's just look up the size of the component:</span>
+<span class="nc" id="L38">				size = components[0].getSize();</span>
+
+<span class="nc" id="L40">			frame.setSize(size);</span>
+		}
+
+<span class="fc" id="L43">		frame.setVisible(true);</span>
+<span class="fc" id="L44">	}</span>
+
+<span class="fc" id="L46">	@Override protected JRootPane _getRootPane() { return getComponent().getRootPane(); }</span>
+
+	@Override
+	protected void _setTitle(String title) {
+<span class="fc" id="L50">		getComponent().setTitle(title);</span>
+<span class="fc" id="L51">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

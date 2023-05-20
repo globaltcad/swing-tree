@@ -1,0 +1,855 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Style.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">Style.java</span></div><h1>Style.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import java.awt.*;
+import java.awt.font.TextAttribute;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
+
+/**
+ *  An immutable, wither based settings container for {@link javax.swing.JComponent} styling.
+ *  The styling in SwingTree is functional, meaning that changing a property
+ *  of a {@link Style} instance will return a new {@link Style} instance with the
+ *  updated property.
+ *  &lt;p&gt;
+ *  Here an example of how a {@link Style} instance is applied to a {@link javax.swing.JPanel}:
+ *  &lt;pre&gt;{@code
+ *  panel(FILL)
+ *  .withStyle( it -&gt;
+ *      it.style()
+ *       .foundationColor(new Color(26,191,230))
+ *       .backgroundColor(new Color(255,255,255))
+ *       .padTop(30)
+ *       .padLeft(35)
+ *       .padRight(35)
+ *       .padBottom(30)
+ *       .borderRadius(25, 25)
+ *       .borderWidth(3)
+ *       .borderColor(new Color(0,102,255))
+ *       .shadowColor(new Color(64,64,64))
+ *       .shadowBlurRadius(6)
+ *       .shadowSpreadRadius(5)
+ *       .shadowInset(false)
+ *  )
+ *  }&lt;/pre&gt;
+ */
+public final class Style
+{
+<span class="fc" id="L40">    private static final Style _BLANK = new Style(</span>
+                                            new LayoutStyle(
+                                                new Outline(null, null, null, null), // margin
+                                                new Outline(null, null, null, null)  // padding
+                                            ),
+                                            new BorderStyle(0,0,-1, null),
+                                            new BackgroundStyle(null, null, null),
+                                            new ShadowStyle(0,0,0,0, null, true),
+<span class="fc" id="L48">                                            new FontStyle(&quot;&quot;, 0, 0, 0, Collections.emptyList(), null, null, null)</span>
+                                        );
+
+<span class="fc" id="L51">    public static Style blank() { return _BLANK; }</span>
+
+    private final LayoutStyle    _layout;
+    private final BorderStyle     _border;
+    private final BackgroundStyle _background;
+    private final ShadowStyle     _shadow;
+    private final FontStyle       _font;
+
+
+    private Style(
+        LayoutStyle layout,
+        BorderStyle border,
+        BackgroundStyle background,
+        ShadowStyle shadow,
+        FontStyle font
+<span class="fc" id="L66">    ) {</span>
+<span class="fc" id="L67">        _layout = layout;</span>
+<span class="fc" id="L68">        _border = border;</span>
+<span class="fc" id="L69">        _background = background;</span>
+<span class="fc" id="L70">        _shadow = shadow;</span>
+<span class="fc" id="L71">        _font = font;</span>
+<span class="fc" id="L72">    }</span>
+
+<span class="fc" id="L74">    private Style _withLayout( LayoutStyle layout ) { return new Style(layout, _border, _background, _shadow, _font); }</span>
+<span class="fc" id="L75">    private Style _withBorder( BorderStyle border ) { return new Style(_layout, border, _background, _shadow, _font); }</span>
+<span class="fc" id="L76">    private Style _withBackground( BackgroundStyle background ) { return new Style(_layout, _border, background, _shadow, _font); }</span>
+<span class="fc" id="L77">    private Style _withShadow( ShadowStyle shadow ) { return new Style(_layout, _border, _background, shadow, _font); }</span>
+<span class="fc" id="L78">    private Style _withFont( FontStyle font ) { return new Style(_layout, _border, _background, _shadow, font); }</span>
+
+    /**
+     *  Creates a new {@link Style} with the provided top, right, left and bottom margin distances.
+     *  It determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * &lt;p&gt;
+     * @param top The top padding distance in pixels.
+     * @param right The right padding distance in pixels.
+     * @param bottom The bottom padding distance in pixels.
+     * @param left The left padding distance in pixels.
+     * @return A new {@link Style} with the provided padding distances.
+     */
+    public Style margin( int top, int right, int bottom, int left ) {
+<span class="fc" id="L93">        return _withLayout(_layout.withMargin(_layout.margin().withTop(top).withLeft(left).withRight(right).withBottom(bottom)));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided margin distance for all sides of the component.
+     *  The margin determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * &lt;p&gt;
+     * @param margin The margin distance in pixels.
+     * @return A new {@link Style} with the provided margin distance.
+     */
+    public Style margin( int margin ) {
+<span class="fc" id="L106">        return _withLayout(_layout.withMargin(_layout.margin().withTop(margin).withLeft(margin).withRight(margin).withBottom(margin)));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided margin distance for the top side of the component.
+     *  The margin determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * &lt;p&gt;
+     * @param margin The margin distance in pixels.
+     * @return A new {@link Style} with the provided margin distance.
+     */
+    public Style marginTop( int margin ) {
+<span class="fc" id="L119">        return _withLayout(_layout.withMargin(_layout.margin().withTop(margin)));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided margin distance for the right side of the component.
+     *  The margin determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * &lt;p&gt;
+     * @param margin The margin distance in pixels.
+     * @return A new {@link Style} with the provided margin distance.
+     */
+    public Style marginRight( int margin ) {
+<span class="fc" id="L132">        return _withLayout(_layout.withMargin(_layout.margin().withRight(margin)));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided margin distance for the bottom side of the component.
+     *  The margin determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * &lt;p&gt;
+     * @param margin The margin distance in pixels.
+     * @return A new {@link Style} with the provided margin distance.
+     */
+    public Style marginBottom( int margin ) {
+<span class="nc" id="L145">        return _withLayout(_layout.withMargin(_layout.margin().withBottom(margin)));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided margin distance for the left side of the component.
+     *  The margin determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * &lt;p&gt;
+     * @param margin The margin distance in pixels.
+     * @return A new {@link Style} with the provided margin distance.
+     */
+    public Style marginLeft( int margin ) {
+<span class="fc" id="L158">        return _withLayout(_layout.withMargin(_layout.margin().withLeft(margin)));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided margin distance for the top and bottom sides of the component.
+     *  The margin determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * &lt;p&gt;
+     * @param margin The margin distance in pixels.
+     * @return A new {@link Style} with the provided margin distance.
+     */
+    public Style marginVertical( int margin ) {
+<span class="nc" id="L171">        return _withLayout(_layout.withMargin(_layout.margin().withTop(margin).withBottom(margin)));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided margin distance for the left and right sides of the component.
+     *  The margin determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * &lt;p&gt;
+     * @param margin The margin distance in pixels.
+     * @return A new {@link Style} with the provided margin distance.
+     */
+    public Style marginHorizontal( int margin ) {
+<span class="nc" id="L184">        return _withLayout(_layout.withMargin(_layout.margin().withLeft(margin).withRight(margin)));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided top, right, left and bottom pad distances.
+     *  It determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * &lt;p&gt;
+     * @param top The top padding distance in pixels.
+     * @param right The right padding distance in pixels.
+     * @param bottom The bottom padding distance in pixels.
+     * @param left The left padding distance in pixels.
+     * @return A new {@link Style} with the provided padding distances.
+     */
+    public Style pad( int top, int right, int bottom, int left ) {
+<span class="fc" id="L200">        return _withLayout(_layout.withPadding(_layout.padding().withTop(top).withLeft(left).withRight(right).withBottom(bottom)));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided padding distance for all sides of the component.
+     *  It determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * &lt;p&gt;
+     * @param padding The padding distance in pixels.
+     * @return A new {@link Style} with the provided padding distance.
+     */
+    public Style pad( int padding ) {
+<span class="fc" id="L213">        return _withLayout(_layout.withPadding(_layout.padding().withTop(padding).withLeft(padding).withRight(padding).withBottom(padding)));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided padding distance for the top side of the component.
+     *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * &lt;p&gt;
+     * @param padding The padding distance in pixels.
+     * @return A new {@link Style} with the provided padding distance.
+     */
+    public Style padTop( int padding ) {
+<span class="fc" id="L226">        return _withLayout(_layout.withPadding(_layout.padding().withTop(padding)));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided padding distance for the right side of the component.
+     *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * &lt;p&gt;
+     * @param padding The padding distance in pixels.
+     * @return A new {@link Style} with the provided padding distance.
+     */
+    public Style padRight( int padding ) {
+<span class="fc" id="L240">        return _withLayout(_layout.withPadding(_layout.padding().withRight(padding)));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided padding distance for the bottom side of the component.
+     *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * &lt;p&gt;
+     * @param padding The padding distance in pixels.
+     * @return A new {@link Style} with the provided padding distance.
+     */
+    public Style padBottom(int padding ) {
+<span class="fc" id="L253">        return _withLayout(_layout.withPadding(_layout.padding().withBottom(padding)));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided padding distance for the left side of the component.
+     *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * &lt;p&gt;
+     * @param padding The padding distance in pixels.
+     * @return A new {@link Style} with the provided padding distance.
+     */
+    public Style padLeft( int padding ) {
+<span class="fc" id="L266">        return _withLayout(_layout.withPadding(_layout.padding().withLeft(padding)));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided padding distance for the top and bottom sides of the component.
+     *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * &lt;p&gt;
+     * @param padding The padding distance in pixels.
+     * @return A new {@link Style} with the provided padding distance.
+     */
+    public Style padVertical( int padding ) {
+<span class="nc" id="L279">        return _withLayout(_layout.withPadding(_layout.padding().withTop(padding).withBottom(padding)));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided padding distance for the left and right sides of the component.
+     *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color), {@link #shadow(int, int, int, int, Color)}).
+     * &lt;p&gt;
+     * @param padding The padding distance in pixels.
+     * @return A new {@link Style} with the provided padding distance.
+     */
+    public Style padHorizontal( int padding ) {
+<span class="nc" id="L292">        return _withLayout(_layout.withPadding(_layout.padding().withLeft(padding).withRight(padding)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided border width and border color.
+     *  The border will be rendered with an inset space based on the margin defined by the {@link Style}.
+     *
+     * @param width The border width in pixels.
+     * @param color The border color.
+     * @return A new {@link Style} with the provided border width and border color.
+     */
+    public Style border( int width, Color color ) {
+<span class="fc" id="L304">        return _withBorder(_border.withWidth(width).withColor(color));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided border width and border color in the form of a string.
+     *  The string can be either a hex color string, a color name or a color constant from the system properties.
+     *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
+     *
+     * @param width The border width in pixels.
+     * @param colorString The border color.
+     * @return A new {@link Style} with the provided border width and border color.
+     */
+    public Style border( int width, String colorString ) {
+<span class="nc" id="L317">        return _withBorder(_border.withWidth(width).withColor(_colorFrom(colorString)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided border width.
+     *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
+     *
+     * @param width The border width in pixels.
+     * @return A new {@link Style} with the provided border width.
+     */
+    public Style borderWidth( int width ) {
+<span class="fc" id="L328">        return _withBorder(_border.withWidth(width));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided border color.
+     *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
+     *
+     * @param color The border color.
+     * @return A new {@link Style} with the provided border color.
+     */
+    public Style borderColor( Color color ) {
+<span class="fc" id="L339">        return _withBorder(_border.withColor(color));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided border color in the form of a string.
+     *  The string can be either a hex color string, a color name or a color constant from the system properties.
+     *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
+     *
+     * @param colorString The border color.
+     * @return A new {@link Style} with the provided border color.
+     */
+    public Style borderColor( String colorString ) {
+<span class="fc" id="L351">        return _withBorder(_border.withColor(_colorFrom(colorString)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided border radius.
+     *  This will override both the arc width and arc height of the border.
+     *  The border will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *
+     * @param radius The border radius in pixels.
+     * @return A new {@link Style} with the provided border radius.
+     */
+    public Style borderRadius( int radius ) {
+<span class="fc" id="L363">        return this._withBorder(_border.withArcWidth(radius).withArcHeight(radius));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided border arc width and arc height.
+     *  Note that the border will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *
+     * @param arcWidth The border arc width in pixels.
+     * @param arcHeight The border arc height in pixels.
+     * @return A new {@link Style} with the provided border arc width and arc height.
+     */
+    public Style borderRadius( int arcWidth, int arcHeight ) {
+<span class="fc" id="L375">        return _withBorder(_border.withArcWidth(arcWidth).withArcHeight(arcHeight));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided inner Background color.
+     *  The inner background will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *
+     * @param color The inner background color.
+     * @return A new {@link Style} with the provided inner background color.
+     */
+<span class="fc" id="L385">    public Style backgroundColor( Color color ) { return _withBackground(_background.withColor(color)); }</span>
+
+    /**
+     *  Returns a new {@link Style} with the provided inner Background color in the form of a string.
+     *  The string can be either a hex color string, a color name or a color constant from the system properties.
+     *  The inner background will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *
+     * @param colorString The inner background color.
+     * @return A new {@link Style} with the provided inner background color.
+     */
+<span class="fc" id="L395">    public Style backgroundColor( String colorString ) { return _withBackground(_background.withColor(_colorFrom(colorString))); }</span>
+
+    /**
+     *  Returns a new {@link Style} with the provided background foundation color.
+     *  The background color covers the entire component area, including the padding spaces.
+     *
+     * @param color The background color.
+     * @return A new {@link Style} with the provided background color.
+     */
+<span class="fc" id="L404">    public Style foundationColor( Color color ) { return _withBackground(_background.withFoundationColor(color)); }</span>
+
+    /**
+     *  Returns a new {@link Style} with the provided background foundation color in the form of a string.
+     *  The string can be either a hex color string, a color name or a color constant from the system properties.
+     *  The background color covers the entire component area, including the padding spaces.
+     *
+     * @param colorString The background color.
+     * @return A new {@link Style} with the provided background color.
+     */
+<span class="fc" id="L414">    public Style foundationColor( String colorString ) { return _withBackground(_background.withFoundationColor(_colorFrom(colorString))); }</span>
+
+    /**
+     *  Returns a new {@link Style} with the provided background renderer, a {@link Consumer} that
+     *  will be called using the {@link Graphics2D} instance used to render the component.
+     *  You may use this to render a custom background for the component.
+     * @param renderer The background renderer.
+     * @return A new {@link Style} with the provided background renderer.
+     */
+<span class="fc" id="L423">    public Style backgroundRenderer( Consumer&lt;Graphics2D&gt; renderer ) { return _withBackground(_background.withBackgroundRenderer(renderer)); }</span>
+
+    /**
+     *  Returns a new {@link Style} with the provided horizontal shadow offset.
+     *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(int)},
+     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}.
+     *
+     * @param offset The shadow offset in pixels.
+     * @return A new {@link Style} with the provided horizontal shadow offset.
+     */
+<span class="fc" id="L434">    public Style shadowHorizontalOffset( int offset ) { return _withShadow(_shadow.withHorizontalOffset(offset)); }</span>
+
+    /**
+     *  Returns a new {@link Style} with the provided vertical shadow offset.
+     *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(int)},
+     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}.
+     *
+     * @param offset The shadow offset in pixels.
+     * @return A new {@link Style} with the provided vertical shadow offset.
+     */
+<span class="fc" id="L445">    public Style shadowVerticalOffset( int offset ) { return _withShadow(_shadow.withVerticalOffset(offset)); }</span>
+
+    /**
+     *  Returns a new {@link Style} with the provided shadow offset.
+     *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(int)},
+     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}.
+     *
+     * @param horizontalOffset The horizontal shadow offset in pixels.
+     * @param verticalOffset The vertical shadow offset in pixels.
+     * @return A new {@link Style} with the provided shadow offset.
+     */
+    public Style shadowOffset( int horizontalOffset, int verticalOffset ) {
+<span class="fc" id="L458">        return _withShadow(_shadow.withHorizontalOffset(horizontalOffset).withVerticalOffset(verticalOffset));</span>
+    }
+
+    public Style shadowOffset( int horizontalAndVerticalOffset ) {
+<span class="fc" id="L462">        return _withShadow(_shadow.withHorizontalOffset(horizontalAndVerticalOffset).withVerticalOffset(horizontalAndVerticalOffset));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided shadow blur radius.
+     *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *  Note that in order to see the shadow, you may also need to call
+     *  {@link #shadowSpreadRadius(int)} and {@link #shadowColor(Color)}.
+     *
+     * @param radius The shadow blur radius in pixels.
+     * @return A new {@link Style} with the provided shadow blur radius.
+     */
+<span class="fc" id="L474">    public Style shadowBlurRadius( int radius ) { return _withShadow(_shadow.withBlurRadius(radius)); }</span>
+
+    /**
+     *  Returns a new {@link Style} with the provided shadow spread radius.
+     *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *  Note that in order to see the shadow, you may also need to call
+     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}.
+     *
+     * @param radius The shadow spread radius in pixels.
+     * @return A new {@link Style} with the provided shadow spread radius.
+     */
+<span class="fc" id="L485">    public Style shadowSpreadRadius( int radius ) { return _withShadow(_shadow.withSpreadRadius(radius)); }</span>
+
+    /**
+     *  Returns a new {@link Style} with the provided shadow color.
+     *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *  Note that in order to see the shadow, you may also need to call
+     *  {@link #shadowBlurRadius(int)} and {@link #shadowSpreadRadius(int)}.
+     *
+     * @param color The shadow color.
+     * @return A new {@link Style} with the provided shadow color.
+     */
+<span class="fc" id="L496">    public Style shadowColor( Color color ) { return _withShadow(_shadow.withColor(color)); }</span>
+
+    /**
+     *  Returns a new {@link Style} with the provided shadow color in the form of a string.
+     *  The string can be either a hex color string, a color name or a color constant from the system properties.
+     *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *  Note that in order to see the shadow, you may also need to call
+     *  {@link #shadowBlurRadius(int)} and {@link #shadowSpreadRadius(int)}.
+     *
+     * @param colorString The shadow color.
+     * @return A new {@link Style} with the provided shadow color.
+     */
+<span class="fc" id="L508">    public Style shadowColor( String colorString ) { return _withShadow(_shadow.withColor(_colorFrom(colorString))); }</span>
+
+<span class="fc" id="L510">    public Style shadowIsInset(boolean b ) { return _withShadow(_shadow.withIsInset(b)); }</span>
+
+    /**
+     *  Returns a new {@link Style} with the provided font name and size.
+     *  Note that the font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param name The font name.
+     * @param size The font size.
+     * @return A new {@link Style} with the provided font name and size.
+     */
+<span class="fc" id="L521">    public Style font( String name, int size ) { return _withFont(_font.withName(name).withSize(size)); }</span>
+
+    /**
+     *  Returns a new {@link Style} with the provided font name.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param name The font name.
+     * @return A new {@link Style} with the provided font name.
+     */
+<span class="fc" id="L531">    public Style fontName( String name ) { return _withFont(_font.withName(name)); }</span>
+
+    /**
+     *  Returns a new {@link Style} with the provided {@link Font}.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param font The {@link Font}.
+     * @return A new {@link Style} with the provided {@link Font}.
+     */
+<span class="fc" id="L541">    public Style font( Font font ) { return _withFont(_font.withFont(font)); }</span>
+
+    /**
+     *  Returns a new {@link Style} with the provided font size.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param size The font size.
+     * @return A new {@link Style} with the provided font size.
+     */
+<span class="fc" id="L551">    public Style fontSize( int size ) { return _withFont(_font.withSize(size)); }</span>
+
+    /**
+     *  Makes the font bold or not bold depending on the value of the {@code isBold} parameter.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param bold Whether the font should be bold or not.
+     * @return A new {@link Style} with the provided font boldness.
+     */
+    public Style fontBold( boolean bold ) {
+<span class="fc bfc" id="L562" title="All 2 branches covered.">        return _withFont(_font.withStyle( bold ? Font.BOLD : Font.PLAIN ));</span>
+    }
+
+    /**
+     *  Makes the font italic or not italic depending on the value of the {@code italic} parameter.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param italic Whether the font should be italic or not.
+     * @return A new {@link Style} with the provided font italicness.
+     */
+    public Style fontItalic( boolean italic ) {
+<span class="nc bnc" id="L574" title="All 2 branches missed.">        return _withFont(_font.withStyle( italic ? Font.ITALIC : Font.PLAIN ));</span>
+    }
+
+    /**
+     *  Makes the font underlined or not underlined depending on the value of the {@code underline} parameter.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param underline Whether the font should be underlined or not.
+     * @return A new {@link Style} with the provided font underlinedness.
+     */
+    public Style fontUnderline( boolean underline ) {
+<span class="fc" id="L586">        List&lt;TextAttribute&gt; attributes = new ArrayList&lt;&gt;(_font.attributes());</span>
+<span class="pc bpc" id="L587" title="1 of 2 branches missed.">        if ( underline ) attributes.add(TextAttribute.UNDERLINE);</span>
+<span class="nc" id="L588">        else     attributes.remove(TextAttribute.UNDERLINE);</span>
+<span class="fc" id="L589">        return _withFont(_font.withAttributes(attributes));</span>
+    }
+
+    /**
+     *  Makes the font struck through or not struck through depending on the value of the {@code strikeThrough} parameter.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param strikeThrough Whether the font should be struck through or not.
+     * @return A new {@link Style} with the provided font struck throughness.
+     */
+    public Style fontStrikeThrough( boolean strikeThrough ) {
+<span class="fc" id="L601">        List&lt;TextAttribute&gt; attributes = new ArrayList&lt;&gt;(_font.attributes());</span>
+<span class="pc bpc" id="L602" title="1 of 2 branches missed.">        if ( strikeThrough ) attributes.add(TextAttribute.STRIKETHROUGH);</span>
+<span class="nc" id="L603">        else     attributes.remove(TextAttribute.STRIKETHROUGH);</span>
+<span class="fc" id="L604">        return _withFont(_font.withAttributes(attributes));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} where the font color is set to the provided {@link Color}.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param color The {@link Color}.
+     * @return A new {@link Style} with the provided font color.
+     */
+    public Style fontColor( Color color ) {
+<span class="fc" id="L616">        return _withFont(_font.withColor(color));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} where the font color is set to a color parsed from the provided string.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param colorString The {@link Color} as a string.
+     * @return A new {@link Style} with the provided font color.
+     */
+    public Style fontColor( String colorString ) {
+<span class="fc" id="L628">        return _withFont(_font.withColor(_colorFrom(colorString)));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} where the font background color is set to the provided {@link Color}.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param color The {@link Color}.
+     * @return A new {@link Style} with the provided font background color.
+     */
+    public Style fontBackgroundColor( Color color ) {
+<span class="nc" id="L640">        return _withFont(_font.withBackgroundColor(color));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} where the font color is set to a color parsed from the provided string.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param colorString The {@link Color} as a string.
+     * @return A new {@link Style} with the provided font color.
+     */
+    public Style fontBackgroundColor( String colorString ) {
+<span class="nc" id="L652">        return _withFont(_font.withBackgroundColor(_colorFrom(colorString)));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} where the font selection color is set to the provided {@link Color}.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param color The {@link Color}.
+     * @return A new {@link Style} with the provided font selection color.
+     */
+    public Style fontSelectionColor( Color color ) {
+<span class="fc" id="L664">        return _withFont(_font.withSelectionColor(color));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} where the font selection color is set to a color parsed from the provided string.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param colorString The {@link Color} as a string.
+     * @return A new {@link Style} with the provided font selection color.
+     */
+    public Style fontSelectionColor( String colorString ) {
+<span class="fc" id="L676">        return _withFont(_font.withSelectionColor(_colorFrom(colorString)));</span>
+    }
+
+<span class="fc" id="L679">    public Outline padding() { return _layout.padding(); }</span>
+
+<span class="fc" id="L681">    public Outline margin() { return _layout.margin(); }</span>
+
+<span class="fc" id="L683">    public BorderStyle border() { return _border; }</span>
+
+<span class="fc" id="L685">    public BackgroundStyle background() { return _background; }</span>
+
+<span class="fc" id="L687">    public ShadowStyle shadow() { return _shadow; }</span>
+
+<span class="fc" id="L689">    public FontStyle font() { return _font; }</span>
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L693">        return Objects.hash(_layout, _border, _background, _shadow, _font);</span>
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+<span class="pc bpc" id="L698" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L699" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="pc bpc" id="L700" title="1 of 2 branches missed.">        if ( !(obj instanceof Style) ) return false;</span>
+<span class="fc" id="L701">        Style other = (Style) obj;</span>
+<span class="pc bpc" id="L702" title="1 of 2 branches missed.">        return Objects.equals(_layout,     other._layout   ) &amp;&amp;</span>
+<span class="pc bpc" id="L703" title="1 of 2 branches missed.">               Objects.equals(_border,     other._border    ) &amp;&amp;</span>
+<span class="pc bpc" id="L704" title="1 of 2 branches missed.">               Objects.equals(_background, other._background) &amp;&amp;</span>
+<span class="fc bfc" id="L705" title="All 2 branches covered.">               Objects.equals(_shadow,     other._shadow    ) &amp;&amp;</span>
+<span class="fc bfc" id="L706" title="All 2 branches covered.">               Objects.equals(_font,       other._font      );</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L711">        return &quot;Style[&quot; +</span>
+                    _layout     + &quot;, &quot; +
+                    _border     + &quot;, &quot; +
+                    _background + &quot;, &quot; +
+                    _shadow     + &quot;, &quot; +
+                    _font       +
+                &quot;]&quot;;
+    }
+
+    /**
+     *  Tries to parse the supplied string as a color value
+     *  based on various formats.
+     *
+     * @param colorString The string to parse.
+     * @return The parsed color.
+     * @throws IllegalArgumentException If the string could not be parsed.
+     */
+    private Color _colorFrom( String colorString )
+    {
+        // First some cleanup
+<span class="fc" id="L731">        colorString = colorString.trim();</span>
+
+<span class="fc bfc" id="L733" title="All 2 branches covered.">        if ( colorString.startsWith(&quot;#&quot;) )</span>
+<span class="fc" id="L734">            return Color.decode(colorString);</span>
+
+<span class="fc bfc" id="L736" title="All 2 branches covered.">        if ( colorString.startsWith(&quot;0x&quot;) )</span>
+<span class="fc" id="L737">            return Color.decode(colorString);</span>
+
+<span class="fc bfc" id="L739" title="All 2 branches covered.">        if ( colorString.startsWith(&quot;rgb&quot;) ) {</span>
+            // We have an rgb() or rgba() color
+<span class="fc" id="L741">            int start = colorString.indexOf('(');</span>
+<span class="fc" id="L742">            int end = colorString.indexOf(')');</span>
+<span class="pc bpc" id="L743" title="3 of 6 branches missed.">            if ( start &lt; 0 || end &lt; 0 || end &lt; start )</span>
+<span class="nc" id="L744">                throw new IllegalArgumentException(&quot;Invalid rgb() or rgba() color: &quot; + colorString);</span>
+
+<span class="fc" id="L746">            String[] parts = colorString.substring(start + 1, end).split(&quot;,&quot;);</span>
+<span class="pc bpc" id="L747" title="2 of 4 branches missed.">            if ( parts.length &lt; 3 || parts.length &gt; 4 )</span>
+<span class="nc" id="L748">                throw new IllegalArgumentException(&quot;Invalid rgb() or rgba() color: &quot; + colorString);</span>
+
+<span class="fc bfc" id="L750" title="All 2 branches covered.">            for ( int i = 0; i &lt; parts.length; i++ )</span>
+<span class="fc" id="L751">                parts[i] = parts[i].trim();</span>
+
+<span class="fc" id="L753">            int[] values = new int[parts.length];</span>
+
+<span class="fc bfc" id="L755" title="All 2 branches covered.">            for ( int i = 0; i &lt; parts.length; i++ ) {</span>
+<span class="fc" id="L756">                String part = parts[i];</span>
+<span class="fc bfc" id="L757" title="All 2 branches covered.">                if ( part.endsWith(&quot;%&quot;) ) {</span>
+<span class="fc" id="L758">                    part = part.substring(0, part.length() - 1);</span>
+<span class="fc" id="L759">                    values[i] = Integer.parseInt(part);</span>
+<span class="pc bpc" id="L760" title="2 of 4 branches missed.">                    if ( values[i] &lt; 0 || values[i] &gt; 100 )</span>
+<span class="nc" id="L761">                        throw new IllegalArgumentException(&quot;Invalid rgb() or rgba() color: &quot; + colorString);</span>
+<span class="fc" id="L762">                    values[i] = (int) Math.ceil(values[i] * 2.55);</span>
+                }
+<span class="fc bfc" id="L764" title="All 2 branches covered.">                else if ( part.matches(&quot;[0-9]+((\\.[0-9]+[fF]?)|[fF])&quot;) )</span>
+<span class="fc" id="L765">                    values[i] = (int) (Float.parseFloat(part) * 255);</span>
+                else
+<span class="fc" id="L767">                    values[i] = Integer.parseInt(part);</span>
+            }
+<span class="fc" id="L769">            int r = values[0];</span>
+<span class="fc" id="L770">            int g = values[1];</span>
+<span class="fc" id="L771">            int b = values[2];</span>
+<span class="fc bfc" id="L772" title="All 2 branches covered.">            int a = values.length == 4 ? values[3] : 255;</span>
+<span class="fc" id="L773">            return new Color(r, g, b, a);</span>
+        }
+
+<span class="fc bfc" id="L776" title="All 2 branches covered.">        if ( colorString.startsWith(&quot;hsb&quot;) ) {</span>
+            // We have an hsb() or hsba() color
+<span class="fc" id="L778">            int start = colorString.indexOf('(');</span>
+<span class="fc" id="L779">            int end = colorString.indexOf(')');</span>
+<span class="pc bpc" id="L780" title="3 of 6 branches missed.">            if ( start &lt; 0 || end &lt; 0 || end &lt; start )</span>
+<span class="nc" id="L781">                throw new IllegalArgumentException(&quot;Invalid hsb() or hsba() color: &quot; + colorString);</span>
+
+<span class="fc" id="L783">            String[] parts = colorString.substring(start + 1, end).split(&quot;,&quot;);</span>
+<span class="pc bpc" id="L784" title="2 of 4 branches missed.">            if ( parts.length &lt; 3 || parts.length &gt; 4 )</span>
+<span class="nc" id="L785">                throw new IllegalArgumentException(&quot;Invalid hsb() or hsba() color: &quot; + colorString);</span>
+
+<span class="fc bfc" id="L787" title="All 2 branches covered.">            for ( int i = 0; i &lt; parts.length; i++ )</span>
+<span class="fc" id="L788">                parts[i] = parts[i].trim();</span>
+
+<span class="fc" id="L790">            float[] values = new float[parts.length];</span>
+
+<span class="fc bfc" id="L792" title="All 2 branches covered.">            for ( int i = 0; i &lt; parts.length; i++ ) {</span>
+<span class="fc" id="L793">                String part = parts[i];</span>
+<span class="fc bfc" id="L794" title="All 2 branches covered.">                if ( part.endsWith(&quot;%&quot;) ) {</span>
+<span class="fc" id="L795">                    part = part.substring(0, part.length() - 1);</span>
+<span class="fc" id="L796">                    values[i] = Float.parseFloat(part);</span>
+<span class="pc bpc" id="L797" title="2 of 4 branches missed.">                    if ( values[i] &lt; 0 || values[i] &gt; 100 )</span>
+<span class="nc" id="L798">                        throw new IllegalArgumentException(</span>
+                            &quot;Invalid hsb() or hsba() string '&quot; + colorString + &quot;', value '&quot; + part + &quot;' out of range.&quot;
+                        );
+<span class="fc" id="L801">                    values[i] = values[i] / 100.0f;</span>
+<span class="fc bfc" id="L802" title="All 2 branches covered.">                } else if ( part.endsWith(&quot;°&quot;) ) {</span>
+<span class="pc bpc" id="L803" title="1 of 2 branches missed.">                    if ( i &gt; 0 )</span>
+<span class="nc" id="L804">                        throw new IllegalArgumentException(</span>
+                            &quot;Invalid hsb() or hsba() string '&quot; + colorString + &quot;', unexpected degree symbol in '&quot; + part + &quot;' (only allowed for hue)&quot;
+                        );
+
+<span class="fc" id="L808">                    part = part.substring(0, part.length() - 1);</span>
+<span class="fc" id="L809">                    values[i] = Float.parseFloat(part);</span>
+<span class="pc bpc" id="L810" title="2 of 4 branches missed.">                    if ( values[i] &lt; 0 || values[i] &gt; 360 )</span>
+<span class="nc" id="L811">                        throw new IllegalArgumentException(</span>
+                            &quot;Invalid hsb() or hsba() string '&quot; + colorString + &quot;', hue value '&quot; + part + &quot;' out of range.&quot;
+                        );
+<span class="fc" id="L814">                    values[i] = values[i] / 360.0f;</span>
+<span class="fc bfc" id="L815" title="All 2 branches covered.">                } else if ( part.matches(&quot;[0-9]+((\\.[0-9]+[fF]?)|[fF])&quot;) )</span>
+<span class="fc" id="L816">                    values[i] = Float.parseFloat(part);</span>
+                else
+<span class="fc" id="L818">                    values[i] = Integer.parseInt(part);</span>
+            }
+
+<span class="fc" id="L821">            float h = values[0];</span>
+<span class="fc" id="L822">            float s = values[1];</span>
+<span class="fc" id="L823">            float b = values[2];</span>
+<span class="fc bfc" id="L824" title="All 2 branches covered.">            float a = values.length == 4 ? values[3] : 1.0f;</span>
+<span class="fc" id="L825">            Color c = Color.getHSBColor(h, s, b);</span>
+<span class="fc" id="L826">            return new Color(c.getRed(), c.getGreen(), c.getBlue(), (int)(a * 255));</span>
+        }
+
+        // Let's try a few common color names
+<span class="fc bfc" id="L830" title="All 2 branches covered.">        if ( colorString.equalsIgnoreCase(&quot;black&quot;)       ) return Color.BLACK;</span>
+<span class="fc bfc" id="L831" title="All 2 branches covered.">        if ( colorString.equalsIgnoreCase(&quot;blue&quot;)        ) return Color.BLUE;</span>
+<span class="fc bfc" id="L832" title="All 2 branches covered.">        if ( colorString.equalsIgnoreCase(&quot;cyan&quot;)        ) return Color.CYAN;</span>
+<span class="pc bpc" id="L833" title="1 of 2 branches missed.">        if ( colorString.equalsIgnoreCase(&quot;darkGray&quot;)    ) return Color.DARK_GRAY;</span>
+<span class="pc bpc" id="L834" title="1 of 2 branches missed.">        if ( colorString.equalsIgnoreCase(&quot;gray&quot;)        ) return Color.GRAY;</span>
+<span class="fc bfc" id="L835" title="All 2 branches covered.">        if ( colorString.equalsIgnoreCase(&quot;green&quot;)       ) return Color.GREEN;</span>
+<span class="pc bpc" id="L836" title="1 of 2 branches missed.">        if ( colorString.equalsIgnoreCase(&quot;lightGray&quot;)   ) return Color.LIGHT_GRAY;</span>
+<span class="fc bfc" id="L837" title="All 2 branches covered.">        if ( colorString.equalsIgnoreCase(&quot;magenta&quot;)     ) return Color.MAGENTA;</span>
+<span class="pc bpc" id="L838" title="1 of 2 branches missed.">        if ( colorString.equalsIgnoreCase(&quot;orange&quot;)      ) return Color.ORANGE;</span>
+<span class="pc bpc" id="L839" title="1 of 2 branches missed.">        if ( colorString.equalsIgnoreCase(&quot;pink&quot;)        ) return Color.PINK;</span>
+<span class="fc bfc" id="L840" title="All 2 branches covered.">        if ( colorString.equalsIgnoreCase(&quot;red&quot;)         ) return Color.RED;</span>
+<span class="pc bpc" id="L841" title="1 of 2 branches missed.">        if ( colorString.equalsIgnoreCase(&quot;white&quot;)       ) return Color.WHITE;</span>
+<span class="fc bfc" id="L842" title="All 2 branches covered.">        if ( colorString.equalsIgnoreCase(&quot;yellow&quot;)      ) return Color.YELLOW;</span>
+<span class="pc bpc" id="L843" title="1 of 2 branches missed.">        if ( colorString.equalsIgnoreCase(&quot;transparent&quot;) ) return new Color(0, 0, 0, 0);</span>
+
+        // Let's try to find it as a system property
+        try {
+<span class="nc" id="L847">            return Color.getColor(colorString);</span>
+<span class="nc" id="L848">        } catch ( IllegalArgumentException e ) {</span>
+            // Ignore
+        }
+
+<span class="nc" id="L852">        throw new IllegalArgumentException(&quot;Could not parse or find color value: &quot; + colorString);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

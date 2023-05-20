@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForAnyWindow.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForAnyWindow.java</span></div><h1>UIForAnyWindow.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import sprouts.Val;
+import swingtree.input.Keyboard;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.function.Consumer;
+
+public abstract class UIForAnyWindow&lt;I extends UIForAnyWindow&lt;I,W&gt;, W extends Window&gt; extends AbstractNestedBuilder&lt;I,W,Component&gt;
+{
+	/**
+	 * Instances of the {@link AbstractBuilder} as well as its subtypes always wrap
+	 * a single component for which they are responsible.
+	 *
+	 * @param component The component type which will be wrapped by this builder node.
+	 */
+<span class="fc" id="L19">	public UIForAnyWindow( W component ) { super(component); }</span>
+
+	/**
+	 *  Adds a title to the window. &lt;br&gt;
+	 *  Note that the way this is displayed depends on the window type and the
+	 *  operating system.
+	 *
+	 * @param title The title to be shown in the top bar of the window.
+	 * @return This builder.
+	 */
+	public final I withTitle( String title ) {
+<span class="fc" id="L30">		_setTitle( title );</span>
+<span class="fc" id="L31">		return _this();</span>
+	}
+
+	/**
+	 *  Binds a text property to the window determining the title displayed in the top bar of the window. &lt;br&gt;
+	 *  Note that the way this is displayed depends on the window type and the
+	 *  operating system.
+	 *
+	 * @param title The title property whose text will be shown in the top bar of the window.
+	 * @return This builder.
+	 */
+	public final I withTitle( Val&lt;String&gt; title ) {
+<span class="nc" id="L43">		NullUtil.nullArgCheck(title, &quot;title&quot;, Val.class);</span>
+<span class="nc" id="L44">		NullUtil.nullPropertyCheck(title, &quot;title&quot;);</span>
+<span class="nc" id="L45">		_onShow( title, v -&gt; _setTitle( v ) );</span>
+<span class="nc" id="L46">		return withTitle( title.orElseThrow() );</span>
+	}
+
+	/**
+	 *  Makes the window visible in the center of the screen.
+	 */
+	public abstract void show();
+
+	protected abstract JRootPane _getRootPane();
+
+	protected abstract void _setTitle( String title );
+
+	private void _onKeyStroke(int code, Consumer&lt;ActionEvent&gt; action) {
+<span class="fc" id="L59">		KeyStroke k = KeyStroke.getKeyStroke(code, 0);</span>
+<span class="fc" id="L60">		int w = JComponent.WHEN_IN_FOCUSED_WINDOW;</span>
+<span class="fc" id="L61">		_getRootPane().registerKeyboardAction(action::accept, k, w);</span>
+<span class="fc" id="L62">	}</span>
+
+	/**
+	 * Adds the supplied {@link sprouts.Action} wrapped in a {@link KeyListener} to the component,
+	 * to receive key events triggered when the wrapped component receives a particular
+	 * keyboard input matching the provided {@link swingtree.input.Keyboard.Key}.
+	 * &lt;br&gt;&lt;br&gt;
+	 * @param key The {@link swingtree.input.Keyboard.Key} which should be matched to the key event.
+	 * @param onKeyPressed The {@link sprouts.Action} which will be executed once the wrapped component received the targeted key press.
+	 * @return This very instance, which enables builder-style method chaining.
+	 */
+	public final I onPressed( Keyboard.Key key, sprouts.Action&lt;WindowDelegate&lt;W, ActionEvent&gt;&gt; onKeyPressed ) {
+<span class="fc" id="L74">		NullUtil.nullArgCheck(key, &quot;key&quot;, Keyboard.Key.class);</span>
+<span class="fc" id="L75">		NullUtil.nullArgCheck(onKeyPressed, &quot;onKeyPressed&quot;, sprouts.Action.class);</span>
+<span class="fc" id="L76">		W window = getComponent();</span>
+<span class="pc" id="L77">		_onKeyStroke(key.code, e -&gt; onKeyPressed.accept(_createDelegate(window, null)));</span>
+<span class="fc" id="L78">		return _this();</span>
+	}
+
+	/**
+	 * Adds the supplied {@link sprouts.Action} wrapped in a {@link java.awt.event.FocusListener}
+	 * to the component, to receive those focus events where the wrapped component gains input focus.
+	 *
+	 * @param onFocus The {@link sprouts.Action} which should be executed once the input focus was gained on the wrapped component.
+	 * @return This very instance, which enables builder-style method chaining.
+	 */
+	public final I onFocusGained( sprouts.Action&lt;WindowDelegate&lt;W, FocusEvent&gt;&gt; onFocus ) {
+<span class="fc" id="L89">		NullUtil.nullArgCheck(onFocus, &quot;onFocus&quot;, sprouts.Action.class);</span>
+<span class="fc" id="L90">		W frame = getComponent();</span>
+<span class="fc" id="L91">		frame.addFocusListener(new FocusAdapter() {</span>
+			@Override public void focusGained(FocusEvent e) {
+<span class="nc" id="L93">				_doApp(()-&gt;onFocus.accept(_createDelegate(frame, e)));</span>
+<span class="nc" id="L94">			}</span>
+		});
+<span class="fc" id="L96">		return _this();</span>
+	}
+
+	/**
+	 * Adds the supplied {@link sprouts.Action} wrapped in a focus listener
+	 * to receive those focus events where the wrapped component loses input focus.
+	 *
+	 * @param onFocus The {@link sprouts.Action} which should be executed once the input focus was lost on the wrapped component.
+	 * @return This very instance, which enables builder-style method chaining.
+	 */
+	public final I onFocusLost( sprouts.Action&lt;WindowDelegate&lt;W, FocusEvent&gt;&gt; onFocus ) {
+<span class="fc" id="L107">		NullUtil.nullArgCheck(onFocus, &quot;onFocus&quot;, Action.class);</span>
+<span class="fc" id="L108">		W window = getComponent();</span>
+<span class="fc" id="L109">		window.addFocusListener(new FocusAdapter() {</span>
+			@Override public void focusLost(FocusEvent e) {
+<span class="nc" id="L111">				_doApp(()-&gt;onFocus.accept(_createDelegate(window, e)));</span>
+<span class="nc" id="L112">			}</span>
+		});
+<span class="fc" id="L114">		return _this();</span>
+	}
+
+	private &lt;E&gt; WindowDelegate&lt;W, E&gt; _createDelegate(W window, E event) {
+<span class="nc" id="L118">		return new WindowDelegate&lt;W, E&gt;() {</span>
+<span class="nc" id="L119">			@Override public W get() { return window; }</span>
+<span class="nc" id="L120">			@Override public E getEvent() { return event; }</span>
+		};
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

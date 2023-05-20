@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForJDialog.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForJDialog.java</span></div><h1>UIForJDialog.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import javax.swing.*;
+import java.awt.*;
+
+public class UIForJDialog&lt;D extends JDialog&gt; extends UIForAnyWindow&lt;UIForJDialog&lt;D&gt;, D&gt;
+{
+	/**
+	 * Instances of the {@link AbstractBuilder} as well as its subtypes always wrap
+	 * a single component for which they are responsible.
+	 *
+	 * @param component The component type which will be wrapped by this builder node.
+	 */
+<span class="fc" id="L14">	public UIForJDialog(D component) { super(component); }</span>
+
+	@Override
+	protected void _add(Component component, Object conf) {
+<span class="pc bpc" id="L18" title="1 of 2 branches missed.">		getComponent().add(conf == null ? null : conf.toString(), component);</span>
+<span class="fc" id="L19">	}</span>
+
+	@Override
+	public void show() {
+<span class="fc" id="L23">		JDialog dialog = getComponent();</span>
+<span class="fc" id="L24">		Component[] components = dialog.getComponents();</span>
+<span class="fc" id="L25">		dialog.setLocationRelativeTo(null); // Initial centering!v</span>
+<span class="fc" id="L26">		dialog.pack(); // Otherwise some components resize strangely or are not shown at all...</span>
+		// First let's check if the dialog has an owner:
+<span class="fc" id="L28">		Window owner = dialog.getOwner();</span>
+		// If there is no owner, we make sure that the window is centered on the screen again but with the component:
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">		if ( owner == null )</span>
+<span class="fc" id="L31">			dialog.setLocationRelativeTo(null);</span>
+		else // Otherwise we center the dialog on the owner:
+<span class="nc" id="L33">			dialog.setLocationRelativeTo(owner);</span>
+
+		// We set the size to fit the component:
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">		if ( components.length &gt; 0 ) {</span>
+<span class="nc" id="L37">			Dimension size = dialog.getSize();</span>
+<span class="nc bnc" id="L38" title="All 2 branches missed.">			if ( size == null ) // The dialog has no size! It is best to set the size to the preferred size of the component:</span>
+<span class="nc" id="L39">				size = components[0].getPreferredSize();</span>
+
+<span class="nc bnc" id="L41" title="All 2 branches missed.">			if ( size == null ) // The component has no preferred size! It is best to set the size to the minimum size of the component:</span>
+<span class="nc" id="L42">				size = components[0].getMinimumSize();</span>
+
+<span class="nc bnc" id="L44" title="All 2 branches missed.">			if ( size == null ) // The component has no minimum size! Let's just look up the size of the component:</span>
+<span class="nc" id="L45">				size = components[0].getSize();</span>
+
+<span class="nc" id="L47">			dialog.setSize(size);</span>
+		}
+
+<span class="fc" id="L50">		dialog.setVisible(true);</span>
+<span class="fc" id="L51">	}</span>
+
+	@Override
+	protected JRootPane _getRootPane() {
+<span class="fc" id="L55">		return getComponent().getRootPane();</span>
+	}
+
+	@Override
+	protected void _setTitle(String title) {
+<span class="fc" id="L60">		getComponent().setTitle(title);</span>
+<span class="fc" id="L61">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
