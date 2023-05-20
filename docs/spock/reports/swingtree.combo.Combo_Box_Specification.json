@@ -4,19 +4,19 @@
   "narrative":"In Swing drop downs are called combo boxes, which\n    is what they will be referred to in this specification as well.  \n    This specification will show you how you can create them and\n    how you can interact with them.",
   "subjects":["swingtree.UIForCombo"],
   "statistics":{
-    "runs":"10",
+    "runs":"14",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.071 seconds"
+    "duration":"?"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"Swing tree is a wrapper around Swing, which means you can create the combo box yourself.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -33,7 +33,7 @@
     {
       "id":"The \"comboBox\" factory method allows you to easily create a combo box from an array.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -52,7 +52,7 @@
     {
       "id":"A combo box created by Swing-Tree uses the provided item array as data model.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n           You don't have to create a ComboBoxModel implementation to model the state\n           of your combo box! If you pass an array or a list to a combo box\n           factory method it will serve as a model of your combo box items.  \n        "]
       },
@@ -69,7 +69,7 @@
     {
       "id":"A combo box created by Swing-Tree uses the provided item list as data model.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n           You don't have to create a ComboBoxModel implementation to model the state\n           of your combo box! If you pass an array or a list to a combo box\n           factory method it will serve as a model of your combo box items.  \n        "]
       },
@@ -86,7 +86,7 @@
     {
       "id":"A combo box can be made editable in a declarative way.",
       "result":"PASS",
-      "duration":"0.008 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -109,7 +109,7 @@
     {
       "id":"The options of an editable combo box are only editable if their items list is modifyable.",
       "result":"PASS",
-      "duration":"0.008 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -132,7 +132,7 @@
     {
       "id":"You can model both the current selection state as well as options of your combo box using a property and an array.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n           In essence, the state of a combo box consists of the current selection, and\n           the options that are available for selection. You can model both of these\n           aspects using a property and a list. The property will be used to model\n           the current selection, and the list will be used to model the options.\n        "]
       },
@@ -167,7 +167,7 @@
     {
       "id":"You can model both the current selection state as well as options of your combo box using a property and a list.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n           In essence, the state of a combo box consists of the current selection, and\n           the options that are available for selection. You can model both of these\n           aspects using a property and a list. The property will be used to model\n           the current selection, and the list will be used to model the options.\n        "]
       },
@@ -202,7 +202,7 @@
     {
       "id":"You can model both the current selection state as well as options of your combo box using 2 properties.",
       "result":"PASS",
-      "duration":"0.021 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n           In essence, the state of a combo box consists of the current selection, and\n           the options that are available for selection. You can model both of these\n           aspects using 2 properties. One modelling the current selection, and another one\n           storing an array to model all available options. \n        "]
       },
@@ -231,7 +231,7 @@
     {
       "id":"You can model the options of your combo boxes using \"Vars\".",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n           In essence, the state of a combo box consists of the current selection, and\n           the options that are available for selection. You can model both of these\n           aspects using a standalone property as well as a \"Vars\" instance\n           representing multiple properties. \n           The single property models the current selection, and the \"Vars\"\n           store a list of all available options. \n        "]
       },
@@ -257,6 +257,88 @@
         {"kind":"when","text":"We add another option somewhere in the middle.","code":["options.addAll(16, 42)"]},
 
         {"kind":"then","text":"The combo box options are updated.","code":["ui.component.itemCount == 4","ui.component.getItemAt(0) == 99","ui.component.getItemAt(1) == 17","ui.component.getItemAt(2) == 16","ui.component.getItemAt(3) == 42"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An editable combo box will try to parse user input to match bound properties.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property of type Integer.","code":["var selection = Var.of(42)"]},
+
+        {"kind":"and","text":"We create a combo box that is bound to the property.","code":["var ui =","            UI.comboBox(selection, 73, 42, 17)","            .isEditableIf(true)"]},
+
+        {"kind":"expect","text":"The combo box is initialized with the current selection.","code":["ui.component.getSelectedItem() == 42"]},
+
+        {"kind":"and","text":"It also reports the correct selection index.","code":["ui.component.getSelectedIndex() == 1"]},
+
+        {"kind":"when","text":"We simulate the user editing the combo box.","code":["ui.component.setSelectedItem('99')"]},
+
+        {"kind":"then","text":"The combo box updates the selection property to the parsed value.","code":["selection.get() == 99"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An editable combo box will try to parse any kind of user input to match bound properties.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        ","\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        ","\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        ","\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        ","\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        ","\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        ","\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        ","\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        ","\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        ","\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        ","\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        ","\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a combo box that is bound to the property.","code":["var ui =","            UI.comboBox(selection, items)","            .isEditableIf(true)"]},
+
+        {"kind":"expect","text":"The combo box is initialized with the current selection.","code":["ui.component.getSelectedItem() == selection.get()"]},
+
+        {"kind":"when","text":"We simulate the user editing the combo box.","code":["ui.component.setSelectedItem(input)","UI.sync()"]},
+
+        {"kind":"then","text":"The combo box updates the selection property to the parsed value.","code":["selection.get() == expectedSelection"]},
+
+        {"kind":"where","text":"We use the following data table to populate the used variables:","code":{"input":["'99'","'42'","'true'","'false'","'yes'","'no'","'3.14'","'2.71'","'foo'","'bar'","'666L'","'777L'"],"selection":["Var.of(42)","Var.of(42)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(3.14)","Var.of(3.14)","Var.of('foo')","Var.of('foo')","Var.of(666L)","Var.of(666L)"],"items":["[73, 42, 17]","[73, 42, 17]","[true, false]","[true, false]","[true, false]","[true, false]","[3.14, 2.71]","[3.14, 2.71]","['foo', 'bar']","['foo', 'bar']","[666L, 777L]","[666L, 777L]"],"expectedSelection":["99","42","true","false","true","false","3.14","2.71","'foo'","'bar'","666L","777L"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Changing properties in you view model automatically updates the combo box.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var selected = Var.of(4);","var options = Vars.of(1, 2, 4, 6, 8, 12, 16)"]},
+
+        {"kind":"and","text":"","code":["            var ui =","                comboBox(options)","\t\t\t\t.withSelectedItem(selected)"]},
+
+        {"kind":"when","text":"We change the selected property to 1...","code":["\t\t    selected.set(1)","UI.sync()"]},
+
+        {"kind":"then","text":"The combo box has been updated as expected!","code":["\t\t    ui.component.selectedItem == 1","\t\t    ui.component.editor.item == 1"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Changing properties in you view model automatically updates an editable combo box.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var selected = Var.of(4);","var options = Vars.of(1, 2, 4, 6, 8, 12, 16)"]},
+
+        {"kind":"and","text":"","code":["            var ui =","                comboBox(options).isEditableIf(true)","\t\t\t\t.withSelectedItem(selected)"]},
+
+        {"kind":"when","text":"We change the selected property to 1...","code":["\t\t    selected.set(1)","UI.sync()"]},
+
+        {"kind":"then","text":"The combo box has been updated as expected!","code":["\t\t    ui.component.selectedItem == 1","\t\t    ui.component.editor.item == 1"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

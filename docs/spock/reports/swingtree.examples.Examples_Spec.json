@@ -4,19 +4,19 @@
   "narrative":"This specification ensures that the\n    various UI examples in the test suite, \n    run successfully and also produce\n    UIs with expected states.",
   "subjects":[],
   "statistics":{
-    "runs":"13",
+    "runs":"17",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"1.581 seconds"
+    "duration":"?"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"The advanced UI define in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.381 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -37,7 +37,7 @@
     {
       "id":"The form UI define in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.046 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -54,7 +54,7 @@
     {
       "id":"The login example UI defined in the examples can be created.",
       "result":"PASS",
-      "duration":"0.007 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -67,7 +67,7 @@
     {
       "id":"The user registration example UI defined in the examples can be created.",
       "result":"PASS",
-      "duration":"0.043 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -80,7 +80,7 @@
     {
       "id":"The list examples UI defined in the examples can be created.",
       "result":"PASS",
-      "duration":"0.183 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -91,9 +91,48 @@
     },
   
     {
+      "id":"The box shadow picker example UI defined in the examples can be created.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["expect : new BoxShadowPickerView(new BoxShadowPickerViewModel())"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The note guesser example UI defined in the examples can be created.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["expect : new NoteGuesserView(new NoteGuesserViewModel())"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The symbol guesser example UI defined in the examples can be created.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["expect : new SymbolGuesserView(new SymbolGuesserViewModel())"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
       "id":"The animated buttons view examples UI defined in the examples can be created.",
       "result":"PASS",
-      "duration":"0.022 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -106,7 +145,7 @@
     {
       "id":"The animation example view can be created.",
       "result":"PASS",
-      "duration":"0.759 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -119,7 +158,7 @@
     {
       "id":"The settings example UI defined in the examples can be created.",
       "result":"PASS",
-      "duration":"0.010 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -140,12 +179,12 @@
     {
       "id":"The spinners example UI defined in the examples can be created.",
       "result":"PASS",
-      "duration":"0.039 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"expect","text":"","code":["expect : new SomeSpinnersView(new SomeSpinnersViewModel())"]}
+        {"kind":"expect","text":"","code":["expect : new SomeComponentsView(new SomeComponentsViewModel())"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -153,7 +192,7 @@
     {
       "id":"The list rendering example UI defined in the examples can be created.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -164,9 +203,22 @@
     },
   
     {
+      "id":"The \"MadeWithSwingTree\" example UI defined in the examples can be created.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["expect : new MadeWithSwingTree()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
       "id":"The calculator UI defined in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.026 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -181,7 +233,7 @@
     {
       "id":"The simple Table-UI example has the expected state.",
       "result":"PASS",
-      "duration":"0.036 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -206,7 +258,7 @@
     {
       "id":"The todo app UI defined in the examples has the expected state.",
       "result":"PASS",
-      "duration":"0.011 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },

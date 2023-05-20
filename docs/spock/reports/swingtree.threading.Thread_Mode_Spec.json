@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.955 seconds"
+    "duration":"?"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can use the decoupled thread mode to queue backend events.",
       "result":"PASS",
-      "duration":"0.074 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that Swing-Tree will not create a new thread for you,\n            you must process the events yourself using the \"UI.processEvents()\" method\n            preferably by a custom thread or the main thread of your application.\n        "]
       },
@@ -37,7 +37,7 @@
     {
       "id":"The default \"coupled\" thread mode will use the AWT thread for event handling.",
       "result":"PASS",
-      "duration":"0.070 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            This is the default thread mode, which means that\n            the explicit specification of \n            `UI.use(EventProcessor.COUPLED, ...)` is not required.\n            However, note that in this thread mode the UI will be blocked \n            until the event is handled. \n        "]
       },
@@ -54,9 +54,9 @@
     {
       "id":"Inside an event lambda we can not access the UI from a background thread.",
       "result":"PASS",
-      "duration":"0.713 seconds",
+      "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n                The event delegate (which is passed to things like `onClick` actions) \n                throws an exception if you try to access the UI from a background thread.\n                This is because SwingTree can not guarantee that the UI is thread safe.\n                However, the delegate provides a `safe` method which will execute the\n                passed lambda on the event dispatch thread.\n            ","\n                The event delegate (which is passed to things like `onClick` actions) \n                throws an exception if you try to access the UI from a background thread.\n                This is because SwingTree can not guarantee that the UI is thread safe.\n                However, the delegate provides a `safe` method which will execute the\n                passed lambda on the event dispatch thread.\n            ","\n                The event delegate (which is passed to things like `onClick` actions) \n                throws an exception if you try to access the UI from a background thread.\n                This is because SwingTree can not guarantee that the UI is thread safe.\n                However, the delegate provides a `safe` method which will execute the\n                passed lambda on the event dispatch thread.\n            ","\n                The event delegate (which is passed to things like `onClick` actions) \n                throws an exception if you try to access the UI from a background thread.\n                This is because SwingTree can not guarantee that the UI is thread safe.\n                However, the delegate provides a `safe` method which will execute the\n                passed lambda on the event dispatch thread.\n            ","\n                The event delegate (which is passed to things like `onClick` actions) \n                throws an exception if you try to access the UI from a background thread.\n                This is because SwingTree can not guarantee that the UI is thread safe.\n                However, the delegate provides a `safe` method which will execute the\n                passed lambda on the event dispatch thread.\n            "]
+      "tags":{},"see":[],"extraInfo":["\n                The event delegate (which is passed to things like `onClick` actions) \n                throws an exception if you try to access the UI from a background thread.\n                This is because SwingTree can not guarantee that the UI is thread safe.\n                However, the delegate provides a `safe` method which will execute the\n                passed lambda on the event dispatch thread.\n            ","\n                The event delegate (which is passed to things like `onClick` actions) \n                throws an exception if you try to access the UI from a background thread.\n                This is because SwingTree can not guarantee that the UI is thread safe.\n                However, the delegate provides a `safe` method which will execute the\n                passed lambda on the event dispatch thread.\n            ","\n                The event delegate (which is passed to things like `onClick` actions) \n                throws an exception if you try to access the UI from a background thread.\n                This is because SwingTree can not guarantee that the UI is thread safe.\n                However, the delegate provides a `safe` method which will execute the\n                passed lambda on the event dispatch thread.\n            ","\n                The event delegate (which is passed to things like `onClick` actions) \n                throws an exception if you try to access the UI from a background thread.\n                This is because SwingTree can not guarantee that the UI is thread safe.\n                However, the delegate provides a `safe` method which will execute the\n                passed lambda on the event dispatch thread.\n            ","\n                The event delegate (which is passed to things like `onClick` actions) \n                throws an exception if you try to access the UI from a background thread.\n                This is because SwingTree can not guarantee that the UI is thread safe.\n                However, the delegate provides a `safe` method which will execute the\n                passed lambda on the event dispatch thread.\n            ","\n                The event delegate (which is passed to things like `onClick` actions) \n                throws an exception if you try to access the UI from a background thread.\n                This is because SwingTree can not guarantee that the UI is thread safe.\n                However, the delegate provides a `safe` method which will execute the\n                passed lambda on the event dispatch thread.\n            "]
       },
       "blocks":[
         {"kind":"given","text":"2 UIs built with the decoupled thread mode, one error prone and the other one safe.","code":["var ui1 =","        UI.use(EventProcessor.DECOUPLED,","                ()-> UI.button(\"X\").onClick(unsafeAccess)","            )","var ui2 =","        UI.use(EventProcessor.DECOUPLED,","                ()-> UI.button(\"X\").onClick(safeAccess)","            )"]},
@@ -69,7 +69,7 @@
 
         {"kind":"then","text":"The delegate does not throw an exception!","code":["noExceptionThrown()"]},
 
-        {"kind":"where","text":"We can use safe, as well as unsafe, ways to access the UI.","code":{"problem":["\"can only be accessed by the Swing thread\"","\"can only be accessed by the Swing thread\"","\"can only be accessed by the Swing thread\"","\"can only be accessed by the Swing thread\"","\"can only be accessed by the Swing thread\""],"unsafeAccess":["{ it.getComponent() }","{ it.getSiblings() }","{ it.getSiblinghood() }","{ it.getSiblingsOfType(JButton) }","{ it.getSiblinghoodOfType(JButton) }"],"safeAccess":["{ it.forComponent(c -> {}) }","{ it.forSiblings(s -> {}) }","{ it.forSiblinghood(c -> {}) }","{ it.forSiblingsOfType(JButton, c -> {}) }","{ it.forSiblinghoodOfType(JButton, c -> {}) }"]}}
+        {"kind":"where","text":"We can use safe, as well as unsafe, ways to access the UI.","code":{"problem":["\"can only be accessed by the Swing thread\"","\"can only access the component from the\"","\"can only be accessed by the Swing thread\"","\"can only be accessed by the Swing thread\"","\"can only be accessed by the Swing thread\"","\"can only be accessed by the Swing thread\""],"unsafeAccess":["{ it.getComponent() }","{ it.get() }","{ it.getSiblings() }","{ it.getSiblinghood() }","{ it.getSiblingsOfType(JButton) }","{ it.getSiblinghoodOfType(JButton) }"],"safeAccess":["{ it.forComponent(c -> {}) }","{ it.forComponent(c -> {}) }","{ it.forSiblings(s -> {}) }","{ it.forSiblinghood(c -> {}) }","{ it.forSiblingsOfType(JButton, c -> {}) }","{ it.forSiblinghoodOfType(JButton, c -> {}) }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -77,12 +77,12 @@
     {
       "id":"The application thread can safely effect the state of the UI by using the \"UI.run(()->{..})\" method.",
       "result":"PASS",
-      "duration":"0.074 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"A UI built with the decoupled thread mode.","code":["var ui =","        UI.use(EventProcessor.DECOUPLED,","                ()-> UI.checkBox(\"X\").onClick( it ->{","                    UI.run(()-> it.getComponent() )","                    // it.getComponent() // This would throw an exception!","                })","            )"]},
+        {"kind":"given","text":"A UI built with the decoupled thread mode.","code":["var ui =","        UI.use(EventProcessor.DECOUPLED,","                ()-> UI.checkBox(\"X\").onClick( it ->{","                    UI.run(()-> it.get() )","                    // it.get() // This would throw an exception!","                })","            )"]},
 
         {"kind":"when","text":"We check the check box and process the event queue (by this current non-swing thread).","code":["UI.runNow( () -> ui.component.doClick() )","UI.joinDecoupledEventProcessorFor(1) // This is done by a custom thread in a real world application."]},
 
@@ -94,7 +94,7 @@
     {
       "id":"Accessing the UI from something other than the UI thread, leads to an exception when in decoupled thread mode.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The UI you build in the decoupled thread mode will try to protect itself\n            from being accessed from a potential application thread (so anything but the UI thread). \n            So if you try to access the UI from another thread, an exception will be thrown.\n        "]
       },

@@ -1,4 +1,5 @@
 <%
+var INCLUDE_DURATION = false
 
 def innerParseWhereCodeLines = { List<String> lines ->
     String code = lines.join("\n")
@@ -153,7 +154,7 @@ def specTitle = utils.specAnnotation( data, spock.lang.Title )?.value()
     "failures":"${stats.failures}",
     "errors":"${stats.errors}",
     "skipped":"${stats.skipped}",
-    "duration":"${fmt.toTimeDuration(stats.time)}"
+    "duration":"${INCLUDE_DURATION ? fmt.toTimeDuration(stats.time) : '?'}"
   },
 <%
   def writeTagOrAttachment = {feature ->
@@ -202,7 +203,7 @@ def specTitle = utils.specAnnotation( data, spock.lang.Title )?.value()
     {
       "id":"${esc(name)}",
       "result":"$result",
-      "duration":"$totalTime",
+      "duration":"${INCLUDE_DURATION ? totalTime : '?'}",
       "iterations":{
       <%
       writeTagOrAttachment( feature )

@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.046 seconds"
+    "duration":"?"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"Multiple properties can be modelled through the \"Vars\" and \"Vals\" classes.",
       "result":"PASS",
-      "duration":"0.013 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -51,7 +51,7 @@
     {
       "id":"You can remove n leading or trailing entries from a property list.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            A very common use case is to remove the first or last entry from a list.\n            Not only can you do this with the \"removeFirst()\" and \"removeLast()\" methods,\n            but you can also remove n entries from the start or end of the list\n            through the \"removeFirst(int)\" and \"removeLast(int)\" methods.\n        "]
       },
@@ -88,7 +88,7 @@
     {
       "id":"The properties of one property list can be added to another property list.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The properties of one property list can be added to another property list.\n            This is useful when you want to combine two property lists into one.\n        "]
       },
@@ -111,7 +111,7 @@
     {
       "id":"The \"Vars\" is a list of properties which can grow and shrink.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -134,7 +134,7 @@
     {
       "id":"Both the \"Vars\" and immutable \"Vals\" types can be used for functional programming.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -153,7 +153,7 @@
     {
       "id":"Map a \"Vals\" instance from one type of properties to another.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -170,7 +170,7 @@
     {
       "id":"Map a \"Vars\" instance from one type of properties to another.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -187,7 +187,7 @@
     {
       "id":"You can create the \"Vars\"/\"Vals\" property lists from property instances.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -206,7 +206,7 @@
     {
       "id":"Just like a regular \"Var\" property you can register change listeners on \"Vars\".",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -219,9 +219,9 @@
 
         {"kind":"when","text":"We modify the property in various ways...","code":["vars.addAt(1, 1)","vars.setAt(0, 2)","vars.removeAt(1)","vars.add(3)"]},
 
-        {"kind":"then","text":"The \"show\" listener has been called four times.","code":["changes.size() == 4"]},
+        {"kind":"then","text":"The change listener has been called four times.","code":["changes.size() == 4"]},
 
-        {"kind":"and","text":"The \"show\" listener has been called with the correct indices.","code":["changes == [1, 0, 1, 2]"]}
+        {"kind":"and","text":"The change listener has been called with the correct indices.","code":["changes == [1, 0, 1, 2]"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -229,7 +229,7 @@
     {
       "id":"The display action of a property or list of properties will not be called if they report \"canBeRemoved()\"",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -238,11 +238,11 @@
 
         {"kind":"and","text":"A list where we are going to record changes.","code":["var changes = []"]},
 
-        {"kind":"and","text":"Now we register a \"show\" listeners on both objects.","code":["prop.onSet(new Action<Integer>() {","    @Override","    void accept(Integer delegate) {","        changes << \"Something happened to the property.\"","    }","    @Override boolean canBeRemoved() { return true }","})","list.onChange(new Action<ValsDelegate<Integer>>() {","    @Override","    void accept(ValsDelegate<Integer> delegate) {","        changes << \"Something happened to the list.\"","    }","    @Override boolean canBeRemoved() { return true }","})"]},
+        {"kind":"and","text":"Now we register a \"set\" listeners on both objects.","code":["prop.onSet(new Action<Integer>() {","    @Override","    void accept(Integer delegate) {","        changes << \"Something happened to the property.\"","    }","    @Override boolean canBeRemoved() { return true }","})","list.onChange(new Action<ValsDelegate<Integer>>() {","    @Override","    void accept(ValsDelegate<Integer> delegate) {","        changes << \"Something happened to the list.\"","    }","    @Override boolean canBeRemoved() { return true }","})"]},
 
         {"kind":"when","text":"We modify the properties in various ways...","code":["prop.set(42)","list.add(1)","list.removeAt(1)","list.setAt(0, 2)","list.addAt(1, 3)","list.remove(3)"]},
 
-        {"kind":"then","text":"The \"show\" listener has been called zero times.","code":["changes.size() == 0"]}
+        {"kind":"then","text":"The change listener has been called zero times.","code":["changes.size() == 0"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -250,7 +250,7 @@
     {
       "id":"The listeners registered in property lists will be informed what type of modification occurred.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -259,13 +259,13 @@
 
         {"kind":"and","text":"A list where we are going to record changes.","code":["var changes = []"]},
 
-        {"kind":"and","text":"Now we register a \"show\" listener on the \"Vars\" class.","code":["vars.onChange{ changes << it.changeType() }"]},
+        {"kind":"and","text":"Now we register a change listener on the \"Vars\" class.","code":["vars.onChange{ changes << it.changeType() }"]},
 
         {"kind":"when","text":"We modify the property in various ways...","code":["vars.addAt(1, 1)","vars.setAt(0, 2)","vars.removeAt(1)","vars.add(3)"]},
 
-        {"kind":"then","text":"The \"show\" listener has been called four times.","code":["changes.size() == 4"]},
+        {"kind":"then","text":"The change listener has been called four times.","code":["changes.size() == 4"]},
 
-        {"kind":"and","text":"The \"show\" listener has been called with the correct indices.","code":["changes == [Change.ADD, Change.SET, Change.REMOVE, Change.ADD]"]}
+        {"kind":"and","text":"The change listener has been called with the correct indices.","code":["changes == [Change.ADD, Change.SET, Change.REMOVE, Change.ADD]"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -273,7 +273,7 @@
     {
       "id":"Lists of properties can be sorted based on their natural order through the \"sort\" method.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -290,7 +290,7 @@
     {
       "id":"Lists of properties can be sorted using a custom comparator through the \"sort\" method.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -307,7 +307,7 @@
     {
       "id":"Change listeners registered on a property list will be called when the list is sorted.",
       "result":"PASS",
-      "duration":"0",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -316,7 +316,7 @@
 
         {"kind":"and","text":"A regular list where we are going to record changes.","code":["var changes = []"]},
 
-        {"kind":"and","text":"Now we register a \"show\" change listener on the properties.","code":["vars.onChange({ changes << it.changeType() })"]},
+        {"kind":"and","text":"Now we register a change listener on the properties.","code":["vars.onChange({ changes << it.changeType() })"]},
 
         {"kind":"when","text":"We sort the list.","code":["vars.sort()"]},
 
@@ -330,7 +330,7 @@
     {
       "id":"You can create a \"Vars\" list from a regular List of properties.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -347,7 +347,7 @@
     {
       "id":"A list of properties can be turned into lists, sets or maps using various convenience methods.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The \"Vals\" class has a number of convenience methods for turning the list of properties into\n            immutable lists, sets or maps. \n            These methods make property lists more compatible with the rest of the Java ecosystem.\n        "]
       },
@@ -366,7 +366,7 @@
     {
       "id":"A list of properties can be turned into an immutable \"Vals\" list using the \"toVals\" method.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -383,9 +383,9 @@
     {
       "id":"The \"makeDistinct\" method on a mutable list of properties modifies the list in-place.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The \"makeDistinct\" method makes sure that there are only unique values in the Vals list.\n            It does this by removing all duplicates from the list.\n            This is especially useful when you use the properties to model \n            combo box or radio button selections.\n            This modification will be reported to all \"show\" listeners,\n            which are usually used to update the UI.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The \"makeDistinct\" method makes sure that there are only unique values in the Vals list.\n            It does this by removing all duplicates from the list.\n            This is especially useful when you use the properties to model \n            combo box or radio button selections.\n            This modification will be reported to all change listeners,\n            which are usually used to update the UI.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A \"Vars\" class with 4 properties that have unique ids.","code":["var vars = Vars.of(","                                    Var.of(3.1415f),","                                    Var.of(2.7182f),","                                    Var.of(3.1415f),","                                    Var.of(1.6180f)","                                )"]},
@@ -396,7 +396,7 @@
 
         {"kind":"then","text":"The list has been modified in-place.","code":["vars.size() == 3","vars == Vars.of(Var.of(3.1415f), Var.of(2.7182f), Var.of(1.6180f))"]},
 
-        {"kind":"and","text":"The \"show\" listeners have been called.","code":["changes == [Change.DISTINCT]"]}
+        {"kind":"and","text":"The change listeners have been called.","code":["changes == [Change.DISTINCT]"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

@@ -4,19 +4,19 @@
   "narrative":"This specification shows you how to bind properties to \n    the states of common types UI components.",
   "subjects":[],
   "statistics":{
-    "runs":"12",
+    "runs":"16",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.069 seconds"
+    "duration":"?"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"We can bind a property to the size of a swing component.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that the binding of a Swing-Tree property will only have side effects\n            when it is deliberately triggered to execute its side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
       },
@@ -39,7 +39,7 @@
     {
       "id":"Simple integer properties can be bound to the width or height of components.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -62,7 +62,7 @@
     {
       "id":"Bind to both width and height independently if you want to.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -85,7 +85,7 @@
     {
       "id":"We can bind to the color of a component.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -108,7 +108,7 @@
     {
       "id":"We can bind to the text of a component.",
       "result":"PASS",
-      "duration":"0.002 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -131,7 +131,7 @@
     {
       "id":"We can enable and disable a UI component dynamically through property binding.",
       "result":"PASS",
-      "duration":"0.006 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -154,7 +154,7 @@
     {
       "id":"We can select or unselect a UI component dynamically through properties.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -177,7 +177,7 @@
     {
       "id":"Enable or disable the split items of a JSplitButton through properties.",
       "result":"PASS",
-      "duration":"0.020 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -200,7 +200,7 @@
     {
       "id":"The visibility of a UI component can be modelled dynamically using boolean properties.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -225,9 +225,90 @@
     },
   
     {
+      "id":"The visibility of a UI component can be modelled using an enum property.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Enums are a common tool for modelling user choices and settings in you view models\n            because they are type safe and descriptive. \n            A common use case is to have certain UI components only visible if a certain enum value\n            in your view model is selected.\n            For this example, we will use the following enum:\n            ```\n                enum Accept { YES, NO, MAYBE }\n            ``\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property representing the visibility state of a component.","code":["Var<Accept> property = Var.of(Accept.YES)"]},
+
+        {"kind":"and","text":"We create a UI with the enum property based binding.","code":["var ui = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"If you accept the terms we can proceed!\"))","            .add(UI.button(\"Yes proceed!\").isVisibleIf(Accept.YES, property))","            .add(UI.label(\"Maybe or No is not enough :/\").isVisibleIfNot(Accept.YES, property))"]},
+
+        {"kind":"expect","text":"Initially the bound button will be visible.","code":["ui.component.components[1].visible == true"]},
+
+        {"kind":"and","text":"The bound label will be invisible.","code":["ui.component.components[2].visible == false"]},
+
+        {"kind":"when","text":"We change the value of the property.","code":["property.set(Accept.NO)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The bound button will be invisible.","code":["ui.component.components[1].visible == false"]},
+
+        {"kind":"and","text":"The bound label will be visible.","code":["ui.component.components[2].visible == true"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The enabled/disabled state of a UI component can be modelled using an enum property.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Enums are a common tool for modelling user choices and settings in you view models\n            because they are type safe and descriptive. \n            A common use case is to have certain UI components only enabled if a certain enum value\n            in your view model is selected.\n            For this example, we will use the following enum:\n            ```\n                enum Accept { YES, NO, MAYBE }\n            ``\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property representing the enabled state of a component.","code":["Var<Accept> property = Var.of(Accept.YES)"]},
+
+        {"kind":"and","text":"We create a UI with the enum property based binding.","code":["var ui = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"If you accept the terms we can proceed!\"))","            .add(UI.button(\"Yes proceed!\").isEnabledIf(Accept.YES, property))","            .add(UI.label(\"Maybe or No is not enough :/\").isEnabledIfNot(Accept.YES, property))"]},
+
+        {"kind":"expect","text":"Initially the bound button will be enabled.","code":["ui.component.components[1].enabled == true"]},
+
+        {"kind":"and","text":"The bound label will be disabled.","code":["ui.component.components[2].enabled == false"]},
+
+        {"kind":"when","text":"We change the value of the property.","code":["property.set(Accept.NO)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The bound button will be disabled.","code":["ui.component.components[1].enabled == false"]},
+
+        {"kind":"and","text":"The bound label will be enabled.","code":["ui.component.components[2].enabled == true"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The focusability of a UI component can be modelled using an enum property.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Enums are a common tool for modelling user choices and settings in you view models\n            because they are descriptive and type safe (not like string values). \n            A common use case is to have certain UI components only focused if a certain enum value\n            in your view model is selected.\n            For this example, we will use the following enum:\n            ```\n                enum Accept { YES, NO, MAYBE }\n            ``\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property representing the focusability state of a component.","code":["Var<Accept> property = Var.of(Accept.YES)"]},
+
+        {"kind":"and","text":"We create a UI with the enum property based binding.","code":["var ui = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"If you accept the terms we can proceed!\"))","            .add(UI.button(\"Yes proceed!\").isFocusableIf(Accept.YES, property))","            .add(UI.label(\"Maybe or No is not enough :/\").isFocusableIfNot(Accept.YES, property))"]},
+
+        {"kind":"expect","text":"Initially the bound button will be focusable.","code":["ui.component.components[1].focusable == true"]},
+
+        {"kind":"and","text":"The bound label will be unfocusable.","code":["ui.component.components[2].focusable == false"]},
+
+        {"kind":"when","text":"We change the value of the property.","code":["property.set(Accept.NO)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The bound button will be unfocusable.","code":["ui.component.components[1].focusable == false"]},
+
+        {"kind":"and","text":"The bound label will be focusable.","code":["ui.component.components[2].focusable == true"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
       "id":"The focusability of a UI component can be modelled dynamically using boolean properties.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -254,7 +335,7 @@
     {
       "id":"Minimum as well as maximum height of UI components can be modelled using integer properties.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -281,7 +362,7 @@
     {
       "id":"The width and height of UI components can be modelled using integer properties.",
       "result":"PASS",
-      "duration":"0.003 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -303,6 +384,35 @@
         {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 
         {"kind":"then","text":"The dimensions of both UI components will be as expected.","code":["node.component.components[1].size.width == 100","node.component.components[1].size.height == 50","node.component.components[3].size.width == 50","node.component.components[3].size.height == 100"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Bind the foreground of a component to a conditional property and 2 color properties.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A common use case is to have a foreground color switching between two colors depending on a condition.\n            This can be achieved by using properties for the condition and the colors.\n            If any of these change in the view model, the UI component will be updated accordingly.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create 3 properties, 1 boolean one and 2 color properties.","code":["Val<Boolean> conditionProperty = Var.of(true)","Val<Color>   color1Property    = Var.of(Color.RED)","Val<Color>   color2Property    = Var.of(Color.BLUE)"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var ui =","            UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Below me is a text area!\"))","            .add(UI.textArea(\"hi\").withForegroundIf(conditionProperty, color1Property, color2Property))"]},
+
+        {"kind":"expect","text":"\n                The foreground of the text area will be red, because the condition is true, \n                meaning the first color is selected!\n            ","code":["ui.component.components[1].foreground == Color.RED"]},
+
+        {"kind":"when","text":"We change the value of the condition property.","code":["conditionProperty.set(false)","UI.sync() // Wait for the EDT to complete the UI modifications..."]},
+
+        {"kind":"then","text":"The foreground of the text area will now switch to blue, because the condition is false.","code":["ui.component.components[1].foreground == Color.BLUE"]},
+
+        {"kind":"when","text":"We change the value of the color properties.","code":["color1Property.set(Color.GREEN)","color2Property.set(Color.YELLOW)","UI.sync() // Wait for the EDT to complete the UI modifications..."]},
+
+        {"kind":"then","text":"The foreground of the text area will be yellow, because the condition is false.","code":["ui.component.components[1].foreground == Color.YELLOW"]},
+
+        {"kind":"when","text":"We change the value of the condition property.","code":["conditionProperty.set(true)","UI.sync() // Wait for the EDT to complete the UI modifications..."]},
+
+        {"kind":"then","text":"The foreground of the text area will be green, because the condition is true.","code":["ui.component.components[1].foreground == Color.GREEN"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

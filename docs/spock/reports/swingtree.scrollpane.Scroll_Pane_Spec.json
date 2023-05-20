@@ -9,14 +9,14 @@
     "failures":"0",
     "errors":"0",
     "skipped":"0",
-    "duration":"0.021 seconds"
+    "duration":"?"
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
       "id":"Use the `UI.ScrollBarPolicy` enum to configure the scroll pane scroll bars.",
       "result":"PASS",
-      "duration":"0.005 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that this is based on the rather non-desciptive `with` method.\n            We are using it because the type and name of the enum instance\n            already describe the scroll bar policy.\n            You will find this pattern in other places in Swing-Tree,\n            where the `with` method is used to configure a component\n            using an enum instance. \n        "]
       },
@@ -31,7 +31,7 @@
     {
       "id":"Configure both the horizontal and vertical scroll policy individually.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that this is based on the rather non-desciptive `withHorizontal` \n            and `withVertical` methods.\n            We are using them because the type and name of the enum instance\n            already describe the scroll bar policy.\n            You will find this pattern in other places in Swing-Tree,\n            where the `with` method, or variations of it, are used to configure a component\n            in a fluent way.\n        "]
       },
@@ -46,7 +46,7 @@
     {
       "id":"We can configure the vertical and horizontal scroll bar scroll increment of a scroll pane.",
       "result":"PASS",
-      "duration":"0.004 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -61,7 +61,7 @@
     {
       "id":"We can configure the general scroll increment of the scroll pane scroll bars.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that this sets the scroll increment unit for both\n            the vertical and horizontal scroll bars.\n            So any previously set scroll increment unit for the\n            vertical or horizontal scroll bar will be overwritten.\n        "]
       },
@@ -76,7 +76,7 @@
     {
       "id":"The horizontal as well as vertical block scroll increment can be configured easily.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
       },
@@ -91,7 +91,7 @@
     {
       "id":"Configure the block scroll increment for both scroll bars in one line.",
       "result":"PASS",
-      "duration":"0.001 seconds",
+      "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that this sets the block scroll increment unit for both\n            the vertical and horizontal scroll bars.\n            So any previously set block scroll increment unit for the\n            vertical or horizontal scroll bar will be overwritten.\n        "]
       },
