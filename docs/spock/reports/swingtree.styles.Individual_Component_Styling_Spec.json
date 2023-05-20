@@ -1,0 +1,78 @@
+{
+  "className":"swingtree.styles.Individual_Component_Styling_Spec",
+  "title":"Styling Components",
+  "narrative":"This specification demonstrates how you can use the styling\n    API to style Swing components in declarative SwingTree code.",
+  "subjects":[],
+  "statistics":{
+    "runs":"4",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"Styling components is based on a functional styler lambda.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Fun-Fact: \n            Styling in SwingTree is fully functional, which means \n            that the `Style` settings objects are all immutable. \n            They are not modified in place, but instead transformed\n            by so called \"styler\" lambdas.\n            Not only does this architecture make it easy to compose, reuse and share\n            styles, but it also makes it possible to have a complex style\n            inheritance hierarchy without the need for very complex code.\n            In practice, this means that your styler lambdas become part\n            of a giant tree of styler lambdas, which is then applied to\n            the component tree in a single pass.\n            How cool is that? :)\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a panel with some custom styling!","code":["var panel =","            UI.panel()","            .withStyle( it ->","                it.style()","                  .foundationColor(\"green\")","                  .backgroundColor(\"cyan\")","                  .borderColor(\"blue\")","                  .borderWidth(5)","                  .shadowColor(\"black\")","                  .shadowSpreadRadius(10)","                  .shadowOffset(10)","            )"]},
+
+        {"kind":"expect","text":"","code":["panel != null"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The margins defined in the style API will be applied to the layout manager.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The default layout manager for SwingTree is MigLayout.\n            It is a very powerful layout manager which is also supported by the styling API.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a panel with some custom styling!","code":["var panel =","            UI.panel()","            .withStyle( it ->","                it.style()","                  .marginRight(42)","                  .marginLeft(64)","            )","            .get(JPanel)"]},
+
+        {"kind":"expect","text":"","code":["panel != null","panel.layout != null","panel.layout instanceof MigLayout","((MigLayout)panel.layout).getLayoutConstraints().contains(\"insets 0 64 0 42\")"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The insets of the layout manager are based on the sum of the margin and padding for a given edge of the component bounds.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Swing does not have a concept of padding and margin.\n            Without a proper layout manager it does not even support the configuration of insets.\n            However, because we are using MigLayout, we can model the padding and margin of a component\n            by using the layout constraints of the layout manager\n            and some custom rendering code.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a panel with some custom styling!","code":["var panel =","            UI.panel()","            .withStyle( it ->","                it.style()","                  .marginTop(11)","                  .marginRight(42)","                  .marginLeft(64)","                  .padRight(10)","                  .padLeft(20)","                  .padBottom(30)","            )","            .get(JPanel)"]},
+
+        {"kind":"expect","text":"","code":["panel != null","panel.layout != null","panel.layout instanceof MigLayout","((MigLayout)panel.layout).getLayoutConstraints().contains(\"insets 11 84 30 52\")"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The Styling API will make sure that the layout manager accounts for the border width!",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A border is a very common feature of Swing components and when it comes to styling\n            your UI elements should not overlap with the border.\n            This is why the styling API will make sure that the layout manager accounts for the border width,\n            meaning that the insets of the layout manager will be increased by the border width.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a panel with some custom styling!","code":["var panel =","            UI.panel()","            .withStyle( it ->","                it.style()","                  .marginTop(7)","                  .marginRight(2)","                  .padLeft(14)","                  .borderWidth(5)","            )","            .get(JPanel)"]},
+
+        {"kind":"expect","text":"","code":["panel != null","panel.layout != null","panel.layout instanceof MigLayout","((MigLayout)panel.layout).getLayoutConstraints().contains(\"insets 12 19 5 7\")"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

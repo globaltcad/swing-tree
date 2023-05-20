@@ -1,0 +1,71 @@
+{
+  "className":"swingtree.styles.Styles_Spec",
+  "title":"Style Properties",
+  "narrative":"This specification demonstrates how the `Style` type\n    can be used to define how Swing components ought to be\n    rendered.",
+  "subjects":["swingtree.style.Style"],
+  "statistics":{
+    "runs":"3",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"Various kinds of String expressions can be parsed as colors by various style properties.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We use method chaining to build a colorful style:","code":["var style = Style.blank()","                    .foundationColor(colorString)","                    .backgroundColor(colorString)","                    .borderColor(colorString)","                    .shadowColor(colorString)","                    .fontSelectionColor(colorString)","                    .fontColor(colorString)"]},
+
+        {"kind":"expect","text":"","code":["style.background().foundationColor().get() == expectedColor","style.background().color().get() == expectedColor","style.border().color().get() == expectedColor","style.shadow().color().get() == expectedColor","style.font().selectionColor().get() == expectedColor","style.font().color().get() == expectedColor"]},
+
+        {"kind":"where","text":"","code":{"colorString":["\"red\"","\"#ff0000\"","\"0xff0000\"","\"rgb(255,0,0)\"","\"rgba(1.0,0,0,1.0)\"","\"rgba(100%,0,0, 1.0)\"","\"rgba(255,0,0,255)\"","\"rgba(100%,0,0,100%)\"","\"hsb(0,100%,100%)\"","\"hsb(0,1.0,1f)\"","\"magenta\"","\"#ff00ff\"","\"0xff00ff\"","\"rgb(255,0,255)\"","\"rgba(1.0,0,1.0,1.0)\"","\"rgba(100%,0,100%,1f)\"","\"rgba(255,0,255,255)\"","\"rgba(100%,0,100%,100%)\"","\"hsb(0.8333333,100%,100%)\"","\"hsb(300°,100%,100%)\"","\"rgb(255,22,0)\"","\"rgba(255,22,0, 0.5)\"","\"hsb(0.014379084,1f,1f)\"","\"hsba(0.014379084,1f,1f,0.5)\"","\"transparent\"","\"yellow\"","\"black\""],"expectedColor":["Color.RED","Color.RED","Color.RED","Color.RED","Color.RED","Color.RED","Color.RED","Color.RED","Color.RED","Color.RED","Color.MAGENTA","Color.MAGENTA","Color.MAGENTA","Color.MAGENTA","Color.MAGENTA","Color.MAGENTA","Color.MAGENTA","Color.MAGENTA","Color.MAGENTA","Color.MAGENTA","new Color(255, 22, 0)","new Color(255, 22, 0, 127)","new Color(255, 22, 0)","new Color(255, 22, 0, 127)","new Color(0, 0, 0, 0)","Color.YELLOW","Color.BLACK"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The String representation of a Style will tell you everything about it!",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first create a style with various properties:","code":["var style = Style.blank()","                    .foundationColor(\"red\")","                    .backgroundColor(\"green\")","                    .borderColor(\"blue\")","                    .borderRadius(12, 18)","                    .shadowColor(\"yellow\")","                    .fontSelectionColor(\"cyan\")","                    .fontColor(\"magenta\")","                    .fontName(\"Times New Roman\")","                    .fontSize(12)","                    .fontBold(true)","                    .fontUnderline(true)","                    .fontStrikeThrough(true)"]},
+
+        {"kind":"expect","text":"","code":["style.toString() == \"Style[\" +","                        \"LayoutStyle[\" +","                            \"margin=Outline[top=?, right=?, bottom=?, left=?], \" +","                            \"padding=Outline[top=?, right=?, bottom=?, left=?]\" +","                        \"], \" +","                        \"BorderStyle[arcWidth=12, arcHeight=18, width=-1, color=rgba(0,0,255,255)], \" +","                        \"BackgroundStyle[\" +","                            \"color=rgba(0,255,0,255), \" +","                            \"foundationColor=rgba(255,0,0,255), \" +","                            \"renderer=null\" +","                        \"], \" +","                        \"ShadowStyle[\" +","                            \"horizontalOffset=0, \" +","                            \"verticalOffset=0, \" +","                            \"blurRadius=0, \" +","                            \"spreadRadius=0, \" +","                            \"color=rgba(255,255,0,255), \" +","                            \"isInset=false\" +","                        \"], \" +","                        \"FontStyle[\" +","                            \"name=Times New Roman, \" +","                            \"size=12, style=1, weight=0, \" +","                            \"attributes=[java.awt.font.TextAttribute(underline),java.awt.font.TextAttribute(strikethrough)], \" +","                            \"color=rgba(255,0,255,255), \" +","                            \"backgroundColor=null, \" +","                            \"selectionColor=rgba(0,255,255,255)\" +","                        \"]\" +","                    \"]\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Style objects are value based (with respect to equality and hash code).",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first create a style with various properties:","code":["var style1 = Style.blank()","                     .foundationColor(\"red\")","                     .backgroundColor(\"green\")","                     .borderColor(\"blue\")","                     .borderRadius(12, 18)","                     .shadowColor(\"yellow\")","                     .fontSelectionColor(\"cyan\")","                     .fontColor(\"magenta\")","                     .fontName(\"Times New Roman\")","                     .fontSize(12)","                     .fontBold(true)","                     .fontUnderline(true)","                     .fontStrikeThrough(true)","                     .shadowSpreadRadius(12)","                     .shadowBlurRadius(42)"]},
+
+        {"kind":"and","text":"We then create a second style with the same properties:","code":["var style2 = Style.blank()","                     .foundationColor(\"red\")","                     .backgroundColor(\"green\")","                     .borderColor(\"blue\")","                     .borderRadius(12, 18)","                     .shadowColor(\"yellow\")","                     .fontSelectionColor(\"cyan\")","                     .fontColor(\"magenta\")","                     .fontName(\"Times New Roman\")","                     .fontSize(12)","                     .fontBold(true)","                     .fontUnderline(true)","                     .fontStrikeThrough(true)","                     .shadowSpreadRadius(12)","                     .shadowBlurRadius(42)"]},
+
+        {"kind":"expect","text":"","code":["style1 == style2","style1.hashCode() == style2.hashCode()"]},
+
+        {"kind":"and","text":"Changing a property and then comparing the styles should return false:","code":["style1 != style2.fontBold(false)","style1.hashCode() != style2.fontBold(false).hashCode()","style1 != style2.shadowSpreadRadius(1)","style1.hashCode() != style2.shadowSpreadRadius(1).hashCode()","style1 != style2.shadowBlurRadius(1)","style1.hashCode() != style2.shadowBlurRadius(1).hashCode()"]},
+
+        {"kind":"and","text":"If we transform them both the same way then they will be equal:","code":["style1.fontBold(false) == style2.fontBold(false)","style1.fontBold(false).hashCode() == style2.fontBold(false).hashCode()","style1.shadowSpreadRadius(1) == style2.shadowSpreadRadius(1)","style1.shadowSpreadRadius(1).hashCode() == style2.shadowSpreadRadius(1).hashCode()","style1.shadowBlurRadius(1) == style2.shadowBlurRadius(1)","style1.shadowBlurRadius(1).hashCode() == style2.shadowBlurRadius(1).hashCode()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}
