@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class SymbolGuesserViewModel
 {
@@ -164,6 +165,7 @@ public class SymbolGuesserViewModel
             new Symbol('十', "ju", "ten"),
             new Symbol('百', "hyaku", "hundred")
         ));
+        enableSymbols();
         newRandomSymbol();
     }
 
@@ -176,6 +178,7 @@ public class SymbolGuesserViewModel
 
     public void selectSymbol( Symbol symbol ) {
         if ( currentSymbol.is(symbol) ) {
+            symbol.incrementSuccesses();
             feedback.set( "Yes. Correct!" );
             feedbackColor.set( new Color(30, 128, 0) );
             if ( cheatMode.is(false) )
@@ -185,7 +188,8 @@ public class SymbolGuesserViewModel
         else {
             feedback.set( "Try again!" );
             feedbackColor.set( Color.RED );
-            score.set(0);
+            // The score is not completely reset, we simply fall back to the level we were at before
+            score.set( level().get() * 10 );
             animateFeedbackAndThen( () -> {} );
         }
     }
@@ -209,14 +213,54 @@ public class SymbolGuesserViewModel
     }
 
     public void newRandomSymbol() {
-        Alphabet randomAlphabet = alphabets.get( (int) (Math.random() * alphabets.size()) );
+        enableSymbols();
+
+        // We sort all the enabled symbols based on their successes!
+        List<Symbol> allEnabledSymbols =
+                                alphabets.stream()
+                                         .flatMap( alphabet -> alphabet.symbols().stream() )
+                                         .filter( symbol -> symbol.isEnabled().is(true) )
+                                         .sorted( (a, b) -> b.successes() - a.successes() )
+                                         .collect( Collectors.toList() );
+
         Symbol randomSymbol = null;
-        while ( randomSymbol == null || randomSymbol.symbol() == '?' )
-            randomSymbol = randomAlphabet.symbols().get( (int) (Math.random() * randomAlphabet.symbols().size()) );
+        if ( allEnabledSymbols.size() > 0 ) {
+            // Now we pick a random number between 0 and 4 and iterate from all the last enabled to the first enabled.
+            // We do a 25% chance of picking the current symbol in the iteration.
+            // If none was picked we repeat the process until we have a symbol.
+            while ( randomSymbol == null )
+                for ( int i = allEnabledSymbols.size() - 1; i >= 0; i-- )
+                    if ( Math.random() < 0.25 ) {
+                        randomSymbol = allEnabledSymbols.get(i);
+                        break;
+                    }
+        }
+        else
+            throw new IllegalStateException( "No symbols are enabled" );
+
         feedback.set( "Choose:" );
         feedbackColor.set( Color.BLACK );
         currentSymbol.set( randomSymbol );
         repaint.fire();
+    }
+
+    private void enableSymbols() {
+        int count = 5 * (level.get()+ 1 );
+
+        for ( Alphabet alphabet : alphabets )
+            for ( Symbol symbol : alphabet.symbols() )
+                symbol.isEnabled().set(false);
+
+        for ( Alphabet alphabet : alphabets ) {
+            for ( Symbol symbol : alphabet.symbols() ) {
+                if ( symbol.isEnabled().is(false) && symbol.symbol() != '?' ) {
+                    symbol.isEnabled().set(true);
+                    count--;
+                    if ( count == 0 )
+                        return;
+                }
+            }
+        }
     }
 
 }

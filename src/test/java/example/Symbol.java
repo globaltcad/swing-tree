@@ -1,5 +1,7 @@
 package example;
 
+import sprouts.Var;
+
 import java.util.Optional;
 
 public class Symbol
@@ -8,6 +10,9 @@ public class Symbol
     private final String _sound;
     private final String _description;
     private final Alphabet _alphabet;
+
+    private final Var<Boolean> _isEnabled = Var.of(false);
+    private int _successes = 0;
 
     public Symbol(char symbol, String sound, String description) {
         this(symbol, sound, description, null);
@@ -27,6 +32,12 @@ public class Symbol
     public String description() { return _description; }
 
     public Optional<Alphabet> alphabet() { return Optional.ofNullable(_alphabet); }
+
+    public Var<Boolean> isEnabled() { return _isEnabled; }
+
+    public int successes() { return _successes; }
+
+    public void incrementSuccesses() { _successes++; }
 
     public Symbol withAlphabet( Alphabet alphabet ) { return new Symbol(_symbol, _sound, _description); }
 

@@ -90,7 +90,9 @@ public class SymbolGuesserView extends Panel
                                     Symbol symbol = alphabet.symbols().get(si);
                                     boolean newLine = (si + 1) % 5 == 0;
                                     p1.add( newLine ? "shrink, wrap" : "shrink",
-                                        button(symbol.sound()).isEnabledIf( symbol.symbol() != '?' )
+                                        button(symbol.sound())
+                                        .isEnabledIf( symbol.symbol() != '?' )
+                                        .isEnabledIf( symbol.isEnabled() )
                                         .withFontSize(12)
                                         .withMinSize( 51, 51 ).withMaxSize( 51, 51 )
                                         .onClick( e -> vm.selectSymbol(symbol) )
