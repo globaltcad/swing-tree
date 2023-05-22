@@ -240,6 +240,12 @@ public final class Render<C extends JComponent,E> {
 				if ( fg == null )
 					fg = UIManager.getColor( "ComboBox.foreground" );
 
+				// Lastly we make sure the color is a user color, not a LaF color:
+				if ( bg != null ) // This is because of a weired JDK bug it seems!
+					bg = new Color( bg.getRGB() );
+				if ( fg != null )
+					fg = new Color( fg.getRGB() );
+
 				if (cell.isSelected()) {
 					if ( bg != null ) l.setBackground( bg );
 					if ( fg != null ) l.setForeground( fg );
@@ -249,14 +255,18 @@ public final class Render<C extends JComponent,E> {
 					if (  cell.getComponent() != null )
 						normalBg = cell.getComponent().getBackground();
 
-					if ( cell.getRow() % 2 == 0 ) {
+					// We need to make sure the color is a user color, not a LaF color:
+					if ( normalBg != null )
+						normalBg = new Color( normalBg.getRGB() ); // This is because of a weired JDK bug it seems!
+
+					if ( cell.getRow() % 2 == 1 ) {
 						// We determine if the base color is more bright or dark,
 						// and then we set the foreground color accordingly
-						double brightness = 1 - (0.299 * normalBg.getRed() + 0.587 * normalBg.getGreen() + 0.114 * normalBg.getBlue()) / 255;
+						double brightness = (0.299 * normalBg.getRed() + 0.587 * normalBg.getGreen() + 0.114 * normalBg.getBlue()) / 255;
 						if ( brightness < 0.5 )
-							normalBg = normalBg.brighter();
+							normalBg = brighter(normalBg);
 						else
-							normalBg = normalBg.darker();
+							normalBg = darker(normalBg);
 					}
 					if ( bg != null ) l.setBackground( normalBg );
 					if ( fg != null && cell.getComponent() != null )
@@ -525,5 +535,37 @@ public final class Render<C extends JComponent,E> {
 
 
 	}
+
+
+	private static Color darker( Color c ) {
+		final double PERCENTAGE = (242*3.0)/(255*3.0);
+		return new Color(
+				(int)(c.getRed()*PERCENTAGE),
+				(int)(c.getGreen()*PERCENTAGE),
+				(int)(c.getBlue()*PERCENTAGE)
+		);
+	}
+
+	private static Color brighter( Color c ) {
+		final double FACTOR = (242*3.0)/(255*3.0);
+		int r = c.getRed();
+		int g = c.getGreen();
+		int b = c.getBlue();
+		int alpha = c.getAlpha();
+
+		int i = (int)(1.0/(1.0-FACTOR));
+		if ( r == 0 && g == 0 && b == 0) {
+			return new Color(i, i, i, alpha);
+		}
+		if ( r > 0 && r < i ) r = i;
+		if ( g > 0 && g < i ) g = i;
+		if ( b > 0 && b < i ) b = i;
+
+		return new Color(Math.min((int)(r/FACTOR), 255),
+				Math.min((int)(g/FACTOR), 255),
+				Math.min((int)(b/FACTOR), 255),
+				alpha);
+	}
+
 
 }
