@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
  * @param <C> The delegate (in most cases origin UI component) type parameter stored by this.
  * @param <E> The event type parameter of the event stored by this.
  */
-public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelegate<C>
+public class SimpleDelegate<C extends JComponent,E> extends AbstractDelegate<C>
 {
     private final E event;
     private final Supplier<List<JComponent>> siblingSource;
@@ -59,7 +59,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
     /**
      * @return The component for which the current {@link Action} originated.
      */
-    public C getComponent() {
+    public final C getComponent() {
         // We make sure that only the Swing thread can access the component:
         if ( UI.thisIsUIThread() ) return _component();
         else
@@ -76,19 +76,19 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
      * @param action The action consuming the component,
      *               which will be executed by the Swing thread.
      */
-    public void forComponent( Consumer<C> action ) {
+    public final void forComponent( Consumer<C> action ) {
         if ( UI.thisIsUIThread() )
             action.accept(_component());
         else
             UI.run( () -> action.accept(_component()) );
     }
 
-    public E getEvent() { return event; }
+    public final E getEvent() { return event; }
 
     /**
      * @return A list of all siblings excluding the component from which this instance originated.
      */
-    public List<JComponent> getSiblings() {
+    public final List<JComponent> getSiblings() {
         // We make sure that only the Swing thread can access the sibling components:
         if ( !UI.thisIsUIThread() )
             throw new IllegalStateException(
@@ -107,7 +107,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
      *               component from which this instance originated),
      *               which will be executed by the Swing thread.
      */
-    public void forSiblings( Consumer<List<JComponent>> action ) {
+    public final void forSiblings( Consumer<List<JComponent>> action ) {
         if ( UI.thisIsUIThread() )
             action.accept(getSiblings());
         else
@@ -119,7 +119,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
      * @param <T> The type of the sibling components to return.
      * @return A list of all siblings of the specified type, excluding the component from which this instance originated.
      */
-    public <T extends JComponent> List<T> getSiblingsOfType(Class<T> type) {
+    public final <T extends JComponent> List<T> getSiblingsOfType(Class<T> type) {
         // We make sure that only the Swing thread can access the sibling components:
         if ( !UI.thisIsUIThread() )
             throw new IllegalStateException(
@@ -145,7 +145,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
      *               excluding the component from which this instance originated,
      *               which will be executed by the Swing thread.
      */
-    public <T extends JComponent> void forSiblingsOfType(
+    public final <T extends JComponent> void forSiblingsOfType(
         Class<T> type, Consumer<List<T>> action
     ) {
         if ( UI.thisIsUIThread() )
@@ -157,7 +157,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
     /**
      * @return A list of all siblings including the component from which this instance originated.
      */
-    public List<JComponent> getSiblinghood() {
+    public final List<JComponent> getSiblinghood() {
         // We make sure that only the Swing thread can access the sibling components:
         if ( !UI.thisIsUIThread() )
             throw new IllegalStateException(
@@ -176,7 +176,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
      *               component from which this instance originated),
      *               which will be executed by the Swing thread.
      */
-    public void forSiblinghood( Consumer<List<JComponent>> action ) {
+    public final void forSiblinghood( Consumer<List<JComponent>> action ) {
         if ( UI.thisIsUIThread() )
             action.accept(getSiblinghood());
         else
@@ -188,7 +188,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
      * @param <T> The {@link JComponent} type of the sibling components to return.
      * @return A list of all siblings of the specified type, including the component from which this instance originated.
      */
-    public <T extends JComponent> List<T> getSiblinghoodOfType(Class<T> type) {
+    public final <T extends JComponent> List<T> getSiblinghoodOfType(Class<T> type) {
         // We make sure that only the Swing thread can access the sibling components:
         if ( !UI.thisIsUIThread() )
             throw new IllegalStateException(
@@ -214,7 +214,7 @@ public final class SimpleDelegate<C extends JComponent,E> extends AbstractDelega
      *               including the component from which this instance originated,
      *               which will be executed by the Swing thread.
      */
-    public <T extends JComponent> void forSiblinghoodOfType(
+    public final <T extends JComponent> void forSiblinghoodOfType(
         Class<T> type, Consumer<List<T>> action
     ) {
         if ( UI.thisIsUIThread() )
