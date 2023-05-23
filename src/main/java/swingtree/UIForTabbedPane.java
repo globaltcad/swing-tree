@@ -105,6 +105,54 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
         return this;
     }
 
+    /**
+     *  Adds an action to be performed when a mouse enter is detected on a tab.
+     *  The action will receive a {@link TabDelegate} instance which
+     *  not only delegates the current tabbed pane and mouse event, but also
+     *  tells the action which tab was entered and whether the entered tab is selected.
+     *
+     * @param onEnter The action to be performed when a tab is entered.
+     * @return This builder node.
+     * @throws NullPointerException if the given action is null.
+     */
+    public final UIForTabbedPane<P> onTabMouseEnter( Action<TabDelegate> onEnter ) {
+        NullUtil.nullArgCheck(onEnter, "onEnter", Action.class);
+        P pane = getComponent();
+        pane.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) {
+                int indexOfTab = _indexOfClick(pane, e.getPoint());
+                int tabCount = pane.getTabCount();
+                if ( indexOfTab >= 0 && indexOfTab < tabCount )
+                    _doApp(() -> onEnter.accept(new TabDelegate(pane, e, () -> getSiblinghood(), indexOfTab)));
+            }
+        });
+        return this;
+    }
+
+    /**
+     *  Adds an action to be performed when a mouse exit is detected on a tab.
+     *  The action will receive a {@link TabDelegate} instance which
+     *  not only delegates the current tabbed pane and mouse event, but also
+     *  tells the action which tab was exited and whether the exited tab is selected.
+     *
+     * @param onExit The action to be performed when a tab is exited.
+     * @return This builder node.
+     * @throws NullPointerException if the given action is null.
+     */
+    public final UIForTabbedPane<P> onTabMouseExit( Action<TabDelegate> onExit ) {
+        NullUtil.nullArgCheck(onExit, "onExit", Action.class);
+        P pane = getComponent();
+        pane.addMouseListener(new MouseAdapter() {
+            @Override public void mouseExited(MouseEvent e) {
+                int indexOfTab = _indexOfClick(pane, e.getPoint());
+                int tabCount = pane.getTabCount();
+                if ( indexOfTab >= 0 && indexOfTab < tabCount )
+                    _doApp(() -> onExit.accept(new TabDelegate(pane, e, () -> getSiblinghood(), indexOfTab)));
+            }
+        });
+        return this;
+    }
+
     private static int _indexOfClick( JTabbedPane pane, Point p ) {
         List<Rectangle> tabBounds = new ArrayList<>();
         for ( int i = 0; i < pane.getTabCount(); i++ )
@@ -117,7 +165,11 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
         return -1;
     }
 
-
+    /**
+     *  Sets the selected tab based on the given index.
+     * @param index The index of the tab to select.
+     * @return This builder node.
+     */
     public final UIForTabbedPane<P> withSelectedIndex( int index ) {
         getComponent().setSelectedIndex(index);
         return this;
