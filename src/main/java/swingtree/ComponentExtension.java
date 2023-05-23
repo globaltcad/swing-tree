@@ -59,7 +59,7 @@ public class ComponentExtension<C extends JComponent>
         else
             _styling = _styling.andThen(s -> styler.apply(new StyleDelegate<>(_owner, s)));
 
-        _calculateStyle().ifPresent(this::_applyStyleToComponentState);
+        _calculateStyle().ifPresent( s -> _applyStyleToComponentState(s, null) );
     }
 
     public void setStyleGroups( String... styleName ) {
@@ -94,7 +94,8 @@ public class ComponentExtension<C extends JComponent>
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
         {
             _calculateStyle().ifPresent( style -> {
-                style = _applyStyleToComponentState( style );
+                style = _applyStyleToComponentState( style, g2d );
+
                 if ( _componentIsDeclaredInUI(_owner) )
                     new StyleRenderer<>( g2d, _owner ).renderStyle( style );
             });
@@ -126,8 +127,9 @@ public class ComponentExtension<C extends JComponent>
             return Optional.of( _styling.apply(new StyleDelegate<>(_owner, style.orElse(Style.none()))) );
     }
 
-    private Style _applyStyleToComponentState( Style style )
+    private Style _applyStyleToComponentState( Style style, Graphics2D g2d )
     {
+        Objects.requireNonNull(style);
         /*
             Note that in SwingTree we do not override the UI classes of Swing to apply styles.
             Instead, we use the "ComponentExtension" class to render styles on components.
@@ -173,8 +175,11 @@ public class ComponentExtension<C extends JComponent>
         style.font()
              .createDerivedFrom(_owner.getFont())
              .ifPresent( newFont -> {
-                    if ( !newFont.equals(_owner.getFont()) )
+                    if ( !newFont.equals(_owner.getFont()) ) 
                         _owner.setFont( newFont );
+
+                     if ( g2d != null && !newFont.equals(g2d.getFont()) )
+                         g2d.setFont( newFont );
                 });
 
         _applyPadding( style );

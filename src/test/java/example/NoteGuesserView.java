@@ -17,7 +17,7 @@ public class NoteGuesserView extends Panel
         FlatLightLaf.setup();
         UIManager.put( "Button.arc", 25 );
         of(this).withBackground(OLD_SHEET_MUSIC_COLOR)
-        .withLayout(FILL.and(INS(12, 0, 12, 0)).and(WRAP(1)))
+        .withLayout(FILL.and(INS(12, 12, 12, 12)).and(WRAP(1)))
         .withPrefSize( 900, 700 )
         .withMinSize( 900, 700 )
         .add(ALIGN_X_CENTER,
@@ -29,6 +29,7 @@ public class NoteGuesserView extends Panel
                 it.style()
                  .backgroundColor(OLD_SHEET_MUSIC_COLOR.brighter())
                  .foundationColor(new Color(255,255,255, 0))
+                 .font("Papyrus", 24)
                  .padTop(5)
                  .padLeft(25)
                  .padRight(25)
@@ -87,7 +88,7 @@ public class NoteGuesserView extends Panel
             )
         )
         .add(ALIGN_CENTER,
-            panel()
+            panel().withStyle( it -> it.style().borderRadius(24) )
             .add(
                 button("New Note")
                 .onClick( e -> vm.newRandomNoteIndex() )
@@ -158,7 +159,10 @@ public class NoteGuesserView extends Panel
                 if ( shouldDraw ) {
                     int noteLabelX = x - 30 + (isActuallyALine ? 15 : 0);
                     int noteLabelY = lineY + distanceBetween2Lines / 5;
-                    g2d.setFont(new Font("Arial", Font.BOLD, distanceBetween2Lines / 2));
+                    int fontSize = distanceBetween2Lines / 2;
+                    Font derivedFont = g2d.getFont().deriveFont((float) fontSize);
+                    derivedFont = derivedFont.deriveFont(derivedFont.getStyle() | Font.BOLD);
+                    g2d.setFont(derivedFont);
                     g2d.setColor(Color.BLACK);
                     g2d.drawString(note, noteLabelX, noteLabelY);
                 }

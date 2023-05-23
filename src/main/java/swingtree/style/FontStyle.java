@@ -98,6 +98,9 @@ public final class FontStyle
 
     public Optional<Font> createDerivedFrom( Font existingFont )
     {
+        if ( this.equals(_NONE) )
+            return Optional.empty();
+
         boolean isChange = false;
 
         if ( existingFont == null )
