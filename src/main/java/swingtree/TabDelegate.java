@@ -6,7 +6,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -34,26 +33,28 @@ public final class TabDelegate extends ComponentMouseEventDelegate<JTabbedPane>
     /**
      * @return The index of the clicked tab.
      */
-    public final int clickedTabIndex() {
+    public final int tabIndex() {
         return _clickedTab;
     }
 
     /**
      * @return The component of the clicked tab.
      */
-    public final boolean clickedTabIsSelected() {
-        return clickedTabIndex() == get().getSelectedIndex();
+    public final boolean tabIsSelected() {
+        return tabIndex() == get().getSelectedIndex();
     }
 
     /**
-     * @return The optional component of the clicked tab.
+     * @return The component of the clicked tab.
      */
-    public final Optional<JComponent> clickedTabComponent() {
-        Component found = get().getComponentAt(clickedTabIndex());
+    public final JComponent clickedTabComponent() {
+        Component found = get().getComponentAt(tabIndex());
         if ( found instanceof JComponent )
-            return Optional.of((JComponent)found);
+            return (JComponent) found;
         else
-            return Optional.empty();
+            throw new RuntimeException(
+                    "The component at index " + tabIndex() + " is not a JComponent"
+                );
     }
 
 }
