@@ -23,7 +23,7 @@ class Styles_Spec extends Specification
         String colorString, Color expectedColor
     ) {
         given : 'We use method chaining to build a colorful style:'
-            var style = Style.blank()
+            var style = Style.none()
                                 .foundationColor(colorString)
                                 .backgroundColor(colorString)
                                 .borderColor(colorString)
@@ -72,7 +72,7 @@ class Styles_Spec extends Specification
     def 'The String representation of a Style will tell you everything about it!'()
     {
         given : 'We first create a style with various properties:'
-            var style = Style.blank()
+            var style = Style.none()
                                 .foundationColor("red")
                                 .backgroundColor("green")
                                 .borderColor("blue")
@@ -120,7 +120,7 @@ class Styles_Spec extends Specification
     def 'Style objects are value based (with respect to equality and hash code).'()
     {
         given : 'We first create a style with various properties:'
-            var style1 = Style.blank()
+            var style1 = Style.none()
                                  .foundationColor("red")
                                  .backgroundColor("green")
                                  .borderColor("blue")
@@ -137,7 +137,7 @@ class Styles_Spec extends Specification
                                  .shadowBlurRadius(42)
 
         and : 'We then create a second style with the same properties:'
-            var style2 = Style.blank()
+            var style2 = Style.none()
                                  .foundationColor("red")
                                  .backgroundColor("green")
                                  .borderColor("blue")

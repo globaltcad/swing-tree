@@ -47,7 +47,7 @@ public final class TabDelegate extends ComponentMouseEventDelegate<JTabbedPane>
     /**
      * @return The component of the clicked tab.
      */
-    public final JComponent clickedTabComponent() {
+    public final JComponent tabComponent() {
         Component found = get().getComponentAt(tabIndex());
         if ( found instanceof JComponent )
             return (JComponent) found;

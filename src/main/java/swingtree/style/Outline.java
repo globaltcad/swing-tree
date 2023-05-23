@@ -14,12 +14,20 @@ import java.util.Optional;
  */
 public final class Outline
 {
+    private static final Outline _NONE = new Outline(null, null, null, null);
+
+    public static Outline none() { return _NONE; }
+
+    public static Outline of( int top, int right, int bottom, int left ) {
+        return new Outline(top, right, bottom, left);
+    }
+
     private final Integer top;
     private final Integer right;
     private final Integer bottom;
     private final Integer left;
 
-    public Outline( Integer top, Integer right, Integer bottom, Integer left ) {
+    private Outline( Integer top, Integer right, Integer bottom, Integer left ) {
         this.top    = top;
         this.right  = right;
         this.bottom = bottom;

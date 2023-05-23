@@ -2,6 +2,10 @@ package swingtree.style;
 
 final class LayoutStyle
 {
+    private static final LayoutStyle _NONE = new LayoutStyle( Outline.none(), Outline.none() );
+
+    public static LayoutStyle none() { return _NONE; }
+
     private final Outline margin;
     private final Outline padding;
 

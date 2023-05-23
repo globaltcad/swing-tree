@@ -123,7 +123,7 @@ public class ComponentExtension<C extends JComponent>
         if ( _styling == null )
             return style;
         else
-            return Optional.of( _styling.apply(new StyleDelegate<>(_owner, style.orElse(Style.blank()))) );
+            return Optional.of( _styling.apply(new StyleDelegate<>(_owner, style.orElse(Style.none()))) );
     }
 
     private Style _applyStyleToComponentState( Style style )

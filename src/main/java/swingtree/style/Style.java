@@ -3,7 +3,6 @@ package swingtree.style;
 import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -37,18 +36,15 @@ import java.util.function.Consumer;
  */
 public final class Style
 {
-    private static final Style _BLANK = new Style(
-                                            new LayoutStyle(
-                                                new Outline(null, null, null, null), // margin
-                                                new Outline(null, null, null, null)  // padding
-                                            ),
-                                            new BorderStyle(0,0,-1, null),
-                                            new BackgroundStyle(null, null, null),
-                                            new ShadowStyle(0,0,0,0, null, true),
-                                            new FontStyle("", 0, 0, 0, Collections.emptyList(), null, null, null)
+    private static final Style _NONE = new Style(
+                                            LayoutStyle.none(),
+                                            BorderStyle.none(),
+                                            BackgroundStyle.none(),
+                                            ShadowStyle.none(),
+                                            FontStyle.none()
                                         );
 
-    public static Style blank() { return _BLANK; }
+    public static Style none() { return _NONE; }
 
     private final LayoutStyle    _layout;
     private final BorderStyle     _border;

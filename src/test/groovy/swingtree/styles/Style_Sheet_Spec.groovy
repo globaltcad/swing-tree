@@ -182,8 +182,8 @@ class Style_Sheet_Spec extends Specification
             var s1 = ss.run(textField.component)
             var s2 = ss.run(textArea.component)
         then :
-            s1.padding() == new Outline(1, 2, 3, 4)
-            s2.padding() == new Outline(1, 2, 3, 4)
+            s1.padding() == Outline.of(1, 2, 3, 4)
+            s2.padding() == Outline.of(1, 2, 3, 4)
             s2.background().foundationColor().get() == Color.CYAN
     }
 
@@ -289,7 +289,7 @@ class Style_Sheet_Spec extends Specification
             s1.border().color().get() == Color.GREEN
             s1.border().arcHeight() == 19
             s1.border().arcWidth() == 19
-            s1.padding() == new Outline(42, 42, 42, 42)
+            s1.padding() == Outline.of(42, 42, 42, 42)
             s1.shadow().isInset() == true
             s1.shadow().blurRadius() == 22
             s1.shadow().spreadRadius() == 6
@@ -298,7 +298,7 @@ class Style_Sheet_Spec extends Specification
             s2.border().color().get() == Color.GREEN
             s2.border().arcHeight() == 19
             s2.border().arcWidth() == 19
-            s2.padding() == new Outline(42, 42, 42, 42)
+            s2.padding() == Outline.of(42, 42, 42, 42)
             s2.shadow().isInset() == false
             s2.shadow().blurRadius() == 22
             s2.shadow().spreadRadius() == 6
@@ -307,7 +307,7 @@ class Style_Sheet_Spec extends Specification
             s3.border().color().get() == Color.GREEN
             s3.border().arcHeight() == 3
             s3.border().arcWidth() == 3
-            s3.padding() == new Outline(42, 42, 42, 42)
+            s3.padding() == Outline.of(42, 42, 42, 42)
             s3.shadow().isInset() == true
             s3.shadow().blurRadius() == 22
             s3.shadow().spreadRadius() == 6
@@ -316,7 +316,7 @@ class Style_Sheet_Spec extends Specification
             s4.border().color().get() == Color.GREEN
             s4.border().arcHeight() == 19
             s4.border().arcWidth() == 19
-            s4.padding() == new Outline(42, 42, 42, 42)
+            s4.padding() == Outline.of(42, 42, 42, 42)
             s4.shadow().isInset() == false
             s4.shadow().blurRadius() == 22
             s4.shadow().spreadRadius() == 6
@@ -325,7 +325,7 @@ class Style_Sheet_Spec extends Specification
             s5.border().color().get() == Color.GREEN
             s5.border().arcHeight() == 3
             s5.border().arcWidth() == 3
-            s5.padding() == new Outline(42, 42, 42, 42)
+            s5.padding() == Outline.of(42, 42, 42, 42)
             s5.shadow().isInset() == true
             s5.shadow().blurRadius() == 22
             s5.shadow().spreadRadius() == 6

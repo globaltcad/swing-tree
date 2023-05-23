@@ -6,6 +6,10 @@ import java.util.Optional;
 
 public final class ShadowStyle
 {
+    private static final ShadowStyle _NONE = new ShadowStyle(0,0,0,0, null, true);
+
+    public static ShadowStyle none() { return _NONE; }
+
     private final int _horizontalOffset;
     private final int _verticalOffset;
     private final int _blurRadius;
@@ -13,7 +17,7 @@ public final class ShadowStyle
     private final Color _color;
     private final boolean _isOutset;
 
-    ShadowStyle(
+    private ShadowStyle(
         int horizontalShadowOffset,
         int verticalShadowOffset,
         int shadowBlurRadius,

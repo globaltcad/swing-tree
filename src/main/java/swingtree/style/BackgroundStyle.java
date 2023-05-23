@@ -7,11 +7,15 @@ import java.util.function.Consumer;
 
 public final class BackgroundStyle
 {
+    private static final BackgroundStyle _NONE = new BackgroundStyle(null, null, null);
+
+    public static BackgroundStyle none() { return _NONE; }
+
     private final Color _color;
     private final Color _foundationColor;
     private final Consumer<Graphics2D> _renderer;
 
-    BackgroundStyle(
+    private BackgroundStyle(
         Color color,
         Color foundation,
         Consumer<Graphics2D> renderer

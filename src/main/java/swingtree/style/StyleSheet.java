@@ -20,7 +20,7 @@ public abstract class StyleSheet
     }
 
     protected StyleSheet( Function<Style, Style> defaultStyle ) {
-        _defaultStyle = () -> defaultStyle.apply(Style.blank());
+        _defaultStyle = () -> defaultStyle.apply(Style.none());
         declaration();
         _buildTraitGraph();
     }

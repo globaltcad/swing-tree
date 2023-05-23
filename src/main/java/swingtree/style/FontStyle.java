@@ -9,6 +9,10 @@ import java.util.List;
 
 public final class FontStyle
 {
+    private static final FontStyle _NONE = new FontStyle("", 0, 0, 0, Collections.emptyList(), null, null, null);
+
+    public static FontStyle none() { return _NONE; }
+
     private final String _name;
     private final int _size;
     private final int _style;

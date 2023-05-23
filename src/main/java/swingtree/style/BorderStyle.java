@@ -6,12 +6,16 @@ import java.util.Optional;
 
 public final class BorderStyle
 {
+    private static final BorderStyle _NONE = new BorderStyle(0,0,-1, null);
+
+    public static BorderStyle none() { return _NONE; }
+
     private final int   _borderArcWidth;
     private final int   _borderArcHeight;
     private final int   _borderWidth;
     private final Color _borderColor;
 
-    BorderStyle(
+    private BorderStyle(
         int borderArcWidth,
         int borderArcHeight,
         int borderWidth,
