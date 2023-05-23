@@ -25,10 +25,10 @@ public class UIForTextField<F extends JTextField> extends UIForAnyTextComponent<
      * @param action The action to be performed.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public UIForTextField<F> onEnter( Action<SimpleDelegate<F, ActionEvent>> action ) {
+    public UIForTextField<F> onEnter( Action<ComponentDelegate<F, ActionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
         F field = getComponent();
-        _onEnter( e -> _doApp( () -> action.accept(new SimpleDelegate<>( field, e, this::getSiblinghood )) ) );
+        _onEnter( e -> _doApp( () -> action.accept(new ComponentDelegate<>( field, e, this::getSiblinghood )) ) );
         return this;
     }
 

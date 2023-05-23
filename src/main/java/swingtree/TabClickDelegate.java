@@ -16,7 +16,7 @@ import java.util.function.Supplier;
  *  Not only does this delegate provide access to the {@link JTabbedPane} component itself, but also to the
  *  {@link MouseEvent} that triggered the event and the index of the clicked tab.
  */
-public final class TabClickDelegate extends SimpleDelegate<JTabbedPane, MouseEvent>
+public final class TabClickDelegate extends ComponentDelegate<JTabbedPane, MouseEvent>
 {
     private final int _clickedTab;
 

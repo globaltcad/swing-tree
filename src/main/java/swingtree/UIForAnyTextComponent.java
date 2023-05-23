@@ -243,15 +243,15 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      * @param action An action which will be executed when the text or its attributes in the underlying {@link JTextComponent} changes.
      * @return This very builder to allow for method chaining.
      */
-    public final I onContentChange( Consumer<SimpleDelegate<JTextComponent, DocumentEvent>> action ) {
+    public final I onContentChange( Consumer<ComponentDelegate<JTextComponent, DocumentEvent>> action ) {
         C component = getComponent();
         component.getDocument().addDocumentListener(new DocumentListener() {
             @Override public void insertUpdate(DocumentEvent e)  {
-                _doApp(()->action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));}
+                _doApp(()->action.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));}
             @Override public void removeUpdate(DocumentEvent e)  {
-                _doApp(()->action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));}
+                _doApp(()->action.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));}
             @Override public void changedUpdate(DocumentEvent e) {
-                _doApp(()->action.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));}
+                _doApp(()->action.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));}
         });
         return _this();
     }
@@ -263,10 +263,10 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      * @param action An action which will be executed when the text string in the underlying {@link JTextComponent} changes.
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextChange( Consumer<SimpleDelegate<JTextComponent, DocumentEvent>> action ) {
+    public final I onTextChange( Consumer<ComponentDelegate<JTextComponent, DocumentEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Consumer.class);
         C component = getComponent();
-        _onTextChange( e -> _doApp( () -> action.accept(new SimpleDelegate<>(component, e, () -> getSiblinghood() ))) );
+        _onTextChange( e -> _doApp( () -> action.accept(new ComponentDelegate<>(component, e, () -> getSiblinghood() ))) );
         return _this();
     }
 

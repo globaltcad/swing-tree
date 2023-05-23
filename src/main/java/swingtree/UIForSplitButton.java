@@ -116,7 +116,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
      *  the currently selected {@link JMenuItem} and a list of
      *  all other items.
      *
-     * @param action The {@link Action} which will receive an {@link SimpleDelegate}
+     * @param action The {@link Action} which will receive an {@link ComponentDelegate}
      *               exposing all essential components making up this {@link JSplitButton}.
      * @return This very instance, which enables builder-style method chaining.
      */
@@ -174,7 +174,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
      *  the currently selected {@link JMenuItem} and a list of
      *  all other items.
      *
-     * @param action The {@link Action} which will receive an {@link SimpleDelegate}
+     * @param action The {@link Action} which will receive an {@link ComponentDelegate}
      *               exposing all essential components making up this {@link JSplitButton}.
      * @return This very instance, which enables builder-style method chaining.
      */
@@ -202,16 +202,16 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
      *  If you need more context information delegated to the action
      *  then consider using {@link #onButtonClick(Action)}.
      *
-     * @param action An {@link Action} instance which will be wrapped by an {@link SimpleDelegate} and passed to the button component.
+     * @param action An {@link Action} instance which will be wrapped by an {@link ComponentDelegate} and passed to the button component.
      * @return This very instance, which enables builder-style method chaining.
      */
     @Override
-    public UIForSplitButton<B> onClick( Action<SimpleDelegate<B, ActionEvent>> action ) {
+    public UIForSplitButton<B> onClick( Action<ComponentDelegate<B, ActionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
         B button = getComponent();
         button.addButtonClickedActionListener(
             e -> _doApp(()->action.accept(
-                 new SimpleDelegate<>(button, e, this::getSiblinghood)
+                 new ComponentDelegate<>(button, e, this::getSiblinghood)
             ))
         );
         return this;
@@ -225,9 +225,9 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
      * @param action the action to be executed when the split button is opened.
      * @return this very instance, which enables builder-style method chaining.
      */
-    public UIForSplitButton<B> onOpen( Action<SimpleDelegate<B, PopupMenuEvent>> action ) {
+    public UIForSplitButton<B> onOpen( Action<ComponentDelegate<B, PopupMenuEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _onPopupOpen( e -> _doApp(()->action.accept(new SimpleDelegate<>( getComponent(), e, this::getSiblinghood )) ) );
+        _onPopupOpen( e -> _doApp(()->action.accept(new ComponentDelegate<>( getComponent(), e, this::getSiblinghood )) ) );
         return this;
     }
 
@@ -250,9 +250,9 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
      * @param action the action to be executed when the split button is closed.
      * @return this very instance, which enables builder-style method chaining.
      */
-    public UIForSplitButton<B> onClose( Action<SimpleDelegate<B, PopupMenuEvent>> action ) {
+    public UIForSplitButton<B> onClose( Action<ComponentDelegate<B, PopupMenuEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _onPopupClose( e -> _doApp(()->action.accept(new SimpleDelegate<>( getComponent(), e, this::getSiblinghood )) ) );
+        _onPopupClose( e -> _doApp(()->action.accept(new ComponentDelegate<>( getComponent(), e, this::getSiblinghood )) ) );
         return this;
     }
 
@@ -274,9 +274,9 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
      * @param action the action to be executed when the split button popup is canceled.
      * @return this very instance, which enables builder-style method chaining.
      */
-    public UIForSplitButton<B> onCancel( Action<SimpleDelegate<B, PopupMenuEvent>> action ) {
+    public UIForSplitButton<B> onCancel( Action<ComponentDelegate<B, PopupMenuEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _onPopupCancel( e -> _doApp(()->action.accept(new SimpleDelegate<>( getComponent(), e, this::getSiblinghood )) ) );
+        _onPopupCancel( e -> _doApp(()->action.accept(new ComponentDelegate<>( getComponent(), e, this::getSiblinghood )) ) );
         return this;
     }
 

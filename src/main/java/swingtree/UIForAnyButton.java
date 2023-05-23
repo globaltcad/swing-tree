@@ -370,9 +370,9 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public final I onChange( Action<SimpleDelegate<B, ItemEvent>> action ) {
+    public final I onChange( Action<ComponentDelegate<B, ItemEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _onChange( e -> _doApp(()->action.accept(new SimpleDelegate<>(getComponent(), e, this::getSiblinghood))) );
+        _onChange( e -> _doApp(()->action.accept(new ComponentDelegate<>(getComponent(), e, this::getSiblinghood))) );
         return _this();
     }
 
@@ -415,16 +415,16 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  This is very useful for changing the state of the JComponent when the action is being triggered.
      *  <br><br>
      *
-     * @param action an {@link Action} instance which will receive an {@link SimpleDelegate} containing important context information.
+     * @param action an {@link Action} instance which will receive an {@link ComponentDelegate} containing important context information.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public I onClick( Action<SimpleDelegate<B, ActionEvent>> action ) {
+    public I onClick( Action<ComponentDelegate<B, ActionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
         B button = getComponent();
         _onClick(
            e -> _doApp(()->action.accept(
-                           new SimpleDelegate<>(button, e, this::getSiblinghood)
+                           new ComponentDelegate<>(button, e, this::getSiblinghood)
                        ))
         );
         return _this();

@@ -153,7 +153,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
                        if ( tabbedPane == null ) return;
                        int index = indexFinder.get();
                        if (index >= 0 && index == tabbedPane.getSelectedIndex())
-                           _doApp(()->onSelection.accept(new SimpleDelegate<>(tabbedPane, e, this::getSiblinghood)));
+                           _doApp(()->onSelection.accept(new ComponentDelegate<>(tabbedPane, e, this::getSiblinghood)));
                    })
            );
 
@@ -247,13 +247,13 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
         private final List<WeakReference<JComponent>> ownerRefs = new ArrayList<>();
         private final WeakReference<JTabbedPane> paneRef;
         private final Supplier<Integer> indexFinder;
-        private final Action<SimpleDelegate<JTabbedPane, MouseEvent>> mouseClickAction;
+        private final Action<ComponentDelegate<JTabbedPane, MouseEvent>> mouseClickAction;
 
 
         private TabMouseClickListener(
             JTabbedPane pane,
             Supplier<Integer> indexFinder,
-            Action<SimpleDelegate<JTabbedPane, MouseEvent>> mouseClickAction
+            Action<ComponentDelegate<JTabbedPane, MouseEvent>> mouseClickAction
         ) {
             this.paneRef = new WeakReference<>(pane);
             this.indexFinder = indexFinder;
@@ -269,7 +269,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
                         int indexClicked = _indexOfClick(pane, e.getPoint());
                         if ( indexClicked < 0 ) return;
                         if ( indexOfThis == indexClicked )
-                            _doApp(()-> mouseClickAction.accept(new SimpleDelegate<>(pane, e, UIForTabbedPane.this::getSiblinghood)));
+                            _doApp(()-> mouseClickAction.accept(new ComponentDelegate<>(pane, e, UIForTabbedPane.this::getSiblinghood)));
                     }
                 });
             }
@@ -286,7 +286,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
             int indexClicked = _indexOfClick( pane, p );
             if ( indexClicked < 0 ) return;
             if ( indexOfThis == indexClicked && mouseClickAction != null )
-                _doApp(()-> { mouseClickAction.accept(new SimpleDelegate<>(pane, e, UIForTabbedPane.this::getSiblinghood)); });
+                _doApp(()-> { mouseClickAction.accept(new ComponentDelegate<>(pane, e, UIForTabbedPane.this::getSiblinghood)); });
             if ( indexOfThis < pane.getTabCount() )
                 pane.setSelectedIndex(indexOfThis);
         }
@@ -338,10 +338,10 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
      * @param onChange The {@link Action} that will be called through the underlying change event.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForTabbedPane<P> onChange( Action<SimpleDelegate<P, ChangeEvent>> onChange ) {
+    public final UIForTabbedPane<P> onChange( Action<ComponentDelegate<P, ChangeEvent>> onChange ) {
         NullUtil.nullArgCheck(onChange, "onChange", Action.class);
         P pane = getComponent();
-        _onChange(e -> _doApp(()->onChange.accept(new SimpleDelegate<>(pane, e, this::getSiblinghood))));
+        _onChange(e -> _doApp(()->onChange.accept(new ComponentDelegate<>(pane, e, this::getSiblinghood))));
         return this;
     }
 

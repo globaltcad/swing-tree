@@ -150,7 +150,7 @@ public final class SplitItem<I extends JMenuItem>
     Val<Boolean> getIsEnabled(){ return _isEnabled; }
 
     /**
-     *  Instances of this are exposed as delegates through the {@link SimpleDelegate} passed
+     *  Instances of this are exposed as delegates through the {@link ComponentDelegate} passed
      *  to the actions supplied to {@link #onSelection(Action)} in order
      *  to give said actions all the necessary context they need to perform whatever action they so desire.
      *

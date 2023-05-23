@@ -467,7 +467,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
             @Override
             public boolean verify( JComponent input ) {
                 return verifier.isValid(
-                        new SimpleDelegate<>(
+                        new ComponentDelegate<>(
                                 getComponent(),
                                 new ComponentEvent(getComponent(), 0),
                                 () -> getSiblinghood()
@@ -2156,12 +2156,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseClick( Action<SimpleDelegate<C, MouseEvent>> onClick ) {
+    public final I onMouseClick( Action<ComponentDelegate<C, MouseEvent>> onClick ) {
         NullUtil.nullArgCheck(onClick, "onClick", Action.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) { 
-                _doApp(() -> onClick.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(() -> onClick.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2177,12 +2177,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onRelease The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseRelease( Action<SimpleDelegate<C, MouseEvent>> onRelease ) {
+    public final I onMouseRelease( Action<ComponentDelegate<C, MouseEvent>> onRelease ) {
         NullUtil.nullArgCheck(onRelease, "onRelease", Action.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mouseReleased(MouseEvent e) {
-                _doApp(() -> onRelease.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(() -> onRelease.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2198,12 +2198,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onPress The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMousePress( Action<SimpleDelegate<C, MouseEvent>> onPress ) {
+    public final I onMousePress( Action<ComponentDelegate<C, MouseEvent>> onPress ) {
         NullUtil.nullArgCheck(onPress, "onPress", Action.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mousePressed(MouseEvent e) {
-                _doApp(() -> onPress.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(() -> onPress.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2219,12 +2219,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onEnter The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseEnter( Action<SimpleDelegate<C, MouseEvent>> onEnter ) {
+    public final I onMouseEnter( Action<ComponentDelegate<C, MouseEvent>> onEnter ) {
         NullUtil.nullArgCheck(onEnter, "onEnter", Action.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mouseEntered(MouseEvent e) {
-                _doApp(() -> onEnter.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(() -> onEnter.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2240,12 +2240,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onExit The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseExit( Action<SimpleDelegate<C, MouseEvent>> onExit ) {
+    public final I onMouseExit( Action<ComponentDelegate<C, MouseEvent>> onExit ) {
         NullUtil.nullArgCheck(onExit, "onExit", Action.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mouseExited(MouseEvent e) {
-                _doApp(() -> onExit.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(() -> onExit.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2261,17 +2261,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onDrag The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseDrag( Action<SimpleDelegate<C, MouseEvent>> onDrag ) {
+    public final I onMouseDrag( Action<ComponentDelegate<C, MouseEvent>> onDrag ) {
         NullUtil.nullArgCheck(onDrag, "onDrag", Action.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mouseDragged(MouseEvent e) {
-                _doApp(() -> onDrag.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(() -> onDrag.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         component.addMouseMotionListener(new MouseMotionAdapter() {
             @Override public void mouseDragged(MouseEvent e) {
-                _doApp(() -> onDrag.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(() -> onDrag.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2287,17 +2287,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onMove The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseMove( Action<SimpleDelegate<C, MouseEvent>> onMove ) {
+    public final I onMouseMove( Action<ComponentDelegate<C, MouseEvent>> onMove ) {
         NullUtil.nullArgCheck(onMove, "onMove", Action.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mouseMoved(MouseEvent e) {
-                _doApp(() -> onMove.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(() -> onMove.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         component.addMouseMotionListener(new MouseMotionAdapter() {
             @Override public void mouseMoved(MouseEvent e) {
-                _doApp(() -> onMove.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(() -> onMove.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2313,12 +2313,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onWheel The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseWheelMove( Action<SimpleDelegate<C, MouseWheelEvent>> onWheel ) {
+    public final I onMouseWheelMove( Action<ComponentDelegate<C, MouseWheelEvent>> onWheel ) {
         NullUtil.nullArgCheck(onWheel, "onWheel", Action.class);
         C component = getComponent();
         component.addMouseWheelListener(new MouseWheelListener() {
             @Override public void mouseWheelMoved(MouseWheelEvent e) {
-                _doApp(() -> onWheel.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(() -> onWheel.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2333,13 +2333,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onWheelUp The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseWheelUp( Action<SimpleDelegate<C, MouseWheelEvent>> onWheelUp ) {
+    public final I onMouseWheelUp( Action<ComponentDelegate<C, MouseWheelEvent>> onWheelUp ) {
         NullUtil.nullArgCheck(onWheelUp, "onWheelUp", Action.class);
         C component = getComponent();
         component.addMouseWheelListener(new MouseWheelListener() {
             @Override public void mouseWheelMoved(MouseWheelEvent e) {
                 if( e.getWheelRotation() < 0 ) {
-                    _doApp(() -> onWheelUp.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                    _doApp(() -> onWheelUp.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
                 }
             }
         });
@@ -2355,12 +2355,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onWheelDown The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseWheelDown( Action<SimpleDelegate<C, MouseWheelEvent>> onWheelDown ) {
+    public final I onMouseWheelDown( Action<ComponentDelegate<C, MouseWheelEvent>> onWheelDown ) {
         NullUtil.nullArgCheck(onWheelDown, "onWheelDown", Action.class);
         C component = getComponent();
         component.addMouseWheelListener( e -> {
                 if ( e.getWheelRotation() > 0 )
-                    _doApp(() -> onWheelDown.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                    _doApp(() -> onWheelDown.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
             });
         return _this();
     }
@@ -2372,12 +2372,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onResize The resize action which will be called when the underlying component changes size.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onResize( Action<SimpleDelegate<C, ComponentEvent>> onResize ) {
+    public final I onResize( Action<ComponentDelegate<C, ComponentEvent>> onResize ) {
         NullUtil.nullArgCheck(onResize, "onResize", Action.class);
         C component = getComponent();
         component.addComponentListener(new ComponentAdapter() {
             @Override public void componentResized(ComponentEvent e) {
-                _doApp(()->onResize.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(()->onResize.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2390,12 +2390,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onMoved The action lambda which will be executed once the component was moved / its position canged.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMoved( Action<SimpleDelegate<C, ComponentEvent>> onMoved ) {
+    public final I onMoved( Action<ComponentDelegate<C, ComponentEvent>> onMoved ) {
         NullUtil.nullArgCheck(onMoved, "onMoved", Action.class);
         C component = getComponent();
         component.addComponentListener(new ComponentAdapter() {
             @Override public void componentMoved(ComponentEvent e) {
-                _doApp(()->onMoved.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(()->onMoved.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2408,12 +2408,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onShown The {@link Action} which gets invoked when the component has been made visible.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onShown( Action<SimpleDelegate<C, ComponentEvent>> onShown ) {
+    public final I onShown( Action<ComponentDelegate<C, ComponentEvent>> onShown ) {
         NullUtil.nullArgCheck(onShown, "onShown", Action.class);
         C component = getComponent();
         component.addComponentListener(new ComponentAdapter() {
             @Override public void componentShown(ComponentEvent e) {
-                _doApp(()->onShown.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(()->onShown.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2426,12 +2426,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onHidden The {@link Action} which gets invoked when the component has been made invisible.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onHidden( Action<SimpleDelegate<C, ComponentEvent>> onHidden ) {
+    public final I onHidden( Action<ComponentDelegate<C, ComponentEvent>> onHidden ) {
         NullUtil.nullArgCheck(onHidden, "onHidden", Action.class);
         C component = getComponent();
         component.addComponentListener(new ComponentAdapter() {
             @Override public void componentHidden(ComponentEvent e) {
-                _doApp(()->onHidden.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(()->onHidden.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2444,12 +2444,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onFocus The {@link Action} which should be executed once the input focus was gained on the wrapped component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onFocusGained( Action<SimpleDelegate<C, ComponentEvent>> onFocus ) {
+    public final I onFocusGained( Action<ComponentDelegate<C, ComponentEvent>> onFocus ) {
         NullUtil.nullArgCheck(onFocus, "onFocus", Action.class);
         C component = getComponent();
         component.addFocusListener(new FocusAdapter() {
             @Override public void focusGained(FocusEvent e) {
-                _doApp(()->onFocus.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(()->onFocus.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2462,12 +2462,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onFocus The {@link Action} which should be executed once the input focus was lost on the wrapped component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onFocusLost( Action<SimpleDelegate<C, ComponentEvent>> onFocus ) {
+    public final I onFocusLost( Action<ComponentDelegate<C, ComponentEvent>> onFocus ) {
         NullUtil.nullArgCheck(onFocus, "onFocus", Action.class);
         C component = getComponent();
         component.addFocusListener(new FocusAdapter() {
             @Override public void focusLost(FocusEvent e) {
-                _doApp(()->onFocus.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(()->onFocus.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2480,12 +2480,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onKeyPressed The {@link Action} which will be executed once the wrapped component received a key press.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onKeyPressed( Action<SimpleDelegate<C, KeyEvent>> onKeyPressed ) {
+    public final I onKeyPressed( Action<ComponentDelegate<C, KeyEvent>> onKeyPressed ) {
         NullUtil.nullArgCheck(onKeyPressed, "onKeyPressed", Action.class);
         C component = getComponent();
         component.addKeyListener(new KeyAdapter() {
             @Override public void keyPressed(KeyEvent e) {
-                _doApp(()->onKeyPressed.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(()->onKeyPressed.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2500,14 +2500,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onKeyPressed The {@link Action} which will be executed once the wrapped component received the targeted key press.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onPressed( Keyboard.Key key, Action<SimpleDelegate<C, KeyEvent>> onKeyPressed ) {
+    public final I onPressed( Keyboard.Key key, Action<ComponentDelegate<C, KeyEvent>> onKeyPressed ) {
         NullUtil.nullArgCheck(key, "key", Keyboard.Key.class);
         NullUtil.nullArgCheck(onKeyPressed, "onKeyPressed", Action.class);
         C component = getComponent();
         component.addKeyListener(new KeyAdapter() {
             @Override public void keyPressed( KeyEvent e ) {
                 if ( e.getKeyCode() == key.code )
-                    _doApp(()->onKeyPressed.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                    _doApp(()->onKeyPressed.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2521,12 +2521,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      * @see #onKeyPressed(Action)
      */
-    public final I onKeyReleased( Action<SimpleDelegate<C, KeyEvent>> onKeyReleased ) {
+    public final I onKeyReleased( Action<ComponentDelegate<C, KeyEvent>> onKeyReleased ) {
         NullUtil.nullArgCheck(onKeyReleased, "onKeyReleased", Action.class);
         C component = getComponent();
         component.addKeyListener(new KeyAdapter() {
             @Override public void keyReleased(KeyEvent e) {
-                _doApp(()->onKeyReleased.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood()))); }
+                _doApp(()->onKeyReleased.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood()))); }
         });
         return _this();
     }
@@ -2542,14 +2542,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @see #onKeyPressed(Action)
      * @see #onKeyReleased(Action)
      */
-    public final I onReleased( Keyboard.Key key, Action<SimpleDelegate<C, KeyEvent>> onKeyReleased ) {
+    public final I onReleased( Keyboard.Key key, Action<ComponentDelegate<C, KeyEvent>> onKeyReleased ) {
         NullUtil.nullArgCheck(key, "key", Keyboard.Key.class);
         NullUtil.nullArgCheck(onKeyReleased, "onKeyReleased", Action.class);
         C component = getComponent();
         component.addKeyListener(new KeyAdapter() {
             @Override public void keyReleased( KeyEvent e ) {
                 if ( e.getKeyCode() == key.code )
-                    _doApp(()->onKeyReleased.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                    _doApp(()->onKeyReleased.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2564,11 +2564,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @see #onKeyPressed(Action)
      * @see #onKeyReleased(Action)
      */
-    public final I onKeyTyped( Action<SimpleDelegate<C, KeyEvent>> onKeyTyped ) {
+    public final I onKeyTyped( Action<ComponentDelegate<C, KeyEvent>> onKeyTyped ) {
         NullUtil.nullArgCheck(onKeyTyped, "onKeyTyped", Action.class);
         C component = getComponent();
         _onKeyTyped( e ->
-            _doApp(()->onKeyTyped.accept(new SimpleDelegate<>(component, e, this::getSiblinghood)))
+            _doApp(()->onKeyTyped.accept(new ComponentDelegate<>(component, e, this::getSiblinghood)))
         );
         return _this();
     }
@@ -2585,13 +2585,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @see #onKeyReleased(Action)
      * @see #onKeyTyped(Action)
      */
-    public final I onTyped( Keyboard.Key key, Action<SimpleDelegate<C, KeyEvent>> onKeyTyped ) {
+    public final I onTyped( Keyboard.Key key, Action<ComponentDelegate<C, KeyEvent>> onKeyTyped ) {
         NullUtil.nullArgCheck(key, "key", Keyboard.Key.class);
         NullUtil.nullArgCheck(onKeyTyped, "onKeyTyped", Action.class);
         C component = getComponent();
         _onKeyTyped( e -> {
             if ( e.getKeyCode() == key.code )
-                _doApp(()->onKeyTyped.accept(new SimpleDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(()->onKeyTyped.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
         });
         return _this();
     }
@@ -2617,9 +2617,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onUpdate The {@link Action} which should be called periodically.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I doUpdates( int delay, Action<SimpleDelegate<C, ActionEvent>> onUpdate ) {
+    public final I doUpdates( int delay, Action<ComponentDelegate<C, ActionEvent>> onUpdate ) {
         NullUtil.nullArgCheck(onUpdate, "onUpdate", Action.class);
-        Timer timer = new Timer(delay, e -> onUpdate.accept(new SimpleDelegate<>(getComponent(), e, this::getSiblinghood)));
+        Timer timer = new Timer(delay, e -> onUpdate.accept(new ComponentDelegate<>(getComponent(), e, this::getSiblinghood)));
         {
             java.util.List<Timer> timers = (java.util.List<Timer>) getComponent().getClientProperty(_TIMERS_KEY);
             if ( timers == null ) {

@@ -1,6 +1,6 @@
 package swingtree.api;
 
-import swingtree.SimpleDelegate;
+import swingtree.ComponentDelegate;
 import swingtree.UIForAnySwing;
 
 import javax.swing.*;
@@ -21,5 +21,5 @@ public interface UIVerifier<C extends JComponent>
      * @param delegate The delegate to the component to be verified.
      * @return true if the component is valid, false otherwise.
      */
-    boolean isValid( SimpleDelegate<C, ComponentEvent> delegate );
+    boolean isValid( ComponentDelegate<C, ComponentEvent> delegate );
 }

@@ -72,9 +72,9 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
      * @param action the action to be executed when the combo box is opened.
      * @return this
      */
-    public UIForCombo<E,C> onOpen( Action<SimpleDelegate<C, PopupMenuEvent>> action ) {
+    public UIForCombo<E,C> onOpen( Action<ComponentDelegate<C, PopupMenuEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _onPopupOpen( e -> _doApp(()->action.accept(new SimpleDelegate<>( (C) getComponent(), e, this::getSiblinghood )) ) );
+        _onPopupOpen( e -> _doApp(()->action.accept(new ComponentDelegate<>( (C) getComponent(), e, this::getSiblinghood )) ) );
         return this;
     }
 
@@ -96,9 +96,9 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
      * @param action the action to be executed when the combo box is closed.
      * @return this
      */
-    public UIForCombo<E,C> onClose( Action<SimpleDelegate<C, PopupMenuEvent>> action ) {
+    public UIForCombo<E,C> onClose( Action<ComponentDelegate<C, PopupMenuEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _onPopupClose( e -> _doApp(()->action.accept(new SimpleDelegate<>( (C) getComponent(), e, this::getSiblinghood )) ) );
+        _onPopupClose( e -> _doApp(()->action.accept(new ComponentDelegate<>( (C) getComponent(), e, this::getSiblinghood )) ) );
         return this;
     }
 
@@ -120,9 +120,9 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
      * @param action the action to be executed when the combo box is canceled.
      * @return this
      */
-    public UIForCombo<E,C> onCancel( Action<SimpleDelegate<C, PopupMenuEvent>> action ) {
+    public UIForCombo<E,C> onCancel( Action<ComponentDelegate<C, PopupMenuEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _onPopupCancel( e -> _doApp(()->action.accept(new SimpleDelegate<>( (C) getComponent(), e, this::getSiblinghood )) ) );
+        _onPopupCancel( e -> _doApp(()->action.accept(new ComponentDelegate<>( (C) getComponent(), e, this::getSiblinghood )) ) );
         return this;
     }
 
@@ -147,10 +147,10 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public UIForCombo<E,C> onSelection( Action<SimpleDelegate<JComboBox<E>, ActionEvent>> action ) {
+    public UIForCombo<E,C> onSelection( Action<ComponentDelegate<JComboBox<E>, ActionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
         JComboBox<E> combo = getComponent();
-        _onSelection(e -> _doApp(()->action.accept(new SimpleDelegate<>( combo, e, this::getSiblinghood ))) );
+        _onSelection(e -> _doApp(()->action.accept(new ComponentDelegate<>( combo, e, this::getSiblinghood ))) );
         return this;
     }
 
@@ -184,10 +184,10 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
      * <p>
      * @param action The {@link Action} that will be notified.
      **/
-    public UIForCombo<E,C> onEnter( Action<SimpleDelegate<C, ActionEvent>> action ) {
+    public UIForCombo<E,C> onEnter( Action<ComponentDelegate<C, ActionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
         C combo = (C) getComponent();
-        _onEnter(e -> _doApp(()->action.accept(new SimpleDelegate<>( combo, e, this::getSiblinghood ))) );
+        _onEnter(e -> _doApp(()->action.accept(new ComponentDelegate<>( combo, e, this::getSiblinghood ))) );
         return this;
     }
 

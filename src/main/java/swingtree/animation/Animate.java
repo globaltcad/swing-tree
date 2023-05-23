@@ -1,5 +1,7 @@
 package swingtree.animation;
 
+import swingtree.ComponentDelegate;
+
 import java.awt.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -7,7 +9,7 @@ import java.util.function.Predicate;
 /**
  *  An API for creating an {@link Animation} and defining how it should be executed.
  *  Instances of this class are intended to be created and used either by the
- *  {@link swingtree.UI} API or the user event delegation API (see {@link swingtree.SimpleDelegate}). <br>
+ *  {@link swingtree.UI} API or the user event delegation API (see {@link ComponentDelegate}). <br>
  *  The UI API can be used like this:
  *  <pre>{@code
  *    UI.schedule( 100, TimeUnit.MILLISECONDS ) // returns an Animate instance

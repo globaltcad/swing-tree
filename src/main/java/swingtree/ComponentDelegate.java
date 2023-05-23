@@ -10,9 +10,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- *  Instances of this are component delegates for a specific component and event that
+ *  Instances of this are delegates for a specific component and event that
  *  are passed to user event action handler lambdas
- *  to give the action handler more context information.
+ *  with the purpose to provide useful context information to the action handler.
  *  <br>
  *  You would typically use this to access and change the state of the component, schedule animations
  *  for the component or query the tree of neighboring components. <br>
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  *          })
  *      )
  *  }</pre>
- *  In this example the {@code it} parameter is a {@code SimpleDelegate<JButton,MouseEvent>}
+ *  In this example the {@code it} parameter is a {@code ComponentDelegate<JButton,MouseEvent>}
  *  which can be used to access/modify the button, the event, the sibling components...
  *  ...but also exposes a nice API to schedule animations for the button.
  * 	<p>
@@ -43,12 +43,12 @@ import java.util.stream.Collectors;
  * @param <C> The delegate (in most cases origin UI component) type parameter stored by this.
  * @param <E> The event type parameter of the event stored by this.
  */
-public class SimpleDelegate<C extends JComponent,E> extends AbstractDelegate<C>
+public class ComponentDelegate<C extends JComponent,E> extends AbstractDelegate<C>
 {
     private final E event;
     private final Supplier<List<JComponent>> siblingSource;
 
-    public SimpleDelegate(
+    public ComponentDelegate(
         C component, E event, Supplier<List<JComponent>> siblingSource
     ) {
         super(component, component);

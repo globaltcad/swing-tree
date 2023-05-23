@@ -52,10 +52,10 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public final UIForSlider<S> onChange( Action<SimpleDelegate<JSlider, ChangeEvent>> action ) {
+    public final UIForSlider<S> onChange( Action<ComponentDelegate<JSlider, ChangeEvent>> action ) {
         NullUtil.nullArgCheck( action, "action", Action.class );
         S slider = getComponent();
-        _onChange( e -> _doApp(()->action.accept(new SimpleDelegate<>(slider, e, this::getSiblinghood))) );
+        _onChange( e -> _doApp(()->action.accept(new ComponentDelegate<>(slider, e, this::getSiblinghood))) );
         return this;
     }
 
