@@ -5,9 +5,7 @@ import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 import sprouts.Action;
 import sprouts.Event;
-import sprouts.Val;
-import sprouts.Vals;
-import sprouts.Var;
+import sprouts.*;
 import swingtree.api.Peeker;
 import swingtree.api.UIVerifier;
 import swingtree.api.mvvm.Viewable;
@@ -2156,12 +2154,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseClick( Action<ComponentDelegate<C, MouseEvent>> onClick ) {
+    public final I onMouseClick( Action<ComponentMouseEventDelegate<C>> onClick ) {
         NullUtil.nullArgCheck(onClick, "onClick", Action.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) { 
-                _doApp(() -> onClick.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(() -> onClick.accept(new ComponentMouseEventDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2177,12 +2175,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onRelease The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseRelease( Action<ComponentDelegate<C, MouseEvent>> onRelease ) {
+    public final I onMouseRelease( Action<ComponentMouseEventDelegate<C>> onRelease ) {
         NullUtil.nullArgCheck(onRelease, "onRelease", Action.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mouseReleased(MouseEvent e) {
-                _doApp(() -> onRelease.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(() -> onRelease.accept(new ComponentMouseEventDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2198,12 +2196,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onPress The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMousePress( Action<ComponentDelegate<C, MouseEvent>> onPress ) {
+    public final I onMousePress( Action<ComponentMouseEventDelegate<C>> onPress ) {
         NullUtil.nullArgCheck(onPress, "onPress", Action.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mousePressed(MouseEvent e) {
-                _doApp(() -> onPress.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(() -> onPress.accept(new ComponentMouseEventDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2219,12 +2217,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onEnter The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseEnter( Action<ComponentDelegate<C, MouseEvent>> onEnter ) {
+    public final I onMouseEnter( Action<ComponentMouseEventDelegate<C>> onEnter ) {
         NullUtil.nullArgCheck(onEnter, "onEnter", Action.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mouseEntered(MouseEvent e) {
-                _doApp(() -> onEnter.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(() -> onEnter.accept(new ComponentMouseEventDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2240,12 +2238,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onExit The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseExit( Action<ComponentDelegate<C, MouseEvent>> onExit ) {
+    public final I onMouseExit( Action<ComponentMouseEventDelegate<C>> onExit ) {
         NullUtil.nullArgCheck(onExit, "onExit", Action.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mouseExited(MouseEvent e) {
-                _doApp(() -> onExit.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(() -> onExit.accept(new ComponentMouseEventDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2261,17 +2259,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onDrag The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseDrag( Action<ComponentDelegate<C, MouseEvent>> onDrag ) {
+    public final I onMouseDrag( Action<ComponentMouseEventDelegate<C>> onDrag ) {
         NullUtil.nullArgCheck(onDrag, "onDrag", Action.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mouseDragged(MouseEvent e) {
-                _doApp(() -> onDrag.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(() -> onDrag.accept(new ComponentMouseEventDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         component.addMouseMotionListener(new MouseMotionAdapter() {
             @Override public void mouseDragged(MouseEvent e) {
-                _doApp(() -> onDrag.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(() -> onDrag.accept(new ComponentMouseEventDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();
@@ -2287,17 +2285,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onMove The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseMove( Action<ComponentDelegate<C, MouseEvent>> onMove ) {
+    public final I onMouseMove( Action<ComponentMouseEventDelegate<C>> onMove ) {
         NullUtil.nullArgCheck(onMove, "onMove", Action.class);
         C component = getComponent();
         component.addMouseListener(new MouseAdapter() {
             @Override public void mouseMoved(MouseEvent e) {
-                _doApp(() -> onMove.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(() -> onMove.accept(new ComponentMouseEventDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         component.addMouseMotionListener(new MouseMotionAdapter() {
             @Override public void mouseMoved(MouseEvent e) {
-                _doApp(() -> onMove.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
+                _doApp(() -> onMove.accept(new ComponentMouseEventDelegate<>(component, e, ()->getSiblinghood())));
             }
         });
         return _this();

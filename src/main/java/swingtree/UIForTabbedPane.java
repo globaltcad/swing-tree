@@ -35,7 +35,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
 
     /**
      *  Adds an action to be performed when a mouse click is detected on a tab.
-     *  The action will receive a {@link TabClickDelegate} instance which
+     *  The action will receive a {@link TabDelegate} instance which
      *  not only delegates the current tabbed pane and mouse event, but also
      *  tells the action which tab was clicked and whether the clicked tab is selected.
      *
@@ -43,7 +43,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
      * @return This builder node.
      * @throws NullPointerException if the given action is null.
      */
-    public final UIForTabbedPane<P> onTabClick( Action<TabClickDelegate> onClick ) {
+    public final UIForTabbedPane<P> onTabMouseClick(Action<TabDelegate> onClick ) {
         NullUtil.nullArgCheck(onClick, "onClick", Action.class);
         P pane = getComponent();
         pane.addMouseListener(new MouseAdapter() {
@@ -51,7 +51,55 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
                 int indexOfTab = _indexOfClick(pane, e.getPoint());
                 int tabCount = pane.getTabCount();
                 if ( indexOfTab >= 0 && indexOfTab < tabCount )
-                    _doApp(() -> onClick.accept(new TabClickDelegate(pane, e, () -> getSiblinghood(), indexOfTab)));
+                    _doApp(() -> onClick.accept(new TabDelegate(pane, e, () -> getSiblinghood(), indexOfTab)));
+            }
+        });
+        return this;
+    }
+
+    /**
+     *  Adds an action to be performed when a mouse press is detected on a tab.
+     *  The action will receive a {@link TabDelegate} instance which
+     *  not only delegates the current tabbed pane and mouse event, but also
+     *  tells the action which tab was pressed and whether the pressed tab is selected.
+     *
+     * @param onPress The action to be performed when a tab is pressed.
+     * @return This builder node.
+     * @throws NullPointerException if the given action is null.
+     */
+    public final UIForTabbedPane<P> onTabMousePress( Action<TabDelegate> onPress ) {
+        NullUtil.nullArgCheck(onPress, "onPress", Action.class);
+        P pane = getComponent();
+        pane.addMouseListener(new MouseAdapter() {
+            @Override public void mousePressed(MouseEvent e) {
+                int indexOfTab = _indexOfClick(pane, e.getPoint());
+                int tabCount = pane.getTabCount();
+                if ( indexOfTab >= 0 && indexOfTab < tabCount )
+                    _doApp(() -> onPress.accept(new TabDelegate(pane, e, () -> getSiblinghood(), indexOfTab)));
+            }
+        });
+        return this;
+    }
+
+    /**
+     *  Adds an action to be performed when a mouse release is detected on a tab.
+     *  The action will receive a {@link TabDelegate} instance which
+     *  not only delegates the current tabbed pane and mouse event, but also
+     *  tells the action which tab was released and whether the released tab is selected.
+     *
+     * @param onRelease The action to be performed when a tab is released.
+     * @return This builder node.
+     * @throws NullPointerException if the given action is null.
+     */
+    public final UIForTabbedPane<P> onTabMouseRelease( Action<TabDelegate> onRelease ) {
+        NullUtil.nullArgCheck(onRelease, "onRelease", Action.class);
+        P pane = getComponent();
+        pane.addMouseListener(new MouseAdapter() {
+            @Override public void mouseReleased(MouseEvent e) {
+                int indexOfTab = _indexOfClick(pane, e.getPoint());
+                int tabCount = pane.getTabCount();
+                if ( indexOfTab >= 0 && indexOfTab < tabCount )
+                    _doApp(() -> onRelease.accept(new TabDelegate(pane, e, () -> getSiblinghood(), indexOfTab)));
             }
         });
         return this;

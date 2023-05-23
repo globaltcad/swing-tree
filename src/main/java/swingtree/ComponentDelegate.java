@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
  * @param <C> The delegate (in most cases origin UI component) type parameter stored by this.
  * @param <E> The event type parameter of the event stored by this.
  */
-public class ComponentDelegate<C extends JComponent,E> extends AbstractDelegate<C>
+public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate<C>
 {
     private final E event;
     private final Supplier<List<JComponent>> siblingSource;

@@ -10,17 +10,18 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
- *  A {@link JTabbedPane} delegate providing useful context information to {@link sprouts.Action} listeners
- *  registered on the {@link UIForTabbedPane#onTabClick(Action)} method.
+ *  A {@link JTabbedPane} delegate providing useful context information to various {@link sprouts.Action} listeners
+ *  used by {@link UIForTabbedPane#onTabMouseClick(Action)}, {@link UIForTabbedPane#onTabMousePress(Action)} and
+ *  {@link UIForTabbedPane#onTabMouseRelease(Action)}, for example.
  *  <br>
  *  Not only does this delegate provide access to the {@link JTabbedPane} component itself, but also to the
  *  {@link MouseEvent} that triggered the event and the index of the clicked tab.
  */
-public final class TabClickDelegate extends ComponentDelegate<JTabbedPane, MouseEvent>
+public final class TabDelegate extends ComponentMouseEventDelegate<JTabbedPane>
 {
     private final int _clickedTab;
 
-    public TabClickDelegate(
+    public TabDelegate(
         JTabbedPane component,
         MouseEvent event,
         Supplier<List<JComponent>> siblingSource,
