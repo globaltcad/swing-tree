@@ -9,7 +9,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 /**
  *  Extensions of this class delegate a component event
@@ -868,7 +867,7 @@ abstract class AbstractDelegate<C extends JComponent>
             if ( isCompClassNestedInUI )
                 UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
                     // We do the rendering later in the paint method!
-                    ComponentExtension.from(_component).addAnimationRenderer(painter);
+                    ComponentExtension.from(_component).addAnimationPainter(painter);
                     // Everything will be rendered in the paint method!
                     // This is important because otherwise our rendering can be erased by a repaint
                 });

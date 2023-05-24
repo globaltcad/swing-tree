@@ -42,6 +42,7 @@ public final class Style
                                             LayoutStyle.none(),
                                             BorderStyle.none(),
                                             BackgroundStyle.none(),
+                                            ForegroundStyle.none(),
                                             ShadowStyle.none(),
                                             FontStyle.none()
                                         );
@@ -51,6 +52,7 @@ public final class Style
     private final LayoutStyle    _layout;
     private final BorderStyle     _border;
     private final BackgroundStyle _background;
+    private final ForegroundStyle _foreground;
     private final ShadowStyle     _shadow;
     private final FontStyle       _font;
 
@@ -59,21 +61,24 @@ public final class Style
         LayoutStyle layout,
         BorderStyle border,
         BackgroundStyle background,
+        ForegroundStyle foreground,
         ShadowStyle shadow,
         FontStyle font
     ) {
         _layout = layout;
         _border = border;
         _background = background;
+        _foreground = foreground;
         _shadow = shadow;
         _font = font;
     }
 
-    private Style _withLayout( LayoutStyle layout ) { return new Style(layout, _border, _background, _shadow, _font); }
-    private Style _withBorder( BorderStyle border ) { return new Style(_layout, border, _background, _shadow, _font); }
-    private Style _withBackground( BackgroundStyle background ) { return new Style(_layout, _border, background, _shadow, _font); }
-    private Style _withShadow( ShadowStyle shadow ) { return new Style(_layout, _border, _background, shadow, _font); }
-    private Style _withFont( FontStyle font ) { return new Style(_layout, _border, _background, _shadow, font); }
+    private Style _withLayout( LayoutStyle layout ) { return new Style(layout, _border, _background, _foreground, _shadow, _font); }
+    private Style _withBorder( BorderStyle border ) { return new Style(_layout, border, _background, _foreground, _shadow, _font); }
+    private Style _withBackground( BackgroundStyle background ) { return new Style(_layout, _border, background, _foreground, _shadow, _font); }
+    private Style _withForeground( ForegroundStyle foreground ) { return new Style(_layout, _border, _background, foreground, _shadow, _font); }
+    private Style _withShadow( ShadowStyle shadow ) { return new Style(_layout, _border, _background, _foreground, shadow, _font); }
+    private Style _withFont( FontStyle font ) { return new Style(_layout, _border, _background, _foreground, _shadow, font); }
 
     /**
      *  Creates a new {@link Style} with the provided top, right, left and bottom margin distances.
@@ -412,13 +417,39 @@ public final class Style
     public Style foundationColor( String colorString ) { return _withBackground(_background.withFoundationColor(_colorFrom(colorString))); }
 
     /**
-     *  Returns a new {@link Style} with the provided background renderer, a {@link Consumer} that
+     *  Returns a new {@link Style} with the provided background renderer, a {@link Painter} that
      *  will be called using the {@link Graphics2D} instance used to render the component.
      *  You may use this to render a custom background for the component.
      * @param renderer The background renderer.
      * @return A new {@link Style} with the provided background renderer.
      */
-    public Style backgroundPainter( Painter renderer ) { return _withBackground(_background.withBackgroundRenderer(renderer)); }
+    public Style backgroundPainter( Painter renderer ) { return _withBackground(_background.withPainter(renderer)); }
+
+    /**
+     *  Returns a new {@link Style} with the provided foreground color.
+     *
+     * @param color The foreground color.
+     * @return A new {@link Style} with the provided foreground color.
+     */
+    public Style foregroundColor( Color color ) { return _withForeground(_foreground.withColor(color)); }
+
+    /**
+     *  Returns a new {@link Style} with the provided foreground color in the form of a string.
+     *  The string can be either a hex color string, a color name or a color constant from the system properties.
+     *
+     * @param colorString The foreground color.
+     * @return A new {@link Style} with the provided foreground color.
+     */
+    public Style foregroundColor( String colorString ) { return _withForeground(_foreground.withColor(_colorFrom(colorString))); }
+
+    /**
+     *  Returns a new {@link Style} with the provided foreground painter, a {@link Painter} that
+     *  will be called using the {@link Graphics2D} instance used to render the component.
+     *  You may use this to render a custom foreground for the component.
+     * @param painter The foreground renderer.
+     * @return A new {@link Style} with the provided foreground renderer.
+     */
+    public Style foregroundPainter( Painter painter ) { return _withForeground(_foreground.withPainter(painter)); }
 
     /**
      *  Returns a new {@link Style} with the provided horizontal shadow offset.
@@ -682,13 +713,15 @@ public final class Style
 
     public BackgroundStyle background() { return _background; }
 
+    public ForegroundStyle foreground() { return _foreground; }
+
     public ShadowStyle shadow() { return _shadow; }
 
     public FontStyle font() { return _font; }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_layout, _border, _background, _shadow, _font);
+        return Objects.hash(_layout, _border, _background, _foreground, _shadow, _font);
     }
 
     @Override
@@ -700,6 +733,7 @@ public final class Style
         return Objects.equals(_layout,     other._layout   ) &&
                Objects.equals(_border,     other._border    ) &&
                Objects.equals(_background, other._background) &&
+                Objects.equals(_foreground, other._foreground) &&
                Objects.equals(_shadow,     other._shadow    ) &&
                Objects.equals(_font,       other._font      );
     }
@@ -710,6 +744,7 @@ public final class Style
                     _layout     + ", " +
                     _border     + ", " +
                     _background + ", " +
+                    _foreground + ", " +
                     _shadow     + ", " +
                     _font       +
                 "]";

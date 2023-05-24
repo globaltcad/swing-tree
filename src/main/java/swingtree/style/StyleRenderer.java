@@ -27,7 +27,7 @@ public class StyleRenderer<C extends JComponent>
         _comp = Objects.requireNonNull(comp);
     }
 
-    public void renderStyle( Style style )
+    public void renderBaseStyle(Style style )
     {
         style.background().foundationColor().ifPresent(outerColor -> {
             _fillOuterBackground(style, outerColor);
@@ -43,6 +43,13 @@ public class StyleRenderer<C extends JComponent>
         });
         style.border().color().ifPresent( color -> {
             _drawBorder(style, color);
+        });
+    }
+
+    public void renderForegroundStyle(Style style )
+    {
+        style.foreground().painter().ifPresent( foregroundPainter -> {
+            foregroundPainter.paint(_g2d);
         });
     }
 

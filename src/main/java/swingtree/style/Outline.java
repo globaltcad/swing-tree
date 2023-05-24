@@ -50,6 +50,12 @@ public final class Outline
 
     Outline withBottom(int bottom) { return new Outline(top, right, bottom, left); }
 
+    public boolean isPositive() {
+        return top    != null && top    > 0 ||
+               right  != null && right  > 0 ||
+               bottom != null && bottom > 0 ||
+               left   != null && left   > 0;
+    }
 
     @Override
     public int hashCode() {

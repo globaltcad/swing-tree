@@ -96,7 +96,11 @@ class Styles_Spec extends Specification
                                         "BackgroundStyle[" +
                                             "color=rgba(0,255,0,255), " +
                                             "foundationColor=rgba(255,0,0,255), " +
-                                            "renderer=null" +
+                                            "painter=null" +
+                                        "], " +
+                                        "ForegroundStyle[" +
+                                            "color=null, " +
+                                            "painter=null" +
                                         "], " +
                                         "ShadowStyle[" +
                                             "horizontalOffset=0, " +

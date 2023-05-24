@@ -19,11 +19,11 @@ public final class BackgroundStyle
     private BackgroundStyle(
         Color color,
         Color foundation,
-        Painter renderer
+        Painter painter
     ) {
         _color           = color;
         _foundationColor = foundation;
-        _painter = renderer;
+        _painter = painter;
     }
 
     public Optional<Color> color() { return Optional.ofNullable(_color); }
@@ -36,7 +36,7 @@ public final class BackgroundStyle
 
     public BackgroundStyle withFoundationColor( Color foundation ) { return new BackgroundStyle(_color, foundation, _painter); }
 
-    public BackgroundStyle withBackgroundRenderer( Painter renderer ) { return new BackgroundStyle(_color, _foundationColor, renderer); }
+    public BackgroundStyle withPainter( Painter renderer ) { return new BackgroundStyle(_color, _foundationColor, renderer); }
 
     @Override
     public int hashCode() { return Objects.hash(_color, _foundationColor, _painter); }
@@ -57,7 +57,7 @@ public final class BackgroundStyle
         return "BackgroundStyle[" +
                     "color="           + StyleUtility.toString(_color) + ", " +
                     "foundationColor=" + StyleUtility.toString(_foundationColor) + ", " +
-                    "renderer="        + _painter +
+                    "painter="         + _painter +
                 "]";
     }
 }

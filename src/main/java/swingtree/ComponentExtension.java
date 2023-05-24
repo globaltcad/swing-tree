@@ -74,12 +74,12 @@ public class ComponentExtension<C extends JComponent>
         _animationPainters = null;
     }
 
-    void addAnimationRenderer( Painter renderer ) {
-        Objects.requireNonNull(renderer);
+    void addAnimationPainter( Painter painter ) {
+        Objects.requireNonNull(painter);
         if ( _animationPainters == null )
             _animationPainters = new java.util.ArrayList<>();
 
-        _animationPainters.add(renderer);
+        _animationPainters.add(painter);
     }
 
     void render( Graphics g, Runnable superPaint ) {
@@ -92,18 +92,27 @@ public class ComponentExtension<C extends JComponent>
 
         // We enable antialiasing:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+        StyleRenderer<?> renderer = null;
+        Style style = null;
         {
-            _calculateStyle().ifPresent( style -> {
+            Optional<Style> maybeStyle = _calculateStyle();
+            if ( maybeStyle.isPresent() ) {
+                style = maybeStyle.get();
                 style = _applyStyleToComponentState( style, g2d );
 
-                if ( _componentIsDeclaredInUI(_owner) )
-                    new StyleRenderer<>( g2d, _owner ).renderStyle( style );
-            });
+                if ( _componentIsDeclaredInUI(_owner) ) {
+                    renderer = new StyleRenderer<>(g2d, _owner);
+                    renderer.renderBaseStyle(style);
+                }
+            }
         }
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
 
         superPaint.run();
+
+        if ( renderer != null )
+            renderer.renderForegroundStyle(style);
 
         // Enable antialiasing again:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
@@ -153,17 +162,26 @@ public class ComponentExtension<C extends JComponent>
                 style = style.foundationColor( _owner.getBackground() );
         }
 
-        if ( _owner.isOpaque() ) {
-            if ( style.background().color().isPresent() )
-                _owner.setOpaque(false);
+        if ( style.foreground().color().isPresent() && !Objects.equals( _owner.getForeground(), style.foreground().color().get() ) )
+            _owner.setForeground( style.foreground().color().get() );
 
-            if ( style.background().foundationColor().isPresent() )
+        if ( style.background().color().isPresent() && !Objects.equals( _owner.getBackground(), style.background().color().get() ) )
+            _owner.setBackground( style.background().color().get() );
+
+        if ( _owner.isOpaque() ) {
+            if ( style.margin().isPositive() )
                 _owner.setOpaque(false);
 
             if ( style.background().painter().isPresent() )
                 _owner.setOpaque(false);
 
             if ( style.shadow().color().isPresent() )
+                _owner.setOpaque(false);
+
+            if ( style.border().arcHeight() > 0 || style.border().arcWidth() > 0 )
+                _owner.setOpaque(false);
+
+            if ( style.border().color().isPresent() && style.border().width() > 0 )
                 _owner.setOpaque(false);
         }
         if ( _owner instanceof JTextComponent) {
