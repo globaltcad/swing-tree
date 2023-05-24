@@ -21,13 +21,11 @@ public class AnimatedButtonsView extends Panel
         of(this).withLayout(FILL.and(WRAP(3)).and(INS(32)), "", "[][]24[]24[]")
         .withPrefSize(800, 600)
         .add( SHRINK.and(SPAN).and(ALIGN_CENTER),
-            label(
-                "<html>" +
-                    "<h1>Animated Buttons</h1>" +
-                    "<p>" +
-                    "A view of various button with lot's of animations." +
-                    "</p>" +
-                "</html>"
+            html(
+                "<h1>Animated Buttons</h1>" +
+                "<p>" +
+                "A view of various button with lot's of animations." +
+                "</p>"
             )
         )
         .add( GROW.and(PUSH_Y),
@@ -105,7 +103,7 @@ public class AnimatedButtonsView extends Panel
             .add(
                 button("I have a click ripple effect")
                 .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
-                    it.render( g -> {
+                    it.paint( g -> {
                         g.setColor(new Color(0.1f, 0.25f, 0.5f, (float) state.fadeOut()));
                         for ( int i = 0; i < 5; i++ ) {
                             double r = 300 * state.fadeIn() * ( 1 - i * 0.2 );
@@ -195,7 +193,7 @@ public class AnimatedButtonsView extends Panel
                 double h = it.getHeight() * state.progress();
                 double x = it.getWidth()  / 2.0 - w / 2.0;
                 double y = it.getHeight() / 2.0 - h / 2.0;
-                it.render( g -> {
+                it.paint( g -> {
                     g.setColor(new Color(1f, 1f, 0f, (float) state.fadeOut()));
                     g.fillRect((int) x, (int) y, (int) w, (int) h);
                 });
@@ -209,7 +207,7 @@ public class AnimatedButtonsView extends Panel
                     double r = 30 * state.fadeIn();
                     double x = it.getEvent().getX() - r / 2.0;
                     double y = it.getEvent().getY() - r / 2.0;
-                    it.render( g -> {
+                    it.paint( g -> {
                         g.setColor(new Color(1f, 1f, 0f, (float) state.fadeOut()));
                         g.fillOval((int) x, (int) y, (int) r, (int) r);
                     });
@@ -219,7 +217,7 @@ public class AnimatedButtonsView extends Panel
                 double r = 300 * state.fadeIn();
                 double x = it.getEvent().getX() - r / 2;
                 double y = it.getEvent().getY() - r / 2;
-                it.render( g -> {
+                it.paint( g -> {
                     g.setColor(new Color(1f, 1f, 0f, (float) state.fadeOut()));
                     g.fillOval((int) x, (int) y, (int) r, (int) r);
                 });

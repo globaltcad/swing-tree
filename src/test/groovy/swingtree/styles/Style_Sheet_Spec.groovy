@@ -384,7 +384,7 @@ class Style_Sheet_Spec extends Specification
                 @Override
                 protected void declaration() {
                     apply(group("Gradient"), it ->
-                        it.style().backgroundRenderer(g2d -> {
+                        it.style().backgroundPainter(g2d -> {
                             // Let's render a gradient:
                             var gradient = new GradientPaint(0, 0, Color.RED, 0, 100, Color.BLUE);
                             g2d.setPaint(gradient);
@@ -392,7 +392,7 @@ class Style_Sheet_Spec extends Specification
                         })
                     );
                     apply(group("ChessBoard"), it ->
-                        it.style().backgroundRenderer(g2d -> {
+                        it.style().backgroundPainter(g2d -> {
                             var w = it.component().getWidth() / 8;// We render a checkerboard pattern!
                             var h = it.component().getHeight() / 8;
                             for (var i = 0; i < 8; i++) {
@@ -416,7 +416,7 @@ class Style_Sheet_Spec extends Specification
             var s1 = ss.run(label1.component)
             var s2 = ss.run(label2.component)
         then : '...and we check the results'
-            s1.background().renderer().isPresent()
-            s2.background().renderer().isPresent()
+            s1.background().painter().isPresent()
+            s2.background().painter().isPresent()
     }
 }

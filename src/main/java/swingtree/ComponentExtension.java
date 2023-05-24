@@ -1,6 +1,7 @@
 package swingtree;
 
 import net.miginfocom.swing.MigLayout;
+import swingtree.api.style.Painter;
 import swingtree.style.Style;
 import swingtree.style.StyleDelegate;
 import swingtree.style.StyleRenderer;
@@ -13,7 +14,6 @@ import java.awt.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -42,7 +42,7 @@ public class ComponentExtension<C extends JComponent>
 
     private Function<StyleDelegate<C>, Style> _styling = null;
 
-    private List<Consumer<Graphics2D>> _animationRenderers;
+    private List<Painter> _animationPainters;
 
     private String[] _styleGroups = new String[0];
 
@@ -71,15 +71,15 @@ public class ComponentExtension<C extends JComponent>
     }
 
     public void clearAnimationRenderer() {
-        _animationRenderers = null;
+        _animationPainters = null;
     }
 
-    void addAnimationRenderer( Consumer<Graphics2D> renderer ) {
+    void addAnimationRenderer( Painter renderer ) {
         Objects.requireNonNull(renderer);
-        if ( _animationRenderers == null )
-            _animationRenderers = new java.util.ArrayList<>();
+        if ( _animationPainters == null )
+            _animationPainters = new java.util.ArrayList<>();
 
-        _animationRenderers.add(renderer);
+        _animationPainters.add(renderer);
     }
 
     void render( Graphics g, Runnable superPaint ) {
@@ -109,9 +109,9 @@ public class ComponentExtension<C extends JComponent>
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         // Animations are last: they are rendered on top of everything else:
-        if ( _animationRenderers != null )
-            for ( Consumer<Graphics2D> renderer : _animationRenderers)
-                renderer.accept(g2d);
+        if ( _animationPainters != null )
+            for ( Painter painter : _animationPainters )
+                painter.paint(g2d);
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
@@ -160,7 +160,7 @@ public class ComponentExtension<C extends JComponent>
             if ( style.background().foundationColor().isPresent() )
                 _owner.setOpaque(false);
 
-            if ( style.background().renderer().isPresent() )
+            if ( style.background().painter().isPresent() )
                 _owner.setOpaque(false);
 
             if ( style.shadow().color().isPresent() )

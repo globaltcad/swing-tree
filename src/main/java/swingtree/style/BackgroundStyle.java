@@ -1,9 +1,10 @@
 package swingtree.style;
 
+import swingtree.api.style.Painter;
+
 import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 public final class BackgroundStyle
 {
@@ -13,32 +14,32 @@ public final class BackgroundStyle
 
     private final Color _color;
     private final Color _foundationColor;
-    private final Consumer<Graphics2D> _renderer;
+    private final Painter _painter;
 
     private BackgroundStyle(
         Color color,
         Color foundation,
-        Consumer<Graphics2D> renderer
+        Painter renderer
     ) {
         _color           = color;
         _foundationColor = foundation;
-        _renderer        = renderer;
+        _painter = renderer;
     }
 
     public Optional<Color> color() { return Optional.ofNullable(_color); }
 
     public Optional<Color> foundationColor() { return Optional.ofNullable(_foundationColor); }
 
-    public Optional<Consumer<Graphics2D>> renderer() { return Optional.ofNullable(_renderer); }
+    public Optional<Painter> painter() { return Optional.ofNullable(_painter); }
 
-    public BackgroundStyle withColor( Color color ) { return new BackgroundStyle(color, _foundationColor, _renderer); }
+    public BackgroundStyle withColor( Color color ) { return new BackgroundStyle(color, _foundationColor, _painter); }
 
-    public BackgroundStyle withFoundationColor( Color foundation ) { return new BackgroundStyle(_color, foundation, _renderer); }
+    public BackgroundStyle withFoundationColor( Color foundation ) { return new BackgroundStyle(_color, foundation, _painter); }
 
-    public BackgroundStyle withBackgroundRenderer(Consumer<Graphics2D> renderer) { return new BackgroundStyle(_color, _foundationColor, renderer); }
+    public BackgroundStyle withBackgroundRenderer( Painter renderer ) { return new BackgroundStyle(_color, _foundationColor, renderer); }
 
     @Override
-    public int hashCode() { return Objects.hash(_color, _foundationColor, _renderer ); }
+    public int hashCode() { return Objects.hash(_color, _foundationColor, _painter); }
 
     @Override
     public boolean equals(Object obj) {
@@ -48,7 +49,7 @@ public final class BackgroundStyle
         BackgroundStyle rhs = (BackgroundStyle) obj;
         return Objects.equals(_color, rhs._color) &&
                Objects.equals(_foundationColor, rhs._foundationColor) &&
-               Objects.equals(_renderer, rhs._renderer);
+               Objects.equals(_painter, rhs._painter);
     }
 
     @Override
@@ -56,7 +57,7 @@ public final class BackgroundStyle
         return "BackgroundStyle[" +
                     "color="           + StyleUtility.toString(_color) + ", " +
                     "foundationColor=" + StyleUtility.toString(_foundationColor) + ", " +
-                    "renderer="        + _renderer +
+                    "renderer="        + _painter +
                 "]";
     }
 }

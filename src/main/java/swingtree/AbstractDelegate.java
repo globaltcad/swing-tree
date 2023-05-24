@@ -3,11 +3,10 @@ package swingtree;
 import swingtree.animation.Animate;
 import swingtree.animation.Animation;
 import swingtree.animation.Schedule;
+import swingtree.api.style.Painter;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -856,9 +855,9 @@ abstract class AbstractDelegate<C extends JComponent>
      *      }))
      *  }</pre>
      *
-     * @param renderer The rendering task which should be executed on the EDT at the end of the current event cycle.
+     * @param painter The rendering task which should be executed on the EDT at the end of the current event cycle.
      */
-    public final void render( Consumer<Graphics2D> renderer ) {
+    public final void paint( Painter painter ) {
             // We check if the component is declared in the UI class
             // as a nested class. If it is, it is one of ours, so we can safely assume that
             // the paint method is overridden and that the component
@@ -869,7 +868,7 @@ abstract class AbstractDelegate<C extends JComponent>
             if ( isCompClassNestedInUI )
                 UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
                     // We do the rendering later in the paint method!
-                    ComponentExtension.from(_component).addAnimationRenderer(renderer);
+                    ComponentExtension.from(_component).addAnimationRenderer(painter);
                     // Everything will be rendered in the paint method!
                     // This is important because otherwise our rendering can be erased by a repaint
                 });
@@ -884,7 +883,7 @@ abstract class AbstractDelegate<C extends JComponent>
                         above code is preferred, but it is a fallback for when the component
                         is not declared in the UI class (one of ours with a modified paint method).
                     */
-                    renderer.accept((Graphics2D) _component.getGraphics());
+                    painter.paint((Graphics2D) _component.getGraphics());
                 });
     }
 

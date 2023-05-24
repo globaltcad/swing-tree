@@ -22,7 +22,7 @@ public class StyleRenderer<C extends JComponent>
     private final C _comp;
 
 
-    public StyleRenderer(Graphics2D g2d, C comp) {
+    public StyleRenderer( Graphics2D g2d, C comp ) {
         _g2d = Objects.requireNonNull(g2d);
         _comp = Objects.requireNonNull(comp);
     }
@@ -35,8 +35,8 @@ public class StyleRenderer<C extends JComponent>
         style.background().color().ifPresent(color -> {
             _fillBackground(style, color);
         });
-        style.background().renderer().ifPresent(renderer -> {
-            renderer.accept(_g2d);
+        style.background().painter().ifPresent( backgroundPainter -> {
+            backgroundPainter.paint(_g2d);
         });
         style.shadow().color().ifPresent(color -> {
             _renderShadows(style, _comp, _g2d, color);

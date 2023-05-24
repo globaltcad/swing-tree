@@ -41,7 +41,7 @@ public class NoteGuesserView extends Panel
                  .shadowBlurRadius(6)
                  .shadowSpreadRadius(3)
                  .shadowIsInset(true)
-                 .backgroundRenderer( g2d -> {
+                 .backgroundPainter(g2d -> {
                      int w = it.component().getWidth() - 25 - 25 - 100;
                      int h = it.component().getHeight() - 20 - 20 - 30;
                      int x = 25 + 50;

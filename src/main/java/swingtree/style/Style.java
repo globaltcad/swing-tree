@@ -1,5 +1,7 @@
 package swingtree.style;
 
+import swingtree.api.style.Painter;
+
 import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.util.ArrayList;
@@ -416,7 +418,7 @@ public final class Style
      * @param renderer The background renderer.
      * @return A new {@link Style} with the provided background renderer.
      */
-    public Style backgroundRenderer( Consumer<Graphics2D> renderer ) { return _withBackground(_background.withBackgroundRenderer(renderer)); }
+    public Style backgroundPainter( Painter renderer ) { return _withBackground(_background.withBackgroundRenderer(renderer)); }
 
     /**
      *  Returns a new {@link Style} with the provided horizontal shadow offset.

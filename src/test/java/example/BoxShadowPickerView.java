@@ -121,7 +121,7 @@ public class BoxShadowPickerView extends UI.Panel
                         it.style()
                          .backgroundColor(vm.backgroundColor().get())
                          .foundationColor(vm.foundationColor().get())
-                         .backgroundRenderer(g2d -> {
+                         .backgroundPainter( g2d -> {
                              if ( vm.drawSmiley().is(false) ) return;
                              int w = it.component().getWidth() - vm.marginLeft().get() - vm.marginRight().get() - 100;
                              int h = it.component().getHeight() - vm.marginTop().get() - vm.marginBottom().get() - 100;
