@@ -1,4 +1,4 @@
-package swingtree.api.style;
+package swingtree.style;
 
 import java.awt.*;
 

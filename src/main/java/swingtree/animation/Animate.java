@@ -10,7 +10,7 @@ import java.util.function.Predicate;
  *  An API for creating an {@link Animation} and defining how it should be executed.
  *  Instances of this class are intended to be created and used either by the
  *  {@link swingtree.UI} API or the user event delegation API (see {@link ComponentDelegate}). <br>
- *  The UI API can be used like this:
+ *  The UI API can be used like so:
  *  <pre>{@code
  *    UI.schedule( 100, TimeUnit.MILLISECONDS ) // returns an Animate instance
  *       .until( it -> it.progress() >= 0.75 && someOtherCondition() )
@@ -138,7 +138,7 @@ public class Animate
      * @param animation The animation that should be executed.
      */
     public void go( Animation animation ) {
-        AnimationScheduler.schedule( new Animator( _component, _schedule, _condition, animation ) );
+        AnimationRunner.add( new ComponentAnimator( _component, _schedule, _condition, animation ) );
     }
 
 }

@@ -1,13 +1,10 @@
 package swingtree.style;
 
-import swingtree.api.style.Painter;
-
 import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 /**
  *  An immutable, wither based settings container for {@link javax.swing.JComponent} styling.

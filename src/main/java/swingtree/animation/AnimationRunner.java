@@ -1,6 +1,7 @@
 package swingtree.animation;
 
 import swingtree.ComponentExtension;
+import swingtree.UI;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -9,11 +10,12 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- *  This class is responsible for scheduling and running animations.
- *  It uses a timer to run the animations at a fixed rate.
+ *  This is a singleton class responsible for running {@link ComponentAnimator}
+ *  instances (which are wrapper classes for {@link Animation} instances)
+ *  in a regular interval based on a Swing {@link Timer}.
  *  The timer is started when the first animation is scheduled and stopped when the last animation is finished.
  */
-class AnimationScheduler
+class AnimationRunner
 {
     /*
         We want the refresh rate to be as high as possible so that the animation
@@ -26,19 +28,19 @@ class AnimationScheduler
     */
     private final static int TIMER_DELAY = 16;
 
-    private static final AnimationScheduler _INSTANCE = new AnimationScheduler();
+    private static final AnimationRunner _INSTANCE = new AnimationRunner();
 
 
-    public static void schedule( Animator animator ) { _INSTANCE._schedule(Objects.requireNonNull(animator)); }
+    public static void add( ComponentAnimator animator ) { _INSTANCE._add(Objects.requireNonNull(animator)); }
 
 
     private final Timer _timer = new Timer( TIMER_DELAY, this::_run );
 
 
-    private final List<Animator> _animators = new ArrayList<>();
+    private final List<ComponentAnimator> _animators = new ArrayList<>();
 
 
-    private AnimationScheduler() {}
+    private AnimationRunner() {}
 
     private void _run( ActionEvent event ) {
         if ( _animators.isEmpty() ) {
@@ -46,24 +48,21 @@ class AnimationScheduler
             return;
         }
 
-        for ( Animator animator : new ArrayList<>(_animators) )
-            clearRenderers(animator.component());
+        for ( ComponentAnimator animator : new ArrayList<>(_animators) )
+            animator.component().ifPresent( component -> {
+                ComponentExtension.from(component).clearAnimationRenderer();
+            });
 
         long now = System.currentTimeMillis();
-        List<Animator> toRemove = new ArrayList<>();
-        for ( Animator animator : new ArrayList<>(_animators) )
+        List<ComponentAnimator> toRemove = new ArrayList<>();
+        for ( ComponentAnimator animator : new ArrayList<>(_animators) )
             if ( !animator.run(now, event) )
                 toRemove.add(animator);
 
         _animators.removeAll(toRemove);
     }
 
-    private void clearRenderers( JComponent comp ) {
-        if ( comp == null ) return;
-        ComponentExtension.from(comp).clearAnimationRenderer();
-    }
-
-    private void _schedule( Animator animator ) {
+    private void _add( ComponentAnimator animator ) {
         Objects.requireNonNull(animator, "Null is not a valid animator!");
         _animators.add(animator);
         if ( !_timer.isRunning() )

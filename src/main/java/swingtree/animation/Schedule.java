@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
- *  A schedule is used to define when an animation should start and how long it should run.
+ *  A schedule defines when an animation should start and for how long it should run.
  */
 public class Schedule
 {

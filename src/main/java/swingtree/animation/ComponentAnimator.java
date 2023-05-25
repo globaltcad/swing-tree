@@ -5,21 +5,25 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-class Animator
+/**
+ *  Runs an {@link Animation} on a {@link Component} according to a {@link Schedule} and a {@link StopCondition}.
+ */
+class ComponentAnimator
 {
     private final WeakReference<Component> _compRef;
-    private final Schedule _schedule;
+    private final Schedule      _schedule;
     private final StopCondition _condition;
-    private final Animation _animation;
+    private final Animation     _animation;
 
 
-    Animator(
-        Component component,
-        Schedule schedule,
+    ComponentAnimator(
+        Component     component, // may be null if the animation is not associated with a specific component
+        Schedule      schedule,
         StopCondition condition,
-        Animation animation
+        Animation     animation
     ) {
         _compRef   = component == null ? null : new WeakReference<>(component);
         _schedule  = Objects.requireNonNull(schedule);
@@ -27,10 +31,10 @@ class Animator
         _animation = Objects.requireNonNull(animation);
     }
 
-    public JComponent component() {
-        if ( _compRef == null ) return null;
+    public Optional<JComponent> component() {
+        if ( _compRef == null ) return Optional.empty();
         Component _component = this._compRef.get();
-        return _component instanceof JComponent ? (JComponent) _component : null;
+        return Optional.ofNullable( _component instanceof JComponent ? (JComponent) _component : null );
     }
 
     private AnimationState _createState( long now, ActionEvent event ) {

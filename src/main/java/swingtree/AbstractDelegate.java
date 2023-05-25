@@ -3,7 +3,7 @@ package swingtree;
 import swingtree.animation.Animate;
 import swingtree.animation.Animation;
 import swingtree.animation.Schedule;
-import swingtree.api.style.Painter;
+import swingtree.style.Painter;
 
 import javax.swing.*;
 import java.awt.*;

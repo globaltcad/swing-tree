@@ -1,7 +1,7 @@
 package swingtree;
 
 import net.miginfocom.swing.MigLayout;
-import swingtree.api.style.Painter;
+import swingtree.style.Painter;
 import swingtree.style.Style;
 import swingtree.style.StyleDelegate;
 import swingtree.style.StyleRenderer;
