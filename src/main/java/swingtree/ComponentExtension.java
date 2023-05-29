@@ -9,6 +9,7 @@ import swingtree.style.StyleRenderer;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.ButtonUI;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.List;
@@ -169,20 +170,34 @@ public class ComponentExtension<C extends JComponent>
             _owner.setBackground( style.background().color().get() );
 
         if ( _owner.isOpaque() ) {
+            boolean weNeedToOverrideLaF = false;
+
             if ( style.margin().isPositive() )
-                _owner.setOpaque(false);
+                weNeedToOverrideLaF = true;
 
             if ( style.background().painter().isPresent() )
-                _owner.setOpaque(false);
+                weNeedToOverrideLaF = true;
 
             if ( style.shadow().color().isPresent() )
-                _owner.setOpaque(false);
+                weNeedToOverrideLaF = true;
 
             if ( style.border().arcHeight() > 0 || style.border().arcWidth() > 0 )
-                _owner.setOpaque(false);
+                weNeedToOverrideLaF = true;
 
             if ( style.border().color().isPresent() && style.border().width() > 0 )
+                weNeedToOverrideLaF = true;
+            else if ( style.border().width() == 0 && _owner instanceof AbstractButton )
+                ((AbstractButton) _owner).setBorderPainted(false);
+
+            if ( weNeedToOverrideLaF ) {
                 _owner.setOpaque(false);
+                if ( _owner instanceof AbstractButton ) {
+                    AbstractButton b = (AbstractButton) _owner;
+                    b.setBorderPainted(false);
+                    b.setContentAreaFilled(false);
+                    b.setFocusPainted(false);
+                }
+            }
         }
         if ( _owner instanceof JTextComponent) {
             JTextComponent tc = (JTextComponent) _owner;
@@ -205,7 +220,7 @@ public class ComponentExtension<C extends JComponent>
         return style;
     }
 
-    private void _applyPadding(Style style ) {
+    private void _applyPadding( Style style ) {
         boolean hasBorder        = style.border().width() > 0;
         boolean insTopPresent    = style.margin().top().isPresent()    || style.padding().top().isPresent();
         boolean insLeftPresent   = style.margin().left().isPresent()   || style.padding().left().isPresent();

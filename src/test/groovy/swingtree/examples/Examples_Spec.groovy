@@ -91,6 +91,11 @@ class Examples_Spec extends Specification
         expect : new SymbolGuesserView(new SymbolGuesserViewModel())
     }
 
+    def 'The "Well rounded" style example UI defined in the examples can be created.'()
+    {
+        expect : new WellRoundedView()
+    }
+
     def 'The animated buttons view examples UI defined in the examples can be created.'()
     {
         expect : new AnimatedButtonsView()
