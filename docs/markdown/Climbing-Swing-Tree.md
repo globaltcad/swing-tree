@@ -309,6 +309,81 @@ schedule animations, and much much more!
 
 Just keep reading and you will see what I mean! :)
 
+## Blooming Flowers ##
+
+An important aspect of modern UIs developed is the ability to
+customize the looks of the UI.
+Swing-Tree allows you to customize the looks of your UI
+using its functional style API.
+
+Traditionally, the looks of a plain old Swing UI is predominantly
+determined by the **"look and feel" (short LaF)** that is installed through the `UIManager`.
+Although it is often possible to configure a particular look and feel 
+to a limited degree,
+like for example specifying the background and foreground colors 
+of specific Swing components, it is almost impossible to change
+non-trivial aspects of a component, like shadows, gradients, etc.
+Swing-Tree solves this problem by overriding the `paintComponent` method
+and intercepting the painting process of Swing components
+so that you can customize the looks of Swing components on top of the LaF.
+This customization is done using the Swing-Tree style API.
+
+Here, take a look this code:
+```java
+UI.show(
+    panel("fill, wrap 2")
+    .withStyle( it ->
+        it.style()
+          .margin(24).pad(24)
+          .backgroundColor(new Color(57, 221, 255,255))
+          .borderRadius(32)
+          .shadowBlurRadius(5)
+          .shadowColor(new Color(0,0,0, 128))
+    )
+    .add("span, alignx center",
+        box("ins 12")
+        .add(html("<h1>A Well Rounded View</h1><p>Built using the SwingTree style API.</p>"))
+    )
+    .add(
+        panel("ins 12", "[grow]")
+        .withStyle( it ->
+            it.style()
+              .backgroundColor(new Color(255, 255, 255,255))
+              .borderRadius(24)
+        )
+        .add("span, wrap", label("Isn't this a well rounded view?"))
+        .add("growx",
+            button("Yes").withStyle( it -> it.style().borderRadius(24)),
+            button("No")
+        )
+    )
+    .add("top",
+        box("ins 24")
+        .add(html("<i>SwingTree can override the default<br>Look and feel based style<br>according to your needs.</i>"))
+    )
+);
+```
+Which will look like this:
+
+![Styling](../img/tutorial/a-well-rounded-view.png)
+
+Here you can see that we can use the `withStyle` method
+to access the style API of a Swing component.
+The style API consists of a `StyleDelegate` which 
+in the above example is the `it` parameter.
+The `StyleDelegate` exposes both the Swing component
+and the current `Style` configuration object.
+
+This API is functional,
+(meaning that the methods on the `Style` object
+will return a new `Style` object with the corresponding
+style property changed), which means that the styling lambda
+is expected to return a new `Style` object with the final
+style configuration you want to apply to the Swing component.
+
+You can configure all kinds of style properties like
+background and foreground colors, border colors, border thickness,
+border radius, shadow color, shadow blur radius, etc.
 
 ## Harvesting Fruit ##
 
