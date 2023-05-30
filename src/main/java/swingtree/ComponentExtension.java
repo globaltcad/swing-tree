@@ -7,9 +7,12 @@ import swingtree.style.StyleDelegate;
 import swingtree.style.StyleRenderer;
 
 import javax.swing.*;
+import javax.swing.border.AbstractBorder;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
-import javax.swing.plaf.ButtonUI;
+import javax.swing.plaf.ComponentUI;
+import javax.swing.plaf.PanelUI;
+import javax.swing.plaf.basic.BasicPanelUI;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.List;
@@ -40,6 +43,8 @@ public class ComponentExtension<C extends JComponent>
     static void makeSureComponentHasExtension( JComponent comp ) { from(comp); }
 
     private final C _owner;
+    private ComponentUI _styleLaF = null;
+    private ComponentUI _formerLaF = null;
 
     private Function<StyleDelegate<C>, Style> _styling = null;
 
@@ -83,7 +88,20 @@ public class ComponentExtension<C extends JComponent>
         _animationPainters.add(painter);
     }
 
+
     void render( Graphics g, Runnable superPaint ) {
+        if ( _styleLaF == null )
+            _render( g, superPaint, _componentIsDeclaredInUI(_owner) );
+        else
+            superPaint.run();
+    }
+
+    void render( Graphics g ) {
+        _render( g, ()->{}, true );
+    }
+
+    void _render( Graphics g, Runnable superPaint, boolean executeStyleRenderer ) {
+        Style style = _calculateStyle().map( s -> _applyStyleToComponentState( s, (Graphics2D) g) ).orElse(null);
         Objects.requireNonNull(g);
         Objects.requireNonNull(superPaint);
 
@@ -94,14 +112,9 @@ public class ComponentExtension<C extends JComponent>
         // We enable antialiasing:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
         StyleRenderer<?> renderer = null;
-        Style style = null;
         {
-            Optional<Style> maybeStyle = _calculateStyle();
-            if ( maybeStyle.isPresent() ) {
-                style = maybeStyle.get();
-                style = _applyStyleToComponentState( style, g2d );
-
-                if ( _componentIsDeclaredInUI(_owner) ) {
+            if ( style != null ) {
+                if ( executeStyleRenderer ) {
                     renderer = new StyleRenderer<>(g2d, _owner);
                     renderer.renderBaseStyle(style);
                 }
@@ -169,36 +182,6 @@ public class ComponentExtension<C extends JComponent>
         if ( style.background().color().isPresent() && !Objects.equals( _owner.getBackground(), style.background().color().get() ) )
             _owner.setBackground( style.background().color().get() );
 
-        if ( _owner.isOpaque() ) {
-            boolean weNeedToOverrideLaF = false;
-
-            if ( style.margin().isPositive() )
-                weNeedToOverrideLaF = true;
-
-            if ( style.background().painter().isPresent() )
-                weNeedToOverrideLaF = true;
-
-            if ( style.shadow().color().isPresent() )
-                weNeedToOverrideLaF = true;
-
-            if ( style.border().arcHeight() > 0 || style.border().arcWidth() > 0 )
-                weNeedToOverrideLaF = true;
-
-            if ( style.border().color().isPresent() && style.border().width() > 0 )
-                weNeedToOverrideLaF = true;
-            else if ( style.border().width() == 0 && _owner instanceof AbstractButton )
-                ((AbstractButton) _owner).setBorderPainted(false);
-
-            if ( weNeedToOverrideLaF ) {
-                _owner.setOpaque(false);
-                if ( _owner instanceof AbstractButton ) {
-                    AbstractButton b = (AbstractButton) _owner;
-                    b.setBorderPainted(false);
-                    b.setContentAreaFilled(false);
-                    b.setFocusPainted(false);
-                }
-            }
-        }
         if ( _owner instanceof JTextComponent) {
             JTextComponent tc = (JTextComponent) _owner;
             if ( style.font().selectionColor().isPresent() && ! Objects.equals( tc.getSelectionColor(), style.font().selectionColor().get() ) )
@@ -217,7 +200,82 @@ public class ComponentExtension<C extends JComponent>
 
         _applyPadding( style );
 
+        _establishLaF( style );
+
         return style;
+    }
+
+    private void _establishLaF( Style style ) {
+
+        // For panels mostly:
+        boolean weNeedToOverrideLaF = false;
+
+        if ( style.margin().isPositive() )
+            weNeedToOverrideLaF = true;
+
+        if ( style.background().painter().isPresent() )
+            weNeedToOverrideLaF = true;
+
+        if ( style.shadow().color().isPresent() )
+            weNeedToOverrideLaF = true;
+
+        if ( style.border().arcHeight() > 0 || style.border().arcWidth() > 0 )
+            weNeedToOverrideLaF = true;
+
+        if ( style.border().color().isPresent() && style.border().width() > 0 )
+            weNeedToOverrideLaF = true;
+        else if ( style.border().width() == 0 && _owner instanceof AbstractButton )
+            ((AbstractButton) _owner).setBorderPainted(false);
+
+        if ( weNeedToOverrideLaF ) {
+            boolean success = _installCustomLaF();
+            if ( !success && _owner.isOpaque() ) {
+                _owner.setOpaque(false);
+                if ( _owner instanceof AbstractButton ) {
+                    AbstractButton b = (AbstractButton) _owner;
+                    b.setContentAreaFilled(false);
+                    b.setBorderPainted(false);
+                }
+            }
+        }
+        else if ( _styleLaF != null ) {
+            _uninstallCustomLaF();
+        }
+    }
+
+    private boolean _installCustomLaF() {
+        if ( _owner instanceof JPanel ) {
+            JPanel p = (JPanel) _owner;
+            _formerLaF = p.getUI();
+            PanelStyler laf = PanelStyler.INSTANCE;
+            p.setUI(laf);
+            _styleLaF = laf;
+            return true;
+        }
+        //else if ( _owner instanceof AbstractButton ) {
+        //    AbstractButton b = (AbstractButton) _owner;
+        //    _formerLaF = b.getUI();
+        //    ButtonStyler laf = new ButtonStyler(b.getUI());
+        //    b.setUI(new ButtonStyler(b.getUI()));
+        //    _styleLaF = laf;
+        //}
+
+        return false;
+    }
+
+    private void _uninstallCustomLaF() {
+        if ( _styleLaF != null ) {
+            if ( _owner instanceof JPanel ) {
+                JPanel p = (JPanel) _owner;
+                p.setUI((PanelUI) _formerLaF);
+                _styleLaF = null;
+            }
+            //else if ( _owner instanceof AbstractButton ) {
+            //    AbstractButton b = (AbstractButton) _owner;
+            //    b.setUI((ButtonUI) _formerLaF);
+            //    _styleLaF = null;
+            //}
+        }
     }
 
     private void _applyPadding( Style style ) {
@@ -367,6 +425,40 @@ public class ComponentExtension<C extends JComponent>
             clazz = clazz.getSuperclass();
         }
         return isSwingTreeComponent;
+    }
+
+
+
+    static class PanelStyler extends BasicPanelUI
+    {
+        static final PanelStyler INSTANCE = new PanelStyler();
+
+        private PanelStyler() {}
+
+        @Override
+        public void update( Graphics g, JComponent c ) {
+            if ( c.isOpaque() )
+                ComponentExtension.from(c).render(g);
+        }
+        @Override
+        public int getBaseline( JComponent c, int width, int height ) {
+            super.getBaseline(c, width, height);
+            Border border = c.getBorder();
+            if ( border instanceof AbstractBorder )
+                return ((AbstractBorder)border).getBaseline(c, width, height);
+
+            return -1;
+        }
+
+        @Override
+        public Component.BaselineResizeBehavior getBaselineResizeBehavior( JComponent c ) {
+            super.getBaselineResizeBehavior(c);
+            Border border = c.getBorder();
+            if ( border instanceof AbstractBorder )
+                return ((AbstractBorder)border).getBaselineResizeBehavior(c);
+
+            return Component.BaselineResizeBehavior.OTHER;
+        }
     }
 
 }

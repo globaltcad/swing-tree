@@ -2,8 +2,9 @@ package example;
 
 import swingtree.UI;
 
-import java.awt.Color;
+import java.awt.*;
 
+import static swingtree.UI.Panel;
 import static swingtree.UI.*;
 
 public class WellRoundedView extends Panel

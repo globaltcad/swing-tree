@@ -149,26 +149,27 @@ public class StyleRenderer<C extends JComponent>
         int arcHeight = Math.max(style.border().arcHeight(),0);
         int width     = comp.getWidth();
         int height    = comp.getHeight();
+        int borderWidth = Math.max(0,style.border().width());
 
         // Calculate the shadow box bounds based on the padding and border thickness
-        int x = left   + style.border().width() / 2 + style.shadow().horizontalOffset();
-        int y = top    + style.border().width() / 2 + style.shadow().verticalOffset();
-        int w = width  - left - right  - style.border().width();
-        int h = height - top  - bottom - style.border().width();
+        int x = left   + borderWidth / 2 + style.shadow().horizontalOffset();
+        int y = top    + borderWidth / 2 + style.shadow().verticalOffset();
+        int w = width  - left - right  - borderWidth;
+        int h = height - top  - bottom - borderWidth;
 
         int blurRadius   = Math.max(style.shadow().blurRadius(), 0);
         int spreadRadius = !style.shadow().isOutset() ? style.shadow().spreadRadius() : -style.shadow().spreadRadius();
 
         RoundRectangle2D.Float baseRect = new RoundRectangle2D.Float(
-                                                        left + (float) style.border().width() / 2,
-                                                        top  + (float) style.border().width() / 2,
+                                                        left + (float) borderWidth / 2,
+                                                        top  + (float) borderWidth / 2,
                                                             w, h,
                                                             arcWidth, arcHeight
                                                     );
 
         int shadowInset  = blurRadius;
         int shadowOutset = blurRadius;
-        int borderWidthOffset = style.border().width() * ( style.shadow().isOutset() ? -1 : 0 );
+        int borderWidthOffset = borderWidth * ( style.shadow().isOutset() ? -1 : 0 );
 
         Rectangle outerShadowRect = new Rectangle(
                                         x - shadowOutset + spreadRadius + borderWidthOffset,

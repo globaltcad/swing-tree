@@ -71,7 +71,7 @@ public final class BorderStyle
         return "BorderStyle[" +
                     (
                         arcWidthEqualsHeight
-                            ? "radius=" + _borderArcWidth
+                            ? "radius="   + _borderArcWidth
                             : "arcWidth=" + _borderArcWidth + ", arcHeight=" + _borderArcHeight
                     ) +
                     ", width=" + _borderWidth +
