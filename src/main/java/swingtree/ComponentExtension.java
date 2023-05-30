@@ -244,6 +244,10 @@ public class ComponentExtension<C extends JComponent>
     }
 
     private boolean _installCustomLaF() {
+        // First we check if we already have a custom LaF installed:
+        if ( _styleLaF != null )
+            return true;
+
         if ( _owner instanceof JPanel ) {
             JPanel p = (JPanel) _owner;
             _formerLaF = p.getUI();
