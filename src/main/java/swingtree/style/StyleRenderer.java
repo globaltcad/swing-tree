@@ -3,6 +3,7 @@ package swingtree.style;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.Objects;
@@ -192,66 +193,36 @@ public class StyleRenderer<C extends JComponent>
         Area baseArea;
         Area outerMostArea;
 
-        if ( blurRadius > 0 )
-        {
-            // Create the shadow shape based on the box bounds and corner arc widths/heights
-            Rectangle outerShadowBox = new Rectangle(
-                                            outerShadowRect.x,
-                                            outerShadowRect.y,
-                                            outerShadowRect.width,
-                                            outerShadowRect.height
-                                        );
+        // Create the shadow shape based on the box bounds and corner arc widths/heights
+        Rectangle outerShadowBox = new Rectangle(
+                                        outerShadowRect.x,
+                                        outerShadowRect.y,
+                                        outerShadowRect.width,
+                                        outerShadowRect.height
+                                    );
 
-            // Apply the clipping to avoid overlapping the shadow and the box
-            Area shadowArea = new Area(outerShadowBox);
-            baseArea = new Area(baseRect);
+        // Apply the clipping to avoid overlapping the shadow and the box
+        Area shadowArea = new Area(outerShadowBox);
+        baseArea = new Area(baseRect);
 
-            if ( !style.shadow().isOutset() )
-                shadowArea.intersect(baseArea);
-            else
-                shadowArea.subtract(baseArea);
+        if ( !style.shadow().isOutset() )
+            shadowArea.intersect(baseArea);
+        else
+            shadowArea.subtract(baseArea);
 
-            // Draw the corner shadows
-            _renderCornerShadow(style, Corner.TOP_LEFT,     shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
-            _renderCornerShadow(style, Corner.TOP_RIGHT,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
-            _renderCornerShadow(style, Corner.BOTTOM_LEFT,  shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
-            _renderCornerShadow(style, Corner.BOTTOM_RIGHT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
+        // Draw the corner shadows
+        _renderCornerShadow(style, Corner.TOP_LEFT,     shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
+        _renderCornerShadow(style, Corner.TOP_RIGHT,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
+        _renderCornerShadow(style, Corner.BOTTOM_LEFT,  shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
+        _renderCornerShadow(style, Corner.BOTTOM_RIGHT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
 
-            // Draw the edge shadows
-            _renderEdgeShadow(style, Side.TOP,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
-            _renderEdgeShadow(style, Side.RIGHT,  shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
-            _renderEdgeShadow(style, Side.BOTTOM, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
-            _renderEdgeShadow(style, Side.LEFT,   shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
+        // Draw the edge shadows
+        _renderEdgeShadow(style, Side.TOP,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
+        _renderEdgeShadow(style, Side.RIGHT,  shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
+        _renderEdgeShadow(style, Side.BOTTOM, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
+        _renderEdgeShadow(style, Side.LEFT,   shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
 
-            outerMostArea = new Area(outerShadowBox);
-        }
-        else // Easy, we simply fill a round rectangle with the shadow color
-        {
-            // Create the shadow shape based on the box bounds and corner arc widths/heights
-            RoundRectangle2D.Float outerShadowBox = new RoundRectangle2D.Float(
-                                                        outerShadowRect.x,
-                                                        outerShadowRect.y,
-                                                        outerShadowRect.width,
-                                                        outerShadowRect.height,
-                                                        (float)(arcWidth  + gradientStartOffset / 4),
-                                                        (float)(arcHeight + gradientStartOffset / 4)
-                                                    );
-
-            // Apply the clipping to avoid overlapping the shadow and the box
-            Area shadowArea = new Area(outerShadowBox);
-            baseArea = new Area(baseRect);
-
-            g2d.setColor(shadowColor);
-
-            if ( !style.shadow().isOutset() ) {
-                shadowArea.intersect(baseArea);
-            } else {
-                shadowArea.subtract(baseArea);
-                g2d.fill(shadowArea);
-            }
-
-            outerMostArea = new Area(outerShadowBox);
-        }
+        outerMostArea = new Area(outerShadowBox);
         // If the base rectangle and the outer shadow box are not equal, then we need to fill the area of the base rectangle that is not covered by the outer shadow box!
         _renderShadowBody(style, baseArea, innerShadowRect, outerMostArea, g2d);
 
@@ -280,7 +251,7 @@ public class StyleRenderer<C extends JComponent>
     private static void _renderCornerShadow(
         Style style,
         Corner corner,
-        Area boxArea,
+        Area areaWhereShadowIsAllowed,
         Rectangle innerShadowRect,
         Rectangle outerShadowRect,
         int gradientStartOffset,
@@ -291,7 +262,7 @@ public class StyleRenderer<C extends JComponent>
         float clipBoxHeight  = outerShadowRect.height / 2f;
         float clipBoxCenterX = outerShadowRect.x + clipBoxWidth;
         float clipBoxCenterY = outerShadowRect.y + clipBoxHeight;
-        Rectangle2D.Float cornerClipBox;
+        Rectangle2D.Float cornerClipBox; // outer box!
 
         // The defining the corner shadow bound (where it starts and ends
         Rectangle2D.Float cornerBox;
@@ -378,13 +349,29 @@ public class StyleRenderer<C extends JComponent>
         }
         RadialGradientPaint cornerPaint;
         float gradientStart = (float) gradientStartOffset / cr;
-        if ( gradientStart >= 1f || gradientStart <= 0f )
+        if ( gradientStart > 1f || gradientStart < 0f )
             cornerPaint = new RadialGradientPaint(
                              cx, cy, cr,
                              new float[] {0f, 1f},
                              new Color[] {innerColor, outerColor}
                          );
         else {
+            if ( gradientStart == 1f || gradientStart == 0f ) {
+                // Simple, we just draw a circle and clip it
+                Area cornerArea = new Area(cornerBox); // For clipping the circle!
+                Area circle = new Area(new Ellipse2D.Float(cx - cr, cy - cr, cr * 2, cr * 2));
+                if ( style.shadow().isInset() ) {
+                    g2d.setColor(outerColor);
+                    cornerArea.subtract(circle);
+                } else {
+                    g2d.setColor(innerColor);
+                    cornerArea.intersect(circle);
+                    cornerArea.intersect(areaWhereShadowIsAllowed);
+                }
+                g2d.fill(cornerArea);
+                return;
+            }
+
             cornerPaint = new RadialGradientPaint(
                              cx, cy, cr,
                              new float[] {0f, gradientStart, 1f},
@@ -394,7 +381,7 @@ public class StyleRenderer<C extends JComponent>
 
         // We need to clip the corner paint to the corner box
         Area cornerArea = new Area(cornerBox);
-        cornerArea.intersect(boxArea);
+        cornerArea.intersect(areaWhereShadowIsAllowed);
         cornerArea.intersect(new Area(cornerClipBox));
 
         Graphics2D cornerG2d = (Graphics2D) g2d.create();
@@ -406,7 +393,7 @@ public class StyleRenderer<C extends JComponent>
     private static void _renderEdgeShadow(
             Style style,
             Side side,
-            Area boxArea,
+            Area contentArea,
             Rectangle innerShadowRect,
             Rectangle outerShadowRect,
             int gradientStartOffset,
@@ -516,7 +503,7 @@ public class StyleRenderer<C extends JComponent>
                                     (gradEndY - gradStartY) * (gradEndY - gradStartY)
                                 );
         float gradientStart = (float) gradientStartOffset / dist;
-        if ( gradientStart >= 1f || gradientStart <= 0f )
+        if ( gradientStart > 1f || gradientStart < 0f )
             edgePaint = new LinearGradientPaint(
                                gradStartX, gradStartY,
                                gradEndX, gradEndY,
@@ -524,6 +511,15 @@ public class StyleRenderer<C extends JComponent>
                                new Color[] {innerColor, outerColor}
                            );
         else {
+            if ( gradientStart == 1f || gradientStart == 0f ) {
+                // The gradient does not really exist, so we can just fill the whole area and then return
+                Area edgeArea = new Area(edgeBox);
+                g2d.setColor(innerColor);
+                if ( style.shadow().isOutset() )
+                    edgeArea.intersect(contentArea);
+                g2d.fill(edgeArea);
+                return;
+            }
             edgePaint = new LinearGradientPaint(
                              gradStartX, gradStartY,
                              gradEndX, gradEndY,
@@ -534,7 +530,7 @@ public class StyleRenderer<C extends JComponent>
 
         // We need to clip the edge paint to the edge box
         Area edgeArea = new Area(edgeBox);
-        edgeArea.intersect(boxArea);
+        edgeArea.intersect(contentArea);
         if ( edgeClipBox != null )
             edgeArea.intersect(new Area(edgeClipBox));
 
