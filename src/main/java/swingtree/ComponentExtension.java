@@ -15,9 +15,8 @@ import javax.swing.plaf.PanelUI;
 import javax.swing.plaf.basic.BasicPanelUI;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -43,16 +42,15 @@ public class ComponentExtension<C extends JComponent>
     static void makeSureComponentHasExtension( JComponent comp ) { from(comp); }
 
     private final C _owner;
-    private ComponentUI _styleLaF = null;
-    private ComponentUI _formerLaF = null;
 
-    private Function<StyleDelegate<C>, Style> _styling = null;
+    private final List<Painter> _animationPainters = new ArrayList<>(0);
 
-    private List<Painter> _animationPainters;
-
-    private String[] _styleGroups = new String[0];
+    private final List<String> _styleGroups = new ArrayList<>(0);
 
     private StyleRenderer<C> _currentRenderer = null;
+    private ComponentUI _styleLaF = null;
+    private ComponentUI _formerLaF = null;
+    private Function<StyleDelegate<C>, Style> _styling = null;
 
 
     private ComponentExtension( C owner ) {
@@ -75,24 +73,18 @@ public class ComponentExtension<C extends JComponent>
     }
 
     public void setStyleGroups( String... styleName ) {
-        _styleGroups = Objects.requireNonNull(styleName);
+        Objects.requireNonNull(styleName);
+        if ( !_styleGroups.isEmpty() )
+            throw new IllegalStateException("Style groups already specified!");
+
+        _styleGroups.addAll( java.util.Arrays.asList(styleName) );
     }
 
-    public List<String> getStyleGroups() {
-        return java.util.Arrays.asList(_styleGroups);
-    }
+    public List<String> getStyleGroups() { return Collections.unmodifiableList(_styleGroups); }
 
-    public void clearAnimationRenderer() {
-        _animationPainters = null;
-    }
+    public void clearAnimationRenderer() { _animationPainters.clear(); }
 
-    void addAnimationPainter( Painter painter ) {
-        Objects.requireNonNull(painter);
-        if ( _animationPainters == null )
-            _animationPainters = new java.util.ArrayList<>();
-
-        _animationPainters.add(painter);
-    }
+    void addAnimationPainter( Painter painter ) { _animationPainters.add(Objects.requireNonNull(painter)); }
 
     private StyleRenderer<C> _createRenderer(Graphics2D g2d) {
         Style style = _calculateStyle().map( s -> _applyStyleToComponentState( s, g2d) ).orElse(null);
@@ -111,7 +103,8 @@ public class ComponentExtension<C extends JComponent>
             _currentRenderer = _createRenderer((Graphics2D) g);
             if ( _currentRenderer != null )
                 _currentRenderer.renderBaseStyle();
-        } else
+        }
+        else
             _currentRenderer = null; // custom style rendering unfortunately not possible for this component :/
 
         superPaint.run();
@@ -134,9 +127,8 @@ public class ComponentExtension<C extends JComponent>
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         // Animations are last: they are rendered on top of everything else:
-        if ( _animationPainters != null )
-            for ( Painter painter : _animationPainters )
-                painter.paint(g2d);
+        for ( Painter painter : _animationPainters )
+            painter.paint(g2d);
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
@@ -216,7 +208,7 @@ public class ComponentExtension<C extends JComponent>
 
         _applyPadding( style );
 
-        _establishLaF( style );
+        _establishLookAndFeel( style );
 
         if ( style.foreground().painter().isPresent() )
             _makeAllChildrenTransparent(_owner);
@@ -252,7 +244,7 @@ public class ComponentExtension<C extends JComponent>
         }
     }
 
-    private void _establishLaF( Style style ) {
+    private void _establishLookAndFeel( Style style ) {
 
         // For panels mostly:
         boolean weNeedToOverrideLaF = false;
@@ -504,14 +496,9 @@ public class ComponentExtension<C extends JComponent>
         private PanelStyler() {}
 
         @Override
-        public void paint( Graphics g, JComponent c ) {
-            ComponentExtension.from(c).renderComponent(g);
-        }
-
+        public void paint( Graphics g, JComponent c ) { ComponentExtension.from(c).renderComponent(g); }
         @Override
-        public void update( Graphics g, JComponent c ) {
-            paint(g, c);
-        }
+        public void update( Graphics g, JComponent c ) { paint(g, c); }
         @Override
         public int getBaseline( JComponent c, int width, int height ) {
             super.getBaseline(c, width, height);

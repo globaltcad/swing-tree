@@ -1,7 +1,6 @@
 package swingtree.animation;
 
 import swingtree.ComponentExtension;
-import swingtree.UI;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
