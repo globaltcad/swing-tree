@@ -218,7 +218,38 @@ public class ComponentExtension<C extends JComponent>
 
         _establishLaF( style );
 
+        if ( style.foreground().painter().isPresent() )
+            _makeAllChildrenTransparent(_owner);
+
         return style;
+    }
+
+    /**
+     *  Note that the foreground painter is intended to paint over all children of the component, <br>
+     *  which is why it will be called at the end of {@code JComponent::paintChildren(Graphics)}.
+     *  <br>
+     *  However, there is a problem with this approach! <br>
+     *  If not all children are transparent, the result of the foreground painter can be overwritten
+     *  by {@link JComponent#paintImmediately(int, int, int, int)} when certain events occur
+     *  (like a child component is a text field with a blinking cursor, or a button with hover effect).
+     *  This type of repaint does unfortunately not call {@code JComponent::paintChildren(Graphics)},
+     *  in fact it completely ignores bypasses the rendering of this current component!
+     *  In order to ensure that the stuff painted by the foreground painter is not overwritten
+     *  in these types of cases,
+     *  we make all children transparent (non-opaque) so that the foreground painter is always visible.
+     *
+     * @param c The component to make all children transparent.
+     */
+    private void _makeAllChildrenTransparent( JComponent c ) {
+        if ( c.isOpaque() )
+            c.setOpaque(false);
+
+        for ( Component child : c.getComponents() ) {
+            if ( child instanceof JComponent ) {
+                JComponent jChild = (JComponent) child;
+                _makeAllChildrenTransparent(jChild);
+            }
+        }
     }
 
     private void _establishLaF( Style style ) {
@@ -473,8 +504,13 @@ public class ComponentExtension<C extends JComponent>
         private PanelStyler() {}
 
         @Override
-        public void update( Graphics g, JComponent c ) {
+        public void paint( Graphics g, JComponent c ) {
             ComponentExtension.from(c).renderComponent(g);
+        }
+
+        @Override
+        public void update( Graphics g, JComponent c ) {
+            paint(g, c);
         }
         @Override
         public int getBaseline( JComponent c, int width, int height ) {
