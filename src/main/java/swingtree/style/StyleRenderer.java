@@ -21,15 +21,23 @@ public class StyleRenderer<C extends JComponent>
 
     private final Graphics2D _g2d;
     private final C _comp;
+    private final Style style;
 
 
-    public StyleRenderer( Graphics2D g2d, C comp ) {
+    public StyleRenderer( Graphics2D g2d, C comp, Style style ) {
         _g2d = Objects.requireNonNull(g2d);
         _comp = Objects.requireNonNull(comp);
+        this.style = style;
     }
 
-    public void renderBaseStyle(Style style )
+    public void renderBaseStyle()
     {
+        // We remember if antialiasing was enabled before we render:
+        boolean antialiasingWasEnabled = _g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
+
+        // We enable antialiasing:
+        _g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+
         style.background().foundationColor().ifPresent(outerColor -> {
             _fillOuterBackground(style, outerColor);
         });
@@ -45,9 +53,12 @@ public class StyleRenderer<C extends JComponent>
         style.border().color().ifPresent( color -> {
             _drawBorder(style, color);
         });
+
+        // Reset antialiasing to its previous state:
+        _g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    public void renderForegroundStyle(Style style )
+    public void renderForegroundStyle()
     {
         style.foreground().painter().ifPresent( foregroundPainter -> {
             foregroundPainter.paint(_g2d);

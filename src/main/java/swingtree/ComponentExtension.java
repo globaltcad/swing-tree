@@ -52,9 +52,15 @@ public class ComponentExtension<C extends JComponent>
 
     private String[] _styleGroups = new String[0];
 
+    private StyleRenderer<C> _currentRenderer = null;
+
 
     private ComponentExtension( C owner ) {
         _owner = Objects.requireNonNull(owner);
+    }
+
+    private boolean _customLookAndFeelIsInstalled() {
+        return _styleLaF != null;
     }
 
     void addStyling( Function<StyleDelegate<C>, Style> styler ) {
@@ -88,46 +94,42 @@ public class ComponentExtension<C extends JComponent>
         _animationPainters.add(painter);
     }
 
-
-    void render( Graphics g, Runnable superPaint ) {
-        if ( _styleLaF == null )
-            _render( g, superPaint, _componentIsDeclaredInUI(_owner) );
-        else
-            superPaint.run();
+    private StyleRenderer<C> _createRenderer(Graphics2D g2d) {
+        Style style = _calculateStyle().map( s -> _applyStyleToComponentState( s, g2d) ).orElse(null);
+        return style == null ? null : new StyleRenderer<>(g2d, _owner, style);
     }
 
-    void render( Graphics g ) {
-        _render( g, ()->{}, true );
-    }
 
-    void _render( Graphics g, Runnable superPaint, boolean executeStyleRenderer ) {
-        Style style = _calculateStyle().map( s -> _applyStyleToComponentState( s, (Graphics2D) g) ).orElse(null);
-        Objects.requireNonNull(g);
-        Objects.requireNonNull(superPaint);
-
-        Graphics2D g2d = (Graphics2D) g;
-        // We remember if antialiasing was enabled before we render:
-        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
-
-        // We enable antialiasing:
-        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
-        StyleRenderer<?> renderer = null;
-        {
-            if ( style != null ) {
-                if ( executeStyleRenderer ) {
-                    renderer = new StyleRenderer<>(g2d, _owner);
-                    renderer.renderBaseStyle(style);
-                }
-            }
+    void renderComponent( Graphics g, Runnable superPaint )
+    {
+        if ( _customLookAndFeelIsInstalled() ) {
+            superPaint.run(); // We render through the custom installed UI!
+            return;
         }
-        // Reset antialiasing to its previous state:
-        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
+
+        if ( _componentIsDeclaredInUI(_owner) ) {
+            _currentRenderer = _createRenderer((Graphics2D) g);
+            if ( _currentRenderer != null )
+                _currentRenderer.renderBaseStyle();
+        } else
+            _currentRenderer = null; // custom style rendering unfortunately not possible for this component :/
 
         superPaint.run();
+        _renderAnimations( (Graphics2D) g );
+    }
 
-        if ( renderer != null )
-            renderer.renderForegroundStyle(style);
+    void renderComponent( Graphics g ) {
+        _currentRenderer = _createRenderer((Graphics2D) g);
+        if ( _currentRenderer != null )
+            _currentRenderer.renderBaseStyle();
+        _renderAnimations( (Graphics2D) g );
+    }
 
+
+    public void _renderAnimations(Graphics2D g2d)
+    {
+        // We remember if antialiasing was enabled before we render:
+        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
         // Enable antialiasing again:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
@@ -138,6 +140,20 @@ public class ComponentExtension<C extends JComponent>
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
+
+    }
+
+    public void renderForeground(Graphics2D g2d) {
+        // We remember if antialiasing was enabled before we render:
+        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
+        // Reset antialiasing to its previous state:
+        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
+
+        if ( _currentRenderer != null )
+            _currentRenderer.renderForegroundStyle();
+
+        // Enable antialiasing again:
+        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
     }
 
     private Optional<Style> _calculateStyle() {
@@ -209,8 +225,13 @@ public class ComponentExtension<C extends JComponent>
 
         // For panels mostly:
         boolean weNeedToOverrideLaF = false;
+        boolean hasBorderRadius = style.border().arcHeight() > 0 || style.border().arcWidth() > 0;
+        boolean hasMargin = style.margin().isPositive();
 
-        if ( style.margin().isPositive() )
+        if ( hasBorderRadius )
+            weNeedToOverrideLaF = true;
+
+        if ( hasMargin )
             weNeedToOverrideLaF = true;
 
         if ( style.background().painter().isPresent() )
@@ -222,12 +243,24 @@ public class ComponentExtension<C extends JComponent>
         if ( style.border().arcHeight() > 0 || style.border().arcWidth() > 0 )
             weNeedToOverrideLaF = true;
 
-        if ( style.border().color().isPresent() && style.border().width() > 0 )
-            weNeedToOverrideLaF = true;
         else if ( style.border().width() == 0 && _owner instanceof AbstractButton )
             ((AbstractButton) _owner).setBorderPainted(false);
 
         if ( weNeedToOverrideLaF ) {
+            boolean foundationIsTransparent = style.background()
+                                                    .foundationColor()
+                                                    .map( c -> c.getAlpha() < 255 )
+                                                    .orElse(
+                                                        Optional.ofNullable(_owner.getBackground())
+                                                                .map( c -> c.getAlpha() < 255 )
+                                                                .orElse(true)
+                                                    );
+
+            _owner.setOpaque( !hasBorderRadius && !hasMargin && !foundationIsTransparent );
+            /* ^
+                If our style reveals what is behind it, then we need
+                to make the component non-opaque so that the previous rendering get's flushed out!
+             */
             boolean success = _installCustomLaF();
             if ( !success && _owner.isOpaque() ) {
                 _owner.setOpaque(false);
@@ -441,8 +474,7 @@ public class ComponentExtension<C extends JComponent>
 
         @Override
         public void update( Graphics g, JComponent c ) {
-            if ( c.isOpaque() )
-                ComponentExtension.from(c).render(g);
+            ComponentExtension.from(c).renderComponent(g);
         }
         @Override
         public int getBaseline( JComponent c, int width, int height ) {
