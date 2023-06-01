@@ -392,14 +392,14 @@ public class ComponentExtension<C extends JComponent>
                             insets.right = old.right;
                     }
 
-                    String newConstr = "insets " + insets.top + " " + insets.left + " " + insets.bottom + " " + insets.right;
+                    String newConstr = "insets " + insets.top + "px " + insets.left + "px " + insets.bottom + "px " + insets.right + "px";
                     if ( lc.isEmpty() )
                         migLayout.setLayoutConstraints( newConstr );
                     else if ( !lc.contains("ins") )
                         migLayout.setLayoutConstraints( lc + ", " + newConstr );
                     else {
                         lc = lc.replace("insets", "ins");
-                        String newLayoutConstraints = lc.replaceAll("ins [0-9]+", newConstr);
+                        String newLayoutConstraints = lc.replaceAll("ins [a-z0-9 ]+", newConstr);
                         migLayout.setLayoutConstraints( newLayoutConstraints );
                     }
                     // Now we need to make sure the layout manager is updated:
@@ -451,13 +451,19 @@ public class ComponentExtension<C extends JComponent>
             if ( token.startsWith("ins") ) {
                 String[] insets = token.split(" ");
                 int[] insetsInt = new int[4];
-                for ( int i = 0; i < insetsInt.length; i++ )
-                    insetsInt[i] = Integer.parseInt( insets[ 1 + ( i % ( insets.length - 1 ) ) ] );
+                for ( int i = 0; i < insetsInt.length; i++ ) {
+                    String numberStr = _stripAlphabeticalChars( insets[ 1 + ( i % ( insets.length - 1 ) ) ] );
+                    insetsInt[i] = Integer.parseInt( numberStr );
+                }
 
                 return Optional.of( new Insets( insetsInt[0], insetsInt[1], insetsInt[2], insetsInt[3] ) );
             }
         }
         return Optional.empty();
+    }
+
+    private String _stripAlphabeticalChars( String str ) {
+        return str.replaceAll("[a-zA-Z]", "");
     }
 
     private void checkIfIsDeclaredInUI() {
