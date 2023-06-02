@@ -5,6 +5,7 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import swingtree.UI
+import swingtree.style.Arc
 import swingtree.style.Outline
 import swingtree.style.Style
 import swingtree.style.StyleSheet
@@ -54,10 +55,12 @@ class Style_Sheet_Spec extends Specification
             var s2 = ss.run(button2.component)
             var s3 = ss.run(panel.component)
         then :
-            s1.border().arcHeight() == 3
-            s1.border().arcWidth() == 3
-            s1.border().width() == 7
-            s2.border().width() == 7
+            s1.border().topLeftArc().get() == new Arc(3, 3)
+            s1.border().topRightArc().get() == new Arc(3, 3)
+            s1.border().bottomLeftArc().get() == new Arc(3, 3)
+            s1.border().bottomRightArc().get() == new Arc(3, 3)
+            s1.border().widths().average() == 7
+            s2.border().widths().average() == 7
             s3.border().color().get() == Color.GREEN
     }
 
@@ -285,46 +288,56 @@ class Style_Sheet_Spec extends Specification
             var s5 = ss.run(label2.component)
         then : '...and we check the results'
             s1.background().foundationColor().get() == Color.BLUE
-            s1.border().width() == 11
+            s1.border().widths().average() == 11
             s1.border().color().get() == Color.GREEN
-            s1.border().arcHeight() == 19
-            s1.border().arcWidth() == 19
+            s1.border().topLeftArc().get() == new Arc(19, 19)
+            s1.border().topRightArc().get() == new Arc(19, 19)
+            s1.border().bottomLeftArc().get() == new Arc(19, 19)
+            s1.border().bottomRightArc().get() == new Arc(19, 19)
             s1.padding() == Outline.of(42, 42, 42, 42)
             s1.shadow().isInset() == true
             s1.shadow().blurRadius() == 22
             s1.shadow().spreadRadius() == 6
             s2.background().foundationColor().get() == Color.RED
-            s2.border().width() == 11
+            s2.border().widths().average() == 11
             s2.border().color().get() == Color.GREEN
-            s2.border().arcHeight() == 19
-            s2.border().arcWidth() == 19
+            s2.border().topLeftArc().get() == new Arc(19, 19)
+            s2.border().topRightArc().get() == new Arc(19, 19)
+            s2.border().bottomLeftArc().get() == new Arc(19, 19)
+            s2.border().bottomRightArc().get() == new Arc(19, 19)
             s2.padding() == Outline.of(42, 42, 42, 42)
             s2.shadow().isInset() == false
             s2.shadow().blurRadius() == 22
             s2.shadow().spreadRadius() == 6
             s3.background().foundationColor().get() == Color.BLUE
-            s3.border().width() == 11
+            s3.border().widths().average() == 11
             s3.border().color().get() == Color.GREEN
-            s3.border().arcHeight() == 3
-            s3.border().arcWidth() == 3
+            s3.border().topLeftArc().get() == new Arc(3, 3)
+            s3.border().topRightArc().get() == new Arc(3, 3)
+            s3.border().bottomLeftArc().get() == new Arc(3, 3)
+            s3.border().bottomRightArc().get() == new Arc(3, 3)
             s3.padding() == Outline.of(42, 42, 42, 42)
             s3.shadow().isInset() == true
             s3.shadow().blurRadius() == 22
             s3.shadow().spreadRadius() == 6
             s4.background().foundationColor().get() == Color.RED
-            s4.border().width() == 11
+            s4.border().widths().average() == 11
             s4.border().color().get() == Color.GREEN
-            s4.border().arcHeight() == 19
-            s4.border().arcWidth() == 19
+            s4.border().topLeftArc().get() == new Arc(19, 19)
+            s4.border().topRightArc().get() == new Arc(19, 19)
+            s4.border().bottomLeftArc().get() == new Arc(19, 19)
+            s4.border().bottomRightArc().get() == new Arc(19, 19)
             s4.padding() == Outline.of(42, 42, 42, 42)
             s4.shadow().isInset() == false
             s4.shadow().blurRadius() == 22
             s4.shadow().spreadRadius() == 6
             s5.background().foundationColor().get() == Color.RED
-            s5.border().width() == 11
+            s5.border().widths().average() == 11
             s5.border().color().get() == Color.GREEN
-            s5.border().arcHeight() == 3
-            s5.border().arcWidth() == 3
+            s5.border().topLeftArc().get() == new Arc(3, 3)
+            s5.border().topRightArc().get() == new Arc(3, 3)
+            s5.border().bottomLeftArc().get() == new Arc(3, 3)
+            s5.border().bottomRightArc().get() == new Arc(3, 3)
             s5.padding() == Outline.of(42, 42, 42, 42)
             s5.shadow().isInset() == true
             s5.shadow().blurRadius() == 22

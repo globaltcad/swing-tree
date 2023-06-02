@@ -211,8 +211,8 @@ public class BoxShadowPickerView extends UI.Panel
         text = text.toLowerCase().trim();
         // Let's try to parse it as a color name.
         if ( text.equals("black") ) return Optional.of(Color.BLACK);
-        if ( text.equals("blue") ) return Optional.of(Color.BLUE);
-        if ( text.equals("cyan") ) return Optional.of(Color.CYAN);
+        if ( text.equals("blue") )  return Optional.of(Color.BLUE);
+        if ( text.equals("cyan") )  return Optional.of(Color.CYAN);
         if ( text.equals("darkgray") ) return Optional.of(Color.DARK_GRAY);
         if ( text.equals("gray") ) return Optional.of(Color.GRAY);
         if ( text.equals("green") ) return Optional.of(Color.GREEN);

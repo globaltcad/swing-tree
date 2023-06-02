@@ -171,15 +171,15 @@ public class ComponentExtension<C extends JComponent>
             is not opaque, so that the background color is visible.
             ... and so on.
         */
-        boolean hasBorderRadius = style.border().arcWidth() > 0 || style.border().arcHeight() > 0;
+        boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();
         // If the style has a border radius set we need to make sure that we have a background color:
         if ( hasBorderRadius && !style.background().color().isPresent() )
             style = style.backgroundColor( _owner.getBackground() );
 
-        if ( style.border().width() >= 0 && !BorderFactory.createEmptyBorder().equals(_owner.getBorder()) )
+        if ( style.border().widths().average() >= 0 && !BorderFactory.createEmptyBorder().equals(_owner.getBorder()) )
             _owner.setBorder( BorderFactory.createEmptyBorder() );
 
-        if ( style.border().color().isPresent() && style.border().width() > 0 ) {
+        if ( style.border().color().isPresent() && style.border().widths().average() > 0 ) {
             if ( !style.background().foundationColor().isPresent() )
                 style = style.foundationColor( _owner.getBackground() );
         }
@@ -248,7 +248,7 @@ public class ComponentExtension<C extends JComponent>
 
         // For panels mostly:
         boolean weNeedToOverrideLaF = false;
-        boolean hasBorderRadius = style.border().arcHeight() > 0 || style.border().arcWidth() > 0;
+        boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();
         boolean hasMargin = style.margin().isPositive();
 
         if ( hasBorderRadius )
@@ -263,10 +263,7 @@ public class ComponentExtension<C extends JComponent>
         if ( style.shadow().color().isPresent() )
             weNeedToOverrideLaF = true;
 
-        if ( style.border().arcHeight() > 0 || style.border().arcWidth() > 0 )
-            weNeedToOverrideLaF = true;
-
-        else if ( style.border().width() == 0 && _owner instanceof AbstractButton )
+        else if ( style.border().widths().average() == 0 && _owner instanceof AbstractButton )
             ((AbstractButton) _owner).setBorderPainted(false);
 
         if ( weNeedToOverrideLaF ) {
@@ -339,7 +336,7 @@ public class ComponentExtension<C extends JComponent>
     }
 
     private void _applyPadding( Style style ) {
-        boolean hasBorder        = style.border().width() > 0;
+        boolean hasBorder        = style.border().widths().average() > 0;
         boolean insTopPresent    = style.margin().top().isPresent()    || style.padding().top().isPresent();
         boolean insLeftPresent   = style.margin().left().isPresent()   || style.padding().left().isPresent();
         boolean insBottomPresent = style.margin().bottom().isPresent() || style.padding().bottom().isPresent();
@@ -352,11 +349,10 @@ public class ComponentExtension<C extends JComponent>
         if ( anyPadding ) {
             // Let's adjust for border width:
             if ( hasBorder ) {
-                int borderWidth = style.border().width();
-                insTop    += borderWidth;
-                insLeft   += borderWidth;
-                insBottom += borderWidth;
-                insRight  += borderWidth;
+                insTop    += style.border().widths().top().orElse(0);
+                insLeft   += style.border().widths().left().orElse(0);
+                insBottom += style.border().widths().bottom().orElse(0);
+                insRight  += style.border().widths().right().orElse(0);
             }
             Insets insets = Optional.ofNullable(_owner.getInsets()).orElse( new Insets(0,0,0,0) );
             boolean alreadyEqual = insets.top == insTop && insets.left == insLeft && insets.bottom == insBottom && insets.right == insRight;

@@ -92,7 +92,7 @@ class Styles_Spec extends Specification
                                             "margin=Outline[top=?, right=?, bottom=?, left=?], " +
                                             "padding=Outline[top=?, right=?, bottom=?, left=?]" +
                                         "], " +
-                                        "BorderStyle[arcWidth=12, arcHeight=18, width=-1, color=rgba(0,0,255,255)], " +
+                                        "BorderStyle[arcWidth=12, arcHeight=18, width=null, color=rgba(0,0,255,255)], " +
                                         "BackgroundStyle[" +
                                             "color=rgba(0,255,0,255), " +
                                             "foundationColor=rgba(255,0,0,255), " +

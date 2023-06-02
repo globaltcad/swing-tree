@@ -57,6 +57,16 @@ public final class Outline
                left   != null && left   > 0;
     }
 
+    public double average() {
+        int count = 0;
+        int sum   = 0;
+        if ( top    != null ) { count++; sum += top;    }
+        if ( right  != null ) { count++; sum += right;  }
+        if ( bottom != null ) { count++; sum += bottom; }
+        if ( left   != null ) { count++; sum += left;   }
+        return count == 0 ? 0 : (double) sum / count;
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;

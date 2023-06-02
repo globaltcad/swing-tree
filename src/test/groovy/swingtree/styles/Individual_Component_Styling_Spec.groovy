@@ -67,7 +67,7 @@ class Individual_Component_Styling_Spec extends Specification
             panel != null
             panel.layout != null
             panel.layout instanceof MigLayout
-            ((MigLayout)panel.layout).getLayoutConstraints().contains("insets 0 64 0 42")
+            ((MigLayout)panel.layout).getLayoutConstraints().contains("insets 0px 64px 0px 42px")
     }
 
 
@@ -97,7 +97,7 @@ class Individual_Component_Styling_Spec extends Specification
             panel != null
             panel.layout != null
             panel.layout instanceof MigLayout
-            ((MigLayout)panel.layout).getLayoutConstraints().contains("insets 11 84 30 52")
+            ((MigLayout)panel.layout).getLayoutConstraints().contains("insets 11px 84px 30px 52px")
     }
 
     def 'The Styling API will make sure that the layout manager accounts for the border width!'()
@@ -123,6 +123,6 @@ class Individual_Component_Styling_Spec extends Specification
             panel != null
             panel.layout != null
             panel.layout instanceof MigLayout
-            ((MigLayout)panel.layout).getLayoutConstraints().contains("insets 12 19 5 7")
+            ((MigLayout)panel.layout).getLayoutConstraints().contains("insets 12px 19px 5px 7px")
     }
 }
