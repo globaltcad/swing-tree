@@ -3,6 +3,8 @@ package example;
 import sprouts.Event;
 import sprouts.Val;
 import sprouts.Var;
+import swingtree.style.Corner;
+import swingtree.style.Edge;
 
 import java.awt.*;
 
@@ -23,10 +25,12 @@ public class BoxShadowPickerViewModel
     private final Var<Integer> marginBottom = Var.of(30).onAct( it -> repaint.fire() );
 
     // Border
-    private final Var<Integer> borderArcWidth = Var.of(25).onAct( it -> repaint.fire() );
+    private final Var<Corner>  borderCorner    = Var.of(Corner.EVERY).onAct(it -> repaint.fire() );
+    private final Var<Edge>    borderEdge      = Var.of(Edge.EVERY).onAct(it -> repaint.fire() );
+    private final Var<Integer> borderArcWidth  = Var.of(25).onAct( it -> repaint.fire() );
     private final Var<Integer> borderArcHeight = Var.of(25).onAct( it -> repaint.fire() );
     private final Var<Integer> borderThickness = Var.of(3).onAct( it -> repaint.fire() );
-    private final Var<Color> borderColor = Var.of(new Color(0,0.4f,1)).onAct( it -> repaint.fire() );
+    private final Var<Color>   borderColor     = Var.of(new Color(0,0.4f,1)).onAct( it -> repaint.fire() );
 
     // Background
     private final Var<Color> backgroundColor = Var.of(new Color(0.1f, 0.75f, 0.9f)).onAct( it -> repaint.fire() );
@@ -67,6 +71,8 @@ public class BoxShadowPickerViewModel
     public Var<Integer> marginRight() { return marginRight; }
 
     public Var<Integer> marginBottom() { return marginBottom; }
+    public Var<Corner> borderCorner() { return borderCorner; }
+    public Var<Edge> borderEdge() { return borderEdge; }
 
     public Var<Integer> borderArcWidth() { return borderArcWidth; }
 

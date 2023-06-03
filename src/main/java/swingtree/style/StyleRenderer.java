@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.*;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  *  This used to smoothly render
@@ -77,6 +78,8 @@ public class StyleRenderer<C extends JComponent>
                 int arcWidth  = style.border().topLeftArc().map( a -> Math.max(0,a.width() ) ).orElse(0);
                 int arcHeight = style.border().topLeftArc().map( a -> Math.max(0,a.height()) ).orElse(0);
                 int borderWidth = style.border().widths().top().orElse(0);
+                if ( borderWidth <= 0 )
+                    return;
                 _g2d.setStroke(new BasicStroke(borderWidth));
                 _g2d.drawRoundRect(
                         left, top,
@@ -98,78 +101,88 @@ public class StyleRenderer<C extends JComponent>
                 // four separate arcs:
                 // Top left:
                 if ( topLeftArc != null ) {
-                    _g2d.setStroke(new BasicStroke((leftBorderWidth + topBorderWidth) / 2f));
-                    _g2d.drawArc(
-                            left, top,
-                            topLeftArc.width(), topLeftArc.height(),
-                            90, 90
-                    );
+                    float strokeWidth = (leftBorderWidth + topBorderWidth) / 2f;
+                    _g2d.setStroke(new BasicStroke(strokeWidth));
+                    if ( strokeWidth > 0 )
+                        _g2d.drawArc(
+                                left, top,
+                                topLeftArc.width(), topLeftArc.height(),
+                                90, 90
+                            );
                 }
                 // Top right:
                 if ( topRightArc != null ) {
-                    _g2d.setStroke(new BasicStroke((rightBorderWidth + topBorderWidth) /2f));
-                    _g2d.drawArc(
-                            width - right - topRightArc.width(), top,
-                            topRightArc.width(), topRightArc.height(),
-                            0, 90
-                    );
+                    float strokeWidth = (rightBorderWidth + topBorderWidth) / 2f;
+                    _g2d.setStroke(new BasicStroke(strokeWidth));
+                    if ( strokeWidth > 0 )
+                        _g2d.drawArc(
+                                width - right - topRightArc.width(), top,
+                                topRightArc.width(), topRightArc.height(),
+                                0, 90
+                            );
                 }
                 // Bottom right:
                 if ( bottomRightArc != null ) {
-                    _g2d.setStroke(new BasicStroke((rightBorderWidth + bottomBorderWidth) /2f));
-                    _g2d.drawArc(
-                            width - right - bottomRightArc.width(), height - bottom - bottomRightArc.height(),
-                            bottomRightArc.width(), bottomRightArc.height(),
-                            270, 90
-                    );
+                    float strokeWidth = (rightBorderWidth + bottomBorderWidth) / 2f;
+                    _g2d.setStroke(new BasicStroke(strokeWidth));
+                    if ( strokeWidth > 0 )
+                        _g2d.drawArc(
+                                width - right - bottomRightArc.width(),
+                                height - bottom - bottomRightArc.height(),
+                                bottomRightArc.width(),
+                                bottomRightArc.height(),
+                                270, 90
+                            );
                 }
                 // Bottom left:
                 if ( bottomLeftArc != null ) {
-                    _g2d.setStroke(new BasicStroke((leftBorderWidth + bottomBorderWidth) /2f));
-                    _g2d.drawArc(
-                            left, height - bottom - bottomLeftArc.height(),
-                            bottomLeftArc.width(), bottomLeftArc.height(),
-                            180, 90
-                    );
+                    float strokeWidth = (leftBorderWidth + bottomBorderWidth) / 2f;
+                    _g2d.setStroke(new BasicStroke(strokeWidth));
+                    if ( strokeWidth > 0 )
+                        _g2d.drawArc(
+                                left, height - bottom - bottomLeftArc.height(),
+                                bottomLeftArc.width(), bottomLeftArc.height(),
+                                180, 90
+                            );
                 }
                 // The four arcs are connected by four lines:
                 // Top:
                 if ( topBorderWidth > 0 ) {
-                    int topLeftArcWidth = topLeftArc == null ? 0 : topLeftArc.width();
-                    int topRightArcWidth = topRightArc == null ? 0 : topRightArc.width();
+                    int topLeftArcWidth  = topLeftArc  == null ? 0 : topLeftArc.width()  + topBorderWidth;
+                    int topRightArcWidth = topRightArc == null ? 0 : topRightArc.width() + topBorderWidth;
                     _g2d.setStroke(new BasicStroke(topBorderWidth));
                     _g2d.drawLine(
                             left + topLeftArcWidth / 2, top,
-                            width - right - topRightArcWidth / 2 - 1, top
-                    );
+                            width - right - topRightArcWidth / 2, top
+                        );
                 }
                 // Right:
                 if ( rightBorderWidth > 0 ) {
-                    int topRightArcHeight = topRightArc == null ? 0 : topRightArc.height();
-                    int bottomRightArcHeight = bottomRightArc == null ? 0 : bottomRightArc.height();
+                    int topRightArcHeight    = topRightArc    == null ? 0 : topRightArc.height()    + rightBorderWidth;
+                    int bottomRightArcHeight = bottomRightArc == null ? 0 : bottomRightArc.height() + rightBorderWidth;
                     _g2d.setStroke(new BasicStroke(rightBorderWidth));
                     _g2d.drawLine(
-                            width - right - 1, top + topRightArcHeight / 2,
-                            width - right - 1, height - bottom - bottomRightArcHeight / 2 - 1
-                    );
+                            width - right, top + topRightArcHeight / 2,
+                            width - right, height - bottom - bottomRightArcHeight / 2
+                        );
                 }
                 // Bottom:
                 if ( bottomBorderWidth > 0 ) {
-                    int bottomLeftArcWidth = bottomLeftArc == null ? 0 : bottomLeftArc.width();
-                    int bottomRightArcWidth = bottomRightArc == null ? 0 : bottomRightArc.width();
+                    int bottomLeftArcWidth  = bottomLeftArc  == null ? 0 : bottomLeftArc.width()  + bottomBorderWidth;
+                    int bottomRightArcWidth = bottomRightArc == null ? 0 : bottomRightArc.width() + bottomBorderWidth;
                     _g2d.setStroke(new BasicStroke(bottomBorderWidth));
                     _g2d.drawLine(
-                            width - right - bottomRightArcWidth / 2 - 1, height - bottom - 1,
-                            left + bottomLeftArcWidth / 2, height - bottom - 1
-                    );
+                            width - right - bottomRightArcWidth / 2, height - bottom,
+                            left + bottomLeftArcWidth / 2, height - bottom
+                        );
                 }
                 // Left:
                 if ( leftBorderWidth > 0 ) {
-                    int topLeftArcHeight = topLeftArc == null ? 0 : topLeftArc.height();
-                    int bottomLeftArcHeight = bottomLeftArc == null ? 0 : bottomLeftArc.height();
+                    int topLeftArcHeight    = topLeftArc    == null ? 0 : topLeftArc.height()    + leftBorderWidth;
+                    int bottomLeftArcHeight = bottomLeftArc == null ? 0 : bottomLeftArc.height() + leftBorderWidth;
                     _g2d.setStroke(new BasicStroke(leftBorderWidth));
                     _g2d.drawLine(
-                            left, height - bottom - bottomLeftArcHeight / 2 - 1,
+                            left, height - bottom - bottomLeftArcHeight / 2,
                             left, top + topLeftArcHeight / 2
                     );
                 }
@@ -239,51 +252,66 @@ public class StyleRenderer<C extends JComponent>
                 and then a single rectangle for the center.
                 The four outer rectangles are calculated from the arcs and the margins.
              */
-            // First we declare the variables that will be used to calculate the inner rectangle:
-            int innerLeft ;
-            int innerTop  ;
-            int innerRight;
-            int innerBottom;
-            // We will find out what these values are when adding the sides
+            int topDistance    = 0;
+            int rightDistance  = 0;
+            int bottomDistance = 0;
+            int leftDistance   = 0;
             // top:
             if ( topLeftArc != null || topRightArc != null ) {
-                innerLeft   = left + (topLeftArc == null ? 0 : topLeftArc.width());
-                innerTop    = top;
-                innerRight  = width - right - (topRightArc == null ? 0 : topRightArc.width());
-                innerBottom = top + (topLeftArc == null ? 0 : topLeftArc.height());
-                area.add(new Area(new Rectangle2D.Float(innerLeft, innerTop, innerRight - innerLeft, innerBottom - innerTop)));
+                int arcWidthLeft   = (int) Math.floor(topLeftArc  == null ? 0.0 : topLeftArc.width()   / 2.0);
+                int arcHeightLeft  = (int) Math.floor(topLeftArc  == null ? 0.0 : topLeftArc.height()  / 2.0);
+                int arcWidthRight  = (int) Math.floor(topRightArc == null ? 0.0 : topRightArc.width()  / 2.0);
+                int arcHeightRight = (int) Math.floor(topRightArc == null ? 0.0 : topRightArc.height() / 2.0);
+                topDistance = Math.max(arcHeightLeft, arcHeightRight);// This is where the center rectangle will start!
+                int innerLeft   = left + arcWidthLeft;
+                int innerRight  = width - right - arcWidthRight;
+                int edgeRectangleHeight = topDistance;
+                area.add(new Area(new Rectangle2D.Float(innerLeft, top, innerRight - innerLeft, edgeRectangleHeight)));
             }
             // right:
             if ( topRightArc != null || bottomRightArc != null ) {
-                innerLeft   = width - right - (topRightArc == null ? 0 : topRightArc.width());
-                innerTop    = top + (topRightArc == null ? 0 : topRightArc.height());
-                innerRight  = width - right;
-                innerBottom = height - bottom - (bottomRightArc == null ? 0 : bottomRightArc.height());
-                area.add(new Area(new Rectangle2D.Float(innerLeft, innerTop, innerRight - innerLeft, innerBottom - innerTop)));
+                int arcWidthTop    = (int) Math.floor(topRightArc    == null ? 0.0 : topRightArc.width()    / 2.0);
+                int arcHeightTop   = (int) Math.floor(topRightArc    == null ? 0.0 : topRightArc.height()   / 2.0);
+                int arcWidthBottom = (int) Math.floor(bottomRightArc == null ? 0.0 : bottomRightArc.width() / 2.0);
+                int arcHeightBottom= (int) Math.floor(bottomRightArc == null ? 0.0 : bottomRightArc.height()/ 2.0);
+                rightDistance = Math.max(arcWidthTop, arcWidthBottom);// This is where the center rectangle will start!
+                int innerTop    = top + arcHeightTop;
+                int innerBottom = height - bottom - arcHeightBottom;
+                int edgeRectangleWidth = rightDistance;
+                area.add(new Area(new Rectangle2D.Float(width - right - edgeRectangleWidth, innerTop, edgeRectangleWidth, innerBottom - innerTop)));
             }
             // bottom:
             if ( bottomRightArc != null || bottomLeftArc != null ) {
-                innerLeft   = left + (bottomLeftArc == null ? 0 : bottomLeftArc.width());
-                innerTop    = height - bottom - (bottomLeftArc == null ? 0 : bottomLeftArc.height());
-                innerRight  = width - right - (bottomRightArc == null ? 0 : bottomRightArc.width());
-                innerBottom = height - bottom;
-                area.add(new Area(new Rectangle2D.Float(innerLeft, innerTop, innerRight - innerLeft, innerBottom - innerTop)));
+                int arcWidthRight  = (int) Math.floor(bottomRightArc == null ? 0.0 : bottomRightArc.width()  / 2.0);
+                int arcHeightRight = (int) Math.floor(bottomRightArc == null ? 0.0 : bottomRightArc.height() / 2.0);
+                int arcWidthLeft   = (int) Math.floor(bottomLeftArc  == null ? 0.0 : bottomLeftArc.width()   / 2.0);
+                int arcHeightLeft  = (int) Math.floor(bottomLeftArc  == null ? 0.0 : bottomLeftArc.height()  / 2.0);
+                bottomDistance = Math.max(arcHeightRight, arcHeightLeft);// This is where the center rectangle will start!
+                int innerLeft   = left + arcWidthLeft;
+                int innerRight  = width - right - arcWidthRight;
+                int edgeRectangleHeight = bottomDistance;
+                area.add(new Area(new Rectangle2D.Float(innerLeft, height - bottom - edgeRectangleHeight, innerRight - innerLeft, edgeRectangleHeight)));
             }
             // left:
             if ( bottomLeftArc != null || topLeftArc != null ) {
-                innerLeft   = left;
-                innerTop    = top + (topLeftArc == null ? 0 : topLeftArc.height());
-                innerRight  = left + (bottomLeftArc == null ? 0 : bottomLeftArc.width());
-                innerBottom = height - bottom - (bottomLeftArc == null ? 0 : bottomLeftArc.height());
-                area.add(new Area(new Rectangle2D.Float(innerLeft, innerTop, innerRight - innerLeft, innerBottom - innerTop)));
+                int arcWidthBottom = (int) Math.floor(bottomLeftArc == null ? 0.0 : bottomLeftArc.width() / 2.0);
+                int arcHeightBottom= (int) Math.floor(bottomLeftArc == null ? 0.0 : bottomLeftArc.height()/ 2.0);
+                int arcWidthTop    = (int) Math.floor(topLeftArc    == null ? 0.0 : topLeftArc.width()    / 2.0);
+                int arcHeightTop   = (int) Math.floor(topLeftArc    == null ? 0.0 : topLeftArc.height()   / 2.0);
+                leftDistance = Math.max(arcWidthBottom, arcWidthTop);// This is where the center rectangle will start!
+                int innerTop    = top + arcHeightTop;
+                int innerBottom = height - bottom - arcHeightBottom;
+                int edgeRectangleWidth = leftDistance;
+                area.add(new Area(new Rectangle2D.Float(left, innerTop, edgeRectangleWidth, innerBottom - innerTop)));
             }
             // Now we add the center:
-            area.add(new Area(new Rectangle2D.Float(
-                    left + (topLeftArc == null ? 0 : topLeftArc.width()),
-                    top + (topLeftArc == null ? 0 : topLeftArc.height()),
-                    width - left - right - (topLeftArc == null ? 0 : topLeftArc.width()) - (topRightArc == null ? 0 : topRightArc.width()),
-                    height - top - bottom - (topLeftArc == null ? 0 : topLeftArc.height()) - (bottomLeftArc == null ? 0 : bottomLeftArc.height())
-            )));
+            area.add(new Area(
+                    new Rectangle2D.Float(
+                            left + leftDistance, top + topDistance,
+                            width - left - leftDistance - right - rightDistance,
+                            height - top - topDistance - bottom - bottomDistance
+                    )
+                ));
             return area;
         }
     }
@@ -355,9 +383,9 @@ public class StyleRenderer<C extends JComponent>
                                         h + shadowOutset * 2 - spreadRadius * 2 - borderWidthOffset * 2
                                     );
 
-        int gradientStartOffset = (int)(( cornerRadius * 2 ) / ( style.shadow().isInset() ? 4.5 : 3.79) );
-        gradientStartOffset += ( style.shadow().isInset() ? 0 : borderWidth );
+        Function<Integer, Integer> offsetFunction = (radius) -> (int)((radius * 2) / ( style.shadow().isInset() ? 4.5 : 3.79) + ( style.shadow().isInset() ? 0 : borderWidth ));
 
+        int gradientStartOffset = 1 + offsetFunction.apply(cornerRadius);
 
         Rectangle innerShadowRect = new Rectangle(
                                         x + shadowInset + gradientStartOffset + spreadRadius + borderWidthOffset,
@@ -391,10 +419,10 @@ public class StyleRenderer<C extends JComponent>
         _renderCornerShadow(style, Corner.BOTTOM_RIGHT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
 
         // Draw the edge shadows
-        _renderEdgeShadow(style, Side.TOP,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
-        _renderEdgeShadow(style, Side.RIGHT,  shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
-        _renderEdgeShadow(style, Side.BOTTOM, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
-        _renderEdgeShadow(style, Side.LEFT,   shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
+        _renderEdgeShadow(style, Edge.TOP,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
+        _renderEdgeShadow(style, Edge.RIGHT,  shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
+        _renderEdgeShadow(style, Edge.BOTTOM, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
+        _renderEdgeShadow(style, Edge.LEFT,   shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
 
         outerMostArea = new Area(outerShadowBox);
         // If the base rectangle and the outer shadow box are not equal, then we need to fill the area of the base rectangle that is not covered by the outer shadow box!
@@ -567,7 +595,7 @@ public class StyleRenderer<C extends JComponent>
 
     private static void _renderEdgeShadow(
             Style style,
-            Side side,
+            Edge edge,
             Area contentArea,
             Rectangle innerShadowRect,
             Rectangle outerShadowRect,
@@ -584,7 +612,7 @@ public class StyleRenderer<C extends JComponent>
         float gradEndY;
         float gradStartX;
         float gradStartY;
-        switch (side) {
+        switch (edge) {
             case TOP:
                 edgeBox = new Rectangle2D.Float(
                                 innerShadowRect.x, outerShadowRect.y,
@@ -656,7 +684,7 @@ public class StyleRenderer<C extends JComponent>
                 gradStartY = edgeBox.y;
                 break;
             default:
-                throw new IllegalArgumentException("Invalid side: " + side);
+                throw new IllegalArgumentException("Invalid edge: " + edge);
         }
 
         if ( gradStartX == gradEndX && gradStartY == gradEndY ) return;

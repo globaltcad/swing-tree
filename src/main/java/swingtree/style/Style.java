@@ -46,7 +46,7 @@ public final class Style
 
     public static Style none() { return _NONE; }
 
-    private final LayoutStyle    _layout;
+    private final LayoutStyle     _layout;
     private final BorderStyle     _border;
     private final BackgroundStyle _background;
     private final ForegroundStyle _foreground;
@@ -329,6 +329,18 @@ public final class Style
     }
 
     /**
+     *  Returns a new {@link Style} with the provided border width for the specified edge.
+     *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
+     *
+     * @param edge The edge to set the border width for.
+     * @param width The border width in pixels.
+     * @return A new {@link Style} with the provided border width for the specified edge.
+     */
+    public Style borderWidthAt( Edge edge, int width ) {
+        return _withBorder(_border.withWidthAt(edge, width));
+    }
+
+    /**
      *  Returns a new {@link Style} with the provided border color.
      *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
      *
@@ -373,6 +385,19 @@ public final class Style
      */
     public Style borderRadius( int arcWidth, int arcHeight ) {
         return _withBorder(_border.withArcWidth(arcWidth).withArcHeight(arcHeight));
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided border arc width and arc height for the specified corner.
+     *  Note that the border will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *
+     * @param corner The corner to apply the border radius to.
+     * @param arcWidth The border arc width in pixels.
+     * @param arcHeight The border arc height in pixels.
+     * @return A new {@link Style} with the provided border arc width and arc height for the specified corner.
+     */
+    public Style borderRadiusAt( Corner corner, int arcWidth, int arcHeight ) {
+        return _withBorder(_border.withArcWidthAt(corner, arcWidth).withArcHeightAt(corner, arcHeight));
     }
 
     /**

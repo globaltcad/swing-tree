@@ -62,6 +62,8 @@ public final class BorderStyle
     public Optional<Color> color() { return Optional.ofNullable(_borderColor); }
 
     public BorderStyle withArcWidthAt( Corner corner, int borderArcWidth ) {
+        if ( corner == Corner.EVERY )
+            return this.withArcWidth(borderArcWidth);
         int arcHeight;
         switch ( corner ) {
             case TOP_LEFT:
@@ -89,6 +91,8 @@ public final class BorderStyle
     }
 
     public BorderStyle withArcHeightAt( Corner corner, int borderArcHeight ) {
+        if ( corner == Corner.EVERY )
+            return this.withArcHeight(borderArcHeight);
         int arcWidth;
         switch ( corner ) {
             case TOP_LEFT:
@@ -115,22 +119,24 @@ public final class BorderStyle
                    .withArcHeightAt(Corner.BOTTOM_RIGHT, borderArcHeight);
     }
 
-    public BorderStyle withWidthAt( Side side, int borderWidth ) {
-        switch ( side ) {
+    public BorderStyle withWidthAt(Edge edge, int borderWidth ) {
+        if ( edge == Edge.EVERY )
+            return this.withWidth(borderWidth);
+        switch (edge) {
             case TOP:    return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withTop(borderWidth), _borderColor);
             case RIGHT:  return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withRight(borderWidth), _borderColor);
             case BOTTOM: return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withBottom(borderWidth), _borderColor);
             case LEFT:   return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withLeft(borderWidth), _borderColor);
             default:
-                throw new IllegalArgumentException("Unknown side: " + side);
+                throw new IllegalArgumentException("Unknown side: " + edge);
         }
     }
 
     public BorderStyle withWidth( int borderWidth ) {
-        return this.withWidthAt(Side.TOP,    borderWidth)
-                   .withWidthAt(Side.RIGHT,  borderWidth)
-                   .withWidthAt(Side.BOTTOM, borderWidth)
-                   .withWidthAt(Side.LEFT,   borderWidth);
+        return this.withWidthAt(Edge.TOP,    borderWidth)
+                   .withWidthAt(Edge.RIGHT,  borderWidth)
+                   .withWidthAt(Edge.BOTTOM, borderWidth)
+                   .withWidthAt(Edge.LEFT,   borderWidth);
     }
 
     public BorderStyle withColor( Color borderColor ) { return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, borderColor); }
