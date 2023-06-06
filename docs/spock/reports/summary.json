@@ -1,13 +1,13 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Sat May 20 23:56:15 CEST 2023",
+  "created": "Tue Jun 06 15:46:10 CEST 2023",
   "statistics":{
-    "runs":"35",
-    "passed":"34",
+    "runs":"37",
+    "passed":"36",
     "failed":"1",
     "featureFailures":"0",
-    "successRate":"0.9714285714285714",
+    "successRate":"0.972972972972973",
     "duration":"?"
   },
   "specifications": [{
@@ -98,13 +98,13 @@
       "className":"swingtree.examples.Examples_Spec",
       "title":"Execution and Validation of Example Code",
       "narrative":"This specification ensures that the\n    various UI examples in the test suite, \n    run successfully and also produce\n    UIs with expected states.",
-      "featureCount":"17",
+      "featureCount":"18",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"The \"MadeWithSwingTree\" example UI defined in the examples can be created.","extraInfo":[]},{"id":"The advanced UI define in the examples has the expected state.","extraInfo":[]},{"id":"The animated buttons view examples UI defined in the examples can be created.","extraInfo":[]},{"id":"The animation example view can be created.","extraInfo":[]},{"id":"The box shadow picker example UI defined in the examples can be created.","extraInfo":[]},{"id":"The calculator UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The form UI define in the examples has the expected state.","extraInfo":[]},{"id":"The list examples UI defined in the examples can be created.","extraInfo":[]},{"id":"The list rendering example UI defined in the examples can be created.","extraInfo":[]},{"id":"The login example UI defined in the examples can be created.","extraInfo":[]},{"id":"The note guesser example UI defined in the examples can be created.","extraInfo":[]},{"id":"The settings example UI defined in the examples can be created.","extraInfo":[]},{"id":"The simple Table-UI example has the expected state.","extraInfo":[]},{"id":"The spinners example UI defined in the examples can be created.","extraInfo":[]},{"id":"The symbol guesser example UI defined in the examples can be created.","extraInfo":[]},{"id":"The todo app UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The user registration example UI defined in the examples can be created.","extraInfo":[]}],
+      "executedFeatures":[{"id":"The \"MadeWithSwingTree\" example UI defined in the examples can be created.","extraInfo":[]},{"id":"The \"Well rounded\" style example UI defined in the examples can be created.","extraInfo":[]},{"id":"The advanced UI define in the examples has the expected state.","extraInfo":[]},{"id":"The animated buttons view examples UI defined in the examples can be created.","extraInfo":[]},{"id":"The animation example view can be created.","extraInfo":[]},{"id":"The box shadow picker example UI defined in the examples can be created.","extraInfo":[]},{"id":"The calculator UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The form UI define in the examples has the expected state.","extraInfo":[]},{"id":"The list examples UI defined in the examples can be created.","extraInfo":[]},{"id":"The list rendering example UI defined in the examples can be created.","extraInfo":[]},{"id":"The login example UI defined in the examples can be created.","extraInfo":[]},{"id":"The note guesser example UI defined in the examples can be created.","extraInfo":[]},{"id":"The settings example UI defined in the examples can be created.","extraInfo":[]},{"id":"The simple Table-UI example has the expected state.","extraInfo":[]},{"id":"The spinners example UI defined in the examples can be created.","extraInfo":[]},{"id":"The symbol guesser example UI defined in the examples can be created.","extraInfo":[]},{"id":"The todo app UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The user registration example UI defined in the examples can be created.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.mvvm.Button_Binding_Spec",
@@ -194,13 +194,13 @@
       "className":"swingtree.renderer.Table_Renderer_Spec",
       "title":"Rendering Table Cells",
       "narrative":"Swing-Tree exposes a user friendly API for rendering table cells.\n    For simple table UIs none of this is necessary, but it\n    is important when you want to populate your table with more complex data.\n    The renderer is a simple function that takes a value and returns a UI node.\n    The UI node is then rendered as a table cell.",
-      "featureCount":"7",
+      "featureCount":"5",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"A map can be used as a data source for tables.","extraInfo":[]},{"id":"We can attach a simple table cell renderer to a JTable in just a few lines of code.","extraInfo":[]},{"id":"We can create a simple column major table cell renderer through a UI factory method.","extraInfo":[]},{"id":"We can create a simple table cell renderer through a UI factory method.","extraInfo":[]},{"id":"We can pass an Event to the table model to trigger updates.","extraInfo":[]},{"id":"We need to attach a update Event to our table when the table data is list based and its data changes.","extraInfo":[]},{"id":"You can render the cells of a table as text by using the \"asText\" method.","extraInfo":[]}],
+      "executedFeatures":[{"id":"A map based table can have a custom cell renderer.","extraInfo":[]},{"id":"We can attach a simple table cell renderer to a JTable in just a few lines of code.","extraInfo":[]},{"id":"We can create a simple column major table cell renderer through a UI factory method.","extraInfo":[]},{"id":"We can create a simple table cell renderer through a UI factory method.","extraInfo":[]},{"id":"You can render the cells of a table as text by using the \"asText\" method.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.splitbutton.JSplitButton_Examples_Spec",
@@ -392,7 +392,7 @@
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"Styling components is based on a functional styler lambda.","extraInfo":[]},{"id":"The Styling API will make sure that the layout manager accounts for the border width!","extraInfo":[]},{"id":"The insets of the layout manager are based on the sum of the margin and padding for a given edge of the component bounds.","extraInfo":[]},{"id":"The margins defined in the style API will be applied to the layout manager.","extraInfo":[]}],
+      "executedFeatures":[{"id":"Styling components is based on a functional styler lambda.","extraInfo":[]},{"id":"The Styling API will make sure that the layout manager accounts for the border width!","extraInfo":[]},{"id":"The insets of the layout manager are based on the sum of the margin and padding for a given edge of the component bounds.","extraInfo":[]},{"id":"The margins defined in the style API will be applied to the layout manager through the border insets.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.styles.Style_Sheet_Spec",
@@ -429,6 +429,30 @@
       "successRate":"1.0",
       "duration":"?",
       "executedFeatures":[{"id":"The \"show\" method causes a JDialog to be displayed to the user.","extraInfo":[]},{"id":"The \"show\" method causes a JFrame to be displayed to the user.","extraInfo":[]},{"id":"Use the \"dialog()\" factory method to build a JDialog.","extraInfo":[]},{"id":"Use the \"frame()\" factory method to build a JFrame.","extraInfo":[]}],
+      "ignoredFeatures":[]
+    },{
+      "className":"swingtree.tabs.Tab_Event_Handling_Spec",
+      "title":"Tab Event Handling",
+      "narrative":"When building a tabbed pane using SwingTree, you often want to react to\n    events that occur on the tabs of a `JTabbedPane`. \n    For example, you may want trigger some action when a tab is selected.\n\n    In this specification, we will see how to handle events on tabs.",
+      "featureCount":"5",
+      "failures":"0",
+      "errors":"0",
+      "skipped":"0" ,
+      "successRate":"1.0",
+      "duration":"?",
+      "executedFeatures":[{"id":"Notice when the mouse enters a tab using the \"onTabMouseEnter\" event handler.","extraInfo":[]},{"id":"Notice when the mouse exits a tab using the \"onTabMouseExit\" event handler.","extraInfo":[]},{"id":"The \"onTabMousePress\" event handler is called when the mouse is pressed on a tab.","extraInfo":[]},{"id":"The \"onTabMouseRelease\" event handler can be used to notice when the mouse press is released on a tab.","extraInfo":[]},{"id":"Use the \"onTabMouseClick\" to receive mouse click events on tabs.","extraInfo":[]}],
+      "ignoredFeatures":[]
+    },{
+      "className":"swingtree.tables.Declarative_Tables_Spec",
+      "title":"Creating Tables",
+      "narrative":"Swing-Tree exposes a user friendly API for defining tables in a declarative manner.\n    You don't necessarily have to implement your own table model, because the Swing-Tree\n    API allows you to supply simple collection based data as a data source for your table.",
+      "featureCount":"4",
+      "failures":"0",
+      "errors":"0",
+      "skipped":"0" ,
+      "successRate":"1.0",
+      "duration":"?",
+      "executedFeatures":[{"id":"A map can be used as a data source for tables.","extraInfo":[]},{"id":"We can create a column major table based on a list of lists as a data model.","extraInfo":[]},{"id":"We can pass an Event to the table model to trigger updates.","extraInfo":[]},{"id":"We need to attach a update Event to our table when the table data is list based and its data changes.","extraInfo":[]}],
       "ignoredFeatures":[]
     }
   ],

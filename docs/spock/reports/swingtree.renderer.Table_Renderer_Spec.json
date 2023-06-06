@@ -4,7 +4,7 @@
   "narrative":"Swing-Tree exposes a user friendly API for rendering table cells.\n    For simple table UIs none of this is necessary, but it\n    is important when you want to populate your table with more complex data.\n    The renderer is a simple function that takes a value and returns a UI node.\n    The UI node is then rendered as a table cell.",
   "subjects":[],
   "statistics":{
-    "runs":"7",
+    "runs":"5",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -32,29 +32,6 @@
         {"kind":"and","text":"Finally we access the component from the renderer (which is responsible for the actual rendering).","code":["found.getTableCellRendererComponent(null, \"1\", false, false, 0, 0)"]},
 
         {"kind":"then","text":"The mocked cell interpreter is called.","code":["1 * render.interpret(_)"]}
-      ],
-      "problems":{"dataValues":[], "errors":[]}
-    },
-  
-    {
-      "id":"We can pass an Event to the table model to trigger updates.",
-      "result":"PASS",
-      "duration":"?",
-      "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
-      },
-      "blocks":[
-        {"kind":"given","text":"We have an update event and some data.","code":["var data = [1, 2, 3, 4]","var update = Event.create()"]},
-
-        {"kind":"and","text":"We create a table with a lambda based table model.","code":["var ui =","        UI.table().withModel(","            UI.tableModel()","            .onColName( {[\"X\", \"Y\", \"Z\"][it]})","            .onColCount({3})","            .onRowCount({data.size()})","            .onGet({r,c ->data[r]})","            .updateOn(update)","        )"]},
-
-        {"kind":"expect","text":"The table has 4 rows and 3 columns.","code":["ui.get(JTable).rowCount == 4","ui.get(JTable).columnCount == 3"]},
-
-        {"kind":"and","text":"The table has the correct data.","code":["ui.get(JTable).getValueAt(0, 0) == 1","ui.get(JTable).getValueAt(1, 0) == 2","ui.get(JTable).getValueAt(2, 0) == 3","ui.get(JTable).getValueAt(3, 0) == 4"]},
-
-        {"kind":"when","text":"We update the data.","code":["data = [5, 6, 7, 8]","update.fire()","UI.sync() // sync with the EDT"]},
-
-        {"kind":"then","text":"The table has the correct data.","code":["ui.get(JTable).getValueAt(0, 0) == 5","ui.get(JTable).getValueAt(1, 0) == 6","ui.get(JTable).getValueAt(2, 0) == 7","ui.get(JTable).getValueAt(3, 0) == 8"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -110,7 +87,7 @@
     },
   
     {
-      "id":"A map can be used as a data source for tables.",
+      "id":"A map based table can have a custom cell renderer.",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -149,25 +126,6 @@
         {"kind":"and","text":"Finally we access the component from the renderer (which is responsible for the actual rendering).","code":["var component = found.getTableCellRendererComponent(null, 1, false, false, 0, 0)"]},
 
         {"kind":"then","text":"The cell is rendered as text (based on a JLabel).","code":["component instanceof JLabel","component.text == \"1!\""]}
-      ],
-      "problems":{"dataValues":[], "errors":[]}
-    },
-  
-    {
-      "id":"We need to attach a update Event to our table when the table data is list based and its data changes.",
-      "result":"PASS",
-      "duration":"?",
-      "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Use the Event class in your view model to define an event you can fire when you modify the data\n            of your table. The event will be used to update the table UI  if you register it with the table UI.\n        "]
-      },
-      "blocks":[
-        {"kind":"given","text":"A simple event and some data.","code":["var event = Event.create()","var data = [[1, 2, 3], [7, 8, 9]]"]},
-
-        {"kind":"and","text":"A simple table UI with a nested list based data table model.","code":["var ui =","            UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data })","            .updateTableOn(event)"]},
-
-        {"kind":"when","text":"We fire the event.","code":["event.fire()"]},
-
-        {"kind":"then","text":"The table UI is updated.","code":["ui.component.getRowCount() == 2","ui.component.getValueAt(0, 0) == 1","ui.component.getValueAt(0, 1) == 2","ui.component.getValueAt(0, 2) == 3","ui.component.getValueAt(1, 0) == 7","ui.component.getValueAt(1, 1) == 8","ui.component.getValueAt(1, 2) == 9"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

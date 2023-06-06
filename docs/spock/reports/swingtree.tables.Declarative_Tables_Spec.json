@@ -1,0 +1,90 @@
+{
+  "className":"swingtree.tables.Declarative_Tables_Spec",
+  "title":"Creating Tables",
+  "narrative":"Swing-Tree exposes a user friendly API for defining tables in a declarative manner.\n    You don't necessarily have to implement your own table model, because the Swing-Tree\n    API allows you to supply simple collection based data as a data source for your table.",
+  "subjects":["swingtree.UIForTable"],
+  "statistics":{
+    "runs":"4",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A map can be used as a data source for tables.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that you can actually pass a provider lambda for a map of header names to column lists \n            to the table factory method and it will create a table model for you, which is based on the provided \n            map provider. This will always result in a column major table. \n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A simple table UI with a map based data table model.","code":["var ui =","        UI.table(UI.MapData.EDITABLE, { [\"X\":[\"a\", \"b\", \"c\"], \"Y\":[\"1\", \"2\", \"3\"]] })"]},
+
+        {"kind":"expect","text":"The table UI has the following state:","code":["ui.component.getColumnName(0) == \"X\"","ui.component.getColumnName(1) == \"Y\"","ui.component.getRowCount() == 3","ui.component.getColumnCount() == 2","ui.component.getValueAt(0, 0) == \"a\"","ui.component.getValueAt(0, 1) == \"1\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can create a column major table based on a list of lists as a data model.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A simple list of lists provider can be supplied to the table factory method\n            and it will be enough to create a simple table model for you.\n            In the table defined below we create a list data based column major table. \n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var ui = UI.table(UI.ListData.COLUMN_MAJOR_EDITABLE, { [[\"a\", \"b\", \"c\"], [\"x\", \"y\", \"z\"]] })"]},
+
+        {"kind":"expect","text":"The table UI has the following state:","code":["ui.component.getColumnName(0) == \"A\" // default column names","ui.component.getColumnName(1) == \"B\"","ui.component.getRowCount() == 3","ui.component.getColumnCount() == 2","ui.component.getValueAt(0, 0) == \"a\"","ui.component.getValueAt(0, 1) == \"x\"","ui.component.getValueAt(1, 0) == \"b\"","ui.component.getValueAt(1, 1) == \"y\"","ui.component.getValueAt(2, 0) == \"c\"","ui.component.getValueAt(2, 1) == \"z\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can pass an Event to the table model to trigger updates.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that in this example we use a lambda based table model\n            through the `UI.tableModel()` factory method. This is a convenient\n            way to create a table model without having to implement the TableModel\n            interface yourself.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We have an update event and some data.","code":["var data = [1, 2, 3, 4]","var update = Event.create()"]},
+
+        {"kind":"and","text":"We create a table with a lambda based table model.","code":["var ui =","        UI.table().withModel(","            UI.tableModel()","            .onColName( {[\"X\", \"Y\", \"Z\"][it]})","            .onColCount({3})","            .onRowCount({data.size()})","            .onGet({r,c ->data[r]})","            .updateOn(update)","        )"]},
+
+        {"kind":"expect","text":"The table has 4 rows and 3 columns.","code":["ui.get(JTable).rowCount == 4","ui.get(JTable).columnCount == 3"]},
+
+        {"kind":"and","text":"The table has the correct data.","code":["ui.get(JTable).getValueAt(0, 0) == 1","ui.get(JTable).getValueAt(1, 0) == 2","ui.get(JTable).getValueAt(2, 0) == 3","ui.get(JTable).getValueAt(3, 0) == 4"]},
+
+        {"kind":"when","text":"We update the data.","code":["data = [5, 6, 7, 8]","update.fire()","UI.sync() // sync with the EDT"]},
+
+        {"kind":"then","text":"The table has the correct data.","code":["ui.get(JTable).getValueAt(0, 0) == 5","ui.get(JTable).getValueAt(1, 0) == 6","ui.get(JTable).getValueAt(2, 0) == 7","ui.get(JTable).getValueAt(3, 0) == 8"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We need to attach a update Event to our table when the table data is list based and its data changes.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Use the Event class in your view model to define an event you can fire when you modify the data\n            of your table. The event will be used to update the table UI  if you register it with the table UI.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A simple event and some data.","code":["var event = Event.create()","var data = [[1, 2, 3], [7, 8, 9]]"]},
+
+        {"kind":"and","text":"A simple table UI with a nested list based data table model.","code":["var ui =","            UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data })","            .updateTableOn(event)"]},
+
+        {"kind":"when","text":"We fire the event.","code":["event.fire()"]},
+
+        {"kind":"then","text":"The table UI is updated.","code":["ui.component.getRowCount() == 2","ui.component.getValueAt(0, 0) == 1","ui.component.getValueAt(0, 1) == 2","ui.component.getValueAt(0, 2) == 3","ui.component.getValueAt(1, 0) == 7","ui.component.getValueAt(1, 1) == 8","ui.component.getValueAt(1, 2) == 9"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

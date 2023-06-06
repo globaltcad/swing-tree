@@ -4,7 +4,7 @@
   "narrative":"This specification ensures that the\n    various UI examples in the test suite, \n    run successfully and also produce\n    UIs with expected states.",
   "subjects":[],
   "statistics":{
-    "runs":"17",
+    "runs":"18",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -125,6 +125,19 @@
       },
       "blocks":[
         {"kind":"expect","text":"","code":["expect : new SymbolGuesserView(new SymbolGuesserViewModel())"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"Well rounded\" style example UI defined in the examples can be created.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["expect : new WellRoundedView()"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

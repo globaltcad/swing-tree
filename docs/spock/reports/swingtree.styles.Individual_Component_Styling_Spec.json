@@ -18,27 +18,35 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Fun-Fact: \n            Styling in SwingTree is fully functional, which means \n            that the `Style` settings objects are all immutable. \n            They are not modified in place, but instead transformed\n            by so called \"styler\" lambdas.\n            Not only does this architecture make it easy to compose, reuse and share\n            styles, but it also makes it possible to have a complex style\n            inheritance hierarchy without the need for very complex code.\n            In practice, this means that your styler lambdas become part\n            of a giant tree of styler lambdas, which is then applied to\n            the component tree in a single pass.\n            How cool is that? :)\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Fun-Fact: \n            Styling in SwingTree is fully functional, which means \n            that the `Style` settings objects are all immutable. \n            They are not modified in place, but instead transformed\n            by so called \"styler\" lambdas.\n            Not only does this architecture make it easy to compose, reuse and share\n            styles, but it also makes it possible to have a complex style\n            inheritance hierarchy without the need for very complex code.\n            In practice, this means that your styler lambdas become part\n            of a compositional tree of styler lambdas, which is then applied to\n            the component tree in a single pass.\n            How cool is that? :)\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We create a panel with some custom styling!","code":["var panel =","            UI.panel()","            .withStyle( it ->","                it.style()","                  .foundationColor(\"green\")","                  .backgroundColor(\"cyan\")","                  .borderColor(\"blue\")","                  .borderWidth(5)","                  .shadowColor(\"black\")","                  .shadowSpreadRadius(10)","                  .shadowOffset(10)","            )"]},
+        {"kind":"given","text":"We create a panel with some custom styling!","code":["var panel =","            UI.panel()","            .withStyle( it ->","                it.style()","                  .foundationColor(\"green\")","                  .backgroundColor(\"cyan\")","                  .foregroundColor(\"blue\")","                  .borderColor(\"blue\")","                  .borderWidth(5)","                  .shadowColor(\"black\")","                  .shadowSpreadRadius(10)","                  .shadowOffset(10)","                  .font(\"Papyrus\", 42)","            )"]},
 
-        {"kind":"expect","text":"","code":["panel != null"]}
+        {"kind":"expect","text":"The background color of the panel will be set to cyan.","code":["panel.component.background == Color.cyan"]},
+
+        {"kind":"and","text":"The foreground color of the panel will be set to blue.","code":["panel.component.foreground == Color.blue"]},
+
+        {"kind":"and","text":"The insets of the border will be increased by half of the border width (because the border grows inwards AND outwards).","code":["panel.component.border.getBorderInsets(panel.component) == new Insets(2, 2, 2, 2)"]},
+
+        {"kind":"and","text":"The font of the panel will be set to Papyrus with a size of 42.","code":["panel.component.font == new Font(\"Papyrus\", Font.PLAIN, 42)"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
   
     {
-      "id":"The margins defined in the style API will be applied to the layout manager.",
+      "id":"The margins defined in the style API will be applied to the layout manager through the border insets.",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The default layout manager for SwingTree is MigLayout.\n            It is a very powerful layout manager which is also supported by the styling API.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Swing does not have a concept of margins.\n            Without a proper layout manager it does not even support the configuration of insets.\n            However, through a custom `Border` implementation and a default layout manager (MigLayout)\n            we can model the margins (and paddings) of a component.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a panel with some custom styling!","code":["var panel =","            UI.panel()","            .withStyle( it ->","                it.style()","                  .marginRight(42)","                  .marginLeft(64)","            )","            .get(JPanel)"]},
 
-        {"kind":"expect","text":"","code":["panel != null","panel.layout != null","panel.layout instanceof MigLayout","((MigLayout)panel.layout).getLayoutConstraints().contains(\"insets 0 64 0 42\")"]}
+        {"kind":"expect","text":"\n            Note that the insets of the border of the component now model the margins of the component.\n            This information is used by the layout manager to position the component correctly.\n        ","code":["panel.border.getBorderInsets(panel) == new Insets(0, 64, 0, 42)"]},
+
+        {"kind":"and","text":"","code":["panel.layout != null","panel.layout instanceof MigLayout"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -48,12 +56,14 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Swing does not have a concept of padding and margin.\n            Without a proper layout manager it does not even support the configuration of insets.\n            However, because we are using MigLayout, we can model the padding and margin of a component\n            by using the layout constraints of the layout manager\n            and some custom rendering code.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Swing does not have a concept of padding and margin.\n            Without a proper layout manager it does not even support the configuration of insets.\n            However, through a custom `Border` implementation and a default layout manager (MigLayout)\n            we can model the padding and margin of a component\n            and also render a fancy border and shadow around it (if specified).\n            Internally the layout manager will indirectly know about the margins and paddings\n            of your component through the `Border::getBorderInsets(Component)` method.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a panel with some custom styling!","code":["var panel =","            UI.panel()","            .withStyle( it ->","                it.style()","                  .marginTop(11)","                  .marginRight(42)","                  .marginLeft(64)","                  .padRight(10)","                  .padLeft(20)","                  .padBottom(30)","            )","            .get(JPanel)"]},
 
-        {"kind":"expect","text":"","code":["panel != null","panel.layout != null","panel.layout instanceof MigLayout","((MigLayout)panel.layout).getLayoutConstraints().contains(\"insets 11 84 30 52\")"]}
+        {"kind":"expect","text":"","code":["panel.border.getBorderInsets(panel) == new Insets(11, 84, 30, 52)"]},
+
+        {"kind":"and","text":"","code":["panel.layout != null","panel.layout instanceof MigLayout"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -63,12 +73,14 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            A border is a very common feature of Swing components and when it comes to styling\n            your UI elements should not overlap with the border.\n            This is why the styling API will make sure that the layout manager accounts for the border width,\n            meaning that the insets of the layout manager will be increased by the border width.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            A border is a very common feature of Swing components and when it comes to styling\n            your UI elements should not overlap with the border.\n            This is why the styling API will make sure that the layout manager accounts for the border width\n            you specify in your style.\n            Internally the layout manager will indirectly know about the margins and paddings\n            of your component through the `Border::getBorderInsets(Component)` method.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a panel with some custom styling!","code":["var panel =","            UI.panel()","            .withStyle( it ->","                it.style()","                  .marginTop(7)","                  .marginRight(2)","                  .padLeft(14)","                  .borderWidth(5)","            )","            .get(JPanel)"]},
 
-        {"kind":"expect","text":"","code":["panel != null","panel.layout != null","panel.layout instanceof MigLayout","((MigLayout)panel.layout).getLayoutConstraints().contains(\"insets 12 19 5 7\")"]}
+        {"kind":"expect","text":"\n            The insets of the border not only model the padding and margin of the component,\n            but also the border width.\n            But note that the border width of a component grows both inwards and outwards.\n            So the insets of the border will only be increased by half of the border width.\n        ","code":["panel.border.getBorderInsets(panel) == new Insets(9, 16, 2, 4)"]},
+
+        {"kind":"and","text":"We also expect there to be the mig layout manager by default.","code":["panel.layout != null","panel.layout instanceof MigLayout"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }
