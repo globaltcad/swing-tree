@@ -22,6 +22,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -1697,7 +1698,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         _onShow( size, v -> {
             C comp = getComponent();
             comp.setMinimumSize(v);
-            comp.revalidate();
+            _revalidate(comp);
         });
         return this.withMinSize( size.orElseThrow() );
     }
@@ -1730,12 +1731,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         _onShow( width, w -> {
             C comp = getComponent();
             comp.setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height));
-            comp.revalidate();
+            _revalidate(comp);
         });
         _onShow( height, h -> {
             C comp = getComponent();
             comp.setMinimumSize(new Dimension(getComponent().getMinimumSize().width, h));
-            comp.revalidate();
+            _revalidate(comp);
         });
         return this.withMinSize( width.orElseThrow(), height.orElseThrow() );
     }
@@ -1763,7 +1764,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         _onShow( width, w -> {
             C comp = getComponent();
             comp.setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height));
-            comp.revalidate(); // Swing is not smart enough to do this automatically
+            _revalidate(comp); // Swing is not smart enough to do this automatically
         });
         return this.withMinWidth( width.orElseThrow() );
     }
@@ -1792,7 +1793,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         _onShow( height, h -> {
             C comp = getComponent();
             comp.setMinimumSize( new Dimension(getComponent().getMinimumSize().width, h));
-            comp.revalidate(); // The revalidate is necessary to make the change visible.
+            _revalidate(comp); // The revalidate is necessary to make the change visible.
         });
         return this.withMinHeight( height.orElseThrow() );
     }
@@ -1822,7 +1823,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         _onShow( size, v -> {
             C comp = getComponent();
             comp.setMaximumSize(v);
-            comp.revalidate(); // For some reason this is needed to make the change visible.
+            _revalidate(comp); // For some reason this is needed to make the change visible.
         });
         return this.withMaxSize( size.orElseThrow() );
     }
@@ -1855,12 +1856,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         _onShow( width, w -> {
             C comp = getComponent();
             comp.setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height));
-            comp.revalidate(); // Swing is not smart enough to do this automatically :(
+            _revalidate(comp); // Swing is not smart enough to do this automatically :(
         });
         _onShow( height, h -> {
             C comp = getComponent();
             comp.setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h));
-            comp.revalidate(); // Still not smart enough to do this automatically :(
+            _revalidate(comp); // Still not smart enough to do this automatically :(
         });
         return this.withMaxSize( width.orElseThrow(), height.orElseThrow() );
     }
@@ -1888,7 +1889,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         _onShow( width, w -> {
             C comp = getComponent();
             comp.setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height));
-            comp.revalidate(); // When the size changes, the layout manager needs to be informed.
+            _revalidate(comp); // When the size changes, the layout manager needs to be informed.
         });
         return this.withMaxWidth( width.orElseThrow() );
     }
@@ -1916,7 +1917,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         _onShow( height, h -> {
             C comp = getComponent();
             comp.setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h));
-            comp.revalidate(); // The revalidate is necessary to make the change visible, this makes sure the layout is recalculated.
+            _revalidate(comp); // The revalidate is necessary to make the change visible, this makes sure the layout is recalculated.
         });
         return this.withMaxHeight( height.orElseThrow() );
     }
@@ -1946,7 +1947,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         _onShow( size, v -> {
             C comp = getComponent();
             comp.setPreferredSize(v);
-            comp.revalidate();
+            _revalidate(comp);
         });
         return this.withPrefSize( size.orElseNull() );
     }
@@ -1979,12 +1980,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         _onShow( width, w -> {
             C comp = getComponent();
             comp.setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height));
-            comp.revalidate(); // We need to revalidate the component to make sure the layout manager is aware of the new size.
+            _revalidate(comp); // We need to revalidate the component to make sure the layout manager is aware of the new size.
         });
         _onShow( height, h -> {
             C comp = getComponent();
             comp.setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h));
-            comp.revalidate(); // We need to revalidate the component to make sure the layout manager is aware of the new size.
+            _revalidate(comp); // We need to revalidate the component to make sure the layout manager is aware of the new size.
         });
         return this.withPrefSize( width.orElseThrow(), height.orElseThrow() );
     }
@@ -2012,7 +2013,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         _onShow( width, w -> {
             C comp = getComponent();
             comp.setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height));
-            comp.revalidate(); // We need to revalidate the component to make sure the new preferred size is applied.
+            _revalidate(comp); // We need to revalidate the component to make sure the new preferred size is applied.
         });
         return this.withPrefWidth( width.orElseThrow() );
     }
@@ -2040,7 +2041,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         _onShow( height, h -> {
             C comp = getComponent();
             comp.setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h));
-            comp.revalidate(); // We need to revalidate the component to make sure the new preferred size is applied.
+            _revalidate(comp); // We need to revalidate the component to make sure the new preferred size is applied.
         });
         return this.withPrefHeight( height.orElseThrow() );
     }
@@ -2070,7 +2071,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         _onShow( size, v -> {
             C comp = getComponent();
             comp.setSize(v);
-            comp.revalidate(); // We need to revalidate the component to make sure the new size is applied.
+            _revalidate(comp); // We need to revalidate the component to make sure the new size is applied.
         });
         return this.withSize( size.orElseNull() );
     }
@@ -2110,7 +2111,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         _onShow( width, w -> {
             C comp = getComponent();
             comp.setSize(new Dimension(w, getComponent().getSize().height));
-            comp.revalidate(); // We need to revalidate the component to make sure the new size is applied.
+            _revalidate(comp); // We need to revalidate the component to make sure the new size is applied.
         });
         return this.withWidth( width.orElseThrow() );
     }
@@ -2139,9 +2140,16 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         _onShow( height, h -> {
             C comp = getComponent();
             comp.setSize(new Dimension(getComponent().getSize().width, h));
-            comp.revalidate(); // We need to revalidate the component to make sure the new size is applied.
+            _revalidate(comp); // We need to revalidate the component to make sure the new size is applied.
         });
         return this.withHeight( height.orElseThrow() );
+    }
+
+    private static void _revalidate( Component comp ) {
+        comp.revalidate();
+        if ( comp instanceof JScrollPane )
+            Optional.ofNullable(comp.getParent())
+                    .ifPresent(Component::revalidate); // For some reason, JScrollPane does not revalidate its parent when its preferred size changes.
     }
 
     /**
