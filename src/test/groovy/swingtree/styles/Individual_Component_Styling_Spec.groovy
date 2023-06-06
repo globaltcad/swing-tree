@@ -7,6 +7,9 @@ import spock.lang.Title
 import swingtree.UI
 
 import javax.swing.*
+import java.awt.Color
+import java.awt.Font
+import java.awt.Insets
 
 @Title("Styling Components")
 @Narrative('''
@@ -27,7 +30,7 @@ class Individual_Component_Styling_Spec extends Specification
             styles, but it also makes it possible to have a complex style
             inheritance hierarchy without the need for very complex code.
             In practice, this means that your styler lambdas become part
-            of a giant tree of styler lambdas, which is then applied to
+            of a compositional tree of styler lambdas, which is then applied to
             the component tree in a single pass.
             How cool is that? :)
         """
@@ -38,21 +41,31 @@ class Individual_Component_Styling_Spec extends Specification
                             it.style()
                               .foundationColor("green")
                               .backgroundColor("cyan")
+                              .foregroundColor("blue")
                               .borderColor("blue")
                               .borderWidth(5)
                               .shadowColor("black")
                               .shadowSpreadRadius(10)
                               .shadowOffset(10)
+                              .font("Papyrus", 42)
                         )
-        expect :
-            panel != null
+        expect : 'The background color of the panel will be set to cyan.'
+            panel.component.background == Color.cyan
+        and : 'The foreground color of the panel will be set to blue.'
+            panel.component.foreground == Color.blue
+        and : 'The insets of the border will be increased by half of the border width (because the border grows inwards AND outwards).'
+            panel.component.border.getBorderInsets(panel.component) == new Insets(2, 2, 2, 2)
+        and : 'The font of the panel will be set to Papyrus with a size of 42.'
+            panel.component.font == new Font("Papyrus", Font.PLAIN, 42)
     }
 
-    def 'The margins defined in the style API will be applied to the layout manager.'()
+    def 'The margins defined in the style API will be applied to the layout manager through the border insets.'()
     {
         reportInfo """
-            The default layout manager for SwingTree is MigLayout.
-            It is a very powerful layout manager which is also supported by the styling API.
+            Swing does not have a concept of margins.
+            Without a proper layout manager it does not even support the configuration of insets.
+            However, through a custom `Border` implementation and a default layout manager (MigLayout)
+            we can model the margins (and paddings) of a component.
         """
         given : 'We create a panel with some custom styling!'
             var panel =
@@ -63,11 +76,14 @@ class Individual_Component_Styling_Spec extends Specification
                               .marginLeft(64)
                         )
                         .get(JPanel)
-        expect :
-            panel != null
+        expect : """
+            Note that the insets of the border of the component now model the margins of the component.
+            This information is used by the layout manager to position the component correctly.
+        """
+            panel.border.getBorderInsets(panel) == new Insets(0, 64, 0, 42)
+        and :
             panel.layout != null
             panel.layout instanceof MigLayout
-            ((MigLayout)panel.layout).getLayoutConstraints().contains("insets 0px 64px 0px 42px")
     }
 
 
@@ -76,9 +92,11 @@ class Individual_Component_Styling_Spec extends Specification
         reportInfo """
             Swing does not have a concept of padding and margin.
             Without a proper layout manager it does not even support the configuration of insets.
-            However, because we are using MigLayout, we can model the padding and margin of a component
-            by using the layout constraints of the layout manager
-            and some custom rendering code.
+            However, through a custom `Border` implementation and a default layout manager (MigLayout)
+            we can model the padding and margin of a component
+            and also render a fancy border and shadow around it (if specified).
+            Internally the layout manager will indirectly know about the margins and paddings
+            of your component through the `Border::getBorderInsets(Component)` method.
         """
         given : 'We create a panel with some custom styling!'
             var panel =
@@ -94,10 +112,10 @@ class Individual_Component_Styling_Spec extends Specification
                         )
                         .get(JPanel)
         expect :
-            panel != null
+            panel.border.getBorderInsets(panel) == new Insets(11, 84, 30, 52)
+        and :
             panel.layout != null
             panel.layout instanceof MigLayout
-            ((MigLayout)panel.layout).getLayoutConstraints().contains("insets 11px 84px 30px 52px")
     }
 
     def 'The Styling API will make sure that the layout manager accounts for the border width!'()
@@ -105,8 +123,10 @@ class Individual_Component_Styling_Spec extends Specification
         reportInfo """
             A border is a very common feature of Swing components and when it comes to styling
             your UI elements should not overlap with the border.
-            This is why the styling API will make sure that the layout manager accounts for the border width,
-            meaning that the insets of the layout manager will be increased by the border width.
+            This is why the styling API will make sure that the layout manager accounts for the border width
+            you specify in your style.
+            Internally the layout manager will indirectly know about the margins and paddings
+            of your component through the `Border::getBorderInsets(Component)` method.
         """
         given : 'We create a panel with some custom styling!'
             var panel =
@@ -119,10 +139,15 @@ class Individual_Component_Styling_Spec extends Specification
                               .borderWidth(5)
                         )
                         .get(JPanel)
-        expect :
-            panel != null
+        expect : """
+            The insets of the border not only model the padding and margin of the component,
+            but also the border width.
+            But note that the border width of a component grows both inwards and outwards.
+            So the insets of the border will only be increased by half of the border width.
+        """
+            panel.border.getBorderInsets(panel) == new Insets(9, 16, 2, 4)
+        and : 'We also expect there to be the mig layout manager by default.'
             panel.layout != null
             panel.layout instanceof MigLayout
-            ((MigLayout)panel.layout).getLayoutConstraints().contains("insets 12px 19px 5px 7px")
     }
 }

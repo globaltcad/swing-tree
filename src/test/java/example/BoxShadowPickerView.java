@@ -117,7 +117,7 @@ public class BoxShadowPickerView extends UI.Panel
                 panel(FILL).withBorderTitled("Preview")
                 .withPrefHeight(350)
                 .add(GROW,
-                    panel(FILL)
+                    panel(FILL.and(INS(0)))
                     .withRepaintIf(vm.repaint())
                     .withStyle( it ->
                         it.style()

@@ -1,6 +1,7 @@
 package swingtree.style;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.geom.*;
 import java.util.Objects;
@@ -14,55 +15,74 @@ import java.util.function.Function;
  */
 public class StyleRenderer<C extends JComponent>
 {
-    private final Graphics2D _g2d;
     private final C _comp;
     private final Style style;
 
 
-    public StyleRenderer( Graphics2D g2d, C comp, Style style ) {
-        _g2d = Objects.requireNonNull(g2d);
+    public StyleRenderer( C comp, Style style ) {
         _comp = Objects.requireNonNull(comp);
         this.style = style;
     }
 
-    public void renderBaseStyle()
+    public void renderBaseStyle(Graphics2D g2d)
     {
         // We remember if antialiasing was enabled before we render:
-        boolean antialiasingWasEnabled = _g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
+        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
 
         // We enable antialiasing:
-        _g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         style.background().foundationColor().ifPresent(outerColor -> {
-            _fillOuterBackground(style, outerColor);
+            _fillOuterBackground(style, outerColor, g2d);
         });
         style.background().color().ifPresent(color -> {
             if ( color.getAlpha() == 0 ) return;
-            _g2d.setColor(color);
-            _g2d.fill(_calculateBaseArea(style));
+            g2d.setColor(color);
+            g2d.fill(_calculateBaseArea(style));
         });
+
+        Font componentFont = _comp.getFont();
+        if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
+            g2d.setFont( componentFont );
+
         style.background().painter().ifPresent( backgroundPainter -> {
-            backgroundPainter.paint(_g2d);
-        });
-        style.shadow().color().ifPresent(color -> {
-            _renderShadows(style, _comp, _g2d, color);
-        });
-        style.border().color().ifPresent( color -> {
-            _drawBorder(style, color);
+            backgroundPainter.paint(g2d);
         });
 
         // Reset antialiasing to its previous state:
-        _g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
+        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    public void renderForegroundStyle()
+    public void renderBorderStyle(Graphics2D g2d) {
+        // We remember if antialiasing was enabled before we render:
+        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
+
+        // We enable antialiasing:
+        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+
+        style.shadow().color().ifPresent(color -> {
+            _renderShadows(style, _comp, g2d, color);
+        });
+        style.border().color().ifPresent( color -> {
+            _drawBorder(style, color, g2d);
+        });
+
+        // Reset antialiasing to its previous state:
+        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
+    }
+
+    public void renderForegroundStyle(Graphics2D g2d)
     {
+        Font componentFont = _comp.getFont();
+        if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
+            g2d.setFont( componentFont );
+
         style.foreground().painter().ifPresent( foregroundPainter -> {
-            foregroundPainter.paint(_g2d);
+            foregroundPainter.paint(g2d);
         });
     }
 
-    private void _drawBorder(Style style, Color color) {
+    private void _drawBorder(Style style, Color color, Graphics2D g2d) {
         if ( !Outline.none().equals(style.border().widths()) ) {
             // The background box is calculated from the margins and border radius:
             int left      = Math.max(style.margin().left().orElse(0),     0);
@@ -71,7 +91,7 @@ public class StyleRenderer<C extends JComponent>
             int bottom    = Math.max(style.margin().bottom().orElse(0),   0);
             int width     = _comp.getWidth();
             int height    = _comp.getHeight();
-            _g2d.setColor(color);
+            g2d.setColor(color);
             boolean allCornersShareTheSameArc = style.border().allCornersShareTheSameArc();
             boolean allSidesShareTheSameWidth = style.border().allSidesShareTheSameWidth();
             if ( allSidesShareTheSameWidth && allCornersShareTheSameArc ) {
@@ -80,8 +100,8 @@ public class StyleRenderer<C extends JComponent>
                 int borderWidth = style.border().widths().top().orElse(0);
                 if ( borderWidth <= 0 )
                     return;
-                _g2d.setStroke(new BasicStroke(borderWidth));
-                _g2d.drawRoundRect(
+                g2d.setStroke(new BasicStroke(borderWidth));
+                g2d.drawRoundRect(
                         left, top,
                         width - left - right - 1,
                         height - top - bottom - 1,
@@ -102,9 +122,9 @@ public class StyleRenderer<C extends JComponent>
                 // Top left:
                 if ( topLeftArc != null ) {
                     float strokeWidth = (leftBorderWidth + topBorderWidth) / 2f;
-                    _g2d.setStroke(new BasicStroke(strokeWidth));
+                    g2d.setStroke(new BasicStroke(strokeWidth));
                     if ( strokeWidth > 0 )
-                        _g2d.drawArc(
+                        g2d.drawArc(
                                 left, top,
                                 topLeftArc.width(), topLeftArc.height(),
                                 90, 90
@@ -113,9 +133,9 @@ public class StyleRenderer<C extends JComponent>
                 // Top right:
                 if ( topRightArc != null ) {
                     float strokeWidth = (rightBorderWidth + topBorderWidth) / 2f;
-                    _g2d.setStroke(new BasicStroke(strokeWidth));
+                    g2d.setStroke(new BasicStroke(strokeWidth));
                     if ( strokeWidth > 0 )
-                        _g2d.drawArc(
+                        g2d.drawArc(
                                 width - right - topRightArc.width(), top,
                                 topRightArc.width(), topRightArc.height(),
                                 0, 90
@@ -124,9 +144,9 @@ public class StyleRenderer<C extends JComponent>
                 // Bottom right:
                 if ( bottomRightArc != null ) {
                     float strokeWidth = (rightBorderWidth + bottomBorderWidth) / 2f;
-                    _g2d.setStroke(new BasicStroke(strokeWidth));
+                    g2d.setStroke(new BasicStroke(strokeWidth));
                     if ( strokeWidth > 0 )
-                        _g2d.drawArc(
+                        g2d.drawArc(
                                 width - right - bottomRightArc.width(),
                                 height - bottom - bottomRightArc.height(),
                                 bottomRightArc.width(),
@@ -137,9 +157,9 @@ public class StyleRenderer<C extends JComponent>
                 // Bottom left:
                 if ( bottomLeftArc != null ) {
                     float strokeWidth = (leftBorderWidth + bottomBorderWidth) / 2f;
-                    _g2d.setStroke(new BasicStroke(strokeWidth));
+                    g2d.setStroke(new BasicStroke(strokeWidth));
                     if ( strokeWidth > 0 )
-                        _g2d.drawArc(
+                        g2d.drawArc(
                                 left, height - bottom - bottomLeftArc.height(),
                                 bottomLeftArc.width(), bottomLeftArc.height(),
                                 180, 90
@@ -150,8 +170,8 @@ public class StyleRenderer<C extends JComponent>
                 if ( topBorderWidth > 0 ) {
                     int topLeftArcWidth  = topLeftArc  == null ? 0 : topLeftArc.width()  + topBorderWidth;
                     int topRightArcWidth = topRightArc == null ? 0 : topRightArc.width() + topBorderWidth;
-                    _g2d.setStroke(new BasicStroke(topBorderWidth));
-                    _g2d.drawLine(
+                    g2d.setStroke(new BasicStroke(topBorderWidth));
+                    g2d.drawLine(
                             left + topLeftArcWidth / 2, top,
                             width - right - topRightArcWidth / 2, top
                         );
@@ -160,8 +180,8 @@ public class StyleRenderer<C extends JComponent>
                 if ( rightBorderWidth > 0 ) {
                     int topRightArcHeight    = topRightArc    == null ? 0 : topRightArc.height()    + rightBorderWidth;
                     int bottomRightArcHeight = bottomRightArc == null ? 0 : bottomRightArc.height() + rightBorderWidth;
-                    _g2d.setStroke(new BasicStroke(rightBorderWidth));
-                    _g2d.drawLine(
+                    g2d.setStroke(new BasicStroke(rightBorderWidth));
+                    g2d.drawLine(
                             width - right, top + topRightArcHeight / 2,
                             width - right, height - bottom - bottomRightArcHeight / 2
                         );
@@ -170,8 +190,8 @@ public class StyleRenderer<C extends JComponent>
                 if ( bottomBorderWidth > 0 ) {
                     int bottomLeftArcWidth  = bottomLeftArc  == null ? 0 : bottomLeftArc.width()  + bottomBorderWidth;
                     int bottomRightArcWidth = bottomRightArc == null ? 0 : bottomRightArc.width() + bottomBorderWidth;
-                    _g2d.setStroke(new BasicStroke(bottomBorderWidth));
-                    _g2d.drawLine(
+                    g2d.setStroke(new BasicStroke(bottomBorderWidth));
+                    g2d.drawLine(
                             width - right - bottomRightArcWidth / 2, height - bottom,
                             left + bottomLeftArcWidth / 2, height - bottom
                         );
@@ -180,8 +200,8 @@ public class StyleRenderer<C extends JComponent>
                 if ( leftBorderWidth > 0 ) {
                     int topLeftArcHeight    = topLeftArc    == null ? 0 : topLeftArc.height()    + leftBorderWidth;
                     int bottomLeftArcHeight = bottomLeftArc == null ? 0 : bottomLeftArc.height() + leftBorderWidth;
-                    _g2d.setStroke(new BasicStroke(leftBorderWidth));
-                    _g2d.drawLine(
+                    g2d.setStroke(new BasicStroke(leftBorderWidth));
+                    g2d.drawLine(
                             left, height - bottom - bottomLeftArcHeight / 2,
                             left, top + topLeftArcHeight / 2
                     );
@@ -316,7 +336,7 @@ public class StyleRenderer<C extends JComponent>
         }
     }
 
-    private void _fillOuterBackground( Style style, Color color ) {
+    private void _fillOuterBackground( Style style, Color color, Graphics2D g2d ) {
         // Check if the color is transparent
         if ( color.getAlpha() == 0 )
             return;
@@ -330,8 +350,8 @@ public class StyleRenderer<C extends JComponent>
         Area inner = _calculateBaseArea( style);
         outer.subtract(inner);
 
-        _g2d.setColor(color);
-        _g2d.fill(outer);
+        g2d.setColor(color);
+        g2d.fill(outer);
     }
 
     private void _renderShadows(
@@ -350,10 +370,10 @@ public class StyleRenderer<C extends JComponent>
         int top       = Math.max(style.margin().top().orElse(0),    0);
         int right     = Math.max(style.margin().right().orElse(0),  0);
         int bottom    = Math.max(style.margin().bottom().orElse(0), 0);
-        int topLeftRadius = Math.max(style.border().topLeftRadius(), 0);
-        int topRightRadius = Math.max(style.border().topRightRadius(), 0);
+        int topLeftRadius     = Math.max(style.border().topLeftRadius(), 0);
+        int topRightRadius    = Math.max(style.border().topRightRadius(), 0);
         int bottomRightRadius = Math.max(style.border().bottomRightRadius(), 0);
-        int bottomLeftRadius = Math.max(style.border().bottomLeftRadius(), 0);
+        int bottomLeftRadius  = Math.max(style.border().bottomLeftRadius(), 0);
         int cornerRadius = ( topLeftRadius + topRightRadius + bottomRightRadius + bottomLeftRadius ) / 4;
         int width     = comp.getWidth();
         int height    = comp.getHeight();
@@ -741,6 +761,24 @@ public class StyleRenderer<C extends JComponent>
         edgeG2d.setPaint(edgePaint);
         edgeG2d.fill(edgeArea);
         edgeG2d.dispose();
+    }
+
+    public Insets calculateBorderInsets(Insets formerInsets) {
+        int left      = style.margin().left().orElse(formerInsets.left);
+        int top       = style.margin().top().orElse(formerInsets.top);
+        int right     = style.margin().right().orElse(formerInsets.right);
+        int bottom    = style.margin().bottom().orElse(formerInsets.bottom);
+        // Add padding:
+        left   += style.padding().left().orElse(0);
+        top    += style.padding().top().orElse(0);
+        right  += style.padding().right().orElse(0);
+        bottom += style.padding().bottom().orElse(0);
+        // Add border widths:
+        left   += Math.max(style.border().widths().left().orElse(0),   0)/2;
+        top    += Math.max(style.border().widths().top().orElse(0),    0)/2;
+        right  += Math.max(style.border().widths().right().orElse(0),  0)/2;
+        bottom += Math.max(style.border().widths().bottom().orElse(0), 0)/2;
+        return new Insets(top, left, bottom, right);
     }
 
 }
