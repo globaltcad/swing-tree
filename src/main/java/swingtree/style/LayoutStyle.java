@@ -14,13 +14,13 @@ final class LayoutStyle
         this.padding = padding;
     }
 
-    public Outline margin() { return margin; }
+    Outline margin() { return margin; }
 
-    public Outline padding() { return padding; }
+    Outline padding() { return padding; }
 
-    public LayoutStyle withMargin( Outline margin ) { return new LayoutStyle( margin, padding ); }
+    LayoutStyle margin( Outline margin ) { return new LayoutStyle( margin, padding ); }
 
-    public LayoutStyle withPadding( Outline padding ) { return new LayoutStyle( margin, padding ); }
+    LayoutStyle padding( Outline padding ) { return new LayoutStyle( margin, padding ); }
 
     @Override
     public int hashCode() {

@@ -58,31 +58,31 @@ public final class FontStyle
 
     public Optional<Color> selectionColor() { return Optional.ofNullable(_selectionColor); }
 
-    FontStyle withName( String fontFamily ) { return new FontStyle(fontFamily, _size, _style, _weight, _attributes, _color, _backgroundColor, _selectionColor); }
+    FontStyle name( String fontFamily ) { return new FontStyle(fontFamily, _size, _style, _weight, _attributes, _color, _backgroundColor, _selectionColor); }
 
-    FontStyle withSize( int fontSize ) { return new FontStyle(_name, fontSize, _style, _weight, _attributes, _color, _backgroundColor, _selectionColor); }
+    FontStyle size( int fontSize ) { return new FontStyle(_name, fontSize, _style, _weight, _attributes, _color, _backgroundColor, _selectionColor); }
 
-    FontStyle withStyle( int fontStyle ) { return new FontStyle(_name, _size, fontStyle, _weight, _attributes, _color, _backgroundColor, _selectionColor); }
+    FontStyle style( int fontStyle ) { return new FontStyle(_name, _size, fontStyle, _weight, _attributes, _color, _backgroundColor, _selectionColor); }
 
-    FontStyle withWeight( int fontWeight ) { return new FontStyle(_name, _size, _style, fontWeight, _attributes, _color, _backgroundColor, _selectionColor); }
+    FontStyle weight( int fontWeight ) { return new FontStyle(_name, _size, _style, fontWeight, _attributes, _color, _backgroundColor, _selectionColor); }
 
-    FontStyle withAttributes( TextAttribute... attributes ) {
+    FontStyle attributes( TextAttribute... attributes ) {
         Objects.requireNonNull(attributes);
         return new FontStyle(_name, _size, _style, _weight, Arrays.asList(attributes), _color, _backgroundColor, _selectionColor);
     }
 
-    FontStyle withAttributes( List<TextAttribute> attributes ) {
+    FontStyle attributes( List<TextAttribute> attributes ) {
         Objects.requireNonNull(attributes);
         return new FontStyle(_name, _size, _style, _weight, attributes, _color, _backgroundColor, _selectionColor);
     }
 
-    FontStyle withColor( Color color ) { return new FontStyle(_name, _size, _style, _weight, _attributes, color, _backgroundColor, _selectionColor); }
+    FontStyle color( Color color ) { return new FontStyle(_name, _size, _style, _weight, _attributes, color, _backgroundColor, _selectionColor); }
 
-    FontStyle withBackgroundColor( Color backgroundColor ) { return new FontStyle(_name, _size, _style, _weight, _attributes, _color, backgroundColor, _selectionColor); }
+    FontStyle backgroundColor( Color backgroundColor ) { return new FontStyle(_name, _size, _style, _weight, _attributes, _color, backgroundColor, _selectionColor); }
 
-    FontStyle withSelectionColor( Color selectionColor ) { return new FontStyle(_name, _size, _style, _weight, _attributes, _color, _backgroundColor, selectionColor); }
+    FontStyle selectionColor( Color selectionColor ) { return new FontStyle(_name, _size, _style, _weight, _attributes, _color, _backgroundColor, selectionColor); }
 
-    FontStyle withFont( Font font ) {
+    FontStyle font( Font font ) {
         Objects.requireNonNull(font);
         return new FontStyle(
                     font.getFamily(),

@@ -42,13 +42,13 @@ public final class Outline
 
     public Optional<Integer> left() { return Optional.ofNullable(left); }
 
-    Outline withTop(int top) { return new Outline(top, right, bottom, left); }
+    Outline top( int top) { return new Outline(top, right, bottom, left); }
 
-    Outline withLeft(int left) { return new Outline(top, right, bottom, left); }
+    Outline left( int left) { return new Outline(top, right, bottom, left); }
 
-    Outline withRight(int right) { return new Outline(top, right, bottom, left); }
+    Outline right( int right) { return new Outline(top, right, bottom, left); }
 
-    Outline withBottom(int bottom) { return new Outline(top, right, bottom, left); }
+    Outline bottom( int bottom) { return new Outline(top, right, bottom, left); }
 
     public boolean isPositive() {
         return top    != null && top    > 0 ||

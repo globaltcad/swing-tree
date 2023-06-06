@@ -97,7 +97,7 @@ public final class Style
      * @return A new {@link Style} with the provided padding distances.
      */
     public Style margin( int top, int right, int bottom, int left ) {
-        return _withLayout(_layout.withMargin(_layout.margin().withTop(top).withLeft(left).withRight(right).withBottom(bottom)));
+        return _withLayout(_layout.margin(_layout.margin().top(top).left(left).right(right).bottom(bottom)));
     }
 
     /**
@@ -110,7 +110,7 @@ public final class Style
      * @return A new {@link Style} with the provided margin distance.
      */
     public Style margin( int margin ) {
-        return _withLayout(_layout.withMargin(_layout.margin().withTop(margin).withLeft(margin).withRight(margin).withBottom(margin)));
+        return _withLayout(_layout.margin(_layout.margin().top(margin).left(margin).right(margin).bottom(margin)));
     }
 
     /**
@@ -123,7 +123,7 @@ public final class Style
      * @return A new {@link Style} with the provided margin distance.
      */
     public Style marginTop( int margin ) {
-        return _withLayout(_layout.withMargin(_layout.margin().withTop(margin)));
+        return _withLayout(_layout.margin(_layout.margin().top(margin)));
     }
 
     /**
@@ -136,7 +136,7 @@ public final class Style
      * @return A new {@link Style} with the provided margin distance.
      */
     public Style marginRight( int margin ) {
-        return _withLayout(_layout.withMargin(_layout.margin().withRight(margin)));
+        return _withLayout(_layout.margin(_layout.margin().right(margin)));
     }
 
     /**
@@ -149,7 +149,7 @@ public final class Style
      * @return A new {@link Style} with the provided margin distance.
      */
     public Style marginBottom( int margin ) {
-        return _withLayout(_layout.withMargin(_layout.margin().withBottom(margin)));
+        return _withLayout(_layout.margin(_layout.margin().bottom(margin)));
     }
 
     /**
@@ -162,7 +162,7 @@ public final class Style
      * @return A new {@link Style} with the provided margin distance.
      */
     public Style marginLeft( int margin ) {
-        return _withLayout(_layout.withMargin(_layout.margin().withLeft(margin)));
+        return _withLayout(_layout.margin(_layout.margin().left(margin)));
     }
 
     /**
@@ -175,7 +175,7 @@ public final class Style
      * @return A new {@link Style} with the provided margin distance.
      */
     public Style marginVertical( int margin ) {
-        return _withLayout(_layout.withMargin(_layout.margin().withTop(margin).withBottom(margin)));
+        return _withLayout(_layout.margin(_layout.margin().top(margin).bottom(margin)));
     }
 
     /**
@@ -188,7 +188,7 @@ public final class Style
      * @return A new {@link Style} with the provided margin distance.
      */
     public Style marginHorizontal( int margin ) {
-        return _withLayout(_layout.withMargin(_layout.margin().withLeft(margin).withRight(margin)));
+        return _withLayout(_layout.margin(_layout.margin().left(margin).right(margin)));
     }
 
     /**
@@ -204,7 +204,7 @@ public final class Style
      * @return A new {@link Style} with the provided padding distances.
      */
     public Style pad( int top, int right, int bottom, int left ) {
-        return _withLayout(_layout.withPadding(_layout.padding().withTop(top).withLeft(left).withRight(right).withBottom(bottom)));
+        return _withLayout(_layout.padding(_layout.padding().top(top).left(left).right(right).bottom(bottom)));
     }
 
     /**
@@ -217,7 +217,7 @@ public final class Style
      * @return A new {@link Style} with the provided padding distance.
      */
     public Style pad( int padding ) {
-        return _withLayout(_layout.withPadding(_layout.padding().withTop(padding).withLeft(padding).withRight(padding).withBottom(padding)));
+        return _withLayout(_layout.padding(_layout.padding().top(padding).left(padding).right(padding).bottom(padding)));
     }
 
     /**
@@ -230,7 +230,7 @@ public final class Style
      * @return A new {@link Style} with the provided padding distance.
      */
     public Style padTop( int padding ) {
-        return _withLayout(_layout.withPadding(_layout.padding().withTop(padding)));
+        return _withLayout(_layout.padding(_layout.padding().top(padding)));
     }
 
     /**
@@ -244,7 +244,7 @@ public final class Style
      * @return A new {@link Style} with the provided padding distance.
      */
     public Style padRight( int padding ) {
-        return _withLayout(_layout.withPadding(_layout.padding().withRight(padding)));
+        return _withLayout(_layout.padding(_layout.padding().right(padding)));
     }
 
     /**
@@ -257,7 +257,7 @@ public final class Style
      * @return A new {@link Style} with the provided padding distance.
      */
     public Style padBottom(int padding ) {
-        return _withLayout(_layout.withPadding(_layout.padding().withBottom(padding)));
+        return _withLayout(_layout.padding(_layout.padding().bottom(padding)));
     }
 
     /**
@@ -270,7 +270,7 @@ public final class Style
      * @return A new {@link Style} with the provided padding distance.
      */
     public Style padLeft( int padding ) {
-        return _withLayout(_layout.withPadding(_layout.padding().withLeft(padding)));
+        return _withLayout(_layout.padding(_layout.padding().left(padding)));
     }
 
     /**
@@ -283,7 +283,7 @@ public final class Style
      * @return A new {@link Style} with the provided padding distance.
      */
     public Style padVertical( int padding ) {
-        return _withLayout(_layout.withPadding(_layout.padding().withTop(padding).withBottom(padding)));
+        return _withLayout(_layout.padding(_layout.padding().top(padding).bottom(padding)));
     }
 
     /**
@@ -296,7 +296,7 @@ public final class Style
      * @return A new {@link Style} with the provided padding distance.
      */
     public Style padHorizontal( int padding ) {
-        return _withLayout(_layout.withPadding(_layout.padding().withLeft(padding).withRight(padding)));
+        return _withLayout(_layout.padding(_layout.padding().left(padding).right(padding)));
     }
 
     /**
@@ -308,7 +308,7 @@ public final class Style
      * @return A new {@link Style} with the provided border width and border color.
      */
     public Style border( int width, Color color ) {
-        return _withBorder(_border.withWidth(width).withColor(color));
+        return _withBorder(_border.width(width).color(color));
     }
 
     /**
@@ -321,7 +321,7 @@ public final class Style
      * @return A new {@link Style} with the provided border width and border color.
      */
     public Style border( int width, String colorString ) {
-        return _withBorder(_border.withWidth(width).withColor(_colorFrom(colorString)));
+        return _withBorder(_border.width(width).color(StyleUtility.toColor(colorString)));
     }
 
     /**
@@ -332,7 +332,7 @@ public final class Style
      * @return A new {@link Style} with the provided border width.
      */
     public Style borderWidth( int width ) {
-        return _withBorder(_border.withWidth(width));
+        return _withBorder(_border.width(width));
     }
 
     /**
@@ -344,7 +344,7 @@ public final class Style
      * @return A new {@link Style} with the provided border width for the specified edge.
      */
     public Style borderWidthAt( Edge edge, int width ) {
-        return _withBorder(_border.withWidthAt(edge, width));
+        return _withBorder(_border.widthAt(edge, width));
     }
 
     /**
@@ -355,7 +355,7 @@ public final class Style
      * @return A new {@link Style} with the provided border color.
      */
     public Style borderColor( Color color ) {
-        return _withBorder(_border.withColor(color));
+        return _withBorder(_border.color(color));
     }
 
     /**
@@ -367,7 +367,7 @@ public final class Style
      * @return A new {@link Style} with the provided border color.
      */
     public Style borderColor( String colorString ) {
-        return _withBorder(_border.withColor(_colorFrom(colorString)));
+        return _withBorder(_border.color(StyleUtility.toColor(colorString)));
     }
 
     /**
@@ -379,7 +379,7 @@ public final class Style
      * @return A new {@link Style} with the provided border radius.
      */
     public Style borderRadius( int radius ) {
-        return this._withBorder(_border.withArcWidth(radius).withArcHeight(radius));
+        return this._withBorder(_border.arcWidth(radius).arcHeight(radius));
     }
 
     /**
@@ -391,7 +391,7 @@ public final class Style
      * @return A new {@link Style} with the provided border arc width and arc height.
      */
     public Style borderRadius( int arcWidth, int arcHeight ) {
-        return _withBorder(_border.withArcWidth(arcWidth).withArcHeight(arcHeight));
+        return _withBorder(_border.arcWidth(arcWidth).arcHeight(arcHeight));
     }
 
     /**
@@ -404,7 +404,7 @@ public final class Style
      * @return A new {@link Style} with the provided border arc width and arc height for the specified corner.
      */
     public Style borderRadiusAt( Corner corner, int arcWidth, int arcHeight ) {
-        return _withBorder(_border.withArcWidthAt(corner, arcWidth).withArcHeightAt(corner, arcHeight));
+        return _withBorder(_border.arcWidthAt(corner, arcWidth).arcHeightAt(corner, arcHeight));
     }
 
     /**
@@ -414,7 +414,7 @@ public final class Style
      * @param color The inner background color.
      * @return A new {@link Style} with the provided inner background color.
      */
-    public Style backgroundColor( Color color ) { return _withBackground(_background.withColor(color)); }
+    public Style backgroundColor( Color color ) { return _withBackground(_background.color(color)); }
 
     /**
      *  Returns a new {@link Style} with the provided inner Background color in the form of a string.
@@ -424,7 +424,7 @@ public final class Style
      * @param colorString The inner background color.
      * @return A new {@link Style} with the provided inner background color.
      */
-    public Style backgroundColor( String colorString ) { return _withBackground(_background.withColor(_colorFrom(colorString))); }
+    public Style backgroundColor( String colorString ) { return _withBackground(_background.color(StyleUtility.toColor(colorString))); }
 
     /**
      *  Returns a new {@link Style} with the provided background foundation color.
@@ -433,7 +433,7 @@ public final class Style
      * @param color The background color.
      * @return A new {@link Style} with the provided background color.
      */
-    public Style foundationColor( Color color ) { return _withBackground(_background.withFoundationColor(color)); }
+    public Style foundationColor( Color color ) { return _withBackground(_background.foundationColor(color)); }
 
     /**
      *  Returns a new {@link Style} with the provided background foundation color in the form of a string.
@@ -443,7 +443,7 @@ public final class Style
      * @param colorString The background color.
      * @return A new {@link Style} with the provided background color.
      */
-    public Style foundationColor( String colorString ) { return _withBackground(_background.withFoundationColor(_colorFrom(colorString))); }
+    public Style foundationColor( String colorString ) { return _withBackground(_background.foundationColor(StyleUtility.toColor(colorString))); }
 
     /**
      *  Returns a new {@link Style} with the provided background renderer, a {@link Painter} that
@@ -452,7 +452,7 @@ public final class Style
      * @param renderer The background renderer.
      * @return A new {@link Style} with the provided background renderer.
      */
-    public Style backgroundPainter( Painter renderer ) { return _withBackground(_background.withPainter(renderer)); }
+    public Style backgroundPainter( Painter renderer ) { return _withBackground(_background.painter(renderer)); }
 
     /**
      *  Returns a new {@link Style} with the provided foreground color.
@@ -460,7 +460,7 @@ public final class Style
      * @param color The foreground color.
      * @return A new {@link Style} with the provided foreground color.
      */
-    public Style foregroundColor( Color color ) { return _withForeground(_foreground.withColor(color)); }
+    public Style foregroundColor( Color color ) { return _withForeground(_foreground.color(color)); }
 
     /**
      *  Returns a new {@link Style} with the provided foreground color in the form of a string.
@@ -469,7 +469,7 @@ public final class Style
      * @param colorString The foreground color.
      * @return A new {@link Style} with the provided foreground color.
      */
-    public Style foregroundColor( String colorString ) { return _withForeground(_foreground.withColor(_colorFrom(colorString))); }
+    public Style foregroundColor( String colorString ) { return _withForeground(_foreground.color(StyleUtility.toColor(colorString))); }
 
     /**
      *  Returns a new {@link Style} with the provided foreground painter, a {@link Painter} that
@@ -478,7 +478,7 @@ public final class Style
      * @param painter The foreground renderer.
      * @return A new {@link Style} with the provided foreground renderer.
      */
-    public Style foregroundPainter( Painter painter ) { return _withForeground(_foreground.withPainter(painter)); }
+    public Style foregroundPainter( Painter painter ) { return _withForeground(_foreground.painter(painter)); }
 
     /**
      *  Returns a new {@link Style} with the provided horizontal shadow offset.
@@ -491,7 +491,7 @@ public final class Style
      * @param offset The shadow offset in pixels.
      * @return A new {@link Style} with the provided horizontal shadow offset.
      */
-    public Style shadowHorizontalOffset( int offset ) { return _withShadow( shadow -> shadow.withHorizontalOffset(offset)); }
+    public Style shadowHorizontalOffset( int offset ) { return _withShadow( shadow -> shadow.horizontalOffset(offset)); }
 
     /**
      *  Returns a new {@link Style} with the provided vertical shadow offset.
@@ -504,7 +504,7 @@ public final class Style
      * @param offset The shadow offset in pixels.
      * @return A new {@link Style} with the provided vertical shadow offset.
      */
-    public Style shadowVerticalOffset( int offset ) { return _withShadow( shadow -> shadow.withVerticalOffset(offset)); }
+    public Style shadowVerticalOffset( int offset ) { return _withShadow( shadow -> shadow.verticalOffset(offset)); }
 
     /**
      *  Returns a new {@link Style} with the provided shadow offset.
@@ -519,7 +519,7 @@ public final class Style
      * @return A new {@link Style} with the provided shadow offset.
      */
     public Style shadowOffset( int horizontalOffset, int verticalOffset ) {
-        return _withShadow( shadow -> shadow.withHorizontalOffset(horizontalOffset).withVerticalOffset(verticalOffset));
+        return _withShadow( shadow -> shadow.horizontalOffset(horizontalOffset).verticalOffset(verticalOffset));
     }
 
     /**
@@ -534,7 +534,7 @@ public final class Style
      * @return A new {@link Style} with the provided shadow offset.
      */
     public Style shadowOffset( int horizontalAndVerticalOffset ) {
-        return _withShadow( shadow -> shadow.withHorizontalOffset(horizontalAndVerticalOffset).withVerticalOffset(horizontalAndVerticalOffset));
+        return _withShadow( shadow -> shadow.horizontalOffset(horizontalAndVerticalOffset).verticalOffset(horizontalAndVerticalOffset));
     }
 
     /**
@@ -548,7 +548,7 @@ public final class Style
      * @param radius The shadow blur radius in pixels.
      * @return A new {@link Style} with the provided shadow blur radius.
      */
-    public Style shadowBlurRadius( int radius ) { return _withShadow( shadow -> shadow.withBlurRadius(radius)); }
+    public Style shadowBlurRadius( int radius ) { return _withShadow( shadow -> shadow.blurRadius(radius)); }
 
     /**
      *  Returns a new {@link Style} with the provided shadow spread radius.
@@ -561,7 +561,7 @@ public final class Style
      * @param radius The shadow spread radius in pixels.
      * @return A new {@link Style} with the provided shadow spread radius.
      */
-    public Style shadowSpreadRadius( int radius ) { return _withShadow( shadow -> shadow.withSpreadRadius(radius)); }
+    public Style shadowSpreadRadius( int radius ) { return _withShadow( shadow -> shadow.spreadRadius(radius)); }
 
     /**
      *  Returns a new {@link Style} with the provided shadow color.
@@ -574,7 +574,7 @@ public final class Style
      * @param color The shadow color.
      * @return A new {@link Style} with the provided shadow color.
      */
-    public Style shadowColor( Color color ) { return _withShadow( shadow -> shadow.withColor(color)); }
+    public Style shadowColor( Color color ) { return _withShadow( shadow -> shadow.color(color)); }
 
     /**
      *  Returns a new {@link Style} with the provided shadow color in the form of a string.
@@ -588,7 +588,7 @@ public final class Style
      * @param colorString The shadow color.
      * @return A new {@link Style} with the provided shadow color.
      */
-    public Style shadowColor( String colorString ) { return _withShadow( shadow -> shadow.withColor(_colorFrom(colorString))); }
+    public Style shadowColor( String colorString ) { return _withShadow( shadow -> shadow.color(StyleUtility.toColor(colorString))); }
 
     /**
      *  Use this to control whether the shadow should be rendered inwards or outwards. <br>
@@ -599,7 +599,7 @@ public final class Style
      * @param inwards Whether the shadow should be rendered inwards or outwards.
      * @return A new {@link Style} with the provided shadow inset flag.
      */
-    public Style shadowIsInset( boolean inwards ) { return _withShadow( shadow -> shadow.withIsInset(inwards)); }
+    public Style shadowIsInset( boolean inwards ) { return _withShadow( shadow -> shadow.isInset(inwards)); }
 
     /**
      *  This method makes it possible to define multiple shadows for a single component
@@ -649,7 +649,7 @@ public final class Style
      * @param size The font size.
      * @return A new {@link Style} with the provided font name and size.
      */
-    public Style font( String name, int size ) { return _withFont(_font.withName(name).withSize(size)); }
+    public Style font( String name, int size ) { return _withFont(_font.name(name).size(size)); }
 
     /**
      *  Returns a new {@link Style} with the provided font name.
@@ -659,7 +659,7 @@ public final class Style
      * @param name The font name.
      * @return A new {@link Style} with the provided font name.
      */
-    public Style fontName( String name ) { return _withFont(_font.withName(name)); }
+    public Style fontName( String name ) { return _withFont(_font.name(name)); }
 
     /**
      *  Returns a new {@link Style} with the provided {@link Font}.
@@ -669,7 +669,7 @@ public final class Style
      * @param font The {@link Font}.
      * @return A new {@link Style} with the provided {@link Font}.
      */
-    public Style font( Font font ) { return _withFont(_font.withFont(font)); }
+    public Style font( Font font ) { return _withFont(_font.font(font)); }
 
     /**
      *  Returns a new {@link Style} with the provided font size.
@@ -679,7 +679,7 @@ public final class Style
      * @param size The font size.
      * @return A new {@link Style} with the provided font size.
      */
-    public Style fontSize( int size ) { return _withFont(_font.withSize(size)); }
+    public Style fontSize( int size ) { return _withFont(_font.size(size)); }
 
     /**
      *  Makes the font bold or not bold depending on the value of the {@code isBold} parameter.
@@ -690,7 +690,7 @@ public final class Style
      * @return A new {@link Style} with the provided font boldness.
      */
     public Style fontBold( boolean bold ) {
-        return _withFont(_font.withStyle( bold ? Font.BOLD : Font.PLAIN ));
+        return _withFont(_font.style( bold ? Font.BOLD : Font.PLAIN ));
     }
 
     /**
@@ -702,7 +702,7 @@ public final class Style
      * @return A new {@link Style} with the provided font italicness.
      */
     public Style fontItalic( boolean italic ) {
-        return _withFont(_font.withStyle( italic ? Font.ITALIC : Font.PLAIN ));
+        return _withFont(_font.style( italic ? Font.ITALIC : Font.PLAIN ));
     }
 
     /**
@@ -717,7 +717,7 @@ public final class Style
         List<TextAttribute> attributes = new ArrayList<>(_font.attributes());
         if ( underline ) attributes.add(TextAttribute.UNDERLINE);
         else     attributes.remove(TextAttribute.UNDERLINE);
-        return _withFont(_font.withAttributes(attributes));
+        return _withFont(_font.attributes(attributes));
     }
 
     /**
@@ -732,7 +732,7 @@ public final class Style
         List<TextAttribute> attributes = new ArrayList<>(_font.attributes());
         if ( strikeThrough ) attributes.add(TextAttribute.STRIKETHROUGH);
         else     attributes.remove(TextAttribute.STRIKETHROUGH);
-        return _withFont(_font.withAttributes(attributes));
+        return _withFont(_font.attributes(attributes));
     }
 
     /**
@@ -744,7 +744,7 @@ public final class Style
      * @return A new {@link Style} with the provided font color.
      */
     public Style fontColor( Color color ) {
-        return _withFont(_font.withColor(color));
+        return _withFont(_font.color(color));
     }
 
     /**
@@ -756,7 +756,7 @@ public final class Style
      * @return A new {@link Style} with the provided font color.
      */
     public Style fontColor( String colorString ) {
-        return _withFont(_font.withColor(_colorFrom(colorString)));
+        return _withFont(_font.color(StyleUtility.toColor(colorString)));
     }
 
     /**
@@ -768,7 +768,7 @@ public final class Style
      * @return A new {@link Style} with the provided font background color.
      */
     public Style fontBackgroundColor( Color color ) {
-        return _withFont(_font.withBackgroundColor(color));
+        return _withFont(_font.backgroundColor(color));
     }
 
     /**
@@ -780,7 +780,7 @@ public final class Style
      * @return A new {@link Style} with the provided font color.
      */
     public Style fontBackgroundColor( String colorString ) {
-        return _withFont(_font.withBackgroundColor(_colorFrom(colorString)));
+        return _withFont(_font.backgroundColor(StyleUtility.toColor(colorString)));
     }
 
     /**
@@ -792,7 +792,7 @@ public final class Style
      * @return A new {@link Style} with the provided font selection color.
      */
     public Style fontSelectionColor( Color color ) {
-        return _withFont(_font.withSelectionColor(color));
+        return _withFont(_font.selectionColor(color));
     }
 
     /**
@@ -804,8 +804,28 @@ public final class Style
      * @return A new {@link Style} with the provided font selection color.
      */
     public Style fontSelectionColor( String colorString ) {
-        return _withFont(_font.withSelectionColor(_colorFrom(colorString)));
+        return _withFont(_font.selectionColor(StyleUtility.toColor(colorString)));
     }
+
+    /**
+     *  Use this to define the weight of the default font of the component.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     * @param weight The weight of the font.
+     * @return A new {@link Style} with the provided font weight.
+     */
+    public Style fontWeight( int weight ) { return _withFont(_font.weight(weight)); }
+
+    /**
+     *  Use this to define an array of {@link TextAttribute}s to be applied to the default font of the component.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     *  @param attributes The {@link TextAttribute}s to apply to the font.
+     *  @return A new {@link Style} with the provided font attributes.
+     */
+    public Style fontAttributes( TextAttribute... attributes ) { return _withFont(_font.attributes(Objects.requireNonNull(attributes))); }
+
 
     public Outline padding() { return _layout.padding(); }
 
@@ -882,138 +902,4 @@ public final class Style
                 "]";
     }
 
-    /**
-     *  Tries to parse the supplied string as a color value
-     *  based on various formats.
-     *
-     * @param colorString The string to parse.
-     * @return The parsed color.
-     * @throws IllegalArgumentException If the string could not be parsed.
-     */
-    private Color _colorFrom( String colorString )
-    {
-        // First some cleanup
-        colorString = colorString.trim();
-
-        if ( colorString.startsWith("#") )
-            return Color.decode(colorString);
-
-        if ( colorString.startsWith("0x") )
-            return Color.decode(colorString);
-
-        if ( colorString.startsWith("rgb") ) {
-            // We have an rgb() or rgba() color
-            int start = colorString.indexOf('(');
-            int end = colorString.indexOf(')');
-            if ( start < 0 || end < 0 || end < start )
-                throw new IllegalArgumentException("Invalid rgb() or rgba() color: " + colorString);
-
-            String[] parts = colorString.substring(start + 1, end).split(",");
-            if ( parts.length < 3 || parts.length > 4 )
-                throw new IllegalArgumentException("Invalid rgb() or rgba() color: " + colorString);
-
-            for ( int i = 0; i < parts.length; i++ )
-                parts[i] = parts[i].trim();
-
-            int[] values = new int[parts.length];
-
-            for ( int i = 0; i < parts.length; i++ ) {
-                String part = parts[i];
-                if ( part.endsWith("%") ) {
-                    part = part.substring(0, part.length() - 1);
-                    values[i] = Integer.parseInt(part);
-                    if ( values[i] < 0 || values[i] > 100 )
-                        throw new IllegalArgumentException("Invalid rgb() or rgba() color: " + colorString);
-                    values[i] = (int) Math.ceil(values[i] * 2.55);
-                }
-                else if ( part.matches("[0-9]+((\\.[0-9]+[fF]?)|[fF])") )
-                    values[i] = (int) (Float.parseFloat(part) * 255);
-                else
-                    values[i] = Integer.parseInt(part);
-            }
-            int r = values[0];
-            int g = values[1];
-            int b = values[2];
-            int a = values.length == 4 ? values[3] : 255;
-            return new Color(r, g, b, a);
-        }
-
-        if ( colorString.startsWith("hsb") ) {
-            // We have an hsb() or hsba() color
-            int start = colorString.indexOf('(');
-            int end = colorString.indexOf(')');
-            if ( start < 0 || end < 0 || end < start )
-                throw new IllegalArgumentException("Invalid hsb() or hsba() color: " + colorString);
-
-            String[] parts = colorString.substring(start + 1, end).split(",");
-            if ( parts.length < 3 || parts.length > 4 )
-                throw new IllegalArgumentException("Invalid hsb() or hsba() color: " + colorString);
-
-            for ( int i = 0; i < parts.length; i++ )
-                parts[i] = parts[i].trim();
-
-            float[] values = new float[parts.length];
-
-            for ( int i = 0; i < parts.length; i++ ) {
-                String part = parts[i];
-                if ( part.endsWith("%") ) {
-                    part = part.substring(0, part.length() - 1);
-                    values[i] = Float.parseFloat(part);
-                    if ( values[i] < 0 || values[i] > 100 )
-                        throw new IllegalArgumentException(
-                            "Invalid hsb() or hsba() string '" + colorString + "', value '" + part + "' out of range."
-                        );
-                    values[i] = values[i] / 100.0f;
-                } else if ( part.endsWith("°") ) {
-                    if ( i > 0 )
-                        throw new IllegalArgumentException(
-                            "Invalid hsb() or hsba() string '" + colorString + "', unexpected degree symbol in '" + part + "' (only allowed for hue)"
-                        );
-
-                    part = part.substring(0, part.length() - 1);
-                    values[i] = Float.parseFloat(part);
-                    if ( values[i] < 0 || values[i] > 360 )
-                        throw new IllegalArgumentException(
-                            "Invalid hsb() or hsba() string '" + colorString + "', hue value '" + part + "' out of range."
-                        );
-                    values[i] = values[i] / 360.0f;
-                } else if ( part.matches("[0-9]+((\\.[0-9]+[fF]?)|[fF])") )
-                    values[i] = Float.parseFloat(part);
-                else
-                    values[i] = Integer.parseInt(part);
-            }
-
-            float h = values[0];
-            float s = values[1];
-            float b = values[2];
-            float a = values.length == 4 ? values[3] : 1.0f;
-            Color c = Color.getHSBColor(h, s, b);
-            return new Color(c.getRed(), c.getGreen(), c.getBlue(), (int)(a * 255));
-        }
-
-        // Let's try a few common color names
-        if ( colorString.equalsIgnoreCase("black")       ) return Color.BLACK;
-        if ( colorString.equalsIgnoreCase("blue")        ) return Color.BLUE;
-        if ( colorString.equalsIgnoreCase("cyan")        ) return Color.CYAN;
-        if ( colorString.equalsIgnoreCase("darkGray")    ) return Color.DARK_GRAY;
-        if ( colorString.equalsIgnoreCase("gray")        ) return Color.GRAY;
-        if ( colorString.equalsIgnoreCase("green")       ) return Color.GREEN;
-        if ( colorString.equalsIgnoreCase("lightGray")   ) return Color.LIGHT_GRAY;
-        if ( colorString.equalsIgnoreCase("magenta")     ) return Color.MAGENTA;
-        if ( colorString.equalsIgnoreCase("orange")      ) return Color.ORANGE;
-        if ( colorString.equalsIgnoreCase("pink")        ) return Color.PINK;
-        if ( colorString.equalsIgnoreCase("red")         ) return Color.RED;
-        if ( colorString.equalsIgnoreCase("white")       ) return Color.WHITE;
-        if ( colorString.equalsIgnoreCase("yellow")      ) return Color.YELLOW;
-        if ( colorString.equalsIgnoreCase("transparent") ) return new Color(0, 0, 0, 0);
-
-        // Let's try to find it as a system property
-        try {
-            return Color.getColor(colorString);
-        } catch ( IllegalArgumentException e ) {
-            // Ignore
-        }
-
-        throw new IllegalArgumentException("Could not parse or find color value: " + colorString);
-    }
 }

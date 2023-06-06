@@ -30,11 +30,11 @@ public final class BackgroundStyle
 
     public Optional<Painter> painter() { return Optional.ofNullable(_painter); }
 
-    public BackgroundStyle withColor( Color color ) { return new BackgroundStyle(color, _foundationColor, _painter); }
+    BackgroundStyle color( Color color ) { return new BackgroundStyle(color, _foundationColor, _painter); }
 
-    public BackgroundStyle withFoundationColor( Color foundation ) { return new BackgroundStyle(_color, foundation, _painter); }
+    BackgroundStyle foundationColor( Color foundation ) { return new BackgroundStyle(_color, foundation, _painter); }
 
-    public BackgroundStyle withPainter( Painter renderer ) { return new BackgroundStyle(_color, _foundationColor, renderer); }
+    BackgroundStyle painter( Painter renderer ) { return new BackgroundStyle(_color, _foundationColor, renderer); }
 
     @Override
     public int hashCode() { return Objects.hash(_color, _foundationColor, _painter); }

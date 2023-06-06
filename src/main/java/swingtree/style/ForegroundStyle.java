@@ -25,9 +25,9 @@ public final class ForegroundStyle
 
     public Optional<Painter> painter() { return Optional.ofNullable(_painter); }
 
-    public ForegroundStyle withColor( Color color ) { return new ForegroundStyle(color, _painter); }
+    ForegroundStyle color( Color color ) { return new ForegroundStyle(color, _painter); }
 
-    public ForegroundStyle withPainter( Painter painter ) { return new ForegroundStyle(_color, painter); }
+    ForegroundStyle painter( Painter painter ) { return new ForegroundStyle(_color, painter); }
 
     @Override
     public int hashCode() { return Objects.hash(_color, _painter); }
