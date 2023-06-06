@@ -53,18 +53,18 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    public UIForAnySwing(C component ) { super(component); }
+    public UIForAnySwing( C component ) { super(component); }
 
     /**
-     *  This method exposes a concise way to bind a {@link Event} to the
+     *  This method exposes a concise way to bind a {@link Noticeable} (usually an {@link Event) to the
      *  {@link JComponent#repaint()} method of the component wrapped by this {@link UI}!
      *  This means that the component will be repainted whenever the event is fired.
      *  <p>
-     * @param event The event to which the repaint method of the component will be bound.
+     * @param noticeable The event to which the repaint method of the component will be bound.
      * @return The JComponent type which will be wrapped by this builder node.
      */
-    public final I withRepaintIf( Event event ) {
-        event.subscribe( () -> _doUI( () -> getComponent().repaint() ) );
+    public final I withRepaintIf( Noticeable noticeable ) {
+        noticeable.subscribe( () -> _doUI( () -> getComponent().repaint() ) );
         return _this();
     }
 
