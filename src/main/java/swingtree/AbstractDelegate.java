@@ -847,7 +847,7 @@ abstract class AbstractDelegate<C extends JComponent>
      *          double r = 300 * state.progress();
      *          double x = it.getEvent().getX() - r / 2;
      *          double y = it.getEvent().getY() - r / 2;
-     *          it.render( g -> {
+     *          it.paint( g -> {
      *              g.setColor(new Color(1f, 1f, 0f, (float) (1 - state.progress())));
      *              g.fillOval((int) x, (int) y, (int) r, (int) r);
      *          });
@@ -857,33 +857,10 @@ abstract class AbstractDelegate<C extends JComponent>
      * @param painter The rendering task which should be executed on the EDT at the end of the current event cycle.
      */
     public final void paint( Painter painter ) {
-            // We check if the component is declared in the UI class
-            // as a nested class. If it is, it is one of ours, so we can safely assume that
-            // the paint method is overridden and that the component
-            // will pick up where we left off.
-            Class<?> enclosing = _component.getClass().getEnclosingClass();
-            boolean isCompClassNestedInUI = enclosing == UI.class;
-
-            if ( isCompClassNestedInUI )
-                UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
-                    // We do the rendering later in the paint method!
-                    ComponentExtension.from(_component).addAnimationPainter(painter);
-                    // Everything will be rendered in the paint method!
-                    // This is important because otherwise our rendering can be erased by a repaint
-                });
-            else
-                UI.runLater(()->{
-                    /*
-                        We do this later because after any user event
-                        it is very likely that the component gets repainted, meaning that anything rendered
-                        will be erased. So we use invoke later to schedule the rendering
-                        of the component to happen after the component is repainted (user event/repaint is over)
-                        Note that this is an unreliable way to do this, which is why the
-                        above code is preferred, but it is a fallback for when the component
-                        is not declared in the UI class (one of ours with a modified paint method).
-                    */
-                    painter.paint((Graphics2D) _component.getGraphics());
-                });
+        UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
+            // We do the rendering later in the paint method of a custom border implementation!
+            ComponentExtension.from(_component).addAnimationPainter(painter);
+        });
     }
 
     /**

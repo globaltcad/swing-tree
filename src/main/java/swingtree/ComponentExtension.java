@@ -80,7 +80,10 @@ public class ComponentExtension<C extends JComponent>
 
     public void clearAnimationRenderer() { _animationPainters.clear(); }
 
-    void addAnimationPainter( Painter painter ) { _animationPainters.add(Objects.requireNonNull(painter)); }
+    void addAnimationPainter( Painter painter ) {
+        _animationPainters.add(Objects.requireNonNull(painter));
+        _installCustomBorderBasedStyleAndAnimationRenderer();
+    }
 
     private StyleRenderer<C> _createRenderer() {
         Style style = _calculateStyle().map( s -> _applyStyleToComponentState( s ) ).orElse(null);
@@ -94,30 +97,21 @@ public class ComponentExtension<C extends JComponent>
         return Optional.ofNullable(_currentRenderer);
     }
 
-    void renderComponent( Graphics g, Runnable superPaint )
+    void renderBaseStyle( Graphics g )
     {
-        if ( _customLookAndFeelIsInstalled() ) {
-            superPaint.run(); // We render through the custom installed UI!
-            return;
-        }
+        if ( _customLookAndFeelIsInstalled() )
+            return; // We render through the custom installed UI!
 
-        if ( _componentIsDeclaredInUI(_owner) ) {
-            _currentRenderer = _createRenderer();
-            if ( _currentRenderer != null )
-                _currentRenderer.renderBaseStyle((Graphics2D) g);
-        }
+        if ( _componentIsDeclaredInUI(_owner) )
+            _renderBaseStyle(g);
         else
             _currentRenderer = null; // custom style rendering unfortunately not possible for this component :/
-
-        superPaint.run();
-        _renderAnimations( (Graphics2D) g );
     }
 
-    void renderComponent( Graphics g ) {
+    private void _renderBaseStyle(Graphics g ) {
         _currentRenderer = _createRenderer();
         if ( _currentRenderer != null )
             _currentRenderer.renderBaseStyle((Graphics2D) g);
-        _renderAnimations( (Graphics2D) g );
     }
 
 
@@ -137,7 +131,7 @@ public class ComponentExtension<C extends JComponent>
 
     }
 
-    public void renderForeground(Graphics2D g2d) {
+    public void renderForegroundStyle(Graphics2D g2d) {
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
         // Reset antialiasing to its previous state:
@@ -202,7 +196,7 @@ public class ComponentExtension<C extends JComponent>
                         _owner.setFont( newFont );
                 });
 
-        _applyPadding( style );
+        _installCustomBorderBasedStyleAndAnimationRenderer();
 
         _establishLookAndFeel( style );
 
@@ -281,7 +275,6 @@ public class ComponentExtension<C extends JComponent>
             if ( !success && _owner instanceof AbstractButton ) {
                 AbstractButton b = (AbstractButton) _owner;
                 b.setContentAreaFilled(false);
-                //b.setBorderPainted(false);
             }
         }
         else if ( _styleLaF != null ) {
@@ -328,10 +321,10 @@ public class ComponentExtension<C extends JComponent>
         }
     }
 
-    private void _applyPadding( Style style ) {
+    private void _installCustomBorderBasedStyleAndAnimationRenderer() {
         Border currentBorder = _owner.getBorder();
-        if ( !(currentBorder instanceof CustomBorder) )
-            _owner.setBorder(new CustomBorder<>(this, currentBorder));
+        if ( !(currentBorder instanceof ComponentExtension.BorderStyleAndAnimationRenderer) )
+            _owner.setBorder(new BorderStyleAndAnimationRenderer<>(this, currentBorder));
     }
 
     private void checkIfIsDeclaredInUI() {
@@ -362,13 +355,13 @@ public class ComponentExtension<C extends JComponent>
     }
 
 
-    static class CustomBorder<C extends JComponent> implements Border
+    static class BorderStyleAndAnimationRenderer<C extends JComponent> implements Border
     {
         private final ComponentExtension<C> _compExt;
         private final Border _formerBorder;
         private Insets _currentInsets;
 
-        CustomBorder(ComponentExtension<C> compExt, Border formerBorder) {
+        BorderStyleAndAnimationRenderer(ComponentExtension<C> compExt, Border formerBorder) {
             _compExt = compExt;
             _currentInsets = null;
             _formerBorder = formerBorder;
@@ -379,6 +372,10 @@ public class ComponentExtension<C extends JComponent>
             _checkIfInsetsChanged();
             if ( _compExt._currentRenderer != null )
                 _compExt._currentRenderer.renderBorderStyle((Graphics2D) g);
+            else if ( _formerBorder != null )
+                _formerBorder.paintBorder(c, g, x, y, width, height);
+
+            _compExt._renderAnimations( (Graphics2D) g );
         }
 
         @Override
@@ -398,7 +395,7 @@ public class ComponentExtension<C extends JComponent>
         private Insets _calculateInsets() {
             return _compExt._getOrCreateRenderer()
                             .map(r -> r.calculateBorderInsets(_formerBorder == null ? new Insets(0,0,0,0) : _formerBorder.getBorderInsets(_compExt._owner)))
-                            .orElse(new Insets(0, 0, 0, 0));
+                            .orElseGet(()->_formerBorder == null ? new Insets(0,0,0,0) : _formerBorder.getBorderInsets(_compExt._owner));
         }
 
         @Override
@@ -414,7 +411,7 @@ public class ComponentExtension<C extends JComponent>
         private PanelStyler() {}
 
         @Override
-        public void paint( Graphics g, JComponent c ) { ComponentExtension.from(c).renderComponent(g); }
+        public void paint( Graphics g, JComponent c ) { ComponentExtension.from(c)._renderBaseStyle(g); }
         @Override
         public void update( Graphics g, JComponent c ) { paint(g, c); }
         @Override
