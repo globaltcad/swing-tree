@@ -250,7 +250,7 @@ public class ComponentExtension<C extends JComponent>
         if ( style.background().painter().isPresent() )
             weNeedToOverrideLaF = true;
 
-        if ( style.shadow().color().isPresent() )
+        if ( style.anyVisibleShadows() )
             weNeedToOverrideLaF = true;
 
         if ( weNeedToOverrideLaF ) {

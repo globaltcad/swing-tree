@@ -2,9 +2,10 @@ package swingtree.style;
 
 import java.awt.*;
 import java.awt.font.TextAttribute;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  *  An immutable, wither based settings container for {@link javax.swing.JComponent} styling.
@@ -40,8 +41,8 @@ public final class Style
                                             BorderStyle.none(),
                                             BackgroundStyle.none(),
                                             ForegroundStyle.none(),
-                                            ShadowStyle.none(),
-                                            FontStyle.none()
+                                            FontStyle.none(),
+                                            Collections.singletonMap(ShadowStyle.DEFAULT_KEY,ShadowStyle.none())
                                         );
 
     public static Style none() { return _NONE; }
@@ -50,8 +51,8 @@ public final class Style
     private final BorderStyle     _border;
     private final BackgroundStyle _background;
     private final ForegroundStyle _foreground;
-    private final ShadowStyle     _shadow;
     private final FontStyle       _font;
+    private final Map<String, ShadowStyle> _shadows = new TreeMap<>();
 
 
     private Style(
@@ -59,23 +60,29 @@ public final class Style
         BorderStyle border,
         BackgroundStyle background,
         ForegroundStyle foreground,
-        ShadowStyle shadow,
-        FontStyle font
+        FontStyle font,
+        Map<String, ShadowStyle> shadows
     ) {
         _layout = layout;
         _border = border;
         _background = background;
         _foreground = foreground;
-        _shadow = shadow;
         _font = font;
+        _shadows.putAll(shadows);
     }
 
-    private Style _withLayout( LayoutStyle layout ) { return new Style(layout, _border, _background, _foreground, _shadow, _font); }
-    private Style _withBorder( BorderStyle border ) { return new Style(_layout, border, _background, _foreground, _shadow, _font); }
-    private Style _withBackground( BackgroundStyle background ) { return new Style(_layout, _border, background, _foreground, _shadow, _font); }
-    private Style _withForeground( ForegroundStyle foreground ) { return new Style(_layout, _border, _background, foreground, _shadow, _font); }
-    private Style _withShadow( ShadowStyle shadow ) { return new Style(_layout, _border, _background, _foreground, shadow, _font); }
-    private Style _withFont( FontStyle font ) { return new Style(_layout, _border, _background, _foreground, _shadow, font); }
+    private Style _withLayout( LayoutStyle layout ) { return new Style(layout, _border, _background, _foreground, _font, _shadows); }
+    private Style _withBorder( BorderStyle border ) { return new Style(_layout, border, _background, _foreground, _font, _shadows); }
+    private Style _withBackground( BackgroundStyle background ) { return new Style(_layout, _border, background, _foreground, _font, _shadows); }
+    private Style _withForeground( ForegroundStyle foreground ) { return new Style(_layout, _border, _background, foreground, _font, _shadows); }
+    private Style _withFont( FontStyle font ) { return new Style(_layout, _border, _background, _foreground, font, _shadows); }
+    private Style _withShadow( Map<String, ShadowStyle> shadows ) { return new Style(_layout, _border, _background, _foreground, _font, shadows); }
+    private Style _withShadow( Function<ShadowStyle, ShadowStyle> styler ) {
+        // A new map is created where all the styler is applied to all the values:
+        Map<String, ShadowStyle> styledShadows = new TreeMap<>();
+        _shadows.forEach( (key, value) -> styledShadows.put(key, styler.apply(value)) );
+        return _withShadow(styledShadows);
+    }
 
     /**
      *  Creates a new {@link Style} with the provided top, right, left and bottom margin distances.
@@ -477,88 +484,161 @@ public final class Style
      *  Returns a new {@link Style} with the provided horizontal shadow offset.
      *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
      *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(int)},
-     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}.
+     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}. <br>
+     *  Note that this property will not only be applied to the default shadow, but also any
+     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
      *
      * @param offset The shadow offset in pixels.
      * @return A new {@link Style} with the provided horizontal shadow offset.
      */
-    public Style shadowHorizontalOffset( int offset ) { return _withShadow(_shadow.withHorizontalOffset(offset)); }
+    public Style shadowHorizontalOffset( int offset ) { return _withShadow( shadow -> shadow.withHorizontalOffset(offset)); }
 
     /**
      *  Returns a new {@link Style} with the provided vertical shadow offset.
      *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
      *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(int)},
-     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}.
+     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}. <br>
+     *  Note that this property will not only be applied to the default shadow, but also any
+     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
      *
      * @param offset The shadow offset in pixels.
      * @return A new {@link Style} with the provided vertical shadow offset.
      */
-    public Style shadowVerticalOffset( int offset ) { return _withShadow(_shadow.withVerticalOffset(offset)); }
+    public Style shadowVerticalOffset( int offset ) { return _withShadow( shadow -> shadow.withVerticalOffset(offset)); }
 
     /**
      *  Returns a new {@link Style} with the provided shadow offset.
      *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
      *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(int)},
-     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}.
+     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}. <br>
+     *  Note that this property will not only be applied to the default shadow, but also any
+     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
      *
      * @param horizontalOffset The horizontal shadow offset in pixels.
      * @param verticalOffset The vertical shadow offset in pixels.
      * @return A new {@link Style} with the provided shadow offset.
      */
     public Style shadowOffset( int horizontalOffset, int verticalOffset ) {
-        return _withShadow(_shadow.withHorizontalOffset(horizontalOffset).withVerticalOffset(verticalOffset));
+        return _withShadow( shadow -> shadow.withHorizontalOffset(horizontalOffset).withVerticalOffset(verticalOffset));
     }
 
+    /**
+     *  Returns a new {@link Style} with the provided horizontal and vertical shadow offset.
+     *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(int)},
+     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}. <br>
+     *  Note that this property will not only be applied to the default shadow, but also any
+     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
+     *
+     * @param horizontalAndVerticalOffset The horizontal and vertical shadow offset in pixels.
+     * @return A new {@link Style} with the provided shadow offset.
+     */
     public Style shadowOffset( int horizontalAndVerticalOffset ) {
-        return _withShadow(_shadow.withHorizontalOffset(horizontalAndVerticalOffset).withVerticalOffset(horizontalAndVerticalOffset));
+        return _withShadow( shadow -> shadow.withHorizontalOffset(horizontalAndVerticalOffset).withVerticalOffset(horizontalAndVerticalOffset));
     }
 
     /**
      *  Returns a new {@link Style} with the provided shadow blur radius.
      *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
      *  Note that in order to see the shadow, you may also need to call
-     *  {@link #shadowSpreadRadius(int)} and {@link #shadowColor(Color)}.
+     *  {@link #shadowSpreadRadius(int)} and {@link #shadowColor(Color)}. <br>
+     *  Note that this property will not only be applied to the default shadow, but also any
+     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
      *
      * @param radius The shadow blur radius in pixels.
      * @return A new {@link Style} with the provided shadow blur radius.
      */
-    public Style shadowBlurRadius( int radius ) { return _withShadow(_shadow.withBlurRadius(radius)); }
+    public Style shadowBlurRadius( int radius ) { return _withShadow( shadow -> shadow.withBlurRadius(radius)); }
 
     /**
      *  Returns a new {@link Style} with the provided shadow spread radius.
      *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
      *  Note that in order to see the shadow, you may also need to call
-     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}.
+     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}. <br>
+     *  Note that this property will not only be applied to the default shadow, but also any
+     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
      *
      * @param radius The shadow spread radius in pixels.
      * @return A new {@link Style} with the provided shadow spread radius.
      */
-    public Style shadowSpreadRadius( int radius ) { return _withShadow(_shadow.withSpreadRadius(radius)); }
+    public Style shadowSpreadRadius( int radius ) { return _withShadow( shadow -> shadow.withSpreadRadius(radius)); }
 
     /**
      *  Returns a new {@link Style} with the provided shadow color.
      *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
      *  Note that in order to see the shadow, you may also need to call
-     *  {@link #shadowBlurRadius(int)} and {@link #shadowSpreadRadius(int)}.
+     *  {@link #shadowBlurRadius(int)} and {@link #shadowSpreadRadius(int)}. <br>
+     *  Note that this property will not only be applied to the default shadow, but also any
+     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
      *
      * @param color The shadow color.
      * @return A new {@link Style} with the provided shadow color.
      */
-    public Style shadowColor( Color color ) { return _withShadow(_shadow.withColor(color)); }
+    public Style shadowColor( Color color ) { return _withShadow( shadow -> shadow.withColor(color)); }
 
     /**
      *  Returns a new {@link Style} with the provided shadow color in the form of a string.
      *  The string can be either a hex color string, a color name or a color constant from the system properties.
      *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
      *  Note that in order to see the shadow, you may also need to call
-     *  {@link #shadowBlurRadius(int)} and {@link #shadowSpreadRadius(int)}.
+     *  {@link #shadowBlurRadius(int)} and {@link #shadowSpreadRadius(int)}. <br>
+     *  Note that this property will not only be applied to the default shadow, but also any
+     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
      *
      * @param colorString The shadow color.
      * @return A new {@link Style} with the provided shadow color.
      */
-    public Style shadowColor( String colorString ) { return _withShadow(_shadow.withColor(_colorFrom(colorString))); }
+    public Style shadowColor( String colorString ) { return _withShadow( shadow -> shadow.withColor(_colorFrom(colorString))); }
 
-    public Style shadowIsInset(boolean b ) { return _withShadow(_shadow.withIsInset(b)); }
+    /**
+     *  Use this to control whether the shadow should be rendered inwards or outwards. <br>
+     *  Note that this property will not only be applied to the default shadow, but also any
+     *  other named shadow that you may have defined using {@link #shadow(String, Function)}. <br>
+     *  (see {@link #shadow(String, Function)} for an example of how to use named shadows)
+     *
+     * @param inwards Whether the shadow should be rendered inwards or outwards.
+     * @return A new {@link Style} with the provided shadow inset flag.
+     */
+    public Style shadowIsInset( boolean inwards ) { return _withShadow( shadow -> shadow.withIsInset(inwards)); }
+
+    /**
+     *  This method makes it possible to define multiple shadows for a single component
+     *  through a unique name.
+     *  This is useful when you want to do advanced shadow effects, such as neumorphism a.k.a. soft UI. <br>
+     *  Here is an example of how to use this method:
+     *  <pre>{@code
+     *      UI.panel()
+     *      .withStyle( it ->
+     *          it.style()
+     *          .shadow("dark shading", shadow ->
+     *              shadow.color("#000000")
+     *              .horizontalOffset(5)
+     *              .verticalOffset(5)
+     *              .blurRadius(10)
+     *              .spreadRadius(0)
+     *          )
+     *          .shadow("light shading", shadow ->
+     *              shadow.color("#ffffff")
+     *              .horizontalOffset(-5)
+     *              .verticalOffset(-5)
+     *              .blurRadius(10)
+     *              .spreadRadius(0)
+     *          )
+     *  }</pre>
+     *
+     * @param shadowName The name of the shadow.
+     * @param styler A function that takes a {@link ShadowStyle} and returns a new {@link ShadowStyle}.
+     * @return A new {@link Style} with a named shadow defined by the provided styler lambda.
+     */
+    public Style shadow( String shadowName, Function<ShadowStyle, ShadowStyle> styler ) {
+        Objects.requireNonNull(shadowName);
+        Objects.requireNonNull(styler);
+        ShadowStyle shadow = Optional.ofNullable(_shadows.get(shadowName)).orElse(ShadowStyle.none());
+        // We clone the shadow map:
+        Map<String, ShadowStyle> newShadows = new HashMap<>(_shadows);
+        newShadows.put(shadowName, styler.apply(shadow));
+        return _withShadow(newShadows);
+    }
 
     /**
      *  Returns a new {@link Style} with the provided font name and size.
@@ -737,13 +817,25 @@ public final class Style
 
     public ForegroundStyle foreground() { return _foreground; }
 
-    public ShadowStyle shadow() { return _shadow; }
+    public ShadowStyle shadow() { return _shadows.get(ShadowStyle.DEFAULT_KEY); }
+
+    public List<ShadowStyle> shadows() {
+        return new ArrayList<>(_shadows.values());
+    }
+
+    public boolean anyVisibleShadows() {
+        return _shadows.values().stream().anyMatch(s -> s.color().isPresent() && s.color().get().getAlpha() > 0 );
+    }
 
     public FontStyle font() { return _font; }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_layout, _border, _background, _foreground, _shadow, _font);
+        return Objects.hash(_layout, _border, _background, _foreground, _font, _mapHash(_shadows));
+    }
+
+    private int _mapHash( Map<String, ShadowStyle> map ) {
+        return map.entrySet().stream().mapToInt(e -> Objects.hash(e.getKey(), e.getValue())).sum();
     }
 
     @Override
@@ -752,22 +844,40 @@ public final class Style
         if ( obj == null ) return false;
         if ( !(obj instanceof Style) ) return false;
         Style other = (Style) obj;
-        return Objects.equals(_layout,     other._layout   ) &&
+        return Objects.equals(_layout,     other._layout    ) &&
                Objects.equals(_border,     other._border    ) &&
                Objects.equals(_background, other._background) &&
-                Objects.equals(_foreground, other._foreground) &&
-               Objects.equals(_shadow,     other._shadow    ) &&
-               Objects.equals(_font,       other._font      );
+               Objects.equals(_foreground, other._foreground) &&
+               Objects.equals(_font,       other._font      ) &&
+                _shadowEquals(_shadows,    other._shadows   );
+    }
+
+    private boolean _shadowEquals( Map<String, ShadowStyle> map1, Map<String, ShadowStyle> map2 ) {
+        if ( map1.size() != map2.size() ) return false;
+        for ( Map.Entry<String, ShadowStyle> entry : map1.entrySet() ) {
+            if ( !map2.containsKey(entry.getKey()) ) return false;
+            if ( !Objects.equals(entry.getValue(), map2.get(entry.getKey())) ) return false;
+        }
+        return true;
     }
 
     @Override
     public String toString() {
+        String shadowString;
+        if ( _shadows.size() == 1 )
+            shadowString = _shadows.get(ShadowStyle.DEFAULT_KEY).toString();
+        else
+            shadowString = _shadows.entrySet()
+                                    .stream()
+                                    .map(e -> e.getKey() + ": " + e.getValue())
+                                    .collect(Collectors.joining(", ", "shadows=[", "]"));
+
         return "Style[" +
                     _layout     + ", " +
                     _border     + ", " +
                     _background + ", " +
                     _foreground + ", " +
-                    _shadow     + ", " +
+                    shadowString + ", " +
                     _font       +
                 "]";
     }

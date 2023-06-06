@@ -6,6 +6,7 @@ import java.util.Optional;
 
 public final class ShadowStyle
 {
+    static final String DEFAULT_KEY = "default";
     private static final ShadowStyle _NONE = new ShadowStyle(0,0,0,0, null, true);
 
     public static ShadowStyle none() { return _NONE; }

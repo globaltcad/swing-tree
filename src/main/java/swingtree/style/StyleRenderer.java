@@ -60,9 +60,11 @@ public class StyleRenderer<C extends JComponent>
         // We enable antialiasing:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
-        style.shadow().color().ifPresent(color -> {
-            _renderShadows(style, _comp, g2d, color);
-        });
+        for ( ShadowStyle shadow : style.shadows() )
+            shadow.color().ifPresent(color -> {
+                _renderShadows(style, shadow, _comp, g2d, color);
+            });
+
         style.border().color().ifPresent( color -> {
             _drawBorder(style, color, g2d);
         });
@@ -356,6 +358,7 @@ public class StyleRenderer<C extends JComponent>
 
     private void _renderShadows(
         Style style,
+        ShadowStyle shadow,
         JComponent comp,
         Graphics2D g2d,
         Color shadowColor
@@ -364,8 +367,6 @@ public class StyleRenderer<C extends JComponent>
         // Is the shadow color transparent?
         if ( shadowColor.getAlpha() == 0 )
             return;
-
-        ShadowStyle shadow = style.shadow();
 
         // The background box is calculated from the margins and border radius:
         int left      = Math.max(style.margin().left().orElse(0),   0);
@@ -405,7 +406,7 @@ public class StyleRenderer<C extends JComponent>
                                         h + shadowOutset * 2 - spreadRadius * 2 - borderWidthOffset * 2
                                     );
 
-        Function<Integer, Integer> offsetFunction = (radius) -> (int)((radius * 2) / ( shadow.isInset() ? 4.5 : 3.79) + ( style.shadow().isInset() ? 0 : borderWidth ));
+        Function<Integer, Integer> offsetFunction = (radius) -> (int)((radius * 2) / ( shadow.isInset() ? 4.5 : 3.79) + ( shadow.isInset() ? 0 : borderWidth ));
 
         int gradientStartOffset = 1 + offsetFunction.apply(cornerRadius);
 
