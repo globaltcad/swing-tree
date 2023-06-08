@@ -9,6 +9,13 @@ public class SimpleStyleSheet extends StyleSheet
 {
     @Override
     protected void declaration() {
+        apply(type(JComponent.class).group("soft base"), it ->
+            it.style()
+                .borderRadius(20)
+                .backgroundColor(new Color(0.4f, 0.85f, 1))
+                .pad(30)
+                .margin(50)
+        );
         apply(type(JComponent.class).group("frameShadow"), it ->
             it.style()
                 .borderRadius(24)
@@ -28,10 +35,8 @@ public class SimpleStyleSheet extends StyleSheet
                 .pad(20)
                 .margin(12)
         );
-        apply(type(JComponent.class).group("neumorphic"), it ->
+        apply(type(JComponent.class).group("neumorphic").inherits("soft base"), it ->
             it.style()
-                .borderRadius(20)
-                .backgroundColor(new Color(0.4f, 0.85f, 1))
                 .shadow("bright", s -> s
                     .color(new Color(0.7f, 0.95f, 1f, 0.35f))
                     .offset(-10)
@@ -43,8 +48,6 @@ public class SimpleStyleSheet extends StyleSheet
                 .shadowBlurRadius(13)
                 .shadowSpreadRadius(-2)
                 .shadowIsInset(false)
-                .pad(30)
-                .margin(50)
                 .backgroundPainter( g2d -> {
                     renderDiagonalShade(g2d, it.component(), new Insets(50,50,50,50), ShadeType.TOP_LEFT_TO_BOTTOM_RIGHT);
                     if ( it.component() instanceof AbstractButton ) {
@@ -59,23 +62,53 @@ public class SimpleStyleSheet extends StyleSheet
                     }
                 })
         );
-        apply(type(AbstractButton.class).group("neumorphic button"), it ->
+        apply(type(AbstractButton.class).group("neumorphic button").inherits("soft base"), it ->
             it.style()
-                .borderRadius(20)
-                .backgroundColor(new Color(0.4f, 0.85f, 1))
                 .shadow("bright", s -> s
                     .color(new Color(0.7f, 0.95f, 1f, 0.35f))
-                    .offset(-10)
+                    .offset(-5)
                 )
                 .shadow("dark", s -> s
                     .color(new Color(0, 0.1f, 0.2f, 0.35f))
-                    .offset(+10)
+                    .offset(+5)
                 )
                 .shadowBlurRadius(13)
                 .shadowSpreadRadius(-2)
                 .shadowIsInset(false)
                 .pad(30)
                 .margin(50)
+        );
+        apply(type(JComponent.class).group("soft inwards").inherits("soft base"), it ->
+            it.style()
+                .shadow("bright", s -> s
+                    .color(new Color(0.7f, 0.95f, 1f, 0.35f))
+                    .offset(-5)
+                )
+                .shadow("dark", s -> s
+                    .color(new Color(0, 0.1f, 0.2f, 0.35f))
+                    .offset(+5)
+                )
+                .shadowBlurRadius(13)
+                .shadowSpreadRadius(-2)
+                .shadowIsInset(true)
+                .pad(30)
+                .margin(10)
+        );
+        apply(type(JComponent.class).group("soft slim").inherits("soft base"), it ->
+            it.style()
+                .shadow("bright", s -> s
+                    .color(new Color(0.7f, 0.95f, 1f, 0.35f))
+                    .offset(-3)
+                )
+                .shadow("dark", s -> s
+                    .color(new Color(0, 0.1f, 0.2f, 0.25f))
+                    .offset(+3)
+                )
+                .shadowBlurRadius(8)
+                .shadowSpreadRadius(-5)
+                .shadowIsInset(false)
+                .pad(0)
+                .margin(15)
         );
     }
 

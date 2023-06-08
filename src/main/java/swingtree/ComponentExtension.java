@@ -7,8 +7,10 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.plaf.ButtonUI;
 import javax.swing.plaf.ComponentUI;
+import javax.swing.plaf.LabelUI;
 import javax.swing.plaf.PanelUI;
 import javax.swing.plaf.basic.BasicButtonUI;
+import javax.swing.plaf.basic.BasicLabelUI;
 import javax.swing.plaf.basic.BasicPanelUI;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
@@ -309,6 +311,13 @@ public class ComponentExtension<C extends JComponent>
             b.setUI(new ButtonStyler(b.getUI()));
             _styleLaF = laf;
         }
+        else if ( _owner instanceof JLabel ) {
+            JLabel l = (JLabel) _owner;
+            _formerLaF = l.getUI();
+            LabelStyler laf = new LabelStyler(l.getUI());
+            l.setUI(laf);
+            _styleLaF = laf;
+        }
 
         return false;
     }
@@ -323,6 +332,11 @@ public class ComponentExtension<C extends JComponent>
             else if ( _owner instanceof AbstractButton ) {
                 AbstractButton b = (AbstractButton) _owner;
                 b.setUI((ButtonUI) _formerLaF);
+                _styleLaF = null;
+            }
+            else if ( _owner instanceof JLabel ) {
+                JLabel l = (JLabel) _owner;
+                l.setUI((LabelUI) _formerLaF);
                 _styleLaF = null;
             }
         }
@@ -432,6 +446,22 @@ public class ComponentExtension<C extends JComponent>
         private final ButtonUI _formerUI;
 
         ButtonStyler(ButtonUI formerUI) { _formerUI = formerUI; }
+
+        @Override public void paint( Graphics g, JComponent c ) {
+            ComponentExtension.from(c)._renderBaseStyle(g);
+            if ( _formerUI != null )
+                _formerUI.paint(g, c);
+        }
+        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
+        @Override
+        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
+    }
+
+    static class LabelStyler extends BasicLabelUI
+    {
+        private final LabelUI _formerUI;
+
+        private LabelStyler(LabelUI formerUI) { _formerUI = formerUI; }
 
         @Override public void paint( Graphics g, JComponent c ) {
             ComponentExtension.from(c)._renderBaseStyle(g);

@@ -307,7 +307,7 @@ public final class UI
      * @param path The path to the icon. It can be a classpath resource or a file path.
      * @return The icon.
      */
-    public static Icon icon( String path ) {
+    public static ImageIcon icon( String path ) {
         // First we make the path platform independent:
         path = path.replace('\\', '/');
         // Then we try to load the icon url from the classpath:
