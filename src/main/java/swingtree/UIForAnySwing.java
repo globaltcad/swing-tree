@@ -1506,8 +1506,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(colorIfTrue, "colorIfTrue", Val.class);
         NullUtil.nullArgCheck(colorIfFalse, "colorIfFalse", Val.class);
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided background color!");
-        _onShow( condition, v -> _updateBackground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
-        _onShow( colorIfTrue, v -> _updateBackground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
+        _onShow( condition,    v -> _updateBackground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
+        _onShow( colorIfTrue,  v -> _updateBackground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
         _onShow( colorIfFalse, v -> _updateBackground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
         return this.withBackground( condition.get() ? colorIfTrue.orElseNull() : colorIfFalse.orElseNull() );
     }
@@ -1539,12 +1539,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     /**
      *  Use this to bind to a {@link sprouts.Val}
      *  containing a foreground color.
-     *  This is a convenience method, which would
-     *  be equivalent to:
+     *  This is a convenience method, which works
+     *  similar to:
      *  <pre>{@code
      *      UI.button("Click Me")
      *      .peek( button -> {
-     *          fg.onSetItem(JButton::setForeground);
+     *          fg.onSet( v -> button.setForeground(v.get()) );
      *          button.setForeground(fg.get());
      *      });
      *  }</pre><br>

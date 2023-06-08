@@ -1,7 +1,6 @@
 package swingtree.style;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.geom.*;
 import java.util.Objects;
@@ -15,6 +14,8 @@ import java.util.function.Function;
  */
 public class StyleRenderer<C extends JComponent>
 {
+    private static boolean DO_ANTIALIASING = true;
+
     private final C _comp;
     private final Style style;
 
@@ -30,7 +31,8 @@ public class StyleRenderer<C extends JComponent>
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
 
         // We enable antialiasing:
-        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+        if ( DO_ANTIALIASING )
+            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         style.background().foundationColor().ifPresent(outerColor -> {
             _fillOuterBackground(style, outerColor, g2d);
@@ -38,7 +40,7 @@ public class StyleRenderer<C extends JComponent>
         style.background().color().ifPresent(color -> {
             if ( color.getAlpha() == 0 ) return;
             g2d.setColor(color);
-            g2d.fill(_calculateBaseArea(style));
+            g2d.fill(_calculateBaseArea(style, 0));
         });
 
         Font componentFont = _comp.getFont();
@@ -46,6 +48,7 @@ public class StyleRenderer<C extends JComponent>
             g2d.setFont( componentFont );
 
         style.background().painter().ifPresent( backgroundPainter -> {
+            g2d.setClip(_calculateBaseArea(style, 0));
             backgroundPainter.paint(g2d);
         });
 
@@ -58,7 +61,8 @@ public class StyleRenderer<C extends JComponent>
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
 
         // We enable antialiasing:
-        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+        if ( DO_ANTIALIASING )
+            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         for ( ShadowStyle shadow : style.shadows() )
             shadow.color().ifPresent(color -> {
@@ -75,6 +79,13 @@ public class StyleRenderer<C extends JComponent>
 
     public void renderForegroundStyle(Graphics2D g2d)
     {
+        // We remember if antialiasing was enabled before we render:
+        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
+
+        // We enable antialiasing:
+        if ( DO_ANTIALIASING )
+            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+
         Font componentFont = _comp.getFont();
         if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
             g2d.setFont( componentFont );
@@ -82,6 +93,9 @@ public class StyleRenderer<C extends JComponent>
         style.foreground().painter().ifPresent( foregroundPainter -> {
             foregroundPainter.paint(g2d);
         });
+
+        // Reset antialiasing to its previous state:
+        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
     private void _drawBorder(Style style, Color color, Graphics2D g2d) {
@@ -212,14 +226,14 @@ public class StyleRenderer<C extends JComponent>
         }
     }
 
-    private Area _calculateBaseArea( Style style )
+    private Area _calculateBaseArea( Style style, int insets )
     {
         // The background box is calculated from the margins and border radius:
-        int left      = Math.max(style.margin().left().orElse(0), 0);
-        int top       = Math.max(style.margin().top().orElse(0), 0);
-        int right     = Math.max(style.margin().right().orElse(0), 0);
-        int bottom    = Math.max(style.margin().bottom().orElse(0), 0);
-        int width     = _comp.getWidth();
+        int left      = Math.max(style.margin().left().orElse(0), 0)   + insets;
+        int top       = Math.max(style.margin().top().orElse(0), 0)    + insets;
+        int right     = Math.max(style.margin().right().orElse(0), 0)  + insets;
+        int bottom    = Math.max(style.margin().bottom().orElse(0), 0) + insets;
+        int width     = _comp.getWidth() ;
         int height    = _comp.getHeight();
 
         if ( style.border().allCornersShareTheSameArc() ) {
@@ -349,7 +363,7 @@ public class StyleRenderer<C extends JComponent>
         Rectangle2D.Float outerRect = new Rectangle2D.Float(0, 0, width, height);
 
         Area outer = new Area(outerRect);
-        Area inner = _calculateBaseArea( style);
+        Area inner = _calculateBaseArea( style, 0 );
         outer.subtract(inner);
 
         g2d.setColor(color);
@@ -393,7 +407,7 @@ public class StyleRenderer<C extends JComponent>
         int blurRadius   = Math.max(shadow.blurRadius(), 0);
         int spreadRadius = !shadow.isOutset() ? shadow.spreadRadius() : -shadow.spreadRadius();
 
-        Area baseArea = _calculateBaseArea(style);
+        Area baseArea = _calculateBaseArea(style, shadow.isOutset() ? +1 : -1);
 
         int shadowInset  = blurRadius;
         int shadowOutset = blurRadius;
@@ -564,7 +578,7 @@ public class StyleRenderer<C extends JComponent>
 
         Color innerColor;
         Color outerColor;
-        Color shadowBackgroundColor = new Color(0,0,0,0);
+        Color shadowBackgroundColor = _transparentShadowBackground(shadowStyle);
         if ( shadowStyle.isOutset() ) {
             innerColor = shadowStyle.color().orElse(Color.BLACK);
             outerColor = shadowBackgroundColor;
@@ -714,7 +728,8 @@ public class StyleRenderer<C extends JComponent>
 
         Color innerColor;
         Color outerColor;
-        Color shadowBackgroundColor = new Color(0,0,0,0);
+        // Same as shadow color but without alpha:
+        Color shadowBackgroundColor = _transparentShadowBackground(shadowStyle);
         if (shadowStyle.isOutset()) {
             innerColor = shadowStyle.color().orElse(Color.BLACK);
             outerColor = shadowBackgroundColor;
@@ -766,6 +781,12 @@ public class StyleRenderer<C extends JComponent>
         edgeG2d.dispose();
     }
 
+    private static Color _transparentShadowBackground(ShadowStyle shadow) {
+        return shadow.color()
+                    .map(c -> new Color(c.getRed(), c.getGreen(), c.getBlue(), 0))
+                    .orElse(new Color(0.5f, 0.5f, 0.5f, 0f));
+    }
+
     public Insets calculateBorderInsets(Insets formerInsets) {
         int left      = style.margin().left().orElse(formerInsets.left);
         int top       = style.margin().top().orElse(formerInsets.top);
@@ -781,6 +802,21 @@ public class StyleRenderer<C extends JComponent>
         top    += Math.max(style.border().widths().top().orElse(0),    0)/2;
         right  += Math.max(style.border().widths().right().orElse(0),  0)/2;
         bottom += Math.max(style.border().widths().bottom().orElse(0), 0)/2;
+        return new Insets(top, left, bottom, right);
+    }
+
+    public Insets calculateMarginInsets() {
+        int left   = style.margin().left().orElse(0);
+        int top    = style.margin().top().orElse(0);
+        int right  = style.margin().right().orElse(0);
+        int bottom = style.margin().bottom().orElse(0);
+
+        // Add border widths:
+        left   += Math.max(style.border().widths().left().orElse(0),   0)/2;
+        top    += Math.max(style.border().widths().top().orElse(0),    0)/2;
+        right  += Math.max(style.border().widths().right().orElse(0),  0)/2;
+        bottom += Math.max(style.border().widths().bottom().orElse(0), 0)/2;
+
         return new Insets(top, left, bottom, right);
     }
 

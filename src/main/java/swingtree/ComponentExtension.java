@@ -1,21 +1,21 @@
 package swingtree;
 
 import swingtree.style.Painter;
-import swingtree.style.Style;
-import swingtree.style.StyleDelegate;
-import swingtree.style.StyleRenderer;
+import swingtree.style.*;
 
 import javax.swing.*;
-import javax.swing.border.AbstractBorder;
 import javax.swing.border.Border;
+import javax.swing.plaf.ButtonUI;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.PanelUI;
+import javax.swing.plaf.basic.BasicButtonUI;
 import javax.swing.plaf.basic.BasicPanelUI;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  *  Is attached to UI components in the form of a client property.
@@ -49,6 +49,7 @@ public class ComponentExtension<C extends JComponent>
     private ComponentUI _styleLaF = null;
     private ComponentUI _formerLaF = null;
     private Function<StyleDelegate<C>, Style> _styling = null;
+    private StyleSheet _styleSheet = null;
 
 
     private ComponentExtension( C owner ) {
@@ -65,6 +66,10 @@ public class ComponentExtension<C extends JComponent>
         else
             _styling = _styling.andThen(s -> styler.apply(new StyleDelegate<>(_owner, s)));
 
+        establishStyle();
+    }
+
+    void establishStyle() {
         _calculateStyle().ifPresent(this::_applyStyleToComponentState);
     }
 
@@ -145,9 +150,8 @@ public class ComponentExtension<C extends JComponent>
     }
 
     private Optional<Style> _calculateStyle() {
-        Optional<Style> style = UI.SETTINGS()
-                                    .getStyleSheet()
-                                    .map( ss -> ss.run(_owner) );
+        _styleSheet = _styleSheet != null ? _styleSheet : UI.SETTINGS().getStyleSheet().orElse(null);
+        Optional<Style> style = _styleSheet == null ? Optional.empty() : Optional.of(_styleSheet.run( _owner ));
         if ( _styling == null )
             return style;
         else
@@ -156,6 +160,9 @@ public class ComponentExtension<C extends JComponent>
 
     private Style _applyStyleToComponentState( Style style )
     {
+        if ( Style.none().equals(style) )
+            return style;
+
         Objects.requireNonNull(style);
         /*
             Note that in SwingTree we do not override the UI classes of Swing to apply styles.
@@ -295,13 +302,13 @@ public class ComponentExtension<C extends JComponent>
             _styleLaF = laf;
             return true;
         }
-        //else if ( _owner instanceof AbstractButton ) {
-        //    AbstractButton b = (AbstractButton) _owner;
-        //    _formerLaF = b.getUI();
-        //    ButtonStyler laf = new ButtonStyler(b.getUI());
-        //    b.setUI(new ButtonStyler(b.getUI()));
-        //    _styleLaF = laf;
-        //}
+        else if ( _owner instanceof AbstractButton ) {
+            AbstractButton b = (AbstractButton) _owner;
+            _formerLaF = b.getUI();
+            ButtonStyler laf = new ButtonStyler(b.getUI());
+            b.setUI(new ButtonStyler(b.getUI()));
+            _styleLaF = laf;
+        }
 
         return false;
     }
@@ -313,11 +320,11 @@ public class ComponentExtension<C extends JComponent>
                 p.setUI((PanelUI) _formerLaF);
                 _styleLaF = null;
             }
-            //else if ( _owner instanceof AbstractButton ) {
-            //    AbstractButton b = (AbstractButton) _owner;
-            //    b.setUI((ButtonUI) _formerLaF);
-            //    _styleLaF = null;
-            //}
+            else if ( _owner instanceof AbstractButton ) {
+                AbstractButton b = (AbstractButton) _owner;
+                b.setUI((ButtonUI) _formerLaF);
+                _styleLaF = null;
+            }
         }
     }
 
@@ -360,6 +367,7 @@ public class ComponentExtension<C extends JComponent>
         private final ComponentExtension<C> _compExt;
         private final Border _formerBorder;
         private Insets _currentInsets;
+        private Insets _currentMarginInsets = new Insets(0,0,0,0);
 
         BorderStyleAndAnimationRenderer(ComponentExtension<C> compExt, Border formerBorder) {
             _compExt = compExt;
@@ -393,15 +401,18 @@ public class ComponentExtension<C extends JComponent>
         }
 
         private Insets _calculateInsets() {
+            _currentMarginInsets = _compExt._getOrCreateRenderer()
+                                            .map(r -> r.calculateMarginInsets())
+                                            .orElse(_currentMarginInsets);
+
             return _compExt._getOrCreateRenderer()
                             .map(r -> r.calculateBorderInsets(_formerBorder == null ? new Insets(0,0,0,0) : _formerBorder.getBorderInsets(_compExt._owner)))
                             .orElseGet(()->_formerBorder == null ? new Insets(0,0,0,0) : _formerBorder.getBorderInsets(_compExt._owner));
         }
 
-        @Override
-        public boolean isBorderOpaque() {
-            return false;
-        }
+        public Insets getCurrentMarginInsets() { return _currentMarginInsets; }
+
+        @Override public boolean isBorderOpaque() { return false; }
     }
 
     static class PanelStyler extends BasicPanelUI
@@ -410,29 +421,38 @@ public class ComponentExtension<C extends JComponent>
 
         private PanelStyler() {}
 
+        @Override public void paint( Graphics g, JComponent c ) { ComponentExtension.from(c)._renderBaseStyle(g); }
+        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
         @Override
-        public void paint( Graphics g, JComponent c ) { ComponentExtension.from(c)._renderBaseStyle(g); }
-        @Override
-        public void update( Graphics g, JComponent c ) { paint(g, c); }
-        @Override
-        public int getBaseline( JComponent c, int width, int height ) {
-            super.getBaseline(c, width, height);
-            Border border = c.getBorder();
-            if ( border instanceof AbstractBorder )
-                return ((AbstractBorder)border).getBaseline(c, width, height);
+        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
+    }
 
-            return -1;
+    static class ButtonStyler extends BasicButtonUI
+    {
+        private final ButtonUI _formerUI;
+
+        ButtonStyler(ButtonUI formerUI) { _formerUI = formerUI; }
+
+        @Override public void paint( Graphics g, JComponent c ) {
+            ComponentExtension.from(c)._renderBaseStyle(g);
+            if ( _formerUI != null )
+                _formerUI.paint(g, c);
         }
-
+        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
         @Override
-        public Component.BaselineResizeBehavior getBaselineResizeBehavior( JComponent c ) {
-            super.getBaselineResizeBehavior(c);
-            Border border = c.getBorder();
-            if ( border instanceof AbstractBorder )
-                return ((AbstractBorder)border).getBaselineResizeBehavior(c);
+        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
+    }
 
-            return Component.BaselineResizeBehavior.OTHER;
+    private static boolean _contains(JComponent c, int x, int y, Supplier<Boolean> superContains) {
+        Border border = c.getBorder();
+        if ( border instanceof BorderStyleAndAnimationRenderer ) {
+            BorderStyleAndAnimationRenderer<?> b = (BorderStyleAndAnimationRenderer<?>) border;
+            Insets margins = b.getCurrentMarginInsets();
+            int width  = c.getWidth();
+            int height = c.getHeight();
+            return (x >= margins.left) && (x < width - margins.right) && (y >= margins.top) && (y < height - margins.bottom);
         }
+        return superContains.get();
     }
 
 }

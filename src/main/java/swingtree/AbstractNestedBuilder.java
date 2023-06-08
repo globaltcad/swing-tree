@@ -98,9 +98,14 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
         if ( builder._parent != null )
             throw new IllegalArgumentException("Builder already used!");
 
+        E component = (E) builder.getComponent();
+
         builder._parent = this;
 
-        _add( (E) builder.getComponent(), conf );
+        _add( component, conf );
+
+        if ( component instanceof JComponent )
+            ComponentExtension.from((JComponent) component).establishStyle();
 
         _detachStrongRef(); // Detach strong reference to the component to allow it to be garbage collected.
     }

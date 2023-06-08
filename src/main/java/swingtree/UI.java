@@ -93,7 +93,13 @@ public final class UI
         StyleSheet oldStyleSheet = settings.getStyleSheet().orElse(null);
         settings.setStyleSheet(styleSheet);
         try {
-            return scope.get();
+            T result = scope.get();
+            if ( result instanceof JComponent )
+                ComponentExtension.from((JComponent) result).establishStyle();
+            if ( result instanceof UIForAnySwing )
+                ComponentExtension.from(((UIForAnySwing<?,?>) result).getComponent()).establishStyle();
+
+            return result;
         } finally {
             settings.setStyleSheet(oldStyleSheet);
         }

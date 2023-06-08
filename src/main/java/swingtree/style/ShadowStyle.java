@@ -48,25 +48,25 @@ public final class ShadowStyle
 
     public boolean isInset() { return !_isOutset; }
 
-    ShadowStyle horizontalOffset(int horizontalShadowOffset) { return new ShadowStyle(horizontalShadowOffset, _verticalOffset, _blurRadius, _spreadRadius, _color, _isOutset); }
+    public ShadowStyle horizontalOffset(int horizontalShadowOffset) { return new ShadowStyle(horizontalShadowOffset, _verticalOffset, _blurRadius, _spreadRadius, _color, _isOutset); }
 
-    ShadowStyle verticalOffset(int verticalShadowOffset) { return new ShadowStyle(_horizontalOffset, verticalShadowOffset, _blurRadius, _spreadRadius, _color, _isOutset); }
+    public ShadowStyle verticalOffset(int verticalShadowOffset) { return new ShadowStyle(_horizontalOffset, verticalShadowOffset, _blurRadius, _spreadRadius, _color, _isOutset); }
 
-    ShadowStyle offset(int horizontalShadowOffset, int verticalShadowOffset) { return new ShadowStyle(horizontalShadowOffset, verticalShadowOffset, _blurRadius, _spreadRadius, _color, _isOutset); }
+    public ShadowStyle offset(int horizontalShadowOffset, int verticalShadowOffset) { return new ShadowStyle(horizontalShadowOffset, verticalShadowOffset, _blurRadius, _spreadRadius, _color, _isOutset); }
 
-    ShadowStyle offset(int shadowOffset) { return new ShadowStyle(shadowOffset, shadowOffset, _blurRadius, _spreadRadius, _color, _isOutset); }
+    public ShadowStyle offset(int shadowOffset) { return new ShadowStyle(shadowOffset, shadowOffset, _blurRadius, _spreadRadius, _color, _isOutset); }
 
-    ShadowStyle blurRadius(int shadowBlurRadius) { return new ShadowStyle(_horizontalOffset, _verticalOffset, shadowBlurRadius, _spreadRadius, _color, _isOutset); }
+    public ShadowStyle blurRadius(int shadowBlurRadius) { return new ShadowStyle(_horizontalOffset, _verticalOffset, shadowBlurRadius, _spreadRadius, _color, _isOutset); }
 
-    ShadowStyle spreadRadius(int shadowSpreadRadius) { return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, shadowSpreadRadius, _color, _isOutset); }
+    public ShadowStyle spreadRadius(int shadowSpreadRadius) { return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, shadowSpreadRadius, _color, _isOutset); }
 
-    ShadowStyle color(Color shadowColor) { return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, shadowColor, _isOutset); }
+    public ShadowStyle color(Color shadowColor) { return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, shadowColor, _isOutset); }
 
-    ShadowStyle color(String shadowColor) { return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, StyleUtility.toColor(shadowColor), _isOutset); }
+    public ShadowStyle color(String shadowColor) { return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, StyleUtility.toColor(shadowColor), _isOutset); }
 
-    ShadowStyle isInset(boolean shadowInset) { return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, _color, shadowInset); }
+    public ShadowStyle isInset(boolean shadowInset) { return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, _color, shadowInset); }
 
-    ShadowStyle isOutset(boolean shadowOutset) { return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, _color, !shadowOutset); }
+    public ShadowStyle isOutset(boolean shadowOutset) { return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, _color, !shadowOutset); }
 
     @Override
     public int hashCode() {
