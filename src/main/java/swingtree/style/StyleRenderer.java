@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  *  This used to smoothly render
@@ -34,21 +35,35 @@ public class StyleRenderer<C extends JComponent>
         if ( DO_ANTIALIASING )
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
+        Area[] baseArea = { null };
+        Supplier<Area> baseAreaSupplier = () -> {
+            if ( baseArea[0] == null )
+                baseArea[0] = _calculateBaseArea(style, 0);
+            return baseArea[0];
+        };
+
         style.background().foundationColor().ifPresent(outerColor -> {
             _fillOuterBackground(style, outerColor, g2d);
         });
         style.background().color().ifPresent(color -> {
             if ( color.getAlpha() == 0 ) return;
             g2d.setColor(color);
-            g2d.fill(_calculateBaseArea(style, 0));
+            g2d.fill(baseAreaSupplier.get());
         });
+
+        for ( ShadeStyle shade : style.background().shades() ) {
+            if ( shade.colors().length > 0 ) {
+                g2d.setClip(baseAreaSupplier.get());
+                _renderDiagonalShade(g2d, _comp, style.margin(), shade);
+            }
+        }
 
         Font componentFont = _comp.getFont();
         if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
             g2d.setFont( componentFont );
 
         style.background().painter().ifPresent( backgroundPainter -> {
-            g2d.setClip(_calculateBaseArea(style, 0));
+            g2d.setClip(baseAreaSupplier.get());
             backgroundPainter.paint(g2d);
         });
 
@@ -785,6 +800,110 @@ public class StyleRenderer<C extends JComponent>
         return shadow.color()
                     .map(c -> new Color(c.getRed(), c.getGreen(), c.getBlue(), 0))
                     .orElse(new Color(0.5f, 0.5f, 0.5f, 0f));
+    }
+
+    /**
+     *  Renders a shade from the top left corner to the bottom right corner.
+     *
+     * @param g2d The graphics object to render to.
+     * @param component The component to render the shade for.
+     * @param margin The margin of the component.
+     * @param shade The shade to render.
+     */
+    private static void _renderDiagonalShade(
+        Graphics2D g2d,
+        JComponent component,
+        Outline margin,
+        ShadeStyle shade
+    ) {
+        ShadingStrategy type = shade.shade();
+        Color[] colors = shade.colors();
+        Dimension size = component.getSize();
+        size.width  -= (margin.right().orElse(0) + margin.left().orElse(0));
+        size.height -= (margin.bottom().orElse(0) + margin.top().orElse(0));
+        int width  = size.width;
+        int height = size.height;
+        int realX = margin.left().orElse(0);
+        int realY = margin.top().orElse(0);
+
+        int corner1X;
+        int corner1Y;
+        int corner2X;
+        int corner2Y;
+        int diagonalCorner1X;
+        int diagonalCorner1Y;
+        int diagonalCorner2X;
+        int diagonalCorner2Y;
+
+        if ( type == ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT ) {
+            corner1X = realX;
+            corner1Y = realY;
+            corner2X = realX + width;
+            corner2Y = realY + height;
+            diagonalCorner1X = realX;
+            diagonalCorner1Y = realY + height;
+            diagonalCorner2X = realX + width;
+            diagonalCorner2Y = realY;
+        } else {
+            corner1X = realX + width;
+            corner1Y = realY;
+            corner2X = realX;
+            corner2Y = realY + height;
+            diagonalCorner1X = realX + width;
+            diagonalCorner1Y = realY + height;
+            diagonalCorner2X = realX;
+            diagonalCorner2Y = realY;
+        }
+
+        int diagonalCenterX = (diagonalCorner1X + diagonalCorner2X) / 2;
+        int diagonalCenterY = (diagonalCorner1Y + diagonalCorner2Y) / 2;
+
+        double vector1X = diagonalCorner1X - diagonalCenterX;
+        double vector1Y = diagonalCorner1Y - diagonalCenterY;
+        double vector2X = diagonalCorner2X - diagonalCenterX;
+        double vector2Y = diagonalCorner2Y - diagonalCenterY;
+
+        double vectorLength = Math.sqrt(vector1X * vector1X + vector1Y * vector1Y);
+        vector1X = (vector1X / vectorLength);
+        vector1Y = (vector1Y / vectorLength);
+
+        vectorLength = Math.sqrt(vector2X * vector2X + vector2Y * vector2Y);
+        vector2X = (vector2X / vectorLength);
+        vector2Y = (vector2Y / vectorLength);
+
+        double nVector1X = -vector1Y;
+        double nVector1Y = vector1X;
+        double nVector2X = -vector2Y;
+        double nVector2Y = vector2X;
+
+        double distance1 = (corner1X - diagonalCenterX) * nVector1X + (corner1Y - diagonalCenterY) * nVector1Y;
+        double distance2 = (corner2X - diagonalCenterX) * nVector2X + (corner2Y - diagonalCenterY) * nVector2Y;
+
+        int gradientStartX = (int) (diagonalCenterX + nVector1X * distance1);
+        int gradientStartY = (int) (diagonalCenterY + nVector1Y * distance1);
+        int gradientEndX = (int) (diagonalCenterX + nVector2X * distance2);
+        int gradientEndY = (int) (diagonalCenterY + nVector2Y * distance2);
+
+        if ( colors.length == 2 )
+            g2d.setPaint(
+                    new GradientPaint(
+                            gradientStartX, gradientStartY, colors[0],
+                            gradientEndX, gradientEndY, colors[1]
+                        )
+                );
+        else {
+            float[] fractions = new float[colors.length];
+            for ( int i = 0; i < colors.length; i++ )
+                fractions[i] = (float) i / (float) (colors.length - 1);
+            g2d.setPaint(
+                    new LinearGradientPaint(
+                            gradientStartX, gradientStartY,
+                            gradientEndX, gradientEndY,
+                            fractions, colors
+                        )
+                );
+        }
+        g2d.fillRect(realX, realY, width, height);
     }
 
     public Insets calculateBorderInsets(Insets formerInsets) {

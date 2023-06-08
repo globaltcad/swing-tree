@@ -96,6 +96,11 @@ class Examples_Spec extends Specification
         expect : new WellRoundedView()
     }
 
+    def 'The example of the soft UI defined in the examples can be created.'()
+    {
+        expect : new SoftUIView()
+    }
+
     def 'The animated buttons view examples UI defined in the examples can be created.'()
     {
         expect : new AnimatedButtonsView()

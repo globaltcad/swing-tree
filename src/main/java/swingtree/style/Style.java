@@ -625,6 +625,7 @@ public final class Style
      *              .spreadRadius(0)
      *          )
      *  }</pre>
+     *  Note that shadows will be rendered in alphabetical order based on their name.
      *
      * @param shadowName The name of the shadow.
      * @param styler A function that takes a {@link ShadowStyle} and returns a new {@link ShadowStyle}.
@@ -638,6 +639,31 @@ public final class Style
         Map<String, ShadowStyle> newShadows = new HashMap<>(_shadows);
         newShadows.put(shadowName, styler.apply(shadow));
         return _withShadow(newShadows);
+    }
+
+    /**
+     *  This method makes it possible to define multiple background shades for a single component
+     *  through a unique name for said shading effect.
+     *  This is useful when you want to do advanced background effects, such as neumorphism a.k.a. soft UI. <br>
+     *  Here is an example of how to use this method:
+     *  <pre>{@code
+     *    UI.panel()
+     *    .withStyle( it ->
+     *      it.style()
+     *      .backgroundShade("dark shading", shade -> shade.colors("#000000", "#000000").type(ShadeStyle.Type.INNER)))
+     *      .backgroundShade("light shading", shade -> shade.colors("#ffffff", "#ffffff").type(ShadeStyle.Type.OUTER)))
+     *    )
+     * }</pre>
+     * Note that the background shades will be rendered in alphabetical order based on the name of the shade.
+     *
+     * @param shadeName The name of the background shade.
+     * @param styler A function that takes a {@link ShadeStyle} and returns a new {@link ShadeStyle}.
+     * @return A new {@link Style} with a named background shade defined by the provided styler lambda.
+     */
+    public Style backgroundShade( String shadeName, Function<ShadeStyle, ShadeStyle> styler ) {
+        Objects.requireNonNull(shadeName);
+        Objects.requireNonNull(styler);
+        return _withBackground(background().shade(shadeName, styler));
     }
 
     /**

@@ -1,7 +1,7 @@
 package example;
 
 import com.formdev.flatlaf.FlatLightLaf;
-import example.styles.SimpleStyleSheet;
+import example.styles.SoftUIStyleSheet;
 import swingtree.UI;
 
 import java.awt.Color;
@@ -9,12 +9,12 @@ import java.util.concurrent.TimeUnit;
 
 import static swingtree.UI.*;
 
-public class StylishView extends Panel
+public class SoftUIView extends Panel
 {
-    public StylishView() {
+    public SoftUIView() {
         FlatLightLaf.setup();
-        UI.use(new SimpleStyleSheet(), ()->
-            UI.of(this).groups("frameShadow")
+        UI.use(new SoftUIStyleSheet(), ()->
+            UI.of(this).groups("soft inwards")
             .add(SHRINK.and(ALIGN_LEFT),
                 box()
                 .withLayout(FILL.and(WRAP(3)).and(INS(32)), "", "[][]24[]24[]")
@@ -23,7 +23,7 @@ public class StylishView extends Panel
                     panel().groups("neumorphic")
                     .add(
                         html(
-                            "<h1>Neumorphism In Swing O.o</h1>" +
+                            "<h1>Soft UI In Swing O.o</h1>" +
                             "<p>" +
                             "See what you can do with this library! " +
                             "</p>"
@@ -42,20 +42,20 @@ public class StylishView extends Panel
                     })
                 )
                 .add( SHRINK.and(SPAN).and(ALIGN_CENTER),
-                    box()
+                    box().groups("soft inwards")
                     .add(
-                        button("Click Me!").groups("neumorphic").onClick(e -> {
+                        button("Click Me!").groups("neumorphic button").onClick(e -> {
                             System.out.println("Clicked!");
                         })
                     )
                     .add(
-                        toggleButton("Toggle Me!").groups("neumorphic")
+                        toggleButton("Toggle Me!").groups("neumorphic button")
                     )
                     .add(WRAP,
                         label(50,50,icon("img/trees.png")).groups("neumorphic")
                     )
                     .add(SPAN.and(GROW_X),
-                        slider(Align.HORIZONTAL).groups("soft slim")
+                        slider(Align.HORIZONTAL, 0, 255).groups("soft slim")
                     )
                 )
             )
@@ -67,6 +67,6 @@ public class StylishView extends Panel
 
 
     public static void main(String[] args) {
-        UI.show(new StylishView());
+        UI.show(new SoftUIView());
     }
 }
