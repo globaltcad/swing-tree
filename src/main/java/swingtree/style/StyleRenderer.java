@@ -152,50 +152,228 @@ public class StyleRenderer<C extends JComponent>
                 // four separate arcs:
                 // Top left:
                 if ( topLeftArc != null ) {
-                    float strokeWidth = (leftBorderWidth + topBorderWidth) / 2f;
-                    g2d.setStroke(new BasicStroke(strokeWidth));
-                    if ( strokeWidth > 0 )
-                        g2d.drawArc(
-                                left, top,
-                                topLeftArc.width(), topLeftArc.height(),
-                                90, 90
+                    float strokeWidth = Math.max(leftBorderWidth, topBorderWidth);
+                    if ( strokeWidth > 0 ) {
+                        boolean doesntNeedWidthTransition = leftBorderWidth == topBorderWidth;
+                        g2d.setStroke(new BasicStroke(strokeWidth));
+
+                        if ( doesntNeedWidthTransition )// Simple case: no clipping needed
+                            g2d.drawArc(
+                                    left, top,
+                                    topLeftArc.width(), topLeftArc.height(),
+                                    90, 90
                             );
+                        else
+                        {
+                            Area outerArcRec; // For filling the border arc
+                            Area innerArcRec; // For clipping the outer arc round rectangle
+                            Area areaWhereArcIsAllowed; // For clipping only the top left corner
+                            int innerWidth = topLeftArc.width() - leftBorderWidth;
+                            int innerHeight = topLeftArc.height() - topBorderWidth;
+                            // Note that the outer arc round rectangle is shifted according to the border widths:
+                            outerArcRec = new Area(
+                                                new RoundRectangle2D.Float(
+                                                        left - (leftBorderWidth / 2f),
+                                                        top  - (topBorderWidth  / 2f),
+                                                        topLeftArc.width()  + leftBorderWidth,
+                                                        topLeftArc.height() + topBorderWidth,
+                                                        topLeftArc.width(),
+                                                        topLeftArc.height()
+                                                    )
+                                                );
+                            innerArcRec = new Area(
+                                                new RoundRectangle2D.Float(
+                                                        left + (leftBorderWidth / 2f),
+                                                        top  + (topBorderWidth  / 2f),
+                                                        innerWidth,
+                                                        innerHeight,
+                                                        topLeftArc.width(),
+                                                        topLeftArc.height()
+                                                    )
+                                            );
+                            int leeway = 1;
+                            areaWhereArcIsAllowed = new Area(new Rectangle(
+                                                                left - (leftBorderWidth / 2),
+                                                                top  - (topBorderWidth  / 2),
+                                                                Math.max(leeway + topLeftArc.width()-innerWidth/2,  leftBorderWidth),
+                                                                Math.max(leeway + topLeftArc.height()-innerHeight/2, topBorderWidth)
+                                                            ));
+
+                            outerArcRec.subtract(innerArcRec);
+                            outerArcRec.intersect(areaWhereArcIsAllowed);
+                            g2d.fill(outerArcRec);
+                        }
+                    }
                 }
                 // Top right:
                 if ( topRightArc != null ) {
                     float strokeWidth = (rightBorderWidth + topBorderWidth) / 2f;
-                    g2d.setStroke(new BasicStroke(strokeWidth));
-                    if ( strokeWidth > 0 )
-                        g2d.drawArc(
-                                width - right - topRightArc.width(), top,
-                                topRightArc.width(), topRightArc.height(),
-                                0, 90
+                    if ( strokeWidth > 0 ) {
+                        boolean doesntNeedWidthTransition = rightBorderWidth == topBorderWidth;
+                        g2d.setStroke(new BasicStroke(strokeWidth));
+                        if ( doesntNeedWidthTransition )
+                            g2d.drawArc(
+                                    width - right - topRightArc.width(), top,
+                                    topRightArc.width(), topRightArc.height(),
+                                    0, 90
                             );
+                        else
+                        {
+                            Area outerArcRec; // For filling the border arc
+                            Area innerArcRec; // For clipping the outer arc round rectangle
+                            Area areaWhereArcIsAllowed; // For clipping only the top right corner
+                            int innerWidth = topRightArc.width() - rightBorderWidth;
+                            int innerHeight = topRightArc.height() - topBorderWidth;
+                            // Note that the outer arc round rectangle is shifted according to the border widths:
+                            outerArcRec = new Area(
+                                                new RoundRectangle2D.Float(
+                                                        width - right - topRightArc.width() - (rightBorderWidth / 2f),
+                                                        top  - (topBorderWidth  / 2f),
+                                                        topRightArc.width()  + rightBorderWidth,
+                                                        topRightArc.height() + topBorderWidth,
+                                                        topRightArc.width(),
+                                                        topRightArc.height()
+                                                    )
+                                                );
+
+                            innerArcRec = new Area(
+                                                new RoundRectangle2D.Float(
+                                                        width - right - topRightArc.width() + (rightBorderWidth / 2f),
+                                                        top  + (topBorderWidth  / 2f),
+                                                        innerWidth,
+                                                        innerHeight,
+                                                        topRightArc.width(),
+                                                        topRightArc.height()
+                                                    )
+                                            );
+                            int leeway = 1;
+                            areaWhereArcIsAllowed = new Area(new Rectangle(
+                                    width - right - topRightArc.width() / 2 + Math.min(innerWidth/2, 0),
+                                                                top  - (topBorderWidth  / 2),
+                                                                Math.max(leeway + topRightArc.width()-innerWidth/2,  rightBorderWidth),
+                                                                Math.max(leeway + topRightArc.height()-innerHeight/2, topBorderWidth)
+                                                            ));
+
+                            outerArcRec.subtract(innerArcRec);
+                            outerArcRec.intersect(areaWhereArcIsAllowed);
+                            g2d.fill(outerArcRec);
+                        }
+                    }
                 }
                 // Bottom right:
                 if ( bottomRightArc != null ) {
                     float strokeWidth = (rightBorderWidth + bottomBorderWidth) / 2f;
-                    g2d.setStroke(new BasicStroke(strokeWidth));
-                    if ( strokeWidth > 0 )
-                        g2d.drawArc(
-                                width - right - bottomRightArc.width(),
-                                height - bottom - bottomRightArc.height(),
-                                bottomRightArc.width(),
-                                bottomRightArc.height(),
-                                270, 90
-                            );
+                    if ( strokeWidth > 0 ) {
+                        boolean doesntNeedWidthTransition = rightBorderWidth == bottomBorderWidth;
+                        g2d.setStroke(new BasicStroke(strokeWidth));
+                        if ( doesntNeedWidthTransition )
+                            g2d.drawArc(
+                                    width - right - bottomRightArc.width(),
+                                    height - bottom - bottomRightArc.height(),
+                                    bottomRightArc.width(),
+                                    bottomRightArc.height(),
+                                    270, 90
+                                );
+                        else
+                        {
+                            Area outerArcRec; // For filling the border arc
+                            Area innerArcRec; // For clipping the outer arc round rectangle
+                            Area areaWhereArcIsAllowed; // For clipping only the bottom right corner
+                            int innerWidth = bottomRightArc.width() - rightBorderWidth;
+                            int innerHeight = bottomRightArc.height() - bottomBorderWidth;
+                            // Note that the outer arc round rectangle is shifted according to the border widths:
+                            outerArcRec = new Area(
+                                                new RoundRectangle2D.Float(
+                                                        width - right - bottomRightArc.width() - (rightBorderWidth / 2f),
+                                                        height - bottom - bottomRightArc.height() - (bottomBorderWidth / 2f),
+                                                        bottomRightArc.width()  + rightBorderWidth,
+                                                        bottomRightArc.height() + bottomBorderWidth,
+                                                        bottomRightArc.width(),
+                                                        bottomRightArc.height()
+                                                    )
+                                                );
+
+                            innerArcRec = new Area(
+                                                new RoundRectangle2D.Float(
+                                                        width - right - bottomRightArc.width() + (rightBorderWidth / 2f),
+                                                        height - bottom - bottomRightArc.height() + (bottomBorderWidth / 2f),
+                                                        innerWidth,
+                                                        innerHeight,
+                                                        bottomRightArc.width(),
+                                                        bottomRightArc.height()
+                                                    )
+                                            );
+                            int leeway = 1;
+                            areaWhereArcIsAllowed = new Area(new Rectangle(
+                                                                width - right - bottomRightArc.width() / 2 + Math.min(innerWidth/2, 0),
+                                                                height - bottom - bottomRightArc.height() / 2 + Math.min(innerHeight/2, 0),
+                                                                Math.max(leeway + bottomRightArc.width()-innerWidth/2,  rightBorderWidth),
+                                                                Math.max(leeway + bottomRightArc.height()-innerHeight/2, bottomBorderWidth)
+                                                            ));
+
+                            outerArcRec.subtract(innerArcRec);
+                            outerArcRec.intersect(areaWhereArcIsAllowed);
+                            g2d.fill(outerArcRec);
+                        }
+                    }
                 }
                 // Bottom left:
                 if ( bottomLeftArc != null ) {
                     float strokeWidth = (leftBorderWidth + bottomBorderWidth) / 2f;
                     g2d.setStroke(new BasicStroke(strokeWidth));
-                    if ( strokeWidth > 0 )
-                        g2d.drawArc(
-                                left, height - bottom - bottomLeftArc.height(),
-                                bottomLeftArc.width(), bottomLeftArc.height(),
-                                180, 90
-                            );
+                    if ( strokeWidth > 0 ) {
+                        boolean doesntNeedWidthTransition = leftBorderWidth == bottomBorderWidth;
+                        g2d.setStroke(new BasicStroke(strokeWidth));
+                        if ( doesntNeedWidthTransition )
+                            g2d.drawArc(
+                                    left, height - bottom - bottomLeftArc.height(),
+                                    bottomLeftArc.width(), bottomLeftArc.height(),
+                                    180, 90
+                                );
+                        else
+                        {
+                            Area outerArcRec; // For filling the border arc
+                            Area innerArcRec; // For clipping the outer arc round rectangle
+                            Area areaWhereArcIsAllowed; // For clipping only the bottom left corner
+                            int innerWidth = bottomLeftArc.width() - leftBorderWidth;
+                            int innerHeight = bottomLeftArc.height() - bottomBorderWidth;
+                            // Note that the outer arc round rectangle is shifted according to the border widths:
+                            outerArcRec = new Area(
+                                                new RoundRectangle2D.Float(
+                                                        left - (leftBorderWidth / 2f),
+                                                        height - bottom - bottomLeftArc.height() - (bottomBorderWidth / 2f),
+                                                        bottomLeftArc.width()  + leftBorderWidth,
+                                                        bottomLeftArc.height() + bottomBorderWidth,
+                                                        bottomLeftArc.width(),
+                                                        bottomLeftArc.height()
+                                                    )
+                                                );
+
+                            innerArcRec = new Area(
+                                                new RoundRectangle2D.Float(
+                                                        left + (leftBorderWidth / 2f),
+                                                        height - bottom - bottomLeftArc.height() + (bottomBorderWidth / 2f),
+                                                        innerWidth,
+                                                        innerHeight,
+                                                        bottomLeftArc.width(),
+                                                        bottomLeftArc.height()
+                                                    )
+                                            );
+                            int leeway = 1;
+                            areaWhereArcIsAllowed = new Area(new Rectangle(
+                                                                left - leftBorderWidth / 2,
+                                                                height - bottom - bottomLeftArc.height() / 2 + Math.min(innerHeight/2, 0),
+                                                                Math.max(leeway + bottomLeftArc.width()-innerWidth/2,  leftBorderWidth),
+                                                                Math.max(leeway + bottomLeftArc.height()-innerHeight/2, bottomBorderWidth)
+                                                            ));
+
+                            outerArcRec.subtract(innerArcRec);
+                            outerArcRec.intersect(areaWhereArcIsAllowed);
+                            g2d.fill(outerArcRec);
+                        }
+                    }
                 }
+
                 // The four arcs are connected by four lines:
                 // Top:
                 if ( topBorderWidth > 0 ) {
