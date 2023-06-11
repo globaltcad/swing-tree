@@ -191,12 +191,12 @@ public class StyleRenderer<C extends JComponent>
                                                         topLeftArc.height()
                                                     )
                                             );
-                            int leeway = 1;
+
                             areaWhereArcIsAllowed = new Area(new Rectangle(
                                                                 left - (leftBorderWidth / 2),
                                                                 top  - (topBorderWidth  / 2),
-                                                                Math.max(leeway + topLeftArc.width()-innerWidth/2,  leftBorderWidth),
-                                                                Math.max(leeway + topLeftArc.height()-innerHeight/2, topBorderWidth)
+                                                                Math.max(topLeftArc.width()-innerWidth/2,  leftBorderWidth),
+                                                                Math.max(topLeftArc.height()-innerHeight/2, topBorderWidth)
                                                             ));
 
                             outerArcRec.subtract(innerArcRec);
@@ -224,6 +224,7 @@ public class StyleRenderer<C extends JComponent>
                             Area areaWhereArcIsAllowed; // For clipping only the top right corner
                             int innerWidth = topRightArc.width() - rightBorderWidth;
                             int innerHeight = topRightArc.height() - topBorderWidth;
+
                             // Note that the outer arc round rectangle is shifted according to the border widths:
                             outerArcRec = new Area(
                                                 new RoundRectangle2D.Float(
@@ -246,12 +247,12 @@ public class StyleRenderer<C extends JComponent>
                                                         topRightArc.height()
                                                     )
                                             );
-                            int leeway = 1;
+
                             areaWhereArcIsAllowed = new Area(new Rectangle(
-                                    width - right - topRightArc.width() / 2 + Math.min(innerWidth/2, 0),
+                                                                width - right - topRightArc.width() / 2 + Math.min(innerWidth/2, 0),
                                                                 top  - (topBorderWidth  / 2),
-                                                                Math.max(leeway + topRightArc.width()-innerWidth/2,  rightBorderWidth),
-                                                                Math.max(leeway + topRightArc.height()-innerHeight/2, topBorderWidth)
+                                                                Math.max(topRightArc.width()-innerWidth/2,  rightBorderWidth),
+                                                                Math.max(topRightArc.height()-innerHeight/2, topBorderWidth)
                                                             ));
 
                             outerArcRec.subtract(innerArcRec);
@@ -303,12 +304,12 @@ public class StyleRenderer<C extends JComponent>
                                                         bottomRightArc.height()
                                                     )
                                             );
-                            int leeway = 1;
+
                             areaWhereArcIsAllowed = new Area(new Rectangle(
                                                                 width - right - bottomRightArc.width() / 2 + Math.min(innerWidth/2, 0),
                                                                 height - bottom - bottomRightArc.height() / 2 + Math.min(innerHeight/2, 0),
-                                                                Math.max(leeway + bottomRightArc.width()-innerWidth/2,  rightBorderWidth),
-                                                                Math.max(leeway + bottomRightArc.height()-innerHeight/2, bottomBorderWidth)
+                                                                Math.max(bottomRightArc.width()-innerWidth/2,  rightBorderWidth),
+                                                                Math.max(bottomRightArc.height()-innerHeight/2, bottomBorderWidth)
                                                             ));
 
                             outerArcRec.subtract(innerArcRec);
@@ -359,12 +360,12 @@ public class StyleRenderer<C extends JComponent>
                                                         bottomLeftArc.height()
                                                     )
                                             );
-                            int leeway = 1;
+
                             areaWhereArcIsAllowed = new Area(new Rectangle(
                                                                 left - leftBorderWidth / 2,
                                                                 height - bottom - bottomLeftArc.height() / 2 + Math.min(innerHeight/2, 0),
-                                                                Math.max(leeway + bottomLeftArc.width()-innerWidth/2,  leftBorderWidth),
-                                                                Math.max(leeway + bottomLeftArc.height()-innerHeight/2, bottomBorderWidth)
+                                                                Math.max(bottomLeftArc.width()-innerWidth/2,  leftBorderWidth),
+                                                                Math.max(bottomLeftArc.height()-innerHeight/2, bottomBorderWidth)
                                                             ));
 
                             outerArcRec.subtract(innerArcRec);
@@ -379,41 +380,84 @@ public class StyleRenderer<C extends JComponent>
                 if ( topBorderWidth > 0 ) {
                     int topLeftArcWidth  = topLeftArc  == null ? 0 : topLeftArc.width()  + topBorderWidth;
                     int topRightArcWidth = topRightArc == null ? 0 : topRightArc.width() + topBorderWidth;
-                    g2d.setStroke(new BasicStroke(topBorderWidth));
-                    g2d.drawLine(
-                            left + topLeftArcWidth / 2, top,
-                            width - right - topRightArcWidth / 2, top
-                        );
+                    int x1 = left + topLeftArcWidth / 2;
+                    int x2 = width - right - topRightArcWidth / 2;
+                    if ( x1 < x2 ) {
+                        g2d.setStroke(new BasicStroke(topBorderWidth));
+                        g2d.drawLine( x1, top, x2, top );
+                    } else {
+                        // The border is more thick than long, so we fill a rectangle
+                        // because drawing a line would not be visible:
+                        g2d.fillRect(
+                                left + topLeftArcWidth / 4,
+                                top - topBorderWidth / 2,
+                                width - right - left - topLeftArcWidth / 2,
+                                topBorderWidth
+                            );
+                    }
                 }
                 // Right:
                 if ( rightBorderWidth > 0 ) {
                     int topRightArcHeight    = topRightArc    == null ? 0 : topRightArc.height()    + rightBorderWidth;
                     int bottomRightArcHeight = bottomRightArc == null ? 0 : bottomRightArc.height() + rightBorderWidth;
-                    g2d.setStroke(new BasicStroke(rightBorderWidth));
-                    g2d.drawLine(
-                            width - right, top + topRightArcHeight / 2,
-                            width - right, height - bottom - bottomRightArcHeight / 2
-                        );
+                    int y1 = top + topRightArcHeight / 2;
+                    int y2 = height - bottom - bottomRightArcHeight / 2;
+                    if ( y1 < y2 ) {
+                        g2d.setStroke(new BasicStroke(rightBorderWidth));
+                        g2d.drawLine( width - right, y1, width - right, y2 );
+                    } else {
+                        int innerHeight = bottomRightArc.height() - bottomBorderWidth;
+                        // The border is more thick than long, so we fill a rectangle
+                        // because drawing a line would not be visible:
+                        g2d.fillRect(
+                                width - right - rightBorderWidth / 2,
+                                top  - (topBorderWidth  / 2) + Math.max(topRightArc.height()-(topRightArc.height() - topBorderWidth)/2, topBorderWidth),
+                                rightBorderWidth,
+                                (height - bottom - bottomRightArc.height() / 2 + Math.min(innerHeight/2, 0)) - (top  - (topBorderWidth  / 2) + Math.max(topRightArc.height()-(topRightArc.height() - topBorderWidth)/2, topBorderWidth))
+                            );
+                    }
                 }
                 // Bottom:
                 if ( bottomBorderWidth > 0 ) {
                     int bottomLeftArcWidth  = bottomLeftArc  == null ? 0 : bottomLeftArc.width()  + bottomBorderWidth;
                     int bottomRightArcWidth = bottomRightArc == null ? 0 : bottomRightArc.width() + bottomBorderWidth;
-                    g2d.setStroke(new BasicStroke(bottomBorderWidth));
-                    g2d.drawLine(
-                            width - right - bottomRightArcWidth / 2, height - bottom,
-                            left + bottomLeftArcWidth / 2, height - bottom
-                        );
+                    int x1 = left + bottomLeftArcWidth / 2;
+                    int x2 = width - right - bottomRightArcWidth / 2;
+                    if ( x1 < x2 ) {
+                        g2d.setStroke(new BasicStroke(bottomBorderWidth));
+                        g2d.drawLine( x1, height - bottom, x2, height - bottom );
+                    } else {
+                        int innerWidth = bottomLeftArc.width() - leftBorderWidth;
+                        // The border is more thick than long, so we fill a rectangle
+                        // because drawing a line would not be visible:
+                        g2d.fillRect(
+                                left - leftBorderWidth / 2 + Math.max(bottomLeftArc.width()-innerWidth/2,  leftBorderWidth),
+                                height - bottom - bottomBorderWidth / 2,
+                                width - right - left - bottomLeftArcWidth / 2,
+                                bottomBorderWidth
+                            );
+                    }
                 }
                 // Left:
                 if ( leftBorderWidth > 0 ) {
                     int topLeftArcHeight    = topLeftArc    == null ? 0 : topLeftArc.height()    + leftBorderWidth;
                     int bottomLeftArcHeight = bottomLeftArc == null ? 0 : bottomLeftArc.height() + leftBorderWidth;
-                    g2d.setStroke(new BasicStroke(leftBorderWidth));
-                    g2d.drawLine(
-                            left, height - bottom - bottomLeftArcHeight / 2,
-                            left, top + topLeftArcHeight / 2
-                    );
+                    int y1 = top + topLeftArcHeight / 2;
+                    int y2 = height - bottom - bottomLeftArcHeight / 2;
+                    if ( y1 < y2 ) {
+                        g2d.setStroke(new BasicStroke(leftBorderWidth));
+                        g2d.drawLine( left, y1, left, y2 );
+                    } else {
+                        int innerHeight = bottomLeftArc.height() - bottomBorderWidth;
+                        // The border is more thick than long, so we fill a rectangle
+                        // because drawing a line would not be visible:
+                        g2d.fillRect(
+                                left - leftBorderWidth / 2,
+                                top  - (topBorderWidth  / 2) + Math.max(topLeftArc.height()-(topLeftArc.height() - topBorderWidth)/2, topBorderWidth),
+                                leftBorderWidth,
+                                (height - bottom - bottomLeftArc.height() / 2 + Math.min(innerHeight/2, 0)) - (top  - (topBorderWidth  / 2) + Math.max(topLeftArc.height()-(topLeftArc.height() - topBorderWidth)/2, topBorderWidth))
+                            );
+                    }
                 }
             }
         }

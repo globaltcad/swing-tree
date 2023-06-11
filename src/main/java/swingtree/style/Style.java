@@ -348,6 +348,46 @@ public final class Style
     }
 
     /**
+     *  Returns a new {@link Style} with the provided top, right, bottom and left border widths.
+     *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
+     *  <p>
+     *  The border widths are specified in the following order: top, right, bottom, left.
+     *  <p>
+     *  Example:
+     *  <pre>{@code
+     *      UI.panel().withStyle( it -> it.style().borderWidths(1, 2, 3, 4) )
+     *  }</pre>
+     * @param top The top border width in pixels.
+     * @param right The right border width in pixels.
+     * @param bottom The bottom border width in pixels.
+     * @param left The left border width in pixels.
+     * @return A new {@link Style} with the provided top, right, bottom and left border widths.
+     * @see #borderWidth(int)
+     * @see #borderWidthAt(Edge, int)
+     */
+    public Style borderWidths( int top, int right, int bottom, int left ) {
+        return _withBorder(_border.widths(Outline.of(top, right, bottom, left)));
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided top/bottom and left/right border widths.
+     *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
+     *  <p>
+     *  Example:
+     *  <pre>{@code
+     *      UI.panel().withStyle( it -> it.style().borderWidths(1, 2) )
+     *  }</pre>
+     * @param topBottom The top and bottom border width in pixels.
+     * @param leftRight The left and right border width in pixels.
+     * @return A new {@link Style} with the provided top/bottom and left/right border widths.
+     * @see #borderWidth(int)
+     * @see #borderWidthAt(Edge, int)
+     */
+    public Style borderWidths( int topBottom, int leftRight ) {
+        return _withBorder(_border.widths(Outline.of(topBottom, leftRight, topBottom, leftRight)));
+    }
+
+    /**
      *  Returns a new {@link Style} with the provided border color.
      *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
      *

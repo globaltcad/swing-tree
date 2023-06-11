@@ -2,6 +2,7 @@ package example;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import swingtree.UI;
+import swingtree.style.Corner;
 
 import java.awt.*;
 import java.util.Optional;
@@ -32,31 +33,24 @@ public class BoxShadowPickerView extends UI.Panel
             .add(GROW_X,
                 panel(FILL.and(WRAP(3)), "[shrink][grow][shrink]").withBorderTitled("Margin")
                 .add(label("Top:"))
-                .add(GROW_X, slider(Align.HORIZONTAL, -25, 100, vm.marginTop()))
+                .add(GROW_X, slider(Align.HORIZONTAL, -25, 150, vm.marginTop()))
                 .add(label(vm.marginTop().viewAsString()))
                 .add(label("Left:"))
-                .add(GROW_X, slider(Align.HORIZONTAL, -25, 100, vm.marginLeft()))
+                .add(GROW_X, slider(Align.HORIZONTAL, -25, 350, vm.marginLeft()))
                 .add(label(vm.marginLeft().viewAsString()))
                 .add(label("Right:"))
-                .add(GROW_X, slider(Align.HORIZONTAL, -25, 100, vm.marginRight()))
+                .add(GROW_X, slider(Align.HORIZONTAL, -25, 350, vm.marginRight()))
                 .add(label(vm.marginRight().viewAsString()))
                 .add(label("Bottom:"))
-                .add(GROW_X, slider(Align.HORIZONTAL, -25, 100, vm.marginBottom()))
+                .add(GROW_X, slider(Align.HORIZONTAL, -25, 150, vm.marginBottom()))
                 .add(label(vm.marginBottom().viewAsString()))
             )
             .add(GROW_X,
                 panel(FILL.and(WRAP(3)), "[shrink][grow][shrink]").withBorderTitled("Border")
                 .add(SPAN, comboBox(vm.borderCorner()))
-                .add(label("Arc Width:"))
-                .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.borderArcWidth()))
-                .add(label(vm.borderArcWidth().viewAsString()))
-                .add(label("Arc Height:"))
-                .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.borderArcHeight()))
-                .add(label(vm.borderArcHeight().viewAsString()))
+                .add(SPAN, vm.currentCornerModel())
                 .add(SPAN, comboBox(vm.borderEdge()))
-                .add(label("Thickness:"))
-                .add(GROW_X, slider(Align.HORIZONTAL, 0, 100, vm.borderThickness()))
-                .add(label(vm.borderThickness().viewAsString()))
+                .add(SPAN, vm.currentEdgeModel())
                 .add(label("Color:"))
                 .add(GROW_X.and(PUSH_X),
                     textField(vm.shadowColor().mapTo(Integer.class, Color::getRGB).itemAsString())
@@ -133,14 +127,17 @@ public class BoxShadowPickerView extends UI.Panel
                          })
                          .pad(vm.paddingTop().get(), vm.paddingRight().get(), vm.paddingBottom().get(), vm.paddingLeft().get())
                          .margin(vm.marginTop().get(), vm.marginRight().get(), vm.marginBottom().get(), vm.marginLeft().get())
-                         .borderRadiusAt(vm.borderCorner().get(), vm.borderArcWidth().get(), vm.borderArcHeight().get())
+                         .borderRadiusAt(Corner.TOP_LEFT, vm.arcWidthAt(Corner.TOP_LEFT), vm.arcHeightAt(Corner.TOP_LEFT))
+                         .borderRadiusAt(Corner.TOP_RIGHT, vm.arcWidthAt(Corner.TOP_RIGHT), vm.arcHeightAt(Corner.TOP_RIGHT))
+                         .borderRadiusAt(Corner.BOTTOM_RIGHT, vm.arcWidthAt(Corner.BOTTOM_RIGHT), vm.arcHeightAt(Corner.BOTTOM_RIGHT))
+                         .borderRadiusAt(Corner.BOTTOM_LEFT, vm.arcWidthAt(Corner.BOTTOM_LEFT), vm.arcHeightAt(Corner.BOTTOM_LEFT))
                          .shadowColor(vm.shadowColor().get())
                          .shadowHorizontalOffset(vm.horizontalShadowOffset().get())
                          .shadowVerticalOffset(vm.verticalShadowOffset().get())
                          .shadowBlurRadius(vm.shadowBlurRadius().get())
                          .shadowSpreadRadius(vm.shadowSpreadRadius().get())
                          .shadowIsInset(vm.shadowInset().get())
-                         .borderWidthAt(vm.borderEdge().get(), vm.borderThickness().get())
+                         .borderWidths(vm.topBorderWidth(), vm.rightBorderWidth(), vm.bottomBorderWidth(), vm.leftBorderWidth())
                          .borderColor(vm.borderColor().get())
                     )
                     .add(TOP.and(SPAN).and(ALIGN_CENTER), label("Label"))

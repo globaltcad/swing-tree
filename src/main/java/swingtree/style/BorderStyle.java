@@ -61,6 +61,10 @@ public final class BorderStyle
 
     public Optional<Color> color() { return Optional.ofNullable(_borderColor); }
 
+    BorderStyle widths( Outline borderWidths ) {
+        return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, borderWidths, _borderColor);
+    }
+
     BorderStyle arcWidthAt( Corner corner, int borderArcWidth ) {
         if ( corner == Corner.EVERY )
             return this.arcWidth(borderArcWidth);

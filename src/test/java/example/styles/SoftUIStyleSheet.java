@@ -54,9 +54,6 @@ public class SoftUIStyleSheet extends StyleSheet
                                 gradientColorsFor(it.component())
                             )
                 )
-                .backgroundPainter( g2d -> {
-
-                })
         );
         apply(type(AbstractButton.class).group("neumorphic button").inherits("soft base"), it ->
             it.style()

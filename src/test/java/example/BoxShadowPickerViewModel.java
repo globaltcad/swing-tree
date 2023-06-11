@@ -3,10 +3,15 @@ package example;
 import sprouts.Event;
 import sprouts.Val;
 import sprouts.Var;
+import swingtree.UI;
+import swingtree.api.mvvm.Viewable;
 import swingtree.style.Corner;
 import swingtree.style.Edge;
 
+import javax.swing.*;
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BoxShadowPickerViewModel
 {
@@ -25,12 +30,47 @@ public class BoxShadowPickerViewModel
     private final Var<Integer> marginBottom = Var.of(30).onAct( it -> repaint.fire() );
 
     // Border
-    private final Var<Corner>  borderCorner    = Var.of(Corner.EVERY).onAct(it -> repaint.fire() );
-    private final Var<Edge>    borderEdge      = Var.of(Edge.EVERY).onAct(it -> repaint.fire() );
-    private final Var<Integer> borderArcWidth  = Var.of(25).onAct( it -> repaint.fire() );
-    private final Var<Integer> borderArcHeight = Var.of(25).onAct( it -> repaint.fire() );
-    private final Var<Integer> borderThickness = Var.of(3).onAct( it -> repaint.fire() );
     private final Var<Color>   borderColor     = Var.of(new Color(0,0.4f,1)).onAct( it -> repaint.fire() );
+    private final Var<Edge>    borderEdge      = Var.of(Edge.EVERY).onAct(it -> updateEdgeSelection(it.get()) );
+    private final Var<Corner>  borderCorner    = Var.of(Corner.EVERY).onAct(it -> updateCornerSelection(it.get()) );
+
+    private final Map<Edge, BorderEdgeViewModel> edgeModels = new HashMap<>();
+    private final Map<Corner, BorderCornerViewModel> cornerModels = new HashMap<>();
+
+    private final Var<BorderEdgeViewModel> currentEdgeModel = Var.ofNullable(BorderEdgeViewModel.class, null);
+    private final Var<BorderCornerViewModel> currentCornerModel = Var.ofNullable(BorderCornerViewModel.class, null);
+
+    public class BorderEdgeViewModel implements Viewable
+    {
+        private final Var<Integer> borderWidth = Var.of(3).onAct(it -> repaint.fire() );
+
+        @Override
+        public <V> V createView(Class<V> viewType) {
+            return viewType.cast(
+                UI.box("fill, wrap 2", "[shrink][grow]")
+                .add(UI.label("Width:"))
+                .add("growx", UI.slider(UI.Align.HORIZONTAL, 0, 100, borderWidth))
+                .get(JPanel.class));
+        }
+    }
+
+    public class BorderCornerViewModel implements Viewable {
+
+        private final Var<Integer> borderArcWidth  = Var.of(25).onAct( it -> repaint.fire() );
+        private final Var<Integer> borderArcHeight = Var.of(25).onAct( it -> repaint.fire() );
+
+
+        @Override
+        public <V> V createView(Class<V> viewType) {
+            return viewType.cast(
+                UI.box("fill, wrap 2", "[shrink][grow]")
+                .add(UI.label("Width:"))
+                .add("growx", UI.slider(UI.Align.HORIZONTAL, 0, 100, borderArcWidth))
+                .add(UI.label("Height:"))
+                .add("growx", UI.slider(UI.Align.HORIZONTAL, 0, 100, borderArcHeight))
+                .get(JPanel.class));
+        }
+    }
 
     // Background
     private final Var<Color> backgroundColor = Var.of(new Color(0.1f, 0.75f, 0.9f)).onAct( it -> repaint.fire() );
@@ -50,8 +90,33 @@ public class BoxShadowPickerViewModel
     private final Var<String> code = Var.of("");
 
     public BoxShadowPickerViewModel() {
+        // Creating sub-view models
+        for (Edge edge : Edge.values()) {
+            BorderEdgeViewModel model = new BorderEdgeViewModel();
+            edgeModels.put(edge, model);
+            if (edge == Edge.EVERY) {
+                currentEdgeModel.set(model);
+            }
+        }
+        for (Corner corner : Corner.values()) {
+            BorderCornerViewModel model = new BorderCornerViewModel();
+            cornerModels.put(corner, model);
+            if (corner == Corner.EVERY) {
+                currentCornerModel.set(model);
+            }
+        }
         repaint.subscribe( () -> createCode() );
         createCode();
+    }
+
+    private void updateEdgeSelection(Edge edge) {
+        currentEdgeModel.set(edgeModels.get(edge));
+        repaint.fire();
+    }
+
+    private void updateCornerSelection(Corner corner) {
+        currentCornerModel.set(cornerModels.get(corner));
+        repaint.fire();
     }
 
     public Event repaint() { return repaint; }
@@ -74,13 +139,17 @@ public class BoxShadowPickerViewModel
     public Var<Corner> borderCorner() { return borderCorner; }
     public Var<Edge> borderEdge() { return borderEdge; }
 
-    public Var<Integer> borderArcWidth() { return borderArcWidth; }
+    public Var<BorderEdgeViewModel> currentEdgeModel() { return currentEdgeModel; }
 
-    public Var<Integer> borderArcHeight() {
-        return borderArcHeight;
-    }
+    public int leftBorderWidth() { return edgeModels.get(Edge.LEFT).borderWidth.get(); }
+    public int rightBorderWidth() { return edgeModels.get(Edge.RIGHT).borderWidth.get(); }
+    public int topBorderWidth() { return edgeModels.get(Edge.TOP).borderWidth.get(); }
+    public int bottomBorderWidth() { return edgeModels.get(Edge.BOTTOM).borderWidth.get(); }
 
-    public Var<Integer> borderThickness() { return borderThickness; }
+    public Var<BorderCornerViewModel> currentCornerModel() { return currentCornerModel; }
+
+    public int arcWidthAt(Corner corner) { return cornerModels.get(corner).borderArcWidth.get(); }
+    public int arcHeightAt(Corner corner) { return cornerModels.get(corner).borderArcHeight.get(); }
 
     public Var<Color> borderColor() { return borderColor; }
 
@@ -123,8 +192,8 @@ public class BoxShadowPickerViewModel
             ) +
             "     .pad(" + str(paddingTop) + ", " + str(paddingRight) + ", " + str(paddingBottom) + ", " + str(paddingLeft) + ")\n" +
             "     .margin(" + str(marginTop) + ", " + str(marginRight) + ", " + str(marginBottom) + ", " + str(marginLeft) + ")\n" +
-            ( borderArcWidth.is(0) && borderArcHeight.is(0) ? "" : "     .borderRadius(" + str(borderArcWidth) + ", " + str(borderArcHeight) + ")\n" ) +
-            ( borderThickness.is(0) ? "" : "     .borderWidth(" + str(borderThickness) + ")\n" ) +
+            //( borderArcWidth.is(0) && borderArcHeight.is(0) ? "" : "     .borderRadius(" + str(borderArcWidth) + ", " + str(borderArcHeight) + ")\n" ) +
+            //( borderThickness.is(0) ? "" : "     .borderWidth(" + str(borderThickness) + ")\n" ) +
             "     .borderColor(" + str(borderColor) + ")\n" +
             "     .shadowColor(" + str(shadowColor) + ")\n" +
             ( horizontalShadowOffset.is(0) ? "" : "     .shadowHorizontalOffset(" + str(horizontalShadowOffset) + ")\n" ) +
