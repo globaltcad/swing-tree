@@ -209,7 +209,7 @@ public class ComponentExtension<C extends JComponent>
 
         _establishLookAndFeel( style );
 
-        if ( style.foreground().painter().isPresent() )
+        if ( style.foreground().hasPainters() )
             _makeAllChildrenTransparent(_owner);
 
         return style;
@@ -256,7 +256,7 @@ public class ComponentExtension<C extends JComponent>
         if ( hasMargin )
             weNeedToOverrideLaF = true;
 
-        if ( style.background().painter().isPresent() )
+        if ( style.background().hasPainters() )
             weNeedToOverrideLaF = true;
 
         if ( style.anyVisibleShadows() )

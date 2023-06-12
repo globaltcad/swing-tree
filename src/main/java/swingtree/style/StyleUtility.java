@@ -1,9 +1,13 @@
 package swingtree.style;
 
 import java.awt.*;
+import java.util.Map;
+import java.util.Objects;
 
 class StyleUtility
 {
+    static final String DEFAULT_KEY = "default";
+
     private StyleUtility() {}
 
     static String toString( Color color ) {
@@ -14,6 +18,12 @@ class StyleUtility
     static String toString( Arc arc ) {
         if ( arc == null ) return "null";
         return "Arc(" + arc.width() + "," + arc.height() + ")";
+    }
+
+    static String toString( Painter painter ) {
+        if ( painter == null ) return "null";
+        if ( painter == Painter.NONE ) return "null";
+        return "Painter@" + Integer.toHexString(Objects.hashCode(painter));
     }
 
 
@@ -150,5 +160,18 @@ class StyleUtility
         }
 
         throw new IllegalArgumentException("Could not parse or find color value: " + colorString);
+    }
+
+    public static  <T> boolean mapEquals(Map<String, T> map1, Map<String, T> map2 ) {
+        if ( map1.size() != map2.size() ) return false;
+        for ( Map.Entry<String, T> entry : map1.entrySet() ) {
+            if ( !map2.containsKey(entry.getKey()) ) return false;
+            if ( !Objects.equals(entry.getValue(), map2.get(entry.getKey())) ) return false;
+        }
+        return true;
+    }
+
+    public static <T> int mapHash(Map<String, T> map ) {
+        return map.entrySet().stream().mapToInt(e -> Objects.hash(e.getKey(), e.getValue())).sum();
     }
 }

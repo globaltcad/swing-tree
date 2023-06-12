@@ -5,6 +5,8 @@ import java.awt.*;
 @FunctionalInterface
 public interface Painter
 {
+    Painter NONE = (g2d) -> {};
+
     /**
      * Paints a custom style on a component using the given graphics context.
      * @param g2d the graphics context to use for painting.

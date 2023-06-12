@@ -42,7 +42,7 @@ public final class Style
                                             BackgroundStyle.none(),
                                             ForegroundStyle.none(),
                                             FontStyle.none(),
-                                            Collections.singletonMap(ShadowStyle.DEFAULT_KEY,ShadowStyle.none())
+                                            Collections.singletonMap(StyleUtility.DEFAULT_KEY,ShadowStyle.none())
                                         );
 
     public static Style none() { return _NONE; }
@@ -492,7 +492,24 @@ public final class Style
      * @param renderer The background renderer.
      * @return A new {@link Style} with the provided background renderer.
      */
-    public Style backgroundPainter( Painter renderer ) { return _withBackground(_background.painter(renderer)); }
+    public Style backgroundPainter( Painter renderer ) {
+        return _withBackground(_background.painter(StyleUtility.DEFAULT_KEY, renderer));
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided named background renderer, a {@link Painter} that
+     *  will be called using the {@link Graphics2D} instance used to render the component.
+     *  You may use this to render a custom background for the component.
+     *  The name can be used to override {@link Painter} instances with that same name
+     *  or use a unique name to ensure that you style is not overridden by another style.
+     *
+     * @param painterName The name of the painter.
+     * @param renderer The background renderer.
+     * @return A new {@link Style} with the provided background renderer.
+     */
+    public Style backgroundPainter( String painterName, Painter renderer ) {
+        return _withBackground(_background.painter(painterName, renderer));
+    }
 
     /**
      *  Returns a new {@link Style} with the provided foreground color.
@@ -518,7 +535,20 @@ public final class Style
      * @param painter The foreground renderer.
      * @return A new {@link Style} with the provided foreground renderer.
      */
-    public Style foregroundPainter( Painter painter ) { return _withForeground(_foreground.painter(painter)); }
+    public Style foregroundPainter( Painter painter ) { return _withForeground(_foreground.painter(StyleUtility.DEFAULT_KEY, painter)); }
+
+    /**
+     *  Returns a new {@link Style} with the provided named foreground painter, a {@link Painter} that
+     *  will be called using the {@link Graphics2D} instance used to render the component.
+     *  You may use this to render a custom foreground for the component.
+     *  The name can be used to override {@link Painter} instances with that same name
+     *  or use a unique name to ensure that you style is not overridden by another style.
+     *
+     * @param painterName The name of the painter.
+     * @param painter The foreground renderer.
+     * @return A new {@link Style} with the provided foreground renderer.
+     */
+    public Style foregroundPainter( String painterName, Painter painter ) { return _withForeground(_foreground.painter(painterName, painter)); }
 
     /**
      *  Returns a new {@link Style} with the provided horizontal shadow offset.
@@ -903,10 +933,18 @@ public final class Style
 
     public ForegroundStyle foreground() { return _foreground; }
 
-    public ShadowStyle shadow() { return _shadows.get(ShadowStyle.DEFAULT_KEY); }
+    public ShadowStyle shadow() { return _shadows.get(StyleUtility.DEFAULT_KEY); }
 
+    /**
+     * @return An unmodifiable list of all shadow styles sorted by their names in ascending alphabetical order.
+     */
     public List<ShadowStyle> shadows() {
-        return new ArrayList<>(_shadows.values());
+        return Collections.unmodifiableList(
+                _shadows.entrySet().stream()
+                        .sorted(Map.Entry.comparingByKey())
+                        .map(Map.Entry::getValue)
+                        .collect(Collectors.toList())
+            );
     }
 
     public boolean anyVisibleShadows() {
@@ -917,11 +955,7 @@ public final class Style
 
     @Override
     public int hashCode() {
-        return Objects.hash(_layout, _border, _background, _foreground, _font, _mapHash(_shadows));
-    }
-
-    private int _mapHash( Map<String, ShadowStyle> map ) {
-        return map.entrySet().stream().mapToInt(e -> Objects.hash(e.getKey(), e.getValue())).sum();
+        return Objects.hash(_layout, _border, _background, _foreground, _font, StyleUtility.mapHash(_shadows));
     }
 
     @Override
@@ -935,23 +969,14 @@ public final class Style
                Objects.equals(_background, other._background) &&
                Objects.equals(_foreground, other._foreground) &&
                Objects.equals(_font,       other._font      ) &&
-                _shadowEquals(_shadows,    other._shadows   );
-    }
-
-    private boolean _shadowEquals( Map<String, ShadowStyle> map1, Map<String, ShadowStyle> map2 ) {
-        if ( map1.size() != map2.size() ) return false;
-        for ( Map.Entry<String, ShadowStyle> entry : map1.entrySet() ) {
-            if ( !map2.containsKey(entry.getKey()) ) return false;
-            if ( !Objects.equals(entry.getValue(), map2.get(entry.getKey())) ) return false;
-        }
-        return true;
+                StyleUtility.mapEquals(_shadows,    other._shadows   );
     }
 
     @Override
     public String toString() {
         String shadowString;
         if ( _shadows.size() == 1 )
-            shadowString = _shadows.get(ShadowStyle.DEFAULT_KEY).toString();
+            shadowString = _shadows.get(StyleUtility.DEFAULT_KEY).toString();
         else
             shadowString = _shadows.entrySet()
                                     .stream()

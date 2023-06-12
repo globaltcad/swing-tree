@@ -8,25 +8,25 @@ import java.util.stream.Collectors;
 
 public final class BackgroundStyle
 {
-    private static final BackgroundStyle _NONE = new BackgroundStyle(null, null, null, Collections.singletonMap(ShadowStyle.DEFAULT_KEY, ShadeStyle.none()));
+    private static final BackgroundStyle _NONE = new BackgroundStyle(null, null, Collections.singletonMap(StyleUtility.DEFAULT_KEY, Painter.NONE), Collections.singletonMap(StyleUtility.DEFAULT_KEY, ShadeStyle.none()));
 
     public static BackgroundStyle none() { return _NONE; }
 
     private final Color _color;
     private final Color _foundationColor;
-    private final Painter _painter;
+    private final Map<String, Painter> _painters = new TreeMap<>();
     private final Map<String, ShadeStyle> _shades = new TreeMap<>();
 
 
     private BackgroundStyle(
         Color color,
         Color foundation,
-        Painter painter,
+        Map<String, Painter> painters,
         Map<String, ShadeStyle> shades
     ) {
         _color           = color;
         _foundationColor = foundation;
-        _painter         = painter;
+        _painters.putAll(painters);
         _shades.putAll(shades);
     }
 
@@ -34,19 +34,33 @@ public final class BackgroundStyle
 
     public Optional<Color> foundationColor() { return Optional.ofNullable(_foundationColor); }
 
-    public Optional<Painter> painter() { return Optional.ofNullable(_painter); }
+    /**
+     * @return An unmodifiable list of painters sorted by their names in ascending alphabetical order.
+     */
+    public List<Painter> painters() {
+        return Collections.unmodifiableList(
+                _painters
+                        .entrySet()
+                        .stream()
+                        .sorted(Map.Entry.comparingByKey())
+                        .map(Map.Entry::getValue)
+                        .collect(Collectors.toList())
+        );
+    }
+
+    public boolean hasPainters() { return !_painters.isEmpty(); }
 
     public List<ShadeStyle> shades() { return new ArrayList<>(_shades.values()); }
 
-    BackgroundStyle color( Color color ) { return new BackgroundStyle(color, _foundationColor, _painter, _shades); }
+    BackgroundStyle color( Color color ) { return new BackgroundStyle(color, _foundationColor, _painters, _shades); }
 
-    BackgroundStyle foundationColor( Color foundation ) { return new BackgroundStyle(_color, foundation, _painter, _shades); }
+    BackgroundStyle foundationColor( Color foundation ) { return new BackgroundStyle(_color, foundation, _painters, _shades); }
 
-    BackgroundStyle painter( Painter renderer ) { return new BackgroundStyle(_color, _foundationColor, renderer, _shades); }
+    BackgroundStyle painter( Map<String, Painter> painters ) { return new BackgroundStyle(_color, _foundationColor, painters, _shades); }
 
     BackgroundStyle shade( Map<String, ShadeStyle> shades ) {
         Objects.requireNonNull(shades);
-        return new BackgroundStyle(_color, _foundationColor, _painter, shades);
+        return new BackgroundStyle(_color, _foundationColor, _painters, shades);
     }
 
     public BackgroundStyle shade( String shadeName, Function<ShadeStyle, ShadeStyle> styler ) {
@@ -59,13 +73,17 @@ public final class BackgroundStyle
         return shade(newShadows);
     }
 
+    public BackgroundStyle painter( String painterName, Painter painter ) {
+        Objects.requireNonNull(painterName);
+        Objects.requireNonNull(painter);
+        // We clone the painter map:
+        Map<String, Painter> newPainters = new HashMap<>(_painters);
+        newPainters.put(painterName, painter); // Existing painters are overwritten if they have the same name.
+        return painter(newPainters);
+    }
 
     @Override
-    public int hashCode() { return Objects.hash(_color, _foundationColor, _painter, _mapHash(_shades)); }
-
-    private int _mapHash( Map<String, ShadeStyle> map ) {
-        return map.entrySet().stream().mapToInt(e -> Objects.hash(e.getKey(), e.getValue())).sum();
-    }
+    public int hashCode() { return Objects.hash(_color, _foundationColor, StyleUtility.mapHash(_painters), StyleUtility.mapHash(_shades)); }
 
     @Override
     public boolean equals(Object obj) {
@@ -75,17 +93,8 @@ public final class BackgroundStyle
         BackgroundStyle rhs = (BackgroundStyle) obj;
         return Objects.equals(_color, rhs._color) &&
                Objects.equals(_foundationColor, rhs._foundationColor) &&
-               Objects.equals(_painter, rhs._painter) &&
-                _shadeEquals(_shades, rhs._shades);
-    }
-
-    private boolean _shadeEquals(Map<String, ShadeStyle> map1, Map<String, ShadeStyle> map2 ) {
-        if ( map1.size() != map2.size() ) return false;
-        for ( Map.Entry<String, ShadeStyle> entry : map1.entrySet() ) {
-            if ( !map2.containsKey(entry.getKey()) ) return false;
-            if ( !Objects.equals(entry.getValue(), map2.get(entry.getKey())) ) return false;
-        }
-        return true;
+                StyleUtility.mapEquals(_painters, rhs._painters) &&
+                StyleUtility.mapEquals(_shades, rhs._shades);
     }
 
     @Override
@@ -93,17 +102,26 @@ public final class BackgroundStyle
 
         String shadesString;
         if ( _shades.size() == 1 )
-            shadesString = _shades.get(ShadowStyle.DEFAULT_KEY).toString();
+            shadesString = _shades.get(StyleUtility.DEFAULT_KEY).toString();
         else
             shadesString = _shades.entrySet()
                                     .stream()
                                     .map(e -> e.getKey() + ": " + e.getValue())
                                     .collect(Collectors.joining(", ", "shades=[", "]"));
 
+        String painterString;
+        if ( _painters.size() == 1 )
+            painterString = "painter=" + StyleUtility.toString(_painters.values().iterator().next());
+        else
+            painterString = _painters.values()
+                                     .stream()
+                                     .map(StyleUtility::toString)
+                                     .collect(Collectors.joining(", ", "painters=[", "]"));
+
         return "BackgroundStyle[" +
                     "color="           + StyleUtility.toString(_color) + ", " +
                     "foundationColor=" + StyleUtility.toString(_foundationColor) + ", " +
-                    "painter="         + _painter + ", " +
+                    painterString + ", " +
                     shadesString +
                 "]";
     }

@@ -62,7 +62,7 @@ public class StyleRenderer<C extends JComponent>
         if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
             g2d.setFont( componentFont );
 
-        style.background().painter().ifPresent( backgroundPainter -> {
+        style.background().painters().forEach( backgroundPainter -> {
             g2d.setClip(baseAreaSupplier.get());
             backgroundPainter.paint(g2d);
         });
@@ -105,7 +105,7 @@ public class StyleRenderer<C extends JComponent>
         if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
             g2d.setFont( componentFont );
 
-        style.foreground().painter().ifPresent( foregroundPainter -> {
+        style.foreground().painters().forEach(foregroundPainter -> {
             foregroundPainter.paint(g2d);
         });
 

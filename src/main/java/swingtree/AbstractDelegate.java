@@ -4,11 +4,13 @@ import swingtree.animation.Animate;
 import swingtree.animation.Animation;
 import swingtree.animation.Schedule;
 import swingtree.style.Painter;
+import swingtree.style.Style;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 /**
  *  Extensions of this class delegate a component event
@@ -897,4 +899,5 @@ abstract class AbstractDelegate<C extends JComponent>
     public final void animateTwice( double duration, TimeUnit unit, Animation animation ) {
         this.animate(duration, unit).goTwice(animation);
     }
+
 }
