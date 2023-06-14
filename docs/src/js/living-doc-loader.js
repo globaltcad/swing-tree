@@ -282,6 +282,7 @@ function buildFeatureListFor(expandableFeature, data, content) {
     setTimeout(() => {
             hljs.initHighlighting.called = false;
             hljs.highlightAll();
+            applyMarkdown();
         },
         50
     );
@@ -323,7 +324,9 @@ function createUIForFeature(featureData) {
     let blocks = $('<div></div>');
     if ( featureData['iterations']['extraInfo'].length > 0 ) {
         // We attach the extra info to the wrapper:
-        wrapper.append("<p>" + featureData['iterations']['extraInfo'][0] + "</p>");
+        let info = removeIndentationFromInfo(featureData['iterations']['extraInfo'][0]);
+        wrapper.append("<p class=\"MarkdownMe\">" + info + "</p>");
+        console.log("|"+info+"|");
         //(only the first one because we don't care about all the iterations)
     }
     // We iterate over the blocks:
@@ -349,6 +352,36 @@ function createUIForFeature(featureData) {
         blocks.append(blockDiv);
     });
     return wrapper.append(blocks);
+}
+
+function removeIndentationFromInfo(info) {
+    // First we split the info into lines:
+    let lines = info.split("\n");
+    // Now we remove leading and trailing empty lines:
+    while ( lines.length > 0 && lines[0].trim() === '' ) lines.shift();
+    while ( lines.length > 0 && lines[lines.length-1].trim() === '' ) lines.pop();
+    // Now we determine the lowest indentation:
+    let lowestIndentation = 1000;
+    lines.forEach((line)=>{
+        // We ignore line which are empty when trimmed:
+        if ( line.trim() === '' ) return;
+
+        let indentation = 0;
+        while ( line.startsWith(" ") ) {
+            indentation++;
+            line = line.substring(1);
+        }
+        if ( indentation < lowestIndentation ) lowestIndentation = indentation;
+    });
+    // Now we remove the indentation:
+    let result = "";
+    lines.forEach((line)=>{
+        if ( line.trim() === '' )
+            result += "\n";
+        else
+            result += line.substring(lowestIndentation) + "\n";
+    });
+    return result;
 }
 
 function autoCompleteMissingBlockData(block, seed) {
