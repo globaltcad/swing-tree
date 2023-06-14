@@ -63,12 +63,16 @@ public class StyleRenderer<C extends JComponent>
             g2d.setFont( componentFont );
 
         style.background().painters().forEach( backgroundPainter -> {
+            if ( backgroundPainter == Painter.NONE ) return;
             g2d.setClip(baseAreaSupplier.get());
             backgroundPainter.paint(g2d);
         });
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
+
+        if ( baseArea[0] != null )
+            g2d.setClip(baseAreaSupplier.get());
     }
 
     public void renderBorderStyle(Graphics2D g2d) {
@@ -106,6 +110,7 @@ public class StyleRenderer<C extends JComponent>
             g2d.setFont( componentFont );
 
         style.foreground().painters().forEach(foregroundPainter -> {
+            if ( foregroundPainter == Painter.NONE ) return;
             foregroundPainter.paint(g2d);
         });
 
