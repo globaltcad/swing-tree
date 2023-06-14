@@ -3,7 +3,9 @@ package example;
 import com.formdev.flatlaf.FlatLightLaf;
 import example.styles.SoftUIStyleSheet;
 import swingtree.UI;
+import swingtree.style.Edge;
 
+import javax.swing.*;
 import java.awt.Color;
 import java.util.concurrent.TimeUnit;
 
@@ -14,13 +16,13 @@ public class SoftUIView extends Panel
     public SoftUIView() {
         FlatLightLaf.setup();
         UI.use(new SoftUIStyleSheet(), ()->
-            UI.of(this).groups("soft inwards")
+            UI.of(this).groups("soft sink")
             .add(SHRINK.and(ALIGN_LEFT),
-                box()
+                box().groups("soft raise")
                 .withLayout(FILL.and(WRAP(3)).and(INS(32)), "", "[][]24[]24[]")
-                .withPrefSize(800, 600)
+                //.withPrefSize(700, 400)
                 .add( SHRINK.and(SPAN).and(ALIGN_CENTER),
-                    panel().groups("neumorphic")
+                    panel().groups("soft banner")
                     .add(
                         html(
                             "<h1>Soft UI In Swing O.o</h1>" +
@@ -40,28 +42,72 @@ public class SoftUIView extends Panel
                             });
                         });
                     })
+                    .add(
+                        label(50,50,icon("img/trees.png")).groups("soft banner")
+                    )
                 )
                 .add( SHRINK.and(SPAN).and(ALIGN_CENTER),
-                    box().groups("soft inwards")
+                    box().groups("soft sink")
                     .add(
-                        button("Click Me!").groups("neumorphic button").onClick(e -> {
-                            System.out.println("Clicked!");
-                        })
-                    )
-                    .add(
-                        toggleButton("Toggle Me!").groups("neumorphic button")
+                        slider(Align.VERTICAL, 0, 255).groups("soft slim")
                     )
                     .add(WRAP,
-                        label(50,50,icon("img/trees.png")).groups("neumorphic")
-                    )
-                    .add(SPAN.and(GROW_X),
-                        slider(Align.HORIZONTAL, 0, 255).groups("soft slim")
+                        box(FILL.and(WRAP(2)))
+                        .add(
+                            box(FILL.and(GAP_REL(0)))
+                            .add(GROW_X,
+                                button("Click Me!").groups("soft button")
+                            )
+                            .add(GROW_X.and(WRAP),
+                                toggleButton("Toggle Me!").groups("soft button")
+                            )
+                            .add(GROW_X,
+                                checkBox("Check")
+                            )
+                            .add(GROW_X.and(WRAP),
+                                radioButton("Radio")
+                            )
+                            .add(GROW_X,
+                                spinner()
+                            )
+                            .add(GROW_X.and(WRAP),
+                                comboBox("A", "B", "C")
+                            )
+                        )
+                        .add(
+                            box(FILL.and(GAP_REL(0)).and(WRAP(1)))
+                            .add(GROW_X,
+                                textField("Text Field")
+                            )
+                            .add(GROW_X,
+                                passwordField("Password Field")
+                            )
+                            .add(GROW_X.and(WRAP),
+                                textArea("Text Area")
+                            )
+                        )
+                        .add(SPAN.and(GROW_X),
+                             of(new JProgressBar(SwingConstants.HORIZONTAL, 0, 100))
+                             .peek(it->{it.setValue(68); it.setString("%"); it.setStringPainted(true);})
+                             .withBackground(Color.WHITE)
+                        )
                     )
                 )
             )
             .add(
-                label(icon("img/swing.png"))
+                label(icon("img/swing.png")).withStyle( it -> it.style().pad(24) )
             )
+            .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
+                it.paint( g -> {
+                    g.setColor(new Color(0.1f, 0.25f, 0.5f, (float) state.fadeOut()));
+                    for ( int i = 0; i < 5; i++ ) {
+                        double r = 300 * state.fadeIn() * ( 1 - i * 0.2 );
+                        double x = it.getEvent().getX() - r / 2;
+                        double y = it.getEvent().getY() - r / 2;
+                        g.drawOval((int) x, (int) y, (int) r, (int) r);
+                    }
+                });
+            }))
         );
     }
 

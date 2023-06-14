@@ -241,6 +241,7 @@ public final class UI
     public static LayoutAttr INS(int top, int left, int bottom, int right) { return LayoutAttr.of("insets " + top + " " + left + " " + bottom + " " + right); }
     public static LayoutAttr INSETS(int top, int left, int bottom, int right) { return LayoutAttr.of("insets " + top + " " + left + " " + bottom + " " + right); }
     public static LayoutAttr WRAP(int times) { return LayoutAttr.of( "wrap " + times ); }
+    public static LayoutAttr GAP_REL(int size) { return LayoutAttr.of( "gap rel " + size ); }
     public static LayoutAttr FLOW_X   = LayoutAttr.of("flowx");
     public static LayoutAttr FLOW_Y   = LayoutAttr.of("flowy");
     public static LayoutAttr NO_GRID  = LayoutAttr.of("nogrid");
@@ -2678,7 +2679,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JToggleButton}, which enables fluent method chaining.
      */
-    public static UIForToggleButton<JToggleButton> toggleButton() { return of(new JToggleButton()); }
+    public static UIForToggleButton<JToggleButton> toggleButton() { return of((JToggleButton) new ToggleButton()); }
 
     /**
      *  Use this to create a builder for a new {@link JToggleButton} instance
@@ -2689,7 +2690,7 @@ public final class UI
      */
     public static UIForToggleButton<JToggleButton> toggleButton( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return of(new JToggleButton(text));
+        return toggleButton().withText(text);
     }
 
     /**
@@ -2701,7 +2702,7 @@ public final class UI
     public static UIForToggleButton<JToggleButton> toggleButton( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of(new JToggleButton())
+        return toggleButton()
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
@@ -2714,7 +2715,7 @@ public final class UI
      */
     public static UIForToggleButton<JToggleButton> toggleButton( Var<Boolean> isToggled ) {
         NullUtil.nullPropertyCheck(isToggled, "isToggled");
-        return of(new JToggleButton())
+        return toggleButton()
                 .applyIf(!isToggled.hasNoID(), it -> it.id(isToggled.id()))
                 .isSelectedIf(isToggled);
     }
@@ -2730,7 +2731,7 @@ public final class UI
     public static UIForToggleButton<JToggleButton> toggleButton( String text, Var<Boolean> isToggled ) {
         NullUtil.nullArgCheck(text, "text", String.class);
         NullUtil.nullPropertyCheck(isToggled, "isToggled");
-        return of(new JToggleButton())
+        return toggleButton()
                 .withText(text)
                 .isSelectedIf(isToggled);
     }
@@ -2748,7 +2749,7 @@ public final class UI
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullArgCheck(isToggled, "isToggled", Var.class);
         NullUtil.nullPropertyCheck(isToggled, "isToggled", "The selection state of a toggle button may not be modelled using null!");
-        return of(new JToggleButton())
+        return toggleButton()
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .applyIf(!isToggled.hasNoID(), it -> it.id(isToggled.id()))
                 .withText(text)
@@ -2764,7 +2765,7 @@ public final class UI
      */
     public static UIForToggleButton<JToggleButton> toggleButton( Icon icon ) {
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
-        return of(new JToggleButton(icon));
+        return toggleButton().withIcon(icon);
     }
 
     /**
@@ -2779,7 +2780,7 @@ public final class UI
     public static UIForToggleButton<JToggleButton> toggleButton( Icon icon, Var<Boolean> isToggled ) {
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
         NullUtil.nullPropertyCheck(isToggled, "isToggled", "The selection state of a toggle button may not be modelled using null!");
-        return of(new JToggleButton(icon))
+        return toggleButton(icon)
                 .applyIf(!isToggled.hasNoID(), it -> it.id(isToggled.id()))
                 .isSelectedIf(isToggled);
     }
@@ -4083,6 +4084,11 @@ public final class UI
 
     /** {inheritDoc} */
     public static class Button extends JButton {
+        @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
+        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
+    }
+    /** {inheritDoc} */
+    public static class ToggleButton extends JToggleButton {
         @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
     }

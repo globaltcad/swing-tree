@@ -1,9 +1,11 @@
 package example.styles;
 
+import swingtree.style.Edge;
 import swingtree.style.ShadingStrategy;
 import swingtree.style.StyleSheet;
 
 import javax.swing.*;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 
 public class SoftUIStyleSheet extends StyleSheet
@@ -14,8 +16,8 @@ public class SoftUIStyleSheet extends StyleSheet
             it.style()
                 .borderRadius(20)
                 .backgroundColor(new Color(0.4f, 0.85f, 1))
-                .pad(30)
-                .margin(30)
+                .pad(12)
+                .margin(16)
         );
         apply(type(JComponent.class).group("frameShadow"), it ->
             it.style()
@@ -36,7 +38,7 @@ public class SoftUIStyleSheet extends StyleSheet
                 .pad(20)
                 .margin(12)
         );
-        apply(type(JComponent.class).group("neumorphic").inherits("soft base"), it ->
+        apply(type(JComponent.class).group("soft banner").inherits("soft base"), it ->
             it.style()
                 .shadow("bright", s -> s
                     .color(new Color(0.7f, 0.95f, 1f, 0.35f))
@@ -55,11 +57,11 @@ public class SoftUIStyleSheet extends StyleSheet
                             )
                 )
         );
-        apply(type(AbstractButton.class).group("neumorphic button").inherits("soft base"), it ->
+        apply(type(AbstractButton.class).group("soft button").inherits("soft base"), it ->
             it.style()
                 .borderRadius(12)
-                .pad(7)
-                .margin(10)
+                .pad(6)
+                .margin(8)
                 .shadow("bright", s -> s
                     .color(new Color(0.7f, 0.95f, 1f, 0.45f))
                     .offset(-6)
@@ -77,7 +79,7 @@ public class SoftUIStyleSheet extends StyleSheet
                             )
                 )
         );
-        apply(type(JComponent.class).group("soft inwards").inherits("soft base"), it ->
+        apply(type(JComponent.class).group("soft sink").inherits("soft base"), it ->
             it.style()
                 .foundationColor(new Color(0.4f, 0.85f, 1))
                 .shadow("bright", s -> s
@@ -94,11 +96,28 @@ public class SoftUIStyleSheet extends StyleSheet
                 .pad(30)
                 .margin(10)
         );
+        apply(type(JComponent.class).group("soft raise").inherits("soft base"), it ->
+            it.style()
+                .foundationColor(new Color(0.4f, 0.85f, 1))
+                .shadow("bright", s -> s
+                    .color(new Color(0.7f, 0.95f, 1f, 0.35f))
+                    .offset(-11)
+                )
+                .shadow("dark", s -> s
+                    .color(new Color(0, 0.1f, 0.2f, 0.20f))
+                    .offset(+6)
+                )
+                .shadowBlurRadius(13)
+                .shadowSpreadRadius(-5)
+                .shadowIsInset(false)
+                .pad(30)
+                .margin(10)
+        );
         apply(type(JComponent.class).group("soft slim").inherits("soft base"), it ->
             it.style()
                 .shadow("bright", s -> s
-                    .color(new Color(0.7f, 0.95f, 1f, 0.35f))
-                    .offset(-3)
+                    .color(new Color(0.7f, 0.95f, 1f, 0.45f))
+                    .offset(-4)
                 )
                 .shadow("dark", s -> s
                     .color(new Color(0, 0.1f, 0.2f, 0.25f))
@@ -107,8 +126,47 @@ public class SoftUIStyleSheet extends StyleSheet
                 .shadowBlurRadius(8)
                 .shadowSpreadRadius(-5)
                 .shadowIsInset(false)
-                .pad(0)
-                .margin(15)
+                .pad(4)
+                .margin(6)
+        );
+
+        apply(type(JComboBox.class).inherits("soft slim"), it ->
+                it.style().pad(4)
+        );
+        apply(type(JCheckBox.class).inherits("soft slim"), it ->
+                it.style().pad(6)
+        );
+        apply(type(JRadioButton.class).inherits("soft slim"), it ->
+                it.style().pad(6)
+        );
+        apply(type(JSpinner.class).inherits("soft slim"), it ->
+                it.style().pad(4)
+        );
+        apply(type(JProgressBar.class).inherits("soft slim"), it ->
+                it.style().pad(0)
+        );
+        apply(type(JTextComponent.class).inherits("soft slim"), it ->
+                it.style()
+                .foundationColor(new Color(0.4f, 0.85f, 1))
+                .shadow("bright", s -> s
+                    .color(new Color(0.7f, 0.95f, 1f, 0.35f))
+                    .offset(-5)
+                )
+                .shadow("dark", s -> s
+                    .color(new Color(0, 0.1f, 0.2f, 0.20f))
+                    .offset(+3)
+                )
+                .shadowBlurRadius(6)
+                .shadowSpreadRadius(-4)
+                .shadowIsInset(true)
+                .pad(4)
+                .margin(8)
+        );
+        apply(type(JComponent.class).group("soft underline").inherits("soft slim"), it ->
+                it.style()
+                    .borderWidthAt(Edge.BOTTOM, 3)
+                    .borderColor(new Color(0, 139, 255))
+                    .borderRadius(4)
         );
     }
 

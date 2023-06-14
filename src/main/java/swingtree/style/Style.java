@@ -148,9 +148,7 @@ public final class Style
      * @param margin The margin distance in pixels.
      * @return A new {@link Style} with the provided margin distance.
      */
-    public Style marginBottom( int margin ) {
-        return _withLayout(_layout.margin(_layout.margin().bottom(margin)));
-    }
+    public Style marginBottom( int margin ) { return _withLayout(_layout.margin(_layout.margin().bottom(margin))); }
 
     /**
      *  Creates a new {@link Style} with the provided margin distance for the left side of the component.
@@ -161,9 +159,7 @@ public final class Style
      * @param margin The margin distance in pixels.
      * @return A new {@link Style} with the provided margin distance.
      */
-    public Style marginLeft( int margin ) {
-        return _withLayout(_layout.margin(_layout.margin().left(margin)));
-    }
+    public Style marginLeft( int margin ) { return _withLayout(_layout.margin(_layout.margin().left(margin))); }
 
     /**
      *  Creates a new {@link Style} with the provided margin distance for the top and bottom sides of the component.
