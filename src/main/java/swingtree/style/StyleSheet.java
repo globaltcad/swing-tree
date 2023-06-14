@@ -57,12 +57,10 @@ public abstract class StyleSheet
         int deepestValidPath = -1;
         List<List<StyleTrait>> validTraitPaths = new java.util.ArrayList<>();
         for (List<StyleTrait> traitPath : _traitPaths) {
-            List<String> inheritedStyleNames = new ArrayList<>();
             int lastValidTrait = -1;
             for (int i = 0; i < traitPath.size(); i++) {
                 StyleTrait trait = traitPath.get(i);
-                boolean valid = trait.isApplicableTo(toBeStyled, inheritedStyleNames);
-                inheritedStyleNames.add(trait.group());
+                boolean valid = trait.isApplicableTo(toBeStyled);
                 if (valid) lastValidTrait = i;
             }
             if ( lastValidTrait >= 0 ) // We add the path up to the last valid trait to the list of valid traits.

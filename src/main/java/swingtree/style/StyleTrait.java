@@ -56,23 +56,15 @@ public final class StyleTrait<C extends JComponent>
 
     public <T extends JComponent> StyleTrait<T> type( Class<T> type ) { return new StyleTrait<>(_group, _id, _toInherit, type ); }
 
-    public boolean isApplicableTo( JComponent component, List<String> inheritedNames ) {
+    public boolean isApplicableTo( JComponent component ) {
         boolean typeIsCompatible = _type.isAssignableFrom(component.getClass());
         boolean idIsCompatible = _id.isEmpty() || _id.equals(component.getName());
         boolean belongsToApplicableGroup =
                 ComponentExtension.from(component)
                         .getStyleGroups()
                         .stream()
-                        .anyMatch( sg -> {
-                            boolean isCompatible = sg.equals(_group);
-                            if ( !isCompatible )
-                                for ( String extension : _toInherit )
-                                    if ( sg.equals(extension) ) {
-                                        isCompatible = true;
-                                        break;
-                                    }
-                            return isCompatible;
-                        });
+                        .anyMatch( sg -> sg.equals(_group));
+
         boolean nameIsCompatible = _group.isEmpty() || belongsToApplicableGroup;
         return typeIsCompatible && idIsCompatible && nameIsCompatible;
     }
