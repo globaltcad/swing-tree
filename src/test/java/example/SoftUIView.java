@@ -3,12 +3,12 @@ package example;
 import com.formdev.flatlaf.FlatLightLaf;
 import example.styles.SoftUIStyleSheet;
 import swingtree.UI;
-import swingtree.style.Edge;
 
 import javax.swing.*;
-import java.awt.Color;
+import java.awt.*;
 import java.util.concurrent.TimeUnit;
 
+import static swingtree.UI.Panel;
 import static swingtree.UI.*;
 
 public class SoftUIView extends Panel

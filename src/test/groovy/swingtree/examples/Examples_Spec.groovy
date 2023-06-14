@@ -83,7 +83,16 @@ class Examples_Spec extends Specification
 
     def 'The note guesser example UI defined in the examples can be created.'()
     {
-        expect : new NoteGuesserView(new NoteGuesserViewModel())
+        reportInfo """
+            The guesser example view looks like this:
+            ![note-guesser-UI.png](../src/test/resources/snapshots/note-guesser-UI.png)
+            This is actually a nice little demo application you can play with
+            yourself. Just navigate to the class and run it.
+        """
+        given : 'We create an instance of the UI.'
+            var ui = new NoteGuesserView(new NoteGuesserViewModel())
+        expect : 'It is rendered as shown in the image.'
+            Utility.similarityBetween(ui, "/snapshots/note-guesser-UI.png") > 97
     }
 
     def 'The symbol guesser example UI defined in the examples can be created.'()
@@ -93,17 +102,42 @@ class Examples_Spec extends Specification
 
     def 'The "Well rounded" style example UI defined in the examples can be created.'()
     {
-        expect : new WellRoundedView()
+        reportInfo """
+            The well rounded UI looks like this:
+            ![well-rounded-UI.png](../src/test/resources/snapshots/well-rounded-UI.png)
+        """
+        given : 'We create the UI.'
+            var ui = new WellRoundedView()
+        expect : 'It is rendered as shown in the image.'
+            Utility.similarityBetween(ui, "/snapshots/well-rounded-UI.png") > 97
     }
 
-    def 'The example of the soft UI defined in the examples can be created.'()
+    def 'The soft example UI is rendered as expected.'()
     {
-        expect : new SoftUIView()
+        reportInfo """
+            The soft example UI looks like this:
+            ![soft-example-UI.png](../src/test/resources/snapshots/soft-example-UI.png)
+        """
+        given : 'We create the UI.'
+            var ui = new SoftUIView()
+        expect : 'It is rendered as shown in the image.'
+            Utility.similarityBetween(ui, "/snapshots/soft-example-UI.png") > 97
     }
 
-    def 'The animated buttons view examples UI defined in the examples can be created.'()
+    def 'The animated buttons view examples UI defined in the examples looks as expected.'()
     {
-        expect : new AnimatedButtonsView()
+        reportInfo """
+            The animated buttons view looks like this:
+            ![animated-buttons-UI.png](../src/test/resources/snapshots/animated-buttons-UI.png)
+            
+            Unfortunately this is just a snapshot of the UI, so you can't play with 
+            the animations right here. But you can run the example found in the test suite
+            of SwingTree and try it out yourself.
+        """
+        given : 'We create the UI.'
+            var ui = new AnimatedButtonsView()
+        expect : 'It is rendered as shown in the image.'
+            Utility.similarityBetween(ui, "/snapshots/animated-buttons-UI.png") > 97
     }
 
     def 'The animation example view can be created.'()
@@ -146,13 +180,19 @@ class Examples_Spec extends Specification
         expect : new MadeWithSwingTree()
     }
 
-    def 'The calculator UI defined in the examples has the expected state.'()
+    def 'The calculator UI defined in the examples has the expected state and looks.'()
     {
-        given : 'We get the UI.'
+        reportInfo """
+            The calculator view looks like this:
+            ![calculator-UI.png](../src/test/resources/snapshots/calculator-UI.png)
+        """
+        given : 'We create the UI.'
             var ui = new Calculator()
         expect :
             new Utility.Query(ui).find(JTextArea, "input-text-area").isPresent()
             new Utility.Query(ui).find(JTextArea, "input-text-area").get().componentOrientation == ComponentOrientation.RIGHT_TO_LEFT
+        and : 'Its render state is as expected.'
+            Utility.similarityBetween(ui, "/snapshots/calculator-UI.png") > 97
     }
 
     def 'The simple Table-UI example has the expected state.'()
@@ -212,14 +252,6 @@ class Examples_Spec extends Specification
             new Utility.Query(ui).find(JPanel, "task-1").isPresent()
             new Utility.Query(ui).find(JPanel, "task-2").isPresent()
             new Utility.Query(ui).find(JPanel, "task-3").isPresent()
-    }
-
-    def 'The soft example UI is rendered as expected.'()
-    {
-        given : 'We get the UI.'
-            var ui = new SoftUIView()
-        expect :
-            Utility.similarityBetween(ui, "/snapshots/soft-example-UI.png") > 97
     }
 
 

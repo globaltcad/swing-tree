@@ -2,7 +2,8 @@ package swingtree;
 
 import com.alexandriasoftware.swing.JSplitButton;
 import com.formdev.flatlaf.FlatLightLaf;
-import example.SoftUIView;
+import example.NoteGuesserView;
+import example.NoteGuesserViewModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -119,18 +120,18 @@ public class Utility {
      *  This is used to make UI snapshots for testing purposes.
      */
     public static void main(String[] args) {
-        SoftUIView ui = new SoftUIView();
+        NoteGuesserView ui = new NoteGuesserView(new NoteGuesserViewModel());
         JWindow f = new JWindow();
         f.add(ui);
         f.pack();
-        safeUIAsImage(ui, "soft-example-UI.png");
+        safeUIAsImage(ui, "src/test/resources/snapshots/note-guesser-UI.png");
         //BufferedImage image = offscreenRender(ui);
         //JFrame frame = new JFrame();
         //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         //frame.getContentPane().add(new JLabel(new ImageIcon(image)));
         //frame.pack();
         //frame.setVisible(true);
-
+        System.exit(0);
     }
 
     public static void safeUIAsImage(JComponent ui, String path) {
@@ -156,19 +157,23 @@ public class Utility {
         return similarityBetween(image, imageFromFile);
     }
 
-    public static double similarityBetween(BufferedImage image1, BufferedImage image2) {
+    public static double similarityBetween(BufferedImage image0, BufferedImage image1) {
         int width1 = image1.getWidth();
-        int width2 = image2.getWidth();
+        int width0 = image0.getWidth();
         int height1 = image1.getHeight();
-        int height2 = image2.getHeight();
-        if ((width1 != width2) || (height1 != height2)) {
-            System.err.println("Error: Images dimensions mismatch");
-            System.exit(1);
+        int height0 = image0.getHeight();
+        if ((width1 != width0) || (height1 != height0)) {
+            // Let's resize the image to the same size
+            BufferedImage resized = new BufferedImage(width1, height1, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g = resized.createGraphics();
+            g.drawImage(image0, 0, 0, width1, height1, null);
+            g.dispose();
+            image0 = resized;
         }
         long diff = 0;
         for (int y = 0; y < height1; y++) {
             for (int x = 0; x < width1; x++) {
-                diff += pixelDiff(image1.getRGB(x, y), image2.getRGB(x, y));
+                diff += pixelDiff(image1.getRGB(x, y), image0.getRGB(x, y));
             }
         }
         long maxDiff = 3L * 255 * width1 * height1;
