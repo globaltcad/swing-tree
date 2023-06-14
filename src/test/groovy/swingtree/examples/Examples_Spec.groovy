@@ -214,5 +214,13 @@ class Examples_Spec extends Specification
             new Utility.Query(ui).find(JPanel, "task-3").isPresent()
     }
 
+    def 'The soft example UI is rendered as expected.'()
+    {
+        given : 'We get the UI.'
+            var ui = new SoftUIView()
+        expect :
+            Utility.similarityBetween(ui, "/snapshots/soft-example-UI.png") > 97
+    }
+
 
 }

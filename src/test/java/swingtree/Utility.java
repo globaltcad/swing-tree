@@ -2,9 +2,12 @@ package swingtree;
 
 import com.alexandriasoftware.swing.JSplitButton;
 import com.formdev.flatlaf.FlatLightLaf;
+import example.SoftUIView;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.InputStream;
 import java.util.List;
 import java.util.*;
 
@@ -101,5 +104,85 @@ public class Utility {
         }
     }
 
+    public static BufferedImage offscreenRender(Component component) {
+        JWindow f = new JWindow();
+        f.add(component);
+        f.pack();
+        BufferedImage image = new BufferedImage(component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = image.createGraphics();
+        component.paint(g2d);
+        g2d.dispose();
+        return image;
+    }
+
+    /**
+     *  This is used to make UI snapshots for testing purposes.
+     */
+    public static void main(String[] args) {
+        SoftUIView ui = new SoftUIView();
+        JWindow f = new JWindow();
+        f.add(ui);
+        f.pack();
+        safeUIAsImage(ui, "soft-example-UI.png");
+        //BufferedImage image = offscreenRender(ui);
+        //JFrame frame = new JFrame();
+        //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //frame.getContentPane().add(new JLabel(new ImageIcon(image)));
+        //frame.pack();
+        //frame.setVisible(true);
+
+    }
+
+    public static void safeUIAsImage(JComponent ui, String path) {
+        BufferedImage image = offscreenRender(ui);
+        // We save the image
+        try {
+            javax.imageio.ImageIO.write(image, "png", new java.io.File(path));
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static double similarityBetween(JComponent ui, String imageFile) {
+        BufferedImage image = offscreenRender(ui);
+        BufferedImage imageFromFile = null;
+        try {
+            // We load from the test resource folder:
+            InputStream resource = Utility.class.getResourceAsStream(imageFile);
+            imageFromFile = javax.imageio.ImageIO.read(resource);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return similarityBetween(image, imageFromFile);
+    }
+
+    public static double similarityBetween(BufferedImage image1, BufferedImage image2) {
+        int width1 = image1.getWidth();
+        int width2 = image2.getWidth();
+        int height1 = image1.getHeight();
+        int height2 = image2.getHeight();
+        if ((width1 != width2) || (height1 != height2)) {
+            System.err.println("Error: Images dimensions mismatch");
+            System.exit(1);
+        }
+        long diff = 0;
+        for (int y = 0; y < height1; y++) {
+            for (int x = 0; x < width1; x++) {
+                diff += pixelDiff(image1.getRGB(x, y), image2.getRGB(x, y));
+            }
+        }
+        long maxDiff = 3L * 255 * width1 * height1;
+        return 100.0 * ( 1 - (double) diff / maxDiff );
+    }
+
+    private static double pixelDiff(int rgb1, int rgb2) {
+        int r1 = (rgb1 >> 16) & 0xff;
+        int g1 = (rgb1 >>  8) & 0xff;
+        int b1 =  rgb1        & 0xff;
+        int r2 = (rgb2 >> 16) & 0xff;
+        int g2 = (rgb2 >>  8) & 0xff;
+        int b2 =  rgb2        & 0xff;
+        return (Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2)) / 3.0;
+    }
 
 }
