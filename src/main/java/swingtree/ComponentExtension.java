@@ -198,6 +198,24 @@ public class ComponentExtension<C extends JComponent>
                 tc.setSelectionColor(style.font().selectionColor().get());
         }
 
+        if ( _owner instanceof JComboBox ) {
+            int bottom = style.margin().bottom().orElse(0);
+            bottom += Math.max(style.border().widths().bottom().orElse(0), 0)/2;
+            // We adjust the position of the popup menu:
+            try {
+                Point location = _owner.getLocationOnScreen();
+                int x = location.x;
+                int y = location.y + _owner.getHeight() - bottom;
+                JComboBox<?> comboBox = (JComboBox<?>) _owner;
+                JPopupMenu popup = (JPopupMenu) comboBox.getAccessibleContext().getAccessibleChild(0);
+                Point oldLocation = popup.getLocation();
+                if ( popup.isShowing() && (oldLocation.x != x || oldLocation.y != y) )
+                    popup.setLocation(x, y);
+            } catch ( Exception e ) {
+                // ignore
+            }
+        }
+
         style.font()
              .createDerivedFrom(_owner.getFont())
              .ifPresent( newFont -> {
@@ -380,6 +398,7 @@ public class ComponentExtension<C extends JComponent>
     {
         private final ComponentExtension<C> _compExt;
         private final Border _formerBorder;
+        private final boolean _borderWasNotPainted;
         private Insets _currentInsets;
         private Insets _currentMarginInsets = new Insets(0,0,0,0);
 
@@ -387,15 +406,29 @@ public class ComponentExtension<C extends JComponent>
             _compExt = compExt;
             _currentInsets = null;
             _formerBorder = formerBorder;
+            if ( _compExt._owner instanceof AbstractButton ) {
+                AbstractButton b = (AbstractButton) _compExt._owner;
+                _borderWasNotPainted = !b.isBorderPainted();
+                b.setBorderPainted(true);
+            }
+            else
+                _borderWasNotPainted = false;
         }
 
         @Override
         public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
             _checkIfInsetsChanged();
+            // We remember the clip:
+            Shape formerClip = g.getClip();
+            g.setClip(null);
+
             if ( _compExt._currentRenderer != null )
                 _compExt._currentRenderer.renderBorderStyle((Graphics2D) g);
-            else if ( _formerBorder != null )
+            else if ( _formerBorder != null && !_borderWasNotPainted )
                 _formerBorder.paintBorder(c, g, x, y, width, height);
+
+            if ( formerClip != null )
+                g.setClip(formerClip);
 
             _compExt._renderAnimations( (Graphics2D) g );
         }
