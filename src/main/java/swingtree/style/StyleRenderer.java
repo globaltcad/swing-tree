@@ -52,9 +52,12 @@ public class StyleRenderer<C extends JComponent>
         });
 
         for ( ShadeStyle shade : style.background().shades() ) {
-            if ( shade.colors().length > 0 ) {
+            if ( shade.colors().length > 0 && !shade.strategy().isNone() ) {
                 g2d.setClip(baseAreaSupplier.get());
-                _renderDiagonalShade(g2d, _comp, style.margin(), shade);
+                if ( shade.strategy().isDiagonal() )
+                    _renderDiagonalShade(g2d, _comp, style.margin(), shade);
+                else
+                    _renderVerticalOrHorizontalShade(g2d, _comp, style.margin(), shade);
             }
         }
 
@@ -712,7 +715,7 @@ public class StyleRenderer<C extends JComponent>
         Outline margin,
         ShadeStyle shade
     ) {
-        ShadingStrategy type = shade.shade();
+        ShadingStrategy type = shade.strategy();
         Color[] colors = shade.colors();
         Dimension size = component.getSize();
         size.width  -= (margin.right().orElse(0) + margin.left().orElse(0));
@@ -731,6 +734,19 @@ public class StyleRenderer<C extends JComponent>
         int diagonalCorner2X;
         int diagonalCorner2Y;
 
+        if ( type == ShadingStrategy.TOP_RIGHT_TO_BOTTOM_LEFT ) {
+            type = ShadingStrategy.BOTTOM_LEFT_TO_TOP_RIGHT;
+            Color tmp = colors[0];
+            colors[0] = colors[1];
+            colors[1] = tmp;
+        }
+        if ( type == ShadingStrategy.BOTTOM_RIGHT_TO_TOP_LEFT ) {
+            type = ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT;
+            Color tmp = colors[0];
+            colors[0] = colors[1];
+            colors[1] = tmp;
+        }
+
         if ( type == ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT ) {
             corner1X = realX;
             corner1Y = realY;
@@ -740,7 +756,7 @@ public class StyleRenderer<C extends JComponent>
             diagonalCorner1Y = realY + height;
             diagonalCorner2X = realX + width;
             diagonalCorner2Y = realY;
-        } else {
+        } else if ( type == ShadingStrategy.BOTTOM_LEFT_TO_TOP_RIGHT ) {
             corner1X = realX + width;
             corner1Y = realY;
             corner2X = realX;
@@ -750,6 +766,8 @@ public class StyleRenderer<C extends JComponent>
             diagonalCorner2X = realX;
             diagonalCorner2Y = realY;
         }
+        else
+            throw new IllegalArgumentException("Invalid shading strategy: " + type);
 
         int diagonalCenterX = (diagonalCorner1X + diagonalCorner2X) / 2;
         int diagonalCenterY = (diagonalCorner1Y + diagonalCorner2Y) / 2;
@@ -795,6 +813,72 @@ public class StyleRenderer<C extends JComponent>
                     new LinearGradientPaint(
                             gradientStartX, gradientStartY,
                             gradientEndX, gradientEndY,
+                            fractions, colors
+                        )
+                );
+        }
+        g2d.fillRect(realX, realY, width, height);
+    }
+
+    private static void _renderVerticalOrHorizontalShade(
+        Graphics2D g2d,
+        JComponent component,
+        Outline margin,
+        ShadeStyle shade
+    ) {
+        ShadingStrategy type = shade.strategy();
+        Color[] colors = shade.colors();
+        Dimension size = component.getSize();
+        size.width  -= (margin.right().orElse(0) + margin.left().orElse(0));
+        size.height -= (margin.bottom().orElse(0) + margin.top().orElse(0));
+        int width  = size.width;
+        int height = size.height;
+        int realX = margin.left().orElse(0);
+        int realY = margin.top().orElse(0);
+
+        int corner1X;
+        int corner1Y;
+        int corner2X;
+        int corner2Y;
+
+        if ( type == ShadingStrategy.TOP_TO_BOTTOM ) {
+            corner1X = realX;
+            corner1Y = realY;
+            corner2X = realX;
+            corner2Y = realY + height;
+        } else if ( type == ShadingStrategy.LEFT_TO_RIGHT ) {
+            corner1X = realX;
+            corner1Y = realY;
+            corner2X = realX + width;
+            corner2Y = realY;
+        } else if ( type == ShadingStrategy.BOTTOM_TO_TOP ) {
+            corner1X = realX;
+            corner1Y = realY + height;
+            corner2X = realX;
+            corner2Y = realY;
+        } else if ( type == ShadingStrategy.RIGHT_TO_LEFT ) {
+            corner1X = realX + width;
+            corner1Y = realY;
+            corner2X = realX;
+            corner2Y = realY;
+        }
+        else throw new IllegalArgumentException("Unknown shading strategy: " + type);
+
+        if ( colors.length == 2 )
+            g2d.setPaint(
+                    new GradientPaint(
+                            corner1X, corner1Y, colors[0],
+                            corner2X, corner2Y, colors[1]
+                        )
+                );
+        else {
+            float[] fractions = new float[colors.length];
+            for ( int i = 0; i < colors.length; i++ )
+                fractions[i] = (float) i / (float) (colors.length - 1);
+            g2d.setPaint(
+                    new LinearGradientPaint(
+                            corner1X, corner1Y,
+                            corner2X, corner2Y,
                             fractions, colors
                         )
                 );

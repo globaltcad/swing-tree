@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public class ShadeStyle
 {
-    private static final ShadeStyle _NONE = new ShadeStyle(ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT, new Color[0]);
+    private static final ShadeStyle _NONE = new ShadeStyle(ShadingStrategy.NONE, new Color[0]);
 
 
     public static ShadeStyle none() { return _NONE; }
@@ -21,13 +21,13 @@ public class ShadeStyle
         _colors = Objects.requireNonNull(colors);
     }
 
-    public ShadingStrategy shade() { return _shadingStrategy; }
+    public ShadingStrategy strategy() { return _shadingStrategy; }
 
     public Color[] colors() { return _colors; }
 
     public ShadeStyle colors( Color... colors ) { return new ShadeStyle(_shadingStrategy, colors); }
 
-    public ShadeStyle shade( ShadingStrategy shadingStrategy) { return new ShadeStyle(shadingStrategy, _colors); }
+    public ShadeStyle strategy(ShadingStrategy shadingStrategy) { return new ShadeStyle(shadingStrategy, _colors); }
 
 
     @Override
@@ -40,8 +40,8 @@ public class ShadeStyle
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ShadeStyle)) return false;
+        if ( this == o ) return true;
+        if ( !(o instanceof ShadeStyle) ) return false;
         ShadeStyle that = (ShadeStyle) o;
         return _shadingStrategy == that._shadingStrategy &&
             Arrays.equals(_colors, that._colors);
