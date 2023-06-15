@@ -200,7 +200,6 @@ public class ComponentExtension<C extends JComponent>
 
         if ( _owner instanceof JComboBox ) {
             int bottom = style.margin().bottom().orElse(0);
-            bottom += Math.max(style.border().widths().bottom().orElse(0), 0)/2;
             // We adjust the position of the popup menu:
             try {
                 Point location = _owner.getLocationOnScreen();

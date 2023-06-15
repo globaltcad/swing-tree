@@ -141,15 +141,31 @@ public class BoxShadowPickerViewModel
 
     public Var<BorderEdgeViewModel> currentEdgeModel() { return currentEdgeModel; }
 
-    public int leftBorderWidth() { return edgeModels.get(Edge.LEFT).borderWidth.get(); }
-    public int rightBorderWidth() { return edgeModels.get(Edge.RIGHT).borderWidth.get(); }
-    public int topBorderWidth() { return edgeModels.get(Edge.TOP).borderWidth.get(); }
-    public int bottomBorderWidth() { return edgeModels.get(Edge.BOTTOM).borderWidth.get(); }
+    public int leftBorderWidth() { return getEdgeModel(Edge.LEFT).borderWidth.get(); }
+    public int rightBorderWidth() { return getEdgeModel(Edge.RIGHT).borderWidth.get(); }
+    public int topBorderWidth() { return getEdgeModel(Edge.TOP).borderWidth.get(); }
+    public int bottomBorderWidth() { return getEdgeModel(Edge.BOTTOM).borderWidth.get(); }
+
+    private BoxShadowPickerViewModel.BorderEdgeViewModel getEdgeModel(Edge edge) {
+        // We check if the
+        if ( currentEdgeModel.is(edgeModels.get(Edge.EVERY)) )
+            return currentEdgeModel.get();
+
+        return edgeModels.get(edge);
+    }
 
     public Var<BorderCornerViewModel> currentCornerModel() { return currentCornerModel; }
 
-    public int arcWidthAt(Corner corner) { return cornerModels.get(corner).borderArcWidth.get(); }
-    public int arcHeightAt(Corner corner) { return cornerModels.get(corner).borderArcHeight.get(); }
+    public int arcWidthAt(Corner corner) { return getCornerModel(corner).borderArcWidth.get(); }
+    public int arcHeightAt(Corner corner) { return getCornerModel(corner).borderArcHeight.get(); }
+
+    private BoxShadowPickerViewModel.BorderCornerViewModel getCornerModel(Corner corner) {
+        // We check if the
+        if ( currentCornerModel.is(cornerModels.get(Corner.EVERY)) )
+            return currentCornerModel.get();
+
+        return cornerModels.get(corner);
+    }
 
     public Var<Color> borderColor() { return borderColor; }
 

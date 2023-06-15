@@ -38,7 +38,7 @@ public class StyleRenderer<C extends JComponent>
         Area[] baseArea = { null };
         Supplier<Area> baseAreaSupplier = () -> {
             if ( baseArea[0] == null )
-                baseArea[0] = _calculateBaseArea(style, 0);
+                baseArea[0] = _calculateBaseArea(style, 0, 0, 0, 0);
             return baseArea[0];
         };
 
@@ -120,361 +120,25 @@ public class StyleRenderer<C extends JComponent>
 
     private void _drawBorder(Style style, Color color, Graphics2D g2d) {
         if ( !Outline.none().equals(style.border().widths()) ) {
-            // The background box is calculated from the margins and border radius:
-            int left      = Math.max(style.margin().left().orElse(0),     0);
-            int top       = Math.max(style.margin().top().orElse(0),      0);
-            int right     = Math.max(style.margin().right().orElse(0),    0);
-            int bottom    = Math.max(style.margin().bottom().orElse(0),   0);
-            int width     = _comp.getWidth();
-            int height    = _comp.getHeight();
+            int leftBorderWidth   = style.border().widths().left().orElse(0);
+            int topBorderWidth    = style.border().widths().top().orElse(0);
+            int rightBorderWidth  = style.border().widths().right().orElse(0);
+            int bottomBorderWidth = style.border().widths().bottom().orElse(0);
+            Area baseArea = _calculateBaseArea(style, 0, 0, 0, 0);
+            Area innerArea = _calculateBaseArea(style, topBorderWidth, leftBorderWidth, bottomBorderWidth, rightBorderWidth);
+            baseArea.subtract(innerArea);
             g2d.setColor(color);
-            boolean allCornersShareTheSameArc = style.border().allCornersShareTheSameArc();
-            boolean allSidesShareTheSameWidth = style.border().allSidesShareTheSameWidth();
-            if ( allSidesShareTheSameWidth && allCornersShareTheSameArc ) {
-                int arcWidth  = style.border().topLeftArc().map( a -> Math.max(0,a.width() ) ).orElse(0);
-                int arcHeight = style.border().topLeftArc().map( a -> Math.max(0,a.height()) ).orElse(0);
-                int borderWidth = style.border().widths().top().orElse(0);
-                if ( borderWidth <= 0 )
-                    return;
-                g2d.setStroke(new BasicStroke(borderWidth));
-                g2d.drawRoundRect(
-                        left, top,
-                        width - left - right - 1,
-                        height - top - bottom - 1,
-                        (arcWidth + (borderWidth == 1 ? 0 : borderWidth + 1)),
-                        (arcHeight + (borderWidth == 1 ? 0 : borderWidth + 1))
-                    );
-            } else {
-                Arc topLeftArc     = style.border().topLeftArc().orElse(null);
-                Arc topRightArc    = style.border().topRightArc().orElse(null);
-                Arc bottomRightArc = style.border().bottomRightArc().orElse(null);
-                Arc bottomLeftArc  = style.border().bottomLeftArc().orElse(null);
-                int leftBorderWidth   = style.border().widths().left().orElse(0);
-                int topBorderWidth    = style.border().widths().top().orElse(0);
-                int rightBorderWidth  = style.border().widths().right().orElse(0);
-                int bottomBorderWidth = style.border().widths().bottom().orElse(0);
-                // A rectangle with corners of different roundness is drawn by drawing
-                // four separate arcs:
-                // Top left:
-                if ( topLeftArc != null ) {
-                    float strokeWidth = Math.max(leftBorderWidth, topBorderWidth);
-                    if ( strokeWidth > 0 ) {
-                        boolean doesntNeedWidthTransition = leftBorderWidth == topBorderWidth;
-                        g2d.setStroke(new BasicStroke(strokeWidth));
-
-                        if ( doesntNeedWidthTransition )// Simple case: no clipping needed
-                            g2d.drawArc(
-                                    left, top,
-                                    topLeftArc.width(), topLeftArc.height(),
-                                    90, 90
-                            );
-                        else
-                        {
-                            Area outerArcRec; // For filling the border arc
-                            Area innerArcRec; // For clipping the outer arc round rectangle
-                            Area areaWhereArcIsAllowed; // For clipping only the top left corner
-                            int innerWidth = topLeftArc.width() - leftBorderWidth;
-                            int innerHeight = topLeftArc.height() - topBorderWidth;
-                            // Note that the outer arc round rectangle is shifted according to the border widths:
-                            outerArcRec = new Area(
-                                                new RoundRectangle2D.Float(
-                                                        left - (leftBorderWidth / 2f),
-                                                        top  - (topBorderWidth  / 2f),
-                                                        topLeftArc.width()  + leftBorderWidth,
-                                                        topLeftArc.height() + topBorderWidth,
-                                                        topLeftArc.width(),
-                                                        topLeftArc.height()
-                                                    )
-                                                );
-                            innerArcRec = new Area(
-                                                new RoundRectangle2D.Float(
-                                                        left + (leftBorderWidth / 2f),
-                                                        top  + (topBorderWidth  / 2f),
-                                                        innerWidth,
-                                                        innerHeight,
-                                                        topLeftArc.width(),
-                                                        topLeftArc.height()
-                                                    )
-                                            );
-
-                            areaWhereArcIsAllowed = new Area(new Rectangle(
-                                                                left - (leftBorderWidth / 2),
-                                                                top  - (topBorderWidth  / 2),
-                                                                Math.max(topLeftArc.width()-innerWidth/2,  leftBorderWidth),
-                                                                Math.max(topLeftArc.height()-innerHeight/2, topBorderWidth)
-                                                            ));
-
-                            outerArcRec.subtract(innerArcRec);
-                            outerArcRec.intersect(areaWhereArcIsAllowed);
-                            g2d.fill(outerArcRec);
-                        }
-                    }
-                }
-                // Top right:
-                if ( topRightArc != null ) {
-                    float strokeWidth = (rightBorderWidth + topBorderWidth) / 2f;
-                    if ( strokeWidth > 0 ) {
-                        boolean doesntNeedWidthTransition = rightBorderWidth == topBorderWidth;
-                        g2d.setStroke(new BasicStroke(strokeWidth));
-                        if ( doesntNeedWidthTransition )
-                            g2d.drawArc(
-                                    width - right - topRightArc.width(), top,
-                                    topRightArc.width(), topRightArc.height(),
-                                    0, 90
-                            );
-                        else
-                        {
-                            Area outerArcRec; // For filling the border arc
-                            Area innerArcRec; // For clipping the outer arc round rectangle
-                            Area areaWhereArcIsAllowed; // For clipping only the top right corner
-                            int innerWidth = topRightArc.width() - rightBorderWidth;
-                            int innerHeight = topRightArc.height() - topBorderWidth;
-
-                            // Note that the outer arc round rectangle is shifted according to the border widths:
-                            outerArcRec = new Area(
-                                                new RoundRectangle2D.Float(
-                                                        width - right - topRightArc.width() - (rightBorderWidth / 2f),
-                                                        top  - (topBorderWidth  / 2f),
-                                                        topRightArc.width()  + rightBorderWidth,
-                                                        topRightArc.height() + topBorderWidth,
-                                                        topRightArc.width(),
-                                                        topRightArc.height()
-                                                    )
-                                                );
-
-                            innerArcRec = new Area(
-                                                new RoundRectangle2D.Float(
-                                                        width - right - topRightArc.width() + (rightBorderWidth / 2f),
-                                                        top  + (topBorderWidth  / 2f),
-                                                        innerWidth,
-                                                        innerHeight,
-                                                        topRightArc.width(),
-                                                        topRightArc.height()
-                                                    )
-                                            );
-
-                            areaWhereArcIsAllowed = new Area(new Rectangle(
-                                                                width - right - topRightArc.width() / 2 + Math.min(innerWidth/2, 0),
-                                                                top  - (topBorderWidth  / 2),
-                                                                Math.max(topRightArc.width()-innerWidth/2,  rightBorderWidth),
-                                                                Math.max(topRightArc.height()-innerHeight/2, topBorderWidth)
-                                                            ));
-
-                            outerArcRec.subtract(innerArcRec);
-                            outerArcRec.intersect(areaWhereArcIsAllowed);
-                            g2d.fill(outerArcRec);
-                        }
-                    }
-                }
-                // Bottom right:
-                if ( bottomRightArc != null ) {
-                    float strokeWidth = (rightBorderWidth + bottomBorderWidth) / 2f;
-                    if ( strokeWidth > 0 ) {
-                        boolean doesntNeedWidthTransition = rightBorderWidth == bottomBorderWidth;
-                        g2d.setStroke(new BasicStroke(strokeWidth));
-                        if ( doesntNeedWidthTransition )
-                            g2d.drawArc(
-                                    width - right - bottomRightArc.width(),
-                                    height - bottom - bottomRightArc.height(),
-                                    bottomRightArc.width(),
-                                    bottomRightArc.height(),
-                                    270, 90
-                                );
-                        else
-                        {
-                            Area outerArcRec; // For filling the border arc
-                            Area innerArcRec; // For clipping the outer arc round rectangle
-                            Area areaWhereArcIsAllowed; // For clipping only the bottom right corner
-                            int innerWidth = bottomRightArc.width() - rightBorderWidth;
-                            int innerHeight = bottomRightArc.height() - bottomBorderWidth;
-                            // Note that the outer arc round rectangle is shifted according to the border widths:
-                            outerArcRec = new Area(
-                                                new RoundRectangle2D.Float(
-                                                        width - right - bottomRightArc.width() - (rightBorderWidth / 2f),
-                                                        height - bottom - bottomRightArc.height() - (bottomBorderWidth / 2f),
-                                                        bottomRightArc.width()  + rightBorderWidth,
-                                                        bottomRightArc.height() + bottomBorderWidth,
-                                                        bottomRightArc.width(),
-                                                        bottomRightArc.height()
-                                                    )
-                                                );
-
-                            innerArcRec = new Area(
-                                                new RoundRectangle2D.Float(
-                                                        width - right - bottomRightArc.width() + (rightBorderWidth / 2f),
-                                                        height - bottom - bottomRightArc.height() + (bottomBorderWidth / 2f),
-                                                        innerWidth,
-                                                        innerHeight,
-                                                        bottomRightArc.width(),
-                                                        bottomRightArc.height()
-                                                    )
-                                            );
-
-                            areaWhereArcIsAllowed = new Area(new Rectangle(
-                                                                width - right - bottomRightArc.width() / 2 + Math.min(innerWidth/2, 0),
-                                                                height - bottom - bottomRightArc.height() / 2 + Math.min(innerHeight/2, 0),
-                                                                Math.max(bottomRightArc.width()-innerWidth/2,  rightBorderWidth),
-                                                                Math.max(bottomRightArc.height()-innerHeight/2, bottomBorderWidth)
-                                                            ));
-
-                            outerArcRec.subtract(innerArcRec);
-                            outerArcRec.intersect(areaWhereArcIsAllowed);
-                            g2d.fill(outerArcRec);
-                        }
-                    }
-                }
-                // Bottom left:
-                if ( bottomLeftArc != null ) {
-                    float strokeWidth = (leftBorderWidth + bottomBorderWidth) / 2f;
-                    g2d.setStroke(new BasicStroke(strokeWidth));
-                    if ( strokeWidth > 0 ) {
-                        boolean doesntNeedWidthTransition = leftBorderWidth == bottomBorderWidth;
-                        g2d.setStroke(new BasicStroke(strokeWidth));
-                        if ( doesntNeedWidthTransition )
-                            g2d.drawArc(
-                                    left, height - bottom - bottomLeftArc.height(),
-                                    bottomLeftArc.width(), bottomLeftArc.height(),
-                                    180, 90
-                                );
-                        else
-                        {
-                            Area outerArcRec; // For filling the border arc
-                            Area innerArcRec; // For clipping the outer arc round rectangle
-                            Area areaWhereArcIsAllowed; // For clipping only the bottom left corner
-                            int innerWidth = bottomLeftArc.width() - leftBorderWidth;
-                            int innerHeight = bottomLeftArc.height() - bottomBorderWidth;
-                            // Note that the outer arc round rectangle is shifted according to the border widths:
-                            outerArcRec = new Area(
-                                                new RoundRectangle2D.Float(
-                                                        left - (leftBorderWidth / 2f),
-                                                        height - bottom - bottomLeftArc.height() - (bottomBorderWidth / 2f),
-                                                        bottomLeftArc.width()  + leftBorderWidth,
-                                                        bottomLeftArc.height() + bottomBorderWidth,
-                                                        bottomLeftArc.width(),
-                                                        bottomLeftArc.height()
-                                                    )
-                                                );
-
-                            innerArcRec = new Area(
-                                                new RoundRectangle2D.Float(
-                                                        left + (leftBorderWidth / 2f),
-                                                        height - bottom - bottomLeftArc.height() + (bottomBorderWidth / 2f),
-                                                        innerWidth,
-                                                        innerHeight,
-                                                        bottomLeftArc.width(),
-                                                        bottomLeftArc.height()
-                                                    )
-                                            );
-
-                            areaWhereArcIsAllowed = new Area(new Rectangle(
-                                                                left - leftBorderWidth / 2,
-                                                                height - bottom - bottomLeftArc.height() / 2 + Math.min(innerHeight/2, 0),
-                                                                Math.max(bottomLeftArc.width()-innerWidth/2,  leftBorderWidth),
-                                                                Math.max(bottomLeftArc.height()-innerHeight/2, bottomBorderWidth)
-                                                            ));
-
-                            outerArcRec.subtract(innerArcRec);
-                            outerArcRec.intersect(areaWhereArcIsAllowed);
-                            g2d.fill(outerArcRec);
-                        }
-                    }
-                }
-
-                // The four arcs are connected by four lines:
-                // Top:
-                if ( topBorderWidth > 0 ) {
-                    int topLeftArcWidth  = topLeftArc  == null ? 0 : topLeftArc.width()  + topBorderWidth;
-                    int topRightArcWidth = topRightArc == null ? 0 : topRightArc.width() + topBorderWidth;
-                    int x1 = left + topLeftArcWidth / 2;
-                    int x2 = width - right - topRightArcWidth / 2;
-                    if ( x1 < x2 ) {
-                        g2d.setStroke(new BasicStroke(topBorderWidth));
-                        g2d.drawLine( x1, top, x2, top );
-                    } else {
-                        // The border is more thick than long, so we fill a rectangle
-                        // because drawing a line would not be visible:
-                        g2d.fillRect(
-                                left + topLeftArcWidth / 4,
-                                top - topBorderWidth / 2,
-                                width - right - left - topLeftArcWidth / 2,
-                                topBorderWidth
-                            );
-                    }
-                }
-                // Right:
-                if ( rightBorderWidth > 0 ) {
-                    int topRightArcHeight    = topRightArc    == null ? 0 : topRightArc.height()    + rightBorderWidth;
-                    int bottomRightArcHeight = bottomRightArc == null ? 0 : bottomRightArc.height() + rightBorderWidth;
-                    int y1 = top + topRightArcHeight / 2;
-                    int y2 = height - bottom - bottomRightArcHeight / 2;
-                    if ( y1 < y2 ) {
-                        g2d.setStroke(new BasicStroke(rightBorderWidth));
-                        g2d.drawLine( width - right, y1, width - right, y2 );
-                    } else {
-                        int innerHeight = bottomRightArc.height() - bottomBorderWidth;
-                        // The border is more thick than long, so we fill a rectangle
-                        // because drawing a line would not be visible:
-                        g2d.fillRect(
-                                width - right - rightBorderWidth / 2,
-                                top  - (topBorderWidth  / 2) + Math.max(topRightArc.height()-(topRightArc.height() - topBorderWidth)/2, topBorderWidth),
-                                rightBorderWidth,
-                                (height - bottom - bottomRightArc.height() / 2 + Math.min(innerHeight/2, 0)) - (top  - (topBorderWidth  / 2) + Math.max(topRightArc.height()-(topRightArc.height() - topBorderWidth)/2, topBorderWidth))
-                            );
-                    }
-                }
-                // Bottom:
-                if ( bottomBorderWidth > 0 ) {
-                    int bottomLeftArcWidth  = bottomLeftArc  == null ? 0 : bottomLeftArc.width()  + bottomBorderWidth;
-                    int bottomRightArcWidth = bottomRightArc == null ? 0 : bottomRightArc.width() + bottomBorderWidth;
-                    int x1 = left + bottomLeftArcWidth / 2;
-                    int x2 = width - right - bottomRightArcWidth / 2;
-                    if ( x1 < x2 ) {
-                        g2d.setStroke(new BasicStroke(bottomBorderWidth));
-                        g2d.drawLine( x1, height - bottom, x2, height - bottom );
-                    } else {
-                        int innerWidth = bottomLeftArc.width() - leftBorderWidth;
-                        // The border is more thick than long, so we fill a rectangle
-                        // because drawing a line would not be visible:
-                        g2d.fillRect(
-                                left - leftBorderWidth / 2 + Math.max(bottomLeftArc.width()-innerWidth/2,  leftBorderWidth),
-                                height - bottom - bottomBorderWidth / 2,
-                                width - right - left - bottomLeftArcWidth / 2,
-                                bottomBorderWidth
-                            );
-                    }
-                }
-                // Left:
-                if ( leftBorderWidth > 0 ) {
-                    int topLeftArcHeight    = topLeftArc    == null ? 0 : topLeftArc.height()    + leftBorderWidth;
-                    int bottomLeftArcHeight = bottomLeftArc == null ? 0 : bottomLeftArc.height() + leftBorderWidth;
-                    int y1 = top + topLeftArcHeight / 2;
-                    int y2 = height - bottom - bottomLeftArcHeight / 2;
-                    if ( y1 < y2 ) {
-                        g2d.setStroke(new BasicStroke(leftBorderWidth));
-                        g2d.drawLine( left, y1, left, y2 );
-                    } else {
-                        int innerHeight = bottomLeftArc.height() - bottomBorderWidth;
-                        // The border is more thick than long, so we fill a rectangle
-                        // because drawing a line would not be visible:
-                        g2d.fillRect(
-                                left - leftBorderWidth / 2,
-                                top  - (topBorderWidth  / 2) + Math.max(topLeftArc.height()-(topLeftArc.height() - topBorderWidth)/2, topBorderWidth),
-                                leftBorderWidth,
-                                (height - bottom - bottomLeftArc.height() / 2 + Math.min(innerHeight/2, 0)) - (top  - (topBorderWidth  / 2) + Math.max(topLeftArc.height()-(topLeftArc.height() - topBorderWidth)/2, topBorderWidth))
-                            );
-                    }
-                }
-            }
+            g2d.fill(baseArea);
         }
     }
 
-    private Area _calculateBaseArea( Style style, int insets )
+    private Area _calculateBaseArea( Style style, int insTop, int insLeft, int insBottom, int insRight )
     {
         // The background box is calculated from the margins and border radius:
-        int left      = Math.max(style.margin().left().orElse(0), 0)   + insets;
-        int top       = Math.max(style.margin().top().orElse(0), 0)    + insets;
-        int right     = Math.max(style.margin().right().orElse(0), 0)  + insets;
-        int bottom    = Math.max(style.margin().bottom().orElse(0), 0) + insets;
+        int left      = Math.max(style.margin().left().orElse(0), 0)   + insLeft  ;
+        int top       = Math.max(style.margin().top().orElse(0), 0)    + insTop   ;
+        int right     = Math.max(style.margin().right().orElse(0), 0)  + insRight ;
+        int bottom    = Math.max(style.margin().bottom().orElse(0), 0) + insBottom;
         int width     = _comp.getWidth() ;
         int height    = _comp.getHeight();
 
@@ -584,12 +248,12 @@ public class StyleRenderer<C extends JComponent>
             }
             // Now we add the center:
             area.add(new Area(
-                    new Rectangle2D.Float(
+                        new Rectangle2D.Float(
                             left + leftDistance, top + topDistance,
                             width - left - leftDistance - right - rightDistance,
                             height - top - topDistance - bottom - bottomDistance
-                    )
-                ));
+                        )
+                    ));
             return area;
         }
     }
@@ -605,7 +269,7 @@ public class StyleRenderer<C extends JComponent>
         Rectangle2D.Float outerRect = new Rectangle2D.Float(0, 0, width, height);
 
         Area outer = new Area(outerRect);
-        Area inner = _calculateBaseArea( style, 0 );
+        Area inner = _calculateBaseArea( style, 0, 0, 0, 0 );
         outer.subtract(inner);
 
         g2d.setColor(color);
@@ -625,52 +289,57 @@ public class StyleRenderer<C extends JComponent>
             return;
 
         // The background box is calculated from the margins and border radius:
-        int left      = Math.max(style.margin().left().orElse(0),   0);
-        int top       = Math.max(style.margin().top().orElse(0),    0);
-        int right     = Math.max(style.margin().right().orElse(0),  0);
-        int bottom    = Math.max(style.margin().bottom().orElse(0), 0);
+        int leftBorderWidth   = style.border().widths().left().orElse(0);
+        int topBorderWidth    = style.border().widths().top().orElse(0);
+        int rightBorderWidth  = style.border().widths().right().orElse(0);
+        int bottomBorderWidth = style.border().widths().bottom().orElse(0);
+        int left      = Math.max(style.margin().left().orElse(0),   0) + ( style.shadow().isInset() ? leftBorderWidth   : 0 );
+        int top       = Math.max(style.margin().top().orElse(0),    0) + ( style.shadow().isInset() ? topBorderWidth    : 0 );
+        int right     = Math.max(style.margin().right().orElse(0),  0) + ( style.shadow().isInset() ? rightBorderWidth  : 0 );
+        int bottom    = Math.max(style.margin().bottom().orElse(0), 0) + ( style.shadow().isInset() ? bottomBorderWidth : 0 );
         int topLeftRadius     = Math.max(style.border().topLeftRadius(), 0);
         int topRightRadius    = Math.max(style.border().topRightRadius(), 0);
         int bottomRightRadius = Math.max(style.border().bottomRightRadius(), 0);
         int bottomLeftRadius  = Math.max(style.border().bottomLeftRadius(), 0);
-        int cornerRadius = ( topLeftRadius + topRightRadius + bottomRightRadius + bottomLeftRadius ) / 4;
         int width     = comp.getWidth();
         int height    = comp.getHeight();
-        int borderWidth = (int) style.border().widths().average();
+        int borderWidth = 0;
 
         // Calculate the shadow box bounds based on the padding and border thickness
         int xOffset = shadow.horizontalOffset();
         int yOffset = shadow.verticalOffset();
-        int x = left   + borderWidth / 2 + xOffset;
-        int y = top    + borderWidth / 2 + yOffset;
+        int x = left + xOffset;
+        int y = top + yOffset;
         int w = width  - left - right  - borderWidth;
         int h = height - top  - bottom - borderWidth;
 
         int blurRadius   = Math.max(shadow.blurRadius(), 0);
         int spreadRadius = !shadow.isOutset() ? shadow.spreadRadius() : -shadow.spreadRadius();
 
-        Area baseArea = _calculateBaseArea(style, shadow.isOutset() ? +1 : -1);
+        int artifactAdjustment = shadow.isOutset() ? +1 : 0;
+        Area baseArea = _calculateBaseArea(style, artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);
 
         int shadowInset  = blurRadius;
         int shadowOutset = blurRadius;
-        int borderWidthOffset = borderWidth * ( shadow.isOutset() ? -1 : 0 );
+        int borderWidthOffset = 0;
 
         Rectangle outerShadowRect = new Rectangle(
                                         x - shadowOutset + spreadRadius + borderWidthOffset,
                                         y - shadowOutset + spreadRadius + borderWidthOffset,
-                                        w + shadowOutset * 2 - spreadRadius * 2 - borderWidthOffset * 2,
-                                        h + shadowOutset * 2 - spreadRadius * 2 - borderWidthOffset * 2
+                                     w + shadowOutset * 2 - spreadRadius * 2,
+                                        h + shadowOutset * 2 - spreadRadius * 2
                                     );
 
         Function<Integer, Integer> offsetFunction = (radius) -> (int)((radius * 2) / ( shadow.isInset() ? 4.5 : 3.79) + ( shadow.isInset() ? 0 : borderWidth ));
 
+        int cornerRadius = ( topLeftRadius + topRightRadius + bottomRightRadius + bottomLeftRadius ) / 4;
         int gradientStartOffset = 1 + offsetFunction.apply(cornerRadius);
 
         Rectangle innerShadowRect = new Rectangle(
                                         x + shadowInset + gradientStartOffset + spreadRadius + borderWidthOffset,
                                         y + shadowInset + gradientStartOffset + spreadRadius + borderWidthOffset,
-                                        w - shadowInset * 2 - gradientStartOffset * 2 - spreadRadius * 2 - borderWidthOffset * 2,
-                                        h - shadowInset * 2 - gradientStartOffset * 2 - spreadRadius * 2 - borderWidthOffset * 2
+                                        w - shadowInset * 2 - gradientStartOffset * 2 - spreadRadius * 2,
+                                        h - shadowInset * 2 - gradientStartOffset * 2 - spreadRadius * 2
                                     );
 
         Area outerMostArea;
@@ -1144,10 +813,10 @@ public class StyleRenderer<C extends JComponent>
         right  += style.padding().right().orElse(0);
         bottom += style.padding().bottom().orElse(0);
         // Add border widths:
-        left   += Math.max(style.border().widths().left().orElse(0),   0)/2;
-        top    += Math.max(style.border().widths().top().orElse(0),    0)/2;
-        right  += Math.max(style.border().widths().right().orElse(0),  0)/2;
-        bottom += Math.max(style.border().widths().bottom().orElse(0), 0)/2;
+        left   += Math.max(style.border().widths().left().orElse(0),   0);
+        top    += Math.max(style.border().widths().top().orElse(0),    0);
+        right  += Math.max(style.border().widths().right().orElse(0),  0);
+        bottom += Math.max(style.border().widths().bottom().orElse(0), 0);
         return new Insets(top, left, bottom, right);
     }
 
@@ -1158,10 +827,10 @@ public class StyleRenderer<C extends JComponent>
         int bottom = style.margin().bottom().orElse(0);
 
         // Add border widths:
-        left   += Math.max(style.border().widths().left().orElse(0),   0)/2;
-        top    += Math.max(style.border().widths().top().orElse(0),    0)/2;
-        right  += Math.max(style.border().widths().right().orElse(0),  0)/2;
-        bottom += Math.max(style.border().widths().bottom().orElse(0), 0)/2;
+        left   += Math.max(style.border().widths().left().orElse(0),   0);
+        top    += Math.max(style.border().widths().top().orElse(0),    0);
+        right  += Math.max(style.border().widths().right().orElse(0),  0);
+        bottom += Math.max(style.border().widths().bottom().orElse(0), 0);
 
         return new Insets(top, left, bottom, right);
     }

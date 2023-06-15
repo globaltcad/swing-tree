@@ -20,7 +20,6 @@ public class SoftUIView extends Panel
             .add(SHRINK.and(ALIGN_LEFT),
                 box().groups("soft raise")
                 .withLayout(FILL.and(WRAP(3)).and(INS(32)), "", "[][]24[]24[]")
-                //.withPrefSize(700, 400)
                 .add( SHRINK.and(SPAN).and(ALIGN_CENTER),
                     panel().groups("soft banner")
                     .add(

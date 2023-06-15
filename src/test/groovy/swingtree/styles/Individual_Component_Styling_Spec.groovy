@@ -53,8 +53,8 @@ class Individual_Component_Styling_Spec extends Specification
             panel.component.background == Color.cyan
         and : 'The foreground color of the panel will be set to blue.'
             panel.component.foreground == Color.blue
-        and : 'The insets of the border will be increased by half of the border width (because the border grows inwards AND outwards).'
-            panel.component.border.getBorderInsets(panel.component) == new Insets(2, 2, 2, 2)
+        and : 'The insets of the border will be increased by the border width (because the border grows inwards).'
+            panel.component.border.getBorderInsets(panel.component) == new Insets(5, 5, 5, 5)
         and : 'The font of the panel will be set to Papyrus with a size of 42.'
             panel.component.font == new Font("Papyrus", Font.PLAIN, 42)
     }
@@ -142,10 +142,8 @@ class Individual_Component_Styling_Spec extends Specification
         expect : """
             The insets of the border not only model the padding and margin of the component,
             but also the border width.
-            But note that the border width of a component grows both inwards and outwards.
-            So the insets of the border will only be increased by half of the border width.
         """
-            panel.border.getBorderInsets(panel) == new Insets(9, 16, 2, 4)
+            panel.border.getBorderInsets(panel) == new Insets(12, 19, 5, 7)
         and : 'We also expect there to be the mig layout manager by default.'
             panel.layout != null
             panel.layout instanceof MigLayout
