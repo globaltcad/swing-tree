@@ -2,8 +2,8 @@ package swingtree;
 
 import com.alexandriasoftware.swing.JSplitButton;
 import com.formdev.flatlaf.FlatLightLaf;
-import example.NoteGuesserView;
-import example.NoteGuesserViewModel;
+import example.SomeSettingsView;
+import example.SomeSettingsViewModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -120,11 +120,11 @@ public class Utility {
      *  This is used to make UI snapshots for testing purposes.
      */
     public static void main(String[] args) {
-        NoteGuesserView ui = new NoteGuesserView(new NoteGuesserViewModel());
+        SomeSettingsView ui = new SomeSettingsView(new SomeSettingsViewModel());
         JWindow f = new JWindow();
         f.add(ui);
         f.pack();
-        safeUIAsImage(ui, "src/test/resources/snapshots/note-guesser-UI.png");
+        safeUIAsImage(ui, "src/test/resources/snapshots/vertical-settings-UI.png");
         //BufferedImage image = offscreenRender(ui);
         //JFrame frame = new JFrame();
         //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -136,7 +136,10 @@ public class Utility {
 
     public static void safeUIAsImage(JComponent ui, String path) {
         BufferedImage image = offscreenRender(ui);
-        // We save the image
+        safeUIImage( image, path );
+    }
+
+    public static void safeUIImage(BufferedImage image, String path) {
         try {
             javax.imageio.ImageIO.write(image, "png", new java.io.File(path));
         } catch (java.io.IOException e) {
@@ -145,6 +148,10 @@ public class Utility {
     }
 
     public static double similarityBetween(JComponent ui, String imageFile) {
+        return similarityBetween(ui, imageFile, 0);
+    }
+
+    public static double similarityBetween(JComponent ui, String imageFile, double expectedSimilarity) {
         BufferedImage image = offscreenRender(ui);
         BufferedImage imageFromFile = null;
         try {
@@ -154,7 +161,24 @@ public class Utility {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return similarityBetween(image, imageFromFile);
+        double similarity = similarityBetween(image, imageFromFile);
+        if ( similarity < expectedSimilarity ) {
+            try {
+                String[] parts = imageFile.split("/");
+                String filename = parts[parts.length-1];
+                String newPath = "build/resources/test/snapshots/" + filename.replace(".png", "-FAILURE.png");
+                safeUIImage( image, newPath );
+                JFrame frame = new JFrame();
+                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                frame.getContentPane().add(new JLabel(new ImageIcon(image)));
+                frame.pack();
+                frame.setVisible(true);
+                Thread.sleep(60_000);
+            } catch (Exception e) {
+                e.printStackTrace();// Probably a headless exception
+            }
+        }
+        return similarity;
     }
 
     public static double similarityBetween(BufferedImage image0, BufferedImage image1) {
@@ -176,8 +200,9 @@ public class Utility {
                 diff += pixelDiff(image1.getRGB(x, y), image0.getRGB(x, y));
             }
         }
-        long maxDiff = 3L * 255 * width1 * height1;
-        return 100.0 * ( 1 - (double) diff / maxDiff );
+        long maxDiff = (long) Math.pow((Math.pow(255, 2) * 3), 0.5) * width1 * height1;
+        double similarity = 100.0 * ( 1 - (double) diff / maxDiff );
+        return similarity;
     }
 
     private static double pixelDiff(int rgb1, int rgb2) {
@@ -187,7 +212,7 @@ public class Utility {
         int r2 = (rgb2 >> 16) & 0xff;
         int g2 = (rgb2 >>  8) & 0xff;
         int b2 =  rgb2        & 0xff;
-        return (Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2)) / 3.0;
+        return Math.pow(Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2), 0.5);
     }
 
 }

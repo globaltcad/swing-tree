@@ -92,7 +92,7 @@ class Examples_Spec extends Specification
         given : 'We create an instance of the UI.'
             var ui = new NoteGuesserView(new NoteGuesserViewModel())
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "/snapshots/note-guesser-UI.png") > 97
+            Utility.similarityBetween(ui, "/snapshots/note-guesser-UI.png", 99.9) > 99.9
     }
 
     def 'The symbol guesser example UI defined in the examples can be created.'()
@@ -105,11 +105,15 @@ class Examples_Spec extends Specification
         reportInfo """
             The well rounded UI looks like this:
             ![well-rounded-UI.png](../src/test/resources/snapshots/well-rounded-UI.png)
+            
+            Here we will only test the UI, if you want to see the code, just
+            navigate to the class and run it yourself, it has 
+            a main method for that purpose already.
         """
         given : 'We create the UI.'
             var ui = new WellRoundedView()
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "/snapshots/well-rounded-UI.png") > 97
+            Utility.similarityBetween(ui, "/snapshots/well-rounded-UI.png", 99.9) > 99.9
     }
 
     def 'The soft example UI is rendered as expected.'()
@@ -117,11 +121,15 @@ class Examples_Spec extends Specification
         reportInfo """
             The soft example UI looks like this:
             ![soft-example-UI.png](../src/test/resources/snapshots/soft-example-UI.png)
+           
+            Here we will only test the soft UI, if you want to see the code, just
+            navigate to the class and run it yourself, it has 
+            a main method for that purpose already.
         """
         given : 'We create the UI.'
             var ui = new SoftUIView()
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "/snapshots/soft-example-UI.png") > 97
+            Utility.similarityBetween(ui, "/snapshots/soft-example-UI.png") > 99.9
     }
 
     def 'The animated buttons view examples UI defined in the examples looks as expected.'()
@@ -133,11 +141,12 @@ class Examples_Spec extends Specification
             Unfortunately this is just a snapshot of the UI, so you can't play with 
             the animations right here. But you can run the example found in the test suite
             of SwingTree and try it out yourself.
+            There is a main method in the class, so you can just run it.
         """
         given : 'We create the UI.'
             var ui = new AnimatedButtonsView()
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "/snapshots/animated-buttons-UI.png") > 97
+            Utility.similarityBetween(ui, "/snapshots/animated-buttons-UI.png", 99.9) > 99.9
     }
 
     def 'The animation example view can be created.'()
@@ -145,8 +154,20 @@ class Examples_Spec extends Specification
         expect : new AnimatedView(Mock(JFrame))
     }
 
-    def 'The settings example UI defined in the examples can be created.'()
+    def 'The settings example UI defined in the examples looks as expected.'()
     {
+        reportInfo """
+            The vertical settings view in the examples looks like this:
+            ![vertical-settings-UI.png](../src/test/resources/snapshots/vertical-settings-UI.png)
+            
+            It demonstrates how UI components can easily be placed vertically
+            and with some slight indentation, to indicate a certain grouping
+            which is especially useful for settings dialogs.
+            
+            Here we will only test the UI, if you want to see the code, just
+            navigate to the class and run it yourself, it has 
+            a main method for that purpose already.
+        """
         given :
             var view = new SomeSettingsView(new SomeSettingsViewModel())
             var speedTextField = new Utility.Query(view).find(JTextField, "speed-text-field").orElse(null)
@@ -156,6 +177,10 @@ class Examples_Spec extends Specification
         and :
             speedTextField.text == "42.0"
             speedTextField.background == Color.WHITE
+        when : 'We rerender the view offscreen...'
+            var similarity = Utility.similarityBetween(view, "/snapshots/vertical-settings-UI.png", 99.9)
+        then : '...it looks as expected.'
+            similarity > 99.9
 
         when : 'We simulate the user entering an invalid number:'
             speedTextField.text = "§"
@@ -163,6 +188,11 @@ class Examples_Spec extends Specification
         then : 'The UI is updated to reflect the invalid value.'
             speedTextField.text == "§"
             speedTextField.background == Color.RED
+
+        when : 'We rerender the view offscreen again because the background color changed...'
+            similarity = Utility.similarityBetween(view, "/snapshots/vertical-settings-UI.png")
+        then : 'The UI is no longer rendered as expected.'
+            similarity < 99.9
     }
 
     def 'The spinners example UI defined in the examples can be created.'()
@@ -185,6 +215,10 @@ class Examples_Spec extends Specification
         reportInfo """
             The calculator view looks like this:
             ![calculator-UI.png](../src/test/resources/snapshots/calculator-UI.png)
+            
+            Here we will only test the UI, if you want to see the code, just
+            navigate to the class and run it yourself, it has 
+            a main method for that purpose already.
         """
         given : 'We create the UI.'
             var ui = new Calculator()
@@ -192,7 +226,7 @@ class Examples_Spec extends Specification
             new Utility.Query(ui).find(JTextArea, "input-text-area").isPresent()
             new Utility.Query(ui).find(JTextArea, "input-text-area").get().componentOrientation == ComponentOrientation.RIGHT_TO_LEFT
         and : 'Its render state is as expected.'
-            Utility.similarityBetween(ui, "/snapshots/calculator-UI.png") > 97
+            Utility.similarityBetween(ui, "/snapshots/calculator-UI.png") > 99.9
     }
 
     def 'The simple Table-UI example has the expected state.'()
