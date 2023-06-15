@@ -53,11 +53,10 @@ public class StyleRenderer<C extends JComponent>
 
         for ( ShadeStyle shade : style.background().shades() ) {
             if ( shade.colors().length > 0 && !shade.strategy().isNone() ) {
-                g2d.setClip(baseAreaSupplier.get());
                 if ( shade.strategy().isDiagonal() )
-                    _renderDiagonalShade(g2d, _comp, style.margin(), shade);
+                    _renderDiagonalShade(g2d, _comp, style.margin(), shade, baseAreaSupplier.get());
                 else
-                    _renderVerticalOrHorizontalShade(g2d, _comp, style.margin(), shade);
+                    _renderVerticalOrHorizontalShade(g2d, _comp, style.margin(), shade, baseAreaSupplier.get());
             }
         }
 
@@ -132,6 +131,18 @@ public class StyleRenderer<C extends JComponent>
             baseArea.subtract(innerArea);
             g2d.setColor(color);
             g2d.fill(baseArea);
+
+            if ( style.border().shades().size() > 0 )  {
+                for ( ShadeStyle shade : style.border().shades() ) {
+                    if ( shade.colors().length > 0 && !shade.strategy().isNone() ) {
+                        if ( shade.strategy().isDiagonal() )
+                            _renderDiagonalShade(g2d, _comp, style.margin(), shade, baseArea);
+                        else
+                            _renderVerticalOrHorizontalShade(g2d, _comp, style.margin(), shade, baseArea);
+                    }
+                }
+            }
+
         }
     }
 
@@ -713,7 +724,8 @@ public class StyleRenderer<C extends JComponent>
         Graphics2D g2d,
         JComponent component,
         Outline margin,
-        ShadeStyle shade
+        ShadeStyle shade,
+        Area specificArea
     ) {
         ShadingStrategy type = shade.strategy();
         Color[] colors = shade.colors();
@@ -817,14 +829,15 @@ public class StyleRenderer<C extends JComponent>
                         )
                 );
         }
-        g2d.fillRect(realX, realY, width, height);
+        g2d.fill(specificArea);
     }
 
     private static void _renderVerticalOrHorizontalShade(
         Graphics2D g2d,
         JComponent component,
         Outline margin,
-        ShadeStyle shade
+        ShadeStyle shade,
+        Area specificArea
     ) {
         ShadingStrategy type = shade.strategy();
         Color[] colors = shade.colors();
@@ -883,7 +896,7 @@ public class StyleRenderer<C extends JComponent>
                         )
                 );
         }
-        g2d.fillRect(realX, realY, width, height);
+        g2d.fill(specificArea);
     }
 
     public Insets calculateBorderInsets(Insets formerInsets) {

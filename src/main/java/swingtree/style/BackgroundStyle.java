@@ -8,7 +8,12 @@ import java.util.stream.Collectors;
 
 public final class BackgroundStyle
 {
-    private static final BackgroundStyle _NONE = new BackgroundStyle(null, null, Collections.singletonMap(StyleUtility.DEFAULT_KEY, Painter.NONE), Collections.singletonMap(StyleUtility.DEFAULT_KEY, ShadeStyle.none()));
+    private static final BackgroundStyle _NONE = new BackgroundStyle(
+                                                    null,
+                                                    null,
+                                                    Collections.singletonMap(StyleUtility.DEFAULT_KEY, Painter.NONE),
+                                                    Collections.singletonMap(StyleUtility.DEFAULT_KEY, ShadeStyle.none())
+                                                );
 
     public static BackgroundStyle none() { return _NONE; }
 
@@ -50,7 +55,14 @@ public final class BackgroundStyle
 
     public boolean hasPainters() { return !_painters.isEmpty(); }
 
-    public List<ShadeStyle> shades() { return new ArrayList<>(_shades.values()); }
+    public List<ShadeStyle> shades() {
+        return Collections.unmodifiableList(
+                _shades.entrySet().stream()
+                        .sorted(Map.Entry.comparingByKey())
+                        .map(Map.Entry::getValue)
+                        .collect(Collectors.toList())
+            );
+    }
 
     BackgroundStyle color( Color color ) { return new BackgroundStyle(color, _foundationColor, _painters, _shades); }
 

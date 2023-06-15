@@ -444,6 +444,50 @@ public final class Style
     }
 
     /**
+     *  This method makes it possible to define border shades for the border of your UI components.
+     *  This is useful when you want to do advanced border effects, such as neumorphism a.k.a. soft UI. <br>
+     *  Here is an example of how to use this method:
+     *  <pre>{@code
+     *    UI.panel()
+     *    .withStyle( it ->
+     *      it.style()
+     *      .borderShade( shade -> shade.colors("#000000", "#000000").strategy(ShadeStrategy.TOP_TO_BOTTOM) )
+     *    )
+     * }</pre>
+     *
+     * @param styler A function that takes a {@link ShadeStyle} and returns a new {@link ShadeStyle}.
+     * @return A new {@link Style} with a border shade defined by the provided styler lambda.
+     */
+    public Style borderShade( Function<ShadeStyle, ShadeStyle> styler ) {
+        Objects.requireNonNull(styler);
+        return _withBorder(border().shade(StyleUtility.DEFAULT_KEY, styler));
+    }
+
+    /**
+     *  This method makes it possible to define multiple border shades through a unique name for said shading effect.
+     *  This is useful when you want to do advanced border effects, such as neumorphism a.k.a. soft UI. <br>
+     *  Here is an example of how to use this method:
+     *  <pre>{@code
+     *    UI.panel()
+     *    .withStyle( it ->
+     *      it.style()
+     *      .borderShade("dark shading", shade -> shade.colors("#000000", "#000000").strategy(ShadeStrategy.TOP_TO_BOTTOM)))
+     *      .borderShade("light shading", shade -> shade.colors("#ffffff", "#ffffff").strategy(ShadeStrategy.TOP_TO_BOTTOM)))
+     *    )
+     * }</pre>
+     * Note that the border shades will be rendered in alphabetical order based on the name of the shade.
+     *
+     * @param shadeName The name of the border shade.
+     * @param styler A function that takes a {@link ShadeStyle} and returns a new {@link ShadeStyle}.
+     * @return A new {@link Style} with a named border shade defined by the provided styler lambda.
+     */
+    public Style borderShade( String shadeName, Function<ShadeStyle, ShadeStyle> styler ) {
+        Objects.requireNonNull(shadeName);
+        Objects.requireNonNull(styler);
+        return _withBorder(border().shade(shadeName, styler));
+    }
+
+    /**
      *  Returns a new {@link Style} with the provided inner Background color.
      *  The inner background will be rendered with an inset space based on the padding defined by this {@link Style}.
      *
@@ -716,8 +760,8 @@ public final class Style
      *    UI.panel()
      *    .withStyle( it ->
      *      it.style()
-     *      .backgroundShade("dark shading", shade -> shade.colors("#000000", "#000000").type(ShadeStyle.Type.INNER)))
-     *      .backgroundShade("light shading", shade -> shade.colors("#ffffff", "#ffffff").type(ShadeStyle.Type.OUTER)))
+     *      .backgroundShade("dark shading", shade -> shade.colors("#000000", "#000000").strategy(ShadeStrategy.TOP_TO_BOTTOM)))
+     *      .backgroundShade("light shading", shade -> shade.colors("#ffffff", "#ffffff").strategy(ShadeStrategy.TOP_TO_BOTTOM)))
      *    )
      * }</pre>
      * Note that the background shades will be rendered in alphabetical order based on the name of the shade.
@@ -730,6 +774,26 @@ public final class Style
         Objects.requireNonNull(shadeName);
         Objects.requireNonNull(styler);
         return _withBackground(background().shade(shadeName, styler));
+    }
+
+    /**
+     *  This method makes it possible to define a background shade for your components.
+     *  This is useful when you want to do advanced background effects, such as neumorphism a.k.a. soft UI. <br>
+     *  Here is an example of how to use this method:
+     *  <pre>{@code
+     *    UI.panel()
+     *    .withStyle( it ->
+     *      it.style()
+     *      .backgroundShade(shade -> shade.colors("#000000", "#000000").strategy(ShadeStrategy.TOP_TO_BOTTOM)))
+     *    )
+     * }</pre>
+     *
+     * @param styler A function that takes a {@link ShadeStyle} and returns a new {@link ShadeStyle}.
+     * @return A new {@link Style} with a background shade defined by the provided styler lambda.
+     */
+    public Style backgroundShade( Function<ShadeStyle, ShadeStyle> styler ) {
+        Objects.requireNonNull(styler);
+        return _withBackground(background().shade(StyleUtility.DEFAULT_KEY, styler));
     }
 
     /**
