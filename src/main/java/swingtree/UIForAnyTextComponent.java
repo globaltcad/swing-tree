@@ -79,7 +79,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      */
     public final I withText( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class, "Please use an empty string instead of null!");
-        getComponent().setText(text);
+        _setTextSilently( getComponent(), text );
         return _this();
     }
 
@@ -98,7 +98,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      */
     public final I withText( Val<String> val ) {
         NullUtil.nullArgCheck(val, "val", Val.class);
-        _onShow(val, v -> getComponent().setText(v) );
+        _onShow(val, v -> _setTextSilently( getComponent(), v ) );
         return withText( val.orElseThrow() );
     }
 
@@ -121,7 +121,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
         _onShow( text, newText -> {
             C c = getComponent();
             if ( !Objects.equals(c.getText(), newText) ) // avoid infinite recursion or some other Swing weirdness
-                c.setText(newText);
+                _setTextSilently( c, newText );
         });
         _onTextChange( e -> {
             try {
@@ -141,6 +141,8 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                             Because if a user decides to rebroadcast the text property in the 'onAct' callback,
                             then the text component will receive that new text while it is still in the middle of
                             document mutation, which is not allowed by Swing!
+                            (java.lang.IllegalStateException: Attempt to mutate in notification
+                                at javax.swing.text.AbstractDocument.writeLock(AbstractDocument.java:1338))
                         */
                     else
                         text.act(t);
@@ -150,6 +152,23 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
             }
         });
         return withText( text.orElseThrow() );
+    }
+
+    protected final void _setTextSilently( C component, String text ) {
+        Document doc = component.getDocument();
+        if (doc instanceof AbstractDocument) {
+            AbstractDocument abstractDoc = (AbstractDocument) doc;
+            // We remove all document listeners to avoid infinite recursion
+            // and other Swing weirdness.
+            DocumentListener[] listeners = abstractDoc.getListeners(DocumentListener.class);
+            for ( DocumentListener listener : listeners )
+                abstractDoc.removeDocumentListener(listener);
+            component.setText(text);
+            for ( DocumentListener listener : listeners )
+                abstractDoc.addDocumentListener(listener);
+        }
+        else
+            component.setText(text);
     }
 
     /**
