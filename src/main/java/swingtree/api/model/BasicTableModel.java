@@ -9,6 +9,21 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 
+/**
+ *  This interface defines a basic table model which can be used to create a table model using lambda expressions.
+ *  Implementations of this are typically created declarative like so: <br>
+ *  <pre>{@code
+ *      UI.table().withModel(
+ *          UI.tableModel()
+ *          .colNames("A", "B")
+ *          .colCount(()->2)
+ *          .rowCount(()->3)
+ *          .getter((int row, int col)->
+ *              vm.getData(row, col)
+ *          )
+ *      )
+ *  }</pre>
+ */
 public interface BasicTableModel extends TableModel
 {
     /** {@inheritDoc} */
@@ -30,12 +45,33 @@ public interface BasicTableModel extends TableModel
     /** {@inheritDoc} */
     @Override default void removeTableModelListener(TableModelListener l) {throw new IllegalStateException("Not implemented");}
 
+    /**
+     *  Implementations of this functional interface translate to the {@link TableModel#getRowCount()} method.
+     */
     @FunctionalInterface interface RowCount { int get(); }
+    /**
+     *  Implementations of this functional interface translate to the {@link TableModel#getColumnCount()} method.
+     */
     @FunctionalInterface interface ColumnCount { int get(); }
+    /**
+     *  Implementations of this functional interface translate to the {@link TableModel#getValueAt(int, int)} method.
+     */
     @FunctionalInterface interface ValueAt { Object get(int rowIndex, int colIndex); }
-    @FunctionalInterface interface SetValueAt { void set(int rowIndex, int colIndexx, Object aValue); }
+    /**
+     *  Implementations of this functional interface translate to the {@link TableModel#setValueAt(Object, int, int)} method.
+     */
+    @FunctionalInterface interface SetValueAt { void set(int rowIndex, int colIndex, Object aValue); }
+    /**
+     *  Implementations of this functional interface translate to the {@link TableModel#getColumnClass(int)} method.
+     */
     @FunctionalInterface interface ColumnClass { Class<?> get(int colIndex); }
+    /**
+     *  Implementations of this functional interface translate to the {@link TableModel#isCellEditable(int, int)} method.
+     */
     @FunctionalInterface interface CellEditable { boolean is(int rowIndex, int colIndex); }
+    /**
+     *  Implementations of this functional interface translate to the {@link TableModel#getColumnName(int)} method.
+     */
     @FunctionalInterface interface ColumnName { String get(int colIndex); }
 
     /**
@@ -58,7 +94,7 @@ public interface BasicTableModel extends TableModel
           * @param rowCount The lambda which will be used to determine the row count of the table model.
           * @return This builder instance.
           */
-        public Builder onRowCount( RowCount rowCount ) {
+        public Builder rowCount( RowCount rowCount ) {
             if ( rowCount == null ) throw new IllegalArgumentException("rowCount cannot be null");
             if ( this.rowCount != null ) throw new IllegalStateException(RowCount.class.getSimpleName()+" already set");
             this.rowCount = rowCount;
@@ -69,40 +105,40 @@ public interface BasicTableModel extends TableModel
          * @param columnCount The lambda which will be used to determine the column count of the table model.
          * @return This builder instance.
          */
-        public Builder onColCount( ColumnCount columnCount ) {
+        public Builder colCount( ColumnCount columnCount ) {
             if ( columnCount == null ) throw new IllegalArgumentException("columnCount cannot be null");
             if ( this.colCount != null ) throw new IllegalStateException(ColumnCount.class.getSimpleName()+" already set");
             this.colCount = columnCount;
             return this;
         }
         /**
-         *  Use this to define the lambda which dynamically determines the value at a given row and column.
+         *  Accepts a lambda allowing the {@link javax.swing.JTable} to dynamically determines the value at a given row and column.
          * @param valueAt The lambda which will be used to determine the value at a given row and column.
          * @return This builder instance.
          */
-        public Builder onGet( ValueAt valueAt ) {
+        public Builder getter( ValueAt valueAt ) {
             if ( valueAt == null ) throw new IllegalArgumentException("valueAt cannot be null");
             if ( this.valueAt != null ) throw new IllegalStateException(ValueAt.class.getSimpleName()+" already set");
             this.valueAt = valueAt;
             return this;
         }
         /**
-         *  Use this to define the lambda which allows the user of the {@link javax.swing.JTable} to set the value at a given row and column.
+         *  Accepts a lambda allowing lambda which allows the user of the {@link javax.swing.JTable} to set the value at a given row and column.
          * @param setValueAt The lambda which will be used to set the value at a given row and column.
          * @return This builder instance.
          */
-        public Builder onSet( SetValueAt setValueAt ) {
+        public Builder setter( SetValueAt setValueAt ) {
             if ( setValueAt == null ) throw new IllegalArgumentException("setValueAt cannot be null");
             if ( this.setValueAt != null ) throw new IllegalStateException(SetValueAt.class.getSimpleName()+" already set");
             this.setValueAt = setValueAt;
             return this;
         }
         /**
-         *  Use this to define the lambda which allows the {@link javax.swing.JTable} to determine the class of the column at a given index.
+         *  Accepts a lambda which allows the {@link javax.swing.JTable} to determine the class of the column at a given index.
          * @param columnClass The lambda which will be used to determine the class of the column at a given index.
          * @return This builder instance.
          */
-        public Builder onColClass( ColumnClass columnClass ) {
+        public Builder colClass( ColumnClass columnClass ) {
             if ( columnClass == null ) throw new IllegalArgumentException("columnClass cannot be null");
             if ( this.columnClass != null ) throw new IllegalStateException(ColumnClass.class.getSimpleName()+" already set");
             this.columnClass = columnClass;
@@ -115,14 +151,14 @@ public interface BasicTableModel extends TableModel
          */
         public Builder colClasses( Class<?>... classes ) {
             if ( classes == null ) throw new IllegalArgumentException("classes cannot be null");
-            return onColClass((colIndex) -> classes[colIndex]);
+            return colClass((colIndex) -> classes[colIndex]);
         }
         /**
-         *  Use this to define the lambda which allows the {@link javax.swing.JTable} to determine if the cell at a given row and column is editable.
+         *  Accepts a lambda allowing the {@link javax.swing.JTable} to determine if the cell at a given row and column is editable.
          * @param cellEditable The lambda which will be used to determine if the cell at a given row and column is editable.
          * @return This builder instance.
          */
-        public Builder onIsEditable( CellEditable cellEditable ) {
+        public Builder isEditableIf( CellEditable cellEditable ) {
             if ( cellEditable == null ) throw new IllegalArgumentException("cellEditable cannot be null");
             if ( this.cellEditable != null ) throw new IllegalStateException(CellEditable.class.getSimpleName()+" already set");
             this.cellEditable = cellEditable;
@@ -133,7 +169,7 @@ public interface BasicTableModel extends TableModel
           * @param columnName The lambda which will be used to determine the name of the column at a given index.
           * @return This builder instance.
           */
-        public Builder onColName( ColumnName columnName ) {
+        public Builder colName( ColumnName columnName ) {
             if ( columnName == null ) throw new IllegalArgumentException("columnName cannot be null");
             if (this.columnName != null)
                 throw new IllegalStateException(ColumnName.class.getSimpleName() + " already set");
@@ -142,7 +178,7 @@ public interface BasicTableModel extends TableModel
         }
         public Builder colNames( String... names ) {
             if ( names == null ) throw new IllegalArgumentException("names cannot be null");
-            return onColName((colIndex) -> names[colIndex]);
+            return colName((colIndex) -> names[colIndex]);
         }
         /**
          *  Use this to define the event which will be fired when the table model is updated.

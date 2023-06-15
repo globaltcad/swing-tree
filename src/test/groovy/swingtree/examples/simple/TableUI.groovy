@@ -25,8 +25,8 @@ class TableUI
             .add("grow, span", label("Row Major 2"))
             .add("grow, span",
                 table(tableModel()
-                   .onColCount({data[0].size()}).onRowCount({data.size()})
-                   .onGet({col, row -> data[col][row]})
+                   .colCount({data[0].size()}).rowCount({data.size()})
+                   .getter({ col, row -> data[col][row]})
                 )
                 .id("RM2")
             )
@@ -34,8 +34,8 @@ class TableUI
             .add("grow, span", label("Column Major 2"))
             .add("grow, span",
                 table(tableModel()
-                   .onColCount({data.size()}).onRowCount({data[0].size()})
-                   .onGet({col, row -> data[row][col]})
+                   .colCount({data.size()}).rowCount({data[0].size()})
+                   .getter({ col, row -> data[row][col]})
                 )
                 .id("CM2")
             )

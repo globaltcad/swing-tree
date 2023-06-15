@@ -1,6 +1,6 @@
 package swingtree.renderer
 
-import sprouts.Event
+
 import swingtree.Render
 import swingtree.UI
 import spock.lang.Narrative
@@ -30,9 +30,9 @@ class Table_Renderer_Spec extends Specification
                     UI.table().withModel(
                         UI.tableModel()
                         .colNames("A", "B")
-                        .onColCount({2})
-                        .onRowCount({3})
-                        .onGet({"O"})
+                        .colCount({2})
+                        .rowCount({3})
+                        .getter({"O"})
                     )
         and : """
                 A mocked cell interpreter which interprets the state of the table cell
