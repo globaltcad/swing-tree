@@ -7,6 +7,7 @@ import spock.lang.Title
 import swingtree.UI
 import swingtree.style.Arc
 import swingtree.style.Outline
+import swingtree.style.ShadingStrategy
 import swingtree.style.Style
 import swingtree.style.StyleSheet
 
@@ -349,6 +350,10 @@ class Style_Sheet_Spec extends Specification
         reportInfo """
             If you specify font information using the styling API then it will
             be used to create a font for the component.
+            
+            In this example you can see how the styling engine of SwingTree prioritizes
+            the different properties of a style trait.
+            Namely, it will prioritize explicit group styles over type styles.
         """
         given :
             var ss = new StyleSheet() {
@@ -368,22 +373,26 @@ class Style_Sheet_Spec extends Specification
         when : 'We create a few UI components:'
             var label1 = UI.label(":)").groups("A")
             var label2 = UI.label(":D").groups("B")
+            var label3 = UI.label(":(") // No group
             var textField = UI.textField().groups("A")
             var textArea = UI.textArea("").groups("B")
         and : 'We run them through the style sheet...'
             var s1 = ss.run(label1.component)
             var s2 = ss.run(label2.component)
-            var s3 = ss.run(textField.component)
-            var s4 = ss.run(textArea.component)
+            var s3 = ss.run(label3.component)
+            var s4 = ss.run(textField.component)
+            var s5 = ss.run(textArea.component)
         then : '...and we check the results'
-            s1.font().name() == "Papyrus"
-            s1.font().size() == 15
-            s2.font().name() == "Papyrus"
-            s2.font().size() == 15
-            s3.font().name() == "Arial"
-            s3.font().size() == 12
-            s4.font().name() == "Sans"
-            s4.font().size() == 14
+            s1.font().name() == "Arial"
+            s1.font().size() == 12
+            s2.font().name() == "Sans"
+            s2.font().size() == 14
+            s3.font().name() == "Papyrus"
+            s3.font().size() == 15
+            s4.font().name() == "Arial"
+            s4.font().size() == 12
+            s5.font().name() == "Sans"
+            s5.font().size() == 14
     }
 
     def 'Use the power of `Graphics2D` to render custom backgrounds inside you styles.'()
@@ -433,5 +442,61 @@ class Style_Sheet_Spec extends Specification
             s1.background().painters().size() == 1
             s2.background().hasPainters()
             s2.background().painters().size() == 1
+    }
+
+    def 'The order of inherited style traits determines the order in which they are applied.'()
+    {
+        reportInfo """
+            Inheritance can be when it comes to multiple inheritance, because
+            if a style trait inherits from multiple other style traits then
+            one might ask: "In which order are the inherited style traits
+            applied?".
+            
+            SwingTree solves this problem by simply applying the inherited
+            style traits in the order in which the inheritance was declared.
+            So for a style trait declared as `group("A").inherits("B", "C")`
+            the style traits of group "B" will be applied first, then the
+            style traits of group "C" and finally the style traits of group
+            "A" itself.
+            
+            Take a look at the following example:
+        """
+        given :
+            var ss = new StyleSheet() {
+                @Override
+                protected void declaration() {
+                    apply(group("A").inherits("B", "C"), it ->
+                        it.style()
+                        .borderShade( s -> s.strategy(ShadingStrategy.BOTTOM_TO_TOP).colors(Color.RED, Color.BLUE) )
+                    );
+                    apply(group("B"), it ->
+                        it.style()
+                            .borderWidth(10)
+                            .borderColor(Color.GREEN)
+                    );
+                    apply(group("C"), it ->
+                        it.style()
+                            .borderWidth(20)
+                            .borderColor(Color.YELLOW)
+                            .borderShade("named shade",
+                                s -> s.strategy(ShadingStrategy.TOP_TO_BOTTOM).colors(Color.CYAN, Color.MAGENTA)
+                            )
+                    );
+                }
+            }
+        when : 'We create a single UI component using style group "A":'
+            var label = UI.label(":)").groups("A")
+        and : 'We run it through the style sheet...'
+            var s = ss.run(label.component)
+        then : '...and we check the results'
+            s.border().widths().top().get() == 10
+            s.border().widths().left().get() == 10
+            s.border().widths().bottom().get() == 10
+            s.border().widths().right().get() == 10
+            s.border().color().get() == Color.GREEN
+            s.border().shade().strategy() == ShadingStrategy.BOTTOM_TO_TOP
+            s.border().shade().colors() as java.util.List == [Color.RED, Color.BLUE]
+            s.border().shade("named shade").strategy() == ShadingStrategy.TOP_TO_BOTTOM
+            s.border().shade("named shade").colors() as java.util.List == [Color.CYAN, Color.MAGENTA]
     }
 }

@@ -98,6 +98,15 @@ public final class BorderStyle
         return shade(newShadows);
     }
 
+    public ShadeStyle shade( String shadeName ) {
+        Objects.requireNonNull(shadeName);
+        return Optional.ofNullable(_shades.get(shadeName)).orElse(ShadeStyle.none());
+    }
+
+    public ShadeStyle shade() {
+        return shade(StyleUtility.DEFAULT_KEY);
+    }
+
     BorderStyle widths( Outline borderWidths ) {
         return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, borderWidths, _borderColor, _shades);
     }

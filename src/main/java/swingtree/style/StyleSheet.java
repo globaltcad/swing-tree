@@ -58,7 +58,7 @@ public abstract class StyleSheet
         List<List<StyleTrait>> validTraitPaths = new java.util.ArrayList<>();
         for (List<StyleTrait> traitPath : _traitPaths) {
             int lastValidTrait = -1;
-            for (int i = 0; i < traitPath.size(); i++) {
+            for ( int i = 0; i < traitPath.size(); i++ ) {
                 StyleTrait trait = traitPath.get(i);
                 boolean valid = trait.isApplicableTo(toBeStyled);
                 if (valid) lastValidTrait = i;
@@ -70,22 +70,42 @@ public abstract class StyleSheet
                 deepestValidPath = lastValidTrait;
         }
 
-        // Now we are going to create one common path from the valid trait paths by mergin them!
+        // Now we are going to create one common path from the valid trait paths by merging them!
         // So first we add all the traits from path step 0, then 1, then 2, etc.
         List<StyleTrait> commonPath = new java.util.ArrayList<>();
-        for ( int i = 0; i <= deepestValidPath; i++ ) {
-            for ( List<StyleTrait> validTraitPath : validTraitPaths ) {
-                if ( i < validTraitPath.size() ) {
+        List<String> inheritedTraits = new java.util.ArrayList<>();
+        for ( int i = deepestValidPath; i >= 0; i-- ) {
+            if ( inheritedTraits.size() > 0 ) {
+                for ( String inheritedTrait : new ArrayList<>(inheritedTraits) ) {
+                    for (List<StyleTrait> validTraitPath : validTraitPaths) {
+                        if (i < validTraitPath.size()) {
+                            StyleTrait trait = validTraitPath.get(i);
+                            if ( !commonPath.contains(trait) && trait.group().equals(inheritedTrait) ) {
+                                inheritedTraits.remove(trait.group());
+                                commonPath.add(trait);
+                                inheritedTraits.addAll(Arrays.asList(trait.inheritance()));
+                            }
+                        }
+                    }
+                }
+            }
+            for (List<StyleTrait> validTraitPath : validTraitPaths) {
+                if (i < validTraitPath.size()) {
                     StyleTrait trait = validTraitPath.get(i);
-                    if ( !commonPath.contains(trait) )
+                    if (!commonPath.contains(trait)) {
+                        inheritedTraits.remove(trait.group());
                         commonPath.add(trait);
+                        inheritedTraits.addAll(Arrays.asList(trait.inheritance()));
+                    }
                 }
             }
         }
 
         // Now we apply the valid traits to the starting style.
-        for ( StyleTrait trait : commonPath )
+        for ( int i = commonPath.size() - 1; i >= 0; i-- ) {
+            StyleTrait trait = commonPath.get(i);
             startingStyle = _traitStylers.get(trait).apply(new StyleDelegate<>(toBeStyled, startingStyle));
+        }
 
         return startingStyle;
     }
