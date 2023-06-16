@@ -72,7 +72,7 @@ public abstract class StyleSheet
 
         // Now we are going to create one common path from the valid trait paths by merging them!
         // So first we add all the traits from path step 0, then 1, then 2, etc.
-        List<StyleTrait> commonPath = new java.util.ArrayList<>();
+        List<StyleTrait> subToSuper = new java.util.ArrayList<>(); // The final merged path.
         List<String> inheritedTraits = new java.util.ArrayList<>();
         StyleTrait lastAdded = null;
         for ( int i = 0; i <= deepestValidPath; i++ ) {
@@ -81,13 +81,9 @@ public abstract class StyleSheet
                     for (List<StyleTrait> validTraitPath : validTraitPaths) {
                         int index = validTraitPath.size() - i - 1;
                         if ( index >= 0 ) {
-                            StyleTrait trait = validTraitPath.get(index);
-                            if ( !commonPath.contains(trait) && trait.group().equals(inheritedTrait) ) {
-                                inheritedTraits.remove(trait.group());
-                                commonPath.add(trait);
-                                inheritedTraits.addAll(Arrays.asList(trait.inheritance()));
-                                lastAdded = trait;
-                            }
+                            StyleTrait current = validTraitPath.get(index);
+                            if ( !subToSuper.contains(current) && current.group().equals(inheritedTrait) )
+                                lastAdded = merge(current, lastAdded, subToSuper, inheritedTraits);
                         }
                     }
                 }
@@ -96,33 +92,38 @@ public abstract class StyleSheet
                 int index = validTraitPath.size() - i - 1;
                 if ( index >= 0 ) {
                     StyleTrait trait = validTraitPath.get(index);
-                    if (!commonPath.contains(trait)) {
-                        inheritedTraits.remove(trait.group());
-                        if ( lastAdded != null && commonPath.size() > 0 ) {
-                            if ( !lastAdded.group().isEmpty() || lastAdded.thisInherits(trait) ) {
-                                commonPath.add(trait);
-                                lastAdded = trait;
-                            }
-                            else
-                                commonPath.add(commonPath.size() - 1, trait);
-                        }
-                        else {
-                            commonPath.add(trait);
-                            lastAdded = trait;
-                        }
-                        inheritedTraits.addAll(Arrays.asList(trait.inheritance()));
-                    }
+                    if ( !subToSuper.contains(trait) )
+                        lastAdded = merge(trait, lastAdded, subToSuper, inheritedTraits);
                 }
             }
         }
 
         // Now we apply the valid traits to the starting style.
-        for ( int i = commonPath.size() - 1; i >= 0; i-- ) {
-            StyleTrait trait = commonPath.get(i);
+        for ( int i = subToSuper.size() - 1; i >= 0; i-- ) {
+            StyleTrait trait = subToSuper.get(i);
             startingStyle = _traitStylers.get(trait).apply(new StyleDelegate<>(toBeStyled, startingStyle));
         }
 
         return startingStyle;
+    }
+
+    private StyleTrait merge(
+            StyleTrait currentTrait,
+            StyleTrait lastAdded,
+            List<StyleTrait> subToSuper,
+            List<String> inheritedTraits
+
+    ) {
+        boolean lastIsSuper = lastAdded != null && lastAdded.group().isEmpty() && !lastAdded.thisInherits(currentTrait);
+        if ( lastIsSuper )
+            subToSuper.add(subToSuper.size() - 1, currentTrait);
+        else {
+            subToSuper.add(currentTrait);
+            lastAdded = currentTrait;
+        }
+        inheritedTraits.remove(currentTrait.group());
+        inheritedTraits.addAll(Arrays.asList(currentTrait.inheritance()));
+        return lastAdded;
     }
 
     private void _buildTraitGraph() {
