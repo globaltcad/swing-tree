@@ -65,6 +65,30 @@ public class AnimatedView extends Panel
                     it.getComponent().setBackground(new Color(highlight, 1f, highlight));
                 }))
             )
+            .add(SPAN,
+                box(FILL).peek( b -> b.setLayout(null) ).withPrefSize(620,40)
+                .add(GROW,
+                    toggleButton("Toggle").peek(
+                         b -> UI.runLater(()-> b.setBounds(0, 0, 100, 30))
+                    )
+                    .onMouseClick( it -> {
+                        // When it is selected we start an animation that will
+                        // move the button to the right end of the parent panel.
+                        if ( it.get().isSelected() )
+                            it.animateOnce(1, TimeUnit.SECONDS, state -> {
+                                int x = (int) (state.progress() * (it.getParent().getWidth() - it.getWidth()));
+                                it.getComponent().setBounds(x, 0, 100, 30);
+                            });
+                        // When it is deselected we start an animation that will
+                        // move the button to the left end of the parent panel.
+                        else
+                            it.animateOnce(1, TimeUnit.SECONDS, state -> {
+                                int x = (int) ((1 - state.progress()) * (it.getParent().getWidth() - it.getWidth()));
+                                it.getComponent().setBounds(x, 0, 100, 30);
+                            });
+                    })
+                )
+            )
         )
         .add( GROW.and(SPAN),
             scrollPanels()
@@ -74,24 +98,9 @@ public class AnimatedView extends Panel
             .add( panel(FILL.and(WRAP(2))).add(label("G")).add(label("H")) )
         );
 
-        int screenCenterX = frame.getX();
-        int screenCenterY = frame.getY();
-
         schedule(1, TimeUnit.SECONDS)
             .go(state -> { w.set((int) (100 * state.cycle())); } );
 
-        schedule(6, TimeUnit.SECONDS)
-            .startingIn(14, TimeUnit.SECONDS)
-            .go(state -> {
-                int MAX_WIDTH = 200;
-                double progress = state.cycle();
-                int width  = 300 + (int) (MAX_WIDTH * progress);
-                int height = 300 + (int) (MAX_WIDTH * progress);
-                int widthPosOffset  = (width / 2);
-                int heightPosOffset = (height / 2);
-                frame.setLocation(screenCenterX - widthPosOffset, screenCenterY - heightPosOffset);
-                frame.setSize(width, height);
-            });
     }
 
     public static void main( String... args ) { UI.show( f -> new AnimatedView(f) ); }

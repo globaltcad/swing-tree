@@ -55,6 +55,11 @@ abstract class AbstractDelegate<C extends JComponent>
     }
 
     /**
+     * @return The parent {@link Container} of the underlying component.
+     */
+    public final Container getParent() { return _component().getParent(); }
+
+    /**
      *  As a delegate to the underlying component, you can use this method to
      *  conveniently set the background color of the component.
      *  This method returns the delegate itself, so you can chain calls to this method.
