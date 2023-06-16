@@ -74,27 +74,42 @@ public abstract class StyleSheet
         // So first we add all the traits from path step 0, then 1, then 2, etc.
         List<StyleTrait> commonPath = new java.util.ArrayList<>();
         List<String> inheritedTraits = new java.util.ArrayList<>();
-        for ( int i = deepestValidPath; i >= 0; i-- ) {
+        StyleTrait lastAdded = null;
+        for ( int i = 0; i <= deepestValidPath; i++ ) {
             if ( inheritedTraits.size() > 0 ) {
                 for ( String inheritedTrait : new ArrayList<>(inheritedTraits) ) {
                     for (List<StyleTrait> validTraitPath : validTraitPaths) {
-                        if (i < validTraitPath.size()) {
-                            StyleTrait trait = validTraitPath.get(i);
+                        int index = validTraitPath.size() - i - 1;
+                        if ( index >= 0 ) {
+                            StyleTrait trait = validTraitPath.get(index);
                             if ( !commonPath.contains(trait) && trait.group().equals(inheritedTrait) ) {
                                 inheritedTraits.remove(trait.group());
                                 commonPath.add(trait);
                                 inheritedTraits.addAll(Arrays.asList(trait.inheritance()));
+                                lastAdded = trait;
                             }
                         }
                     }
                 }
             }
             for (List<StyleTrait> validTraitPath : validTraitPaths) {
-                if (i < validTraitPath.size()) {
-                    StyleTrait trait = validTraitPath.get(i);
+                int index = validTraitPath.size() - i - 1;
+                if ( index >= 0 ) {
+                    StyleTrait trait = validTraitPath.get(index);
                     if (!commonPath.contains(trait)) {
                         inheritedTraits.remove(trait.group());
-                        commonPath.add(trait);
+                        if ( lastAdded != null && commonPath.size() > 0 ) {
+                            if ( !lastAdded.group().isEmpty() || lastAdded.thisInherits(trait) ) {
+                                commonPath.add(trait);
+                                lastAdded = trait;
+                            }
+                            else
+                                commonPath.add(commonPath.size() - 1, trait);
+                        }
+                        else {
+                            commonPath.add(trait);
+                            lastAdded = trait;
+                        }
                         inheritedTraits.addAll(Arrays.asList(trait.inheritance()));
                     }
                 }

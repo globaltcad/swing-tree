@@ -995,6 +995,11 @@ public final class Style
 
     public ShadowStyle shadow() { return _shadows.get(StyleUtility.DEFAULT_KEY); }
 
+    public ShadowStyle shadow(String shadowName) {
+        Objects.requireNonNull(shadowName);
+        return _shadows.get(shadowName);
+    }
+
     /**
      * @return An unmodifiable list of all shadow styles sorted by their names in ascending alphabetical order.
      */

@@ -3,7 +3,6 @@ package swingtree.style;
 import swingtree.ComponentExtension;
 
 import javax.swing.*;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -28,8 +27,6 @@ public final class StyleTrait<C extends JComponent>
         _id = Objects.requireNonNull(id);
         _toInherit = Objects.requireNonNull(inherits).clone();
         _type = Objects.requireNonNull(type);
-        // Now we sort the "inherits" groups:
-        java.util.Arrays.sort(_toInherit);
         // And we check for duplicates and throw an exception if we find any.
         for ( int i = 0; i < _toInherit.length - 1; i++ )
             if ( _toInherit[i].equals(_toInherit[i+1]) )
@@ -89,6 +86,15 @@ public final class StyleTrait<C extends JComponent>
                 );
 
         return (thisIsExtensionOfOther || other.group().isEmpty()) && thisIsSubclassOfOther;
+    }
+
+    public boolean typeInherits(StyleTrait<?> other ) {
+        if ( this.type().equals(other.type()) )
+            return true;
+        else if ( other.type().isAssignableFrom(this.type()) )
+            return true;
+        else
+            return false;
     }
 
     @Override

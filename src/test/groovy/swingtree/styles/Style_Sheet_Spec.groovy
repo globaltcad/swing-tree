@@ -94,31 +94,41 @@ class Style_Sheet_Spec extends Specification
                          }
                      }
         and : 'A few components we are going to style'
+            var textField = UI.textField("type something")
             var button = UI.button("click me!")
             var panel = UI.panel()
-            var textField = UI.textField("type something")
             var textArea = UI.textArea("type some more!")
-        when : 'We run the style sheet on the components and access the shadow style for each component.'
-            var buttonStyle = ss.run(button.component).shadow()
-            var panelStyle  = ss.run(panel.component).shadow()
+
+        when :
             var fieldStyle  = ss.run(textField.component).shadow()
-            var areaStyle   = ss.run(textArea.component).shadow()
+        then :
+            fieldStyle.color().get() == Color.BLUE // The text component trait overrides the component trait!
+            fieldStyle.blurRadius() == 9 // The text field trait overrides the component trait!
+            fieldStyle.spreadRadius() != 33 // a text field is not a panel
+            fieldStyle.verticalOffset() == 24
+            fieldStyle.horizontalOffset() == 42
+
+        when :
+            var buttonStyle = ss.run(button.component).shadow()
         then :
             buttonStyle.color().get() == Color.RED
             buttonStyle.blurRadius() == 17
             buttonStyle.spreadRadius() != 33 // a button is not a panel
             buttonStyle.verticalOffset() != 42 // a button is not a text component
             buttonStyle.horizontalOffset() != 24 // a button is not a text component
+
+        when :
+            var panelStyle  = ss.run(panel.component).shadow()
+        then :
             panelStyle.color().get() == Color.RED
             panelStyle.blurRadius() == 17
             panelStyle.spreadRadius() == 33
             panelStyle.verticalOffset() != 42 // a panel is not a text component
             panelStyle.horizontalOffset() != 24 // a panel is not a text component
-            fieldStyle.color().get() == Color.BLUE // The text component trait overrides the component trait!
-            fieldStyle.blurRadius() == 9 // The text field trait overrides the component trait!
-            fieldStyle.spreadRadius() != 33 // a text field is not a panel
-            fieldStyle.verticalOffset() == 24
-            fieldStyle.horizontalOffset() == 42
+
+        when :
+            var areaStyle   = ss.run(textArea.component).shadow()
+        then :
             areaStyle.color().get() == Color.BLUE // The text component trait overrides the component trait!
             areaStyle.blurRadius() == 17
             areaStyle.spreadRadius() != 33 // a text area is not a panel
@@ -370,13 +380,13 @@ class Style_Sheet_Spec extends Specification
                     );
                 }
             }
-        when : 'We create a few UI components:'
+        and : 'We create a few UI components:'
             var label1 = UI.label(":)").groups("A")
             var label2 = UI.label(":D").groups("B")
             var label3 = UI.label(":(") // No group
             var textField = UI.textField().groups("A")
             var textArea = UI.textArea("").groups("B")
-        and : 'We run them through the style sheet...'
+        when : 'We run them through the style sheet...'
             var s1 = ss.run(label1.component)
             var s2 = ss.run(label2.component)
             var s3 = ss.run(label3.component)
@@ -494,9 +504,99 @@ class Style_Sheet_Spec extends Specification
             s.border().widths().bottom().get() == 10
             s.border().widths().right().get() == 10
             s.border().color().get() == Color.GREEN
+        and : 'Note that only the default border shade will be overridden, not the named one.'
             s.border().shade().strategy() == ShadingStrategy.BOTTOM_TO_TOP
             s.border().shade().colors() as java.util.List == [Color.RED, Color.BLUE]
             s.border().shade("named shade").strategy() == ShadingStrategy.TOP_TO_BOTTOM
             s.border().shade("named shade").colors() as java.util.List == [Color.CYAN, Color.MAGENTA]
+    }
+
+
+    def 'You can define complex group inheritance graphs inside your style sheets.'()
+    {
+        reportInfo """
+            This is a more complicated example where we demonstrate how
+            complex group inheritance graphs can be defined inside your
+            style sheets.
+            
+            The following example defines the following inheritance graph:
+            ```
+                    A
+                  / | \
+                 /  |  \
+                B   C   |
+                |   |   |
+                D   |   |
+                 \\  |  /
+                  \\ | /
+                    E
+            ```
+        """
+        given :
+            var ss = new StyleSheet() {
+                @Override
+                protected void declaration() {
+                    apply(group("A").inherits("E", "B", "C"), it ->
+                        it.style()
+                        .borderWidth(5)
+                        .backgroundColor(Color.RED)
+                        .borderShade( s -> s.strategy(ShadingStrategy.BOTTOM_TO_TOP).colors(Color.RED, Color.BLUE) )
+                    );
+                    apply(group("B").inherits("D"), it ->
+                        it.style()
+                            .borderWidth(7)
+                            .borderColor(Color.GREEN)
+                    );
+                    apply(group("C").inherits("E"), it ->
+                        it.style()
+                            .borderWidth(11)
+                            .borderColor(Color.YELLOW)
+                            .shadow("named shadow", s -> s
+                                .spreadRadius(10)
+                                .color(Color.CYAN)
+                                .isInset(true)
+                            )
+                    );
+                    apply(group("D").inherits("E"), it ->
+                        it.style()
+                            .borderWidth(20)
+                            .borderColor(Color.WHITE)
+                            .shadow("named shadow", s -> s
+                                .spreadRadius(20)
+                                .color(Color.MAGENTA)
+                                .isInset(false)
+                            )
+                    );
+                    apply(group("E"), it ->
+                        it.style()
+                            .borderWidth(42)
+                            .borderColor(Color.MAGENTA)
+                            .shadow("named shadow", s -> s
+                                .spreadRadius(42)
+                                .isInset(false)
+                            )
+                            .font(new Font("Arial", Font.BOLD, 12))
+                    );
+                }
+            }
+        when : 'We create a single UI component using style group "A":'
+            var button = UI.toggleButton(":)").groups("A")
+        and : 'We run it through the style sheet...'
+            var s = ss.run(button.component)
+        then : '...and we check the results'
+            s.border().widths().top().get() == 5
+            s.border().widths().left().get() == 5
+            s.border().widths().bottom().get() == 5
+            s.border().widths().right().get() == 5
+            s.border().color().get() == Color.MAGENTA
+            s.background().color().get() == Color.RED
+            s.border().shade().strategy() == ShadingStrategy.BOTTOM_TO_TOP
+            s.border().shade().colors() as java.util.List == [Color.RED, Color.BLUE]
+            s.shadow("named shadow").spreadRadius() == 42
+            s.shadow("named shadow").color().get() == Color.CYAN
+            s.shadow("named shadow").isInset() == false
+            s.font().name() == "Arial"
+            s.font().size() == 12
+            s.font().style() == Font.BOLD
     }
 }
