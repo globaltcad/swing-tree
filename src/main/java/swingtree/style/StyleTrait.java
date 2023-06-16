@@ -41,13 +41,24 @@ public final class StyleTrait<C extends JComponent>
 
     public StyleTrait<C> group( String group ) { return new StyleTrait<>(group, _id, _toInherit, _type); }
 
+    public <E extends Enum<E>> StyleTrait<C> group( E group ) { return group(group.name()); }
+
     public StyleTrait<C> id( String id ) { return new StyleTrait<>(_group, id, _toInherit, _type); }
+
+    public <E extends Enum<E>> StyleTrait<C> id( E id ) { return id(id.name()); }
 
     public String id() { return _id; }
 
     public String[] inheritance() { return _toInherit; }
 
     public StyleTrait<C> inherits( String... superGroups ) { return new StyleTrait<>(_group, _id, superGroups, _type ); }
+
+    public <E extends Enum<E>> StyleTrait<C> inherits( E... superGroups ) {
+        String[] superGroupNames = new String[superGroups.length];
+        for ( int i = 0; i < superGroups.length; i++ )
+            superGroupNames[i] = superGroups[i].name();
+        return inherits(superGroupNames);
+    }
 
     public Class<?> type() { return _type; }
 
@@ -100,7 +111,7 @@ public final class StyleTrait<C extends JComponent>
     @Override
     public String toString() {
         return "StyleTrait[" +
-                    "name='" + _group + '\'' +
+                    "group='" + _group + '\'' +
                     ", id='" + _id + '\'' +
                     ", inherits=" + java.util.Arrays.toString(_toInherit) +
                     ", type=" + _type +

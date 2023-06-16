@@ -89,9 +89,109 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _this();
     }
 
-    public final I groups( String... groupName ) {
-        ComponentExtension.from(getComponent()).setStyleGroups(groupName);
+    /**
+     *  This method exposes a concise way to set an enum based identifier for the component
+     *  wrapped by this {@link UI}!
+     *  In essence this is simply a delegate for the {@link JComponent#setName(String)} method
+     *  to make it more expressive and widely recognized what is meant
+     *  ("id" is shorter and makes more sense than "name" which could be confused with "title").
+     *  <p>
+     *  The enum identifier will be translated to a string using {@link Enum#name()}.
+     *
+     * @param id The enum identifier for this {@link JComponent} which will
+     *           simply translate to {@link JComponent#setName(String)}
+     *
+     * @return The JComponent type which will be wrapped by this builder node.
+     */
+    public final <E extends Enum<E>> I id( E id ) { return id( id.name() ); }
+
+    /**
+     *  This method is part of the SwingTree style API, and it allows you to
+     *  add this component to a style group.
+     *  This is conceptually similar to CSS classes, with the difference that
+     *  style groups can inherit from each other inside {@link swingtree.style.StyleSheet}s. <br>
+     *  Here an example of how to define styles for a style group:
+     *  <pre>{@code
+     *  new StyleSheet() {
+     *      @Override
+     *      protected void build() {
+     *          add(group("A").inherits("B", "C"),
+     *            it ->
+     *              it.style()
+     *              .backgroundColor(Color.RED)
+     *          );
+     *          add(group("B"), it ->
+     *              it.style()
+     *              .borderWidth(12)
+     *          );
+     *          add(group("C"), it ->
+     *              it.style()
+     *              .borderWidth(16)
+     *              .borderColor(Color.YELLOW)
+     *          );
+     *      }
+     *    }
+     *  }</pre>
+     *  This example style sheet can be applied to a component like this:
+     *  <pre>{@code
+     *      UI.use(new MyStyleSheet(), ()->
+     *          UI.button("Click me").group("A")
+     *          .onAction(() -> System.out.println("Clicked!"))
+     *      );
+     *  }</pre>
+     *
+     * @param groupNames The names of the style groups to which this component should be added.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I group( String... groupNames ) {
+        ComponentExtension.from(getComponent()).setStyleGroups(groupNames);
         return _this();
+    }
+
+    /**
+     *  This method is part of the SwingTree style API, and it allows you to
+     *  add this component to an enum based style group.
+     *  This is conceptually similar to CSS classes, with the difference that
+     *  style groups can inherit from each other inside {@link swingtree.style.StyleSheet}s. <br>
+     *  Here an example of how to define styles for a style group:
+     *  <pre>{@code
+     *  new StyleSheet() {
+     *          @Override
+     *          protected void build() {
+     *              add(group(MyGroups.A).inherits("B", "C"),
+     *                it ->
+     *                  it.style()
+     *                  .backgroundColor(Color.RED)
+     *              );
+     *              add(group(MyGroups.B), it ->
+     *                  it.style()
+     *                  .borderWidth(12)
+     *              );
+     *              add(group(MyGroups.C), it ->
+     *                  it.style()
+     *                  .borderWidth(16)
+     *                  .borderColor(Color.YELLOW)
+     *              );
+     *          }
+     *      }
+     *  }</pre>
+     *  This example style sheet can be applied to a component like this:
+     *  <pre>{@code
+     *      UI.use(new MyStyleSheet(), ()->
+     *          UI.button("Click me").group(MyGroup.A)
+     *          .onAction(() -> System.out.println("Clicked!"))
+     *      );
+     *  }</pre>
+     *
+     * @param groupName The enum based style group to which this component should be added.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    @SafeVarargs
+    public final <E extends Enum<E>> I group( E... groupName ) {
+        String[] names = new String[groupName.length];
+        for ( int i = 0; i < groupName.length; i++ )
+            names[i] = groupName[i].name();
+        return group(names);
     }
 
     /**

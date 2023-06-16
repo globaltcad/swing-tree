@@ -5,6 +5,10 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ *  An abstract class that can be extended to create custom style sheets for
+ *  your Swing application.
+ */
 public abstract class StyleSheet
 {
     private final Supplier<Style> _defaultStyle;
@@ -21,7 +25,7 @@ public abstract class StyleSheet
 
     protected StyleSheet( Function<Style, Style> defaultStyle ) {
         _defaultStyle = () -> defaultStyle.apply(Style.none());
-        declaration();
+        build();
         _buildTraitGraph();
     }
 
@@ -31,7 +35,7 @@ public abstract class StyleSheet
 
     protected <C extends JComponent> StyleTrait<C> type( Class<C> type ) { return new StyleTrait<>().type(type); }
 
-    protected <C extends JComponent> void apply( StyleTrait<C> rule, Function<StyleDelegate<C>, Style> traitStyler ) {
+    protected <C extends JComponent> void add(StyleTrait<C> rule, Function<StyleDelegate<C>, Style> traitStyler ) {
         // First let's make sure the trait does not already exist.
         if ( _traitStylers.containsKey(rule) )
             throw new IllegalArgumentException("The trait " + rule.group() + " already exists in this style sheet.");
@@ -42,7 +46,7 @@ public abstract class StyleSheet
         _traitGraph.put(rule, new java.util.ArrayList<>());
     }
 
-    protected abstract void declaration();
+    protected abstract void build();
 
     public Style run( JComponent toBeStyled ) {
         return run(toBeStyled, _defaultStyle.get());

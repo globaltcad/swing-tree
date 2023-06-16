@@ -1,5 +1,14 @@
 package swingtree.style;
 
+import java.util.function.Function;
+
+/**
+ *  Use these enum instances to specify the shading strategy for various sub styles,
+ *  like for example {@link BackgroundStyle} or {@link BorderStyle} through the
+ *  {@link ShadeStyle#strategy(ShadingStrategy)} method exposed by methods like
+ *  {@link Style#backgroundShade(Function)}, {@link Style#backgroundShade(String, Function)}
+ *  or {@link Style#borderShade(Function)}, {@link Style#borderShade(String, Function)}.
+ */
 public enum ShadingStrategy
 {
     NONE,

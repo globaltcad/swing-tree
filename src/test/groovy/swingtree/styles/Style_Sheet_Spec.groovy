@@ -35,14 +35,14 @@ class Style_Sheet_Spec extends Specification
         given :
             var ss = new StyleSheet() {
                         @Override
-                        protected void declaration() {
-                             apply(id("unique id!"), it ->
+                        protected void build() {
+                             add(id("unique id!"), it ->
                                  it.style().borderRadius(3)
                              );
-                             apply(type(JButton.class), it ->
+                             add(type(JButton.class), it ->
                                  it.style().borderWidth(7)
                              );
-                             apply(type(JPanel.class), it ->
+                             add(type(JPanel.class), it ->
                                 it.style().borderColor(Color.GREEN)
                              );
                          }
@@ -74,19 +74,19 @@ class Style_Sheet_Spec extends Specification
         given :
             var ss = new StyleSheet() {
                         @Override
-                        protected void declaration() {
-                            apply(type(JTextField.class), it ->
+                        protected void build() {
+                            add(type(JTextField.class), it ->
                                     it.style().shadowBlurRadius(9)
                                 );
-                             apply(type(JPanel.class), it ->
+                             add(type(JPanel.class), it ->
                                     it.style().shadowSpreadRadius(33)
                                 );
-                            apply(type(JTextComponent.class), it ->
+                            add(type(JTextComponent.class), it ->
                                     it.style()
                                         .shadowOffset(42, 24)
                                         .shadowColor(Color.BLUE)
                                 );
-                            apply(type(JComponent.class), it ->
+                            add(type(JComponent.class), it ->
                                     it.style()
                                         .shadowColor(Color.RED)
                                         .shadowBlurRadius(17)
@@ -145,19 +145,19 @@ class Style_Sheet_Spec extends Specification
         given :
             var ss = new StyleSheet() {
                         @Override
-                        protected void declaration() {
-                             apply(group("group1"), it ->
+                        protected void build() {
+                             add(group("group1"), it ->
                                  it.style().backgroundColor(Color.BLUE)
                              );
-                             apply(group("group2"), it ->
+                             add(group("group2"), it ->
                                  it.style().foundationColor(Color.CYAN)
                              );
                          }
                      }
         and : 'A few components we are going to style'
-            var label = UI.label("hi").groups("group1")
-            var toggle = UI.toggleButton("click me!").groups("group2")
-            var panel = UI.panel().groups("group1", "group2")
+            var label = UI.label("hi").group("group1")
+            var toggle = UI.toggleButton("click me!").group("group2")
+            var panel = UI.panel().group("group1", "group2")
         when :
             var s1 = ss.run(label.component)
             var s2 = ss.run(toggle.component)
@@ -180,18 +180,18 @@ class Style_Sheet_Spec extends Specification
         given :
             var ss = new StyleSheet() {
                         @Override
-                        protected void declaration() {
-                             apply(group("group1"), it ->
+                        protected void build() {
+                             add(group("group1"), it ->
                                  it.style().pad(1, 2, 3, 4)
                              );
-                             apply(group("group2").inherits("group1"), it ->
+                             add(group("group2").inherits("group1"), it ->
                                  it.style().foundationColor(Color.CYAN)
                              );
                          }
                      }
         and : 'A few components we are going to style'
-            var textField = UI.textField("hi").groups("group1")
-            var textArea = UI.textArea("wassup?").groups("group2")
+            var textField = UI.textField("hi").group("group1")
+            var textArea = UI.textArea("wassup?").group("group2")
         when :
             var s1 = ss.run(textField.component)
             var s2 = ss.run(textArea.component)
@@ -214,11 +214,11 @@ class Style_Sheet_Spec extends Specification
         when :
             new StyleSheet() {
                @Override
-               protected void declaration() {
-                    apply(group("A").type(JButton.class), it ->
+               protected void build() {
+                    add(group("A").type(JButton.class), it ->
                         it.style().borderRadius(3)
                     );
-                    apply(group("B").inherits("A").type(JPanel.class), it ->
+                    add(group("B").inherits("A").type(JPanel.class), it ->
                         it.style().borderColor(Color.GREEN)
                     );
                 }
@@ -235,11 +235,11 @@ class Style_Sheet_Spec extends Specification
         when :
             new StyleSheet() {
                @Override
-               protected void declaration() {
-                    apply(group("A"), it ->
+               protected void build() {
+                    add(group("A"), it ->
                         it.style().borderRadius(3)
                     );
-                    apply(group("A"), it ->
+                    add(group("A"), it ->
                         it.style().borderColor(Color.GREEN)
                     );
                 }
@@ -273,24 +273,24 @@ class Style_Sheet_Spec extends Specification
                                   .shadowSpreadRadius(6)
                      }) {
                         @Override
-                        protected void declaration() {
-                             apply(group("A"), it ->
+                        protected void build() {
+                             add(group("A"), it ->
                                  it.style().borderRadius(19)
                              );
-                            apply(group("B").type(JSlider.class), it ->
+                            add(group("B").type(JSlider.class), it ->
                                  it.style().foundationColor(Color.BLUE)
                              );
-                            apply(group("B").type(JComponent.class), it ->
+                            add(group("B").type(JComponent.class), it ->
                                  it.style().shadowIsInset(true)
                              );
                          }
                      }
         when : 'We create a few UI components:'
-            var slider1 = UI.slider(UI.Align.HORIZONTAL).groups("A", "B")
-            var slider2 = UI.slider(UI.Align.HORIZONTAL).groups("A")
-            var slider3 = UI.slider(UI.Align.HORIZONTAL).groups("B")
-            var label1 = UI.label(":)").groups("A")
-            var label2 = UI.label(":D").groups("B")
+            var slider1 = UI.slider(UI.Align.HORIZONTAL).group("A", "B")
+            var slider2 = UI.slider(UI.Align.HORIZONTAL).group("A")
+            var slider3 = UI.slider(UI.Align.HORIZONTAL).group("B")
+            var label1 = UI.label(":)").group("A")
+            var label2 = UI.label(":D").group("B")
         and : 'We run them through the style sheet...'
             var s1 = ss.run(slider1.component)
             var s2 = ss.run(slider2.component)
@@ -368,24 +368,24 @@ class Style_Sheet_Spec extends Specification
         given :
             var ss = new StyleSheet() {
                 @Override
-                protected void declaration() {
-                    apply(group("A"), it ->
+                protected void build() {
+                    add(group("A"), it ->
                         it.style().font("Arial", 12)
                     );
-                    apply(group("B"), it ->
+                    add(group("B"), it ->
                         it.style().font("Sans", 14)
                     );
-                    apply(type(JLabel.class), it ->
+                    add(type(JLabel.class), it ->
                         it.style().font("Papyrus", 15)
                     );
                 }
             }
         and : 'We create a few UI components:'
-            var label1 = UI.label(":)").groups("A")
-            var label2 = UI.label(":D").groups("B")
+            var label1 = UI.label(":)").group("A")
+            var label2 = UI.label(":D").group("B")
             var label3 = UI.label(":(") // No group
-            var textField = UI.textField().groups("A")
-            var textArea = UI.textArea("").groups("B")
+            var textField = UI.textField().group("A")
+            var textArea = UI.textArea("").group("B")
         when : 'We run them through the style sheet...'
             var s1 = ss.run(label1.component)
             var s2 = ss.run(label2.component)
@@ -414,8 +414,8 @@ class Style_Sheet_Spec extends Specification
         given :
             var ss = new StyleSheet() {
                 @Override
-                protected void declaration() {
-                    apply(group("Gradient"), it ->
+                protected void build() {
+                    add(group("Gradient"), it ->
                         it.style().backgroundPainter(g2d -> {
                             // Let's render a gradient:
                             var gradient = new GradientPaint(0, 0, Color.RED, 0, 100, Color.BLUE);
@@ -423,7 +423,7 @@ class Style_Sheet_Spec extends Specification
                             g2d.fillRect(0, 0, g2d.getClipBounds().width, g2d.getClipBounds().height);
                         })
                     );
-                    apply(group("ChessBoard"), it ->
+                    add(group("ChessBoard"), it ->
                         it.style().backgroundPainter(g2d -> {
                             var w = it.component().getWidth() / 8;// We render a checkerboard pattern!
                             var h = it.component().getHeight() / 8;
@@ -442,8 +442,8 @@ class Style_Sheet_Spec extends Specification
                 }
             }
         when : 'We create a few UI components:'
-            var label1 = UI.label(":)").groups("Gradient")
-            var label2 = UI.label(":D").groups("ChessBoard")
+            var label1 = UI.label(":)").group("Gradient")
+            var label2 = UI.label(":D").group("ChessBoard")
         and : 'We run them through the style sheet...'
             var s1 = ss.run(label1.component)
             var s2 = ss.run(label2.component)
@@ -474,28 +474,28 @@ class Style_Sheet_Spec extends Specification
         given :
             var ss = new StyleSheet() {
                 @Override
-                protected void declaration() {
-                    apply(group("A").inherits("B", "C"), it ->
+                protected void build() {
+                    add(group("A").inherits("B", "C"), it ->
                         it.style()
                         .borderShade( s -> s.strategy(ShadingStrategy.BOTTOM_TO_TOP).colors(Color.RED, Color.BLUE) )
                     );
-                    apply(group("B"), it ->
+                    add(group("B"), it ->
                         it.style()
-                            .borderWidth(10)
-                            .borderColor(Color.GREEN)
+                        .borderWidth(10)
+                        .borderColor(Color.GREEN)
                     );
-                    apply(group("C"), it ->
+                    add(group("C"), it ->
                         it.style()
-                            .borderWidth(20)
-                            .borderColor(Color.YELLOW)
-                            .borderShade("named shade",
-                                s -> s.strategy(ShadingStrategy.TOP_TO_BOTTOM).colors(Color.CYAN, Color.MAGENTA)
-                            )
+                        .borderWidth(20)
+                        .borderColor(Color.YELLOW)
+                        .borderShade("named shade",
+                            s -> s.strategy(ShadingStrategy.TOP_TO_BOTTOM).colors(Color.CYAN, Color.MAGENTA)
+                        )
                     );
                 }
             }
         when : 'We create a single UI component using style group "A":'
-            var label = UI.label(":)").groups("A")
+            var label = UI.label(":)").group("A")
         and : 'We run it through the style sheet...'
             var s = ss.run(label.component)
         then : '...and we check the results'
@@ -535,19 +535,19 @@ class Style_Sheet_Spec extends Specification
         given :
             var ss = new StyleSheet() {
                 @Override
-                protected void declaration() {
-                    apply(group("A").inherits("E", "B", "C"), it ->
+                protected void build() {
+                    add(group("A").inherits("E", "B", "C"), it ->
                         it.style()
                         .borderWidth(5)
                         .backgroundColor(Color.RED)
                         .borderShade( s -> s.strategy(ShadingStrategy.BOTTOM_TO_TOP).colors(Color.RED, Color.BLUE) )
                     );
-                    apply(group("B").inherits("D"), it ->
+                    add(group("B").inherits("D"), it ->
                         it.style()
                             .borderWidth(7)
                             .borderColor(Color.GREEN)
                     );
-                    apply(group("C").inherits("E"), it ->
+                    add(group("C").inherits("E"), it ->
                         it.style()
                             .borderWidth(11)
                             .borderColor(Color.YELLOW)
@@ -557,7 +557,7 @@ class Style_Sheet_Spec extends Specification
                                 .isInset(true)
                             )
                     );
-                    apply(group("D").inherits("E"), it ->
+                    add(group("D").inherits("E"), it ->
                         it.style()
                             .borderWidth(20)
                             .borderColor(Color.WHITE)
@@ -567,7 +567,7 @@ class Style_Sheet_Spec extends Specification
                                 .isInset(false)
                             )
                     );
-                    apply(group("E"), it ->
+                    add(group("E"), it ->
                         it.style()
                             .borderWidth(42)
                             .borderColor(Color.MAGENTA)
@@ -580,7 +580,7 @@ class Style_Sheet_Spec extends Specification
                 }
             }
         when : 'We create a single UI component using style group "A":'
-            var button = UI.toggleButton(":)").groups("A")
+            var button = UI.toggleButton(":)").group("A")
         and : 'We run it through the style sheet...'
             var s = ss.run(button.component)
         then : '...and we check the results'

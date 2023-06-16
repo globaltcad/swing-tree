@@ -390,9 +390,7 @@ public final class Style
      * @param color The border color.
      * @return A new {@link Style} with the provided border color.
      */
-    public Style borderColor( Color color ) {
-        return _withBorder(_border.color(color));
-    }
+    public Style borderColor( Color color ) { return _withBorder(_border.color(color)); }
 
     /**
      *  Returns a new {@link Style} with the provided border color in the form of a string.
@@ -993,8 +991,15 @@ public final class Style
 
     public ForegroundStyle foreground() { return _foreground; }
 
+    /**
+     * @return The default shadow style.
+     */
     public ShadowStyle shadow() { return _shadows.get(StyleUtility.DEFAULT_KEY); }
 
+    /**
+     * @param shadowName The name of the shadow style to retrieve.
+     * @return The shadow style with the provided name.
+     */
     public ShadowStyle shadow(String shadowName) {
         Objects.requireNonNull(shadowName);
         return _shadows.get(shadowName);

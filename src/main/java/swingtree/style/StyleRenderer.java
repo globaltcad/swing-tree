@@ -120,7 +120,7 @@ public class StyleRenderer<C extends JComponent>
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    private void _drawBorder(Style style, Color color, Graphics2D g2d) {
+    private void _drawBorder( Style style, Color color, Graphics2D g2d ) {
         if ( !Outline.none().equals(style.border().widths()) ) {
             int leftBorderWidth   = style.border().widths().left().orElse(0);
             int topBorderWidth    = style.border().widths().top().orElse(0);
