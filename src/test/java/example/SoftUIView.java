@@ -4,7 +4,6 @@ import com.formdev.flatlaf.FlatLightLaf;
 import example.styles.SoftUIStyleSheet;
 import swingtree.UI;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.concurrent.TimeUnit;
 
@@ -94,7 +93,7 @@ public class SoftUIView extends Panel
                 )
             )
             .add(
-                label(icon("img/swing.png")).withStyle( it -> it.style().pad(24) )
+                label(icon("img/swing.png")).withStyle( it -> it.style().padding(24) )
             )
             .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
                 it.paint( g -> {

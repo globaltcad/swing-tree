@@ -32,7 +32,7 @@ public class SymbolGuesserView extends Panel
                           .backgroundColor(BACKGROUND.brighter())
                           .foundationColor(new Color(255,255,255, 0))
                           .margin(22)
-                          .pad(22)
+                          .padding(22)
                           .borderRadius(37)
                           .borderWidth(1)
                           .borderColor(new Color(0, 0, 0,255))

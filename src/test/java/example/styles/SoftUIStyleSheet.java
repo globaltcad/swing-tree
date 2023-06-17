@@ -16,7 +16,7 @@ public class SoftUIStyleSheet extends StyleSheet
             it.style()
                 .borderRadius(20)
                 .backgroundColor(new Color(0.4f, 0.85f, 1))
-                .pad(12)
+                .padding(12)
                 .margin(16)
         );
         add(type(JComponent.class).group("frameShadow"), it ->
@@ -35,7 +35,7 @@ public class SoftUIStyleSheet extends StyleSheet
                 .shadowBlurRadius(9)
                 .shadowSpreadRadius(-9)
                 .shadowIsInset(true)
-                .pad(20)
+                .padding(20)
                 .margin(12)
         );
         add(type(JComponent.class).group("soft banner").inherits("soft base"), it ->
@@ -60,7 +60,7 @@ public class SoftUIStyleSheet extends StyleSheet
         add(type(AbstractButton.class).group("soft button").inherits("soft base"), it ->
             it.style()
                 .borderRadius(12)
-                .pad(6)
+                .padding(6)
                 .margin(8)
                 .shadow("bright", s -> s
                     .color(new Color(0.7f, 0.95f, 1f, 0.45f))
@@ -93,7 +93,7 @@ public class SoftUIStyleSheet extends StyleSheet
                 .shadowBlurRadius(13)
                 .shadowSpreadRadius(-2)
                 .shadowIsInset(true)
-                .pad(30)
+                .padding(30)
                 .margin(10)
         );
         add(type(JComponent.class).group("soft raise").inherits("soft base"), it ->
@@ -110,7 +110,7 @@ public class SoftUIStyleSheet extends StyleSheet
                 .shadowBlurRadius(13)
                 .shadowSpreadRadius(-5)
                 .shadowIsInset(false)
-                .pad(30)
+                .padding(30)
                 .margin(10)
         );
         add(type(JComponent.class).group("soft slim").inherits("soft base"), it ->
@@ -126,24 +126,24 @@ public class SoftUIStyleSheet extends StyleSheet
                 .shadowBlurRadius(8)
                 .shadowSpreadRadius(-5)
                 .shadowIsInset(false)
-                .pad(4)
+                .padding(4)
                 .margin(6)
         );
 
         add(type(JComboBox.class).inherits("soft slim"), it ->
-                it.style().pad(4)
+                it.style().padding(4)
         );
         add(type(JCheckBox.class).inherits("soft slim"), it ->
-                it.style().pad(6)
+                it.style().padding(6)
         );
         add(type(JRadioButton.class).inherits("soft slim"), it ->
-                it.style().pad(6)
+                it.style().padding(6)
         );
         add(type(JSpinner.class).inherits("soft slim"), it ->
-                it.style().pad(4)
+                it.style().padding(4)
         );
         add(type(JProgressBar.class).inherits("soft slim"), it ->
-                it.style().pad(0)
+                it.style().padding(0)
         );
         add(type(JTextComponent.class).inherits("soft slim"), it ->
                 it.style()
@@ -159,7 +159,7 @@ public class SoftUIStyleSheet extends StyleSheet
                 .shadowBlurRadius(6)
                 .shadowSpreadRadius(-4)
                 .shadowIsInset(true)
-                .pad(4)
+                .padding(4)
                 .margin(8)
         );
         add(type(JComponent.class).group("soft underline").inherits("soft slim"), it ->

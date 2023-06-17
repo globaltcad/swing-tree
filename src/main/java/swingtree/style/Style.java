@@ -199,7 +199,7 @@ public final class Style
      * @param left The left padding distance in pixels.
      * @return A new {@link Style} with the provided padding distances.
      */
-    public Style pad( int top, int right, int bottom, int left ) {
+    public Style padding( int top, int right, int bottom, int left ) {
         return _withLayout(_layout.padding(_layout.padding().top(top).left(left).right(right).bottom(bottom)));
     }
 
@@ -212,7 +212,7 @@ public final class Style
      * @param padding The padding distance in pixels.
      * @return A new {@link Style} with the provided padding distance.
      */
-    public Style pad( int padding ) {
+    public Style padding( int padding ) {
         return _withLayout(_layout.padding(_layout.padding().top(padding).left(padding).right(padding).bottom(padding)));
     }
 
@@ -225,7 +225,7 @@ public final class Style
      * @param padding The padding distance in pixels.
      * @return A new {@link Style} with the provided padding distance.
      */
-    public Style padTop( int padding ) {
+    public Style paddingTop( int padding ) {
         return _withLayout(_layout.padding(_layout.padding().top(padding)));
     }
 
@@ -239,7 +239,7 @@ public final class Style
      * @param padding The padding distance in pixels.
      * @return A new {@link Style} with the provided padding distance.
      */
-    public Style padRight( int padding ) {
+    public Style paddingRight( int padding ) {
         return _withLayout(_layout.padding(_layout.padding().right(padding)));
     }
 
@@ -252,7 +252,7 @@ public final class Style
      * @param padding The padding distance in pixels.
      * @return A new {@link Style} with the provided padding distance.
      */
-    public Style padBottom(int padding ) {
+    public Style paddingBottom( int padding ) {
         return _withLayout(_layout.padding(_layout.padding().bottom(padding)));
     }
 
@@ -265,7 +265,7 @@ public final class Style
      * @param padding The padding distance in pixels.
      * @return A new {@link Style} with the provided padding distance.
      */
-    public Style padLeft( int padding ) {
+    public Style paddingLeft( int padding ) {
         return _withLayout(_layout.padding(_layout.padding().left(padding)));
     }
 
@@ -278,7 +278,7 @@ public final class Style
      * @param padding The padding distance in pixels.
      * @return A new {@link Style} with the provided padding distance.
      */
-    public Style padVertical( int padding ) {
+    public Style paddingVertical( int padding ) {
         return _withLayout(_layout.padding(_layout.padding().top(padding).bottom(padding)));
     }
 
@@ -291,7 +291,7 @@ public final class Style
      * @param padding The padding distance in pixels.
      * @return A new {@link Style} with the provided padding distance.
      */
-    public Style padHorizontal( int padding ) {
+    public Style paddingHorizontal( int padding ) {
         return _withLayout(_layout.padding(_layout.padding().left(padding).right(padding)));
     }
 

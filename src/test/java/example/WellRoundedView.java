@@ -15,7 +15,7 @@ public class WellRoundedView extends Panel
         .withLayout(FILL.and(WRAP(2)))
         .withStyle( it ->
             it.style()
-              .margin(24).pad(24)
+              .margin(24).padding(24)
               .backgroundColor(new Color(57, 221, 255,255))
               .borderRadius(32)
               .shadowBlurRadius(5)

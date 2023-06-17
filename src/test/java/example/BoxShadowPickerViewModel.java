@@ -235,7 +235,7 @@ public class BoxShadowPickerViewModel
             "         drawASmiley(g2d, x, y, w, h);\n" +
             "     })\n"
             ) +
-            "     .pad(" + str(paddingTop) + ", " + str(paddingRight) + ", " + str(paddingBottom) + ", " + str(paddingLeft) + ")\n" +
+            "     .padding(" + str(paddingTop) + ", " + str(paddingRight) + ", " + str(paddingBottom) + ", " + str(paddingLeft) + ")\n" +
             "     .margin(" + str(marginTop) + ", " + str(marginRight) + ", " + str(marginBottom) + ", " + str(marginLeft) + ")\n" +
             cornerRadius +
             borderWidth +

@@ -135,7 +135,7 @@ public class BoxShadowPickerView extends UI.Panel
                              int y = vm.marginTop().get() + 50;
                              drawASmiley(g2d, x, y, w, h);
                          })
-                         .pad(vm.paddingTop().get(), vm.paddingRight().get(), vm.paddingBottom().get(), vm.paddingLeft().get())
+                         .padding(vm.paddingTop().get(), vm.paddingRight().get(), vm.paddingBottom().get(), vm.paddingLeft().get())
                          .margin(vm.marginTop().get(), vm.marginRight().get(), vm.marginBottom().get(), vm.marginLeft().get())
                          .borderRadiusAt(Corner.TOP_LEFT, vm.arcWidthAt(Corner.TOP_LEFT), vm.arcHeightAt(Corner.TOP_LEFT))
                          .borderRadiusAt(Corner.TOP_RIGHT, vm.arcWidthAt(Corner.TOP_RIGHT), vm.arcHeightAt(Corner.TOP_RIGHT))

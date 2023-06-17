@@ -182,7 +182,7 @@ class Style_Sheet_Spec extends Specification
                         @Override
                         protected void build() {
                              add(group("group1"), it ->
-                                 it.style().pad(1, 2, 3, 4)
+                                 it.style().padding(1, 2, 3, 4)
                              );
                              add(group("group2").inherits("group1"), it ->
                                  it.style().foundationColor(Color.CYAN)
@@ -267,7 +267,7 @@ class Style_Sheet_Spec extends Specification
                                   .foundationColor(Color.RED)
                                   .border(11, Color.GREEN)
                                   .borderRadius(3)
-                                  .pad(42)
+                                  .padding(42)
                                   .shadowIsInset(false)
                                   .shadowBlurRadius(22)
                                   .shadowSpreadRadius(6)
