@@ -86,8 +86,8 @@ public class SoftUIView extends Panel
                             )
                         )
                         .add(SPAN.and(GROW_X),
-                             of(new JProgressBar(SwingConstants.HORIZONTAL, 0, 100))
-                             .peek(it->{it.setValue(68); it.setString("%"); it.setStringPainted(true);})
+                             progressBar(Align.HORIZONTAL, 0, 100).withValue(68)
+                             .peek(it->{it.setString("%"); it.setStringPainted(true);})
                              .withBackground(Color.WHITE)
                         )
                     )

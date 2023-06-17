@@ -427,6 +427,13 @@ public final class UI
             }
             throw new RuntimeException();
         }
+        int forProgressBar() {
+            switch ( this ) {
+                case HORIZONTAL: return JProgressBar.HORIZONTAL;
+                case VERTICAL  : return JProgressBar.VERTICAL;
+            }
+            throw new RuntimeException();
+        }
         int forSeparator() {
             switch ( this ) {
                 case HORIZONTAL: return JSeparator.HORIZONTAL;
@@ -441,7 +448,6 @@ public final class UI
             }
             throw new RuntimeException();
         }
-
         int forToolBar() {
             switch ( this ) {
                 case HORIZONTAL: return JToolBar.HORIZONTAL;
@@ -3061,6 +3067,50 @@ public final class UI
     public static UIForPasswordField<JPasswordField> passwordField() { return of(new JPasswordField()); }
 
     /**
+     *  Use this to create a builder for the provided {@link JProgressBar} instance.
+     *
+     * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
+     */
+    public static <P extends JProgressBar> UIForProgressBar<P> of( P component ) {
+        NullUtil.nullArgCheck(component, "component", JProgressBar.class);
+        return new UIForProgressBar<>(component);
+    }
+
+    /**
+     *  Use this to create a builder for the provided {@link JProgressBar} instance.
+     *
+     * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
+     */
+    public static UIForProgressBar<JProgressBar> progressBar() { return of(new ProgressBar()); }
+
+    /**
+     *  Use this to create a builder for a new {@link JProgressBar} instance with
+     *  the provided minimum and maximum values.
+     *
+     * @param min The minimum value of the progress bar.
+     * @param max The maximum value of the progress bar.
+     * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
+     */
+    public static UIForProgressBar<JProgressBar> progressBar( int min, int max ) {
+        return progressBar().withMin(min).withMax(max);
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JProgressBar} instance with
+     *  the provided alignment, minimum and maximum values.
+     *  The alignment is a {@link Align} value, which may be either {@link Align#HORIZONTAL}
+     *  or {@link Align#VERTICAL}.
+     *
+     * @param align The alignment of the progress bar.
+     * @param min The minimum value of the progress bar.
+     * @param max The maximum value of the progress bar.
+     * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
+     */
+    public static UIForProgressBar<JProgressBar> progressBar( Align align, int min, int max ) {
+        return progressBar().with(align).withMin(min).withMax(max);
+    }
+
+    /**
      *  Use this to create a builder for the provided {@link JTextArea} instance.
      *
      * @return A builder instance for the provided {@link JTextArea}, which enables fluent method chaining.
@@ -4083,16 +4133,6 @@ public final class UI
     }
 
     /** {inheritDoc} */
-    public static class Button extends JButton {
-        @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
-        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
-    }
-    /** {inheritDoc} */
-    public static class ToggleButton extends JToggleButton {
-        @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
-        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
-    }
-    /** {inheritDoc} */
     public static class Panel extends JPanel {
         @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
@@ -4114,6 +4154,16 @@ public final class UI
     }
     /** {inheritDoc} */
     public static class CheckBox extends JCheckBox {
+        @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
+        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
+    }
+    /** {inheritDoc} */
+    public static class Button extends JButton {
+        @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
+        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
+    }
+    /** {inheritDoc} */
+    public static class ToggleButton extends JToggleButton {
         @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
     }
@@ -4188,11 +4238,6 @@ public final class UI
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
     }
     /** {inheritDoc} */
-    public static class ProgressBar extends JProgressBar {
-        @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
-        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
-    }
-    /** {inheritDoc} */
     public static class Spinner extends JSpinner {
         @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
@@ -4203,17 +4248,22 @@ public final class UI
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
     }
     /** {inheritDoc} */
+    public static class PasswordField extends JPasswordField {
+        @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
+        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
+    }
+    /** {inheritDoc} */
+    public static class ProgressBar extends JProgressBar {
+        @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
+        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
+    }
+    /** {inheritDoc} */
     public static class TextPane extends JTextPane {
         @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
     }
     /** {inheritDoc} */
     public static class EditorPane extends JEditorPane {
-        @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
-        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
-    }
-    /** {inheritDoc} */
-    public static class PasswordField extends JPasswordField {
         @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
     }

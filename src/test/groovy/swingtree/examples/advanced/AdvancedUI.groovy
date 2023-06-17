@@ -122,7 +122,7 @@ class AdvancedUI {
                             .doUpdates(1250, it -> it.component.setValue(it.component.value + (new Random().nextInt()%5)-((it.component.value-40)/25) as int))
                         )
                         .add("alignx right, shrinkx, growy, pushy, wrap",
-                            UI.of(new JProgressBar(SwingConstants.VERTICAL, 0, 100))
+                            UI.progressBar(UI.Align.VERTICAL, 0, 100)
                             .peek({it.setValue(68); it.setString("%"); it.setStringPainted(true)})
                             .doUpdates(25000, it -> it.component.setValue(it.component.value - 1))
                         )
