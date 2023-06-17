@@ -252,10 +252,11 @@ class Property_Binding_Spec extends Specification
             because they are type safe and descriptive. 
             A common use case is to have certain UI components only visible if a certain enum value
             in your view model is selected.
+
             For this example, we will use the following enum:
             ```
                 enum Accept { YES, NO, MAYBE }
-            ``
+            ```
         """
         given : 'We create a property representing the visibility state of a component.'
             Var<Accept> property = Var.of(Accept.YES)
@@ -290,7 +291,7 @@ class Property_Binding_Spec extends Specification
             For this example, we will use the following enum:
             ```
                 enum Accept { YES, NO, MAYBE }
-            ``
+            ```
         """
         given : 'We create a property representing the enabled state of a component.'
             Var<Accept> property = Var.of(Accept.YES)
@@ -325,7 +326,7 @@ class Property_Binding_Spec extends Specification
             For this example, we will use the following enum:
             ```
                 enum Accept { YES, NO, MAYBE }
-            ``
+            ```
         """
         given : 'We create a property representing the focusability state of a component.'
             Var<Accept> property = Var.of(Accept.YES)
