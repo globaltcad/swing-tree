@@ -4,6 +4,9 @@ import sprouts.Val;
 
 import javax.swing.*;
 
+/**
+ *  A swing tree builder node for {@link JProgressBar} instances.
+ */
 public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIForProgressBar<P>, P>
 {
     /**
@@ -58,6 +61,7 @@ public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIFo
      */
     public final UIForProgressBar<P> withMin( Val<Integer> min ) {
         NullUtil.nullArgCheck( min, "min", Val.class );
+        NullUtil.nullPropertyCheck(min, "min", "Null is not a valid min value for the value of a progress bar.");
         _onShow( min, this::withMin);
         return this;
     }
@@ -81,6 +85,7 @@ public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIFo
      */
     public final UIForProgressBar<P> withMax( Val<Integer> max ) {
         NullUtil.nullArgCheck( max, "max", Val.class );
+        NullUtil.nullPropertyCheck(max, "max", "Null is not a valid max value for the value of a progress bar.");
         _onShow( max, this::withMax);
         return this;
     }
@@ -117,6 +122,7 @@ public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIFo
      */
     public final UIForProgressBar<P> withValue( Val<Integer> val ) {
         NullUtil.nullArgCheck( val, "val", Val.class );
+        NullUtil.nullPropertyCheck(val, "value", "Null is not a valid value for the progress property of a progress bar.");
         _onShow( val, this::withValue );
         return withValue(val.orElseThrow());
     }
@@ -128,6 +134,7 @@ public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIFo
      */
     public final UIForProgressBar<P> withProgress( Val<Double> progress ) {
         NullUtil.nullArgCheck( progress, "progress", Val.class );
+        NullUtil.nullPropertyCheck(progress, "progress", "Null is not a valid progress for the progress property of a progress bar.");
         _onShow( progress, this::withProgress );
         return withProgress(progress.orElseThrow());
     }
