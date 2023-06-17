@@ -164,7 +164,6 @@ public class BoxShadowPickerView extends UI.Panel
                 .withStyle( s -> s.style().borderWidth(0).borderColor(Color.BLUE) )
                 .add(
                     textArea(vm.code()).isEditableIf(false)
-                    .withRepaintIf(vm.repaint())
                     .withStyle( it ->
                         it.style()
                             .font(new Font("Monospaced", Font.PLAIN, 15))
