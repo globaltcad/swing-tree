@@ -484,12 +484,22 @@ public class ComponentExtension<C extends JComponent>
 
         private Insets _calculateInsets() {
             _currentMarginInsets = _compExt._getOrCreateRenderer()
-                                            .map(r -> r.calculateMarginInsets())
+                                            .map( r -> r.calculateMarginInsets() )
                                             .orElse(_currentMarginInsets);
 
             return _compExt._getOrCreateRenderer()
-                            .map(r -> r.calculateBorderInsets(_formerBorder == null ? new Insets(0,0,0,0) : _formerBorder.getBorderInsets(_compExt._owner)))
-                            .orElseGet(()->_formerBorder == null ? new Insets(0,0,0,0) : _formerBorder.getBorderInsets(_compExt._owner));
+                            .map(r ->
+                                r.calculateBorderInsets(
+                                    _formerBorder == null
+                                        ? new Insets(0,0,0,0)
+                                        : _formerBorder.getBorderInsets(_compExt._owner)
+                                )
+                            )
+                            .orElseGet(()->
+                                _formerBorder == null
+                                    ? new Insets(0,0,0,0)
+                                    : _formerBorder.getBorderInsets(_compExt._owner)
+                            );
         }
 
         public Insets getCurrentMarginInsets() { return _currentMarginInsets; }

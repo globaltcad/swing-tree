@@ -14,6 +14,10 @@ import java.util.concurrent.TimeUnit;
 
 import static swingtree.UI.*;
 
+/**
+ *  An advanced feature of SwingTree is the ability to animate any property of any component.
+ *  In this example, we animate various buttons in various creative ways for you to get some inspiration from.
+ */
 public class AnimatedButtonsView extends Panel
 {
     public AnimatedButtonsView() {
