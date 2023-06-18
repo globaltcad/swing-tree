@@ -1,18 +1,25 @@
 package swingtree.examples
 
 import com.alexandriasoftware.swing.JSplitButton
-import example.*
+import examples.*
+import examples.comparisons.comparison1.MadeWithSwingTree
+import examples.games.NoteGuesserView
+import examples.games.NoteGuesserViewModel
+import examples.games.SymbolGuesserView
+import examples.games.SymbolGuesserViewModel
+import examples.simple.TodoApp
+import examples.stylish.BoxShadowPickerView
+import examples.stylish.BoxShadowPickerViewModel
+import examples.stylish.SoftUIView
+import examples.stylish.WellRoundedView
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import swingtree.UI
-import swingtree.Utility
+import utility.Utility
 import swingtree.examples.advanced.AdvancedUI
-import swingtree.examples.comparison1.MadeWithSwingTree
-import swingtree.examples.simple.Calculator
-import swingtree.examples.simple.ListRendering
+import examples.simple.ListRendering
 import swingtree.examples.simple.TableUI
-import swingtree.examples.slim.TodoApp
 
 import javax.swing.*
 import java.awt.*
@@ -50,7 +57,7 @@ class Examples_Spec extends Specification
     def 'The form UI define in the examples has the expected state.'()
     {
         given : 'We get the UI.'
-            var ui = new swingtree.examples.simple.Form()
+            var ui = new examples.simple.Form()
         expect :
             new Utility.Query(ui).find(JButton, "hover-icon-button").isPresent()
             new Utility.Query(ui).find(JButton, "hover-icon-button").get().text == ""

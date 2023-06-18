@@ -5,7 +5,7 @@ import sprouts.Event
 import sprouts.Listener
 import sprouts.Var
 import swingtree.UI
-import swingtree.Utility
+import utility.Utility
 import groovy.transform.CompileDynamic
 import spock.lang.Narrative
 import spock.lang.Specification

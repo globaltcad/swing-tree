@@ -1,7 +1,7 @@
 package swingtree.common
 
 import swingtree.UI
-import swingtree.Utility
+import utility.Utility
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title

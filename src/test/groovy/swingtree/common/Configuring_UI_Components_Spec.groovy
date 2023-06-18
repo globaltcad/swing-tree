@@ -5,12 +5,11 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import swingtree.UI
-import swingtree.Utility
+import utility.Utility
 
 import javax.swing.JButton
 import javax.swing.JCheckBox
 import javax.swing.JEditorPane
-import javax.swing.JLabel
 import javax.swing.JSlider
 import javax.swing.JTextArea
 import javax.swing.JToggleButton

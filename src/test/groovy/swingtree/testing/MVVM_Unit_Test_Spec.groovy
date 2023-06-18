@@ -1,7 +1,7 @@
 package swingtree.testing
 
-import example.LoginViewModel
-import example.UserRegistrationViewModel
+import examples.LoginViewModel
+import examples.UserRegistrationViewModel
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject

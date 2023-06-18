@@ -1,11 +1,11 @@
 package swingtree.mvvm
 
-import example.LoginViewModel
+import examples.LoginViewModel
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import swingtree.UI
-import swingtree.Utility
+import utility.Utility
 import sprouts.Var
 import sprouts.Vars
 import swingtree.api.mvvm.Viewable

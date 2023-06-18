@@ -1,6 +1,6 @@
 package swingtree.mvvm
 
-import example.ScrollPanelsViewModel
+import examples.ScrollPanelsViewModel
 import spock.lang.Specification
 import swingtree.UI
 

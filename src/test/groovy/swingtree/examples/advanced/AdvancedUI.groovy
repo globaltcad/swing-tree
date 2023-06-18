@@ -45,7 +45,7 @@ class AdvancedUI {
                                .add(UI.editorPane().withForeground(Color.DARK_GRAY).withText((Data.explain.trim().replace("\n", " "))).isEditableIf(false)))
                         )
                         .add("width 480!, shrink, aligny bottom",
-                            UI.of(new JSlider(SwingConstants.HORIZONTAL)).peek({
+                            UI.slider(UI.Align.HORIZONTAL).peek({
                                 Hashtable labelTable = new Hashtable();
                                 9.times {level -> labelTable.put( level*12, new JLabel(String.valueOf(level)) )}
                                 it.setLabelTable( labelTable );
@@ -114,7 +114,7 @@ class AdvancedUI {
                             .add(UI.splitRadioItem("S-192.153.122.80"))
                         )
                         .add("alignx right, shrinkx, growy, pushy",
-                            UI.of(new JSlider(SwingConstants.VERTICAL)).peek({
+                            UI.slider(UI.Align.VERTICAL).peek({
                                 it.setPaintLabels(true);it.setPaintTicks(true);
                                 it.setMajorTickSpacing(10);
                                 it.setMinorTickSpacing(1);

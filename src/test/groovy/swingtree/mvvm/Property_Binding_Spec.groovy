@@ -3,7 +3,7 @@ package swingtree.mvvm
 import swingtree.UI
 import sprouts.Val
 import sprouts.Var
-import swingtree.Utility
+import utility.Utility
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
