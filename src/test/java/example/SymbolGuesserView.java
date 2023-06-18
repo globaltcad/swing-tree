@@ -21,15 +21,14 @@ public class SymbolGuesserView extends Panel
         .add(TOP,
             box(WRAP(1))
             .add(ALIGN_X_CENTER.and(GROW_X),
-                panel(INS(12).and(WRAP(1)), "[grow]").withStyle( it -> it.style().borderRadius(24) )
+                panel(INS(12).and(WRAP(1)), "[grow]").withStyle( it -> it.borderRadius(24) )
                 .add(ALIGN_X_CENTER,
                     label("Which symbol is this?").withFont(new Font("Arial", Font.BOLD, 24))
                 )
                 .add(ALIGN_X_CENTER,
                     panel(FILL.and(INS(48))).withRepaintIf(vm.getRepaintEvent())
                     .withStyle( it ->
-                        it.style()
-                          .backgroundColor(BACKGROUND.brighter())
+                        it.backgroundColor(BACKGROUND.brighter())
                           .foundationColor(new Color(255,255,255, 0))
                           .margin(22)
                           .padding(22)
@@ -49,7 +48,7 @@ public class SymbolGuesserView extends Panel
             )
             .add(PUSH_X.and(GROW_X), separator())
             .add(ALIGN_CENTER,
-                panel(INS(12)).withStyle( it -> it.style().borderRadius(12) )
+                panel(INS(12)).withStyle( it -> it.borderRadius(12) )
                 .add(
                     button("New Symbol")
                     .onClick( e -> vm.newRandomSymbol() )
@@ -65,7 +64,7 @@ public class SymbolGuesserView extends Panel
             )
         )
         .add(ALIGN_CENTER,
-            panel(FILL_X.and(INS(12))).withStyle( it -> it.style().borderRadius(24) )
+            panel(FILL_X.and(INS(12))).withStyle( it -> it.borderRadius(24) )
             .add(SPAN.and(WRAP).and(GROW),
                 panel(FILL).withMinHeight(60)
                 .add(ALIGN_CENTER,

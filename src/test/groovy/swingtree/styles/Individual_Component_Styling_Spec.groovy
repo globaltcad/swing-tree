@@ -38,8 +38,7 @@ class Individual_Component_Styling_Spec extends Specification
             var panel =
                         UI.panel()
                         .withStyle( it ->
-                            it.style()
-                              .foundationColor("green")
+                            it.foundationColor("green")
                               .backgroundColor("cyan")
                               .foregroundColor("blue")
                               .borderColor("blue")
@@ -71,8 +70,7 @@ class Individual_Component_Styling_Spec extends Specification
             var panel =
                         UI.panel()
                         .withStyle( it ->
-                            it.style()
-                              .marginRight(42)
+                            it.marginRight(42)
                               .marginLeft(64)
                         )
                         .get(JPanel)
@@ -102,8 +100,7 @@ class Individual_Component_Styling_Spec extends Specification
             var panel =
                         UI.panel()
                         .withStyle( it ->
-                            it.style()
-                              .marginTop(11)
+                            it.marginTop(11)
                               .marginRight(42)
                               .marginLeft(64)
                               .paddingRight(10)
@@ -132,8 +129,7 @@ class Individual_Component_Styling_Spec extends Specification
             var panel =
                         UI.panel()
                         .withStyle( it ->
-                            it.style()
-                              .marginTop(7)
+                            it.marginTop(7)
                               .marginRight(2)
                               .paddingLeft(14)
                               .borderWidth(5)

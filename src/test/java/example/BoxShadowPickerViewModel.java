@@ -193,9 +193,9 @@ public class BoxShadowPickerViewModel
         String cornerRadius = "";
         if ( this.borderCorner.is(Corner.EVERY) ) {
             if ( arcWidthAt(Corner.TOP_LEFT) == arcHeightAt(Corner.TOP_LEFT) )
-                cornerRadius = "     borderRadius(" + arcWidthAt(Corner.TOP_LEFT) + ")\n";
+                cornerRadius = "     .borderRadius(" + arcWidthAt(Corner.TOP_LEFT) + ")\n";
             else
-                cornerRadius = "     borderRadius(" + arcWidthAt(Corner.TOP_LEFT) + ", " + arcHeightAt(Corner.TOP_LEFT) + ")\n";
+                cornerRadius = "     .borderRadius(" + arcWidthAt(Corner.TOP_LEFT) + ", " + arcHeightAt(Corner.TOP_LEFT) + ")\n";
         }
         else
             cornerRadius =
@@ -207,10 +207,10 @@ public class BoxShadowPickerViewModel
         String borderWidth = "";
         if ( this.borderEdge.is(Edge.EVERY) ) {
             if ( leftBorderWidth() == rightBorderWidth() && leftBorderWidth() == topBorderWidth() && leftBorderWidth() == bottomBorderWidth() )
-                borderWidth = leftBorderWidth() == 0 ? "" : "     borderWidth(" + leftBorderWidth() + ")\n";
+                borderWidth = leftBorderWidth() == 0 ? "" : "     .borderWidth(" + leftBorderWidth() + ")\n";
             else
                 borderWidth =
-                    "     borderWidth(" + leftBorderWidth() + ", " + topBorderWidth() + ", " + rightBorderWidth() + ", " + bottomBorderWidth() + ")\n";
+                    "     .borderWidth(" + leftBorderWidth() + ", " + topBorderWidth() + ", " + rightBorderWidth() + ", " + bottomBorderWidth() + ")\n";
         }
         else
             borderWidth =
@@ -222,7 +222,7 @@ public class BoxShadowPickerViewModel
         code.set(
             "panel(FILL)\n" +
             ".withStyle( it ->\n" +
-            "    it.style()\n" +
+            "    it\n" +
             "     .backgroundColor("+ str(backgroundColor) + ")\n" +
             "     .foundationColor(" + str(foundationColor) + ")\n" +
             ( drawSmiley().is(false) ? "" :

@@ -50,7 +50,7 @@ public class ComponentExtension<C extends JComponent>
     private StyleRenderer<C> _currentRenderer = null;
     private ComponentUI _styleLaF = null;
     private ComponentUI _formerLaF = null;
-    private Function<StyleDelegate<C>, Style> _styling = null;
+    private Function<StyleDelegate<C>, StyleDelegate<C>> _styling = null;
     private StyleSheet _styleSheet = null;
 
 
@@ -60,13 +60,13 @@ public class ComponentExtension<C extends JComponent>
 
     private boolean _customLookAndFeelIsInstalled() { return _styleLaF != null; }
 
-    void addStyling( Function<StyleDelegate<C>, Style> styler ) {
+    void addStyling( Function<StyleDelegate<C>, StyleDelegate<C>> styler ) {
         Objects.requireNonNull(styler);
         checkIfIsDeclaredInUI();
         if ( _styling == null )
             _styling = styler;
         else
-            _styling = _styling.andThen(s -> styler.apply(new StyleDelegate<>(_owner, s)));
+            _styling = _styling.andThen(s -> styler.apply(new StyleDelegate<>(_owner, s.style())));
 
         establishStyle();
     }
@@ -157,7 +157,7 @@ public class ComponentExtension<C extends JComponent>
         if ( _styling == null )
             return style;
         else
-            return Optional.of( _styling.apply(new StyleDelegate<>(_owner, style.orElse(Style.none()))) );
+            return Optional.of( _styling.apply(new StyleDelegate<>(_owner, style.orElse(Style.none()))).style() );
     }
 
     private Style _applyStyleToComponentState( Style style )
@@ -179,7 +179,7 @@ public class ComponentExtension<C extends JComponent>
         boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();
         // If the style has a border radius set we need to make sure that we have a background color:
         if ( hasBorderRadius && !style.background().color().isPresent() )
-            style = style.backgroundColor( _owner.getBackground() );
+            style = style.backgroundColor(_owner.getBackground());
 
         if ( style.border().color().isPresent() && style.border().widths().average() > 0 ) {
             if ( !style.background().foundationColor().isPresent() )

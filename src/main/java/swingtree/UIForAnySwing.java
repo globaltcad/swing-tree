@@ -117,17 +117,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *      protected void build() {
      *          add(group("A").inherits("B", "C"),
      *            it ->
-     *              it.style()
-     *              .backgroundColor(Color.RED)
+     *              it.backgroundColor(Color.RED)
      *          );
      *          add(group("B"), it ->
-     *              it.style()
-     *              .borderWidth(12)
+     *              it.borderWidth(12)
      *          );
      *          add(group("C"), it ->
-     *              it.style()
-     *              .borderWidth(16)
-     *              .borderColor(Color.YELLOW)
+     *              it.borderWidth(16)
+     *                .borderColor(Color.YELLOW)
      *          );
      *      }
      *    }
@@ -160,17 +157,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *          protected void build() {
      *              add(group(MyGroups.A).inherits("B", "C"),
      *                it ->
-     *                  it.style()
-     *                  .backgroundColor(Color.RED)
+     *                  it.backgroundColor(Color.RED)
      *              );
      *              add(group(MyGroups.B), it ->
-     *                  it.style()
-     *                  .borderWidth(12)
+     *                  it.borderWidth(12)
      *              );
      *              add(group(MyGroups.C), it ->
-     *                  it.style()
-     *                  .borderWidth(16)
-     *                  .borderColor(Color.YELLOW)
+     *                  it.borderWidth(16)
+     *                    .borderColor(Color.YELLOW)
      *              );
      *          }
      *      }
@@ -1612,7 +1606,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return this.withBackground( condition.get() ? colorIfTrue.orElseNull() : colorIfFalse.orElseNull() );
     }
 
-    public final I withStyle( Function<StyleDelegate<C>, Style> styler ) {
+    public final I withStyle( Function<StyleDelegate<C>, StyleDelegate<C>> styler ) {
         NullUtil.nullArgCheck(styler, "styler", Function.class);
         ComponentExtension.from(getComponent()).addStyling(styler);
         return _this();

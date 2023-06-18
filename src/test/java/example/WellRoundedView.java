@@ -14,8 +14,7 @@ public class WellRoundedView extends Panel
         of(this)
         .withLayout(FILL.and(WRAP(2)))
         .withStyle( it ->
-            it.style()
-              .margin(24).padding(24)
+            it.margin(24).padding(24)
               .backgroundColor(new Color(57, 221, 255,255))
               .borderRadius(32)
               .shadowBlurRadius(5)
@@ -27,13 +26,12 @@ public class WellRoundedView extends Panel
         .add(
             panel(INS(12), "[grow]")
             .withStyle( it ->
-                it.style()
-                  .backgroundColor(new Color(255, 255, 255,255))
+                it.backgroundColor(new Color(255, 255, 255,255))
                   .borderRadius(24)
             )
             .add(SPAN.and(WRAP), label("Isn't this a well rounded view?"))
             .add(GROW_X,
-                button("Yes").withStyle( it -> it.style().borderRadius(24)),
+                button("Yes").withStyle( it -> it.borderRadius(24)),
                 button("No")
             )
         )

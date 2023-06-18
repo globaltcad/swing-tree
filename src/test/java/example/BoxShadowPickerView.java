@@ -124,7 +124,7 @@ public class BoxShadowPickerView extends UI.Panel
                     panel(FILL.and(INS(0)))
                     .withRepaintIf(vm.repaint())
                     .withStyle( it ->
-                        it.style()
+                        it
                          .backgroundColor(vm.backgroundColor().get())
                          .foundationColor(vm.foundationColor().get())
                          .backgroundPainter( g2d -> {
@@ -160,17 +160,16 @@ public class BoxShadowPickerView extends UI.Panel
         .add(GROW.and(PUSH_X),
             panel(FILL.and(INS(16))).withBorderTitled("Code")
             .add(GROW,
-                scrollPane().withStyle( it -> it.style().borderWidth(0) )
-                .withStyle( s -> s.style().borderWidth(0).borderColor(Color.BLUE) )
+                scrollPane().withStyle( it -> it.borderWidth(0) )
+                .withStyle( s -> s.borderWidth(0).borderColor(Color.BLUE) )
                 .add(
                     textArea(vm.code()).isEditableIf(false)
                     .withStyle( it ->
-                        it.style()
-                            .font(new Font("Monospaced", Font.PLAIN, 15))
-                            .fontColor(Color.BLUE.darker())
-                            .fontSelectionColor(new Color(20, 200, 100, 100))
-                            .borderWidth(0)
-                            .borderColor(Color.GREEN)
+                        it.font(new Font("Monospaced", Font.PLAIN, 15))
+                          .fontColor(Color.BLUE.darker())
+                          .fontSelectionColor(new Color(20, 200, 100, 100))
+                          .borderWidth(0)
+                          .borderColor(Color.GREEN)
                     )
                 )
             )

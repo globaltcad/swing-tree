@@ -37,13 +37,13 @@ class Style_Sheet_Spec extends Specification
                         @Override
                         protected void build() {
                              add(id("unique id!"), it ->
-                                 it.style().borderRadius(3)
+                                 it.borderRadius(3)
                              );
                              add(type(JButton.class), it ->
-                                 it.style().borderWidth(7)
+                                 it.borderWidth(7)
                              );
                              add(type(JPanel.class), it ->
-                                it.style().borderColor(Color.GREEN)
+                                it.borderColor(Color.GREEN)
                              );
                          }
                      }
@@ -76,20 +76,18 @@ class Style_Sheet_Spec extends Specification
                         @Override
                         protected void build() {
                             add(type(JTextField.class), it ->
-                                    it.style().shadowBlurRadius(9)
+                                    it.shadowBlurRadius(9)
                                 );
                              add(type(JPanel.class), it ->
-                                    it.style().shadowSpreadRadius(33)
+                                    it.shadowSpreadRadius(33)
                                 );
                             add(type(JTextComponent.class), it ->
-                                    it.style()
-                                        .shadowOffset(42, 24)
-                                        .shadowColor(Color.BLUE)
+                                    it.shadowOffset(42, 24)
+                                      .shadowColor(Color.BLUE)
                                 );
                             add(type(JComponent.class), it ->
-                                    it.style()
-                                        .shadowColor(Color.RED)
-                                        .shadowBlurRadius(17)
+                                    it.shadowColor(Color.RED)
+                                      .shadowBlurRadius(17)
                             );
                          }
                      }
@@ -147,10 +145,10 @@ class Style_Sheet_Spec extends Specification
                         @Override
                         protected void build() {
                              add(group("group1"), it ->
-                                 it.style().backgroundColor(Color.BLUE)
+                                 it.backgroundColor(Color.BLUE)
                              );
                              add(group("group2"), it ->
-                                 it.style().foundationColor(Color.CYAN)
+                                 it.foundationColor(Color.CYAN)
                              );
                          }
                      }
@@ -182,10 +180,10 @@ class Style_Sheet_Spec extends Specification
                         @Override
                         protected void build() {
                              add(group("group1"), it ->
-                                 it.style().padding(1, 2, 3, 4)
+                                 it.padding(1, 2, 3, 4)
                              );
                              add(group("group2").inherits("group1"), it ->
-                                 it.style().foundationColor(Color.CYAN)
+                                 it.foundationColor(Color.CYAN)
                              );
                          }
                      }
@@ -216,10 +214,10 @@ class Style_Sheet_Spec extends Specification
                @Override
                protected void build() {
                     add(group("A").type(JButton.class), it ->
-                        it.style().borderRadius(3)
+                        it.borderRadius(3)
                     );
                     add(group("B").inherits("A").type(JPanel.class), it ->
-                        it.style().borderColor(Color.GREEN)
+                        it.borderColor(Color.GREEN)
                     );
                 }
             }
@@ -237,10 +235,10 @@ class Style_Sheet_Spec extends Specification
                @Override
                protected void build() {
                     add(group("A"), it ->
-                        it.style().borderRadius(3)
+                        it.borderRadius(3)
                     );
                     add(group("A"), it ->
-                        it.style().borderColor(Color.GREEN)
+                        it.borderColor(Color.GREEN)
                     );
                 }
             }
@@ -275,13 +273,13 @@ class Style_Sheet_Spec extends Specification
                         @Override
                         protected void build() {
                              add(group("A"), it ->
-                                 it.style().borderRadius(19)
+                                 it.borderRadius(19)
                              );
                             add(group("B").type(JSlider.class), it ->
-                                 it.style().foundationColor(Color.BLUE)
+                                 it.foundationColor(Color.BLUE)
                              );
                             add(group("B").type(JComponent.class), it ->
-                                 it.style().shadowIsInset(true)
+                                 it.shadowIsInset(true)
                              );
                          }
                      }
@@ -370,13 +368,13 @@ class Style_Sheet_Spec extends Specification
                 @Override
                 protected void build() {
                     add(group("A"), it ->
-                        it.style().font("Arial", 12)
+                        it.font("Arial", 12)
                     );
                     add(group("B"), it ->
-                        it.style().font("Sans", 14)
+                        it.font("Sans", 14)
                     );
                     add(type(JLabel.class), it ->
-                        it.style().font("Papyrus", 15)
+                        it.font("Papyrus", 15)
                     );
                 }
             }
@@ -416,7 +414,7 @@ class Style_Sheet_Spec extends Specification
                 @Override
                 protected void build() {
                     add(group("Gradient"), it ->
-                        it.style().backgroundPainter(g2d -> {
+                        it.backgroundPainter(g2d -> {
                             // Let's render a gradient:
                             var gradient = new GradientPaint(0, 0, Color.RED, 0, 100, Color.BLUE);
                             g2d.setPaint(gradient);
@@ -424,7 +422,7 @@ class Style_Sheet_Spec extends Specification
                         })
                     );
                     add(group("ChessBoard"), it ->
-                        it.style().backgroundPainter(g2d -> {
+                        it.backgroundPainter(g2d -> {
                             var w = it.component().getWidth() / 8;// We render a checkerboard pattern!
                             var h = it.component().getHeight() / 8;
                             for (var i = 0; i < 8; i++) {
@@ -476,21 +474,18 @@ class Style_Sheet_Spec extends Specification
                 @Override
                 protected void build() {
                     add(group("A").inherits("B", "C"), it ->
-                        it.style()
-                        .borderShade( s -> s.strategy(ShadingStrategy.BOTTOM_TO_TOP).colors(Color.RED, Color.BLUE) )
+                        it.borderShade( s -> s.strategy(ShadingStrategy.BOTTOM_TO_TOP).colors(Color.RED, Color.BLUE) )
                     );
                     add(group("B"), it ->
-                        it.style()
-                        .borderWidth(10)
-                        .borderColor(Color.GREEN)
+                        it.borderWidth(10)
+                          .borderColor(Color.GREEN)
                     );
                     add(group("C"), it ->
-                        it.style()
-                        .borderWidth(20)
-                        .borderColor(Color.YELLOW)
-                        .borderShade("named shade",
-                            s -> s.strategy(ShadingStrategy.TOP_TO_BOTTOM).colors(Color.CYAN, Color.MAGENTA)
-                        )
+                        it.borderWidth(20)
+                          .borderColor(Color.YELLOW)
+                          .borderShade("named shade",
+                              s -> s.strategy(ShadingStrategy.TOP_TO_BOTTOM).colors(Color.CYAN, Color.MAGENTA)
+                          )
                     );
                 }
             }
@@ -537,45 +532,40 @@ class Style_Sheet_Spec extends Specification
                 @Override
                 protected void build() {
                     add(group("A").inherits("E", "B", "C"), it ->
-                        it.style()
-                        .borderWidth(5)
-                        .backgroundColor(Color.RED)
-                        .borderShade( s -> s.strategy(ShadingStrategy.BOTTOM_TO_TOP).colors(Color.RED, Color.BLUE) )
+                        it.borderWidth(5)
+                          .backgroundColor(Color.RED)
+                          .borderShade( s -> s.strategy(ShadingStrategy.BOTTOM_TO_TOP).colors(Color.RED, Color.BLUE) )
                     );
                     add(group("B").inherits("D"), it ->
-                        it.style()
-                            .borderWidth(7)
-                            .borderColor(Color.GREEN)
+                        it.borderWidth(7)
+                          .borderColor(Color.GREEN)
                     );
                     add(group("C").inherits("E"), it ->
-                        it.style()
-                            .borderWidth(11)
-                            .borderColor(Color.YELLOW)
-                            .shadow("named shadow", s -> s
-                                .spreadRadius(10)
-                                .color(Color.CYAN)
-                                .isInset(true)
-                            )
+                        it.borderWidth(11)
+                          .borderColor(Color.YELLOW)
+                          .shadow("named shadow", s -> s
+                              .spreadRadius(10)
+                              .color(Color.CYAN)
+                              .isInset(true)
+                          )
                     );
                     add(group("D").inherits("E"), it ->
-                        it.style()
-                            .borderWidth(20)
-                            .borderColor(Color.WHITE)
-                            .shadow("named shadow", s -> s
-                                .spreadRadius(20)
-                                .color(Color.MAGENTA)
-                                .isInset(false)
-                            )
+                        it.borderWidth(20)
+                          .borderColor(Color.WHITE)
+                          .shadow("named shadow", s -> s
+                              .spreadRadius(20)
+                              .color(Color.MAGENTA)
+                              .isInset(false)
+                          )
                     );
                     add(group("E"), it ->
-                        it.style()
-                            .borderWidth(42)
-                            .borderColor(Color.MAGENTA)
-                            .shadow("named shadow", s -> s
-                                .spreadRadius(42)
-                                .isInset(false)
-                            )
-                            .font(new Font("Arial", Font.BOLD, 12))
+                        it.borderWidth(42)
+                          .borderColor(Color.MAGENTA)
+                          .shadow("named shadow", s -> s
+                              .spreadRadius(42)
+                              .isInset(false)
+                          )
+                          .font(new Font("Arial", Font.BOLD, 12))
                     );
                 }
             }

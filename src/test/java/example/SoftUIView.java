@@ -93,7 +93,7 @@ public class SoftUIView extends Panel
                 )
             )
             .add(
-                label(icon("img/swing.png")).withStyle( it -> it.style().padding(24) )
+                label(icon("img/swing.png")).withStyle( it -> it.padding(24) )
             )
             .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
                 it.paint( g -> {
