@@ -192,7 +192,43 @@ public class ComponentExtension<C extends JComponent>
         if ( style.background().color().isPresent() && !Objects.equals( _owner.getBackground(), style.background().color().get() ) )
             _owner.setBackground( style.background().color().get() );
 
-        if ( _owner instanceof JTextComponent) {
+        if ( style.dimensionality().minWidth().isPresent() || style.dimensionality().minHeight().isPresent() ) {
+            Dimension minSize = _owner.getMinimumSize();
+
+            int minWidth  = style.dimensionality().minWidth().orElse(minSize == null ? 0 : minSize.width);
+            int minHeight = style.dimensionality().minHeight().orElse(minSize == null ? 0 : minSize.height);
+
+            Dimension newMinSize = new Dimension(minWidth, minHeight);
+
+            if ( ! newMinSize.equals(minSize) )
+                _owner.setMinimumSize(newMinSize);
+        }
+
+        if ( style.dimensionality().maxWidth().isPresent() || style.dimensionality().maxHeight().isPresent() ) {
+            Dimension maxSize = _owner.getMaximumSize();
+
+            int maxWidth  = style.dimensionality().maxWidth().orElse(maxSize == null  ? Integer.MAX_VALUE : maxSize.width);
+            int maxHeight = style.dimensionality().maxHeight().orElse(maxSize == null ? Integer.MAX_VALUE : maxSize.height);
+
+            Dimension newMaxSize = new Dimension(maxWidth, maxHeight);
+
+            if ( ! newMaxSize.equals(maxSize) )
+                _owner.setMaximumSize(newMaxSize);
+        }
+
+        if ( style.dimensionality().preferredWidth().isPresent() || style.dimensionality().preferredHeight().isPresent() ) {
+            Dimension prefSize = _owner.getPreferredSize();
+
+            int prefWidth  = style.dimensionality().preferredWidth().orElse(prefSize == null ? 0 : prefSize.width);
+            int prefHeight = style.dimensionality().preferredHeight().orElse(prefSize == null ? 0 : prefSize.height);
+
+            Dimension newPrefSize = new Dimension(prefWidth, prefHeight);
+
+            if ( ! newPrefSize.equals(prefSize) )
+                _owner.setPreferredSize(newPrefSize);
+        }
+
+        if ( _owner instanceof JTextComponent ) {
             JTextComponent tc = (JTextComponent) _owner;
             if ( style.font().selectionColor().isPresent() && ! Objects.equals( tc.getSelectionColor(), style.font().selectionColor().get() ) )
                 tc.setSelectionColor(style.font().selectionColor().get());

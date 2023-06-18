@@ -260,18 +260,19 @@ class Style_Sheet_Spec extends Specification
             because we are in a Groovy script :)
         """
         given :
-            var ss = new StyleSheet( (style) -> {
-                                  style
-                                  .foundationColor(Color.RED)
-                                  .border(11, Color.GREEN)
-                                  .borderRadius(3)
-                                  .padding(42)
-                                  .shadowIsInset(false)
-                                  .shadowBlurRadius(22)
-                                  .shadowSpreadRadius(6)
-                     }) {
+            var ss = new StyleSheet() {
                         @Override
                         protected void build() {
+                            add(type(JComponent.class), it ->
+                                 it
+                                   .foundationColor(Color.RED)
+                                   .border(11, Color.GREEN)
+                                   .borderRadius(3)
+                                   .padding(42)
+                                   .shadowIsInset(false)
+                                   .shadowBlurRadius(22)
+                                   .shadowSpreadRadius(6)
+                            );
                              add(group("A"), it ->
                                  it.borderRadius(19)
                              );

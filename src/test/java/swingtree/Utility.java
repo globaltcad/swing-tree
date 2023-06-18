@@ -165,15 +165,16 @@ public class Utility {
         if ( similarity < expectedSimilarity ) {
             try {
                 String[] parts = imageFile.split("/");
-                String filename = parts[parts.length-1];
+                String filename = parts[parts.length - 1];
                 String newPath = "build/resources/test/snapshots/" + filename.replace(".png", "-FAILURE.png");
-                safeUIImage( image, newPath );
-                JFrame frame = new JFrame();
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.getContentPane().add(new JLabel(new ImageIcon(image)));
-                frame.pack();
-                frame.setVisible(true);
-                Thread.sleep(60_000);
+                safeUIImage(image, newPath);
+                SwingUtilities.invokeLater(()-> {
+                    JFrame frame = new JFrame();
+                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                    frame.getContentPane().add(new JLabel(new ImageIcon(image)));
+                    frame.pack();
+                    frame.setVisible(true);
+                });
             } catch (Exception e) {
                 e.printStackTrace();// Probably a headless exception
             }

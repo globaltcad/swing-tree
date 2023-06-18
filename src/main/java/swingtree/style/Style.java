@@ -40,6 +40,7 @@ public final class Style
                                             BackgroundStyle.none(),
                                             ForegroundStyle.none(),
                                             FontStyle.none(),
+                                            DimensionalityStyle.none(),
                                             Collections.singletonMap(StyleUtility.DEFAULT_KEY,ShadowStyle.none())
                                         );
 
@@ -50,6 +51,7 @@ public final class Style
     private final BackgroundStyle _background;
     private final ForegroundStyle _foreground;
     private final FontStyle       _font;
+    private final DimensionalityStyle _dimensionality;
     private final Map<String, ShadowStyle> _shadows = new TreeMap<>();
 
 
@@ -59,22 +61,39 @@ public final class Style
         BackgroundStyle background,
         ForegroundStyle foreground,
         FontStyle font,
+        DimensionalityStyle dimensionality,
         Map<String, ShadowStyle> shadows
     ) {
-        _layout = layout;
-        _border = border;
-        _background = background;
-        _foreground = foreground;
-        _font = font;
+        _layout         = layout;
+        _border         = border;
+        _background     = background;
+        _foreground     = foreground;
+        _font           = font;
+        _dimensionality = dimensionality;
         _shadows.putAll(shadows);
     }
 
-    Style _withLayout( LayoutStyle layout ) { return new Style(layout, _border, _background, _foreground, _font, _shadows); }
-    Style _withBorder( BorderStyle border ) { return new Style(_layout, border, _background, _foreground, _font, _shadows); }
-    Style _withBackground( BackgroundStyle background ) { return new Style(_layout, _border, background, _foreground, _font, _shadows); }
-    Style _withForeground( ForegroundStyle foreground ) { return new Style(_layout, _border, _background, foreground, _font, _shadows); }
-    Style _withFont( FontStyle font ) { return new Style(_layout, _border, _background, _foreground, font, _shadows); }
-    Style _withShadow( Map<String, ShadowStyle> shadows ) { return new Style(_layout, _border, _background, _foreground, _font, shadows); }
+    Style _withLayout( LayoutStyle layout ) {
+        return new Style(layout, _border, _background, _foreground, _font, _dimensionality, _shadows);
+    }
+    Style _withBorder( BorderStyle border ) {
+        return new Style(_layout, border, _background, _foreground, _font, _dimensionality, _shadows);
+    }
+    Style _withBackground( BackgroundStyle background ) {
+        return new Style(_layout, _border, background, _foreground, _font, _dimensionality, _shadows);
+    }
+    Style _withForeground( ForegroundStyle foreground ) {
+        return new Style(_layout, _border, _background, foreground, _font, _dimensionality, _shadows);
+    }
+    Style _withFont( FontStyle font ) {
+        return new Style(_layout, _border, _background, _foreground, font, _dimensionality, _shadows);
+    }
+    Style _withDimensionality( DimensionalityStyle dimensionality ) {
+        return new Style(_layout, _border, _background, _foreground, _font, dimensionality, _shadows);
+    }
+    Style _withShadow( Map<String, ShadowStyle> shadows ) {
+        return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, shadows);
+    }
     Style _withShadow( Function<ShadowStyle, ShadowStyle> styler ) {
         // A new map is created where all the styler is applied to all the values:
         Map<String, ShadowStyle> styledShadows = new TreeMap<>();
@@ -93,6 +112,8 @@ public final class Style
     public BackgroundStyle background() { return _background; }
 
     public ForegroundStyle foreground() { return _foreground; }
+
+    public DimensionalityStyle dimensionality() { return _dimensionality; }
 
     /**
      * @return The default shadow style.

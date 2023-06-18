@@ -25,7 +25,7 @@ public final class StyleDelegate<C extends JComponent>
 
     public StyleDelegate( C component, Style style ) {
         _component = component;
-        _style = style;
+        _style     = style;
     }
 
     public C component() { return _component; }
@@ -977,5 +977,159 @@ public final class StyleDelegate<C extends JComponent>
     public StyleDelegate<C> fontAttributes( TextAttribute... attributes ) { 
         return _withStyle(_style._withFont(_style.font().attributes(Objects.requireNonNull(attributes)))); 
     }
-    
+
+    /**
+     *  Defines the minimum {@link Dimension} of this {@link JComponent}. <br>
+     *  This ultimately translates to {@link JComponent#setMinimumSize(Dimension)} on the underlying component. <br>
+     * @param minSize The minimum {@link Dimension}.
+     * @return A new {@link StyleDelegate} with the provided minimum {@link Dimension} set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public StyleDelegate<C> minSize( Dimension minSize ) {
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(minSize.width)._withMaxHeight(minSize.height)));
+    }
+
+    /**
+     *  Defines the minimum {@link Dimension} for this {@link JComponent}. <br>
+     *  This ultimately translates to {@link JComponent#setMinimumSize(Dimension)} on the underlying component,
+     *  which will be called when all the other styles are applied and rendered. <br>
+     * @param width The minimum width.
+     * @param height The minimum height.
+     * @return A new {@link StyleDelegate} with the provided minimum {@link Dimension} set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public StyleDelegate<C> minSize( int width, int height ) {
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(width)._withMaxHeight(height)));
+    }
+
+    /**
+     *  Defines the minimum width for this {@link JComponent}. <br>
+     *  This ultimately translates to {@link JComponent#setMinimumSize(Dimension)} on the underlying component,
+     *  which will be called when all the other styles are applied and rendered. <br>
+     * @param minWidth The minimum width.
+     * @return A new {@link StyleDelegate} with the provided minimum width set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public StyleDelegate<C> minWidth( int minWidth ) {
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(minWidth)));
+    }
+
+    /**
+     *  Defines the minimum height for this {@link JComponent}. <br>
+     *  This ultimately translates to {@link JComponent#setMinimumSize(Dimension)} on the underlying component,
+     *  which will be called when all the other styles are applied and rendered. <br>
+     * @param minHeight The minimum height.
+     * @return A new {@link StyleDelegate} with the provided minimum height set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public StyleDelegate<C> minHeight( int minHeight ) {
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxHeight(minHeight)));
+    }
+
+    /**
+     *  Defines the maximum {@link Dimension} for this {@link JComponent}. <br>
+     *  This ultimately translates to {@link JComponent#setMaximumSize(Dimension)} on the underlying component. <br>
+     *  The passed {@link Dimension} will be applied when all the other styles are applied and rendered. <br>
+     *
+     * @param maxSize The maximum {@link Dimension}.
+     * @return A new {@link StyleDelegate} with the provided maximum {@link Dimension} set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public StyleDelegate<C> maxSize( Dimension maxSize ) {
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(maxSize.width)._withMaxHeight(maxSize.height)));
+    }
+
+    /**
+     *  Defines the maximum {@link Dimension} for this {@link JComponent}. <br>
+     *  This ultimately translates to {@link JComponent#setMaximumSize(Dimension)} on the underlying component. <br>
+     *  The passed {@link Dimension} will be applied when all the other styles are applied and rendered. <br>
+     *
+     * @param width The maximum width.
+     * @param height The maximum height.
+     * @return A new {@link StyleDelegate} with the provided maximum {@link Dimension} set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public StyleDelegate<C> maxSize( int width, int height ) {
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(width)._withMaxHeight(height)));
+    }
+
+    /**
+     *  Defines the maximum width for this {@link JComponent}. <br>
+     *  This ultimately translates to {@link JComponent#setMaximumSize(Dimension)} on the underlying component. <br>
+     *  The passed width will be applied when all the other styles are applied and rendered. <br>
+     *
+     * @param maxWidth The maximum width.
+     * @return A new {@link StyleDelegate} with the provided maximum width set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public StyleDelegate<C> maxWidth( int maxWidth ) {
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(maxWidth)));
+    }
+
+    /**
+     *  Defines the maximum height for this {@link JComponent}. <br>
+     *  This ultimately translates to {@link JComponent#setMaximumSize(Dimension)} on the underlying component. <br>
+     *  The passed height will be applied when all the other styles are applied and rendered. <br>
+     *
+     * @param maxHeight The maximum height.
+     * @return A new {@link StyleDelegate} with the provided maximum height set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public StyleDelegate<C> maxHeight( int maxHeight ) {
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxHeight(maxHeight)));
+    }
+
+    /**
+     *  Defines the preferred {@link Dimension} for this {@link JComponent}. <br>
+     *  This ultimately translates to {@link JComponent#setPreferredSize(Dimension)} on the underlying component. <br>
+     *  The passed {@link Dimension} will be applied when all the other styles are applied and rendered. <br>
+     *
+     * @param preferredSize The preferred {@link Dimension}.
+     * @return A new {@link StyleDelegate} with the provided preferred {@link Dimension} set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public StyleDelegate<C> prefSize( Dimension preferredSize ) {
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredWidth(preferredSize.width)._withPreferredHeight(preferredSize.height)));
+    }
+
+    /**
+     *  Defines the preferred {@link Dimension} for this {@link JComponent}. <br>
+     *  This ultimately translates to {@link JComponent#setPreferredSize(Dimension)} on the underlying component. <br>
+     *  The passed {@link Dimension} will be applied when all the other styles are applied and rendered. <br>
+     *
+     * @param width The preferred width.
+     * @param height The preferred height.
+     * @return A new {@link StyleDelegate} with the provided preferred {@link Dimension} set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public StyleDelegate<C> prefSize( int width, int height ) {
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredWidth(width)._withPreferredHeight(height)));
+    }
+
+    /**
+     *  Defines the preferred width for this {@link JComponent}. <br>
+     *  This ultimately translates to {@link JComponent#setPreferredSize(Dimension)} on the underlying component. <br>
+     *  The passed width will be applied when all the other styles are applied and rendered. <br>
+     *
+     * @param preferredWidth The preferred width.
+     * @return A new {@link StyleDelegate} with the provided preferred width set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public StyleDelegate<C> prefWidth( int preferredWidth ) {
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredWidth(preferredWidth)));
+    }
+
+    /**
+     *  Defines the preferred height for this {@link JComponent}. <br>
+     *  This ultimately translates to {@link JComponent#setPreferredSize(Dimension)} on the underlying component. <br>
+     *  The passed height will be applied when all the other styles are applied and rendered. <br>
+     *
+     * @param preferredHeight The preferred height.
+     * @return A new {@link StyleDelegate} with the provided preferred height set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public StyleDelegate<C> prefHeight( int preferredHeight ) {
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredHeight(preferredHeight)));
+    }
+
 }
