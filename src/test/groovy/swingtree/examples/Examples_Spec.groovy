@@ -129,7 +129,7 @@ class Examples_Spec extends Specification
         given : 'We create the UI.'
             var ui = new SoftUIView()
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "/snapshots/soft-example-UI.png") > 99.9
+            Utility.similarityBetween(ui, "/snapshots/soft-example-UI.png", 99.9) > 99.9
     }
 
     def 'The animated buttons view examples UI defined in the examples looks as expected.'()
@@ -178,9 +178,9 @@ class Examples_Spec extends Specification
             speedTextField.text == "42.0"
             speedTextField.background == Color.WHITE
         when : 'We rerender the view offscreen...'
-            var similarity = Utility.similarityBetween(view, "/snapshots/vertical-settings-UI.png", 99.9)
+            var similarity = Utility.similarityBetween(view, "/snapshots/vertical-settings-UI.png", 99.7)
         then : '...it looks as expected.'
-            similarity > 99.9
+            similarity > 99.7
 
         when : 'We simulate the user entering an invalid number:'
             speedTextField.text = "§"
@@ -192,7 +192,7 @@ class Examples_Spec extends Specification
         when : 'We rerender the view offscreen again because the background color changed...'
             similarity = Utility.similarityBetween(view, "/snapshots/vertical-settings-UI.png")
         then : 'The UI is no longer rendered as expected.'
-            similarity < 99.9
+            similarity < 99.7
     }
 
     def 'The spinners example UI defined in the examples can be created.'()

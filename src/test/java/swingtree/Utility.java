@@ -7,6 +7,7 @@ import example.SomeSettingsViewModel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.util.List;
@@ -161,6 +162,14 @@ public class Utility {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        int width1 = imageFromFile.getWidth();
+        int width0 = image.getWidth();
+        int height1 = imageFromFile.getHeight();
+        int height0 = image.getHeight();
+        if ((width1 != width0) || (height1 != height0)) {
+            // Let's resize the image to the same size
+            image = _stretchFirstToSecondSize(image, imageFromFile);
+        }
         double similarity = similarityBetween(image, imageFromFile);
         if ( similarity < expectedSimilarity ) {
             try {
@@ -168,13 +177,24 @@ public class Utility {
                 String filename = parts[parts.length - 1];
                 String newPath = "build/resources/test/snapshots/" + filename.replace(".png", "-FAILURE.png");
                 safeUIImage(image, newPath);
+                BufferedImage finalImageFromFile = imageFromFile;
+                BufferedImage finalImage = image;
                 SwingUtilities.invokeLater(()-> {
+                    JLabel wrongImage = new JLabel(new ImageIcon(finalImage));
+                    JLabel expectedImage = new JLabel(new ImageIcon(finalImageFromFile));
                     JFrame frame = new JFrame();
                     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                    frame.getContentPane().add(new JLabel(new ImageIcon(image)));
+                    frame.getContentPane().add(
+                        UI.box()
+                        .add(wrongImage)
+                        .add(UI.label("=|=").withFontSize(26))
+                        .add(expectedImage)
+                        .getComponent()
+                    );
                     frame.pack();
                     frame.setVisible(true);
                 });
+                Thread.sleep(10000);
             } catch (Exception e) {
                 e.printStackTrace();// Probably a headless exception
             }
@@ -184,17 +204,7 @@ public class Utility {
 
     public static double similarityBetween(BufferedImage image0, BufferedImage image1) {
         int width1 = image1.getWidth();
-        int width0 = image0.getWidth();
         int height1 = image1.getHeight();
-        int height0 = image0.getHeight();
-        if ((width1 != width0) || (height1 != height0)) {
-            // Let's resize the image to the same size
-            BufferedImage resized = new BufferedImage(width1, height1, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g = resized.createGraphics();
-            g.drawImage(image0, 0, 0, width1, height1, null);
-            g.dispose();
-            image0 = resized;
-        }
         long diff = 0;
         for (int y = 0; y < height1; y++) {
             for (int x = 0; x < width1; x++) {
@@ -214,6 +224,28 @@ public class Utility {
         int g2 = (rgb2 >>  8) & 0xff;
         int b2 =  rgb2        & 0xff;
         return Math.pow(Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2), 0.5);
+    }
+
+    /**
+     *  Stretches the first image to the size of the second image.
+     * @param image0 The image to stretch
+     * @param image1 The image with the target size
+     * @return The new stretched image
+     */
+    private static BufferedImage _stretchFirstToSecondSize( BufferedImage image0, BufferedImage image1 )
+    {
+        int width1 = image1.getWidth();
+        int width0 = image0.getWidth();
+        double widthRatio = (double) width1 / width0;
+        int height1 = image1.getHeight();
+        int height0 = image0.getHeight();
+        double heightRatio = (double) height1 / height0;
+        BufferedImage image = new BufferedImage(width1, height1, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = image.createGraphics();
+        AffineTransform at = AffineTransform.getScaleInstance(widthRatio, heightRatio);
+        g2d.drawRenderedImage(image0, at);
+        g2d.dispose();
+        return image;
     }
 
 }

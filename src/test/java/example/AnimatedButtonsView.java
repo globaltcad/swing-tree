@@ -19,7 +19,6 @@ public class AnimatedButtonsView extends Panel
     public AnimatedButtonsView() {
         FlatLightLaf.setup();
         of(this).withLayout(FILL.and(WRAP(3)).and(INS(32)), "", "[][]24[]24[]")
-        .withPrefSize(800, 600)
         .add( SHRINK.and(SPAN).and(ALIGN_CENTER),
             html(
                 "<h1>Animated Buttons</h1>" +
