@@ -22,6 +22,30 @@ import java.awt.*
     It does, however, have something better, which is similar to CSS.
     An API for configuring styles in a declarative and type-safe way.
 
+    The main class for creating style sheets is the `StyleSheet` class,
+    an abstract class that you can extend to create your own styles like so:
+    ```java
+        class MyStyleSheet {
+           @Override
+           protected void build() {
+                add(id("some unique id!"), it ->
+                    it.borderRadius(3)
+                );
+                add(type(JPanel.class), it ->
+                   it.borderColor(Color.GREEN)
+                );
+                add(type(JButton.class), it ->
+                    it.borderWidth(7)
+                );
+            }
+        }
+    ```
+    You can then easily apply this style sheet to you SinwgTree views like so:
+    ```java
+        UI.use(new MyStyleSheet(), () -> new MyView());
+    ```
+    The style sheet will be applied to all UI components created within the scope of the `use` method.
+    
 """)
 @Subject([StyleSheet, Style])
 class Style_Sheet_Spec extends Specification
@@ -203,9 +227,9 @@ class Style_Sheet_Spec extends Specification
     {
         reportInfo """
             A nonsensical style trait is one that does not make sense in relation to other style traits.
-            So for example, if we have 1 traits, one with a group identifier `"A"` and another 
+            So for example, a traits with a group identifier `"A"` and another 
             one with a group identifier `"B"` and the one with `"B"` inherits from `"A"`, then it would
-            it would be nonsensical when style trait `"A"` specifies a component type of `JButton` 
+            be nonsensical when style trait `"A"` specifies a component type of `JButton` 
             and style trait `"B"` specifies a component type of `JPanel`.
             This is because a component cannot be both a `JButton` and a `JPanel` at the same time.
         """
@@ -229,6 +253,8 @@ class Style_Sheet_Spec extends Specification
     {
         reportInfo """
             If you try to declare a style trait more than once, then an exception will be thrown.
+            This is because it does not make sense to declare the same style trait more than once.
+            They might contain conflicting style properties, which would be nonsensical to allow.
         """
         when :
             new StyleSheet() {
@@ -249,15 +275,11 @@ class Style_Sheet_Spec extends Specification
     def 'A StyleSheet can be created with a default style.'()
     {
         reportInfo """
-            The default styles always apply if they are not overridden by
-            any style traits defined in the style sheet class.
-            Note that we pass the default style as a supplier to the
-            `StyleSheet` constructor.
-            This constructor is protected, so you should always declare
-            a dedicated style sheet class that extends `StyleSheet`.
-            
-            In the code below we can call the constructor as part of an anonymous class
-            because we are in a Groovy script :)
+            The default style is a `StyleTrait` is declared as `type(JComponent.class)` without 
+            any group, id or sub-component properties.
+            Therefore it will always serve as a fallback style for all components.
+            and all of it's styles will be applied if they are not overridden by
+            any other subordinated style traits.
         """
         given :
             var ss = new StyleSheet() {
