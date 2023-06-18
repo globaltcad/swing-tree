@@ -26,14 +26,14 @@ public class NoteGuesserView extends Panel
         .add(PUSH.and(GROW),
             panel(FILL).withRepaintIf(vm.getRepaintEvent())
             .withStyle( it ->
-                it.style()
+                it
                  .backgroundColor(OLD_SHEET_MUSIC_COLOR.brighter())
                  .foundationColor(new Color(255,255,255, 0))
                  .font("Papyrus", 24)
-                 .padTop(5)
-                 .padLeft(25)
-                 .padRight(25)
-                 .padBottom(5)
+                 .paddingTop(5)
+                 .paddingLeft(25)
+                 .paddingRight(25)
+                 .paddingBottom(5)
                  .borderRadius(25, 25)
                  .borderWidth(3)
                  .borderColor(new Color(0, 0, 0,255))
@@ -51,7 +51,7 @@ public class NoteGuesserView extends Panel
             )
         )
         .add(ALIGN_CENTER,
-            panel(FILL_X.and(INS(8))).withStyle( it -> it.style().borderRadius(24) )
+            panel(FILL_X.and(INS(8))).withStyle( it -> it.borderRadius(24) )
             .add(SPAN.and(WRAP).and(GROW),
                 panel(FILL).withMinHeight(60)
                 .add(ALIGN_CENTER,
@@ -88,7 +88,7 @@ public class NoteGuesserView extends Panel
             )
         )
         .add(ALIGN_CENTER,
-            panel().withStyle( it -> it.style().borderRadius(24) )
+            panel().withStyle( it -> it.borderRadius(24) )
             .add(
                 button("New Note")
                 .onClick( e -> vm.newRandomNoteIndex() )

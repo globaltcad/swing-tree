@@ -5,7 +5,10 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import swingtree.style.Style
+import swingtree.style.StyleDelegate
 
+import javax.swing.JComponent
+import javax.swing.JPanel
 import java.awt.*
 
 @Title("Style Properties")
@@ -23,13 +26,14 @@ class Styles_Spec extends Specification
         String colorString, Color expectedColor
     ) {
         given : 'We use method chaining to build a colorful style:'
-            var style = Style.none()
+            var style = new StyleDelegate<>(new JPanel(), Style.none())
                                 .foundationColor(colorString)
                                 .backgroundColor(colorString)
                                 .borderColor(colorString)
                                 .shadowColor(colorString)
                                 .fontSelectionColor(colorString)
                                 .fontColor(colorString)
+                                .style()
         expect :
             style.background().foundationColor().get() == expectedColor
             style.background().color().get() == expectedColor
@@ -72,7 +76,7 @@ class Styles_Spec extends Specification
     def 'The String representation of a Style will tell you everything about it!'()
     {
         given : 'We first create a style with various properties:'
-            var style = Style.none()
+            var style = new StyleDelegate<>(new JPanel(), Style.none())
                                 .foundationColor("red")
                                 .backgroundColor("green")
                                 .borderColor("blue")
@@ -85,36 +89,28 @@ class Styles_Spec extends Specification
                                 .fontBold(true)
                                 .fontUnderline(true)
                                 .fontStrikeThrough(true)
+                                .style()
 
         expect :
                 style.toString() == "Style[" +
                                         "LayoutStyle[" +
                                             "margin=Outline[top=?, right=?, bottom=?, left=?], " +
-                                            "padding=Outline[top=?, right=?, bottom=?, left=?]" +
-                                        "], " +
-                                        "BorderStyle[arcWidth=12, arcHeight=18, width=null, color=rgba(0,0,255,255)], " +
-                                        "BackgroundStyle[" +
-                                            "color=rgba(0,255,0,255), " +
-                                            "foundationColor=rgba(255,0,0,255), " +
-                                            "painter=null, " +
-                                            "ShadeStyle[strategy=TOP_LEFT_TO_BOTTOM_RIGHT, colors=[]]" +
-                                        "], " +
-                                        "ForegroundStyle[" +
-                                            "color=null, " +
-                                            "painter=null" +
-                                        "], " +
-                                        "ShadowStyle[" +
-                                            "horizontalOffset=0, " +
-                                            "verticalOffset=0, " +
-                                            "blurRadius=0, " +
-                                            "spreadRadius=0, " +
-                                            "color=rgba(255,255,0,255), " +
-                                            "isInset=false" +
-                                        "], " +
-                                        "FontStyle[" +
-                                            "name=Times New Roman, " +
-                                            "size=12, style=1, weight=0, " +
-                                            "attributes=[java.awt.font.TextAttribute(underline),java.awt.font.TextAttribute(strikethrough)], " +
+                                            "padding=Outline[top=?, right=?, bottom=?, left=?]], " +
+                                            "BorderStyle[" +
+                                                "arcWidth=12, arcHeight=18, " +
+                                                "width=null, " +
+                                                "color=rgba(0,0,255,255)" +
+                                                "ShadeStyle[strategy=NONE, colors=[]]" +
+                                            "], " +
+                                            "BackgroundStyle[" +
+                                                "color=rgba(0,255,0,255), " +
+                                                "foundationColor=rgba(255,0,0,255), " +
+                                                "painter=null, " +
+                                                "ShadeStyle[strategy=NONE, colors=[]]" +
+                                            "], " +
+                                            "ForegroundStyle[color=null, painter=null], " +
+                                            "ShadowStyle[horizontalOffset=0, verticalOffset=0, blurRadius=0, spreadRadius=0, color=rgba(255,255,0,255), isInset=false], " +
+                                            "FontStyle[name=Times New Roman, size=12, style=1, weight=0, attributes=[java.awt.font.TextAttribute(underline),java.awt.font.TextAttribute(strikethrough)], " +
                                             "color=rgba(255,0,255,255), " +
                                             "backgroundColor=null, " +
                                             "selectionColor=rgba(0,255,255,255)" +
@@ -124,8 +120,11 @@ class Styles_Spec extends Specification
 
     def 'Style objects are value based (with respect to equality and hash code).'()
     {
-        given : 'We first create a style with various properties:'
-            var style1 = Style.none()
+        given : 'First we need the `StyleDelegate` styler, which can apply styles to `Style` objects.'
+            var styler = s -> new StyleDelegate<>(new JPanel(), s)
+
+        and : 'Then we create a starting style with various properties:'
+            var style1 = styler(Style.none())
                                  .foundationColor("red")
                                  .backgroundColor("green")
                                  .borderColor("blue")
@@ -140,9 +139,10 @@ class Styles_Spec extends Specification
                                  .fontStrikeThrough(true)
                                  .shadowSpreadRadius(12)
                                  .shadowBlurRadius(42)
+                                 .style()
 
         and : 'We then create a second style with the same properties:'
-            var style2 = Style.none()
+            var style2 = styler(Style.none())
                                  .foundationColor("red")
                                  .backgroundColor("green")
                                  .borderColor("blue")
@@ -157,22 +157,23 @@ class Styles_Spec extends Specification
                                  .fontStrikeThrough(true)
                                  .shadowSpreadRadius(12)
                                  .shadowBlurRadius(42)
+                                 .style()
         expect :
                 style1 == style2
                 style1.hashCode() == style2.hashCode()
         and : 'Changing a property and then comparing the styles should return false:'
-                style1 != style2.fontBold(false)
-                style1.hashCode() != style2.fontBold(false).hashCode()
-                style1 != style2.shadowSpreadRadius(1)
-                style1.hashCode() != style2.shadowSpreadRadius(1).hashCode()
-                style1 != style2.shadowBlurRadius(1)
-                style1.hashCode() != style2.shadowBlurRadius(1).hashCode()
+                style1 != styler(style2).fontBold(false).style()
+                style1.hashCode() != styler(style2).fontBold(false).style().hashCode()
+                style1 != styler(style2).shadowSpreadRadius(1).style()
+                style1.hashCode() != styler(style2).shadowSpreadRadius(1).style().hashCode()
+                style1 != styler(style2).shadowBlurRadius(1).style()
+                style1.hashCode() != styler(style2).shadowBlurRadius(1).style().hashCode()
         and : 'If we transform them both the same way then they will be equal:'
-                style1.fontBold(false) == style2.fontBold(false)
-                style1.fontBold(false).hashCode() == style2.fontBold(false).hashCode()
-                style1.shadowSpreadRadius(1) == style2.shadowSpreadRadius(1)
-                style1.shadowSpreadRadius(1).hashCode() == style2.shadowSpreadRadius(1).hashCode()
-                style1.shadowBlurRadius(1) == style2.shadowBlurRadius(1)
-                style1.shadowBlurRadius(1).hashCode() == style2.shadowBlurRadius(1).hashCode()
+                styler(style2).fontBold(false).style()                   == styler(style2).fontBold(false).style()
+                styler(style2).fontBold(false).style().hashCode()        == styler(style2).fontBold(false).style().hashCode()
+                styler(style2).shadowSpreadRadius(1).style()            == styler(style2).shadowSpreadRadius(1).style()
+                styler(style2).shadowSpreadRadius(1).style().hashCode() == styler(style2).shadowSpreadRadius(1).style().hashCode()
+                styler(style2).shadowBlurRadius(1).style()              == styler(style2).shadowBlurRadius(1).style()
+                styler(style2).shadowBlurRadius(1).style().hashCode()   == styler(style2).shadowBlurRadius(1).style().hashCode()
     }
 }

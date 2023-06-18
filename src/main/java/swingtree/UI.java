@@ -427,6 +427,13 @@ public final class UI
             }
             throw new RuntimeException();
         }
+        int forProgressBar() {
+            switch ( this ) {
+                case HORIZONTAL: return JProgressBar.HORIZONTAL;
+                case VERTICAL  : return JProgressBar.VERTICAL;
+            }
+            throw new RuntimeException();
+        }
         int forSeparator() {
             switch ( this ) {
                 case HORIZONTAL: return JSeparator.HORIZONTAL;
@@ -441,7 +448,6 @@ public final class UI
             }
             throw new RuntimeException();
         }
-
         int forToolBar() {
             switch ( this ) {
                 case HORIZONTAL: return JToolBar.HORIZONTAL;
@@ -3061,6 +3067,168 @@ public final class UI
     public static UIForPasswordField<JPasswordField> passwordField() { return of(new JPasswordField()); }
 
     /**
+     *  Use this to create a builder for the provided {@link JProgressBar} instance.
+     *
+     * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
+     */
+    public static <P extends JProgressBar> UIForProgressBar<P> of( P component ) {
+        NullUtil.nullArgCheck(component, "component", JProgressBar.class);
+        return new UIForProgressBar<>(component);
+    }
+
+    /**
+     *  A factory method for creating a progress bar builder with a default {@link JProgressBar} implementation.
+     *
+     * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
+     */
+    public static UIForProgressBar<JProgressBar> progressBar() { return of(new ProgressBar()); }
+
+    /**
+     *  Use this to create a builder for a new {@link JProgressBar} instance with
+     *  the provided minimum and maximum values.
+     *
+     * @param min The minimum value of the progress bar.
+     * @param max The maximum value of the progress bar.
+     * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
+     */
+    public static UIForProgressBar<JProgressBar> progressBar( int min, int max ) {
+        return progressBar().withMin(min).withMax(max);
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JProgressBar} instance with
+     *  the provided minimum, maximum and current value.
+     *
+     * @param min The minimum value of the progress bar.
+     * @param max The maximum value of the progress bar.
+     * @param value The current value of the progress bar.
+     * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
+     */
+    public static UIForProgressBar<JProgressBar> progressBar( int min, int max, int value ) {
+        return progressBar().withMin(min).withMax(max).withValue(value);
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JProgressBar} instance with
+     *  the provided minimum, maximum and current value property dynamically bound to the progress bar.
+     *
+     * @param min The minimum value of the progress bar.
+     * @param max The maximum value of the progress bar.
+     * @param value The current value property of the progress bar.
+     * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
+     */
+    public static UIForProgressBar<JProgressBar> progressBar( int min, int max, Val<Integer> value ) {
+        NullUtil.nullPropertyCheck(value, "value", "Null is not a valid value for the value property of a progress bar.");
+        return progressBar().withMin(min).withMax(max).withValue(value);
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JProgressBar} instance with
+     *  the provided alignment, minimum and maximum values.
+     *  The alignment is a {@link Align} value, which may be either {@link Align#HORIZONTAL}
+     *  or {@link Align#VERTICAL}.
+     *
+     * @param align The alignment of the progress bar.
+     * @param min The minimum value of the progress bar.
+     * @param max The maximum value of the progress bar.
+     * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
+     */
+    public static UIForProgressBar<JProgressBar> progressBar( Align align, int min, int max ) {
+        NullUtil.nullArgCheck(align, "align", Align.class);
+        return progressBar().with(align).withMin(min).withMax(max);
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JProgressBar} instance with
+     *  the provided alignment, minimum, maximum and current value.
+     *  The alignment is a {@link Align} value, which may be either {@link Align#HORIZONTAL}
+     *  or {@link Align#VERTICAL}.
+     *
+     * @param align The alignment of the progress bar.
+     * @param min The minimum value of the progress bar.
+     * @param max The maximum value of the progress bar.
+     * @param value The current value of the progress bar.
+     * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
+     */
+    public static UIForProgressBar<JProgressBar> progressBar( Align align, int min, int max, int value ) {
+        NullUtil.nullArgCheck(align, "align", Align.class);
+        return progressBar().with(align).withMin(min).withMax(max).withValue(value);
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JProgressBar} instance with
+     *  the provided alignment, minimum, maximum and current value property dynamically bound to the progress bar.
+     *  The alignment is a {@link Align} value, which may be either {@link Align#HORIZONTAL}
+     *  or {@link Align#VERTICAL}.
+     *
+     * @param align The alignment of the progress bar.
+     * @param min The minimum value of the progress bar.
+     * @param max The maximum value of the progress bar.
+     * @param value The current value property of the progress bar.
+     * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
+     */
+    public static UIForProgressBar<JProgressBar> progressBar( Align align, int min, int max, Val<Integer> value ) {
+        NullUtil.nullArgCheck(align, "align", Align.class);
+        NullUtil.nullArgCheck(value, "value", Val.class);
+        NullUtil.nullPropertyCheck(value, "value", "Null is not a valid value for the value property of a progress bar.");
+        return progressBar().with(align).withMin(min).withMax(max).withValue(value);
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JProgressBar} instance with a default minimum and maximum value
+     *  of 0 and 100 and the provided alignment and double based progress property (a property wrapping a double value between 0 and 1)
+     *  dynamically bound to the progress bar.
+     *  The alignment is a {@link Align} value, which may be either {@link Align#HORIZONTAL}
+     *  or {@link Align#VERTICAL}.
+     *
+     * @param align The alignment of the progress bar.
+     * @param progress The current progress property of the progress bar, a property wrapping a double value between 0 and 1.
+     * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
+     */
+    public static UIForProgressBar<JProgressBar> progressBar( Align align, Val<Double> progress ) {
+        NullUtil.nullArgCheck(align, "align", Align.class);
+        NullUtil.nullArgCheck(progress, "progress", Val.class);
+        NullUtil.nullPropertyCheck(progress, "progress", "Null is not a valid value for the progress property of a progress bar.");
+        return progressBar().with(align).withMin(0).withMax(100).withProgress(progress);
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JProgressBar} instance with a default minimum and maximum value
+     *  of 0 and 100 and the provided alignment and double based progress property (a property wrapping a double value between 0 and 1)
+     *  dynamically bound to the progress bar.
+     *  The alignment is a {@link Align} value, which may be either {@link Align#HORIZONTAL}
+     *  or {@link Align#VERTICAL}.
+     *
+     * @param align The alignment of the progress bar.
+     * @param progress The current progress property of the progress bar, a property wrapping a double value between 0 and 1.
+     * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
+     */
+    public static UIForProgressBar<JProgressBar> progressBar( Align align, double progress ) {
+        NullUtil.nullArgCheck(align, "align", Align.class);
+        return progressBar().with(align).withMin(0).withMax(100).withProgress(progress);
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JProgressBar} instance with a default minimum and maximum value
+     *  of 0 and 100 and the provided alignment property and double based progress
+     *  property (a property wrapping a double value between 0 and 1)
+     *  dynamically bound to the progress bar.
+     *  The alignment property wraps a {@link Align} value, which may be either {@link Align#HORIZONTAL}
+     *  or {@link Align#VERTICAL}.
+     *  When any of the two properties change in your view model, the progress bar will be updated accordingly.
+     *
+     * @param align The alignment of the progress bar.
+     * @param progress The current progress property of the progress bar, a property wrapping a double value between 0 and 1.
+     * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
+     */
+    public static UIForProgressBar<JProgressBar> progressBar( Val<Align> align, Val<Double> progress ) {
+        NullUtil.nullArgCheck(align, "align", Align.class);
+        NullUtil.nullArgCheck(progress, "progress", Val.class);
+        NullUtil.nullPropertyCheck(progress, "progress", "Null is not a valid value for the progress property of a progress bar.");
+        return progressBar().withAlignment(align).withMin(0).withMax(100).withProgress(progress);
+    }
+
+    /**
      *  Use this to create a builder for the provided {@link JTextArea} instance.
      *
      * @return A builder instance for the provided {@link JTextArea}, which enables fluent method chaining.
@@ -4083,16 +4251,6 @@ public final class UI
     }
 
     /** {inheritDoc} */
-    public static class Button extends JButton {
-        @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
-        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
-    }
-    /** {inheritDoc} */
-    public static class ToggleButton extends JToggleButton {
-        @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
-        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
-    }
-    /** {inheritDoc} */
     public static class Panel extends JPanel {
         @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
@@ -4114,6 +4272,16 @@ public final class UI
     }
     /** {inheritDoc} */
     public static class CheckBox extends JCheckBox {
+        @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
+        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
+    }
+    /** {inheritDoc} */
+    public static class Button extends JButton {
+        @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
+        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
+    }
+    /** {inheritDoc} */
+    public static class ToggleButton extends JToggleButton {
         @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
     }
@@ -4188,11 +4356,6 @@ public final class UI
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
     }
     /** {inheritDoc} */
-    public static class ProgressBar extends JProgressBar {
-        @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
-        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
-    }
-    /** {inheritDoc} */
     public static class Spinner extends JSpinner {
         @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
@@ -4203,17 +4366,22 @@ public final class UI
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
     }
     /** {inheritDoc} */
+    public static class PasswordField extends JPasswordField {
+        @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
+        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
+    }
+    /** {inheritDoc} */
+    public static class ProgressBar extends JProgressBar {
+        @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
+        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
+    }
+    /** {inheritDoc} */
     public static class TextPane extends JTextPane {
         @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
     }
     /** {inheritDoc} */
     public static class EditorPane extends JEditorPane {
-        @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
-        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
-    }
-    /** {inheritDoc} */
-    public static class PasswordField extends JPasswordField {
         @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
     }

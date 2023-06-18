@@ -48,22 +48,22 @@ public class LoginViewModel
     public void login() {
         buttonEnabled.set( false );
         feedbackColor.set( Color.BLACK );
-        feedback.set("Please wait...");
+        feedback.set("Please wait..");
         try {
             Thread.sleep(500);
             feedback.set("Please wait.");
             Thread.sleep(500);
+            feedback.set("Please wait.");
+            Thread.sleep(500);
             feedback.set("Please wait..");
             Thread.sleep(500);
-            feedback.set("Please wait...");
+            feedback.set("Please wait.");
             Thread.sleep(500);
             feedback.set("Please wait.");
             Thread.sleep(500);
             feedback.set("Please wait..");
             Thread.sleep(500);
-            feedback.set("Please wait...");
-            Thread.sleep(500);
-            feedback.set("Please wait..");
+            feedback.set("Please wait.");
             Thread.sleep(500);
             // A dark yellow tint:
             feedbackColor.set( new Color(0, 71, 105) );

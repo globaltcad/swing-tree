@@ -120,7 +120,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
         NullUtil.nullPropertyCheck(text, "text", "Use an empty string instead of null!");
         _onShow( text, newText -> {
             C c = getComponent();
-            if ( !Objects.equals(c.getText(), newText) ) // avoid infinite recursion or some other Swing weirdness
+            if ( !Objects.equals(c.getText(), newText) )  // avoid infinite recursion or some other Swing weirdness
                 _setTextSilently( c, newText );
         });
         _onTextChange( e -> {
@@ -166,6 +166,8 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
             component.setText(text);
             for ( DocumentListener listener : listeners )
                 abstractDoc.addDocumentListener(listener);
+
+            component.repaint(); // otherwise the text is not updated until the next repaint
         }
         else
             component.setText(text);

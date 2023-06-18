@@ -158,7 +158,6 @@ public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner
                 ((Var<Object>) value).act( interpreted );
             });
         });
-        getComponent().setValue(value.get());
         return withValue( value.get() );
     }
 

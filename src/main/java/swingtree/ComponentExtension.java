@@ -50,7 +50,7 @@ public class ComponentExtension<C extends JComponent>
     private StyleRenderer<C> _currentRenderer = null;
     private ComponentUI _styleLaF = null;
     private ComponentUI _formerLaF = null;
-    private Function<StyleDelegate<C>, Style> _styling = null;
+    private Function<StyleDelegate<C>, StyleDelegate<C>> _styling = null;
     private StyleSheet _styleSheet = null;
 
 
@@ -60,13 +60,13 @@ public class ComponentExtension<C extends JComponent>
 
     private boolean _customLookAndFeelIsInstalled() { return _styleLaF != null; }
 
-    void addStyling( Function<StyleDelegate<C>, Style> styler ) {
+    void addStyling( Function<StyleDelegate<C>, StyleDelegate<C>> styler ) {
         Objects.requireNonNull(styler);
         checkIfIsDeclaredInUI();
         if ( _styling == null )
             _styling = styler;
         else
-            _styling = _styling.andThen(s -> styler.apply(new StyleDelegate<>(_owner, s)));
+            _styling = _styling.andThen(s -> styler.apply(new StyleDelegate<>(_owner, s.style())));
 
         establishStyle();
     }
@@ -157,7 +157,7 @@ public class ComponentExtension<C extends JComponent>
         if ( _styling == null )
             return style;
         else
-            return Optional.of( _styling.apply(new StyleDelegate<>(_owner, style.orElse(Style.none()))) );
+            return Optional.of( _styling.apply(new StyleDelegate<>(_owner, style.orElse(Style.none()))).style() );
     }
 
     private Style _applyStyleToComponentState( Style style )
@@ -179,7 +179,7 @@ public class ComponentExtension<C extends JComponent>
         boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();
         // If the style has a border radius set we need to make sure that we have a background color:
         if ( hasBorderRadius && !style.background().color().isPresent() )
-            style = style.backgroundColor( _owner.getBackground() );
+            style = style.backgroundColor(_owner.getBackground());
 
         if ( style.border().color().isPresent() && style.border().widths().average() > 0 ) {
             if ( !style.background().foundationColor().isPresent() )
@@ -192,7 +192,43 @@ public class ComponentExtension<C extends JComponent>
         if ( style.background().color().isPresent() && !Objects.equals( _owner.getBackground(), style.background().color().get() ) )
             _owner.setBackground( style.background().color().get() );
 
-        if ( _owner instanceof JTextComponent) {
+        if ( style.dimensionality().minWidth().isPresent() || style.dimensionality().minHeight().isPresent() ) {
+            Dimension minSize = _owner.getMinimumSize();
+
+            int minWidth  = style.dimensionality().minWidth().orElse(minSize == null ? 0 : minSize.width);
+            int minHeight = style.dimensionality().minHeight().orElse(minSize == null ? 0 : minSize.height);
+
+            Dimension newMinSize = new Dimension(minWidth, minHeight);
+
+            if ( ! newMinSize.equals(minSize) )
+                _owner.setMinimumSize(newMinSize);
+        }
+
+        if ( style.dimensionality().maxWidth().isPresent() || style.dimensionality().maxHeight().isPresent() ) {
+            Dimension maxSize = _owner.getMaximumSize();
+
+            int maxWidth  = style.dimensionality().maxWidth().orElse(maxSize == null  ? Integer.MAX_VALUE : maxSize.width);
+            int maxHeight = style.dimensionality().maxHeight().orElse(maxSize == null ? Integer.MAX_VALUE : maxSize.height);
+
+            Dimension newMaxSize = new Dimension(maxWidth, maxHeight);
+
+            if ( ! newMaxSize.equals(maxSize) )
+                _owner.setMaximumSize(newMaxSize);
+        }
+
+        if ( style.dimensionality().preferredWidth().isPresent() || style.dimensionality().preferredHeight().isPresent() ) {
+            Dimension prefSize = _owner.getPreferredSize();
+
+            int prefWidth  = style.dimensionality().preferredWidth().orElse(prefSize == null ? 0 : prefSize.width);
+            int prefHeight = style.dimensionality().preferredHeight().orElse(prefSize == null ? 0 : prefSize.height);
+
+            Dimension newPrefSize = new Dimension(prefWidth, prefHeight);
+
+            if ( ! newPrefSize.equals(prefSize) )
+                _owner.setPreferredSize(newPrefSize);
+        }
+
+        if ( _owner instanceof JTextComponent ) {
             JTextComponent tc = (JTextComponent) _owner;
             if ( style.font().selectionColor().isPresent() && ! Objects.equals( tc.getSelectionColor(), style.font().selectionColor().get() ) )
                 tc.setSelectionColor(style.font().selectionColor().get());
@@ -448,12 +484,22 @@ public class ComponentExtension<C extends JComponent>
 
         private Insets _calculateInsets() {
             _currentMarginInsets = _compExt._getOrCreateRenderer()
-                                            .map(r -> r.calculateMarginInsets())
+                                            .map( r -> r.calculateMarginInsets() )
                                             .orElse(_currentMarginInsets);
 
             return _compExt._getOrCreateRenderer()
-                            .map(r -> r.calculateBorderInsets(_formerBorder == null ? new Insets(0,0,0,0) : _formerBorder.getBorderInsets(_compExt._owner)))
-                            .orElseGet(()->_formerBorder == null ? new Insets(0,0,0,0) : _formerBorder.getBorderInsets(_compExt._owner));
+                            .map(r ->
+                                r.calculateBorderInsets(
+                                    _formerBorder == null
+                                        ? new Insets(0,0,0,0)
+                                        : _formerBorder.getBorderInsets(_compExt._owner)
+                                )
+                            )
+                            .orElseGet(()->
+                                _formerBorder == null
+                                    ? new Insets(0,0,0,0)
+                                    : _formerBorder.getBorderInsets(_compExt._owner)
+                            );
         }
 
         public Insets getCurrentMarginInsets() { return _currentMarginInsets; }

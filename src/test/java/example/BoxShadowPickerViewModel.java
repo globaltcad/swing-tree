@@ -190,10 +190,39 @@ public class BoxShadowPickerViewModel
     public Var<String> code() { return code; }
 
     private void createCode() {
+        String cornerRadius = "";
+        if ( this.borderCorner.is(Corner.EVERY) ) {
+            if ( arcWidthAt(Corner.TOP_LEFT) == arcHeightAt(Corner.TOP_LEFT) )
+                cornerRadius = "     .borderRadius(" + arcWidthAt(Corner.TOP_LEFT) + ")\n";
+            else
+                cornerRadius = "     .borderRadius(" + arcWidthAt(Corner.TOP_LEFT) + ", " + arcHeightAt(Corner.TOP_LEFT) + ")\n";
+        }
+        else
+            cornerRadius =
+                "     .borderRadiusAt(Corner.TOP_LEFT, " + arcWidthAt(Corner.TOP_LEFT) + ", " + arcHeightAt(Corner.TOP_LEFT) + ")\n" +
+                "     .borderRadiusAt(Corner.TOP_RIGHT, " + arcWidthAt(Corner.TOP_RIGHT) + ", " + arcHeightAt(Corner.TOP_RIGHT) + ")\n" +
+                "     .borderRadiusAt(Corner.BOTTOM_LEFT, " + arcWidthAt(Corner.BOTTOM_LEFT) + ", " + arcHeightAt(Corner.BOTTOM_LEFT) + ")\n" +
+                "     .borderRadiusAt(Corner.BOTTOM_RIGHT, " + arcWidthAt(Corner.BOTTOM_RIGHT) + ", " + arcHeightAt(Corner.BOTTOM_RIGHT) + ")\n";
+
+        String borderWidth = "";
+        if ( this.borderEdge.is(Edge.EVERY) ) {
+            if ( leftBorderWidth() == rightBorderWidth() && leftBorderWidth() == topBorderWidth() && leftBorderWidth() == bottomBorderWidth() )
+                borderWidth = leftBorderWidth() == 0 ? "" : "     .borderWidth(" + leftBorderWidth() + ")\n";
+            else
+                borderWidth =
+                    "     .borderWidth(" + leftBorderWidth() + ", " + topBorderWidth() + ", " + rightBorderWidth() + ", " + bottomBorderWidth() + ")\n";
+        }
+        else
+            borderWidth =
+                "     .borderWidthAt(Edge.LEFT, " + leftBorderWidth() + ")\n" +
+                "     .borderWidthAt(Edge.TOP, " + topBorderWidth() + ")\n" +
+                "     .borderWidthAt(Edge.RIGHT, " + rightBorderWidth() + ")\n" +
+                "     .borderWidthAt(Edge.BOTTOM, " + bottomBorderWidth() + ")\n";
+
         code.set(
             "panel(FILL)\n" +
             ".withStyle( it ->\n" +
-            "    it.style()\n" +
+            "    it\n" +
             "     .backgroundColor("+ str(backgroundColor) + ")\n" +
             "     .foundationColor(" + str(foundationColor) + ")\n" +
             ( drawSmiley().is(false) ? "" :
@@ -206,11 +235,11 @@ public class BoxShadowPickerViewModel
             "         drawASmiley(g2d, x, y, w, h);\n" +
             "     })\n"
             ) +
-            "     .pad(" + str(paddingTop) + ", " + str(paddingRight) + ", " + str(paddingBottom) + ", " + str(paddingLeft) + ")\n" +
+            "     .padding(" + str(paddingTop) + ", " + str(paddingRight) + ", " + str(paddingBottom) + ", " + str(paddingLeft) + ")\n" +
             "     .margin(" + str(marginTop) + ", " + str(marginRight) + ", " + str(marginBottom) + ", " + str(marginLeft) + ")\n" +
-            //( borderArcWidth.is(0) && borderArcHeight.is(0) ? "" : "     .borderRadius(" + str(borderArcWidth) + ", " + str(borderArcHeight) + ")\n" ) +
-            //( borderThickness.is(0) ? "" : "     .borderWidth(" + str(borderThickness) + ")\n" ) +
-            "     .borderColor(" + str(borderColor) + ")\n" +
+            cornerRadius +
+            borderWidth +
+            (borderWidth.isEmpty() ? "" : "     .borderColor(" + str(borderColor) + ")\n") +
             "     .shadowColor(" + str(shadowColor) + ")\n" +
             ( horizontalShadowOffset.is(0) ? "" : "     .shadowHorizontalOffset(" + str(horizontalShadowOffset) + ")\n" ) +
             ( verticalShadowOffset.is(0) ? "" : "     .shadowVerticalOffset(" + str(verticalShadowOffset) + ")\n" ) +

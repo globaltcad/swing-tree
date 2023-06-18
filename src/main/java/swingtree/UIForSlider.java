@@ -39,7 +39,7 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
         NullUtil.nullArgCheck( align, "align", Val.class );
         NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment" );
         _onShow( align, v -> with(align.orElseThrow()) );
-        return this;
+        return with(align.orElseThrow());
     }
 
     /**
