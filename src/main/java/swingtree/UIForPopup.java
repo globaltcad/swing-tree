@@ -1,8 +1,13 @@
 package swingtree;
 
+import sprouts.Action;
 import sprouts.Val;
 
 import javax.swing.*;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
+import java.awt.*;
+import java.util.function.Consumer;
 
 /**
  *  A swing tree builder node for {@link JPopupMenu} instances.
@@ -30,13 +35,85 @@ public class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForPopup<P
      *  based on the value of the given {@link Val}.
      *  If the value of the {@link Val} changes, the border will be painted or not.
      *
-     * @param val A {@link Val} which will be used to determine if the border is painted or not.
+     * @param isPainted A {@link Val} which will be used to determine if the border is painted or not.
      * @return This builder node, to qllow for method chaining.
      */
-    public UIForPopup<P> borderIsPaintedIf( Val<Boolean> val ) {
-        _onShow(val, v -> borderIsPaintedIf(v) );
-        return borderIsPaintedIf( val.get() );
+    public UIForPopup<P> borderIsPaintedIf( Val<Boolean> isPainted ) {
+        _onShow(isPainted, v -> borderIsPaintedIf(v) );
+        return borderIsPaintedIf( isPainted.get() );
     }
+
+
+    /**
+     *  Registers a listener to be notified when the popup is shown.
+     *  This is typically triggered when {@link JPopupMenu#show(Component, int, int)} is called.
+     *
+     * @param action The action to be executed when the popup is shown.
+     * @return this
+     */
+    public UIForPopup<P> onVisible( Action<ComponentDelegate<P, PopupMenuEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", Action.class);
+        _onPopupOpen( e -> _doApp(()->action.accept(new ComponentDelegate<>( getComponent(), e, this::getSiblinghood )) ) );
+        return this;
+    }
+
+    private void _onPopupOpen( Consumer<PopupMenuEvent> consumer ) {
+        getComponent().addPopupMenuListener(new PopupMenuListener() {
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                // This method is called before the popup menu becomes visible.
+                consumer.accept(e);
+            }
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}
+            public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}
+        });
+    }
+
+    /**
+     *  Registers a listener to be notified when the popup becomes invisible,
+     *  meaning its popup menu is hidden.
+     *
+     * @param action The action to be executed when the popup becomes invisible.
+     * @return This builder node, to allow for method chaining.
+     */
+    public UIForPopup<P> onInvisible( Action<ComponentDelegate<P, PopupMenuEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", Action.class);
+        _onPopupClose( e -> _doApp(()->action.accept(new ComponentDelegate<>( (P) getComponent(), e, this::getSiblinghood )) ) );
+        return this;
+    }
+
+    private void _onPopupClose( Consumer<PopupMenuEvent> consumer ) {
+        getComponent().addPopupMenuListener(new PopupMenuListener() {
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                consumer.accept(e); // This method is called before the popup menu becomes invisible
+            }
+            public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}
+        });
+    }
+
+    /**
+     *  Registers a listener to be notified when the popup is canceled.
+     *  This is typically triggered when the user clicks outside the popup.
+     *
+     * @param action the action to be executed when the popup is canceled.
+     * @return this
+     */
+    public UIForPopup<P> onCancel( Action<ComponentDelegate<P, PopupMenuEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", Action.class);
+        _onPopupCancel( e -> _doApp(()->action.accept(new ComponentDelegate<>( getComponent(), e, this::getSiblinghood )) ) );
+        return this;
+    }
+
+    private void _onPopupCancel( Consumer<PopupMenuEvent> consumer ) {
+        getComponent().addPopupMenuListener(new PopupMenuListener() {
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}
+            public void popupMenuCanceled(PopupMenuEvent e) {
+                consumer.accept(e); // This method is called when the popup menu is canceled
+            }
+        });
+    }
+
 
     public UIForPopup<P> add(JMenuItem item) { return this.add(UI.of(item)); }
 
