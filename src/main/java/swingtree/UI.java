@@ -1333,6 +1333,360 @@ public final class UI
     }
 
     /**
+     *  A factory method to wrap the provided {@link JRadioButtonMenuItem} instance in a SwingTree UI builder.
+     *
+     * @param radioMenuItem The {@link JRadioButtonMenuItem} instance to be wrapped.
+     * @return A builder instance for the provided {@link JRadioButtonMenuItem}, which enables fluent method chaining.
+     * @param <M> The type of the {@link JRadioButtonMenuItem} instance to be wrapped.
+     */
+    public static <M extends JRadioButtonMenuItem> UIForRadioButtonMenuItem<M> of( M radioMenuItem ) {
+        NullUtil.nullArgCheck(radioMenuItem, "component", JRadioButtonMenuItem.class);
+        return new UIForRadioButtonMenuItem<>(radioMenuItem);
+    }
+
+    /**
+     *  A factory method to create a plain {@link JRadioButtonMenuItem} instance. <br>
+     *  Here an example demonstrating the usage of this method: <br>
+     *  <pre>{@code
+     *    UI.popupMenu()
+     *    .add(UI.radioButtonMenuItem().onClick( it -> {..} ))
+     *    .add(UI.radioButtonMenuItem().onClick( it -> {..} ))
+     *  }</pre>
+     *
+     * @return A builder instance for the provided {@link JRadioButtonMenuItem}, which enables fluent method chaining.
+     */
+    public static UIForRadioButtonMenuItem<JRadioButtonMenuItem> radioButtonMenuItem() {
+        return new UIForRadioButtonMenuItem<>((JRadioButtonMenuItem) new RadioButtonMenuItem());
+    }
+
+    /**
+     *  A factory method to create a {@link JRadioButtonMenuItem} with the provided text
+     *  displayed on the menu button. <br>
+     *  Here an example demonstrating the usage of this method: <br>
+     *  <pre>{@code
+     *    UI.popupMenu()
+     *    .add(UI.radioButtonMenuItem("Delete").onClick( it -> {..} ))
+     *    .add(UI.radioButtonMenuItem("Edit").onClick( it -> {..} ))
+     * }</pre>
+     *
+     * @param text The text which should be displayed on the wrapped {@link JRadioButtonMenuItem}.
+     * @return A builder instance for the provided {@link JRadioButtonMenuItem}, which enables fluent method chaining.
+     */
+    public static UIForRadioButtonMenuItem<JRadioButtonMenuItem> radioButtonMenuItem( String text ) {
+        NullUtil.nullArgCheck(text, "text", String.class);
+        return radioButtonMenuItem().withText(text);
+    }
+
+    /**
+     *  A factory method to create a {@link JRadioButtonMenuItem} bound to the provided text
+     *  property, whose value will be displayed on the menu button dynamically. <br>
+     *  Here an example demonstrating the usage of this method: <br>
+     *  <pre>{@code
+     *    UI.popupMenu()
+     *    .add(UI.radioButtonMenuItem(Val.of("Delete")).onClick( it -> {..} ))
+     *    .add(UI.radioButtonMenuItem(Val.of("Edit")).onClick( it -> {..} ))
+     * }</pre>
+     * Note that in a real application you would take the text property from a model object through
+     * a plain old getter method (e.g. {@code myViewModel.getTextProperty()}).
+     *
+     * @param text The text property which should be displayed on the wrapped {@link JRadioButtonMenuItem} dynamically.
+     * @return A builder instance for the provided {@link JRadioButtonMenuItem}, which enables fluent method chaining.
+     */
+    public static UIForRadioButtonMenuItem<JRadioButtonMenuItem> radioButtonMenuItem( Val<String> text ) {
+        NullUtil.nullArgCheck(text, "text", Val.class);
+        return radioButtonMenuItem().withText(text);
+    }
+
+    /**
+     *  A factory method to create a {@link JRadioButtonMenuItem} with the provided text
+     *  displayed on the menu button and the provided icon displayed on the menu button. <br>
+     *  Here an example demonstrating the usage of this method: <br>
+     *  <pre>{@code
+     *    UI.popupMenu()
+     *    .add(UI.radioButtonMenuItem("Delete", UI.icon("delete.png")).onClick( it -> {..} ))
+     *    .add(UI.radioButtonMenuItem("Edit", UI.icon("edit.png")).onClick( it -> {..} ))
+     * }</pre>
+     *
+     * @param text The text which should be displayed on the wrapped {@link JRadioButtonMenuItem}.
+     * @param icon The icon which should be displayed on the wrapped {@link JRadioButtonMenuItem}.
+     * @return A builder instance for the provided {@link JRadioButtonMenuItem}, which enables fluent method chaining.
+     */
+    public static UIForRadioButtonMenuItem<JRadioButtonMenuItem> radioButtonMenuItem( String text, Icon icon ) {
+        NullUtil.nullArgCheck(text, "text", String.class);
+        NullUtil.nullArgCheck(icon, "icon", Icon.class);
+        return radioButtonMenuItem().withText(text).withIcon(icon);
+    }
+
+    /**
+     *  A factory method to create a {@link JRadioButtonMenuItem} bound to the provided text
+     *  property, whose value will be displayed on the menu button dynamically and the provided icon
+     *  displayed on the menu button. <br>
+     *  Here an example demonstrating the usage of this method: <br>
+     *  <pre>{@code
+     *    UI.popupMenu()
+     *    .add(UI.radioButtonMenuItem(Val.of("Delete"), UI.icon("delete.png")).onClick( it -> {..} ))
+     *    .add(UI.radioButtonMenuItem(Val.of("Edit"), UI.icon("edit.png")).onClick( it -> {..} ))
+     * }</pre>
+     * Note that in a real application you would take the text property from a model object through
+     * a plain old getter method (e.g. {@code myViewModel.getTextProperty()}).
+     *
+     * @param text The text property which should be displayed on the wrapped {@link JRadioButtonMenuItem} dynamically.
+     * @param icon The icon which should be displayed on the wrapped {@link JRadioButtonMenuItem}.
+     * @return A builder instance for the provided {@link JRadioButtonMenuItem}, which enables fluent method chaining.
+     */
+
+    public static UIForRadioButtonMenuItem<JRadioButtonMenuItem> radioButtonMenuItem( Val<String> text, Icon icon ) {
+        NullUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullArgCheck(icon, "icon", Icon.class);
+        return radioButtonMenuItem().withText(text).withIcon(icon);
+    }
+
+    /**
+     *  A factory method to create a {@link JRadioButtonMenuItem} bound to a fixed enum value
+     *  and a variable enum property which will dynamically select the menu item based on the
+     *  equality of the fixed enum value and the variable enum property value. <br>
+     *  Consider the following example code:
+     *  <pre>{@code
+     *    UI.popupMenu()
+     *    .add(UI.radioButtonMenuItem(Unit.SECONDS, myViewModel.unitProperty()))
+     *    .add(UI.radioButtonMenuItem(Unit.MINUTES, myViewModel.unitProperty()))
+     *    .add(UI.radioButtonMenuItem(Unit.HOURS,   myViewModel.unitProperty()))
+     *  }</pre>
+     *  In this example the {@code myViewModel.unitProperty()} is a {@link Var} property of
+     *  example type {@code Unit}.
+     *  A given menu item will be selected if the value of the {@code myViewModel.unitProperty()}
+     *  is equal to the first enum value passed to the factory method.
+     *  This first enum will also be used as the text of the menu item through the {@code toString()}.
+     *
+     * @param state The fixed enum value which will be used as the text of the menu item and
+     * @param property The variable enum property which will be used to select the menu item.
+     * @return A builder instance for the provided {@link JRadioButtonMenuItem}, which enables fluent method chaining.
+     */
+    public static <E extends Enum<E>> UIForRadioButtonMenuItem<JRadioButtonMenuItem> radioButtonMenuItem( E state, Var<E> property ) {
+        NullUtil.nullArgCheck(state, "state", Enum.class);
+        NullUtil.nullArgCheck(property, "property", Var.class);
+        return radioButtonMenuItem(state.toString()).isSelectedIf(state, property);
+    }
+
+    /**
+     *  A factory method to create a {@link JRadioButtonMenuItem} with some custom text and a boolean property,
+     *  dynamically determining whether the radio button based menu item is selected or not. <br>
+     *  Here an example demonstrating the usage of this method: <br>
+     *  <pre>{@code
+     *    // inside your view model class:
+     *    Var<Boolean> isSelected1 = Var.of(false);
+     *    Var<Boolean> isSelected2 = Var.of(false);
+     *    // inside your view class:
+     *    UI.popupMenu()
+     *    .add(UI.radioButtonMenuItem("Make Coffee", isSelected1).onClick( it -> {..} ))
+     *    .add(UI.radioButtonMenuItem("Make Tea", isSelected2).onClick( it -> {..} ))
+     * }</pre>
+     * Note that in a real application you would take the boolean property from a model object through
+     * a plain old getter method (e.g. {@code myViewModel.getIsSelectedProperty()}).
+     *
+     * @param text The text which should be displayed on the wrapped {@link JRadioButtonMenuItem}.
+     * @param isSelected The boolean property which will be bound to the menu item to dynamically
+     *                   determines whether the menu item is selected or not.
+     * @return A builder instance for the provided {@link JRadioButtonMenuItem}, which enables fluent method chaining.
+     */
+    public static UIForRadioButtonMenuItem<JRadioButtonMenuItem> radioButtonMenuItem( String text, Var<Boolean> isSelected ) {
+        NullUtil.nullArgCheck(text, "text", String.class);
+        NullUtil.nullArgCheck(isSelected, "isSelected", Var.class);
+        return radioButtonMenuItem().withText(text).isSelectedIf(isSelected);
+    }
+
+    /**
+     *  A factory method to create a {@link JRadioButtonMenuItem} with some custom text and a boolean property,
+     *  dynamically determining whether the radio button based menu item is selected or not. <br>
+     *  Here an example demonstrating the usage of this method: <br>
+     *  <pre>{@code
+     *    // inside your view model class:
+     *    Var<Boolean> isSelected1 = Var.of(false);
+     *    Var<Boolean> isSelected2 = Var.of(false);
+     *    // inside your view class:
+     *    UI.popupMenu()
+     *    .add(UI.radioButtonMenuItem(Val.of("Make Coffee"), isSelected1).onClick( it -> {..} ))
+     *    .add(UI.radioButtonMenuItem(Val.of("Make Tea"), isSelected2).onClick( it -> {..} ))
+     * }</pre>
+     * Note that in a real application you would take the {@code String} and {@code boolean}
+     * properties from a view model object through
+     * plain old getter methods
+     * (e.g. {@code myViewModel.getTextProperty()} and {@code myViewModel.getIsSelectedProperty()}).
+     *
+     * @param text The text property whose text should dynamically be displayed on the wrapped {@link JRadioButtonMenuItem}.
+     * @param isSelected The boolean property which will be bound to the menu item to dynamically
+     *                   determines whether the menu item is selected or not.
+     * @return A builder instance for the provided {@link JRadioButtonMenuItem}, which enables fluent method chaining.
+     */
+    public static UIForRadioButtonMenuItem<JRadioButtonMenuItem> radioButtonMenuItem( Val<String> text, Var<Boolean> isSelected ) {
+        NullUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullArgCheck(isSelected, "isSelected", Var.class);
+        return radioButtonMenuItem().withText(text).isSelectedIf(isSelected);
+    }
+
+    /**
+     *  A factory method to wrap the provided {@link JCheckBoxMenuItem} instance in a SwingTree UI builder.
+     *
+     * @param checkBoxMenuItem The {@link JCheckBoxMenuItem} instance to be wrapped.
+     * @return A builder instance for the provided {@link JCheckBoxMenuItem}, which enables fluent method chaining.
+     * @param <M> The type of the {@link JCheckBoxMenuItem} instance to be wrapped.
+     */
+    public static <M extends JCheckBoxMenuItem> UIForCheckBoxMenuItem<M> of( M checkBoxMenuItem ) {
+        NullUtil.nullArgCheck(checkBoxMenuItem, "component", JCheckBoxMenuItem.class);
+        return new UIForCheckBoxMenuItem<>(checkBoxMenuItem);
+    }
+
+    /**
+     *  A factory method to create a {@link JCheckBoxMenuItem} without text
+     *  displayed on top of the menu button. <br>
+     *  Here an example demonstrating the usage of this method: <br>
+     *  <pre>{@code
+     *    UI.popupMenu()
+     *    .add(UI.checkBoxMenuItem().onClick( it -> {..} ))
+     *    .add(UI.checkBoxMenuItem().onClick( it -> {..} ))
+     * }</pre>
+     *
+     * @return A builder instance for the provided {@link JCheckBoxMenuItem}, which enables fluent method chaining.
+     */
+    public static UIForCheckBoxMenuItem<JCheckBoxMenuItem> checkBoxMenuItem() {
+        return of(new CheckBoxMenuItem());
+    }
+
+    /**
+     *  A factory method to create a {@link JCheckBoxMenuItem} with the provided text
+     *  displayed on the menu button. <br>
+     *  Here an example demonstrating the usage of this method: <br>
+     *  <pre>{@code
+     *    UI.popupMenu()
+     *    .add(UI.checkBoxMenuItem("Delete").onClick( it -> {..} ))
+     *    .add(UI.checkBoxMenuItem("Edit").onClick( it -> {..} ))
+     * }</pre>
+     *
+     * @param text The text which should be displayed on the wrapped {@link JCheckBoxMenuItem}.
+     * @return A builder instance for the provided {@link JCheckBoxMenuItem}, which enables fluent method chaining.
+     */
+    public static UIForCheckBoxMenuItem<JCheckBoxMenuItem> checkBoxMenuItem( String text ) {
+        NullUtil.nullArgCheck(text, "text", String.class);
+        return checkBoxMenuItem().withText(text);
+    }
+
+    /**
+     *  A factory method to create a {@link JCheckBoxMenuItem} bound to the provided text
+     *  property, whose value will be displayed on the menu button dynamically. <br>
+     *  Here an example demonstrating the usage of this method: <br>
+     *  <pre>{@code
+     *    UI.popupMenu()
+     *    .add(UI.checkBoxMenuItem(Val.of("Delete")).onClick( it -> {..} ))
+     *    .add(UI.checkBoxMenuItem(Val.of("Edit")).onClick( it -> {..} ))
+     * }</pre>
+     * Note that in a real application you would take the text property from a model object through
+     * a plain old getter method (e.g. {@code myViewModel.getTextProperty()}).
+     *
+     * @param text The text property which should be displayed on the wrapped {@link JCheckBoxMenuItem} dynamically.
+     * @return A builder instance for the provided {@link JCheckBoxMenuItem}, which enables fluent method chaining.
+     */
+    public static UIForCheckBoxMenuItem<JCheckBoxMenuItem> checkBoxMenuItem( Val<String> text ) {
+        NullUtil.nullArgCheck(text, "text", Val.class);
+        return checkBoxMenuItem().withText(text);
+    }
+
+    /**
+     *  A factory method to create a {@link JCheckBoxMenuItem} with the provided text
+     *  displayed on the menu button and the provided icon displayed on the menu button. <br>
+     *  Here an example demonstrating the usage of this method: <br>
+     *  <pre>{@code
+     *    UI.popupMenu()
+     *    .add(UI.checkBoxMenuItem("Delete", UI.icon("delete.png")).onClick( it -> {..} ))
+     *    .add(UI.checkBoxMenuItem("Edit", UI.icon("edit.png")).onClick( it -> {..} ))
+     * }</pre>
+     *
+     * @param text The text which should be displayed on the wrapped {@link JCheckBoxMenuItem}.
+     * @param icon The icon which should be displayed on the wrapped {@link JCheckBoxMenuItem}.
+     * @return A builder instance for the provided {@link JCheckBoxMenuItem}, which enables fluent method chaining.
+     */
+    public static UIForCheckBoxMenuItem<JCheckBoxMenuItem> checkBoxMenuItem( String text, Icon icon ) {
+        NullUtil.nullArgCheck(text, "text", String.class);
+        NullUtil.nullArgCheck(icon, "icon", Icon.class);
+        return checkBoxMenuItem().withText(text).withIcon(icon);
+    }
+
+    /**
+     *  A factory method to create a {@link JCheckBoxMenuItem} with some custom text and a boolean property,
+     *  dynamically determining whether the menu item is selected or not. <br>
+     *  Here an example demonstrating the usage of this method: <br>
+     *  <pre>{@code
+     *    // inside your view model class:
+     *    Var<Boolean> isSelected = Var.of(false);
+     *    // inside your view class:
+     *    UI.popupMenu()
+     *    .add(UI.checkBoxMenuItem("Delete", isSelected).onClick( it -> {..} ))
+     *    .add(UI.checkBoxMenuItem("Edit", isSelected).onClick( it -> {..} ))
+     * }</pre>
+     * Note that in a real application you would take the boolean property from a model object through
+     * a plain old getter method (e.g. {@code myViewModel.getIsSelectedProperty()}).
+     *
+     * @param text The text which should be displayed on the wrapped {@link JCheckBoxMenuItem}.
+     * @param isSelected The boolean property which will be bound to the menu item to dynamically
+     *                   determines whether the menu item is selected or not.
+     * @return A builder instance for the provided {@link JCheckBoxMenuItem}, which enables fluent method chaining.
+     */
+    public static UIForCheckBoxMenuItem<JCheckBoxMenuItem> checkBoxMenuItem( String text, Var<Boolean> isSelected ) {
+        NullUtil.nullArgCheck(text, "text", String.class);
+        NullUtil.nullArgCheck(isSelected, "isSelected", Var.class);
+        return checkBoxMenuItem().withText(text).isSelectedIf(isSelected);
+    }
+
+    /**
+     *  A factory method to create a {@link JCheckBoxMenuItem} bound to the provided text
+     *  property, whose value will be displayed on the menu button dynamically and the provided icon
+     *  displayed on the menu button. <br>
+     *  Here an example demonstrating the usage of this method: <br>
+     *  <pre>{@code
+     *    UI.popupMenu()
+     *    .add(UI.checkBoxMenuItem(Val.of("Delete"), UI.icon("delete.png")).onClick( it -> {..} ))
+     *    .add(UI.checkBoxMenuItem(Val.of("Edit"), UI.icon("edit.png")).onClick( it -> {..} ))
+     * }</pre>
+     * Note that in a real application you would take the text property from a model object through
+     * a plain old getter method (e.g. {@code myViewModel.getTextProperty()}).
+     *
+     * @param text The text property which should be displayed on the wrapped {@link JCheckBoxMenuItem} dynamically.
+     * @param icon The icon which should be displayed on the wrapped {@link JCheckBoxMenuItem}.
+     * @return A builder instance for the provided {@link JCheckBoxMenuItem}, which enables fluent method chaining.
+     */
+    public static UIForCheckBoxMenuItem<JCheckBoxMenuItem> checkBoxMenuItem( Val<String> text, Icon icon ) {
+        NullUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullArgCheck(icon, "icon", Icon.class);
+        return checkBoxMenuItem().withText(text).withIcon(icon);
+    }
+
+    /**
+     *  A factory method to create a {@link JCheckBoxMenuItem} bound to the provided text
+     *  property, whose value will be displayed on the menu button dynamically and the provided boolean property,
+     *  dynamically determining whether the menu item is selected or not. <br>
+     *  Here an example demonstrating the usage of this method: <br>
+     *  <pre>{@code
+     *    // inside your view model class:
+     *    Var<Boolean> isSelected = Var.of(false);
+     *    // inside your view class:
+     *    UI.popupMenu()
+     *    .add(UI.checkBoxMenuItem(Val.of("Delete"), isSelected).onClick( it -> {..} ))
+     *    .add(UI.checkBoxMenuItem(Val.of("Edit"), isSelected).onClick( it -> {..} ))
+     * }</pre>
+     * Note that in a real application you would take the text property from a model object through
+     * a plain old getter method (e.g. {@code myViewModel.getTextProperty()}).
+     *
+     * @param text The text property which should be displayed on the wrapped {@link JCheckBoxMenuItem} dynamically.
+     * @param isSelected The boolean property which will be bound to the menu item to dynamically
+     *                   determines whether the menu item is selected or not.
+     * @return A builder instance for the provided {@link JCheckBoxMenuItem}, which enables fluent method chaining.
+     */
+    public static UIForCheckBoxMenuItem<JCheckBoxMenuItem> checkBoxMenuItem( Val<String> text, Var<Boolean> isSelected ) {
+        NullUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullArgCheck(isSelected, "isSelected", Var.class);
+        return checkBoxMenuItem().withText(text).isSelectedIf(isSelected);
+    }
+
+    /**
      *  Use this to create a builder for the provided {@link JToolBar} instance.
      *  Using method chaining you can populate the {@link JToolBar} by like so: <br>
      *  <pre>{@code
@@ -4320,6 +4674,16 @@ public final class UI
         @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
     }
+    /** {inheritDoc} */
+    public static class RadioButtonMenuItem extends JRadioButtonMenuItem {
+        @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
+        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
+    }
+    /** {inheritDoc} */
+     public static class CheckBoxMenuItem extends JCheckBoxMenuItem {
+         @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
+         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
+     }
     /** {inheritDoc} */
     public static class Menu extends JMenu {
         @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }

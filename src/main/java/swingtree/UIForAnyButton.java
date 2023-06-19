@@ -333,11 +333,19 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         return isSelectedIf( var.orElseThrow() );
     }
 
+    /**
+     * @param borderPainted Whether the border of the button should be painted.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public I isBorderPaintedIf( boolean borderPainted ) {
         getComponent().setBorderPainted(borderPainted);
         return _this();
     }
 
+    /**
+     * @param val Whether the border of the button should be painted.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public I isBorderPaintedIf( Val<Boolean> val ) {
         _onShow(val, v -> isBorderPaintedIf(v) );
         return isBorderPaintedIf( val.get() );
