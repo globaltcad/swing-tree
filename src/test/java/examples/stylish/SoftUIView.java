@@ -1,7 +1,6 @@
 package examples.stylish;
 
 import com.formdev.flatlaf.FlatLightLaf;
-import examples.styles.SoftUIStyleSheet;
 import swingtree.UI;
 
 import java.awt.*;

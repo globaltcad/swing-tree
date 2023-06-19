@@ -283,6 +283,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I isVisibleIf( Var<Boolean> isVisible ) {
+        NullUtil.nullArgCheck(isVisible, "isVisible", Var.class);
+        NullUtil.nullPropertyCheck(isVisible, "isVisible", "Null is not allowed to model the visibility of a UI component! A boolean should only be true or false in this case.");
         _onShow( isVisible, v -> getComponent().setVisible(v) );
         onShown( it -> isVisible.act(true) );
         onHidden( it -> isVisible.act(false) );

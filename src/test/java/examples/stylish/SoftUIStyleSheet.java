@@ -1,4 +1,4 @@
-package examples.styles;
+package examples.stylish;
 
 import swingtree.style.Edge;
 import swingtree.style.ShadingStrategy;
@@ -119,7 +119,7 @@ public class SoftUIStyleSheet extends StyleSheet
                 .shadowBlurRadius(8)
                 .shadowSpreadRadius(-5)
                 .shadowIsInset(false)
-                .padding(4)
+                .padding(-1)
                 .margin(6)
         );
 

@@ -152,6 +152,7 @@ class Examples_Spec extends Specification
         """
         given : 'We create the UI.'
             var ui = new AnimatedButtonsView()
+            ui.setBackground(new Color(242, 242, 242))
         expect : 'It is rendered as shown in the image.'
             Utility.similarityBetween(ui, "/snapshots/animated-buttons-UI.png", 99.9) > 99.9
     }

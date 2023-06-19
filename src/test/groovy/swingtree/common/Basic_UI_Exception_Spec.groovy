@@ -118,7 +118,9 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.spinner((Var<?>)null)},
                     {UI.spinner((SpinnerModel)null)},
                     {UI.toolBar((UI.Align)null)},
-                    {UI.toolBar((Val)null)}
+                    {UI.toolBar((Val)null)},
+                    {UI.toolBar().isVisibleIf((Val)null)},
+                    {UI.toolBar().isVisibleIf((Var)null)},
             ]
     }
 
@@ -154,6 +156,7 @@ class Basic_UI_Exception_Spec extends Specification
                     { UI.button().isSelectedIf(Var.ofNullable(Boolean, true)) },
                     { UI.button().isSelectedIfNot(Var.ofNullable(Boolean, true)) },
                     { UI.popupMenu().isVisibleIf(Val.ofNullable(Boolean,true)) },
+                    { UI.popupMenu().isVisibleIf(Var.ofNullable(Boolean,true)) },
                     { UI.button(Val.ofNullable(String,"Click Me!")) },
                     { UI.label(Val.ofNullable(String, "")) },
                     { UI.spinner().withValue(Val.ofNullable(Number, 4)) },
