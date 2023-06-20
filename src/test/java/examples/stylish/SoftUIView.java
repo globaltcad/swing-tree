@@ -33,7 +33,7 @@ public class SoftUIView extends Panel
                             double r = 30 * state.fadeIn();
                             double x = it.getEvent().getX() - r / 2.0;
                             double y = it.getEvent().getY() - r / 2.0;
-                            it.paint( g -> {
+                            it.paint(state, g -> {
                                 g.setColor(new Color(1f, 1f, 0f, (float) state.fadeOut()));
                                 g.fillOval((int) x, (int) y, (int) r, (int) r);
                             });
@@ -95,7 +95,7 @@ public class SoftUIView extends Panel
                 label(icon("img/swing.png")).withStyle( it -> it.padding(24) )
             )
             .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
-                it.paint( g -> {
+                it.paint(state, g -> {
                     g.setColor(new Color(0.1f, 0.25f, 0.5f, (float) state.fadeOut()));
                     for ( int i = 0; i < 5; i++ ) {
                         double r = 300 * state.fadeIn() * ( 1 - i * 0.2 );

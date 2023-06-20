@@ -8,6 +8,9 @@ import java.util.concurrent.TimeUnit;
  */
 public final class LifeTime
 {
+    private static long _instances = 0;
+
+    private final long _id = _instances++;
     private final long _delay; // in milliseconds
     private final long _duration;
     private final long _startTime;
@@ -114,19 +117,25 @@ public final class LifeTime
         return unit.convert(_startTime + _duration * iteration, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * @return Weather the animation is expired or not.
+     */
+    public boolean isExpired() {
+        return System.currentTimeMillis() >= _startTime + _duration;
+    }
+
     @Override
     public boolean equals( Object o ) {
         if ( this == o ) return true;
         if ( !(o instanceof LifeTime) ) return false;
         LifeTime lifeTime = (LifeTime) o;
-        return _delay     == lifeTime._delay    &&
+        return _id        == lifeTime._id       &&
+               _delay     == lifeTime._delay    &&
                _duration  == lifeTime._duration &&
                _startTime == lifeTime._startTime;
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(_delay, _duration, _startTime);
-    }
+    public int hashCode() { return Objects.hash(_id, _delay, _duration, _startTime); }
 
 }

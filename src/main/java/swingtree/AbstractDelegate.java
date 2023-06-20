@@ -2,6 +2,7 @@ package swingtree;
 
 import swingtree.animation.Animate;
 import swingtree.animation.Animation;
+import swingtree.animation.AnimationState;
 import swingtree.animation.LifeTime;
 import swingtree.style.Painter;
 
@@ -852,19 +853,20 @@ abstract class AbstractDelegate<C extends JComponent>
      *          double r = 300 * state.progress();
      *          double x = it.getEvent().getX() - r / 2;
      *          double y = it.getEvent().getY() - r / 2;
-     *          it.paint( g -> {
+     *          it.paint(state, g -> {
      *              g.setColor(new Color(1f, 1f, 0f, (float) (1 - state.progress())));
      *              g.fillOval((int) x, (int) y, (int) r, (int) r);
      *          });
      *      }))
      *  }</pre>
      *
+     * @param state The current animation state, which is important so that the rendering can be synchronized with the animation.
      * @param painter The rendering task which should be executed on the EDT at the end of the current event cycle.
      */
-    public final void paint( Painter painter ) {
+    public final void paint( AnimationState state, Painter painter ) {
         UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
             // We do the rendering later in the paint method of a custom border implementation!
-            ComponentExtension.from(_component).addAnimationPainter(painter);
+            ComponentExtension.from(_component).addAnimationPainter(state, painter);
         });
     }
 

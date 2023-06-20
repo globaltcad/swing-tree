@@ -1,5 +1,7 @@
 package swingtree;
 
+import swingtree.animation.AnimationState;
+import swingtree.animation.LifeTime;
 import swingtree.style.Painter;
 import swingtree.style.*;
 
@@ -43,7 +45,7 @@ public class ComponentExtension<C extends JComponent>
 
     private final C _owner;
 
-    private final List<Painter> _animationPainters = new ArrayList<>(0);
+    private final Map<LifeTime, Painter> _animationPainters = new LinkedHashMap<>(0);
 
     private final List<String> _styleGroups = new ArrayList<>(0);
 
@@ -87,8 +89,8 @@ public class ComponentExtension<C extends JComponent>
 
     public void clearAnimationRenderer() { _animationPainters.clear(); }
 
-    void addAnimationPainter( Painter painter ) {
-        _animationPainters.add(Objects.requireNonNull(painter));
+    void addAnimationPainter( AnimationState state, Painter painter ) {
+        _animationPainters.put(Objects.requireNonNull(state.lifetime()), Objects.requireNonNull(painter));
         _installCustomBorderBasedStyleAndAnimationRenderer();
     }
 
@@ -130,8 +132,11 @@ public class ComponentExtension<C extends JComponent>
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         // Animations are last: they are rendered on top of everything else:
-        for ( Painter painter : _animationPainters )
-            painter.paint(g2d);
+        for ( Map.Entry<LifeTime, Painter> entry : new ArrayList<>(_animationPainters.entrySet()) )
+            if ( entry.getKey().isExpired() )
+                _animationPainters.remove(entry.getKey());
+            else
+                entry.getValue().paint(g2d);
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
