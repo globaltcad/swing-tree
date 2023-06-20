@@ -201,6 +201,14 @@ public class AnimatedButtonsView extends Panel
                     g.fillRect((int) x, (int) y, (int) w, (int) h);
                 });
             }))
+            .onMouseEnter( it -> it.animateOnce(1, TimeUnit.SECONDS, state -> {
+                it.style(state, style ->
+                    style.borderWidth((int)(10 * state.cycle()))
+                         .borderColor(new Color(1f, 1f, 0f, (float) (1 - state.cycle())))
+                         .borderRadius((int)(100 * state.progress()))
+                         .foundationColor(new Color(1f,1f,1f,0f))
+                );
+            }))
         )
         .add(GROW.and(SPAN),
             button("I show many little mouse move explosions when you move your mouse over me")

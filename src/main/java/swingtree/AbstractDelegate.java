@@ -5,6 +5,7 @@ import swingtree.animation.Animation;
 import swingtree.animation.AnimationState;
 import swingtree.animation.LifeTime;
 import swingtree.style.Painter;
+import swingtree.style.Styler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -842,8 +843,9 @@ abstract class AbstractDelegate<C extends JComponent>
     /**
      *  A common use case is to render something on top of the component
      *  using the {@link Graphics2D} instance of the component.
-     *  This method allows you to dispatch a rendering task to the EDT
-     *  at the end of the current event cycle, ensuring that custom rendering
+     *  This method allows you to attach a paint task to the component, which
+     *  the EDT will process in the next repaint event cycle, and remove when the animation expires.
+     *  This ensures that custom rendering
      *  is not erased by a potential repaint of the component after a user event.
      *  <p>
      *  Here is an example of how to use this method as part of a fancy button animation:
@@ -867,6 +869,36 @@ abstract class AbstractDelegate<C extends JComponent>
         UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
             // We do the rendering later in the paint method of a custom border implementation!
             ComponentExtension.from(_component).addAnimationPainter(state, painter);
+        });
+    }
+
+    /**
+     *  A common use case is to style the component based on the current animation state.
+     *  This method allows you to dispatch a styling task to the EDT
+     *  which will be executed before the next component repaint.
+     *  Because animation styles are applied last, it is guaranteed not to be overwritten by
+     *  other styles.
+     *  The provided styling will be removed when the animation expires.
+     *  <p>
+     *  Here is an example of how to use this method as part of a fancy styling animation:
+     *  <pre>{@code
+     *      UI.button("Click me").withPrefSize(400, 400)
+     *      .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
+     *          it.style(state, style -> style
+     *              .borderWidth((int)(10 * state.progress()))
+     *              .borderColor(new Color(1f, 1f, 0f, (float) (1 - state.progress())))
+     *              .borderRadius((int)(100 * state.progress()))
+     *          );
+     *      }))
+     *  }</pre>
+     *
+     * @param state The current animation state, which is important so that the styling can be synchronized with the animation.
+     * @param styler The styling task which should be executed on the EDT at the end of the current event cycle.
+     */
+    public final void style( AnimationState state, Styler<C> styler ) {
+        UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
+            // We do the styling later in the paint method of a custom border implementation!
+            ComponentExtension.from(_component).addAnimationStyler(state, styler);
         });
     }
 

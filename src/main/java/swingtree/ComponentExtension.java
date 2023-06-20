@@ -45,6 +45,7 @@ public class ComponentExtension<C extends JComponent>
     private final C _owner;
 
     private final Map<LifeTime, Painter> _animationPainters = new LinkedHashMap<>(0);
+    private final Map<LifeTime, Styler<C>> _animationStylers = new LinkedHashMap<>(0);
 
     private final List<String> _styleGroups = new ArrayList<>(0);
 
@@ -73,7 +74,7 @@ public class ComponentExtension<C extends JComponent>
     }
 
     void establishStyle() {
-        _calculateStyle().ifPresent(this::_applyStyleToComponentState);
+        _applyStyleToComponentState(_calculateStyle());
     }
 
     public void setStyleGroups( String... styleName ) {
@@ -86,16 +87,24 @@ public class ComponentExtension<C extends JComponent>
 
     public List<String> getStyleGroups() { return Collections.unmodifiableList(_styleGroups); }
 
-    public void clearAnimationRenderer() { _animationPainters.clear(); }
+    public void clearAnimationRenderer() {
+        _animationPainters.clear();
+        _animationStylers.clear();
+    }
 
     void addAnimationPainter( AnimationState state, Painter painter ) {
         _animationPainters.put(Objects.requireNonNull(state.lifetime()), Objects.requireNonNull(painter));
         _installCustomBorderBasedStyleAndAnimationRenderer();
     }
 
+    void addAnimationStyler( AnimationState state, Styler<C> styler ) {
+        _animationStylers.put(Objects.requireNonNull(state.lifetime()), Objects.requireNonNull(styler));
+        _installCustomBorderBasedStyleAndAnimationRenderer();
+    }
+
     private StyleRenderer<C> _createRenderer() {
-        Style style = _calculateStyle().map( s -> _applyStyleToComponentState( s ) ).orElse(null);
-        return style == null ? null : new StyleRenderer<>(_owner, style);
+        Style style = _applyStyleToComponentState(_calculateStyle());
+        return style.equals(Style.none()) ? null : new StyleRenderer<>(_owner, style);
     }
 
     private Optional<StyleRenderer<C>> _getOrCreateRenderer() {
@@ -155,13 +164,20 @@ public class ComponentExtension<C extends JComponent>
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
     }
 
-    private Optional<Style> _calculateStyle() {
+    private Style _calculateStyle() {
         _styleSheet = _styleSheet != null ? _styleSheet : UI.SETTINGS().getStyleSheet().orElse(null);
-        Optional<Style> style = _styleSheet == null ? Optional.empty() : Optional.of(_styleSheet.run( _owner ));
-        if ( _styling == null )
-            return style;
-        else
-            return Optional.of( _styling.style(new StyleDelegate<>(_owner, style.orElse(Style.none()))).style() );
+        Style style = _styleSheet == null ? Style.none() : _styleSheet.run( _owner );
+        if ( _styling != null )
+            style = _styling.style(new StyleDelegate<>(_owner, style)).style();
+
+        // Animations styles are last: they override everything else:
+        for ( Map.Entry<LifeTime, Styler<C>> entry : new ArrayList<>(_animationStylers.entrySet()) )
+            if ( entry.getKey().isExpired() )
+                _animationStylers.remove(entry.getKey());
+            else
+                style = entry.getValue().style(new StyleDelegate<>(_owner, style)).style();
+
+        return style;
     }
 
     private Style _applyStyleToComponentState( Style style )
