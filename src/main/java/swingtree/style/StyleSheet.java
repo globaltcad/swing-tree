@@ -13,7 +13,7 @@ public abstract class StyleSheet
 {
     private final Function<JComponent, Style> _defaultStyle;
     private final Map<StyleTrait, List<StyleTrait>> _traitGraph = new LinkedHashMap<>();
-    private final Map<StyleTrait, Function<StyleDelegate<?>, StyleDelegate<?>>> _traitStylers = new LinkedHashMap<>();
+    private final Map<StyleTrait, Styler> _traitStylers = new LinkedHashMap<>();
     private final List<StyleTrait> _rootTraits = new java.util.ArrayList<>();
     private final List<List<StyleTrait>> _traitPaths = new java.util.ArrayList<>();
 
@@ -39,13 +39,13 @@ public abstract class StyleSheet
 
     protected <C extends JComponent> StyleTrait<C> type( Class<C> type ) { return new StyleTrait<>().type(type); }
 
-    protected <C extends JComponent> void add(StyleTrait<C> rule, Function<StyleDelegate<C>, StyleDelegate<C>> traitStyler ) {
+    protected <C extends JComponent> void add(StyleTrait<C> rule, Styler<C> traitStyler ) {
         // First let's make sure the trait does not already exist.
         if ( _traitStylers.containsKey(rule) )
             throw new IllegalArgumentException("The trait " + rule.group() + " already exists in this style sheet.");
 
         // Now let's add the trait to the style sheet.
-        _traitStylers.put(rule, (Function) traitStyler);
+        _traitStylers.put(rule, traitStyler);
         // And let's add the trait to the trait graph.
         _traitGraph.put(rule, new java.util.ArrayList<>());
     }
@@ -109,7 +109,7 @@ public abstract class StyleSheet
         // Now we apply the valid traits to the starting style.
         for ( int i = subToSuper.size() - 1; i >= 0; i-- ) {
             StyleTrait trait = subToSuper.get(i);
-            startingStyle = _traitStylers.get(trait).apply(new StyleDelegate<>(toBeStyled, startingStyle)).style();
+            startingStyle = _traitStylers.get(trait).style(new StyleDelegate<>(toBeStyled, startingStyle)).style();
         }
 
         return startingStyle;

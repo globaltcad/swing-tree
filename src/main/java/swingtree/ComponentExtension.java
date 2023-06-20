@@ -18,7 +18,6 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -52,7 +51,7 @@ public class ComponentExtension<C extends JComponent>
     private StyleRenderer<C> _currentRenderer = null;
     private ComponentUI _styleLaF = null;
     private ComponentUI _formerLaF = null;
-    private Function<StyleDelegate<C>, StyleDelegate<C>> _styling = null;
+    private Styler<C> _styling = null;
     private StyleSheet _styleSheet = null;
 
 
@@ -62,13 +61,13 @@ public class ComponentExtension<C extends JComponent>
 
     private boolean _customLookAndFeelIsInstalled() { return _styleLaF != null; }
 
-    void addStyling( Function<StyleDelegate<C>, StyleDelegate<C>> styler ) {
+    void addStyling( Styler<C> styler ) {
         Objects.requireNonNull(styler);
         checkIfIsDeclaredInUI();
         if ( _styling == null )
             _styling = styler;
         else
-            _styling = _styling.andThen(s -> styler.apply(new StyleDelegate<>(_owner, s.style())));
+            _styling = _styling.andThen(s -> styler.style(new StyleDelegate<>(_owner, s.style())));
 
         establishStyle();
     }
@@ -162,7 +161,7 @@ public class ComponentExtension<C extends JComponent>
         if ( _styling == null )
             return style;
         else
-            return Optional.of( _styling.apply(new StyleDelegate<>(_owner, style.orElse(Style.none()))).style() );
+            return Optional.of( _styling.style(new StyleDelegate<>(_owner, style.orElse(Style.none()))).style() );
     }
 
     private Style _applyStyleToComponentState( Style style )

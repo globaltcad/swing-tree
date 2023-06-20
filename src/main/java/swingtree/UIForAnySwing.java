@@ -12,8 +12,7 @@ import swingtree.api.mvvm.Viewable;
 import swingtree.input.Keyboard;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
-import swingtree.style.Style;
-import swingtree.style.StyleDelegate;
+import swingtree.style.Styler;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -1625,7 +1624,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return this.withBackground( condition.get() ? colorIfTrue.orElseNull() : colorIfFalse.orElseNull() );
     }
 
-    public final I withStyle( Function<StyleDelegate<C>, StyleDelegate<C>> styler ) {
+    public final I withStyle( Styler<C> styler ) {
         NullUtil.nullArgCheck(styler, "styler", Function.class);
         ComponentExtension.from(getComponent()).addStyling(styler);
         return _this();
