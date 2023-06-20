@@ -9,24 +9,24 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
- *  Runs an {@link Animation} on a {@link Component} according to a {@link Schedule} and a {@link StopCondition}.
+ *  Runs an {@link Animation} on a {@link Component} according to a {@link LifeTime} and a {@link StopCondition}.
  */
 class ComponentAnimator
 {
     private final WeakReference<Component> _compRef;
-    private final Schedule      _schedule;
+    private final LifeTime      _lifeTime;
     private final StopCondition _condition;
     private final Animation     _animation;
 
 
     ComponentAnimator(
         Component     component, // may be null if the animation is not associated with a specific component
-        Schedule      schedule,
+        LifeTime lifeTime,
         StopCondition condition,
         Animation     animation
     ) {
         _compRef   = component == null ? null : new WeakReference<>(component);
-        _schedule  = Objects.requireNonNull(schedule);
+        _lifeTime = Objects.requireNonNull(lifeTime);
         _condition = Objects.requireNonNull(condition);
         _animation = Objects.requireNonNull(animation);
     }
@@ -38,22 +38,22 @@ class ComponentAnimator
     }
 
     private AnimationState _createState( long now, ActionEvent event ) {
-        long duration = _schedule.getDurationIn(TimeUnit.MILLISECONDS);
-        long howLongIsRunning = Math.max(0, now - _schedule.getStartTimeIn(TimeUnit.MILLISECONDS));
+        long duration = _lifeTime.getDurationIn(TimeUnit.MILLISECONDS);
+        long howLongIsRunning = Math.max(0, now - _lifeTime.getStartTimeIn(TimeUnit.MILLISECONDS));
         long howLongCurrentLoop = howLongIsRunning % duration;
         long howManyLoops       = howLongIsRunning / duration;
         double progress         = howLongCurrentLoop / (double) duration;
         return new AnimationState() {
-            @Override public double progress() { return progress; }
+            @Override public double progress()       { return progress;     }
             @Override public long currentIteration() { return howManyLoops; }
-            @Override public Schedule schedule() { return _schedule; }
-            @Override public ActionEvent event() { return event; }
+            @Override public LifeTime lifetime()     { return _lifeTime;    }
+            @Override public ActionEvent event()     { return event;        }
         };
     }
 
     boolean run( long now, ActionEvent event )
     {
-        if ( now < _schedule.getStartTimeIn(TimeUnit.MILLISECONDS) )
+        if ( now < _lifeTime.getStartTimeIn(TimeUnit.MILLISECONDS) )
             return true;
 
         AnimationState state = _createState(now, event);

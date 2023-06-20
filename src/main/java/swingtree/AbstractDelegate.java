@@ -2,15 +2,13 @@ package swingtree;
 
 import swingtree.animation.Animate;
 import swingtree.animation.Animation;
-import swingtree.animation.Schedule;
+import swingtree.animation.LifeTime;
 import swingtree.style.Painter;
-import swingtree.style.Style;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 /**
  *  Extensions of this class delegate a component event
@@ -878,7 +876,7 @@ abstract class AbstractDelegate<C extends JComponent>
      *  @return An {@link Animate} instance which can be used to define how the animation should be executed.
      */
     public final Animate animate( double duration, TimeUnit unit ) {
-        return Animate.on( _component(), Schedule.of(duration, unit) );
+        return Animate.on( _component(), LifeTime.of(duration, unit) );
     }
 
     /**

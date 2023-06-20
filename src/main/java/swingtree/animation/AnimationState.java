@@ -258,7 +258,7 @@ public interface AnimationState
     /**
      * @return The schedule of the animation, i.e. the time when the animation started and how long it should run.
      */
-    Schedule schedule();
+    LifeTime lifetime();
     /**
      * @return The timer event that triggered the animation.
      */

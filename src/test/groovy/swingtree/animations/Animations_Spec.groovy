@@ -8,7 +8,7 @@ import swingtree.UI
 import swingtree.animation.Animate
 import swingtree.animation.Animation
 import swingtree.animation.AnimationState
-import swingtree.animation.Schedule
+import swingtree.animation.LifeTime
 
 import javax.swing.JButton
 import javax.swing.JLabel
@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit
     Animations are a great way to make your application more interactive and more fun to use.
 
 ''')
-@Subject([Animate, UI, Schedule])
+@Subject([Animate, UI, LifeTime])
 class Animations_Spec extends Specification
 {
     def 'Use the API exposed by "UI.schedule(..)" to schedule animations'()

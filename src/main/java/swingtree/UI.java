@@ -5,7 +5,7 @@ import net.miginfocom.swing.MigLayout;
 import sprouts.Event;
 import sprouts.*;
 import swingtree.animation.Animate;
-import swingtree.animation.Schedule;
+import swingtree.animation.LifeTime;
 import swingtree.api.Buildable;
 import swingtree.api.MenuBuilder;
 import swingtree.api.SwingBuilder;
@@ -4248,7 +4248,7 @@ public final class UI
 
     /**
      *  Exposes an API for scheduling periodic animation updates.
-     *  This is a convenience method for {@link Animate#on(Schedule)}. <br>
+     *  This is a convenience method for {@link Animate#on(LifeTime)}. <br>
      *  A typical usage would be:
      *  <pre>{@code
      *    UI.schedule( 100, TimeUnit.MILLISECONDS )
@@ -4263,12 +4263,12 @@ public final class UI
      */
     public static Animate schedule( long duration, TimeUnit unit ) {
         Objects.requireNonNull(unit, "unit");
-        return Animate.on( Schedule.of(duration, unit) );
+        return Animate.on( LifeTime.of(duration, unit) );
     }
 
     /**
      *  Exposes an API for scheduling periodic animation updates.
-     *  This is a convenience method for {@link Animate#on(Schedule)}. <br>
+     *  This is a convenience method for {@link Animate#on(LifeTime)}. <br>
      *  A typical usage would be:
      *  <pre>{@code
      *    UI.schedule( 0.1, TimeUnit.MINUTES )
@@ -4282,7 +4282,7 @@ public final class UI
      *  }</pre>
      */
     public static Animate schedule( double duration, TimeUnit unit ) {
-        return Animate.on( Schedule.of(duration, unit) );
+        return Animate.on( LifeTime.of(duration, unit) );
     }
 
     /**

@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 /**
  *  A schedule defines when an animation should start and for how long it should run.
  */
-public class Schedule
+public final class LifeTime
 {
     private final long _delay; // in milliseconds
     private final long _duration;
@@ -18,8 +18,8 @@ public class Schedule
      * @param unit The time unit of the duration.
      * @return A new schedule that will start immediately and run for the given duration.
      */
-    public static Schedule of( long time, TimeUnit unit ) {
-        return new Schedule(0, unit.toMillis(time));
+    public static LifeTime of(long time, TimeUnit unit ) {
+        return new LifeTime(0, unit.toMillis(time));
     }
 
     /**
@@ -28,9 +28,9 @@ public class Schedule
      * @param unit The time unit of the duration.
      * @return A new schedule that will start immediately and run for the given duration.
      */
-    public static Schedule of( double time, TimeUnit unit ) {
+    public static LifeTime of(double time, TimeUnit unit ) {
         long millis = _convertTimeFromDoublePrecisely(time, unit, TimeUnit.MILLISECONDS);
-        return new Schedule(0, millis);
+        return new LifeTime(0, millis);
     }
 
     /**
@@ -41,8 +41,8 @@ public class Schedule
      * @param durationUnit The time unit of the duration.
      * @return A new schedule that will start after the given delay and run for the given duration.
      */
-    public static Schedule of( long startDelay, TimeUnit startUnit, long duration, TimeUnit durationUnit ) {
-        return new Schedule(startUnit.toMillis(startDelay), durationUnit.toMillis(duration));
+    public static LifeTime of(long startDelay, TimeUnit startUnit, long duration, TimeUnit durationUnit ) {
+        return new LifeTime(startUnit.toMillis(startDelay), durationUnit.toMillis(duration));
     }
 
     /**
@@ -53,10 +53,10 @@ public class Schedule
      * @param durationUnit The time unit of the duration.
      * @return A new schedule that will start after the given delay and run for the given duration.
      */
-    public static Schedule of( double startDelay, TimeUnit startUnit, double duration, TimeUnit durationUnit ) {
+    public static LifeTime of(double startDelay, TimeUnit startUnit, double duration, TimeUnit durationUnit ) {
         long startMillis    = _convertTimeFromDoublePrecisely(startDelay, startUnit, TimeUnit.MILLISECONDS);
         long durationMillis = _convertTimeFromDoublePrecisely(duration, durationUnit, TimeUnit.MILLISECONDS);
-        return new Schedule(startMillis, durationMillis);
+        return new LifeTime(startMillis, durationMillis);
     }
 
     private static long _convertTimeFromDoublePrecisely( double time, TimeUnit from, TimeUnit to ) {
@@ -66,7 +66,7 @@ public class Schedule
     }
 
 
-    private Schedule( long delay, long duration ) {
+    private LifeTime(long delay, long duration ) {
         _delay     = delay;
         _duration  = duration;
         _startTime = System.currentTimeMillis() + _delay;
@@ -112,6 +112,21 @@ public class Schedule
     public long getIterationEndTimeIn( TimeUnit unit, int iteration ) {
         Objects.requireNonNull(unit);
         return unit.convert(_startTime + _duration * iteration, TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public boolean equals( Object o ) {
+        if ( this == o ) return true;
+        if ( !(o instanceof LifeTime) ) return false;
+        LifeTime lifeTime = (LifeTime) o;
+        return _delay     == lifeTime._delay    &&
+               _duration  == lifeTime._duration &&
+               _startTime == lifeTime._startTime;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(_delay, _duration, _startTime);
     }
 
 }

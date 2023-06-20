@@ -36,7 +36,7 @@ import java.util.function.Predicate;
 public class Animate
 {
     private final Component _component;
-    private final Schedule _schedule;
+    private final LifeTime _lifeTime;
     private final StopCondition _condition;
 
     /**
@@ -44,11 +44,11 @@ public class Animate
      * for an animation as well as an {@link Animation} that will be executed
      * when passed to the {@link #go(Animation)} or {@link #goOnce(Animation)} methods.
      *
-     * @param schedule The schedule that defines when the animation should be executed and for how long.
+     * @param lifeTime The schedule that defines when the animation should be executed and for how long.
      * @return An {@link Animate} instance that can be used to define how the animation should be executed.
      */
-    public static Animate on( Schedule schedule ) {
-        return new Animate( null, schedule, state -> true );
+    public static Animate on( LifeTime lifeTime) {
+        return new Animate( null, lifeTime, state -> true );
     }
 
     /**
@@ -57,16 +57,16 @@ public class Animate
      * when passed to the {@link #go(Animation)} or {@link #goOnce(Animation)} methods.
      *
      * @param component The component that should be repainted after each animation step.
-     * @param schedule The schedule that defines when the animation should be executed and for how long.
+     * @param lifeTime The schedule that defines when the animation should be executed and for how long.
      * @return An {@link Animate} instance that can be used to define how the animation should be executed.
      */
-    public static Animate on( Component component, Schedule schedule ) {
-        return new Animate( component, schedule, state -> true );
+    public static Animate on( Component component, LifeTime lifeTime) {
+        return new Animate( component, lifeTime, state -> true );
     }
 
-    private Animate( Component component, Schedule schedule, StopCondition animation ) {
+    private Animate(Component component, LifeTime lifeTime, StopCondition animation ) {
         _component = component;
-        _schedule = schedule;
+        _lifeTime = lifeTime;
         _condition = animation;
     }
 
@@ -79,12 +79,12 @@ public class Animate
      */
     public Animate startingIn( long delay, TimeUnit unit ) {
         long offset = unit.toMillis( delay );
-        Schedule schedule = Schedule.of(
+        LifeTime lifeTime = LifeTime.of(
                 offset,                                         TimeUnit.MILLISECONDS,
-                _schedule.getDurationIn(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS
+                _lifeTime.getDurationIn(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS
         );
 
-        return new Animate( _component, schedule, _condition );
+        return new Animate( _component, lifeTime, _condition );
     }
 
     /**
@@ -124,7 +124,7 @@ public class Animate
      *                  as long as this condition is true.
      */
     public Animate asLongAs( Predicate<AnimationState> shouldRun ) {
-        return new Animate( _component, _schedule, state -> {
+        return new Animate( _component, _lifeTime, state -> {
             if ( shouldRun.test(state) )
                 return _condition.check(state);
             return false;
@@ -138,7 +138,7 @@ public class Animate
      * @param animation The animation that should be executed.
      */
     public void go( Animation animation ) {
-        AnimationRunner.add( new ComponentAnimator( _component, _schedule, _condition, animation ) );
+        AnimationRunner.add( new ComponentAnimator( _component, _lifeTime, _condition, animation ) );
     }
 
 }
