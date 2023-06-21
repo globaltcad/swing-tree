@@ -62,7 +62,16 @@ class Examples_Spec extends Specification
 
     def 'The advanced UI define in the examples has the expected state.'()
     {
-        given : 'We get the UI.'
+        reportInfo """
+            The ${Utility.link('advanced UI  example', AdvancedUI)} is absolutely packed with things to see.
+            Yet, at the same time, it is not too much code
+            and also not too complicated. 
+            It really shows you
+            how boilerplate code can be reduced to a minimum
+            when using SwingTree.
+        """
+
+        given : 'We create the UI.'
             var ui = AdvancedUI.of(null)
         expect :
             new Utility.Query(ui).find(JLabel, "APIC-label").isPresent()
@@ -78,11 +87,20 @@ class Examples_Spec extends Specification
             Utility.getSplitButtonPopup(new Utility.Query(ui).find(JSplitButton, "con-split-button").get()).components.length == 4
     }
 
-    def 'The form UI define in the examples has the expected state.'()
+    def 'The form UI defined in the examples has the expected state.'()
     {
+        reportInfo """
+            The form UI looks like this:
+            ![simple-form-UI.png](../src/test/resources/snapshots/simple-form-UI.png)
+            
+            This is the ${Utility.link('oldest example in the test suite', Form)} and also a great
+            first example of how to write declarative UI code with SwingTree.
+        """
         given : 'We get the UI.'
             var ui = new Form()
-        expect :
+        expect : """
+            We should be able to find the hover icon button and it should have the expected state.
+        """
             new Utility.Query(ui).find(JButton, "hover-icon-button").isPresent()
             new Utility.Query(ui).find(JButton, "hover-icon-button").get().text == ""
             new Utility.Query(ui).find(JButton, "hover-icon-button").get().icon != null
@@ -90,15 +108,30 @@ class Examples_Spec extends Specification
             new Utility.Query(ui).find(JButton, "hover-icon-button").get().rolloverIcon != null
         and :
             new Utility.Query(ui).find(JButton, "hover-icon-button").get().cursor.type == Cursor.HAND_CURSOR
+        and :
+            Utility.similarityBetween(ui, "/snapshots/simple-form-UI.png", 99.9) > 99.9
     }
 
-    def 'The login example UI defined in the examples can be created.'()
+    def 'The login example UI defined in the examples, a good MVVM demonstration.'()
     {
+        reportInfo """
+            The ${Utility.link('login example view', LoginView)}, together
+            with the ${Utility.link('login example view model', LoginViewModel)}, is
+            a really basic example of how to do MVVM with SwingTree.
+            For a more advanced example, see the ${Utility.link('user registration example', UserRegistrationView)}.
+        """
         expect : new LoginView(new LoginViewModel())
     }
 
-    def 'The user registration example UI defined in the examples can be created.'()
+    def 'The user registration example UI defined in the examples, a good MVVM demonstration.'()
     {
+        reportInfo """
+            The ${Utility.link('user registration example', UserRegistrationView)}, together
+            with the ${Utility.link('user registration example view model', UserRegistrationViewModel)}, is
+            a more advanced example of how to do the MVVM design pattern with SwingTree.
+            It involves a lot of input validation that is done in the view model.
+            For a more basic example, see the ${Utility.link('login example view', LoginView)}.
+        """
         expect : new UserRegistrationView(new UserRegistrationViewModel())
     }
 
@@ -109,6 +142,12 @@ class Examples_Spec extends Specification
 
     def 'The box shadow picker example UI defined in the examples can be created.'()
     {
+        reportInfo """
+            Not only is the ${Utility.link('box shadow picker example', BoxShadowPickerView)} 
+            an advanced example of how to write MVVM applications with SwingTree,
+            it is also a nice little tool that shows you how to use the 
+            SwingTree style API to override the default look and feel of Swing components.
+        """
         expect : new BoxShadowPickerView(new BoxShadowPickerViewModel())
     }
 
@@ -117,8 +156,13 @@ class Examples_Spec extends Specification
         reportInfo """
             The guesser example view looks like this:
             ![note-guesser-UI.png](../src/test/resources/snapshots/note-guesser-UI.png)
-            This is actually a nice little demo application you can play with
-            yourself. Just navigate to the class and run it.
+            This not only demonstrates how to do some custom 2D rendering on a JPanel,
+            it is also a nice little game you can play to test your knowledge of music theory.
+
+            Just ${Utility.link('navigate to the class', NoteGuesserView)} and run
+            it yourself and play around with it.
+            The ${Utility.link('view model', NoteGuesserViewModel)} is also a nice example of how to
+            do MVVM with SwingTree.
         """
         given : 'We create an instance of the UI.'
             var ui = new NoteGuesserView(new NoteGuesserViewModel())
@@ -136,9 +180,15 @@ class Examples_Spec extends Specification
         reportInfo """
             The well rounded UI looks like this:
             ![well-rounded-UI.png](../src/test/resources/snapshots/well-rounded-UI.png)
+
+            This is the most basic example of how to use the SwingTree style API to
+            override the default look and feel of Swing components.
+            As you can see, the style engine of SwingTree supports shadows, rounded corners,
+            gradients and much much more out of the box.
             
-            Here we will only test the UI, if you want to see the code, just
-            ${Utility.link('navigate to the class', WellRoundedView)} and run 
+            Here we will only test looks of the UI, if you want to see the code, 
+            ${Utility.link('click here', WellRoundedView)} to jump to the class.
+            And also feel free to run 
             it yourself, it has a main method for that purpose already.
         """
         given : 'We create the UI.'
@@ -152,10 +202,16 @@ class Examples_Spec extends Specification
         reportInfo """
             The soft example UI looks like this:
             ![soft-example-UI.png](../src/test/resources/snapshots/soft-example-UI.png)
+            
+            This is the most advanced example of how to use the SwingTree style API to
+            customize the look and feel of your entire application.
+            You can turn a plain old metal look and feel into a modern 
+            soft UI with just a few lines of code.
            
-            Here we will only test the soft UI, if you want to see the code, just
-            navigate to the class and run it yourself, it has 
-            a main method for that purpose already.
+            Here we will only test looks of the UI, if you want to see the code,
+            ${Utility.link('click here', SoftUIView)} to visit the class.
+            And also feel free to run
+            it yourself, it has a main method for that purpose already.
         """
         given : 'We create the UI.'
             var ui = new SoftUIView()
