@@ -35,6 +35,14 @@ import java.awt.*
 ''')
 class Examples_Spec extends Specification
 {
+    def setup()
+    {
+        // We reset to the default look and feel:
+        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
+        // This is to make sure that the tests are not influenced by
+        // other look and feels that might be used in the example code...
+    }
+
 
     def 'The advanced UI define in the examples has the expected state.'()
     {

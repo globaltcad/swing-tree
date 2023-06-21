@@ -55,6 +55,7 @@ public class ComponentExtension<C extends JComponent>
     private Styler<C> _styling = null;
     private StyleSheet _styleSheet = null;
 
+    private Color _initialBackgroundColor = null;
 
     private ComponentExtension( C owner ) {
         _owner = Objects.requireNonNull(owner);
@@ -182,8 +183,13 @@ public class ComponentExtension<C extends JComponent>
 
     private Style _applyStyleToComponentState( Style style )
     {
-        if ( Style.none().equals(style) )
+        if ( Style.none().equals(style) ) {
+            _uninstallCustomLaF();
+            _uninstallCustomBorderBasedStyleAndAnimationRenderer();
+            if ( _initialBackgroundColor != null )
+                _owner.setBackground(_initialBackgroundColor);
             return style;
+        }
 
         Objects.requireNonNull(style);
         /*
@@ -197,9 +203,17 @@ public class ComponentExtension<C extends JComponent>
             ... and so on.
         */
         boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();
+
+        if ( style.background().color().isPresent() && !Objects.equals( _owner.getBackground(), style.background().color().get() ) ) {
+            _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor :  _owner.getBackground();
+            _owner.setBackground( style.background().color().get() );
+        }
+
         // If the style has a border radius set we need to make sure that we have a background color:
-        if ( hasBorderRadius && !style.background().color().isPresent() )
-            style = style.backgroundColor(_owner.getBackground());
+        if ( hasBorderRadius && !style.background().color().isPresent() ) {
+            _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor :  _owner.getBackground();
+            style = style.backgroundColor(_initialBackgroundColor);
+        }
 
         if ( style.border().color().isPresent() && style.border().widths().average() > 0 ) {
             if ( !style.background().foundationColor().isPresent() )
@@ -208,9 +222,6 @@ public class ComponentExtension<C extends JComponent>
 
         if ( style.foreground().color().isPresent() && !Objects.equals( _owner.getForeground(), style.foreground().color().get() ) )
             _owner.setForeground( style.foreground().color().get() );
-
-        if ( style.background().color().isPresent() && !Objects.equals( _owner.getBackground(), style.background().color().get() ) )
-            _owner.setBackground( style.background().color().get() );
 
         if ( style.dimensionality().minWidth().isPresent() || style.dimensionality().minHeight().isPresent() ) {
             Dimension minSize = _owner.getMinimumSize();
@@ -329,7 +340,7 @@ public class ComponentExtension<C extends JComponent>
         if ( hasMargin )
             weNeedToOverrideLaF = true;
 
-        if ( style.background().hasPainters() )
+        if ( style.background().hasCustomPainters() )
             weNeedToOverrideLaF = true;
 
         if ( style.anyVisibleShadows() )
@@ -354,14 +365,9 @@ public class ComponentExtension<C extends JComponent>
             if ( !success && _owner.isOpaque() ) {
                 _owner.setOpaque(false);
             }
-            if ( !success && _owner instanceof AbstractButton ) {
-                AbstractButton b = (AbstractButton) _owner;
-                b.setContentAreaFilled(false);
-            }
         }
-        else if ( _styleLaF != null ) {
+        else if ( _styleLaF != null )
             _uninstallCustomLaF();
-        }
     }
 
     private boolean _installCustomLaF() {
@@ -383,6 +389,7 @@ public class ComponentExtension<C extends JComponent>
             ButtonStyler laf = new ButtonStyler(b.getUI());
             b.setUI(new ButtonStyler(b.getUI()));
             _styleLaF = laf;
+            return true;
         }
         else if ( _owner instanceof JLabel ) {
             JLabel l = (JLabel) _owner;
@@ -390,6 +397,7 @@ public class ComponentExtension<C extends JComponent>
             LabelStyler laf = new LabelStyler(l.getUI());
             l.setUI(laf);
             _styleLaF = laf;
+            return true;
         }
 
         return false;
@@ -419,6 +427,14 @@ public class ComponentExtension<C extends JComponent>
         Border currentBorder = _owner.getBorder();
         if ( !(currentBorder instanceof ComponentExtension.BorderStyleAndAnimationRenderer) )
             _owner.setBorder(new BorderStyleAndAnimationRenderer<>(this, currentBorder));
+    }
+
+    private void _uninstallCustomBorderBasedStyleAndAnimationRenderer() {
+        Border currentBorder = _owner.getBorder();
+        if ( currentBorder instanceof ComponentExtension.BorderStyleAndAnimationRenderer ) {
+            BorderStyleAndAnimationRenderer<?> border = (BorderStyleAndAnimationRenderer<?>) currentBorder;
+            _owner.setBorder(border.getDelegate());
+        }
     }
 
     private void checkIfIsDeclaredInUI() {
@@ -469,6 +485,8 @@ public class ComponentExtension<C extends JComponent>
             else
                 _borderWasNotPainted = false;
         }
+
+        public Border getDelegate() { return _formerBorder; }
 
         @Override
         public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {

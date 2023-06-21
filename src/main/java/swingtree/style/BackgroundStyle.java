@@ -53,7 +53,9 @@ public final class BackgroundStyle
         );
     }
 
-    public boolean hasPainters() { return !_painters.isEmpty(); }
+    public boolean hasCustomPainters() {
+        return !( _painters.size() == 1 && Painter.NONE.equals(_painters.get(StyleUtility.DEFAULT_KEY)) );
+    }
 
     public List<ShadeStyle> shades() {
         return Collections.unmodifiableList(

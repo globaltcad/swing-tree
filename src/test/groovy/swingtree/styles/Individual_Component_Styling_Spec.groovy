@@ -7,9 +7,10 @@ import spock.lang.Title
 import swingtree.UI
 
 import javax.swing.*
-import java.awt.Color
-import java.awt.Font
-import java.awt.Insets
+import javax.swing.border.TitledBorder
+import javax.swing.plaf.metal.MetalLabelUI
+import java.awt.*
+import java.awt.image.BufferedImage
 
 @Title("Styling Components")
 @Narrative('''
@@ -143,5 +144,78 @@ class Individual_Component_Styling_Spec extends Specification
         and : 'We also expect there to be the mig layout manager by default.'
             panel.layout != null
             panel.layout instanceof MigLayout
+    }
+
+
+    def 'SwingTree will un-install any custom border if no styles are found.'()
+    {
+        reportInfo """
+            SwingTree will dynamically install or uninstall a custom border on a component
+            depending on whether or not there are any styles defined for the component.
+            Check out the following example:
+        """
+        given : 'We create a simple `JLabel` UI component with a style animation.'
+            var doStyle = true
+            var label = UI.label("Click me!")
+                            .withStyle(style ->
+                                 doStyle ? style.border(3, new Color(230, 238, 220)) : style
+                            )
+
+        expect : """
+            There is now a custom border installed on the label.
+        """
+            label.component.border != null
+
+        when : 'We disable the style and simulate a repaint.'
+            doStyle = false
+            label.component.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+
+        then : """
+            The custom border has been uninstalled.
+        """
+            label.component.border == null
+    }
+
+
+    def 'SwingTree will re-install any borders overridden by the style API.'()
+    {
+        reportInfo """
+            If you supply a border implementation yourself, SwingTree may override it with a custom border
+            if you define a style for the component.
+            However, if you disable the style, SwingTree will re-install the original border.
+            Smart, right?
+        """
+        given : 'We create a simple `JLabel` UI component with a style animation.'
+            var doStyle = false
+            var label = UI.label("Click me!").withBorderTitled("Original border")
+                            .withStyle(style ->
+                                 doStyle ? style.border(3, new Color(230, 238, 220)) : style
+                            )
+
+        expect : """
+            Initially there is a custom border installed on the label.
+        """
+            label.component.border instanceof TitledBorder
+            label.component.border.title == "Original border"
+
+        when : 'We enable the style and simulate a repaint.'
+            doStyle = true
+            label.component.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+
+        then : """
+            The custom border has been installed.
+        """
+            label.component.border != null
+            !(label.component.border instanceof TitledBorder)
+
+        when : 'We disable the style and simulate a repaint.'
+            doStyle = false
+            label.component.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+
+        then : """
+            The original border has been re-installed.
+        """
+            label.component.border instanceof TitledBorder
+            label.component.border.title == "Original border"
     }
 }
