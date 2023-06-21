@@ -2,7 +2,7 @@
   "className":"swingtree.testing.MVVM_Unit_Test_Spec",
   "title":"Writing Unit Tests for View Models",
   "narrative":"Not only is Swing-Tree a framework for building UIs, it is also a framework for\n    building view models based on its built in property types. \n    This specification demonstrates how to write unit tests\n    for the example view models in the test suite.",
-  "subjects":["example.UserRegistrationViewModel","example.LoginViewModel"],
+  "subjects":["examples.mvvm.UserRegistrationViewModel","examples.mvvm.LoginViewModel"],
   "statistics":{
     "runs":"2",
     "successRate":"100.0%",
