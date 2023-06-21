@@ -136,7 +136,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The well rounded UI looks like this:\n            ![well-rounded-UI.png](../src/test/resources/snapshots/well-rounded-UI.png)\n\n            Here we will only test the UI, if you want to see the code, just\n            navigate to the class and run it yourself, it has \n            a main method for that purpose already.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The well rounded UI looks like this:\n            ![well-rounded-UI.png](../src/test/resources/snapshots/well-rounded-UI.png)\n\n            Here we will only test the UI, if you want to see the code, just\n            <a href=\"../src/test/java/examples/stylish/WellRoundedView.java\">navigate to the class</a> and run \n            it yourself, it has a main method for that purpose already.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create the UI.","code":["var ui = new WellRoundedView()"]},
@@ -166,7 +166,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The animated buttons view looks like this:\n            ![animated-buttons-UI.png](../src/test/resources/snapshots/animated-buttons-UI.png)\n\n            Unfortunately this is just a snapshot of the UI, so you can't play with \n            the animations right here. But you can run the example found in the test suite\n            of SwingTree and try it out yourself.\n            There is a main method in the class, so you can just run it.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The animated buttons view looks like this:\n            ![animated-buttons-UI.png](../src/test/resources/snapshots/animated-buttons-UI.png)\n\n            Unfortunately this is just a snapshot of the UI, so you can't play with \n            the animations right here. But you can run the \n            <a href=\"../src/test/java/examples/animated/AnimatedButtonsView.java\">example found in the test suite</a>\n            of SwingTree and try it out yourself.\n            There is a main method in the class, so you can just run it.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create the UI.","code":["var ui = new AnimatedButtonsView()","ui.setBackground(new Color(242, 242, 242))"]},
@@ -194,7 +194,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The vertical settings view in the examples looks like this:\n            ![vertical-settings-UI.png](../src/test/resources/snapshots/vertical-settings-UI.png)\n\n            It demonstrates how UI components can easily be placed vertically\n            and with some slight indentation, to indicate a certain grouping\n            which is especially useful for settings dialogs.\n\n            Here we will only test the UI, if you want to see the code, just\n            navigate to the class and run it yourself, it has \n            a main method for that purpose already.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The vertical settings view from the examples looks like this:\n            ![vertical-settings-UI.png](../src/test/resources/snapshots/vertical-settings-UI.png)\n\n            It demonstrates how UI components can easily be placed vertically\n            and with some slight indentation, to indicate a certain grouping\n            which is especially useful for settings dialogs.\n\n            If you want to see the code, just\n            <a href=\"../src/test/java/examples/mvvm/SomeSettingsView.java\">navigate to the class</a> and run it yourself, \n            it has a main method for that purpose already.\n\n            Here we will only test the UI.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"","code":["var view = new SomeSettingsView(new SomeSettingsViewModel())","var speedTextField = new Utility.Query(view).find(JTextField, \"speed-text-field\").orElse(null)"]},
@@ -262,7 +262,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The calculator view looks like this:\n            ![calculator-UI.png](../src/test/resources/snapshots/calculator-UI.png)\n\n            Here we will only test the UI, if you want to see the code, just\n            navigate to the class and run it yourself, it has \n            a main method for that purpose already.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The calculator view looks like this:\n            ![calculator-UI.png](../src/test/resources/snapshots/calculator-UI.png)\n\n            Here we only check that it is rendered as expected and we will not go further into detail \n            with respect to its code, if you want to see the code, just \n            <a href=\"../src/test/java/examples/Calculator.java\">navigate to the class</a> \n            and run it yourself, it has \n            a main method for that purpose already.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create the UI.","code":["var ui = new Calculator()","ui.setBackground(new Color(242, 242, 242))"]},
