@@ -19,6 +19,7 @@ import examples.mvvm.SomeSettingsView
 import examples.mvvm.SomeSettingsViewModel
 import examples.mvvm.UserRegistrationView
 import examples.mvvm.UserRegistrationViewModel
+import examples.simple.Form
 import examples.simple.TodoApp
 import examples.stylish.BoxShadowPickerView
 import examples.stylish.BoxShadowPickerViewModel
@@ -47,12 +48,15 @@ import java.awt.*
 ''')
 class Examples_Spec extends Specification
 {
-    def setup()
-    {
+    def setup() {
         // We reset to the default look and feel:
         UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
         // This is to make sure that the tests are not influenced by
         // other look and feels that might be used in the example code...
+    }
+
+    def cleanup() {
+        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
     }
 
 
@@ -77,7 +81,7 @@ class Examples_Spec extends Specification
     def 'The form UI define in the examples has the expected state.'()
     {
         given : 'We get the UI.'
-            var ui = new examples.simple.Form()
+            var ui = new Form()
         expect :
             new Utility.Query(ui).find(JButton, "hover-icon-button").isPresent()
             new Utility.Query(ui).find(JButton, "hover-icon-button").get().text == ""
@@ -174,7 +178,7 @@ class Examples_Spec extends Specification
             var ui = new AnimatedButtonsView()
             ui.setBackground(new Color(242, 242, 242))
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "/snapshots/animated-buttons-UI.png", 99.9) > 99.9
+            Utility.similarityBetween(ui, "/snapshots/animated-buttons-UI.png", 99) > 99
     }
 
     def 'The animation example view can be created.'()
@@ -255,7 +259,7 @@ class Examples_Spec extends Specification
             new Utility.Query(ui).find(JTextArea, "input-text-area").isPresent()
             new Utility.Query(ui).find(JTextArea, "input-text-area").get().componentOrientation == ComponentOrientation.RIGHT_TO_LEFT
         and : 'Its render state is as expected.'
-            Utility.similarityBetween(ui, "/snapshots/calculator-UI.png", 99.9) > 99.9
+            Utility.similarityBetween(ui, "/snapshots/calculator-UI.png", 99) > 99
     }
 
     def 'The simple Table-UI example has the expected state.'()

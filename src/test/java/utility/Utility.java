@@ -113,6 +113,11 @@ public class Utility {
         JWindow f = new JWindow();
         f.add(component);
         f.pack();
+        try {
+            UI.sync();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         BufferedImage image = new BufferedImage(component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = image.createGraphics();
         component.paint(g2d);
@@ -171,6 +176,7 @@ public class Utility {
         int height1 = imageFromFile.getHeight();
         int height0 = image.getHeight();
         if ((width1 != width0) || (height1 != height0)) {
+            System.err.println("Images must have the same dimensions!");
             // Let's resize the image to the same size
             image = _stretchFirstToSecondSize(image, imageFromFile);
         }
