@@ -259,7 +259,7 @@ public class Utility {
     public static String link(String linkText, Class<?> exampleTypeClass) {
         String pathBase = "https://github.com/globaltcad/swing-tree/blob/main/src/test/java/";
         String filename = exampleTypeClass.getName().replace(".", "/") + ".java";
-        String base = "<a href=\"" + pathBase + filename + "\">";
+        String base = "<a href=\"" + pathBase + filename + "\" target=\"_blank\">";
         return  base + linkText + "</a>";
     }
 
