@@ -70,7 +70,7 @@ class Style_Animations_Spec extends Specification
             // Note that there is no "onMouseClick()" method on the label.
             // Instead we need to do this:
             label.component.dispatchEvent(new MouseEvent(label.component, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))
-            Thread.sleep(10)
+            Thread.sleep(100)
             UI.sync()
             label.component.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
 

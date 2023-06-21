@@ -185,7 +185,8 @@ public class ComponentExtension<C extends JComponent>
     {
         if ( Style.none().equals(style) ) {
             _uninstallCustomLaF();
-            _uninstallCustomBorderBasedStyleAndAnimationRenderer();
+            if ( _animationStylers.isEmpty() && _animationPainters.isEmpty() )
+                _uninstallCustomBorderBasedStyleAndAnimationRenderer();
             if ( _initialBackgroundColor != null )
                 _owner.setBackground(_initialBackgroundColor);
             return style;
