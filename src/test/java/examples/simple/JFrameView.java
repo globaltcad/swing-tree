@@ -1,4 +1,4 @@
-package examples;
+package examples.simple;
 
 import swingtree.input.Keyboard;
 

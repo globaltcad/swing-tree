@@ -1,4 +1,4 @@
-package examples;
+package examples.mvvm;
 
 import swingtree.EventProcessor;
 import swingtree.UI;

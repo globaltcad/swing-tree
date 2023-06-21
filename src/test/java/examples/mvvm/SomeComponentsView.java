@@ -1,4 +1,4 @@
-package examples;
+package examples.mvvm;
 
 import com.formdev.flatlaf.intellijthemes.FlatMaterialDesignDarkIJTheme;
 import sprouts.Var;

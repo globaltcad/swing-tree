@@ -1,4 +1,4 @@
-package examples;
+package examples.animated;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import sprouts.Var;

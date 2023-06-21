@@ -1,4 +1,4 @@
-package examples;
+package examples.animated;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import swingtree.UI;
@@ -143,7 +143,7 @@ public class AnimatedButtonsView extends Panel
                 })
             )
             .add(
-                button("I shrink when you hover over me")
+                button("I shrink when you hover hover me")
                 .apply( ui -> {
                     Dimension prefSize = ui.getComponent().getPreferredSize();
                     ui.withPrefSize(prefSize.width + 15, prefSize.height + 15);
@@ -205,7 +205,7 @@ public class AnimatedButtonsView extends Panel
                 it.style(state, style ->
                     style.borderWidth((int)(10 * state.cycle()))
                          .borderColor(new Color(1f, 1f, 0f, (float) (1 - state.cycle())))
-                         .borderRadius((int)(100 * state.progress()))
+                         .borderRadius((int)(100 * state.cycle()))
                          .foundationColor(new Color(1f,1f,1f,0f))
                 );
             }))

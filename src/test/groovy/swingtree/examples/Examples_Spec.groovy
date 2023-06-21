@@ -2,11 +2,23 @@ package swingtree.examples
 
 import com.alexandriasoftware.swing.JSplitButton
 import examples.*
+import examples.animated.AnimatedButtonsView
+import examples.animated.AnimatedView
 import examples.comparisons.comparison1.MadeWithSwingTree
 import examples.games.NoteGuesserView
 import examples.games.NoteGuesserViewModel
 import examples.games.SymbolGuesserView
 import examples.games.SymbolGuesserViewModel
+import examples.mvvm.ListSearchView
+import examples.mvvm.ListSearchViewModel
+import examples.mvvm.LoginView
+import examples.mvvm.LoginViewModel
+import examples.mvvm.SomeComponentsView
+import examples.mvvm.SomeComponentsViewModel
+import examples.mvvm.SomeSettingsView
+import examples.mvvm.SomeSettingsViewModel
+import examples.mvvm.UserRegistrationView
+import examples.mvvm.UserRegistrationViewModel
 import examples.simple.TodoApp
 import examples.stylish.BoxShadowPickerView
 import examples.stylish.BoxShadowPickerViewModel
