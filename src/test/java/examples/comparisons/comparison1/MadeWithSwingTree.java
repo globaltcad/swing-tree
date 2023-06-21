@@ -14,7 +14,9 @@ public class MadeWithSwingTree extends Panel
     public MadeWithSwingTree()
     {
         Utility.setLaF(Utility.LaF.NIMBUS);
-        add(panel("fillx, gap rel 0, insets "+M+"")
+        of(this).withLayout("fill, ins 0")
+        .add("grow",
+            panel("fillx, gap rel 0, insets "+M+"")
             .add("aligny top, growx, span, wrap",
                 panel("insets 0, fillx", "[shrink]"+M+"[grow]"+L+"[shrink][grow]", "[]"+S+"[]"+M+"[]"+L+"[]"+L+"[]0")
                 .add(label("Label 1"))

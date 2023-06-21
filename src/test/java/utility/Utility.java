@@ -256,4 +256,11 @@ public class Utility {
         return image;
     }
 
+    public static String link(String linkText, Class<?> exampleTypeClass) {
+        String pathBase = "../src/test/java/";
+        String filename = exampleTypeClass.getName().replace(".", "/") + ".java";
+        String base = "<a href=\"" + pathBase + filename + "\">";
+        return  base + linkText + "</a>";
+    }
+
 }

@@ -138,8 +138,8 @@ class Examples_Spec extends Specification
             ![well-rounded-UI.png](../src/test/resources/snapshots/well-rounded-UI.png)
             
             Here we will only test the UI, if you want to see the code, just
-            navigate to the class and run it yourself, it has 
-            a main method for that purpose already.
+            ${Utility.link('navigate to the class', WellRoundedView)} and run 
+            it yourself, it has a main method for that purpose already.
         """
         given : 'We create the UI.'
             var ui = new WellRoundedView()
@@ -170,7 +170,8 @@ class Examples_Spec extends Specification
             ![animated-buttons-UI.png](../src/test/resources/snapshots/animated-buttons-UI.png)
             
             Unfortunately this is just a snapshot of the UI, so you can't play with 
-            the animations right here. But you can run the example found in the test suite
+            the animations right here. But you can run the 
+            ${Utility.link('example found in the test suite', AnimatedButtonsView)}
             of SwingTree and try it out yourself.
             There is a main method in the class, so you can just run it.
         """
@@ -189,16 +190,18 @@ class Examples_Spec extends Specification
     def 'The settings example UI defined in the examples looks as expected.'()
     {
         reportInfo """
-            The vertical settings view in the examples looks like this:
+            The vertical settings view from the examples looks like this:
             ![vertical-settings-UI.png](../src/test/resources/snapshots/vertical-settings-UI.png)
             
             It demonstrates how UI components can easily be placed vertically
             and with some slight indentation, to indicate a certain grouping
             which is especially useful for settings dialogs.
             
-            Here we will only test the UI, if you want to see the code, just
-            navigate to the class and run it yourself, it has 
-            a main method for that purpose already.
+            If you want to see the code, just
+            ${Utility.link('navigate to the class', SomeSettingsView)} and run it yourself, 
+            it has a main method for that purpose already.
+            
+            Here we will only test the UI.
         """
         given :
             var view = new SomeSettingsView(new SomeSettingsViewModel())
@@ -248,8 +251,10 @@ class Examples_Spec extends Specification
             The calculator view looks like this:
             ![calculator-UI.png](../src/test/resources/snapshots/calculator-UI.png)
             
-            Here we will only test the UI, if you want to see the code, just
-            navigate to the class and run it yourself, it has 
+            Here we only check that it is rendered as expected and we will not go further into detail 
+            with respect to its code, if you want to see the code, just 
+            ${Utility.link('navigate to the class', Calculator)} 
+            and run it yourself, it has 
             a main method for that purpose already.
         """
         given : 'We create the UI.'
