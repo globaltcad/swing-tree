@@ -51,7 +51,7 @@ def innerParseWhereCodeLines = { List<String> lines ->
                 table[singleKey]?.add(currentExpression.trim())
                 currentExpression = ""
             }
-            else if ( squareDepth > 0 && c != "[" && !isComment )
+            else if ( squareDepth > 0 && (c != "[" || isInsideString) && !isComment )
                 currentExpression += c
             //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         } else {
