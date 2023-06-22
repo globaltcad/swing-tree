@@ -333,8 +333,7 @@ Here, take a look this code:
 UI.show(
     panel("fill, wrap 2")
     .withStyle( it ->
-        it.style()
-          .margin(24).pad(24)
+        it.margin(24).pad(24)
           .backgroundColor(new Color(57, 221, 255,255))
           .borderRadius(32)
           .shadowBlurRadius(5)
@@ -347,8 +346,7 @@ UI.show(
     .add(
         panel("ins 12", "[grow]")
         .withStyle( it ->
-            it.style()
-              .backgroundColor(new Color(255, 255, 255,255))
+            it.backgroundColor(new Color(255, 255, 255,255))
               .borderRadius(24)
         )
         .add("span, wrap", label("Isn't this a well rounded view?"))

@@ -2,8 +2,8 @@ package utility;
 
 import com.alexandriasoftware.swing.JSplitButton;
 import com.formdev.flatlaf.FlatLightLaf;
-import examples.SomeSettingsView;
-import examples.SomeSettingsViewModel;
+import examples.mvvm.SomeSettingsView;
+import examples.mvvm.SomeSettingsViewModel;
 import swingtree.UI;
 import swingtree.UIForAnySwing;
 import swingtree.UIForSplitButton;
@@ -113,6 +113,11 @@ public class Utility {
         JWindow f = new JWindow();
         f.add(component);
         f.pack();
+        try {
+            UI.sync();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         BufferedImage image = new BufferedImage(component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = image.createGraphics();
         component.paint(g2d);
@@ -171,6 +176,7 @@ public class Utility {
         int height1 = imageFromFile.getHeight();
         int height0 = image.getHeight();
         if ((width1 != width0) || (height1 != height0)) {
+            System.err.println("Images must have the same dimensions!");
             // Let's resize the image to the same size
             image = _stretchFirstToSecondSize(image, imageFromFile);
         }
@@ -248,6 +254,13 @@ public class Utility {
         g2d.drawRenderedImage(image0, at);
         g2d.dispose();
         return image;
+    }
+
+    public static String link(String linkText, Class<?> exampleTypeClass) {
+        String pathBase = "https://github.com/globaltcad/swing-tree/blob/main/src/test/java/";
+        String filename = exampleTypeClass.getName().replace(".", "/") + ".java";
+        String base = "<a href=\"" + pathBase + filename + "\" target=\"_blank\">";
+        return  base + linkText + "</a>";
     }
 
 }

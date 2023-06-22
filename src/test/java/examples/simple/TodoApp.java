@@ -9,9 +9,9 @@ import static swingtree.UI.*;
  *  Note that in this example we import the "UI" class from the "swingtree" package statically.
  *  This allows us to omit the "UI." prefix when using the methods of the "UI" class.
  */
-class TodoApp extends Panel
+public class TodoApp extends Panel
 {
-    TodoApp() {
+    public TodoApp() {
         of(this).withLayout(FILL)
         .add(GROW.and(SPAN).and(WRAP), label("Todo List"))
         .add(GROW.and(SPAN).and(WRAP),

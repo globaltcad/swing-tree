@@ -1,6 +1,6 @@
 package swingtree.mvvm
 
-import examples.LoginViewModel
+import examples.mvvm.LoginViewModel
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title

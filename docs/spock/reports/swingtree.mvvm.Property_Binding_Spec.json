@@ -229,7 +229,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Enums are a common tool for modelling user choices and settings in you view models\n            because they are type safe and descriptive. \n            A common use case is to have certain UI components only visible if a certain enum value\n            in your view model is selected.\n            For this example, we will use the following enum:\n            ```\n                enum Accept { YES, NO, MAYBE }\n            ``\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Enums are a common tool for modelling user choices and settings in you view models\n            because they are type safe and descriptive. \n            A common use case is to have certain UI components only visible if a certain enum value\n            in your view model is selected.\n\n            For this example, we will use the following enum:\n            ```\n                enum Accept { YES, NO, MAYBE }\n            ```\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a property representing the visibility state of a component.","code":["Var<Accept> property = Var.of(Accept.YES)"]},
@@ -256,7 +256,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Enums are a common tool for modelling user choices and settings in you view models\n            because they are type safe and descriptive. \n            A common use case is to have certain UI components only enabled if a certain enum value\n            in your view model is selected.\n            For this example, we will use the following enum:\n            ```\n                enum Accept { YES, NO, MAYBE }\n            ``\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Enums are a common tool for modelling user choices and settings in you view models\n            because they are type safe and descriptive. \n            A common use case is to have certain UI components only enabled if a certain enum value\n            in your view model is selected.\n            For this example, we will use the following enum:\n            ```\n                enum Accept { YES, NO, MAYBE }\n            ```\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a property representing the enabled state of a component.","code":["Var<Accept> property = Var.of(Accept.YES)"]},
@@ -283,7 +283,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Enums are a common tool for modelling user choices and settings in you view models\n            because they are descriptive and type safe (not like string values). \n            A common use case is to have certain UI components only focused if a certain enum value\n            in your view model is selected.\n            For this example, we will use the following enum:\n            ```\n                enum Accept { YES, NO, MAYBE }\n            ``\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Enums are a common tool for modelling user choices and settings in you view models\n            because they are descriptive and type safe (not like string values). \n            A common use case is to have certain UI components only focused if a certain enum value\n            in your view model is selected.\n            For this example, we will use the following enum:\n            ```\n                enum Accept { YES, NO, MAYBE }\n            ```\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a property representing the focusability state of a component.","code":["Var<Accept> property = Var.of(Accept.YES)"]},

@@ -156,13 +156,16 @@ public class StyleRenderer<C extends JComponent>
         int width     = _comp.getWidth() ;
         int height    = _comp.getHeight();
 
-        if ( style.border().allCornersShareTheSameArc() ) {
+        boolean insAllTheSame = insTop == insLeft && insLeft == insBottom && insBottom == insRight;
+
+        if ( style.border().allCornersShareTheSameArc() && insAllTheSame ) {
             int arcWidth  = style.border().topLeftArc().map( a -> Math.max(0,a.width() ) ).orElse(0);
             int arcHeight = style.border().topLeftArc().map( a -> Math.max(0,a.height()) ).orElse(0);
             // We can return a simple round rectangle:
             return new Area(new RoundRectangle2D.Float(
                     left, top, width - left - right, height - top - bottom,
-                    arcWidth, arcHeight
+                    Math.max(0, arcWidth  - insTop),
+                    Math.max(0, arcHeight - insTop)
                 ));
         } else {
             Arc topLeftArc     = style.border().topLeftArc().orElse(null);
@@ -171,35 +174,52 @@ public class StyleRenderer<C extends JComponent>
             Arc bottomLeftArc  = style.border().bottomLeftArc().orElse(null);
             Area area = new Area();
 
+            int topLeftRoundnessAdjustment     = Math.min(insLeft,   insTop  );
+            int topRightRoundnessAdjustment    = Math.min(insTop,    insRight);
+            int bottomRightRoundnessAdjustment = Math.min(insBottom, insRight);
+            int bottomLeftRoundnessAdjustment  = Math.min(insBottom, insLeft );
+
+            int arcWidthTL  = Math.max(0, topLeftArc     == null ? 0 : topLeftArc.width()      - topLeftRoundnessAdjustment);
+            int arcHeightTL = Math.max(0, topLeftArc     == null ? 0 : topLeftArc.height()     - topLeftRoundnessAdjustment);
+            int arcWidthTR  = Math.max(0, topRightArc    == null ? 0 : topRightArc.width()     - topRightRoundnessAdjustment);
+            int arcHeightTR = Math.max(0, topRightArc    == null ? 0 : topRightArc.height()    - topRightRoundnessAdjustment);
+            int arcWidthBR  = Math.max(0, bottomRightArc == null ? 0 : bottomRightArc.width()  - bottomRightRoundnessAdjustment);
+            int arcHeightBR = Math.max(0, bottomRightArc == null ? 0 : bottomRightArc.height() - bottomRightRoundnessAdjustment);
+            int arcWidthBL  = Math.max(0, bottomLeftArc  == null ? 0 : bottomLeftArc.width()   - bottomLeftRoundnessAdjustment);
+            int arcHeightBL = Math.max(0, bottomLeftArc  == null ? 0 : bottomLeftArc.height()  - bottomLeftRoundnessAdjustment);
+
             // Top left:
             if ( topLeftArc != null ) {
                 area.add(new Area(new Arc2D.Float(
                         left, top,
-                        topLeftArc.width(), topLeftArc.height(),
+                        arcWidthTL, arcHeightTL,
                         90, 90, Arc2D.PIE
                 )));
             }
             // Top right:
             if ( topRightArc != null ) {
                 area.add(new Area(new Arc2D.Float(
-                        width - right - topRightArc.width(), top,
-                        topRightArc.width(), topRightArc.height(),
+                        width - right - topRightArc.width() + topRightRoundnessAdjustment,
+                        top,
+                        arcWidthTR, arcHeightTR,
                         0, 90, Arc2D.PIE
                 )));
             }
             // Bottom right:
             if ( bottomRightArc != null ) {
                 area.add(new Area(new Arc2D.Float(
-                        width - right - bottomRightArc.width(), height - bottom - bottomRightArc.height(),
-                        bottomRightArc.width(), bottomRightArc.height(),
+                        width  - right  - bottomRightArc.width()  + bottomRightRoundnessAdjustment,
+                        height - bottom - bottomRightArc.height() + bottomRightRoundnessAdjustment,
+                        arcWidthBR, arcHeightBR,
                         270, 90, Arc2D.PIE
                 )));
             }
             // Bottom left:
             if ( bottomLeftArc != null ) {
                 area.add(new Area(new Arc2D.Float(
-                        left, height - bottom - bottomLeftArc.height(),
-                        bottomLeftArc.width(), bottomLeftArc.height(),
+                        left,
+                        height - bottom - bottomLeftArc.height() + bottomLeftRoundnessAdjustment,
+                        arcWidthBL, arcHeightBL,
                         180, 90, Arc2D.PIE
                 )));
             }
@@ -214,51 +234,59 @@ public class StyleRenderer<C extends JComponent>
             int leftDistance   = 0;
             // top:
             if ( topLeftArc != null || topRightArc != null ) {
-                int arcWidthLeft   = (int) Math.floor(topLeftArc  == null ? 0.0 : topLeftArc.width()   / 2.0);
-                int arcHeightLeft  = (int) Math.floor(topLeftArc  == null ? 0.0 : topLeftArc.height()  / 2.0);
-                int arcWidthRight  = (int) Math.floor(topRightArc == null ? 0.0 : topRightArc.width()  / 2.0);
-                int arcHeightRight = (int) Math.floor(topRightArc == null ? 0.0 : topRightArc.height() / 2.0);
+                int arcWidthLeft   = (int) Math.floor(arcWidthTL  / 2.0);
+                int arcHeightLeft  = (int) Math.floor(arcHeightTL / 2.0);
+                int arcWidthRight  = (int) Math.floor(arcWidthTR  / 2.0);
+                int arcHeightRight = (int) Math.floor(arcHeightTR / 2.0);
                 topDistance = Math.max(arcHeightLeft, arcHeightRight);// This is where the center rectangle will start!
                 int innerLeft   = left + arcWidthLeft;
                 int innerRight  = width - right - arcWidthRight;
                 int edgeRectangleHeight = topDistance;
-                area.add(new Area(new Rectangle2D.Float(innerLeft, top, innerRight - innerLeft, edgeRectangleHeight)));
+                area.add(new Area(new Rectangle2D.Float(
+                        innerLeft, top, innerRight - innerLeft, edgeRectangleHeight
+                    )));
             }
             // right:
             if ( topRightArc != null || bottomRightArc != null ) {
-                int arcWidthTop    = (int) Math.floor(topRightArc    == null ? 0.0 : topRightArc.width()    / 2.0);
-                int arcHeightTop   = (int) Math.floor(topRightArc    == null ? 0.0 : topRightArc.height()   / 2.0);
-                int arcWidthBottom = (int) Math.floor(bottomRightArc == null ? 0.0 : bottomRightArc.width() / 2.0);
-                int arcHeightBottom= (int) Math.floor(bottomRightArc == null ? 0.0 : bottomRightArc.height()/ 2.0);
+                int arcWidthTop    = (int) Math.floor(arcWidthTR  / 2.0);
+                int arcHeightTop   = (int) Math.floor(arcHeightTR / 2.0);
+                int arcWidthBottom = (int) Math.floor(arcWidthBR  / 2.0);
+                int arcHeightBottom= (int) Math.floor(arcHeightBR / 2.0);
                 rightDistance = Math.max(arcWidthTop, arcWidthBottom);// This is where the center rectangle will start!
                 int innerTop    = top + arcHeightTop;
                 int innerBottom = height - bottom - arcHeightBottom;
                 int edgeRectangleWidth = rightDistance;
-                area.add(new Area(new Rectangle2D.Float(width - right - edgeRectangleWidth, innerTop, edgeRectangleWidth, innerBottom - innerTop)));
+                area.add(new Area(new Rectangle2D.Float(
+                        width - right - edgeRectangleWidth, innerTop, edgeRectangleWidth, innerBottom - innerTop
+                    )));
             }
             // bottom:
             if ( bottomRightArc != null || bottomLeftArc != null ) {
-                int arcWidthRight  = (int) Math.floor(bottomRightArc == null ? 0.0 : bottomRightArc.width()  / 2.0);
-                int arcHeightRight = (int) Math.floor(bottomRightArc == null ? 0.0 : bottomRightArc.height() / 2.0);
-                int arcWidthLeft   = (int) Math.floor(bottomLeftArc  == null ? 0.0 : bottomLeftArc.width()   / 2.0);
-                int arcHeightLeft  = (int) Math.floor(bottomLeftArc  == null ? 0.0 : bottomLeftArc.height()  / 2.0);
+                int arcWidthRight  = (int) Math.floor(arcWidthBR  / 2.0);
+                int arcHeightRight = (int) Math.floor(arcHeightBR / 2.0);
+                int arcWidthLeft   = (int) Math.floor(arcWidthBL  / 2.0);
+                int arcHeightLeft  = (int) Math.floor(arcHeightBL / 2.0);
                 bottomDistance = Math.max(arcHeightRight, arcHeightLeft);// This is where the center rectangle will start!
                 int innerLeft   = left + arcWidthLeft;
                 int innerRight  = width - right - arcWidthRight;
                 int edgeRectangleHeight = bottomDistance;
-                area.add(new Area(new Rectangle2D.Float(innerLeft, height - bottom - edgeRectangleHeight, innerRight - innerLeft, edgeRectangleHeight)));
+                area.add(new Area(new Rectangle2D.Float(
+                        innerLeft, height - bottom - edgeRectangleHeight, innerRight - innerLeft, edgeRectangleHeight
+                    )));
             }
             // left:
             if ( bottomLeftArc != null || topLeftArc != null ) {
-                int arcWidthBottom = (int) Math.floor(bottomLeftArc == null ? 0.0 : bottomLeftArc.width() / 2.0);
-                int arcHeightBottom= (int) Math.floor(bottomLeftArc == null ? 0.0 : bottomLeftArc.height()/ 2.0);
-                int arcWidthTop    = (int) Math.floor(topLeftArc    == null ? 0.0 : topLeftArc.width()    / 2.0);
-                int arcHeightTop   = (int) Math.floor(topLeftArc    == null ? 0.0 : topLeftArc.height()   / 2.0);
+                int arcWidthBottom = (int) Math.floor(arcWidthBL  / 2.0);
+                int arcHeightBottom= (int) Math.floor(arcHeightBL / 2.0);
+                int arcWidthTop    = (int) Math.floor(arcWidthTL  / 2.0);
+                int arcHeightTop   = (int) Math.floor(arcHeightTL / 2.0);
                 leftDistance = Math.max(arcWidthBottom, arcWidthTop);// This is where the center rectangle will start!
                 int innerTop    = top + arcHeightTop;
                 int innerBottom = height - bottom - arcHeightBottom;
                 int edgeRectangleWidth = leftDistance;
-                area.add(new Area(new Rectangle2D.Float(left, innerTop, edgeRectangleWidth, innerBottom - innerTop)));
+                area.add(new Area(new Rectangle2D.Float(
+                        left, innerTop, edgeRectangleWidth, innerBottom - innerTop
+                    )));
             }
             // Now we add the center:
             area.add(new Area(

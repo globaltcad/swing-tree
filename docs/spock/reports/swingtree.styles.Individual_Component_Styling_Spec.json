@@ -4,7 +4,7 @@
   "narrative":"This specification demonstrates how you can use the styling\n    API to style Swing components in declarative SwingTree code.",
   "subjects":[],
   "statistics":{
-    "runs":"4",
+    "runs":"6",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -21,13 +21,13 @@
       "tags":{},"see":[],"extraInfo":["\n            Fun-Fact: \n            Styling in SwingTree is fully functional, which means \n            that the `Style` settings objects are all immutable. \n            They are not modified in place, but instead transformed\n            by so called \"styler\" lambdas.\n            Not only does this architecture make it easy to compose, reuse and share\n            styles, but it also makes it possible to have a complex style\n            inheritance hierarchy without the need for very complex code.\n            In practice, this means that your styler lambdas become part\n            of a compositional tree of styler lambdas, which is then applied to\n            the component tree in a single pass.\n            How cool is that? :)\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We create a panel with some custom styling!","code":["var panel =","            UI.panel()","            .withStyle( it ->","                it.style()","                  .foundationColor(\"green\")","                  .backgroundColor(\"cyan\")","                  .foregroundColor(\"blue\")","                  .borderColor(\"blue\")","                  .borderWidth(5)","                  .shadowColor(\"black\")","                  .shadowSpreadRadius(10)","                  .shadowOffset(10)","                  .font(\"Papyrus\", 42)","            )"]},
+        {"kind":"given","text":"We create a panel with some custom styling!","code":["var panel =","            UI.panel()","            .withStyle( it ->","                it.foundationColor(\"green\")","                  .backgroundColor(\"cyan\")","                  .foregroundColor(\"blue\")","                  .borderColor(\"blue\")","                  .borderWidth(5)","                  .shadowColor(\"black\")","                  .shadowSpreadRadius(10)","                  .shadowOffset(10)","                  .font(\"Papyrus\", 42)","            )"]},
 
         {"kind":"expect","text":"The background color of the panel will be set to cyan.","code":["panel.component.background == Color.cyan"]},
 
         {"kind":"and","text":"The foreground color of the panel will be set to blue.","code":["panel.component.foreground == Color.blue"]},
 
-        {"kind":"and","text":"The insets of the border will be increased by half of the border width (because the border grows inwards AND outwards).","code":["panel.component.border.getBorderInsets(panel.component) == new Insets(2, 2, 2, 2)"]},
+        {"kind":"and","text":"The insets of the border will be increased by the border width (because the border grows inwards).","code":["panel.component.border.getBorderInsets(panel.component) == new Insets(5, 5, 5, 5)"]},
 
         {"kind":"and","text":"The font of the panel will be set to Papyrus with a size of 42.","code":["panel.component.font == new Font(\"Papyrus\", Font.PLAIN, 42)"]}
       ],
@@ -42,7 +42,7 @@
       "tags":{},"see":[],"extraInfo":["\n            Swing does not have a concept of margins.\n            Without a proper layout manager it does not even support the configuration of insets.\n            However, through a custom `Border` implementation and a default layout manager (MigLayout)\n            we can model the margins (and paddings) of a component.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We create a panel with some custom styling!","code":["var panel =","            UI.panel()","            .withStyle( it ->","                it.style()","                  .marginRight(42)","                  .marginLeft(64)","            )","            .get(JPanel)"]},
+        {"kind":"given","text":"We create a panel with some custom styling!","code":["var panel =","            UI.panel()","            .withStyle( it ->","                it.marginRight(42)","                  .marginLeft(64)","            )","            .get(JPanel)"]},
 
         {"kind":"expect","text":"\n            Note that the insets of the border of the component now model the margins of the component.\n            This information is used by the layout manager to position the component correctly.\n        ","code":["panel.border.getBorderInsets(panel) == new Insets(0, 64, 0, 42)"]},
 
@@ -59,7 +59,7 @@
       "tags":{},"see":[],"extraInfo":["\n            Swing does not have a concept of padding and margin.\n            Without a proper layout manager it does not even support the configuration of insets.\n            However, through a custom `Border` implementation and a default layout manager (MigLayout)\n            we can model the padding and margin of a component\n            and also render a fancy border and shadow around it (if specified).\n            Internally the layout manager will indirectly know about the margins and paddings\n            of your component through the `Border::getBorderInsets(Component)` method.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We create a panel with some custom styling!","code":["var panel =","            UI.panel()","            .withStyle( it ->","                it.style()","                  .marginTop(11)","                  .marginRight(42)","                  .marginLeft(64)","                  .padRight(10)","                  .padLeft(20)","                  .padBottom(30)","            )","            .get(JPanel)"]},
+        {"kind":"given","text":"We create a panel with some custom styling!","code":["var panel =","            UI.panel()","            .withStyle( it ->","                it.marginTop(11)","                  .marginRight(42)","                  .marginLeft(64)","                  .paddingRight(10)","                  .paddingLeft(20)","                  .paddingBottom(30)","            )","            .get(JPanel)"]},
 
         {"kind":"expect","text":"","code":["panel.border.getBorderInsets(panel) == new Insets(11, 84, 30, 52)"]},
 
@@ -76,11 +76,53 @@
       "tags":{},"see":[],"extraInfo":["\n            A border is a very common feature of Swing components and when it comes to styling\n            your UI elements should not overlap with the border.\n            This is why the styling API will make sure that the layout manager accounts for the border width\n            you specify in your style.\n            Internally the layout manager will indirectly know about the margins and paddings\n            of your component through the `Border::getBorderInsets(Component)` method.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We create a panel with some custom styling!","code":["var panel =","            UI.panel()","            .withStyle( it ->","                it.style()","                  .marginTop(7)","                  .marginRight(2)","                  .padLeft(14)","                  .borderWidth(5)","            )","            .get(JPanel)"]},
+        {"kind":"given","text":"We create a panel with some custom styling!","code":["var panel =","            UI.panel()","            .withStyle( it ->","                it.marginTop(7)","                  .marginRight(2)","                  .paddingLeft(14)","                  .borderWidth(5)","            )","            .get(JPanel)"]},
 
-        {"kind":"expect","text":"\n            The insets of the border not only model the padding and margin of the component,\n            but also the border width.\n            But note that the border width of a component grows both inwards and outwards.\n            So the insets of the border will only be increased by half of the border width.\n        ","code":["panel.border.getBorderInsets(panel) == new Insets(9, 16, 2, 4)"]},
+        {"kind":"expect","text":"\n            The insets of the border not only model the padding and margin of the component,\n            but also the border width.\n        ","code":["panel.border.getBorderInsets(panel) == new Insets(12, 19, 5, 7)"]},
 
         {"kind":"and","text":"We also expect there to be the mig layout manager by default.","code":["panel.layout != null","panel.layout instanceof MigLayout"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"SwingTree will un-install any custom border if no styles are found.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            SwingTree will dynamically install or uninstall a custom border on a component\n            depending on whether or not there are any styles defined for the component.\n            Check out the following example:\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple `JLabel` UI component with a style animation.","code":["var doStyle = true","var label = UI.label(\"Click me!\")","                .withStyle(style ->","                     doStyle ? style.border(3, new Color(230, 238, 220)) : style","                )"]},
+
+        {"kind":"expect","text":"\n            There is now a custom border installed on the label.\n        ","code":["label.component.border != null"]},
+
+        {"kind":"when","text":"We disable the style and simulate a repaint.","code":["doStyle = false","label.component.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"\n            The custom border has been uninstalled.\n        ","code":["label.component.border == null"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"SwingTree will re-install any borders overridden by the style API.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            If you supply a border implementation yourself, SwingTree may override it with a custom border\n            if you define a style for the component.\n            However, if you disable the style, SwingTree will re-install the original border.\n            Smart, right?\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple `JLabel` UI component with a style animation.","code":["var doStyle = false","var label = UI.label(\"Click me!\").withBorderTitled(\"Original border\")","                .withStyle(style ->","                     doStyle ? style.border(3, new Color(230, 238, 220)) : style","                )"]},
+
+        {"kind":"expect","text":"\n            Initially there is a custom border installed on the label.\n        ","code":["label.component.border instanceof TitledBorder","label.component.border.title == \"Original border\""]},
+
+        {"kind":"when","text":"We enable the style and simulate a repaint.","code":["doStyle = true","label.component.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"\n            The custom border has been installed.\n        ","code":["label.component.border != null","!(label.component.border instanceof TitledBorder)"]},
+
+        {"kind":"when","text":"We disable the style and simulate a repaint.","code":["doStyle = false","label.component.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"\n            The original border has been re-installed.\n        ","code":["label.component.border instanceof TitledBorder","label.component.border.title == \"Original border\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

@@ -16,25 +16,24 @@ public class Form extends JPanel
 		ImageIcon cover    = new ImageIcon(getClass().getResource("/img/swing.png"));
 
 		String description = "All of this is less than a hundred lines of code!<br>The layout of this is powered by MigLayout.<br><br>";
-		String debug = "";
 
 		UI.of(this)
-		.withLayout(debug+"fill", "[][grow]")
+		.withLayout("fill", "[][grow]")
 		.withBackground(Color.WHITE)
 		.add(UI.label(200, 200, cover).withTooltip("I am a picture of a swing on a tree!"))
 		.add("grow",
-			UI.panel(debug+"fill, insets 0","[grow][shrink]")
+			UI.panel("fill, insets 0","[grow][shrink]")
 			.onMouseClick( e -> {/* does something */} )
 			.add("cell 0 0",
 				UI.boldLabel("Hello and welcome to this UI! (Click me I'm a link)")
 				.makeLinkTo("https://github.com/globaltcad")
 			)
 			.add("cell 0 1, grow, pushy",
-				UI.panel(debug+"fill, insets 0","[grow][shrink]")
+				UI.panel("fill, insets 0","[grow][shrink]")
 				.withBackground(Color.WHITE)
 				.add("cell 0 0, aligny top, grow x",
-					UI.panel(debug+"fill, insets 7","grow")
-					.withBackground(new Color(255, 138, 99))
+					UI.panel("fill, insets 9","grow")
+					.withBackground(new Color(128, 234, 255))
 					.add( "span",
 						UI.label("<html><div style=\"width:275px;\">"+ description +"</div></html>")
 					)
@@ -56,9 +55,9 @@ public class Form extends JPanel
 				.withBorder(BorderFactory.createMatteBorder(0,0,1,0,Color.LIGHT_GRAY))
 			)
 			.add("cell 0 2, grow",
-				UI.panel(debug+"fill, insets 0 0 0 0","[grow][grow][grow]")
+				UI.panel("fill, insets 0 0 0 0","[grow][grow][grow]")
 				.withBackground(Color.WHITE)
-				.add("cell 1 0", UI.label("Built with swingtree"))
+				.add("cell 1 0", UI.label("Built with SwingTree"))
 				.add("cell 2 0", UI.label("GTS-OSS"))
 				.add("cell 3 0", UI.label("29-March-2022"))
 			)

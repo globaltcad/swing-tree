@@ -1,13 +1,13 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Tue Jun 06 15:46:10 CEST 2023",
+  "created": "Thu Jun 22 00:18:09 CEST 2023",
   "statistics":{
-    "runs":"37",
-    "passed":"36",
+    "runs":"38",
+    "passed":"37",
     "failed":"1",
     "featureFailures":"0",
-    "successRate":"0.972972972972973",
+    "successRate":"0.9736842105263158",
     "duration":"?"
   },
   "specifications": [{
@@ -98,13 +98,13 @@
       "className":"swingtree.examples.Examples_Spec",
       "title":"Execution and Validation of Example Code",
       "narrative":"This specification ensures that the\n    various UI examples in the test suite, \n    run successfully and also produce\n    UIs with expected states.",
-      "featureCount":"18",
+      "featureCount":"19",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"The \"MadeWithSwingTree\" example UI defined in the examples can be created.","extraInfo":[]},{"id":"The \"Well rounded\" style example UI defined in the examples can be created.","extraInfo":[]},{"id":"The advanced UI define in the examples has the expected state.","extraInfo":[]},{"id":"The animated buttons view examples UI defined in the examples can be created.","extraInfo":[]},{"id":"The animation example view can be created.","extraInfo":[]},{"id":"The box shadow picker example UI defined in the examples can be created.","extraInfo":[]},{"id":"The calculator UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The form UI define in the examples has the expected state.","extraInfo":[]},{"id":"The list examples UI defined in the examples can be created.","extraInfo":[]},{"id":"The list rendering example UI defined in the examples can be created.","extraInfo":[]},{"id":"The login example UI defined in the examples can be created.","extraInfo":[]},{"id":"The note guesser example UI defined in the examples can be created.","extraInfo":[]},{"id":"The settings example UI defined in the examples can be created.","extraInfo":[]},{"id":"The simple Table-UI example has the expected state.","extraInfo":[]},{"id":"The spinners example UI defined in the examples can be created.","extraInfo":[]},{"id":"The symbol guesser example UI defined in the examples can be created.","extraInfo":[]},{"id":"The todo app UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The user registration example UI defined in the examples can be created.","extraInfo":[]}],
+      "executedFeatures":[{"id":"The \"MadeWithSwingTree\" example UI defined in the examples can be created.","extraInfo":[]},{"id":"The \"Well rounded\" style example UI defined in the examples can be created.","extraInfo":[]},{"id":"The advanced UI define in the examples has the expected state.","extraInfo":[]},{"id":"The animated buttons view examples UI defined in the examples looks as expected.","extraInfo":[]},{"id":"The animation example view can be created.","extraInfo":[]},{"id":"The box shadow picker example UI defined in the examples can be created.","extraInfo":[]},{"id":"The calculator UI defined in the examples has the expected state and looks.","extraInfo":[]},{"id":"The form UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The list examples UI defined in the examples can be created.","extraInfo":[]},{"id":"The list rendering example UI defined in the examples can be created.","extraInfo":[]},{"id":"The login example UI defined in the examples, a good MVVM demonstration.","extraInfo":[]},{"id":"The note guesser example UI defined in the examples can be created.","extraInfo":[]},{"id":"The settings example UI defined in the examples looks as expected.","extraInfo":[]},{"id":"The simple Table-UI example has the expected state.","extraInfo":[]},{"id":"The soft example UI is rendered as expected.","extraInfo":[]},{"id":"The spinners example UI defined in the examples can be created.","extraInfo":[]},{"id":"The symbol guesser example UI defined in the examples can be created.","extraInfo":[]},{"id":"The todo app UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The user registration example UI defined in the examples, a good MVVM demonstration.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.mvvm.Button_Binding_Spec",
@@ -386,25 +386,25 @@
       "className":"swingtree.styles.Individual_Component_Styling_Spec",
       "title":"Styling Components",
       "narrative":"This specification demonstrates how you can use the styling\n    API to style Swing components in declarative SwingTree code.",
-      "featureCount":"4",
+      "featureCount":"6",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"Styling components is based on a functional styler lambda.","extraInfo":[]},{"id":"The Styling API will make sure that the layout manager accounts for the border width!","extraInfo":[]},{"id":"The insets of the layout manager are based on the sum of the margin and padding for a given edge of the component bounds.","extraInfo":[]},{"id":"The margins defined in the style API will be applied to the layout manager through the border insets.","extraInfo":[]}],
+      "executedFeatures":[{"id":"Styling components is based on a functional styler lambda.","extraInfo":[]},{"id":"SwingTree will re-install any borders overridden by the style API.","extraInfo":[]},{"id":"SwingTree will un-install any custom border if no styles are found.","extraInfo":[]},{"id":"The Styling API will make sure that the layout manager accounts for the border width!","extraInfo":[]},{"id":"The insets of the layout manager are based on the sum of the margin and padding for a given edge of the component bounds.","extraInfo":[]},{"id":"The margins defined in the style API will be applied to the layout manager through the border insets.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.styles.Style_Sheet_Spec",
       "title":"Creating Style Sheets",
-      "narrative":"No, SwingTree does not have a CSS parser.  \n    It does, however, have something better, which is similar to CSS.\n    An API for configuring styles in a declarative and type-safe way.",
-      "featureCount":"9",
+      "narrative":"No, SwingTree does not have a CSS parser.  \n    It does, however, have something better, which is similar to CSS.\n    An API for configuring styles in a declarative and type-safe way.\n\n    The main class for creating style sheets is the `StyleSheet` class,\n    an abstract class that you can extend to create your own styles like so:\n    ```java\n        class MyStyleSheet {\n           @Override\n           protected void build() {\n                add(id(\"some unique id!\"), it ->\n                    it.borderRadius(3)\n                );\n                add(type(JPanel.class), it ->\n                   it.borderColor(Color.GREEN)\n                );\n                add(type(JButton.class), it ->\n                    it.borderWidth(7)\n                );\n            }\n        }\n    ```\n    You can then easily apply this style sheet to you SinwgTree views like so:\n    ```java\n        UI.use(new MyStyleSheet(), () -> new MyView());\n    ```\n    The style sheet will be applied to all UI components created within the scope of the `use` method.",
+      "featureCount":"11",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"A StyleSheet can be created with a default style.","extraInfo":[]},{"id":"Duplicate style trait declaration will throw an exception!","extraInfo":[]},{"id":"Nonsensical style trait group inheritance rules will throw an exception!","extraInfo":[]},{"id":"The `group` style trait allows for inheritance, meaning a group can inherit from other ones.","extraInfo":[]},{"id":"The `type` style trait allows you to specify how a style trait applies to a component types.","extraInfo":[]},{"id":"Use the `group` style trait to classify components.","extraInfo":[]},{"id":"Use the power of `Graphics2D` to render custom backgrounds inside you styles.","extraInfo":[]},{"id":"Write custom style sheet classes by extending the StyleSheet class.","extraInfo":[]},{"id":"You can style the font of a component inside your style sheet.","extraInfo":[]}],
+      "executedFeatures":[{"id":"A StyleSheet can be created with a default style.","extraInfo":[]},{"id":"Duplicate style trait declaration will throw an exception!","extraInfo":[]},{"id":"Nonsensical style trait group inheritance rules will throw an exception!","extraInfo":[]},{"id":"The `group` style trait allows for inheritance, meaning a group can inherit from other ones.","extraInfo":[]},{"id":"The `type` style trait allows you to specify how a style trait applies to a component types.","extraInfo":[]},{"id":"The order of inherited style traits determines the order in which they are applied.","extraInfo":[]},{"id":"Use the `group` style trait to classify components.","extraInfo":[]},{"id":"Use the power of `Graphics2D` to render custom backgrounds inside you styles.","extraInfo":[]},{"id":"Write custom style sheet classes by extending the StyleSheet class.","extraInfo":[]},{"id":"You can define complex group inheritance graphs inside your style sheets.","extraInfo":[]},{"id":"You can style the font of a component inside your style sheet.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.styles.Styles_Spec",
@@ -453,6 +453,18 @@
       "successRate":"1.0",
       "duration":"?",
       "executedFeatures":[{"id":"A map can be used as a data source for tables.","extraInfo":[]},{"id":"We can create a column major table based on a list of lists as a data model.","extraInfo":[]},{"id":"We can pass an Event to the table model to trigger updates.","extraInfo":[]},{"id":"We need to attach a update Event to our table when the table data is list based and its data changes.","extraInfo":[]}],
+      "ignoredFeatures":[]
+    },{
+      "className":"swingtree.styles.Style_Animations.Style_Animations_Spec",
+      "title":"Style Animations",
+      "narrative":"Styles in SwingTree are based on a functional style engine\n    which reevaluates your styles whenever your component is\n    repainted. \n    This makes them a perfect fit for animations.\n    Continue reading to learn how to animate your styles.",
+      "featureCount":"3",
+      "failures":"0",
+      "errors":"0",
+      "skipped":"0" ,
+      "successRate":"1.0",
+      "duration":"?",
+      "executedFeatures":[{"id":"Advanced style animations will override the Look and Feel of a component temporarily","extraInfo":[]},{"id":"An `onMouseClick` event style animation is only temporary.","extraInfo":[]},{"id":"SwingTree will uninstall any custom border after an animation has completed.","extraInfo":[]}],
       "ignoredFeatures":[]
     }
   ],
