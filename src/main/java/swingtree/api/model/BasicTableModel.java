@@ -151,7 +151,7 @@ public interface BasicTableModel extends TableModel
          */
         public Builder colClasses( Class<?>... classes ) {
             if ( classes == null ) throw new IllegalArgumentException("classes cannot be null");
-            return colClass((colIndex) -> classes[colIndex]);
+            return colClass((colIndex) -> colIndex >= classes.length ? Object.class : classes[colIndex]);
         }
         /**
          *  Accepts a lambda allowing the {@link javax.swing.JTable} to determine if the cell at a given row and column is editable.
