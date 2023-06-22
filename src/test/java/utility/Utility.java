@@ -263,4 +263,8 @@ public class Utility {
         return  base + linkText + "</a>";
     }
 
+    public static String linkSnapshot(String filename) {
+        String pathBase = "https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/";
+        return "![" + filename + "](" + pathBase + filename + ")";
+    }
 }

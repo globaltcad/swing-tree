@@ -37,13 +37,16 @@ import swingtree.examples.simple.TableUI
 import javax.swing.*
 import java.awt.*
 
-@Title("Execution and Validation of Example Code")
+@Title("Examples UIs")
 @Narrative('''
 
-    This specification ensures that the
+    This is an overview of the various example UIs
+    in the test suite.
+   
+    This specification also ensures that the
     various UI examples in the test suite, 
     run successfully and also produce
-    UIs with expected states.
+    UIs with expected state and appearance.
 
 ''')
 class Examples_Spec extends Specification
@@ -91,7 +94,7 @@ class Examples_Spec extends Specification
     {
         reportInfo """
             The form UI looks like this:
-            ![simple-form-UI.png](../src/test/resources/snapshots/simple-form-UI.png)
+            ${Utility.linkSnapshot('simple-form-UI.png')}
             
             This is the ${Utility.link('oldest example in the test suite', Form)} and also a great
             first example of how to write declarative UI code with SwingTree.
@@ -155,7 +158,7 @@ class Examples_Spec extends Specification
     {
         reportInfo """
             The guesser example view looks like this:
-            ![note-guesser-UI.png](../src/test/resources/snapshots/note-guesser-UI.png)
+            ${Utility.linkSnapshot('note-guesser-UI.png')}
             This not only demonstrates how to do some custom 2D rendering on a JPanel,
             it is also a nice little game you can play to test your knowledge of music theory.
 
@@ -179,7 +182,7 @@ class Examples_Spec extends Specification
     {
         reportInfo """
             The well rounded UI looks like this:
-            ![well-rounded-UI.png](../src/test/resources/snapshots/well-rounded-UI.png)
+            ${Utility.linkSnapshot('well-rounded-UI.png')}
 
             This is the most basic example of how to use the SwingTree style API to
             override the default look and feel of Swing components.
@@ -201,7 +204,7 @@ class Examples_Spec extends Specification
     {
         reportInfo """
             The soft example UI looks like this:
-            ![soft-example-UI.png](../src/test/resources/snapshots/soft-example-UI.png)
+            ${Utility.linkSnapshot('soft-example-UI.png')}
             
             This is the most advanced example of how to use the SwingTree style API to
             customize the look and feel of your entire application.
@@ -223,7 +226,7 @@ class Examples_Spec extends Specification
     {
         reportInfo """
             The animated buttons view looks like this:
-            ![animated-buttons-UI.png](../src/test/resources/snapshots/animated-buttons-UI.png)
+            ${Utility.linkSnapshot('animated-buttons-UI.png')}
             
             Unfortunately this is just a snapshot of the UI, so you can't play with 
             the animations right here. But you can run the 
@@ -247,7 +250,7 @@ class Examples_Spec extends Specification
     {
         reportInfo """
             The vertical settings view from the examples looks like this:
-            ![vertical-settings-UI.png](../src/test/resources/snapshots/vertical-settings-UI.png)
+            ${Utility.linkSnapshot('vertical-settings-UI.png')}
             
             It demonstrates how UI components can easily be placed vertically
             and with some slight indentation, to indicate a certain grouping
@@ -305,7 +308,7 @@ class Examples_Spec extends Specification
     {
         reportInfo """
             The calculator view looks like this:
-            ![calculator-UI.png](../src/test/resources/snapshots/calculator-UI.png)
+            ${Utility.linkSnapshot('calculator-UI.png')}
             
             Here we only check that it is rendered as expected and we will not go further into detail 
             with respect to its code, if you want to see the code, just 

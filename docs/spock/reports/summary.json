@@ -1,7 +1,7 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Thu Jun 22 00:18:09 CEST 2023",
+  "created": "Thu Jun 22 15:27:40 CEST 2023",
   "statistics":{
     "runs":"38",
     "passed":"37",
@@ -96,8 +96,8 @@
       "ignoredFeatures":[]
     },{
       "className":"swingtree.examples.Examples_Spec",
-      "title":"Execution and Validation of Example Code",
-      "narrative":"This specification ensures that the\n    various UI examples in the test suite, \n    run successfully and also produce\n    UIs with expected states.",
+      "title":"Examples UIs",
+      "narrative":"This is an overview of the various example UIs\n    in the test suite.\n\n    This specification also ensures that the\n    various UI examples in the test suite, \n    run successfully and also produce\n    UIs with expected state and appearance.",
       "featureCount":"19",
       "failures":"0",
       "errors":"0",
