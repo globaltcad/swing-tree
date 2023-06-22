@@ -44,8 +44,8 @@ public class ComponentExtension<C extends JComponent>
 
     private final C _owner;
 
-    private final Map<LifeTime, Painter> _animationPainters = new LinkedHashMap<>(0);
-    private final Map<LifeTime, Styler<C>> _animationStylers = new LinkedHashMap<>(0);
+    private final Map<LifeTime, Painter>   _animationPainters = new LinkedHashMap<>(0);
+    private final Map<LifeTime, Styler<C>> _animationStylers  = new LinkedHashMap<>(0);
 
     private final List<String> _styleGroups = new ArrayList<>(0);
 
@@ -191,26 +191,19 @@ public class ComponentExtension<C extends JComponent>
 
     private Style _applyStyleToComponentState( Style style )
     {
+        Objects.requireNonNull(style);
+
         if ( Style.none().equals(style) ) {
             _uninstallCustomLaF();
             if ( _animationStylers.isEmpty() && _animationPainters.isEmpty() )
                 _uninstallCustomBorderBasedStyleAndAnimationRenderer();
-            if ( _initialBackgroundColor != null )
+            if ( _initialBackgroundColor != null ) {
                 _owner.setBackground(_initialBackgroundColor);
+                _initialBackgroundColor = null;
+            }
             return style;
         }
 
-        Objects.requireNonNull(style);
-        /*
-            Note that in SwingTree we do not override the UI classes of Swing to apply styles.
-            Instead, we use the "ComponentExtension" class to render styles on components.
-            This is because we don't want to means with the current LaF of the application
-            and instead simply allow users to carefully replace the LaF with a custom one.
-            So when the user has set a border style, we remove the border of the component!
-            And if the user has set a background color, we make sure that the component
-            is not opaque, so that the background color is visible.
-            ... and so on.
-        */
         boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();
 
         if ( style.background().color().isPresent() && !Objects.equals( _owner.getBackground(), style.background().color().get() ) ) {
