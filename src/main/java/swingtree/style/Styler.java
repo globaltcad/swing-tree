@@ -1,6 +1,7 @@
 package swingtree.style;
 
 import javax.swing.*;
+import java.util.Objects;
 
 /**
  * A {@link Styler} is a function that takes a {@link StyleDelegate}, applies some style to it, and then
@@ -12,6 +13,8 @@ import javax.swing.*;
 @FunctionalInterface
 public interface Styler<C extends JComponent>
 {
+    static <C extends JComponent> Styler<C> none() { return (Styler<C>) StyleUtility.STYLER_NONE; }
+
     /**
      * Applies some style to the given {@link StyleDelegate} and returns a new {@link StyleDelegate}
      * that has the style applied.
@@ -28,6 +31,16 @@ public interface Styler<C extends JComponent>
      * of the given {@link Styler}.
      */
     default Styler<C> andThen( Styler<C> other ) {
-        return delegate -> other.style( style( delegate ) );
+        Objects.requireNonNull(other);
+        return delegate -> {
+            StyleDelegate<C> result = delegate;
+            try {
+                result = style( delegate );
+            } catch ( Exception e ) {
+                e.printStackTrace();
+                // Exceptions inside a styler should not be fatal.
+            }
+            return other.style( result );
+        };
     }
 }

@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 public final class ForegroundStyle
 {
-    private static final ForegroundStyle _NONE = new ForegroundStyle(null, Collections.singletonMap(StyleUtility.DEFAULT_KEY, Painter.NONE));
+    private static final ForegroundStyle _NONE = new ForegroundStyle(null, Collections.singletonMap(StyleUtility.DEFAULT_KEY, Painter.none()));
 
     public static ForegroundStyle none() { return _NONE; }
 

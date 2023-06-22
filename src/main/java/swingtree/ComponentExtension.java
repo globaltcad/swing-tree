@@ -52,7 +52,7 @@ public class ComponentExtension<C extends JComponent>
     private StyleRenderer<C> _currentRenderer = null;
     private ComponentUI _styleLaF = null;
     private ComponentUI _formerLaF = null;
-    private Styler<C> _styling = null;
+    private Styler<C> _styling = Styler.none();
     private StyleSheet _styleSheet = null;
 
     private Color _initialBackgroundColor = null;
@@ -66,10 +66,7 @@ public class ComponentExtension<C extends JComponent>
     void addStyling( Styler<C> styler ) {
         Objects.requireNonNull(styler);
         checkIfIsDeclaredInUI();
-        if ( _styling == null )
-            _styling = styler;
-        else
-            _styling = _styling.andThen(s -> styler.style(new StyleDelegate<>(_owner, s.style())));
+        _styling = _styling.andThen( s -> styler.style(new StyleDelegate<>(_owner, s.style())) );
 
         establishStyle();
     }
@@ -144,8 +141,14 @@ public class ComponentExtension<C extends JComponent>
         for ( Map.Entry<LifeTime, Painter> entry : new ArrayList<>(_animationPainters.entrySet()) )
             if ( entry.getKey().isExpired() )
                 _animationPainters.remove(entry.getKey());
-            else
-                entry.getValue().paint(g2d);
+            else {
+                try {
+                    entry.getValue().paint(g2d);
+                } catch ( Exception e ) {
+                    e.printStackTrace();
+                    // An exception inside a painter should not prevent everything else from being painted!
+                }
+            }
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
@@ -168,15 +171,20 @@ public class ComponentExtension<C extends JComponent>
     private Style _calculateStyle() {
         _styleSheet = _styleSheet != null ? _styleSheet : UI.SETTINGS().getStyleSheet().orElse(null);
         Style style = _styleSheet == null ? Style.none() : _styleSheet.run( _owner );
-        if ( _styling != null )
-            style = _styling.style(new StyleDelegate<>(_owner, style)).style();
+        style = _styling.style(new StyleDelegate<>(_owner, style)).style();
 
         // Animations styles are last: they override everything else:
         for ( Map.Entry<LifeTime, Styler<C>> entry : new ArrayList<>(_animationStylers.entrySet()) )
             if ( entry.getKey().isExpired() )
                 _animationStylers.remove(entry.getKey());
-            else
-                style = entry.getValue().style(new StyleDelegate<>(_owner, style)).style();
+            else {
+                try {
+                    style = entry.getValue().style(new StyleDelegate<>(_owner, style)).style();
+                } catch ( Exception e ) {
+                    e.printStackTrace();
+                    // An exception inside a styler should not prevent other stylers from being applied!
+                }
+            }
 
         return style;
     }

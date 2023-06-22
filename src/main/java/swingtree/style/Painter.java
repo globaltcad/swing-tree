@@ -5,7 +5,7 @@ import java.awt.*;
 @FunctionalInterface
 public interface Painter
 {
-    Painter NONE = (g2d) -> {};
+    static Painter none() { return StyleUtility.PAINTER_NONE; }
 
     /**
      * Paints a custom style on a component using the given graphics context.
@@ -19,9 +19,19 @@ public interface Painter
      * @return a new painter that paints this painter's style and then the given painter's style.
      */
     default Painter andThen(Painter after) {
-        return (g2d) -> {
-                    paint(g2d);
-                    after.paint(g2d);
+        return g2d -> {
+                    try {
+                        paint(g2d);
+                    } catch ( Exception e ) {
+                        e.printStackTrace();
+                        // Exceptions inside a painter should not be fatal.
+                    }
+                    try {
+                        after.paint(g2d);
+                    } catch ( Exception e ) {
+                        e.printStackTrace();
+                        // Exceptions inside a painter should not cripple the rest of the painting.
+                    }
                 };
     }
 }

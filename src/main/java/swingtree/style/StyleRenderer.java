@@ -65,7 +65,7 @@ public class StyleRenderer<C extends JComponent>
             g2d.setFont( componentFont );
 
         style.background().painters().forEach( backgroundPainter -> {
-            if ( backgroundPainter == Painter.NONE ) return;
+            if ( backgroundPainter == Painter.none() ) return;
             g2d.setClip(baseAreaSupplier.get());
             backgroundPainter.paint(g2d);
         });
@@ -112,8 +112,13 @@ public class StyleRenderer<C extends JComponent>
             g2d.setFont( componentFont );
 
         style.foreground().painters().forEach(foregroundPainter -> {
-            if ( foregroundPainter == Painter.NONE ) return;
-            foregroundPainter.paint(g2d);
+            if ( foregroundPainter == Painter.none() ) return;
+            try {
+                foregroundPainter.paint(g2d);
+            } catch ( Exception e ) {
+                e.printStackTrace();
+                // Exceptions in painters should not cripple the rest of the rendering.
+            }
         });
 
         // Reset antialiasing to its previous state:

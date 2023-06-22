@@ -7,6 +7,8 @@ import java.util.Objects;
 class StyleUtility
 {
     static final String DEFAULT_KEY = "default";
+    static final Styler<?> STYLER_NONE = delegate -> delegate;
+    static final Painter PAINTER_NONE = g2d -> {};
 
     private StyleUtility() {}
 
@@ -22,7 +24,7 @@ class StyleUtility
 
     static String toString( Painter painter ) {
         if ( painter == null ) return "null";
-        if ( painter == Painter.NONE ) return "null";
+        if ( painter == Painter.none() ) return "null";
         return "Painter@" + Integer.toHexString(Objects.hashCode(painter));
     }
 

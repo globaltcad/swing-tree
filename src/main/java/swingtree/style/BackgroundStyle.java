@@ -1,8 +1,8 @@
 package swingtree.style;
 
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -11,7 +11,7 @@ public final class BackgroundStyle
     private static final BackgroundStyle _NONE = new BackgroundStyle(
                                                     null,
                                                     null,
-                                                    Collections.singletonMap(StyleUtility.DEFAULT_KEY, Painter.NONE),
+                                                    Collections.singletonMap(StyleUtility.DEFAULT_KEY, Painter.none()),
                                                     Collections.singletonMap(StyleUtility.DEFAULT_KEY, ShadeStyle.none())
                                                 );
 
@@ -54,7 +54,7 @@ public final class BackgroundStyle
     }
 
     public boolean hasCustomPainters() {
-        return !( _painters.size() == 1 && Painter.NONE.equals(_painters.get(StyleUtility.DEFAULT_KEY)) );
+        return !( _painters.size() == 1 && Painter.none().equals(_painters.get(StyleUtility.DEFAULT_KEY)) );
     }
 
     public List<ShadeStyle> shades() {
