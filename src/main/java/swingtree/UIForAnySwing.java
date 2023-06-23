@@ -690,7 +690,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withEmptyBorderTitled( Val<String> title, int top, int left, int bottom, int right ) {
         NullUtil.nullArgCheck( title, "title", Val.class );
         NullUtil.nullPropertyCheck( title, "title", "Null value for title is not allowed! Use an empty string instead!" );
-        _onShow( title, v -> getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(top, left, bottom, right), v)) );
+        _onShow( title, v ->
+                getComponent().setBorder(
+                        BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(top, left, bottom, right), v)
+                    )
+            );
         return this.withEmptyBorderTitled( title.orElseNull(), top, left, bottom, right );
     }
 
@@ -789,7 +793,21 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-     *  Creates a titled empty border bound to a {@link String} property.
+     *  Use this to define an empty {@link Border} with a title
+     *  and a default insets size of 5.
+     *
+     * @param title The title of the border.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withEmptyBorderTitled( String title ) {
+        NullUtil.nullArgCheck( title, "title", String.class );
+        return withEmptyBorderTitled(title, 5);
+    }
+
+    /**
+     *  Creates a titled empty border bound to a {@link String} property
+     *  and a default insets size of 5.
+     *
      * @param title The title of the border in the form of a {@link Val} property.
      * @return This very instance, which enables builder-style method chaining.
      */

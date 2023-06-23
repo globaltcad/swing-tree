@@ -1929,7 +1929,7 @@ public final class UI
 
     /**
      *  Use this to create a builder for a transparent {@link JPanel} without any insets
-     *  and a {@link MigLayout} based on the provided constraints.
+     *  and a {@link MigLayout} constructed using the provided constraints.
      *  This is essentially a convenience method for the following: <br>
      *  <pre>{@code
      *      UI.of(new JPanel(new MigLayout(attr, colConstraints, rowConstraints))).makeNonOpaque()
