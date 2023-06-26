@@ -66,6 +66,10 @@ public final class BackgroundStyle
             );
     }
 
+    public boolean hasCustomShades() {
+        return !( _shades.size() == 1 && ShadeStyle.none().equals(_shades.get(StyleUtility.DEFAULT_KEY)) );
+    }
+
     BackgroundStyle color( Color color ) { return new BackgroundStyle(color, _foundationColor, _painters, _shades); }
 
     BackgroundStyle foundationColor( Color foundation ) { return new BackgroundStyle(_color, foundation, _painters, _shades); }

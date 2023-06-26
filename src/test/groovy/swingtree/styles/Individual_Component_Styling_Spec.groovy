@@ -5,10 +5,11 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import swingtree.UI
+import swingtree.style.ShadingStrategy
+import utility.Utility
 
 import javax.swing.*
 import javax.swing.border.TitledBorder
-import javax.swing.plaf.metal.MetalLabelUI
 import java.awt.*
 import java.awt.image.BufferedImage
 
@@ -218,4 +219,111 @@ class Individual_Component_Styling_Spec extends Specification
             label.component.border instanceof TitledBorder
             label.component.border.title == "Original border"
     }
+
+    def 'This is how you can create a rounded green label with a border at the bottom.'()
+    {
+        reportInfo """
+            This is how you can create a rounded green label with a border at the bottom.
+            It looks like this:
+            ${Utility.linkSnapshot('components/rounded-green-JLabel.png')}
+            
+            It demonstrates how to style a JLabel with the style API.
+        """
+        given : 'We create a UI with a green label.'
+            var ui =
+                            UI.label("I am a green label")
+                            .withStyle( it -> it
+                                .size(205, 60)
+                                .backgroundColor(new Color(40,200,70))
+                                .padding(4, 7, 4, 7)
+                                .border(0, 0, 3, 0, Color.BLACK)
+                                .borderRadius(13)
+                                .margin(12)
+                                .foregroundColor(Color.GREEN)
+                                .shadowColor(new Color(0,0,0,100))
+                                .shadowSpreadRadius(1)
+                                .shadowBlurRadius(2)
+                                .font(new Font("Arial", Font.BOLD, 20))
+                            )
+
+        when : 'We render the label into a BufferedImage.'
+            var image = Utility.renderSingleComponent(ui.getComponent())
+
+        then : 'The image is as expected.'
+            Utility.similarityBetween(image, "components/rounded-green-JLabel.png", 99.9) > 99.9
+    }
+
+    def 'This is how you can create a JPanel with a shaded border.'()
+    {
+        reportInfo """
+            This is how you can create a JPanel with a shaded border.
+            It looks like this:
+            ${Utility.linkSnapshot('components/shaded-border-JPanel.png')}
+            
+            It demonstrates how to style a JPanel with the style API.
+        """
+        given : 'We create a UI with a green label.'
+            var ui =
+                            UI.panel()
+                            .withStyle( it -> it
+                                .size(205, 205)
+                                .backgroundColor(new Color(40,180,240))
+                                .foundationColor(new Color(200,200,240))
+                                .padding(30)
+                                .margin(22)
+                                .border(15, Color.CYAN)
+                                .borderShade( s -> s
+                                    .strategy(ShadingStrategy.BOTTOM_RIGHT_TO_TOP_LEFT)
+                                    .colors(Color.YELLOW, new Color(255,255,255,0))
+                                )
+                                .shadowColor(new Color(0,0,0,100))
+                                .shadowSpreadRadius(1)
+                                .shadowBlurRadius(2)
+                                .font(new Font("Arial", Font.BOLD, 20))
+                            )
+
+        when : 'We render the label into a BufferedImage.'
+            var image = Utility.renderSingleComponent(ui.getComponent())
+
+        then : 'The image is as expected.'
+            Utility.similarityBetween(image, "components/shaded-border-JPanel.png", 99.9) > 99.9
+    }
+
+    def 'You can style a toggle button to have a custom selection shading.'()
+    {
+        reportInfo """
+            You can style a toggle button to have a custom selection shading.
+            This is what it looks like:
+            ${Utility.linkSnapshot('components/shaded-JToggleButton.png')}
+            And when toggled it would like this:
+            ${Utility.linkSnapshot('components/selection-shaded-JToggleButton.png')}
+            
+            It demonstrates how to style a JToggleButton with the style API
+            in a way where the style changes depending on the component state.
+        """
+        given : 'We create a UI with a green label.'
+            var ui =
+                            UI.toggleButton("I am a toggle button")
+                            .withStyle( it -> it
+                                .size(205, 60)
+                                .backgroundShade( shade -> shade
+                                   .strategy(ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT)
+                                   .colors(
+                                       it.component().getModel().isSelected()
+                                           ? new Color[]{ Color.YELLOW, Color.CYAN   }
+                                           : new Color[]{ Color.CYAN,   Color.ORANGE }
+                                   )
+                                )
+                            )
+
+        when : 'We render the label into a BufferedImage.'
+            var image1 = Utility.renderSingleComponent(ui.getComponent())
+            ui.getComponent().setSelected(true)
+            var image2 = Utility.renderSingleComponent(ui.getComponent())
+
+        then : 'The image is as expected.'
+            Utility.similarityBetween(image1, "components/shaded-JToggleButton.png", 99.9) > 99.9
+            Utility.similarityBetween(image2, "components/selection-shaded-JToggleButton.png", 99.9) > 99.9
+    }
+
 }

@@ -261,6 +261,18 @@ public class ComponentExtension<C extends JComponent>
                 _owner.setPreferredSize(newPrefSize);
         }
 
+        if ( style.dimensionality().width().isPresent() || style.dimensionality().height().isPresent() ) {
+            Dimension size = _owner.getSize();
+
+            int width  = style.dimensionality().width().orElse(size == null ? 0 : size.width);
+            int height = style.dimensionality().height().orElse(size == null ? 0 : size.height);
+
+            Dimension newSize = new Dimension(width, height);
+
+            if ( ! newSize.equals(size) )
+                _owner.setSize(newSize);
+        }
+
         if ( _owner instanceof JTextComponent ) {
             JTextComponent tc = (JTextComponent) _owner;
             if ( style.font().selectionColor().isPresent() && ! Objects.equals( tc.getSelectionColor(), style.font().selectionColor().get() ) )
@@ -335,11 +347,19 @@ public class ComponentExtension<C extends JComponent>
         boolean weNeedToOverrideLaF = false;
         boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();
         boolean hasMargin = style.margin().isPositive();
+        boolean hasBackgroundPainter = style.background().hasCustomPainters();
+        boolean hasBackgroundShades = style.background().hasCustomShades();
 
         if ( hasBorderRadius )
             weNeedToOverrideLaF = true;
 
         if ( hasMargin )
+            weNeedToOverrideLaF = true;
+
+        if ( hasBackgroundPainter )
+            weNeedToOverrideLaF = true;
+
+        if ( hasBackgroundShades )
             weNeedToOverrideLaF = true;
 
         if ( style.background().hasCustomPainters() )
@@ -366,6 +386,11 @@ public class ComponentExtension<C extends JComponent>
             boolean success = _installCustomLaF();
             if ( !success && _owner.isOpaque() ) {
                 _owner.setOpaque(false);
+            }
+
+            if ( _owner instanceof AbstractButton ) {
+                AbstractButton b = (AbstractButton) _owner;
+                b.setContentAreaFilled(!hasBackgroundShades && !hasBackgroundPainter);
             }
         }
         else if ( _styleLaF != null )

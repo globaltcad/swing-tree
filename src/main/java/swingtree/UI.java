@@ -2704,12 +2704,12 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JLabel} instance.
      *
-     * @param component The {@link JLabel} instance to be used by the builder.
+     * @param label The {@link JLabel} instance to be used by the builder.
      * @return A builder instance for the provided {@link JLabel}, which enables fluent method chaining.
      */
-    public static <L extends JLabel> UIForLabel<L> of( L component ) {
-        NullUtil.nullArgCheck(component, "component", JLabel.class);
-        return new UIForLabel<>(component);
+    public static <L extends JLabel> UIForLabel<L> of( L label ) {
+        NullUtil.nullArgCheck(label, "component", JLabel.class);
+        return new UIForLabel<>(label);
     }
 
     /**

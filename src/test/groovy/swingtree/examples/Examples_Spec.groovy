@@ -1,7 +1,7 @@
 package swingtree.examples
 
 import com.alexandriasoftware.swing.JSplitButton
-import examples.*
+import examples.Calculator
 import examples.animated.AnimatedButtonsView
 import examples.animated.AnimatedView
 import examples.comparisons.comparison1.MadeWithSwingTree
@@ -9,17 +9,9 @@ import examples.games.NoteGuesserView
 import examples.games.NoteGuesserViewModel
 import examples.games.SymbolGuesserView
 import examples.games.SymbolGuesserViewModel
-import examples.mvvm.ListSearchView
-import examples.mvvm.ListSearchViewModel
-import examples.mvvm.LoginView
-import examples.mvvm.LoginViewModel
-import examples.mvvm.SomeComponentsView
-import examples.mvvm.SomeComponentsViewModel
-import examples.mvvm.SomeSettingsView
-import examples.mvvm.SomeSettingsViewModel
-import examples.mvvm.UserRegistrationView
-import examples.mvvm.UserRegistrationViewModel
+import examples.mvvm.*
 import examples.simple.Form
+import examples.simple.ListRendering
 import examples.simple.TodoApp
 import examples.stylish.BoxShadowPickerView
 import examples.stylish.BoxShadowPickerViewModel
@@ -29,10 +21,9 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import swingtree.UI
-import utility.Utility
 import swingtree.examples.advanced.AdvancedUI
-import examples.simple.ListRendering
 import swingtree.examples.simple.TableUI
+import utility.Utility
 
 import javax.swing.*
 import java.awt.*
@@ -94,7 +85,7 @@ class Examples_Spec extends Specification
     {
         reportInfo """
             The form UI looks like this:
-            ${Utility.linkSnapshot('simple-form-UI.png')}
+            ${Utility.linkSnapshot('views/simple-form-UI.png')}
             
             This is the ${Utility.link('oldest example in the test suite', Form)} and also a great
             first example of how to write declarative UI code with SwingTree.
@@ -112,7 +103,7 @@ class Examples_Spec extends Specification
         and :
             new Utility.Query(ui).find(JButton, "hover-icon-button").get().cursor.type == Cursor.HAND_CURSOR
         and :
-            Utility.similarityBetween(ui, "/snapshots/simple-form-UI.png", 99.9) > 99.9
+            Utility.similarityBetween(ui, "views/simple-form-UI.png", 99.9) > 99.9
     }
 
     def 'The login example UI defined in the examples, a good MVVM demonstration.'()
@@ -158,7 +149,7 @@ class Examples_Spec extends Specification
     {
         reportInfo """
             The guesser example view looks like this:
-            ${Utility.linkSnapshot('note-guesser-UI.png')}
+            ${Utility.linkSnapshot('views/note-guesser-UI.png')}
             This not only demonstrates how to do some custom 2D rendering on a JPanel,
             it is also a nice little game you can play to test your knowledge of music theory.
 
@@ -170,7 +161,7 @@ class Examples_Spec extends Specification
         given : 'We create an instance of the UI.'
             var ui = new NoteGuesserView(new NoteGuesserViewModel())
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "/snapshots/note-guesser-UI.png", 99.9) > 99.9
+            Utility.similarityBetween(ui, "views/note-guesser-UI.png", 99.9) > 99.9
     }
 
     def 'The symbol guesser example UI defined in the examples can be created.'()
@@ -182,7 +173,7 @@ class Examples_Spec extends Specification
     {
         reportInfo """
             The well rounded UI looks like this:
-            ${Utility.linkSnapshot('well-rounded-UI.png')}
+            ${Utility.linkSnapshot('views/well-rounded-UI.png')}
 
             This is the most basic example of how to use the SwingTree style API to
             override the default look and feel of Swing components.
@@ -197,14 +188,14 @@ class Examples_Spec extends Specification
         given : 'We create the UI.'
             var ui = new WellRoundedView()
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "/snapshots/well-rounded-UI.png", 99.9) > 99.9
+            Utility.similarityBetween(ui, "views/well-rounded-UI.png", 99.9) > 99.9
     }
 
     def 'The soft example UI is rendered as expected.'()
     {
         reportInfo """
             The soft example UI looks like this:
-            ${Utility.linkSnapshot('soft-example-UI.png')}
+            ${Utility.linkSnapshot('views/soft-example-UI.png')}
             
             This is the most advanced example of how to use the SwingTree style API to
             customize the look and feel of your entire application.
@@ -219,14 +210,14 @@ class Examples_Spec extends Specification
         given : 'We create the UI.'
             var ui = new SoftUIView()
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "/snapshots/soft-example-UI.png", 99.9) > 99.9
+            Utility.similarityBetween(ui, "views/soft-example-UI.png", 99.9) > 99.9
     }
 
     def 'The animated buttons view examples UI defined in the examples looks as expected.'()
     {
         reportInfo """
             The animated buttons view looks like this:
-            ${Utility.linkSnapshot('animated-buttons-UI.png')}
+            ${Utility.linkSnapshot('views/animated-buttons-UI.png')}
             
             Unfortunately this is just a snapshot of the UI, so you can't play with 
             the animations right here. But you can run the 
@@ -238,7 +229,7 @@ class Examples_Spec extends Specification
             var ui = new AnimatedButtonsView()
             ui.setBackground(new Color(242, 242, 242))
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "/snapshots/animated-buttons-UI.png", 99) > 99
+            Utility.similarityBetween(ui, "views/animated-buttons-UI.png", 99) > 99
     }
 
     def 'The animation example view can be created.'()
@@ -250,7 +241,7 @@ class Examples_Spec extends Specification
     {
         reportInfo """
             The vertical settings view from the examples looks like this:
-            ${Utility.linkSnapshot('vertical-settings-UI.png')}
+            ${Utility.linkSnapshot('views/vertical-settings-UI.png')}
             
             It demonstrates how UI components can easily be placed vertically
             and with some slight indentation, to indicate a certain grouping
@@ -272,7 +263,7 @@ class Examples_Spec extends Specification
             speedTextField.text == "42.0"
             speedTextField.background == Color.WHITE
         when : 'We rerender the view offscreen...'
-            var similarity = Utility.similarityBetween(view, "/snapshots/vertical-settings-UI.png", 99.7)
+            var similarity = Utility.similarityBetween(view, "views/vertical-settings-UI.png", 99.7)
         then : '...it looks as expected.'
             similarity > 99.7
 
@@ -284,7 +275,7 @@ class Examples_Spec extends Specification
             speedTextField.background == Color.RED
 
         when : 'We rerender the view offscreen again because the background color changed...'
-            similarity = Utility.similarityBetween(view, "/snapshots/vertical-settings-UI.png")
+            similarity = Utility.similarityBetween(view, "views/vertical-settings-UI.png")
         then : 'The UI is no longer rendered as expected.'
             similarity < 99.7
     }
@@ -308,7 +299,7 @@ class Examples_Spec extends Specification
     {
         reportInfo """
             The calculator view looks like this:
-            ${Utility.linkSnapshot('calculator-UI.png')}
+            ${Utility.linkSnapshot('views/calculator-UI.png')}
             
             Here we only check that it is rendered as expected and we will not go further into detail 
             with respect to its code, if you want to see the code, just 
@@ -323,7 +314,7 @@ class Examples_Spec extends Specification
             new Utility.Query(ui).find(JTextArea, "input-text-area").isPresent()
             new Utility.Query(ui).find(JTextArea, "input-text-area").get().componentOrientation == ComponentOrientation.RIGHT_TO_LEFT
         and : 'Its render state is as expected.'
-            Utility.similarityBetween(ui, "/snapshots/calculator-UI.png", 99) > 99
+            Utility.similarityBetween(ui, "views/calculator-UI.png", 99) > 99
     }
 
     def 'The simple Table-UI example has the expected state.'()
@@ -384,6 +375,5 @@ class Examples_Spec extends Specification
             new Utility.Query(ui).find(JPanel, "task-2").isPresent()
             new Utility.Query(ui).find(JPanel, "task-3").isPresent()
     }
-
 
 }

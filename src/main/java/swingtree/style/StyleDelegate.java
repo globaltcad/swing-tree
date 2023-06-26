@@ -264,6 +264,21 @@ public final class StyleDelegate<C extends JComponent>
     }
 
     /**
+     *  Returns a new {@link Style} with the provided border widths and border color.
+     *  The border will be rendered with an inset space based on the margin defined by the {@link Style}.
+     *
+     * @param top The border width in pixels for the top side of the component.
+     * @param right The border width in pixels for the right side of the component.
+     * @param bottom The border width in pixels for the bottom side of the component.
+     * @param left The border width in pixels for the left side of the component.
+     * @param color The border color.
+     * @return A new {@link StyleDelegate} with the provided border widths and border color.
+     */
+    public StyleDelegate<C> border( int top, int right, int bottom, int left, Color color ) {
+        return _withStyle(_style._withBorder(_style.border().widths(Outline.of(top, right, bottom, left)).color(color)));
+    }
+
+    /**
      *  Returns a new {@link Style} with the provided border width and border color in the form of a string.
      *  The string can be either a hex color string, a color name or a color constant from the system properties.
      *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
@@ -1130,6 +1145,52 @@ public final class StyleDelegate<C extends JComponent>
      */
     public StyleDelegate<C> prefHeight( int preferredHeight ) {
         return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredHeight(preferredHeight)));
+    }
+
+    /**
+     *  Defines the size of this {@link JComponent}. <br>
+     *  This ultimately translates to {@link JComponent#setSize(Dimension)} on the underlying component. <br>
+     * @param size The width and height size {@link Dimension}.
+     * @return A new {@link StyleDelegate} with the provided size (width and height) {@link Dimension} set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public StyleDelegate<C> size( Dimension size ) {
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withWidth(size.width)._withHeight(size.height)));
+    }
+
+    /**
+     *  Defines the size of this {@link JComponent}. <br>
+     *  This ultimately translates to {@link JComponent#setSize(Dimension)} on the underlying component. <br>
+     * @param width The width.
+     * @param height The height.
+     * @return A new {@link StyleDelegate} with the provided size (width and height) {@link Dimension} set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public StyleDelegate<C> size( int width, int height ) {
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withWidth(width)._withHeight(height)));
+    }
+
+
+    /**
+     *  Defines the width of this {@link JComponent}. <br>
+     *  This ultimately translates to {@link JComponent#setSize(Dimension)} on the underlying component. <br>
+     * @param width The width.
+     * @return A new {@link StyleDelegate} with the provided width set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public StyleDelegate<C> width( int width ) {
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withWidth(width)));
+    }
+
+    /**
+     *  Defines the height of this {@link JComponent}. <br>
+     *  This ultimately translates to {@link JComponent#setSize(Dimension)} on the underlying component. <br>
+     * @param height The height.
+     * @return A new {@link StyleDelegate} with the provided height set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public StyleDelegate<C> height( int height ) {
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withHeight(height)));
     }
 
 }

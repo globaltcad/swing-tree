@@ -19,6 +19,7 @@ public class StyleRenderer<C extends JComponent>
 
     private final C _comp;
     private final Style style;
+    private Area baseArea = null;
 
 
     public StyleRenderer( C comp, Style style ) {
@@ -26,8 +27,16 @@ public class StyleRenderer<C extends JComponent>
         this.style = style;
     }
 
+    private Area _getBaseArea() {
+        if ( baseArea == null )
+            baseArea = _calculateBaseArea(style, 0, 0, 0, 0);
+        return baseArea;
+    }
+
     public void renderBaseStyle(Graphics2D g2d)
     {
+        baseArea = null;
+
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
 
@@ -35,12 +44,9 @@ public class StyleRenderer<C extends JComponent>
         if ( DO_ANTIALIASING )
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
-        Area[] baseArea = { null };
-        Supplier<Area> baseAreaSupplier = () -> {
-            if ( baseArea[0] == null )
-                baseArea[0] = _calculateBaseArea(style, 0, 0, 0, 0);
-            return baseArea[0];
-        };
+        Font componentFont = _comp.getFont();
+        if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
+            g2d.setFont( componentFont );
 
         style.background().foundationColor().ifPresent(outerColor -> {
             _fillOuterBackground(style, outerColor, g2d);
@@ -48,33 +54,29 @@ public class StyleRenderer<C extends JComponent>
         style.background().color().ifPresent(color -> {
             if ( color.getAlpha() == 0 ) return;
             g2d.setColor(color);
-            g2d.fill(baseAreaSupplier.get());
+            g2d.fill(_getBaseArea());
         });
 
         for ( ShadeStyle shade : style.background().shades() ) {
             if ( shade.colors().length > 0 && !shade.strategy().isNone() ) {
                 if ( shade.strategy().isDiagonal() )
-                    _renderDiagonalShade(g2d, _comp, style.margin(), shade, baseAreaSupplier.get());
+                    _renderDiagonalShade(g2d, _comp, style.margin(), shade, _getBaseArea());
                 else
-                    _renderVerticalOrHorizontalShade(g2d, _comp, style.margin(), shade, baseAreaSupplier.get());
+                    _renderVerticalOrHorizontalShade(g2d, _comp, style.margin(), shade, _getBaseArea());
             }
         }
 
-        Font componentFont = _comp.getFont();
-        if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
-            g2d.setFont( componentFont );
-
         style.background().painters().forEach( backgroundPainter -> {
             if ( backgroundPainter == Painter.none() ) return;
-            g2d.setClip(baseAreaSupplier.get());
+            g2d.setClip(_getBaseArea());
             backgroundPainter.paint(g2d);
         });
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
 
-        if ( baseArea[0] != null )
-            g2d.setClip(baseAreaSupplier.get());
+        if ( baseArea != null )
+            g2d.setClip(_getBaseArea());
     }
 
     public void renderBorderStyle(Graphics2D g2d) {

@@ -12,6 +12,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.*;
@@ -125,6 +127,16 @@ public class Utility {
         return image;
     }
 
+    public static BufferedImage renderSingleComponent(Component component) {
+        int w = Math.max(component.getWidth(), component.getPreferredSize().width);
+        int h = Math.max(component.getHeight(), component.getPreferredSize().height);
+        BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = image.createGraphics();
+        component.paint(g2d);
+        g2d.dispose();
+        return image;
+    }
+
     /**
      *  This is used to make UI snapshots for testing purposes.
      */
@@ -133,7 +145,7 @@ public class Utility {
         JWindow f = new JWindow();
         f.add(ui);
         f.pack();
-        safeUIAsImage(ui, "src/test/resources/snapshots/vertical-settings-UI.png");
+        safeUIAsImage(ui, "src/test/resources/snapshots/views/vertical-settings-UI.png");
         //BufferedImage image = offscreenRender(ui);
         //JFrame frame = new JFrame();
         //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -150,6 +162,11 @@ public class Utility {
 
     public static void safeUIImage(BufferedImage image, String path) {
         try {
+            if ( !new File(path).exists() ) {
+                File parent = new File(path).getParentFile();
+                if ( !parent.exists() )
+                    parent.mkdirs();
+            }
             javax.imageio.ImageIO.write(image, "png", new java.io.File(path));
         } catch (java.io.IOException e) {
             e.printStackTrace();
@@ -160,8 +177,14 @@ public class Utility {
         return similarityBetween(ui, imageFile, 0);
     }
 
+
     public static double similarityBetween(JComponent ui, String imageFile, double expectedSimilarity) {
         BufferedImage image = offscreenRender(ui);
+        return similarityBetween(image, imageFile, expectedSimilarity);
+    }
+
+    public static double similarityBetween(BufferedImage image, String imageFile, double expectedSimilarity) {
+        imageFile = "/snapshots/" + imageFile;
         BufferedImage originalImage = image;
         BufferedImage imageFromFile = null;
         try {
@@ -183,9 +206,7 @@ public class Utility {
         double similarity = similarityBetween(image, imageFromFile);
         if ( similarity < expectedSimilarity ) {
             try {
-                String[] parts = imageFile.split("/");
-                String filename = parts[parts.length - 1];
-                String newPath = "build/resources/test/snapshots/" + filename.replace(".png", "-FAILURE.png");
+                String newPath = "build/resources/test" + imageFile.replace(".png", "-FAILURE.png");
                 safeUIImage(originalImage, newPath);
                 BufferedImage finalImageFromFile = imageFromFile;
                 SwingUtilities.invokeLater(()-> {
@@ -208,6 +229,21 @@ public class Utility {
             }
         }
         return similarity;
+    }
+
+    /**
+     *  Makes sure the directory of the provided file exists.
+     *
+     * @param filePath The file for which the path is to be established.
+     */
+    private static void establishLocation(String filePath) {
+        String[] parts = filePath.split("/");
+        String filename = parts[parts.length - 1];
+        String path = filePath.replace(filename, "");
+        File dir = new File(path);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
     }
 
     public static double similarityBetween(BufferedImage image0, BufferedImage image1) {
