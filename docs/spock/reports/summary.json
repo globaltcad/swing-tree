@@ -1,7 +1,7 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Mon Jun 26 23:17:29 CEST 2023",
+  "created": "Tue Jun 27 00:22:54 CEST 2023",
   "statistics":{
     "runs":"38",
     "passed":"37",
@@ -385,14 +385,14 @@
     },{
       "className":"swingtree.styles.Individual_Component_Styling_Spec",
       "title":"Styling Components",
-      "narrative":"This specification demonstrates how you can use the styling\n    API to style Swing components in declarative SwingTree code.",
-      "featureCount":"10",
+      "narrative":"This specification demonstrates how you can use the styling\n    API to style Swing components in a functional and declarative fashion.",
+      "featureCount":"11",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"Make a text area look like it is sunken in the background using a shadow going inwards.","extraInfo":[]},{"id":"Styling components is based on a functional styler lambda.","extraInfo":[]},{"id":"SwingTree will re-install any borders overridden by the style API.","extraInfo":[]},{"id":"SwingTree will un-install any custom border if no styles are found.","extraInfo":[]},{"id":"The Styling API will make sure that the layout manager accounts for the border width!","extraInfo":[]},{"id":"The insets of the layout manager are based on the sum of the margin and padding for a given edge of the component bounds.","extraInfo":[]},{"id":"The margins defined in the style API will be applied to the layout manager through the border insets.","extraInfo":[]},{"id":"This is how you can create a JPanel with a shaded border.","extraInfo":[]},{"id":"This is how you can create a rounded green label with a border at the bottom.","extraInfo":[]},{"id":"You can style a toggle button to have a custom selection shading.","extraInfo":[]}],
+      "executedFeatures":[{"id":"Create a soft UI slider that sinks into the background if you wish.","extraInfo":[]},{"id":"Make a text area look like it is sunken in the background using a shadow going inwards.","extraInfo":[]},{"id":"Styling components is based on a functional styler lambda.","extraInfo":[]},{"id":"SwingTree will re-install any borders overridden by the style API.","extraInfo":[]},{"id":"SwingTree will un-install any custom border if no styles are found.","extraInfo":[]},{"id":"The Styling API will make sure that the layout manager accounts for the border width!","extraInfo":[]},{"id":"The insets of the layout manager are based on the sum of the margin and padding for a given edge of the component bounds.","extraInfo":[]},{"id":"The margins defined in the style API will be applied to the layout manager through the border insets.","extraInfo":[]},{"id":"This is how you can create a JPanel with a shaded border.","extraInfo":[]},{"id":"This is how you can create a rounded green label with a border at the bottom.","extraInfo":[]},{"id":"You can style a toggle button to have a custom selection shading.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.styles.Style_Sheet_Spec",

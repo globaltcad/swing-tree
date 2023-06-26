@@ -1,5 +1,6 @@
 package swingtree.styles
 
+import com.formdev.flatlaf.FlatLightLaf
 import net.miginfocom.swing.MigLayout
 import spock.lang.Narrative
 import spock.lang.Specification
@@ -16,10 +17,21 @@ import java.awt.image.BufferedImage
 @Title("Styling Components")
 @Narrative('''
     This specification demonstrates how you can use the styling
-    API to style Swing components in declarative SwingTree code.
+    API to style Swing components in a functional and declarative fashion.
 ''')
 class Individual_Component_Styling_Spec extends Specification
 {
+    def setup() {
+        // We reset to the default look and feel:
+        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
+        // This is to make sure that the tests are not influenced by
+        // other look and feels that might be used in the example code...
+    }
+
+    def cleanup() {
+        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
+    }
+
     def 'Styling components is based on a functional styler lambda.'()
     {
         reportInfo """
@@ -29,11 +41,11 @@ class Individual_Component_Styling_Spec extends Specification
             They are not modified in place, but instead transformed
             by so called "styler" lambdas.
             Not only does this architecture make it easy to compose, reuse and share
-            styles, but it also makes it possible to have a complex style
-            inheritance hierarchy without the need for very complex code.
+            styles, but it also makes it possible to have a extensive style
+            hierarchy without the need for very complex code.
             In practice, this means that your styler lambdas become part
-            of a compositional tree of styler lambdas, which is then applied to
-            the component tree in a single pass.
+            of a compositional tree of styler all the other lambdas, which is then applied to
+            the components of the component tree in every repaint.
             How cool is that? :)
         """
         given : 'We create a panel with some custom styling!'
@@ -65,8 +77,9 @@ class Individual_Component_Styling_Spec extends Specification
         reportInfo """
             Swing does not have a concept of margins.
             Without a proper layout manager it does not even support the configuration of insets.
-            However, through a custom `Border` implementation and a default layout manager (MigLayout)
-            we can model the margins (and paddings) of a component.
+            However, SwingTree fixes this
+            through a custom `Border` implementation and a default layout manager (`MigLayout`)
+            which models the margins (and paddings) of a component.
         """
         given : 'We create a panel with some custom styling!'
             var panel =
@@ -256,8 +269,11 @@ class Individual_Component_Styling_Spec extends Specification
     def 'This is how you can create a JPanel with a shaded border.'()
     {
         reportInfo """
-            This is how you can create a JPanel with a shaded border.
-            It looks like this:
+            It is really simple to create a JPanel with a shaded border,
+            all you need to do is pass the style configuration to the style API.
+            SwingTree will dynamically install or uninstall a custom border on a component
+            depending on whether or not there are any style configurations defined for the component. <br>
+            Note that in this example we make the border extra wide so that you can see the difference.
             ${Utility.linkSnapshot('components/shaded-border-JPanel.png')}
             
             It demonstrates how to style a JPanel with the style API.
@@ -282,7 +298,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .font(new Font("Arial", Font.BOLD, 20))
                     )
 
-        when : 'We render the label into a BufferedImage.'
+        when : 'We render the panel into a BufferedImage.'
             var image = Utility.renderSingleComponent(ui.getComponent())
 
         then : 'The image is as expected.'
@@ -293,15 +309,19 @@ class Individual_Component_Styling_Spec extends Specification
     {
         reportInfo """
             You can style a toggle button to have a custom selection shading.
-            This is what it looks like:
+            Please note that this will actually override some parts of the original 
+            look and feel of the button simply because SwingTree needs to cut some
+            corners to install custom styles for you. <br>
+            So in this example you may notice that the regular Metal Lool and Feel
+            is replaced by the our shading.
             ${Utility.linkSnapshot('components/shaded-JToggleButton.png')}
             And when toggled it would like this:
             ${Utility.linkSnapshot('components/selection-shaded-JToggleButton.png')}
             
-            It demonstrates how to style a JToggleButton with the style API
-            in a way where the style changes depending on the component state.
+            Note that this example very nicely demonstrates how the style of a JToggleButton 
+            will update immediately depending on component changes.
         """
-        given : 'We create a UI with a green label.'
+        given : 'We create a toggle button with some shading gradients.'
             var ui =
                     UI.toggleButton("I am a toggle button")
                     .withStyle( it -> it
@@ -316,7 +336,7 @@ class Individual_Component_Styling_Spec extends Specification
                         )
                     )
 
-        when : 'We render the label into a BufferedImage.'
+        when : 'We render the toggle button into a BufferedImage.'
             var image1 = Utility.renderSingleComponent(ui.getComponent())
             ui.getComponent().setSelected(true)
             var image2 = Utility.renderSingleComponent(ui.getComponent())
@@ -330,12 +350,12 @@ class Individual_Component_Styling_Spec extends Specification
     {
         reportInfo """
             Make a text area look like it is sunken in the background using a shadow going inwards.
-            This is what it looks like:
+            We achieve this by configuring the default shadow (with the name "default").
             ${Utility.linkSnapshot('components/sunken-JTextArea.png')}
             
-            It demonstrates how to style a JTextArea with the style API.
+            This kind of shadow effect looks really nice on text areas.
         """
-        given : 'We create a UI with a green label.'
+        given : 'A text area UI with a custom styler lambda.'
             var ui =
                     UI.textArea("""Ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.""")
                     .peek( it -> it.setLineWrap(true) )
@@ -353,11 +373,57 @@ class Individual_Component_Styling_Spec extends Specification
                         .font(new Font("Palatino", Font.PLAIN, 20))
                     )
 
-        when : 'We render the label into a BufferedImage.'
+        when : 'We render the text area into a BufferedImage.'
             var image = Utility.renderSingleComponent(ui.getComponent())
 
         then : 'The image is as expected.'
             Utility.similarityBetween(image, "components/sunken-JTextArea.png", 99.9) > 99.9
     }
 
+    def 'Create a soft UI slider that sinks into the background if you wish.'()
+    {
+        reportInfo """
+            Specifying multiple (named) shadows, allows you to create soft UI,
+            like for example a slider that sinks into the background. <br>
+            The reason why we use named shadows is because we don't want to override
+            the default shadow of the slider, but rather add a new one. <br>
+
+            ${Utility.linkSnapshot('components/soft-JSlider.png')}
+            
+            The concept of naming exists to make any number of sub-styles possible.
+            This concept of sub-styles is not exclusive to shadows.
+            You can also name shadesa and custom foreground or background painters.
+        """
+        given : 'Before we create the styled slider, we first setup up FlatLaF as a basis.'
+            FlatLightLaf.setup()
+        and : 'Now a slider UI with a custom styler lambda.'
+            var ui =
+                    UI.slider(UI.Align.HORIZONTAL, 0, 100, 50)
+                    .withStyle( it -> it
+                        .size(280, 38)
+                        .prefSize(280, 38)
+                        .borderRadius(20)
+                        .backgroundColor(new Color(0.4f, 0.85f, 1))
+                        .foundationColor(new Color(0.4f, 0.85f, 1))
+                        .shadow("bright", s -> s
+                            .color(new Color(0.7f, 0.95f, 1f, 0.35f))
+                            .offset(-11)
+                        )
+                        .shadow("dark", s -> s
+                            .color(new Color(0, 0.1f, 0.2f, 0.20f))
+                            .offset(+4)
+                        )
+                        .shadowBlurRadius(4)
+                        .shadowSpreadRadius(-2)
+                        .shadowIsInset(true)
+                        .padding(6)
+                        .margin(10)
+                    )
+
+        when : 'We render the slider into a BufferedImage.'
+            var image = Utility.renderSingleComponent(ui.getComponent())
+
+        then : 'The image is as expected.'
+            Utility.similarityBetween(image, "components/soft-JSlider.png", 99.9) > 99.9
+    }
 }

@@ -1,10 +1,10 @@
 {
   "className":"swingtree.styles.Individual_Component_Styling_Spec",
   "title":"Styling Components",
-  "narrative":"This specification demonstrates how you can use the styling\n    API to style Swing components in declarative SwingTree code.",
+  "narrative":"This specification demonstrates how you can use the styling\n    API to style Swing components in a functional and declarative fashion.",
   "subjects":[],
   "statistics":{
-    "runs":"10",
+    "runs":"11",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -18,7 +18,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Fun-Fact: \n            Styling in SwingTree is fully functional, which means \n            that the `Style` settings objects are all immutable. \n            They are not modified in place, but instead transformed\n            by so called \"styler\" lambdas.\n            Not only does this architecture make it easy to compose, reuse and share\n            styles, but it also makes it possible to have a complex style\n            inheritance hierarchy without the need for very complex code.\n            In practice, this means that your styler lambdas become part\n            of a compositional tree of styler lambdas, which is then applied to\n            the component tree in a single pass.\n            How cool is that? :)\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Fun-Fact: \n            Styling in SwingTree is fully functional, which means \n            that the `Style` settings objects are all immutable. \n            They are not modified in place, but instead transformed\n            by so called \"styler\" lambdas.\n            Not only does this architecture make it easy to compose, reuse and share\n            styles, but it also makes it possible to have a extensive style\n            hierarchy without the need for very complex code.\n            In practice, this means that your styler lambdas become part\n            of a compositional tree of styler all the other lambdas, which is then applied to\n            the components of the component tree in every repaint.\n            How cool is that? :)\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a panel with some custom styling!","code":["var panel =","            UI.panel()","            .withStyle( it ->","                it.foundationColor(\"green\")","                  .backgroundColor(\"cyan\")","                  .foregroundColor(\"blue\")","                  .borderColor(\"blue\")","                  .borderWidth(5)","                  .shadowColor(\"black\")","                  .shadowSpreadRadius(10)","                  .shadowOffset(10)","                  .font(\"Papyrus\", 42)","            )"]},
@@ -39,7 +39,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Swing does not have a concept of margins.\n            Without a proper layout manager it does not even support the configuration of insets.\n            However, through a custom `Border` implementation and a default layout manager (MigLayout)\n            we can model the margins (and paddings) of a component.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Swing does not have a concept of margins.\n            Without a proper layout manager it does not even support the configuration of insets.\n            However, SwingTree fixes this\n            through a custom `Border` implementation and a default layout manager (`MigLayout`)\n            which models the margins (and paddings) of a component.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a panel with some custom styling!","code":["var panel =","            UI.panel()","            .withStyle( it ->","                it.marginRight(42)","                  .marginLeft(64)","            )","            .get(JPanel)"]},
@@ -149,12 +149,12 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            This is how you can create a JPanel with a shaded border.\n            It looks like this:\n            ![components/shaded-border-JPanel.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/shaded-border-JPanel.png)\n\n            It demonstrates how to style a JPanel with the style API.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            It is really simple to create a JPanel with a shaded border,\n            all you need to do is pass the style configuration to the style API.\n            SwingTree will dynamically install or uninstall a custom border on a component\n            depending on whether or not there are any style configurations defined for the component. <br>\n            Note that in this example we make the border extra wide so that you can see the difference.\n            ![components/shaded-border-JPanel.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/shaded-border-JPanel.png)\n\n            It demonstrates how to style a JPanel with the style API.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a UI with a green label.","code":["var ui =","        UI.panel()","        .withStyle( it -> it","            .size(205, 205)","            .backgroundColor(new Color(40,180,240))","            .foundationColor(new Color(200,200,240))","            .padding(30)","            .margin(22)","            .border(15, Color.CYAN)","            .borderShade( s -> s","                .strategy(ShadingStrategy.BOTTOM_RIGHT_TO_TOP_LEFT)","                .colors(Color.YELLOW, new Color(255,255,255,0))","            )","            .shadowColor(new Color(0,0,0,100))","            .shadowSpreadRadius(1)","            .shadowBlurRadius(2)","            .font(new Font(\"Arial\", Font.BOLD, 20))","        )"]},
 
-        {"kind":"when","text":"We render the label into a BufferedImage.","code":["var image = Utility.renderSingleComponent(ui.getComponent())"]},
+        {"kind":"when","text":"We render the panel into a BufferedImage.","code":["var image = Utility.renderSingleComponent(ui.getComponent())"]},
 
         {"kind":"then","text":"The image is as expected.","code":["Utility.similarityBetween(image, \"components/shaded-border-JPanel.png\", 99.9) > 99.9"]}
       ],
@@ -166,12 +166,12 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            You can style a toggle button to have a custom selection shading.\n            This is what it looks like:\n            ![components/shaded-JToggleButton.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/shaded-JToggleButton.png)\n            And when toggled it would like this:\n            ![components/selection-shaded-JToggleButton.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/selection-shaded-JToggleButton.png)\n\n            It demonstrates how to style a JToggleButton with the style API\n            in a way where the style changes depending on the component state.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            You can style a toggle button to have a custom selection shading.\n            Please note that this will actually override some parts of the original \n            look and feel of the button simply because SwingTree needs to cut some\n            corners to install custom styles for you. <br>\n            So in this example you may notice that the regular Metal Lool and Feel\n            is replaced by the our shading.\n            ![components/shaded-JToggleButton.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/shaded-JToggleButton.png)\n            And when toggled it would like this:\n            ![components/selection-shaded-JToggleButton.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/selection-shaded-JToggleButton.png)\n\n            Note that this example very nicely demonstrates how the style of a JToggleButton \n            will update immediately depending on component changes.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We create a UI with a green label.","code":["var ui =","        UI.toggleButton(\"I am a toggle button\")","        .withStyle( it -> it","            .size(205, 60)","            .backgroundShade( shade -> shade","               .strategy(ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT)","               .colors(","                   it.component().getModel().isSelected()","                       ? new Color[]{ Color.YELLOW, Color.CYAN   }","                       : new Color[]{ Color.CYAN,   Color.ORANGE }","               )","            )","        )"]},
+        {"kind":"given","text":"We create a toggle button with some shading gradients.","code":["var ui =","        UI.toggleButton(\"I am a toggle button\")","        .withStyle( it -> it","            .size(205, 60)","            .backgroundShade( shade -> shade","               .strategy(ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT)","               .colors(","                   it.component().getModel().isSelected()","                       ? new Color[]{ Color.YELLOW, Color.CYAN   }","                       : new Color[]{ Color.CYAN,   Color.ORANGE }","               )","            )","        )"]},
 
-        {"kind":"when","text":"We render the label into a BufferedImage.","code":["var image1 = Utility.renderSingleComponent(ui.getComponent())","ui.getComponent().setSelected(true)","var image2 = Utility.renderSingleComponent(ui.getComponent())"]},
+        {"kind":"when","text":"We render the toggle button into a BufferedImage.","code":["var image1 = Utility.renderSingleComponent(ui.getComponent())","ui.getComponent().setSelected(true)","var image2 = Utility.renderSingleComponent(ui.getComponent())"]},
 
         {"kind":"then","text":"The image is as expected.","code":["Utility.similarityBetween(image1, \"components/shaded-JToggleButton.png\", 99.9) > 99.9","Utility.similarityBetween(image2, \"components/selection-shaded-JToggleButton.png\", 99.9) > 99.9"]}
       ],
@@ -183,14 +183,33 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Make a text area look like it is sunken in the background using a shadow going inwards.\n            This is what it looks like:\n            ![components/sunken-JTextArea.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/sunken-JTextArea.png)\n\n            It demonstrates how to style a JTextArea with the style API.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Make a text area look like it is sunken in the background using a shadow going inwards.\n            We achieve this by configuring the default shadow (with the name \"default\").\n            ![components/sunken-JTextArea.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/sunken-JTextArea.png)\n\n            This kind of shadow effect looks really nice on text areas.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We create a UI with a green label.","code":["var ui =","        UI.textArea(\"\"\"Ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.\"\"\")","        .peek( it -> it.setLineWrap(true) )","        .withStyle( it -> it","            .size(200, 240)","            .backgroundColor(new Color(120,255,240))","            .foundationColor(new Color(50,100,200))","            .margin(12)","            .padding(6, 7, 6, 7)","            .borderRadius(16)","            .foregroundColor(Color.DARK_GRAY)","            .shadowColor(new Color(0,0,0))","            .shadowBlurRadius(4)","            .shadowIsInset(true)","            .font(new Font(\"Palatino\", Font.PLAIN, 20))","        )"]},
+        {"kind":"given","text":"A text area UI with a custom styler lambda.","code":["var ui =","        UI.textArea(\"\"\"Ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.\"\"\")","        .peek( it -> it.setLineWrap(true) )","        .withStyle( it -> it","            .size(200, 240)","            .backgroundColor(new Color(120,255,240))","            .foundationColor(new Color(50,100,200))","            .margin(12)","            .padding(6, 7, 6, 7)","            .borderRadius(16)","            .foregroundColor(Color.DARK_GRAY)","            .shadowColor(new Color(0,0,0))","            .shadowBlurRadius(4)","            .shadowIsInset(true)","            .font(new Font(\"Palatino\", Font.PLAIN, 20))","        )"]},
 
-        {"kind":"when","text":"We render the label into a BufferedImage.","code":["var image = Utility.renderSingleComponent(ui.getComponent())"]},
+        {"kind":"when","text":"We render the text area into a BufferedImage.","code":["var image = Utility.renderSingleComponent(ui.getComponent())"]},
 
         {"kind":"then","text":"The image is as expected.","code":["Utility.similarityBetween(image, \"components/sunken-JTextArea.png\", 99.9) > 99.9"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Create a soft UI slider that sinks into the background if you wish.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Specifying multiple (named) shadows, allows you to create soft UI,\n            like for example a slider that sinks into the background. <br>\n            The reason why we use named shadows is because we don't want to override\n            the default shadow of the slider, but rather add a new one. <br>\n\n            ![components/soft-JSlider.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/soft-JSlider.png)\n\n            The concept of naming exists to make any number of sub-styles possible.\n            This concept of sub-styles is not exclusive to shadows.\n            You can also name shadesa and custom foreground or background painters.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Before we create the styled slider, we first setup up FlatLaF as a basis.","code":["FlatLightLaf.setup()"]},
+
+        {"kind":"and","text":"Now a slider UI with a custom styler lambda.","code":["var ui =","        UI.slider(UI.Align.HORIZONTAL, 0, 100, 50)","        .withStyle( it -> it","            .size(280, 38)","            .prefSize(280, 38)","            .borderRadius(20)","            .backgroundColor(new Color(0.4f, 0.85f, 1))","            .foundationColor(new Color(0.4f, 0.85f, 1))","            .shadow(\"bright\", s -> s","                .color(new Color(0.7f, 0.95f, 1f, 0.35f))","                .offset(-11)","            )","            .shadow(\"dark\", s -> s","                .color(new Color(0, 0.1f, 0.2f, 0.20f))","                .offset(+4)","            )","            .shadowBlurRadius(4)","            .shadowSpreadRadius(-2)","            .shadowIsInset(true)","            .padding(6)","            .margin(10)","        )"]},
+
+        {"kind":"when","text":"We render the slider into a BufferedImage.","code":["var image = Utility.renderSingleComponent(ui.getComponent())"]},
+
+        {"kind":"then","text":"The image is as expected.","code":["Utility.similarityBetween(image, \"components/soft-JSlider.png\", 99.9) > 99.9"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }
