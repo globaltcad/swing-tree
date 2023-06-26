@@ -4,7 +4,7 @@
   "narrative":"This specification demonstrates how you can use the styling\n    API to style Swing components in declarative SwingTree code.",
   "subjects":[],
   "statistics":{
-    "runs":"6",
+    "runs":"10",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -123,6 +123,74 @@
         {"kind":"when","text":"We disable the style and simulate a repaint.","code":["doStyle = false","label.component.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"\n            The original border has been re-installed.\n        ","code":["label.component.border instanceof TitledBorder","label.component.border.title == \"Original border\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"This is how you can create a rounded green label with a border at the bottom.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is how you can create a rounded green label with a border at the bottom.\n            It looks like this:\n            ![components/rounded-green-JLabel.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/rounded-green-JLabel.png)\n\n            It demonstrates how to style a JLabel with the style API.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a UI with a green label.","code":["var ui =","        UI.label(\"I am a green label\")","        .withStyle( it -> it","            .size(205, 60)","            .backgroundColor(new Color(40,200,70))","            .padding(4, 7, 4, 7)","            .border(0, 0, 3, 0, Color.BLACK)","            .borderRadius(13)","            .margin(12)","            .foregroundColor(Color.GREEN)","            .shadowColor(new Color(0,0,0,100))","            .shadowSpreadRadius(1)","            .shadowBlurRadius(2)","            .font(new Font(\"Arial\", Font.BOLD, 20))","        )"]},
+
+        {"kind":"when","text":"We render the label into a BufferedImage.","code":["var image = Utility.renderSingleComponent(ui.getComponent())"]},
+
+        {"kind":"then","text":"The image is as expected.","code":["Utility.similarityBetween(image, \"components/rounded-green-JLabel.png\", 99.9) > 99.9"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"This is how you can create a JPanel with a shaded border.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is how you can create a JPanel with a shaded border.\n            It looks like this:\n            ![components/shaded-border-JPanel.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/shaded-border-JPanel.png)\n\n            It demonstrates how to style a JPanel with the style API.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a UI with a green label.","code":["var ui =","        UI.panel()","        .withStyle( it -> it","            .size(205, 205)","            .backgroundColor(new Color(40,180,240))","            .foundationColor(new Color(200,200,240))","            .padding(30)","            .margin(22)","            .border(15, Color.CYAN)","            .borderShade( s -> s","                .strategy(ShadingStrategy.BOTTOM_RIGHT_TO_TOP_LEFT)","                .colors(Color.YELLOW, new Color(255,255,255,0))","            )","            .shadowColor(new Color(0,0,0,100))","            .shadowSpreadRadius(1)","            .shadowBlurRadius(2)","            .font(new Font(\"Arial\", Font.BOLD, 20))","        )"]},
+
+        {"kind":"when","text":"We render the label into a BufferedImage.","code":["var image = Utility.renderSingleComponent(ui.getComponent())"]},
+
+        {"kind":"then","text":"The image is as expected.","code":["Utility.similarityBetween(image, \"components/shaded-border-JPanel.png\", 99.9) > 99.9"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can style a toggle button to have a custom selection shading.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can style a toggle button to have a custom selection shading.\n            This is what it looks like:\n            ![components/shaded-JToggleButton.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/shaded-JToggleButton.png)\n            And when toggled it would like this:\n            ![components/selection-shaded-JToggleButton.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/selection-shaded-JToggleButton.png)\n\n            It demonstrates how to style a JToggleButton with the style API\n            in a way where the style changes depending on the component state.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a UI with a green label.","code":["var ui =","        UI.toggleButton(\"I am a toggle button\")","        .withStyle( it -> it","            .size(205, 60)","            .backgroundShade( shade -> shade","               .strategy(ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT)","               .colors(","                   it.component().getModel().isSelected()","                       ? new Color[]{ Color.YELLOW, Color.CYAN   }","                       : new Color[]{ Color.CYAN,   Color.ORANGE }","               )","            )","        )"]},
+
+        {"kind":"when","text":"We render the label into a BufferedImage.","code":["var image1 = Utility.renderSingleComponent(ui.getComponent())","ui.getComponent().setSelected(true)","var image2 = Utility.renderSingleComponent(ui.getComponent())"]},
+
+        {"kind":"then","text":"The image is as expected.","code":["Utility.similarityBetween(image1, \"components/shaded-JToggleButton.png\", 99.9) > 99.9","Utility.similarityBetween(image2, \"components/selection-shaded-JToggleButton.png\", 99.9) > 99.9"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Make a text area look like it is sunken in the background using a shadow going inwards.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Make a text area look like it is sunken in the background using a shadow going inwards.\n            This is what it looks like:\n            ![components/sunken-JTextArea.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/sunken-JTextArea.png)\n\n            It demonstrates how to style a JTextArea with the style API.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a UI with a green label.","code":["var ui =","        UI.textArea(\"\"\"Ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.\"\"\")","        .peek( it -> it.setLineWrap(true) )","        .withStyle( it -> it","            .size(200, 240)","            .backgroundColor(new Color(120,255,240))","            .foundationColor(new Color(50,100,200))","            .margin(12)","            .padding(6, 7, 6, 7)","            .borderRadius(16)","            .foregroundColor(Color.DARK_GRAY)","            .shadowColor(new Color(0,0,0))","            .shadowBlurRadius(4)","            .shadowIsInset(true)","            .font(new Font(\"Palatino\", Font.PLAIN, 20))","        )"]},
+
+        {"kind":"when","text":"We render the label into a BufferedImage.","code":["var image = Utility.renderSingleComponent(ui.getComponent())"]},
+
+        {"kind":"then","text":"The image is as expected.","code":["Utility.similarityBetween(image, \"components/sunken-JTextArea.png\", 99.9) > 99.9"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

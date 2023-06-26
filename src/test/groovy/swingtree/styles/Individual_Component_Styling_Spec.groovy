@@ -231,20 +231,20 @@ class Individual_Component_Styling_Spec extends Specification
         """
         given : 'We create a UI with a green label.'
             var ui =
-                            UI.label("I am a green label")
-                            .withStyle( it -> it
-                                .size(205, 60)
-                                .backgroundColor(new Color(40,200,70))
-                                .padding(4, 7, 4, 7)
-                                .border(0, 0, 3, 0, Color.BLACK)
-                                .borderRadius(13)
-                                .margin(12)
-                                .foregroundColor(Color.GREEN)
-                                .shadowColor(new Color(0,0,0,100))
-                                .shadowSpreadRadius(1)
-                                .shadowBlurRadius(2)
-                                .font(new Font("Arial", Font.BOLD, 20))
-                            )
+                    UI.label("I am a green label")
+                    .withStyle( it -> it
+                        .size(205, 60)
+                        .backgroundColor(new Color(40,200,70))
+                        .padding(4, 7, 4, 7)
+                        .border(0, 0, 3, 0, Color.BLACK)
+                        .borderRadius(13)
+                        .margin(12)
+                        .foregroundColor(Color.GREEN)
+                        .shadowColor(new Color(0,0,0,100))
+                        .shadowSpreadRadius(1)
+                        .shadowBlurRadius(2)
+                        .font(new Font("Arial", Font.BOLD, 20))
+                    )
 
         when : 'We render the label into a BufferedImage.'
             var image = Utility.renderSingleComponent(ui.getComponent())
@@ -264,23 +264,23 @@ class Individual_Component_Styling_Spec extends Specification
         """
         given : 'We create a UI with a green label.'
             var ui =
-                            UI.panel()
-                            .withStyle( it -> it
-                                .size(205, 205)
-                                .backgroundColor(new Color(40,180,240))
-                                .foundationColor(new Color(200,200,240))
-                                .padding(30)
-                                .margin(22)
-                                .border(15, Color.CYAN)
-                                .borderShade( s -> s
-                                    .strategy(ShadingStrategy.BOTTOM_RIGHT_TO_TOP_LEFT)
-                                    .colors(Color.YELLOW, new Color(255,255,255,0))
-                                )
-                                .shadowColor(new Color(0,0,0,100))
-                                .shadowSpreadRadius(1)
-                                .shadowBlurRadius(2)
-                                .font(new Font("Arial", Font.BOLD, 20))
-                            )
+                    UI.panel()
+                    .withStyle( it -> it
+                        .size(205, 205)
+                        .backgroundColor(new Color(40,180,240))
+                        .foundationColor(new Color(200,200,240))
+                        .padding(30)
+                        .margin(22)
+                        .border(15, Color.CYAN)
+                        .borderShade( s -> s
+                            .strategy(ShadingStrategy.BOTTOM_RIGHT_TO_TOP_LEFT)
+                            .colors(Color.YELLOW, new Color(255,255,255,0))
+                        )
+                        .shadowColor(new Color(0,0,0,100))
+                        .shadowSpreadRadius(1)
+                        .shadowBlurRadius(2)
+                        .font(new Font("Arial", Font.BOLD, 20))
+                    )
 
         when : 'We render the label into a BufferedImage.'
             var image = Utility.renderSingleComponent(ui.getComponent())
@@ -303,18 +303,18 @@ class Individual_Component_Styling_Spec extends Specification
         """
         given : 'We create a UI with a green label.'
             var ui =
-                            UI.toggleButton("I am a toggle button")
-                            .withStyle( it -> it
-                                .size(205, 60)
-                                .backgroundShade( shade -> shade
-                                   .strategy(ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT)
-                                   .colors(
-                                       it.component().getModel().isSelected()
-                                           ? new Color[]{ Color.YELLOW, Color.CYAN   }
-                                           : new Color[]{ Color.CYAN,   Color.ORANGE }
-                                   )
-                                )
-                            )
+                    UI.toggleButton("I am a toggle button")
+                    .withStyle( it -> it
+                        .size(205, 60)
+                        .backgroundShade( shade -> shade
+                           .strategy(ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT)
+                           .colors(
+                               it.component().getModel().isSelected()
+                                   ? new Color[]{ Color.YELLOW, Color.CYAN   }
+                                   : new Color[]{ Color.CYAN,   Color.ORANGE }
+                           )
+                        )
+                    )
 
         when : 'We render the label into a BufferedImage.'
             var image1 = Utility.renderSingleComponent(ui.getComponent())
@@ -324,6 +324,40 @@ class Individual_Component_Styling_Spec extends Specification
         then : 'The image is as expected.'
             Utility.similarityBetween(image1, "components/shaded-JToggleButton.png", 99.9) > 99.9
             Utility.similarityBetween(image2, "components/selection-shaded-JToggleButton.png", 99.9) > 99.9
+    }
+
+    def 'Make a text area look like it is sunken in the background using a shadow going inwards.'()
+    {
+        reportInfo """
+            Make a text area look like it is sunken in the background using a shadow going inwards.
+            This is what it looks like:
+            ${Utility.linkSnapshot('components/sunken-JTextArea.png')}
+            
+            It demonstrates how to style a JTextArea with the style API.
+        """
+        given : 'We create a UI with a green label.'
+            var ui =
+                    UI.textArea("""Ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.""")
+                    .peek( it -> it.setLineWrap(true) )
+                    .withStyle( it -> it
+                        .size(200, 240)
+                        .backgroundColor(new Color(120,255,240))
+                        .foundationColor(new Color(50,100,200))
+                        .margin(12)
+                        .padding(6, 7, 6, 7)
+                        .borderRadius(16)
+                        .foregroundColor(Color.DARK_GRAY)
+                        .shadowColor(new Color(0,0,0))
+                        .shadowBlurRadius(4)
+                        .shadowIsInset(true)
+                        .font(new Font("Palatino", Font.PLAIN, 20))
+                    )
+
+        when : 'We render the label into a BufferedImage.'
+            var image = Utility.renderSingleComponent(ui.getComponent())
+
+        then : 'The image is as expected.'
+            Utility.similarityBetween(image, "components/sunken-JTextArea.png", 99.9) > 99.9
     }
 
 }

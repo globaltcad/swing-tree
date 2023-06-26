@@ -80,7 +80,7 @@
 
         {"kind":"and","text":"The panel has no insets.","code":["ui.component.layout.layoutConstraints.contains(\"ins 0\")"]},
 
-        {"kind":"where","text":"The following UI nodes are created using the \"box(..)\" factory methods.","code":{"ui":["UI.box()","UI.box(\"fill\")","UI.box(\"fill\", \"grow]12shrink]\")","UI.box(\"fill\", \"grow]12shrink]\", \"grow]12shrink]\")","UI.box(UI.FILL & UI.FLOW_X)","UI.box(UI.FILL & UI.FLOW_X, \"grow]12shrink]\")","UI.box(UI.FILL & UI.FLOW_X, \"grow]12shrink]\", \"grow]12shrink]\")",""]}}
+        {"kind":"where","text":"The following UI nodes are created using the \"box(..)\" factory methods.","code":{"ui":["UI.box()","UI.box(\"fill\")","UI.box(\"fill\", \"[grow]12[shrink]\")","UI.box(\"fill\", \"[grow]12[shrink]\", \"[grow]12[shrink]\")","UI.box(UI.FILL & UI.FLOW_X)","UI.box(UI.FILL & UI.FLOW_X, \"[grow]12[shrink]\")","UI.box(UI.FILL & UI.FLOW_X, \"[grow]12[shrink]\", \"[grow]12[shrink]\")",""]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
