@@ -414,7 +414,7 @@ public class ComponentExtension<C extends JComponent>
             AbstractButton b = (AbstractButton) _owner;
             _formerLaF = b.getUI();
             ButtonStyler laf = new ButtonStyler(b.getUI());
-            b.setUI(new ButtonStyler(b.getUI()));
+            b.setUI(laf);
             _styleLaF = laf;
             return true;
         }
