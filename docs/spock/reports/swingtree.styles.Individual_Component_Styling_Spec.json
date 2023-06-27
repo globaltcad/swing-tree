@@ -4,7 +4,7 @@
   "narrative":"This specification demonstrates how you can use the styling\n    API to style Swing components in a functional and declarative fashion.",
   "subjects":[],
   "statistics":{
-    "runs":"11",
+    "runs":"12",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -210,6 +210,23 @@
         {"kind":"when","text":"We render the slider into a BufferedImage.","code":["var image = Utility.renderSingleComponent(ui.getComponent())"]},
 
         {"kind":"then","text":"The image is as expected.","code":["Utility.similarityBetween(image, \"components/soft-JSlider.png\", 99.9) > 99.9"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The look of a component, like a button for example, will be preserved if possible, when doing custom styling.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            In order to make it possible for SwingTree to apply the styles you specify,\n            it will have to override some parts of the original look and feel of the component.\n            However, SwingTree will try to preserve as much of the original look and feel as possible. <br>\n            So for example, if you specify simple style attributes like padding, margin or border radius,\n            the component will still look like a regular button, \n            but with the specified padding, margin or border radius. <br>\n\n            ![components/rounded-metal-JButton.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/rounded-metal-JButton.png)\n\n            In this example we have a button with a custom style that specifies a border radius of 20 pixels\n            as well as a little bit of padding and margin. <br>\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A button UI with a custom styler lambda.","code":["var ui =","        UI.button(\"I am a button\")","        .withStyle( it -> it","            .size(200, 60)","            .border(1, Color.BLACK)","            .borderRadius(20)","            .padding(6)","            .margin(10)","        )"]},
+
+        {"kind":"when","text":"We render the button into a BufferedImage.","code":["var image = Utility.renderSingleComponent(ui.getComponent())"]},
+
+        {"kind":"then","text":"The image is as expected.","code":["Utility.similarityBetween(image, \"components/rounded-metal-JButton.png\", 99.9) > 99.9"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

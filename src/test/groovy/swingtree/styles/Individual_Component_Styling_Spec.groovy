@@ -426,4 +426,37 @@ class Individual_Component_Styling_Spec extends Specification
         then : 'The image is as expected.'
             Utility.similarityBetween(image, "components/soft-JSlider.png", 99.9) > 99.9
     }
+
+    def 'The look of a component, like a button for example, will be preserved if possible, when doing custom styling.'()
+    {
+        reportInfo """
+            In order to make it possible for SwingTree to apply the styles you specify,
+            it will have to override some parts of the original look and feel of the component.
+            However, SwingTree will try to preserve as much of the original look and feel as possible. <br>
+            So for example, if you specify simple style attributes like padding, margin or border radius,
+            the component will still look like a regular button, 
+            but with the specified padding, margin or border radius. <br>
+            
+            ${Utility.linkSnapshot('components/rounded-metal-JButton.png')}
+
+            In this example we have a button with a custom style that specifies a border radius of 20 pixels
+            as well as a little bit of padding and margin. <br>
+        """
+        given : 'A button UI with a custom styler lambda.'
+            var ui =
+                    UI.button("I am a button")
+                    .withStyle( it -> it
+                        .size(200, 60)
+                        .border(1, Color.BLACK)
+                        .borderRadius(20)
+                        .padding(6)
+                        .margin(10)
+                    )
+
+        when : 'We render the button into a BufferedImage.'
+            var image = Utility.renderSingleComponent(ui.getComponent())
+
+        then : 'The image is as expected.'
+            Utility.similarityBetween(image, "components/rounded-metal-JButton.png", 99.9) > 99.9
+    }
 }

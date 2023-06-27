@@ -593,7 +593,7 @@ public class ComponentExtension<C extends JComponent>
         @Override public void paint( Graphics g, JComponent c ) {
             ComponentExtension.from(c)._renderBaseStyle(g);
             if ( _formerUI != null )
-                _formerUI.paint(g, c);
+                _formerUI.update(g, c);
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
         @Override
@@ -609,7 +609,7 @@ public class ComponentExtension<C extends JComponent>
         @Override public void paint( Graphics g, JComponent c ) {
             ComponentExtension.from(c)._renderBaseStyle(g);
             if ( _formerUI != null )
-                _formerUI.paint(g, c);
+                _formerUI.update(g, c);
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
         @Override
