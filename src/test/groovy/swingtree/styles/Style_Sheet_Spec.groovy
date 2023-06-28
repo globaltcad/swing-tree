@@ -469,10 +469,10 @@ class Style_Sheet_Spec extends Specification
             var s1 = ss.run(label1.component)
             var s2 = ss.run(label2.component)
         then : '...and we check the results'
-            s1.background().hasCustomPainters()
-            s1.background().painters().size() == 1
-            s2.background().hasCustomPainters()
-            s2.background().painters().size() == 1
+            s1.hasCustomBackgroundPainters()
+            s1.painters().size() == 1
+            s2.hasCustomBackgroundPainters()
+            s2.painters().size() == 1
     }
 
     def 'The order of inherited style traits determines the order in which they are applied.'()

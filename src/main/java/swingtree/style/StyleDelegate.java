@@ -511,7 +511,7 @@ public final class StyleDelegate<C extends JComponent>
      * @return A new {@link StyleDelegate} with the provided background renderer.
      */
     public StyleDelegate<C> backgroundPainter( Painter renderer ) {
-        return _withStyle(_style._withBackground(_style.background().painter(StyleUtility.DEFAULT_KEY, renderer)));
+        return _withStyle(_style.painter(StyleUtility.DEFAULT_KEY, Layer.BACKGROUND, renderer));
     }
 
     /**
@@ -526,7 +526,7 @@ public final class StyleDelegate<C extends JComponent>
      * @return A new {@link StyleDelegate} with the provided background renderer.
      */
     public StyleDelegate<C> backgroundPainter( String painterName, Painter renderer ) {
-        return _withStyle(_style._withBackground(_style.background().painter(painterName, renderer)));
+        return _withStyle(_style.painter(painterName, Layer.BACKGROUND, renderer));
     }
 
     /**
@@ -558,7 +558,7 @@ public final class StyleDelegate<C extends JComponent>
      * @return A new {@link StyleDelegate} with the provided foreground renderer.
      */
     public StyleDelegate<C> foregroundPainter( Painter painter ) {
-        return _withStyle(_style._withForeground(_style.foreground().painter(StyleUtility.DEFAULT_KEY, painter)));
+        return _withStyle(_style.painter(StyleUtility.DEFAULT_KEY, Layer.FOREGROUND, painter));
     }
 
     /**
@@ -573,7 +573,7 @@ public final class StyleDelegate<C extends JComponent>
      * @return A new {@link StyleDelegate} with the provided foreground renderer.
      */
     public StyleDelegate<C> foregroundPainter( String painterName, Painter painter ) {
-        return _withStyle(_style._withForeground(_style.foreground().painter(painterName, painter)));
+        return _withStyle(_style.painter(painterName, Layer.FOREGROUND, painter));
     }
 
     /**
@@ -783,7 +783,7 @@ public final class StyleDelegate<C extends JComponent>
     public StyleDelegate<C> shade( String shadeName, Function<ShadeStyle, ShadeStyle> styler ) {
         Objects.requireNonNull(shadeName);
         Objects.requireNonNull(styler);
-        return _withStyle(_style._withBackground(_style.background().shade(shadeName, styler)));
+        return _withStyle(_style.shade(shadeName, styler));
     }
 
     /**
@@ -802,7 +802,7 @@ public final class StyleDelegate<C extends JComponent>
      */
     public StyleDelegate<C> shade(Function<ShadeStyle, ShadeStyle> styler ) {
         Objects.requireNonNull(styler);
-        return _withStyle(_style._withBackground(_style.background().shade(StyleUtility.DEFAULT_KEY, styler)));
+        return _withStyle(_style.shade(StyleUtility.DEFAULT_KEY, styler));
     }
 
     /**

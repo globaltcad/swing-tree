@@ -58,12 +58,6 @@ public class StyleRenderer<C extends JComponent>
 
         _renderOn(Layer.BACKGROUND, g2d);
 
-        style.background().painters().forEach( backgroundPainter -> {
-            if ( backgroundPainter == Painter.none() ) return;
-            g2d.setClip(_getBaseArea());
-            backgroundPainter.paint(g2d);
-        });
-
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
 
@@ -72,7 +66,7 @@ public class StyleRenderer<C extends JComponent>
     }
 
     private void _renderOn(Layer layer, Graphics2D g2d) {
-        for ( ShadeStyle shade : style.background().shades(layer) ) {
+        for ( ShadeStyle shade : style.shades(layer) ) {
             if ( shade.colors().length > 0 && !shade.strategy().isNone() ) {
                 if ( shade.strategy().isDiagonal() )
                     _renderDiagonalShade(g2d, _comp, style.margin(), shade, _getBaseArea());
@@ -85,6 +79,14 @@ public class StyleRenderer<C extends JComponent>
             shadow.color().ifPresent(color -> {
                 _renderShadows(style, shadow, _comp, g2d, color);
             });
+
+
+        style.painters(layer).forEach( backgroundPainter -> {
+            if ( backgroundPainter == Painter.none() ) return;
+            g2d.setClip(_getBaseArea());
+            backgroundPainter.paint(g2d);
+        });
+
     }
 
     public void renderBorderStyle(Graphics2D g2d) {
@@ -122,16 +124,6 @@ public class StyleRenderer<C extends JComponent>
 
 
         _renderOn(Layer.FOREGROUND, g2d);
-
-        style.foreground().painters().forEach(foregroundPainter -> {
-            if ( foregroundPainter == Painter.none() ) return;
-            try {
-                foregroundPainter.paint(g2d);
-            } catch ( Exception e ) {
-                e.printStackTrace();
-                // Exceptions in painters should not cripple the rest of the rendering.
-            }
-        });
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
