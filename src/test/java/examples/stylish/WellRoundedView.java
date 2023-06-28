@@ -19,6 +19,7 @@ public class WellRoundedView extends Panel
               .borderRadius(32)
               .shadowBlurRadius(5)
               .shadowColor(new Color(0,0,0, 128))
+              .shadowIsInset(true)
         )
         .add(SPAN.and(ALIGN_X_CENTER),
             box(INS(12)).add(html("<h1>A Well Rounded View</h1><p>Built using the SwingTree style API.</p>"))

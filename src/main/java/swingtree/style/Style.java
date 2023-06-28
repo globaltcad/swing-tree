@@ -132,11 +132,13 @@ public final class Style
     /**
      * @return An unmodifiable list of all shadow styles sorted by their names in ascending alphabetical order.
      */
-    public List<ShadowStyle> shadows() {
+    public List<ShadowStyle> shadows(Layer layer) {
         return Collections.unmodifiableList(
-                _shadows.entrySet().stream()
+                _shadows.entrySet()
+                        .stream()
                         .sorted(Map.Entry.comparingByKey())
                         .map(Map.Entry::getValue)
+                        .filter( s -> s.layer() == layer )
                         .collect(Collectors.toList())
             );
     }

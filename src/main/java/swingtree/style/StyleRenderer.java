@@ -5,7 +5,6 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  *  This used to smoothly render
@@ -49,7 +48,7 @@ public class StyleRenderer<C extends JComponent>
             g2d.setFont( componentFont );
 
         style.background().foundationColor().ifPresent(outerColor -> {
-            _fillOuterBackground(style, outerColor, g2d);
+            _fillOuterFoundationBackground(outerColor, g2d);
         });
         style.background().color().ifPresent(color -> {
             if ( color.getAlpha() == 0 ) return;
@@ -65,6 +64,11 @@ public class StyleRenderer<C extends JComponent>
                     _renderVerticalOrHorizontalShade(g2d, _comp, style.margin(), shade, _getBaseArea());
             }
         }
+
+        for ( ShadowStyle shadow : style.shadows(Layer.BACKGROUND) )
+            shadow.color().ifPresent(color -> {
+                _renderShadows(style, shadow, _comp, g2d, color);
+            });
 
         style.background().painters().forEach( backgroundPainter -> {
             if ( backgroundPainter == Painter.none() ) return;
@@ -87,7 +91,7 @@ public class StyleRenderer<C extends JComponent>
         if ( DO_ANTIALIASING )
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
-        for ( ShadowStyle shadow : style.shadows() )
+        for ( ShadowStyle shadow : style.shadows(Layer.CONTENT) )
             shadow.color().ifPresent(color -> {
                 _renderShadows(style, shadow, _comp, g2d, color);
             });
@@ -95,6 +99,11 @@ public class StyleRenderer<C extends JComponent>
         style.border().color().ifPresent( color -> {
             _drawBorder(style, color, g2d);
         });
+
+        for ( ShadowStyle shadow : style.shadows(Layer.BORDER) )
+            shadow.color().ifPresent(color -> {
+                _renderShadows(style, shadow, _comp, g2d, color);
+            });
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
@@ -112,6 +121,11 @@ public class StyleRenderer<C extends JComponent>
         Font componentFont = _comp.getFont();
         if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
             g2d.setFont( componentFont );
+
+        for ( ShadowStyle shadow : style.shadows(Layer.FOREGROUND) )
+            shadow.color().ifPresent(color -> {
+                _renderShadows(style, shadow, _comp, g2d, color);
+            });
 
         style.foreground().painters().forEach(foregroundPainter -> {
             if ( foregroundPainter == Painter.none() ) return;
@@ -133,7 +147,7 @@ public class StyleRenderer<C extends JComponent>
             int topBorderWidth    = style.border().widths().top().orElse(0);
             int rightBorderWidth  = style.border().widths().right().orElse(0);
             int bottomBorderWidth = style.border().widths().bottom().orElse(0);
-            Area baseArea = _calculateBaseArea(style, 0, 0, 0, 0);
+            Area baseArea = _getBaseArea();
             Area innerArea = _calculateBaseArea(style, topBorderWidth, leftBorderWidth, bottomBorderWidth, rightBorderWidth);
             baseArea.subtract(innerArea);
             g2d.setColor(color);
@@ -307,7 +321,7 @@ public class StyleRenderer<C extends JComponent>
         }
     }
 
-    private void _fillOuterBackground( Style style, Color color, Graphics2D g2d ) {
+    private void _fillOuterFoundationBackground( Color color, Graphics2D g2d ) {
         // Check if the color is transparent
         if ( color.getAlpha() == 0 )
             return;
@@ -318,7 +332,7 @@ public class StyleRenderer<C extends JComponent>
         Rectangle2D.Float outerRect = new Rectangle2D.Float(0, 0, width, height);
 
         Area outer = new Area(outerRect);
-        Area inner = _calculateBaseArea( style, 0, 0, 0, 0 );
+        Area inner = _getBaseArea();
         outer.subtract(inner);
 
         g2d.setColor(color);

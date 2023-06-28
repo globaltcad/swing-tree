@@ -109,7 +109,7 @@ class Styles_Spec extends Specification
                                                 "ShadeStyle[strategy=NONE, colors=[]]" +
                                             "], " +
                                             "ForegroundStyle[color=null, painter=null], " +
-                                            "ShadowStyle[horizontalOffset=0, verticalOffset=0, blurRadius=0, spreadRadius=0, color=rgba(255,255,0,255), isInset=false], " +
+                                            "ShadowStyle[horizontalOffset=0, verticalOffset=0, blurRadius=0, spreadRadius=0, color=rgba(255,255,0,255), isInset=false, layer=CONTENT], " +
                                             "FontStyle[name=Times New Roman, size=12, style=1, weight=0, attributes=[java.awt.font.TextAttribute(underline),java.awt.font.TextAttribute(strikethrough)], " +
                                             "color=rgba(255,0,255,255), " +
                                             "backgroundColor=null, " +

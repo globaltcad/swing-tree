@@ -712,6 +712,16 @@ public final class StyleDelegate<C extends JComponent>
     }
 
     /**
+     *  Use this to configure on which layer the shadow should be rendered. <br>
+     *  The default layer is {@link Layer#CONTENT}. <br>
+     * @param layer The layer on which the shadow should be rendered.
+     * @return A new {@link StyleDelegate} with the provided shadow layer.
+     */
+    public StyleDelegate<C> shadowLayer( Layer layer ) {
+        return _withStyle(_style._withShadow( shadow -> shadow.layer(layer)));
+    }
+
+    /**
      *  This method makes it possible to define multiple shadows for a single component
      *  through a unique name.
      *  This is useful when you want to do advanced shadow effects, such as neumorphism a.k.a. soft UI. <br>

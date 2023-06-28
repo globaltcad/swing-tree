@@ -6,6 +6,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import swingtree.UI
+import swingtree.style.Layer
 import swingtree.style.ShadingStrategy
 import utility.Utility
 
@@ -263,7 +264,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.getComponent())
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/rounded-green-JLabel.png", 99.9) > 99.9
+            Utility.similarityBetween(image, "components/rounded-green-JLabel.png", 99.99) > 99.99
     }
 
     def 'This is how you can create a JPanel with a shaded border.'()
@@ -302,7 +303,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.getComponent())
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/shaded-border-JPanel.png", 99.9) > 99.9
+            Utility.similarityBetween(image, "components/shaded-border-JPanel.png", 99.99) > 99.99
     }
 
     def 'You can style a toggle button to have a custom selection shading.'()
@@ -342,8 +343,8 @@ class Individual_Component_Styling_Spec extends Specification
             var image2 = Utility.renderSingleComponent(ui.getComponent())
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image1, "components/shaded-JToggleButton.png", 99.9) > 99.9
-            Utility.similarityBetween(image2, "components/selection-shaded-JToggleButton.png", 99.9) > 99.9
+            Utility.similarityBetween(image1, "components/shaded-JToggleButton.png", 99.99) > 99.99
+            Utility.similarityBetween(image2, "components/selection-shaded-JToggleButton.png", 99.99) > 99.99
     }
 
     def 'Make a text area look like it is sunken in the background using a shadow going inwards.'()
@@ -377,7 +378,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.getComponent())
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/sunken-JTextArea.png", 99.9) > 99.9
+            Utility.similarityBetween(image, "components/sunken-JTextArea.png", 99.99) > 99.99
     }
 
     def 'Create a soft UI slider that sinks into the background if you wish.'()
@@ -416,6 +417,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .shadowBlurRadius(4)
                         .shadowSpreadRadius(-2)
                         .shadowIsInset(true)
+                        .shadowLayer(Layer.BACKGROUND) // So that the slider track is not affected by the shadow.
                         .padding(6)
                         .margin(10)
                     )
@@ -424,7 +426,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.getComponent())
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/soft-JSlider.png", 99.9) > 99.9
+            Utility.similarityBetween(image, "components/soft-JSlider.png", 99.99) > 99.99
     }
 
     def 'The look of a component, like a button for example, will be preserved if possible, when doing custom styling.'()
@@ -457,6 +459,6 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.getComponent())
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/rounded-metal-JButton.png", 99.9) > 99.9
+            Utility.similarityBetween(image, "components/rounded-metal-JButton.png", 99.99) > 99.99
     }
 }
