@@ -4,6 +4,10 @@ import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ *  An immutable, wither-like cloner method based settings class for background styles
+ *  that is part of the full {@link Style} configuration.
+ */
 public final class BackgroundStyle
 {
     private static final BackgroundStyle _NONE = new BackgroundStyle(

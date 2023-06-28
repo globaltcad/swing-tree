@@ -7,6 +7,10 @@ import java.text.AttributedCharacterIterator;
 import java.util.*;
 import java.util.List;
 
+/**
+ *  An immutable, wither-like cloner method based settings class for font styles
+ *  that is part of the full {@link Style} configuration object.
+ */
 public final class FontStyle
 {
     private static final FontStyle _NONE = new FontStyle("", 0, 0, 0, Collections.emptyList(), null, null, null);

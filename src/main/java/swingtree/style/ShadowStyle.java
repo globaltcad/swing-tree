@@ -4,9 +4,16 @@ import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ *  An immutable, wither-like cloner method based settings class for shadow styles
+ *  that is part of the full {@link Style} configuration object.
+ */
 public final class ShadowStyle
 {
-    private static final ShadowStyle _NONE = new ShadowStyle(0,0,0,0, null, true, Layer.CONTENT);
+    private static final ShadowStyle _NONE = new ShadowStyle(
+                                                    0,0,0,0,
+                                                    null, true, Layer.CONTENT
+                                                );
 
     public static ShadowStyle none() { return _NONE; }
 
@@ -17,6 +24,7 @@ public final class ShadowStyle
     private final Color   _color;
     private final boolean _isOutset;
     private final Layer   _layer;
+
 
     private ShadowStyle(
         int     horizontalShadowOffset,

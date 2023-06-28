@@ -6,13 +6,14 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ *  An immutable, wither-like cloner method based settings container for border styles that is part of
+ *  a {@link Style} configuration object.
+ */
 public final class BorderStyle
 {
     private static final BorderStyle _NONE = new BorderStyle(
-                                                null,
-                                                null,
-                                                null,
-                                                null,
+                                                null, null, null, null,
                                                 Outline.none(),
                                                 null,
                                                 Collections.singletonMap(StyleUtility.DEFAULT_KEY, ShadeStyle.none())
@@ -28,6 +29,7 @@ public final class BorderStyle
     private final Outline _borderWidths;
     private final Color _borderColor;
     private final Map<String, ShadeStyle> _shades = new TreeMap<>();
+
 
     private BorderStyle(
         Arc topLeftArc,
@@ -274,7 +276,7 @@ public final class BorderStyle
         return "BorderStyle[" +
                     arcsString + ", " +
                     borderWidthsString + ", " +
-                    "color=" + StyleUtility.toString(_borderColor) +
+                    "color=" + StyleUtility.toString(_borderColor) + ", " +
                     shadesString +
                 "]";
     }

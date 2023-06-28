@@ -101,7 +101,7 @@ class Styles_Spec extends Specification
                                             "arcWidth=12, " +
                                             "arcHeight=18, " +
                                             "width=null, " +
-                                            "color=rgba(0,0,255,255)" +
+                                            "color=rgba(0,0,255,255), " +
                                             "ShadeStyle[strategy=NONE, colors=[], layer=BACKGROUND]" +
                                         "], " +
                                         "BackgroundStyle[" +
