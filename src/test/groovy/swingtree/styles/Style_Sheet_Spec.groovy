@@ -6,6 +6,7 @@ import spock.lang.Subject
 import spock.lang.Title
 import swingtree.UI
 import swingtree.style.Arc
+import swingtree.style.Layer
 import swingtree.style.Outline
 import swingtree.style.ShadingStrategy
 import swingtree.style.Style
@@ -437,7 +438,7 @@ class Style_Sheet_Spec extends Specification
                 @Override
                 protected void build() {
                     add(group("Gradient"), it ->
-                        it.backgroundPainter(g2d -> {
+                        it.painter(Layer.BACKGROUND, g2d -> {
                             // Let's render a gradient:
                             var gradient = new GradientPaint(0, 0, Color.RED, 0, 100, Color.BLUE);
                             g2d.setPaint(gradient);
@@ -445,7 +446,7 @@ class Style_Sheet_Spec extends Specification
                         })
                     );
                     add(group("ChessBoard"), it ->
-                        it.backgroundPainter(g2d -> {
+                        it.painter(Layer.BACKGROUND, g2d -> {
                             var w = it.component().getWidth() / 8;// We render a checkerboard pattern!
                             var h = it.component().getHeight() / 8;
                             for (var i = 0; i < 8; i++) {

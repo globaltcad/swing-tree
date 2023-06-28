@@ -8,7 +8,13 @@ class StyleUtility
 {
     static final String DEFAULT_KEY = "default";
     static final Styler<?> STYLER_NONE = delegate -> delegate;
-    static final Painter PAINTER_NONE = g2d -> {};
+    static final Painter PAINTER_NONE = new Painter() {
+                                            @Override
+                                            public void paint(Graphics2D g2d) {
+                                                // None
+                                            }
+                                            @Override public String toString() { return "none"; }
+                                        };
 
     private StyleUtility() {}
 

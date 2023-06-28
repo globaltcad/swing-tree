@@ -504,29 +504,32 @@ public final class StyleDelegate<C extends JComponent>
     }
 
     /**
-     *  Returns a new {@link Style} with the provided background renderer, a {@link Painter} that
-     *  will be called using the {@link Graphics2D} instance used to render the component.
+     *  Returns a new {@link Style} with the provided custom {@link Painter}, which
+     *  will be called using the {@link Graphics2D} of the current component.
      *  You may use this to render a custom background for the component.
+     * @param layer The layer on which the painter should do its work.
      * @param renderer The background renderer.
      * @return A new {@link StyleDelegate} with the provided background renderer.
      */
-    public StyleDelegate<C> backgroundPainter( Painter renderer ) {
-        return _withStyle(_style.painter(StyleUtility.DEFAULT_KEY, Layer.BACKGROUND, renderer));
+    public StyleDelegate<C> painter( Layer layer, Painter renderer ) {
+        return _withStyle(_style.painter(StyleUtility.DEFAULT_KEY, layer, renderer));
     }
 
     /**
-     *  Returns a new {@link Style} with the provided named background renderer, a {@link Painter} that
-     *  will be called using the {@link Graphics2D} instance used to render the component.
-     *  You may use this to render a custom background for the component.
+     *  Returns a new {@link Style} with the provided named {@link Painter}, which
+     *  will be called using the {@link Graphics2D} instance of the current component.
+     *  You may use this to render custom styles for the component... <br>
      *  The name can be used to override {@link Painter} instances with that same name
      *  or use a unique name to ensure that you style is not overridden by another style.
+     *  This allows you to attach an arbitrary number of custom painters to a component.
      *
+     * @param layer The layer on which the painter should do its work.
      * @param painterName The name of the painter.
      * @param renderer The background renderer.
      * @return A new {@link StyleDelegate} with the provided background renderer.
      */
-    public StyleDelegate<C> backgroundPainter( String painterName, Painter renderer ) {
-        return _withStyle(_style.painter(painterName, Layer.BACKGROUND, renderer));
+    public StyleDelegate<C> painter( Layer layer, String painterName, Painter renderer ) {
+        return _withStyle(_style.painter(painterName, layer, renderer));
     }
 
     /**
@@ -548,32 +551,6 @@ public final class StyleDelegate<C extends JComponent>
      */
     public StyleDelegate<C> foregroundColor( String colorString ) {
         return _withStyle(_style._withForeground(_style.foreground().color(StyleUtility.toColor(colorString))));
-    }
-
-    /**
-     *  Returns a new {@link Style} with the provided foreground painter, a {@link Painter} that
-     *  will be called using the {@link Graphics2D} instance used to render the component.
-     *  You may use this to render a custom foreground for the component.
-     * @param painter The foreground renderer.
-     * @return A new {@link StyleDelegate} with the provided foreground renderer.
-     */
-    public StyleDelegate<C> foregroundPainter( Painter painter ) {
-        return _withStyle(_style.painter(StyleUtility.DEFAULT_KEY, Layer.FOREGROUND, painter));
-    }
-
-    /**
-     *  Returns a new {@link Style} with the provided named foreground painter, a {@link Painter} that
-     *  will be called using the {@link Graphics2D} instance used to render the component.
-     *  You may use this to render a custom foreground for the component.
-     *  The name can be used to override {@link Painter} instances with that same name
-     *  or use a unique name to ensure that you style is not overridden by another style.
-     *
-     * @param painterName The name of the painter.
-     * @param painter The foreground renderer.
-     * @return A new {@link StyleDelegate} with the provided foreground renderer.
-     */
-    public StyleDelegate<C> foregroundPainter( String painterName, Painter painter ) {
-        return _withStyle(_style.painter(painterName, Layer.FOREGROUND, painter));
     }
 
     /**

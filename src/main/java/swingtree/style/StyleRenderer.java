@@ -66,6 +66,8 @@ public class StyleRenderer<C extends JComponent>
     }
 
     private void _renderOn(Layer layer, Graphics2D g2d) {
+        // Every layer has 3 things:
+        // 1. Shades, which are simple gradient effects
         for ( ShadeStyle shade : style.shades(layer) ) {
             if ( shade.colors().length > 0 && !shade.strategy().isNone() ) {
                 if ( shade.strategy().isDiagonal() )
@@ -74,19 +76,18 @@ public class StyleRenderer<C extends JComponent>
                     _renderVerticalOrHorizontalShade(g2d, _comp, style.margin(), shade, _getBaseArea());
             }
         }
-
+        // 2. Shadows, which are simple drop shadows that cn go inwards or outwards
         for ( ShadowStyle shadow : style.shadows(layer) )
             shadow.color().ifPresent(color -> {
                 _renderShadows(style, shadow, _comp, g2d, color);
             });
 
-
+        // 3. Painters, which are provided by the user and can be anything
         style.painters(layer).forEach( backgroundPainter -> {
             if ( backgroundPainter == Painter.none() ) return;
             g2d.setClip(_getBaseArea());
             backgroundPainter.paint(g2d);
         });
-
     }
 
     public void renderBorderStyle(Graphics2D g2d) {
@@ -121,7 +122,6 @@ public class StyleRenderer<C extends JComponent>
         Font componentFont = _comp.getFont();
         if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
             g2d.setFont( componentFont );
-
 
         _renderOn(Layer.FOREGROUND, g2d);
 

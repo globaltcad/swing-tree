@@ -14,7 +14,7 @@ public class PainterStyle
     private final Layer _layer;
 
 
-    private PainterStyle(Painter painter, Layer layer)
+    private PainterStyle( Painter painter, Layer layer )
     {
         _painter = painter;
         _layer   = layer;

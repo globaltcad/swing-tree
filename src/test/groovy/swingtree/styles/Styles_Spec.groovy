@@ -95,26 +95,35 @@ class Styles_Spec extends Specification
                 style.toString() == "Style[" +
                                         "LayoutStyle[" +
                                             "margin=Outline[top=?, right=?, bottom=?, left=?], " +
-                                            "padding=Outline[top=?, right=?, bottom=?, left=?]], " +
-                                            "BorderStyle[" +
-                                                "arcWidth=12, arcHeight=18, " +
-                                                "width=null, " +
-                                                "color=rgba(0,0,255,255)" +
-                                                "ShadeStyle[strategy=NONE, colors=[], layer=BACKGROUND]" +
-                                            "], " +
-                                            "BackgroundStyle[" +
-                                                "color=rgba(0,255,0,255), " +
-                                                "foundationColor=rgba(255,0,0,255), " +
-                                                "painter=null, " +
-                                                "ShadeStyle[strategy=NONE, colors=[], layer=BACKGROUND]" +
-                                            "], " +
-                                            "ForegroundStyle[color=null, painter=null], " +
-                                            "ShadowStyle[horizontalOffset=0, verticalOffset=0, blurRadius=0, spreadRadius=0, color=rgba(255,255,0,255), isInset=false, layer=CONTENT], " +
-                                            "FontStyle[name=Times New Roman, size=12, style=1, weight=0, attributes=[java.awt.font.TextAttribute(underline),java.awt.font.TextAttribute(strikethrough)], " +
-                                            "color=rgba(255,0,255,255), " +
-                                            "backgroundColor=null, " +
-                                            "selectionColor=rgba(0,255,255,255)" +
-                                        "]" +
+                                            "padding=Outline[top=?, right=?, bottom=?, left=?]" +
+                                        "], " +
+                                        "BorderStyle[" +
+                                            "arcWidth=12, " +
+                                            "arcHeight=18, " +
+                                            "width=null, " +
+                                            "color=rgba(0,0,255,255)" +
+                                            "ShadeStyle[strategy=NONE, colors=[], layer=BACKGROUND]" +
+                                        "], " +
+                                        "BackgroundStyle[" +
+                                            "color=rgba(0,255,0,255), foundationColor=rgba(255,0,0,255)" +
+                                        "], " +
+                                        "ForegroundStyle[color=null], " +
+                                        "FontStyle[" +
+                                            "name=Times New Roman, size=12, style=1, weight=0, attributes=[java.awt.font.TextAttribute(underline),java.awt.font.TextAttribute(strikethrough)], color=rgba(255,0,255,255), backgroundColor=null, selectionColor=rgba(0,255,255,255)" +
+                                        "], " +
+                                        "ShadowStyle[" +
+                                            "horizontalOffset=0, " +
+                                            "verticalOffset=0, " +
+                                            "blurRadius=0, " +
+                                            "spreadRadius=0, " +
+                                            "color=rgba(255,255,0,255), " +
+                                            "isInset=false, layer=CONTENT" +
+                                        "], " +
+                                        "PainterStyle[" +
+                                            "painter=none, " +
+                                            "layer=BACKGROUND" +
+                                        "], " +
+                                        "ShadeStyle[strategy=NONE, colors=[], layer=BACKGROUND]" +
                                     "]"
     }
 
