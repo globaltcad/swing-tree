@@ -56,19 +56,7 @@ public class StyleRenderer<C extends JComponent>
             g2d.fill(_getBaseArea());
         });
 
-        for ( ShadeStyle shade : style.background().shades() ) {
-            if ( shade.colors().length > 0 && !shade.strategy().isNone() ) {
-                if ( shade.strategy().isDiagonal() )
-                    _renderDiagonalShade(g2d, _comp, style.margin(), shade, _getBaseArea());
-                else
-                    _renderVerticalOrHorizontalShade(g2d, _comp, style.margin(), shade, _getBaseArea());
-            }
-        }
-
-        for ( ShadowStyle shadow : style.shadows(Layer.BACKGROUND) )
-            shadow.color().ifPresent(color -> {
-                _renderShadows(style, shadow, _comp, g2d, color);
-            });
+        _renderOn(Layer.BACKGROUND, g2d);
 
         style.background().painters().forEach( backgroundPainter -> {
             if ( backgroundPainter == Painter.none() ) return;
@@ -83,6 +71,22 @@ public class StyleRenderer<C extends JComponent>
             g2d.setClip(_getBaseArea());
     }
 
+    private void _renderOn(Layer layer, Graphics2D g2d) {
+        for ( ShadeStyle shade : style.background().shades(layer) ) {
+            if ( shade.colors().length > 0 && !shade.strategy().isNone() ) {
+                if ( shade.strategy().isDiagonal() )
+                    _renderDiagonalShade(g2d, _comp, style.margin(), shade, _getBaseArea());
+                else
+                    _renderVerticalOrHorizontalShade(g2d, _comp, style.margin(), shade, _getBaseArea());
+            }
+        }
+
+        for ( ShadowStyle shadow : style.shadows(layer) )
+            shadow.color().ifPresent(color -> {
+                _renderShadows(style, shadow, _comp, g2d, color);
+            });
+    }
+
     public void renderBorderStyle(Graphics2D g2d) {
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
@@ -91,19 +95,13 @@ public class StyleRenderer<C extends JComponent>
         if ( DO_ANTIALIASING )
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
-        for ( ShadowStyle shadow : style.shadows(Layer.CONTENT) )
-            shadow.color().ifPresent(color -> {
-                _renderShadows(style, shadow, _comp, g2d, color);
-            });
+        _renderOn(Layer.CONTENT, g2d);
 
         style.border().color().ifPresent( color -> {
             _drawBorder(style, color, g2d);
         });
 
-        for ( ShadowStyle shadow : style.shadows(Layer.BORDER) )
-            shadow.color().ifPresent(color -> {
-                _renderShadows(style, shadow, _comp, g2d, color);
-            });
+        _renderOn(Layer.BORDER, g2d);
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
@@ -122,10 +120,8 @@ public class StyleRenderer<C extends JComponent>
         if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
             g2d.setFont( componentFont );
 
-        for ( ShadowStyle shadow : style.shadows(Layer.FOREGROUND) )
-            shadow.color().ifPresent(color -> {
-                _renderShadows(style, shadow, _comp, g2d, color);
-            });
+
+        _renderOn(Layer.FOREGROUND, g2d);
 
         style.foreground().painters().forEach(foregroundPainter -> {
             if ( foregroundPainter == Painter.none() ) return;

@@ -100,13 +100,13 @@ class Styles_Spec extends Specification
                                                 "arcWidth=12, arcHeight=18, " +
                                                 "width=null, " +
                                                 "color=rgba(0,0,255,255)" +
-                                                "ShadeStyle[strategy=NONE, colors=[]]" +
+                                                "ShadeStyle[strategy=NONE, colors=[], layer=BACKGROUND]" +
                                             "], " +
                                             "BackgroundStyle[" +
                                                 "color=rgba(0,255,0,255), " +
                                                 "foundationColor=rgba(255,0,0,255), " +
                                                 "painter=null, " +
-                                                "ShadeStyle[strategy=NONE, colors=[]]" +
+                                                "ShadeStyle[strategy=NONE, colors=[], layer=BACKGROUND]" +
                                             "], " +
                                             "ForegroundStyle[color=null, painter=null], " +
                                             "ShadowStyle[horizontalOffset=0, verticalOffset=0, blurRadius=0, spreadRadius=0, color=rgba(255,255,0,255), isInset=false, layer=CONTENT], " +

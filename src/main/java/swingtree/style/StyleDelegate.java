@@ -770,8 +770,8 @@ public final class StyleDelegate<C extends JComponent>
      *    UI.panel()
      *    .withStyle( it ->
      *      it
-     *      .backgroundShade("dark shading", shade -> shade.colors("#000000", "#000000").strategy(ShadeStrategy.TOP_TO_BOTTOM)))
-     *      .backgroundShade("light shading", shade -> shade.colors("#ffffff", "#ffffff").strategy(ShadeStrategy.TOP_TO_BOTTOM)))
+     *      .shade("dark shading", shade -> shade.colors("#000000", "#000000").strategy(ShadeStrategy.TOP_TO_BOTTOM)))
+     *      .shade("light shading", shade -> shade.colors("#ffffff", "#ffffff").strategy(ShadeStrategy.TOP_TO_BOTTOM)))
      *    )
      * }</pre>
      * Note that the background shades will be rendered in alphabetical order based on the name of the shade.
@@ -780,7 +780,7 @@ public final class StyleDelegate<C extends JComponent>
      * @param styler A function that takes a {@link ShadeStyle} and returns a new {@link ShadeStyle}.
      * @return A new {@link StyleDelegate} with a named background shade defined by the provided styler lambda.
      */
-    public StyleDelegate<C> backgroundShade( String shadeName, Function<ShadeStyle, ShadeStyle> styler ) {
+    public StyleDelegate<C> shade( String shadeName, Function<ShadeStyle, ShadeStyle> styler ) {
         Objects.requireNonNull(shadeName);
         Objects.requireNonNull(styler);
         return _withStyle(_style._withBackground(_style.background().shade(shadeName, styler)));
@@ -800,7 +800,7 @@ public final class StyleDelegate<C extends JComponent>
      * @param styler A function that takes a {@link ShadeStyle} and returns a new {@link ShadeStyle}.
      * @return A new {@link StyleDelegate} with a background shade defined by the provided styler lambda.
      */
-    public StyleDelegate<C> backgroundShade( Function<ShadeStyle, ShadeStyle> styler ) {
+    public StyleDelegate<C> shade(Function<ShadeStyle, ShadeStyle> styler ) {
         Objects.requireNonNull(styler);
         return _withStyle(_style._withBackground(_style.background().shade(StyleUtility.DEFAULT_KEY, styler)));
     }

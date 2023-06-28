@@ -327,7 +327,7 @@ class Individual_Component_Styling_Spec extends Specification
                     UI.toggleButton("I am a toggle button")
                     .withStyle( it -> it
                         .size(205, 60)
-                        .backgroundShade( shade -> shade
+                        .shade(shade -> shade
                            .strategy(ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT)
                            .colors(
                                it.component().getModel().isSelected()

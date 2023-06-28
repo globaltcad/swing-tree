@@ -57,11 +57,12 @@ public final class BackgroundStyle
         return !( _painters.size() == 1 && Painter.none().equals(_painters.get(StyleUtility.DEFAULT_KEY)) );
     }
 
-    public List<ShadeStyle> shades() {
+    public List<ShadeStyle> shades(Layer layer) {
         return Collections.unmodifiableList(
                 _shades.entrySet().stream()
                         .sorted(Map.Entry.comparingByKey())
                         .map(Map.Entry::getValue)
+                        .filter( s -> s.layer() == layer )
                         .collect(Collectors.toList())
             );
     }

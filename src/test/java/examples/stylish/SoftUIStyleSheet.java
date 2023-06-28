@@ -48,7 +48,7 @@ public class SoftUIStyleSheet extends StyleSheet
                 .shadowBlurRadius(13)
                 .shadowSpreadRadius(-2)
                 .shadowIsInset(false)
-                .backgroundShade("default",
+                .shade("default",
                     shade -> shade.strategy(ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT).colors(
                                 gradientColorsFor(it.component())
                             )
@@ -69,7 +69,7 @@ public class SoftUIStyleSheet extends StyleSheet
                 .shadowBlurRadius(6)
                 .shadowSpreadRadius(-2)
                 .shadowIsInset(false)
-                .backgroundShade("default",
+                .shade("default",
                     shade -> shade.strategy(ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT).colors(
                                 gradientColorsFor(it.component())
                             )
