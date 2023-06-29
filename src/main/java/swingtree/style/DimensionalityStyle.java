@@ -95,6 +95,19 @@ public final class DimensionalityStyle
 
     public Optional<Integer> height() { return Optional.ofNullable(_height); }
 
+    DimensionalityStyle _scale( double scale ) {
+        return new DimensionalityStyle(
+                    _minWidth        == null ? null : (int) Math.round( _minWidth        * scale ),
+                    _minHeight       == null ? null : (int) Math.round( _minHeight       * scale ),
+                    _maxWidth        == null ? null : (int) Math.round( _maxWidth        * scale ),
+                    _maxHeight       == null ? null : (int) Math.round( _maxHeight       * scale ),
+                    _preferredWidth  == null ? null : (int) Math.round( _preferredWidth  * scale ),
+                    _preferredHeight == null ? null : (int) Math.round( _preferredHeight * scale ),
+                    _width           == null ? null : (int) Math.round( _width           * scale ),
+                    _height          == null ? null : (int) Math.round( _height          * scale )
+                );
+    }
+
     @Override
     public String toString() {
         return String.format(
@@ -122,11 +135,11 @@ public final class DimensionalityStyle
         if ( this == o ) return true;
         if ( !(o instanceof DimensionalityStyle) ) return false;
         DimensionalityStyle that = (DimensionalityStyle) o;
-        return Objects.equals(_minWidth, that._minWidth) &&
-               Objects.equals(_minHeight, that._minHeight) &&
-               Objects.equals(_maxWidth, that._maxWidth) &&
-               Objects.equals(_maxHeight, that._maxHeight) &&
-               Objects.equals(_preferredWidth, that._preferredWidth) &&
+        return Objects.equals(_minWidth,        that._minWidth       ) &&
+               Objects.equals(_minHeight,       that._minHeight      ) &&
+               Objects.equals(_maxWidth,        that._maxWidth       ) &&
+               Objects.equals(_maxHeight,       that._maxHeight      ) &&
+               Objects.equals(_preferredWidth,  that._preferredWidth ) &&
                Objects.equals(_preferredHeight, that._preferredHeight);
     }
 

@@ -50,6 +50,15 @@ public final class Outline
 
     Outline bottom( int bottom) { return new Outline(top, right, bottom, left); }
 
+    Outline scale( double scale ) {
+        return new Outline(
+            top    == null ? null : (int) Math.round( top    * scale ),
+            right  == null ? null : (int) Math.round( right  * scale ),
+            bottom == null ? null : (int) Math.round( bottom * scale ),
+            left   == null ? null : (int) Math.round( left   * scale )
+        );
+    }
+
     public boolean isPositive() {
         return top    != null && top    > 0 ||
                right  != null && right  > 0 ||

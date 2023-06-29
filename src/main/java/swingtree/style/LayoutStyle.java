@@ -22,6 +22,10 @@ final class LayoutStyle
 
     LayoutStyle padding( Outline padding ) { return new LayoutStyle( margin, padding ); }
 
+    LayoutStyle _scale( double scale ) {
+        return new LayoutStyle( margin.scale( scale ), padding.scale( scale ) );
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;

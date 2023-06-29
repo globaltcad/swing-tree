@@ -178,6 +178,14 @@ public final class ShadowStyle
         return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, _color, _isOutset, shadowLayer);
     }
 
+    ShadowStyle _scale( double scaleFactor ) {
+        return new ShadowStyle((int) Math.round(_horizontalOffset * scaleFactor),
+                               (int) Math.round(_verticalOffset   * scaleFactor),
+                               (int) Math.round(_blurRadius       * scaleFactor),
+                               (int) Math.round(_spreadRadius     * scaleFactor),
+                               _color, _isOutset, _layer);
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;

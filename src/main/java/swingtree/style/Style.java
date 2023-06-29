@@ -56,7 +56,7 @@ public final class Style
     private final DimensionalityStyle       _dimensionality;
     private final Map<String, ShadowStyle>  _shadows  = new TreeMap<>();
     private final Map<String, PainterStyle> _painters = new TreeMap<>();
-    private final Map<String, ShadeStyle>   _shades  = new TreeMap<>();
+    private final Map<String, ShadeStyle>   _shades   = new TreeMap<>();
 
 
 
@@ -244,6 +244,20 @@ public final class Style
         Map<String, PainterStyle> newPainters = new HashMap<>(_painters);
         newPainters.put(painterName, PainterStyle.none().painter(painter).layer(layer)); // Existing painters are overwritten if they have the same name.
         return painter(newPainters);
+    }
+
+    public Style scale( double scale ) {
+        return new Style(
+                    _layout._scale(scale),
+                    _border._scale(scale),
+                    _background,
+                    _foreground,
+                    _font._scale(scale),
+                    _dimensionality._scale(scale),
+                    _shadows.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue()._scale(scale))),
+                    _painters,
+                    _shades
+                );
     }
 
     @Override

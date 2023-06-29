@@ -205,6 +205,18 @@ public final class BorderStyle
                Objects.equals(_borderWidths.top().orElse(null), _borderWidths.left().orElse(null));
     }
 
+    BorderStyle _scale( double scale ) {
+        return new BorderStyle(
+                    _topLeftArc     == null ? null : _topLeftArc.scale(scale),
+                    _topRightArc    == null ? null : _topRightArc.scale(scale),
+                    _bottomLeftArc  == null ? null : _bottomLeftArc.scale(scale),
+                    _bottomRightArc == null ? null : _bottomRightArc.scale(scale),
+                    _borderWidths.scale(scale),
+                    _borderColor,
+                    _shades
+            );
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;
