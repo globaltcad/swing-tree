@@ -4,6 +4,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
+import swingtree.EventProcessor
 import swingtree.UI
 import swingtree.animation.Animate
 import swingtree.animation.Animation
@@ -25,6 +26,11 @@ import java.util.concurrent.TimeUnit
 @Subject([Animate, UI, LifeTime])
 class Animations_Spec extends Specification
 {
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED)
+        // This is so that the test thread is also allowed to perform UI operations
+    }
+
     def 'Use the API exposed by "UI.schedule(..)" to schedule animations'()
     {
         reportInfo """

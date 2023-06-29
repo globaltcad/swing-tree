@@ -86,13 +86,20 @@ abstract class AbstractBuilder<I, C extends Component>
                         is not disposed. This is important because the action may
                         access the component, and we don't want to get a NPE.
                      */
-                        component().ifPresent(c -> {
-                            displayAction.accept(v); // Here the captured value is used. This is extremely important!
-                        /*
-                             Since this is happening in another thread we are using the captured property item/value.
-                             The property might have changed in the meantime, but we don't care about that,
-                             we want things to happen in the order they were triggered.
-                         */
+                        component().ifPresent( c -> {
+                            try {
+                                displayAction.accept(v); // Here the captured value is used. This is extremely important!
+                                /*
+                                     Since this is happening in another thread we are using the captured property item/value.
+                                     The property might have changed in the meantime, but we don't care about that,
+                                     we want things to happen in the order they were triggered.
+                                 */
+                            } catch ( Exception e ) {
+                                throw new RuntimeException(
+                                    "Failed to apply state of property '" + val + "' to component '" + c + "'.",
+                                    e
+                                );
+                            }
                         })
                 );
             }
@@ -136,7 +143,10 @@ abstract class AbstractBuilder<I, C extends Component>
      *  The component wrapped by this builder node.
      */
     public final C getComponent() {
-        if ( _eventProcessor != EventProcessor.COUPLED && !UI.thisIsUIThread() )
+        boolean isCoupled       = _eventProcessor == EventProcessor.COUPLED;
+        boolean isCoupledStrict = _eventProcessor == EventProcessor.COUPLED_STRICT;
+
+        if ( !isCoupled && !isCoupledStrict && !UI.thisIsUIThread() )
             throw new IllegalStateException(
                     "This UI is configured to be decoupled from the application thread, " +
                     "which means that it can only be modified from the EDT. " +

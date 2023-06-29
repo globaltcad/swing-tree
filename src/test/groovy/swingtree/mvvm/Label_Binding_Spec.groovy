@@ -1,5 +1,6 @@
 package swingtree.mvvm
 
+import swingtree.EventProcessor
 import swingtree.UI
 import sprouts.Val
 import sprouts.Var
@@ -25,6 +26,11 @@ import java.awt.Dimension
 ''')
 class Label_Binding_Spec extends Specification
 {
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED)
+        // This is so that the test thread is also allowed to perform UI operations
+    }
+
     def 'We can bind to the text of a label.'()
     {
         reportInfo """

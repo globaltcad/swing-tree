@@ -1,5 +1,6 @@
 package swingtree.mvvm
 
+import swingtree.EventProcessor
 import swingtree.UI
 import sprouts.Val
 import sprouts.Var
@@ -21,6 +22,11 @@ import java.awt.Dimension
 class Property_Binding_Spec extends Specification
 {
     enum Accept { YES, NO, MAYBE }
+
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED)
+        // This is so that the test thread is also allowed to perform UI operations
+    }
 
     def 'We can bind a property to the size of a swing component.'()
     {

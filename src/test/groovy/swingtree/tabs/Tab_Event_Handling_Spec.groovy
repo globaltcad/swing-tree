@@ -4,6 +4,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
+import swingtree.EventProcessor
 import swingtree.UI
 import swingtree.UIForTabbedPane
 
@@ -24,6 +25,11 @@ import java.awt.event.MouseEvent
 @Subject([UIForTabbedPane])
 class Tab_Event_Handling_Spec extends Specification
 {
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED)
+        // This is so that the test thread is also allowed to perform UI operations
+    }
+
     def 'Use the "onTabMouseClick" to receive mouse click events on tabs.'()
     {
         reportInfo """

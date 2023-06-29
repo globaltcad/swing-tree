@@ -3,6 +3,7 @@ package swingtree.styles.Style_Animations
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
+import swingtree.EventProcessor
 import swingtree.UI
 import swingtree.style.Layer
 
@@ -27,6 +28,11 @@ import java.util.concurrent.TimeUnit
 ''')
 class Style_Animations_Spec extends Specification
 {
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED)
+        // This is so that the test thread is also allowed to perform UI operations
+    }
+
     def setup()
     {
         // We reset to the default look and feel:

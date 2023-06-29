@@ -3,6 +3,7 @@ package swingtree.splitpane
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
+import swingtree.EventProcessor
 import swingtree.UI
 import sprouts.Var
 
@@ -19,6 +20,12 @@ import java.awt.Dimension
 ''')
 class Split_Pane_Spec extends Specification
 {
+
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED)
+        // This is so that the test thread is also allowed to perform UI operations
+    }
+
     def 'A horizontally aligned split pane can be created through the "splitPane" factory method.'()
     {
         given : 'We create a horizontally aligned split pane UI node.'

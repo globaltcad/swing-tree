@@ -4,6 +4,7 @@ import com.alexandriasoftware.swing.JSplitButton
 import sprouts.Event
 import sprouts.Listener
 import sprouts.Var
+import swingtree.EventProcessor
 import swingtree.UI
 import utility.Utility
 import groovy.transform.CompileDynamic
@@ -49,6 +50,11 @@ class JSplitButton_Examples_Spec extends Specification
             }
             return "?"
         }
+    }
+
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED)
+        // This is so that the test thread is also allowed to perform UI operations
     }
 
     def 'The most simple kind of split button can be built like so:'()

@@ -2,11 +2,19 @@ package swingtree;
 
 class CoupledEventProcessor implements EventProcessor
 {
-    @Override public void registerAppEvent(Runnable runnable ) { runnable.run(); }
+    @Override public void registerAppEvent( Runnable runnable ) { _tryRunning( runnable ); }
 
-    @Override public void registerAndRunAppEventNow(Runnable runnable ) { runnable.run(); }
+    @Override public void registerAndRunAppEventNow( Runnable runnable ) { _tryRunning( runnable ); }
 
-    @Override public void registerUIEvent(Runnable runnable ) { runnable.run(); }
+    @Override public void registerUIEvent( Runnable runnable ) { _tryRunning( runnable ); }
 
-    @Override public void registerAndRunUIEventNow(Runnable runnable ) { runnable.run(); }
+    @Override public void registerAndRunUIEventNow( Runnable runnable ) { _tryRunning( runnable ); }
+
+    private void _tryRunning( Runnable runnable ) {
+        try {
+            runnable.run();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

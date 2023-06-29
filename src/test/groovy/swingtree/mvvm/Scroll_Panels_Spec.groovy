@@ -2,10 +2,16 @@ package swingtree.mvvm
 
 import examples.mvvm.ScrollPanelsViewModel
 import spock.lang.Specification
+import swingtree.EventProcessor
 import swingtree.UI
 
 class Scroll_Panels_Spec extends Specification
 {
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED_STRICT)
+        // In this specification we are using the strict event processor
+        // which will throw exceptions if we try to perform UI operations in the test thread.
+    }
 
     def 'We can instantiate the scroll panels view model and build a view for it.'()
     {

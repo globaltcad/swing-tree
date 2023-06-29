@@ -1,5 +1,6 @@
 package swingtree.combo
 
+import swingtree.EventProcessor
 import swingtree.UI
 import swingtree.UIForCombo
 import sprouts.Var
@@ -26,6 +27,11 @@ import static swingtree.UI.comboBox
 @Subject([UIForCombo])
 class Combo_Box_Specification extends Specification
 {
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED)
+        // This is so that the test thread is also allowed to perform UI operations
+    }
+
     def 'Swing tree is a wrapper around Swing, which means you can create the combo box yourself.'()
     {
         given : 'We pass the combo box to the Swing-Tree factory method.'

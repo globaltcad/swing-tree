@@ -1,6 +1,6 @@
 package swingtree.button
 
-
+import swingtree.EventProcessor
 import swingtree.UI
 import spock.lang.Specification
 
@@ -8,6 +8,12 @@ import javax.swing.*
 
 class JButton_Example_Spec extends Specification
 {
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED_STRICT)
+        // In this specification we are using the strict event processor
+        // which will throw exceptions if we try to perform UI operations in the test thread.
+    }
+
     def 'We can easily create a button with an associated action:'()
     {
         given : 'We create a basic button which will a simple "onClick".'

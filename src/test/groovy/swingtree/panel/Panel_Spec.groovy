@@ -1,5 +1,6 @@
 package swingtree.panel
 
+import swingtree.EventProcessor
 import swingtree.UI
 import swingtree.UIForPanel
 import sprouts.Var
@@ -25,6 +26,11 @@ import java.awt.FlowLayout
 @Subject([UIForPanel])
 class Panel_Spec extends Specification
 {
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED)
+        // This is so that the test thread is also allowed to perform UI operations
+    }
+
     def 'A panel node can be created using the UI.panel() factory method.'() {
         when : 'We create a panel...'
             def ui = UI.panel()
