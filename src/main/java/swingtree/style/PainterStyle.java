@@ -2,7 +2,7 @@ package swingtree.style;
 
 import java.util.Objects;
 
-public class PainterStyle
+public final class PainterStyle
 {
     private static final PainterStyle _NONE = new PainterStyle(Painter.none(), Layer.BACKGROUND);
 

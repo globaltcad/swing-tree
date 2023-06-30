@@ -33,7 +33,7 @@ import java.util.StringTokenizer;
  * @author Daniel Nepp, but originally a derivative work of
  *         Karl Tauber (com.formdev.flatlaf.util.SystemInfo)
  */
-class SystemInfo
+final class SystemInfo
 {
     // platforms
     public static final boolean isWindows;
