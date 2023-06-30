@@ -12,9 +12,11 @@ import java.util.function.Function;
  *  the user to override the paint method of the component.
  *  This is especially important to allow for declarative UI.
  */
-public class StyleRenderer<C extends JComponent>
+public final class StyleRenderer<C extends JComponent>
 {
-    private static boolean DO_ANTIALIASING = UIScale.getUserScaleFactor() < 1.5;
+    private static boolean DO_ANTIALIASING(){
+        return UIScale.getUserScaleFactor() < 1.5;
+    }
 
     private final C _comp;
     private final Style style;
@@ -40,7 +42,7 @@ public class StyleRenderer<C extends JComponent>
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
 
         // We enable antialiasing:
-        if ( DO_ANTIALIASING )
+        if ( DO_ANTIALIASING() )
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         Font componentFont = _comp.getFont();
@@ -95,7 +97,7 @@ public class StyleRenderer<C extends JComponent>
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
 
         // We enable antialiasing:
-        if ( DO_ANTIALIASING )
+        if ( DO_ANTIALIASING() )
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         _renderOn(Layer.CONTENT, g2d);
@@ -116,7 +118,7 @@ public class StyleRenderer<C extends JComponent>
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
 
         // We enable antialiasing:
-        if ( DO_ANTIALIASING )
+        if ( DO_ANTIALIASING() )
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         Font componentFont = _comp.getFont();
