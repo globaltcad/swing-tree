@@ -1,6 +1,5 @@
 package swingtree.examples
 
-import com.alexandriasoftware.swing.JSplitButton
 import examples.Calculator
 import examples.animated.AnimatedButtonsView
 import examples.animated.AnimatedView
@@ -21,6 +20,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import swingtree.UI
+import swingtree.components.JSplitButton
 import swingtree.examples.advanced.AdvancedUI
 import swingtree.examples.simple.TableUI
 import utility.Utility

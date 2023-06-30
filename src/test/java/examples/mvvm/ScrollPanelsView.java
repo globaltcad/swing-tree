@@ -2,15 +2,15 @@ package examples.mvvm;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import swingtree.EventProcessor;
-import swingtree.JScrollPanels;
+import swingtree.components.JScrollPanels;
 import swingtree.UI;
 
 import javax.swing.*;
 import static swingtree.UI.*;
 
 /**
- *  This little example UI demonstrates the usage of the {@link swingtree.JScrollPanels} class.
- *  The {@link swingtree.JScrollPanels} class is a custom Swing-Tree component which exists
+ *  This little example UI demonstrates the usage of the {@link JScrollPanels} class.
+ *  The {@link JScrollPanels} class is a custom Swing-Tree component which exists
  *  to compensate for the deficits of the {@link JList} and {@link JTable} components.
  *  Just like the former mentioned components, the {@link JScrollPanels} component is a
  *  container for a list of scrollable components.

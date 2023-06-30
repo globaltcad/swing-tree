@@ -1,6 +1,6 @@
 package swingtree;
 
-import com.alexandriasoftware.swing.JSplitButton;
+import swingtree.components.JSplitButton;
 import net.miginfocom.swing.MigLayout;
 import sprouts.Event;
 import sprouts.*;
@@ -12,6 +12,7 @@ import swingtree.api.SwingBuilder;
 import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
+import swingtree.components.JScrollPanels;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
 import swingtree.style.StyleSheet;
@@ -877,7 +878,7 @@ public final class UI
      */
     public static UIForSplitButton<JSplitButton> splitButton( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return new UIForSplitButton<>(new JSplitButton(text));
+        return new UIForSplitButton<>((JSplitButton) new SplitButton()).withText(text);
     }
 
     /**
@@ -976,7 +977,7 @@ public final class UI
      *  You can also use the {@link SplitItem} wrapper class to wrap
      *  useful action lambdas for the split item.
      *
-     * @param text The text property to dynamically display text on the {@link JMenuItem} exposed by the {@link JSplitButton}s {@link JPopupMenu}.
+     * @param text The text property to dynamically display text on the {@link JMenuItem} exposed by the {@link swingtree.components.JSplitButton}s {@link JPopupMenu}.
      * @return A new {@link SplitItem} wrapping a simple {@link JMenuItem}.
      */
     public static SplitItem<JMenuItem> splitItem( Val<String> text ) {
@@ -985,7 +986,7 @@ public final class UI
     }
 
     /**
-     *  Use this to add radio item entries to the {@link JSplitButton} by
+     *  Use this to add radio item entries to the {@link swingtree.components.JSplitButton} by
      *  passing {@link SplitItem} instances to {@link UIForSplitButton} builder like so: <br>
      *  <pre>{@code
      *      UI.splitButton("Button")
@@ -996,7 +997,7 @@ public final class UI
      *  You can also use the {@link SplitItem} wrapper class to wrap
      *  useful action lambdas for the split item.
      *
-     * @param text The text displayed on the {@link JRadioButtonMenuItem} exposed by the {@link JSplitButton}s {@link JPopupMenu}.
+     * @param text The text displayed on the {@link JRadioButtonMenuItem} exposed by the {@link swingtree.components.JSplitButton}s {@link JPopupMenu}.
      * @return A new {@link SplitItem} wrapping a simple {@link JRadioButtonMenuItem}.
      */
     public static SplitItem<JRadioButtonMenuItem> splitRadioItem( String text ) {
@@ -4749,4 +4750,15 @@ public final class UI
         @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _renderForeground(this, g); }
     }
+    /** {@inheritDoc} */
+    public static class FormattedTextField extends JFormattedTextField {
+        @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
+        @Override public void paintChildren(Graphics g){ super.paintChildren(g); _renderForeground(this, g); }
+    }
+    /** {@inheritDoc} */
+    public static class SplitButton extends JSplitButton {
+        @Override public void paint(Graphics g){ _renderComponent(this, g); super.paint(g); }
+        @Override public void paintChildren(Graphics g){ super.paintChildren(g); _renderForeground(this, g); }
+    }
+
 }

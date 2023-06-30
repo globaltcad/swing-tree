@@ -1,6 +1,6 @@
 package utility;
 
-import com.alexandriasoftware.swing.JSplitButton;
+import swingtree.components.JSplitButton;
 import com.formdev.flatlaf.FlatLightLaf;
 import examples.mvvm.SomeSettingsView;
 import examples.mvvm.SomeSettingsViewModel;
@@ -13,7 +13,6 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.*;

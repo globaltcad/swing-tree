@@ -1,10 +1,10 @@
 package swingtree;
 
 
-import com.alexandriasoftware.swing.JSplitButton;
 import sprouts.Action;
 import sprouts.Val;
 import sprouts.Var;
+import swingtree.components.JSplitButton;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

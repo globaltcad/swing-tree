@@ -5,6 +5,7 @@ import sprouts.Vals;
 import sprouts.Var;
 import swingtree.api.mvvm.Viewable;
 import swingtree.api.mvvm.ViewableEntry;
+import swingtree.components.JScrollPanels;
 
 import javax.swing.*;
 import java.util.List;
