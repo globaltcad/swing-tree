@@ -311,10 +311,10 @@ Just keep reading and you will see what I mean! :)
 
 ## Blooming Flowers ##
 
-An important aspect of modern UIs developed is the ability to
-customize the looks of the UI.
-Swing-Tree allows you to customize the looks of your UI
-using its functional style API.
+An important aspect of modern UI development is the ability to
+customize how your UI is rendered.
+Swing-Tree allows you to customize the looks 
+of your UI using its functional style API.
 
 Traditionally, the looks of a plain old Swing UI is predominantly
 determined by the **"look and feel" (short LaF)** that is installed through the `UIManager`.
@@ -322,18 +322,18 @@ Although it is often possible to configure a particular look and feel
 to a limited degree,
 like for example specifying the background and foreground colors 
 of specific Swing components, it is almost impossible to change
-non-trivial aspects of a component, like shadows, gradients, etc.
-Swing-Tree solves this problem by overriding the `paintComponent` method
-and intercepting the painting process of Swing components
-so that you can customize the looks of Swing components on top of the LaF.
-This customization is done using the Swing-Tree style API.
+non-trivial aspects of a component, like shadows, gradients, borders, etc.
+Swing-Tree solves this problem by carefully
+intercepting the painting process of Swing components
+so that you can customize their looks on top of the current default LaF.
+This customization is done using the **Swing-Tree style API**.
 
 Here, take a look this code:
 ```java
 UI.show(
     panel("fill, wrap 2")
     .withStyle( it ->
-        it.margin(24).pad(24)
+        it.margin(24).padding(24)
           .backgroundColor(new Color(57, 221, 255,255))
           .borderRadius(32)
           .shadowBlurRadius(5)
@@ -366,22 +366,28 @@ Which will look like this:
 ![Styling](../img/tutorial/a-well-rounded-view.png)
 
 Here you can see that we can use the `withStyle` method
-to access the style API of a Swing component.
+to supply a `Styler` lambda giving us access to the
+style API of a Swing component.
 The style API consists of a `StyleDelegate` which 
 in the above example is the `it` parameter.
 The `StyleDelegate` exposes both the Swing component
 and the current `Style` configuration object.
 
-This API is functional,
-(meaning that the methods on the `Style` object
-will return a new `Style` object with the corresponding
-style property changed), which means that the styling lambda
-is expected to return a new `Style` object with the final
-style configuration you want to apply to the Swing component.
+This API is functional and immutable,
+meaning that the methods on the `StyleDelegate` object
+will return a new `StyleDelegate` object with the corresponding
+`Style` properties changed.
+This allows you to compose `Styler` lambdas
+to combine different styles for different components
+and then execute them eagerly before rendering the UI
+without any side effects... But I digress.
 
 You can configure all kinds of style properties like
-background and foreground colors, border colors, border thickness,
-border radius, shadow color, shadow blur radius, etc.
+**background** and **foreground colors, border colors, border thickness,
+border radius, shadow color, shadow blur radius, shading gradients etc.**
+
+All of these styles will of course be rendered
+with DPI awareness and HiDPI support out of the box!
 
 ## Harvesting Fruit ##
 
@@ -455,7 +461,7 @@ Which is based on this code:
       it.render( g -> {
           g.setColor(new Color(0.1f, 0.25f, 0.5f, (float) state.fadeOut()));
           for ( int i = 0; i < 5; i++ ) {
-              double r = 300 * state.fadeIn() * ( 1 - i * 0.2 );
+              double r = 300 * state.fadeIn() * ( 1 - i * 0.2 ) * it.getUIScale();
               double x = it.getEvent().getX() - r / 2;
               double y = it.getEvent().getY() - r / 2;
               g.drawOval((int) x, (int) y, (int) r, (int) r);
@@ -479,7 +485,7 @@ here is a more complex example:
   button("I show many little mouse move explosions when you move your mouse over me")
   .withPrefHeight(100)
   .onMouseMove( it -> it.animateOnce(1, TimeUnit.SECONDS, state -> {
-          double r = 30 * state.fadeIn();
+          double r = 30 * state.fadeIn() * it.getUIScale();
           double x = it.getEvent().getX() - r / 2.0;
           double y = it.getEvent().getY() - r / 2.0;
           it.render( g -> {
@@ -488,7 +494,7 @@ here is a more complex example:
           });
   }))
   .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
-      double r = 300 * state.fadeIn();
+      double r = 300 * state.fadeIn() * it.getUIScale();
       double x = it.getEvent().getX() - r / 2;
       double y = it.getEvent().getY() - r / 2;
       it.render( g -> {
