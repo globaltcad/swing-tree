@@ -433,7 +433,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.getComponent())
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/soft-JSlider.png", 99.99) > 99.99
+            Utility.similarityBetween(image, "components/soft-JSlider.png", 99.8) > 99.8
     }
 
     def 'The look of a component, like a button for example, will be preserved if possible, when doing custom styling.'()

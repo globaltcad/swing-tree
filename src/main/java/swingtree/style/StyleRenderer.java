@@ -14,7 +14,7 @@ import java.util.function.Function;
  */
 public class StyleRenderer<C extends JComponent>
 {
-    private static boolean DO_ANTIALIASING = true;
+    private static boolean DO_ANTIALIASING = UIScale.getUserScaleFactor() < 1.5;
 
     private final C _comp;
     private final Style style;
@@ -32,7 +32,7 @@ public class StyleRenderer<C extends JComponent>
         return baseArea;
     }
 
-    public void renderBaseStyle(Graphics2D g2d)
+    public void renderBaseStyle( Graphics2D g2d )
     {
         baseArea = null;
 
@@ -968,5 +968,4 @@ public class StyleRenderer<C extends JComponent>
 
         return new Insets(top, left, bottom, right);
     }
-
 }

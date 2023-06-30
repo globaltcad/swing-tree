@@ -14,6 +14,13 @@ public class Arc
 
     public int height() { return _arcHeight; }
 
+    Arc scale( double scale ) {
+        return new Arc(
+                (int) Math.round( _arcWidth  * scale ),
+                (int) Math.round( _arcHeight * scale )
+            );
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;

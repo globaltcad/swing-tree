@@ -1,6 +1,6 @@
 package swingtree.splitbutton
 
-import com.alexandriasoftware.swing.JSplitButton
+import swingtree.components.JSplitButton
 import sprouts.Event
 import sprouts.Listener
 import sprouts.Var

@@ -1,6 +1,6 @@
 package swingtree.common
 
-import com.alexandriasoftware.swing.JSplitButton
+import swingtree.components.JSplitButton
 import swingtree.EventProcessor
 import swingtree.UI
 import swingtree.api.MenuBuilder

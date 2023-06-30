@@ -148,6 +148,19 @@ public final class FontStyle
             return Optional.empty();
     }
 
+    FontStyle _scale( double scale ) {
+        return new FontStyle(
+                    _name,
+                    (int) Math.round(_size * scale),
+                    _style,
+                    _weight,
+                    _attributes,
+                    _color,
+                    _backgroundColor,
+                    _selectionColor
+                );
+    }
+
     @Override
     public int hashCode()
     {

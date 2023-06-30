@@ -1,6 +1,6 @@
 package swingtree;
 
-import com.alexandriasoftware.swing.JSplitButton;
+import swingtree.components.JSplitButton;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

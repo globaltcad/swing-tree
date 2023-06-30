@@ -1,19 +1,14 @@
 package swingtree.common
 
-import com.alexandriasoftware.swing.JSplitButton
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import swingtree.EventProcessor
 import swingtree.UI
+import swingtree.components.JSplitButton
 import utility.Utility
 
-import javax.swing.JButton
-import javax.swing.JCheckBox
-import javax.swing.JEditorPane
-import javax.swing.JSlider
-import javax.swing.JTextArea
-import javax.swing.JToggleButton
+import javax.swing.*
 
 @Title("Configuring UI withMethod Chaining")
 @Narrative('''

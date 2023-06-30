@@ -57,6 +57,7 @@ public class ComponentExtension<C extends JComponent>
 
     private Color _initialBackgroundColor = null;
 
+
     private ComponentExtension( C owner ) {
         _owner = Objects.requireNonNull(owner);
     }
@@ -186,7 +187,14 @@ public class ComponentExtension<C extends JComponent>
                 }
             }
 
-        return style;
+        return _applyDPIScaling(style);
+    }
+
+    private static Style _applyDPIScaling(Style style) {
+        if ( UIScale.getUserScaleFactor() == 1f )
+            return style;
+
+        return style.scale( UIScale.getUserScaleFactor() );
     }
 
     private Style _applyStyleToComponentState( Style style )

@@ -1,9 +1,7 @@
 package swingtree.api.mvvm;
 
 import sprouts.Var;
-import swingtree.JScrollPanels;
-
-import javax.swing.*;
+import swingtree.components.JScrollPanels;
 
 /**
  *  A {@link ViewableEntry} is used to model an entry inside of the {@link JScrollPanels} component.

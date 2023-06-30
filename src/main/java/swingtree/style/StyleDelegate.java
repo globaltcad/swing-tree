@@ -1180,4 +1180,45 @@ public final class StyleDelegate<C extends JComponent>
         return _withStyle(_style._withDimensionality(_style.dimensionality()._withHeight(height)));
     }
 
+    /**
+     * @return The current UI scale factor, which is used to scale the UI
+     *         for high resolution displays (high dots-per-inch, or DPI).
+     */
+    public float getUIScale() {
+        return UIScale.getUserScaleFactor();
+    }
+
+    /**
+     *  Use this method inside custom {@link Painter} implementations (see {@link #painter(Layer, Painter)})
+     *  to scale an {@code int} value by the current UI scale factor to ensure
+     *  that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
+     *  @param value The {@code int} value to scale.
+     *  @return The scaled {@code int} value.
+     */
+    public int scale( int value ) {
+        return UIScale.scale(value);
+    }
+
+    /**
+     *  Use this method inside custom {@link Painter} implementations (see {@link #painter(Layer, Painter)})
+     *  to scale a {@code float} value by the current UI scale factor to ensure
+     *  that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
+     *  @param value The {@code float} value to scale.
+     *  @return The scaled {@code float} value.
+     */
+    public float scale( float value ) {
+        return UIScale.scale(value);
+    }
+
+    /**
+     *  Use this method inside custom {@link Painter} implementations (see {@link #painter(Layer, Painter)})
+     *  to scale a {@code double} value by the current UI scale factor to ensure
+     *  that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
+     *  @param value The {@code double} value to scale.
+     *  @return The scaled {@code double} value.
+     */
+    public double scale( double value ) {
+        return UIScale.scale(value);
+    }
+
 }

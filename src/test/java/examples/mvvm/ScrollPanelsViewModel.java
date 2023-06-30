@@ -2,7 +2,7 @@ package examples.mvvm;
 
 import sprouts.Var;
 import sprouts.Vars;
-import swingtree.JScrollPanels;
+import swingtree.components.JScrollPanels;
 import swingtree.UI;
 import swingtree.api.mvvm.ViewableEntry;
 
@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 
 /**
  *  This is the view model of the {@link ScrollPanelsView} example UI,
- *  which demonstrates the usage of the {@link swingtree.JScrollPanels} class.
- *  The {@link swingtree.JScrollPanels} class is a custom Swing-Tree component which exists
+ *  which demonstrates the usage of the {@link JScrollPanels} class.
+ *  The {@link JScrollPanels} class is a custom Swing-Tree component which exists
  *  to compensate for the deficits of the {@link JList} and {@link JTable} components.
  *  Just like the former mentioned components, the {@link JScrollPanels} component is a
  *  container for a list of scrollable components.

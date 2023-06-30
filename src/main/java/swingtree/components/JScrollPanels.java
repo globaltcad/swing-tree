@@ -1,6 +1,7 @@
-package swingtree;
+package swingtree.components;
 
 import net.miginfocom.swing.MigLayout;
+import swingtree.UI;
 import swingtree.api.mvvm.ViewableEntry;
 
 import javax.swing.*;
