@@ -1,3 +1,29 @@
+/*
+ *   IMPORTANT:
+ *   This file is a derived work of the UIScale.java class from
+ *   FlatLaf library (com.formdev.flatlaf.util.UIScale),
+ *   which is licensed under the Apache License, Version 2.0.
+ *   The original author is FormDev Software GmbH, more
+ *   specifically, Karl Tauber.
+ *   Here the copy of the original license:
+ *
+ *
+ * Copyright 2019 FormDev Software GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package swingtree.style;
 
 
@@ -25,7 +51,7 @@ import javax.swing.plaf.UIResource;
  * provides methods to scale integer, float, {@link Dimension} and {@link Insets}.
  * This class is look and feel independent.
  * <p>
- * Two scaling modes are supported by FlatLaf for HiDPI displays:
+ * Two scaling modes are supported by SwingTree for HiDPI displays:
  *
  * <h2>1) system scaling mode</h2>
  *
@@ -50,7 +76,7 @@ import javax.swing.plaf.UIResource;
  * If system scaling mode is available the user scale factor is usually 1,
  * but may be larger on Linux or if the default font is changed.
  *
- * @author A derivative work of Daniel Nepp, originally from Karl Tauber (com.formdev.flatlaf.util.UIScale)
+ * @author Daniel Nepp, but a derivative work originally from Karl Tauber (com.formdev.flatlaf.util.UIScale)
  */
 public class UIScale
 {
@@ -161,7 +187,7 @@ public class UIScale
         if( !isUserScalingEnabled() )
             return;
 
-        // apply custom scale factor specified in system property "flatlaf.uiScale"
+        // apply custom scale factor specified in system property "style.uiScale"
         float customScaleFactor = getCustomScaleFactor();
         if( customScaleFactor > 0 ) {
             setUserScaleFactor( customScaleFactor, false );
@@ -253,7 +279,7 @@ public class UIScale
     }
 
     /**
-     * Applies a custom scale factor given in system property "flatlaf.uiScale"
+     * Applies a custom scale factor given in system property "style.uiScale"
      * to the given font.
      */
     public static FontUIResource applyCustomScaleFactor( FontUIResource font ) {
@@ -273,7 +299,7 @@ public class UIScale
     }
 
     /**
-     * Get custom scale factor specified in system property "flatlaf.uiScale".
+     * Get custom scale factor specified in system property "style.uiScale".
      */
     private static float getCustomScaleFactor() {
         return parseScaleFactor( System.getProperty( StyleSystemProperties.UI_SCALE ) );

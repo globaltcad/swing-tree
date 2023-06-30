@@ -1,3 +1,27 @@
+/*
+ *   IMPORTANT:
+ *   This file is a derived work of the SystemInfo.java class from
+ *   FlatLaf library (com.formdev.flatlaf.util.SystemInfo),
+ *   which is licensed under the Apache License, Version 2.0.
+ *   The original author is FormDev Software GmbH, more
+ *   specifically, Karl Tauber.
+ *   Here the copy of the original license:
+ *
+ * Copyright 2019 FormDev Software GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package swingtree.style;
 
 import java.util.Locale;
@@ -21,23 +45,23 @@ class SystemInfo
     public static final boolean isWindows_10_orLater;
     /** <strong>Note</strong>: This requires Java 8u321, 11.0.14, 17.0.2 or 18 (or later).
      * (see https://bugs.openjdk.java.net/browse/JDK-8274840)
-     * @since 2 */ public static final boolean isWindows_11_orLater;
+     **/ public static final boolean isWindows_11_orLater;
     public static final boolean isMacOS_10_11_ElCapitan_orLater;
     public static final boolean isMacOS_10_14_Mojave_orLater;
     public static final boolean isMacOS_10_15_Catalina_orLater;
 
     // OS architecture
-    /** @since 2 */ public static final boolean isX86;
-    /** @since 1.1 */ public static final boolean isX86_64;
-    /** @since 2 */ public static final boolean isAARCH64;
+    public static final boolean isX86;
+    public static final boolean isX86_64;
+    public static final boolean isAARCH64;
 
     // Java versions
     public static final long javaVersion;
     public static final boolean isJava_9_orLater;
     public static final boolean isJava_11_orLater;
     public static final boolean isJava_15_orLater;
-    /** @since 2 */ public static final boolean isJava_17_orLater;
-    /** @since 2 */ public static final boolean isJava_18_orLater;
+    public static final boolean isJava_17_orLater;
+    public static final boolean isJava_18_orLater;
 
     // Java VMs
     public static final boolean isJetBrainsJVM;
@@ -47,9 +71,9 @@ class SystemInfo
     public static final boolean isKDE;
 
     // other
-    /** @since 1.1 */ public static final boolean isProjector;
-    /** @since 1.1.2 */ public static final boolean isWebswing;
-    /** @since 1.1.1 */ public static final boolean isWinPE;
+    public static final boolean isProjector;
+    public static final boolean isWebswing;
+    public static final boolean isWinPE;
 
     static {
         // platforms
