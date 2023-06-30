@@ -374,6 +374,14 @@ public class UIScale
     }
 
     /**
+     * Multiplies the given value by the user scale factor.
+     */
+    public static double scale( double value ) {
+        initialize();
+        return (scaleFactor == 1) ? value : (value * scaleFactor);
+    }
+
+    /**
      * Multiplies the given value by the user scale factor and rounds the result.
      */
     public static int scale( int value ) {
