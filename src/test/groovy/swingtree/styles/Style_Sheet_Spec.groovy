@@ -4,6 +4,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
+import swingtree.EventProcessor
 import swingtree.UI
 import swingtree.style.Arc
 import swingtree.style.Layer
@@ -51,6 +52,12 @@ import java.awt.*
 @Subject([StyleSheet, Style])
 class Style_Sheet_Spec extends Specification
 {
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED_STRICT)
+        // In this specification we are using the strict event processor
+        // which will throw exceptions if we try to perform UI operations in the test thread.
+    }
+
     def 'Write custom style sheet classes by extending the StyleSheet class.'()
     {
         reportInfo """

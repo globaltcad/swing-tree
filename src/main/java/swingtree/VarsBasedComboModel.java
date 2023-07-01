@@ -7,13 +7,13 @@ class VarsBasedComboModel<E> extends AbstractComboModel<E>
 {
     private final Vars<E> _items;
 
-    VarsBasedComboModel(Vars<E> items) {
+    VarsBasedComboModel( Vars<E> items ) {
         super(Var.ofNullable(_findCommonType(items), null));
         _items = items;
         _selectedIndex = _indexOf(_selectedItem.orElseNull());
     }
 
-    VarsBasedComboModel(Var<E> var, Vars<E> items) {
+    VarsBasedComboModel( Var<E> var, Vars<E> items ) {
         super(var);
         _items = items;
         _selectedIndex = _indexOf(_selectedItem.orElseNull());

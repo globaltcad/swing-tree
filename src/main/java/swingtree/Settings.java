@@ -7,7 +7,7 @@ import java.util.Optional;
 
 class Settings {
 
-	private EventProcessor _eventProcessor = EventProcessor.COUPLED;
+	private EventProcessor _eventProcessor = EventProcessor.COUPLED_STRICT;
 	private StyleSheet _styleSheet = null;
 
 	public EventProcessor getEventProcessor() {

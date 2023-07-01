@@ -1,5 +1,6 @@
 package swingtree.mvvm
 
+import swingtree.EventProcessor
 import swingtree.UI
 import sprouts.Val
 import sprouts.Var
@@ -24,6 +25,11 @@ import javax.swing.ButtonGroup
 class Button_Binding_Spec extends Specification
 {
     enum SelectionState { SELECTED, NOT_SELECTED }
+
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED)
+        // This is so that the test thread is also allowed to perform UI operations
+    }
 
     def 'We can bind to the text of a button.'()
     {

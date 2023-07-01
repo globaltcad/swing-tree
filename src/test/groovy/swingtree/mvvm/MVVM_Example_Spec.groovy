@@ -4,6 +4,7 @@ import examples.mvvm.LoginViewModel
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
+import swingtree.EventProcessor
 import swingtree.UI
 import utility.Utility
 import sprouts.Var
@@ -32,6 +33,10 @@ import java.util.List
 ''')
 class MVVM_Example_Spec extends Specification
 {
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED)
+        // This is so that the test thread is also allowed to perform UI operations
+    }
 
     def 'We can create a property based view model and build a view for it.'()
     {

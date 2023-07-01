@@ -4,10 +4,11 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
+import swingtree.EventProcessor
+import swingtree.UI
 import swingtree.style.Style
 import swingtree.style.StyleDelegate
 
-import javax.swing.JComponent
 import javax.swing.JPanel
 import java.awt.*
 
@@ -22,6 +23,12 @@ import java.awt.*
 @Subject([Style])
 class Styles_Spec extends Specification
 {
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED_STRICT)
+        // In this specification we are using the strict event processor
+        // which will throw exceptions if we try to perform UI operations in the test thread.
+    }
+
     def 'Various kinds of String expressions can be parsed as colors by various style properties.'(
         String colorString, Color expectedColor
     ) {

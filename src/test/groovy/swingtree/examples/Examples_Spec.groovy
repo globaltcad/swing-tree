@@ -19,6 +19,7 @@ import examples.stylish.WellRoundedView
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
+import swingtree.EventProcessor
 import swingtree.UI
 import swingtree.components.JSplitButton
 import swingtree.examples.advanced.AdvancedUI
@@ -42,6 +43,11 @@ import java.awt.*
 ''')
 class Examples_Spec extends Specification
 {
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED)
+        // This is so that the test thread is also allowed to perform UI operations
+    }
+
     def setup() {
         // We reset to the default look and feel:
         UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())

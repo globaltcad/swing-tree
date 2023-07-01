@@ -78,11 +78,13 @@ import javax.swing.plaf.UIResource;
  *
  * @author Daniel Nepp, but a derivative work originally from Karl Tauber (com.formdev.flatlaf.util.UIScale)
  */
-public class UIScale
+public final class UIScale
 {
     private static final boolean DEBUG = false;
 
     private static PropertyChangeSupport changeSupport;
+
+    private UIScale() {} // prevent instantiation
 
     public static void addPropertyChangeListener( PropertyChangeListener listener ) {
         if( changeSupport == null )

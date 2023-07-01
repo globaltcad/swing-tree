@@ -4,7 +4,7 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class ShadeStyle
+public final class ShadeStyle
 {
     private static final ShadeStyle _NONE = new ShadeStyle(ShadingStrategy.NONE, new Color[0], Layer.BACKGROUND);
 

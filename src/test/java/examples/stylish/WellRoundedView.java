@@ -39,7 +39,7 @@ public class WellRoundedView extends Panel
         .add(TOP,
             box(INS(24)).add(html(
                 "<i>SwingTree can override the default<br>" +
-                        "Look and feel based style<br>" +
+                        "look and feel based style<br>" +
                         "according to your needs.</i>"
             ))
         );

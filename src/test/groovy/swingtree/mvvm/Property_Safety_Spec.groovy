@@ -4,6 +4,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
+import swingtree.EventProcessor
 import swingtree.UI
 import sprouts.Val
 import sprouts.Vals
@@ -30,6 +31,12 @@ import java.util.function.Consumer
 @Subject([Val, Var, Vals, Vars])
 class Property_Safety_Spec extends Specification
 {
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED_STRICT)
+        // In this specification we are using the strict event processor
+        // which will throw exceptions if we try to perform UI operations in the test thread.
+    }
+
     def 'The "get" method of a property throws an exception if the property is null.'()
     {
         reportInfo """

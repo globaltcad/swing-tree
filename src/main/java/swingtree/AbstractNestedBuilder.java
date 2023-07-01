@@ -83,7 +83,10 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
     {
         NullUtil.nullArgCheck(builder, "builder", AbstractNestedBuilder.class);
 
-        if ( _eventProcessor != EventProcessor.COUPLED && !UI.thisIsUIThread() )
+        boolean isCoupled       = _eventProcessor == EventProcessor.COUPLED;
+        boolean isCoupledStrict = _eventProcessor == EventProcessor.COUPLED_STRICT;
+
+        if ( !isCoupled && !isCoupledStrict && !UI.thisIsUIThread() )
             throw new IllegalStateException(
                     "This UI is configured to be decoupled from the application thread, " +
                     "which means that it can only be modified from the EDT. " +

@@ -1,24 +1,24 @@
 package swingtree;
 
 /**
- * 	One of Swing's biggest drawbacks is that it is single threaded. This means that all
- * 	GUI events are processed on the same thread as the application logic.
- * 	This is... <br>
+ * 	One of Swing's biggest drawback is that it is single threaded. This means that all
+ * 	GUI events are processed on the same thread as the application logic. <br>
+ * 	This is problematic for several reasons:
  * 	<ul>
- * 		<li> not very efficient
- * 		<li> not very responsive
- * 		<li> not very scalable
- * 		<li> not very testable
- * 		<li> not very maintainable
- * 		<li> not very extensible
- * 		<li> not very ... (you get the idea)
+ * 		<li> The GUI is not responsive while the application logic is running.
+ * 			 For example, if you have a long running task, the GUI will not be updated
+ * 			 until the task is finished.
+ * 		<li> The GUI is not thread safe. If you try to update the GUI from a different thread
+ * 			 than the GUI thread, you will get an exception.
+ * 		<li> The GUI is not decoupled from the application logic. This means that the GUI
+ * 			 is tightly coupled to the application logic, which makes it hard to test the GUI.
+ * 		<li> Using your GUI thread not only for GUI events and rendering but also for application logic,
+ * 	         will reduce the performance of your application.
  * 	</ul>
  *
  * 	Swing-Tree fixes this mess by decoupling the GUI from the application by delegating
  * 	the GUI events to a separate thread.
  * 	This is done through implementations of this {@link EventProcessor} interface.
- * 	By default, Swing-Tree uses a {@link DecoupledEventProcessor} which simply uses the
- * 	executes the GUI events immediately on the GUI thread.
  * 	<p>
  * 	If you want to do proper decoupling, you can switch to the decoupled event processor like so: <br>
  * 	<pre>{@code
@@ -33,10 +33,31 @@ package swingtree;
  *      )
  *  );
  *  }</pre>
+ * 	Note that by default, Swing-Tree uses a simple event processor which does not delegate GUI events to a separate thread.
+ * 	So if you want to activate this powerful feature you have to change the event processor. <br>
+ * 	See {@link EventProcessor#COUPLED}, {@link EventProcessor#COUPLED_STRICT} and {@link EventProcessor#DECOUPLED}.
  */
 public interface EventProcessor
 {
-	EventProcessor COUPLED   = new CoupledEventProcessor();
+	/**
+	 *  This event processor simply runs the events immediately without caring
+	 *  about the thread they are executed on.
+	 *  This means that events are executed on the GUI thread, which is the EDT in Swing.
+	 *  However, events may also be executed on other threads, which is why this event processor
+	 *  is usually used for testing.
+	 */
+	EventProcessor COUPLED = new CoupledEventProcessor();
+	/**
+	 *  This event processor runs the events immediately on the GUI thread.
+	 *  If the current thread is the GUI thread, the events are executed immediately,
+	 *  otherwise an exception is thrown.
+	 */
+	EventProcessor COUPLED_STRICT = new AWTOnlyEventProcessor();
+	/**
+	 *  This event processor makes a distinction between application events and UI events.
+	 *  Application events are executed on the application thread, whereas UI events are
+	 *  executed on the GUI thread (AWT Event Dispatch Thread).
+	 */
 	EventProcessor DECOUPLED = DecoupledEventProcessor.INSTANCE();
 
 

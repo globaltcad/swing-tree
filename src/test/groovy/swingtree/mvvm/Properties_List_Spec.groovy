@@ -5,6 +5,8 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import sprouts.*
+import swingtree.EventProcessor
+import swingtree.UI
 
 @Title("Lists of Properties")
 @Narrative('''
@@ -22,6 +24,11 @@ import sprouts.*
 @Subject([Vals, Vars])
 class Properties_List_Spec extends Specification
 {
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED_STRICT)
+        // In this specification we are using the strict event processor
+        // which will throw exceptions if we try to perform UI operations in the test thread.
+    }
 
     def 'Multiple properties can be modelled through the "Vars" and "Vals" classes.'()
     {

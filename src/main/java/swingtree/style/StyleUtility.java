@@ -4,7 +4,7 @@ import java.awt.*;
 import java.util.Map;
 import java.util.Objects;
 
-class StyleUtility
+final class StyleUtility
 {
     static final String DEFAULT_KEY = "default";
     static final Styler<?> STYLER_NONE = delegate -> delegate;

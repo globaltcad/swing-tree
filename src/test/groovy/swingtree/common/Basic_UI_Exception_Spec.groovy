@@ -1,6 +1,7 @@
 package swingtree.common
 
 import swingtree.components.JSplitButton
+import swingtree.EventProcessor
 import swingtree.UI
 import swingtree.api.MenuBuilder
 import swingtree.api.SwingBuilder
@@ -24,6 +25,12 @@ import java.awt.Component
 ''')
 class Basic_UI_Exception_Spec extends Specification
 {
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED_STRICT)
+        // In this specification we are using the strict event processor
+        // which will throw exceptions if we try to perform UI operations in the test thread.
+    }
+
     def 'The given factory methods do not accept null arguments.'(
             Runnable illegalAction
     ) {

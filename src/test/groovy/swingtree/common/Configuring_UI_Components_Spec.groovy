@@ -3,6 +3,7 @@ package swingtree.common
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
+import swingtree.EventProcessor
 import swingtree.UI
 import swingtree.components.JSplitButton
 import utility.Utility
@@ -26,6 +27,12 @@ import javax.swing.*
 ''')
 class Configuring_UI_Components_Spec extends Specification
 {
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED_STRICT)
+        // In this specification we are using the strict event processor
+        // which will throw exceptions if we try to perform UI operations in the test thread.
+    }
+
     def 'We can make a UI component grab the current input focus.'()
     {
         given : 'We create a UI with a button that grabs the focus and some other components.'

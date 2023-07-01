@@ -9,6 +9,7 @@ import java.awt.*;
 import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  *  This is the root builder type for all other builder subtypes.
@@ -33,12 +34,11 @@ abstract class AbstractBuilder<I, C extends Component>
 
     /**
      *  The type class of the component wrapped by this builder node.
-     *  See documentation for method "build" for more information.
      */
     protected final Class<C> _type;
 
     /**
-     *  Instances of the {@link AbstractBuilder} as well as its sub types always wrap
+     *  Instances of the {@link AbstractBuilder} as well as its subtypes always wrap
      *  a single component for which they are responsible.
      *
      * @param component The component type which will be wrapped by this builder node.
@@ -57,25 +57,31 @@ abstract class AbstractBuilder<I, C extends Component>
     protected final void _doUI( Runnable action ) { _eventProcessor.registerUIEvent( action ); }
 
     /**
-     * @param action An action which should be executed by the application thread.
+     * @param action An action which should be executed by the application thread,
+     *               which is determined by implementations of the {@link EventProcessor},
+     *               also see {@link UI#use(EventProcessor, Supplier)}.
      */
     protected final void _doApp( Runnable action ) { _eventProcessor.registerAppEvent(action); }
 
     /**
-     * @param value A value which should be captured.
-     * @param action A consumer lambda receiving the provided value and
-     *               is then executed by the application thread.
+     * @param value A value which should be captured and then passed to the provided action
+     *              on the current application thread (see {@link EventProcessor} and {@link UI#use(EventProcessor, Supplier)}).
+     * @param action A consumer lambda which is executed by the application thread
+     *               and receives the provided value.
      * @param <T> The type of the value.
      */
     protected final <T> void _doApp( T value, Consumer<T> action ) { _doApp(()->action.accept(value)); }
 
     /**
-     * @param val A property which should be captured.
+     *  Use this to register a state change listener for the provided property
+     *  which will be executed by the UI thread (see {@link EventProcessor}).
+     *
+     * @param val A property whose state changes should be listened to on the UI thread.
      * @param displayAction A consumer lambda receiving the provided value and
      *                      is then executed by the UI thread.
-     * @param <T> The type of the value.
+     * @param <T> The type of the item wrapped by the provided property.
      */
-    protected final <T> void _onShow(Val<T> val, Consumer<T> displayAction ) {
+    protected final <T> void _onShow( Val<T> val, Consumer<T> displayAction ) {
         Action<Val<T>> action = new Action<Val<T>>() {
             @Override
             public void accept( Val<T> val ) {
@@ -86,13 +92,20 @@ abstract class AbstractBuilder<I, C extends Component>
                         is not disposed. This is important because the action may
                         access the component, and we don't want to get a NPE.
                      */
-                        component().ifPresent(c -> {
-                            displayAction.accept(v); // Here the captured value is used. This is extremely important!
-                        /*
-                             Since this is happening in another thread we are using the captured property item/value.
-                             The property might have changed in the meantime, but we don't care about that,
-                             we want things to happen in the order they were triggered.
-                         */
+                        component().ifPresent( c -> {
+                            try {
+                                displayAction.accept(v); // Here the captured value is used. This is extremely important!
+                                /*
+                                     Since this is happening in another thread we are using the captured property item/value.
+                                     The property might have changed in the meantime, but we don't care about that,
+                                     we want things to happen in the order they were triggered.
+                                 */
+                            } catch ( Exception e ) {
+                                throw new RuntimeException(
+                                    "Failed to apply state of property '" + val + "' to component '" + c + "'.",
+                                    e
+                                );
+                            }
                         })
                 );
             }
@@ -104,12 +117,15 @@ abstract class AbstractBuilder<I, C extends Component>
     }
 
     /**
-     * @param vals A property list which should be captured.
+     *  Use this to register a state change listener for the provided property list
+     *  which will be executed by the UI thread (see {@link EventProcessor}).
+     *
+     * @param vals A property list whose state changes should be listened to on the UI thread.
      * @param displayAction A consumer lambda receiving the action delegate and
      *                      is then executed by the UI thread.
-     * @param <T> The type of the value.
+     * @param <T> The type of the items wrapped by the provided property list.
      */
-    protected final <T> void _onShow(Vals<T> vals, Consumer<ValsDelegate<T>> displayAction ) {
+    protected final <T> void _onShow( Vals<T> vals, Consumer<ValsDelegate<T>> displayAction ) {
         vals.onChange(new Action<ValsDelegate<T>>() {
             @Override
             public void accept(ValsDelegate<T> delegate) {
@@ -128,15 +144,28 @@ abstract class AbstractBuilder<I, C extends Component>
         });
     }
 
+    /**
+     * @return The builder instance itself based on the type parameter {@code <I>}.
+     */
     protected final I _this() { return (I) this; }
 
+    /**
+     *  This method sets the strong reference to the component to null,
+     *  which allows the component to be garbage collected.
+     *  This is important to avoid memory leaks, as a component is typically
+     *  part of a tree of components, and if one component is not garbage collected,
+     *  then the whole tree is not garbage collected.
+     */
     protected final void _detachStrongRef() { _componentStrongRef = null; }
 
     /**
      *  The component wrapped by this builder node.
      */
     public final C getComponent() {
-        if ( _eventProcessor != EventProcessor.COUPLED && !UI.thisIsUIThread() )
+        boolean isCoupled       = _eventProcessor == EventProcessor.COUPLED;
+        boolean isCoupledStrict = _eventProcessor == EventProcessor.COUPLED_STRICT;
+
+        if ( !isCoupled && !isCoupledStrict && !UI.thisIsUIThread() )
             throw new IllegalStateException(
                     "This UI is configured to be decoupled from the application thread, " +
                     "which means that it can only be modified from the EDT. " +
@@ -184,15 +213,31 @@ abstract class AbstractBuilder<I, C extends Component>
     /**
      *  Use this to build or not build UI, based on a boolean condition value and a consumer
      *  lambda which continues the building process if the previous boolean is true.
-     *  This builder will simply be supplied to the provided consumer lambda.
+     *  This builder instance will simply be supplied to the provided consumer lambda.
      *  Inside the second lambda, one can then continue building the UI while also not
      *  breaking the benefits of nesting and method chaining provided by this class...
      *  <p>
-     *  This isin essence a more advanced version of {@link #apply(Consumer)}.
+     *  This is in essence a more advanced version of {@link #apply(Consumer)}.
      *  <br>
+     *  Here a simple usage example:
+     *  <pre>{@code
+     *      UI.panel()
+     *      .applyIf( userIsLoggedIn, it -> it
+     *          .add( UI.label("Welcome back!") )
+     *          .add( UI.button("Logout")).onClick( () -> logout() )
+     *          .add( UI.button("Settings")).onClick( () -> showSettings() )
+     *      )
+     *      .applyIf( !userIsLoggedIn, it -> it
+     *          .add( UI.label("Please login to continue.") )
+     *          .add( UI.button("Login")).onClick( () -> login() );
+     *      );
+     *  }</pre>
+     *  Here we use theis method to build a panel
+     *  with different content depending on whether the user is logged in or not.
+     *  <br><br>
      *
-     * @param condition The truth value which determines if the second consumer lambda will be executed.
-     * @param building A Consumer lambda which simply consumes this builder.
+     * @param condition The truth value which determines if the second consumer lambda is executed or not.
+     * @param building A {@link Consumer} lambda which simply consumes this builder instance.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I applyIf( boolean condition, Consumer<I> building ) {
@@ -225,14 +270,38 @@ abstract class AbstractBuilder<I, C extends Component>
     }
 
     /**
-     *  Use this to continue building UI inside a provided lambda.
+     *  Use this to continue building UI inside a provided lambda
+     *  if you need to introduce some procedural code in between
+     *  the building process. <br>
      *  This is especially useful for when you need to build UI based on loops.
-     *  This builder instance will simply be supplied to the provided consumer lambda.
-     *  Inside this lambda, you can then continue building the UI while also not
-     *  breaking the benefits of nesting and method chaining provided by this class...
+     *  The current builder instance will simply be supplied to the provided {@link Consumer} lambda.
+     *  Inside the supplied lambda, you can then continue building the UI while also not
+     *  breaking the benefits of nesting and method chaining, effectively preserving
+     *  the declarative nature of the builder.
+     *  <br><br>
+     *  Here is a simple example of how this method can be used to build a panel
+     *  with a variable amount of images displayed in a grid:
+     *  <pre>{@code
+     *      UI.panel("wrap 3")
+     *      .apply( it -> {
+     *          for ( String path : imagePaths )
+     *              it.add( UI.label(UI.icon(path)) );
+     *      });
+     *  }</pre>
+     *  <br><br>
+     *  Here is another example of how this method can be used to build a panel
+     *  with a variable amount of buttons displayed in a grid:
+     *  <pre>{@code
+     *    UI.panel("wrap 4")
+     *    .apply( it -> {
+     *      for ( int i = 0; i < numOfButtons; i++ )
+     *          it.add( UI.button("Button " + i)
+     *          .onClick( () -> {...} );
+     *    });
+     *  }</pre>
      *  <br><br>
      *
-     * @param building A Consumer lambda which simply consumes this builder.
+     * @param building A Consumer lambda which simply consumes this builder instance.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I apply( Consumer<I> building ) {
@@ -248,9 +317,27 @@ abstract class AbstractBuilder<I, C extends Component>
      *  readability when using the builder in more extensive ways where
      *  the beginning and end of the method chaining and nesting of the builder does
      *  not fit on one screen. <br>
-     *  In that case the expression "{@code .getResulting(JMenu.class)}" helps
-     *  to identify which type of {@link javax.swing.JComponent} is currently being build on a given
+     *  In that case the expression "{@code .get(JMenu.class)}" helps
+     *  to identify which type of {@link javax.swing.JComponent} is currently being built on a given
      *  nesting layer... <br><br>
+     *  Here is a simple example of how this method can be used to build a menu bar:
+     *  <pre>{@code
+     *      UI.panel()
+     *      .add(
+     *          UI.menuBar()
+     *          .add( UI.menu("File") )
+     *          .add( UI.menuItem("Open") )
+     *          .add( UI.menuItem("Save") )
+     *          // ...
+     *          .add( UI.menuItem("Exit") )
+     *          .get(JMenuBar.class)
+     *      )
+     *      .add( UI.button("Click me!") )
+     *      .get(JPanel.class);
+     *  }</pre>
+     *  As you can see, the expression "{@code .get(JMenuBar.class)}" as well as the expression
+     *  "{@code .get(JPanel.class)}" at the end of the builder chain help to identify
+     *  which type of {@link javax.swing.JComponent} is currently being built on a given nesting layer.
      *
      * @param type The type class of the component which this builder wraps.
      * @param <T> The type parameter of the component which this builder wraps.

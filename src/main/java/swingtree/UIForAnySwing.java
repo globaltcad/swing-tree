@@ -128,11 +128,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *      }
      *    }
      *  }</pre>
-     *  This example style sheet can be applied to a component like this:
+     *  <br>
+     *  The style sheet in the above example code can be applied to a component like so:
      *  <pre>{@code
      *      UI.use(new MyStyleSheet(), ()->
      *          UI.button("Click me").group("A")
-     *          .onAction(() -> System.out.println("Clicked!"))
+     *          .onClick(it -> {...})
      *      );
      *  }</pre>
      *
@@ -168,11 +169,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *          }
      *      }
      *  }</pre>
-     *  This example style sheet can be applied to a component like this:
+     *  <br>
+     *  The style sheet in the above example code can be applied to a component like so:
      *  <pre>{@code
      *      UI.use(new MyStyleSheet(), ()->
      *          UI.button("Click me").group(MyGroup.A)
-     *          .onAction(() -> System.out.println("Clicked!"))
+     *          .onClick(it -> {...})
      *      );
      *  }</pre>
      *

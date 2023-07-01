@@ -6,6 +6,8 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
+import swingtree.EventProcessor
+import swingtree.UI
 
 @Title("Writing Unit Tests for View Models")
 @Narrative('''
@@ -19,6 +21,12 @@ import spock.lang.Title
 @Subject([UserRegistrationViewModel, LoginViewModel])
 class MVVM_Unit_Test_Spec extends Specification
 {
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED_STRICT)
+        // In this specification we are using the strict event processor
+        // which will throw exceptions if we try to perform UI operations in the test thread.
+    }
+
 
     def 'The registration view model will display feedback about invalid inputs.'()
     {

@@ -4,6 +4,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
+import swingtree.EventProcessor
 import swingtree.OptionalUI
 import swingtree.UI
 
@@ -19,6 +20,12 @@ import javax.swing.*
 @Subject([OptionalUI])
 class OptionalUI_Spec extends Specification
 {
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED_STRICT)
+        // In this specification we are using the strict event processor
+        // which will throw exceptions if we try to perform UI operations in the test thread.
+    }
+
     def 'OptionalUI wraps AWT components exclusively.'()
     {
         given:

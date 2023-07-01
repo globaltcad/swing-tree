@@ -1,6 +1,6 @@
 package swingtree.renderer
 
-
+import swingtree.EventProcessor
 import swingtree.Render
 import swingtree.UI
 import spock.lang.Narrative
@@ -22,6 +22,12 @@ import javax.swing.JTable
 """)
 class Table_Renderer_Spec extends Specification
 {
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED_STRICT)
+        // In this specification we are using the strict event processor
+        // which will throw exceptions if we try to perform UI operations in the test thread.
+    }
+
 
     def 'We can attach a simple table cell renderer to a JTable in just a few lines of code.'()
     {

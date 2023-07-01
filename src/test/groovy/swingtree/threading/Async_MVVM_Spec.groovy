@@ -33,6 +33,13 @@ import javax.swing.JLabel
 @Subject([UI, EventProcessor, Var])
 class Async_MVVM_Spec extends Specification
 {
+    def setupSpec() {
+        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED_STRICT)
+        // In this specification we are using the strict event processor
+        // which will throw exceptions if we try to perform UI operations in the test thread.
+        // We will override the processor in the tests where we need to.
+    }
+
     def 'The order in which the states of properties change is preserved when applied to the UI.'()
     {
         reportInfo """

@@ -1,6 +1,6 @@
 package swingtree.style;
 
-public class Arc
+public final class Arc
 {
     private final int _arcWidth;
     private final int _arcHeight;
