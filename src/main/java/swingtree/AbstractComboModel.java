@@ -11,7 +11,7 @@ import java.util.Objects;
 /**
  *  A {@link ComboBoxModel} type designed in a way to allow for MVVM style
  *  property binding to the selection state of the model.
- *  This model wraps a {@link sprouts.Var} instance which will be used
+ *  This model wraps a {@link sprouts.Var} instance which is used
  *  to dynamically model the selection state of the model.
  *
  * @param <E> The type of the elements which will be stored in this model.
@@ -34,17 +34,16 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 		Class<E> type = null;
 		for ( E item : items ) {
 			if ( item == null ) continue;
-			if ( type == null ) {
+			if ( type == null )
 				type = (Class<E>) item.getClass();
-			} else {
+			else
 				type = (Class<E>) Object.class;
-			}
 		}
 		return type;
 	}
 
 	AbstractComboModel( Var<E> selectedItem ) {
-		_selectedItem = selectedItem;
+		_selectedItem = Objects.requireNonNull(selectedItem);
 	}
 
 	final Var<E> _getSelectedItemVar() { return _selectedItem; }
@@ -64,10 +63,13 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 		});
 	}
 
+	/** {@inheritDoc} */
 	@Override public Object getSelectedItem() { return _selectedItem.orElseNull(); }
 
+	/** {@inheritDoc} */
 	@Override public void addListDataListener( ListDataListener l ) { listeners.add(l); }
 
+	/** {@inheritDoc} */
 	@Override public void removeListDataListener( ListDataListener l ) { listeners.remove(l); }
 
     void fireListeners() {
@@ -118,6 +120,12 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 		}
 	}
 
+	/**
+	 *  Tries to convert the given {@link String} to the type of the combo box
+	 *  through a number of different ways.
+	 * @param o The string to convert
+	 * @return The converted object or simply the item of the combo box if no conversion was possible.
+	 */
 	private E _convert( String o ) {
 		// We need to turn the above string into an object of the correct type!
 		// First of all, we know our target type:

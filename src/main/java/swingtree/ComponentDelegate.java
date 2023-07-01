@@ -10,9 +10,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- *  Instances of this are delegates for a specific component and event that
- *  are passed to user event action handler lambdas
- *  with the purpose to provide useful context information to the action handler.
+ *  Instances of this are delegates for a specific components and events that
+ *  are passed to user event action handlers (see {@link Action}),
+ *  with the purpose of providing useful context information to the action handler.
  *  <br>
  *  You would typically use this to access and change the state of the component, schedule animations
  *  for the component or query the tree of neighboring components. <br>

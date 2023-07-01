@@ -1184,7 +1184,7 @@ public final class StyleDelegate<C extends JComponent>
      * @return The current UI scale factor, which is used to scale the UI
      *         for high resolution displays (high dots-per-inch, or DPI).
      */
-    public float getUIScale() {
+    public float getScale() {
         return UIScale.getUserScaleFactor();
     }
 

@@ -14,9 +14,9 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
- *  Extensions of this class delegate a component event
- *  the component itself and the component tree of the component
- *  in which the component is contained.
+ *  Extensions of this class delegate a component
+ *  as well as provide useful methods for trying the tree of the components
+ *  in which the delegated component is contained. <br>
  *  Instances of this class are passed to various user event {@link Action} handlers.
  *  You can use this to change the state of the component, schedule animations
  *  for the component or query the tree of the components.
@@ -28,7 +28,7 @@ abstract class AbstractDelegate<C extends JComponent>
     private final Query _query; // the query object that allows us to query the component tree
     private final C _component;
 
-    AbstractDelegate(C component, JComponent handle) {
+    AbstractDelegate( C component, JComponent handle ) {
         _query = new Query(handle);
         _component = component;
     }
@@ -83,6 +83,11 @@ abstract class AbstractDelegate<C extends JComponent>
     public final Point getLocation() { return _component().getLocation(); }
 
     /**
+     *  This is class a delegate API, which means that it represents
+     *  the API of a wrapped component. This method allows you to access
+     *  the parent of the underlying component.
+     *  In essence, this is a delegate to {@link Component#getParent()}. <br>
+     *
      * @return The parent {@link Container} of the underlying component.
      */
     public final Container getParent() { return _component().getParent(); }
@@ -880,7 +885,7 @@ abstract class AbstractDelegate<C extends JComponent>
      *  <pre>{@code
      *      UI.button("Click me").withPrefSize(400, 400)
      *      .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
-     *          double r = 300 * state.progress();
+     *          double r = 300 * state.progress() * it.getScale();
      *          double x = it.getEvent().getX() - r / 2;
      *          double y = it.getEvent().getY() - r / 2;
      *          it.paint(state, g -> {
@@ -974,7 +979,7 @@ abstract class AbstractDelegate<C extends JComponent>
      * @return The current UI scale factor, which is used to scale the UI
      *         for high resolution displays (high dots-per-inch, or DPI).
      */
-    public float getUIScale() {
+    public float getScale() {
         return UIScale.getUserScaleFactor();
     }
 
