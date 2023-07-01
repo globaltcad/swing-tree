@@ -56,6 +56,33 @@ abstract class AbstractDelegate<C extends JComponent>
     }
 
     /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently access the x-coordinate of the component relative to its parent.
+     *
+     * @return The x-coordinate of the component relative to its parent.
+     */
+    public final int getX() { return _component().getX(); }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently access the y-coordinate of the component relative to its parent.
+     *
+     * @return The y-coordinate of the component relative to its parent.
+     */
+    public final int getY() { return _component().getY(); }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently access the location of the component relative to its parent
+     *  in the form of a {@link Point} object.
+     *  The value returned by this method is equal to the value returned by
+     *  {@link #getX()} and {@link #getY()}.
+     *
+     * @return The location of the component relative to its parent.
+     */
+    public final Point getLocation() { return _component().getLocation(); }
+
+    /**
      * @return The parent {@link Container} of the underlying component.
      */
     public final Container getParent() { return _component().getParent(); }
