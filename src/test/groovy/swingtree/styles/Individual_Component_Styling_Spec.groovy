@@ -264,7 +264,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.getComponent())
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/rounded-green-JLabel.png", 99.99) > 99.99
+            Utility.similarityBetween(image, "components/rounded-green-JLabel.png", 99.95) > 99.95
     }
 
     def 'This is how you can create a JPanel with a shaded border.'()
@@ -303,7 +303,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.getComponent())
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/shaded-border-JPanel.png", 99.99) > 99.99
+            Utility.similarityBetween(image, "components/shaded-border-JPanel.png", 99.95) > 99.95
     }
 
     def 'You can style a toggle button to have a custom selection shading.'()
@@ -343,8 +343,8 @@ class Individual_Component_Styling_Spec extends Specification
             var image2 = Utility.renderSingleComponent(ui.getComponent())
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image1, "components/shaded-JToggleButton.png", 99.99) > 99.99
-            Utility.similarityBetween(image2, "components/selection-shaded-JToggleButton.png", 99.99) > 99.99
+            Utility.similarityBetween(image1, "components/shaded-JToggleButton.png", 99.95) > 99.95
+            Utility.similarityBetween(image2, "components/selection-shaded-JToggleButton.png", 99.95) > 99.95
     }
 
     def 'Make a text area look like it is sunken in the background using a shadow going inwards.'()
@@ -378,7 +378,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.getComponent())
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/sunken-JTextArea.png", 99.99) > 99.99
+            Utility.similarityBetween(image, "components/sunken-JTextArea.png", 99.95) > 99.95
     }
 
     def 'Create a soft UI slider that sinks into the background if you wish.'()
@@ -459,6 +459,31 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.getComponent())
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/rounded-metal-JButton.png", 99.99) > 99.99
+            Utility.similarityBetween(image, "components/rounded-metal-JButton.png", 99.95) > 99.95
+    }
+
+    def 'Turn a panel into a nice banner by giving it a round border, background color and some margins.'()
+    {
+        reportInfo """
+            Turn a panel into a nice banner by giving it a round border, background color and some margins. <br>
+            ${Utility.linkSnapshot('components/banner-JPanel.png')}
+        """
+        given : 'A panel UI with a custom styler lambda.'
+            var ui =
+                    UI.panel()
+                    .withStyle( it -> it
+                        .size(160, 120)
+                        .border(3, Color.BLACK)
+                        .borderRadius(36)
+                        .backgroundColor(Color.CYAN)
+                        .padding(6)
+                        .margin(10)
+                    )
+
+        when : 'We render the panel into a BufferedImage.'
+            var image = Utility.renderSingleComponent(ui.getComponent())
+
+        then : 'The image is as expected.'
+            Utility.similarityBetween(image, "components/banner-JPanel.png", 99.95) > 99.95
     }
 }

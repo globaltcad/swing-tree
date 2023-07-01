@@ -213,21 +213,17 @@ public class ComponentExtension<C extends JComponent>
         }
 
         boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();
+        boolean hasBackground   = style.background().color().isPresent();
 
-        if ( style.background().color().isPresent() && !Objects.equals( _owner.getBackground(), style.background().color().get() ) ) {
+        if ( hasBackground && !Objects.equals( _owner.getBackground(), style.background().color().get() ) ) {
             _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor :  _owner.getBackground();
             _owner.setBackground( style.background().color().get() );
         }
 
         // If the style has a border radius set we need to make sure that we have a background color:
-        if ( hasBorderRadius && !style.background().color().isPresent() ) {
+        if ( hasBorderRadius && !hasBackground ) {
             _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor :  _owner.getBackground();
             style = style.backgroundColor(_initialBackgroundColor);
-        }
-
-        if ( style.border().color().isPresent() && style.border().widths().average() > 0 ) {
-            if ( !style.background().foundationColor().isPresent() )
-                style = style.foundationColor( _owner.getBackground() );
         }
 
         if ( style.foreground().color().isPresent() && !Objects.equals( _owner.getForeground(), style.foreground().color().get() ) )
