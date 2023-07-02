@@ -527,4 +527,46 @@ class Individual_Component_Styling_Spec extends Specification
             Utility.similarityBetween(image, "components/custom-font-JTextArea.png", 99.95) > 99.95
     }
 
+    def 'For full styling freedom, we can add custom painters to a component on various layers.'()
+    {
+        reportInfo """
+            If you want to have full control over how a component is painted,
+            you can add custom painters to a component on various layers. <br>
+            <br>
+            Here you can see an example of a panel with a custom painter on the background layer. <br>
+            ${Utility.linkSnapshot('components/custom-painter-JLabel.png')}
+        """
+        given : 'A label UI with a custom styler lambda.'
+            var ui =
+                    UI.label("I am a label")
+                    .withStyle( it -> it
+                        .size(120, 50)
+                        .padding(6)
+                        .margin(10)
+                        .painter(Layer.BACKGROUND, g -> {
+                            g.setColor(Color.RED);
+                            g.fillRoundRect(10,15,20,20,5,5);
+                        })
+                        .painter(Layer.CONTENT, g -> {
+                             g.setColor(Color.ORANGE);
+                             g.fillRoundRect(25,15,20,20,5,5);
+                        })
+                        .painter(Layer.BORDER, g -> {
+                             g.setColor(Color.BLUE);
+                             g.fillRoundRect(40,15,20,20,5,5);
+                        })
+                        .painter(Layer.FOREGROUND, g -> {
+                             g.setColor(Color.MAGENTA);
+                             g.fillRoundRect(55,15,20,20,5,5);
+                        })
+
+                    )
+
+        when : 'We render the label into a BufferedImage.'
+            var image = Utility.renderSingleComponent(ui.getComponent())
+
+        then : 'The image is as expected.'
+            Utility.similarityBetween(image, "components/custom-painter-JLabel.png", 99.95) > 99.95
+    }
+
 }

@@ -42,7 +42,7 @@ public final class Style
                                             FontStyle.none(),
                                             DimensionalityStyle.none(),
                                             Collections.singletonMap(StyleUtility.DEFAULT_KEY,ShadowStyle.none()),
-                                            Collections.singletonMap(StyleUtility.DEFAULT_KEY,PainterStyle.none()),
+                                            Collections.singletonMap(StyleUtility.DEFAULT_KEY + "_" + PainterStyle.none().layer().name(),PainterStyle.none()),
                                             Collections.singletonMap(StyleUtility.DEFAULT_KEY,ShadeStyle.none())
                                         );
 
@@ -183,15 +183,15 @@ public final class Style
     }
 
         public List<Painter> painters() {
-        return Collections.unmodifiableList(
-                _painters
-                        .entrySet()
-                        .stream()
-                        .sorted(Map.Entry.comparingByKey())
-                        .map(Map.Entry::getValue)
-                        .map(PainterStyle::painter)
-                        .collect(Collectors.toList())
-        );
+            return Collections.unmodifiableList(
+                                    _painters
+                                        .entrySet()
+                                        .stream()
+                                        .sorted(Map.Entry.comparingByKey())
+                                        .map(Map.Entry::getValue)
+                                        .map(PainterStyle::painter)
+                                        .collect(Collectors.toList())
+                                );
     }
 
 
@@ -240,6 +240,7 @@ public final class Style
     public Style painter( String painterName, Layer layer, Painter painter ) {
         Objects.requireNonNull(painterName);
         Objects.requireNonNull(painter);
+        painterName = painterName + "_" + layer.name();
         // We clone the painter map:
         Map<String, PainterStyle> newPainters = new HashMap<>(_painters);
         newPainters.put(painterName, PainterStyle.none().painter(painter).layer(layer)); // Existing painters are overwritten if they have the same name.
@@ -294,12 +295,12 @@ public final class Style
 
         String painterString;
         if ( _painters.size() == 1 )
-            painterString = _painters.get(StyleUtility.DEFAULT_KEY).toString();
+            painterString = _painters.get(StyleUtility.DEFAULT_KEY + "_" + PainterStyle.none().layer().name()).toString();
         else
             painterString = _painters.entrySet()
-                    .stream()
-                    .map(e -> e.getKey() + ": " + e.getValue())
-                    .collect(Collectors.joining(", ", "painters=[", "]"));
+                                    .stream()
+                                    .map(e -> e.getKey() + ": " + e.getValue())
+                                    .collect(Collectors.joining(", ", "painters=[", "]"));
 
         String shadeString;
         if ( _shades.size() == 1 )
