@@ -535,6 +535,9 @@ class Individual_Component_Styling_Spec extends Specification
             <br>
             Here you can see an example of a panel with a custom painter on the background layer. <br>
             ${Utility.linkSnapshot('components/custom-painter-JLabel.png')}
+
+            This little example demonstrates very nicely how the painters are layered on top of each other
+            and at which layer the text of the component is painted over by your custom painters.
         """
         given : 'A label UI with a custom styler lambda.'
             var ui =
