@@ -469,10 +469,14 @@ class Individual_Component_Styling_Spec extends Specification
             Utility.similarityBetween(image, "components/rounded-metal-JButton.png", 99.95) > 99.95
     }
 
-    def 'Turn a panel into a nice banner by giving it a round border, background color and some margins.'()
+    def 'Turn a panel into a card like looking panel by giving it a round border, background color and some margins.'()
     {
         reportInfo """
-            Turn a panel into a nice banner by giving it a round border, background color and some margins. <br>
+            If you want certain content to be grouped and highlighted by a custom background color
+            and a rounded border so that it looks like a card, you can do that
+            very easily in a `Styler` lambda. <br>
+            Here you can see an example of a panel with a black border of 3 pixels,
+            a margin of 10 pixels and a border radius of 36 pixels. <br>
             ${Utility.linkSnapshot('components/banner-JPanel.png')}
         """
         given : 'A panel UI with a custom styler lambda.'
@@ -493,4 +497,34 @@ class Individual_Component_Styling_Spec extends Specification
         then : 'The image is as expected.'
             Utility.similarityBetween(image, "components/banner-JPanel.png", 99.95) > 99.95
     }
+
+    def 'Adjust how text is styled through the API exposed in your `Styler` lambdas'()
+    {
+        reportInfo """
+                The `Styler` lambda exposes a lot of API to adjust how text is styled. <br>
+                More specifically, you can adjust the style of the font, e.g. the font family, size and, well, style. <br>
+                <br>
+                Here you can see an example of a text area with a custom font family, size and style. <br>
+                ${Utility.linkSnapshot('components/custom-font-JTextArea.png')}
+            """
+
+        given : 'A text area UI with a custom styler lambda.'
+            var ui =
+                    UI.textArea("I am a text area, \nhow are you today :) ?")
+                    .peek( it -> it.setLineWrap(true) )
+                    .withStyle( it -> it
+                        .size(120, 60)
+                        .font("Goudy Old Style", 13)
+                        .fontBold(true)
+                        .fontItalic(true)
+                        .fontColor("#FF0000") // Red
+                    )
+
+        when : 'We render the text area into a BufferedImage.'
+            var image = Utility.renderSingleComponent(ui.getComponent())
+
+        then : 'The image is as expected.'
+            Utility.similarityBetween(image, "components/custom-font-JTextArea.png", 99.95) > 99.95
+    }
+
 }
