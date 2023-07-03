@@ -191,9 +191,9 @@ the same fundamental goal:
 
 In Swing-Tree you can achieve this separation by using the 
 **Sprouts property collection API**.
-Properties are a simple yet powerful concept, they are just wrapper types
-for the field variables of you view model which allow you register change listeners on them.
-These listeners make it possible to dynamically update UI components 
+Properties are a simple yet powerful concept, they are wrapper types
+for the field variables of your view models which allow your UI to register change listeners on them.
+These listeners thereby make it possible to dynamically update UI components 
 when your business logic mutates the properties, and also to
 update the properties when the user interacts with the UI.
 This **bidirectional observer/listener pattern** is called **data binding**,
