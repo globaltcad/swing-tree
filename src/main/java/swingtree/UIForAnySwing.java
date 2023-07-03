@@ -274,25 +274,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-     *  Use this to make the wrapped UI component dynamically visible or invisible
-     *  based on the supplied mutable boolean property. <br>
-     *  Note that contrary to {@link #isVisibleIf(Val)} this method receives a mutable sprouts property, which
-     *  means that it will not just
-     *  observe the property but also update it when the UI component is shown or hidden.
-     *
-     * @param isVisible The truth value determining if the UI component should be visible or not wrapped in a {@link Var}.
-     * @return This very instance, which enables builder-style method chaining.
-     */
-    public final I isVisibleIf( Var<Boolean> isVisible ) {
-        NullUtil.nullArgCheck(isVisible, "isVisible", Var.class);
-        NullUtil.nullPropertyCheck(isVisible, "isVisible", "Null is not allowed to model the visibility of a UI component! A boolean should only be true or false in this case.");
-        _onShow( isVisible, v -> getComponent().setVisible(v) );
-        onShown( it -> isVisible.act(true) );
-        onHidden( it -> isVisible.act(false) );
-        return _this();
-    }
-
-    /**
      *  Use this to enable or disable the wrapped UI component.
      *
      * @param isEnabled The truth value determining if the UI component should be enabled or not.
