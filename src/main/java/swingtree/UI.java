@@ -4567,11 +4567,16 @@ public final class UI
             if ( !title.isEmpty() ) this.frame.setTitle(title);
             frame.setLocationRelativeTo(null); // Initial centering!
             Component c = null;
-            try {
-                c = UI.runAndGet(() -> uiSupplier.apply(frame));
-            } catch (Exception e) {
-                System.err.println(e);
+            if ( !UI.thisIsUIThread() ) {
+                try {
+                    c = UI.runAndGet(() -> uiSupplier.apply(frame));
+                } catch (Exception e) {
+                    System.err.println(e);
+                }
             }
+            else
+                c = uiSupplier.apply(frame);
+
             this.component = c;
             frame.add(component);
             frame.pack(); // Otherwise some components resize strangely or are not shown at all...
