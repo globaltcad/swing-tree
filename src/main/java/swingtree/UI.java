@@ -4566,7 +4566,13 @@ public final class UI
             this.frame = new JFrame();
             if ( !title.isEmpty() ) this.frame.setTitle(title);
             frame.setLocationRelativeTo(null); // Initial centering!
-            this.component = uiSupplier.apply(frame);
+            Component c = null;
+            try {
+                c = UI.runAndGet(() -> uiSupplier.apply(frame));
+            } catch (Exception e) {
+                System.err.println(e);
+            }
+            this.component = c;
             frame.add(component);
             frame.pack(); // Otherwise some components resize strangely or are not shown at all...
             // Make sure that the window is centered on the screen again but with the component:
