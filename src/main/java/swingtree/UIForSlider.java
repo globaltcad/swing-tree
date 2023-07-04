@@ -117,7 +117,7 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSlider<S> withValue( int value ) {
-        _doWithoutListeners(()->getComponent().setValue( value ));
+        _setValueSilently( value );
         return this;
     }
 
@@ -129,8 +129,12 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
     public final UIForSlider<S> withValue( Val<Integer> val ) {
         NullUtil.nullArgCheck( val, "val", Val.class );
         _onShow( val, this::withValue );
-        getComponent().setValue( val.orElseThrow() );
+        _setValueSilently( val.orElseThrow() );
         return this;
+    }
+
+    private void _setValueSilently( int value ) {
+        _doWithoutListeners(()->getComponent().setValue( value ));
     }
 
     /**

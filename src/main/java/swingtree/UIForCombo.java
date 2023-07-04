@@ -4,8 +4,11 @@ import sprouts.Action;
 import sprouts.Var;
 
 import javax.swing.*;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.Document;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -282,18 +285,46 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
         // This is a problem, because we don't want to trigger the action listener.
         // So we temporarily remove the action listener(s), and then add them back.
         // 1. Get the action listener(s)
-        ActionListener[] listeners = getComponent().getActionListeners();
+        Component editor = getComponent().getEditor().getEditorComponent();
+        AbstractDocument abstractDocument = null;
+        ActionListener[]   listeners    = getComponent().getActionListeners();
+        DocumentListener[] docListeners = {};
+        if ( editor instanceof JTextField ) {
+            JTextField field = (JTextField) editor;
+            Document doc = field.getDocument();
+            if ( doc instanceof AbstractDocument ) {
+                abstractDocument = (AbstractDocument) doc;
+                docListeners = ((AbstractDocument)doc).getDocumentListeners();
+            }
+        }
+
         // 2. Remove them
         for ( ActionListener listener : listeners )
             getComponent().removeActionListener(listener);
-        // 3. Set the selected item
-        getComponent().setSelectedItem(item);
-        // 3.1 We make sure the editor also gets an update!
-        getComponent().getEditor().setItem(item);
+        if ( abstractDocument != null ) {
+            for (DocumentListener listener : docListeners) {
+                abstractDocument.removeDocumentListener(listener);
+            }
+        }
+
+        try {
+            // 3. Set the selected item
+            getComponent().setSelectedItem(item);
+            // 3.1 We make sure the editor also gets an update!
+            getComponent().getEditor().setItem(item);
+
+        } catch ( Exception e ) {
+            throw new RuntimeException(e);
+        }
 
         // 4. Add them back
         for ( ActionListener listener : listeners )
             getComponent().addActionListener(listener);
+        if ( abstractDocument != null ) {
+            for (DocumentListener listener : docListeners) {
+                abstractDocument.addDocumentListener(listener);
+            }
+        }
     }
 
 }

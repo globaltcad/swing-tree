@@ -6,6 +6,7 @@ import sprouts.Var;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.util.function.Consumer;
 
 /**
@@ -101,8 +102,23 @@ public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner
      */
     public final UIForSpinner<S> withValue( Object value ) {
         NullUtil.nullArgCheck(value, "value", Object.class);
-        getComponent().setValue(value);
+        _doSilently( () -> getComponent().setValue(value) );
         return this;
+    }
+
+    private void _doSilently( Runnable action ) {
+        S spinner = getComponent();
+        ChangeListener[] listeners = spinner.getChangeListeners();
+        for ( ChangeListener listener : listeners ) {
+            spinner.removeChangeListener(listener);
+        }
+        try {
+            action.run();
+        }
+        finally {
+            for ( ChangeListener listener : listeners )
+                spinner.addChangeListener(listener);
+        }
     }
 
     /**
@@ -176,7 +192,7 @@ public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner
                     "This JSpinner can not have a numeric step size as it is not based on the SpinnerNumberModel!"
                 );
         SpinnerNumberModel numberModel = (SpinnerNumberModel) model;
-        numberModel.setStepSize(n);
+        _doSilently( () -> numberModel.setStepSize(n) );
         return this;
     }
 
