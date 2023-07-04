@@ -1,6 +1,6 @@
 package swingtree.common
 
-import swingtree.EventProcessor
+import swingtree.threading.EventProcessor
 import swingtree.UI
 import utility.Utility
 import spock.lang.Narrative

@@ -1,6 +1,6 @@
 package swingtree.combo
 
-import swingtree.EventProcessor
+import swingtree.threading.EventProcessor
 import swingtree.UI
 import swingtree.UIForCombo
 import sprouts.Var

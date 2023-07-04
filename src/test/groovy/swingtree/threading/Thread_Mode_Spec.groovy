@@ -1,7 +1,6 @@
 package swingtree.threading
 
 import swingtree.ComponentDelegate
-import swingtree.EventProcessor
 import swingtree.UI
 import sprouts.Action
 import spock.lang.Narrative

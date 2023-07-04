@@ -1,7 +1,7 @@
 package swingtree.common
 
 import swingtree.components.JSplitButton
-import swingtree.EventProcessor
+import swingtree.threading.EventProcessor
 import swingtree.UI
 import swingtree.api.MenuBuilder
 import swingtree.api.SwingBuilder

@@ -3,12 +3,11 @@ package swingtree.splitpane
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
-import swingtree.EventProcessor
+import swingtree.threading.EventProcessor
 import swingtree.UI
 import sprouts.Var
 
 import javax.swing.JSplitPane
-import java.awt.Dimension
 
 @Title("Split Panes")
 @Narrative('''

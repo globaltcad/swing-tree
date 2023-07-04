@@ -1,4 +1,4 @@
-package swingtree;
+package swingtree.threading;
 
 class CoupledEventProcessor implements EventProcessor
 {

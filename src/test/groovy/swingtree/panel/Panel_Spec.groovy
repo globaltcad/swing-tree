@@ -1,6 +1,6 @@
 package swingtree.panel
 
-import swingtree.EventProcessor
+import swingtree.threading.EventProcessor
 import swingtree.UI
 import swingtree.UIForPanel
 import sprouts.Var

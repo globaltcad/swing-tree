@@ -1,4 +1,6 @@
-package swingtree;
+package swingtree.threading;
+
+import swingtree.UI;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -6,7 +8,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * This is a synchronized singleton wrapping a {@link BlockingQueue}.
  */
-class DecoupledEventProcessor implements EventProcessor
+public final class DecoupledEventProcessor implements EventProcessor
 {
 	private static final DecoupledEventProcessor _INSTANCE = new DecoupledEventProcessor();
 
@@ -84,7 +86,7 @@ class DecoupledEventProcessor implements EventProcessor
 		}
 	}
 
-	void join() {
+	public void join() {
 		try {
 			this.join(false);
 		} catch (InterruptedException e) {
@@ -92,11 +94,11 @@ class DecoupledEventProcessor implements EventProcessor
 		}
 	}
 
-	void joinUntilException() throws InterruptedException {
+	public void joinUntilException() throws InterruptedException {
 		this.join(true);
 	}
 
-	void joinFor( long numberOfEvents ) {
+	public void joinFor( long numberOfEvents ) {
 		for ( long i = 0; i < numberOfEvents; i++ ) {
 			try {
 				this.rendererQueue.take().run();
@@ -106,12 +108,12 @@ class DecoupledEventProcessor implements EventProcessor
 		}
 	}
 
-	void joinUntilExceptionFor( long numberOfEvents ) throws InterruptedException {
+	public void joinUntilExceptionFor( long numberOfEvents ) throws InterruptedException {
 		for ( long i = 0; i < numberOfEvents; i++ )
 			this.rendererQueue.take().run();
 	}
 
-	void joinUntilDoneOrException() throws InterruptedException {
+	public void joinUntilDoneOrException() throws InterruptedException {
 		while ( !this.rendererQueue.isEmpty() )
 			this.rendererQueue.take().run();
 	}

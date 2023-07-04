@@ -16,6 +16,7 @@ import swingtree.components.JScrollPanels;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
 import swingtree.style.StyleSheet;
+import swingtree.threading.EventProcessor;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -85,7 +86,7 @@ public final class UI
     public static <T> T use( StyleSheet styleSheet, Supplier<T> scope ) {
         if ( !UI.thisIsUIThread() )
             try {
-                return runAndGet(()-> use(styleSheet, scope));
+                return runAndGet( ()-> use(styleSheet, scope) );
             } catch (InvocationTargetException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -109,7 +110,7 @@ public final class UI
     /**
      *  Sets the {@link EventProcessor} to be used for all subsequent UI building operations.
      *  This method allows to switch between different event processing strategies.
-     *  In particular, the {@link DecoupledEventProcessor} is recommended to be used for
+     *  In particular, the {@link EventProcessor#DECOUPLED} is recommended to be used for
      *  proper decoupling of the UI thread from the application logic.
      *  <p>
      * 	You can switch to the decoupled event processor like so: <br>
@@ -164,7 +165,7 @@ public final class UI
     public static void joinDecoupledEventProcessor() {
         if ( thisIsUIThread() )
             throw new IllegalStateException("This method must not be called from the UI thread.");
-        DecoupledEventProcessor.INSTANCE().join();
+        EventProcessor.DECOUPLED.join();
     }
 
     /**
@@ -181,7 +182,7 @@ public final class UI
      *  @throws InterruptedException If the thread is interrupted while waiting for the event processor to join.
      */
     public static void joinDecoupledEventProcessorUntilException() throws InterruptedException {
-        DecoupledEventProcessor.INSTANCE().joinUntilException();
+        EventProcessor.DECOUPLED.joinUntilException();
     }
 
     /**
@@ -197,7 +198,7 @@ public final class UI
      *  @param numberOfEvents The number of events to wait for.
      */
     public static void joinDecoupledEventProcessorFor(long numberOfEvents) {
-        DecoupledEventProcessor.INSTANCE().joinFor(numberOfEvents);
+        EventProcessor.DECOUPLED.joinFor(numberOfEvents);
     }
 
     /**
@@ -215,7 +216,7 @@ public final class UI
      *  @throws InterruptedException If the thread is interrupted while waiting for the event processor to join.
      */
     public static void joinDecoupledEventProcessorUntilExceptionFor(long numberOfEvents) throws InterruptedException {
-        DecoupledEventProcessor.INSTANCE().joinUntilExceptionFor(numberOfEvents);
+        EventProcessor.DECOUPLED.joinUntilExceptionFor(numberOfEvents);
     }
 
     /**
@@ -230,7 +231,7 @@ public final class UI
      * @throws InterruptedException If the thread is interrupted while waiting.
      */
     public static void joinDecoupledEventProcessorUntilDoneOrException() throws InterruptedException {
-        DecoupledEventProcessor.INSTANCE().joinUntilDoneOrException();
+        EventProcessor.DECOUPLED.joinUntilDoneOrException();
     }
 
     // Common Mig layout constants:

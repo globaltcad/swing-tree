@@ -19,7 +19,7 @@ import examples.stylish.WellRoundedView
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
-import swingtree.EventProcessor
+import swingtree.threading.EventProcessor
 import swingtree.UI
 import swingtree.components.JSplitButton
 import swingtree.examples.advanced.AdvancedUI

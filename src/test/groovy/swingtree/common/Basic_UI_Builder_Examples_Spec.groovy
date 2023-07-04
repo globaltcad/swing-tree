@@ -5,7 +5,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import sprouts.Var
-import swingtree.EventProcessor
+import swingtree.threading.EventProcessor
 import swingtree.UI
 import swingtree.input.Keyboard
 

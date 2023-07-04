@@ -4,7 +4,7 @@ import examples.mvvm.LoginViewModel
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
-import swingtree.EventProcessor
+import swingtree.threading.EventProcessor
 import swingtree.UI
 import utility.Utility
 import sprouts.Var

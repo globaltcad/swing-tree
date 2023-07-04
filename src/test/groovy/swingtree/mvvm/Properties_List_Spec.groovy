@@ -5,7 +5,7 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import sprouts.*
-import swingtree.EventProcessor
+import swingtree.threading.EventProcessor
 import swingtree.UI
 
 @Title("Lists of Properties")

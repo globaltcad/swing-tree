@@ -2,7 +2,7 @@ package swingtree.mvvm
 
 import examples.mvvm.ScrollPanelsViewModel
 import spock.lang.Specification
-import swingtree.EventProcessor
+import swingtree.threading.EventProcessor
 import swingtree.UI
 
 class Scroll_Panels_Spec extends Specification

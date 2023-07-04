@@ -1,7 +1,7 @@
 package examples.mvvm;
 
 import com.formdev.flatlaf.FlatLightLaf;
-import swingtree.EventProcessor;
+import swingtree.threading.EventProcessor;
 import swingtree.components.JScrollPanels;
 import swingtree.UI;
 

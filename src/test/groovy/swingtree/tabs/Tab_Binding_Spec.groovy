@@ -1,6 +1,6 @@
 package swingtree.tabs
 
-import swingtree.EventProcessor
+import swingtree.threading.EventProcessor
 import swingtree.UI
 import sprouts.Var
 import spock.lang.Narrative

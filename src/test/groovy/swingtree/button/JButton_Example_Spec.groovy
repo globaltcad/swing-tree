@@ -1,6 +1,6 @@
 package swingtree.button
 
-import swingtree.EventProcessor
+import swingtree.threading.EventProcessor
 import swingtree.UI
 import spock.lang.Specification
 

@@ -1,4 +1,4 @@
-package swingtree;
+package swingtree.threading;
 
 /**
  * 	One of Swing's biggest drawback is that it is single threaded. This means that all
@@ -58,7 +58,7 @@ public interface EventProcessor
 	 *  Application events are executed on the application thread, whereas UI events are
 	 *  executed on the GUI thread (AWT Event Dispatch Thread).
 	 */
-	EventProcessor DECOUPLED = DecoupledEventProcessor.INSTANCE();
+	DecoupledEventProcessor DECOUPLED = DecoupledEventProcessor.INSTANCE();
 
 
 	/**

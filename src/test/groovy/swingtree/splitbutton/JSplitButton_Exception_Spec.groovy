@@ -1,7 +1,7 @@
 package swingtree.splitbutton
 
 import swingtree.components.JSplitButton
-import swingtree.EventProcessor
+import swingtree.threading.EventProcessor
 import swingtree.UI
 import spock.lang.Specification
 

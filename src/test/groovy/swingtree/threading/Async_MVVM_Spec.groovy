@@ -5,7 +5,6 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import sprouts.Var
-import swingtree.EventProcessor
 import swingtree.UI
 
 import javax.swing.JLabel

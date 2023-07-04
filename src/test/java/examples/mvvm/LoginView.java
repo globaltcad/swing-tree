@@ -1,6 +1,6 @@
 package examples.mvvm;
 
-import swingtree.EventProcessor;
+import swingtree.threading.EventProcessor;
 import swingtree.UI;
 
 import static swingtree.UI.*;

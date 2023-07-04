@@ -1,6 +1,7 @@
 package swingtree;
 
 import swingtree.style.StyleSheet;
+import swingtree.threading.EventProcessor;
 
 import java.util.Objects;
 import java.util.Optional;

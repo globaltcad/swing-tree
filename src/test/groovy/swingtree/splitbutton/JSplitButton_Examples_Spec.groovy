@@ -4,7 +4,7 @@ import swingtree.components.JSplitButton
 import sprouts.Event
 import sprouts.Listener
 import sprouts.Var
-import swingtree.EventProcessor
+import swingtree.threading.EventProcessor
 import swingtree.UI
 import utility.Utility
 import groovy.transform.CompileDynamic

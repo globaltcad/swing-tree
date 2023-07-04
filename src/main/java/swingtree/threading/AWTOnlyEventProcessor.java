@@ -1,4 +1,6 @@
-package swingtree;
+package swingtree.threading;
+
+import swingtree.UI;
 
 class AWTOnlyEventProcessor implements EventProcessor
 {
