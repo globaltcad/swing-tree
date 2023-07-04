@@ -1,5 +1,7 @@
 package swingtree.threading;
 
+import swingtree.UI;
+
 /**
  * 	One of Swing's biggest drawback is that it is single threaded. This means that all
  * 	GUI events are processed on the same thread as the application logic. <br>
@@ -45,6 +47,8 @@ public interface EventProcessor
 	 *  This means that events are executed on the GUI thread, which is the EDT in Swing.
 	 *  However, events may also be executed on other threads, which is why this event processor
 	 *  is usually used for testing.
+	 *  Make sure an application thread is registered through {@link UI#joinDecoupledEventProcessor()}
+	 *  when using this processor, otherwise events will not be handled.
 	 */
 	EventProcessor COUPLED = new CoupledEventProcessor();
 	/**
@@ -59,7 +63,6 @@ public interface EventProcessor
 	 *  executed on the GUI thread (AWT Event Dispatch Thread).
 	 */
 	DecoupledEventProcessor DECOUPLED = DecoupledEventProcessor.INSTANCE();
-
 
 	/**
 	 *   Adds the supplied task to an event queue for processing application events.
