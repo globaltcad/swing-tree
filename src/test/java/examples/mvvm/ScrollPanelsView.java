@@ -39,6 +39,6 @@ public class ScrollPanelsView extends Panel
 	{
 		FlatLightLaf.setup();
 		UI.showUsing(EventProcessor.DECOUPLED, frame -> new ScrollPanelsView(new ScrollPanelsViewModel()));
-		UI.joinDecoupledEventProcessor();
+		EventProcessor.DECOUPLED.join();
 	}
 }

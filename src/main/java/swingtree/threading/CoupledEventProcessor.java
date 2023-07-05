@@ -13,7 +13,8 @@ import java.util.function.Supplier;
  *  however, when building larger products it is important to not use the UI thread for
  *  business logic so that the UI stays responsive.
  *  This is why you should prefer the usage of the {@link DecoupledEventProcessor}
- *  alongside the registration of a worker thread through {@link UI#joinDecoupledEventProcessor()}.
+ *  alongside the registration of a worker thread through
+ *  {@link DecoupledEventProcessor#join()} at {@link EventProcessor#DECOUPLED}.
  */
 class CoupledEventProcessor implements EventProcessor
 {

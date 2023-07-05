@@ -28,6 +28,6 @@ public class LoginView extends Panel
 
     public static void main( String[] args ) {
         UI.show(new LoginView( new LoginViewModel() ));
-        UI.joinDecoupledEventProcessor();
+        EventProcessor.DECOUPLED.join();
     }
 }

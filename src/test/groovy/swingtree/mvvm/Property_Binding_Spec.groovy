@@ -1,5 +1,6 @@
 package swingtree.mvvm
 
+import swingtree.SwingTreeContext
 import swingtree.threading.EventProcessor
 import swingtree.UI
 import sprouts.Val
@@ -24,7 +25,7 @@ class Property_Binding_Spec extends Specification
     enum Accept { YES, NO, MAYBE }
 
     def setupSpec() {
-        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED)
+        SwingTreeContext.get().setEventProcessor(EventProcessor.COUPLED)
         // This is so that the test thread is also allowed to perform UI operations
     }
 

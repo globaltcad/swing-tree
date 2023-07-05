@@ -1,5 +1,6 @@
 package swingtree.renderer
 
+import swingtree.SwingTreeContext
 import swingtree.threading.EventProcessor
 import swingtree.Render
 import swingtree.UI
@@ -23,7 +24,7 @@ import javax.swing.JTable
 class Table_Renderer_Spec extends Specification
 {
     def setupSpec() {
-        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED_STRICT)
+        SwingTreeContext.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
         // In this specification we are using the strict event processor
         // which will throw exceptions if we try to perform UI operations in the test thread.
     }

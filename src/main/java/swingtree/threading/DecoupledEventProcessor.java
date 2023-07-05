@@ -86,7 +86,19 @@ public final class DecoupledEventProcessor implements EventProcessor
 		}
 	}
 
+	/**
+	 *  A fully blocking call to the decoupled thread event processor
+	 *  causing this thread to join its event queue
+	 *  so that it can continuously process events produced by the UI.
+	 *  <p>
+	 *  This method wither be called by the main thread of the application
+	 *  after the UI has been built and shown to the user, or alternatively
+	 *  a new thread dedicated to processing events. (things like button clicks, etc.)
+	 *  @throws IllegalStateException If this method is called from the UI thread.
+	 */
 	public void join() {
+		if ( UI.thisIsUIThread() )
+			throw new IllegalStateException("The UI thread cannot join the application event processing queue!");
 		try {
 			this.join(false);
 		} catch (InterruptedException e) {
@@ -94,10 +106,35 @@ public final class DecoupledEventProcessor implements EventProcessor
 		}
 	}
 
+	/**
+	 *  A fully blocking call to the decoupled thread event processor
+	 *  causing this thread to join its event queue
+	 *  so that it can continuously process events produced by the UI.
+	 *  <p>
+	 *  This method should be called by the main thread of the application
+	 *  after the UI has been built and shown to the user, or alternatively
+	 *  a new thread dedicated to processing events. (things like button clicks, etc.)
+	 *  <p>
+	 *  This method will block until an exception is thrown by the event processor.
+	 *  This is useful for debugging purposes.
+	 *  @throws InterruptedException If the thread is interrupted while waiting for the event processor to join.
+	 */
 	public void joinUntilException() throws InterruptedException {
 		this.join(true);
 	}
 
+	/**
+	 *  A fully blocking call to the decoupled thread event processor
+	 *  causing this thread to join its event queue
+	 *  so that it can process the given number of events produced by the UI.
+	 *  <p>
+	 *  This method should be called by the main thread of the application
+	 *  after the UI has been built and shown to the user, or alternatively
+	 *  a new thread dedicated to processing events. (things like button clicks, etc.)
+	 *  <p>
+	 *  This method will block until the given number of events have been processed.
+	 *  @param numberOfEvents The number of events to wait for.
+	 */
 	public void joinFor( long numberOfEvents ) {
 		for ( long i = 0; i < numberOfEvents; i++ ) {
 			try {
@@ -108,11 +145,36 @@ public final class DecoupledEventProcessor implements EventProcessor
 		}
 	}
 
+	/**
+	 *  A temporarily blocking call to the decoupled thread event processor
+	 *  causing this thread to join its event queue
+	 *  so that it can process the given number of events produced by the UI.
+	 *  <p>
+	 *  This method should be called by the main thread of the application
+	 *  after the UI has been built and shown to the user, or alternatively
+	 *  a new thread dedicated to processing events. (things like button clicks, etc.)
+	 *  <p>
+	 *  This method will block until the given number of events have been processed
+	 *  or an exception is thrown by the event processor.
+	 *  @param numberOfEvents The number of events to wait for.
+	 *  @throws InterruptedException If the thread is interrupted while waiting for the event processor to join.
+	 */
 	public void joinUntilExceptionFor( long numberOfEvents ) throws InterruptedException {
 		for ( long i = 0; i < numberOfEvents; i++ )
 			this.rendererQueue.take().run();
 	}
 
+	/**
+	 *  A temporarily blocking call to the decoupled thread event processor
+	 *  causing this thread to join its event queue
+	 *  so that it can continuously process events produced by the UI
+	 *  until all events have been processed or an exception is thrown by the event processor.
+	 *  <p>
+	 *  This method should be called by the main thread of the application
+	 *  after the UI has been built and shown to the user, or alternatively
+	 *  a new thread dedicated to processing events. (things like button clicks, etc.)
+	 * @throws InterruptedException If the thread is interrupted while waiting.
+	 */
 	public void joinUntilDoneOrException() throws InterruptedException {
 		while ( !this.rendererQueue.isEmpty() )
 			this.rendererQueue.take().run();

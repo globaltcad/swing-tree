@@ -1,6 +1,7 @@
 package examples.simple;
 
 import swingtree.UI;
+import swingtree.threading.EventProcessor;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -51,7 +52,6 @@ public class ListRendering extends Panel
 
     public static void main(String[] args) {
         UI.show(new ListRendering());
-        UI.joinDecoupledEventProcessor();
     }
 
 }

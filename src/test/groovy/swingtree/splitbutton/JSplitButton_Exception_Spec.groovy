@@ -1,5 +1,6 @@
 package swingtree.splitbutton
 
+import swingtree.SwingTreeContext
 import swingtree.components.JSplitButton
 import swingtree.threading.EventProcessor
 import swingtree.UI
@@ -8,7 +9,7 @@ import spock.lang.Specification
 class JSplitButton_Exception_Spec extends Specification
 {
     def setupSpec() {
-        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED_STRICT)
+        SwingTreeContext.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
         // In this specification we are using the strict event processor
         // which will throw exceptions if we try to perform UI operations in the test thread.
     }

@@ -4,6 +4,7 @@ import com.formdev.flatlaf.intellijthemes.FlatMaterialDesignDarkIJTheme;
 import sprouts.Var;
 import sprouts.Vars;
 import swingtree.UI;
+import swingtree.threading.EventProcessor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -137,7 +138,7 @@ public class SomeComponentsView extends Panel
 
 	public static void main(String... args) {
 		UI.show(new SomeComponentsView(new SomeComponentsViewModel()));
-		UI.joinDecoupledEventProcessor();
+		EventProcessor.DECOUPLED.join();
 	}
 
 

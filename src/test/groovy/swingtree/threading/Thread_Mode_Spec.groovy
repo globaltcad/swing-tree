@@ -1,6 +1,7 @@
 package swingtree.threading
 
 import swingtree.ComponentDelegate
+import swingtree.SwingTreeContext
 import swingtree.UI
 import sprouts.Action
 import spock.lang.Narrative
@@ -30,7 +31,7 @@ import java.awt.event.ActionEvent
 class Thread_Mode_Spec extends Specification
 {
     def setupSpec() {
-        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED_STRICT)
+        SwingTreeContext.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
         // In this specification we are using the strict event processor
         // which will throw exceptions if we try to perform UI operations in the test thread.
         // We will override the processor in the tests where we need to.
@@ -60,7 +61,7 @@ class Thread_Mode_Spec extends Specification
                 application would be done by a custom thread, or the main thread
                 of your application (everything but your GUI thread really).
             """
-            UI.joinDecoupledEventProcessorUntilDoneOrException()
+            EventProcessor.DECOUPLED.joinUntilDoneOrException()
             UI.sync()
         then: 'The event is handled.'
             eventWasHandled
@@ -111,7 +112,7 @@ class Thread_Mode_Spec extends Specification
                         )
         when : 'We click the button and process the event queue (by this current non-swing thread).'
             UI.runNow( () -> ui1.component.doClick() )
-            UI.joinDecoupledEventProcessorUntilDoneOrException() // This is done by a custom thread in a real world application.
+            EventProcessor.DECOUPLED.joinUntilDoneOrException() // This is done by a custom thread in a real world application.
 
         then: 'The delegate throws an exception!'
             var e = thrown(Exception)
@@ -119,7 +120,7 @@ class Thread_Mode_Spec extends Specification
 
         when : 'We click the button second button and then process the event queue (by this current non-swing thread).'
             UI.runNow( () -> ui2.component.doClick() )
-            UI.joinDecoupledEventProcessorUntilDoneOrException() // This is done by a custom thread in a real world application.
+            EventProcessor.DECOUPLED.joinUntilDoneOrException() // This is done by a custom thread in a real world application.
         then: 'The delegate does not throw an exception!'
             noExceptionThrown()
 
@@ -145,7 +146,7 @@ class Thread_Mode_Spec extends Specification
                         )
         when : 'We check the check box and process the event queue (by this current non-swing thread).'
             UI.runNow( () -> ui.component.doClick() )
-            UI.joinDecoupledEventProcessorFor(1) // This is done by a custom thread in a real world application.
+            EventProcessor.DECOUPLED.joinFor(1) // This is done by a custom thread in a real world application.
         then: 'The delegate does not throw an exception!'
             noExceptionThrown()
     }

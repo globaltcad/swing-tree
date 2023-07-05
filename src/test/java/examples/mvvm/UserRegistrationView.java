@@ -74,7 +74,7 @@ public class UserRegistrationView extends Panel
 
     public static void main( String[] args ) {
         UI.show(new UserRegistrationView(new UserRegistrationViewModel()));
-        UI.joinDecoupledEventProcessor();
+        EventProcessor.DECOUPLED.join();
     }
 
 }

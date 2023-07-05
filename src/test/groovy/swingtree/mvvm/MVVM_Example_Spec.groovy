@@ -4,6 +4,7 @@ import examples.mvvm.LoginViewModel
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
+import swingtree.SwingTreeContext
 import swingtree.threading.EventProcessor
 import swingtree.UI
 import utility.Utility
@@ -34,7 +35,7 @@ import java.util.List
 class MVVM_Example_Spec extends Specification
 {
     def setupSpec() {
-        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED)
+        SwingTreeContext.get().setEventProcessor(EventProcessor.COUPLED)
         // This is so that the test thread is also allowed to perform UI operations
     }
 

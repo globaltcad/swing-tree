@@ -5,6 +5,7 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import sprouts.Var
+import swingtree.SwingTreeContext
 import swingtree.UI
 
 import javax.swing.JLabel
@@ -33,7 +34,7 @@ import javax.swing.JLabel
 class Async_MVVM_Spec extends Specification
 {
     def setupSpec() {
-        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED_STRICT)
+        SwingTreeContext.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
         // In this specification we are using the strict event processor
         // which will throw exceptions if we try to perform UI operations in the test thread.
         // We will override the processor in the tests where we need to.

@@ -52,17 +52,6 @@ import java.util.function.Supplier;
  */
 public final class UI
 {
-    private static final ThreadLocal<Settings> _SETTINGS = new ThreadLocal<>();
-
-    static Settings SETTINGS() {
-        Settings settings = _SETTINGS.get();
-        if ( settings == null ) {
-            settings = new Settings();
-            _SETTINGS.set(settings);
-        }
-        return settings;
-    }
-
     /**
      *  Sets a {@link StyleSheet} which will be applied to all SwingTree UIs defined in the subsequent lambda scope.
      *  This method allows to switch between different style sheets.
@@ -91,9 +80,9 @@ public final class UI
                 throw new RuntimeException(e);
             }
 
-        Settings settings = SETTINGS();
-        StyleSheet oldStyleSheet = settings.getStyleSheet().orElse(null);
-        settings.setStyleSheet(styleSheet);
+        SwingTreeContext swingTreeContext = SwingTreeContext.get();
+        StyleSheet oldStyleSheet = swingTreeContext.getStyleSheet().orElse(null);
+        swingTreeContext.setStyleSheet(styleSheet);
         try {
             T result = scope.get();
             if ( result instanceof JComponent )
@@ -103,7 +92,7 @@ public final class UI
 
             return result;
         } finally {
-            settings.setStyleSheet(oldStyleSheet);
+            swingTreeContext.setStyleSheet(oldStyleSheet);
         }
     }
 
@@ -142,96 +131,14 @@ public final class UI
                 throw new RuntimeException(e);
             }
 
-        Settings settings = SETTINGS();
-        EventProcessor oldProcessor = settings.getEventProcessor();
-        settings.setEventProcessor(processor);
+        SwingTreeContext swingTreeContext = SwingTreeContext.get();
+        EventProcessor oldProcessor = swingTreeContext.getEventProcessor();
+        swingTreeContext.setEventProcessor(processor);
         try {
             return scope.get();
         } finally {
-            settings.setEventProcessor(oldProcessor);
+            swingTreeContext.setEventProcessor(oldProcessor);
         }
-    }
-
-    /**
-     *  A fully blocking call to the decoupled thread event processor
-     *  causing this thread to join its event queue
-     *  so that it can continuously process events produced by the UI.
-     *  <p>
-     *  This method wither be called by the main thread of the application
-     *  after the UI has been built and shown to the user, or alternatively
-     *  a new thread dedicated to processing events. (things like button clicks, etc.)
-     *  @throws IllegalStateException If this method is called from the UI thread.
-     */
-    public static void joinDecoupledEventProcessor() {
-        if ( thisIsUIThread() )
-            throw new IllegalStateException("This method must not be called from the UI thread.");
-        EventProcessor.DECOUPLED.join();
-    }
-
-    /**
-     *  A fully blocking call to the decoupled thread event processor
-     *  causing this thread to join its event queue
-     *  so that it can continuously process events produced by the UI.
-     *  <p>
-     *  This method should be called by the main thread of the application
-     *  after the UI has been built and shown to the user, or alternatively
-     *  a new thread dedicated to processing events. (things like button clicks, etc.)
-     *  <p>
-     *  This method will block until an exception is thrown by the event processor.
-     *  This is useful for debugging purposes.
-     *  @throws InterruptedException If the thread is interrupted while waiting for the event processor to join.
-     */
-    public static void joinDecoupledEventProcessorUntilException() throws InterruptedException {
-        EventProcessor.DECOUPLED.joinUntilException();
-    }
-
-    /**
-     *  A fully blocking call to the decoupled thread event processor
-     *  causing this thread to join its event queue
-     *  so that it can process the given number of events produced by the UI.
-     *  <p>
-     *  This method should be called by the main thread of the application
-     *  after the UI has been built and shown to the user, or alternatively
-     *  a new thread dedicated to processing events. (things like button clicks, etc.)
-     *  <p>
-     *  This method will block until the given number of events have been processed.
-     *  @param numberOfEvents The number of events to wait for.
-     */
-    public static void joinDecoupledEventProcessorFor(long numberOfEvents) {
-        EventProcessor.DECOUPLED.joinFor(numberOfEvents);
-    }
-
-    /**
-     *  A temporarily blocking call to the decoupled thread event processor
-     *  causing this thread to join its event queue
-     *  so that it can process the given number of events produced by the UI.
-     *  <p>
-     *  This method should be called by the main thread of the application
-     *  after the UI has been built and shown to the user, or alternatively
-     *  a new thread dedicated to processing events. (things like button clicks, etc.)
-     *  <p>
-     *  This method will block until the given number of events have been processed
-     *  or an exception is thrown by the event processor.
-     *  @param numberOfEvents The number of events to wait for.
-     *  @throws InterruptedException If the thread is interrupted while waiting for the event processor to join.
-     */
-    public static void joinDecoupledEventProcessorUntilExceptionFor(long numberOfEvents) throws InterruptedException {
-        EventProcessor.DECOUPLED.joinUntilExceptionFor(numberOfEvents);
-    }
-
-    /**
-     *  A temporarily blocking call to the decoupled thread event processor
-     *  causing this thread to join its event queue
-     *  so that it can continuously process events produced by the UI
-     *  until all events have been processed or an exception is thrown by the event processor.
-     *  <p>
-     *  This method should be called by the main thread of the application
-     *  after the UI has been built and shown to the user, or alternatively
-     *  a new thread dedicated to processing events. (things like button clicks, etc.)
-     * @throws InterruptedException If the thread is interrupted while waiting.
-     */
-    public static void joinDecoupledEventProcessorUntilDoneOrException() throws InterruptedException {
-        EventProcessor.DECOUPLED.joinUntilDoneOrException();
     }
 
     // Common Mig layout constants:

@@ -47,7 +47,8 @@ public interface EventProcessor
 	 *  This means that events are executed on the GUI thread, which is the EDT in Swing.
 	 *  However, events may also be executed on other threads, which is why this event processor
 	 *  is usually used for testing.
-	 *  Make sure an application thread is registered through {@link UI#joinDecoupledEventProcessor()}
+	 *  Make sure an application thread is registered through
+	 *  {@link DecoupledEventProcessor#join()} at {@link EventProcessor#DECOUPLED}
 	 *  when using this processor, otherwise events will not be handled.
 	 */
 	EventProcessor COUPLED = new CoupledEventProcessor();

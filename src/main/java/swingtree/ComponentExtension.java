@@ -170,7 +170,7 @@ public class ComponentExtension<C extends JComponent>
     }
 
     private Style _calculateStyle() {
-        _styleSheet = _styleSheet != null ? _styleSheet : UI.SETTINGS().getStyleSheet().orElse(null);
+        _styleSheet = _styleSheet != null ? _styleSheet : SwingTreeContext.get().getStyleSheet().orElse(null);
         Style style = _styleSheet == null ? Style.none() : _styleSheet.run( _owner );
         style = _styling.style(new StyleDelegate<>(_owner, style)).style();
 

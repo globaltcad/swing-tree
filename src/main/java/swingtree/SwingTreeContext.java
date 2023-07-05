@@ -6,7 +6,19 @@ import swingtree.threading.EventProcessor;
 import java.util.Objects;
 import java.util.Optional;
 
-class Settings {
+public class SwingTreeContext
+{
+	private static final ThreadLocal<SwingTreeContext> _INSTANCES = new ThreadLocal<>();
+
+	public static SwingTreeContext get() {
+		SwingTreeContext swingTreeContext = _INSTANCES.get();
+		if ( swingTreeContext == null ) {
+			swingTreeContext = new SwingTreeContext();
+			_INSTANCES.set(swingTreeContext);
+		}
+		return swingTreeContext;
+	}
+
 
 	private EventProcessor _eventProcessor = EventProcessor.COUPLED_STRICT;
 	private StyleSheet _styleSheet = null;
@@ -15,7 +27,7 @@ class Settings {
 		return _eventProcessor;
 	}
 
-	public void setEventProcessor(EventProcessor eventProcessor) {
+	public void setEventProcessor( EventProcessor eventProcessor ) {
 		_eventProcessor = Objects.requireNonNull(eventProcessor);
 	}
 

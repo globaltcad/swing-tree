@@ -2,6 +2,7 @@ package swingtree.combo
 
 import swingtree.threading.EventProcessor
 import swingtree.UI
+import swingtree.SwingTreeContext
 import swingtree.UIForCombo
 import sprouts.Var
 import spock.lang.Narrative
@@ -28,7 +29,7 @@ import static swingtree.UI.comboBox
 class Combo_Box_Specification extends Specification
 {
     def setupSpec() {
-        UI.SETTINGS().setEventProcessor(EventProcessor.COUPLED)
+        SwingTreeContext.get().setEventProcessor(EventProcessor.COUPLED)
         // This is so that the test thread is also allowed to perform UI operations
     }
 
