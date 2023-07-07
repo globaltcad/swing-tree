@@ -2,9 +2,11 @@ package examples.stylish;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import swingtree.UI;
+import swingtree.api.mvvm.Viewer;
 import swingtree.style.Corner;
 import swingtree.style.Layer;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.Optional;
 
@@ -110,12 +112,12 @@ public class BoxShadowPickerView extends UI.Panel
                 .add(SPAN,
                     panel(FILL.and(WRAP(3)), "[shrink][grow][shrink]").withBorderTitled("Corners")
                     .add(SPAN, comboBox(vm.borderCorner()))
-                    .add(SPAN, vm.currentCornerModel())
+                    .add(SPAN, vm.currentCornerModel(), viewModel -> viewModel.createView())
                 )
                 .add(SPAN,
                     panel(FILL.and(WRAP(3)), "[shrink][grow][shrink]").withBorderTitled("Edges")
                     .add(SPAN, comboBox(vm.borderEdge()))
-                    .add(SPAN, vm.currentEdgeModel())
+                    .add(SPAN, vm.currentEdgeModel(), viewModel -> viewModel.createView())
                 )
             )
             .add(GROW.and(SPAN),

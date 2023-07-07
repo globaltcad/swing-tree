@@ -4,6 +4,7 @@ package swingtree.api.mvvm;
  *  A provider of a view which is expected to be the view model of the view
  *  it provides.
  */
+@Deprecated
 public interface Viewable
 {
     /**

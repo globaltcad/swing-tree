@@ -4,7 +4,6 @@ import sprouts.Event;
 import sprouts.Val;
 import sprouts.Var;
 import swingtree.UI;
-import swingtree.api.mvvm.Viewable;
 import swingtree.style.Corner;
 import swingtree.style.Edge;
 
@@ -40,35 +39,32 @@ public class BoxShadowPickerViewModel
     private final Var<BorderEdgeViewModel> currentEdgeModel = Var.ofNullable(BorderEdgeViewModel.class, null);
     private final Var<BorderCornerViewModel> currentCornerModel = Var.ofNullable(BorderCornerViewModel.class, null);
 
-    public class BorderEdgeViewModel implements Viewable
+    public class BorderEdgeViewModel
     {
         private final Var<Integer> borderWidth = Var.of(3).onAct(it -> repaint.fire() );
 
-        @Override
-        public <V> V createView(Class<V> viewType) {
-            return viewType.cast(
+        public JComponent createView() {
+            return
                 UI.box("fill, wrap 2", "[shrink][grow]")
                 .add(UI.label("Width:"))
                 .add("growx", UI.slider(UI.Align.HORIZONTAL, 0, 100, borderWidth))
-                .get(JPanel.class));
+                .get(JPanel.class);
         }
     }
 
-    public class BorderCornerViewModel implements Viewable {
+    public class BorderCornerViewModel{
 
         private final Var<Integer> borderArcWidth  = Var.of(25).onAct( it -> repaint.fire() );
         private final Var<Integer> borderArcHeight = Var.of(25).onAct( it -> repaint.fire() );
 
-
-        @Override
-        public <V> V createView(Class<V> viewType) {
-            return viewType.cast(
+        public JComponent createView() {
+            return
                 UI.box("fill, wrap 2", "[shrink][grow]")
                 .add(UI.label("Width:"))
                 .add("growx", UI.slider(UI.Align.HORIZONTAL, 0, 100, borderArcWidth))
                 .add(UI.label("Height:"))
                 .add("growx", UI.slider(UI.Align.HORIZONTAL, 0, 100, borderArcHeight))
-                .get(JPanel.class));
+                .get(JPanel.class);
         }
     }
 

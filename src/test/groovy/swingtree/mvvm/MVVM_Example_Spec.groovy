@@ -4,13 +4,13 @@ import examples.mvvm.LoginViewModel
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
-import swingtree.SwingTreeContext
-import swingtree.threading.EventProcessor
-import swingtree.UI
-import utility.Utility
 import sprouts.Var
 import sprouts.Vars
-import swingtree.api.mvvm.Viewable
+import swingtree.SwingTreeContext
+import swingtree.UI
+import swingtree.api.mvvm.Viewer
+import swingtree.threading.EventProcessor
+import utility.Utility
 
 import javax.swing.*
 import javax.swing.border.TitledBorder
@@ -339,27 +339,30 @@ class MVVM_Example_Spec extends Specification
         given : 'We create a view model.'
             Var<String> name = Var.of("Tofu")
             Var<Integer> population = Var.of(4)
-
-            var vm1 = (Viewable){
+            var vm1 = "Dummy View Model 1"
+            var vm2 = "Dummy View Model 2"
+            Viewer<String> viewer = viewModel -> {
+                switch (viewModel) {
+                    case "Dummy View Model 1":
                             return UI.panel().id("sub-1")
                                     .add(UI.label("Name:"))
                                     .add(UI.textField(name))
                                     .add(UI.button("Update").onClick { name.set("Tempeh") })
                                     .component
-                        }
-            var vm2 = (Viewable) {
+                    case "Dummy View Model 2":
                             return UI.panel().id("sub-2")
                                     .add(UI.label("Population:"))
                                     .add(UI.slider(UI.Align.HORIZONTAL).withValue(population))
                                     .add(UI.button("Update").onClick { population.set(5) })
                                     .component
-                        }
+                }
+            }
         and : 'A property storing the first view model.'
-            Var<Viewable> vm = Var.of(vm1)
+            Var<String> vm = Var.of(vm1)
         and : 'Finally a view which binds to the view model property.'
             var ui = UI.panel()
                     .add(UI.label("Dynamic Super View:"))
-                    .add(UI.panel().id("super").add(vm))
+                    .add(UI.panel().id("super").add(vm, viewer))
         expect : 'We query the UI for the views and verify that the "super" and "sub-1" views are present.'
             new Utility.Query(ui).find(JPanel, "super").isPresent()
             new Utility.Query(ui).find(JPanel, "sub-1").isPresent()
@@ -395,40 +398,44 @@ class MVVM_Example_Spec extends Specification
             Var<Option> option = Var.of(Option.YES)
 
         and : 'We create 4 view models with 4 locally created views:'
-            var vm1 = (Viewable) {
+            var vm1 = "Dummy View Model 1"
+            var vm2 = "Dummy View Model 2"
+            var vm3 = "Dummy View Model 3"
+            var vm4 = "Dummy View Model 4"
+            Viewer<String> viewer = viewModel -> {
+                switch ( viewModel ) {
+                    case "Dummy View Model 1":
                             return UI.panel().id("sub-1")
                                     .add(UI.label("Address:"))
                                     .add(UI.textField(address))
                                     .add(UI.button("Update").onClick { address.set("456 Main Street") })
                                     .component
-                        }
-            var vm2 = (Viewable) {
+                    case "Dummy View Model 2":
                             return UI.panel().id("sub-2")
                                     .add(UI.label("Title:"))
                                     .add(UI.textField(title))
                                     .add(UI.button("Update").onClick { title.set("Mrs.") })
                                     .component
-                        }
-            var vm3 = (Viewable){
+                    case "Dummy View Model 3":
                             return UI.panel().id("sub-3")
                                     .add(UI.label("Price:"))
                                     .add(UI.slider(UI.Align.HORIZONTAL).withValue(price))
                                     .add(UI.button("Update").onClick { price.set(2000000.0) })
                                     .component
-                        }
-            var vm4 = (Viewable){
+                    case "Dummy View Model 4":
                                 return UI.panel().id("sub-4")
                                     .add(UI.label("Option:"))
                                     .add(UI.comboBox(option, Option.values()))
                                     .add(UI.button("Update").onClick { option.set(Option.NO) })
                                     .component
                             }
+                        }
         and : 'A property list storing the view models.'
             var vms = Vars.of(vm1, vm2, vm3, vm4)
         and : 'Finally a view which binds to the view model property list.'
             var ui = UI.panel()
                     .add(UI.label("Dynamic Super View:"))
-                    .add(UI.panel().id("super").add(vms))
+                    .add(UI.panel().id("super").add(vms, viewer))
         expect : 'We query the UI for the views and verify that the "super" and "sub-1" views are present.'
             new Utility.Query(ui).find(JPanel, "super").isPresent()
             new Utility.Query(ui).find(JPanel, "sub-1").isPresent()
@@ -489,8 +496,8 @@ class MVVM_Example_Spec extends Specification
         given : 'We create a view model.'
             Var<String> username = Var.of("123 Main Street")
             Var<String> password = Var.of("Mr.")
-            Var<Viewable> moreUI = Var.ofNullable(Viewable, null)
-        and : 'A view which binds to the view model.'
+            Var<String> moreUI = Var.ofNullable(String, null)
+        and : 'A view which binds to the view model and a viewer which provides the view.'
             var ui = UI.panel("fill, wrap 1")
                     .add("shrink", UI.label("Dynamic Super View:"))
                     .add("grow",
@@ -499,18 +506,18 @@ class MVVM_Example_Spec extends Specification
                             .add(UI.textField(username))
                             .add(UI.label("Password:"))
                             .add(UI.textField(password))
-                            .add(moreUI)
+                            .add(moreUI, subViewModel ->
+                                UI.panel().id("sub-1")
+                                .add(UI.label("Admin Status Code: xyz"))
+                                .add(UI.button("Do admin stuff!"))
+                                .component
+                            )
                     )
         expect : 'We query the UI for the views and verify that the "super" and "sub-1" views are present.'
             new Utility.Query(ui).find(JPanel, "super").isPresent()
             !new Utility.Query(ui).find(JPanel, "sub-1").isPresent()
         when : 'We set the "moreUI" property to a view model which implements the "Viewable" interface (a "view provider").'
-            moreUI.set((Viewable) {
-                    UI.panel().id("sub-1")
-                        .add(UI.label("Admin Status Code: xyz"))
-                        .add(UI.button("Do admin stuff!"))
-                        .component
-                })
+            moreUI.set("I am a dummy view model!")
             UI.sync()
         then : 'We expect all views to be present.'
             new Utility.Query(ui).find(JPanel, "super").isPresent()

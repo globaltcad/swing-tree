@@ -9,6 +9,7 @@ import sprouts.*;
 import swingtree.api.Peeker;
 import swingtree.api.UIVerifier;
 import swingtree.api.mvvm.Viewable;
+import swingtree.api.mvvm.Viewer;
 import swingtree.input.Keyboard;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
@@ -2885,9 +2886,24 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *        that will be used to generate the view.
      * @return This very instance, which enables builder-style method chaining.
      */
+    @Deprecated
     public final I add( Val<? extends Viewable> viewable ) {
         NullUtil.nullArgCheck(viewable, "viewable", Val.class);
         _addViewableProp(viewable, null);
+        return _this();
+    }
+
+    /**
+     *  This allows you to bind to a {@link swingtree.api.mvvm.Viewable}
+     *  implementation and automatically update the view when the view model changes.
+     *
+     * @param viewable A {@link sprouts.Val} property which holds a {@link Viewable} instance
+     *        that will be used to generate the view.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final <M> I add( Val<M> viewable, Viewer<M> viewer ) {
+        NullUtil.nullArgCheck(viewable, "viewable", Val.class);
+        _addViewableProp(viewable, null, viewer);
         return _this();
     }
 
@@ -2900,9 +2916,25 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *                  The Viewables will be used to generate the view.
      * @return This very instance, which enables builder-style method chaining.
      */
+    @Deprecated
     public final I add( Vals<? extends Viewable> viewables ) {
         NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
         _addViewableProps( viewables, null );
+        return _this();
+    }
+
+    /**
+     *  This allows you to bind to a property list of {@link Viewable}s
+     *  to automatically update the view when your view models change.
+     *
+     * @param viewables A {@link sprouts.Vals} list of {@link Viewable}s
+     *                  wrapped in a {@link sprouts.Val} properties.
+     *                  The Viewables will be used to generate the view.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final <M> I add( Vals<M> viewables, Viewer<M> viewer ) {
+        NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
+        _addViewableProps( viewables, null, viewer );
         return _this();
     }
 
@@ -2915,11 +2947,32 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *        that will be used to generate the view.
      * @return This very instance, which enables builder-style method chaining.
      */
+    @Deprecated
     public final I add( String attr, Val<? extends Viewable> viewable ) {
         NullUtil.nullArgCheck(attr, "attr", Object.class);
         NullUtil.nullArgCheck(viewable, "viewable", Val.class);
         _addViewableProp(viewable, attr);
         return _this();
+    }
+
+    /**
+     *  This allows you to bind to a {@link Viewable}
+     *  implementation and automatically update the view when the view model changes.
+     *
+     * @param attr The layout information which should be passed to the UI tree.
+     * @param viewable A {@link sprouts.Val} property which holds a {@link Viewable} instance
+     *        that will be used to generate the view.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final <M> I add( String attr, Val<M> viewable, Viewer<M> viewer ) {
+        NullUtil.nullArgCheck(attr, "attr", Object.class);
+        NullUtil.nullArgCheck(viewable, "viewable", Val.class);
+        _addViewableProp(viewable, attr, viewer);
+        return _this();
+    }
+
+    public final <M> I add( CompAttr attr, Val<M> viewable, Viewer<M> viewer ) {
+        return this.add(attr.toString(), viewable, viewer);
     }
 
     /**
@@ -2932,6 +2985,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *                  The Viewables will be used to generate the view.
      * @return This very instance, which enables builder-style method chaining.
      */
+    @Deprecated
     public final I add( String attr, Vals<? extends Viewable> viewables ) {
         NullUtil.nullArgCheck(attr, "attr", Object.class);
         NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
@@ -2948,8 +3002,65 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *        that will be used to generate the view.
      * @return This very instance, which enables builder-style method chaining.
      */
+    @Deprecated
     public final I add( CompAttr attr, Val<? extends Viewable> viewable ) {
         return this.add(attr.toString(), viewable);
+    }
+
+    /**
+     *  This allows you to bind to a property list of view models to your vew
+     *  to automatically update it when your view models change.
+     *
+     * @param attr The layout information which should be passed to the UI tree.
+     * @param viewables A {@link sprouts.Vals} list of {@link Viewable}s
+     *                  wrapped in a {@link sprouts.Val} properties.
+     *                  The Viewables will be used to generate the view.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final <M> I add( CompAttr attr, Vals<M> viewables, Viewer<M> viewer ) {
+        return this.add(attr.toString(), viewables, viewer);
+    }
+
+    /**
+     *  This allows you to bind to a property list of view models to your view
+     *  to automatically update it when your view models change.
+     *
+     * @param attr The layout information which should be passed to the UI tree.
+     * @param viewables A {@link sprouts.Vals} list of view models
+     *                  wrapped in a {@link sprouts.Val} properties.
+     *                  The models will be used to generate the view.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final <M> I add( String attr, Vals<M> viewables, Viewer<M> viewer ) {
+        NullUtil.nullArgCheck(attr, "attr", Object.class);
+        NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
+        _addViewableProps( viewables, attr, viewer );
+        return _this();
+    }
+
+    protected <M> void _addViewableProps( Vals<M> viewables, String attr, Viewer<M> viewer ) {
+        _onShow( viewables, delegate -> {
+            // we simply redo all the components.
+            switch ( delegate.changeType() ) {
+                case SET: _updateComponentAt(delegate.index(), delegate.newValue().get(), viewer, attr); break;
+                case ADD:
+                    if ( delegate.index() < 0 && delegate.newValue().isEmpty() ) {
+                        // This is basically a add all operation, so we clear the components first.
+                        _clearComponents();
+                        // and then we add all the components.
+                        for ( int i = 0; i < delegate.vals().size(); i++ )
+                            _addComponentAt( i, delegate.vals().at(i).get(), viewer, attr );
+                    }
+                    else
+                        _addComponentAt(delegate.index(), delegate.newValue().get(), viewer, attr);
+                    break;
+                case REMOVE: _removeComponentAt(delegate.index()); break;
+                case CLEAR: _clearComponents(); break;
+                case NONE: break;
+                default: throw new IllegalStateException("Unknown type: "+delegate.changeType());
+            }
+        });
+        viewables.forEach( v -> add(viewer.getView(v)) );
     }
 
     /**
@@ -2962,10 +3073,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *                  The Viewables will be used to generate the view.
      * @return This very instance, which enables builder-style method chaining.
      */
+    @Deprecated
     public final I add( CompAttr attr, Vals<? extends Viewable> viewables ) {
         return this.add(attr.toString(), viewables);
     }
 
+    @Deprecated
     protected void _addViewableProps( Vals<? extends Viewable> viewables, String attr ) {
         _onShow( viewables, delegate -> {
             // we simply redo all the components.
@@ -2991,6 +3104,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         viewables.forEach( v -> add(v.createView(JComponent.class)) );
     }
 
+    @Deprecated
     private void _addViewableProp( Val<? extends Viewable> viewable, String attr ) {
         // First we remember the index of the component which will be provided by the viewable dynamically.
         final int index = _childCount();
@@ -3010,6 +3124,26 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         _onShow( viewable, v -> _updateComponentAt(index, v, attr) );
     }
 
+    private <M> void _addViewableProp( Val<M> viewable, String attr, Viewer<M> viewer ) {
+        // First we remember the index of the component which will be provided by the viewable dynamically.
+        final int index = _childCount();
+        // Then we add the component provided by the viewable to the list of children.
+        if ( attr == null ) {
+            if ( viewable.isPresent() )
+                this.add(viewer.getView(viewable.get()));
+            else
+                this.add(new JPanel()); // We add a dummy component to the list of children.
+        } else {
+            if ( viewable.isPresent() )
+                this.add(attr, viewer.getView(viewable.get()));
+            else
+                this.add(attr, new JPanel()); // We add a dummy component to the list of children.
+        }
+        // Finally we add a listener to the viewable which will update the component when the viewable changes.
+        _onShow( viewable, v -> _updateComponentAt(index, v, viewer, attr) );
+    }
+
+    @Deprecated
     private void _updateComponentAt( int index, Viewable v, String attr ) {
         component().ifPresent( c -> {
             JComponent newComponent = v == null ? new JPanel() : UI.use(_eventProcessor, () -> v.createView(JComponent.class) );
@@ -3026,6 +3160,23 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         });
     }
 
+    private <M> void _updateComponentAt( int index, M v, Viewer<M> viewer, String attr ) {
+        component().ifPresent( c -> {
+            JComponent newComponent = v == null ? new JPanel() : UI.use(_eventProcessor, () -> viewer.getView(v) );
+            // We remove the old component.
+            c.remove(c.getComponent(index));
+            // We add the new component.
+            if ( attr == null )
+                c.add(newComponent, index);
+            else
+                c.add(newComponent, attr, index);
+            // We update the layout.
+            c.revalidate();
+            c.repaint();
+        });
+    }
+
+    @Deprecated
     private void _addComponentAt( int index, Viewable v, String attr ) {
         component().ifPresent( c -> {
             // We add the new component.
@@ -3033,6 +3184,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
                 c.add(UI.use(_eventProcessor, () -> v.createView(JComponent.class)), index);
             else
                 c.add(UI.use(_eventProcessor, () -> v.createView(JComponent.class)), attr, index);
+            // We update the layout.
+            c.revalidate();
+            c.repaint();
+        });
+    }
+
+    private <M> void _addComponentAt( int index, M v, Viewer<M> viewer, String attr ) {
+        component().ifPresent( c -> {
+            // We add the new component.
+            if ( attr == null )
+                c.add(UI.use(_eventProcessor, () -> viewer.getView(v)), index);
+            else
+                c.add(UI.use(_eventProcessor, () -> viewer.getView(v)), attr, index);
             // We update the layout.
             c.revalidate();
             c.repaint();
