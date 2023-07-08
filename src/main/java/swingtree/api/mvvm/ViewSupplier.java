@@ -4,8 +4,6 @@ import sprouts.Val;
 import sprouts.Vals;
 import swingtree.UIForAnySwing;
 
-import javax.swing.*;
-
 /**
  *  A provider of a view, usually a view model or a simple data model with the purpose of
  *  making it possible to dynamically creating sub-views for inside a view for a given
@@ -22,5 +20,13 @@ import javax.swing.*;
 @FunctionalInterface
 public interface ViewSupplier<M>
 {
+    /**
+     *  Creates a view representing an instance of the type {@code M},
+     *  which is a view model or a simple data model.
+     *
+     * @param viewModel The thing to create a view for, usually a view model or a simple data model.
+     * @return A view for the given view model in the form of a {@link UIForAnySwing}, a builder node
+     *         which wraps the actual main component of the view.
+     */
     UIForAnySwing<?,?> createViewFor( M viewModel );
 }
