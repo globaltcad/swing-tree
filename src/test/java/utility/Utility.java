@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Utility {
 
@@ -75,6 +76,14 @@ public class Utility {
         }
 
         public <C extends Component> Optional<C> find(Class<C> type, String id) {
+            List<C> found = findAll(type, id);
+            if ( found.isEmpty() )
+                return Optional.empty();
+            else
+                return Optional.of(found.get(0));
+        }
+
+        public <C extends Component> List<C> findAll(Class<C> type, String id) {
             if ( !_tree.containsKey(id) ) {
                 _tree.clear();
                 Component root = _traverseUpwards(_current);
@@ -84,7 +93,11 @@ public class Utility {
                     .stream()
                     .filter( c -> type.isAssignableFrom(c.getClass()) )
                     .map( c -> (C) c )
-                    .findFirst();
+                    .collect(Collectors.toList());
+        }
+
+        public List<JComponent> findAll(String id) {
+            return findAll(JComponent.class, id);
         }
 
         private Component _traverseUpwards(Component component) {
