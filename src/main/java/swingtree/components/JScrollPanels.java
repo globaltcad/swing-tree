@@ -2,7 +2,9 @@ package swingtree.components;
 
 import net.miginfocom.swing.MigLayout;
 import swingtree.UI;
+import swingtree.api.mvvm.EntryViewModel;
 import swingtree.api.mvvm.ViewableEntry;
+import swingtree.api.mvvm.Viewer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -51,14 +53,20 @@ public class JScrollPanels extends JScrollPane
 	public static JScrollPanels of(
 		UI.Align align, Dimension size
 	) {
-		return _construct(align, size, Collections.emptyList(), null);
+		return _construct(align, size, Collections.emptyList(), null, m -> {
+			if ( m instanceof ViewableEntry )
+				return ((ViewableEntry) m).createView(JComponent.class);
+			else
+				throw new IllegalArgumentException("The supplied model is not a ViewableEntry");
+		});
 	}
 
 	private static JScrollPanels _construct(
 		UI.Align align,
 		Dimension shape,
-		List<ViewableEntry> components,
-		String constraints
+		List<EntryViewModel> components,
+		String constraints,
+		Viewer<EntryViewModel> viewer
 	) {
 		UI.Align type = align;
 		InternalPanel[] forwardReference = {null};
@@ -69,6 +77,7 @@ public class JScrollPanels extends JScrollPane
 									()-> _entriesIn(forwardReference[0].getComponents()),
 									i,
 									components.get(i),
+									viewer,
 									constraints
 								)
 						)
@@ -110,7 +119,14 @@ public class JScrollPanels extends JScrollPane
 	 *
 	 * @param entryViewModel A provider lambda which ought to turn a context object into a fitting UI.
 	 */
+	@Deprecated
 	public void addEntry( ViewableEntry entryViewModel ) { addEntry( null, entryViewModel ); }
+
+	public <M extends EntryViewModel> void addEntry( M entryViewModel, Viewer<M> viewer ) {
+		Objects.requireNonNull(entryViewModel);
+		EntryPanel entryPanel = _createEntryPanel(null, entryViewModel, viewer, this._internal.getComponents().length);
+		this._internal.add(entryPanel);
+	}
 
 	/**
 	 * 	The {@link JScrollPanels} does not store components statically in the UI tree.
@@ -122,9 +138,17 @@ public class JScrollPanels extends JScrollPane
 	 * @param constraints The constraints which ought to be applied to the entry.
 	 * @param entryViewModel A provider lambda which ought to turn a context object into a fitting UI.
 	 */
+	@Deprecated
 	public void addEntry( String constraints, ViewableEntry entryViewModel ) {
 		Objects.requireNonNull(entryViewModel);
-		EntryPanel entryPanel = _createEntryPanel(constraints, entryViewModel, this._internal.getComponents().length);
+		EntryPanel entryPanel = _createEntryPanel(constraints, entryViewModel, m -> entryViewModel.createView(javax.swing.JComponent.class), this._internal.getComponents().length);
+		this._internal.add(entryPanel);
+		this.validate();
+	}
+
+	public <M extends EntryViewModel> void addEntry( String constraints, M entryViewModel, Viewer<M> viewer ) {
+		Objects.requireNonNull(entryViewModel);
+		EntryPanel entryPanel = _createEntryPanel(constraints, entryViewModel, viewer, this._internal.getComponents().length);
 		this._internal.add(entryPanel);
 		this.validate();
 	}
@@ -141,10 +165,28 @@ public class JScrollPanels extends JScrollPane
 														i -> _createEntryPanel(
 																	constraints,
 																	entryViewModels.get(i),
+																	m -> m.createView(javax.swing.JComponent.class),
 																	this._internal.getComponents().length + i
 																)
 													)
 													.collect(Collectors.toList());
+
+		entryPanels.forEach(this._internal::add);
+		this.validate();
+	}
+
+	public <M extends EntryViewModel> void addAllEntries( String constraints, List<M> entryViewModels, Viewer<M> viewer ) {
+		Objects.requireNonNull(entryViewModels);
+		List<EntryPanel> entryPanels = IntStream.range(0, entryViewModels.size())
+				.mapToObj(
+						i -> _createEntryPanel(
+								constraints,
+								entryViewModels.get(i),
+								viewer,
+								this._internal.getComponents().length + i
+						)
+				)
+				.collect(Collectors.toList());
 
 		entryPanels.forEach(this._internal::add);
 		this.validate();
@@ -175,9 +217,17 @@ public class JScrollPanels extends JScrollPane
 	 *  @param attr The constraints which ought to be applied to the entry, may be null.
 	 *  @param entryViewModel The entry provider which ought to be added.
 	 */
+	@Deprecated
 	public void addEntryAt( int index, String attr, ViewableEntry entryViewModel ) {
 		Objects.requireNonNull(entryViewModel);
-		EntryPanel entryPanel = _createEntryPanel(attr, entryViewModel, index);
+		EntryPanel entryPanel = _createEntryPanel(attr, entryViewModel, m -> m.createView(javax.swing.JComponent.class), index);
+		this._internal.add(entryPanel, index);
+		this.validate();
+	}
+
+	public <M extends EntryViewModel> void addEntryAt( int index, String attr, M entryViewModel, Viewer<M> viewer ) {
+		Objects.requireNonNull(entryViewModel);
+		EntryPanel entryPanel = _createEntryPanel(attr, entryViewModel, viewer, index);
 		this._internal.add(entryPanel, index);
 		this.validate();
 	}
@@ -190,9 +240,23 @@ public class JScrollPanels extends JScrollPane
 	 *  @param attr The constraints which ought to be applied to the entry, may be null.
 	 *  @param entryViewModel The entry provider which ought to be added.
 	 */
+	@Deprecated
 	public void setEntryAt( int index, String attr, ViewableEntry entryViewModel ) {
 		Objects.requireNonNull(entryViewModel);
-		EntryPanel entryPanel = _createEntryPanel(attr, entryViewModel, index);
+		EntryPanel entryPanel = _createEntryPanel(attr, entryViewModel, m -> m.createView(javax.swing.JComponent.class), index);
+		// We first remove the old entry panel and then add the new one.
+		// This is necessary because the layout manager does not allow to replace
+		// a component at a certain index.
+		this._internal.remove(index);
+		// We have to re-add the entry panel at the same index
+		// because the layout manager will otherwise add it at the end.
+		this._internal.add(entryPanel, index);
+		this.validate();
+	}
+
+	public <M extends EntryViewModel> void setEntryAt( int index, String attr, M entryViewModel, Viewer<M> viewer ) {
+		Objects.requireNonNull(entryViewModel);
+		EntryPanel entryPanel = _createEntryPanel(attr, entryViewModel, viewer, index);
 		// We first remove the old entry panel and then add the new one.
 		// This is necessary because the layout manager does not allow to replace
 		// a component at a certain index.
@@ -278,9 +342,10 @@ public class JScrollPanels extends JScrollPane
 		});
 	}
 
-	private EntryPanel _createEntryPanel(
+	private <M extends EntryViewModel> EntryPanel _createEntryPanel(
 		String constraints,
-		ViewableEntry entryProvider,
+		M entryProvider,
+		Viewer<M> viewer,
 		int index
 	) {
 		Objects.requireNonNull(entryProvider);
@@ -288,6 +353,7 @@ public class JScrollPanels extends JScrollPane
 						()-> _entriesIn(_internal.getComponents()),
 						index,
 						entryProvider,
+						viewer,
 						constraints
 					);
 	}
@@ -404,15 +470,16 @@ public class JScrollPanels extends JScrollPane
 		private static final Color HIGHLIGHT = Color.GREEN;
 		private static final Color LOW_LIGHT = Color.WHITE;
 		private final Function<Boolean, JComponent> provider;
-		private final ViewableEntry viewable;
+		private final EntryViewModel viewable;
 		private boolean isSelected;
 		private JComponent lastState;
 
 
-		private EntryPanel(
+		private <M extends EntryViewModel> EntryPanel(
 				Supplier<List<EntryPanel>> components,
 				int position,
-				ViewableEntry provider,
+				M provider,
+				Viewer<M> viewer,
 				String constraints
 		) {
 			Objects.requireNonNull(components);
@@ -423,7 +490,7 @@ public class JScrollPanels extends JScrollPane
 			this.provider = isSelected -> {
 								provider.position().act(position);
 								provider.isSelected().act(isSelected);
-								return (JComponent) provider.createView(javax.swing.JComponent.class);
+								return viewer.getView(provider);
 							};
 			this.lastState = this.provider.apply(false);
 			this.add(lastState, constraints != null ? constraints : "grow" );

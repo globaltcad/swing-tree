@@ -3,8 +3,10 @@ package swingtree;
 import sprouts.Change;
 import sprouts.Vals;
 import sprouts.Var;
+import swingtree.api.mvvm.EntryViewModel;
 import swingtree.api.mvvm.Viewable;
 import swingtree.api.mvvm.ViewableEntry;
+import swingtree.api.mvvm.Viewer;
 import swingtree.components.JScrollPanels;
 
 import javax.swing.*;
@@ -37,13 +39,14 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 		Objects.requireNonNull(component);
 		JScrollPanels panels = this.getComponent();
 
-		ViewableEntry entry = _entryFrom(component);
+		EntryViewModel entry = _entryModel();
 		if ( conf == null )
-			panels.addEntry(entry);
+			panels.addEntry(entry, m -> component);
 		else
-			panels.addEntry(conf.toString(), entry);
+			panels.addEntry(conf.toString(), entry, m -> component);
 	}
 
+	@Deprecated
 	private ViewableEntry _entryFrom(JComponent component) {
 		Var<Boolean> selected = Var.of(false);
 		Var<Integer> position = Var.of(0);
@@ -54,7 +57,17 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 		};
 	}
 
+	private EntryViewModel _entryModel() {
+		Var<Boolean> selected = Var.of(false);
+		Var<Integer> position = Var.of(0);
+		return new EntryViewModel() {
+			@Override public Var<Boolean> isSelected() { return selected; }
+			@Override public Var<Integer> position() { return position; }
+		};
+	}
+
 	@Override
+	@Deprecated
 	protected void _addViewableProps( Vals<? extends Viewable> viewables, String attr )
 	{
 		BiFunction<Integer, Vals<Viewable>, Viewable> viewableFetcher = (i, vals) -> {
@@ -110,5 +123,79 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 			}
 		});
 		addAll.accept((Vals<Viewable>) viewables);
+	}
+
+	@Override
+	protected <M> void _addViewableProps( Vals<M> viewables, String attr, Viewer<M> viewer )
+	{
+		BiFunction<Integer, Vals<M>, M> viewableFetcher = (i, vals) -> {
+			M v = vals.at(i).get();
+			if ( v instanceof EntryViewModel ) ((EntryViewModel) v).position().set(i);
+			return v;
+		};
+		BiFunction<Integer, Vals<M>, M> entryFetcher = (i, vals) -> {
+			M v = viewableFetcher.apply(i, vals);
+			return ( v != null ? (M) v : (M)_entryModel() );
+		};
+
+		Consumer<Vals<M>> addAll = vals -> {
+			boolean allAreEntries = vals.stream().allMatch( v -> v instanceof EntryViewModel );
+			if ( allAreEntries ) {
+				List<EntryViewModel> entries = (List) vals.toList();
+				this.getComponent().addAllEntries(attr, entries, (Viewer<EntryViewModel>) viewer);
+			}
+			else
+				for ( int i = 0; i< vals.size(); i++ ) {
+					int finalI = i;
+					this.getComponent().addEntry(
+							_entryModel(),//entryFetcher.apply(i,vals),
+							m -> viewer.getView(entryFetcher.apply(finalI,vals))
+						);
+				}
+		};
+
+		_onShow( viewables, delegate -> {
+			JScrollPanels panels = this.getComponent();
+			Vals<M> vals = delegate.vals();
+			int delegateIndex = delegate.index();
+			Change changeType = delegate.changeType();
+			// we simply redo all the components.
+			switch ( changeType ) {
+				case SET:
+				case ADD:
+				case REMOVE:
+					if ( delegateIndex >= 0 ) {
+						if ( changeType == Change.ADD ) {
+							M m = entryFetcher.apply(delegateIndex, vals);
+							if ( m instanceof EntryViewModel )
+								panels.addEntryAt(delegateIndex, null, (EntryViewModel)m, (Viewer<EntryViewModel>) viewer);
+							else
+								panels.addEntryAt(delegateIndex, null, _entryModel(), em -> viewer.getView(m));
+						} else if ( changeType == Change.REMOVE )
+							panels.removeEntryAt( delegateIndex );
+						else if ( changeType == Change.SET ) {
+							M m = entryFetcher.apply(delegateIndex, vals);
+							if ( m instanceof EntryViewModel )
+								panels.setEntryAt(delegateIndex, null, (EntryViewModel)m, (Viewer<EntryViewModel>) viewer);
+							else
+								panels.setEntryAt(delegateIndex, null, _entryModel(), em -> viewer.getView(m));
+						}
+						// Now we need to update the positions of all the entries
+						for ( int i = delegateIndex; i < vals.size(); i++ ) {
+							M m = entryFetcher.apply(i, vals);
+							if ( m instanceof EntryViewModel )
+								((EntryViewModel)m).position().set(i);
+						}
+					} else {
+						panels.removeAllEntries();
+						addAll.accept(vals);
+					}
+				break;
+				case CLEAR: panels.removeAllEntries(); break;
+				case NONE: break;
+				default: throw new IllegalStateException("Unknown type: "+delegate.changeType());
+			}
+		});
+		addAll.accept(viewables);
 	}
 }

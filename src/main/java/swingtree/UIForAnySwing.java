@@ -2879,6 +2879,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
+     *  <b>Deprecated:</b> Use {@link #add(Val, Viewer)} instead.
      *  This allows you to bind to a {@link swingtree.api.mvvm.Viewable}
      *  implementation and automatically update the view when the view model changes.
      *
@@ -2894,11 +2895,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-     *  This allows you to bind to a {@link swingtree.api.mvvm.Viewable}
-     *  implementation and automatically update the view when the view model changes.
+     *  This allows you to dynamically generate a view for the item of a property (usually a property
+     *  holding a sub-view model) and automatically regenerate the view when the property changes.
+     *  The {@link Viewer} lambda passed to this method will receive the value of the property
+     *  and is then expected to return a {@link JComponent} instance which will be added to the
+     *  wrapped {@link JComponent} type of this builder.
      *
-     * @param viewable A {@link sprouts.Val} property which holds a {@link Viewable} instance
-     *        that will be used to generate the view.
+     * @param viewable A {@link sprouts.Val} property holding null or any other type of value,
+     *                 preferably a view model instance.
+     * @param viewer A {@link Viewer} instance which will be used to generate the view for the value held by the property.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final <M> I add( Val<M> viewable, Viewer<M> viewer ) {
@@ -2908,6 +2913,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
+     *  <b>Deprecated:</b> Use {@link #add(Vals, Viewer)} instead.
      *  This allows you to bind to a property list of {@link Viewable}s
      *  to automatically update the view when your view models change.
      *
@@ -2924,12 +2930,16 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-     *  This allows you to bind to a property list of {@link Viewable}s
-     *  to automatically update the view when your view models change.
+     *  This allows you to dynamically generate views for the items in a {@link Vals} property list
+     *  and automatically regenerate the view when any of the items change.
+     *  The type of item can be anything, but it is usually a view model instance.
+     *  The {@link Viewer} lambda passed to this method will receive the value of the property
+     *  and is then expected to return a {@link JComponent} instance which will be added to the
+     *  wrapped {@link JComponent} type of this builder.
      *
-     * @param viewables A {@link sprouts.Vals} list of {@link Viewable}s
-     *                  wrapped in a {@link sprouts.Val} properties.
-     *                  The Viewables will be used to generate the view.
+     * @param viewables A {@link sprouts.Vals} list of items of any type but preferably view model instances.
+     * @param viewer A {@link Viewer} instance which will be used to generate the view for each item in the list.
+     *               The views will be added to the component wrapped by this builder instance.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final <M> I add( Vals<M> viewables, Viewer<M> viewer ) {
@@ -2939,6 +2949,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
+     *  <b>Deprecated:</b> Use {@link #add(String, Val, Viewer)} instead.
      *  This allows you to bind to a {@link Viewable}
      *  implementation and automatically update the view when the view model changes.
      *
@@ -2956,12 +2967,16 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-     *  This allows you to bind to a {@link Viewable}
-     *  implementation and automatically update the view when the view model changes.
+     *  This allows you to dynamically generate a view for the item of a property (usually a property
+     *  holding a sub-view model) and automatically regenerate the view when the property changes.
+     *  The {@link Viewer} lambda passed to this method will receive the value of the property
+     *  and is then expected to return a {@link JComponent} instance which will be added to the
+     *  wrapped {@link JComponent} type of this builder.
      *
-     * @param attr The layout information which should be passed to the UI tree.
-     * @param viewable A {@link sprouts.Val} property which holds a {@link Viewable} instance
-     *        that will be used to generate the view.
+     * @param attr The layout information which should be used as layout constraints for the generated view.
+     * @param viewable A {@link sprouts.Val} property holding null or any other type of value,
+     *                 preferably a view model instance.
+     * @param viewer A {@link Viewer} instance which will be used to generate the view for the value held by the property.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final <M> I add( String attr, Val<M> viewable, Viewer<M> viewer ) {
@@ -2971,11 +2986,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _this();
     }
 
-    public final <M> I add( CompAttr attr, Val<M> viewable, Viewer<M> viewer ) {
-        return this.add(attr.toString(), viewable, viewer);
-    }
-
     /**
+     *  <b>Deprecated:</b> Use {@link #add(String, Vals, Viewer)} instead.
      *  This allows you to bind to a property list of {@link Viewable}s
      *  to automatically update the view when your view models change.
      *
@@ -2994,6 +3006,28 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
+     *  This allows you to dynamically generate views for the items in a {@link Vals} property list
+     *  and automatically regenerate the view when any of the items change.
+     *  The type of item can be anything, but it is usually a view model instance.
+     *  The {@link Viewer} lambda passed to this method will receive the value of the property
+     *  and is then expected to return a {@link JComponent} instance which will be added to the
+     *  wrapped {@link JComponent} type of this builder.
+     *
+     * @param attr The layout information which should be used as layout constraints for the generated views.
+     * @param viewables A {@link sprouts.Vals} list of items of any type but preferably view model instances.
+     * @param viewer A {@link Viewer} instance which will be used to generate the view for each item in the list.
+     *               The views will be added to the component wrapped by this builder instance.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final <M> I add( String attr, Vals<M> viewables, Viewer<M> viewer ) {
+        NullUtil.nullArgCheck(attr, "attr", Object.class);
+        NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
+        _addViewableProps( viewables, attr, viewer );
+        return _this();
+    }
+
+    /**
+     *  <b>Deprecated:</b> Use {@link #add(CompAttr, Val, Viewer)} instead.
      *  This allows you to bind to a {@link Viewable}
      *  implementation and automatically update the view when the view model changes.
      *
@@ -3008,59 +3042,20 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-     *  This allows you to bind to a property list of view models to your vew
-     *  to automatically update it when your view models change.
+     *  This allows you to dynamically generate a view for the item of a property (usually a property
+     *  holding a sub-view model) and automatically regenerate the view when the property changes.
+     *  The {@link Viewer} lambda passed to this method will receive the value of the property
+     *  and is then expected to return a {@link JComponent} instance which will be added to the
+     *  wrapped {@link JComponent} type of this builder.
      *
-     * @param attr The layout information which should be passed to the UI tree.
-     * @param viewables A {@link sprouts.Vals} list of {@link Viewable}s
-     *                  wrapped in a {@link sprouts.Val} properties.
-     *                  The Viewables will be used to generate the view.
+     * @param attr The layout information which should be used as layout constraints for the generated view.
+     * @param viewable A {@link sprouts.Val} property holding null or any other type of value,
+     *                 preferably a view model instance.
+     * @param viewer A {@link Viewer} instance which will be used to generate the view for the value held by the property.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final <M> I add( CompAttr attr, Vals<M> viewables, Viewer<M> viewer ) {
-        return this.add(attr.toString(), viewables, viewer);
-    }
-
-    /**
-     *  This allows you to bind to a property list of view models to your view
-     *  to automatically update it when your view models change.
-     *
-     * @param attr The layout information which should be passed to the UI tree.
-     * @param viewables A {@link sprouts.Vals} list of view models
-     *                  wrapped in a {@link sprouts.Val} properties.
-     *                  The models will be used to generate the view.
-     * @return This very instance, which enables builder-style method chaining.
-     */
-    public final <M> I add( String attr, Vals<M> viewables, Viewer<M> viewer ) {
-        NullUtil.nullArgCheck(attr, "attr", Object.class);
-        NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
-        _addViewableProps( viewables, attr, viewer );
-        return _this();
-    }
-
-    protected <M> void _addViewableProps( Vals<M> viewables, String attr, Viewer<M> viewer ) {
-        _onShow( viewables, delegate -> {
-            // we simply redo all the components.
-            switch ( delegate.changeType() ) {
-                case SET: _updateComponentAt(delegate.index(), delegate.newValue().get(), viewer, attr); break;
-                case ADD:
-                    if ( delegate.index() < 0 && delegate.newValue().isEmpty() ) {
-                        // This is basically a add all operation, so we clear the components first.
-                        _clearComponents();
-                        // and then we add all the components.
-                        for ( int i = 0; i < delegate.vals().size(); i++ )
-                            _addComponentAt( i, delegate.vals().at(i).get(), viewer, attr );
-                    }
-                    else
-                        _addComponentAt(delegate.index(), delegate.newValue().get(), viewer, attr);
-                    break;
-                case REMOVE: _removeComponentAt(delegate.index()); break;
-                case CLEAR: _clearComponents(); break;
-                case NONE: break;
-                default: throw new IllegalStateException("Unknown type: "+delegate.changeType());
-            }
-        });
-        viewables.forEach( v -> add(viewer.getView(v)) );
+    public final <M> I add( CompAttr attr, Val<M> viewable, Viewer<M> viewer ) {
+        return this.add(attr.toString(), viewable, viewer);
     }
 
     /**
@@ -3076,6 +3071,24 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     @Deprecated
     public final I add( CompAttr attr, Vals<? extends Viewable> viewables ) {
         return this.add(attr.toString(), viewables);
+    }
+
+    /**
+     *  This allows you to dynamically generate views for the items in a {@link Vals} property list
+     *  and automatically regenerate the view when any of the items change.
+     *  The type of item can be anything, but it is usually a view model instance.
+     *  The {@link Viewer} lambda passed to this method will receive the value of the property
+     *  and is then expected to return a {@link JComponent} instance which will be added to the
+     *  wrapped {@link JComponent} type of this builder.
+     *
+     * @param attr The layout information which should be used as layout constraints for the generated views.
+     * @param viewables A {@link sprouts.Vals} list of items of any type but preferably view model instances.
+     * @param viewer A {@link Viewer} instance which will be used to generate the view for each item in the list.
+     *               The views will be added to the component wrapped by this builder instance.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final <M> I add( CompAttr attr, Vals<M> viewables, Viewer<M> viewer ) {
+        return this.add(attr.toString(), viewables, viewer);
     }
 
     @Deprecated
@@ -3102,6 +3115,31 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
             }
         });
         viewables.forEach( v -> add(v.createView(JComponent.class)) );
+    }
+
+    protected <M> void _addViewableProps( Vals<M> viewables, String attr, Viewer<M> viewer ) {
+        _onShow( viewables, delegate -> {
+            // we simply redo all the components.
+            switch ( delegate.changeType() ) {
+                case SET: _updateComponentAt(delegate.index(), delegate.newValue().get(), viewer, attr); break;
+                case ADD:
+                    if ( delegate.index() < 0 && delegate.newValue().isEmpty() ) {
+                        // This is basically a add all operation, so we clear the components first.
+                        _clearComponents();
+                        // and then we add all the components.
+                        for ( int i = 0; i < delegate.vals().size(); i++ )
+                            _addComponentAt( i, delegate.vals().at(i).get(), viewer, attr );
+                    }
+                    else
+                        _addComponentAt(delegate.index(), delegate.newValue().get(), viewer, attr);
+                    break;
+                case REMOVE: _removeComponentAt(delegate.index()); break;
+                case CLEAR: _clearComponents(); break;
+                case NONE: break;
+                default: throw new IllegalStateException("Unknown type: "+delegate.changeType());
+            }
+        });
+        viewables.forEach( v -> add(viewer.getView(v)) );
     }
 
     @Deprecated
