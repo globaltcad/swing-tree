@@ -64,7 +64,6 @@ public class ScrollPanelsView extends Panel
 					int i = evm.entries().indexOf(evm);
 					evm.entries().setAt(i, evm.createNew("Replaced!"));
 				}))
-				.getComponent()
 			)
 		)
 		.add( "shrink, span, wrap", separator() )

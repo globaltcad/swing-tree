@@ -24,11 +24,48 @@ class Scroll_Panels_Spec extends Specification
         given : 'We instantiate the view model.'
             var vm = new ScrollPanelsViewModel()
         when : 'We create a view for our view model...'
-            var ui = UI.panel("fill, wrap 1")
-                        .add( UI.label("Something to scroll:") )
-                        .add( UI.separator() )
-                        .add( UI.scrollPanels().add(vm.entries()) )
-                        .add( UI.separator() )
+            var ui =
+                UI.panel("fill, wrap 1")
+                .add( UI.label("Something to scroll:") )
+                .add( UI.separator() )
+                .add(
+                    UI.scrollPanels().add(vm.entries(), evm ->
+                        UI.panel("fill")
+                        .add("pushx", UI.label(evm.text()))
+                        .add(UI.label(evm.position().viewAs(String.class, s -> "Position: " + s)))
+                        .add(UI.label(evm.position().viewAs(String.class, s -> "Selected: " + s)))
+                        .add(UI.button("Delete me!").onClick(it -> {
+                            System.out.println("Deleting " + evm.text().get());
+                            int i = evm.entries().indexOf(evm);
+                            evm.entries().removeAt(i);
+                            if ( i != evm.position().get() )
+                                throw new IllegalStateException("Index mismatch: " + i + " != " + evm.position().get());
+                        }))
+                        .add(UI.button("Duplicate").onClick( it -> {
+                            int i = evm.entries().indexOf(evm);
+                            evm.entries().addAt(i, evm.createNew(evm.text().get() + " (copy)"));
+                        }))
+                        .add(UI.button("up").onClick( it -> {
+                            int i = evm.entries().indexOf(evm);
+                            if ( i > 0 ) {
+                                evm.entries().removeAt(i);
+                                evm.entries().addAt(i - 1, evm);
+                            }
+                        }))
+                        .add(UI.button("down").onClick( it -> {
+                            int i = evm.entries().indexOf(evm);
+                            if ( i < evm.entries().size() - 1 ) {
+                                evm.entries().removeAt(i);
+                                evm.entries().addAt(i + 1, evm);
+                            }
+                        }))
+                        .add(UI.button("replace").onClick( it -> {
+                            int i = evm.entries().indexOf(evm);
+                            evm.entries().setAt(i, evm.createNew("Replaced!"));
+                        }))
+                    )
+                )
+                .add( UI.separator() )
         then : 'The view was successfully created.'
             ui != null
     }

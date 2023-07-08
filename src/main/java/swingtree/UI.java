@@ -4479,7 +4479,7 @@ public final class UI
                 try {
                     c = UI.runAndGet(() -> uiSupplier.apply(frame));
                 } catch (Exception e) {
-                    System.err.println(e);
+                    e.printStackTrace();
                 }
             }
             else

@@ -6,7 +6,7 @@ import sprouts.Var;
 import swingtree.api.mvvm.EntryViewModel;
 import swingtree.api.mvvm.Viewable;
 import swingtree.api.mvvm.ViewableEntry;
-import swingtree.api.mvvm.Viewer;
+import swingtree.api.mvvm.ViewSupplier;
 import swingtree.components.JScrollPanels;
 
 import javax.swing.*;
@@ -41,9 +41,9 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 
 		EntryViewModel entry = _entryModel();
 		if ( conf == null )
-			panels.addEntry(entry, m -> component);
+			panels.addEntry(entry, m -> UI.of(component));
 		else
-			panels.addEntry(conf.toString(), entry, m -> component);
+			panels.addEntry(conf.toString(), entry, m -> UI.of(component));
 	}
 
 	@Deprecated
@@ -126,7 +126,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 	}
 
 	@Override
-	protected <M> void _addViewableProps( Vals<M> viewables, String attr, Viewer<M> viewer )
+	protected <M> void _addViewableProps( Vals<M> viewables, String attr, ViewSupplier<M> viewSupplier)
 	{
 		BiFunction<Integer, Vals<M>, M> viewableFetcher = (i, vals) -> {
 			M v = vals.at(i).get();
@@ -142,14 +142,14 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 			boolean allAreEntries = vals.stream().allMatch( v -> v instanceof EntryViewModel );
 			if ( allAreEntries ) {
 				List<EntryViewModel> entries = (List) vals.toList();
-				this.getComponent().addAllEntries(attr, entries, (Viewer<EntryViewModel>) viewer);
+				this.getComponent().addAllEntries(attr, entries, (ViewSupplier<EntryViewModel>) viewSupplier);
 			}
 			else
 				for ( int i = 0; i< vals.size(); i++ ) {
 					int finalI = i;
 					this.getComponent().addEntry(
 							_entryModel(),//entryFetcher.apply(i,vals),
-							m -> viewer.getView(entryFetcher.apply(finalI,vals))
+							m -> viewSupplier.createViewFor(entryFetcher.apply(finalI,vals))
 						);
 				}
 		};
@@ -168,17 +168,17 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 						if ( changeType == Change.ADD ) {
 							M m = entryFetcher.apply(delegateIndex, vals);
 							if ( m instanceof EntryViewModel )
-								panels.addEntryAt(delegateIndex, null, (EntryViewModel)m, (Viewer<EntryViewModel>) viewer);
+								panels.addEntryAt(delegateIndex, null, (EntryViewModel)m, (ViewSupplier<EntryViewModel>) viewSupplier);
 							else
-								panels.addEntryAt(delegateIndex, null, _entryModel(), em -> viewer.getView(m));
+								panels.addEntryAt(delegateIndex, null, _entryModel(), em -> viewSupplier.createViewFor(m));
 						} else if ( changeType == Change.REMOVE )
 							panels.removeEntryAt( delegateIndex );
 						else if ( changeType == Change.SET ) {
 							M m = entryFetcher.apply(delegateIndex, vals);
 							if ( m instanceof EntryViewModel )
-								panels.setEntryAt(delegateIndex, null, (EntryViewModel)m, (Viewer<EntryViewModel>) viewer);
+								panels.setEntryAt(delegateIndex, null, (EntryViewModel)m, (ViewSupplier<EntryViewModel>) viewSupplier);
 							else
-								panels.setEntryAt(delegateIndex, null, _entryModel(), em -> viewer.getView(m));
+								panels.setEntryAt(delegateIndex, null, _entryModel(), em -> viewSupplier.createViewFor(m));
 						}
 						// Now we need to update the positions of all the entries
 						for ( int i = delegateIndex; i < vals.size(); i++ ) {

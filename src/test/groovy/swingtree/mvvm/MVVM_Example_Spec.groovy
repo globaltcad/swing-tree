@@ -8,7 +8,7 @@ import sprouts.Var
 import sprouts.Vars
 import swingtree.SwingTreeContext
 import swingtree.UI
-import swingtree.api.mvvm.Viewer
+import swingtree.api.mvvm.ViewSupplier
 import swingtree.threading.EventProcessor
 import utility.Utility
 
@@ -341,20 +341,18 @@ class MVVM_Example_Spec extends Specification
             Var<Integer> population = Var.of(4)
             var vm1 = "Dummy View Model 1"
             var vm2 = "Dummy View Model 2"
-            Viewer<String> viewer = viewModel -> {
+            ViewSupplier<String> viewer = viewModel -> {
                 switch (viewModel) {
                     case "Dummy View Model 1":
                             return UI.panel().id("sub-1")
                                     .add(UI.label("Name:"))
                                     .add(UI.textField(name))
                                     .add(UI.button("Update").onClick { name.set("Tempeh") })
-                                    .component
                     case "Dummy View Model 2":
                             return UI.panel().id("sub-2")
                                     .add(UI.label("Population:"))
                                     .add(UI.slider(UI.Align.HORIZONTAL).withValue(population))
                                     .add(UI.button("Update").onClick { population.set(5) })
-                                    .component
                 }
             }
         and : 'A property storing the first view model.'
@@ -402,32 +400,28 @@ class MVVM_Example_Spec extends Specification
             var vm2 = "Dummy View Model 2"
             var vm3 = "Dummy View Model 3"
             var vm4 = "Dummy View Model 4"
-            Viewer<String> viewer = viewModel -> {
+            ViewSupplier<String> viewer = viewModel -> {
                 switch ( viewModel ) {
                     case "Dummy View Model 1":
                             return UI.panel().id("sub-1")
                                     .add(UI.label("Address:"))
                                     .add(UI.textField(address))
                                     .add(UI.button("Update").onClick { address.set("456 Main Street") })
-                                    .component
                     case "Dummy View Model 2":
                             return UI.panel().id("sub-2")
                                     .add(UI.label("Title:"))
                                     .add(UI.textField(title))
                                     .add(UI.button("Update").onClick { title.set("Mrs.") })
-                                    .component
                     case "Dummy View Model 3":
                             return UI.panel().id("sub-3")
                                     .add(UI.label("Price:"))
                                     .add(UI.slider(UI.Align.HORIZONTAL).withValue(price))
                                     .add(UI.button("Update").onClick { price.set(2000000.0) })
-                                    .component
                     case "Dummy View Model 4":
                                 return UI.panel().id("sub-4")
                                     .add(UI.label("Option:"))
                                     .add(UI.comboBox(option, Option.values()))
                                     .add(UI.button("Update").onClick { option.set(Option.NO) })
-                                    .component
                             }
                         }
         and : 'A property list storing the view models.'
@@ -510,7 +504,6 @@ class MVVM_Example_Spec extends Specification
                                 UI.panel().id("sub-1")
                                 .add(UI.label("Admin Status Code: xyz"))
                                 .add(UI.button("Do admin stuff!"))
-                                .component
                             )
                     )
         expect : 'We query the UI for the views and verify that the "super" and "sub-1" views are present.'
