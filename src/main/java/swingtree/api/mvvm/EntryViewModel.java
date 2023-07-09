@@ -2,6 +2,9 @@ package swingtree.api.mvvm;
 
 import sprouts.Var;
 
+/**
+ *  A view model for a single entry in a {@link swingtree.components.JScrollPanels}.
+ */
 public interface EntryViewModel
 {
     /**
