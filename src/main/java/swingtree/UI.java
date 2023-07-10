@@ -16,6 +16,7 @@ import swingtree.components.JScrollPanels;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
 import swingtree.style.StyleSheet;
+import swingtree.style.UIScale;
 import swingtree.threading.EventProcessor;
 
 import javax.swing.*;
@@ -2681,8 +2682,13 @@ public final class UI
      */
     public static UIForLabel<JLabel> label( int width, int height, ImageIcon icon ) {
         NullUtil.nullArgCheck(icon, "icon", ImageIcon.class);
+        int scaleHint = Image.SCALE_SMOOTH;
+        if ( UIScale.getUserScaleFactor() > 1.5f )
+            scaleHint = Image.SCALE_FAST;
+
+        Image scaled = icon.getImage().getScaledInstance(width, height, scaleHint);
         return of((JLabel) new Label())
-                .with(new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT)));
+                .with(new ImageIcon(scaled));
     }
 
     /**
