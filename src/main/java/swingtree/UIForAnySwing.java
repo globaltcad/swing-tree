@@ -102,7 +102,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *
      * @return The JComponent type which will be wrapped by this builder node.
      */
-    public final <E extends Enum<E>> I id( E id ) { return id( id.name() ); }
+    public final <E extends Enum<E>> I id( E id ) {
+        Objects.requireNonNull(id);
+        return id( id.getClass().getSimpleName() + "." + id.name() );
+    }
 
     /**
      *  This method is part of the SwingTree style API, and it allows you to
@@ -184,8 +187,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     @SafeVarargs
     public final <E extends Enum<E>> I group( E... groupName ) {
         String[] names = new String[groupName.length];
-        for ( int i = 0; i < groupName.length; i++ )
-            names[i] = groupName[i].name();
+        for ( int i = 0; i < groupName.length; i++ ) {
+            E group = groupName[i];
+            Objects.requireNonNull(group);
+            names[i] = group.getClass().getSimpleName() + "." + group.name();
+        }
         return group(names);
     }
 

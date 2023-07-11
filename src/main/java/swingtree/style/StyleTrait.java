@@ -43,11 +43,17 @@ public final class StyleTrait<C extends JComponent>
 
     public StyleTrait<C> group( String group ) { return new StyleTrait<>(group, _id, _toInherit, _type); }
 
-    public <E extends Enum<E>> StyleTrait<C> group( E group ) { return group(group.name()); }
+    public <E extends Enum<E>> StyleTrait<C> group( E group ) {
+        Objects.requireNonNull(group);
+        return group(group.getClass().getSimpleName() + "." + group.name());
+    }
 
     public StyleTrait<C> id( String id ) { return new StyleTrait<>(_group, id, _toInherit, _type); }
 
-    public <E extends Enum<E>> StyleTrait<C> id( E id ) { return id(id.name()); }
+    public <E extends Enum<E>> StyleTrait<C> id( E id ) {
+        Objects.requireNonNull(id);
+        return id(id.getClass().getSimpleName() + "." + id.name());
+    }
 
     public String id() { return _id; }
 
@@ -57,8 +63,10 @@ public final class StyleTrait<C extends JComponent>
 
     public <E extends Enum<E>> StyleTrait<C> inherits( E... superGroups ) {
         String[] superGroupNames = new String[superGroups.length];
-        for ( int i = 0; i < superGroups.length; i++ )
-            superGroupNames[i] = superGroups[i].name();
+        for ( int i = 0; i < superGroups.length; i++ ) {
+            E superGroup = Objects.requireNonNull(superGroups[i]);
+            superGroupNames[i] = superGroup.getClass().getSimpleName() + "." + superGroup.name();
+        }
         return inherits(superGroupNames);
     }
 
@@ -99,15 +107,6 @@ public final class StyleTrait<C extends JComponent>
                 );
 
         return (thisIsExtensionOfOther || other.group().isEmpty()) && thisIsSubclassOfOther;
-    }
-
-    public boolean typeInherits(StyleTrait<?> other ) {
-        if ( this.type().equals(other.type()) )
-            return true;
-        else if ( other.type().isAssignableFrom(this.type()) )
-            return true;
-        else
-            return false;
     }
 
     @Override
