@@ -12,13 +12,13 @@ public class SoftUIStyleSheet extends StyleSheet
 {
     @Override
     protected void build() {
-        add(type(JComponent.class).group(SOFT.BASE), it ->
+        add(type(JComponent.class).group(Soft.BASE), it ->
               it.borderRadius(20)
                 .backgroundColor(new Color(0.4f, 0.85f, 1))
                 .padding(12)
                 .margin(16)
         );
-        add(type(JComponent.class).group(SOFT.FRAME_SHADOW), it ->
+        add(type(JComponent.class).group(Soft.FRAME_SHADOW), it ->
               it.borderRadius(24)
                 .backgroundColor(new Color(100,200,240))
                 .foundationColor(Color.BLACK)
@@ -36,7 +36,7 @@ public class SoftUIStyleSheet extends StyleSheet
                 .padding(20)
                 .margin(12)
         );
-        add(type(JComponent.class).group(SOFT.BANNER).inherits(SOFT.BASE), it ->
+        add(type(JComponent.class).group(Soft.BANNER).inherits(Soft.BASE), it ->
               it.shadow("bright", s -> s
                     .color(new Color(0.7f, 0.95f, 1f, 0.35f))
                     .offset(-10)
@@ -54,7 +54,7 @@ public class SoftUIStyleSheet extends StyleSheet
                             )
                 )
         );
-        add(type(AbstractButton.class).group(SOFT.BUTTON).inherits(SOFT.BASE), it ->
+        add(type(AbstractButton.class).group(Soft.BUTTON).inherits(Soft.BASE), it ->
               it.borderRadius(12)
                 .padding(6)
                 .margin(8)
@@ -75,7 +75,7 @@ public class SoftUIStyleSheet extends StyleSheet
                             )
                 )
         );
-        add(type(JComponent.class).group(SOFT.SINK).inherits(SOFT.BASE), it ->
+        add(type(JComponent.class).group(Soft.SINK).inherits(Soft.BASE), it ->
               it.foundationColor(new Color(0.4f, 0.85f, 1))
                 .shadow("bright", s -> s
                     .color(new Color(0.7f, 0.95f, 1f, 0.35f))
@@ -91,7 +91,7 @@ public class SoftUIStyleSheet extends StyleSheet
                 .padding(30)
                 .margin(10)
         );
-        add(type(JComponent.class).group(SOFT.RAISE).inherits(SOFT.BASE), it ->
+        add(type(JComponent.class).group(Soft.RAISE).inherits(Soft.BASE), it ->
               it.foundationColor(new Color(0.4f, 0.85f, 1))
                 .shadow("bright", s -> s
                     .color(new Color(0.7f, 0.95f, 1f, 0.35f))
@@ -107,7 +107,7 @@ public class SoftUIStyleSheet extends StyleSheet
                 .padding(30)
                 .margin(10)
         );
-        add(type(JComponent.class).group(SOFT.SLIM).inherits(SOFT.BASE), it ->
+        add(type(JComponent.class).group(Soft.SLIM).inherits(Soft.BASE), it ->
               it.shadow("bright", s -> s
                     .color(new Color(0.7f, 0.95f, 1f, 0.45f))
                     .offset(-4)
@@ -123,22 +123,22 @@ public class SoftUIStyleSheet extends StyleSheet
                 .margin(6)
         );
 
-        add(type(JComboBox.class).inherits(SOFT.SLIM), it ->
+        add(type(JComboBox.class).inherits(Soft.SLIM), it ->
                 it.padding(4)
         );
-        add(type(JCheckBox.class).inherits(SOFT.SLIM), it ->
+        add(type(JCheckBox.class).inherits(Soft.SLIM), it ->
                 it.padding(6)
         );
-        add(type(JRadioButton.class).inherits(SOFT.SLIM), it ->
+        add(type(JRadioButton.class).inherits(Soft.SLIM), it ->
                 it.padding(6)
         );
-        add(type(JSpinner.class).inherits(SOFT.SLIM), it ->
+        add(type(JSpinner.class).inherits(Soft.SLIM), it ->
                 it.padding(4)
         );
-        add(type(JProgressBar.class).inherits(SOFT.SLIM), it ->
+        add(type(JProgressBar.class).inherits(Soft.SLIM), it ->
                 it.padding(0)
         );
-        add(type(JTextComponent.class).inherits(SOFT.SLIM), it ->
+        add(type(JTextComponent.class).inherits(Soft.SLIM), it ->
                 it
                 .foundationColor(new Color(0.4f, 0.85f, 1))
                 .shadow("bright", s -> s
@@ -155,7 +155,7 @@ public class SoftUIStyleSheet extends StyleSheet
                 .padding(4)
                 .margin(8)
         );
-        add(type(JComponent.class).group(SOFT.UNDERLINE).inherits(SOFT.SLIM), it -> it
+        add(type(JComponent.class).group(Soft.UNDERLINE).inherits(Soft.SLIM), it -> it
             .borderWidthAt(Edge.BOTTOM, 3)
             .borderColor(new Color(0, 139, 255))
             .borderRadius(4)

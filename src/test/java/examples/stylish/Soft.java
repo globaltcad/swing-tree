@@ -1,6 +1,9 @@
 package examples.stylish;
 
-public enum SOFT {
+/**
+ *  Defines style key words for the Soft UI example.
+ */
+public enum Soft {
     BASE,
     BANNER,
     BUTTON,

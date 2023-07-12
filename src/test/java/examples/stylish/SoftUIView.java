@@ -14,12 +14,12 @@ public class SoftUIView extends Panel
     public SoftUIView() {
         FlatLightLaf.setup();
         UI.use(new SoftUIStyleSheet(), ()->
-            UI.of(this).group(SOFT.SINK)
+            UI.of(this).group(Soft.SINK)
             .add(SHRINK.and(ALIGN_LEFT),
-                box().group(SOFT.RAISE)
+                box().group(Soft.RAISE)
                 .withLayout(FILL.and(WRAP(3)).and(INS(32)), "", "[][]24[]24[]")
                 .add( SHRINK.and(SPAN).and(ALIGN_CENTER),
-                    panel().group(SOFT.BANNER)
+                    panel().group(Soft.BANNER)
                     .add(
                         html(
                             "<h1>Soft UI In Swing O.o</h1>" +
@@ -40,23 +40,23 @@ public class SoftUIView extends Panel
                         });
                     })
                     .add(
-                        label(50,50,icon("img/trees.png")).group(SOFT.BANNER)
+                        label(50,50,icon("img/trees.png")).group(Soft.BANNER)
                     )
                 )
                 .add( SHRINK.and(SPAN).and(ALIGN_CENTER),
-                    box().group(SOFT.SINK)
+                    box().group(Soft.SINK)
                     .add(
-                        slider(Align.VERTICAL, 0, 255).group(SOFT.SLIM)
+                        slider(Align.VERTICAL, 0, 255).group(Soft.SLIM)
                     )
                     .add(WRAP,
                         box(FILL.and(WRAP(2)))
                         .add(
                             box(FILL.and(GAP_REL(0)))
                             .add(GROW_X,
-                                button("Click Me!").group(SOFT.BUTTON)
+                                button("Click Me!").group(Soft.BUTTON)
                             )
                             .add(GROW_X.and(WRAP),
-                                toggleButton("Toggle Me!").group(SOFT.BUTTON)
+                                toggleButton("Toggle Me!").group(Soft.BUTTON)
                             )
                             .add(GROW_X,
                                 checkBox("Check")
