@@ -211,7 +211,6 @@ public class Utility {
         int height1 = imageFromFile.getHeight();
         int height0 = image.getHeight();
         if ((width1 != width0) || (height1 != height0)) {
-            System.err.println("Images must have the same dimensions!");
             // Let's resize the image to the same size
             image = _stretchFirstToSecondSize(image, imageFromFile);
         }
@@ -220,7 +219,7 @@ public class Utility {
             try {
                 String newPath = "build/resources/test" + imageFile.replace(".png", "-FAILURE.png");
                 safeUIImage(originalImage, newPath);
-                BufferedImage finalImageFromFile = imageFromFile;
+                BufferedImage finalImageFromFile = image;
                 SwingUtilities.invokeLater(()-> {
                     JLabel wrongImage = new JLabel(new ImageIcon(originalImage));
                     JLabel expectedImage = new JLabel(new ImageIcon(finalImageFromFile));

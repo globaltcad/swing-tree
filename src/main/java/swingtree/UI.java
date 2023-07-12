@@ -2682,9 +2682,14 @@ public final class UI
      */
     public static UIForLabel<JLabel> label( int width, int height, ImageIcon icon ) {
         NullUtil.nullArgCheck(icon, "icon", ImageIcon.class);
+        float scale = UIScale.getUserScaleFactor();
+
         int scaleHint = Image.SCALE_SMOOTH;
-        if ( UIScale.getUserScaleFactor() > 1.5f )
+        if ( scale > 1.5f )
             scaleHint = Image.SCALE_FAST;
+
+        width  = (int) (width * scale);
+        height = (int) (height * scale);
 
         Image scaled = icon.getImage().getScaledInstance(width, height, scaleHint);
         return of((JLabel) new Label())
