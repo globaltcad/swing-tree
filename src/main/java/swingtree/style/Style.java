@@ -263,7 +263,11 @@ public final class Style
 
     @Override
     public int hashCode() {
-        return Objects.hash(_layout, _border, _background, _foreground, _font, StyleUtility.mapHash(_shadows), StyleUtility.mapHash(_painters), StyleUtility.mapHash(_shades));
+        return Objects.hash(
+                _layout, _border, _background, _foreground, _font,
+                StyleUtility.mapHash(_shadows), StyleUtility.mapHash(_painters), StyleUtility.mapHash(_shades),
+                _dimensionality
+            );
     }
 
     @Override
@@ -279,7 +283,8 @@ public final class Style
                Objects.equals(_font,       other._font      ) &&
                StyleUtility.mapEquals(_shadows,    other._shadows   ) &&
                StyleUtility.mapEquals(_painters,   other._painters  ) &&
-               StyleUtility.mapEquals(_shades,     other._shades    );
+               StyleUtility.mapEquals(_shades,     other._shades    ) &&
+               Objects.equals(_dimensionality, other._dimensionality);
     }
 
     @Override

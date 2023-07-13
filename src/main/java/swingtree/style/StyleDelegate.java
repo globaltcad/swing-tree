@@ -988,7 +988,7 @@ public final class StyleDelegate<C extends JComponent>
      *          applied to the underlying component when the final {@link Style} is applied.
      */
     public StyleDelegate<C> minSize( Dimension minSize ) {
-        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(minSize.width)._withMaxHeight(minSize.height)));
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinWidth(minSize.width)._withMinHeight(minSize.height)));
     }
 
     /**
@@ -1001,7 +1001,7 @@ public final class StyleDelegate<C extends JComponent>
      *          applied to the underlying component when the final {@link Style} is applied.
      */
     public StyleDelegate<C> minSize( int width, int height ) {
-        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(width)._withMaxHeight(height)));
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinWidth(width)._withMinHeight(height)));
     }
 
     /**
@@ -1013,7 +1013,7 @@ public final class StyleDelegate<C extends JComponent>
      *          applied to the underlying component when the final {@link Style} is applied.
      */
     public StyleDelegate<C> minWidth( int minWidth ) {
-        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(minWidth)));
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinWidth(minWidth)));
     }
 
     /**
@@ -1025,7 +1025,7 @@ public final class StyleDelegate<C extends JComponent>
      *          applied to the underlying component when the final {@link Style} is applied.
      */
     public StyleDelegate<C> minHeight( int minHeight ) {
-        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxHeight(minHeight)));
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinHeight(minHeight)));
     }
 
     /**
