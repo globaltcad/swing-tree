@@ -13,6 +13,7 @@ import swingtree.input.Keyboard;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
 import swingtree.style.Styler;
+import swingtree.style.UIScale;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -1790,7 +1791,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withMinSize( Dimension size ) {
         NullUtil.nullArgCheck(size, "size", Dimension.class);
-        getComponent().setMinimumSize(size);
+        getComponent().setMinimumSize(new Dimension(UIScale.scale(size.width), UIScale.scale(size.height)));
         return _this();
     }
 
@@ -1816,7 +1817,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the minimum size of this component!");
         _onShow( size, v -> {
             C comp = getComponent();
-            comp.setMinimumSize(v);
+            comp.setMinimumSize(UIScale.scale(v));
             _revalidate(comp);
         });
         return this.withMinSize( size.orElseThrow() );
@@ -1830,7 +1831,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withMinSize( int width, int height ) {
-        getComponent().setMinimumSize(new Dimension(width, height));
+        getComponent().setMinimumSize(new Dimension(UIScale.scale(width), UIScale.scale(height)));
         return _this();
     }
 
@@ -1849,12 +1850,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the minimum height of this component!");
         _onShow( width, w -> {
             C comp = getComponent();
-            comp.setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height));
+            comp.setMinimumSize(new Dimension(UIScale.scale(w), getComponent().getMinimumSize().height));
             _revalidate(comp);
         });
         _onShow( height, h -> {
             C comp = getComponent();
-            comp.setMinimumSize(new Dimension(getComponent().getMinimumSize().width, h));
+            comp.setMinimumSize(new Dimension(getComponent().getMinimumSize().width, UIScale.scale(h)));
             _revalidate(comp);
         });
         return this.withMinSize( width.orElseThrow(), height.orElseThrow() );
@@ -1867,7 +1868,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withMinWidth( int width ) {
-        getComponent().setMinimumSize(new Dimension(width, getComponent().getMinimumSize().height));
+        getComponent().setMinimumSize(new Dimension(UIScale.scale(width), getComponent().getMinimumSize().height));
         return _this();
     }
 
@@ -1882,7 +1883,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the minimum width of this component!");
         _onShow( width, w -> {
             C comp = getComponent();
-            comp.setMinimumSize(new Dimension(w, getComponent().getMinimumSize().height));
+            comp.setMinimumSize(new Dimension(UIScale.scale(w), getComponent().getMinimumSize().height));
             _revalidate(comp); // Swing is not smart enough to do this automatically
         });
         return this.withMinWidth( width.orElseThrow() );
@@ -1896,7 +1897,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withMinHeight( int height ) {
-        getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, height));
+        getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, UIScale.scale(height)));
         return _this();
     }
 
@@ -1911,7 +1912,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the minimum height of this component!");
         _onShow( height, h -> {
             C comp = getComponent();
-            comp.setMinimumSize( new Dimension(getComponent().getMinimumSize().width, h));
+            comp.setMinimumSize( new Dimension(getComponent().getMinimumSize().width, UIScale.scale(h)) );
             _revalidate(comp); // The revalidate is necessary to make the change visible.
         });
         return this.withMinHeight( height.orElseThrow() );
@@ -1925,7 +1926,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withMaxSize( Dimension size ) {
         NullUtil.nullArgCheck(size, "size", Dimension.class);
-        getComponent().setMaximumSize(size);
+        getComponent().setMaximumSize(new Dimension(UIScale.scale(size.width), UIScale.scale(size.height)));
         return _this();
     }
 
@@ -1941,7 +1942,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the maximum size of this component!");
         _onShow( size, v -> {
             C comp = getComponent();
-            comp.setMaximumSize(v);
+            comp.setMaximumSize( new Dimension(UIScale.scale(v.width), UIScale.scale(v.height)) );
             _revalidate(comp); // For some reason this is needed to make the change visible.
         });
         return this.withMaxSize( size.orElseThrow() );
@@ -1955,7 +1956,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withMaxSize( int width, int height ) {
-        getComponent().setMaximumSize(new Dimension(width, height));
+        getComponent().setMaximumSize(new Dimension(UIScale.scale(width), UIScale.scale(height)));
         return _this();
     }
 
@@ -1974,12 +1975,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the maximum height of this component!");
         _onShow( width, w -> {
             C comp = getComponent();
-            comp.setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height));
+            comp.setMaximumSize(new Dimension(UIScale.scale(w), getComponent().getMaximumSize().height));
             _revalidate(comp); // Swing is not smart enough to do this automatically :(
         });
         _onShow( height, h -> {
             C comp = getComponent();
-            comp.setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h));
+            comp.setMaximumSize(new Dimension(getComponent().getMaximumSize().width, UIScale.scale(h)));
             _revalidate(comp); // Still not smart enough to do this automatically :(
         });
         return this.withMaxSize( width.orElseThrow(), height.orElseThrow() );
@@ -1992,7 +1993,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withMaxWidth( int width ) {
-        getComponent().setMaximumSize(new Dimension(width, getComponent().getMaximumSize().height));
+        getComponent().setMaximumSize(new Dimension(UIScale.scale(width), getComponent().getMaximumSize().height));
         return _this();
     }
 
@@ -2007,7 +2008,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the maximum width of this component!");
         _onShow( width, w -> {
             C comp = getComponent();
-            comp.setMaximumSize(new Dimension(w, getComponent().getMaximumSize().height));
+            comp.setMaximumSize(new Dimension(UIScale.scale(w), getComponent().getMaximumSize().height));
             _revalidate(comp); // When the size changes, the layout manager needs to be informed.
         });
         return this.withMaxWidth( width.orElseThrow() );
@@ -2020,7 +2021,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withMaxHeight( int height ) {
-        getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, height));
+        getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, UIScale.scale(height)));
         return _this();
     }
 
@@ -2035,7 +2036,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the maximum height of this component!");
         _onShow( height, h -> {
             C comp = getComponent();
-            comp.setMaximumSize(new Dimension(getComponent().getMaximumSize().width, h));
+            comp.setMaximumSize(new Dimension(getComponent().getMaximumSize().width, UIScale.scale(h)));
             _revalidate(comp); // The revalidate is necessary to make the change visible, this makes sure the layout is recalculated.
         });
         return this.withMaxHeight( height.orElseThrow() );
@@ -2049,7 +2050,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withPrefSize( Dimension size ) {
         NullUtil.nullArgCheck(size, "size", Dimension.class);
-        getComponent().setPreferredSize(size);
+        getComponent().setPreferredSize(new Dimension(UIScale.scale(size.width), UIScale.scale(size.height)));
         return _this();
     }
 
@@ -2065,7 +2066,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the preferred size of this component!");
         _onShow( size, v -> {
             C comp = getComponent();
-            comp.setPreferredSize(v);
+            comp.setPreferredSize(new Dimension(UIScale.scale(v.width), UIScale.scale(v.height)));
             _revalidate(comp);
         });
         return this.withPrefSize( size.orElseNull() );
@@ -2079,7 +2080,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withPrefSize( int width, int height ) {
-        getComponent().setPreferredSize(new Dimension(width, height));
+        getComponent().setPreferredSize(new Dimension(UIScale.scale(width), UIScale.scale(height)));
         return _this();
     }
 
@@ -2098,12 +2099,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the preferred height of this component!");
         _onShow( width, w -> {
             C comp = getComponent();
-            comp.setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height));
+            comp.setPreferredSize(new Dimension(UIScale.scale(w), getComponent().getPreferredSize().height));
             _revalidate(comp); // We need to revalidate the component to make sure the layout manager is aware of the new size.
         });
         _onShow( height, h -> {
             C comp = getComponent();
-            comp.setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h));
+            comp.setPreferredSize(new Dimension(getComponent().getPreferredSize().width, UIScale.scale(h)));
             _revalidate(comp); // We need to revalidate the component to make sure the layout manager is aware of the new size.
         });
         return this.withPrefSize( width.orElseThrow(), height.orElseThrow() );
@@ -2116,7 +2117,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withPrefWidth( int width ) {
-        getComponent().setPreferredSize(new Dimension(width, getComponent().getPreferredSize().height));
+        getComponent().setPreferredSize(new Dimension(UIScale.scale(width), getComponent().getPreferredSize().height));
         return _this();
     }
 
@@ -2131,7 +2132,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the preferred width of this component!");
         _onShow( width, w -> {
             C comp = getComponent();
-            comp.setPreferredSize(new Dimension(w, getComponent().getPreferredSize().height));
+            comp.setPreferredSize(new Dimension(UIScale.scale(w), getComponent().getPreferredSize().height));
             _revalidate(comp); // We need to revalidate the component to make sure the new preferred size is applied.
         });
         return this.withPrefWidth( width.orElseThrow() );
@@ -2144,7 +2145,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withPrefHeight( int height ) {
-        getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, height));
+        getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, UIScale.scale(height)));
         return _this();
     }
 
@@ -2159,7 +2160,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the preferred height of this component!");
         _onShow( height, h -> {
             C comp = getComponent();
-            comp.setPreferredSize(new Dimension(getComponent().getPreferredSize().width, h));
+            comp.setPreferredSize(new Dimension(getComponent().getPreferredSize().width, UIScale.scale(h)));
             _revalidate(comp); // We need to revalidate the component to make sure the new preferred size is applied.
         });
         return this.withPrefHeight( height.orElseThrow() );
@@ -2173,7 +2174,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withSize( Dimension size ) {
         NullUtil.nullArgCheck(size, "size", Dimension.class);
-        getComponent().setSize(size);
+        getComponent().setSize( new Dimension(UIScale.scale(size.width), UIScale.scale(size.height)) );
         return _this();
     }
 
@@ -2189,7 +2190,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the size of this component!");
         _onShow( size, v -> {
             C comp = getComponent();
-            comp.setSize(v);
+            comp.setSize( new Dimension(UIScale.scale(v.width), UIScale.scale(v.height)) );
             _revalidate(comp); // We need to revalidate the component to make sure the new size is applied.
         });
         return this.withSize( size.orElseNull() );
@@ -2213,7 +2214,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withWidth( int width ) {
-        getComponent().setSize(new Dimension(width, getComponent().getSize().height));
+        getComponent().setSize(new Dimension(UIScale.scale(width), getComponent().getSize().height));
         return _this();
     }
 
@@ -2229,7 +2230,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the width of this component!");
         _onShow( width, w -> {
             C comp = getComponent();
-            comp.setSize(new Dimension(w, getComponent().getSize().height));
+            comp.setSize(new Dimension(UIScale.scale(w), getComponent().getSize().height));
             _revalidate(comp); // We need to revalidate the component to make sure the new size is applied.
         });
         return this.withWidth( width.orElseThrow() );
@@ -2242,7 +2243,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withHeight( int height ) {
-        getComponent().setSize(new Dimension(getComponent().getSize().width, height));
+        getComponent().setSize(new Dimension(getComponent().getSize().width, UIScale.scale(height)));
         return _this();
     }
 
@@ -2258,7 +2259,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the height of this component!");
         _onShow( height, h -> {
             C comp = getComponent();
-            comp.setSize(new Dimension(getComponent().getSize().width, h));
+            comp.setSize(new Dimension(getComponent().getSize().width, UIScale.scale(h)));
             _revalidate(comp); // We need to revalidate the component to make sure the new size is applied.
         });
         return this.withHeight( height.orElseThrow() );
