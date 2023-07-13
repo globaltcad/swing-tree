@@ -126,7 +126,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
      */
     @SafeVarargs
     @SuppressWarnings("varargs")
-    public final <X, Y extends E, B extends AbstractNestedBuilder<X, Y, E>> I add( B... builders ) {
+    public final <B extends AbstractNestedBuilder<?, ?, JComponent>> I add( B... builders ) {
         if ( builders == null )
             throw new IllegalArgumentException("Swing tree builders may not be null!");
 
