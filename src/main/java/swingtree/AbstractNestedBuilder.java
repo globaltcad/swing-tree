@@ -1,5 +1,6 @@
 package swingtree;
 
+import swingtree.style.ComponentExtension;
 import swingtree.threading.EventProcessor;
 
 import javax.swing.*;

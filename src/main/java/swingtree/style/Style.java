@@ -111,7 +111,7 @@ public final class Style
         return _withShadow(styledShadows);
     }
 
-    LayoutStyle layout() { return _layout; }
+    public LayoutStyle layout() { return _layout; }
 
     public Outline padding() { return _layout.padding(); }
 
@@ -142,7 +142,7 @@ public final class Style
     /**
      * @return An unmodifiable list of all shadow styles sorted by their names in ascending alphabetical order.
      */
-    public List<ShadowStyle> shadows(Layer layer) {
+    List<ShadowStyle> shadows(Layer layer) {
         return Collections.unmodifiableList(
                 _shadows.entrySet()
                         .stream()
@@ -155,7 +155,7 @@ public final class Style
 
     Map<String, ShadowStyle> shadowsMap() { return _shadows; }
 
-    public boolean anyVisibleShadows() {
+    boolean anyVisibleShadows() {
         return _shadows.values().stream().anyMatch(s -> s.color().isPresent() && s.color().get().getAlpha() > 0 );
     }
 
@@ -169,7 +169,7 @@ public final class Style
     /**
      * @return An unmodifiable list of painters sorted by their names in ascending alphabetical order.
      */
-    public List<Painter> painters(Layer layer) {
+    List<Painter> painters(Layer layer) {
         return Collections.unmodifiableList(
                 _painters
                         .entrySet()
@@ -182,28 +182,28 @@ public final class Style
         );
     }
 
-        public List<Painter> painters() {
-            return Collections.unmodifiableList(
-                                    _painters
-                                        .entrySet()
-                                        .stream()
-                                        .sorted(Map.Entry.comparingByKey())
-                                        .map(Map.Entry::getValue)
-                                        .map(PainterStyle::painter)
-                                        .collect(Collectors.toList())
-                                );
+    public List<Painter> painters() {
+        return Collections.unmodifiableList(
+                                _painters
+                                    .entrySet()
+                                    .stream()
+                                    .sorted(Map.Entry.comparingByKey())
+                                    .map(Map.Entry::getValue)
+                                    .map(PainterStyle::painter)
+                                    .collect(Collectors.toList())
+                            );
     }
 
 
-    public boolean hasCustomBackgroundPainters() {
+    boolean hasCustomBackgroundPainters() {
         return _painters.values().stream().anyMatch(p -> p.layer() == Layer.BACKGROUND && !Painter.none().equals(p.painter()));
     }
 
-    public boolean hasCustomForegroundPainters() {
+    boolean hasCustomForegroundPainters() {
         return _painters.values().stream().anyMatch(p -> p.layer() == Layer.FOREGROUND && !Painter.none().equals(p.painter()));
     }
 
-    public List<ShadeStyle> shades(Layer layer) {
+    List<ShadeStyle> shades(Layer layer) {
         return Collections.unmodifiableList(
                 _shades.entrySet().stream()
                         .sorted(Map.Entry.comparingByKey())
@@ -213,7 +213,7 @@ public final class Style
         );
     }
 
-    public boolean hasCustomBackgroundShades() {
+    boolean hasCustomBackgroundShades() {
         return !( _shades.size() == 1 && ShadeStyle.none().equals(_shades.get(StyleUtility.DEFAULT_KEY)) );
     }
 
@@ -227,7 +227,7 @@ public final class Style
         return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, _shadows, _painters, shades);
     }
 
-    public Style shade( String shadeName, Function<ShadeStyle, ShadeStyle> styler ) {
+    Style shade( String shadeName, Function<ShadeStyle, ShadeStyle> styler ) {
         Objects.requireNonNull(shadeName);
         Objects.requireNonNull(styler);
         ShadeStyle shadow = Optional.ofNullable(_shades.get(shadeName)).orElse(ShadeStyle.none());
@@ -237,7 +237,7 @@ public final class Style
         return shade(newShadows);
     }
 
-    public Style painter( String painterName, Layer layer, Painter painter ) {
+    Style painter( String painterName, Layer layer, Painter painter ) {
         Objects.requireNonNull(painterName);
         Objects.requireNonNull(painter);
         painterName = painterName + "_" + layer.name();
@@ -247,7 +247,7 @@ public final class Style
         return painter(newPainters);
     }
 
-    public Style scale( double scale ) {
+    Style scale( double scale ) {
         return new Style(
                     _layout._scale(scale),
                     _border._scale(scale),
@@ -270,35 +270,57 @@ public final class Style
             );
     }
 
+    boolean hasEqualLayoutAs( Style otherStyle ) {
+        return Objects.equals(_layout, otherStyle._layout);
+    }
+
+    boolean hasEqualBorderAs( Style otherStyle ) {
+        return Objects.equals(_border, otherStyle._border);
+    }
+
+    boolean hasEqualBackgroundAs( Style otherStyle ) {
+        return Objects.equals(_background, otherStyle._background);
+    }
+
+    boolean hasEqualForegroundAs( Style otherStyle ) {
+        return Objects.equals(_foreground, otherStyle._foreground);
+    }
+
+    boolean hasEqualFontAs( Style otherStyle ) {
+        return Objects.equals(_font, otherStyle._font);
+    }
+
+    boolean hasEqualDimensionalityAs( Style otherStyle ) {
+        return Objects.equals(_dimensionality, otherStyle._dimensionality);
+    }
+
+    boolean hasEqualShadowsAs( Style otherStyle ) {
+        return StyleUtility.mapEquals(_shadows, otherStyle._shadows);
+    }
+
+    boolean hasEqualPaintersAs( Style otherStyle ) {
+        return StyleUtility.mapEquals(_painters, otherStyle._painters);
+    }
+
+    boolean hasEqualShadesAs( Style otherStyle ) {
+        return StyleUtility.mapEquals(_shades, otherStyle._shades);
+    }
+
     @Override
     public boolean equals( Object obj ) {
         if ( obj == this ) return true;
         if ( obj == null ) return false;
         if ( !(obj instanceof Style) ) return false;
         Style other = (Style) obj;
-        return Objects.equals(_layout,     other._layout    ) &&
-               Objects.equals(_border,     other._border    ) &&
-               Objects.equals(_background, other._background) &&
-               Objects.equals(_foreground, other._foreground) &&
-               Objects.equals(_font,       other._font      ) &&
-               StyleUtility.mapEquals(_shadows,    other._shadows   ) &&
-               StyleUtility.mapEquals(_painters,   other._painters  ) &&
-               StyleUtility.mapEquals(_shades,     other._shades    ) &&
-               Objects.equals(_dimensionality, other._dimensionality);
-    }
-
-    public List<Class<?>> unEqualSubStyles( Style otherStyle ) {
-        List<Class<?>> notEqualSubStyles = new ArrayList<>();
-        if ( !Objects.equals(_layout, otherStyle._layout)                 ) notEqualSubStyles.add(LayoutStyle.class);
-        if ( !Objects.equals(_border, otherStyle._border)                 ) notEqualSubStyles.add(BorderStyle.class);
-        if ( !Objects.equals(_background, otherStyle._background)         ) notEqualSubStyles.add(BackgroundStyle.class);
-        if ( !Objects.equals(_foreground, otherStyle._foreground)         ) notEqualSubStyles.add(ForegroundStyle.class);
-        if ( !Objects.equals(_font, otherStyle._font)                     ) notEqualSubStyles.add(FontStyle.class);
-        if ( !Objects.equals(_dimensionality, otherStyle._dimensionality) ) notEqualSubStyles.add(DimensionalityStyle.class);
-        if ( !StyleUtility.mapEquals(_shadows, otherStyle._shadows)       ) notEqualSubStyles.add(ShadowStyle.class);
-        if ( !StyleUtility.mapEquals(_painters, otherStyle._painters)     ) notEqualSubStyles.add(PainterStyle.class);
-        if ( !StyleUtility.mapEquals(_shades, otherStyle._shades)         ) notEqualSubStyles.add(ShadeStyle.class);
-        return Collections.unmodifiableList(notEqualSubStyles);
+        return hasEqualLayoutAs(other)         &&
+               hasEqualBorderAs(other)         &&
+               hasEqualBackgroundAs(other)     &&
+               hasEqualForegroundAs(other)     &&
+               hasEqualFontAs(other)           &&
+               hasEqualDimensionalityAs(other) &&
+               hasEqualShadowsAs(other)        &&
+               hasEqualPaintersAs(other)       &&
+               hasEqualShadesAs(other);
     }
 
     @Override

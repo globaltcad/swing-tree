@@ -1,7 +1,5 @@
 package swingtree.style;
 
-import swingtree.ComponentExtension;
-
 import javax.swing.*;
 import java.util.Objects;
 

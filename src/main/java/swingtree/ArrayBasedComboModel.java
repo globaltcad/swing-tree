@@ -2,7 +2,7 @@ package swingtree;
 
 import sprouts.Var;
 
-class ArrayBasedComboModel<E> extends AbstractComboModel<E>
+final class ArrayBasedComboModel<E> extends AbstractComboModel<E>
 {
 	private final E[] items;
 

@@ -12,6 +12,7 @@ import swingtree.api.mvvm.ViewSupplier;
 import swingtree.input.Keyboard;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
+import swingtree.style.ComponentExtension;
 import swingtree.style.Styler;
 import swingtree.style.UIScale;
 

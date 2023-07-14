@@ -15,6 +15,7 @@ import swingtree.api.model.TableMapDataSource;
 import swingtree.components.JScrollPanels;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
+import swingtree.style.ComponentExtension;
 import swingtree.style.StyleSheet;
 import swingtree.style.UIScale;
 import swingtree.threading.EventProcessor;
@@ -732,8 +733,17 @@ public final class UI
     public static UIForButton<JButton> button( int width, int height, ImageIcon icon, ImageIcon onHover ) {
         NullUtil.nullArgCheck(icon, "icon", ImageIcon.class);
         NullUtil.nullArgCheck(onHover, "onHover", ImageIcon.class);
-        onHover = new ImageIcon(onHover.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT));
-        icon = new ImageIcon(icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT));
+        float scale = UIScale.getUserScaleFactor();
+
+        int scaleHint = Image.SCALE_SMOOTH;
+        if ( scale > 1.5f )
+            scaleHint = Image.SCALE_FAST;
+
+        width  = (int) (width * scale);
+        height = (int) (height * scale);
+
+        onHover = new ImageIcon(onHover.getImage().getScaledInstance(width, height, scaleHint));
+        icon = new ImageIcon(icon.getImage().getScaledInstance(width, height, scaleHint));
         return button(icon, onHover, onHover);
     }
 

@@ -1,9 +1,9 @@
-package swingtree;
+package swingtree.style;
 
+import swingtree.SwingTreeContext;
+import swingtree.UI;
 import swingtree.animation.AnimationState;
 import swingtree.animation.LifeTime;
-import swingtree.style.Painter;
-import swingtree.style.*;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -25,7 +25,7 @@ import java.util.function.Supplier;
  *  It exists to give Swing-Tree components some custom rendering
  *  in a declarative fashion.
  */
-public class ComponentExtension<C extends JComponent>
+public final class ComponentExtension<C extends JComponent>
 {
     /**
      * Returns the {@link ComponentExtension} associated with the given component.
@@ -40,7 +40,7 @@ public class ComponentExtension<C extends JComponent>
         return ext;
     }
 
-    static void makeSureComponentHasExtension( JComponent comp ) { from(comp); }
+    public static void makeSureComponentHasExtension( JComponent comp ) { from(comp); }
 
     private final C _owner;
 
@@ -64,7 +64,7 @@ public class ComponentExtension<C extends JComponent>
 
     private boolean _customLookAndFeelIsInstalled() { return _styleLaF != null; }
 
-    void addStyling( Styler<C> styler ) {
+    public void addStyling( Styler<C> styler ) {
         Objects.requireNonNull(styler);
         checkIfIsDeclaredInUI();
         _styling = _styling.andThen( s -> styler.style(new StyleDelegate<>(_owner, s.style())) );
@@ -72,7 +72,7 @@ public class ComponentExtension<C extends JComponent>
         establishStyle();
     }
 
-    void establishStyle() {
+    public void establishStyle() {
         _applyStyleToComponentState(_calculateStyle());
     }
 
@@ -91,12 +91,12 @@ public class ComponentExtension<C extends JComponent>
         _animationStylers.clear();
     }
 
-    void addAnimationPainter( AnimationState state, Painter painter ) {
+    public void addAnimationPainter( AnimationState state, Painter painter ) {
         _animationPainters.put(Objects.requireNonNull(state.lifetime()), Objects.requireNonNull(painter));
         _installCustomBorderBasedStyleAndAnimationRenderer();
     }
 
-    void addAnimationStyler( AnimationState state, Styler<C> styler ) {
+    public void addAnimationStyler( AnimationState state, Styler<C> styler ) {
         _animationStylers.put(Objects.requireNonNull(state.lifetime()), Objects.requireNonNull(styler));
         _installCustomBorderBasedStyleAndAnimationRenderer();
     }
@@ -113,7 +113,7 @@ public class ComponentExtension<C extends JComponent>
         return Optional.ofNullable(_currentRenderer);
     }
 
-    void renderBaseStyle( Graphics g )
+    public void renderBaseStyle( Graphics g )
     {
         if ( _customLookAndFeelIsInstalled() )
             return; // We render through the custom installed UI!
@@ -201,11 +201,38 @@ public class ComponentExtension<C extends JComponent>
     {
         Objects.requireNonNull(style);
 
-        List<Class<?>> touchedStyles = Style.none().unEqualSubStyles(style);
-        boolean isNotStyled = touchedStyles.isEmpty();
-        boolean onlyDimensionalityChanged = touchedStyles.size() == 1 && touchedStyles.get(0) == DimensionalityStyle.class;
+        final boolean noLayoutStyle         = Style.none().hasEqualLayoutAs(style);
+        final boolean noBorderStyle         = Style.none().hasEqualBorderAs(style);
+        final boolean noBackgroundStyle     = Style.none().hasEqualBackgroundAs(style);
+        final boolean noForegroundStyle     = Style.none().hasEqualForegroundAs(style);
+        final boolean noFontStyle           = Style.none().hasEqualFontAs(style);
+        final boolean noDimensionalityStyle = Style.none().hasEqualDimensionalityAs(style);
+        final boolean noShadowStyle         = Style.none().hasEqualShadowsAs(style);
+        final boolean noPainters            = Style.none().hasEqualPaintersAs(style);
+        final boolean noShades              = Style.none().hasEqualShadesAs(style);
 
-        if ( isNotStyled || onlyDimensionalityChanged ) {
+        boolean isNotStyled = noLayoutStyle          &&
+                              noBorderStyle          &&
+                              noBackgroundStyle      &&
+                              noForegroundStyle      &&
+                              noFontStyle            &&
+                              noDimensionalityStyle  &&
+                              noShadowStyle          &&
+                              noPainters             &&
+                              noShades;
+
+        boolean onlyDimensionalityIsStyled =
+                              noLayoutStyle          &&
+                              noBorderStyle          &&
+                              noBackgroundStyle      &&
+                              noForegroundStyle      &&
+                              noFontStyle            &&
+                              !noDimensionalityStyle &&
+                              noShadowStyle          &&
+                              noPainters             &&
+                              noShades;
+
+        if ( isNotStyled || onlyDimensionalityIsStyled ) {
             _uninstallCustomLaF();
             if ( _animationStylers.isEmpty() && _animationPainters.isEmpty() )
                 _uninstallCustomBorderBasedStyleAndAnimationRenderer();
@@ -312,7 +339,7 @@ public class ComponentExtension<C extends JComponent>
                         _owner.setFont( newFont );
                 });
 
-        if ( !onlyDimensionalityChanged ) {
+        if ( !onlyDimensionalityIsStyled ) {
             _installCustomBorderBasedStyleAndAnimationRenderer();
             _establishLookAndFeel(style);
         }

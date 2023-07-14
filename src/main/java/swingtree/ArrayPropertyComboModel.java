@@ -3,7 +3,7 @@ package swingtree;
 import sprouts.Val;
 import sprouts.Var;
 
-class ArrayPropertyComboModel<E> extends AbstractComboModel<E>
+final class ArrayPropertyComboModel<E> extends AbstractComboModel<E>
 {
 	private final Val<E[]> _items;
 	private final boolean _mutable;

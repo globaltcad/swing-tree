@@ -3,6 +3,7 @@ package swingtree;
 import sprouts.*;
 import sprouts.Action;
 import swingtree.api.Peeker;
+import swingtree.style.ComponentExtension;
 import swingtree.threading.EventProcessor;
 
 import javax.swing.*;

@@ -4,6 +4,7 @@ import swingtree.animation.Animate;
 import swingtree.animation.Animation;
 import swingtree.animation.AnimationState;
 import swingtree.animation.LifeTime;
+import swingtree.style.ComponentExtension;
 import swingtree.style.Painter;
 import swingtree.style.Styler;
 import swingtree.style.UIScale;
