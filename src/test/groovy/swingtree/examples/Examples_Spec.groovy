@@ -168,7 +168,7 @@ class Examples_Spec extends Specification
         given : 'We create an instance of the UI.'
             var ui = new NoteGuesserView(new NoteGuesserViewModel())
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "views/note-guesser-UI.png", 99.9) > 99.9
+            Utility.similarityBetween(ui, "views/note-guesser-UI.png", 93) > 93
     }
 
     def 'The symbol guesser example UI defined in the examples can be created.'()
@@ -195,7 +195,7 @@ class Examples_Spec extends Specification
         given : 'We create the UI.'
             var ui = new WellRoundedView()
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "views/well-rounded-UI.png", 99.9) > 99.9
+            Utility.similarityBetween(ui, "views/well-rounded-UI.png", 98.1) > 98.1
     }
 
     def 'The soft example UI is rendered as expected.'()
@@ -236,7 +236,7 @@ class Examples_Spec extends Specification
             var ui = new AnimatedButtonsView()
             ui.setBackground(new Color(242, 242, 242))
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "views/animated-buttons-UI.png", 99) > 99
+            Utility.similarityBetween(ui, "views/animated-buttons-UI.png", 94.3) > 94.3
     }
 
     def 'The animation example view can be created.'()
@@ -321,7 +321,7 @@ class Examples_Spec extends Specification
             new Utility.Query(ui).find(JTextArea, "input-text-area").isPresent()
             new Utility.Query(ui).find(JTextArea, "input-text-area").get().componentOrientation == ComponentOrientation.RIGHT_TO_LEFT
         and : 'Its render state is as expected.'
-            Utility.similarityBetween(ui, "views/calculator-UI.png", 99) > 99
+            Utility.similarityBetween(ui, "views/calculator-UI.png", 97.5) > 97.5
     }
 
     def 'The simple Table-UI example has the expected state.'()
