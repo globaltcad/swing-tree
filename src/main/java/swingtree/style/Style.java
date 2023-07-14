@@ -287,6 +287,20 @@ public final class Style
                Objects.equals(_dimensionality, other._dimensionality);
     }
 
+    public List<Class<?>> unEqualSubStyles( Style otherStyle ) {
+        List<Class<?>> notEqualSubStyles = new ArrayList<>();
+        if ( !Objects.equals(_layout, otherStyle._layout)                 ) notEqualSubStyles.add(LayoutStyle.class);
+        if ( !Objects.equals(_border, otherStyle._border)                 ) notEqualSubStyles.add(BorderStyle.class);
+        if ( !Objects.equals(_background, otherStyle._background)         ) notEqualSubStyles.add(BackgroundStyle.class);
+        if ( !Objects.equals(_foreground, otherStyle._foreground)         ) notEqualSubStyles.add(ForegroundStyle.class);
+        if ( !Objects.equals(_font, otherStyle._font)                     ) notEqualSubStyles.add(FontStyle.class);
+        if ( !Objects.equals(_dimensionality, otherStyle._dimensionality) ) notEqualSubStyles.add(DimensionalityStyle.class);
+        if ( !StyleUtility.mapEquals(_shadows, otherStyle._shadows)       ) notEqualSubStyles.add(ShadowStyle.class);
+        if ( !StyleUtility.mapEquals(_painters, otherStyle._painters)     ) notEqualSubStyles.add(PainterStyle.class);
+        if ( !StyleUtility.mapEquals(_shades, otherStyle._shades)         ) notEqualSubStyles.add(ShadeStyle.class);
+        return Collections.unmodifiableList(notEqualSubStyles);
+    }
+
     @Override
     public String toString() {
         String shadowString;

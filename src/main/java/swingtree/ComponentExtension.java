@@ -201,7 +201,11 @@ public class ComponentExtension<C extends JComponent>
     {
         Objects.requireNonNull(style);
 
-        if ( Style.none().equals(style) ) {
+        List<Class<?>> touchedStyles = Style.none().unEqualSubStyles(style);
+        boolean isNotStyled = touchedStyles.isEmpty();
+        boolean onlyDimensionalityChanged = touchedStyles.size() == 1 && touchedStyles.get(0) == DimensionalityStyle.class;
+
+        if ( isNotStyled || onlyDimensionalityChanged ) {
             _uninstallCustomLaF();
             if ( _animationStylers.isEmpty() && _animationPainters.isEmpty() )
                 _uninstallCustomBorderBasedStyleAndAnimationRenderer();
@@ -209,7 +213,8 @@ public class ComponentExtension<C extends JComponent>
                 _owner.setBackground(_initialBackgroundColor);
                 _initialBackgroundColor = null;
             }
-            return style;
+            if ( isNotStyled )
+                return style;
         }
 
         boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();
@@ -307,9 +312,10 @@ public class ComponentExtension<C extends JComponent>
                         _owner.setFont( newFont );
                 });
 
-        _installCustomBorderBasedStyleAndAnimationRenderer();
-
-        _establishLookAndFeel( style );
+        if ( !onlyDimensionalityChanged ) {
+            _installCustomBorderBasedStyleAndAnimationRenderer();
+            _establishLookAndFeel(style);
+        }
 
         if ( !style.hasCustomForegroundPainters() )
             _makeAllChildrenTransparent(_owner);
@@ -377,9 +383,10 @@ public class ComponentExtension<C extends JComponent>
                                                     .foundationColor()
                                                     .map( c -> c.getAlpha() < 255 )
                                                     .orElse(
-                                                        Optional.ofNullable(_owner.getBackground())
-                                                                .map( c -> c.getAlpha() < 255 )
-                                                                .orElse(true)
+                                                        Optional
+                                                        .ofNullable(_owner.getBackground())
+                                                        .map( c -> c.getAlpha() < 255 )
+                                                        .orElse(true)
                                                     );
 
             _owner.setOpaque( !hasBorderRadius && !hasMargin && !foundationIsTransparent );
@@ -522,6 +529,7 @@ public class ComponentExtension<C extends JComponent>
         @Override
         public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
             _checkIfInsetsChanged();
+
             // We remember the clip:
             Shape formerClip = g.getClip();
             g.setClip(null);
