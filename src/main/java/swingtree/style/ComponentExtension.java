@@ -191,10 +191,10 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     private static Style _applyDPIScaling(Style style) {
-        if ( UIScale.getUserScaleFactor() == 1f )
+        if ( UI.scale() == 1f )
             return style;
 
-        return style.scale( UIScale.getUserScaleFactor() );
+        return style.scale( UI.scale() );
     }
 
     private Style _applyStyleToComponentState( Style style )

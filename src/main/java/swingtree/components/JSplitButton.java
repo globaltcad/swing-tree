@@ -23,29 +23,16 @@
 
 package swingtree.components;
 
+import swingtree.UI;
 import swingtree.components.action.ButtonClickedActionListener;
 import swingtree.components.action.SplitButtonActionListener;
 import swingtree.components.action.SplitButtonClickedActionListener;
-import swingtree.style.UIScale;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JPopupMenu;
-import javax.swing.UIManager;
 
 /**
  * An implementation of a "split" button.The left side acts like a normal
@@ -393,15 +380,15 @@ public class JSplitButton extends JButton implements Serializable {
     }
 
     private int _calculateArrowSize() {
-        return UIScale.scale(this.arrowSize);
+        return UI.scale(this.arrowSize);
     }
 
     private int _calculateSplitWidth() {
-        return UIScale.scale(this.splitWidth);
+        return UI.scale(this.splitWidth);
     }
 
     private int _calculateSeparatorSpacing() {
-        return UIScale.scale(this.separatorSpacing);
+        return UI.scale(this.separatorSpacing);
     }
 
     /**

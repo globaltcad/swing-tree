@@ -7,7 +7,6 @@ import swingtree.animation.LifeTime;
 import swingtree.style.ComponentExtension;
 import swingtree.style.Painter;
 import swingtree.style.Styler;
-import swingtree.style.UIScale;
 
 import javax.swing.*;
 import java.awt.*;
@@ -980,9 +979,18 @@ abstract class AbstractDelegate<C extends JComponent>
      * @return The current UI scale factor, which is used to scale the UI
      *         for high resolution displays (high dots-per-inch, or DPI).
      */
-    public float getScale() {
-        return UIScale.getUserScaleFactor();
-    }
+    public float getScale() { return UI.scale(); }
+
+    /**
+     *  The number returned by this method is used to scale the UI
+     *  to ensure that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
+     *  Use it inside custom {@link Painter} implementations (see {@link #paint(AnimationState, Painter)})
+     *  to scale custom {@link Graphics2D} painting operations.
+     *
+     * @return The current UI scale factor, which is used to scale the UI
+     *         for high resolution displays (high dots-per-inch, or DPI).
+     */
+    public float scale() { return UI.scale(); }
 
     /**
      *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationState, Painter)})
@@ -991,9 +999,7 @@ abstract class AbstractDelegate<C extends JComponent>
      *  @param value The {@code int} value to scale.
      *  @return The scaled {@code int} value.
      */
-    public int scale( int value ) {
-        return UIScale.scale(value);
-    }
+    public int scale( int value ) { return UI.scale(value); }
 
     /**
      *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationState, Painter)})
@@ -1002,9 +1008,7 @@ abstract class AbstractDelegate<C extends JComponent>
      *  @param value The {@code float} value to scale.
      *  @return The scaled {@code float} value.
      */
-    public float scale( float value ) {
-        return UIScale.scale(value);
-    }
+    public float scale( float value ) { return UI.scale(value); }
 
     /**
      *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationState, Painter)})
@@ -1013,8 +1017,6 @@ abstract class AbstractDelegate<C extends JComponent>
      *  @param value The {@code double} value to scale.
      *  @return The scaled {@code double} value.
      */
-    public double scale( double value ) {
-        return UIScale.scale(value);
-    }
+    public double scale( double value ) { return UI.scale(value); }
 
 }

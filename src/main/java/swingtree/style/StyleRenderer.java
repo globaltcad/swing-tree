@@ -1,5 +1,7 @@
 package swingtree.style;
 
+import swingtree.UI;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.*;
@@ -15,7 +17,7 @@ import java.util.function.Function;
 public final class StyleRenderer<C extends JComponent>
 {
     private static boolean DO_ANTIALIASING(){
-        return UIScale.getUserScaleFactor() < 1.5;
+        return UI.scale() < 1.5;
     }
 
     private final C _comp;
