@@ -19,7 +19,7 @@ public interface StyleSystemProperties
      * <p>
      * <strong>Allowed Values</strong> e.g. {@code 1.5}, {@code 1.5x}, {@code 150%} or {@code 144dpi} (96dpi is 100%)<br>
      */
-    String UI_SCALE = "style.uiScale";
+    String UI_SCALE = "swingtree.uiScale";
 
     /**
      * Specifies whether user scaling mode is enabled.
@@ -27,7 +27,7 @@ public interface StyleSystemProperties
      * <strong>Allowed Values</strong> {@code false} and {@code true}<br>
      * <strong>Default</strong> {@code true}
      */
-    String UI_SCALE_ENABLED = "style.uiScale.enabled";
+    String UI_SCALE_ENABLED = "swingtree.uiScale.enabled";
 
     /**
      * Specifies whether values smaller than 100% are allowed for the user scale factor
@@ -36,7 +36,7 @@ public interface StyleSystemProperties
      * <strong>Allowed Values</strong> {@code false} and {@code true}<br>
      * <strong>Default</strong> {@code false}
      */
-    String UI_SCALE_ALLOW_SCALE_DOWN = "style.uiScale.allowScaleDown";
+    String UI_SCALE_ALLOW_SCALE_DOWN = "swingtree.uiScale.allowScaleDown";
 
     /**
      * Checks whether a system property is set and returns {@code true} if its value
