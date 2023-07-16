@@ -46,6 +46,11 @@ public final class SwingTreeContext
 		return _INSTANCES;
 	}
 
+    public static void reset() {
+        _INSTANCES = null;
+        UIScale.reset();
+    }
+
 
 	private EventProcessor _eventProcessor = EventProcessor.COUPLED_STRICT;
 	private StyleSheet _styleSheet = null;
@@ -121,6 +126,7 @@ public final class SwingTreeContext
         private static final boolean DEBUG = false;
 
         private static PropertyChangeSupport changeSupport;
+
 
         private UIScale() {} // prevent instantiation
 
@@ -221,6 +227,11 @@ public final class SwingTreeContext
             UIManager.getLookAndFeelDefaults().addPropertyChangeListener( listener );
 
             updateScaleFactor();
+        }
+
+        public static void reset() {
+            scaleFactor = 1;
+            initialized = false;
         }
 
         private static void updateScaleFactor() {
@@ -379,6 +390,11 @@ public final class SwingTreeContext
             return scaleFactor;
         }
 
+        public static void setUserScaleFactor( float scaleFactor ) {
+            initialize();
+            setUserScaleFactor( scaleFactor, true );
+        }
+
         /**
          * Sets the user scale factor.
          */
@@ -503,7 +519,7 @@ public final class SwingTreeContext
      *
      * @author Daniel Nepp, but originally a derivative work of Karl Tauber
      */
-    public static interface SystemProperties
+    private static interface SystemProperties
     {
         /**
          * Specifies a custom scale factor used to scale the UI.

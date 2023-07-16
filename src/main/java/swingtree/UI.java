@@ -3398,7 +3398,7 @@ public final class UI
     public static UIForPasswordField<JPasswordField> passwordField( Var<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of(new JPasswordField())
+        return passwordField()
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
@@ -3409,7 +3409,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JPasswordField}, which enables fluent method chaining.
      */
-    public static UIForPasswordField<JPasswordField> passwordField() { return of(new JPasswordField()); }
+    public static UIForPasswordField<JPasswordField> passwordField() { return of(new PasswordField()); }
 
     /**
      *  Use this to create a builder for the provided {@link JProgressBar} instance.
