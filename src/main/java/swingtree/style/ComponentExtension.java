@@ -162,8 +162,15 @@ public final class ComponentExtension<C extends JComponent>
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
 
+        // We remember the clip:
+        Shape formerClip = g2d.getClip();
+
         if ( _currentRenderer != null )
             _currentRenderer.renderForegroundStyle(g2d);
+
+        // We restore the clip:
+        if ( g2d.getClip() != formerClip )
+            g2d.setClip(formerClip);
 
         // Enable antialiasing again:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
@@ -559,17 +566,19 @@ public final class ComponentExtension<C extends JComponent>
 
             // We remember the clip:
             Shape formerClip = g.getClip();
-            g.setClip(null);
 
             if ( _compExt._currentRenderer != null )
                 _compExt._currentRenderer.renderBorderStyle((Graphics2D) g);
             else if ( _formerBorder != null && !_borderWasNotPainted )
                 _formerBorder.paintBorder(c, g, x, y, width, height);
 
-            if ( formerClip != null )
+            if ( g.getClip() != formerClip )
                 g.setClip(formerClip);
 
             _compExt._renderAnimations( (Graphics2D) g );
+
+            if ( g.getClip() != formerClip )
+                g.setClip(formerClip);
         }
 
         @Override
