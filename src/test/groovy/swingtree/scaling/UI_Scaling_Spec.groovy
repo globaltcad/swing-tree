@@ -4,8 +4,10 @@ package swingtree.scaling
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
+import sprouts.Var
 import swingtree.SwingTreeContext
 import swingtree.UI
+import swingtree.threading.EventProcessor
 
 import javax.swing.*
 import java.awt.*
@@ -34,6 +36,10 @@ import java.awt.*
 ''')
 class UI_Scaling_Spec extends Specification
 {
+    def setup() {
+        SwingTreeContext.get().setEventProcessor(EventProcessor.COUPLED)
+    }
+
     def cleanup() {
         SwingTreeContext.reset()
     }
@@ -101,7 +107,16 @@ class UI_Scaling_Spec extends Specification
     }
 
 
-    def 'The dimensionality specified in the styling API are scaled by the scaling factor'() {
+    def 'The dimensionality specified in the styling API are scaled by the scaling factor'()
+    {
+        reportInfo """
+            The preferred API for changing how a component looks is the styling API of SwingTree.
+            The styling API allows you to style components based on functional styler lambdas
+            which are executed eagerly before every repaint.
+            That means that you can determine the dimensions of a component based on 
+            some current context (e.g. the size of the parent component) dynamically. 
+            How cool is that? :) 
+        """
         given:
             SwingTreeContext.UIScale.setUserScaleFactor(2.0f)
 
@@ -167,5 +182,97 @@ class UI_Scaling_Spec extends Specification
             passwordField.size.height == 120
     }
 
+    def 'Dimensionality scaling also works for bound properties.'()
+    {
+        reportInfo """
+            SwingTree supports MVVM (Model-View-ViewModel) and therefore allows you to bind
+            properties of the UI components to properties of a view model.
+            The values of properties modeling the dimensionality of the components are also scaled by the
+            scaling factor when applied to the UI components dynamically.
+        """
+        given : 'We set the scaling factor to 2.0'
+            SwingTreeContext.UIScale.setUserScaleFactor(2.0f)
+        and : 'We create a whole lot of properties:'
+            var prefSize = Var.of(new Dimension(70, 50))
+            var minSize  = Var.of(new Dimension(75, 25))
+            var maxSize  = Var.of(new Dimension(80, 45))
+            var size     = Var.of(new Dimension(20, 22))
+            var prefWidth  = Var.of(142)
+            var minWidth   = Var.of(110)
+            var maxWidth   = Var.of(90)
+            var width      = Var.of(284)
+            var prefHeight = Var.of(30)
+            var minHeight  = Var.of(36)
+            var maxHeight  = Var.of(40)
+            var height     = Var.of(66)
+
+        and : 'We create a UI with a button where all of these properties are bound to:'
+            var panel =
+                UI.panel()
+                .add(
+                    UI.button("Button")
+                    .withPrefSize(prefSize)
+                    .withMinSize(minSize)
+                    .withMaxSize(maxSize)
+                    .withSize(size)
+                    .withPrefWidth(prefWidth)
+                    .withMinWidth(minWidth)
+                    .withMaxWidth(maxWidth)
+                    .withWidth(width)
+                    .withPrefHeight(prefHeight)
+                    .withMinHeight(minHeight)
+                    .withMaxHeight(maxHeight)
+                    .withHeight(height)
+                )
+                .get(JPanel)
+
+        and : 'We unpack the tree of components:'
+            var button = panel.components[0]
+
+        expect : 'The specified dimensions of the components will be scaled by the scaling factor'
+            button.preferredSize == new Dimension(284, 60)
+            button.minimumSize == new Dimension(220, 72)
+            button.maximumSize == new Dimension(180, 80)
+            button.size == new Dimension(568, 132)
+
+        when : 'We change the first set of properties...'
+            prefSize.set(new Dimension(200, 100))
+            minSize.set(new Dimension(150, 50))
+            maxSize.set(new Dimension(140, 100))
+            size.set(new Dimension(300, 100))
+            UI.sync() // We need to wait for the UI thread to update the UI
+
+        then : 'The specified dimensions of the components will be scaled by the scaling factor'
+            button.preferredSize == new Dimension(400, 200)
+            button.minimumSize == new Dimension(300, 100)
+            button.maximumSize == new Dimension(280, 200)
+            button.size == new Dimension(600, 200)
+
+        when : 'We change the second set of properties...'
+            prefWidth.set(200)
+            minWidth.set(150)
+            maxWidth.set(140)
+            width.set(300)
+            UI.sync() // We need to wait for the UI thread to update the UI
+
+        then : 'The specified dimensions of the components will be scaled by the scaling factor'
+            button.preferredSize == new Dimension(400, 200)
+            button.minimumSize == new Dimension(300, 100)
+            button.maximumSize == new Dimension(280, 200)
+            button.size == new Dimension(600, 200)
+
+        when : 'We change the third set of properties...'
+            prefHeight.set(60)
+            minHeight.set(72)
+            maxHeight.set(80)
+            height.set(120)
+            UI.sync() // We need to wait for the UI thread to update the UI
+
+        then : 'The specified dimensions of the components will be scaled by the scaling factor'
+            button.preferredSize == new Dimension(400, 120)
+            button.minimumSize == new Dimension(300, 144)
+            button.maximumSize == new Dimension(280, 160)
+            button.size == new Dimension(600, 240)
+    }
 
 }
