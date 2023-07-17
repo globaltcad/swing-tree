@@ -254,12 +254,12 @@ public final class BorderStyle
             boolean arcWidthEqualsHeight = _topLeftArc == null || _topLeftArc.width() == _topLeftArc.height();
             arcsString = (
                         arcWidthEqualsHeight
-                            ? "radius="   + _topLeftArc.width()
+                            ? "radius="   + ( _topLeftArc == null ? "?" : _topLeftArc.width() )
                             : "arcWidth=" + _topLeftArc.width() + ", arcHeight=" + _topLeftArc.height()
                     );
         } else {
             arcsString =
-                    "topLeftArc="    + StyleUtility.toString(_topLeftArc)     +
+                    "topLeftArc="       + StyleUtility.toString(_topLeftArc)     +
                     ", topRightArc="    + StyleUtility.toString(_topRightArc)    +
                     ", bottomLeftArc="  + StyleUtility.toString(_bottomLeftArc)  +
                     ", bottomRightArc=" + StyleUtility.toString(_bottomRightArc);
@@ -270,7 +270,7 @@ public final class BorderStyle
             borderWidthsString = "width=" + _borderWidths.top().orElse(null);
         } else {
             borderWidthsString =
-                    "topWidth="    + _borderWidths.top().orElse(null)    +
+                    "topWidth="      + _borderWidths.top().orElse(null)    +
                     ", rightWidth="  + _borderWidths.right().orElse(null)  +
                     ", bottomWidth=" + _borderWidths.bottom().orElse(null) +
                     ", leftWidth="   + _borderWidths.left().orElse(null);
