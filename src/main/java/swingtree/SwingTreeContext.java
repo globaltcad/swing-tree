@@ -48,14 +48,20 @@ public final class SwingTreeContext
 
     public static void reset() {
         _INSTANCES = null;
-        UIScale.reset();
     }
 
 
 	private EventProcessor _eventProcessor = EventProcessor.COUPLED_STRICT;
 	private StyleSheet _styleSheet = null;
 
-	private SwingTreeContext() {}
+    private final UIScale uiScale;
+
+
+	private SwingTreeContext() {
+        this.uiScale = new UIScale();
+    }
+
+    public UIScale getUIScale() { return uiScale; }
 
 	/**
 	 * @return The currently configured {@link EventProcessor} that is used to process
@@ -123,20 +129,25 @@ public final class SwingTreeContext
      */
     public static final class UIScale
     {
-        private static final boolean DEBUG = false;
+        private final boolean DEBUG = false;
 
-        private static PropertyChangeSupport changeSupport;
+        private PropertyChangeSupport changeSupport;
+
+        private Boolean jreHiDPI;
+
+        private float scaleFactor = 1;
+        private boolean initialized;
 
 
         private UIScale() {} // prevent instantiation
 
-        public static void addPropertyChangeListener( PropertyChangeListener listener ) {
+        public void addPropertyChangeListener( PropertyChangeListener listener ) {
             if( changeSupport == null )
                 changeSupport = new PropertyChangeSupport( UIScale.class );
             changeSupport.addPropertyChangeListener( listener );
         }
 
-        public static void removePropertyChangeListener( PropertyChangeListener listener ) {
+        public void removePropertyChangeListener( PropertyChangeListener listener ) {
             if( changeSupport == null )
                 return;
             changeSupport.removePropertyChangeListener( listener );
@@ -144,12 +155,10 @@ public final class SwingTreeContext
 
         //---- system scaling (Java 9) --------------------------------------------
 
-        private static Boolean jreHiDPI;
-
         /**
          * Returns whether system scaling is enabled.
          */
-        public static boolean isSystemScalingEnabled() {
+        public boolean isSystemScalingEnabled() {
             if( jreHiDPI != null )
                 return jreHiDPI;
 
@@ -179,23 +188,20 @@ public final class SwingTreeContext
         /**
          * Returns the system scale factor for the given graphics context.
          */
-        public static double getSystemScaleFactor( Graphics2D g ) {
+        public double getSystemScaleFactor( Graphics2D g ) {
             return isSystemScalingEnabled() ? getSystemScaleFactor( g.getDeviceConfiguration() ) : 1;
         }
 
         /**
          * Returns the system scale factor for the given graphics configuration.
          */
-        public static double getSystemScaleFactor( GraphicsConfiguration gc ) {
+        public double getSystemScaleFactor( GraphicsConfiguration gc ) {
             return (isSystemScalingEnabled() && gc != null) ? gc.getDefaultTransform().getScaleX() : 1;
         }
 
         //---- user scaling (Java 8) ----------------------------------------------
 
-        private static float scaleFactor = 1;
-        private static boolean initialized;
-
-        private static void initialize() {
+        private void initialize() {
             if( initialized )
                 return;
             initialized = true;
@@ -229,12 +235,12 @@ public final class SwingTreeContext
             updateScaleFactor();
         }
 
-        public static void reset() {
+        public void reset() {
             scaleFactor = 1;
             initialized = false;
         }
 
-        private static void updateScaleFactor() {
+        private void updateScaleFactor() {
             if( !isUserScalingEnabled() )
                 return;
 
@@ -261,7 +267,7 @@ public final class SwingTreeContext
          *
          * @since 2
          */
-        public static float computeFontScaleFactor( Font font ) {
+        public float computeFontScaleFactor( Font font ) {
             if( SystemInfo.isWindows ) {
                 // Special handling for Windows to be compatible with OS scaling,
                 // which distinguish between "screen scaling" and "text scaling".
@@ -333,7 +339,7 @@ public final class SwingTreeContext
          * Applies a custom scale factor given in system property "style.uiScale"
          * to the given font.
          */
-        public static FontUIResource applyCustomScaleFactor(FontUIResource font ) {
+        public FontUIResource applyCustomScaleFactor(FontUIResource font ) {
             if( !isUserScalingEnabled() )
                 return font;
 
@@ -385,12 +391,12 @@ public final class SwingTreeContext
         /**
          * Returns the user scale factor.
          */
-        public static float getUserScaleFactor() {
+        public float getUserScaleFactor() {
             initialize();
             return scaleFactor;
         }
 
-        public static void setUserScaleFactor( float scaleFactor ) {
+        public void setUserScaleFactor( float scaleFactor ) {
             initialize();
             setUserScaleFactor( scaleFactor, true );
         }
@@ -398,7 +404,7 @@ public final class SwingTreeContext
         /**
          * Sets the user scale factor.
          */
-        private static void setUserScaleFactor( float scaleFactor, boolean normalize ) {
+        private void setUserScaleFactor( float scaleFactor, boolean normalize ) {
             if( normalize ) {
                 if( scaleFactor < 1f ) {
                     scaleFactor = SystemProperties.getBoolean( SystemProperties.UI_SCALE_ALLOW_SCALE_DOWN, false )
@@ -411,8 +417,8 @@ public final class SwingTreeContext
             // minimum scale factor
             scaleFactor = Math.max( scaleFactor, 0.1f );
 
-            float oldScaleFactor = UIScale.scaleFactor;
-            UIScale.scaleFactor = scaleFactor;
+            float oldScaleFactor = this.scaleFactor;
+            this.scaleFactor = scaleFactor;
 
             if( DEBUG )
                 System.out.println( "HiDPI scale factor " + scaleFactor );
@@ -424,7 +430,7 @@ public final class SwingTreeContext
         /**
          * Multiplies the given value by the user scale factor.
          */
-        public static float scale( float value ) {
+        public float scale( float value ) {
             initialize();
             return (scaleFactor == 1) ? value : (value * scaleFactor);
         }
@@ -432,7 +438,7 @@ public final class SwingTreeContext
         /**
          * Multiplies the given value by the user scale factor.
          */
-        public static double scale( double value ) {
+        public double scale( double value ) {
             initialize();
             return (scaleFactor == 1) ? value : (value * scaleFactor);
         }
@@ -440,7 +446,7 @@ public final class SwingTreeContext
         /**
          * Multiplies the given value by the user scale factor and rounds the result.
          */
-        public static int scale( int value ) {
+        public int scale( int value ) {
             initialize();
             return (scaleFactor == 1) ? value : Math.round( value * scaleFactor );
         }
@@ -450,7 +456,7 @@ public final class SwingTreeContext
          * <p>
          * For use in special cases. {@link #scale(int)} is the preferred method.
          */
-        public static int scale2( int value ) {
+        public int scale2( int value ) {
             initialize();
             return (scaleFactor == 1) ? value : (int) (value * scaleFactor);
         }
@@ -458,7 +464,7 @@ public final class SwingTreeContext
         /**
          * Divides the given value by the user scale factor.
          */
-        public static float unscale( float value ) {
+        public float unscale( float value ) {
             initialize();
             return (scaleFactor == 1f) ? value : (value / scaleFactor);
         }
@@ -466,7 +472,7 @@ public final class SwingTreeContext
         /**
          * Divides the given value by the user scale factor and rounds the result.
          */
-        public static int unscale( int value ) {
+        public int unscale( int value ) {
             initialize();
             return (scaleFactor == 1f) ? value : Math.round( value / scaleFactor );
         }
@@ -475,7 +481,7 @@ public final class SwingTreeContext
          * If user scale factor is not 1, scale the given graphics context by invoking
          * {@link Graphics2D#scale(double, double)} with user scale factor.
          */
-        public static void scaleGraphics( Graphics2D g ) {
+        public void scaleGraphics( Graphics2D g ) {
             initialize();
             if( scaleFactor != 1f )
                 g.scale( scaleFactor, scaleFactor );
@@ -488,7 +494,7 @@ public final class SwingTreeContext
          * Otherwise, a new instance of {@link Dimension} or {@link DimensionUIResource}
          * is returned, depending on whether the passed dimension implements {@link UIResource}.
          */
-        public static Dimension scale( Dimension dimension ) {
+        public Dimension scale( Dimension dimension ) {
             initialize();
             return (dimension == null || scaleFactor == 1f)
                     ? dimension
@@ -504,7 +510,7 @@ public final class SwingTreeContext
          * Otherwise, a new instance of {@link Insets} or {@link InsetsUIResource}
          * is returned, depending on whether the passed dimension implements {@link UIResource}.
          */
-        public static Insets scale( Insets insets ) {
+        public Insets scale( Insets insets ) {
             initialize();
             return (insets == null || scaleFactor == 1f)
                     ? insets

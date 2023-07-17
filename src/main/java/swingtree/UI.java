@@ -56,44 +56,44 @@ public final class UI
     /**
      * @return The current UI scale factor, which is used for DPI aware painting and layouts.
      */
-    public static float scale() { return SwingTreeContext.UIScale.getUserScaleFactor(); }
+    public static float scale() { return SwingTreeContext.get().getUIScale().getUserScaleFactor(); }
 
     /**
      * Multiplies the given float value by the user scale factor.
      * This is essentially a delegate for {@link SwingTreeContext.UIScale#scale(float)}.
      */
-    public static float scale( float value ) { return SwingTreeContext.UIScale.scale( value ); }
+    public static float scale( float value ) { return SwingTreeContext.get().getUIScale().scale( value ); }
 
     /**
      * Multiplies the given double value by the user scale factor.
      * This is essentially a delegate for {@link SwingTreeContext.UIScale#scale(double)}.
      */
-    public static double scale( double value ) { return SwingTreeContext.UIScale.scale( value ); }
+    public static double scale( double value ) { return SwingTreeContext.get().getUIScale().scale( value ); }
 
     /**
      * Multiplies the given int value by the user scale factor and rounds the result.
      * This is essentially a delegate for {@link SwingTreeContext.UIScale#scale(int)}.
      */
-    public static int scale( int value ) { return SwingTreeContext.UIScale.scale( value ); }
+    public static int scale( int value ) { return SwingTreeContext.get().getUIScale().scale( value ); }
 
     /**
      * Divides the given float value by the user scale factor.
      * This is essentially a delegate for {@link SwingTreeContext.UIScale#unscale(float)}.
      */
-    public static float unscale( float value ) { return SwingTreeContext.UIScale.unscale( value ); }
+    public static float unscale( float value ) { return SwingTreeContext.get().getUIScale().unscale( value ); }
 
     /**
      * Divides the given int value by the user scale factor and rounds the result.
      * This is essentially a delegate for {@link SwingTreeContext.UIScale#unscale(int)}.
      */
-    public static int unscale( int value ) { return SwingTreeContext.UIScale.unscale( value ); }
+    public static int unscale( int value ) { return SwingTreeContext.get().getUIScale().unscale( value ); }
 
     /**
      * If user scale factor is not 1, scale the given graphics context by invoking
      * {@link Graphics2D#scale(double, double)} with user scale factor.
      * This is essentially a delegate for {@link SwingTreeContext.UIScale#scaleGraphics(Graphics2D)} (Graphics2D)}.
      */
-    public static void scale( Graphics2D g ) { SwingTreeContext.UIScale.scaleGraphics( g ); }
+    public static void scale( Graphics2D g ) { SwingTreeContext.get().getUIScale().scaleGraphics( g ); }
 
     /**
      * Scales the given dimension with the user scale factor.
@@ -103,7 +103,7 @@ public final class UI
      * is returned, depending on whether the passed dimension implements {@link javax.swing.plaf.UIResource}.
      * This is essentially a delegate for {@link SwingTreeContext.UIScale#scale(Dimension)}.
      */
-    public static Dimension scale( Dimension dimension ) { return SwingTreeContext.UIScale.scale(dimension); }
+    public static Dimension scale( Dimension dimension ) { return SwingTreeContext.get().getUIScale().scale(dimension); }
 
     /**
      * Scales the given insets with the user scale factor.
@@ -113,7 +113,7 @@ public final class UI
      * is returned, depending on whether the passed dimension implements {@link javax.swing.plaf.UIResource}.
      * This is essentially a delegate for {@link SwingTreeContext.UIScale#scale(Insets)}.
      */
-    public static Insets scale( Insets insets ) { return SwingTreeContext.UIScale.scale(insets); }
+    public static Insets scale( Insets insets ) { return SwingTreeContext.get().getUIScale().scale(insets); }
 
     /**
      *  Sets a {@link StyleSheet} which will be applied to all SwingTree UIs defined in the subsequent lambda scope.
@@ -794,7 +794,7 @@ public final class UI
     public static UIForButton<JButton> button( int width, int height, ImageIcon icon, ImageIcon onHover ) {
         NullUtil.nullArgCheck(icon, "icon", ImageIcon.class);
         NullUtil.nullArgCheck(onHover, "onHover", ImageIcon.class);
-        float scale = SwingTreeContext.UIScale.getUserScaleFactor();
+        float scale = SwingTreeContext.get().getUIScale().getUserScaleFactor();
 
         int scaleHint = Image.SCALE_SMOOTH;
         if ( scale > 1.5f )
@@ -2753,7 +2753,7 @@ public final class UI
      */
     public static UIForLabel<JLabel> label( int width, int height, ImageIcon icon ) {
         NullUtil.nullArgCheck(icon, "icon", ImageIcon.class);
-        float scale = SwingTreeContext.UIScale.getUserScaleFactor();
+        float scale = SwingTreeContext.get().getUIScale().getUserScaleFactor();
 
         int scaleHint = Image.SCALE_SMOOTH;
         if ( scale > 1.5f )
