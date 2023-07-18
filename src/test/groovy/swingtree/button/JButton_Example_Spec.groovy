@@ -1,12 +1,26 @@
 package swingtree.button
 
-import swingtree.SwingTreeContext
-import swingtree.threading.EventProcessor
-import swingtree.UI
+import spock.lang.Narrative
 import spock.lang.Specification
+import spock.lang.Subject
+import spock.lang.Title
+import swingtree.SwingTreeContext
+import swingtree.UI
+import swingtree.UIForButton
+import swingtree.threading.EventProcessor
 
 import javax.swing.*
 
+@Title("Using JButton in SwingTree")
+@Narrative('''
+
+    This specification demonstrates how the SwingTree API
+    can be used to create `JButton`s and how to register event handlers
+    on them while still being able to integrate them
+    in a declarative UI. 
+
+''')
+@Subject([UIForButton])
 class JButton_Example_Spec extends Specification
 {
     def setupSpec() {
@@ -17,6 +31,12 @@ class JButton_Example_Spec extends Specification
 
     def 'We can easily create a button with an associated action:'()
     {
+        reportInfo """
+            This is he most basic example of defining a button.
+            It has some text displayed on top of it and a simple click action.
+            Take a look:
+        """
+
         given : 'We create a basic button which will a simple "onClick".'
             var ui =
                 UI.button("I am displayed on the button!")
@@ -35,6 +55,12 @@ class JButton_Example_Spec extends Specification
 
     def 'A button will delegate its siblings within actions:'()
     {
+        reportInfo """
+            The event handlers you register on a component receive a useful context 
+            which offers all kinds of relevant information to your event action.
+            This is also true for a click action handler registered on a 
+            button, which can access the neighbouring sibling components. 
+        """
         given : 'We create a panel with a label and a button!'
         var ui =
             UI.panel()
@@ -64,7 +90,8 @@ class JButton_Example_Spec extends Specification
             The event handlers you register on a component receive a useful context 
             which offers all kinds of relevant information to your event action.
             This is also true for a click action handler registered on a 
-            button, which can access the neighbouring sibling components. 
+            button, which can access the "siblinghood", which is all siblings
+            including itself. 
         """
         given : 'We create a panel with some random components and a fancy click action'
             var ui =
