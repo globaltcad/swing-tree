@@ -1,4 +1,4 @@
-package swingtree.styles.Style_Animations
+package swingtree.styles
 
 import spock.lang.Narrative
 import spock.lang.Specification

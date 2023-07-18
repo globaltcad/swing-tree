@@ -117,7 +117,7 @@ class Styles_Spec extends Specification
                                         "], " +
                                         "ForegroundStyle[color=null], " +
                                         "FontStyle[" +
-                                            "name=Times New Roman, size=12, style=1, weight=0, attributes=[java.awt.font.TextAttribute(underline),java.awt.font.TextAttribute(strikethrough)], color=rgba(255,0,255,255), backgroundColor=null, selectionColor=rgba(0,255,255,255)" +
+                                            "name=Times New Roman, size=12, posture=0.0, weight=2.0, attributes=[java.awt.font.TextAttribute(underline),java.awt.font.TextAttribute(strikethrough)], color=rgba(255,0,255,255), backgroundColor=null, selectionColor=rgba(0,255,255,255)" +
                                         "], " +
                                         "ShadowStyle[" +
                                             "horizontalOffset=0, " +

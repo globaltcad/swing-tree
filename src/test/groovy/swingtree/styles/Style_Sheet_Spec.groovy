@@ -619,6 +619,6 @@ class Style_Sheet_Spec extends Specification
             s.shadow("named shadow").isInset() == false
             s.font().name() == "Arial"
             s.font().size() == 12
-            s.font().style() == Font.BOLD
+            s.font().posture() == Font.BOLD
     }
 }

@@ -355,6 +355,47 @@ class Individual_Component_Styling_Spec extends Specification
             Utility.similarityBetween(image2, "components/selection-shaded-JToggleButton.png", 99.95) > 99.95
     }
 
+    def 'A text area background can be shaded from left to right with any number of colors.'()
+    {
+        reportInfo """
+            A component can be shaded from left to right with any number of colors.
+            ${Utility.linkSnapshot('components/left-to-right-shaded-JTextArea.png')}
+            
+            In this example we are painting a rainbow shading effect.
+            This kind of shading looks really nice on text areas.
+        """
+        given : 'A text area UI with a custom styler lambda.'
+            var ui =
+                    UI.textArea("""Ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.""")
+                    .peek( it -> it.setLineWrap(true) )
+                    .withStyle( it -> it
+                        .size(200, 240)
+                        .fontBold(true)
+                        .border(2, Color.DARK_GRAY)
+                        .backgroundColor(Color.CYAN)
+                        .padding(12)
+                        .margin(6)
+                        .shade(shade -> shade
+                           .strategy(ShadingStrategy.LEFT_TO_RIGHT)
+                           .colors(
+                              new Color(255,0,0,64),
+                              new Color(0,255,0,64),
+                              new Color(0,0,255,64),
+                              new Color(255,255,0,64),
+                              new Color(255,0,255,64),
+                              new Color(0,255,255,64)
+                           )
+                           .layer(Layer.BACKGROUND)
+                        )
+                    )
+
+        when : 'We render the text area into a BufferedImage.'
+            var image = Utility.renderSingleComponent(ui.getComponent())
+
+        then : 'The image is as expected.'
+            Utility.similarityBetween(image, "components/left-to-right-shaded-JTextArea.png", 99.95) > 99.95
+    }
+
     def 'Make a text area look like it is sunken in the background using a shadow going inwards.'()
     {
         reportInfo """
@@ -514,7 +555,7 @@ class Individual_Component_Styling_Spec extends Specification
                     UI.textArea("I am a text area, \nhow are you today :) ?")
                     .peek( it -> it.setLineWrap(true) )
                     .withStyle( it -> it
-                        .size(120, 60)
+                        .size(140, 80)
                         .font("Goudy Old Style", 13)
                         .fontBold(true)
                         .fontItalic(true)

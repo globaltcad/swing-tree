@@ -219,7 +219,7 @@ public class Utility {
             try {
                 String newPath = "build/resources/test" + imageFile.replace(".png", "-FAILURE.png");
                 safeUIImage(originalImage, newPath);
-                BufferedImage finalImageFromFile = image;
+                BufferedImage finalImageFromFile = imageFromFile;
                 SwingUtilities.invokeLater(()-> {
                     JLabel wrongImage = new JLabel(new ImageIcon(originalImage));
                     JLabel expectedImage = new JLabel(new ImageIcon(finalImageFromFile));

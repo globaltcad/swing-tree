@@ -842,7 +842,7 @@ public final class StyleDelegate<C extends JComponent>
      * @return A new {@link StyleDelegate} with the provided font boldness.
      */
     public StyleDelegate<C> fontBold( boolean bold ) {
-        return _withStyle(_style._withFont(_style.font().style( bold ? Font.BOLD : Font.PLAIN )));
+        return _withStyle(_style._withFont(_style.font().weight( bold ? 2 : 1 )));
     }
 
     /**
@@ -854,7 +854,7 @@ public final class StyleDelegate<C extends JComponent>
      * @return A new {@link StyleDelegate} with the provided font italicness.
      */
     public StyleDelegate<C> fontItalic( boolean italic ) {
-        return _withStyle(_style._withFont(_style.font().style( italic ? Font.ITALIC : Font.PLAIN )));
+        return _withStyle(_style._withFont(_style.font().posture( italic ? 0.2f : 0f )));
     }
 
     /**
@@ -966,7 +966,7 @@ public final class StyleDelegate<C extends JComponent>
      * @param weight The weight of the font.
      * @return A new {@link StyleDelegate} with the provided font weight.
      */
-    public StyleDelegate<C> fontWeight( int weight ) { 
+    public StyleDelegate<C> fontWeight( float weight ) {
         return _withStyle(_style._withFont(_style.font().weight(weight))); 
     }
 
