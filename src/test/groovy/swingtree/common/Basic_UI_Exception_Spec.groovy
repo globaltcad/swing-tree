@@ -144,6 +144,8 @@ class Basic_UI_Exception_Spec extends Specification
                     { UI.toggleButton(Var.ofNullable(Boolean, false)) },
                     { UI.toggleButton("Toggle Me!", Var.ofNullable(Boolean, true)) },
                     { UI.toggleButton(Var.ofNullable(String, null), Var.of(true)) },
+                    { UI.toggleButtonWithIcon(Var.ofNullable(Icon, null), Var.of(true)) },
+                    { UI.toggleButtonWithIcon(null, null) },
                     { UI.textArea(Var.ofNullable(String, "Ooops")) },
                     { UI.textArea(Val.ofNullable(String, null)) },
                     { UI.textArea(UI.HorizontalDirection.LEFT_TO_RIGHT, Val.ofNullable(String, "")) },

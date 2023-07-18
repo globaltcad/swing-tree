@@ -58,8 +58,14 @@ class JButton_Example_Spec extends Specification
             ui.component.getComponent(1).isEnabled()
     }
 
-    def 'We can go through the entire siblinghood, including the current button!'()
+    def 'In a button event we can go through the entire siblinghood, including the current button!'()
     {
+        reportInfo """
+            The event handlers you register on a component receive a useful context 
+            which offers all kinds of relevant information to your event action.
+            This is also true for a click action handler registered on a 
+            button, which can access the neighbouring sibling components. 
+        """
         given : 'We create a panel with some random components and a fancy click action'
             var ui =
                 UI.panel()
