@@ -78,7 +78,7 @@ class Individual_Component_Styling_Spec extends Specification
         and : 'The insets of the border will be increased by the border width (because the border grows inwards).'
             panel.component.border.getBorderInsets(panel.component) == new Insets(5, 5, 5, 5)
         and : 'The font of the panel will be set to Papyrus with a size of 42.'
-            panel.component.font == new Font("Papyrus", Font.PLAIN, 42)
+            panel.component.font.toString().contains("family=Dialog,name=Papyrus,style=plain,size=42")
     }
 
     def 'The margins defined in the style API will be applied to the layout manager through the border insets.'()

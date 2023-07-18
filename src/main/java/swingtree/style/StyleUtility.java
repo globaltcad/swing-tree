@@ -19,17 +19,17 @@ final class StyleUtility
     private StyleUtility() {}
 
     static String toString( Color color ) {
-        if ( color == null ) return "null";
+        if ( color == null ) return "?";
         return "rgba(" + color.getRed() + "," + color.getGreen() + "," + color.getBlue() + "," + color.getAlpha() + ")";
     }
 
     static String toString( Arc arc ) {
-        if ( arc == null ) return "null";
+        if ( arc == null ) return "?";
         return "Arc(" + arc.width() + "," + arc.height() + ")";
     }
 
     static String toString( Painter painter ) {
-        if ( painter == null ) return "null";
+        if ( painter == null ) return "?";
         if ( painter == Painter.none() ) return "null";
         return "Painter@" + Integer.toHexString(Objects.hashCode(painter));
     }

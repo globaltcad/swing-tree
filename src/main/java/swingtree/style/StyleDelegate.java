@@ -5,6 +5,7 @@ import swingtree.UI;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.font.TextAttribute;
+import java.awt.geom.AffineTransform;
 import java.util.List;
 import java.util.*;
 import java.util.function.Function;
@@ -866,10 +867,7 @@ public final class StyleDelegate<C extends JComponent>
      * @return A new {@link StyleDelegate} with the provided font underlinedness.
      */
     public StyleDelegate<C> fontUnderline( boolean underline ) {
-        List<TextAttribute> attributes = new ArrayList<>(_style.font().attributes());
-        if ( underline ) attributes.add(TextAttribute.UNDERLINE);
-        else     attributes.remove(TextAttribute.UNDERLINE);
-        return _withStyle(_style._withFont(_style.font().attributes(attributes)));
+        return _withStyle(_style._withFont(_style.font().isUnderlined(underline)));
     }
 
     /**
@@ -881,10 +879,7 @@ public final class StyleDelegate<C extends JComponent>
      * @return A new {@link StyleDelegate} with the provided font struck throughness.
      */
     public StyleDelegate<C> fontStrikeThrough( boolean strikeThrough ) {
-        List<TextAttribute> attributes = new ArrayList<>(_style.font().attributes());
-        if ( strikeThrough ) attributes.add(TextAttribute.STRIKETHROUGH);
-        else     attributes.remove(TextAttribute.STRIKETHROUGH);
-        return _withStyle(_style._withFont(_style.font().attributes(attributes)));
+        return _withStyle(_style._withFont(_style.font().isStrike(strikeThrough)));
     }
 
     /**
@@ -960,6 +955,38 @@ public final class StyleDelegate<C extends JComponent>
     }
 
     /**
+     * @param underline Whether the font should be underlined or not.
+     * @return A new {@link StyleDelegate} with the provided flag defining whether the font should be underlined or not.
+     */
+    public StyleDelegate<C> underline( boolean underline ) {
+        return _withStyle(_style._withFont(_style.font().isUnderlined(underline)));
+    }
+
+    /**
+     * @param strikeThrough Whether the font should be struck through or not.
+     * @return A new {@link StyleDelegate} with the provided flag defining whether the font should be struck through or not.
+     */
+    public StyleDelegate<C> strikeThrough( boolean strikeThrough ) {
+        return _withStyle(_style._withFont(_style.font().isStrike(strikeThrough)));
+    }
+
+    /**
+     * @param transform The {@link AffineTransform} to apply to the font.
+     * @return A new {@link StyleDelegate} with the provided font transform.
+     */
+    public StyleDelegate<C> transform( AffineTransform transform ) {
+        return _withStyle(_style._withFont(_style.font().transform(transform)));
+    }
+
+    /**
+     * @param paint The {@link Paint} to use for the foreground of the font.
+     * @return A new {@link StyleDelegate} with the provided font paint.
+     */
+    public StyleDelegate<C> paint( Paint paint ) {
+        return _withStyle(_style._withFont(_style.font().paint(paint)));
+    }
+
+    /**
      *  Use this to define the weight of the default font of the component.
      *  Note that font styles will only apply if the component that is being rendered
      *  also supports displaying text.
@@ -968,18 +995,6 @@ public final class StyleDelegate<C extends JComponent>
      */
     public StyleDelegate<C> fontWeight( float weight ) {
         return _withStyle(_style._withFont(_style.font().weight(weight))); 
-    }
-
-    /**
-     *  Use this to define an array of {@link TextAttribute}s to be applied to the default font of the component.
-     *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text.
-     *
-     *  @param attributes The {@link TextAttribute}s to apply to the font.
-     *  @return A new {@link StyleDelegate} with the provided font attributes.
-     */
-    public StyleDelegate<C> fontAttributes( TextAttribute... attributes ) { 
-        return _withStyle(_style._withFont(_style.font().attributes(Objects.requireNonNull(attributes)))); 
     }
 
     /**

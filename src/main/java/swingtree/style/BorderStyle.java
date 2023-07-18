@@ -267,13 +267,13 @@ public final class BorderStyle
 
         String borderWidthsString;
         if ( allSidesShareTheSameWidth() ) {
-            borderWidthsString = "width=" + _borderWidths.top().orElse(null);
+            borderWidthsString = "width=" + _borderWidths.top().map(Objects::toString).orElse("?");
         } else {
             borderWidthsString =
-                    "topWidth="      + _borderWidths.top().orElse(null)    +
-                    ", rightWidth="  + _borderWidths.right().orElse(null)  +
-                    ", bottomWidth=" + _borderWidths.bottom().orElse(null) +
-                    ", leftWidth="   + _borderWidths.left().orElse(null);
+                    "topWidth="      + _borderWidths.top().map(Objects::toString).orElse("?")    +
+                    ", rightWidth="  + _borderWidths.right().map(Objects::toString).orElse("?")  +
+                    ", bottomWidth=" + _borderWidths.bottom().map(Objects::toString).orElse("?") +
+                    ", leftWidth="   + _borderWidths.left().map(Objects::toString).orElse("?");
         }
 
         String shadesString;

@@ -108,16 +108,18 @@ class Styles_Spec extends Specification
                                         "BorderStyle[" +
                                             "arcWidth=12, " +
                                             "arcHeight=18, " +
-                                            "width=null, " +
+                                            "width=?, " +
                                             "color=rgba(0,0,255,255), " +
                                             "ShadeStyle[strategy=NONE, colors=[], layer=BACKGROUND]" +
                                         "], " +
                                         "BackgroundStyle[" +
                                             "color=rgba(0,255,0,255), foundationColor=rgba(255,0,0,255)" +
                                         "], " +
-                                        "ForegroundStyle[color=null], " +
+                                        "ForegroundStyle[color=?], " +
                                         "FontStyle[" +
-                                            "name=Times New Roman, size=12, posture=0.0, weight=2.0, attributes=[java.awt.font.TextAttribute(underline),java.awt.font.TextAttribute(strikethrough)], color=rgba(255,0,255,255), backgroundColor=null, selectionColor=rgba(0,255,255,255)" +
+                                            "name=Times New Roman, size=12, posture=0.0, weight=2.0, underlined=true, " +
+                                            "strikeThrough=true, color=rgba(255,0,255,255), backgroundColor=?, " +
+                                            "selectionColor=rgba(0,255,255,255), transform=?, paint=?" +
                                         "], " +
                                         "ShadowStyle[" +
                                             "horizontalOffset=0, " +

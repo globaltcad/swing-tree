@@ -121,12 +121,12 @@ public final class DimensionalityStyle
                     "width=%s," +
                     "height=%s" +
                 "]",
-            _minWidth,
-            _minHeight,
-            _maxWidth,
-            _maxHeight,
-            _preferredWidth,
-            _preferredHeight
+                (_minWidth        == null ? "?" : _minWidth        ),
+                (_minHeight       == null ? "?" : _minHeight       ),
+                (_maxWidth        == null ? "?" : _maxWidth        ),
+                (_maxHeight       == null ? "?" : _maxHeight       ),
+                (_preferredWidth  == null ? "?" : _preferredWidth  ),
+                (_preferredHeight == null ? "?" : _preferredHeight )
         );
     }
 

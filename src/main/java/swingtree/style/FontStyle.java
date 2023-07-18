@@ -3,6 +3,7 @@ package swingtree.style;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.font.TextAttribute;
+import java.awt.geom.AffineTransform;
 import java.text.AttributedCharacterIterator;
 import java.util.*;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
  */
 public final class FontStyle
 {
-    private static final FontStyle _NONE = new FontStyle("", 0, 0, 0, Collections.emptyList(), null, null, null);
+    private static final FontStyle _NONE = new FontStyle("", 0, 0, 0, null, null, null, false, null, null, null);
 
     public static FontStyle none() { return _NONE; }
 
@@ -21,29 +22,38 @@ public final class FontStyle
     private final int _size;
     private final float _posture;
     private final float _weight;
-    private final List<TextAttribute> _attributes;
     private final Color _color;
     private final Color _backgroundColor;
     private final Color _selectionColor;
+    private final Boolean _isUnderlined;
+    private final Boolean _isStrike;
+    private final AffineTransform _transform;
+    private final Paint _paint;
 
     FontStyle(
         String name,
         int fontSize,
         float posture,
         float weight,
-        List<TextAttribute> attributes,
         Color color,
         Color backgroundColor,
-        Color selectionColor
+        Color selectionColor,
+        Boolean isUnderline,
+        Boolean isStrike,
+        AffineTransform transform,
+        Paint paint
     ) {
-        _name = Objects.requireNonNull(name);
-        _size = fontSize;
+        _name    = Objects.requireNonNull(name);
+        _size    = fontSize;
         _posture = posture;
-        _weight = weight;
-        _attributes = Collections.unmodifiableList(Objects.requireNonNull(attributes));
-        _color = color;
+        _weight  = weight;
+        _color   = color;
         _backgroundColor = backgroundColor;
-        _selectionColor = selectionColor;
+        _selectionColor  = selectionColor;
+        _isUnderlined    = isUnderline;
+        _isStrike        = isStrike;
+        _transform       = transform;
+        _paint           = paint;
     }
 
     public String name() { return _name; }
@@ -54,49 +64,70 @@ public final class FontStyle
 
     public float weight() { return _weight; }
     
-    public List<TextAttribute> attributes() { return _attributes; }
-
     public Optional<Color> color() { return Optional.ofNullable(_color); }
 
     public Optional<Color> backgroundColor() { return Optional.ofNullable(_backgroundColor); }
 
     public Optional<Color> selectionColor() { return Optional.ofNullable(_selectionColor); }
+    
+    public boolean isUnderlined() { return _isUnderlined; }
+    
+    public Optional<AffineTransform> transform() { return Optional.ofNullable(_transform); }
+    
+    public Optional<Paint> paint() { return Optional.ofNullable(_paint); }
 
-    FontStyle name( String fontFamily ) { return new FontStyle(fontFamily, _size, _posture, _weight, _attributes, _color, _backgroundColor, _selectionColor); }
+    FontStyle name( String fontFamily ) { return new FontStyle(fontFamily, _size, _posture, _weight, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint); }
 
-    FontStyle size( int fontSize ) { return new FontStyle(_name, fontSize, _posture, _weight, _attributes, _color, _backgroundColor, _selectionColor); }
+    FontStyle size( int fontSize ) { return new FontStyle(_name, fontSize, _posture, _weight, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint); }
 
-    FontStyle posture( float posture ) { return new FontStyle(_name, _size, posture, _weight, _attributes, _color, _backgroundColor, _selectionColor); }
+    FontStyle posture( float posture ) { return new FontStyle(_name, _size, posture, _weight, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint); }
 
-    FontStyle weight( float fontWeight ) { return new FontStyle(_name, _size, _posture, fontWeight, _attributes, _color, _backgroundColor, _selectionColor); }
+    FontStyle weight( float fontWeight ) { return new FontStyle(_name, _size, _posture, fontWeight, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint); }
 
-    FontStyle attributes( TextAttribute... attributes ) {
-        Objects.requireNonNull(attributes);
-        return new FontStyle(_name, _size, _posture, _weight, Arrays.asList(attributes), _color, _backgroundColor, _selectionColor);
-    }
+    FontStyle color( Color color ) { return new FontStyle(_name, _size, _posture, _weight, color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint); }
 
-    FontStyle attributes( List<TextAttribute> attributes ) {
-        Objects.requireNonNull(attributes);
-        return new FontStyle(_name, _size, _posture, _weight, attributes, _color, _backgroundColor, _selectionColor);
-    }
+    FontStyle backgroundColor( Color backgroundColor ) { return new FontStyle(_name, _size, _posture, _weight, _color, backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint); }
 
-    FontStyle color( Color color ) { return new FontStyle(_name, _size, _posture, _weight, _attributes, color, _backgroundColor, _selectionColor); }
+    FontStyle selectionColor( Color selectionColor ) { return new FontStyle(_name, _size, _posture, _weight, _color, _backgroundColor, selectionColor, _isUnderlined, _isStrike, _transform, _paint); }
 
-    FontStyle backgroundColor( Color backgroundColor ) { return new FontStyle(_name, _size, _posture, _weight, _attributes, _color, backgroundColor, _selectionColor); }
+    FontStyle isUnderlined( boolean underlined ) { return new FontStyle(_name, _size, _posture, _weight, _color, _backgroundColor, _selectionColor, underlined, _isStrike, _transform, _paint); }
 
-    FontStyle selectionColor( Color selectionColor ) { return new FontStyle(_name, _size, _posture, _weight, _attributes, _color, _backgroundColor, selectionColor); }
+    FontStyle isStrike( boolean strike ) { return new FontStyle(_name, _size, _posture, _weight, _color, _backgroundColor, _selectionColor, _isUnderlined, strike, _transform, _paint); }
+
+    FontStyle transform( AffineTransform transform ) { return new FontStyle(_name, _size, _posture, _weight, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike, transform, _paint); }
+
+    FontStyle paint( Paint paint ) { return new FontStyle(_name, _size, _posture, _weight, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, paint); }
 
     FontStyle font( Font font ) {
+        Map<TextAttribute, ?> attributeMap = font.getAttributes();
+        Color   color       = null;
+        Color   background  = null;
+        boolean isUnderline = false;
+        boolean isStriked   = false;
+        AffineTransform transform = null;
+        Paint paint = null;
+        try {
+            isUnderline = Objects.equals(attributeMap.get(TextAttribute.UNDERLINE), TextAttribute.UNDERLINE_ON);
+            isStriked = Objects.equals(attributeMap.get(TextAttribute.STRIKETHROUGH), TextAttribute.STRIKETHROUGH_ON);
+            paint = (Paint) attributeMap.get(TextAttribute.FOREGROUND);
+            transform = (AffineTransform) attributeMap.get(TextAttribute.TRANSFORM);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         Objects.requireNonNull(font);
         return new FontStyle(
                     font.getFamily(),
                     font.getSize(),
-                    font.getStyle(),
-                    font.isBold() ? Font.BOLD : font.isItalic() ? Font.ITALIC : Font.PLAIN,
-                    Collections.emptyList(),
+                    font.isItalic() ? 0.2f : 0f,
+                    font.isBold() ? 2f : 0f,
                     _color,
                     _backgroundColor,
-                    _selectionColor
+                    _selectionColor,
+                    isUnderline,
+                    isStriked,
+                    transform,
+                    paint
                 );
     }
 
@@ -125,6 +156,22 @@ public final class FontStyle
             isChange = isChange || !Float.valueOf(_weight).equals(currentAttributes.get(TextAttribute.WEIGHT));
             attributes.put(TextAttribute.WEIGHT, _weight);
         }
+        if ( _isUnderlined != null ) {
+            isChange = isChange || !Objects.equals(_isUnderlined, currentAttributes.get(TextAttribute.UNDERLINE));
+            attributes.put(TextAttribute.UNDERLINE, _isUnderlined);
+        }
+        if ( _isStrike != null ) {
+            isChange = isChange || !Objects.equals(_isStrike, currentAttributes.get(TextAttribute.STRIKETHROUGH));
+            attributes.put(TextAttribute.STRIKETHROUGH, _isStrike);
+        }
+        if ( _transform != null ) {
+            isChange = isChange || !Objects.equals(_transform, currentAttributes.get(TextAttribute.TRANSFORM));
+            attributes.put(TextAttribute.TRANSFORM, _transform);
+        }
+        if ( _paint != null ) {
+            isChange = isChange || !Objects.equals(_paint, currentAttributes.get(TextAttribute.FOREGROUND));
+            attributes.put(TextAttribute.FOREGROUND, _paint);
+        }
         if ( !_name.isEmpty() ) {
             isChange = isChange || !Objects.equals(_name, currentAttributes.get(TextAttribute.FAMILY));
             attributes.put(TextAttribute.FAMILY, _name);
@@ -138,10 +185,6 @@ public final class FontStyle
             attributes.put(TextAttribute.BACKGROUND, _backgroundColor);
         }
 
-        if ( _attributes != null ) {
-            _attributes.forEach( attr -> attributes.put(attr, attr));
-        }
-
         if ( isChange )
             return Optional.of(existingFont.deriveFont(attributes));
         else
@@ -152,12 +195,15 @@ public final class FontStyle
         return new FontStyle(
                     _name,
                     (int) Math.round(_size * scale),
-                _posture,
+                    _posture,
                     _weight,
-                    _attributes,
                     _color,
                     _backgroundColor,
-                    _selectionColor
+                    _selectionColor, 
+                    _isUnderlined,
+                    _isStrike,
+                    _transform,
+                    _paint
                 );
     }
 
@@ -169,10 +215,12 @@ public final class FontStyle
         hash = 97 * hash + _size;
         hash = 97 * hash + Float.hashCode(_posture);
         hash = 97 * hash + Float.hashCode(_weight);
-        hash = 97 * hash + Objects.hashCode(_attributes);
         hash = 97 * hash + Objects.hashCode(_color);
         hash = 97 * hash + Objects.hashCode(_backgroundColor);
         hash = 97 * hash + Objects.hashCode(_selectionColor);
+        hash = 97 * hash + Objects.hashCode(_isUnderlined);
+        hash = 97 * hash + Objects.hashCode(_transform);
+        hash = 97 * hash + Objects.hashCode(_paint);
         return hash;
     }
 
@@ -192,13 +240,17 @@ public final class FontStyle
             return false;
         if ( _weight != other._weight )
             return false;
-        if ( !Objects.equals(_attributes, other._attributes) )
-            return false;
         if ( !Objects.equals(_color, other._color) )
             return false;
         if ( !Objects.equals(_backgroundColor, other._backgroundColor) )
             return false;
         if ( !Objects.equals(_selectionColor, other._selectionColor) )
+            return false;
+        if ( !Objects.equals(_isUnderlined, other._isUnderlined) )
+            return false;
+        if ( !Objects.equals(_transform, other._transform) )
+            return false;
+        if ( !Objects.equals(_paint, other._paint) )
             return false;
         return true;
     }
@@ -211,10 +263,13 @@ public final class FontStyle
                     "size="            + _size + ", " +
                     "posture="         + _posture + ", " +
                     "weight="          + _weight + ", " +
-                    "attributes=["     + _attributes.stream().map(AttributedCharacterIterator.Attribute::toString).reduce( (a, b) -> a + "," + b ).orElse("") + "], " +
+                    "underlined="      + (_isUnderlined == null ? "?" : _isUnderlined) + ", " +
+                    "strikeThrough="   + (_isStrike == null ? "?" : _isStrike) + ", " +
                     "color="           + StyleUtility.toString(_color) + ", " +
                     "backgroundColor=" + StyleUtility.toString(_backgroundColor) + ", " +
-                    "selectionColor="  + StyleUtility.toString(_selectionColor) +
+                    "selectionColor="  + StyleUtility.toString(_selectionColor) + ", " +
+                    "transform="       + ( _transform == null ? "?" : _transform.toString() ) + ", " +
+                    "paint="           + ( _paint == null ? "?" : _paint.toString() ) +
                 "]";
     }
 }
