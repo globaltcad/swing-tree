@@ -1,6 +1,8 @@
 package swingtree.panel
 
 import swingtree.SwingTreeContext
+import swingtree.UIForBox
+import swingtree.components.JBox
 import swingtree.threading.EventProcessor
 import swingtree.UI
 import swingtree.UIForPanel
@@ -57,14 +59,14 @@ class Panel_Spec extends Specification
             def ui = UI.box().withLayout(new FlowLayout())
         then : 'The panel UI is not null.'
             ui != null
-        and : 'The UI node wraps a JPanel.'
-            ui.component instanceof JPanel
+        and : 'The UI node wraps a JBox.'
+            ui.component instanceof JBox
         and : 'The panel has a FlowLayout.'
             ui.component.layout instanceof FlowLayout
     }
 
     def 'All of the "box(..)" factory methods will create transparent panels without insets.'(
-        UIForPanel<JPanel> ui
+        UIForBox<JBox> ui
     ) {
         expect : 'The panel is transparent.'
             ui.component.isOpaque() == false

@@ -2,26 +2,26 @@ package swingtree;
 
 import net.miginfocom.swing.MigLayout;
 import sprouts.Val;
+import swingtree.components.JBox;
 import swingtree.layout.LayoutAttr;
 
-import javax.swing.*;
 import java.awt.*;
 
 /**
- *  A swing tree builder node for {@link JPanel} instances.
+ *  A swing tree builder node for {@link swingtree.components.JBox} instances.
  */
-public class UIForPanel<P extends JPanel> extends UIForAnySwing<UIForPanel<P>, P>
+public class UIForBox<B extends JBox> extends UIForAnySwing<UIForBox<B>, B>
 {
-    protected UIForPanel( P component ) { super(component); }
+    protected UIForBox( B component ) { super(component); }
 
     /**
-     *  Use this to dynamically set the {@link MigLayout} attributes of the {@link MigLayout} of the {@link JPanel}.
+     *  Use this to dynamically set the {@link MigLayout} attributes of the {@link MigLayout} of the {@link JBox}.
      *
      * @param attr The layout attributes property which will be dynamically passed to the {@link MigLayout} constructor as first argument.
-     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code attr} is {@code null}.
      */
-    public final UIForPanel<P> withLayout( Val<LayoutAttr> attr ) {
+    public final UIForBox<B> withLayout( Val<LayoutAttr> attr ) {
         NullUtil.nullArgCheck(attr, "attr", Val.class);
         NullUtil.nullPropertyCheck(attr, "attr", "Null is not a valid layout attribute.");
         _onShow(attr, it -> {
@@ -36,7 +36,7 @@ public class UIForPanel<P extends JPanel> extends UIForAnySwing<UIForPanel<P>, P
             else
                 throw new IllegalStateException(
                         "Cannot set layout mig-layout specific constraints on a panel with a non-mig layout."
-                    );
+                );
         });
         return _this();
     }
@@ -44,24 +44,25 @@ public class UIForPanel<P extends JPanel> extends UIForAnySwing<UIForPanel<P>, P
     @Override protected void _setEnabled( boolean isEnabled ) {
         getComponent().setEnabled( isEnabled );
         /*
-            In the vast vast majority of cases regular JPanels are simple wrappers for
+            In the vast vast majority of cases regular JBoxs are simple wrappers for
             other components.
             They are mostly used to group things together, provide a border and
             position them using a fancy layout manager.
-            Disabling only a JPanel is therefore not very useful, because it will not
+            Disabling only a JBox is therefore not very useful, because it will not
             disable the components it contains.
-            So what we want to do here is traverse the tree of JPanel instances
+            So what we want to do here is traverse the tree of JBox instances
             and disable all the components that are contained in the tree
-            except for the children of non JPanels.
+            except for the children of non JBoxs.
         */
         InternalUtil._traverseEnable( getComponent(), isEnabled );
         /*
             Note:
-            If you really only want to disable the JPanel itself, then you can
-            simply peek into the tree and disable the JPanel directly.
+            If you really only want to disable the JBox itself, then you can
+            simply peek into the tree and disable the JBox directly.
             Or, a better idea, is to simply change color and event handling
-            of the JPanel to make it look and behave like a disabled component,
+            of the JBox to make it look and behave like a disabled component,
             but still allow the user to interact with the components it contains.
          */
     }
+
 }

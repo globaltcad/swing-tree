@@ -6,6 +6,7 @@ import spock.lang.Specification
 import spock.lang.Title
 import sprouts.Var
 import swingtree.SwingTreeContext
+import swingtree.components.JBox
 import swingtree.threading.EventProcessor
 import swingtree.UI
 import swingtree.input.Keyboard
@@ -87,13 +88,13 @@ class Basic_UI_Builder_Examples_Spec extends Specification
                     )
                     .add(UI.box())
 
-        expect : 'The UI node contains a root JPanel with 3 children.'
-            ui.component instanceof JPanel
+        expect : 'The UI node contains a root JBox with 3 children.'
+            ui.component instanceof JBox
             ui.component.components.length == 3
         and : 'Because this is a regular Swing UI, we traverse the tree and find the children.'
-            ui.component.components[0] instanceof JPanel
-            ui.component.components[1] instanceof JPanel
-            ui.component.components[2] instanceof JPanel
+            ui.component.components[0] instanceof JBox
+            ui.component.components[1] instanceof JBox
+            ui.component.components[2] instanceof JBox
         and : 'We can also traverse the tree to find the children of the children.'
             ui.component.components[1].components[0] instanceof JPanel
             ui.component.components[1].components[1] instanceof JPanel

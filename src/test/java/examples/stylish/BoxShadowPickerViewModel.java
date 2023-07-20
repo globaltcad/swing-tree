@@ -4,6 +4,7 @@ import sprouts.Event;
 import sprouts.Val;
 import sprouts.Var;
 import swingtree.UI;
+import swingtree.components.JBox;
 import swingtree.style.Corner;
 import swingtree.style.Edge;
 
@@ -48,7 +49,7 @@ public class BoxShadowPickerViewModel
                 UI.box("fill, wrap 2", "[shrink][grow]")
                 .add(UI.label("Width:"))
                 .add("growx", UI.slider(UI.Align.HORIZONTAL, 0, 100, borderWidth))
-                .get(JPanel.class);
+                .get(JBox.class);
         }
     }
 
@@ -64,7 +65,7 @@ public class BoxShadowPickerViewModel
                 .add("growx", UI.slider(UI.Align.HORIZONTAL, 0, 100, borderArcWidth))
                 .add(UI.label("Height:"))
                 .add("growx", UI.slider(UI.Align.HORIZONTAL, 0, 100, borderArcHeight))
-                .get(JPanel.class);
+                .get(JBox.class);
         }
     }
 

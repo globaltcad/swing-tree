@@ -4,6 +4,7 @@ import swingtree.SwingTreeContext;
 import swingtree.UI;
 import swingtree.animation.AnimationState;
 import swingtree.animation.LifeTime;
+import swingtree.components.JBox;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -99,6 +100,34 @@ public final class ComponentExtension<C extends JComponent>
     public void addAnimationStyler( AnimationState state, Styler<C> styler ) {
         _animationStylers.put(Objects.requireNonNull(state.lifetime()), Objects.requireNonNull(styler));
         _installCustomBorderBasedStyleAndAnimationRenderer();
+    }
+
+    public PanelUI createJBoxUI() {
+        return new PanelStyler() {
+            @Override
+            public void installUI(JComponent c) {
+                JBox b = (JBox)c;
+                installDefaults(b);
+            }
+            @Override
+            public void uninstallUI(JComponent c) {
+                JBox b = (JBox)c;
+                uninstallDefaults(b);
+            }
+
+            private void installDefaults(JBox b) {
+                LookAndFeel.installColorsAndFont(b,
+                        "Box.background",
+                        "Box.foreground",
+                        "Box.font");
+                LookAndFeel.installBorder(b,"Box.border");
+                LookAndFeel.installProperty(b, "opaque", Boolean.FALSE);
+            }
+
+            private void uninstallDefaults(JBox b) {
+                LookAndFeel.uninstallBorder(b);
+            }
+        };
     }
 
     private StyleRenderer<C> _createRenderer() {
