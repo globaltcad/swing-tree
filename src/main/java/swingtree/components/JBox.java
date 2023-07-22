@@ -13,7 +13,10 @@ import java.awt.*;
  * <code>JBox</code> is a generic lightweight container similar to
  * <code>javax.swing.JPanel</code>, but with 2 important differences:
  * <ul>
- *     <li> The <code>JBox</code> is transparent by default, meaning that it is not opaque. </li>
+ *     <li>
+ *         The <code>JBox</code> is transparent by default, meaning that it does
+ *         not paint its background if it is not explicitly set through the st<le API.
+ *     </li>
  *     <li> It does not have any insets by default. </li>
  * </ul>
  *
@@ -87,9 +90,7 @@ public class JBox extends JComponent implements Accessible
      *
      * @return the PanelUI object that renders this component
      */
-    public PanelUI getUI() {
-        return (PanelUI)ui;
-    }
+    public PanelUI getUI() { return (PanelUI) ui; }
 
 
     /**
@@ -118,10 +119,7 @@ public class JBox extends JComponent implements Accessible
      *        expert: true
      *   description: A string that specifies the name of the L&amp;F class.
      */
-    @Override
-    public String getUIClassID() {
-        return uiClassID;
-    }
+    @Override public String getUIClassID() { return uiClassID; }
 
     /**
      * Returns a string representation of this JBox. This method
@@ -132,9 +130,7 @@ public class JBox extends JComponent implements Accessible
      *
      * @return  a string representation of this JBox.
      */
-    protected String paramString() {
-        return super.paramString();
-    }
+    protected String paramString() { return super.paramString(); }
 
 /////////////////
 // Accessibility support
@@ -150,9 +146,9 @@ public class JBox extends JComponent implements Accessible
      *         AccessibleContext of this JBox
      */
     public AccessibleContext getAccessibleContext() {
-        if (accessibleContext == null) {
+        if ( accessibleContext == null )
             accessibleContext = new AccessibleJBox();
-        }
+
         return accessibleContext;
     }
 
@@ -178,9 +174,7 @@ public class JBox extends JComponent implements Accessible
          * @return an instance of AccessibleRole describing the role of the
          * object
          */
-        public AccessibleRole getAccessibleRole() {
-            return AccessibleRole.PANEL;
-        }
+        public AccessibleRole getAccessibleRole() { return AccessibleRole.PANEL; }
     }
 }
 
