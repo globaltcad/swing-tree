@@ -2383,23 +2383,34 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *  an an{@link MouseListener} instance to the wrapped
      *  button component.
      *  <br><br>
+     *  The {@link ComponentDragEventDelegate} received by the {@link Action} lambda
+     *  exposes both component and drag event
+     *  context information, including a list of all the {@link MouseEvent}s involved
+     *  in one continuous dragging motion (see {@link ComponentDragEventDelegate#dragEvents()} for more information).
      *
      * @param onDrag The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onMouseDrag( Action<ComponentMouseEventDelegate<C>> onDrag ) {
+    public final I onMouseDrag( Action<ComponentDragEventDelegate<C>> onDrag ) {
         NullUtil.nullArgCheck(onDrag, "onDrag", Action.class);
+        java.util.List<MouseEvent> dragEventHistory = new ArrayList<>();
         C component = getComponent();
-        component.addMouseListener(new MouseAdapter() {
-            @Override public void mouseDragged(MouseEvent e) {
-                _doApp(() -> onDrag.accept(new ComponentMouseEventDelegate<>(component, e, ()->getSiblinghood())));
+        MouseAdapter listener = new MouseAdapter() {
+            @Override public void mousePressed(MouseEvent e) {
+                dragEventHistory.clear();
+                dragEventHistory.add(e);
             }
-        });
-        component.addMouseMotionListener(new MouseMotionAdapter() {
-            @Override public void mouseDragged(MouseEvent e) {
-                _doApp(() -> onDrag.accept(new ComponentMouseEventDelegate<>(component, e, ()->getSiblinghood())));
+            @Override public void mouseReleased(MouseEvent e) {
+                dragEventHistory.clear();
             }
-        });
+            @Override public void mouseDragged(MouseEvent e) {
+                dragEventHistory.add(e);
+                _doApp(() -> onDrag.accept(new ComponentDragEventDelegate<>(component, e, ()->getSiblinghood(), dragEventHistory)));
+            }
+        };
+
+        component.addMouseListener(listener);
+        component.addMouseMotionListener(listener);
         return _this();
     }
 
