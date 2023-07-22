@@ -16,7 +16,7 @@ import java.util.function.Function;
  */
 public final class StyleRenderer<C extends JComponent>
 {
-    private static boolean DO_ANTIALIASING(){
+    static boolean DO_ANTIALIASING(){
         return UI.scale() < 1.5;
     }
 
