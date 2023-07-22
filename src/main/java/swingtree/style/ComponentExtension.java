@@ -467,13 +467,13 @@ public final class ComponentExtension<C extends JComponent>
                 b.setContentAreaFilled(!hasBackgroundShades && !hasBackgroundPainter);
             }
         }
-        else if ( _styleLaF != null )
+        else if ( _customLookAndFeelIsInstalled() )
             _uninstallCustomLaF();
     }
 
     private boolean _installCustomLaF() {
         // First we check if we already have a custom LaF installed:
-        if ( _styleLaF != null )
+        if ( _customLookAndFeelIsInstalled() )
             return true;
 
         if ( _owner instanceof JPanel ) {
@@ -482,6 +482,14 @@ public final class ComponentExtension<C extends JComponent>
             PanelStyler laf = PanelStyler.INSTANCE;
             p.setUI(laf);
             _styleLaF = laf;
+            return true;
+        }
+        if ( _owner instanceof JBox ) {
+            JBox p = (JBox) _owner;
+            _formerLaF = p.getUI();
+            //PanelUI laf = createJBoxUI();
+            //p.setUI(laf);
+            _styleLaF = _formerLaF;
             return true;
         }
         else if ( _owner instanceof AbstractButton ) {
@@ -505,10 +513,15 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     private void _uninstallCustomLaF() {
-        if ( _styleLaF != null ) {
+        if ( _customLookAndFeelIsInstalled() ) {
             if ( _owner instanceof JPanel ) {
                 JPanel p = (JPanel) _owner;
                 p.setUI((PanelUI) _formerLaF);
+                _styleLaF = null;
+            }
+            if ( _owner instanceof JBox ) {
+                //JBox p = (JBox) _owner;
+                //p.setUI((PanelUI) _formerLaF);
                 _styleLaF = null;
             }
             else if ( _owner instanceof AbstractButton ) {
