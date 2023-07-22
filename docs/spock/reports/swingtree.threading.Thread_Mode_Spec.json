@@ -27,7 +27,7 @@
 
         {"kind":"then","text":"The event is queued up, waiting to be handled.","code":["!eventWasHandled"]},
 
-        {"kind":"when","text":"\n                We process the event queue, which in a real world\n                application would be done by a custom thread, or the main thread\n                of your application (everything but your GUI thread really).\n            ","code":["UI.joinDecoupledEventProcessorUntilDoneOrException()","UI.sync()"]},
+        {"kind":"when","text":"\n                We process the event queue, which in a real world\n                application would be done by a custom thread, or the main thread\n                of your application (everything but your GUI thread really).\n            ","code":["EventProcessor.DECOUPLED.joinUntilDoneOrException()","UI.sync()"]},
 
         {"kind":"then","text":"The event is handled.","code":["eventWasHandled"]}
       ],
@@ -61,11 +61,11 @@
       "blocks":[
         {"kind":"given","text":"2 UIs built with the decoupled thread mode, one error prone and the other one safe.","code":["var ui1 =","        UI.use(EventProcessor.DECOUPLED,","                ()-> UI.button(\"X\").onClick(unsafeAccess)","            )","var ui2 =","        UI.use(EventProcessor.DECOUPLED,","                ()-> UI.button(\"X\").onClick(safeAccess)","            )"]},
 
-        {"kind":"when","text":"We click the button and process the event queue (by this current non-swing thread).","code":["UI.runNow( () -> ui1.component.doClick() )","UI.joinDecoupledEventProcessorUntilDoneOrException() // This is done by a custom thread in a real world application."]},
+        {"kind":"when","text":"We click the button and process the event queue (by this current non-swing thread).","code":["UI.runNow( () -> ui1.component.doClick() )","EventProcessor.DECOUPLED.joinUntilDoneOrException() // This is done by a custom thread in a real world application."]},
 
         {"kind":"then","text":"The delegate throws an exception!","code":["var e = thrown(Exception)","e.message.contains(problem)"]},
 
-        {"kind":"when","text":"We click the button second button and then process the event queue (by this current non-swing thread).","code":["UI.runNow( () -> ui2.component.doClick() )","UI.joinDecoupledEventProcessorUntilDoneOrException() // This is done by a custom thread in a real world application."]},
+        {"kind":"when","text":"We click the button second button and then process the event queue (by this current non-swing thread).","code":["UI.runNow( () -> ui2.component.doClick() )","EventProcessor.DECOUPLED.joinUntilDoneOrException() // This is done by a custom thread in a real world application."]},
 
         {"kind":"then","text":"The delegate does not throw an exception!","code":["noExceptionThrown()"]},
 
@@ -84,7 +84,7 @@
       "blocks":[
         {"kind":"given","text":"A UI built with the decoupled thread mode.","code":["var ui =","        UI.use(EventProcessor.DECOUPLED,","                ()-> UI.checkBox(\"X\").onClick( it ->{","                    UI.run(()-> it.get() )","                    // it.get() // This would throw an exception!","                })","            )"]},
 
-        {"kind":"when","text":"We check the check box and process the event queue (by this current non-swing thread).","code":["UI.runNow( () -> ui.component.doClick() )","UI.joinDecoupledEventProcessorFor(1) // This is done by a custom thread in a real world application."]},
+        {"kind":"when","text":"We check the check box and process the event queue (by this current non-swing thread).","code":["UI.runNow( () -> ui.component.doClick() )","EventProcessor.DECOUPLED.joinFor(1) // This is done by a custom thread in a real world application."]},
 
         {"kind":"then","text":"The delegate does not throw an exception!","code":["noExceptionThrown()"]}
       ],

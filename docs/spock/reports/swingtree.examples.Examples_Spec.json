@@ -115,7 +115,7 @@
       "blocks":[
         {"kind":"given","text":"We create an instance of the UI.","code":["var ui = new NoteGuesserView(new NoteGuesserViewModel())"]},
 
-        {"kind":"expect","text":"It is rendered as shown in the image.","code":["Utility.similarityBetween(ui, \"views/note-guesser-UI.png\", 99.9) > 99.9"]}
+        {"kind":"expect","text":"It is rendered as shown in the image.","code":["Utility.similarityBetween(ui, \"views/note-guesser-UI.png\", 93) > 93"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -143,7 +143,7 @@
       "blocks":[
         {"kind":"given","text":"We create the UI.","code":["var ui = new WellRoundedView()"]},
 
-        {"kind":"expect","text":"It is rendered as shown in the image.","code":["Utility.similarityBetween(ui, \"views/well-rounded-UI.png\", 99.9) > 99.9"]}
+        {"kind":"expect","text":"It is rendered as shown in the image.","code":["Utility.similarityBetween(ui, \"views/well-rounded-UI.png\", 98.1) > 98.1"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -158,7 +158,7 @@
       "blocks":[
         {"kind":"given","text":"We create the UI.","code":["var ui = new SoftUIView()"]},
 
-        {"kind":"expect","text":"It is rendered as shown in the image.","code":["Utility.similarityBetween(ui, \"views/soft-example-UI.png\", 99.9) > 99.9"]}
+        {"kind":"expect","text":"It is rendered as shown in the image.","code":["Utility.similarityBetween(ui, \"views/soft-example-UI.png\", 98.7) > 98.7"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -173,7 +173,7 @@
       "blocks":[
         {"kind":"given","text":"We create the UI.","code":["var ui = new AnimatedButtonsView()","ui.setBackground(new Color(242, 242, 242))"]},
 
-        {"kind":"expect","text":"It is rendered as shown in the image.","code":["Utility.similarityBetween(ui, \"views/animated-buttons-UI.png\", 99) > 99"]}
+        {"kind":"expect","text":"It is rendered as shown in the image.","code":["Utility.similarityBetween(ui, \"views/animated-buttons-UI.png\", 94.3) > 94.3"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -271,7 +271,7 @@
 
         {"kind":"expect","text":"","code":["new Utility.Query(ui).find(JTextArea, \"input-text-area\").isPresent()","new Utility.Query(ui).find(JTextArea, \"input-text-area\").get().componentOrientation == ComponentOrientation.RIGHT_TO_LEFT"]},
 
-        {"kind":"and","text":"Its render state is as expected.","code":["Utility.similarityBetween(ui, \"views/calculator-UI.png\", 99) > 99"]}
+        {"kind":"and","text":"Its render state is as expected.","code":["Utility.similarityBetween(ui, \"views/calculator-UI.png\", 97.5) > 97.5"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

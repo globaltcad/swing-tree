@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ShadeStyle.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">ShadeStyle.java</span></div><h1>ShadeStyle.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import java.awt.*;
+import java.util.Arrays;
+import java.util.Objects;
+
+public final class ShadeStyle
+{
+<span class="fc" id="L9">    private static final ShadeStyle _NONE = new ShadeStyle(ShadingStrategy.NONE, new Color[0], Layer.BACKGROUND);</span>
+
+
+<span class="fc" id="L12">    public static ShadeStyle none() { return _NONE; }</span>
+
+    private final ShadingStrategy _shadingStrategy;
+    private final Color[] _colors;
+    private final Layer _layer;
+
+
+    public ShadeStyle(ShadingStrategy shadingStrategy, Color[] colors, Layer layer)
+<span class="fc" id="L20">    {</span>
+<span class="fc" id="L21">        _shadingStrategy = Objects.requireNonNull(shadingStrategy);</span>
+<span class="fc" id="L22">        _colors          = Objects.requireNonNull(colors);</span>
+<span class="fc" id="L23">        _layer           = Objects.requireNonNull(layer);</span>
+<span class="fc" id="L24">    }</span>
+
+<span class="fc" id="L26">    public ShadingStrategy strategy() { return _shadingStrategy; }</span>
+
+<span class="fc" id="L28">    public Color[] colors() { return _colors; }</span>
+
+<span class="fc" id="L30">    public ShadeStyle colors( Color... colors ) { return new ShadeStyle(_shadingStrategy, colors, _layer); }</span>
+
+<span class="fc" id="L32">    public ShadeStyle strategy(ShadingStrategy shadingStrategy) { return new ShadeStyle(shadingStrategy, _colors, _layer); }</span>
+
+<span class="fc" id="L34">    public Layer layer() { return _layer; }</span>
+
+<span class="fc" id="L36">    public ShadeStyle layer(Layer layer) { return new ShadeStyle(_shadingStrategy, _colors, layer); }</span>
+
+
+    @Override
+    public String toString() {
+<span class="fc" id="L41">        return &quot;ShadeStyle[&quot; +</span>
+                    &quot;strategy=&quot; + _shadingStrategy         + &quot;, &quot; +
+<span class="fc" id="L43">                    &quot;colors=&quot;   + Arrays.toString(_colors) + &quot;, &quot; +</span>
+                    &quot;layer=&quot;    + _layer +
+                ']';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        if ( this == o ) return true;</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if ( !(o instanceof ShadeStyle) ) return false;</span>
+<span class="fc" id="L52">        ShadeStyle that = (ShadeStyle) o;</span>
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">        return _shadingStrategy == that._shadingStrategy &amp;&amp;</span>
+<span class="pc bnc" id="L54" title="All 4 branches missed.">               Arrays.equals(_colors, that._colors)      &amp;&amp;</span>
+               _layer == that._layer;
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L60">        int result = Objects.hash(_shadingStrategy);</span>
+<span class="fc" id="L61">        result = 31 * result + Arrays.hashCode(_colors);</span>
+<span class="fc" id="L62">        result = 31 * result + Objects.hash(_layer);</span>
+<span class="fc" id="L63">        return result;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

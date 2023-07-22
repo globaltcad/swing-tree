@@ -39,7 +39,7 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAnySwing&lt;UIFor
 <span class="nc" id="L39">        NullUtil.nullArgCheck( align, &quot;align&quot;, Val.class );</span>
 <span class="nc" id="L40">        NullUtil.nullPropertyCheck( align, &quot;align&quot;, &quot;Null is not a valid alignment&quot; );</span>
 <span class="nc" id="L41">        _onShow( align, v -&gt; with(align.orElseThrow()) );</span>
-<span class="nc" id="L42">        return this;</span>
+<span class="nc" id="L42">        return with(align.orElseThrow());</span>
     }
 
     /**
@@ -52,10 +52,10 @@ public class UIForSlider&lt;S extends JSlider&gt; extends UIForAnySwing&lt;UIFor
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public final UIForSlider&lt;S&gt; onChange( Action&lt;SimpleDelegate&lt;JSlider, ChangeEvent&gt;&gt; action ) {
+    public final UIForSlider&lt;S&gt; onChange( Action&lt;ComponentDelegate&lt;JSlider, ChangeEvent&gt;&gt; action ) {
 <span class="fc" id="L56">        NullUtil.nullArgCheck( action, &quot;action&quot;, Action.class );</span>
 <span class="fc" id="L57">        S slider = getComponent();</span>
-<span class="pc" id="L58">        _onChange( e -&gt; _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;(slider, e, this::getSiblinghood))) );</span>
+<span class="pc" id="L58">        _onChange( e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;(slider, e, this::getSiblinghood))) );</span>
 <span class="fc" id="L59">        return this;</span>
     }
 

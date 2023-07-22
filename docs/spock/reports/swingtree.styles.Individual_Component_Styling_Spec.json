@@ -4,7 +4,7 @@
   "narrative":"This specification demonstrates how you can use the styling\n    API to style Swing components in a functional and declarative fashion.",
   "subjects":[],
   "statistics":{
-    "runs":"15",
+    "runs":"16",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -29,7 +29,7 @@
 
         {"kind":"and","text":"The insets of the border will be increased by the border width (because the border grows inwards).","code":["panel.component.border.getBorderInsets(panel.component) == new Insets(5, 5, 5, 5)"]},
 
-        {"kind":"and","text":"The font of the panel will be set to Papyrus with a size of 42.","code":["panel.component.font == new Font(\"Papyrus\", Font.PLAIN, 42)"]}
+        {"kind":"and","text":"The font of the panel will be set to Papyrus with a size of 42.","code":["panel.component.font.toString().contains(\"family=Dialog,name=Papyrus,style=plain,size=42\")"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -179,6 +179,23 @@
     },
   
     {
+      "id":"A text area background can be shaded from left to right with any number of colors.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A component can be shaded from left to right with any number of colors.\n            ![components/left-to-right-shaded-JTextArea.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/left-to-right-shaded-JTextArea.png)\n\n            In this example we are painting a rainbow shading effect.\n            This kind of shading looks really nice on text areas.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A text area UI with a custom styler lambda.","code":["var ui =","        UI.textArea(\"\"\"Ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.\"\"\")","        .peek( it -> it.setLineWrap(true) )","        .withStyle( it -> it","            .size(200, 240)","            .fontBold(true)","            .border(2, Color.DARK_GRAY)","            .backgroundColor(Color.CYAN)","            .padding(12)","            .margin(6)","            .shade(shade -> shade","               .strategy(ShadingStrategy.LEFT_TO_RIGHT)","               .colors(","                  new Color(255,0,0,64),","                  new Color(0,255,0,64),","                  new Color(0,0,255,64),","                  new Color(255,255,0,64),","                  new Color(255,0,255,64),","                  new Color(0,255,255,64)","               )","               .layer(Layer.BACKGROUND)","            )","        )"]},
+
+        {"kind":"when","text":"We render the text area into a BufferedImage.","code":["var image = Utility.renderSingleComponent(ui.getComponent())"]},
+
+        {"kind":"then","text":"The image is as expected.","code":["Utility.similarityBetween(image, \"components/left-to-right-shaded-JTextArea.png\", 99.95) > 99.95"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
       "id":"Make a text area look like it is sunken in the background using a shadow going inwards.",
       "result":"PASS",
       "duration":"?",
@@ -256,7 +273,7 @@
       "tags":{},"see":[],"extraInfo":["\n                The `Styler` lambda exposes a lot of API to adjust how text is styled. <br>\n                More specifically, you can adjust the style of the font, e.g. the font family, size and, well, style. <br>\n                <br>\n                Here you can see an example of a text area with a custom font family, size and style. <br>\n                ![components/custom-font-JTextArea.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/custom-font-JTextArea.png)\n            "]
       },
       "blocks":[
-        {"kind":"given","text":"A text area UI with a custom styler lambda.","code":["var ui =","        UI.textArea(\"I am a text area, \\nhow are you today :) ?\")","        .peek( it -> it.setLineWrap(true) )","        .withStyle( it -> it","            .size(120, 60)","            .font(\"Goudy Old Style\", 13)","            .fontBold(true)","            .fontItalic(true)","            .fontColor(\"#FF0000\") // Red","        )"]},
+        {"kind":"given","text":"A text area UI with a custom styler lambda.","code":["var ui =","        UI.textArea(\"I am a text area, \\nhow are you today :) ?\")","        .peek( it -> it.setLineWrap(true) )","        .withStyle( it -> it","            .size(140, 80)","            .font(\"Goudy Old Style\", 13)","            .fontBold(true)","            .fontItalic(true)","            .fontColor(\"#FF0000\") // Red","        )"]},
 
         {"kind":"when","text":"We render the text area into a BufferedImage.","code":["var image = Utility.renderSingleComponent(ui.getComponent())"]},
 

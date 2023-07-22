@@ -148,10 +148,10 @@ public class UIForList&lt;E, L extends JList&lt;E&gt;&gt; extends UIForAnySwing&
      * @param action The {@link Action} that will be notified.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForList&lt;E, L&gt; onSelection( Action&lt;SimpleDelegate&lt;JList&lt;E&gt;, ListSelectionEvent&gt;&gt; action ) {
+    public final UIForList&lt;E, L&gt; onSelection( Action&lt;ComponentDelegate&lt;JList&lt;E&gt;, ListSelectionEvent&gt;&gt; action ) {
 <span class="fc" id="L152">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
 <span class="fc" id="L153">        L list = getComponent();</span>
-<span class="pc" id="L154">        list.addListSelectionListener(e -&gt; _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;(list, e, ()-&gt;getSiblinghood()))) );</span>
+<span class="pc" id="L154">        list.addListSelectionListener(e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;(list, e, ()-&gt;getSiblinghood()))) );</span>
 <span class="fc" id="L155">        return this;</span>
     }
 

@@ -1,8 +1,8 @@
 {
   "className":"swingtree.button.JButton_Example_Spec",
-  "title":"",
-  "narrative":"",
-  "subjects":[],
+  "title":"Using JButton in SwingTree",
+  "narrative":"This specification demonstrates how the SwingTree API\n    can be used to create `JButton`s and how to register event handlers\n    on them while still being able to integrate them\n    in a declarative UI.",
+  "subjects":["swingtree.UIForButton"],
   "statistics":{
     "runs":"3",
     "successRate":"100.0%",
@@ -18,7 +18,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n            This is he most basic example of defining a button.\n            It has some text displayed on top of it and a simple click action.\n            Take a look:\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a basic button which will a simple \"onClick\".","code":["var ui =","    UI.button(\"I am displayed on the button!\")","    .onClick( it -> it.component.setEnabled(false) )"]},
@@ -39,7 +39,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n            The event handlers you register on a component receive a useful context \n            which offers all kinds of relevant information to your event action.\n            This is also true for a click action handler registered on a \n            button, which can access the neighbouring sibling components. \n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a panel with a label and a button!","code":["var ui =","    UI.panel()","        .add(UI.label(\"Button:\"))","        .add(","            UI.button(\"Click me!\")","            .onClick( it -> it.siblings.each {s -> s.setEnabled(false)} )","        )"]},
@@ -56,11 +56,11 @@
     },
   
     {
-      "id":"We can go through the entire siblinghood, including the current button!",
+      "id":"In a button event we can go through the entire siblinghood, including the current button!",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n            The event handlers you register on a component receive a useful context \n            which offers all kinds of relevant information to your event action.\n            This is also true for a click action handler registered on a \n            button, which can access the \"siblinghood\", which is all siblings\n            including itself. \n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a panel with some random components and a fancy click action","code":["var ui =","    UI.panel()","    .add(UI.textField(\"text field\"))","    .add(UI.label(\"innocent label\"))","    .add(","        UI.button(\"Click me!\")","        .onClick(it ->","            it.siblinghood.each {s -> { if ( s instanceof JLabel ) s.setText(\"I got hacked!\") }}","        )","    )","    .add(UI.spinner())"]},

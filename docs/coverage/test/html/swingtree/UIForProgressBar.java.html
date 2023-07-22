@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForProgressBar.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForProgressBar.java</span></div><h1>UIForProgressBar.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import sprouts.Val;
+
+import javax.swing.*;
+
+/**
+ *  A swing tree builder node for {@link JProgressBar} instances.
+ */
+public class UIForProgressBar&lt;P extends JProgressBar&gt; extends UIForAnySwing&lt;UIForProgressBar&lt;P&gt;, P&gt;
+{
+    /**
+     * Extensions of the {@link  UIForAnySwing} always wrap
+     * a single component for which they are responsible.
+     *
+     * @param component The JComponent type which will be wrapped by this builder node.
+     */
+    public UIForProgressBar( P component ) {
+<span class="fc" id="L19">        super(component);</span>
+<span class="fc" id="L20">    }</span>
+
+    /**
+     *  Sets the orientation of the slider.
+     *  @param align The orientation of the slider.
+     *  @return This builder node.
+     */
+    public final UIForProgressBar&lt;P&gt; with( UI.Align align ) {
+<span class="fc" id="L28">        NullUtil.nullArgCheck( align, &quot;align&quot;, UI.Align.class );</span>
+<span class="fc" id="L29">        getComponent().setOrientation(align.forProgressBar());</span>
+<span class="fc" id="L30">        return this;</span>
+    }
+
+    /**
+     *  Dynamically sets the orientation of the slider.
+     *  @param align The orientation of the slider.
+     *  @return This builder node.
+     */
+    public final UIForProgressBar&lt;P&gt; withAlignment( Val&lt;UI.Align&gt; align ) {
+<span class="nc" id="L39">        NullUtil.nullArgCheck( align, &quot;align&quot;, Val.class );</span>
+<span class="nc" id="L40">        NullUtil.nullPropertyCheck( align, &quot;align&quot;, &quot;Null is not a valid alignment&quot; );</span>
+<span class="nc" id="L41">        _onShow( align, v -&gt; with(align.orElseThrow()) );</span>
+<span class="nc" id="L42">        return with(align.orElseThrow());</span>
+    }
+
+    /**
+     * Sets the minimum value of the slider.
+     * For more information see {@link JProgressBar#setMinimum(int)}.
+     *
+     * @param min The minimum value of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForProgressBar&lt;P&gt; withMin( int min ) {
+<span class="fc" id="L53">        getComponent().setMinimum( min );</span>
+<span class="fc" id="L54">        return this;</span>
+    }
+
+    /**
+     * @param min The min property used to dynamically update the min value of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code min} is {@code null}.
+     */
+    public final UIForProgressBar&lt;P&gt; withMin( Val&lt;Integer&gt; min ) {
+<span class="nc" id="L63">        NullUtil.nullArgCheck( min, &quot;min&quot;, Val.class );</span>
+<span class="nc" id="L64">        NullUtil.nullPropertyCheck(min, &quot;min&quot;, &quot;Null is not a valid min value for the value of a progress bar.&quot;);</span>
+<span class="nc" id="L65">        _onShow( min, this::withMin);</span>
+<span class="nc" id="L66">        return this;</span>
+    }
+
+    /**
+     * Sets the maximum value of the progress bar.
+     * For more information see {@link JProgressBar#setMaximum(int)} (int)}.
+     *
+     * @param max The maximum value of the progress bar.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForProgressBar&lt;P&gt; withMax( int max ) {
+<span class="fc" id="L77">        getComponent().setMaximum( max );</span>
+<span class="fc" id="L78">        return this;</span>
+    }
+
+    /**
+     * @param max An integer property used to dynamically update the max value of the progress bar.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code max} is {@code null}.
+     */
+    public final UIForProgressBar&lt;P&gt; withMax( Val&lt;Integer&gt; max ) {
+<span class="nc" id="L87">        NullUtil.nullArgCheck( max, &quot;max&quot;, Val.class );</span>
+<span class="nc" id="L88">        NullUtil.nullPropertyCheck(max, &quot;max&quot;, &quot;Null is not a valid max value for the value of a progress bar.&quot;);</span>
+<span class="nc" id="L89">        _onShow( max, this::withMax);</span>
+<span class="nc" id="L90">        return this;</span>
+    }
+
+    /**
+     * @param value The value to set for this {@link JProgressBar}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForProgressBar&lt;P&gt; withValue( int value ) {
+<span class="fc" id="L98">        getComponent().setValue(value);</span>
+<span class="fc" id="L99">        return this;</span>
+    }
+
+    /**
+     * @param progress The progress value, a number between 0 and 1, to set for this {@link JProgressBar}.
+     *              Note that this will be converted to an integer value between the min and max values.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForProgressBar&lt;P&gt; withProgress( double progress ) {
+<span class="nc bnc" id="L108" title="All 4 branches missed.">        if ( progress &lt; 0 || progress &gt; 1 )</span>
+<span class="nc" id="L109">            throw new IllegalArgumentException( &quot;Progress value must be between 0 and 1&quot; );</span>
+<span class="nc" id="L110">        int min = getComponent().getMinimum();</span>
+<span class="nc" id="L111">        int max = getComponent().getMaximum();</span>
+<span class="nc" id="L112">        int range = max - min;</span>
+<span class="nc" id="L113">        int value = (int) (min + range * progress);</span>
+<span class="nc" id="L114">        getComponent().setValue(value);</span>
+<span class="nc" id="L115">        return this;</span>
+    }
+
+    /**
+     * @param val An integer property used to dynamically update the value of the progress bar.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code value} is {@code null}.
+     */
+    public final UIForProgressBar&lt;P&gt; withValue( Val&lt;Integer&gt; val ) {
+<span class="nc" id="L124">        NullUtil.nullArgCheck( val, &quot;val&quot;, Val.class );</span>
+<span class="nc" id="L125">        NullUtil.nullPropertyCheck(val, &quot;value&quot;, &quot;Null is not a valid value for the progress property of a progress bar.&quot;);</span>
+<span class="nc" id="L126">        _onShow( val, this::withValue );</span>
+<span class="nc" id="L127">        return withValue(val.orElseThrow());</span>
+    }
+
+    /**
+     * @param progress A double property used to dynamically update the value of the progress bar.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code value} is {@code null}.
+     */
+    public final UIForProgressBar&lt;P&gt; withProgress( Val&lt;Double&gt; progress ) {
+<span class="nc" id="L136">        NullUtil.nullArgCheck( progress, &quot;progress&quot;, Val.class );</span>
+<span class="nc" id="L137">        NullUtil.nullPropertyCheck(progress, &quot;progress&quot;, &quot;Null is not a valid progress for the progress property of a progress bar.&quot;);</span>
+<span class="nc" id="L138">        _onShow( progress, this::withProgress );</span>
+<span class="nc" id="L139">        return withProgress(progress.orElseThrow());</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

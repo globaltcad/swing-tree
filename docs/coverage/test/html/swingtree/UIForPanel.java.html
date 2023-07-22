@@ -54,7 +54,7 @@ public class UIForPanel&lt;P extends JPanel&gt; extends UIForAnySwing&lt;UIForPa
             and disable all the components that are contained in the tree
             except for the children of non JPanels.
         */
-<span class="nc" id="L57">        _traverseEnable( getComponent(), isEnabled );</span>
+<span class="nc" id="L57">        InternalUtil._traverseEnable( getComponent(), isEnabled );</span>
         /*
             Note:
             If you really only want to disable the JPanel itself, then you can
@@ -64,19 +64,5 @@ public class UIForPanel&lt;P extends JPanel&gt; extends UIForAnySwing&lt;UIForPa
             but still allow the user to interact with the components it contains.
          */
 <span class="nc" id="L66">    }</span>
-
-    private void _traverseEnable( Component c, boolean isEnabled ) {
-<span class="nc" id="L69">        c.setEnabled( isEnabled );</span>
-<span class="nc bnc" id="L70" title="All 2 branches missed.">        if ( c.getClass() == JPanel.class )</span>
-<span class="nc bnc" id="L71" title="All 2 branches missed.">            for ( Component c2 : ((JPanel)c).getComponents() )</span>
-<span class="nc" id="L72">                _traverseEnable( c2, isEnabled );</span>
-        /*
-            Note:
-                We use getClass() here, because we want to stop at subclasses of
-                JPanel because they are likely user defined components and not dumb
-                wrappers for other components.
-        */
-<span class="nc" id="L79">    }</span>
-
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

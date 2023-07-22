@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Arc.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">Arc.java</span></div><h1>Arc.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+public final class Arc
+{
+    private final int _arcWidth;
+    private final int _arcHeight;
+
+<span class="fc" id="L8">    public Arc( int arcWidth, int arcHeight ) {</span>
+<span class="fc" id="L9">        _arcWidth  = arcWidth;</span>
+<span class="fc" id="L10">        _arcHeight = arcHeight;</span>
+<span class="fc" id="L11">    }</span>
+
+<span class="fc" id="L13">    public int width() { return _arcWidth; }</span>
+
+<span class="fc" id="L15">    public int height() { return _arcHeight; }</span>
+
+    Arc scale( double scale ) {
+<span class="nc" id="L18">        return new Arc(</span>
+<span class="nc" id="L19">                (int) Math.round( _arcWidth  * scale ),</span>
+<span class="nc" id="L20">                (int) Math.round( _arcHeight * scale )</span>
+            );
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L26">        int hash = 7;</span>
+<span class="fc" id="L27">        hash = 31 * hash + _arcWidth;</span>
+<span class="fc" id="L28">        hash = 31 * hash + _arcHeight;</span>
+<span class="fc" id="L29">        return hash;</span>
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        if ( obj == null ) return false;</span>
+<span class="pc bpc" id="L35" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+
+<span class="fc" id="L38">        Arc rhs = (Arc) obj;</span>
+<span class="pc bpc" id="L39" title="2 of 4 branches missed.">        return _arcWidth == rhs._arcWidth &amp;&amp; _arcHeight == rhs._arcHeight;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

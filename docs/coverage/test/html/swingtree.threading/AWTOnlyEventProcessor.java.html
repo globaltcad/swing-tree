@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AWTOnlyEventProcessor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.threading</a> &gt; <span class="el_source">AWTOnlyEventProcessor.java</span></div><h1>AWTOnlyEventProcessor.java</h1><pre class="source lang-java linenums">package swingtree.threading;
+
+import swingtree.UI;
+
+<span class="fc" id="L5">class AWTOnlyEventProcessor implements EventProcessor</span>
+{
+<span class="fc" id="L7">    @Override public void registerAppEvent( Runnable runnable ) { _tryRunning( runnable ); }</span>
+
+<span class="nc" id="L9">    @Override public void registerAndRunAppEventNow( Runnable runnable ) { _tryRunning( runnable ); }</span>
+
+<span class="nc" id="L11">    @Override public void registerUIEvent( Runnable runnable ) { _tryRunning( runnable ); }</span>
+
+<span class="nc" id="L13">    @Override public void registerAndRunUIEventNow( Runnable runnable ) { _tryRunning( runnable ); }</span>
+
+    private void _tryRunning( Runnable runnable ) {
+<span class="pc bpc" id="L16" title="1 of 2 branches missed.">        if ( UI.thisIsUIThread() ) {</span>
+            try {
+<span class="fc" id="L18">                runnable.run();</span>
+<span class="nc" id="L19">            } catch (Exception e) {</span>
+<span class="nc" id="L20">                e.printStackTrace();</span>
+<span class="pc" id="L21">            }</span>
+        }
+        else {
+<span class="nc" id="L24">            Thread currentThread = Thread.currentThread();</span>
+<span class="nc" id="L25">            String threadName    = currentThread.getName();</span>
+<span class="nc" id="L26">            String problem       = &quot;The current thread is not the UI thread!&quot;;</span>
+<span class="nc" id="L27">            String requirement   = &quot;The current event processor is the '&quot; + AWTOnlyEventProcessor.class.getSimpleName() + &quot;' which &quot; +</span>
+                                   &quot;only supports running tasks in the UI thread.  The current thread however is '&quot; + threadName + &quot;' which &quot; +
+                                   &quot;is not the UI thread (the AWT thread).&quot;;
+
+<span class="nc" id="L31">            throw new RuntimeException( problem + &quot;  &quot; + requirement );</span>
+        }
+<span class="fc" id="L33">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,77 +1,295 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BorderStyle.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">BorderStyle.java</span></div><h1>BorderStyle.java</h1><pre class="source lang-java linenums">package swingtree.style;
 
 import java.awt.*;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+/**
+ *  An immutable, wither-like cloner method based settings container for border styles that is part of
+ *  a {@link Style} configuration object.
+ */
 public final class BorderStyle
 {
-    private final int   _borderArcWidth;
-    private final int   _borderArcHeight;
-    private final int   _borderWidth;
+<span class="fc" id="L15">    private static final BorderStyle _NONE = new BorderStyle(</span>
+                                                null, null, null, null,
+<span class="fc" id="L17">                                                Outline.none(),</span>
+                                                null,
+<span class="fc" id="L19">                                                Collections.singletonMap(StyleUtility.DEFAULT_KEY, ShadeStyle.none())</span>
+                                            );
+
+<span class="fc" id="L22">    public static BorderStyle none() { return _NONE; }</span>
+
+    private final Arc   _topLeftArc;
+    private final Arc   _topRightArc;
+    private final Arc   _bottomLeftArc;
+    private final Arc   _bottomRightArc;
+
+    private final Outline _borderWidths;
     private final Color _borderColor;
+<span class="fc" id="L31">    private final Map&lt;String, ShadeStyle&gt; _shades = new TreeMap&lt;&gt;();</span>
 
-    BorderStyle(
-        int borderArcWidth,
-        int borderArcHeight,
-        int borderWidth,
-        Color borderColor
-<span class="fc" id="L19">    ) {</span>
-<span class="fc" id="L20">        _borderArcWidth  = borderArcWidth;</span>
-<span class="fc" id="L21">        _borderArcHeight = borderArcHeight;</span>
-<span class="fc" id="L22">        _borderWidth     = borderWidth;</span>
-<span class="fc" id="L23">        _borderColor     = borderColor;</span>
-<span class="fc" id="L24">    }</span>
 
-<span class="fc" id="L26">    public int arcWidth() { return _borderArcWidth; }</span>
+    private BorderStyle(
+        Arc topLeftArc,
+        Arc topRightArc,
+        Arc bottomLeftArc,
+        Arc bottomRightArc,
+        Outline borderWidths,
+        Color borderColor,
+        Map&lt;String, ShadeStyle&gt; shades
+<span class="fc" id="L42">    ) {</span>
+<span class="fc" id="L43">        _topLeftArc      = topLeftArc;</span>
+<span class="fc" id="L44">        _topRightArc     = topRightArc;</span>
+<span class="fc" id="L45">        _bottomLeftArc   = bottomLeftArc;</span>
+<span class="fc" id="L46">        _bottomRightArc  = bottomRightArc;</span>
+<span class="fc" id="L47">        _borderWidths    = Objects.requireNonNull(borderWidths);</span>
+<span class="fc" id="L48">        _borderColor     = borderColor;</span>
+<span class="fc" id="L49">        _shades.putAll(shades);</span>
+<span class="fc" id="L50">    }</span>
 
-<span class="fc" id="L28">    public int arcHeight() { return _borderArcHeight; }</span>
+<span class="fc" id="L52">    public Optional&lt;Arc&gt; topLeftArc() { return Optional.ofNullable(_topLeftArc); }</span>
 
-<span class="fc" id="L30">    public int width() { return _borderWidth; }</span>
+<span class="fc" id="L54">    public Optional&lt;Arc&gt; topRightArc() { return Optional.ofNullable(_topRightArc); }</span>
 
-<span class="fc" id="L32">    public Optional&lt;Color&gt; color() { return Optional.ofNullable(_borderColor); }</span>
+<span class="fc" id="L56">    public Optional&lt;Arc&gt; bottomLeftArc() { return Optional.ofNullable(_bottomLeftArc); }</span>
 
-<span class="fc" id="L34">    public BorderStyle withArcWidth( int borderArcWidth ) { return new BorderStyle(borderArcWidth, _borderArcHeight, _borderWidth, _borderColor); }</span>
+<span class="fc" id="L58">    public Optional&lt;Arc&gt; bottomRightArc() { return Optional.ofNullable(_bottomRightArc); }</span>
 
-<span class="fc" id="L36">    public BorderStyle withArcHeight( int borderArcHeight ) { return new BorderStyle(_borderArcWidth, borderArcHeight, _borderWidth, _borderColor); }</span>
+    public boolean hasAnyNonZeroArcs() {
+<span class="pc bpc" id="L61" title="3 of 8 branches missed.">        return _topLeftArc     != null &amp;&amp; _topLeftArc.width()     &gt; 0 &amp;&amp; _topLeftArc.height()     &gt; 0 ||</span>
+<span class="pc bpc" id="L62" title="5 of 6 branches missed.">               _topRightArc    != null &amp;&amp; _topRightArc.width()    &gt; 0 &amp;&amp; _topRightArc.height()    &gt; 0 ||</span>
+<span class="pc bpc" id="L63" title="5 of 6 branches missed.">               _bottomLeftArc  != null &amp;&amp; _bottomLeftArc.width()  &gt; 0 &amp;&amp; _bottomLeftArc.height()  &gt; 0 ||</span>
+<span class="pc bnc" id="L64" title="All 4 branches missed.">               _bottomRightArc != null &amp;&amp; _bottomRightArc.width() &gt; 0 &amp;&amp; _bottomRightArc.height() &gt; 0;</span>
+    }
 
-<span class="fc" id="L38">    public BorderStyle withWidth( int borderThickness ) { return new BorderStyle(_borderArcWidth, _borderArcHeight, borderThickness, _borderColor); }</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">    public int topLeftRadius() { return _topLeftArc != null ? (_topLeftArc.width() + _topLeftArc.height()) / 2 : 0; }</span>
 
-<span class="fc" id="L40">    public BorderStyle withColor( Color borderColor ) { return new BorderStyle(_borderArcWidth, _borderArcHeight, _borderWidth, borderColor); }</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">    public int topRightRadius() { return _topRightArc != null ? (_topRightArc.width() + _topRightArc.height()) / 2 : 0; }</span>
+
+<span class="fc bfc" id="L71" title="All 2 branches covered.">    public int bottomLeftRadius() { return _bottomLeftArc != null ? (_bottomLeftArc.width() + _bottomLeftArc.height()) / 2 : 0; }</span>
+
+<span class="fc bfc" id="L73" title="All 2 branches covered.">    public int bottomRightRadius() { return _bottomRightArc != null ? (_bottomRightArc.width() + _bottomRightArc.height()) / 2 : 0; }</span>
+
+<span class="fc" id="L75">    public Outline widths() { return _borderWidths; }</span>
+
+<span class="fc" id="L77">    public Optional&lt;Color&gt; color() { return Optional.ofNullable(_borderColor); }</span>
+
+    public List&lt;ShadeStyle&gt; shades() {
+<span class="fc" id="L80">        return Collections.unmodifiableList(</span>
+<span class="fc" id="L81">                _shades.entrySet().stream()</span>
+<span class="fc" id="L82">                        .sorted(Map.Entry.comparingByKey())</span>
+<span class="fc" id="L83">                        .map(Map.Entry::getValue)</span>
+<span class="fc" id="L84">                        .collect(Collectors.toList())</span>
+            );
+    }
+
+    BorderStyle shade( Map&lt;String, ShadeStyle&gt; shades ) {
+<span class="fc" id="L89">        Objects.requireNonNull(shades);</span>
+<span class="fc" id="L90">        return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _borderColor, shades);</span>
+    }
+
+    public BorderStyle shade( String shadeName, Function&lt;ShadeStyle, ShadeStyle&gt; styler ) {
+<span class="fc" id="L94">        Objects.requireNonNull(shadeName);</span>
+<span class="fc" id="L95">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L96">        ShadeStyle shadow = Optional.ofNullable(_shades.get(shadeName)).orElse(ShadeStyle.none());</span>
+        // We clone the shadow map:
+<span class="fc" id="L98">        Map&lt;String, ShadeStyle&gt; newShadows = new HashMap&lt;&gt;(_shades);</span>
+<span class="fc" id="L99">        newShadows.put(shadeName, styler.apply(shadow));</span>
+<span class="fc" id="L100">        return shade(newShadows);</span>
+    }
+
+    public ShadeStyle shade( String shadeName ) {
+<span class="fc" id="L104">        Objects.requireNonNull(shadeName);</span>
+<span class="fc" id="L105">        return Optional.ofNullable(_shades.get(shadeName)).orElse(ShadeStyle.none());</span>
+    }
+
+    public ShadeStyle shade() {
+<span class="fc" id="L109">        return shade(StyleUtility.DEFAULT_KEY);</span>
+    }
+
+    BorderStyle widths( Outline borderWidths ) {
+<span class="fc" id="L113">        return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, borderWidths, _borderColor, _shades);</span>
+    }
+
+    BorderStyle arcWidthAt( Corner corner, int borderArcWidth ) {
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">        if ( corner == Corner.EVERY )</span>
+<span class="nc" id="L118">            return this.arcWidth(borderArcWidth);</span>
+        int arcHeight;
+<span class="pc bpc" id="L120" title="1 of 5 branches missed.">        switch ( corner ) {</span>
+            case TOP_LEFT:
+<span class="fc bfc" id="L122" title="All 2 branches covered.">                arcHeight = _topLeftArc != null ? _topLeftArc.height() : 0;</span>
+<span class="fc" id="L123">                return new BorderStyle(new Arc(borderArcWidth, arcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _borderColor, _shades);</span>
+            case TOP_RIGHT:
+<span class="fc bfc" id="L125" title="All 2 branches covered.">                arcHeight = _topRightArc != null ? _topRightArc.height() : 0;</span>
+<span class="fc" id="L126">                return new BorderStyle(_topLeftArc, new Arc(borderArcWidth, arcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _borderColor, _shades);</span>
+            case BOTTOM_LEFT:
+<span class="fc bfc" id="L128" title="All 2 branches covered.">                arcHeight = _bottomLeftArc != null ? _bottomLeftArc.height() : 0;</span>
+<span class="fc" id="L129">                return new BorderStyle(_topLeftArc, _topRightArc, new Arc(borderArcWidth, arcHeight), _bottomRightArc, _borderWidths, _borderColor, _shades);</span>
+            case BOTTOM_RIGHT:
+<span class="fc bfc" id="L131" title="All 2 branches covered.">                arcHeight = _bottomRightArc != null ? _bottomRightArc.height() : 0;</span>
+<span class="fc" id="L132">                return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, new Arc(borderArcWidth, arcHeight), _borderWidths, _borderColor, _shades);</span>
+            default:
+<span class="nc" id="L134">                throw new IllegalArgumentException(&quot;Unknown corner: &quot; + corner);</span>
+        }
+    }
+
+    BorderStyle arcWidth( int borderArcWidth ) {
+<span class="fc" id="L139">        return this.arcWidthAt(Corner.TOP_LEFT,     borderArcWidth)</span>
+<span class="fc" id="L140">                   .arcWidthAt(Corner.TOP_RIGHT,    borderArcWidth)</span>
+<span class="fc" id="L141">                   .arcWidthAt(Corner.BOTTOM_LEFT,  borderArcWidth)</span>
+<span class="fc" id="L142">                   .arcWidthAt(Corner.BOTTOM_RIGHT, borderArcWidth);</span>
+    }
+
+    BorderStyle arcHeightAt( Corner corner, int borderArcHeight ) {
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">        if ( corner == Corner.EVERY )</span>
+<span class="nc" id="L147">            return this.arcHeight(borderArcHeight);</span>
+        int arcWidth;
+<span class="pc bpc" id="L149" title="1 of 5 branches missed.">        switch ( corner ) {</span>
+            case TOP_LEFT:
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">                arcWidth = _topLeftArc != null ? _topLeftArc.width() : 0;</span>
+<span class="fc" id="L152">                return new BorderStyle(new Arc(arcWidth, borderArcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _borderColor, _shades);</span>
+            case TOP_RIGHT:
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">                arcWidth = _topRightArc != null ? _topRightArc.width() : 0;</span>
+<span class="fc" id="L155">                return new BorderStyle(_topLeftArc, new Arc(arcWidth, borderArcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _borderColor, _shades);</span>
+            case BOTTOM_LEFT:
+<span class="pc bpc" id="L157" title="1 of 2 branches missed.">                arcWidth = _bottomLeftArc != null ? _bottomLeftArc.width() : 0;</span>
+<span class="fc" id="L158">                return new BorderStyle(_topLeftArc, _topRightArc, new Arc(arcWidth, borderArcHeight), _bottomRightArc, _borderWidths, _borderColor, _shades);</span>
+            case BOTTOM_RIGHT:
+<span class="pc bpc" id="L160" title="1 of 2 branches missed.">                arcWidth = _bottomRightArc != null ? _bottomRightArc.width() : 0;</span>
+<span class="fc" id="L161">                return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, new Arc(arcWidth, borderArcHeight), _borderWidths, _borderColor, _shades);</span>
+            default:
+<span class="nc" id="L163">                throw new IllegalArgumentException(&quot;Unknown corner: &quot; + corner);</span>
+        }
+    }
+
+    BorderStyle arcHeight( int borderArcHeight ) {
+<span class="fc" id="L168">        return this.arcHeightAt(Corner.TOP_LEFT,     borderArcHeight)</span>
+<span class="fc" id="L169">                   .arcHeightAt(Corner.TOP_RIGHT,    borderArcHeight)</span>
+<span class="fc" id="L170">                   .arcHeightAt(Corner.BOTTOM_LEFT,  borderArcHeight)</span>
+<span class="fc" id="L171">                   .arcHeightAt(Corner.BOTTOM_RIGHT, borderArcHeight);</span>
+    }
+
+    BorderStyle widthAt( Edge edge, int borderWidth ) {
+<span class="pc bpc" id="L175" title="1 of 2 branches missed.">        if ( edge == Edge.EVERY )</span>
+<span class="nc" id="L176">            return this.width(borderWidth);</span>
+<span class="pc bpc" id="L177" title="1 of 5 branches missed.">        switch (edge) {</span>
+<span class="fc" id="L178">            case TOP:    return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.top(borderWidth), _borderColor, _shades);</span>
+<span class="fc" id="L179">            case RIGHT:  return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.right(borderWidth), _borderColor, _shades);</span>
+<span class="fc" id="L180">            case BOTTOM: return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.bottom(borderWidth), _borderColor, _shades);</span>
+<span class="fc" id="L181">            case LEFT:   return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.left(borderWidth), _borderColor, _shades);</span>
+            default:
+<span class="nc" id="L183">                throw new IllegalArgumentException(&quot;Unknown side: &quot; + edge);</span>
+        }
+    }
+
+    BorderStyle width( int borderWidth ) {
+<span class="fc" id="L188">        return this.widthAt(Edge.TOP,    borderWidth)</span>
+<span class="fc" id="L189">                   .widthAt(Edge.RIGHT,  borderWidth)</span>
+<span class="fc" id="L190">                   .widthAt(Edge.BOTTOM, borderWidth)</span>
+<span class="fc" id="L191">                   .widthAt(Edge.LEFT,   borderWidth);</span>
+    }
+
+<span class="fc" id="L194">    BorderStyle color( Color borderColor ) { return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, borderColor, _shades); }</span>
+
+    boolean allCornersShareTheSameArc() {
+<span class="pc bpc" id="L197" title="1 of 2 branches missed.">        return Objects.equals(_topLeftArc, _topRightArc) &amp;&amp;</span>
+<span class="pc bpc" id="L198" title="1 of 2 branches missed.">               Objects.equals(_topLeftArc, _bottomLeftArc) &amp;&amp;</span>
+<span class="pc bpc" id="L199" title="1 of 2 branches missed.">               Objects.equals(_topLeftArc, _bottomRightArc);</span>
+    }
+
+    boolean allSidesShareTheSameWidth() {
+<span class="pc bpc" id="L203" title="1 of 2 branches missed.">        return Objects.equals(_borderWidths.top().orElse(null), _borderWidths.right().orElse(null)) &amp;&amp;</span>
+<span class="pc bpc" id="L204" title="1 of 2 branches missed.">               Objects.equals(_borderWidths.top().orElse(null), _borderWidths.bottom().orElse(null)) &amp;&amp;</span>
+<span class="pc bpc" id="L205" title="1 of 2 branches missed.">               Objects.equals(_borderWidths.top().orElse(null), _borderWidths.left().orElse(null));</span>
+    }
+
+    BorderStyle _scale( double scale ) {
+<span class="pc bpc" id="L209" title="1 of 2 branches missed.">        return new BorderStyle(</span>
+<span class="pc bpc" id="L210" title="1 of 2 branches missed.">                    _topLeftArc     == null ? null : _topLeftArc.scale(scale),</span>
+<span class="pc bpc" id="L211" title="1 of 2 branches missed.">                    _topRightArc    == null ? null : _topRightArc.scale(scale),</span>
+<span class="pc bpc" id="L212" title="1 of 2 branches missed.">                    _bottomLeftArc  == null ? null : _bottomLeftArc.scale(scale),</span>
+<span class="pc" id="L213">                    _bottomRightArc == null ? null : _bottomRightArc.scale(scale),</span>
+<span class="fc" id="L214">                    _borderWidths.scale(scale),</span>
+                    _borderColor,
+                    _shades
+            );
+    }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L44">        int hash = 7;</span>
-<span class="fc" id="L45">        hash = 31 * hash + _borderArcWidth;</span>
-<span class="fc" id="L46">        hash = 31 * hash + _borderArcHeight;</span>
-<span class="fc" id="L47">        hash = 31 * hash + _borderWidth;</span>
-<span class="fc" id="L48">        hash = 31 * hash + Objects.hashCode(_borderColor);</span>
-<span class="fc" id="L49">        return hash;</span>
+<span class="fc" id="L222">        int hash = 7;</span>
+<span class="pc bpc" id="L223" title="1 of 2 branches missed.">        hash = 97 * hash + ( _topLeftArc     != null ? _topLeftArc.hashCode()     : 0 );</span>
+<span class="pc bpc" id="L224" title="1 of 2 branches missed.">        hash = 97 * hash + ( _topRightArc    != null ? _topRightArc.hashCode()    : 0 );</span>
+<span class="pc bpc" id="L225" title="1 of 2 branches missed.">        hash = 97 * hash + ( _bottomLeftArc  != null ? _bottomLeftArc.hashCode()  : 0 );</span>
+<span class="pc bpc" id="L226" title="1 of 2 branches missed.">        hash = 97 * hash + ( _bottomRightArc != null ? _bottomRightArc.hashCode() : 0 );</span>
+<span class="pc bpc" id="L227" title="1 of 2 branches missed.">        hash = 97 * hash + ( _borderColor    != null ? _borderColor.hashCode()    : 0 );</span>
+<span class="fc" id="L228">        hash = 97 * hash + _borderWidths.hashCode();</span>
+<span class="fc" id="L229">        hash = 97 * hash + StyleUtility.mapHash(_shades);</span>
+<span class="fc" id="L230">        return hash;</span>
     }
 
     @Override
     public boolean equals( Object obj ) {
-<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
-<span class="pc bpc" id="L55" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
-<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
-<span class="fc" id="L57">        BorderStyle rhs = (BorderStyle) obj;</span>
-<span class="pc bpc" id="L58" title="3 of 6 branches missed.">        return _borderArcWidth  == rhs._borderArcWidth  &amp;&amp;</span>
-               _borderArcHeight == rhs._borderArcHeight &amp;&amp;
-               _borderWidth     == rhs._borderWidth     &amp;&amp;
-<span class="pc bpc" id="L61" title="1 of 2 branches missed.">               Objects.equals(_borderColor, rhs._borderColor);</span>
+<span class="pc bpc" id="L235" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="pc bpc" id="L236" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L237" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L238">        BorderStyle rhs = (BorderStyle) obj;</span>
+<span class="fc" id="L239">        return</span>
+<span class="fc bfc" id="L240" title="All 2 branches covered.">            Objects.equals(_topLeftArc,     rhs._topLeftArc)     &amp;&amp;</span>
+<span class="pc bpc" id="L241" title="1 of 2 branches missed.">            Objects.equals(_topRightArc,    rhs._topRightArc)    &amp;&amp;</span>
+<span class="pc bpc" id="L242" title="1 of 2 branches missed.">            Objects.equals(_bottomLeftArc,  rhs._bottomLeftArc)  &amp;&amp;</span>
+<span class="pc bpc" id="L243" title="1 of 2 branches missed.">            Objects.equals(_bottomRightArc, rhs._bottomRightArc) &amp;&amp;</span>
+<span class="fc bfc" id="L244" title="All 2 branches covered.">            Objects.equals(_borderColor,    rhs._borderColor)    &amp;&amp;</span>
+<span class="fc bfc" id="L245" title="All 2 branches covered.">            Objects.equals(_borderWidths,   rhs._borderWidths)   &amp;&amp;</span>
+<span class="pc bpc" id="L246" title="1 of 2 branches missed.">            StyleUtility.mapEquals(_shades, rhs._shades);</span>
     }
 
     @Override
-    public String toString() {
-<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        boolean arcWidthEqualsHeight = _borderArcWidth == _borderArcHeight;</span>
-<span class="pc bpc" id="L67" title="1 of 2 branches missed.">        return &quot;BorderStyle[&quot; +</span>
-                    (
+    public String toString()
+    {
+        String arcsString;
+<span class="pc bpc" id="L253" title="1 of 2 branches missed.">        if ( allCornersShareTheSameArc() ) {</span>
+<span class="pc bpc" id="L254" title="2 of 4 branches missed.">            boolean arcWidthEqualsHeight = _topLeftArc == null || _topLeftArc.width() == _topLeftArc.height();</span>
+<span class="pc bpc" id="L255" title="3 of 4 branches missed.">            arcsString = (</span>
                         arcWidthEqualsHeight
-                            ? &quot;radius=&quot; + _borderArcWidth
-                            : &quot;arcWidth=&quot; + _borderArcWidth + &quot;, arcHeight=&quot; + _borderArcHeight
-                    ) +
-                    &quot;, width=&quot; + _borderWidth +
-<span class="fc" id="L74">                    &quot;, color=&quot; + StyleUtility.toString(_borderColor) +</span>
+<span class="pc" id="L257">                            ? &quot;radius=&quot;   + ( _topLeftArc == null ? &quot;?&quot; : _topLeftArc.width() )</span>
+<span class="fc" id="L258">                            : &quot;arcWidth=&quot; + _topLeftArc.width() + &quot;, arcHeight=&quot; + _topLeftArc.height()</span>
+                    );
+<span class="fc" id="L260">        } else {</span>
+<span class="nc" id="L261">            arcsString =</span>
+<span class="nc" id="L262">                    &quot;topLeftArc=&quot;       + StyleUtility.toString(_topLeftArc)     +</span>
+<span class="nc" id="L263">                    &quot;, topRightArc=&quot;    + StyleUtility.toString(_topRightArc)    +</span>
+<span class="nc" id="L264">                    &quot;, bottomLeftArc=&quot;  + StyleUtility.toString(_bottomLeftArc)  +</span>
+<span class="nc" id="L265">                    &quot;, bottomRightArc=&quot; + StyleUtility.toString(_bottomRightArc);</span>
+        }
+
+        String borderWidthsString;
+<span class="pc bpc" id="L269" title="1 of 2 branches missed.">        if ( allSidesShareTheSameWidth() ) {</span>
+<span class="fc" id="L270">            borderWidthsString = &quot;width=&quot; + _borderWidths.top().map(Objects::toString).orElse(&quot;?&quot;);</span>
+        } else {
+<span class="nc" id="L272">            borderWidthsString =</span>
+<span class="nc" id="L273">                    &quot;topWidth=&quot;      + _borderWidths.top().map(Objects::toString).orElse(&quot;?&quot;)    +</span>
+<span class="nc" id="L274">                    &quot;, rightWidth=&quot;  + _borderWidths.right().map(Objects::toString).orElse(&quot;?&quot;)  +</span>
+<span class="nc" id="L275">                    &quot;, bottomWidth=&quot; + _borderWidths.bottom().map(Objects::toString).orElse(&quot;?&quot;) +</span>
+<span class="nc" id="L276">                    &quot;, leftWidth=&quot;   + _borderWidths.left().map(Objects::toString).orElse(&quot;?&quot;);</span>
+        }
+
+        String shadesString;
+<span class="pc bpc" id="L280" title="1 of 2 branches missed.">        if ( _shades.size() == 1 )</span>
+<span class="fc" id="L281">            shadesString = _shades.get(StyleUtility.DEFAULT_KEY).toString();</span>
+        else
+<span class="nc" id="L283">            shadesString = _shades.entrySet()</span>
+<span class="nc" id="L284">                                    .stream()</span>
+<span class="nc" id="L285">                                    .map(e -&gt; e.getKey() + &quot;: &quot; + e.getValue())</span>
+<span class="nc" id="L286">                                    .collect(Collectors.joining(&quot;, &quot;, &quot;shades=[&quot;, &quot;]&quot;));</span>
+
+<span class="fc" id="L288">        return &quot;BorderStyle[&quot; +</span>
+                    arcsString + &quot;, &quot; +
+                    borderWidthsString + &quot;, &quot; +
+<span class="fc" id="L291">                    &quot;color=&quot; + StyleUtility.toString(_borderColor) + &quot;, &quot; +</span>
+                    shadesString +
                 &quot;]&quot;;
     }
 }

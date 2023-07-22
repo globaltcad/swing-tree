@@ -1,26 +1,26 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Mon Jul 03 00:01:18 CEST 2023",
+  "created": "Sat Jul 22 10:38:45 CEST 2023",
   "statistics":{
-    "runs":"38",
-    "passed":"37",
+    "runs":"40",
+    "passed":"39",
     "failed":"1",
     "featureFailures":"0",
-    "successRate":"0.9736842105263158",
+    "successRate":"0.975",
     "duration":"?"
   },
   "specifications": [{
       "className":"swingtree.button.JButton_Example_Spec",
-      "title":"",
-      "narrative":"",
+      "title":"Using JButton in SwingTree",
+      "narrative":"This specification demonstrates how the SwingTree API\n    can be used to create `JButton`s and how to register event handlers\n    on them while still being able to integrate them\n    in a declarative UI.",
       "featureCount":"3",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"A button will delegate its siblings within actions:","extraInfo":[]},{"id":"We can easily create a button with an associated action:","extraInfo":[]},{"id":"We can go through the entire siblinghood, including the current button!","extraInfo":[]}],
+      "executedFeatures":[{"id":"A button will delegate its siblings within actions:","extraInfo":[]},{"id":"In a button event we can go through the entire siblinghood, including the current button!","extraInfo":[]},{"id":"We can easily create a button with an associated action:","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.combo.Combo_Box_Specification",
@@ -324,15 +324,15 @@
       "ignoredFeatures":[]
     },{
       "className":"swingtree.mvvm.Scroll_Panels_Spec",
-      "title":"",
-      "narrative":"",
-      "featureCount":"1",
+      "title":"Scroll Panels",
+      "narrative":"This specification is dedicated to showing how to use the\n    `JScrollPanels` class, a custom SwingTree component that\n    is designed to display a list of scrollable panels\n    which can be populated with any kind of interactive UI\n    based on any kind of sub-view model type.",
+      "featureCount":"2",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"We can instantiate the scroll panels view model and build a view for it.","extraInfo":[]}],
+      "executedFeatures":[{"id":"The `JScrollPanels` instance can visually represent a view model consisting of sub-view models.","extraInfo":[]},{"id":"Use a simple property list of Strings to populate a scroll panel.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.threading.Async_MVVM_Spec",
@@ -386,13 +386,13 @@
       "className":"swingtree.styles.Individual_Component_Styling_Spec",
       "title":"Styling Components",
       "narrative":"This specification demonstrates how you can use the styling\n    API to style Swing components in a functional and declarative fashion.",
-      "featureCount":"15",
+      "featureCount":"16",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"Adjust how text is styled through the API exposed in your `Styler` lambdas","extraInfo":[]},{"id":"Create a soft UI slider that sinks into the background if you wish.","extraInfo":[]},{"id":"For full styling freedom, we can add custom painters to a component on various layers.","extraInfo":[]},{"id":"Make a text area look like it is sunken in the background using a shadow going inwards.","extraInfo":[]},{"id":"Styling components is based on a functional styler lambda.","extraInfo":[]},{"id":"SwingTree will re-install any borders overridden by the style API.","extraInfo":[]},{"id":"SwingTree will un-install any custom border if no styles are found.","extraInfo":[]},{"id":"The Styling API will make sure that the layout manager accounts for the border width!","extraInfo":[]},{"id":"The insets of the layout manager are based on the sum of the margin and padding for a given edge of the component bounds.","extraInfo":[]},{"id":"The look of a component, like a button for example, will be preserved if possible, when doing custom styling.","extraInfo":[]},{"id":"The margins defined in the style API will be applied to the layout manager through the border insets.","extraInfo":[]},{"id":"This is how you can create a JPanel with a shaded border.","extraInfo":[]},{"id":"This is how you can create a rounded green label with a border at the bottom.","extraInfo":[]},{"id":"Turn a panel into a card like looking panel by giving it a round border, background color and some margins.","extraInfo":[]},{"id":"You can style a toggle button to have a custom selection shading.","extraInfo":[]}],
+      "executedFeatures":[{"id":"A text area background can be shaded from left to right with any number of colors.","extraInfo":[]},{"id":"Adjust how text is styled through the API exposed in your `Styler` lambdas","extraInfo":[]},{"id":"Create a soft UI slider that sinks into the background if you wish.","extraInfo":[]},{"id":"For full styling freedom, we can add custom painters to a component on various layers.","extraInfo":[]},{"id":"Make a text area look like it is sunken in the background using a shadow going inwards.","extraInfo":[]},{"id":"Styling components is based on a functional styler lambda.","extraInfo":[]},{"id":"SwingTree will re-install any borders overridden by the style API.","extraInfo":[]},{"id":"SwingTree will un-install any custom border if no styles are found.","extraInfo":[]},{"id":"The Styling API will make sure that the layout manager accounts for the border width!","extraInfo":[]},{"id":"The insets of the layout manager are based on the sum of the margin and padding for a given edge of the component bounds.","extraInfo":[]},{"id":"The look of a component, like a button for example, will be preserved if possible, when doing custom styling.","extraInfo":[]},{"id":"The margins defined in the style API will be applied to the layout manager through the border insets.","extraInfo":[]},{"id":"This is how you can create a JPanel with a shaded border.","extraInfo":[]},{"id":"This is how you can create a rounded green label with a border at the bottom.","extraInfo":[]},{"id":"Turn a panel into a card like looking panel by giving it a round border, background color and some margins.","extraInfo":[]},{"id":"You can style a toggle button to have a custom selection shading.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.styles.Style_Sheet_Spec",
@@ -456,6 +456,30 @@
       "ignoredFeatures":[]
     },{
       "className":"swingtree.styles.Style_Animations.Style_Animations_Spec",
+      "title":"Style Animations",
+      "narrative":"Styles in SwingTree are based on a functional style engine\n    which reevaluates your styles whenever your component is\n    repainted. \n    This makes them a perfect fit for animations.\n    Continue reading to learn how to animate your styles.",
+      "featureCount":"3",
+      "failures":"0",
+      "errors":"0",
+      "skipped":"0" ,
+      "successRate":"1.0",
+      "duration":"?",
+      "executedFeatures":[{"id":"Advanced style animations will override the Look and Feel of a component temporarily","extraInfo":[]},{"id":"An `onMouseClick` event style animation is only temporary.","extraInfo":[]},{"id":"SwingTree will uninstall any custom border after an animation has completed.","extraInfo":[]}],
+      "ignoredFeatures":[]
+    },{
+      "className":"swingtree.scaling.UI_Scaling_Spec",
+      "title":"High IPD Scaling",
+      "narrative":"Higher resolution displays with higher pixel density \n    (measured in pixels per inch (PPI) or dots per inch (DPI)) have become the norm.  \n    This is especially true for mobile devices, but it is also true for desktop displays.  \n\n    Vanilla Swing does not handle this well unfortunately, even with the introduction of\n    the HiDPI support in Java 9, which allows us to determine the DPI of the display.\n    Because although we calculate the scaling factor, there is no way to apply it to the UI.\n    Instead the task is left to the Look and Feel implementations which may or may not\n    scale the UI.\n    The problem is that older Look and Feels do not scale the UI, and even newer ones\n    may not scale the UI at all. \n    In fact none of the Look and Feels included in the JDK scale the UI.\n\n    SwingTree can hardly solve this problem entirely, but it can help by scaling the UI\n    where the Look and Feel does not.\n    In this specification you will find out how to adjust the SwingTree scaling factor\n    and how it affects the properties of the UI components.",
+      "featureCount":"3",
+      "failures":"0",
+      "errors":"0",
+      "skipped":"0" ,
+      "successRate":"1.0",
+      "duration":"?",
+      "executedFeatures":[{"id":"Dimensionality scaling also works for bound properties.","extraInfo":[]},{"id":"The dimensionality of components will be scaled by the scaling factor","extraInfo":[]},{"id":"The dimensionality specified in the styling API are scaled by the scaling factor","extraInfo":[]}],
+      "ignoredFeatures":[]
+    },{
+      "className":"swingtree.styles.Style_Animations_Spec",
       "title":"Style Animations",
       "narrative":"Styles in SwingTree are based on a functional style engine\n    which reevaluates your styles whenever your component is\n    repainted. \n    This makes them a perfect fit for animations.\n    Continue reading to learn how to animate your styles.",
       "featureCount":"3",

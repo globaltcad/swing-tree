@@ -3,12 +3,15 @@
 import sprouts.*;
 import sprouts.Action;
 import swingtree.api.Peeker;
+import swingtree.style.ComponentExtension;
+import swingtree.threading.EventProcessor;
 
 import javax.swing.*;
 import java.awt.*;
 import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  *  This is the root builder type for all other builder subtypes.
@@ -17,7 +20,7 @@ import java.util.function.Consumer;
  * @param &lt;I&gt; The concrete implementation type of this builder, &quot;I&quot; stands for &quot;Implementation&quot;.
  * @param &lt;C&gt; The component type parameter.
  */
-<span class="pc bpc" id="L20" title="1 of 2 branches missed.">abstract class AbstractBuilder&lt;I, C extends Component&gt;</span>
+<span class="pc bpc" id="L23" title="1 of 2 branches missed.">abstract class AbstractBuilder&lt;I, C extends Component&gt;</span>
 {
     /**
      *  The component wrapped by this builder node.
@@ -29,133 +32,161 @@ import java.util.function.Consumer;
      * The thread mode determines how events are dispatched to the component.
      * And also which type of thread can access the component.
      */
-<span class="fc" id="L32">    protected final EventProcessor _eventProcessor = UI.SETTINGS().getEventProcessor();</span>
+<span class="fc" id="L35">    protected final EventProcessor _eventProcessor = SwingTreeContext.get().getEventProcessor();</span>
 
     /**
      *  The type class of the component wrapped by this builder node.
-     *  See documentation for method &quot;build&quot; for more information.
      */
     protected final Class&lt;C&gt; _type;
 
     /**
-     *  Instances of the {@link AbstractBuilder} as well as its sub types always wrap
+     *  Instances of the {@link AbstractBuilder} as well as its subtypes always wrap
      *  a single component for which they are responsible.
      *
      * @param component The component type which will be wrapped by this builder node.
      */
-<span class="fc" id="L46">    public AbstractBuilder( C component ) {</span>
-<span class="fc" id="L47">        _type = (Class&lt;C&gt;) component.getClass();</span>
-<span class="fc" id="L48">        _component = new WeakReference&lt;&gt;(component);</span>
-<span class="fc" id="L49">        _componentStrongRef = component;</span>
-<span class="fc bfc" id="L50" title="All 2 branches covered.">        if ( component instanceof JComponent )</span>
-<span class="fc" id="L51">            ComponentExtension.makeSureComponentHasExtension( (JComponent) component );</span>
-<span class="fc" id="L52">    }</span>
+<span class="fc" id="L48">    public AbstractBuilder( C component ) {</span>
+<span class="fc" id="L49">        _type = (Class&lt;C&gt;) component.getClass();</span>
+<span class="fc" id="L50">        _component = new WeakReference&lt;&gt;(component);</span>
+<span class="fc" id="L51">        _componentStrongRef = component;</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">        if ( component instanceof JComponent )</span>
+<span class="fc" id="L53">            ComponentExtension.makeSureComponentHasExtension( (JComponent) component );</span>
+<span class="fc" id="L54">    }</span>
 
     /**
      * @param action An action which should be executed by the UI thread (EDT).
      */
-<span class="fc" id="L57">    protected final void _doUI( Runnable action ) { _eventProcessor.registerUIEvent( action ); }</span>
+<span class="fc" id="L59">    protected final void _doUI( Runnable action ) { _eventProcessor.registerUIEvent( action ); }</span>
 
     /**
-     * @param action An action which should be executed by the application thread.
+     * @param action An action which should be executed by the application thread,
+     *               which is determined by implementations of the {@link EventProcessor},
+     *               also see {@link UI#use(EventProcessor, Supplier)}.
      */
-<span class="fc" id="L62">    protected final void _doApp( Runnable action ) { _eventProcessor.registerAppEvent(action); }</span>
+<span class="fc" id="L66">    protected final void _doApp( Runnable action ) { _eventProcessor.registerAppEvent(action); }</span>
 
     /**
-     * @param value A value which should be captured.
-     * @param action A consumer lambda receiving the provided value and
-     *               is then executed by the application thread.
+     * @param value A value which should be captured and then passed to the provided action
+     *              on the current application thread (see {@link EventProcessor} and {@link UI#use(EventProcessor, Supplier)}).
+     * @param action A consumer lambda which is executed by the application thread
+     *               and receives the provided value.
      * @param &lt;T&gt; The type of the value.
      */
-<span class="fc" id="L70">    protected final &lt;T&gt; void _doApp( T value, Consumer&lt;T&gt; action ) { _doApp(()-&gt;action.accept(value)); }</span>
+<span class="fc" id="L75">    protected final &lt;T&gt; void _doApp( T value, Consumer&lt;T&gt; action ) { _doApp(()-&gt;action.accept(value)); }</span>
 
     /**
-     * @param val A property which should be captured.
+     *  Use this to register a state change listener for the provided property
+     *  which will be executed by the UI thread (see {@link EventProcessor}).
+     *
+     * @param val A property whose state changes should be listened to on the UI thread.
      * @param displayAction A consumer lambda receiving the provided value and
      *                      is then executed by the UI thread.
-     * @param &lt;T&gt; The type of the value.
+     * @param &lt;T&gt; The type of the item wrapped by the provided property.
      */
-    protected final &lt;T&gt; void _onShow(Val&lt;T&gt; val, Consumer&lt;T&gt; displayAction ) {
-<span class="fc" id="L79">        Action&lt;Val&lt;T&gt;&gt; action = new Action&lt;Val&lt;T&gt;&gt;() {</span>
+    protected final &lt;T&gt; void _onShow( Val&lt;T&gt; val, Consumer&lt;T&gt; displayAction ) {
+<span class="fc" id="L87">        Action&lt;Val&lt;T&gt;&gt; action = new Action&lt;Val&lt;T&gt;&gt;() {</span>
             @Override
             public void accept( Val&lt;T&gt; val ) {
-<span class="fc" id="L82">                T v = val.orElseNull(); // IMPORTANT! We first capture the value and then execute the action in the app thread.</span>
-<span class="fc" id="L83">                _doUI(() -&gt;</span>
+<span class="fc" id="L90">                T v = val.orElseNull(); // IMPORTANT! We first capture the value and then execute the action in the app thread.</span>
+<span class="fc" id="L91">                _doUI(() -&gt;</span>
                     /*
                         We make sure that the action is only executed if the component
                         is not disposed. This is important because the action may
                         access the component, and we don't want to get a NPE.
                      */
-<span class="fc" id="L89">                        component().ifPresent(c -&gt; {</span>
-<span class="fc" id="L90">                            displayAction.accept(v); // Here the captured value is used. This is extremely important!</span>
-                        /*
-                             Since this is happening in another thread we are using the captured property item/value.
-                             The property might have changed in the meantime, but we don't care about that,
-                             we want things to happen in the order they were triggered.
-                         */
-<span class="fc" id="L96">                        })</span>
+<span class="fc" id="L97">                        component().ifPresent( c -&gt; {</span>
+                            try {
+<span class="fc" id="L99">                                displayAction.accept(v); // Here the captured value is used. This is extremely important!</span>
+                                /*
+                                     Since this is happening in another thread we are using the captured property item/value.
+                                     The property might have changed in the meantime, but we don't care about that,
+                                     we want things to happen in the order they were triggered.
+                                 */
+<span class="nc" id="L105">                            } catch ( Exception e ) {</span>
+<span class="nc" id="L106">                                throw new RuntimeException(</span>
+                                    &quot;Failed to apply state of property '&quot; + val + &quot;' to component '&quot; + c + &quot;'.&quot;,
+                                    e
+                                );
+<span class="fc" id="L110">                            }</span>
+<span class="fc" id="L111">                        })</span>
                 );
-<span class="fc" id="L98">            }</span>
-<span class="pc bpc" id="L99" title="1 of 2 branches missed.">            @Override public boolean canBeRemoved() { return !component().isPresent(); }</span>
+<span class="fc" id="L113">            }</span>
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">            @Override public boolean canBeRemoved() { return !component().isPresent(); }</span>
         };
-<span class="fc" id="L101">        val.onSet(action);</span>
-<span class="pc bpc" id="L102" title="1 of 2 branches missed.">        if ( val instanceof Var )</span>
-<span class="fc" id="L103">            ((Var)val).onAct(action);</span>
-<span class="fc" id="L104">    }</span>
+<span class="fc" id="L116">        val.onSet(action);</span>
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">        if ( val instanceof Var )</span>
+<span class="fc" id="L118">            ((Var)val).onAct(action);</span>
+<span class="fc" id="L119">    }</span>
 
     /**
-     * @param vals A property list which should be captured.
+     *  Use this to register a state change listener for the provided property list
+     *  which will be executed by the UI thread (see {@link EventProcessor}).
+     *
+     * @param vals A property list whose state changes should be listened to on the UI thread.
      * @param displayAction A consumer lambda receiving the action delegate and
      *                      is then executed by the UI thread.
-     * @param &lt;T&gt; The type of the value.
+     * @param &lt;T&gt; The type of the items wrapped by the provided property list.
      */
-    protected final &lt;T&gt; void _onShow(Vals&lt;T&gt; vals, Consumer&lt;ValsDelegate&lt;T&gt;&gt; displayAction ) {
-<span class="fc" id="L113">        vals.onChange(new Action&lt;ValsDelegate&lt;T&gt;&gt;() {</span>
+    protected final &lt;T&gt; void _onShow( Vals&lt;T&gt; vals, Consumer&lt;ValsDelegate&lt;T&gt;&gt; displayAction ) {
+<span class="fc" id="L131">        vals.onChange(new Action&lt;ValsDelegate&lt;T&gt;&gt;() {</span>
             @Override
             public void accept(ValsDelegate&lt;T&gt; delegate) {
-<span class="fc" id="L116">                _doUI(() -&gt;</span>
-<span class="fc" id="L117">                        component().ifPresent(c -&gt; {</span>
-<span class="fc" id="L118">                            displayAction.accept(delegate);</span>
+<span class="fc" id="L134">                _doUI(() -&gt;</span>
+<span class="fc" id="L135">                        component().ifPresent(c -&gt; {</span>
+<span class="fc" id="L136">                            displayAction.accept(delegate);</span>
                         /*
                             We make sure that the action is only executed if the component
                             is not disposed. This is important because the action may
                             access the component, and we don't want to get a NPE.
                          */
-<span class="fc" id="L124">                        })</span>
+<span class="fc" id="L142">                        })</span>
                 );
-<span class="fc" id="L126">            }</span>
-<span class="pc bpc" id="L127" title="1 of 2 branches missed.">            @Override public boolean canBeRemoved() { return !component().isPresent(); }</span>
+<span class="fc" id="L144">            }</span>
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">            @Override public boolean canBeRemoved() { return !component().isPresent(); }</span>
         });
-<span class="fc" id="L129">    }</span>
+<span class="fc" id="L147">    }</span>
 
-<span class="fc" id="L131">    protected final I _this() { return (I) this; }</span>
+    /**
+     * @return The builder instance itself based on the type parameter {@code &lt;I&gt;}.
+     */
+<span class="fc" id="L152">    protected final I _this() { return (I) this; }</span>
 
-<span class="fc" id="L133">    protected final void _detachStrongRef() { _componentStrongRef = null; }</span>
+    /**
+     *  This method sets the strong reference to the component to null,
+     *  which allows the component to be garbage collected.
+     *  This is important to avoid memory leaks, as a component is typically
+     *  part of a tree of components, and if one component is not garbage collected,
+     *  then the whole tree is not garbage collected.
+     */
+<span class="fc" id="L161">    protected final void _detachStrongRef() { _componentStrongRef = null; }</span>
 
     /**
      *  The component wrapped by this builder node.
      */
     public final C getComponent() {
-<span class="fc bfc" id="L139" title="All 4 branches covered.">        if ( _eventProcessor != EventProcessor.COUPLED &amp;&amp; !UI.thisIsUIThread() )</span>
-<span class="fc" id="L140">            throw new IllegalStateException(</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">        boolean isCoupled       = _eventProcessor == EventProcessor.COUPLED;</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">        boolean isCoupledStrict = _eventProcessor == EventProcessor.COUPLED_STRICT;</span>
+
+<span class="fc bfc" id="L170" title="All 6 branches covered.">        if ( !isCoupled &amp;&amp; !isCoupledStrict &amp;&amp; !UI.thisIsUIThread() )</span>
+<span class="fc" id="L171">            throw new IllegalStateException(</span>
                     &quot;This UI is configured to be decoupled from the application thread, &quot; +
                     &quot;which means that it can only be modified from the EDT. &quot; +
                     &quot;Please use 'UI.run(()-&gt;...)' method to execute your modifications on the EDT.&quot;
                 );
-<span class="fc" id="L145">        return _component.get();</span>
+<span class="fc" id="L176">        return _component.get();</span>
     }
 
     /**
      *  The optional component wrapped by this builder node.
      */
-<span class="fc" id="L151">    public final OptionalUI&lt;C&gt; component() { return OptionalUI.ofNullable(_component.get()); }</span>
+<span class="fc" id="L182">    public final OptionalUI&lt;C&gt; component() { return OptionalUI.ofNullable(_component.get()); }</span>
 
     /**
      *  The type class of the component wrapped by this builder node.
      *  See documentation for method &quot;build&quot; for more information.
      * @return The type class of the component wrapped by this builder node.
      */
-<span class="nc" id="L158">    public final Class&lt;C&gt; getType() { return _type; }</span>
+<span class="nc" id="L189">    public final Class&lt;C&gt; getType() { return _type; }</span>
 
     /**
      *  Use this if you wish to access the component wrapped by this builder directly.
@@ -177,29 +208,45 @@ import java.util.function.Consumer;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I peek( Peeker&lt;C&gt; action ) {
-<span class="fc" id="L180">        action.accept(getComponent());</span>
-<span class="fc" id="L181">        return _this();</span>
+<span class="fc" id="L211">        action.accept(getComponent());</span>
+<span class="fc" id="L212">        return _this();</span>
     }
 
     /**
      *  Use this to build or not build UI, based on a boolean condition value and a consumer
      *  lambda which continues the building process if the previous boolean is true.
-     *  This builder will simply be supplied to the provided consumer lambda.
+     *  This builder instance will simply be supplied to the provided consumer lambda.
      *  Inside the second lambda, one can then continue building the UI while also not
      *  breaking the benefits of nesting and method chaining provided by this class...
      *  &lt;p&gt;
-     *  This isin essence a more advanced version of {@link #apply(Consumer)}.
+     *  This is in essence a more advanced version of {@link #apply(Consumer)}.
      *  &lt;br&gt;
+     *  Here a simple usage example:
+     *  &lt;pre&gt;{@code
+     *      UI.panel()
+     *      .applyIf( userIsLoggedIn, it -&gt; it
+     *          .add( UI.label(&quot;Welcome back!&quot;) )
+     *          .add( UI.button(&quot;Logout&quot;)).onClick( () -&gt; logout() )
+     *          .add( UI.button(&quot;Settings&quot;)).onClick( () -&gt; showSettings() )
+     *      )
+     *      .applyIf( !userIsLoggedIn, it -&gt; it
+     *          .add( UI.label(&quot;Please login to continue.&quot;) )
+     *          .add( UI.button(&quot;Login&quot;)).onClick( () -&gt; login() );
+     *      );
+     *  }&lt;/pre&gt;
+     *  Here we use theis method to build a panel
+     *  with different content depending on whether the user is logged in or not.
+     *  &lt;br&gt;&lt;br&gt;
      *
-     * @param condition The truth value which determines if the second consumer lambda will be executed.
-     * @param building A Consumer lambda which simply consumes this builder.
+     * @param condition The truth value which determines if the second consumer lambda is executed or not.
+     * @param building A {@link Consumer} lambda which simply consumes this builder instance.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I applyIf( boolean condition, Consumer&lt;I&gt; building ) {
-<span class="fc" id="L199">        NullUtil.nullArgCheck(building, &quot;building&quot;, Consumer.class);</span>
-<span class="fc" id="L200">        I builder = _this();</span>
-<span class="fc bfc" id="L201" title="All 2 branches covered.">        if ( condition ) building.accept(builder);</span>
-<span class="fc" id="L202">        return builder;</span>
+<span class="fc" id="L246">        NullUtil.nullArgCheck(building, &quot;building&quot;, Consumer.class);</span>
+<span class="fc" id="L247">        I builder = _this();</span>
+<span class="fc bfc" id="L248" title="All 2 branches covered.">        if ( condition ) building.accept(builder);</span>
+<span class="fc" id="L249">        return builder;</span>
     }
 
 
@@ -218,26 +265,50 @@ import java.util.function.Consumer;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I applyIfPresent( Optional&lt;Consumer&lt;I&gt;&gt; building ) {
-<span class="fc" id="L221">        NullUtil.nullArgCheck(building, &quot;building&quot;, Optional.class);</span>
-<span class="fc" id="L222">        I builder = _this();</span>
-<span class="pc" id="L223">        building.ifPresent( buildingLambda -&gt; buildingLambda.accept(builder) );</span>
-<span class="fc" id="L224">        return builder;</span>
+<span class="fc" id="L268">        NullUtil.nullArgCheck(building, &quot;building&quot;, Optional.class);</span>
+<span class="fc" id="L269">        I builder = _this();</span>
+<span class="pc" id="L270">        building.ifPresent( buildingLambda -&gt; buildingLambda.accept(builder) );</span>
+<span class="fc" id="L271">        return builder;</span>
     }
 
     /**
-     *  Use this to continue building UI inside a provided lambda.
+     *  Use this to continue building UI inside a provided lambda
+     *  if you need to introduce some procedural code in between
+     *  the building process. &lt;br&gt;
      *  This is especially useful for when you need to build UI based on loops.
-     *  This builder instance will simply be supplied to the provided consumer lambda.
-     *  Inside this lambda, you can then continue building the UI while also not
-     *  breaking the benefits of nesting and method chaining provided by this class...
+     *  The current builder instance will simply be supplied to the provided {@link Consumer} lambda.
+     *  Inside the supplied lambda, you can then continue building the UI while also not
+     *  breaking the benefits of nesting and method chaining, effectively preserving
+     *  the declarative nature of the builder.
+     *  &lt;br&gt;&lt;br&gt;
+     *  Here is a simple example of how this method can be used to build a panel
+     *  with a variable amount of images displayed in a grid:
+     *  &lt;pre&gt;{@code
+     *      UI.panel(&quot;wrap 3&quot;)
+     *      .apply( it -&gt; {
+     *          for ( String path : imagePaths )
+     *              it.add( UI.label(UI.icon(path)) );
+     *      });
+     *  }&lt;/pre&gt;
+     *  &lt;br&gt;&lt;br&gt;
+     *  Here is another example of how this method can be used to build a panel
+     *  with a variable amount of buttons displayed in a grid:
+     *  &lt;pre&gt;{@code
+     *    UI.panel(&quot;wrap 4&quot;)
+     *    .apply( it -&gt; {
+     *      for ( int i = 0; i &lt; numOfButtons; i++ )
+     *          it.add( UI.button(&quot;Button &quot; + i)
+     *          .onClick( () -&gt; {...} );
+     *    });
+     *  }&lt;/pre&gt;
      *  &lt;br&gt;&lt;br&gt;
      *
-     * @param building A Consumer lambda which simply consumes this builder.
+     * @param building A Consumer lambda which simply consumes this builder instance.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I apply( Consumer&lt;I&gt; building ) {
-<span class="fc" id="L239">        NullUtil.nullArgCheck(building, &quot;building&quot;, Consumer.class);</span>
-<span class="fc" id="L240">        return applyIf(true, building);</span>
+<span class="fc" id="L310">        NullUtil.nullArgCheck(building, &quot;building&quot;, Consumer.class);</span>
+<span class="fc" id="L311">        return applyIf(true, building);</span>
     }
 
     /**
@@ -248,17 +319,35 @@ import java.util.function.Consumer;
      *  readability when using the builder in more extensive ways where
      *  the beginning and end of the method chaining and nesting of the builder does
      *  not fit on one screen. &lt;br&gt;
-     *  In that case the expression &quot;{@code .getResulting(JMenu.class)}&quot; helps
-     *  to identify which type of {@link javax.swing.JComponent} is currently being build on a given
+     *  In that case the expression &quot;{@code .get(JMenu.class)}&quot; helps
+     *  to identify which type of {@link javax.swing.JComponent} is currently being built on a given
      *  nesting layer... &lt;br&gt;&lt;br&gt;
+     *  Here is a simple example of how this method can be used to build a menu bar:
+     *  &lt;pre&gt;{@code
+     *      UI.panel()
+     *      .add(
+     *          UI.menuBar()
+     *          .add( UI.menu(&quot;File&quot;) )
+     *          .add( UI.menuItem(&quot;Open&quot;) )
+     *          .add( UI.menuItem(&quot;Save&quot;) )
+     *          // ...
+     *          .add( UI.menuItem(&quot;Exit&quot;) )
+     *          .get(JMenuBar.class)
+     *      )
+     *      .add( UI.button(&quot;Click me!&quot;) )
+     *      .get(JPanel.class);
+     *  }&lt;/pre&gt;
+     *  As you can see, the expression &quot;{@code .get(JMenuBar.class)}&quot; as well as the expression
+     *  &quot;{@code .get(JPanel.class)}&quot; at the end of the builder chain help to identify
+     *  which type of {@link javax.swing.JComponent} is currently being built on a given nesting layer.
      *
      * @param type The type class of the component which this builder wraps.
      * @param &lt;T&gt; The type parameter of the component which this builder wraps.
      * @return The result of the building process, namely: a type of JComponent.
      */
     public &lt;T extends C&gt; T get( Class&lt;T&gt; type ) {
-<span class="pc bpc" id="L260" title="2 of 6 branches missed.">        assert type == _type || type.isAssignableFrom(_type);</span>
-<span class="fc" id="L261">        return (T) _component.get();</span>
+<span class="pc bpc" id="L349" title="2 of 6 branches missed.">        assert type == _type || type.isAssignableFrom(_type);</span>
+<span class="fc" id="L350">        return (T) _component.get();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

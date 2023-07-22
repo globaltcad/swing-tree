@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Animate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.animation</a> &gt; <span class="el_source">Animate.java</span></div><h1>Animate.java</h1><pre class="source lang-java linenums">package swingtree.animation;
 
+import swingtree.ComponentDelegate;
+
 import java.awt.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -7,8 +9,8 @@ import java.util.function.Predicate;
 /**
  *  An API for creating an {@link Animation} and defining how it should be executed.
  *  Instances of this class are intended to be created and used either by the
- *  {@link swingtree.UI} API or the user event delegation API (see {@link swingtree.SimpleDelegate}). &lt;br&gt;
- *  The UI API can be used like this:
+ *  {@link swingtree.UI} API or the user event delegation API (see {@link ComponentDelegate}). &lt;br&gt;
+ *  The UI API can be used like so:
  *  &lt;pre&gt;{@code
  *    UI.schedule( 100, TimeUnit.MILLISECONDS ) // returns an Animate instance
  *       .until( it -&gt; it.progress() &gt;= 0.75 &amp;&amp; someOtherCondition() )
@@ -34,7 +36,7 @@ import java.util.function.Predicate;
 public class Animate
 {
     private final Component _component;
-    private final Schedule _schedule;
+    private final LifeTime _lifeTime;
     private final StopCondition _condition;
 
     /**
@@ -42,11 +44,11 @@ public class Animate
      * for an animation as well as an {@link Animation} that will be executed
      * when passed to the {@link #go(Animation)} or {@link #goOnce(Animation)} methods.
      *
-     * @param schedule The schedule that defines when the animation should be executed and for how long.
+     * @param lifeTime The schedule that defines when the animation should be executed and for how long.
      * @return An {@link Animate} instance that can be used to define how the animation should be executed.
      */
-    public static Animate on( Schedule schedule ) {
-<span class="fc" id="L49">        return new Animate( null, schedule, state -&gt; true );</span>
+    public static Animate on( LifeTime lifeTime) {
+<span class="fc" id="L51">        return new Animate( null, lifeTime, state -&gt; true );</span>
     }
 
     /**
@@ -55,18 +57,18 @@ public class Animate
      * when passed to the {@link #go(Animation)} or {@link #goOnce(Animation)} methods.
      *
      * @param component The component that should be repainted after each animation step.
-     * @param schedule The schedule that defines when the animation should be executed and for how long.
+     * @param lifeTime The schedule that defines when the animation should be executed and for how long.
      * @return An {@link Animate} instance that can be used to define how the animation should be executed.
      */
-    public static Animate on( Component component, Schedule schedule ) {
-<span class="fc" id="L62">        return new Animate( component, schedule, state -&gt; true );</span>
+    public static Animate on( Component component, LifeTime lifeTime) {
+<span class="fc" id="L64">        return new Animate( component, lifeTime, state -&gt; true );</span>
     }
 
-<span class="fc" id="L65">    private Animate( Component component, Schedule schedule, StopCondition animation ) {</span>
-<span class="fc" id="L66">        _component = component;</span>
-<span class="fc" id="L67">        _schedule = schedule;</span>
-<span class="fc" id="L68">        _condition = animation;</span>
-<span class="fc" id="L69">    }</span>
+<span class="fc" id="L67">    private Animate(Component component, LifeTime lifeTime, StopCondition animation ) {</span>
+<span class="fc" id="L68">        _component = component;</span>
+<span class="fc" id="L69">        _lifeTime = lifeTime;</span>
+<span class="fc" id="L70">        _condition = animation;</span>
+<span class="fc" id="L71">    }</span>
 
     /**
      *  Creates a new {@link Animate} instance that will be executed after the given delay.
@@ -76,13 +78,13 @@ public class Animate
      * @return A new {@link Animate} instance that will be executed after the given delay.
      */
     public Animate startingIn( long delay, TimeUnit unit ) {
-<span class="fc" id="L79">        long offset = unit.toMillis( delay );</span>
-<span class="fc" id="L80">        Schedule schedule = Schedule.of(</span>
+<span class="nc" id="L81">        long offset = unit.toMillis( delay );</span>
+<span class="nc" id="L82">        LifeTime lifeTime = LifeTime.of(</span>
                 offset,                                         TimeUnit.MILLISECONDS,
-<span class="fc" id="L82">                _schedule.getDurationIn(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS</span>
+<span class="nc" id="L84">                _lifeTime.getDurationIn(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS</span>
         );
 
-<span class="fc" id="L85">        return new Animate( _component, schedule, _condition );</span>
+<span class="nc" id="L87">        return new Animate( _component, lifeTime, _condition );</span>
     }
 
     /**
@@ -92,8 +94,8 @@ public class Animate
      * @param animation The animation that should be executed.
      */
     public void goOnce( Animation animation ) {
-<span class="fc bfc" id="L95" title="All 2 branches covered.">        this.asLongAs( state -&gt; state.currentIteration() == 0 ).go( animation );</span>
-<span class="fc" id="L96">    }</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        this.asLongAs( state -&gt; state.currentIteration() == 0 ).go( animation );</span>
+<span class="fc" id="L98">    }</span>
 
     /**
      *  Runs the given animation twice
@@ -102,8 +104,8 @@ public class Animate
      * @param animation The animation that should be executed.
      */
     public void goTwice( Animation animation ) {
-<span class="nc bnc" id="L105" title="All 2 branches missed.">        this.asLongAs( state -&gt; state.currentIteration() &lt; 2 ).go( animation );</span>
-<span class="nc" id="L106">    }</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">        this.asLongAs( state -&gt; state.currentIteration() &lt; 2 ).go( animation );</span>
+<span class="nc" id="L108">    }</span>
 
     /**
      *  Use this to define a stop condition for the animation.
@@ -112,7 +114,7 @@ public class Animate
      *                   until this condition is true.
      */
     public Animate until( Predicate&lt;AnimationState&gt; shouldStop ) {
-<span class="nc" id="L115">        return this.asLongAs( shouldStop.negate() );</span>
+<span class="nc" id="L117">        return this.asLongAs( shouldStop.negate() );</span>
     }
 
     /**
@@ -122,10 +124,10 @@ public class Animate
      *                  as long as this condition is true.
      */
     public Animate asLongAs( Predicate&lt;AnimationState&gt; shouldRun ) {
-<span class="fc" id="L125">        return new Animate( _component, _schedule, state -&gt; {</span>
-<span class="fc bfc" id="L126" title="All 2 branches covered.">            if ( shouldRun.test(state) )</span>
-<span class="fc" id="L127">                return _condition.check(state);</span>
-<span class="fc" id="L128">            return false;</span>
+<span class="fc" id="L127">        return new Animate( _component, _lifeTime, state -&gt; {</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">            if ( shouldRun.test(state) )</span>
+<span class="fc" id="L129">                return _condition.check(state);</span>
+<span class="fc" id="L130">            return false;</span>
         });
     }
 
@@ -136,8 +138,8 @@ public class Animate
      * @param animation The animation that should be executed.
      */
     public void go( Animation animation ) {
-<span class="fc" id="L139">        AnimationScheduler.schedule( new Animator( _component, _schedule, _condition, animation ) );</span>
-<span class="fc" id="L140">    }</span>
+<span class="fc" id="L141">        AnimationRunner.add( new ComponentAnimator( _component, _lifeTime, _condition, animation ) );</span>
+<span class="fc" id="L142">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

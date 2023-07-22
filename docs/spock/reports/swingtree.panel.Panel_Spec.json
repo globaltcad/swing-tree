@@ -61,7 +61,7 @@
 
         {"kind":"then","text":"The panel UI is not null.","code":["ui != null"]},
 
-        {"kind":"and","text":"The UI node wraps a JPanel.","code":["ui.component instanceof JPanel"]},
+        {"kind":"and","text":"The UI node wraps a JBox.","code":["ui.component instanceof JBox"]},
 
         {"kind":"and","text":"The panel has a FlowLayout.","code":["ui.component.layout instanceof FlowLayout"]}
       ],

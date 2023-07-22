@@ -81,10 +81,10 @@ public class UIForSpinner&lt;S extends JSpinner&gt; extends UIForAnySwing&lt;UIF
      * @param action The action to be performed.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForSpinner&lt;S&gt; onChange( Action&lt;SimpleDelegate&lt;JSpinner, ChangeEvent&gt;&gt; action ) {
+    public final UIForSpinner&lt;S&gt; onChange( Action&lt;ComponentDelegate&lt;JSpinner, ChangeEvent&gt;&gt; action ) {
 <span class="nc" id="L85">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
 <span class="nc" id="L86">        S spinner = getComponent();</span>
-<span class="nc" id="L87">        _onChange(e -&gt; _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;(spinner, e, this::getSiblinghood))) );</span>
+<span class="nc" id="L87">        _onChange(e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;(spinner, e, this::getSiblinghood))) );</span>
 <span class="nc" id="L88">        return this;</span>
     }
 
@@ -158,8 +158,7 @@ public class UIForSpinner&lt;S extends JSpinner&gt; extends UIForAnySwing&lt;UIF
 <span class="fc" id="L158">                ((Var&lt;Object&gt;) value).act( interpreted );</span>
 <span class="fc" id="L159">            });</span>
 <span class="fc" id="L160">        });</span>
-<span class="fc" id="L161">        getComponent().setValue(value.get());</span>
-<span class="fc" id="L162">        return withValue( value.get() );</span>
+<span class="fc" id="L161">        return withValue( value.get() );</span>
     }
 
     /**
@@ -170,15 +169,15 @@ public class UIForSpinner&lt;S extends JSpinner&gt; extends UIForAnySwing&lt;UIF
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSpinner&lt;S&gt; withStepSize( Number n ) {
-<span class="fc" id="L173">        NullUtil.nullArgCheck(n, &quot;n&quot;, Number.class);</span>
-<span class="fc" id="L174">        SpinnerModel model = getComponent().getModel();</span>
-<span class="pc bpc" id="L175" title="1 of 2 branches missed.">        if ( !(model instanceof SpinnerNumberModel) )</span>
-<span class="nc" id="L176">            throw new IllegalArgumentException(</span>
+<span class="fc" id="L172">        NullUtil.nullArgCheck(n, &quot;n&quot;, Number.class);</span>
+<span class="fc" id="L173">        SpinnerModel model = getComponent().getModel();</span>
+<span class="pc bpc" id="L174" title="1 of 2 branches missed.">        if ( !(model instanceof SpinnerNumberModel) )</span>
+<span class="nc" id="L175">            throw new IllegalArgumentException(</span>
                     &quot;This JSpinner can not have a numeric step size as it is not based on the SpinnerNumberModel!&quot;
                 );
-<span class="fc" id="L179">        SpinnerNumberModel numberModel = (SpinnerNumberModel) model;</span>
-<span class="fc" id="L180">        numberModel.setStepSize(n);</span>
-<span class="fc" id="L181">        return this;</span>
+<span class="fc" id="L178">        SpinnerNumberModel numberModel = (SpinnerNumberModel) model;</span>
+<span class="fc" id="L179">        numberModel.setStepSize(n);</span>
+<span class="fc" id="L180">        return this;</span>
     }
 
     /**
@@ -189,17 +188,17 @@ public class UIForSpinner&lt;S extends JSpinner&gt; extends UIForAnySwing&lt;UIF
      * @return This very instance, which enables builder-style method chaining.
      */
     public final &lt;N extends Number&gt; UIForSpinner&lt;S&gt; withStepSize( Val&lt;N&gt; val ) {
-<span class="nc" id="L192">        NullUtil.nullArgCheck(val, &quot;val&quot;, Val.class);</span>
-<span class="nc" id="L193">        NullUtil.nullPropertyCheck(val, &quot;val&quot;, &quot;Null is not a valid spinner step size!&quot;);</span>
-<span class="nc" id="L194">        SpinnerModel model = getComponent().getModel();</span>
-<span class="nc bnc" id="L195" title="All 2 branches missed.">        if ( !(model instanceof SpinnerNumberModel) )</span>
-<span class="nc" id="L196">            throw new IllegalArgumentException(</span>
+<span class="nc" id="L191">        NullUtil.nullArgCheck(val, &quot;val&quot;, Val.class);</span>
+<span class="nc" id="L192">        NullUtil.nullPropertyCheck(val, &quot;val&quot;, &quot;Null is not a valid spinner step size!&quot;);</span>
+<span class="nc" id="L193">        SpinnerModel model = getComponent().getModel();</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">        if ( !(model instanceof SpinnerNumberModel) )</span>
+<span class="nc" id="L195">            throw new IllegalArgumentException(</span>
                     &quot;This JSpinner can not have a numeric step size as it is not based on the SpinnerNumberModel!&quot;
                 );
-<span class="nc" id="L199">        SpinnerNumberModel numberModel = (SpinnerNumberModel) model;</span>
-<span class="nc" id="L200">        _onShow(val, numberModel::setStepSize);</span>
-<span class="nc" id="L201">        numberModel.setStepSize(val.get());</span>
-<span class="nc" id="L202">        return this;</span>
+<span class="nc" id="L198">        SpinnerNumberModel numberModel = (SpinnerNumberModel) model;</span>
+<span class="nc" id="L199">        _onShow(val, numberModel::setStepSize);</span>
+<span class="nc" id="L200">        numberModel.setStepSize(val.get());</span>
+<span class="nc" id="L201">        return this;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

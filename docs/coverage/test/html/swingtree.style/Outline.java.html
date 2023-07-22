@@ -14,60 +14,93 @@ import java.util.Optional;
  */
 public final class Outline
 {
+<span class="fc" id="L17">    private static final Outline _NONE = new Outline(null, null, null, null);</span>
+
+<span class="fc" id="L19">    public static Outline none() { return _NONE; }</span>
+
+    public static Outline of( int top, int right, int bottom, int left ) {
+<span class="fc" id="L22">        return new Outline(top, right, bottom, left);</span>
+    }
+
     private final Integer top;
     private final Integer right;
     private final Integer bottom;
     private final Integer left;
 
-<span class="fc" id="L22">    public Outline( Integer top, Integer right, Integer bottom, Integer left ) {</span>
-<span class="fc" id="L23">        this.top    = top;</span>
-<span class="fc" id="L24">        this.right  = right;</span>
-<span class="fc" id="L25">        this.bottom = bottom;</span>
-<span class="fc" id="L26">        this.left   = left;</span>
-<span class="fc" id="L27">    }</span>
+<span class="fc" id="L30">    private Outline( Integer top, Integer right, Integer bottom, Integer left ) {</span>
+<span class="fc" id="L31">        this.top    = top;</span>
+<span class="fc" id="L32">        this.right  = right;</span>
+<span class="fc" id="L33">        this.bottom = bottom;</span>
+<span class="fc" id="L34">        this.left   = left;</span>
+<span class="fc" id="L35">    }</span>
 
-<span class="fc" id="L29">    public Optional&lt;Integer&gt; top() { return Optional.ofNullable(top); }</span>
+<span class="fc" id="L37">    public Optional&lt;Integer&gt; top() { return Optional.ofNullable(top); }</span>
 
-<span class="fc" id="L31">    public Optional&lt;Integer&gt; right() { return Optional.ofNullable(right); }</span>
+<span class="fc" id="L39">    public Optional&lt;Integer&gt; right() { return Optional.ofNullable(right); }</span>
 
-<span class="fc" id="L33">    public Optional&lt;Integer&gt; bottom() { return Optional.ofNullable(bottom); }</span>
+<span class="fc" id="L41">    public Optional&lt;Integer&gt; bottom() { return Optional.ofNullable(bottom); }</span>
 
-<span class="fc" id="L35">    public Optional&lt;Integer&gt; left() { return Optional.ofNullable(left); }</span>
+<span class="fc" id="L43">    public Optional&lt;Integer&gt; left() { return Optional.ofNullable(left); }</span>
 
-<span class="fc" id="L37">    Outline withTop(int top) { return new Outline(top, right, bottom, left); }</span>
+<span class="fc" id="L45">    Outline top( int top) { return new Outline(top, right, bottom, left); }</span>
 
-<span class="fc" id="L39">    Outline withLeft(int left) { return new Outline(top, right, bottom, left); }</span>
+<span class="fc" id="L47">    Outline left( int left) { return new Outline(top, right, bottom, left); }</span>
 
-<span class="fc" id="L41">    Outline withRight(int right) { return new Outline(top, right, bottom, left); }</span>
+<span class="fc" id="L49">    Outline right( int right) { return new Outline(top, right, bottom, left); }</span>
 
-<span class="fc" id="L43">    Outline withBottom(int bottom) { return new Outline(top, right, bottom, left); }</span>
+<span class="fc" id="L51">    Outline bottom( int bottom) { return new Outline(top, right, bottom, left); }</span>
 
+    Outline scale( double scale ) {
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        return new Outline(</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">            top    == null ? null : (int) Math.round( top    * scale ),</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">            right  == null ? null : (int) Math.round( right  * scale ),</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">            bottom == null ? null : (int) Math.round( bottom * scale ),</span>
+<span class="pc" id="L58">            left   == null ? null : (int) Math.round( left   * scale )</span>
+        );
+    }
+
+    public boolean isPositive() {
+<span class="pc bpc" id="L63" title="1 of 6 branches missed.">        return top    != null &amp;&amp; top    &gt; 0 ||</span>
+<span class="pc bpc" id="L64" title="2 of 4 branches missed.">               right  != null &amp;&amp; right  &gt; 0 ||</span>
+<span class="pc bpc" id="L65" title="3 of 4 branches missed.">               bottom != null &amp;&amp; bottom &gt; 0 ||</span>
+<span class="pc bnc" id="L66" title="All 2 branches missed.">               left   != null &amp;&amp; left   &gt; 0;</span>
+    }
+
+    public double average() {
+<span class="fc" id="L70">        int count = 0;</span>
+<span class="fc" id="L71">        int sum   = 0;</span>
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">        if ( top    != null ) { count++; sum += top;    }</span>
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">        if ( right  != null ) { count++; sum += right;  }</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        if ( bottom != null ) { count++; sum += bottom; }</span>
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">        if ( left   != null ) { count++; sum += left;   }</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">        return count == 0 ? 0 : (double) sum / count;</span>
+    }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L48">        int hash = 7;</span>
-<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        hash = 31 * hash + ( top    == null ? 1 : top    );</span>
-<span class="pc bpc" id="L50" title="1 of 2 branches missed.">        hash = 31 * hash + ( right  == null ? 2 : right  );</span>
-<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        hash = 31 * hash + ( bottom == null ? 3 : bottom );</span>
-<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        hash = 31 * hash + ( left   == null ? 4 : left   );</span>
-<span class="fc" id="L53">        return hash;</span>
+<span class="fc" id="L81">        int hash = 7;</span>
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">        hash = 31 * hash + ( top    == null ? 1 : top    );</span>
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">        hash = 31 * hash + ( right  == null ? 2 : right  );</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        hash = 31 * hash + ( bottom == null ? 3 : bottom );</span>
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">        hash = 31 * hash + ( left   == null ? 4 : left   );</span>
+<span class="fc" id="L86">        return hash;</span>
     }
 
     @Override
     public boolean equals( Object obj ) {
-<span class="pc bpc" id="L58" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
-<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
-<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
-<span class="fc" id="L61">        Outline rhs = (Outline) obj;</span>
-<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        return Objects.equals(top,    rhs.top   ) &amp;&amp;</span>
-<span class="pc bpc" id="L63" title="1 of 2 branches missed.">               Objects.equals(right,  rhs.right ) &amp;&amp;</span>
-<span class="pc bpc" id="L64" title="1 of 2 branches missed.">               Objects.equals(bottom, rhs.bottom) &amp;&amp;</span>
-<span class="pc bpc" id="L65" title="1 of 2 branches missed.">               Objects.equals(left,   rhs.left  );</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L94">        Outline rhs = (Outline) obj;</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        return Objects.equals(top,    rhs.top   ) &amp;&amp;</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">               Objects.equals(right,  rhs.right ) &amp;&amp;</span>
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">               Objects.equals(bottom, rhs.bottom) &amp;&amp;</span>
+<span class="pc bpc" id="L98" title="1 of 2 branches missed.">               Objects.equals(left,   rhs.left  );</span>
     }
 
     @Override
     public String toString() {
-<span class="pc bpc" id="L70" title="4 of 8 branches missed.">        return &quot;Outline[&quot; +</span>
+<span class="pc bpc" id="L103" title="4 of 8 branches missed.">        return &quot;Outline[&quot; +</span>
                     &quot;top=&quot;    + ( top    == null ? &quot;?&quot; : top    ) + &quot;, &quot; +
                     &quot;right=&quot;  + ( right  == null ? &quot;?&quot; : right  ) + &quot;, &quot; +
                     &quot;bottom=&quot; + ( bottom == null ? &quot;?&quot; : bottom ) + &quot;, &quot; +

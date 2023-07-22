@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LifeTime.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.animation</a> &gt; <span class="el_source">LifeTime.java</span></div><h1>LifeTime.java</h1><pre class="source lang-java linenums">package swingtree.animation;
+
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
+/**
+ *  A schedule defines when an animation should start and for how long it should run.
+ */
+public final class LifeTime
+{
+<span class="fc" id="L11">    private static long _instances = 0;</span>
+
+<span class="fc" id="L13">    private final long _id = _instances++;</span>
+    private final long _delay; // in milliseconds
+    private final long _duration;
+    private final long _startTime;
+
+    /**
+     *  Creates a new schedule that will start immediately and run for the given duration.
+     * @param time The duration of the animation.
+     * @param unit The time unit of the duration.
+     * @return A new schedule that will start immediately and run for the given duration.
+     */
+    public static LifeTime of(long time, TimeUnit unit ) {
+<span class="fc" id="L25">        return new LifeTime(0, unit.toMillis(time));</span>
+    }
+
+    /**
+     *  Creates a new schedule that will start immediately and run for the given duration.
+     * @param time The duration of the animation.
+     * @param unit The time unit of the duration.
+     * @return A new schedule that will start immediately and run for the given duration.
+     */
+    public static LifeTime of(double time, TimeUnit unit ) {
+<span class="fc" id="L35">        long millis = _convertTimeFromDoublePrecisely(time, unit, TimeUnit.MILLISECONDS);</span>
+<span class="fc" id="L36">        return new LifeTime(0, millis);</span>
+    }
+
+    /**
+     *  Creates a new schedule that will start after the given delay and run for the given duration.
+     * @param startDelay The delay after which the animation should start.
+     * @param startUnit The time unit of the delay.
+     * @param duration The duration of the animation.
+     * @param durationUnit The time unit of the duration.
+     * @return A new schedule that will start after the given delay and run for the given duration.
+     */
+    public static LifeTime of(long startDelay, TimeUnit startUnit, long duration, TimeUnit durationUnit ) {
+<span class="nc" id="L48">        return new LifeTime(startUnit.toMillis(startDelay), durationUnit.toMillis(duration));</span>
+    }
+
+    /**
+     *  Creates a new schedule that will start after the given delay and run for the given duration.
+     * @param startDelay The delay after which the animation should start.
+     * @param startUnit The time unit of the delay.
+     * @param duration The duration of the animation.
+     * @param durationUnit The time unit of the duration.
+     * @return A new schedule that will start after the given delay and run for the given duration.
+     */
+    public static LifeTime of(double startDelay, TimeUnit startUnit, double duration, TimeUnit durationUnit ) {
+<span class="nc" id="L60">        long startMillis    = _convertTimeFromDoublePrecisely(startDelay, startUnit, TimeUnit.MILLISECONDS);</span>
+<span class="nc" id="L61">        long durationMillis = _convertTimeFromDoublePrecisely(duration, durationUnit, TimeUnit.MILLISECONDS);</span>
+<span class="nc" id="L62">        return new LifeTime(startMillis, durationMillis);</span>
+    }
+
+    private static long _convertTimeFromDoublePrecisely( double time, TimeUnit from, TimeUnit to ) {
+<span class="fc" id="L66">        long millis = (long) (time * from.toMillis(1));</span>
+<span class="fc" id="L67">        long remainderMillis = (long) (time * from.toMillis(1) - millis);</span>
+<span class="fc" id="L68">        return to.convert(millis + remainderMillis, TimeUnit.MILLISECONDS);</span>
+    }
+
+
+<span class="fc" id="L72">    private LifeTime(long delay, long duration ) {</span>
+<span class="fc" id="L73">        _delay     = delay;</span>
+<span class="fc" id="L74">        _duration  = duration;</span>
+<span class="fc" id="L75">        _startTime = System.currentTimeMillis() + _delay;</span>
+<span class="fc" id="L76">    }</span>
+
+    /**
+     *  Returns the duration of the animation in the given time unit.
+     * @return The duration of the animation.
+     */
+    public long getDurationIn( TimeUnit unit ) {
+<span class="fc" id="L83">        Objects.requireNonNull(unit);</span>
+<span class="fc" id="L84">        return unit.convert(_duration, TimeUnit.MILLISECONDS);</span>
+    }
+
+    /**
+     *  Returns the delay after which the animation should start in the given time unit.
+     * @return The delay after which the animation should start.
+     */
+    public long getDelayIn( TimeUnit unit ) {
+<span class="nc" id="L92">        Objects.requireNonNull(unit);</span>
+<span class="nc" id="L93">        return unit.convert(_delay, TimeUnit.MILLISECONDS);</span>
+    }
+
+    /**
+     *  Returns the time when the animation should start in the given time unit.
+     * @return The time when the animation should start.
+     */
+    public long getStartTimeIn( TimeUnit unit ) {
+<span class="fc" id="L101">        Objects.requireNonNull(unit);</span>
+<span class="fc" id="L102">        return unit.convert(_startTime, TimeUnit.MILLISECONDS);</span>
+    }
+
+    /**
+     *   Returns the end time of the specified iteration in the given time unit.
+     *   The end time is the time when the animation is scheduled to be finished.
+     *   This is essentially the start time plus the duration of the
+     *   animation times the provided iteration number.
+     *
+     * @param unit The time unit in which the end time should be returned.
+     * @param iteration The iteration for which the end time should be determined and returned.
+     * @return The end time of the specified iteration in the given time unit.
+     */
+    public long getIterationEndTimeIn( TimeUnit unit, int iteration ) {
+<span class="nc" id="L116">        Objects.requireNonNull(unit);</span>
+<span class="nc" id="L117">        return unit.convert(_startTime + _duration * iteration, TimeUnit.MILLISECONDS);</span>
+    }
+
+    /**
+     * @return Weather the animation is expired or not.
+     */
+    public boolean isExpired() {
+<span class="pc bpc" id="L124" title="1 of 2 branches missed.">        return System.currentTimeMillis() &gt;= _startTime + _duration;</span>
+    }
+
+    @Override
+    public boolean equals( Object o ) {
+<span class="nc bnc" id="L129" title="All 2 branches missed.">        if ( this == o ) return true;</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">        if ( !(o instanceof LifeTime) ) return false;</span>
+<span class="nc" id="L131">        LifeTime lifeTime = (LifeTime) o;</span>
+<span class="nc bnc" id="L132" title="All 8 branches missed.">        return _id        == lifeTime._id       &amp;&amp;</span>
+               _delay     == lifeTime._delay    &amp;&amp;
+               _duration  == lifeTime._duration &amp;&amp;
+               _startTime == lifeTime._startTime;
+    }
+
+    @Override
+<span class="fc" id="L139">    public int hashCode() { return Objects.hash(_id, _delay, _duration, _startTime); }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

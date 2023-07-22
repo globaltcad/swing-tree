@@ -223,7 +223,7 @@
 
         {"kind":"and","text":"We run it through the style sheet...","code":["var s = ss.run(button.component)"]},
 
-        {"kind":"then","text":"...and we check the results","code":["s.border().widths().top().get() == 5","s.border().widths().left().get() == 5","s.border().widths().bottom().get() == 5","s.border().widths().right().get() == 5","s.border().color().get() == Color.MAGENTA","s.background().color().get() == Color.RED","s.border().shade().strategy() == ShadingStrategy.BOTTOM_TO_TOP","s.border().shade().colors() as java.util.List == [Color.RED, Color.BLUE]","s.shadow(\"named shadow\").spreadRadius() == 42","s.shadow(\"named shadow\").color().get() == Color.CYAN","s.shadow(\"named shadow\").isInset() == false","s.font().name() == \"Arial\"","s.font().size() == 12","s.font().style() == Font.BOLD"]}
+        {"kind":"then","text":"...and we check the results","code":["s.border().widths().top().get() == 5","s.border().widths().left().get() == 5","s.border().widths().bottom().get() == 5","s.border().widths().right().get() == 5","s.border().color().get() == Color.MAGENTA","s.background().color().get() == Color.RED","s.border().shade().strategy() == ShadingStrategy.BOTTOM_TO_TOP","s.border().shade().colors() as java.util.List == [Color.RED, Color.BLUE]","s.shadow(\"named shadow\").spreadRadius() == 42","s.shadow(\"named shadow\").color().get() == Color.CYAN","s.shadow(\"named shadow\").isInset() == false","s.font().name() == \"Arial\"","s.font().size() == 12","s.font().posture() == 0"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

@@ -3,194 +3,273 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.font.TextAttribute;
+import java.awt.geom.AffineTransform;
 import java.text.AttributedCharacterIterator;
 import java.util.*;
 import java.util.List;
 
+/**
+ *  An immutable, wither-like cloner method based settings class for font styles
+ *  that is part of the full {@link Style} configuration object.
+ */
 public final class FontStyle
 {
+<span class="fc" id="L17">    private static final FontStyle _NONE = new FontStyle(&quot;&quot;, 0, 0, 0, null, null, null, false, null, null, null);</span>
+
+<span class="fc" id="L19">    public static FontStyle none() { return _NONE; }</span>
+
     private final String _name;
     private final int _size;
-    private final int _style;
-    private final int _weight;
-    private final List&lt;TextAttribute&gt; _attributes;
+    private final float _posture;
+    private final float _weight;
     private final Color _color;
     private final Color _backgroundColor;
     private final Color _selectionColor;
+    private final Boolean _isUnderlined;
+    private final Boolean _isStrike;
+    private final AffineTransform _transform;
+    private final Paint _paint;
 
     FontStyle(
         String name,
         int fontSize,
-        int fontStyle,
-        int fontWeight,
-        List&lt;TextAttribute&gt; attributes,
+        float posture,
+        float weight,
         Color color,
         Color backgroundColor,
-        Color selectionColor
-<span class="fc" id="L30">    ) {</span>
-<span class="fc" id="L31">        _name = Objects.requireNonNull(name);</span>
-<span class="fc" id="L32">        _size = fontSize;</span>
-<span class="fc" id="L33">        _style = fontStyle;</span>
-<span class="fc" id="L34">        _weight = fontWeight;</span>
-<span class="fc" id="L35">        _attributes = Collections.unmodifiableList(Objects.requireNonNull(attributes));</span>
-<span class="fc" id="L36">        _color = color;</span>
-<span class="fc" id="L37">        _backgroundColor = backgroundColor;</span>
-<span class="fc" id="L38">        _selectionColor = selectionColor;</span>
-<span class="fc" id="L39">    }</span>
+        Color selectionColor,
+        Boolean isUnderline,
+        Boolean isStrike,
+        AffineTransform transform,
+        Paint paint
+<span class="fc" id="L45">    ) {</span>
+<span class="fc" id="L46">        _name    = Objects.requireNonNull(name);</span>
+<span class="fc" id="L47">        _size    = fontSize;</span>
+<span class="fc" id="L48">        _posture = posture;</span>
+<span class="fc" id="L49">        _weight  = weight;</span>
+<span class="fc" id="L50">        _color   = color;</span>
+<span class="fc" id="L51">        _backgroundColor = backgroundColor;</span>
+<span class="fc" id="L52">        _selectionColor  = selectionColor;</span>
+<span class="fc" id="L53">        _isUnderlined    = isUnderline;</span>
+<span class="fc" id="L54">        _isStrike        = isStrike;</span>
+<span class="fc" id="L55">        _transform       = transform;</span>
+<span class="fc" id="L56">        _paint           = paint;</span>
+<span class="fc" id="L57">    }</span>
 
-<span class="fc" id="L41">    public String name() { return _name; }</span>
+<span class="fc" id="L59">    public String name() { return _name; }</span>
 
-<span class="fc" id="L43">    public int size() { return _size; }</span>
+<span class="fc" id="L61">    public int size() { return _size; }</span>
 
-<span class="nc" id="L45">    public int style() { return _style; }</span>
+<span class="fc" id="L63">    public float posture() { return _posture; }</span>
 
-<span class="nc" id="L47">    public int weight() { return _weight; }</span>
+<span class="nc" id="L65">    public float weight() { return _weight; }</span>
     
-<span class="fc" id="L49">    public List&lt;TextAttribute&gt; attributes() { return _attributes; }</span>
+<span class="fc" id="L67">    public Optional&lt;Color&gt; color() { return Optional.ofNullable(_color); }</span>
 
-<span class="fc" id="L51">    public Optional&lt;Color&gt; color() { return Optional.ofNullable(_color); }</span>
+<span class="nc" id="L69">    public Optional&lt;Color&gt; backgroundColor() { return Optional.ofNullable(_backgroundColor); }</span>
 
-<span class="nc" id="L53">    public Optional&lt;Color&gt; backgroundColor() { return Optional.ofNullable(_backgroundColor); }</span>
+<span class="fc" id="L71">    public Optional&lt;Color&gt; selectionColor() { return Optional.ofNullable(_selectionColor); }</span>
+    
+<span class="nc" id="L73">    public boolean isUnderlined() { return _isUnderlined; }</span>
+    
+<span class="nc" id="L75">    public Optional&lt;AffineTransform&gt; transform() { return Optional.ofNullable(_transform); }</span>
+    
+<span class="nc" id="L77">    public Optional&lt;Paint&gt; paint() { return Optional.ofNullable(_paint); }</span>
 
-<span class="fc" id="L55">    public Optional&lt;Color&gt; selectionColor() { return Optional.ofNullable(_selectionColor); }</span>
+<span class="fc" id="L79">    FontStyle name( String fontFamily ) { return new FontStyle(fontFamily, _size, _posture, _weight, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint); }</span>
 
-<span class="fc" id="L57">    FontStyle withName( String fontFamily ) { return new FontStyle(fontFamily, _size, _style, _weight, _attributes, _color, _backgroundColor, _selectionColor); }</span>
+<span class="fc" id="L81">    FontStyle size( int fontSize ) { return new FontStyle(_name, fontSize, _posture, _weight, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint); }</span>
 
-<span class="fc" id="L59">    FontStyle withSize( int fontSize ) { return new FontStyle(_name, fontSize, _style, _weight, _attributes, _color, _backgroundColor, _selectionColor); }</span>
+<span class="fc" id="L83">    FontStyle posture( float posture ) { return new FontStyle(_name, _size, posture, _weight, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint); }</span>
 
-<span class="fc" id="L61">    FontStyle withStyle( int fontStyle ) { return new FontStyle(_name, _size, fontStyle, _weight, _attributes, _color, _backgroundColor, _selectionColor); }</span>
+<span class="fc" id="L85">    FontStyle weight( float fontWeight ) { return new FontStyle(_name, _size, _posture, fontWeight, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint); }</span>
 
-<span class="nc" id="L63">    FontStyle withWeight( int fontWeight ) { return new FontStyle(_name, _size, _style, fontWeight, _attributes, _color, _backgroundColor, _selectionColor); }</span>
+<span class="fc" id="L87">    FontStyle color( Color color ) { return new FontStyle(_name, _size, _posture, _weight, color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint); }</span>
 
-    FontStyle withAttributes( TextAttribute... attributes ) {
-<span class="nc" id="L66">        Objects.requireNonNull(attributes);</span>
-<span class="nc" id="L67">        return new FontStyle(_name, _size, _style, _weight, Arrays.asList(attributes), _color, _backgroundColor, _selectionColor);</span>
-    }
+<span class="nc" id="L89">    FontStyle backgroundColor( Color backgroundColor ) { return new FontStyle(_name, _size, _posture, _weight, _color, backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint); }</span>
 
-    FontStyle withAttributes( List&lt;TextAttribute&gt; attributes ) {
-<span class="fc" id="L71">        Objects.requireNonNull(attributes);</span>
-<span class="fc" id="L72">        return new FontStyle(_name, _size, _style, _weight, attributes, _color, _backgroundColor, _selectionColor);</span>
-    }
+<span class="fc" id="L91">    FontStyle selectionColor( Color selectionColor ) { return new FontStyle(_name, _size, _posture, _weight, _color, _backgroundColor, selectionColor, _isUnderlined, _isStrike, _transform, _paint); }</span>
 
-<span class="fc" id="L75">    FontStyle withColor( Color color ) { return new FontStyle(_name, _size, _style, _weight, _attributes, color, _backgroundColor, _selectionColor); }</span>
+<span class="fc" id="L93">    FontStyle isUnderlined( boolean underlined ) { return new FontStyle(_name, _size, _posture, _weight, _color, _backgroundColor, _selectionColor, underlined, _isStrike, _transform, _paint); }</span>
 
-<span class="nc" id="L77">    FontStyle withBackgroundColor( Color backgroundColor ) { return new FontStyle(_name, _size, _style, _weight, _attributes, _color, backgroundColor, _selectionColor); }</span>
+<span class="fc" id="L95">    FontStyle isStrike( boolean strike ) { return new FontStyle(_name, _size, _posture, _weight, _color, _backgroundColor, _selectionColor, _isUnderlined, strike, _transform, _paint); }</span>
 
-<span class="fc" id="L79">    FontStyle withSelectionColor( Color selectionColor ) { return new FontStyle(_name, _size, _style, _weight, _attributes, _color, _backgroundColor, selectionColor); }</span>
+<span class="nc" id="L97">    FontStyle transform( AffineTransform transform ) { return new FontStyle(_name, _size, _posture, _weight, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike, transform, _paint); }</span>
 
-    FontStyle withFont( Font font ) {
-<span class="fc" id="L82">        Objects.requireNonNull(font);</span>
-<span class="fc" id="L83">        return new FontStyle(</span>
-<span class="fc" id="L84">                    font.getFamily(),</span>
-<span class="fc" id="L85">                    font.getSize(),</span>
-<span class="fc" id="L86">                    font.getStyle(),</span>
-<span class="pc bpc" id="L87" title="2 of 4 branches missed.">                    font.isBold() ? Font.BOLD : font.isItalic() ? Font.ITALIC : Font.PLAIN,</span>
-<span class="fc" id="L88">                    Collections.emptyList(),</span>
+<span class="nc" id="L99">    FontStyle paint( Paint paint ) { return new FontStyle(_name, _size, _posture, _weight, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, paint); }</span>
+
+    FontStyle font( Font font ) {
+<span class="fc" id="L102">        Map&lt;TextAttribute, ?&gt; attributeMap = font.getAttributes();</span>
+<span class="fc" id="L103">        Color   color       = null;</span>
+<span class="fc" id="L104">        Color   background  = null;</span>
+<span class="fc" id="L105">        boolean isUnderline = false;</span>
+<span class="fc" id="L106">        boolean isStriked   = false;</span>
+<span class="fc" id="L107">        AffineTransform transform = null;</span>
+<span class="fc" id="L108">        Paint paint = null;</span>
+        try {
+<span class="fc" id="L110">            isUnderline = Objects.equals(attributeMap.get(TextAttribute.UNDERLINE), TextAttribute.UNDERLINE_ON);</span>
+<span class="fc" id="L111">            isStriked = Objects.equals(attributeMap.get(TextAttribute.STRIKETHROUGH), TextAttribute.STRIKETHROUGH_ON);</span>
+<span class="fc" id="L112">            paint = (Paint) attributeMap.get(TextAttribute.FOREGROUND);</span>
+<span class="fc" id="L113">            transform = (AffineTransform) attributeMap.get(TextAttribute.TRANSFORM);</span>
+<span class="nc" id="L114">        } catch (Exception e) {</span>
+<span class="nc" id="L115">            e.printStackTrace();</span>
+<span class="fc" id="L116">        }</span>
+
+<span class="fc" id="L118">        Objects.requireNonNull(font);</span>
+<span class="fc" id="L119">        return new FontStyle(</span>
+<span class="fc" id="L120">                    font.getFamily(),</span>
+<span class="fc" id="L121">                    font.getSize(),</span>
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">                    font.isItalic() ? 0.2f : 0f,</span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">                    font.isBold() ? 2f : 0f,</span>
                     _color,
                     _backgroundColor,
-                    _selectionColor
+                    _selectionColor,
+<span class="fc" id="L127">                    isUnderline,</span>
+<span class="fc" id="L128">                    isStriked,</span>
+                    transform,
+                    paint
                 );
     }
 
     public Optional&lt;Font&gt; createDerivedFrom( Font existingFont )
     {
-<span class="fc" id="L97">        boolean isChange = false;</span>
-
-<span class="pc bpc" id="L99" title="1 of 2 branches missed.">        if ( existingFont == null )</span>
-<span class="nc" id="L100">            existingFont = new JLabel().getFont();</span>
-
-<span class="fc" id="L102">        Map&lt;TextAttribute, Object&gt; currentAttributes = (Map&lt;TextAttribute, Object&gt;) existingFont.getAttributes();</span>
-<span class="fc" id="L103">        Map&lt;TextAttribute, Object&gt; attributes = new HashMap&lt;&gt;();</span>
-
-<span class="fc bfc" id="L105" title="All 2 branches covered.">        if ( _size &gt; 0 ) {</span>
-<span class="pc bpc" id="L106" title="2 of 4 branches missed.">            isChange = isChange || !Integer.valueOf(_size).equals(currentAttributes.get(TextAttribute.SIZE));</span>
-<span class="fc" id="L107">            attributes.put(TextAttribute.SIZE, _size);</span>
-        }
-<span class="pc bpc" id="L109" title="1 of 2 branches missed.">        if ( _style &gt; 0 ) {</span>
-<span class="nc bnc" id="L110" title="All 4 branches missed.">            isChange = isChange || !Integer.valueOf(_style).equals(currentAttributes.get(TextAttribute.POSTURE));</span>
-<span class="nc" id="L111">            attributes.put(TextAttribute.POSTURE, _style);</span>
-        }
-<span class="pc bpc" id="L113" title="1 of 2 branches missed.">        if ( _weight &gt; 0 ) {</span>
-<span class="nc bnc" id="L114" title="All 4 branches missed.">            isChange = isChange || !Integer.valueOf(_weight).equals(currentAttributes.get(TextAttribute.WEIGHT));</span>
-<span class="nc" id="L115">            attributes.put(TextAttribute.WEIGHT, _weight);</span>
-        }
-<span class="fc bfc" id="L117" title="All 2 branches covered.">        if ( !_name.isEmpty() ) {</span>
-<span class="pc bpc" id="L118" title="3 of 4 branches missed.">            isChange = isChange || !Objects.equals(_name, currentAttributes.get(TextAttribute.FAMILY));</span>
-<span class="fc" id="L119">            attributes.put(TextAttribute.FAMILY, _name);</span>
-        }
-<span class="fc bfc" id="L121" title="All 2 branches covered.">        if ( _color != null ) {</span>
-<span class="pc bpc" id="L122" title="3 of 4 branches missed.">            isChange = isChange || !Objects.equals(_color, currentAttributes.get(TextAttribute.FOREGROUND));</span>
-<span class="fc" id="L123">            attributes.put(TextAttribute.FOREGROUND, _color);</span>
-        }
-<span class="pc bpc" id="L125" title="1 of 2 branches missed.">        if ( _backgroundColor != null ) {</span>
-<span class="nc bnc" id="L126" title="All 4 branches missed.">            isChange = isChange || !Objects.equals(_backgroundColor, currentAttributes.get(TextAttribute.BACKGROUND));</span>
-<span class="nc" id="L127">            attributes.put(TextAttribute.BACKGROUND, _backgroundColor);</span>
-        }
-
-<span class="pc bpc" id="L130" title="1 of 2 branches missed.">        if ( _attributes != null ) {</span>
-<span class="pc" id="L131">            _attributes.forEach( attr -&gt; attributes.put(attr, attr));</span>
-        }
-
-<span class="fc bfc" id="L134" title="All 2 branches covered.">        if ( isChange )</span>
-<span class="fc" id="L135">            return Optional.of(existingFont.deriveFont(attributes));</span>
-        else
+<span class="fc bfc" id="L136" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
 <span class="fc" id="L137">            return Optional.empty();</span>
+
+<span class="fc" id="L139">        boolean isChange = false;</span>
+
+<span class="pc bpc" id="L141" title="1 of 2 branches missed.">        if ( existingFont == null )</span>
+<span class="nc" id="L142">            existingFont = new JLabel().getFont();</span>
+
+<span class="fc" id="L144">        Map&lt;TextAttribute, Object&gt; currentAttributes = (Map&lt;TextAttribute, Object&gt;) existingFont.getAttributes();</span>
+<span class="fc" id="L145">        Map&lt;TextAttribute, Object&gt; attributes = new HashMap&lt;&gt;();</span>
+
+<span class="fc bfc" id="L147" title="All 2 branches covered.">        if ( _size &gt; 0 ) {</span>
+<span class="pc bpc" id="L148" title="2 of 4 branches missed.">            isChange = isChange || !Integer.valueOf(_size).equals(currentAttributes.get(TextAttribute.SIZE));</span>
+<span class="fc" id="L149">            attributes.put(TextAttribute.SIZE, _size);</span>
+        }
+<span class="fc bfc" id="L151" title="All 2 branches covered.">        if ( _posture &gt; 0 ) {</span>
+<span class="pc bpc" id="L152" title="3 of 4 branches missed.">            isChange = isChange || !Float.valueOf(_posture).equals(currentAttributes.get(TextAttribute.POSTURE));</span>
+<span class="fc" id="L153">            attributes.put(TextAttribute.POSTURE, _posture);</span>
+        }
+<span class="fc bfc" id="L155" title="All 2 branches covered.">        if ( _weight &gt; 0 ) {</span>
+<span class="fc bfc" id="L156" title="All 4 branches covered.">            isChange = isChange || !Float.valueOf(_weight).equals(currentAttributes.get(TextAttribute.WEIGHT));</span>
+<span class="fc" id="L157">            attributes.put(TextAttribute.WEIGHT, _weight);</span>
+        }
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">        if ( _isUnderlined != null ) {</span>
+<span class="pc bpc" id="L160" title="1 of 4 branches missed.">            isChange = isChange || !Objects.equals(_isUnderlined, currentAttributes.get(TextAttribute.UNDERLINE));</span>
+<span class="fc" id="L161">            attributes.put(TextAttribute.UNDERLINE, _isUnderlined);</span>
+        }
+<span class="fc bfc" id="L163" title="All 2 branches covered.">        if ( _isStrike != null ) {</span>
+<span class="pc bpc" id="L164" title="3 of 4 branches missed.">            isChange = isChange || !Objects.equals(_isStrike, currentAttributes.get(TextAttribute.STRIKETHROUGH));</span>
+<span class="fc" id="L165">            attributes.put(TextAttribute.STRIKETHROUGH, _isStrike);</span>
+        }
+<span class="pc bpc" id="L167" title="1 of 2 branches missed.">        if ( _transform != null ) {</span>
+<span class="nc bnc" id="L168" title="All 4 branches missed.">            isChange = isChange || !Objects.equals(_transform, currentAttributes.get(TextAttribute.TRANSFORM));</span>
+<span class="nc" id="L169">            attributes.put(TextAttribute.TRANSFORM, _transform);</span>
+        }
+<span class="pc bpc" id="L171" title="1 of 2 branches missed.">        if ( _paint != null ) {</span>
+<span class="nc bnc" id="L172" title="All 4 branches missed.">            isChange = isChange || !Objects.equals(_paint, currentAttributes.get(TextAttribute.FOREGROUND));</span>
+<span class="nc" id="L173">            attributes.put(TextAttribute.FOREGROUND, _paint);</span>
+        }
+<span class="fc bfc" id="L175" title="All 2 branches covered.">        if ( !_name.isEmpty() ) {</span>
+<span class="pc bpc" id="L176" title="3 of 4 branches missed.">            isChange = isChange || !Objects.equals(_name, currentAttributes.get(TextAttribute.FAMILY));</span>
+<span class="fc" id="L177">            attributes.put(TextAttribute.FAMILY, _name);</span>
+        }
+<span class="fc bfc" id="L179" title="All 2 branches covered.">        if ( _color != null ) {</span>
+<span class="pc bpc" id="L180" title="3 of 4 branches missed.">            isChange = isChange || !Objects.equals(_color, currentAttributes.get(TextAttribute.FOREGROUND));</span>
+<span class="fc" id="L181">            attributes.put(TextAttribute.FOREGROUND, _color);</span>
+        }
+<span class="pc bpc" id="L183" title="1 of 2 branches missed.">        if ( _backgroundColor != null ) {</span>
+<span class="nc bnc" id="L184" title="All 4 branches missed.">            isChange = isChange || !Objects.equals(_backgroundColor, currentAttributes.get(TextAttribute.BACKGROUND));</span>
+<span class="nc" id="L185">            attributes.put(TextAttribute.BACKGROUND, _backgroundColor);</span>
+        }
+
+<span class="pc bpc" id="L188" title="1 of 2 branches missed.">        if ( isChange )</span>
+<span class="fc" id="L189">            return Optional.of(existingFont.deriveFont(attributes));</span>
+        else
+<span class="nc" id="L191">            return Optional.empty();</span>
+    }
+
+    FontStyle _scale( double scale ) {
+<span class="fc" id="L195">        return new FontStyle(</span>
+                    _name,
+<span class="fc" id="L197">                    (int) Math.round(_size * scale),</span>
+                    _posture,
+                    _weight,
+                    _color,
+                    _backgroundColor,
+                    _selectionColor, 
+                    _isUnderlined,
+                    _isStrike,
+                    _transform,
+                    _paint
+                );
     }
 
     @Override
     public int hashCode()
     {
-<span class="fc" id="L143">        int hash = 7;</span>
-<span class="fc" id="L144">        hash = 97 * hash + Objects.hashCode(_name);</span>
-<span class="fc" id="L145">        hash = 97 * hash + _size;</span>
-<span class="fc" id="L146">        hash = 97 * hash + _style;</span>
-<span class="fc" id="L147">        hash = 97 * hash + _weight;</span>
-<span class="fc" id="L148">        hash = 97 * hash + Objects.hashCode(_attributes);</span>
-<span class="fc" id="L149">        hash = 97 * hash + Objects.hashCode(_color);</span>
-<span class="fc" id="L150">        hash = 97 * hash + Objects.hashCode(_backgroundColor);</span>
-<span class="fc" id="L151">        hash = 97 * hash + Objects.hashCode(_selectionColor);</span>
-<span class="fc" id="L152">        return hash;</span>
+<span class="fc" id="L213">        int hash = 7;</span>
+<span class="fc" id="L214">        hash = 97 * hash + Objects.hashCode(_name);</span>
+<span class="fc" id="L215">        hash = 97 * hash + _size;</span>
+<span class="fc" id="L216">        hash = 97 * hash + Float.hashCode(_posture);</span>
+<span class="fc" id="L217">        hash = 97 * hash + Float.hashCode(_weight);</span>
+<span class="fc" id="L218">        hash = 97 * hash + Objects.hashCode(_color);</span>
+<span class="fc" id="L219">        hash = 97 * hash + Objects.hashCode(_backgroundColor);</span>
+<span class="fc" id="L220">        hash = 97 * hash + Objects.hashCode(_selectionColor);</span>
+<span class="fc" id="L221">        hash = 97 * hash + Objects.hashCode(_isUnderlined);</span>
+<span class="fc" id="L222">        hash = 97 * hash + Objects.hashCode(_transform);</span>
+<span class="fc" id="L223">        hash = 97 * hash + Objects.hashCode(_paint);</span>
+<span class="fc" id="L224">        return hash;</span>
     }
 
     @Override
     public boolean equals( Object obj )
     {
-<span class="pc bpc" id="L158" title="1 of 2 branches missed.">        if ( obj == null )</span>
-<span class="nc" id="L159">            return false;</span>
-<span class="pc bpc" id="L160" title="1 of 2 branches missed.">        if ( getClass() != obj.getClass() )</span>
-<span class="nc" id="L161">            return false;</span>
-<span class="fc" id="L162">        final FontStyle other = (FontStyle)obj;</span>
-<span class="pc bpc" id="L163" title="1 of 2 branches missed.">        if ( !Objects.equals(_name, other._name) )</span>
-<span class="nc" id="L164">            return false;</span>
-<span class="pc bpc" id="L165" title="1 of 2 branches missed.">        if ( _size != other._size )</span>
-<span class="nc" id="L166">            return false;</span>
-<span class="fc bfc" id="L167" title="All 2 branches covered.">        if ( _style != other._style )</span>
-<span class="fc" id="L168">            return false;</span>
-<span class="pc bpc" id="L169" title="1 of 2 branches missed.">        if ( _weight != other._weight )</span>
-<span class="nc" id="L170">            return false;</span>
-<span class="pc bpc" id="L171" title="1 of 2 branches missed.">        if ( !Objects.equals(_attributes, other._attributes) )</span>
-<span class="nc" id="L172">            return false;</span>
-<span class="pc bpc" id="L173" title="1 of 2 branches missed.">        if ( !Objects.equals(_color, other._color) )</span>
-<span class="nc" id="L174">            return false;</span>
-<span class="pc bpc" id="L175" title="1 of 2 branches missed.">        if ( !Objects.equals(_backgroundColor, other._backgroundColor) )</span>
-<span class="nc" id="L176">            return false;</span>
-<span class="pc bpc" id="L177" title="1 of 2 branches missed.">        if ( !Objects.equals(_selectionColor, other._selectionColor) )</span>
-<span class="nc" id="L178">            return false;</span>
-<span class="fc" id="L179">        return true;</span>
+<span class="pc bpc" id="L230" title="1 of 2 branches missed.">        if ( obj == null )</span>
+<span class="nc" id="L231">            return false;</span>
+<span class="pc bpc" id="L232" title="1 of 2 branches missed.">        if ( getClass() != obj.getClass() )</span>
+<span class="nc" id="L233">            return false;</span>
+<span class="fc" id="L234">        final FontStyle other = (FontStyle)obj;</span>
+<span class="fc bfc" id="L235" title="All 2 branches covered.">        if ( !Objects.equals(_name, other._name) )</span>
+<span class="fc" id="L236">            return false;</span>
+<span class="pc bpc" id="L237" title="1 of 2 branches missed.">        if ( _size != other._size )</span>
+<span class="nc" id="L238">            return false;</span>
+<span class="pc bpc" id="L239" title="1 of 2 branches missed.">        if ( _posture != other._posture)</span>
+<span class="nc" id="L240">            return false;</span>
+<span class="fc bfc" id="L241" title="All 2 branches covered.">        if ( _weight != other._weight )</span>
+<span class="fc" id="L242">            return false;</span>
+<span class="pc bpc" id="L243" title="1 of 2 branches missed.">        if ( !Objects.equals(_color, other._color) )</span>
+<span class="nc" id="L244">            return false;</span>
+<span class="pc bpc" id="L245" title="1 of 2 branches missed.">        if ( !Objects.equals(_backgroundColor, other._backgroundColor) )</span>
+<span class="nc" id="L246">            return false;</span>
+<span class="pc bpc" id="L247" title="1 of 2 branches missed.">        if ( !Objects.equals(_selectionColor, other._selectionColor) )</span>
+<span class="nc" id="L248">            return false;</span>
+<span class="pc bpc" id="L249" title="1 of 2 branches missed.">        if ( !Objects.equals(_isUnderlined, other._isUnderlined) )</span>
+<span class="nc" id="L250">            return false;</span>
+<span class="pc bpc" id="L251" title="1 of 2 branches missed.">        if ( !Objects.equals(_transform, other._transform) )</span>
+<span class="nc" id="L252">            return false;</span>
+<span class="pc bpc" id="L253" title="1 of 2 branches missed.">        if ( !Objects.equals(_paint, other._paint) )</span>
+<span class="nc" id="L254">            return false;</span>
+<span class="fc" id="L255">        return true;</span>
     }
 
     @Override
     public String toString()
     {
-<span class="fc" id="L185">        return &quot;FontStyle[&quot; +</span>
+<span class="pc bpc" id="L261" title="2 of 4 branches missed.">        return &quot;FontStyle[&quot; +</span>
                     &quot;name=&quot;            + _name + &quot;, &quot; +
                     &quot;size=&quot;            + _size + &quot;, &quot; +
-                    &quot;style=&quot;           + _style + &quot;, &quot; +
+                    &quot;posture=&quot;         + _posture + &quot;, &quot; +
                     &quot;weight=&quot;          + _weight + &quot;, &quot; +
-<span class="fc" id="L190">                    &quot;attributes=[&quot;     + _attributes.stream().map(AttributedCharacterIterator.Attribute::toString).reduce( (a, b) -&gt; a + &quot;,&quot; + b ).orElse(&quot;&quot;) + &quot;], &quot; +</span>
-<span class="fc" id="L191">                    &quot;color=&quot;           + StyleUtility.toString(_color) + &quot;, &quot; +</span>
-<span class="fc" id="L192">                    &quot;backgroundColor=&quot; + StyleUtility.toString(_backgroundColor) + &quot;, &quot; +</span>
-<span class="fc" id="L193">                    &quot;selectionColor=&quot;  + StyleUtility.toString(_selectionColor) +</span>
+                    &quot;underlined=&quot;      + (_isUnderlined == null ? &quot;?&quot; : _isUnderlined) + &quot;, &quot; +
+                    &quot;strikeThrough=&quot;   + (_isStrike == null ? &quot;?&quot; : _isStrike) + &quot;, &quot; +
+<span class="fc" id="L268">                    &quot;color=&quot;           + StyleUtility.toString(_color) + &quot;, &quot; +</span>
+<span class="fc" id="L269">                    &quot;backgroundColor=&quot; + StyleUtility.toString(_backgroundColor) + &quot;, &quot; +</span>
+<span class="pc bpc" id="L270" title="1 of 2 branches missed.">                    &quot;selectionColor=&quot;  + StyleUtility.toString(_selectionColor) + &quot;, &quot; +</span>
+<span class="pc bpc" id="L271" title="1 of 2 branches missed.">                    &quot;transform=&quot;       + ( _transform == null ? &quot;?&quot; : _transform.toString() ) + &quot;, &quot; +</span>
+<span class="pc" id="L272">                    &quot;paint=&quot;           + ( _paint == null ? &quot;?&quot; : _paint.toString() ) +</span>
                 &quot;]&quot;;
     }
 }

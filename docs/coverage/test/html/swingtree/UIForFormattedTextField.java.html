@@ -11,10 +11,10 @@ public class UIForFormattedTextField extends UIForAnyTextComponent&lt;UIForForma
 {
 <span class="fc" id="L12">    protected UIForFormattedTextField( JFormattedTextField component ) { super(component); }</span>
 
-    public UIForFormattedTextField onEnter( Action&lt;SimpleDelegate&lt;JFormattedTextField, ActionEvent&gt;&gt; action ) {
+    public UIForFormattedTextField onEnter( Action&lt;ComponentDelegate&lt;JFormattedTextField, ActionEvent&gt;&gt; action ) {
 <span class="fc" id="L15">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
 <span class="fc" id="L16">        JFormattedTextField field = getComponent();</span>
-<span class="fc" id="L17">        _onEnter( e -&gt; _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;( field, e, this::getSiblinghood )) ) );</span>
+<span class="fc" id="L17">        _onEnter( e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( field, e, this::getSiblinghood )) ) );</span>
 <span class="fc" id="L18">        return this;</span>
     }
 

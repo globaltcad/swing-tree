@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForSplitButton.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForSplitButton.java</span></div><h1>UIForSplitButton.java</h1><pre class="source lang-java linenums">package swingtree;
 
-import com.alexandriasoftware.swing.JSplitButton;
+import swingtree.components.JSplitButton;
 import sprouts.Action;
 import sprouts.Event;
 import sprouts.Var;
@@ -116,7 +116,7 @@ public class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForAnyButt
      *  the currently selected {@link JMenuItem} and a list of
      *  all other items.
      *
-     * @param action The {@link Action} which will receive an {@link SimpleDelegate}
+     * @param action The {@link Action} which will receive an {@link ComponentDelegate}
      *               exposing all essential components making up this {@link JSplitButton}.
      * @return This very instance, which enables builder-style method chaining.
      */
@@ -174,7 +174,7 @@ public class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForAnyButt
      *  the currently selected {@link JMenuItem} and a list of
      *  all other items.
      *
-     * @param action The {@link Action} which will receive an {@link SimpleDelegate}
+     * @param action The {@link Action} which will receive an {@link ComponentDelegate}
      *               exposing all essential components making up this {@link JSplitButton}.
      * @return This very instance, which enables builder-style method chaining.
      */
@@ -202,16 +202,16 @@ public class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForAnyButt
      *  If you need more context information delegated to the action
      *  then consider using {@link #onButtonClick(Action)}.
      *
-     * @param action An {@link Action} instance which will be wrapped by an {@link SimpleDelegate} and passed to the button component.
+     * @param action An {@link Action} instance which will be wrapped by an {@link ComponentDelegate} and passed to the button component.
      * @return This very instance, which enables builder-style method chaining.
      */
     @Override
-    public UIForSplitButton&lt;B&gt; onClick( Action&lt;SimpleDelegate&lt;B, ActionEvent&gt;&gt; action ) {
+    public UIForSplitButton&lt;B&gt; onClick( Action&lt;ComponentDelegate&lt;B, ActionEvent&gt;&gt; action ) {
 <span class="nc" id="L210">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
 <span class="nc" id="L211">        B button = getComponent();</span>
 <span class="nc" id="L212">        button.addButtonClickedActionListener(</span>
 <span class="nc" id="L213">            e -&gt; _doApp(()-&gt;action.accept(</span>
-                 new SimpleDelegate&lt;&gt;(button, e, this::getSiblinghood)
+                 new ComponentDelegate&lt;&gt;(button, e, this::getSiblinghood)
             ))
         );
 <span class="nc" id="L217">        return this;</span>
@@ -225,9 +225,9 @@ public class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForAnyButt
      * @param action the action to be executed when the split button is opened.
      * @return this very instance, which enables builder-style method chaining.
      */
-    public UIForSplitButton&lt;B&gt; onOpen( Action&lt;SimpleDelegate&lt;B, PopupMenuEvent&gt;&gt; action ) {
+    public UIForSplitButton&lt;B&gt; onOpen( Action&lt;ComponentDelegate&lt;B, PopupMenuEvent&gt;&gt; action ) {
 <span class="fc" id="L229">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="pc" id="L230">        _onPopupOpen( e -&gt; _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;( getComponent(), e, this::getSiblinghood )) ) );</span>
+<span class="pc" id="L230">        _onPopupOpen( e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( getComponent(), e, this::getSiblinghood )) ) );</span>
 <span class="fc" id="L231">        return this;</span>
     }
 
@@ -250,9 +250,9 @@ public class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForAnyButt
      * @param action the action to be executed when the split button is closed.
      * @return this very instance, which enables builder-style method chaining.
      */
-    public UIForSplitButton&lt;B&gt; onClose( Action&lt;SimpleDelegate&lt;B, PopupMenuEvent&gt;&gt; action ) {
+    public UIForSplitButton&lt;B&gt; onClose( Action&lt;ComponentDelegate&lt;B, PopupMenuEvent&gt;&gt; action ) {
 <span class="fc" id="L254">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="pc" id="L255">        _onPopupClose( e -&gt; _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;( getComponent(), e, this::getSiblinghood )) ) );</span>
+<span class="pc" id="L255">        _onPopupClose( e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( getComponent(), e, this::getSiblinghood )) ) );</span>
 <span class="fc" id="L256">        return this;</span>
     }
 
@@ -274,9 +274,9 @@ public class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForAnyButt
      * @param action the action to be executed when the split button popup is canceled.
      * @return this very instance, which enables builder-style method chaining.
      */
-    public UIForSplitButton&lt;B&gt; onCancel( Action&lt;SimpleDelegate&lt;B, PopupMenuEvent&gt;&gt; action ) {
+    public UIForSplitButton&lt;B&gt; onCancel( Action&lt;ComponentDelegate&lt;B, PopupMenuEvent&gt;&gt; action ) {
 <span class="fc" id="L278">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="pc" id="L279">        _onPopupCancel( e -&gt; _doApp(()-&gt;action.accept(new SimpleDelegate&lt;&gt;( getComponent(), e, this::getSiblinghood )) ) );</span>
+<span class="pc" id="L279">        _onPopupCancel( e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( getComponent(), e, this::getSiblinghood )) ) );</span>
 <span class="fc" id="L280">        return this;</span>
     }
 
