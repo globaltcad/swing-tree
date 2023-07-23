@@ -1876,7 +1876,9 @@ public final class UI
     }
 
     /**
-     *  Use this to create a builder for the provided {@link JBox} instance.
+     *  Use this to create a builder for the provided {@link JBox} instance,
+     *  a generic component wrapper type which is transparent and without any insets
+     *  as well as with a {@link MigLayout} as its default layout manager.
      *
      * @return A builder instance for the provided {@link JBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
@@ -1887,29 +1889,37 @@ public final class UI
     }
 
     /**
-     *  Use this to create a builder for a transparent {@link JPanel} without any insets
-     *  based on a {@link MigLayout} as its layout manager.
+     *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
+     *  which is transparent and without any insets as well as with a {@link MigLayout}
+     *  as its layout manager.
      *  This factory method is especially useful for when you simply want to nest components
-     *  in a {@link JPanel} without having to worry about the layout manager or the background
-     *  color of the panel as it will be transparent and thus show the background of its parent.
-     *  This is in essence a convenience method for {@code UI.panel("ins 0").makeNonOpaque()}.
+     *  tightly without having to worry about the layout manager or the background
+     *  color covering the background of the parent component.
+     *  <br>
+     *  Note that you can also emulate the {@link JBox} type with a {@link JPanel} using
+     *  {@code UI.panel("ins 0").makeNonOpaque()}.
      *
-     * @return A builder instance for a transparent {@link JPanel}, which enables fluent method chaining.
+     * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.
      */
     public static UIForBox<JBox> box() { return of((JBox)new Box()).withLayout(new MigLayout("ins 0, hidemode 2")); }
 
     /**
-     *  Use this to create a builder for a transparent {@link JPanel} without any insets
-     *  and a {@link MigLayout} based on the provided constraints.
-     *  This is essentially a convenience method for the following: <br>
+     *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
+     *  which is transparent and without any insets as well as with a {@link MigLayout}
+     *  as its layout manager.
+     *  This factory method is especially useful for when you simply want to nest components
+     *  tightly without having to worry about the layout manager or the background
+     *  color covering the background of the parent component.
+     *  <br>
+     *  Note that you can also emulate the {@link JBox} type with a {@link JPanel} using
      *  <pre>{@code
-     *      UI.of(new JPanel(new MigLayout(attr, colConstraints, rowConstraints))).makeNonOpaque()
+     *      UI.panel(attr, colConstraints, rowConstraints).makeNonOpaque()
      *  }</pre>
      *  <br>
      * @param attr The layout attributes.
      * @param colConstraints The column constraints.
      * @param rowConstraints The row constraints.
-     * @return A builder instance for a transparent {@link JPanel}, which enables fluent method chaining.
+     * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.
      */
     public static UIForBox<JBox> box( String attr, String colConstraints, String rowConstraints ) {
         NullUtil.nullArgCheck(attr, "attr", String.class);
@@ -1944,10 +1954,7 @@ public final class UI
     /**
      *  Use this to create a builder for a {@link JBox}, conceptually the same as a
      *  transparent {@link JPanel} without any insets
-     *  This is essentially a convenience method for the following: <br>
-     *  <pre>{@code
-     *      UI.of(new JBox(new MigLayout(attr+", ins 0", colConstraints))).makeNonOpaque()
-     *  }</pre>
+     *  and a {@link MigLayout} constructed using the provided constraints.
      *  <br>
      * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
      * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
@@ -1962,12 +1969,13 @@ public final class UI
     }
 
     /**
-     *  Use this to create a builder for a transparent {@link JPanel} without any insets.
-     *  This is essentially a convenience method for the following: <br>
-     *  <pre>{@code
-     *      UI.of(new JBox(new MigLayout(attr+", ins 0", colConstraints))).makeNonOpaque()
-     *  }</pre>
-     *  <br>
+     *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
+     *  which is transparent and without any insets as well as with a {@link MigLayout}
+     *  as its layout manager.
+     *  This is conceptually the same as a
+     *  transparent {@link JPanel} without any insets
+     *  and a {@link MigLayout} constructed using the provided constraints.
+     *
      * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
      * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
      * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
@@ -1979,11 +1987,12 @@ public final class UI
     }
 
     /**
-     *  Use this to create a builder for a transparent {@link JBox} without any insets.
-     *  This is essentially a convenience method for the following: <br>
-     *  <pre>{@code
-     *      UI.of(new JBox(new MigLayout(attr+", ins 0"))).makeNonOpaque()
-     *  }</pre>
+     *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
+     *  which is transparent and without any insets as well as with a {@link MigLayout}
+     *  as its layout manager.
+     *  This is conceptually the same as a
+     *  transparent {@link JPanel} without any insets
+     *  and a {@link MigLayout} constructed using the provided constraints.
      *  <br>
      * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
      * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.
@@ -1991,14 +2000,22 @@ public final class UI
      */
     public static UIForBox<JBox> box( String attr ) {
         NullUtil.nullArgCheck(attr, "attr", String.class);
-        if (attr.isEmpty()) attr = "ins 0";
-        else if (!attr.contains("ins")) attr += ", ins 0";
+        if ( attr.isEmpty() ) attr = "ins 0";
+        else if ( !attr.contains("ins") ) attr += ", ins 0";
         return box().withLayout(attr);
     }
 
     /**
-     *  Use this to create a builder for a transparent {@link JBox} without any insets.
-     *  This is in essence a convenience method for {@code UI.box(attr.toString()+", ins 0").makeNonOpaque()}.
+     *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
+     *  which is transparent and without any insets as well as with a {@link MigLayout}
+     *  as its layout manager.
+     *  This is conceptually the same as a
+     *  transparent {@link JPanel} without any insets
+     *  and a {@link MigLayout} constructed using the provided constraints.
+     *  <br>
+     *  This method allows you to pass a {@link LayoutAttr} constants as the layout attributes,
+     *  which is an instance typically chosen from the {@link UI} class constants
+     *  like for example {@link UI#FILL}, {@link UI#FILL_X}, {@link UI#FILL_Y}...
      *
      * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
      * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
@@ -2010,11 +2027,18 @@ public final class UI
     }
 
     /**
-     *  Use this to create a builder for a {@link JBox}, conceptually the same as a
-     *  transparent {@link JPanel} without any insets.
-     *  dynamically updated set of {@link MigLayout} attributes.
-     *  This is in essence a convenience method for
-     *  {@code UI.of(new JPanel()).withLayout(attr.viewAsString( it -> it+", ins 0"))}.
+     *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
+     *  which is transparent and without any insets as well as with a {@link MigLayout}
+     *  as its layout manager.
+     *  This is conceptually the same as a
+     *  transparent {@link JPanel} without any insets
+     *  and a {@link MigLayout} constructed using the provided constraints.
+     *  This method allows you to dynamically determine the {@link LayoutAttr} constants
+     *  of the {@link MigLayout} instance, by passing a {@link Val} property which
+     *  will be observed and its value passed to the {@link MigLayout} constructor
+     *  whenever it changes.
+     *  This is in essence a convenience method for:
+     *  {@code UI.box().withLayout(attr.viewAsString( it -> it+", ins 0"))}.
      *
      * @param attr The layout attributes property which will be passed to the {@link MigLayout} constructor as first argument.
      * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.

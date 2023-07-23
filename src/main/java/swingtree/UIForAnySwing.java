@@ -2408,7 +2408,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
                 _doApp(() -> onDrag.accept(new ComponentDragEventDelegate<>(component, e, ()->getSiblinghood(), dragEventHistory)));
             }
         };
-
         component.addMouseListener(listener);
         component.addMouseMotionListener(listener);
         return _this();
