@@ -99,7 +99,7 @@ public class ComponentMouseEventDelegate<C extends JComponent> extends Component
 
     /**
      * Returns the absolute vertical y position of the event of this delegate.
-     * In a virtual device multi-screen environment in which the
+     * In a virtual device multiscreen environment in which the
      * desktop area could span multiple physical screen devices,
      * this coordinate is relative to the virtual coordinate system.
      * Otherwise, this coordinate is relative to the coordinate system

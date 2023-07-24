@@ -15,7 +15,7 @@ import java.awt.*;
  * <ul>
  *     <li>
  *         The <code>JBox</code> is transparent by default, meaning that it does
- *         not paint its background if it is not explicitly set through the st<le API.
+ *         not paint its background if it is not explicitly set through the style API.
  *     </li>
  *     <li> It does not have any insets by default. </li>
  * </ul>
