@@ -58,6 +58,8 @@ public final class ComponentExtension<C extends JComponent>
 
     private Color _initialBackgroundColor = null;
 
+    private Shape _mainClip = null;
+
 
     private ComponentExtension( C owner ) {
         _owner = Objects.requireNonNull(owner);
@@ -154,6 +156,10 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     private void _renderBaseStyle(Graphics g ) {
+
+        _mainClip = null;
+        _mainClip = g.getClip();
+
         _currentRenderer = _createRenderer();
         if ( _currentRenderer != null )
             _currentRenderer.renderBaseStyle((Graphics2D) g);
@@ -610,6 +616,8 @@ public final class ComponentExtension<C extends JComponent>
 
             // We remember the clip:
             Shape formerClip = g.getClip();
+
+            g.setClip(_compExt._mainClip);
 
             if ( _compExt._currentRenderer != null )
                 _compExt._currentRenderer.renderBorderStyle((Graphics2D) g);
