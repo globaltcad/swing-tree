@@ -19,7 +19,7 @@ import java.util.Optional;
 import java.util.StringTokenizer;
 
 /**
- *  A {@link SwingTreeContext} is a singleton that holds global state for the SwingTree library.
+ *  A {@link SwingTreeContext} is a singleton that holds global configuration for the SwingTree library.
  *  This includes the {@link EventProcessor} that is used to process events, as well as the
  *  {@link StyleSheet} that is used to style components.
  *
