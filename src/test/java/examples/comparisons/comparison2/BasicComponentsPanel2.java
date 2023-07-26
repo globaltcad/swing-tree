@@ -36,17 +36,6 @@ class BasicComponentsPanel2 extends JPanel
         iconsTextField = new JTextField();
         compsTextField = new JTextField();
         clearTextField = new JTextField();
-        JLabel h00Label = new JLabel();
-        JLabel h0Label = new JLabel();
-        JLabel h1Label = new JLabel();
-        JLabel h2Label = new JLabel();
-        JLabel h3Label = new JLabel();
-        JLabel h4Label = new JLabel();
-        JLabel lightLabel = new JLabel();
-        JLabel semiboldLabel = new JLabel();
-        JLabel fontZoomLabel = new JLabel();
-        JLabel largeLabel = new JLabel();
-        JLabel defaultLabel = new JLabel();
         JLabel mediumLabel = new JLabel();
         JLabel smallLabel = new JLabel();
         JLabel miniLabel = new JLabel();
@@ -233,62 +222,18 @@ class BasicComponentsPanel2 extends JPanel
         .add("cell 0 15, growx", UI.label("Leading/trailing comp.:"))
         .add("cell 1 15 2 1, growx", UI.of(compsTextField))
         .add("cell 3 15, growx", UI.of(clearTextField).withText("clear me"))
-        .add("cell 0 16", UI.label("Typography / Fonts:"));
-
-        //---- h00Label ----
-        h00Label.setText("H00");
-        h00Label.putClientProperty("FlatLaf.styleClass", "h00");
-        add(h00Label, "cell 1 16 5 1");
-
-        //---- h0Label ----
-        h0Label.setText("H0");
-        h0Label.putClientProperty("FlatLaf.styleClass", "h0");
-        add(h0Label, "cell 1 16 5 1");
-
-        //---- h1Label ----
-        h1Label.setText("H1");
-        h1Label.putClientProperty("FlatLaf.styleClass", "h1");
-        add(h1Label, "cell 1 16 5 1");
-
-        //---- h2Label ----
-        h2Label.setText("H2");
-        h2Label.putClientProperty("FlatLaf.styleClass", "h2");
-        add(h2Label, "cell 1 16 5 1");
-
-        //---- h3Label ----
-        h3Label.setText("H3");
-        h3Label.putClientProperty("FlatLaf.styleClass", "h3");
-        add(h3Label, "cell 1 16 5 1");
-
-        //---- h4Label ----
-        h4Label.setText("H4");
-        h4Label.putClientProperty("FlatLaf.styleClass", "h4");
-        add(h4Label, "cell 1 16 5 1");
-
-        //---- lightLabel ----
-        lightLabel.setText("light");
-        lightLabel.putClientProperty("FlatLaf.style", "font: 200% $light.font");
-        add(lightLabel, "cell 1 16 5 1,gapx 30");
-
-        //---- semiboldLabel ----
-        semiboldLabel.setText("semibold");
-        semiboldLabel.putClientProperty("FlatLaf.style", "font: 200% $semibold.font");
-        add(semiboldLabel, "cell 1 16 5 1");
-
-        //---- fontZoomLabel ----
-        fontZoomLabel.setText("(200%)");
-        fontZoomLabel.putClientProperty("FlatLaf.styleClass", "small");
-        fontZoomLabel.setEnabled(false);
-        add(fontZoomLabel, "cell 1 16 5 1");
-
-        //---- largeLabel ----
-        largeLabel.setText("large");
-        largeLabel.putClientProperty("FlatLaf.styleClass", "large");
-        add(largeLabel, "cell 1 17 5 1");
-
-        //---- defaultLabel ----
-        defaultLabel.setText("default");
-        add(defaultLabel, "cell 1 17 5 1");
+        .add("cell 0 16", UI.label("Typography / Fonts:").withProperty("FlatLaf.styleClass", "h00"))
+        .add("cell 1 16 5 1", UI.label("H00"))
+        .add("cell 1 16 5 1", UI.label("H0").withProperty("FlatLaf.styleClass", "h0"))
+        .add("cell 1 16 5 1", UI.label("H1").withProperty("FlatLaf.styleClass", "h1"))
+        .add("cell 1 16 5 1", UI.label("H2").withProperty("FlatLaf.styleClass", "h2"))
+        .add("cell 1 16 5 1", UI.label("H3").withProperty("FlatLaf.styleClass", "h3"))
+        .add("cell 1 16 5 1", UI.label("H4").withProperty("FlatLaf.styleClass", "h4"))
+        .add("cell 1 16 5 1,gapx 30", UI.label("light").withProperty("FatLaf.style", "font: 200% $light.font"))
+        .add("cell 1 16 5 1", UI.label("semibold").withProperty("FlatLaf.style", "font: 200% $semibold.font"))
+        .add("cell 1 16 5 1", UI.label("(200%)").withProperty("FlatLaf.styleClass", "small").isEnabledIf(false))
+        .add("cell 1 17 5 1", UI.label("large").withProperty("FlatLaf.styleClass", "large"))
+        .add("cell 1 17 5 1", UI.label("default"));
 
         //---- mediumLabel ----
         mediumLabel.setText("medium");
