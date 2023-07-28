@@ -14,7 +14,7 @@ import java.util.function.Function;
  *  the user to override the paint method of the component.
  *  This is especially important to allow for declarative UI.
  */
-public final class StyleRenderer<C extends JComponent>
+final class StylePainter<C extends JComponent>
 {
     static boolean DO_ANTIALIASING(){
         return UI.scale() < 1.5;
@@ -25,7 +25,7 @@ public final class StyleRenderer<C extends JComponent>
     private Area baseArea = null;
 
 
-    public StyleRenderer( C comp, Style style ) {
+    StylePainter(C comp, Style style ) {
         _comp = Objects.requireNonNull(comp);
         this.style = style;
     }
@@ -36,7 +36,7 @@ public final class StyleRenderer<C extends JComponent>
         return baseArea;
     }
 
-    public void renderBaseStyle( Graphics2D g2d )
+    public void renderBackgroundStyle(Graphics2D g2d )
     {
         baseArea = null;
 
@@ -60,7 +60,7 @@ public final class StyleRenderer<C extends JComponent>
             g2d.fill(_getBaseArea());
         });
 
-        _renderOn(Layer.BACKGROUND, g2d);
+        _paintStylesOn(Layer.BACKGROUND, g2d);
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
@@ -69,7 +69,7 @@ public final class StyleRenderer<C extends JComponent>
             g2d.setClip(_getBaseArea());
     }
 
-    private void _renderOn(Layer layer, Graphics2D g2d) {
+    private void _paintStylesOn( Layer layer, Graphics2D g2d ) {
         // Every layer has 3 things:
         // 1. Shades, which are simple gradient effects
         for ( ShadeStyle shade : style.shades(layer) ) {
@@ -94,7 +94,7 @@ public final class StyleRenderer<C extends JComponent>
         });
     }
 
-    public void renderBorderStyle(Graphics2D g2d) {
+    public void paintBorderStyle( Graphics2D g2d ) {
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
 
@@ -102,19 +102,19 @@ public final class StyleRenderer<C extends JComponent>
         if ( DO_ANTIALIASING() )
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
-        _renderOn(Layer.CONTENT, g2d);
+        _paintStylesOn(Layer.CONTENT, g2d);
 
         style.border().color().ifPresent( color -> {
             _drawBorder(style, color, g2d);
         });
 
-        _renderOn(Layer.BORDER, g2d);
+        _paintStylesOn(Layer.BORDER, g2d);
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    public void renderForegroundStyle(Graphics2D g2d)
+    public void paintForegroundStyle(Graphics2D g2d)
     {
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
@@ -127,7 +127,7 @@ public final class StyleRenderer<C extends JComponent>
         if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
             g2d.setFont( componentFont );
 
-        _renderOn(Layer.FOREGROUND, g2d);
+        _paintStylesOn(Layer.FOREGROUND, g2d);
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );

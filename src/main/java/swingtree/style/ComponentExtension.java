@@ -50,7 +50,7 @@ public final class ComponentExtension<C extends JComponent>
 
     private final List<String> _styleGroups = new ArrayList<>(0);
 
-    private StyleRenderer<C> _currentRenderer = null;
+    private StylePainter<C> _currentStylePainter = null;
     private ComponentUI _styleLaF = null;
     private ComponentUI _formerLaF = null;
     private Styler<C> _styling = Styler.none();
@@ -132,37 +132,37 @@ public final class ComponentExtension<C extends JComponent>
         };
     }
 
-    private StyleRenderer<C> _createRenderer() {
+    private StylePainter<C> _createStylePainter() {
         Style style = _applyStyleToComponentState(_calculateStyle());
-        return style.equals(Style.none()) ? null : new StyleRenderer<>(_owner, style);
+        return style.equals(Style.none()) ? null : new StylePainter<>(_owner, style);
     }
 
-    private Optional<StyleRenderer<C>> _getOrCreateRenderer() {
-        if ( _currentRenderer == null )
-            _currentRenderer = _createRenderer();
+    private Optional<StylePainter<C>> _getOrCreateStylePainter() {
+        if ( _currentStylePainter == null )
+            _currentStylePainter = _createStylePainter();
 
-        return Optional.ofNullable(_currentRenderer);
+        return Optional.ofNullable(_currentStylePainter);
     }
 
-    public void renderBaseStyle( Graphics g )
+    public void paintBackgroundStyle( Graphics g )
     {
         if ( _customLookAndFeelIsInstalled() )
             return; // We render through the custom installed UI!
 
         if ( _componentIsDeclaredInUI(_owner) )
-            _renderBaseStyle(g);
+            _paintBackground(g);
         else
-            _currentRenderer = null; // custom style rendering unfortunately not possible for this component :/
+            _currentStylePainter = null; // custom style rendering unfortunately not possible for this component :/
     }
 
-    private void _renderBaseStyle(Graphics g ) {
+    private void _paintBackground( Graphics g ) {
 
         _mainClip = null;
         _mainClip = g.getClip();
 
-        _currentRenderer = _createRenderer();
-        if ( _currentRenderer != null )
-            _currentRenderer.renderBaseStyle((Graphics2D) g);
+        _currentStylePainter = _createStylePainter();
+        if ( _currentStylePainter != null )
+            _currentStylePainter.renderBackgroundStyle( (Graphics2D) g );
     }
 
 
@@ -172,7 +172,7 @@ public final class ComponentExtension<C extends JComponent>
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
 
         // We enable antialiasing:
-        if ( StyleRenderer.DO_ANTIALIASING() )
+        if ( StylePainter.DO_ANTIALIASING() )
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         // Animations are last: they are rendered on top of everything else:
@@ -193,7 +193,7 @@ public final class ComponentExtension<C extends JComponent>
 
     }
 
-    public void renderForegroundStyle(Graphics2D g2d) {
+    public void paintForegroundStyle(Graphics2D g2d) {
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
         // Reset antialiasing to its previous state:
@@ -202,8 +202,8 @@ public final class ComponentExtension<C extends JComponent>
         // We remember the clip:
         Shape formerClip = g2d.getClip();
 
-        if ( _currentRenderer != null )
-            _currentRenderer.renderForegroundStyle(g2d);
+        if ( _currentStylePainter != null )
+            _currentStylePainter.paintForegroundStyle(g2d);
 
         // We restore the clip:
         if ( g2d.getClip() != formerClip )
@@ -624,8 +624,8 @@ public final class ComponentExtension<C extends JComponent>
 
             g.setClip(_compExt._mainClip);
 
-            if ( _compExt._currentRenderer != null )
-                _compExt._currentRenderer.renderBorderStyle((Graphics2D) g);
+            if ( _compExt._currentStylePainter != null )
+                _compExt._currentStylePainter.paintBorderStyle((Graphics2D) g);
             else if ( _formerBorder != null && !_borderWasNotPainted )
                 _formerBorder.paintBorder(c, g, x, y, width, height);
 
@@ -653,11 +653,11 @@ public final class ComponentExtension<C extends JComponent>
         }
 
         private Insets _calculateInsets() {
-            _currentMarginInsets = _compExt._getOrCreateRenderer()
+            _currentMarginInsets = _compExt._getOrCreateStylePainter()
                                             .map( r -> r.calculateMarginInsets() )
                                             .orElse(_currentMarginInsets);
 
-            return _compExt._getOrCreateRenderer()
+            return _compExt._getOrCreateStylePainter()
                             .map(r ->
                                 r.calculateBorderInsets(
                                     _formerBorder == null
@@ -683,7 +683,7 @@ public final class ComponentExtension<C extends JComponent>
 
         private PanelStyler() {}
 
-        @Override public void paint( Graphics g, JComponent c ) { ComponentExtension.from(c)._renderBaseStyle(g); }
+        @Override public void paint( Graphics g, JComponent c ) { ComponentExtension.from(c)._paintBackground(g); }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
         @Override
         public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
@@ -696,7 +696,7 @@ public final class ComponentExtension<C extends JComponent>
         ButtonStyler(ButtonUI formerUI) { _formerUI = formerUI; }
 
         @Override public void paint( Graphics g, JComponent c ) {
-            ComponentExtension.from(c)._renderBaseStyle(g);
+            ComponentExtension.from(c)._paintBackground(g);
             if ( _formerUI != null )
                 _formerUI.update(g, c);
         }
@@ -712,7 +712,7 @@ public final class ComponentExtension<C extends JComponent>
         private LabelStyler(LabelUI formerUI) { _formerUI = formerUI; }
 
         @Override public void paint( Graphics g, JComponent c ) {
-            ComponentExtension.from(c)._renderBaseStyle(g);
+            ComponentExtension.from(c)._paintBackground(g);
             if ( _formerUI != null )
                 _formerUI.update(g, c);
         }

@@ -26,19 +26,32 @@ public final class StyleDelegate<C extends JComponent>
     private final C _component;
     private final Style _style;
 
+
     public StyleDelegate( C component, Style style ) {
         _component = component;
         _style     = style;
     }
 
+    StyleDelegate<C> _withStyle( Style style ) { return new StyleDelegate<>(_component, style); }
+
+    /**
+     *  Returns the {@link JComponent} this {@link StyleDelegate} is defining a {@link Style} for.
+     *  This is useful if you want to make the styling of a component based on its state,
+     *  like for example determining the background color of a {@link JCheckBox} based on
+     *  whether it is selected or not...
+     * <p>
+     * @return The {@link JComponent} this {@link StyleDelegate} is for.
+     */
     public C component() { return _component; }
 
+    /**
+     *  Returns the {@link Style} this {@link StyleDelegate} is defining for the {@link JComponent}
+     *  returned by {@link #component()}.
+     * <p>
+     * @return The {@link Style} this {@link StyleDelegate} is for.
+     */
     public Style style() { return _style; }
-    
-    StyleDelegate<C> _withStyle( Style style ) {
-        return new StyleDelegate<>(_component, style);
-    }
-    
+
     /**
      *  Creates a new {@link Style} with the provided top, right, left and bottom margin distances.
      *  It determines the amount of space between the component's outer bounds and the beginning
