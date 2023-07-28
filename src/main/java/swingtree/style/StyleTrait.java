@@ -23,10 +23,10 @@ public final class StyleTrait<C extends JComponent>
     private final Class<C> _type;
 
     private StyleTrait( String name, String id, String[] inherits, Class<C> type ) {
-        _group = Objects.requireNonNull(name);
-        _id = Objects.requireNonNull(id);
+        _group     = Objects.requireNonNull(name);
+        _id        = Objects.requireNonNull(id);
         _toInherit = Objects.requireNonNull(inherits).clone();
-        _type = Objects.requireNonNull(type);
+        _type      = Objects.requireNonNull(type);
         // And we check for duplicates and throw an exception if we find any.
         for ( int i = 0; i < _toInherit.length - 1; i++ )
             if ( _toInherit[i].equals(_toInherit[i+1]) )
@@ -43,14 +43,14 @@ public final class StyleTrait<C extends JComponent>
 
     public <E extends Enum<E>> StyleTrait<C> group( E group ) {
         Objects.requireNonNull(group);
-        return group(group.getClass().getSimpleName() + "." + group.name());
+        return group(StyleUtility.toString(group));
     }
 
     public StyleTrait<C> id( String id ) { return new StyleTrait<>(_group, id, _toInherit, _type); }
 
     public <E extends Enum<E>> StyleTrait<C> id( E id ) {
         Objects.requireNonNull(id);
-        return id(id.getClass().getSimpleName() + "." + id.name());
+        return id(StyleUtility.toString(id));
     }
 
     public String id() { return _id; }
@@ -59,11 +59,12 @@ public final class StyleTrait<C extends JComponent>
 
     public StyleTrait<C> inherits( String... superGroups ) { return new StyleTrait<>(_group, _id, superGroups, _type ); }
 
-    public <E extends Enum<E>> StyleTrait<C> inherits( E... superGroups ) {
+    @SafeVarargs
+    public final <E extends Enum<E>> StyleTrait<C> inherits( E... superGroups ) {
         String[] superGroupNames = new String[superGroups.length];
         for ( int i = 0; i < superGroups.length; i++ ) {
             E superGroup = Objects.requireNonNull(superGroups[i]);
-            superGroupNames[i] = superGroup.getClass().getSimpleName() + "." + superGroup.name();
+            superGroupNames[i] = StyleUtility.toString(superGroup);
         }
         return inherits(superGroupNames);
     }
@@ -132,10 +133,10 @@ public final class StyleTrait<C extends JComponent>
             return false;
 
         StyleTrait<?> that = (StyleTrait<?>) other;
-        return this._group.equals(that._group) &&
-                this._id.equals(that._id) &&
-                this._type.equals(that._type) &&
-                java.util.Arrays.equals(this._toInherit, that._toInherit);
+        return _group.equals(that._group) &&
+               _id.equals(that._id) &&
+               _type.equals(that._type) &&
+                java.util.Arrays.equals(_toInherit, that._toInherit);
     }
 
 }

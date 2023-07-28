@@ -68,7 +68,7 @@ class Style_Sheet_Spec extends Specification
         given :
             var ss = new StyleSheet() {
                         @Override
-                        protected void build() {
+                        protected void configure() {
                              add(id("unique id!"), it ->
                                  it.borderRadius(3)
                              );
@@ -107,7 +107,7 @@ class Style_Sheet_Spec extends Specification
         given :
             var ss = new StyleSheet() {
                         @Override
-                        protected void build() {
+                        protected void configure() {
                             add(type(JTextField.class), it ->
                                     it.shadowBlurRadius(9)
                                 );
@@ -176,7 +176,7 @@ class Style_Sheet_Spec extends Specification
         given :
             var ss = new StyleSheet() {
                         @Override
-                        protected void build() {
+                        protected void configure() {
                              add(group("group1"), it ->
                                  it.backgroundColor(Color.BLUE)
                              );
@@ -211,7 +211,7 @@ class Style_Sheet_Spec extends Specification
         given :
             var ss = new StyleSheet() {
                         @Override
-                        protected void build() {
+                        protected void configure() {
                              add(group("group1"), it ->
                                  it.padding(1, 2, 3, 4)
                              );
@@ -245,7 +245,7 @@ class Style_Sheet_Spec extends Specification
         when :
             new StyleSheet() {
                @Override
-               protected void build() {
+               protected void configure() {
                     add(group("A").type(JButton.class), it ->
                         it.borderRadius(3)
                     );
@@ -268,7 +268,7 @@ class Style_Sheet_Spec extends Specification
         when :
             new StyleSheet() {
                @Override
-               protected void build() {
+               protected void configure() {
                     add(group("A"), it ->
                         it.borderRadius(3)
                     );
@@ -293,7 +293,7 @@ class Style_Sheet_Spec extends Specification
         given :
             var ss = new StyleSheet() {
                         @Override
-                        protected void build() {
+                        protected void configure() {
                             add(type(JComponent.class), it ->
                                  it
                                    .foundationColor(Color.RED)
@@ -398,7 +398,7 @@ class Style_Sheet_Spec extends Specification
         given :
             var ss = new StyleSheet() {
                 @Override
-                protected void build() {
+                protected void configure() {
                     add(group("A"), it ->
                         it.font("Arial", 12)
                     );
@@ -444,7 +444,7 @@ class Style_Sheet_Spec extends Specification
         given :
             var ss = new StyleSheet() {
                 @Override
-                protected void build() {
+                protected void configure() {
                     add(group("Gradient"), it ->
                         it.painter(Layer.BACKGROUND, g2d -> {
                             // Let's render a gradient:
@@ -504,7 +504,7 @@ class Style_Sheet_Spec extends Specification
         given :
             var ss = new StyleSheet() {
                 @Override
-                protected void build() {
+                protected void configure() {
                     add(group("A").inherits("B", "C"), it ->
                         it.borderShade( s -> s.strategy(ShadingStrategy.BOTTOM_TO_TOP).colors(Color.RED, Color.BLUE) )
                     );
@@ -562,7 +562,7 @@ class Style_Sheet_Spec extends Specification
         given :
             var ss = new StyleSheet() {
                 @Override
-                protected void build() {
+                protected void configure() {
                     add(group("A").inherits("E", "B", "C"), it ->
                         it.borderWidth(5)
                           .backgroundColor(Color.RED)

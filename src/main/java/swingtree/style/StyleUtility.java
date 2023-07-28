@@ -34,6 +34,9 @@ final class StyleUtility
         return "Painter@" + Integer.toHexString(Objects.hashCode(painter));
     }
 
+    static String toString( Enum<?> e ) {
+        return e.getClass().getSimpleName() + "." + e.name();
+    }
 
     /**
      *  Tries to parse the supplied string as a color value
@@ -144,21 +147,39 @@ final class StyleUtility
             return new Color(c.getRed(), c.getGreen(), c.getBlue(), (int)(a * 255));
         }
 
-        // Let's try a few common color names
-        if ( colorString.equalsIgnoreCase("black")       ) return Color.BLACK;
-        if ( colorString.equalsIgnoreCase("blue")        ) return Color.BLUE;
-        if ( colorString.equalsIgnoreCase("cyan")        ) return Color.CYAN;
-        if ( colorString.equalsIgnoreCase("darkGray")    ) return Color.DARK_GRAY;
-        if ( colorString.equalsIgnoreCase("gray")        ) return Color.GRAY;
-        if ( colorString.equalsIgnoreCase("green")       ) return Color.GREEN;
-        if ( colorString.equalsIgnoreCase("lightGray")   ) return Color.LIGHT_GRAY;
-        if ( colorString.equalsIgnoreCase("magenta")     ) return Color.MAGENTA;
-        if ( colorString.equalsIgnoreCase("orange")      ) return Color.ORANGE;
-        if ( colorString.equalsIgnoreCase("pink")        ) return Color.PINK;
-        if ( colorString.equalsIgnoreCase("red")         ) return Color.RED;
-        if ( colorString.equalsIgnoreCase("white")       ) return Color.WHITE;
-        if ( colorString.equalsIgnoreCase("yellow")      ) return Color.YELLOW;
-        if ( colorString.equalsIgnoreCase("transparent") ) return new Color(0, 0, 0, 0);
+        {
+            boolean transparent = false;
+
+            if ( colorString.trim().startsWith("transparent ") ) {
+                transparent = true;
+                colorString = colorString.substring(12);
+            }
+
+            Color color = null;
+
+            // Let's try a few common color names
+            if ( colorString.equalsIgnoreCase("black")       ) color = Color.BLACK;
+            if ( colorString.equalsIgnoreCase("blue")        ) color = Color.BLUE;
+            if ( colorString.equalsIgnoreCase("cyan")        ) color = Color.CYAN;
+            if ( colorString.equalsIgnoreCase("darkGray")    ) color = Color.DARK_GRAY;
+            if ( colorString.equalsIgnoreCase("gray")        ) color = Color.GRAY;
+            if ( colorString.equalsIgnoreCase("green")       ) color = Color.GREEN;
+            if ( colorString.equalsIgnoreCase("lightGray")   ) color = Color.LIGHT_GRAY;
+            if ( colorString.equalsIgnoreCase("magenta")     ) color = Color.MAGENTA;
+            if ( colorString.equalsIgnoreCase("orange")      ) color = Color.ORANGE;
+            if ( colorString.equalsIgnoreCase("pink")        ) color = Color.PINK;
+            if ( colorString.equalsIgnoreCase("red")         ) color = Color.RED;
+            if ( colorString.equalsIgnoreCase("white")       ) color = Color.WHITE;
+            if ( colorString.equalsIgnoreCase("yellow")      ) color = Color.YELLOW;
+            if ( colorString.equalsIgnoreCase("transparent") ) color = new Color(0, 0, 0, 0);
+
+            if ( color != null ) {
+                if ( transparent )
+                    return new Color(color.getRed(), color.getGreen(), color.getBlue(), 0);
+                else
+                    return color;
+            }
+        }
 
         // Let's try to find it as a system property
         try {

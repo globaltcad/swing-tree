@@ -29,7 +29,8 @@ public abstract class StyleSheet
         else
             _defaultStyle = c -> parentStyleSheet.run( c, Style.none() );
 
-        build();
+        configure(); // The subclass will add traits to this style sheet using the add(..) method.
+
         _buildTraitGraph();
     }
 
@@ -52,7 +53,33 @@ public abstract class StyleSheet
         _traitGraph.put(rule, new java.util.ArrayList<>());
     }
 
-    protected abstract void build();
+    /**
+     *  Override this method to configure the style sheet
+     *  by adding {@link StyleTrait}s and corresponding {@link Styler} lambdas
+     *  to the style sheet through the {@link #add(StyleTrait, Styler)} method. <br>
+     *  <br>
+     *  Example:
+     *  <pre>{@code
+     *  @Override
+     *  protected void configure() {
+     *      add(type(JComponent.class), it -> it
+     *        .backgroundColor(new Color(0.7f, 0.85f, 1f))
+     *        .padding(4)
+     *        .margin(5)
+     *      );
+     *      add(type(JButton.class), it -> it
+     *         .padding(12)
+     *         .margin(16)
+     *         .shade("default", shade -> shade
+     *             .strategy(ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT)
+     *             .colors(it.component().getBackground().brighter(), Color.CYAN)
+     *         )
+     *      );
+     *      // ...
+     *   }
+     * }</pre>
+     */
+    protected abstract void configure();
 
     public Style run( JComponent toBeStyled ) {
         return run(toBeStyled, _defaultStyle.apply(toBeStyled));

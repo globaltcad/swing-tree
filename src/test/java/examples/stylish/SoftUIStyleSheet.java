@@ -19,7 +19,7 @@ import java.awt.*;
 public class SoftUIStyleSheet extends StyleSheet
 {
     @Override
-    protected void build() {
+    protected void configure() {
         add(group(Soft.BASE), it -> it
             .borderRadius(20)
             .backgroundColor(new Color(0.4f, 0.85f, 1))
