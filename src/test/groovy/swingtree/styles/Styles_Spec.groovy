@@ -121,6 +121,12 @@ class Styles_Spec extends Specification
                                             "strikeThrough=true, color=rgba(255,0,255,255), backgroundColor=?, " +
                                             "selectionColor=rgba(0,255,255,255), transform=?, paint=?" +
                                         "], " +
+                                        "DimensionalityStyle[" +
+                                            "minWidth=?, minHeight=?, " +
+                                            "maxWidth=?, maxHeight=?, " +
+                                            "preferredWidth=?, preferredHeight=?, " +
+                                            "width=?, height=?" +
+                                        "], " +
                                         "ShadowStyle[" +
                                             "horizontalOffset=0, " +
                                             "verticalOffset=0, " +

@@ -1198,6 +1198,33 @@ public final class StyleDelegate<C extends JComponent>
     }
 
     /**
+     *  Defines the cursor type for this {@link JComponent} based on
+     *  the predefined {@link UI.Cursor} values. <br>
+     *  If you want to specify a custom cursor implementation,
+     *  use {@link #cursor(Cursor)} instead. <br>
+     *
+     * @param cursor The {@link UI.Cursor} value.
+     * @return A new {@link StyleDelegate} with the provided cursor type set to be later
+     */
+    public StyleDelegate<C> cursor( UI.Cursor cursor ) {
+        return _withStyle(_style._withCursor(cursor.toAWTCursor()));
+    }
+
+    /**
+     *  Defines the cursor type for this {@link JComponent} based on
+     *  the provided {@link Cursor} value. <br>
+     *  Use this method if you want to specify a custom cursor implementation,
+     *  in case you merely want to pick one of the many predefined {@link UI.Cursor} values,
+     *  use {@link #cursor(UI.Cursor)} instead. <br>
+     *
+     * @param cursor The {@link Cursor} value.
+     * @return A new {@link StyleDelegate} with the provided cursor type set to be later
+     */
+    public StyleDelegate<C> cursor( Cursor cursor ) {
+        return _withStyle(_style._withCursor(cursor));
+    }
+
+    /**
      * @return The current UI scale factor, which is used to scale the UI
      *         for high resolution displays (high dots-per-inch, or DPI).
      */

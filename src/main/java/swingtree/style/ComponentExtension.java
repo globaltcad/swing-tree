@@ -383,6 +383,11 @@ public final class ComponentExtension<C extends JComponent>
                         _owner.setFont( newFont );
                 });
 
+        style.cursor().ifPresent( cursor -> {
+            if ( !Objects.equals( _owner.getCursor(), cursor ) )
+                _owner.setCursor( cursor );
+        });
+
         if ( !onlyDimensionalityIsStyled ) {
             _installCustomBorderBasedStyleAndAnimationRenderer();
             _establishLookAndFeel(style);

@@ -41,10 +41,11 @@ public final class Style
                                             ForegroundStyle.none(),
                                             FontStyle.none(),
                                             DimensionalityStyle.none(),
+                                            null,
                                             Collections.singletonMap(StyleUtility.DEFAULT_KEY,ShadowStyle.none()),
                                             Collections.singletonMap(StyleUtility.DEFAULT_KEY + "_" + PainterStyle.none().layer().name(),PainterStyle.none()),
                                             Collections.singletonMap(StyleUtility.DEFAULT_KEY,ShadeStyle.none())
-                                        );
+    );
 
     public static Style none() { return _NONE; }
 
@@ -54,6 +55,7 @@ public final class Style
     private final ForegroundStyle           _foreground;
     private final FontStyle                 _font;
     private final DimensionalityStyle       _dimensionality;
+    private final Cursor                    _cursor;
     private final Map<String, ShadowStyle>  _shadows  = new TreeMap<>();
     private final Map<String, PainterStyle> _painters = new TreeMap<>();
     private final Map<String, ShadeStyle>   _shades   = new TreeMap<>();
@@ -62,15 +64,16 @@ public final class Style
 
 
     private Style(
-        LayoutStyle               layout,
-        BorderStyle               border,
-        BackgroundStyle           background,
-        ForegroundStyle           foreground,
-        FontStyle                 font,
-        DimensionalityStyle       dimensionality,
-        Map<String, ShadowStyle>  shadows,
-        Map<String, PainterStyle> painters,
-        Map<String, ShadeStyle>   shades
+            LayoutStyle               layout,
+            BorderStyle               border,
+            BackgroundStyle           background,
+            ForegroundStyle           foreground,
+            FontStyle                 font,
+            DimensionalityStyle       dimensionality,
+            Cursor                    cursor,
+            Map<String, ShadowStyle>  shadows,
+            Map<String, PainterStyle> painters,
+            Map<String, ShadeStyle>   shades
     ) {
         _layout         = layout;
         _border         = border;
@@ -78,31 +81,36 @@ public final class Style
         _foreground     = foreground;
         _font           = font;
         _dimensionality = dimensionality;
+        _cursor         = cursor;
         _shadows.putAll(shadows);
         _painters.putAll(painters);
         _shades.putAll(shades);
     }
 
     Style _withLayout( LayoutStyle layout ) {
-        return new Style(layout, _border, _background, _foreground, _font, _dimensionality, _shadows, _painters, _shades);
+        return new Style(layout, _border, _background, _foreground, _font, _dimensionality, _cursor, _shadows, _painters, _shades);
     }
     Style _withBorder( BorderStyle border ) {
-        return new Style(_layout, border, _background, _foreground, _font, _dimensionality, _shadows, _painters, _shades);
+        return new Style(_layout, border, _background, _foreground, _font, _dimensionality, _cursor, _shadows, _painters, _shades);
     }
     Style _withBackground( BackgroundStyle background ) {
-        return new Style(_layout, _border, background, _foreground, _font, _dimensionality, _shadows, _painters, _shades);
+        return new Style(_layout, _border, background, _foreground, _font, _dimensionality, _cursor, _shadows, _painters, _shades);
     }
     Style _withForeground( ForegroundStyle foreground ) {
-        return new Style(_layout, _border, _background, foreground, _font, _dimensionality, _shadows, _painters, _shades);
+        return new Style(_layout, _border, _background, foreground, _font, _dimensionality, _cursor, _shadows, _painters, _shades);
     }
     Style _withFont( FontStyle font ) {
-        return new Style(_layout, _border, _background, _foreground, font, _dimensionality, _shadows, _painters, _shades);
+        return new Style(_layout, _border, _background, _foreground, font, _dimensionality, _cursor, _shadows, _painters, _shades);
     }
     Style _withDimensionality( DimensionalityStyle dimensionality ) {
-        return new Style(_layout, _border, _background, _foreground, _font, dimensionality, _shadows, _painters, _shades);
+        return new Style(_layout, _border, _background, _foreground, _font, dimensionality, _cursor, _shadows, _painters, _shades);
     }
+    Style _withCursor( Cursor cursor ) {
+        return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, cursor, _shadows, _painters, _shades);
+    }
+
     Style _withShadow( Map<String, ShadowStyle> shadows ) {
-        return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, shadows, _painters, _shades);
+        return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, _cursor, shadows, _painters, _shades);
     }
     Style _withShadow( Function<ShadowStyle, ShadowStyle> styler ) {
         // A new map is created where all the styler is applied to all the values:
@@ -124,6 +132,8 @@ public final class Style
     public ForegroundStyle foreground() { return _foreground; }
 
     public DimensionalityStyle dimensionality() { return _dimensionality; }
+
+    public Optional<Cursor> cursor() { return Optional.ofNullable(_cursor); }
 
     /**
      * @return The default shadow style.
@@ -219,12 +229,12 @@ public final class Style
 
     Style painter( Map<String, PainterStyle> painters ) {
         Objects.requireNonNull(painters);
-        return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, _shadows, painters, _shades);
+        return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, _cursor, _shadows, painters, _shades);
     }
 
     Style shade( Map<String, ShadeStyle> shades ) {
         Objects.requireNonNull(shades);
-        return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, _shadows, _painters, shades);
+        return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, _cursor, _shadows, _painters, shades);
     }
 
     Style shade( String shadeName, Function<ShadeStyle, ShadeStyle> styler ) {
@@ -255,6 +265,7 @@ public final class Style
                     _foreground,
                     _font._scale(scale),
                     _dimensionality._scale(scale),
+                    _cursor,
                     _shadows.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue()._scale(scale))),
                     _painters,
                     _shades
@@ -264,9 +275,8 @@ public final class Style
     @Override
     public int hashCode() {
         return Objects.hash(
-                _layout, _border, _background, _foreground, _font,
-                StyleUtility.mapHash(_shadows), StyleUtility.mapHash(_painters), StyleUtility.mapHash(_shades),
-                _dimensionality
+                _layout, _border, _background, _foreground, _font, _dimensionality, _cursor,
+                StyleUtility.mapHash(_shadows), StyleUtility.mapHash(_painters), StyleUtility.mapHash(_shades)
             );
     }
 
@@ -294,6 +304,10 @@ public final class Style
         return Objects.equals(_dimensionality, otherStyle._dimensionality);
     }
 
+    boolean hasEqualCursorAs( Style otherStyle ) {
+        return Objects.equals(_cursor, otherStyle._cursor);
+    }
+
     boolean hasEqualShadowsAs( Style otherStyle ) {
         return StyleUtility.mapEquals(_shadows, otherStyle._shadows);
     }
@@ -318,6 +332,7 @@ public final class Style
                hasEqualForegroundAs(other)     &&
                hasEqualFontAs(other)           &&
                hasEqualDimensionalityAs(other) &&
+               hasEqualCursorAs(other)         &&
                hasEqualShadowsAs(other)        &&
                hasEqualPaintersAs(other)       &&
                hasEqualShadesAs(other);
@@ -353,13 +368,15 @@ public final class Style
                     .collect(Collectors.joining(", ", "shades=[", "]"));
 
         return "Style[" +
-                    _layout       + ", " +
-                    _border       + ", " +
-                    _background   + ", " +
-                    _foreground   + ", " +
-                    _font         + ", " +
-                    shadowString  + ", " +
-                    painterString + ", " +
+                    _layout         + ", " +
+                    _border         + ", " +
+                    _background     + ", " +
+                    _foreground     + ", " +
+                    _font           + ", " +
+                    _dimensionality + ", " +
+                    ( _cursor == null ? "" : _cursor ) +
+                    shadowString    + ", " +
+                    painterString   + ", " +
                     shadeString +
                 "]";
     }

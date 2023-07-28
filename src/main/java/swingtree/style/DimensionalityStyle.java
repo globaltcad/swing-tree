@@ -110,24 +110,17 @@ public final class DimensionalityStyle
 
     @Override
     public String toString() {
-        return String.format(
+        return
             "DimensionalityStyle[" +
-                    "minWidth=%s, " +
-                    "minHeight=%s, " +
-                    "maxWidth=%s, " +
-                    "maxHeight=%s, " +
-                    "preferredWidth=%s, " +
-                    "preferredHeight=%s," +
-                    "width=%s," +
-                    "height=%s" +
-                "]",
-                (_minWidth        == null ? "?" : _minWidth        ),
-                (_minHeight       == null ? "?" : _minHeight       ),
-                (_maxWidth        == null ? "?" : _maxWidth        ),
-                (_maxHeight       == null ? "?" : _maxHeight       ),
-                (_preferredWidth  == null ? "?" : _preferredWidth  ),
-                (_preferredHeight == null ? "?" : _preferredHeight )
-        );
+                    "minWidth="        + (_minWidth        == null ? "?" : _minWidth        ) + ", " +
+                    "minHeight="       + (_minHeight       == null ? "?" : _minHeight       ) + ", " +
+                    "maxWidth="        + (_maxWidth        == null ? "?" : _maxWidth        ) + ", " +
+                    "maxHeight="       + (_maxHeight       == null ? "?" : _maxHeight       ) + ", " +
+                    "preferredWidth="  + (_preferredWidth  == null ? "?" : _preferredWidth  ) + ", " +
+                    "preferredHeight=" + (_preferredHeight == null ? "?" : _preferredHeight ) + ", " +
+                    "width="           + (_width           == null ? "?" : _width           ) + ", " +
+                    "height="          + (_height          == null ? "?" : _height          ) +
+                "]";
     }
 
     @Override

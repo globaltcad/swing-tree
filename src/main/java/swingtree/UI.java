@@ -329,6 +329,8 @@ public final class UI
         final int type;
 
         Cursor( int type ) { this.type = type; }
+
+        public java.awt.Cursor toAWTCursor() { return java.awt.Cursor.getPredefinedCursor(type); }
     }
 
     /**
