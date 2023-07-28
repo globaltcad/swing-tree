@@ -1,5 +1,6 @@
 package examples.stylish;
 
+import swingtree.UI;
 import swingtree.style.Edge;
 import swingtree.style.ShadingStrategy;
 import swingtree.style.StyleSheet;
@@ -80,6 +81,7 @@ public class SoftUIStyleSheet extends StyleSheet
                 .strategy(ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT)
                 .colors(gradientColorsFor(it.component()))
             )
+            .cursor(UI.Cursor.HAND)
         );
         add(group(Soft.SINK).inherits(Soft.BASE), it -> it
             .foundationColor(new Color(0.4f, 0.85f, 1))
@@ -131,15 +133,22 @@ public class SoftUIStyleSheet extends StyleSheet
 
         add(type(JComboBox.class).inherits(Soft.SLIM), it -> it
             .padding(4)
+            .cursor(UI.Cursor.HAND)
         );
         add(type(JCheckBox.class).inherits(Soft.SLIM), it -> it
             .padding(6)
+            .cursor(UI.Cursor.HAND)
         );
         add(type(JRadioButton.class).inherits(Soft.SLIM), it -> it
             .padding(6)
+            .cursor(UI.Cursor.HAND)
         );
         add(type(JSpinner.class).inherits(Soft.SLIM), it -> it
             .padding(4)
+            .cursor(UI.Cursor.HAND)
+        );
+        add(type(JSlider.class), it -> it
+            .cursor(UI.Cursor.HAND)
         );
         add(type(JProgressBar.class).inherits(Soft.SLIM), it -> it
             .padding(0)
