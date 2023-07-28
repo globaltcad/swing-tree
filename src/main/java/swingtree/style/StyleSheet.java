@@ -37,9 +37,11 @@ public abstract class StyleSheet
 
     protected StyleTrait<JComponent> group( String name ) { return new StyleTrait<>().group(name); }
 
+    protected <E extends Enum<E>> StyleTrait<JComponent> group( E group ) { return new StyleTrait<>().group(group); }
+
     protected <C extends JComponent> StyleTrait<C> type( Class<C> type ) { return new StyleTrait<>().type(type); }
 
-    protected <C extends JComponent> void add(StyleTrait<C> rule, Styler<C> traitStyler ) {
+    protected <C extends JComponent> void add( StyleTrait<C> rule, Styler<C> traitStyler ) {
         // First let's make sure the trait does not already exist.
         if ( _traitStylers.containsKey(rule) )
             throw new IllegalArgumentException("The trait " + rule.group() + " already exists in this style sheet.");
