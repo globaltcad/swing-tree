@@ -434,15 +434,18 @@ public final class StyleDelegate<C extends JComponent>
      *  Here is an example of how to use this method:
      *  <pre>{@code
      *    UI.panel()
-     *    .withStyle( it ->
-     *      it.borderShade( shade -> shade.colors("#000000", "#000000").strategy(ShadeStrategy.TOP_TO_BOTTOM) )
+     *    .withStyle( it -> it
+     *      .borderShade( grad -> grad
+     *        .colors("#000000", "#000000")
+     *        .align(GradientAlignment.TOP_TO_BOTTOM)
+     *      )
      *    )
      * }</pre>
      *
      * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
      * @return A new {@link StyleDelegate} with a border shade defined by the provided styler lambda.
      */
-    public StyleDelegate<C> borderShade( Function<GradientStyle, GradientStyle> styler ) {
+    public StyleDelegate<C> borderGradient(Function<GradientStyle, GradientStyle> styler ) {
         Objects.requireNonNull(styler);
         return _withStyle(_style._withBorder(_style.border().gradient(StyleUtility.DEFAULT_KEY, styler)));
     }
@@ -453,10 +456,15 @@ public final class StyleDelegate<C extends JComponent>
      *  Here is an example of how to use this method:
      *  <pre>{@code
      *    UI.panel()
-     *    .withStyle( it ->
-     *      it
-     *      .borderShade("dark shading", shade -> shade.colors("#000000", "#000000").strategy(ShadeStrategy.TOP_TO_BOTTOM)))
-     *      .borderShade("light shading", shade -> shade.colors("#ffffff", "#ffffff").strategy(ShadeStrategy.TOP_TO_BOTTOM)))
+     *    .withStyle( it -> it
+     *      .borderGradient("dark shading", grad -> grad
+     *        .colors("#000000", "#000000")
+     *        .align(GradientAlignment.TOP_TO_BOTTOM)
+     *      )
+     *      .borderGradient("light shading", grad -> grad
+     *        .colors("#ffffff", "#ffffff")
+     *        .align(GradientAlignment.TOP_TO_BOTTOM)
+     *      )
      *    )
      * }</pre>
      * Note that the border shades will be rendered in alphabetical order based on the name of the shade.
@@ -465,7 +473,7 @@ public final class StyleDelegate<C extends JComponent>
      * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
      * @return A new {@link StyleDelegate} with a named border shade defined by the provided styler lambda.
      */
-    public StyleDelegate<C> borderShade( String shadeName, Function<GradientStyle, GradientStyle> styler ) {
+    public StyleDelegate<C> borderGradient( String shadeName, Function<GradientStyle, GradientStyle> styler ) {
         Objects.requireNonNull(shadeName);
         Objects.requireNonNull(styler);
         return _withStyle(_style._withBorder(_style.border().gradient(shadeName, styler)));
@@ -761,8 +769,14 @@ public final class StyleDelegate<C extends JComponent>
      *    UI.panel()
      *    .withStyle( it ->
      *      it
-     *      .gradient("dark shading", shade -> shade.colors("#000000", "#000000").strategy(ShadeStrategy.TOP_TO_BOTTOM)))
-     *      .gradient("light shading", shade -> shade.colors("#ffffff", "#ffffff").strategy(ShadeStrategy.TOP_TO_BOTTOM)))
+     *      .gradient("dark shading", grad -> grad
+     *        .colors("#000000", "#000000")
+     *        .align(GradientAlignment.TOP_TO_BOTTOM)
+     *      )
+     *      .gradient("light shading", grad -> grad
+     *        .colors("#ffffff", "#ffffff")
+     *        .align(GradientAlignment.TOP_TO_BOTTOM))
+     *      )
      *    )
      * }</pre>
      * Note that the background shades will be rendered in alphabetical order based on the name of the shade.

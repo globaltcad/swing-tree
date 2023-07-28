@@ -297,7 +297,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .padding(30)
                         .margin(22)
                         .border(15, Color.CYAN)
-                        .borderShade( s -> s
+                        .borderGradient(s -> s
                             .align(GradientAlignment.BOTTOM_RIGHT_TO_TOP_LEFT)
                             .colors(Color.YELLOW, new Color(255,255,255,0))
                         )

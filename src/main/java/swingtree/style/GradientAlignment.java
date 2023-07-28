@@ -3,11 +3,10 @@ package swingtree.style;
 import java.util.function.Function;
 
 /**
- *  Use these enum instances to specify the shading strategy for various sub styles,
+ *  Use these enum instances to specify the gradient alignment for various sub styles,
  *  like for example {@link BackgroundStyle} or {@link BorderStyle} through the
  *  {@link GradientStyle#align(GradientAlignment)} method exposed by methods like
- *  {@link Style#backgroundShade(Function)}, {@link Style#backgroundShade(String, Function)}
- *  or {@link Style#borderShade(Function)}, {@link Style#borderShade(String, Function)}.
+ *  {@link StyleDelegate#gradient(String, Function)} or {@link StyleDelegate#borderGradient(String, Function)}.
  */
 public enum GradientAlignment
 {

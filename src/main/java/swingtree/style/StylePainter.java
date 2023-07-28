@@ -820,7 +820,7 @@ final class StylePainter<C extends JComponent>
             diagonalCorner2Y = realY;
         }
         else
-            throw new IllegalArgumentException("Invalid shading strategy: " + type);
+            throw new IllegalArgumentException("Invalid gradient alignment: " + type);
 
         int diagonalCenterX = (diagonalCorner1X + diagonalCorner2X) / 2;
         int diagonalCenterY = (diagonalCorner1Y + diagonalCorner2Y) / 2;
@@ -916,7 +916,7 @@ final class StylePainter<C extends JComponent>
             corner2X = realX;
             corner2Y = realY;
         }
-        else throw new IllegalArgumentException("Unknown shading strategy: " + type);
+        else throw new IllegalArgumentException("Unknown gradient alignment: " + type);
 
         if ( colors.length == 2 )
             g2d.setPaint(

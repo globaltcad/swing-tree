@@ -505,7 +505,7 @@ class Style_Sheet_Spec extends Specification
                 @Override
                 protected void configure() {
                     add(group("A").inherits("B", "C"), it -> it
-                        .borderShade( s -> s
+                        .borderGradient(s -> s
                             .align(GradientAlignment.BOTTOM_TO_TOP)
                              .colors(Color.RED, Color.BLUE)
                         )
@@ -517,7 +517,7 @@ class Style_Sheet_Spec extends Specification
                     add(group("C"), it -> it
                         .borderWidth(20)
                         .borderColor(Color.YELLOW)
-                        .borderShade("named shade", s -> s
+                        .borderGradient("named shade", s -> s
                              .align(GradientAlignment.TOP_TO_BOTTOM)
                              .colors(Color.CYAN, Color.MAGENTA)
                         )
@@ -569,7 +569,7 @@ class Style_Sheet_Spec extends Specification
                     add(group("A").inherits("E", "B", "C"), it -> it
                         .borderWidth(5)
                         .backgroundColor(Color.RED)
-                        .borderShade( s -> s
+                        .borderGradient(s -> s
                             .align(GradientAlignment.BOTTOM_TO_TOP)
                             .colors(Color.RED, Color.BLUE)
                         )
