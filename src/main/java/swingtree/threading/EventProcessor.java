@@ -1,7 +1,5 @@
 package swingtree.threading;
 
-import swingtree.UI;
-
 /**
  * 	One of Swing's biggest drawback is that it is single threaded. This means that all
  * 	GUI events are processed on the same thread as the application logic. <br>
@@ -51,13 +49,14 @@ public interface EventProcessor
 	 *  {@link DecoupledEventProcessor#join()} at {@link EventProcessor#DECOUPLED}
 	 *  when using this processor, otherwise events will not be handled.
 	 */
-	EventProcessor COUPLED = new CoupledEventProcessor();
+	EventProcessor COUPLED = new LenientAWTEventProcessor();
 	/**
 	 *  This event processor runs the events immediately on the GUI thread.
 	 *  If the current thread is the GUI thread, the events are executed immediately,
-	 *  otherwise an exception is thrown.
+	 *  otherwise an exception is thrown, and it's stack trace is printed
+	 *  (but the application will not crash).
 	 */
-	EventProcessor COUPLED_STRICT = new AWTOnlyEventProcessor();
+	EventProcessor COUPLED_STRICT = new AWTEventProcessor();
 	/**
 	 *  This event processor makes a distinction between application events and UI events.
 	 *  Application events are executed on the application thread, whereas UI events are
@@ -73,7 +72,7 @@ public interface EventProcessor
 	 *
 	 * @param runnable The task to be executed in the application thread.
 	 */
-	void registerAppEvent(Runnable runnable);
+	void registerAppEvent( Runnable runnable );
 
 	/**
 	 *   Adds the supplied task to an event queue for processing application events
