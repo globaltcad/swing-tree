@@ -215,7 +215,7 @@ public final class ComponentExtension<C extends JComponent>
 
     private Style _calculateStyle() {
         _styleSheet = _styleSheet != null ? _styleSheet : SwingTreeContext.get().getStyleSheet().orElse(null);
-        Style style = _styleSheet == null ? Style.none() : _styleSheet.run( _owner );
+        Style style = _styleSheet == null ? Style.none() : _styleSheet.applyTo( _owner );
         style = _styling.style(new StyleDelegate<>(_owner, style)).style();
 
         // Animations styles are last: they override everything else:

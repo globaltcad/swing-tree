@@ -3,7 +3,6 @@ package swingtree.style;
 import javax.swing.*;
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  *  An abstract class that can be extended to create custom style sheets for
@@ -27,21 +26,109 @@ public abstract class StyleSheet
         if ( parentStyleSheet == null )
             _defaultStyle = c -> Style.none();
         else
-            _defaultStyle = c -> parentStyleSheet.run( c, Style.none() );
+            _defaultStyle = c -> parentStyleSheet.applyTo( c, Style.none() );
 
         configure(); // The subclass will add traits to this style sheet using the add(..) method.
 
         _buildTraitGraph();
     }
 
+    /**
+     *  A factory method for a {@link StyleTrait} targeting components
+     *  with the given id/name (see {@link JComponent#setName(String)}).
+     *  This is intended to be used in the {@link #configure()} method of the style sheet.
+     *  Note that this method does not set the id/name of the component, it expects there to be a component with
+     *  the given id/name already in the component hierarchy so that a corresponding {@link Styler} lambda can be applied to it.
+     *  <br><br>
+     *  This is intended to be used in the {@link #configure()} method of the style sheet. <br>
+     *  Here an example of how to use this method in the {@link #configure()} method:
+     *  <pre>{@code
+     *      add(id("myButton"), it -> it.backgroundColor(Color.RED));
+     *  }</pre>
+     *
+     * @param id The id/name of the component to target.
+     * @return A {@link StyleTrait} targeting components with the given id/name.
+     */
     protected StyleTrait<JComponent> id( String id ) { return new StyleTrait<>().id(id); }
 
-    protected StyleTrait<JComponent> group( String name ) { return new StyleTrait<>().group(name); }
+    /**
+     *  A factory method for a {@link StyleTrait} targeting components
+     *  belonging to the given string group (see {@link swingtree.UIForAnySwing#group(String...)}.
+     *  A group is conceptually similar to a CSS class, meaning that you can add a group to any component
+     *  and then target all components belonging to that group with a single {@link StyleTrait}.
+     *  Note that this method does not add the group to any component, it expects there to be a component with
+     *  the given group already in the component hierarchy so that a corresponding {@link Styler} lambda can be applied to it.
+     *  <br><br>
+     *  This is intended to be used in the {@link #configure()} method of the style sheet. <br>
+     *  Here an example of how to use this method in the {@link #configure()} method:
+     *  <pre>{@code
+     *      add(group("myGroup"), it -> it.backgroundColor(Color.RED));
+     *  }</pre>
+     *  <b>Although using {@link String}s is a convenient way of grouping components,
+     *  it is not ideal with respect to compile time safety. Please use {@link #group(Enum)} and {@link swingtree.UIForAnySwing#group(Enum[])}
+     *  instead...</b>
+     *
+     * @param group The group to target in the form of a string.
+     * @return A {@link StyleTrait} targeting components belonging to the given group.
+     */
+    protected StyleTrait<JComponent> group( String group ) { return new StyleTrait<>().group(group); }
 
+    /**
+     *  A factory method for a {@link StyleTrait} targeting components
+     *  belonging to the given enum group (see {@link swingtree.UIForAnySwing#group(Enum...)}.
+     *  A group is conceptually similar to a CSS class, meaning that you can add a group to any component
+     *  and then target all components belonging to that group with a single {@link StyleTrait}.
+     *  Note that this method does not add the group to any component, it expects there to be a component with
+     *  the given group already in the component hierarchy so that a corresponding {@link Styler} lambda can be applied to it.
+     *  <br><br>
+     *  This is intended to be used in the {@link #configure()} method of the style sheet. <br>
+     *  Here an example of how to use this method in the {@link #configure()} method:
+     *  <pre>{@code
+     *      add(group(Group.ERROR), it -> it.backgroundColor(Color.RED));
+     *  }</pre>
+     *
+     * @param group The group to target in the form of an enum.
+     * @return A {@link StyleTrait} targeting components belonging to the given group.
+     */
     protected <E extends Enum<E>> StyleTrait<JComponent> group( E group ) { return new StyleTrait<>().group(group); }
 
+    /**
+     *  A factory method for a {@link StyleTrait} targeting components
+     *  which are of a given type (see {@link JComponent#getClass()}.
+     *  Note that this method does not set the type of any component, it expects there to be a component of
+     *  the given type already in the component hierarchy so that a corresponding {@link Styler} lambda can be applied to it.
+     *  <br><br>
+     *  This is intended to be used in the {@link #configure()} method of the style sheet. <br>
+     *  Here an example of how to use this method in the {@link #configure()} method:
+     *  <pre>{@code
+     *      add(type(JButton.class), it -> it.backgroundColor(Color.RED));
+     *  }</pre>
+     *
+     * @param type The type of the component to target.
+     * @return A {@link StyleTrait} targeting components of the given type.
+     */
     protected <C extends JComponent> StyleTrait<C> type( Class<C> type ) { return new StyleTrait<>().type(type); }
 
+    /**
+     *  Use this to register style rules in you {@link #configure()} implementation by providing a {@link StyleTrait}
+     *  targeting the components you want to style (see {@link #id(String)}, {@link #group(String)}, {@link #group(Enum)}, {@link #type(Class)}),
+     *  and a corresponding {@link Styler} lambda which will be applied to the components targeted by the {@link StyleTrait}.
+     *  <br><br>
+     *  Here an example of how to use this method in the {@link #configure()} method:
+     *  <pre>{@code
+     *  @Override
+     *  protected void configure() {
+     *      add(id("arial-button"), it -> it.font(new Font("Arial", Font.BOLD, 12)));
+     *      add(type(JButton).group("FooBar"), it -> it.borderRadius(5));
+     *      add(group(Group.ERROR), it -> it.backgroundColor(Color.RED));
+     *      // ...
+     *  }
+     *  }</pre>
+     *
+     * @param rule The {@link StyleTrait} targeting the components you want to style.
+     * @param traitStyler The {@link Styler} lambda which will be applied to the components targeted by the {@link StyleTrait}.
+     * @param <C> The type of the components targeted by the {@link StyleTrait}.
+     */
     protected <C extends JComponent> void add( StyleTrait<C> rule, Styler<C> traitStyler ) {
         // First let's make sure the trait does not already exist.
         if ( _traitStylers.containsKey(rule) )
@@ -81,11 +168,38 @@ public abstract class StyleSheet
      */
     protected abstract void configure();
 
-    public Style run( JComponent toBeStyled ) {
-        return run(toBeStyled, _defaultStyle.apply(toBeStyled));
-    }
+    /**
+     *  Applies the style sheet to the given component.
+     *  Note that the style sheet is already configured at this point,
+     *  because the {@link #configure()} method is called in the constructor of the style sheet.
+     *  <br><br>
+     *  Example:
+     *  <pre>{@code
+     *      MyStyleSheet styleSheet = new MyStyleSheet();
+     *      JComboBox<String> comboBox = new JComboBox<>();
+     *      styleSheet.applyTo(comboBox);
+     * }</pre>
+     *
+     * @param toBeStyled The component to apply the style sheet to.
+     */
+    public Style applyTo( JComponent toBeStyled ) { return applyTo( toBeStyled, _defaultStyle.apply(toBeStyled) ); }
 
-    public Style run( JComponent toBeStyled, Style startingStyle ) {
+    /**
+     *  Applies the style sheet to the given component using a starting {@link Style}.
+     *  Note that the style sheet is already configured at this point,
+     *  because the {@link #configure()} method is called in the constructor of the style sheet.
+     *  <br><br>
+     *  Example:
+     *  <pre>{@code
+     *      MyStyleSheet styleSheet = new MyStyleSheet();
+     *      JComboBox<String> comboBox = new JComboBox<>();
+     *      styleSheet.applyTo(comboBox, Style.none());
+     * }</pre>
+     *
+     * @param toBeStyled The component to apply the style sheet to.
+     * @param startingStyle The {@link Style} to start with when applying the style sheet.
+     */
+    Style applyTo( JComponent toBeStyled, Style startingStyle ) {
         if ( !_traitGraphBuilt )
             throw new IllegalStateException("The trait graph has not been built yet.");
 
@@ -120,7 +234,7 @@ public abstract class StyleSheet
                         if ( index >= 0 ) {
                             StyleTrait current = validTraitPath.get(index);
                             if ( !subToSuper.contains(current) && current.group().equals(inheritedTrait) )
-                                lastAdded = merge(current, lastAdded, subToSuper, inheritedTraits);
+                                lastAdded = _merge(current, lastAdded, subToSuper, inheritedTraits);
                         }
                     }
                 }
@@ -130,7 +244,7 @@ public abstract class StyleSheet
                 if ( index >= 0 ) {
                     StyleTrait trait = validTraitPath.get(index);
                     if ( !subToSuper.contains(trait) )
-                        lastAdded = merge(trait, lastAdded, subToSuper, inheritedTraits);
+                        lastAdded = _merge(trait, lastAdded, subToSuper, inheritedTraits);
                 }
             }
         }
@@ -144,12 +258,11 @@ public abstract class StyleSheet
         return startingStyle;
     }
 
-    private StyleTrait merge(
-            StyleTrait currentTrait,
-            StyleTrait lastAdded,
-            List<StyleTrait> subToSuper,
-            List<String> inheritedTraits
-
+    private StyleTrait _merge(
+        StyleTrait currentTrait,
+        StyleTrait lastAdded,
+        List<StyleTrait> subToSuper,
+        List<String> inheritedTraits
     ) {
         boolean lastIsSuper = lastAdded != null && lastAdded.group().isEmpty() && !lastAdded.thisInherits(currentTrait);
         if ( lastIsSuper )

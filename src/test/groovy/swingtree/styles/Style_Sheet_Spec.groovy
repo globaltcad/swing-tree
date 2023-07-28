@@ -30,7 +30,7 @@ import java.awt.*
     ```java
         class MyStyleSheet {
            @Override
-           protected void build() {
+           protected void configure() {
                 add(id("some unique id!"), it -> it
                     .borderRadius(3)
                 );
@@ -43,7 +43,7 @@ import java.awt.*
             }
         }
     ```
-    You can then easily apply this style sheet to you SinwgTree views like so:
+    You can then easily apply this style sheet to you SwingTree views like so:
     ```java
         UI.use(new MyStyleSheet(), () -> new MyView());
     ```
@@ -85,9 +85,9 @@ class Style_Sheet_Spec extends Specification
             var button2 = UI.button("wassup?")
             var panel = UI.panel()
         when :
-            var s1 = ss.run(button.component)
-            var s2 = ss.run(button2.component)
-            var s3 = ss.run(panel.component)
+            var s1 = ss.applyTo(button.component)
+            var s2 = ss.applyTo(button2.component)
+            var s3 = ss.applyTo(panel.component)
         then :
             s1.border().topLeftArc().get() == new Arc(3, 3)
             s1.border().topRightArc().get() == new Arc(3, 3)
@@ -131,7 +131,7 @@ class Style_Sheet_Spec extends Specification
             var textArea = UI.textArea("type some more!")
 
         when :
-            var fieldStyle  = ss.run(textField.component).shadow()
+            var fieldStyle  = ss.applyTo(textField.component).shadow()
         then :
             fieldStyle.color().get() == Color.BLUE // The text component trait overrides the component trait!
             fieldStyle.blurRadius() == 9 // The text field trait overrides the component trait!
@@ -140,7 +140,7 @@ class Style_Sheet_Spec extends Specification
             fieldStyle.horizontalOffset() == 42
 
         when :
-            var buttonStyle = ss.run(button.component).shadow()
+            var buttonStyle = ss.applyTo(button.component).shadow()
         then :
             buttonStyle.color().get() == Color.RED
             buttonStyle.blurRadius() == 17
@@ -149,7 +149,7 @@ class Style_Sheet_Spec extends Specification
             buttonStyle.horizontalOffset() != 24 // a button is not a text component
 
         when :
-            var panelStyle  = ss.run(panel.component).shadow()
+            var panelStyle  = ss.applyTo(panel.component).shadow()
         then :
             panelStyle.color().get() == Color.RED
             panelStyle.blurRadius() == 17
@@ -158,7 +158,7 @@ class Style_Sheet_Spec extends Specification
             panelStyle.horizontalOffset() != 24 // a panel is not a text component
 
         when :
-            var areaStyle   = ss.run(textArea.component).shadow()
+            var areaStyle   = ss.applyTo(textArea.component).shadow()
         then :
             areaStyle.color().get() == Color.BLUE // The text component trait overrides the component trait!
             areaStyle.blurRadius() == 17
@@ -190,9 +190,9 @@ class Style_Sheet_Spec extends Specification
             var toggle = UI.toggleButton("click me!").group("group2")
             var panel = UI.panel().group("group1", "group2")
         when :
-            var s1 = ss.run(label.component)
-            var s2 = ss.run(toggle.component)
-            var s3 = ss.run(panel.component)
+            var s1 = ss.applyTo(label.component)
+            var s2 = ss.applyTo(toggle.component)
+            var s3 = ss.applyTo(panel.component)
         then :
             s1.background().color().get() == Color.BLUE
             s2.background().foundationColor().get() == Color.CYAN
@@ -224,8 +224,8 @@ class Style_Sheet_Spec extends Specification
             var textField = UI.textField("hi").group("group1")
             var textArea = UI.textArea("wassup?").group("group2")
         when :
-            var s1 = ss.run(textField.component)
-            var s2 = ss.run(textArea.component)
+            var s1 = ss.applyTo(textField.component)
+            var s2 = ss.applyTo(textArea.component)
         then :
             s1.padding() == Outline.of(1, 2, 3, 4)
             s2.padding() == Outline.of(1, 2, 3, 4)
@@ -321,11 +321,11 @@ class Style_Sheet_Spec extends Specification
             var label1 = UI.label(":)").group("A")
             var label2 = UI.label(":D").group("B")
         and : 'We run them through the style sheet...'
-            var s1 = ss.run(slider1.component)
-            var s2 = ss.run(slider2.component)
-            var s3 = ss.run(slider3.component)
-            var s4 = ss.run(label1.component)
-            var s5 = ss.run(label2.component)
+            var s1 = ss.applyTo(slider1.component)
+            var s2 = ss.applyTo(slider2.component)
+            var s3 = ss.applyTo(slider3.component)
+            var s4 = ss.applyTo(label1.component)
+            var s5 = ss.applyTo(label2.component)
         then : '...and we check the results'
             s1.background().foundationColor().get() == Color.BLUE
             s1.border().widths().average() == 11
@@ -416,11 +416,11 @@ class Style_Sheet_Spec extends Specification
             var textField = UI.textField().group("A")
             var textArea = UI.textArea("").group("B")
         when : 'We run them through the style sheet...'
-            var s1 = ss.run(label1.component)
-            var s2 = ss.run(label2.component)
-            var s3 = ss.run(label3.component)
-            var s4 = ss.run(textField.component)
-            var s5 = ss.run(textArea.component)
+            var s1 = ss.applyTo(label1.component)
+            var s2 = ss.applyTo(label2.component)
+            var s3 = ss.applyTo(label3.component)
+            var s4 = ss.applyTo(textField.component)
+            var s5 = ss.applyTo(textArea.component)
         then : '...and we check the results'
             s1.font().name() == "Arial"
             s1.font().size() == 12
@@ -474,8 +474,8 @@ class Style_Sheet_Spec extends Specification
             var label1 = UI.label(":)").group("Gradient")
             var label2 = UI.label(":D").group("ChessBoard")
         and : 'We run them through the style sheet...'
-            var s1 = ss.run(label1.component)
-            var s2 = ss.run(label2.component)
+            var s1 = ss.applyTo(label1.component)
+            var s2 = ss.applyTo(label2.component)
         then : '...and we check the results'
             s1.hasCustomBackgroundPainters()
             s1.painters().size() == 1
@@ -527,7 +527,7 @@ class Style_Sheet_Spec extends Specification
         when : 'We create a single UI component using style group "A":'
             var label = UI.label(":)").group("A")
         and : 'We run it through the style sheet...'
-            var s = ss.run(label.component)
+            var s = ss.applyTo(label.component)
         then : '...and we check the results'
             s.border().widths().top().get() == 10
             s.border().widths().left().get() == 10
@@ -610,7 +610,7 @@ class Style_Sheet_Spec extends Specification
         when : 'We create a single UI component using style group "A":'
             var button = UI.toggleButton(":)").group("A")
         and : 'We run it through the style sheet...'
-            var s = ss.run(button.component)
+            var s = ss.applyTo(button.component)
         then : '...and we check the results'
             s.border().widths().top().get() == 5
             s.border().widths().left().get() == 5
