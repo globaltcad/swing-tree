@@ -1,12 +1,15 @@
 
-# Swing Tree - Declarative UI Design for Swing [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) ![Java Version](https://img.shields.io/static/v1.svg?label=Java&message=8%2B&color=blue) #
+# SwingTree [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) ![Java Version](https://img.shields.io/static/v1.svg?label=Java&message=8%2B&color=blue) #
+## Modern Declarative UI Design for Swing ##
 
-Fluent and boilerplate free composition based Swing UI design!
-(Think [Jetpack Compose](https://developer.android.com/jetpack/compose) or [Flutter](https://flutter.dev) but for Swing)
+SwingTree is a Swing based UI framework for creating boilerplate free 
+and composition based Swing UIs fluently. <br>
+Think [Jetpack Compose](https://developer.android.com/jetpack/compose), [SwiftUI](https://developer.apple.com/xcode/swiftui/) or [Flutter](https://flutter.dev) but for Swing 
+(similar to [JetBrains UI DSL](https://plugins.jetbrains.com/docs/intellij/kotlin-ui-dsl-version-2.html#ui-dsl-basics)).
 
 - [Motivation](docs/markdown/Motivation.md)
-- [Documentation](https://globaltcad.github.io/swing-tree/)
-- [Tutorial](docs/markdown/Climbing-Swing-Tree.md)
+- [Starter Tutorial](docs/markdown/Climbing-Swing-Tree.md)
+- [Living Documentation](https://globaltcad.github.io/swing-tree/)
 
 <table>
 <tr>
@@ -16,13 +19,13 @@ Fluent and boilerplate free composition based Swing UI design!
 <tr>
 <td> 
 
-- intuitive nested UI building in an HTML like fashion
-- extremely light weight and simple
-- powered by `MigLayout` by default
+- lightweight, intuitive nested UI building in an HTML like fashion
+- powerful layout declaration through `MigLayout`
 - lambda friendly API for peeking into the underlying UI tree and manipulating swing components directly
 - boilerplate free event registration through `onClick`, `onChange` methods...
-- compatible with custom swing components
-- built-in properties for dynamic UI design decoupled from business logic 
+- compatible with custom swing components and legacy Swing code
+- built-in [MVVM property](https://github.com/globaltcad/sprouts) support for dynamic [UI design decoupled from business logic](docs/markdown/Advanced-MVVM.md) 
+- advanced styling through a CSS like DSL API
 	
 </td>
 <td>

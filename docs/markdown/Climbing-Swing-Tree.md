@@ -332,12 +332,12 @@ Here, take a look this code:
 ```java
 UI.show(
     panel("fill, wrap 2")
-    .withStyle( it ->
-        it.margin(24).padding(24)
-          .backgroundColor(new Color(57, 221, 255,255))
-          .borderRadius(32)
-          .shadowBlurRadius(5)
-          .shadowColor(new Color(0,0,0, 128))
+    .withStyle( it -> it
+        .margin(24).padding(24)
+        .backgroundColor(new Color(57, 221, 255,255))
+        .borderRadius(32)
+        .shadowBlurRadius(5)
+        .shadowColor(new Color(0,0,0, 128))
     )
     .add("span, alignx center",
         box("ins 12")
@@ -345,9 +345,9 @@ UI.show(
     )
     .add(
         panel("ins 12", "[grow]")
-        .withStyle( it ->
-            it.backgroundColor(new Color(255, 255, 255,255))
-              .borderRadius(24)
+        .withStyle( it -> it
+            .backgroundColor(new Color(255, 255, 255,255))
+            .borderRadius(24)
         )
         .add("span, wrap", label("Isn't this a well rounded view?"))
         .add("growx",
@@ -404,7 +404,7 @@ Which is based on the following code:
 
 ```java
   button("I turn green when you hover over me")
-  .onMouseEnter( it ->
+  .onMouseEnter( it -> 
       it.animateOnce(0.5, TimeUnit.SECONDS, state -> {
           double highlight = 1 - state.progress() * 0.5;
           it.setBackgroundColor(highlight, 1, highlight);
@@ -485,13 +485,13 @@ here is a more complex example:
   button("I show many little mouse move explosions when you move your mouse over me")
   .withPrefHeight(100)
   .onMouseMove( it -> it.animateOnce(1, TimeUnit.SECONDS, state -> {
-          double r = 30 * state.fadeIn() * it.getUIScale();
-          double x = it.getEvent().getX() - r / 2.0;
-          double y = it.getEvent().getY() - r / 2.0;
-          it.render( g -> {
-              g.setColor(new Color(1f, 1f, 0f, (float) state.fadeOut()));
-              g.fillOval((int) x, (int) y, (int) r, (int) r);
-          });
+      double r = 30 * state.fadeIn() * it.getUIScale();
+      double x = it.getEvent().getX() - r / 2.0;
+      double y = it.getEvent().getY() - r / 2.0;
+      it.render( g -> {
+          g.setColor(new Color(1f, 1f, 0f, (float) state.fadeOut()));
+          g.fillOval((int) x, (int) y, (int) r, (int) r);
+      });
   }))
   .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
       double r = 300 * state.fadeIn() * it.getUIScale();
