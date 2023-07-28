@@ -33,16 +33,17 @@ This is all you need to start building Swing UIs with the tree. :tada:
 
 ## Growing a Stem ##
 
-No matter which UI framework you use, all UIs are built up from
-a tree of components. Swing is no different, which is why the Swing-Tree
-library allows you to build Swing UIs in a declarative fashion,
+No matter which UI framework you use, **all UIs essentially consist
+of a tree structure made up of components**. <br>
+Swing is no different, which is why the SwingTree
+library allows you to **build Swing UIs in a declarative fashion**,
 just like you would declare your UI structure in HTML or in other XML-based
 UI frameworks.
 
-So you build your UI by describing it
-using method chaining and nesting based composition 
-and then let Swing-Tree
-convert this component tree into a Swing UI on the fly.
+This is done by describing your UI using regular code
+designed around **method chaining** and **nesting based composition** 
+which then gets converted into a Swing component tree 
+and ultimately Swing UI on the fly.
 
 Here a little example UI that demonstrates this:
 
@@ -73,12 +74,12 @@ builder style method chaining
 and composition. 
 Swing Tree combines this to give you a quasi XML-based UI framework
 with compile time type safety, turing completeness and all the
-other good stuff that comes with Java.
+other good stuff that comes with Java (or any other JVM language you prefer).
 
 ## Growing Branches ##
 
 The next important step to building Swing UIs with Swing-Tree is
-mastering layout managers. 
+mastering **layout managers**. 
 Swing-Tree has a general purpose layout manager built into it
 which is set as the default layout manager if you do not specify
 a different one. 
@@ -311,10 +312,12 @@ Just keep reading and you will see what I mean! :)
 
 ## Blooming Flowers ##
 
+<img src="../img/tutorial/blooming-flowers.png" style = "float: right; width: 30%; margin: 2em; -webkit-box-shadow: 0px 0px 18px -2px rgba(0,0,0,0.75); -moz-box-shadow: 0px 0px 18px -2px rgba(0,0,0,0.75); box-shadow: 0px 0px 18px -2px rgba(0,0,0,0.75);">
+
 An important aspect of modern UI development is the ability to
-customize how your UI is rendered.
+**customize how your UI is rendered**. <br>
 Swing-Tree allows you to customize the looks 
-of your UI using its functional style API.
+of your UI using its **functional style API**.
 
 Traditionally, the looks of a plain old Swing UI is predominantly
 determined by the **"look and feel" (short LaF)** that is installed through the `UIManager`.
@@ -322,11 +325,11 @@ Although it is often possible to configure a particular look and feel
 to a limited degree,
 like for example specifying the background and foreground colors 
 of specific Swing components, it is almost impossible to change
-non-trivial aspects of a component, like shadows, gradients, borders, etc.
-Swing-Tree solves this problem by carefully
-intercepting the painting process of Swing components
+non-trivial aspects of a component in regular Swing, like shadows, gradients, borders, etc.
+**SwingTree solves this problem by carefully
+intercepting the painting process of Swing components**
 so that you can customize their looks on top of the current default LaF.
-This customization is done using the **Swing-Tree style API**.
+This customization is done using the **SwingTree style API**.
 
 Here, take a look this code:
 ```java
@@ -351,7 +354,7 @@ UI.show(
         )
         .add("span, wrap", label("Isn't this a well rounded view?"))
         .add("growx",
-            button("Yes").withStyle( it -> it.style().borderRadius(24)),
+            button("Yes").withStyle( it -> it.borderRadius(24) ),
             button("No")
         )
     )
@@ -366,21 +369,12 @@ Which will look like this:
 ![Styling](../img/tutorial/a-well-rounded-view.png)
 
 Here you can see that we can use the `withStyle` method
-to supply a `Styler` lambda giving us access to the
-style API of a Swing component.
+to **supply a `Styler` lambda giving us access to the
+style API of a Swing component**.
 The style API consists of a `StyleDelegate` which 
 in the above example is the `it` parameter.
 The `StyleDelegate` exposes both the Swing component
 and the current `Style` configuration object.
-
-This API is functional and immutable,
-meaning that the methods on the `StyleDelegate` object
-will return a new `StyleDelegate` object with the corresponding
-`Style` properties changed.
-This allows you to compose `Styler` lambdas
-to combine different styles for different components
-and then execute them eagerly before rendering the UI
-without any side effects... But I digress.
 
 You can configure all kinds of style properties like
 **background** and **foreground colors, border colors, border thickness,
@@ -389,10 +383,25 @@ border radius, shadow color, shadow blur radius, shading gradients etc.**
 All of these styles will of course be rendered
 with DPI awareness and HiDPI support out of the box!
 
+This API is functional and immutable,
+meaning that the methods on the `StyleDelegate` object
+will return a new `StyleDelegate` object with the corresponding
+`Style` properties changed.
+This makes it easy to compose `Styler` lambdas
+to combine different styles for different components.
+
+Also note that all `Styler` lambdas are executed eagerly 
+every time a Swing component is painted.
+So feel free to use any kind of logic in your `Styler` lambdas
+to dynamically change the style of a component based on its state.
+The `StyleDelegate` also exposes the current component through the `component()` method,
+so you can use it to query the component's state and properties
+(like for example checking if a toggle button is selected or not and then styling according to that information).
+
 ## Harvesting Fruit ##
 
-The final step in mastering Swing-Tree are animations.
-Yes you heard me right, Swing-Tree supports animations
+The final step in mastering SwingTree are animations.
+Yes you read that right, SwingTree supports animations
 and advanced custom rendering for all Swing components 
 out of the box!
 
@@ -458,20 +467,20 @@ Which is based on this code:
 ```java
   button("I have a click ripple effect")
   .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
-      it.render( g -> {
+      it.paint(state, g -> {
           g.setColor(new Color(0.1f, 0.25f, 0.5f, (float) state.fadeOut()));
           for ( int i = 0; i < 5; i++ ) {
-              double r = 300 * state.fadeIn() * ( 1 - i * 0.2 ) * it.getUIScale();
-              double x = it.getEvent().getX() - r / 2;
-              double y = it.getEvent().getY() - r / 2;
+              double r = 300 * state.fadeIn() * ( 1 - i * 0.2 ) * it.getScale();
+              double x = it.mouseX() - r / 2;
+              double y = it.mouseY() - r / 2;
               g.drawOval((int) x, (int) y, (int) r, (int) r);
           }
       });
   }))
 ```
 
-Note that the `render` method is called repeatedly
-until the animation is finished. The `render` method
+Note that the `paint` method is called repeatedly
+until the animation is finished. The `paint` method
 accepts a lambda which is called with a `Graphics2D` object
 that you can use to draw on the component.
 
@@ -485,19 +494,19 @@ here is a more complex example:
   button("I show many little mouse move explosions when you move your mouse over me")
   .withPrefHeight(100)
   .onMouseMove( it -> it.animateOnce(1, TimeUnit.SECONDS, state -> {
-      double r = 30 * state.fadeIn() * it.getUIScale();
-      double x = it.getEvent().getX() - r / 2.0;
-      double y = it.getEvent().getY() - r / 2.0;
-      it.render( g -> {
+      double r = 30 * state.fadeIn() * it.getScale();
+      double x = it.mouseX() - r / 2.0;
+      double y = it.mouseY() - r / 2.0;
+      it.paint(state, g -> {
           g.setColor(new Color(1f, 1f, 0f, (float) state.fadeOut()));
           g.fillOval((int) x, (int) y, (int) r, (int) r);
       });
   }))
   .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
-      double r = 300 * state.fadeIn() * it.getUIScale();
-      double x = it.getEvent().getX() - r / 2;
-      double y = it.getEvent().getY() - r / 2;
-      it.render( g -> {
+      double r = 300 * state.fadeIn() * it.getScale();
+      double x = it.mouseX() - r / 2;
+      double y = it.mouseY() - r / 2;
+      it.paint(state, g -> {
           g.setColor(new Color(1f, 1f, 0f, (float) state.fadeOut()));
           g.fillOval((int) x, (int) y, (int) r, (int) r);
       });

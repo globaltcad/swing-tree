@@ -886,8 +886,8 @@ abstract class AbstractDelegate<C extends JComponent>
      *      UI.button("Click me").withPrefSize(400, 400)
      *      .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
      *          double r = 300 * state.progress() * it.getScale();
-     *          double x = it.getEvent().getX() - r / 2;
-     *          double y = it.getEvent().getY() - r / 2;
+     *          double x = it.mouseX() - r / 2;
+     *          double y = it.mouseY() - r / 2;
      *          it.paint(state, g -> {
      *              g.setColor(new Color(1f, 1f, 0f, (float) (1 - state.progress())));
      *              g.fillOval((int) x, (int) y, (int) r, (int) r);
