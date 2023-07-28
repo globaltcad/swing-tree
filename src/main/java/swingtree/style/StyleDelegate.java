@@ -4,9 +4,7 @@ import swingtree.UI;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.font.TextAttribute;
 import java.awt.geom.AffineTransform;
-import java.util.List;
 import java.util.*;
 import java.util.function.Function;
 
@@ -441,12 +439,12 @@ public final class StyleDelegate<C extends JComponent>
      *    )
      * }</pre>
      *
-     * @param styler A function that takes a {@link ShadeStyle} and returns a new {@link ShadeStyle}.
+     * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
      * @return A new {@link StyleDelegate} with a border shade defined by the provided styler lambda.
      */
-    public StyleDelegate<C> borderShade( Function<ShadeStyle, ShadeStyle> styler ) {
+    public StyleDelegate<C> borderShade( Function<GradientStyle, GradientStyle> styler ) {
         Objects.requireNonNull(styler);
-        return _withStyle(_style._withBorder(_style.border().shade(StyleUtility.DEFAULT_KEY, styler)));
+        return _withStyle(_style._withBorder(_style.border().gradient(StyleUtility.DEFAULT_KEY, styler)));
     }
 
     /**
@@ -464,13 +462,13 @@ public final class StyleDelegate<C extends JComponent>
      * Note that the border shades will be rendered in alphabetical order based on the name of the shade.
      *
      * @param shadeName The name of the border shade.
-     * @param styler A function that takes a {@link ShadeStyle} and returns a new {@link ShadeStyle}.
+     * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
      * @return A new {@link StyleDelegate} with a named border shade defined by the provided styler lambda.
      */
-    public StyleDelegate<C> borderShade( String shadeName, Function<ShadeStyle, ShadeStyle> styler ) {
+    public StyleDelegate<C> borderShade( String shadeName, Function<GradientStyle, GradientStyle> styler ) {
         Objects.requireNonNull(shadeName);
         Objects.requireNonNull(styler);
-        return _withStyle(_style._withBorder(_style.border().shade(shadeName, styler)));
+        return _withStyle(_style._withBorder(_style.border().gradient(shadeName, styler)));
     }
 
     /**
@@ -763,20 +761,20 @@ public final class StyleDelegate<C extends JComponent>
      *    UI.panel()
      *    .withStyle( it ->
      *      it
-     *      .shade("dark shading", shade -> shade.colors("#000000", "#000000").strategy(ShadeStrategy.TOP_TO_BOTTOM)))
-     *      .shade("light shading", shade -> shade.colors("#ffffff", "#ffffff").strategy(ShadeStrategy.TOP_TO_BOTTOM)))
+     *      .gradient("dark shading", shade -> shade.colors("#000000", "#000000").strategy(ShadeStrategy.TOP_TO_BOTTOM)))
+     *      .gradient("light shading", shade -> shade.colors("#ffffff", "#ffffff").strategy(ShadeStrategy.TOP_TO_BOTTOM)))
      *    )
      * }</pre>
      * Note that the background shades will be rendered in alphabetical order based on the name of the shade.
      *
      * @param shadeName The name of the background shade.
-     * @param styler A function that takes a {@link ShadeStyle} and returns a new {@link ShadeStyle}.
+     * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
      * @return A new {@link StyleDelegate} with a named background shade defined by the provided styler lambda.
      */
-    public StyleDelegate<C> shade( String shadeName, Function<ShadeStyle, ShadeStyle> styler ) {
+    public StyleDelegate<C> gradient( String shadeName, Function<GradientStyle, GradientStyle> styler ) {
         Objects.requireNonNull(shadeName);
         Objects.requireNonNull(styler);
-        return _withStyle(_style.shade(shadeName, styler));
+        return _withStyle(_style.gradient(shadeName, styler));
     }
 
     /**
@@ -790,12 +788,12 @@ public final class StyleDelegate<C extends JComponent>
      *    )
      * }</pre>
      *
-     * @param styler A function that takes a {@link ShadeStyle} and returns a new {@link ShadeStyle}.
+     * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
      * @return A new {@link StyleDelegate} with a background shade defined by the provided styler lambda.
      */
-    public StyleDelegate<C> shade(Function<ShadeStyle, ShadeStyle> styler ) {
+    public StyleDelegate<C> gradient( Function<GradientStyle, GradientStyle> styler ) {
         Objects.requireNonNull(styler);
-        return _withStyle(_style.shade(StyleUtility.DEFAULT_KEY, styler));
+        return _withStyle(_style.gradient(StyleUtility.DEFAULT_KEY, styler));
     }
 
     /**

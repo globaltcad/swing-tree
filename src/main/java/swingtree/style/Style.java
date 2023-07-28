@@ -44,7 +44,7 @@ public final class Style
                                             null,
                                             Collections.singletonMap(StyleUtility.DEFAULT_KEY,ShadowStyle.none()),
                                             Collections.singletonMap(StyleUtility.DEFAULT_KEY + "_" + PainterStyle.none().layer().name(),PainterStyle.none()),
-                                            Collections.singletonMap(StyleUtility.DEFAULT_KEY,ShadeStyle.none())
+                                            Collections.singletonMap(StyleUtility.DEFAULT_KEY, GradientStyle.none())
     );
 
     public static Style none() { return _NONE; }
@@ -58,7 +58,7 @@ public final class Style
     private final Cursor                    _cursor;
     private final Map<String, ShadowStyle>  _shadows  = new TreeMap<>();
     private final Map<String, PainterStyle> _painters = new TreeMap<>();
-    private final Map<String, ShadeStyle>   _shades   = new TreeMap<>();
+    private final Map<String, GradientStyle>   _shades   = new TreeMap<>();
 
 
 
@@ -73,7 +73,7 @@ public final class Style
             Cursor                    cursor,
             Map<String, ShadowStyle>  shadows,
             Map<String, PainterStyle> painters,
-            Map<String, ShadeStyle>   shades
+            Map<String, GradientStyle>   shades
     ) {
         _layout         = layout;
         _border         = border;
@@ -213,7 +213,7 @@ public final class Style
         return _painters.values().stream().anyMatch(p -> p.layer() == Layer.FOREGROUND && !Painter.none().equals(p.painter()));
     }
 
-    List<ShadeStyle> shades(Layer layer) {
+    List<GradientStyle> gradients(Layer layer) {
         return Collections.unmodifiableList(
                 _shades.entrySet().stream()
                         .sorted(Map.Entry.comparingByKey())
@@ -224,7 +224,7 @@ public final class Style
     }
 
     boolean hasCustomBackgroundShades() {
-        return !( _shades.size() == 1 && ShadeStyle.none().equals(_shades.get(StyleUtility.DEFAULT_KEY)) );
+        return !( _shades.size() == 1 && GradientStyle.none().equals(_shades.get(StyleUtility.DEFAULT_KEY)) );
     }
 
     Style painter( Map<String, PainterStyle> painters ) {
@@ -232,19 +232,19 @@ public final class Style
         return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, _cursor, _shadows, painters, _shades);
     }
 
-    Style shade( Map<String, ShadeStyle> shades ) {
+    Style gradient( Map<String, GradientStyle> shades ) {
         Objects.requireNonNull(shades);
         return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, _cursor, _shadows, _painters, shades);
     }
 
-    Style shade( String shadeName, Function<ShadeStyle, ShadeStyle> styler ) {
+    Style gradient( String shadeName, Function<GradientStyle, GradientStyle> styler ) {
         Objects.requireNonNull(shadeName);
         Objects.requireNonNull(styler);
-        ShadeStyle shadow = Optional.ofNullable(_shades.get(shadeName)).orElse(ShadeStyle.none());
+        GradientStyle shadow = Optional.ofNullable(_shades.get(shadeName)).orElse(GradientStyle.none());
         // We clone the shadow map:
-        Map<String, ShadeStyle> newShadows = new HashMap<>(_shades);
+        Map<String, GradientStyle> newShadows = new HashMap<>(_shades);
         newShadows.put(shadeName, styler.apply(shadow));
-        return shade(newShadows);
+        return gradient(newShadows);
     }
 
     Style painter( String painterName, Layer layer, Painter painter ) {

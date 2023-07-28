@@ -157,7 +157,7 @@ public abstract class StyleSheet
      *      add(type(JButton.class), it -> it
      *         .padding(12)
      *         .margin(16)
-     *         .shade("default", shade -> shade
+     *         .gradient("default", shade -> shade
      *             .strategy(ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT)
      *             .colors(it.component().getBackground().brighter(), Color.CYAN)
      *         )

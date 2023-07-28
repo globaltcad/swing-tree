@@ -72,12 +72,12 @@ final class StylePainter<C extends JComponent>
     private void _paintStylesOn( Layer layer, Graphics2D g2d ) {
         // Every layer has 3 things:
         // 1. Shades, which are simple gradient effects
-        for ( ShadeStyle shade : style.shades(layer) ) {
-            if ( shade.colors().length > 0 && !shade.strategy().isNone() ) {
-                if ( shade.strategy().isDiagonal() )
-                    _renderDiagonalShade(g2d, _comp, style.margin(), shade, _getBaseArea());
+        for ( GradientStyle gradient : style.gradients(layer) ) {
+            if ( gradient.colors().length > 0 && !gradient.align().isNone() ) {
+                if ( gradient.align().isDiagonal() )
+                    _renderDiagonalGradient(g2d, _comp, style.margin(), gradient, _getBaseArea());
                 else
-                    _renderVerticalOrHorizontalShade(g2d, _comp, style.margin(), shade, _getBaseArea());
+                    _renderVerticalOrHorizontalGradient(g2d, _comp, style.margin(), gradient, _getBaseArea());
             }
         }
         // 2. Shadows, which are simple drop shadows that cn go inwards or outwards
@@ -145,13 +145,13 @@ final class StylePainter<C extends JComponent>
             g2d.setColor(color);
             g2d.fill(baseArea);
 
-            if ( style.border().shades().size() > 0 )  {
-                for ( ShadeStyle shade : style.border().shades() ) {
-                    if ( shade.colors().length > 0 && !shade.strategy().isNone() ) {
-                        if ( shade.strategy().isDiagonal() )
-                            _renderDiagonalShade(g2d, _comp, style.margin(), shade, baseArea);
+            if ( style.border().gradients().size() > 0 )  {
+                for ( GradientStyle shade : style.border().gradients() ) {
+                    if ( shade.colors().length > 0 && !shade.align().isNone() ) {
+                        if ( shade.align().isDiagonal() )
+                            _renderDiagonalGradient(g2d, _comp, style.margin(), shade, baseArea);
                         else
-                            _renderVerticalOrHorizontalShade(g2d, _comp, style.margin(), shade, baseArea);
+                            _renderVerticalOrHorizontalGradient(g2d, _comp, style.margin(), shade, baseArea);
                     }
                 }
             }
@@ -761,14 +761,14 @@ final class StylePainter<C extends JComponent>
      * @param margin The margin of the component.
      * @param shade The shade to render.
      */
-    private static void _renderDiagonalShade(
+    private static void _renderDiagonalGradient(
         Graphics2D g2d,
         JComponent component,
         Outline margin,
-        ShadeStyle shade,
+        GradientStyle shade,
         Area specificArea
     ) {
-        ShadingStrategy type = shade.strategy();
+        GradientAlignment type = shade.align();
         Color[] colors = shade.colors();
         Dimension size = component.getSize();
         size.width  -= (margin.right().orElse(0) + margin.left().orElse(0));
@@ -787,20 +787,20 @@ final class StylePainter<C extends JComponent>
         int diagonalCorner2X;
         int diagonalCorner2Y;
 
-        if ( type == ShadingStrategy.TOP_RIGHT_TO_BOTTOM_LEFT ) {
-            type = ShadingStrategy.BOTTOM_LEFT_TO_TOP_RIGHT;
+        if ( type == GradientAlignment.TOP_RIGHT_TO_BOTTOM_LEFT ) {
+            type = GradientAlignment.BOTTOM_LEFT_TO_TOP_RIGHT;
             Color tmp = colors[0];
             colors[0] = colors[1];
             colors[1] = tmp;
         }
-        if ( type == ShadingStrategy.BOTTOM_RIGHT_TO_TOP_LEFT ) {
-            type = ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT;
+        if ( type == GradientAlignment.BOTTOM_RIGHT_TO_TOP_LEFT ) {
+            type = GradientAlignment.TOP_LEFT_TO_BOTTOM_RIGHT;
             Color tmp = colors[0];
             colors[0] = colors[1];
             colors[1] = tmp;
         }
 
-        if ( type == ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT ) {
+        if ( type == GradientAlignment.TOP_LEFT_TO_BOTTOM_RIGHT ) {
             corner1X = realX;
             corner1Y = realY;
             corner2X = realX + width;
@@ -809,7 +809,7 @@ final class StylePainter<C extends JComponent>
             diagonalCorner1Y = realY + height;
             diagonalCorner2X = realX + width;
             diagonalCorner2Y = realY;
-        } else if ( type == ShadingStrategy.BOTTOM_LEFT_TO_TOP_RIGHT ) {
+        } else if ( type == GradientAlignment.BOTTOM_LEFT_TO_TOP_RIGHT ) {
             corner1X = realX + width;
             corner1Y = realY;
             corner2X = realX;
@@ -873,14 +873,14 @@ final class StylePainter<C extends JComponent>
         g2d.fill(specificArea);
     }
 
-    private static void _renderVerticalOrHorizontalShade(
+    private static void _renderVerticalOrHorizontalGradient(
         Graphics2D g2d,
         JComponent component,
         Outline margin,
-        ShadeStyle shade,
+        GradientStyle shade,
         Area specificArea
     ) {
-        ShadingStrategy type = shade.strategy();
+        GradientAlignment type = shade.align();
         Color[] colors = shade.colors();
         Dimension size = component.getSize();
         size.width  -= (margin.right().orElse(0) + margin.left().orElse(0));
@@ -895,22 +895,22 @@ final class StylePainter<C extends JComponent>
         int corner2X;
         int corner2Y;
 
-        if ( type == ShadingStrategy.TOP_TO_BOTTOM ) {
+        if ( type == GradientAlignment.TOP_TO_BOTTOM ) {
             corner1X = realX;
             corner1Y = realY;
             corner2X = realX;
             corner2Y = realY + height;
-        } else if ( type == ShadingStrategy.LEFT_TO_RIGHT ) {
+        } else if ( type == GradientAlignment.LEFT_TO_RIGHT ) {
             corner1X = realX;
             corner1Y = realY;
             corner2X = realX + width;
             corner2Y = realY;
-        } else if ( type == ShadingStrategy.BOTTOM_TO_TOP ) {
+        } else if ( type == GradientAlignment.BOTTOM_TO_TOP ) {
             corner1X = realX;
             corner1Y = realY + height;
             corner2X = realX;
             corner2Y = realY;
-        } else if ( type == ShadingStrategy.RIGHT_TO_LEFT ) {
+        } else if ( type == GradientAlignment.RIGHT_TO_LEFT ) {
             corner1X = realX + width;
             corner1Y = realY;
             corner2X = realX;

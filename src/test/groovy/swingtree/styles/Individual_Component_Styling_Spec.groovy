@@ -9,7 +9,7 @@ import swingtree.SwingTreeContext
 import swingtree.threading.EventProcessor
 import swingtree.UI
 import swingtree.style.Layer
-import swingtree.style.ShadingStrategy
+import swingtree.style.GradientAlignment
 import utility.Utility
 
 import javax.swing.*
@@ -298,7 +298,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .margin(22)
                         .border(15, Color.CYAN)
                         .borderShade( s -> s
-                            .strategy(ShadingStrategy.BOTTOM_RIGHT_TO_TOP_LEFT)
+                            .align(GradientAlignment.BOTTOM_RIGHT_TO_TOP_LEFT)
                             .colors(Color.YELLOW, new Color(255,255,255,0))
                         )
                         .shadowColor(new Color(0,0,0,100))
@@ -335,8 +335,8 @@ class Individual_Component_Styling_Spec extends Specification
                     UI.toggleButton("I am a toggle button")
                     .withStyle( it -> it
                         .size(205, 60)
-                        .shade(shade -> shade
-                           .strategy(ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT)
+                        .gradient(shade -> shade
+                           .align(GradientAlignment.TOP_LEFT_TO_BOTTOM_RIGHT)
                            .colors(
                                it.component().getModel().isSelected()
                                    ? new Color[]{ Color.YELLOW, Color.CYAN   }
@@ -375,8 +375,8 @@ class Individual_Component_Styling_Spec extends Specification
                         .backgroundColor(Color.CYAN)
                         .padding(12)
                         .margin(6)
-                        .shade(shade -> shade
-                           .strategy(ShadingStrategy.LEFT_TO_RIGHT)
+                        .gradient(shade -> shade
+                           .align(GradientAlignment.LEFT_TO_RIGHT)
                            .colors(
                               new Color(255,0,0,64),
                               new Color(0,255,0,64),

@@ -10,7 +10,7 @@ import swingtree.UI
 import swingtree.style.Arc
 import swingtree.style.Layer
 import swingtree.style.Outline
-import swingtree.style.ShadingStrategy
+import swingtree.style.GradientAlignment
 import swingtree.style.Style
 import swingtree.style.StyleSheet
 
@@ -506,7 +506,7 @@ class Style_Sheet_Spec extends Specification
                 protected void configure() {
                     add(group("A").inherits("B", "C"), it -> it
                         .borderShade( s -> s
-                            .strategy(ShadingStrategy.BOTTOM_TO_TOP)
+                            .align(GradientAlignment.BOTTOM_TO_TOP)
                              .colors(Color.RED, Color.BLUE)
                         )
                     );
@@ -518,7 +518,7 @@ class Style_Sheet_Spec extends Specification
                         .borderWidth(20)
                         .borderColor(Color.YELLOW)
                         .borderShade("named shade", s -> s
-                             .strategy(ShadingStrategy.TOP_TO_BOTTOM)
+                             .align(GradientAlignment.TOP_TO_BOTTOM)
                              .colors(Color.CYAN, Color.MAGENTA)
                         )
                     );
@@ -535,10 +535,10 @@ class Style_Sheet_Spec extends Specification
             s.border().widths().right().get() == 10
             s.border().color().get() == Color.GREEN
         and : 'Note that only the default border shade will be overridden, not the named one.'
-            s.border().shade().strategy() == ShadingStrategy.BOTTOM_TO_TOP
-            s.border().shade().colors() as java.util.List == [Color.RED, Color.BLUE]
-            s.border().shade("named shade").strategy() == ShadingStrategy.TOP_TO_BOTTOM
-            s.border().shade("named shade").colors() as java.util.List == [Color.CYAN, Color.MAGENTA]
+            s.border().gradient().align() == GradientAlignment.BOTTOM_TO_TOP
+            s.border().gradient().colors() as java.util.List == [Color.RED, Color.BLUE]
+            s.border().gradient("named shade").align() == GradientAlignment.TOP_TO_BOTTOM
+            s.border().gradient("named shade").colors() as java.util.List == [Color.CYAN, Color.MAGENTA]
     }
 
 
@@ -570,7 +570,7 @@ class Style_Sheet_Spec extends Specification
                         .borderWidth(5)
                         .backgroundColor(Color.RED)
                         .borderShade( s -> s
-                            .strategy(ShadingStrategy.BOTTOM_TO_TOP)
+                            .align(GradientAlignment.BOTTOM_TO_TOP)
                             .colors(Color.RED, Color.BLUE)
                         )
                     );
@@ -618,8 +618,8 @@ class Style_Sheet_Spec extends Specification
             s.border().widths().right().get() == 5
             s.border().color().get() == Color.MAGENTA
             s.background().color().get() == Color.RED
-            s.border().shade().strategy() == ShadingStrategy.BOTTOM_TO_TOP
-            s.border().shade().colors() as java.util.List == [Color.RED, Color.BLUE]
+            s.border().gradient().align() == GradientAlignment.BOTTOM_TO_TOP
+            s.border().gradient().colors() as java.util.List == [Color.RED, Color.BLUE]
             s.shadow("named shadow").spreadRadius() == 42
             s.shadow("named shadow").color().get() == Color.CYAN
             s.shadow("named shadow").isInset() == false

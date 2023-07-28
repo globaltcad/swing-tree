@@ -2,7 +2,7 @@ package examples.stylish;
 
 import swingtree.UI;
 import swingtree.style.Edge;
-import swingtree.style.ShadingStrategy;
+import swingtree.style.GradientAlignment;
 import swingtree.style.StyleSheet;
 
 import javax.swing.*;
@@ -57,8 +57,8 @@ public class SoftUIStyleSheet extends StyleSheet
             .shadowBlurRadius(13)
             .shadowSpreadRadius(-2)
             .shadowIsInset(false)
-            .shade("default", shade -> shade
-                .strategy(ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT)
+            .gradient("default", shade -> shade
+                .align(GradientAlignment.TOP_LEFT_TO_BOTTOM_RIGHT)
                 .colors(gradientColorsFor(it.component()))
             )
         );
@@ -77,8 +77,8 @@ public class SoftUIStyleSheet extends StyleSheet
             .shadowBlurRadius(6)
             .shadowSpreadRadius(-2)
             .shadowIsInset(false)
-            .shade("default", shade -> shade
-                .strategy(ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT)
+            .gradient("default", shade -> shade
+                .align(GradientAlignment.TOP_LEFT_TO_BOTTOM_RIGHT)
                 .colors(gradientColorsFor(it.component()))
             )
             .cursor(UI.Cursor.HAND)

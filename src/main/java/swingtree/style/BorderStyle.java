@@ -16,7 +16,7 @@ public final class BorderStyle
                                                 null, null, null, null,
                                                 Outline.none(),
                                                 null,
-                                                Collections.singletonMap(StyleUtility.DEFAULT_KEY, ShadeStyle.none())
+                                                Collections.singletonMap(StyleUtility.DEFAULT_KEY, GradientStyle.none())
                                             );
 
     public static BorderStyle none() { return _NONE; }
@@ -28,7 +28,7 @@ public final class BorderStyle
 
     private final Outline _borderWidths;
     private final Color _borderColor;
-    private final Map<String, ShadeStyle> _shades = new TreeMap<>();
+    private final Map<String, GradientStyle> _shades = new TreeMap<>();
 
 
     private BorderStyle(
@@ -38,7 +38,7 @@ public final class BorderStyle
         Arc bottomRightArc,
         Outline borderWidths,
         Color borderColor,
-        Map<String, ShadeStyle> shades
+        Map<String, GradientStyle> shades
     ) {
         _topLeftArc      = topLeftArc;
         _topRightArc     = topRightArc;
@@ -76,7 +76,7 @@ public final class BorderStyle
 
     public Optional<Color> color() { return Optional.ofNullable(_borderColor); }
 
-    public List<ShadeStyle> shades() {
+    public List<GradientStyle> gradients() {
         return Collections.unmodifiableList(
                 _shades.entrySet().stream()
                         .sorted(Map.Entry.comparingByKey())
@@ -85,28 +85,28 @@ public final class BorderStyle
             );
     }
 
-    BorderStyle shade( Map<String, ShadeStyle> shades ) {
+    BorderStyle gradient( Map<String, GradientStyle> shades ) {
         Objects.requireNonNull(shades);
         return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _borderColor, shades);
     }
 
-    public BorderStyle shade( String shadeName, Function<ShadeStyle, ShadeStyle> styler ) {
+    public BorderStyle gradient( String shadeName, Function<GradientStyle, GradientStyle> styler ) {
         Objects.requireNonNull(shadeName);
         Objects.requireNonNull(styler);
-        ShadeStyle shadow = Optional.ofNullable(_shades.get(shadeName)).orElse(ShadeStyle.none());
+        GradientStyle shadow = Optional.ofNullable(_shades.get(shadeName)).orElse(GradientStyle.none());
         // We clone the shadow map:
-        Map<String, ShadeStyle> newShadows = new HashMap<>(_shades);
+        Map<String, GradientStyle> newShadows = new HashMap<>(_shades);
         newShadows.put(shadeName, styler.apply(shadow));
-        return shade(newShadows);
+        return gradient(newShadows);
     }
 
-    public ShadeStyle shade( String shadeName ) {
+    public GradientStyle gradient( String shadeName ) {
         Objects.requireNonNull(shadeName);
-        return Optional.ofNullable(_shades.get(shadeName)).orElse(ShadeStyle.none());
+        return Optional.ofNullable(_shades.get(shadeName)).orElse(GradientStyle.none());
     }
 
-    public ShadeStyle shade() {
-        return shade(StyleUtility.DEFAULT_KEY);
+    public GradientStyle gradient() {
+        return gradient(StyleUtility.DEFAULT_KEY);
     }
 
     BorderStyle widths( Outline borderWidths ) {
