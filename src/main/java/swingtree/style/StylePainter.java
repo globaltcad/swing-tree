@@ -72,14 +72,18 @@ final class StylePainter<C extends JComponent>
     private void _paintStylesOn( Layer layer, Graphics2D g2d ) {
         // Every layer has 3 things:
         // 1. Shades, which are simple gradient effects
-        for ( GradientStyle gradient : style.gradients(layer) ) {
-            if ( gradient.colors().length > 0 && !gradient.align().isNone() ) {
-                if ( gradient.align().isDiagonal() )
+        for ( GradientStyle gradient : style.gradients(layer) )
+            if ( gradient.colors().length > 0 ) {
+                if ( gradient.colors().length == 1 ) {
+                    g2d.setColor(gradient.colors()[0]);
+                    g2d.fill(_getBaseArea());
+                }
+                else if ( gradient.align().isDiagonal() )
                     _renderDiagonalGradient(g2d, _comp, style.margin(), gradient, _getBaseArea());
                 else
                     _renderVerticalOrHorizontalGradient(g2d, _comp, style.margin(), gradient, _getBaseArea());
             }
-        }
+
         // 2. Shadows, which are simple drop shadows that cn go inwards or outwards
         for ( ShadowStyle shadow : style.shadows(layer) )
             shadow.color().ifPresent(color -> {
@@ -90,7 +94,16 @@ final class StylePainter<C extends JComponent>
         style.painters(layer).forEach( backgroundPainter -> {
             if ( backgroundPainter == Painter.none() ) return;
             g2d.setClip(_getBaseArea());
-            backgroundPainter.paint(g2d);
+            try {
+                backgroundPainter.paint(g2d);
+            } catch ( Exception e ) {
+                e.printStackTrace();
+                /*
+                    If exceptions happen in user provided painters, we don't want to
+                    mess up the rendering of the rest of the component, so we just
+                    print the stack trace and move on.
+                */
+            }
         });
     }
 
@@ -146,12 +159,12 @@ final class StylePainter<C extends JComponent>
             g2d.fill(baseArea);
 
             if ( style.border().gradients().size() > 0 )  {
-                for ( GradientStyle shade : style.border().gradients() ) {
-                    if ( shade.colors().length > 0 && !shade.align().isNone() ) {
-                        if ( shade.align().isDiagonal() )
-                            _renderDiagonalGradient(g2d, _comp, style.margin(), shade, baseArea);
+                for ( GradientStyle gradient : style.border().gradients() ) {
+                    if ( gradient.colors().length > 0 ) {
+                        if ( gradient.align().isDiagonal() )
+                            _renderDiagonalGradient(g2d, _comp, style.margin(), gradient, baseArea);
                         else
-                            _renderVerticalOrHorizontalGradient(g2d, _comp, style.margin(), shade, baseArea);
+                            _renderVerticalOrHorizontalGradient(g2d, _comp, style.margin(), gradient, baseArea);
                     }
                 }
             }
@@ -759,17 +772,17 @@ final class StylePainter<C extends JComponent>
      * @param g2d The graphics object to render to.
      * @param component The component to render the shade for.
      * @param margin The margin of the component.
-     * @param shade The shade to render.
+     * @param gradient The shade to render.
      */
     private static void _renderDiagonalGradient(
         Graphics2D g2d,
         JComponent component,
         Outline margin,
-        GradientStyle shade,
+        GradientStyle gradient,
         Area specificArea
     ) {
-        GradientAlignment type = shade.align();
-        Color[] colors = shade.colors();
+        Color[] colors = gradient.colors();
+        GradientAlignment type = gradient.align();
         Dimension size = component.getSize();
         size.width  -= (margin.right().orElse(0) + margin.left().orElse(0));
         size.height -= (margin.bottom().orElse(0) + margin.top().orElse(0));
@@ -787,17 +800,29 @@ final class StylePainter<C extends JComponent>
         int diagonalCorner2X;
         int diagonalCorner2Y;
 
+        boolean revertColors = false;
         if ( type == GradientAlignment.TOP_RIGHT_TO_BOTTOM_LEFT ) {
             type = GradientAlignment.BOTTOM_LEFT_TO_TOP_RIGHT;
-            Color tmp = colors[0];
-            colors[0] = colors[1];
-            colors[1] = tmp;
+            // We revert the colors
+            revertColors = true;
         }
         if ( type == GradientAlignment.BOTTOM_RIGHT_TO_TOP_LEFT ) {
             type = GradientAlignment.TOP_LEFT_TO_BOTTOM_RIGHT;
-            Color tmp = colors[0];
-            colors[0] = colors[1];
-            colors[1] = tmp;
+            revertColors = true;
+        }
+
+        if ( revertColors ) {// We revert the colors
+            if ( colors.length == 2 ) {
+                Color tmp = colors[0];
+                colors[0] = colors[1];
+                colors[1] = tmp;
+            } else
+                // We have more than 2 colors, so we need to revert the array
+                for ( int i = 0; i < colors.length / 2; i++ ) {
+                    Color tmp = colors[i];
+                    colors[i] = colors[colors.length - i - 1];
+                    colors[colors.length - i - 1] = tmp;
+                }
         }
 
         if ( type == GradientAlignment.TOP_LEFT_TO_BOTTOM_RIGHT ) {
@@ -825,50 +850,76 @@ final class StylePainter<C extends JComponent>
         int diagonalCenterX = (diagonalCorner1X + diagonalCorner2X) / 2;
         int diagonalCenterY = (diagonalCorner1Y + diagonalCorner2Y) / 2;
 
-        double vector1X = diagonalCorner1X - diagonalCenterX;
-        double vector1Y = diagonalCorner1Y - diagonalCenterY;
-        double vector2X = diagonalCorner2X - diagonalCenterX;
-        double vector2Y = diagonalCorner2Y - diagonalCenterY;
+        float[] fractions = new float[colors.length];
+        for ( int i = 0; i < colors.length; i++ )
+            fractions[i] = (float) i / (float) (colors.length - 1);
 
-        double vectorLength = Math.sqrt(vector1X * vector1X + vector1Y * vector1Y);
-        vector1X = (vector1X / vectorLength);
-        vector1Y = (vector1Y / vectorLength);
+        if ( gradient.type() == GradientType.RADIAL ) {
+            float startCornerX, startCornerY;
+            if ( type == GradientAlignment.TOP_LEFT_TO_BOTTOM_RIGHT ) {
+                startCornerX = corner1X;
+                startCornerY = corner1Y;
+            } else {
+                startCornerX = corner2X;
+                startCornerY = corner2Y;
+            }
+            float radius = (float) Math.sqrt(
+                                                (diagonalCenterX - startCornerX) * (diagonalCenterX - startCornerX) +
+                                                (diagonalCenterY - startCornerY) * (diagonalCenterY - startCornerY)
+                                            );
+            if ( colors.length == 2 )
+                g2d.setPaint(new RadialGradientPaint(
+                        new Point2D.Float(startCornerX, startCornerY),
+                        radius,
+                        fractions,
+                        colors
+                ));
+            else
+                g2d.setPaint(new RadialGradientPaint(
+                        new Point2D.Float(startCornerX, startCornerY),
+                        radius,
+                        fractions,
+                        colors,
+                        MultipleGradientPaint.CycleMethod.NO_CYCLE
+                ));
+        } else if ( gradient.type() == GradientType.LINEAR ) {
+            double vector1X = diagonalCorner1X - diagonalCenterX;
+            double vector1Y = diagonalCorner1Y - diagonalCenterY;
+            double vector2X = diagonalCorner2X - diagonalCenterX;
+            double vector2Y = diagonalCorner2Y - diagonalCenterY;
 
-        vectorLength = Math.sqrt(vector2X * vector2X + vector2Y * vector2Y);
-        vector2X = (vector2X / vectorLength);
-        vector2Y = (vector2Y / vectorLength);
+            double vectorLength = Math.sqrt(vector1X * vector1X + vector1Y * vector1Y);
+            vector1X = (vector1X / vectorLength);
+            vector1Y = (vector1Y / vectorLength);
 
-        double nVector1X = -vector1Y;
-        double nVector1Y = vector1X;
-        double nVector2X = -vector2Y;
-        double nVector2Y = vector2X;
+            vectorLength = Math.sqrt(vector2X * vector2X + vector2Y * vector2Y);
+            vector2X = (vector2X / vectorLength);
+            vector2Y = (vector2Y / vectorLength);
 
-        double distance1 = (corner1X - diagonalCenterX) * nVector1X + (corner1Y - diagonalCenterY) * nVector1Y;
-        double distance2 = (corner2X - diagonalCenterX) * nVector2X + (corner2Y - diagonalCenterY) * nVector2Y;
+            double nVector1X = -vector1Y;
+            double nVector1Y =  vector1X;
+            double nVector2X = -vector2Y;
+            double nVector2Y =  vector2X;
 
-        int gradientStartX = (int) (diagonalCenterX + nVector1X * distance1);
-        int gradientStartY = (int) (diagonalCenterY + nVector1Y * distance1);
-        int gradientEndX = (int) (diagonalCenterX + nVector2X * distance2);
-        int gradientEndY = (int) (diagonalCenterY + nVector2Y * distance2);
+            double distance1 = (corner1X - diagonalCenterX) * nVector1X + (corner1Y - diagonalCenterY) * nVector1Y;
+            double distance2 = (corner2X - diagonalCenterX) * nVector2X + (corner2Y - diagonalCenterY) * nVector2Y;
 
-        if ( colors.length == 2 )
-            g2d.setPaint(
-                    new GradientPaint(
-                            gradientStartX, gradientStartY, colors[0],
-                            gradientEndX, gradientEndY, colors[1]
-                        )
-                );
-        else {
-            float[] fractions = new float[colors.length];
-            for ( int i = 0; i < colors.length; i++ )
-                fractions[i] = (float) i / (float) (colors.length - 1);
-            g2d.setPaint(
-                    new LinearGradientPaint(
-                            gradientStartX, gradientStartY,
-                            gradientEndX, gradientEndY,
-                            fractions, colors
-                        )
-                );
+            int gradientStartX = (int) (diagonalCenterX + nVector1X * distance1);
+            int gradientStartY = (int) (diagonalCenterY + nVector1Y * distance1);
+            int gradientEndX = (int) (diagonalCenterX + nVector2X * distance2);
+            int gradientEndY = (int) (diagonalCenterY + nVector2Y * distance2);
+
+            if ( colors.length == 2 )
+                g2d.setPaint(new GradientPaint(
+                                gradientStartX, gradientStartY, colors[0],
+                                gradientEndX, gradientEndY, colors[1]
+                            ));
+            else
+                g2d.setPaint(new LinearGradientPaint(
+                                gradientStartX, gradientStartY,
+                                gradientEndX, gradientEndY,
+                                fractions, colors
+                            ));
         }
         g2d.fill(specificArea);
     }
@@ -877,11 +928,11 @@ final class StylePainter<C extends JComponent>
         Graphics2D g2d,
         JComponent component,
         Outline margin,
-        GradientStyle shade,
+        GradientStyle gradient,
         Area specificArea
     ) {
-        GradientAlignment type = shade.align();
-        Color[] colors = shade.colors();
+        GradientAlignment type = gradient.align();
+        Color[] colors = gradient.colors();
         Dimension size = component.getSize();
         size.width  -= (margin.right().orElse(0) + margin.left().orElse(0));
         size.height -= (margin.bottom().orElse(0) + margin.top().orElse(0));
@@ -929,13 +980,29 @@ final class StylePainter<C extends JComponent>
             float[] fractions = new float[colors.length];
             for ( int i = 0; i < colors.length; i++ )
                 fractions[i] = (float) i / (float) (colors.length - 1);
-            g2d.setPaint(
+
+            if ( gradient.type() == GradientType.LINEAR )
+                g2d.setPaint(
                     new LinearGradientPaint(
                             corner1X, corner1Y,
                             corner2X, corner2Y,
                             fractions, colors
                         )
                 );
+            else if ( gradient.type() == GradientType.RADIAL ) {
+                float radius = (float) Math.sqrt(
+                                            (corner2X - corner1X) * (corner2X - corner1X) +
+                                            (corner2Y - corner1Y) * (corner2Y - corner1Y)
+                                        );
+                g2d.setPaint(new RadialGradientPaint(
+                            new Point2D.Float(corner1X, corner1Y),
+                            radius,
+                            fractions,
+                            colors
+                        ));
+            }
+            else
+                throw new IllegalArgumentException("Invalid gradient type: " + gradient.type());
         }
         g2d.fill(specificArea);
     }

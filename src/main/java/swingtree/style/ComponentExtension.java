@@ -23,8 +23,7 @@ import java.util.function.Supplier;
 
 /**
  *  Is attached to UI components in the form of a client property.
- *  It exists to give Swing-Tree components some custom rendering
- *  in a declarative fashion.
+ *  It exists to give Swing-Tree components some custom style and animation capabilities.
  */
 public final class ComponentExtension<C extends JComponent>
 {
@@ -155,8 +154,8 @@ public final class ComponentExtension<C extends JComponent>
             _currentStylePainter = null; // custom style rendering unfortunately not possible for this component :/
     }
 
-    private void _paintBackground( Graphics g ) {
-
+    private void _paintBackground( Graphics g )
+    {
         _mainClip = null;
         _mainClip = g.getClip();
 

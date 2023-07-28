@@ -110,7 +110,7 @@ class Styles_Spec extends Specification
                                             "arcHeight=18, " +
                                             "width=?, " +
                                             "color=rgba(0,0,255,255), " +
-                                            "ShadeStyle[strategy=NONE, colors=[], layer=BACKGROUND]" +
+                                            "GradientStyle[alignment=TOP_TO_BOTTOM, type=LINEAR, colors=[], layer=BACKGROUND]" +
                                         "], " +
                                         "BackgroundStyle[" +
                                             "color=rgba(0,255,0,255), foundationColor=rgba(255,0,0,255)" +
@@ -139,7 +139,7 @@ class Styles_Spec extends Specification
                                             "painter=none, " +
                                             "layer=BACKGROUND" +
                                         "], " +
-                                        "ShadeStyle[strategy=NONE, colors=[], layer=BACKGROUND]" +
+                                        "GradientStyle[alignment=TOP_TO_BOTTOM, type=LINEAR, colors=[], layer=BACKGROUND]" +
                                     "]"
     }
 
