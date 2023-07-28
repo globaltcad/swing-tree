@@ -36,19 +36,25 @@ class BasicComponentsPanel2 extends JPanel
         iconsTextField = new JTextField();
         compsTextField = new JTextField();
         clearTextField = new JTextField();
-        JLabel mediumLabel = new JLabel();
-        JLabel smallLabel = new JLabel();
-        JLabel miniLabel = new JLabel();
-        JLabel monospacedLabel = new JLabel();
-        JPopupMenu popupMenu1 = new JPopupMenu();
-        JMenuItem cutMenuItem = new JMenuItem();
-        JMenuItem copyMenuItem = new JMenuItem();
-        JMenuItem pasteMenuItem = new JMenuItem();
 
-        //======== this ========
-        UI.of(this)
-                        .withLayout(
-                "insets dialog,hidemode 3",
+        JPopupMenu popupMenu1 = new JPopupMenu();
+
+        UI.of(popupMenu1)
+        .add(
+            UI.menuItem("Cut").peek(it -> it.setMnemonic('C'))
+            .onClick( it -> new DefaultEditorKit.CutAction().actionPerformed(it.getEvent()) )
+        )
+        .add(
+            UI.menuItem("Copy").peek(it -> it.setMnemonic('O'))
+            .onClick( it -> new DefaultEditorKit.CopyAction().actionPerformed(it.getEvent()) )
+        )
+        .add(
+            UI.menuItem("Paste").peek(it -> it.setMnemonic('P'))
+            .onClick( it -> new DefaultEditorKit.PasteAction().actionPerformed(it.getEvent()) )
+        );
+
+        UI.of(this).withLayout(
+                "insets dialog, hidemode 3",
                 // columns
                 "[]" +
                         "[sizegroup 1]" +
@@ -222,8 +228,8 @@ class BasicComponentsPanel2 extends JPanel
         .add("cell 0 15, growx", UI.label("Leading/trailing comp.:"))
         .add("cell 1 15 2 1, growx", UI.of(compsTextField))
         .add("cell 3 15, growx", UI.of(clearTextField).withText("clear me"))
-        .add("cell 0 16", UI.label("Typography / Fonts:").withProperty("FlatLaf.styleClass", "h00"))
-        .add("cell 1 16 5 1", UI.label("H00"))
+        .add("cell 0 16", UI.label("Typography / Fonts:"))
+        .add("cell 1 16 5 1", UI.label("H00").withProperty("FlatLaf.styleClass", "h00"))
         .add("cell 1 16 5 1", UI.label("H0").withProperty("FlatLaf.styleClass", "h0"))
         .add("cell 1 16 5 1", UI.label("H1").withProperty("FlatLaf.styleClass", "h1"))
         .add("cell 1 16 5 1", UI.label("H2").withProperty("FlatLaf.styleClass", "h2"))
@@ -233,51 +239,11 @@ class BasicComponentsPanel2 extends JPanel
         .add("cell 1 16 5 1", UI.label("semibold").withProperty("FlatLaf.style", "font: 200% $semibold.font"))
         .add("cell 1 16 5 1", UI.label("(200%)").withProperty("FlatLaf.styleClass", "small").isEnabledIf(false))
         .add("cell 1 17 5 1", UI.label("large").withProperty("FlatLaf.styleClass", "large"))
-        .add("cell 1 17 5 1", UI.label("default"));
-
-        //---- mediumLabel ----
-        mediumLabel.setText("medium");
-        mediumLabel.putClientProperty("FlatLaf.styleClass", "medium");
-        add(mediumLabel, "cell 1 17 5 1");
-
-        //---- smallLabel ----
-        smallLabel.setText("small");
-        smallLabel.putClientProperty("FlatLaf.styleClass", "small");
-        add(smallLabel, "cell 1 17 5 1");
-
-        //---- miniLabel ----
-        miniLabel.setText("mini");
-        miniLabel.putClientProperty("FlatLaf.styleClass", "mini");
-        add(miniLabel, "cell 1 17 5 1");
-
-        //---- monospacedLabel ----
-        monospacedLabel.setText("monospaced");
-        monospacedLabel.putClientProperty("FlatLaf.styleClass", "monospaced");
-        add(monospacedLabel, "cell 1 17 5 1,gapx 30");
-
-        //======== popupMenu1 ========
-        {
-
-            //---- cutMenuItem ----
-            cutMenuItem.setText("Cut");
-            cutMenuItem.setMnemonic('C');
-            popupMenu1.add(cutMenuItem);
-
-            //---- copyMenuItem ----
-            copyMenuItem.setText("Copy");
-            copyMenuItem.setMnemonic('O');
-            popupMenu1.add(copyMenuItem);
-
-            //---- pasteMenuItem ----
-            pasteMenuItem.setText("Paste");
-            pasteMenuItem.setMnemonic('P');
-            popupMenu1.add(pasteMenuItem);
-        }
-        // JFormDesigner - End of component initialization  //GEN-END:initComponents
-
-        cutMenuItem.addActionListener(new DefaultEditorKit.CutAction());
-        copyMenuItem.addActionListener(new DefaultEditorKit.CopyAction());
-        pasteMenuItem.addActionListener(new DefaultEditorKit.PasteAction());
+        .add("cell 1 17 5 1", UI.label("default"))
+        .add("cell 1 17 5 1", UI.label("medium").withProperty("FlatLaf.styleClass", "medium"))
+        .add("cell 1 17 5 1", UI.label("small").withProperty("FlatLaf.styleClass", "small"))
+        .add("cell 1 17 5 1", UI.label("mini").withProperty("FlatLaf.styleClass", "mini"))
+        .add("cell 1 17 5 1,gapx 30", UI.label("monospaced").withProperty("FlatLaf.styleClass", "monospaced"));
     }
 
     private void configure() {
