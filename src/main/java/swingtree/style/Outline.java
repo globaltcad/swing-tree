@@ -12,7 +12,7 @@ import java.util.Optional;
  *  was specified through the styling API or not so that the default properties of a component
  *  can be preserved (the insets of a layout manager, for example).
  */
-public final class Outline
+final class Outline
 {
     private static final Outline _NONE = new Outline(null, null, null, null);
 

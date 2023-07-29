@@ -1,6 +1,9 @@
 package swingtree.style;
 
-public final class Arc
+/**
+ *  A value object that represents the arc width and height of a rounded rectangle.
+ */
+final class Arc
 {
     private final int _arcWidth;
     private final int _arcHeight;
