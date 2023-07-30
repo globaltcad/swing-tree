@@ -68,7 +68,7 @@ public final class ComponentExtension<C extends JComponent>
 
     public void addStyling( Styler<C> styler ) {
         Objects.requireNonNull(styler);
-        checkIfIsDeclaredInUI();
+
         _styling = _styling.andThen( s -> styler.style(new StyleDelegate<>(_owner, s.style())) );
 
         establishStyle();
@@ -165,7 +165,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
 
-    public void _renderAnimations(Graphics2D g2d)
+    public void _renderAnimations( Graphics2D g2d )
     {
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
@@ -192,7 +192,7 @@ public final class ComponentExtension<C extends JComponent>
 
     }
 
-    public void paintForegroundStyle(Graphics2D g2d) {
+    public void paintForegroundStyle( Graphics2D g2d ) {
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
         // Reset antialiasing to its previous state:
@@ -233,7 +233,7 @@ public final class ComponentExtension<C extends JComponent>
         return _applyDPIScaling(style);
     }
 
-    private static Style _applyDPIScaling(Style style) {
+    private static Style _applyDPIScaling( Style style ) {
         if ( UI.scale() == 1f )
             return style;
 
@@ -253,6 +253,7 @@ public final class ComponentExtension<C extends JComponent>
         final boolean noShadowStyle         = Style.none().hasEqualShadowsAs(style);
         final boolean noPainters            = Style.none().hasEqualPaintersAs(style);
         final boolean noShades              = Style.none().hasEqualShadesAs(style);
+        final boolean noCursor              = Style.none().hasEqualCursorAs(style);
 
         boolean isNotStyled = noLayoutStyle          &&
                               noBorderStyle          &&
@@ -262,7 +263,8 @@ public final class ComponentExtension<C extends JComponent>
                               noDimensionalityStyle  &&
                               noShadowStyle          &&
                               noPainters             &&
-                              noShades;
+                              noShades               &&
+                              noCursor;
 
         boolean onlyDimensionalityIsStyled =
                               noLayoutStyle          &&
@@ -273,7 +275,8 @@ public final class ComponentExtension<C extends JComponent>
                               !noDimensionalityStyle &&
                               noShadowStyle          &&
                               noPainters             &&
-                              noShades;
+                              noShades               &&
+                              noCursor;
 
         if ( isNotStyled || onlyDimensionalityIsStyled ) {
             _uninstallCustomLaF();
@@ -559,16 +562,8 @@ public final class ComponentExtension<C extends JComponent>
         Border currentBorder = _owner.getBorder();
         if ( currentBorder instanceof ComponentExtension.BorderStyleAndAnimationRenderer ) {
             BorderStyleAndAnimationRenderer<?> border = (BorderStyleAndAnimationRenderer<?>) currentBorder;
-            _owner.setBorder(border.getDelegate());
+            _owner.setBorder(border.getFormerBorder());
         }
-    }
-
-    private void checkIfIsDeclaredInUI() {
-        boolean isSwingTreeComponent = _componentIsDeclaredInUI(_owner);
-        if ( !isSwingTreeComponent ) // We throw an exception if the component is not a sub-type of any of the classes declared in UI.
-            throw new RuntimeException(
-                    "Custom (declarative) rendering is only allowed/supported for Swing-Tree components declared in UI."
-                );
     }
 
     static boolean _componentIsDeclaredInUI(JComponent comp ) {
@@ -591,7 +586,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
 
-    static class BorderStyleAndAnimationRenderer<C extends JComponent> implements Border
+    static final class BorderStyleAndAnimationRenderer<C extends JComponent> implements Border
     {
         private final ComponentExtension<C> _compExt;
         private final Border _formerBorder;
@@ -612,7 +607,7 @@ public final class ComponentExtension<C extends JComponent>
                 _borderWasNotPainted = false;
         }
 
-        public Border getDelegate() { return _formerBorder; }
+        Border getFormerBorder() { return _formerBorder; }
 
         @Override
         public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {

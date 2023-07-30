@@ -6,6 +6,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import swingtree.SwingTreeContext
+import swingtree.components.JBox
 import swingtree.threading.EventProcessor
 import swingtree.UI
 
@@ -611,6 +612,75 @@ class Individual_Component_Styling_Spec extends Specification
 
         then : 'The image is as expected.'
             Utility.similarityBetween(image, "components/custom-painter-JLabel.png", 99.95) > 99.95
+    }
+
+    def 'The cursor of any component can be configured through the style API.'(
+        JComponent component, UI.Cursor cursor
+    ) {
+        reportInfo """
+            The cursor of any component can be configured through the style API
+            exposed by the `withStyle` method. 
+        """
+        given : 'We create a SwingTree builder node using the `of`method and apply the cursor in the style API.'
+            var ui = UI.of(component).withStyle( it -> it.cursor(cursor) )
+
+        expect : 'The component indeed has the specified cursor!'
+            ui.component.cursor == cursor.toAWTCursor()
+
+        where :
+            component        | cursor
+            new JButton()    | UI.Cursor.HAND
+            new JTextArea()  | UI.Cursor.CROSS
+            new JTextField() | UI.Cursor.DEFAULT
+            new JBox()       | UI.Cursor.RESIZE_EAST
+            new JSlider()    | UI.Cursor.RESIZE_NORTH
+            new JSpinner()   | UI.Cursor.RESIZE_NORTH_EAST
+    }
+
+    def 'The background color of any component can be configured through the style API.'(
+        JComponent component, Color color
+    ) {
+        reportInfo """
+            The background color of any component can be configured through the style API
+            exposed by the `withStyle` method. 
+        """
+        given : 'We create a SwingTree builder node using the `of`method and apply the background color in the style API.'
+            var ui = UI.of(component).withStyle( it -> it.backgroundColor(color) )
+
+        expect : 'The component indeed has the specified background color!'
+            ui.component.background == color
+
+        where :
+            component        | color
+            new JButton()    | Color.RED
+            new JTextArea()  | Color.GREEN
+            new JTextField() | Color.BLUE
+            new JBox()       | Color.YELLOW
+            new JSlider()    | Color.CYAN
+            new JSpinner()   | Color.MAGENTA
+    }
+
+    def 'The foreground color of any component can be configured through the style API.'(
+        JComponent component, Color color
+    ) {
+        reportInfo """
+            The foreground color of any component can be configured through the style API
+            exposed by the `withStyle` method. 
+        """
+        given : 'We create a SwingTree builder node using the `of`method and apply the foreground color in the style API.'
+            var ui = UI.of(component).withStyle( it -> it.foregroundColor(color) )
+
+        expect : 'The component indeed has the specified foreground color!'
+            ui.component.foreground == color
+
+        where :
+            component        | color
+            new JButton()    | Color.RED
+            new JTextArea()  | Color.GREEN
+            new JTextField() | Color.BLUE
+            new JBox()       | Color.YELLOW
+            new JSlider()    | Color.CYAN
+            new JSpinner()   | Color.MAGENTA
     }
 
 }
