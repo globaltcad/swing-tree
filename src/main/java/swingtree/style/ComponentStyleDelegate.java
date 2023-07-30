@@ -53,7 +53,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param peeker A {@link Peeker} that takes the {@link JComponent} of this {@link ComponentStyleDelegate}
      * @return This {@link ComponentStyleDelegate} instance.
      */
-    public ComponentStyleDelegate<C> peek(Peeker<C> peeker ) {
+    public ComponentStyleDelegate<C> peek( Peeker<C> peeker ) {
         try {
             peeker.accept(_component);
         } catch( Exception e ) {
@@ -69,7 +69,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * <p>
      * @return The {@link Style} this {@link ComponentStyleDelegate} is for.
      */
-    public Style style() { return _style; }
+    Style style() { return _style; }
 
     /**
      *  Creates a new {@link Style} with the provided top, right, left and bottom margin distances.
