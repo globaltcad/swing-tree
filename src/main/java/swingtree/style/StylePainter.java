@@ -78,7 +78,7 @@ final class StylePainter<C extends JComponent>
                     g2d.setColor(gradient.colors()[0]);
                     g2d.fill(_getBaseArea());
                 }
-                else if ( gradient.align().isDiagonal() )
+                else if ( gradient.transition().isDiagonal() )
                     _renderDiagonalGradient(g2d, _comp, style.margin(), gradient, _getBaseArea());
                 else
                     _renderVerticalOrHorizontalGradient(g2d, _comp, style.margin(), gradient, _getBaseArea());
@@ -161,7 +161,7 @@ final class StylePainter<C extends JComponent>
             if ( style.border().gradients().size() > 0 )  {
                 for ( GradientStyle gradient : style.border().gradients() ) {
                     if ( gradient.colors().length > 0 ) {
-                        if ( gradient.align().isDiagonal() )
+                        if ( gradient.transition().isDiagonal() )
                             _renderDiagonalGradient(g2d, _comp, style.margin(), gradient, baseArea);
                         else
                             _renderVerticalOrHorizontalGradient(g2d, _comp, style.margin(), gradient, baseArea);
@@ -782,7 +782,7 @@ final class StylePainter<C extends JComponent>
         Area specificArea
     ) {
         Color[] colors = gradient.colors();
-        UI.Transition type = gradient.align();
+        UI.Transition type = gradient.transition();
         Dimension size = component.getSize();
         size.width  -= (margin.right().orElse(0) + margin.left().orElse(0));
         size.height -= (margin.bottom().orElse(0) + margin.top().orElse(0));
@@ -931,7 +931,7 @@ final class StylePainter<C extends JComponent>
         GradientStyle gradient,
         Area specificArea
     ) {
-        UI.Transition type = gradient.align();
+        UI.Transition type = gradient.transition();
         Color[] colors = gradient.colors();
         Dimension size = component.getSize();
         size.width  -= (margin.right().orElse(0) + margin.left().orElse(0));

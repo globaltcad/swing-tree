@@ -69,7 +69,7 @@ public final class ComponentExtension<C extends JComponent>
     public void addStyling( Styler<C> styler ) {
         Objects.requireNonNull(styler);
 
-        _styling = _styling.andThen( s -> styler.style(new StyleDelegate<>(_owner, s.style())) );
+        _styling = _styling.andThen( s -> styler.style(new ComponentStyleDelegate<>(_owner, s.style())) );
 
         establishStyle();
     }
@@ -215,7 +215,7 @@ public final class ComponentExtension<C extends JComponent>
     private Style _calculateStyle() {
         _styleSheet = _styleSheet != null ? _styleSheet : SwingTreeContext.get().getStyleSheet().orElse(null);
         Style style = _styleSheet == null ? Style.none() : _styleSheet.applyTo( _owner );
-        style = _styling.style(new StyleDelegate<>(_owner, style)).style();
+        style = _styling.style(new ComponentStyleDelegate<>(_owner, style)).style();
 
         // Animations styles are last: they override everything else:
         for ( Map.Entry<LifeTime, Styler<C>> entry : new ArrayList<>(_animationStylers.entrySet()) )
@@ -223,7 +223,7 @@ public final class ComponentExtension<C extends JComponent>
                 _animationStylers.remove(entry.getKey());
             else {
                 try {
-                    style = entry.getValue().style(new StyleDelegate<>(_owner, style)).style();
+                    style = entry.getValue().style(new ComponentStyleDelegate<>(_owner, style)).style();
                 } catch ( Exception e ) {
                     e.printStackTrace();
                     // An exception inside a styler should not prevent other stylers from being applied!

@@ -512,7 +512,7 @@ public final class UI
      *  Use this to target specific edges of a {@link JComponent} and apply
      *  custom {@link Style} properties to them.
      *  <br>
-     *  See {@link StyleDelegate#borderWidthAt(Edge, int)}
+     *  See {@link ComponentStyleDelegate#borderWidthAt(Edge, int)}
      */
     public enum Edge
     {
@@ -537,7 +537,7 @@ public final class UI
      *  Use these enum instances to specify the gradient type for various sub styles,
      *  like for example {@link BackgroundStyle} or {@link BorderStyle} through the
      *  {@link GradientStyle#type(GradientType)} method exposed by methods like
-     *  {@link StyleDelegate#gradient(String, Function)} or {@link StyleDelegate#borderGradient(String, Function)}.
+     *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#borderGradient(String, Function)}.
      */
     public enum GradientType
     {
@@ -547,8 +547,8 @@ public final class UI
     /**
      *  Use these enum instances to specify the gradient alignment for various sub styles,
      *  like for example {@link BackgroundStyle} or {@link BorderStyle} through the
-     *  {@link GradientStyle#align(Transition)} method exposed by methods like
-     *  {@link StyleDelegate#gradient(String, Function)} or {@link StyleDelegate#borderGradient(String, Function)}.
+     *  {@link GradientStyle#transition(Transition)} method exposed by methods like
+     *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#borderGradient(String, Function)}.
      */
     public enum Transition
     {

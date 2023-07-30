@@ -10,7 +10,7 @@ import java.util.function.Function;
 /**
  *  Use this class to specify a gradient style for various sub styles,
  *  like for example {@link BackgroundStyle} or {@link BorderStyle} through the
- *  {@link StyleDelegate#gradient(String, Function)} or {@link StyleDelegate#borderGradient(String, Function)}
+ *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#borderGradient(String, Function)}
  *  methods.
  *  <p>
  *  Note that you can use the {@link #none()} method to specify that no gradient should be used,
@@ -29,30 +29,30 @@ public final class GradientStyle
      */
     public static GradientStyle none() { return _NONE; }
 
-    private final UI.Transition _gradientAlignment;
-    private final UI.GradientType _gradientType;
+    private final UI.Transition _transition;
+    private final UI.GradientType _type;
     private final Color[] _colors;
     private final UI.Layer _layer;
 
 
-    public GradientStyle(UI.Transition gradientAlignment, UI.GradientType type, Color[] colors, UI.Layer layer )
+    public GradientStyle( UI.Transition transition, UI.GradientType type, Color[] colors, UI.Layer layer )
     {
-        _gradientAlignment = Objects.requireNonNull(gradientAlignment);
-        _gradientType      = Objects.requireNonNull(type);
-        _colors            = Objects.requireNonNull(colors);
-        _layer             = Objects.requireNonNull(layer);
+        _transition = Objects.requireNonNull(transition);
+        _type       = Objects.requireNonNull(type);
+        _colors     = Objects.requireNonNull(colors);
+        _layer      = Objects.requireNonNull(layer);
     }
 
-    UI.Transition align() { return _gradientAlignment; }
+    UI.Transition transition() { return _transition; }
 
-    UI.GradientType type() { return _gradientType; }
+    UI.GradientType type() { return _type; }
 
     Color[] colors() { return _colors; }
 
     UI.Layer layer() { return _layer; }
 
     /**
-     *  Define a list of colors which will, as art of the gradient, transition from one
+     *  Define a list of colors which will, as part of the gradient, transition from one
      *  to the next in the order they are specified.
      *  <p>
      *  Note that you need to specify at least two colors for a gradient to be visible.
@@ -65,7 +65,25 @@ public final class GradientStyle
         Objects.requireNonNull(colors);
         for ( Color color : colors )
             Objects.requireNonNull(color);
-        return new GradientStyle(_gradientAlignment, _gradientType, colors, _layer);
+        return new GradientStyle(_transition, _type, colors, _layer);
+    }
+
+    /**
+     *  Define a list of {@link String} based colors which will, as part of the gradient, transition from one
+     *  to the next in the order they are specified.
+     *  <p>
+     *  Note that you need to specify at least two colors for a gradient to be visible.
+     *
+     * @param colors The colors in the gradient in {@link String} format.
+     * @return A new gradient style with the specified colors.
+     * @throws NullPointerException if any of the colors is {@code null}.
+     */
+    public GradientStyle colors( String... colors ) {
+        Objects.requireNonNull(colors);
+        Color[] actualColors = new Color[colors.length];
+        for ( int i = 0; i < colors.length; i++ )
+            actualColors[i] = StyleUtility.toColor(colors[i]);
+        return new GradientStyle(_transition, _type, actualColors, _layer);
     }
 
     /**
@@ -81,13 +99,13 @@ public final class GradientStyle
      *     <li>{@link UI.Transition#RIGHT_TO_LEFT}</li>
      *  </ul>
      *
-     * @param gradientAlignment The alignment of the gradient.
+     * @param transition The alignment of the gradient.
      * @return A new gradient style with the specified alignment.
      * @throws NullPointerException if the alignment is {@code null}.
      */
-    public GradientStyle align( UI.Transition gradientAlignment ) {
-        Objects.requireNonNull(gradientAlignment);
-        return new GradientStyle(gradientAlignment, _gradientType, _colors, _layer);
+    public GradientStyle transition( UI.Transition transition ) {
+        Objects.requireNonNull(transition);
+        return new GradientStyle(transition, _type, _colors, _layer);
     }
 
     /**
@@ -103,7 +121,7 @@ public final class GradientStyle
      */
     public GradientStyle type( UI.GradientType type ) {
         Objects.requireNonNull(type);
-        return new GradientStyle(_gradientAlignment, type, _colors, _layer);
+        return new GradientStyle(_transition, type, _colors, _layer);
     }
 
     /**
@@ -119,15 +137,15 @@ public final class GradientStyle
      */
     public GradientStyle layer( UI.Layer layer ) {
         Objects.requireNonNull(layer);
-        return new GradientStyle(_gradientAlignment, _gradientType, _colors, layer);
+        return new GradientStyle(_transition, _type, _colors, layer);
     }
 
 
     @Override
     public String toString() {
         return getClass().getSimpleName() + "[" +
-                    "alignment=" + _gradientAlignment       + ", " +
-                    "type="      + _gradientType            + ", " +
+                    "alignment=" + _transition + ", " +
+                    "type="      + _type + ", " +
                     "colors="    + Arrays.toString(_colors) + ", " +
                     "layer="     + _layer                   +
                 ']';
@@ -138,16 +156,16 @@ public final class GradientStyle
         if ( this == o ) return true;
         if ( !(o instanceof GradientStyle) ) return false;
         GradientStyle that = (GradientStyle) o;
-        return _gradientAlignment == that._gradientAlignment &&
-               _gradientType      == that._gradientType      &&
+        return _transition == that._transition &&
+               _type == that._type &&
                Arrays.equals(_colors, that._colors)          &&
                _layer == that._layer;
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(_gradientAlignment);
-        result = 31 * result + Objects.hash(_gradientType);
+        int result = Objects.hash(_transition);
+        result = 31 * result + Objects.hash(_type);
         result = 31 * result + Arrays.hashCode(_colors);
         result = 31 * result + Objects.hash(_layer);
         return result;

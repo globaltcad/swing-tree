@@ -6,9 +6,8 @@ import spock.lang.Subject
 import spock.lang.Title
 import swingtree.SwingTreeContext
 import swingtree.threading.EventProcessor
-import swingtree.UI
 import swingtree.style.Style
-import swingtree.style.StyleDelegate
+import swingtree.style.ComponentStyleDelegate
 
 import javax.swing.JPanel
 import java.awt.*
@@ -34,7 +33,7 @@ class Styles_Spec extends Specification
         String colorString, Color expectedColor
     ) {
         given : 'We use method chaining to build a colorful style:'
-            var style = new StyleDelegate<>(new JPanel(), Style.none())
+            var style = new ComponentStyleDelegate<>(new JPanel(), Style.none())
                                 .foundationColor(colorString)
                                 .backgroundColor(colorString)
                                 .borderColor(colorString)
@@ -84,7 +83,7 @@ class Styles_Spec extends Specification
     def 'The String representation of a Style will tell you everything about it!'()
     {
         given : 'We first create a style with various properties:'
-            var style = new StyleDelegate<>(new JPanel(), Style.none())
+            var style = new ComponentStyleDelegate<>(new JPanel(), Style.none())
                                 .foundationColor("red")
                                 .backgroundColor("green")
                                 .borderColor("blue")
@@ -146,7 +145,7 @@ class Styles_Spec extends Specification
     def 'Style objects are value based (with respect to equality and hash code).'()
     {
         given : 'First we need the `StyleDelegate` styler, which can apply styles to `Style` objects.'
-            var styler = s -> new StyleDelegate<>(new JPanel(), s)
+            var styler = s -> new ComponentStyleDelegate<>(new JPanel(), s)
 
         and : 'Then we create a starting style with various properties:'
             var style1 = styler(Style.none())

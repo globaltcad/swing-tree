@@ -4,7 +4,7 @@ package swingtree.style;
  *  Use this to target specific corners of a {@link javax.swing.JComponent} and apply
  *  custom {@link Style} properties to them.
  *  <br>
- *  See {@link StyleDelegate#borderRadiusAt(Corner, int, int)}.
+ *  See {@link ComponentStyleDelegate#borderRadiusAt(Corner, int, int)}.
  */
 public enum Corner
 {

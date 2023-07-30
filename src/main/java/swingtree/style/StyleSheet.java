@@ -252,7 +252,7 @@ public abstract class StyleSheet
         // Now we apply the valid traits to the starting style.
         for ( int i = subToSuper.size() - 1; i >= 0; i-- ) {
             StyleTrait trait = subToSuper.get(i);
-            startingStyle = _traitStylers.get(trait).style(new StyleDelegate<>(toBeStyled, startingStyle)).style();
+            startingStyle = _traitStylers.get(trait).style(new ComponentStyleDelegate<>(toBeStyled, startingStyle)).style();
         }
 
         return startingStyle;

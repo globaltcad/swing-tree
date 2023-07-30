@@ -1,6 +1,7 @@
 package swingtree.style;
 
 import swingtree.UI;
+import swingtree.api.Peeker;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,44 +10,62 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- *  A {@link StyleDelegate} is a delegate for a {@link JComponent} and its {@link Style} configuration
+ *  A {@link ComponentStyleDelegate} is a delegate for a {@link JComponent} and its {@link Style} configuration
  *  used to apply further specify the style of said {@link JComponent}.
  *  Instances of this will be exposed to you via the {@link swingtree.UIForAnySwing#withStyle(Styler)}
- *  method, where you can specify a lambda that takes a {@link StyleDelegate} and returns a
+ *  method, where you can specify a lambda that takes a {@link ComponentStyleDelegate} and returns a
  *  transformed {@link Style} object, as well as inside of {@link StyleSheet} extensions
  *  where you can declare similar styling lambdas for {@link StyleTrait}s, which are
  *  styling rules... <br>
  *
- * @param <C> The type of {@link JComponent} this {@link StyleDelegate} is for.
+ * @param <C> The type of {@link JComponent} this {@link ComponentStyleDelegate} is for.
  */
-public final class StyleDelegate<C extends JComponent>
+public final class ComponentStyleDelegate<C extends JComponent>
 {
     private final C _component;
     private final Style _style;
 
 
-    public StyleDelegate( C component, Style style ) {
+    public ComponentStyleDelegate(C component, Style style ) {
         _component = component;
         _style     = style;
     }
 
-    StyleDelegate<C> _withStyle( Style style ) { return new StyleDelegate<>(_component, style); }
+    ComponentStyleDelegate<C> _withStyle(Style style ) { return new ComponentStyleDelegate<>(_component, style); }
 
     /**
-     *  Returns the {@link JComponent} this {@link StyleDelegate} is defining a {@link Style} for.
+     *  Returns the {@link JComponent} this {@link ComponentStyleDelegate} is defining a {@link Style} for.
      *  This is useful if you want to make the styling of a component based on its state,
      *  like for example determining the background color of a {@link JCheckBox} based on
      *  whether it is selected or not...
      * <p>
-     * @return The {@link JComponent} this {@link StyleDelegate} is for.
+     * @return The {@link JComponent} this {@link ComponentStyleDelegate} is for.
      */
     public C component() { return _component; }
 
     /**
-     *  Returns the {@link Style} this {@link StyleDelegate} is defining for the {@link JComponent}
+     *  Use this to peek at the {@link JComponent} of this {@link ComponentStyleDelegate}
+     *  to perform some style-related component specific actions on it
+     *  which are otherwise not found in the {@link ComponentStyleDelegate} API.
+     *
+     * @param peeker A {@link Peeker} that takes the {@link JComponent} of this {@link ComponentStyleDelegate}
+     * @return This {@link ComponentStyleDelegate} instance.
+     */
+    public ComponentStyleDelegate<C> peek(Peeker<C> peeker ) {
+        try {
+            peeker.accept(_component);
+        } catch( Exception e ) {
+            e.printStackTrace();
+            // We don't want to crash the application if the peeker throws an exception.
+        }
+        return this;
+    }
+
+    /**
+     *  Returns the {@link Style} this {@link ComponentStyleDelegate} is defining for the {@link JComponent}
      *  returned by {@link #component()}.
      * <p>
-     * @return The {@link Style} this {@link StyleDelegate} is for.
+     * @return The {@link Style} this {@link ComponentStyleDelegate} is for.
      */
     public Style style() { return _style; }
 
@@ -60,9 +79,9 @@ public final class StyleDelegate<C extends JComponent>
      * @param right The right padding distance in pixels.
      * @param bottom The bottom padding distance in pixels.
      * @param left The left padding distance in pixels.
-     * @return A new {@link StyleDelegate} with the provided padding distances.
+     * @return A new {@link ComponentStyleDelegate} with the provided padding distances.
      */
-    public StyleDelegate<C> margin( int top, int right, int bottom, int left ) {
+    public ComponentStyleDelegate<C> margin( int top, int right, int bottom, int left ) {
         return _withStyle(_style._withLayout(_style.layout().margin(_style.layout().margin().top(top).left(left).right(right).bottom(bottom))));
     }
 
@@ -73,9 +92,9 @@ public final class StyleDelegate<C extends JComponent>
      *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param margin The margin distance in pixels.
-     * @return A new {@link StyleDelegate} with the provided margin distance.
+     * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
-    public StyleDelegate<C> margin( int margin ) {
+    public ComponentStyleDelegate<C> margin( int margin ) {
         return _withStyle(_style._withLayout(_style.layout().margin(_style.layout().margin().top(margin).left(margin).right(margin).bottom(margin))));
     }
 
@@ -86,9 +105,9 @@ public final class StyleDelegate<C extends JComponent>
      *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param margin The margin distance in pixels.
-     * @return A new {@link StyleDelegate} with the provided margin distance.
+     * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
-    public StyleDelegate<C> marginTop( int margin ) {
+    public ComponentStyleDelegate<C> marginTop( int margin ) {
         return _withStyle(_style._withLayout(_style.layout().margin(_style.layout().margin().top(margin))));
     }
 
@@ -99,9 +118,9 @@ public final class StyleDelegate<C extends JComponent>
      *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param margin The margin distance in pixels.
-     * @return A new {@link StyleDelegate} with the provided margin distance.
+     * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
-    public StyleDelegate<C> marginRight( int margin ) {
+    public ComponentStyleDelegate<C> marginRight( int margin ) {
         return _withStyle(_style._withLayout(_style.layout().margin(_style.layout().margin().right(margin))));
     }
 
@@ -112,9 +131,9 @@ public final class StyleDelegate<C extends JComponent>
      *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param margin The margin distance in pixels.
-     * @return A new {@link StyleDelegate} with the provided margin distance.
+     * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
-    public StyleDelegate<C> marginBottom( int margin ) {
+    public ComponentStyleDelegate<C> marginBottom( int margin ) {
         return _withStyle(_style._withLayout(_style.layout().margin(_style.layout().margin().bottom(margin))));
     }
 
@@ -125,9 +144,9 @@ public final class StyleDelegate<C extends JComponent>
      *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param margin The margin distance in pixels.
-     * @return A new {@link StyleDelegate} with the provided margin distance.
+     * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
-    public StyleDelegate<C> marginLeft( int margin ) {
+    public ComponentStyleDelegate<C> marginLeft( int margin ) {
         return _withStyle(_style._withLayout(_style.layout().margin(_style.layout().margin().left(margin))));
     }
 
@@ -138,9 +157,9 @@ public final class StyleDelegate<C extends JComponent>
      *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param margin The margin distance in pixels.
-     * @return A new {@link StyleDelegate} with the provided margin distance.
+     * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
-    public StyleDelegate<C> marginVertical( int margin ) {
+    public ComponentStyleDelegate<C> marginVertical( int margin ) {
         return _withStyle(_style._withLayout(_style.layout().margin(_style.layout().margin().top(margin).bottom(margin))));
     }
 
@@ -151,9 +170,9 @@ public final class StyleDelegate<C extends JComponent>
      *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param margin The margin distance in pixels.
-     * @return A new {@link StyleDelegate} with the provided margin distance.
+     * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
-    public StyleDelegate<C> marginHorizontal( int margin ) {
+    public ComponentStyleDelegate<C> marginHorizontal( int margin ) {
         return _withStyle(_style._withLayout(_style.layout().margin(_style.layout().margin().left(margin).right(margin))));
     }
 
@@ -167,9 +186,9 @@ public final class StyleDelegate<C extends JComponent>
      * @param right The right padding distance in pixels.
      * @param bottom The bottom padding distance in pixels.
      * @param left The left padding distance in pixels.
-     * @return A new {@link StyleDelegate} with the provided padding distances.
+     * @return A new {@link ComponentStyleDelegate} with the provided padding distances.
      */
-    public StyleDelegate<C> padding( int top, int right, int bottom, int left ) {
+    public ComponentStyleDelegate<C> padding( int top, int right, int bottom, int left ) {
         return _withStyle(_style._withLayout(_style.layout().padding(_style.layout().padding().top(top).left(left).right(right).bottom(bottom))));
     }
 
@@ -180,9 +199,9 @@ public final class StyleDelegate<C extends JComponent>
      *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param padding The padding distance in pixels.
-     * @return A new {@link StyleDelegate} with the provided padding distance.
+     * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
-    public StyleDelegate<C> padding( int padding ) {
+    public ComponentStyleDelegate<C> padding( int padding ) {
         return _withStyle(_style._withLayout(_style.layout().padding(_style.layout().padding().top(padding).left(padding).right(padding).bottom(padding))));
     }
 
@@ -193,9 +212,9 @@ public final class StyleDelegate<C extends JComponent>
      *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param padding The padding distance in pixels.
-     * @return A new {@link StyleDelegate} with the provided padding distance.
+     * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
-    public StyleDelegate<C> paddingTop( int padding ) {
+    public ComponentStyleDelegate<C> paddingTop( int padding ) {
         return _withStyle(_style._withLayout(_style.layout().padding(_style.layout().padding().top(padding))));
     }
 
@@ -207,9 +226,9 @@ public final class StyleDelegate<C extends JComponent>
      *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param padding The padding distance in pixels.
-     * @return A new {@link StyleDelegate} with the provided padding distance.
+     * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
-    public StyleDelegate<C> paddingRight( int padding ) {
+    public ComponentStyleDelegate<C> paddingRight( int padding ) {
         return _withStyle(_style._withLayout(_style.layout().padding(_style.layout().padding().right(padding))));
     }
 
@@ -220,9 +239,9 @@ public final class StyleDelegate<C extends JComponent>
      *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param padding The padding distance in pixels.
-     * @return A new {@link StyleDelegate} with the provided padding distance.
+     * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
-    public StyleDelegate<C> paddingBottom( int padding ) {
+    public ComponentStyleDelegate<C> paddingBottom( int padding ) {
         return _withStyle(_style._withLayout(_style.layout().padding(_style.layout().padding().bottom(padding))));
     }
 
@@ -233,9 +252,9 @@ public final class StyleDelegate<C extends JComponent>
      *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param padding The padding distance in pixels.
-     * @return A new {@link StyleDelegate} with the provided padding distance.
+     * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
-    public StyleDelegate<C> paddingLeft( int padding ) {
+    public ComponentStyleDelegate<C> paddingLeft( int padding ) {
         return _withStyle(_style._withLayout(_style.layout().padding(_style.layout().padding().left(padding))));
     }
 
@@ -246,9 +265,9 @@ public final class StyleDelegate<C extends JComponent>
      *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param padding The padding distance in pixels.
-     * @return A new {@link StyleDelegate} with the provided padding distance.
+     * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
-    public StyleDelegate<C> paddingVertical( int padding ) {
+    public ComponentStyleDelegate<C> paddingVertical( int padding ) {
         return _withStyle(_style._withLayout(_style.layout().padding(_style.layout().padding().top(padding).bottom(padding))));
     }
 
@@ -259,9 +278,9 @@ public final class StyleDelegate<C extends JComponent>
      *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param padding The padding distance in pixels.
-     * @return A new {@link StyleDelegate} with the provided padding distance.
+     * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
-    public StyleDelegate<C> paddingHorizontal( int padding ) {
+    public ComponentStyleDelegate<C> paddingHorizontal( int padding ) {
         return _withStyle(_style._withLayout(_style.layout().padding(_style.layout().padding().left(padding).right(padding))));
     }
 
@@ -271,9 +290,9 @@ public final class StyleDelegate<C extends JComponent>
      *
      * @param width The border width in pixels.
      * @param color The border color.
-     * @return A new {@link StyleDelegate} with the provided border width and border color.
+     * @return A new {@link ComponentStyleDelegate} with the provided border width and border color.
      */
-    public StyleDelegate<C> border( int width, Color color ) {
+    public ComponentStyleDelegate<C> border( int width, Color color ) {
         return _withStyle(_style._withBorder(_style.border().width(width).color(color)));
     }
 
@@ -286,9 +305,9 @@ public final class StyleDelegate<C extends JComponent>
      * @param bottom The border width in pixels for the bottom side of the component.
      * @param left The border width in pixels for the left side of the component.
      * @param color The border color.
-     * @return A new {@link StyleDelegate} with the provided border widths and border color.
+     * @return A new {@link ComponentStyleDelegate} with the provided border widths and border color.
      */
-    public StyleDelegate<C> border( int top, int right, int bottom, int left, Color color ) {
+    public ComponentStyleDelegate<C> border( int top, int right, int bottom, int left, Color color ) {
         return _withStyle(_style._withBorder(_style.border().widths(Outline.of(top, right, bottom, left)).color(color)));
     }
 
@@ -299,9 +318,9 @@ public final class StyleDelegate<C extends JComponent>
      *
      * @param width The border width in pixels.
      * @param colorString The border color.
-     * @return A new {@link StyleDelegate} with the provided border width and border color.
+     * @return A new {@link ComponentStyleDelegate} with the provided border width and border color.
      */
-    public StyleDelegate<C> border( int width, String colorString ) {
+    public ComponentStyleDelegate<C> border( int width, String colorString ) {
         return _withStyle(_style._withBorder(_style.border().width(width).color(StyleUtility.toColor(colorString))));
     }
 
@@ -310,9 +329,9 @@ public final class StyleDelegate<C extends JComponent>
      *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
      *
      * @param width The border width in pixels.
-     * @return A new {@link StyleDelegate} with the provided border width.
+     * @return A new {@link ComponentStyleDelegate} with the provided border width.
      */
-    public StyleDelegate<C> borderWidth( int width ) {
+    public ComponentStyleDelegate<C> borderWidth( int width ) {
         return _withStyle(_style._withBorder(_style.border().width(width)));
     }
 
@@ -322,9 +341,9 @@ public final class StyleDelegate<C extends JComponent>
      *
      * @param edge The edge to set the border width for.
      * @param width The border width in pixels.
-     * @return A new {@link StyleDelegate} with the provided border width for the specified edge.
+     * @return A new {@link ComponentStyleDelegate} with the provided border width for the specified edge.
      */
-    public StyleDelegate<C> borderWidthAt(UI.Edge edge, int width ) {
+    public ComponentStyleDelegate<C> borderWidthAt( UI.Edge edge, int width ) {
         return _withStyle(_style._withBorder(_style.border().widthAt(edge, width)));
     }
 
@@ -342,11 +361,11 @@ public final class StyleDelegate<C extends JComponent>
      * @param right The right border width in pixels.
      * @param bottom The bottom border width in pixels.
      * @param left The left border width in pixels.
-     * @return A new {@link StyleDelegate} with the provided top, right, bottom and left border widths.
+     * @return A new {@link ComponentStyleDelegate} with the provided top, right, bottom and left border widths.
      * @see #borderWidth(int)
      * @see #borderWidthAt(UI.Edge, int)
      */
-    public StyleDelegate<C> borderWidths( int top, int right, int bottom, int left ) {
+    public ComponentStyleDelegate<C> borderWidths( int top, int right, int bottom, int left ) {
         return _withStyle(_style._withBorder(_style.border().widths(Outline.of(top, right, bottom, left))));
     }
 
@@ -360,11 +379,11 @@ public final class StyleDelegate<C extends JComponent>
      *  }</pre>
      * @param topBottom The top and bottom border width in pixels.
      * @param leftRight The left and right border width in pixels.
-     * @return A new {@link StyleDelegate} with the provided top/bottom and left/right border widths.
+     * @return A new {@link ComponentStyleDelegate} with the provided top/bottom and left/right border widths.
      * @see #borderWidth(int)
      * @see #borderWidthAt(UI.Edge, int)
      */
-    public StyleDelegate<C> borderWidths( int topBottom, int leftRight ) {
+    public ComponentStyleDelegate<C> borderWidths( int topBottom, int leftRight ) {
         return _withStyle(_style._withBorder(_style.border().widths(Outline.of(topBottom, leftRight, topBottom, leftRight))));
     }
 
@@ -373,9 +392,9 @@ public final class StyleDelegate<C extends JComponent>
      *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
      *
      * @param color The border color.
-     * @return A new {@link StyleDelegate} with the provided border color.
+     * @return A new {@link ComponentStyleDelegate} with the provided border color.
      */
-    public StyleDelegate<C> borderColor( Color color ) {
+    public ComponentStyleDelegate<C> borderColor( Color color ) {
         return _withStyle(_style._withBorder(_style.border().color(color)));
     }
 
@@ -385,9 +404,9 @@ public final class StyleDelegate<C extends JComponent>
      *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
      *
      * @param colorString The border color.
-     * @return A new {@link StyleDelegate} with the provided border color.
+     * @return A new {@link ComponentStyleDelegate} with the provided border color.
      */
-    public StyleDelegate<C> borderColor( String colorString ) {
+    public ComponentStyleDelegate<C> borderColor( String colorString ) {
         return _withStyle(_style._withBorder(_style.border().color(StyleUtility.toColor(colorString))));
     }
 
@@ -397,9 +416,9 @@ public final class StyleDelegate<C extends JComponent>
      *  The border will be rendered with an inset space based on the padding defined by this {@link Style}.
      *
      * @param radius The border radius in pixels.
-     * @return A new {@link StyleDelegate} with the provided border radius.
+     * @return A new {@link ComponentStyleDelegate} with the provided border radius.
      */
-    public StyleDelegate<C> borderRadius( int radius ) {
+    public ComponentStyleDelegate<C> borderRadius( int radius ) {
         return _withStyle(_style._withBorder(_style.border().arcWidth(radius).arcHeight(radius)));
     }
 
@@ -409,9 +428,9 @@ public final class StyleDelegate<C extends JComponent>
      *
      * @param arcWidth The border arc width in pixels.
      * @param arcHeight The border arc height in pixels.
-     * @return A new {@link StyleDelegate} with the provided border arc width and arc height.
+     * @return A new {@link ComponentStyleDelegate} with the provided border arc width and arc height.
      */
-    public StyleDelegate<C> borderRadius( int arcWidth, int arcHeight ) {
+    public ComponentStyleDelegate<C> borderRadius( int arcWidth, int arcHeight ) {
         return _withStyle(_style._withBorder(_style.border().arcWidth(arcWidth).arcHeight(arcHeight)));
     }
 
@@ -422,9 +441,9 @@ public final class StyleDelegate<C extends JComponent>
      * @param corner The corner to apply the border radius to.
      * @param arcWidth The border arc width in pixels.
      * @param arcHeight The border arc height in pixels.
-     * @return A new {@link StyleDelegate} with the provided border arc width and arc height for the specified corner.
+     * @return A new {@link ComponentStyleDelegate} with the provided border arc width and arc height for the specified corner.
      */
-    public StyleDelegate<C> borderRadiusAt( Corner corner, int arcWidth, int arcHeight ) {
+    public ComponentStyleDelegate<C> borderRadiusAt( Corner corner, int arcWidth, int arcHeight ) {
         return _withStyle(_style._withBorder(_style.border().arcWidthAt(corner, arcWidth).arcHeightAt(corner, arcHeight)));
     }
 
@@ -443,9 +462,9 @@ public final class StyleDelegate<C extends JComponent>
      * }</pre>
      *
      * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
-     * @return A new {@link StyleDelegate} with a border shade defined by the provided styler lambda.
+     * @return A new {@link ComponentStyleDelegate} with a border shade defined by the provided styler lambda.
      */
-    public StyleDelegate<C> borderGradient(Function<GradientStyle, GradientStyle> styler ) {
+    public ComponentStyleDelegate<C> borderGradient( Function<GradientStyle, GradientStyle> styler ) {
         Objects.requireNonNull(styler);
         return _withStyle(_style._withBorder(_style.border().gradient(StyleUtility.DEFAULT_KEY, styler)));
     }
@@ -459,11 +478,11 @@ public final class StyleDelegate<C extends JComponent>
      *    .withStyle( it -> it
      *      .borderGradient("dark shading", grad -> grad
      *        .colors("#000000", "#000000")
-     *        .align(GradientAlignment.TOP_TO_BOTTOM)
+     *        .transition(UI.Transition.TOP_TO_BOTTOM)
      *      )
      *      .borderGradient("light shading", grad -> grad
      *        .colors("#ffffff", "#ffffff")
-     *        .align(GradientAlignment.TOP_TO_BOTTOM)
+     *        .transition(UI.Transition.TOP_TO_BOTTOM)
      *      )
      *    )
      * }</pre>
@@ -471,9 +490,9 @@ public final class StyleDelegate<C extends JComponent>
      *
      * @param shadeName The name of the border shade.
      * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
-     * @return A new {@link StyleDelegate} with a named border shade defined by the provided styler lambda.
+     * @return A new {@link ComponentStyleDelegate} with a named border shade defined by the provided styler lambda.
      */
-    public StyleDelegate<C> borderGradient( String shadeName, Function<GradientStyle, GradientStyle> styler ) {
+    public ComponentStyleDelegate<C> borderGradient( String shadeName, Function<GradientStyle, GradientStyle> styler ) {
         Objects.requireNonNull(shadeName);
         Objects.requireNonNull(styler);
         return _withStyle(_style._withBorder(_style.border().gradient(shadeName, styler)));
@@ -484,9 +503,9 @@ public final class StyleDelegate<C extends JComponent>
      *  The inner background will be rendered with an inset space based on the padding defined by this {@link Style}.
      *
      * @param color The inner background color.
-     * @return A new {@link StyleDelegate} with the provided inner background color.
+     * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
      */
-    public StyleDelegate<C> backgroundColor( Color color ) {
+    public ComponentStyleDelegate<C> backgroundColor( Color color ) {
         return _withStyle(_style._withBackground(_style.background().color(color)));
     }
 
@@ -496,9 +515,9 @@ public final class StyleDelegate<C extends JComponent>
      *  The inner background will be rendered with an inset space based on the padding defined by this {@link Style}.
      *
      * @param colorString The inner background color.
-     * @return A new {@link StyleDelegate} with the provided inner background color.
+     * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
      */
-    public StyleDelegate<C> backgroundColor( String colorString ) {
+    public ComponentStyleDelegate<C> backgroundColor( String colorString ) {
         return _withStyle(_style._withBackground(_style.background().color(StyleUtility.toColor(colorString))));
     }
 
@@ -507,9 +526,9 @@ public final class StyleDelegate<C extends JComponent>
      *  The background color covers the entire component area, including the padding spaces.
      *
      * @param color The background color.
-     * @return A new {@link StyleDelegate} with the provided background color.
+     * @return A new {@link ComponentStyleDelegate} with the provided background color.
      */
-    public StyleDelegate<C> foundationColor( Color color ) {
+    public ComponentStyleDelegate<C> foundationColor( Color color ) {
         return _withStyle(_style._withBackground(_style.background().foundationColor(color)));
     }
 
@@ -519,9 +538,9 @@ public final class StyleDelegate<C extends JComponent>
      *  The background color covers the entire component area, including the padding spaces.
      *
      * @param colorString The background color.
-     * @return A new {@link StyleDelegate} with the provided background color.
+     * @return A new {@link ComponentStyleDelegate} with the provided background color.
      */
-    public StyleDelegate<C> foundationColor( String colorString ) {
+    public ComponentStyleDelegate<C> foundationColor( String colorString ) {
         return _withStyle(_style._withBackground(_style.background().foundationColor(StyleUtility.toColor(colorString))));
     }
 
@@ -531,9 +550,9 @@ public final class StyleDelegate<C extends JComponent>
      *  You may use this to render a custom background for the component.
      * @param layer The layer on which the painter should do its work.
      * @param renderer The background renderer.
-     * @return A new {@link StyleDelegate} with the provided background renderer.
+     * @return A new {@link ComponentStyleDelegate} with the provided background renderer.
      */
-    public StyleDelegate<C> painter(UI.Layer layer, Painter renderer ) {
+    public ComponentStyleDelegate<C> painter( UI.Layer layer, Painter renderer ) {
         return _withStyle(_style.painter(StyleUtility.DEFAULT_KEY, layer, renderer));
     }
 
@@ -548,9 +567,9 @@ public final class StyleDelegate<C extends JComponent>
      * @param layer The layer on which the painter should do its work.
      * @param painterName The name of the painter.
      * @param renderer The background renderer.
-     * @return A new {@link StyleDelegate} with the provided background renderer.
+     * @return A new {@link ComponentStyleDelegate} with the provided background renderer.
      */
-    public StyleDelegate<C> painter(UI.Layer layer, String painterName, Painter renderer ) {
+    public ComponentStyleDelegate<C> painter( UI.Layer layer, String painterName, Painter renderer ) {
         return _withStyle(_style.painter(painterName, layer, renderer));
     }
 
@@ -558,9 +577,9 @@ public final class StyleDelegate<C extends JComponent>
      *  Returns a new {@link Style} with the provided foreground color.
      *
      * @param color The foreground color.
-     * @return A new {@link StyleDelegate} with the provided foreground color.
+     * @return A new {@link ComponentStyleDelegate} with the provided foreground color.
      */
-    public StyleDelegate<C> foregroundColor( Color color ) {
+    public ComponentStyleDelegate<C> foregroundColor( Color color ) {
         return _withStyle(_style._withForeground(_style.foreground().color(color)));
     }
 
@@ -569,9 +588,9 @@ public final class StyleDelegate<C extends JComponent>
      *  The string can be either a hex color string, a color name or a color constant from the system properties.
      *
      * @param colorString The foreground color.
-     * @return A new {@link StyleDelegate} with the provided foreground color.
+     * @return A new {@link ComponentStyleDelegate} with the provided foreground color.
      */
-    public StyleDelegate<C> foregroundColor( String colorString ) {
+    public ComponentStyleDelegate<C> foregroundColor( String colorString ) {
         return _withStyle(_style._withForeground(_style.foreground().color(StyleUtility.toColor(colorString))));
     }
 
@@ -584,9 +603,9 @@ public final class StyleDelegate<C extends JComponent>
      *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
      *
      * @param offset The shadow offset in pixels.
-     * @return A new {@link StyleDelegate} with the provided horizontal shadow offset.
+     * @return A new {@link ComponentStyleDelegate} with the provided horizontal shadow offset.
      */
-    public StyleDelegate<C> shadowHorizontalOffset( int offset ) {
+    public ComponentStyleDelegate<C> shadowHorizontalOffset( int offset ) {
         return _withStyle(_style._withShadow( shadow -> shadow.horizontalOffset(offset)));
     }
 
@@ -599,9 +618,9 @@ public final class StyleDelegate<C extends JComponent>
      *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
      *
      * @param offset The shadow offset in pixels.
-     * @return A new {@link StyleDelegate} with the provided vertical shadow offset.
+     * @return A new {@link ComponentStyleDelegate} with the provided vertical shadow offset.
      */
-    public StyleDelegate<C> shadowVerticalOffset( int offset ) {
+    public ComponentStyleDelegate<C> shadowVerticalOffset( int offset ) {
         return _withStyle(_style._withShadow( shadow -> shadow.verticalOffset(offset)));
     }
 
@@ -615,9 +634,9 @@ public final class StyleDelegate<C extends JComponent>
      *
      * @param horizontalOffset The horizontal shadow offset in pixels.
      * @param verticalOffset The vertical shadow offset in pixels.
-     * @return A new {@link StyleDelegate} with the provided shadow offset.
+     * @return A new {@link ComponentStyleDelegate} with the provided shadow offset.
      */
-    public StyleDelegate<C> shadowOffset( int horizontalOffset, int verticalOffset ) {
+    public ComponentStyleDelegate<C> shadowOffset( int horizontalOffset, int verticalOffset ) {
         return _withStyle(_style._withShadow( shadow -> shadow.horizontalOffset(horizontalOffset).verticalOffset(verticalOffset)));
     }
 
@@ -630,9 +649,9 @@ public final class StyleDelegate<C extends JComponent>
      *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
      *
      * @param horizontalAndVerticalOffset The horizontal and vertical shadow offset in pixels.
-     * @return A new {@link StyleDelegate} with the provided shadow offset.
+     * @return A new {@link ComponentStyleDelegate} with the provided shadow offset.
      */
-    public StyleDelegate<C> shadowOffset( int horizontalAndVerticalOffset ) {
+    public ComponentStyleDelegate<C> shadowOffset( int horizontalAndVerticalOffset ) {
         return _withStyle(_style._withShadow( shadow -> shadow.horizontalOffset(horizontalAndVerticalOffset).verticalOffset(horizontalAndVerticalOffset)));
     }
 
@@ -645,9 +664,9 @@ public final class StyleDelegate<C extends JComponent>
      *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
      *
      * @param radius The shadow blur radius in pixels.
-     * @return A new {@link StyleDelegate} with the provided shadow blur radius.
+     * @return A new {@link ComponentStyleDelegate} with the provided shadow blur radius.
      */
-    public StyleDelegate<C> shadowBlurRadius( int radius ) {
+    public ComponentStyleDelegate<C> shadowBlurRadius( int radius ) {
         return _withStyle(_style._withShadow( shadow -> shadow.blurRadius(radius)));
     }
 
@@ -660,9 +679,9 @@ public final class StyleDelegate<C extends JComponent>
      *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
      *
      * @param radius The shadow spread radius in pixels.
-     * @return A new {@link StyleDelegate} with the provided shadow spread radius.
+     * @return A new {@link ComponentStyleDelegate} with the provided shadow spread radius.
      */
-    public StyleDelegate<C> shadowSpreadRadius( int radius ) {
+    public ComponentStyleDelegate<C> shadowSpreadRadius( int radius ) {
         return _withStyle(_style._withShadow( shadow -> shadow.spreadRadius(radius)));
     }
 
@@ -675,9 +694,9 @@ public final class StyleDelegate<C extends JComponent>
      *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
      *
      * @param color The shadow color.
-     * @return A new {@link StyleDelegate} with the provided shadow color.
+     * @return A new {@link ComponentStyleDelegate} with the provided shadow color.
      */
-    public StyleDelegate<C> shadowColor( Color color ) {
+    public ComponentStyleDelegate<C> shadowColor( Color color ) {
         return _withStyle(_style._withShadow( shadow -> shadow.color(color)));
     }
 
@@ -691,9 +710,9 @@ public final class StyleDelegate<C extends JComponent>
      *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
      *
      * @param colorString The shadow color.
-     * @return A new {@link StyleDelegate} with the provided shadow color.
+     * @return A new {@link ComponentStyleDelegate} with the provided shadow color.
      */
-    public StyleDelegate<C> shadowColor( String colorString ) {
+    public ComponentStyleDelegate<C> shadowColor( String colorString ) {
         return _withStyle(_style._withShadow( shadow -> shadow.color(StyleUtility.toColor(colorString))));
     }
 
@@ -704,9 +723,9 @@ public final class StyleDelegate<C extends JComponent>
      *  (see {@link #shadow(String, Function)} for an example of how to use named shadows)
      *
      * @param inwards Whether the shadow should be rendered inwards or outwards.
-     * @return A new {@link StyleDelegate} with the provided shadow inset flag.
+     * @return A new {@link ComponentStyleDelegate} with the provided shadow inset flag.
      */
-    public StyleDelegate<C> shadowIsInset( boolean inwards ) {
+    public ComponentStyleDelegate<C> shadowIsInset( boolean inwards ) {
         return _withStyle(_style._withShadow( shadow -> shadow.isInset(inwards)));
     }
 
@@ -714,9 +733,9 @@ public final class StyleDelegate<C extends JComponent>
      *  Use this to configure on which layer the shadow should be rendered. <br>
      *  The default layer is {@link UI.Layer#CONTENT}. <br>
      * @param layer The layer on which the shadow should be rendered.
-     * @return A new {@link StyleDelegate} with the provided shadow layer.
+     * @return A new {@link ComponentStyleDelegate} with the provided shadow layer.
      */
-    public StyleDelegate<C> shadowLayer( UI.Layer layer ) {
+    public ComponentStyleDelegate<C> shadowLayer( UI.Layer layer ) {
         return _withStyle(_style._withShadow( shadow -> shadow.layer(layer)));
     }
 
@@ -727,17 +746,16 @@ public final class StyleDelegate<C extends JComponent>
      *  Here is an example of how to use this method:
      *  <pre>{@code
      *      UI.panel()
-     *      .withStyle( it ->
-     *          it
-     *          .shadow("dark shading", shadow ->
-     *              shadow.color("#000000")
+     *      .withStyle( it -> it
+     *          .shadow("dark shading", shadow -> shadow
+     *              .color("#000000")
      *              .horizontalOffset(5)
      *              .verticalOffset(5)
      *              .blurRadius(10)
      *              .spreadRadius(0)
      *          )
-     *          .shadow("light shading", shadow ->
-     *              shadow.color("#ffffff")
+     *          .shadow("light shading", shadow -> shadow
+     *              .color("#ffffff")
      *              .horizontalOffset(-5)
      *              .verticalOffset(-5)
      *              .blurRadius(10)
@@ -748,9 +766,9 @@ public final class StyleDelegate<C extends JComponent>
      *
      * @param shadowName The name of the shadow.
      * @param styler A function that takes a {@link ShadowStyle} and returns a new {@link ShadowStyle}.
-     * @return A new {@link StyleDelegate} with a named shadow defined by the provided styler lambda.
+     * @return A new {@link ComponentStyleDelegate} with a named shadow defined by the provided styler lambda.
      */
-    public StyleDelegate<C> shadow( String shadowName, Function<ShadowStyle, ShadowStyle> styler ) {
+    public ComponentStyleDelegate<C> shadow( String shadowName, Function<ShadowStyle, ShadowStyle> styler ) {
         Objects.requireNonNull(shadowName);
         Objects.requireNonNull(styler);
         ShadowStyle shadow = Optional.ofNullable(_style.shadow(shadowName)).orElse(ShadowStyle.none());
@@ -767,15 +785,14 @@ public final class StyleDelegate<C extends JComponent>
      *  Here is an example of how to use this method:
      *  <pre>{@code
      *    UI.panel()
-     *    .withStyle( it ->
-     *      it
+     *    .withStyle( it -> it
      *      .gradient("dark shading", grad -> grad
      *        .colors("#000000", "#000000")
-     *        .align(GradientAlignment.TOP_TO_BOTTOM)
+     *        .transition(UI.Transition.TOP_TO_BOTTOM)
      *      )
      *      .gradient("light shading", grad -> grad
      *        .colors("#ffffff", "#ffffff")
-     *        .align(GradientAlignment.TOP_TO_BOTTOM))
+     *        .transition(UI.Transition.TOP_TO_BOTTOM))
      *      )
      *    )
      * }</pre>
@@ -783,9 +800,9 @@ public final class StyleDelegate<C extends JComponent>
      *
      * @param shadeName The name of the background shade.
      * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
-     * @return A new {@link StyleDelegate} with a named background shade defined by the provided styler lambda.
+     * @return A new {@link ComponentStyleDelegate} with a named background shade defined by the provided styler lambda.
      */
-    public StyleDelegate<C> gradient( String shadeName, Function<GradientStyle, GradientStyle> styler ) {
+    public ComponentStyleDelegate<C> gradient(String shadeName, Function<GradientStyle, GradientStyle> styler ) {
         Objects.requireNonNull(shadeName);
         Objects.requireNonNull(styler);
         return _withStyle(_style.gradient(shadeName, styler));
@@ -797,15 +814,18 @@ public final class StyleDelegate<C extends JComponent>
      *  Here is an example of how to use this method:
      *  <pre>{@code
      *    UI.panel()
-     *    .withStyle( it ->
-     *      it.backgroundShade(shade -> shade.colors("#000000", "#000000").strategy(ShadeStrategy.TOP_TO_BOTTOM)))
+     *    .withStyle( it -> it
+     *        .gradient( grad -> grad
+     *            .colors("#000000", "#000000")
+     *            .transition(UI.Transition.TOP_TO_BOTTOM)
+     *        )
      *    )
      * }</pre>
      *
      * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
-     * @return A new {@link StyleDelegate} with a background shade defined by the provided styler lambda.
+     * @return A new {@link ComponentStyleDelegate} with a background shade defined by the provided styler lambda.
      */
-    public StyleDelegate<C> gradient( Function<GradientStyle, GradientStyle> styler ) {
+    public ComponentStyleDelegate<C> gradient( Function<GradientStyle, GradientStyle> styler ) {
         Objects.requireNonNull(styler);
         return _withStyle(_style.gradient(StyleUtility.DEFAULT_KEY, styler));
     }
@@ -817,9 +837,9 @@ public final class StyleDelegate<C extends JComponent>
      *
      * @param name The font name.
      * @param size The font size.
-     * @return A new {@link StyleDelegate} with the provided font name and size.
+     * @return A new {@link ComponentStyleDelegate} with the provided font name and size.
      */
-    public StyleDelegate<C> font( String name, int size ) {
+    public ComponentStyleDelegate<C> font( String name, int size ) {
         return _withStyle(_style._withFont(_style.font().name(name).size(size)));
     }
 
@@ -829,9 +849,9 @@ public final class StyleDelegate<C extends JComponent>
      *  also supports displaying text.
      *
      * @param name The font name.
-     * @return A new {@link StyleDelegate} with the provided font name.
+     * @return A new {@link ComponentStyleDelegate} with the provided font name.
      */
-    public StyleDelegate<C> fontName( String name ) {
+    public ComponentStyleDelegate<C> fontName( String name ) {
         return _withStyle(_style._withFont(_style.font().name(name)));
     }
 
@@ -841,9 +861,9 @@ public final class StyleDelegate<C extends JComponent>
      *  also supports displaying text.
      *
      * @param font The {@link Font}.
-     * @return A new {@link StyleDelegate} with the provided {@link Font}.
+     * @return A new {@link ComponentStyleDelegate} with the provided {@link Font}.
      */
-    public StyleDelegate<C> font( Font font ) {
+    public ComponentStyleDelegate<C> font( Font font ) {
         return _withStyle(_style._withFont(_style.font().font(font)));
     }
 
@@ -853,9 +873,9 @@ public final class StyleDelegate<C extends JComponent>
      *  also supports displaying text.
      *
      * @param size The font size.
-     * @return A new {@link StyleDelegate} with the provided font size.
+     * @return A new {@link ComponentStyleDelegate} with the provided font size.
      */
-    public StyleDelegate<C> fontSize( int size ) {
+    public ComponentStyleDelegate<C> fontSize( int size ) {
         return _withStyle(_style._withFont(_style.font().size(size)));
     }
 
@@ -865,9 +885,9 @@ public final class StyleDelegate<C extends JComponent>
      *  also supports displaying text.
      *
      * @param bold Whether the font should be bold or not.
-     * @return A new {@link StyleDelegate} with the provided font boldness.
+     * @return A new {@link ComponentStyleDelegate} with the provided font boldness.
      */
-    public StyleDelegate<C> fontBold( boolean bold ) {
+    public ComponentStyleDelegate<C> fontBold( boolean bold ) {
         return _withStyle(_style._withFont(_style.font().weight( bold ? 2 : 1 )));
     }
 
@@ -877,9 +897,9 @@ public final class StyleDelegate<C extends JComponent>
      *  also supports displaying text.
      *
      * @param italic Whether the font should be italic or not.
-     * @return A new {@link StyleDelegate} with the provided font italicness.
+     * @return A new {@link ComponentStyleDelegate} with the provided font italicness.
      */
-    public StyleDelegate<C> fontItalic( boolean italic ) {
+    public ComponentStyleDelegate<C> fontItalic( boolean italic ) {
         return _withStyle(_style._withFont(_style.font().posture( italic ? 0.2f : 0f )));
     }
 
@@ -889,9 +909,9 @@ public final class StyleDelegate<C extends JComponent>
      *  also supports displaying text.
      *
      * @param underline Whether the font should be underlined or not.
-     * @return A new {@link StyleDelegate} with the provided font underlinedness.
+     * @return A new {@link ComponentStyleDelegate} with the provided font underlinedness.
      */
-    public StyleDelegate<C> fontUnderline( boolean underline ) {
+    public ComponentStyleDelegate<C> fontUnderline( boolean underline ) {
         return _withStyle(_style._withFont(_style.font().isUnderlined(underline)));
     }
 
@@ -901,9 +921,9 @@ public final class StyleDelegate<C extends JComponent>
      *  also supports displaying text.
      *
      * @param strikeThrough Whether the font should be struck through or not.
-     * @return A new {@link StyleDelegate} with the provided font struck throughness.
+     * @return A new {@link ComponentStyleDelegate} with the provided font struck throughness.
      */
-    public StyleDelegate<C> fontStrikeThrough( boolean strikeThrough ) {
+    public ComponentStyleDelegate<C> fontStrikeThrough( boolean strikeThrough ) {
         return _withStyle(_style._withFont(_style.font().isStrike(strikeThrough)));
     }
 
@@ -913,9 +933,9 @@ public final class StyleDelegate<C extends JComponent>
      *  also supports displaying text.
      *
      * @param color The {@link Color}.
-     * @return A new {@link StyleDelegate} with the provided font color.
+     * @return A new {@link ComponentStyleDelegate} with the provided font color.
      */
-    public StyleDelegate<C> fontColor( Color color ) {
+    public ComponentStyleDelegate<C> fontColor( Color color ) {
         return _withStyle(_style._withFont(_style.font().color(color)));
     }
 
@@ -925,9 +945,9 @@ public final class StyleDelegate<C extends JComponent>
      *  also supports displaying text.
      *
      * @param colorString The {@link Color} as a string.
-     * @return A new {@link StyleDelegate} with the provided font color.
+     * @return A new {@link ComponentStyleDelegate} with the provided font color.
      */
-    public StyleDelegate<C> fontColor( String colorString ) {
+    public ComponentStyleDelegate<C> fontColor( String colorString ) {
         return _withStyle(_style._withFont(_style.font().color(StyleUtility.toColor(colorString))));
     }
 
@@ -937,9 +957,9 @@ public final class StyleDelegate<C extends JComponent>
      *  also supports displaying text.
      *
      * @param color The {@link Color}.
-     * @return A new {@link StyleDelegate} with the provided font background color.
+     * @return A new {@link ComponentStyleDelegate} with the provided font background color.
      */
-    public StyleDelegate<C> fontBackgroundColor( Color color ) {
+    public ComponentStyleDelegate<C> fontBackgroundColor( Color color ) {
         return _withStyle(_style._withFont(_style.font().backgroundColor(color)));
     }
 
@@ -949,9 +969,9 @@ public final class StyleDelegate<C extends JComponent>
      *  also supports displaying text.
      *
      * @param colorString The {@link Color} as a string.
-     * @return A new {@link StyleDelegate} with the provided font color.
+     * @return A new {@link ComponentStyleDelegate} with the provided font color.
      */
-    public StyleDelegate<C> fontBackgroundColor( String colorString ) {
+    public ComponentStyleDelegate<C> fontBackgroundColor( String colorString ) {
         return _withStyle(_style._withFont(_style.font().backgroundColor(StyleUtility.toColor(colorString))));
     }
 
@@ -961,9 +981,9 @@ public final class StyleDelegate<C extends JComponent>
      *  also supports displaying text.
      *
      * @param color The {@link Color}.
-     * @return A new {@link StyleDelegate} with the provided font selection color.
+     * @return A new {@link ComponentStyleDelegate} with the provided font selection color.
      */
-    public StyleDelegate<C> fontSelectionColor( Color color ) {
+    public ComponentStyleDelegate<C> fontSelectionColor( Color color ) {
         return _withStyle(_style._withFont(_style.font().selectionColor(color)));
     }
 
@@ -973,25 +993,25 @@ public final class StyleDelegate<C extends JComponent>
      *  also supports displaying text.
      *
      * @param colorString The {@link Color} as a string.
-     * @return A new {@link StyleDelegate} with the provided font selection color.
+     * @return A new {@link ComponentStyleDelegate} with the provided font selection color.
      */
-    public StyleDelegate<C> fontSelectionColor( String colorString ) {
+    public ComponentStyleDelegate<C> fontSelectionColor( String colorString ) {
         return _withStyle(_style._withFont(_style.font().selectionColor(StyleUtility.toColor(colorString))));
     }
 
     /**
      * @param transform The {@link AffineTransform} to apply to the font.
-     * @return A new {@link StyleDelegate} with the provided font transform.
+     * @return A new {@link ComponentStyleDelegate} with the provided font transform.
      */
-    public StyleDelegate<C> fontTransform(AffineTransform transform ) {
+    public ComponentStyleDelegate<C> fontTransform( AffineTransform transform ) {
         return _withStyle(_style._withFont(_style.font().transform(transform)));
     }
 
     /**
      * @param paint The {@link Paint} to use for the foreground of the font.
-     * @return A new {@link StyleDelegate} with the provided font paint.
+     * @return A new {@link ComponentStyleDelegate} with the provided font paint.
      */
-    public StyleDelegate<C> fontPaint(Paint paint ) {
+    public ComponentStyleDelegate<C> fontPaint( Paint paint ) {
         return _withStyle(_style._withFont(_style.font().paint(paint)));
     }
 
@@ -1000,9 +1020,9 @@ public final class StyleDelegate<C extends JComponent>
      *  Note that font styles will only apply if the component that is being rendered
      *  also supports displaying text.
      * @param weight The weight of the font.
-     * @return A new {@link StyleDelegate} with the provided font weight.
+     * @return A new {@link ComponentStyleDelegate} with the provided font weight.
      */
-    public StyleDelegate<C> fontWeight( float weight ) {
+    public ComponentStyleDelegate<C> fontWeight( float weight ) {
         return _withStyle(_style._withFont(_style.font().weight(weight))); 
     }
 
@@ -1013,9 +1033,9 @@ public final class StyleDelegate<C extends JComponent>
      *  Also note that not all text based components support text alignment.
      *  @param alignment The horizontal alignment of the font.
      *                   See {@link UI.HorizontalAlignment} for more information.
-     *  @return A new {@link StyleDelegate} with the provided font alignment.
+     *  @return A new {@link ComponentStyleDelegate} with the provided font alignment.
      */
-    public StyleDelegate<C> fontAlignment( UI.HorizontalAlignment alignment ) {
+    public ComponentStyleDelegate<C> fontAlignment( UI.HorizontalAlignment alignment ) {
         return _withStyle(_style._withFont(_style.font().horizontalAlignment(alignment)));
     }
 
@@ -1023,10 +1043,11 @@ public final class StyleDelegate<C extends JComponent>
      *  Defines the minimum {@link Dimension} of this {@link JComponent}. <br>
      *  This ultimately translates to {@link JComponent#setMinimumSize(Dimension)} on the underlying component. <br>
      * @param minSize The minimum {@link Dimension}.
-     * @return A new {@link StyleDelegate} with the provided minimum {@link Dimension} set to be later
+     * @return A new {@link ComponentStyleDelegate} with the provided minimum {@link Dimension} set to be later
      *          applied to the underlying component when the final {@link Style} is applied.
      */
-    public StyleDelegate<C> minSize( Dimension minSize ) {
+    public ComponentStyleDelegate<C> minSize( Dimension minSize ) {
+        Objects.requireNonNull(minSize);
         return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinWidth(minSize.width)._withMinHeight(minSize.height)));
     }
 
@@ -1036,10 +1057,10 @@ public final class StyleDelegate<C extends JComponent>
      *  which will be called when all the other styles are applied and rendered. <br>
      * @param width The minimum width.
      * @param height The minimum height.
-     * @return A new {@link StyleDelegate} with the provided minimum {@link Dimension} set to be later
+     * @return A new {@link ComponentStyleDelegate} with the provided minimum {@link Dimension} set to be later
      *          applied to the underlying component when the final {@link Style} is applied.
      */
-    public StyleDelegate<C> minSize( int width, int height ) {
+    public ComponentStyleDelegate<C> minSize( int width, int height ) {
         return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinWidth(width)._withMinHeight(height)));
     }
 
@@ -1048,10 +1069,10 @@ public final class StyleDelegate<C extends JComponent>
      *  This ultimately translates to {@link JComponent#setMinimumSize(Dimension)} on the underlying component,
      *  which will be called when all the other styles are applied and rendered. <br>
      * @param minWidth The minimum width.
-     * @return A new {@link StyleDelegate} with the provided minimum width set to be later
+     * @return A new {@link ComponentStyleDelegate} with the provided minimum width set to be later
      *          applied to the underlying component when the final {@link Style} is applied.
      */
-    public StyleDelegate<C> minWidth( int minWidth ) {
+    public ComponentStyleDelegate<C> minWidth( int minWidth ) {
         return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinWidth(minWidth)));
     }
 
@@ -1060,10 +1081,10 @@ public final class StyleDelegate<C extends JComponent>
      *  This ultimately translates to {@link JComponent#setMinimumSize(Dimension)} on the underlying component,
      *  which will be called when all the other styles are applied and rendered. <br>
      * @param minHeight The minimum height.
-     * @return A new {@link StyleDelegate} with the provided minimum height set to be later
+     * @return A new {@link ComponentStyleDelegate} with the provided minimum height set to be later
      *          applied to the underlying component when the final {@link Style} is applied.
      */
-    public StyleDelegate<C> minHeight( int minHeight ) {
+    public ComponentStyleDelegate<C> minHeight( int minHeight ) {
         return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinHeight(minHeight)));
     }
 
@@ -1073,10 +1094,10 @@ public final class StyleDelegate<C extends JComponent>
      *  The passed {@link Dimension} will be applied when all the other styles are applied and rendered. <br>
      *
      * @param maxSize The maximum {@link Dimension}.
-     * @return A new {@link StyleDelegate} with the provided maximum {@link Dimension} set to be later
+     * @return A new {@link ComponentStyleDelegate} with the provided maximum {@link Dimension} set to be later
      *          applied to the underlying component when the final {@link Style} is applied.
      */
-    public StyleDelegate<C> maxSize( Dimension maxSize ) {
+    public ComponentStyleDelegate<C> maxSize( Dimension maxSize ) {
         return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(maxSize.width)._withMaxHeight(maxSize.height)));
     }
 
@@ -1087,10 +1108,10 @@ public final class StyleDelegate<C extends JComponent>
      *
      * @param width The maximum width.
      * @param height The maximum height.
-     * @return A new {@link StyleDelegate} with the provided maximum {@link Dimension} set to be later
+     * @return A new {@link ComponentStyleDelegate} with the provided maximum {@link Dimension} set to be later
      *          applied to the underlying component when the final {@link Style} is applied.
      */
-    public StyleDelegate<C> maxSize( int width, int height ) {
+    public ComponentStyleDelegate<C> maxSize( int width, int height ) {
         return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(width)._withMaxHeight(height)));
     }
 
@@ -1100,10 +1121,10 @@ public final class StyleDelegate<C extends JComponent>
      *  The passed width will be applied when all the other styles are applied and rendered. <br>
      *
      * @param maxWidth The maximum width.
-     * @return A new {@link StyleDelegate} with the provided maximum width set to be later
+     * @return A new {@link ComponentStyleDelegate} with the provided maximum width set to be later
      *          applied to the underlying component when the final {@link Style} is applied.
      */
-    public StyleDelegate<C> maxWidth( int maxWidth ) {
+    public ComponentStyleDelegate<C> maxWidth( int maxWidth ) {
         return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(maxWidth)));
     }
 
@@ -1113,10 +1134,10 @@ public final class StyleDelegate<C extends JComponent>
      *  The passed height will be applied when all the other styles are applied and rendered. <br>
      *
      * @param maxHeight The maximum height.
-     * @return A new {@link StyleDelegate} with the provided maximum height set to be later
+     * @return A new {@link ComponentStyleDelegate} with the provided maximum height set to be later
      *          applied to the underlying component when the final {@link Style} is applied.
      */
-    public StyleDelegate<C> maxHeight( int maxHeight ) {
+    public ComponentStyleDelegate<C> maxHeight( int maxHeight ) {
         return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxHeight(maxHeight)));
     }
 
@@ -1126,10 +1147,11 @@ public final class StyleDelegate<C extends JComponent>
      *  The passed {@link Dimension} will be applied when all the other styles are applied and rendered. <br>
      *
      * @param preferredSize The preferred {@link Dimension}.
-     * @return A new {@link StyleDelegate} with the provided preferred {@link Dimension} set to be later
+     * @return A new {@link ComponentStyleDelegate} with the provided preferred {@link Dimension} set to be later
      *          applied to the underlying component when the final {@link Style} is applied.
      */
-    public StyleDelegate<C> prefSize( Dimension preferredSize ) {
+    public ComponentStyleDelegate<C> prefSize( Dimension preferredSize ) {
+        Objects.requireNonNull(preferredSize);
         return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredWidth(preferredSize.width)._withPreferredHeight(preferredSize.height)));
     }
 
@@ -1140,10 +1162,10 @@ public final class StyleDelegate<C extends JComponent>
      *
      * @param width The preferred width.
      * @param height The preferred height.
-     * @return A new {@link StyleDelegate} with the provided preferred {@link Dimension} set to be later
+     * @return A new {@link ComponentStyleDelegate} with the provided preferred {@link Dimension} set to be later
      *          applied to the underlying component when the final {@link Style} is applied.
      */
-    public StyleDelegate<C> prefSize( int width, int height ) {
+    public ComponentStyleDelegate<C> prefSize( int width, int height ) {
         return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredWidth(width)._withPreferredHeight(height)));
     }
 
@@ -1153,10 +1175,10 @@ public final class StyleDelegate<C extends JComponent>
      *  The passed width will be applied when all the other styles are applied and rendered. <br>
      *
      * @param preferredWidth The preferred width.
-     * @return A new {@link StyleDelegate} with the provided preferred width set to be later
+     * @return A new {@link ComponentStyleDelegate} with the provided preferred width set to be later
      *          applied to the underlying component when the final {@link Style} is applied.
      */
-    public StyleDelegate<C> prefWidth( int preferredWidth ) {
+    public ComponentStyleDelegate<C> prefWidth( int preferredWidth ) {
         return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredWidth(preferredWidth)));
     }
 
@@ -1166,10 +1188,10 @@ public final class StyleDelegate<C extends JComponent>
      *  The passed height will be applied when all the other styles are applied and rendered. <br>
      *
      * @param preferredHeight The preferred height.
-     * @return A new {@link StyleDelegate} with the provided preferred height set to be later
+     * @return A new {@link ComponentStyleDelegate} with the provided preferred height set to be later
      *          applied to the underlying component when the final {@link Style} is applied.
      */
-    public StyleDelegate<C> prefHeight( int preferredHeight ) {
+    public ComponentStyleDelegate<C> prefHeight( int preferredHeight ) {
         return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredHeight(preferredHeight)));
     }
 
@@ -1177,10 +1199,11 @@ public final class StyleDelegate<C extends JComponent>
      *  Defines the size of this {@link JComponent}. <br>
      *  This ultimately translates to {@link JComponent#setSize(Dimension)} on the underlying component. <br>
      * @param size The width and height size {@link Dimension}.
-     * @return A new {@link StyleDelegate} with the provided size (width and height) {@link Dimension} set to be later
+     * @return A new {@link ComponentStyleDelegate} with the provided size (width and height) {@link Dimension} set to be later
      *          applied to the underlying component when the final {@link Style} is applied.
      */
-    public StyleDelegate<C> size( Dimension size ) {
+    public ComponentStyleDelegate<C> size( Dimension size ) {
+        Objects.requireNonNull(size);
         return _withStyle(_style._withDimensionality(_style.dimensionality()._withWidth(size.width)._withHeight(size.height)));
     }
 
@@ -1189,10 +1212,10 @@ public final class StyleDelegate<C extends JComponent>
      *  This ultimately translates to {@link JComponent#setSize(Dimension)} on the underlying component. <br>
      * @param width The width.
      * @param height The height.
-     * @return A new {@link StyleDelegate} with the provided size (width and height) {@link Dimension} set to be later
+     * @return A new {@link ComponentStyleDelegate} with the provided size (width and height) {@link Dimension} set to be later
      *          applied to the underlying component when the final {@link Style} is applied.
      */
-    public StyleDelegate<C> size( int width, int height ) {
+    public ComponentStyleDelegate<C> size( int width, int height ) {
         return _withStyle(_style._withDimensionality(_style.dimensionality()._withWidth(width)._withHeight(height)));
     }
 
@@ -1201,10 +1224,10 @@ public final class StyleDelegate<C extends JComponent>
      *  Defines the width of this {@link JComponent}. <br>
      *  This ultimately translates to {@link JComponent#setSize(Dimension)} on the underlying component. <br>
      * @param width The width.
-     * @return A new {@link StyleDelegate} with the provided width set to be later
+     * @return A new {@link ComponentStyleDelegate} with the provided width set to be later
      *          applied to the underlying component when the final {@link Style} is applied.
      */
-    public StyleDelegate<C> width( int width ) {
+    public ComponentStyleDelegate<C> width( int width ) {
         return _withStyle(_style._withDimensionality(_style.dimensionality()._withWidth(width)));
     }
 
@@ -1212,10 +1235,10 @@ public final class StyleDelegate<C extends JComponent>
      *  Defines the height of this {@link JComponent}. <br>
      *  This ultimately translates to {@link JComponent#setSize(Dimension)} on the underlying component. <br>
      * @param height The height.
-     * @return A new {@link StyleDelegate} with the provided height set to be later
+     * @return A new {@link ComponentStyleDelegate} with the provided height set to be later
      *          applied to the underlying component when the final {@link Style} is applied.
      */
-    public StyleDelegate<C> height( int height ) {
+    public ComponentStyleDelegate<C> height( int height ) {
         return _withStyle(_style._withDimensionality(_style.dimensionality()._withHeight(height)));
     }
 
@@ -1226,9 +1249,10 @@ public final class StyleDelegate<C extends JComponent>
      *  use {@link #cursor(Cursor)} instead. <br>
      *
      * @param cursor The {@link UI.Cursor} value.
-     * @return A new {@link StyleDelegate} with the provided cursor type set to be later
+     * @return A new {@link ComponentStyleDelegate} with the provided cursor type set to be later
      */
-    public StyleDelegate<C> cursor( UI.Cursor cursor ) {
+    public ComponentStyleDelegate<C> cursor( UI.Cursor cursor ) {
+        Objects.requireNonNull(cursor);
         return _withStyle(_style._withCursor(cursor.toAWTCursor()));
     }
 
@@ -1240,9 +1264,10 @@ public final class StyleDelegate<C extends JComponent>
      *  use {@link #cursor(UI.Cursor)} instead. <br>
      *
      * @param cursor The {@link Cursor} value.
-     * @return A new {@link StyleDelegate} with the provided cursor type set to be later
+     * @return A new {@link ComponentStyleDelegate} with the provided cursor type set to be later
      */
-    public StyleDelegate<C> cursor( Cursor cursor ) {
+    public ComponentStyleDelegate<C> cursor( Cursor cursor ) {
+        Objects.requireNonNull(cursor);
         return _withStyle(_style._withCursor(cursor));
     }
 

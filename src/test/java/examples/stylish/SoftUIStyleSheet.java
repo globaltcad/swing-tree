@@ -56,7 +56,7 @@ public class SoftUIStyleSheet extends StyleSheet
             .shadowSpreadRadius(-2)
             .shadowIsInset(false)
             .gradient("default", grad -> grad
-                .align(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT)
+                .transition(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT)
                 .type(UI.GradientType.LINEAR)
                 .colors(gradientColorsFor(it.component()))
             )
@@ -77,7 +77,7 @@ public class SoftUIStyleSheet extends StyleSheet
             .shadowSpreadRadius(-2)
             .shadowIsInset(false)
             .gradient("default", grad -> grad
-                .align(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT)
+                .transition(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT)
                 .colors(gradientColorsFor(it.component()))
             )
             .cursor(UI.Cursor.HAND)

@@ -6,7 +6,7 @@ import java.util.Objects;
 /**
  *  A {@link StyleTrait} is a set of properties that will be used to
  *  target specific {@link JComponent}s matching said properties, so that
- *  you can apply custom {@link Style}a to them using the {@link StyleDelegate} API
+ *  you can apply custom {@link Style}a to them using the {@link ComponentStyleDelegate} API
  *  exposed by methods like {@link StyleSheet#add(StyleTrait, Styler)}
  *  (or on component builders directly through {@link swingtree.UIForAnySwing#withStyle(Styler)}). <br>
  *  Instances of this are supposed to be created and registered inside
