@@ -110,42 +110,35 @@ public final class DimensionalityStyle
 
     @Override
     public String toString() {
-<span class="nc bnc" id="L113" title="All 12 branches missed.">        return String.format(</span>
+<span class="pc bpc" id="L113" title="8 of 16 branches missed.">        return</span>
             &quot;DimensionalityStyle[&quot; +
-                    &quot;minWidth=%s, &quot; +
-                    &quot;minHeight=%s, &quot; +
-                    &quot;maxWidth=%s, &quot; +
-                    &quot;maxHeight=%s, &quot; +
-                    &quot;preferredWidth=%s, &quot; +
-                    &quot;preferredHeight=%s,&quot; +
-                    &quot;width=%s,&quot; +
-                    &quot;height=%s&quot; +
-                &quot;]&quot;,
-                (_minWidth        == null ? &quot;?&quot; : _minWidth        ),
-                (_minHeight       == null ? &quot;?&quot; : _minHeight       ),
-                (_maxWidth        == null ? &quot;?&quot; : _maxWidth        ),
-                (_maxHeight       == null ? &quot;?&quot; : _maxHeight       ),
-                (_preferredWidth  == null ? &quot;?&quot; : _preferredWidth  ),
-                (_preferredHeight == null ? &quot;?&quot; : _preferredHeight )
-        );
+                    &quot;minWidth=&quot;        + (_minWidth        == null ? &quot;?&quot; : _minWidth        ) + &quot;, &quot; +
+                    &quot;minHeight=&quot;       + (_minHeight       == null ? &quot;?&quot; : _minHeight       ) + &quot;, &quot; +
+                    &quot;maxWidth=&quot;        + (_maxWidth        == null ? &quot;?&quot; : _maxWidth        ) + &quot;, &quot; +
+                    &quot;maxHeight=&quot;       + (_maxHeight       == null ? &quot;?&quot; : _maxHeight       ) + &quot;, &quot; +
+                    &quot;preferredWidth=&quot;  + (_preferredWidth  == null ? &quot;?&quot; : _preferredWidth  ) + &quot;, &quot; +
+                    &quot;preferredHeight=&quot; + (_preferredHeight == null ? &quot;?&quot; : _preferredHeight ) + &quot;, &quot; +
+                    &quot;width=&quot;           + (_width           == null ? &quot;?&quot; : _width           ) + &quot;, &quot; +
+                    &quot;height=&quot;          + (_height          == null ? &quot;?&quot; : _height          ) +
+                &quot;]&quot;;
     }
 
     @Override
     public final boolean equals( Object o ) {
-<span class="pc bpc" id="L135" title="1 of 2 branches missed.">        if ( this == o ) return true;</span>
-<span class="pc bpc" id="L136" title="1 of 2 branches missed.">        if ( !(o instanceof DimensionalityStyle) ) return false;</span>
-<span class="fc" id="L137">        DimensionalityStyle that = (DimensionalityStyle) o;</span>
-<span class="fc bfc" id="L138" title="All 2 branches covered.">        return Objects.equals(_minWidth,        that._minWidth       ) &amp;&amp;</span>
-<span class="fc bfc" id="L139" title="All 2 branches covered.">               Objects.equals(_minHeight,       that._minHeight      ) &amp;&amp;</span>
-<span class="pc bpc" id="L140" title="1 of 2 branches missed.">               Objects.equals(_maxWidth,        that._maxWidth       ) &amp;&amp;</span>
-<span class="pc bpc" id="L141" title="1 of 2 branches missed.">               Objects.equals(_maxHeight,       that._maxHeight      ) &amp;&amp;</span>
-<span class="fc bfc" id="L142" title="All 2 branches covered.">               Objects.equals(_preferredWidth,  that._preferredWidth ) &amp;&amp;</span>
-<span class="pc bpc" id="L143" title="1 of 2 branches missed.">               Objects.equals(_preferredHeight, that._preferredHeight);</span>
+<span class="pc bpc" id="L128" title="1 of 2 branches missed.">        if ( this == o ) return true;</span>
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">        if ( !(o instanceof DimensionalityStyle) ) return false;</span>
+<span class="fc" id="L130">        DimensionalityStyle that = (DimensionalityStyle) o;</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">        return Objects.equals(_minWidth,        that._minWidth       ) &amp;&amp;</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">               Objects.equals(_minHeight,       that._minHeight      ) &amp;&amp;</span>
+<span class="pc bpc" id="L133" title="1 of 2 branches missed.">               Objects.equals(_maxWidth,        that._maxWidth       ) &amp;&amp;</span>
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">               Objects.equals(_maxHeight,       that._maxHeight      ) &amp;&amp;</span>
+<span class="fc bfc" id="L135" title="All 2 branches covered.">               Objects.equals(_preferredWidth,  that._preferredWidth ) &amp;&amp;</span>
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">               Objects.equals(_preferredHeight, that._preferredHeight);</span>
     }
 
     @Override
     public final int hashCode() {
-<span class="fc" id="L148">        return Objects.hash(_minWidth, _minHeight, _maxWidth, _maxHeight, _preferredWidth, _preferredHeight);</span>
+<span class="fc" id="L141">        return Objects.hash(_minWidth, _minHeight, _maxWidth, _maxHeight, _preferredWidth, _preferredHeight);</span>
     }
 
 }

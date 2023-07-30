@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Style.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">Style.java</span></div><h1>Style.java</h1><pre class="source lang-java linenums">package swingtree.style;
 
+import swingtree.UI;
+
 import java.awt.*;
 import java.util.List;
 import java.util.*;
@@ -34,19 +36,20 @@ import java.util.stream.Collectors;
  */
 public final class Style
 {
-<span class="fc" id="L37">    private static final Style _NONE = new Style(</span>
-<span class="fc" id="L38">                                            LayoutStyle.none(),</span>
-<span class="fc" id="L39">                                            BorderStyle.none(),</span>
-<span class="fc" id="L40">                                            BackgroundStyle.none(),</span>
-<span class="fc" id="L41">                                            ForegroundStyle.none(),</span>
-<span class="fc" id="L42">                                            FontStyle.none(),</span>
-<span class="fc" id="L43">                                            DimensionalityStyle.none(),</span>
-<span class="fc" id="L44">                                            Collections.singletonMap(StyleUtility.DEFAULT_KEY,ShadowStyle.none()),</span>
-<span class="fc" id="L45">                                            Collections.singletonMap(StyleUtility.DEFAULT_KEY + &quot;_&quot; + PainterStyle.none().layer().name(),PainterStyle.none()),</span>
-<span class="fc" id="L46">                                            Collections.singletonMap(StyleUtility.DEFAULT_KEY,ShadeStyle.none())</span>
-                                        );
+<span class="fc" id="L39">    private static final Style _NONE = new Style(</span>
+<span class="fc" id="L40">                                            LayoutStyle.none(),</span>
+<span class="fc" id="L41">                                            BorderStyle.none(),</span>
+<span class="fc" id="L42">                                            BackgroundStyle.none(),</span>
+<span class="fc" id="L43">                                            ForegroundStyle.none(),</span>
+<span class="fc" id="L44">                                            FontStyle.none(),</span>
+<span class="fc" id="L45">                                            DimensionalityStyle.none(),</span>
+                                            null,
+<span class="fc" id="L47">                                            Collections.singletonMap(StyleUtility.DEFAULT_KEY,ShadowStyle.none()),</span>
+<span class="fc" id="L48">                                            Collections.singletonMap(StyleUtility.DEFAULT_KEY + &quot;_&quot; + PainterStyle.none().layer().name(),PainterStyle.none()),</span>
+<span class="fc" id="L49">                                            Collections.singletonMap(StyleUtility.DEFAULT_KEY, GradientStyle.none())</span>
+    );
 
-<span class="fc" id="L49">    public static Style none() { return _NONE; }</span>
+<span class="fc" id="L52">    public static Style none() { return _NONE; }</span>
 
     private final LayoutStyle               _layout;
     private final BorderStyle               _border;
@@ -54,208 +57,218 @@ public final class Style
     private final ForegroundStyle           _foreground;
     private final FontStyle                 _font;
     private final DimensionalityStyle       _dimensionality;
-<span class="fc" id="L57">    private final Map&lt;String, ShadowStyle&gt;  _shadows  = new TreeMap&lt;&gt;();</span>
-<span class="fc" id="L58">    private final Map&lt;String, PainterStyle&gt; _painters = new TreeMap&lt;&gt;();</span>
-<span class="fc" id="L59">    private final Map&lt;String, ShadeStyle&gt;   _shades   = new TreeMap&lt;&gt;();</span>
+    private final Cursor                    _cursor;
+<span class="fc" id="L61">    private final Map&lt;String, ShadowStyle&gt;  _shadows  = new TreeMap&lt;&gt;();</span>
+<span class="fc" id="L62">    private final Map&lt;String, PainterStyle&gt; _painters = new TreeMap&lt;&gt;();</span>
+<span class="fc" id="L63">    private final Map&lt;String, GradientStyle&gt;   _shades   = new TreeMap&lt;&gt;();</span>
 
 
 
 
     private Style(
-        LayoutStyle               layout,
-        BorderStyle               border,
-        BackgroundStyle           background,
-        ForegroundStyle           foreground,
-        FontStyle                 font,
-        DimensionalityStyle       dimensionality,
-        Map&lt;String, ShadowStyle&gt;  shadows,
-        Map&lt;String, PainterStyle&gt; painters,
-        Map&lt;String, ShadeStyle&gt;   shades
-<span class="fc" id="L74">    ) {</span>
-<span class="fc" id="L75">        _layout         = layout;</span>
-<span class="fc" id="L76">        _border         = border;</span>
-<span class="fc" id="L77">        _background     = background;</span>
-<span class="fc" id="L78">        _foreground     = foreground;</span>
-<span class="fc" id="L79">        _font           = font;</span>
-<span class="fc" id="L80">        _dimensionality = dimensionality;</span>
-<span class="fc" id="L81">        _shadows.putAll(shadows);</span>
-<span class="fc" id="L82">        _painters.putAll(painters);</span>
-<span class="fc" id="L83">        _shades.putAll(shades);</span>
-<span class="fc" id="L84">    }</span>
+            LayoutStyle               layout,
+            BorderStyle               border,
+            BackgroundStyle           background,
+            ForegroundStyle           foreground,
+            FontStyle                 font,
+            DimensionalityStyle       dimensionality,
+            Cursor                    cursor,
+            Map&lt;String, ShadowStyle&gt;  shadows,
+            Map&lt;String, PainterStyle&gt; painters,
+            Map&lt;String, GradientStyle&gt;   shades
+<span class="fc" id="L79">    ) {</span>
+<span class="fc" id="L80">        _layout         = layout;</span>
+<span class="fc" id="L81">        _border         = border;</span>
+<span class="fc" id="L82">        _background     = background;</span>
+<span class="fc" id="L83">        _foreground     = foreground;</span>
+<span class="fc" id="L84">        _font           = font;</span>
+<span class="fc" id="L85">        _dimensionality = dimensionality;</span>
+<span class="fc" id="L86">        _cursor         = cursor;</span>
+<span class="fc" id="L87">        _shadows.putAll(shadows);</span>
+<span class="fc" id="L88">        _painters.putAll(painters);</span>
+<span class="fc" id="L89">        _shades.putAll(shades);</span>
+<span class="fc" id="L90">    }</span>
 
     Style _withLayout( LayoutStyle layout ) {
-<span class="fc" id="L87">        return new Style(layout, _border, _background, _foreground, _font, _dimensionality, _shadows, _painters, _shades);</span>
+<span class="fc" id="L93">        return new Style(layout, _border, _background, _foreground, _font, _dimensionality, _cursor, _shadows, _painters, _shades);</span>
     }
     Style _withBorder( BorderStyle border ) {
-<span class="fc" id="L90">        return new Style(_layout, border, _background, _foreground, _font, _dimensionality, _shadows, _painters, _shades);</span>
+<span class="fc" id="L96">        return new Style(_layout, border, _background, _foreground, _font, _dimensionality, _cursor, _shadows, _painters, _shades);</span>
     }
     Style _withBackground( BackgroundStyle background ) {
-<span class="fc" id="L93">        return new Style(_layout, _border, background, _foreground, _font, _dimensionality, _shadows, _painters, _shades);</span>
+<span class="fc" id="L99">        return new Style(_layout, _border, background, _foreground, _font, _dimensionality, _cursor, _shadows, _painters, _shades);</span>
     }
     Style _withForeground( ForegroundStyle foreground ) {
-<span class="fc" id="L96">        return new Style(_layout, _border, _background, foreground, _font, _dimensionality, _shadows, _painters, _shades);</span>
+<span class="fc" id="L102">        return new Style(_layout, _border, _background, foreground, _font, _dimensionality, _cursor, _shadows, _painters, _shades);</span>
     }
     Style _withFont( FontStyle font ) {
-<span class="fc" id="L99">        return new Style(_layout, _border, _background, _foreground, font, _dimensionality, _shadows, _painters, _shades);</span>
+<span class="fc" id="L105">        return new Style(_layout, _border, _background, _foreground, font, _dimensionality, _cursor, _shadows, _painters, _shades);</span>
     }
     Style _withDimensionality( DimensionalityStyle dimensionality ) {
-<span class="fc" id="L102">        return new Style(_layout, _border, _background, _foreground, _font, dimensionality, _shadows, _painters, _shades);</span>
+<span class="fc" id="L108">        return new Style(_layout, _border, _background, _foreground, _font, dimensionality, _cursor, _shadows, _painters, _shades);</span>
     }
+    Style _withCursor( Cursor cursor ) {
+<span class="fc" id="L111">        return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, cursor, _shadows, _painters, _shades);</span>
+    }
+
     Style _withShadow( Map&lt;String, ShadowStyle&gt; shadows ) {
-<span class="fc" id="L105">        return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, shadows, _painters, _shades);</span>
+<span class="fc" id="L115">        return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, _cursor, shadows, _painters, _shades);</span>
     }
     Style _withShadow( Function&lt;ShadowStyle, ShadowStyle&gt; styler ) {
         // A new map is created where all the styler is applied to all the values:
-<span class="fc" id="L109">        Map&lt;String, ShadowStyle&gt; styledShadows = new TreeMap&lt;&gt;();</span>
-<span class="fc" id="L110">        _shadows.forEach( (key, value) -&gt; styledShadows.put(key, styler.apply(value)) );</span>
-<span class="fc" id="L111">        return _withShadow(styledShadows);</span>
+<span class="fc" id="L119">        Map&lt;String, ShadowStyle&gt; styledShadows = new TreeMap&lt;&gt;();</span>
+<span class="fc" id="L120">        _shadows.forEach( (key, value) -&gt; styledShadows.put(key, styler.apply(value)) );</span>
+<span class="fc" id="L121">        return _withShadow(styledShadows);</span>
     }
 
-<span class="fc" id="L114">    public LayoutStyle layout() { return _layout; }</span>
+<span class="fc" id="L124">    public LayoutStyle layout() { return _layout; }</span>
 
-<span class="fc" id="L116">    public Outline padding() { return _layout.padding(); }</span>
+<span class="fc" id="L126">    public Outline padding() { return _layout.padding(); }</span>
 
-<span class="fc" id="L118">    public Outline margin() { return _layout.margin(); }</span>
+<span class="fc" id="L128">    public Outline margin() { return _layout.margin(); }</span>
 
-<span class="fc" id="L120">    public BorderStyle border() { return _border; }</span>
+<span class="fc" id="L130">    public BorderStyle border() { return _border; }</span>
 
-<span class="fc" id="L122">    public BackgroundStyle background() { return _background; }</span>
+<span class="fc" id="L132">    public BackgroundStyle background() { return _background; }</span>
 
-<span class="fc" id="L124">    public ForegroundStyle foreground() { return _foreground; }</span>
+<span class="fc" id="L134">    public ForegroundStyle foreground() { return _foreground; }</span>
 
-<span class="fc" id="L126">    public DimensionalityStyle dimensionality() { return _dimensionality; }</span>
+<span class="fc" id="L136">    public DimensionalityStyle dimensionality() { return _dimensionality; }</span>
+
+<span class="fc" id="L138">    public Optional&lt;Cursor&gt; cursor() { return Optional.ofNullable(_cursor); }</span>
 
     /**
      * @return The default shadow style.
      */
-<span class="fc" id="L131">    public ShadowStyle shadow() { return _shadows.get(StyleUtility.DEFAULT_KEY); }</span>
+<span class="fc" id="L143">    public ShadowStyle shadow() { return _shadows.get(StyleUtility.DEFAULT_KEY); }</span>
 
     /**
      * @param shadowName The name of the shadow style to retrieve.
      * @return The shadow style with the provided name.
      */
     public ShadowStyle shadow(String shadowName) {
-<span class="fc" id="L138">        Objects.requireNonNull(shadowName);</span>
-<span class="fc" id="L139">        return _shadows.get(shadowName);</span>
+<span class="fc" id="L150">        Objects.requireNonNull(shadowName);</span>
+<span class="fc" id="L151">        return _shadows.get(shadowName);</span>
     }
 
     /**
      * @return An unmodifiable list of all shadow styles sorted by their names in ascending alphabetical order.
      */
-    List&lt;ShadowStyle&gt; shadows(Layer layer) {
-<span class="fc" id="L146">        return Collections.unmodifiableList(</span>
-<span class="fc" id="L147">                _shadows.entrySet()</span>
-<span class="fc" id="L148">                        .stream()</span>
-<span class="fc" id="L149">                        .sorted(Map.Entry.comparingByKey())</span>
-<span class="fc" id="L150">                        .map(Map.Entry::getValue)</span>
-<span class="fc bfc" id="L151" title="All 2 branches covered.">                        .filter( s -&gt; s.layer() == layer )</span>
-<span class="fc" id="L152">                        .collect(Collectors.toList())</span>
+    List&lt;ShadowStyle&gt; shadows(UI.Layer layer) {
+<span class="fc" id="L158">        return Collections.unmodifiableList(</span>
+<span class="fc" id="L159">                _shadows.entrySet()</span>
+<span class="fc" id="L160">                        .stream()</span>
+<span class="fc" id="L161">                        .sorted(Map.Entry.comparingByKey())</span>
+<span class="fc" id="L162">                        .map(Map.Entry::getValue)</span>
+<span class="fc bfc" id="L163" title="All 2 branches covered.">                        .filter( s -&gt; s.layer() == layer )</span>
+<span class="fc" id="L164">                        .collect(Collectors.toList())</span>
             );
     }
 
-<span class="fc" id="L156">    Map&lt;String, ShadowStyle&gt; shadowsMap() { return _shadows; }</span>
+<span class="fc" id="L168">    Map&lt;String, ShadowStyle&gt; shadowsMap() { return _shadows; }</span>
 
     boolean anyVisibleShadows() {
-<span class="pc bpc" id="L159" title="1 of 4 branches missed.">        return _shadows.values().stream().anyMatch(s -&gt; s.color().isPresent() &amp;&amp; s.color().get().getAlpha() &gt; 0 );</span>
+<span class="pc bpc" id="L171" title="1 of 4 branches missed.">        return _shadows.values().stream().anyMatch(s -&gt; s.color().isPresent() &amp;&amp; s.color().get().getAlpha() &gt; 0 );</span>
     }
 
 
-<span class="nc" id="L163">    public Style foundationColor( Color color ) { return _withBackground(background().foundationColor(color)); }</span>
+<span class="nc" id="L175">    public Style foundationColor( Color color ) { return _withBackground(background().foundationColor(color)); }</span>
 
-<span class="fc" id="L165">    public Style backgroundColor( Color color ) { return _withBackground(background().color(color)); }</span>
+<span class="fc" id="L177">    public Style backgroundColor( Color color ) { return _withBackground(background().color(color)); }</span>
 
-<span class="fc" id="L167">    public FontStyle font() { return _font; }</span>
+<span class="fc" id="L179">    public FontStyle font() { return _font; }</span>
 
     /**
      * @return An unmodifiable list of painters sorted by their names in ascending alphabetical order.
      */
-    List&lt;Painter&gt; painters(Layer layer) {
-<span class="fc" id="L173">        return Collections.unmodifiableList(</span>
+    List&lt;Painter&gt; painters(UI.Layer layer) {
+<span class="fc" id="L185">        return Collections.unmodifiableList(</span>
                 _painters
-<span class="fc" id="L175">                        .entrySet()</span>
-<span class="fc" id="L176">                        .stream()</span>
-<span class="fc" id="L177">                        .sorted(Map.Entry.comparingByKey())</span>
-<span class="fc" id="L178">                        .map(Map.Entry::getValue)</span>
-<span class="fc bfc" id="L179" title="All 2 branches covered.">                        .filter( p -&gt; p.layer() == layer )</span>
-<span class="fc" id="L180">                        .map(PainterStyle::painter)</span>
-<span class="fc" id="L181">                        .collect(Collectors.toList())</span>
+<span class="fc" id="L187">                        .entrySet()</span>
+<span class="fc" id="L188">                        .stream()</span>
+<span class="fc" id="L189">                        .sorted(Map.Entry.comparingByKey())</span>
+<span class="fc" id="L190">                        .map(Map.Entry::getValue)</span>
+<span class="fc bfc" id="L191" title="All 2 branches covered.">                        .filter( p -&gt; p.layer() == layer )</span>
+<span class="fc" id="L192">                        .map(PainterStyle::painter)</span>
+<span class="fc" id="L193">                        .collect(Collectors.toList())</span>
         );
     }
 
     public List&lt;Painter&gt; painters() {
-<span class="fc" id="L186">        return Collections.unmodifiableList(</span>
+<span class="fc" id="L198">        return Collections.unmodifiableList(</span>
                                 _painters
-<span class="fc" id="L188">                                    .entrySet()</span>
-<span class="fc" id="L189">                                    .stream()</span>
-<span class="fc" id="L190">                                    .sorted(Map.Entry.comparingByKey())</span>
-<span class="fc" id="L191">                                    .map(Map.Entry::getValue)</span>
-<span class="fc" id="L192">                                    .map(PainterStyle::painter)</span>
-<span class="fc" id="L193">                                    .collect(Collectors.toList())</span>
+<span class="fc" id="L200">                                    .entrySet()</span>
+<span class="fc" id="L201">                                    .stream()</span>
+<span class="fc" id="L202">                                    .sorted(Map.Entry.comparingByKey())</span>
+<span class="fc" id="L203">                                    .map(Map.Entry::getValue)</span>
+<span class="fc" id="L204">                                    .map(PainterStyle::painter)</span>
+<span class="fc" id="L205">                                    .collect(Collectors.toList())</span>
                             );
     }
 
 
     boolean hasCustomBackgroundPainters() {
-<span class="pc bpc" id="L199" title="1 of 4 branches missed.">        return _painters.values().stream().anyMatch(p -&gt; p.layer() == Layer.BACKGROUND &amp;&amp; !Painter.none().equals(p.painter()));</span>
+<span class="pc bpc" id="L211" title="1 of 4 branches missed.">        return _painters.values().stream().anyMatch(p -&gt; p.layer() == UI.Layer.BACKGROUND &amp;&amp; !Painter.none().equals(p.painter()));</span>
     }
 
     boolean hasCustomForegroundPainters() {
-<span class="pc bpc" id="L203" title="1 of 4 branches missed.">        return _painters.values().stream().anyMatch(p -&gt; p.layer() == Layer.FOREGROUND &amp;&amp; !Painter.none().equals(p.painter()));</span>
+<span class="pc bpc" id="L215" title="1 of 4 branches missed.">        return _painters.values().stream().anyMatch(p -&gt; p.layer() == UI.Layer.FOREGROUND &amp;&amp; !Painter.none().equals(p.painter()));</span>
     }
 
-    List&lt;ShadeStyle&gt; shades(Layer layer) {
-<span class="fc" id="L207">        return Collections.unmodifiableList(</span>
-<span class="fc" id="L208">                _shades.entrySet().stream()</span>
-<span class="fc" id="L209">                        .sorted(Map.Entry.comparingByKey())</span>
-<span class="fc" id="L210">                        .map(Map.Entry::getValue)</span>
-<span class="fc bfc" id="L211" title="All 2 branches covered.">                        .filter( s -&gt; s.layer() == layer )</span>
-<span class="fc" id="L212">                        .collect(Collectors.toList())</span>
+    List&lt;GradientStyle&gt; gradients(UI.Layer layer) {
+<span class="fc" id="L219">        return Collections.unmodifiableList(</span>
+<span class="fc" id="L220">                _shades.entrySet().stream()</span>
+<span class="fc" id="L221">                        .sorted(Map.Entry.comparingByKey())</span>
+<span class="fc" id="L222">                        .map(Map.Entry::getValue)</span>
+<span class="fc bfc" id="L223" title="All 2 branches covered.">                        .filter( s -&gt; s.layer() == layer )</span>
+<span class="fc" id="L224">                        .collect(Collectors.toList())</span>
         );
     }
 
     boolean hasCustomBackgroundShades() {
-<span class="pc bpc" id="L217" title="1 of 4 branches missed.">        return !( _shades.size() == 1 &amp;&amp; ShadeStyle.none().equals(_shades.get(StyleUtility.DEFAULT_KEY)) );</span>
+<span class="pc bpc" id="L229" title="1 of 4 branches missed.">        return !( _shades.size() == 1 &amp;&amp; GradientStyle.none().equals(_shades.get(StyleUtility.DEFAULT_KEY)) );</span>
     }
 
     Style painter( Map&lt;String, PainterStyle&gt; painters ) {
-<span class="fc" id="L221">        Objects.requireNonNull(painters);</span>
-<span class="fc" id="L222">        return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, _shadows, painters, _shades);</span>
+<span class="fc" id="L233">        Objects.requireNonNull(painters);</span>
+<span class="fc" id="L234">        return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, _cursor, _shadows, painters, _shades);</span>
     }
 
-    Style shade( Map&lt;String, ShadeStyle&gt; shades ) {
-<span class="fc" id="L226">        Objects.requireNonNull(shades);</span>
-<span class="fc" id="L227">        return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, _shadows, _painters, shades);</span>
+    Style gradient( Map&lt;String, GradientStyle&gt; shades ) {
+<span class="fc" id="L238">        Objects.requireNonNull(shades);</span>
+<span class="fc" id="L239">        return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, _cursor, _shadows, _painters, shades);</span>
     }
 
-    Style shade( String shadeName, Function&lt;ShadeStyle, ShadeStyle&gt; styler ) {
-<span class="fc" id="L231">        Objects.requireNonNull(shadeName);</span>
-<span class="fc" id="L232">        Objects.requireNonNull(styler);</span>
-<span class="fc" id="L233">        ShadeStyle shadow = Optional.ofNullable(_shades.get(shadeName)).orElse(ShadeStyle.none());</span>
+    Style gradient( String shadeName, Function&lt;GradientStyle, GradientStyle&gt; styler ) {
+<span class="fc" id="L243">        Objects.requireNonNull(shadeName);</span>
+<span class="fc" id="L244">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L245">        GradientStyle shadow = Optional.ofNullable(_shades.get(shadeName)).orElse(GradientStyle.none());</span>
         // We clone the shadow map:
-<span class="fc" id="L235">        Map&lt;String, ShadeStyle&gt; newShadows = new HashMap&lt;&gt;(_shades);</span>
-<span class="fc" id="L236">        newShadows.put(shadeName, styler.apply(shadow));</span>
-<span class="fc" id="L237">        return shade(newShadows);</span>
+<span class="fc" id="L247">        Map&lt;String, GradientStyle&gt; newShadows = new HashMap&lt;&gt;(_shades);</span>
+<span class="fc" id="L248">        newShadows.put(shadeName, styler.apply(shadow));</span>
+<span class="fc" id="L249">        return gradient(newShadows);</span>
     }
 
-    Style painter( String painterName, Layer layer, Painter painter ) {
-<span class="fc" id="L241">        Objects.requireNonNull(painterName);</span>
-<span class="fc" id="L242">        Objects.requireNonNull(painter);</span>
-<span class="fc" id="L243">        painterName = painterName + &quot;_&quot; + layer.name();</span>
+    Style painter(String painterName, UI.Layer layer, Painter painter ) {
+<span class="fc" id="L253">        Objects.requireNonNull(painterName);</span>
+<span class="fc" id="L254">        Objects.requireNonNull(painter);</span>
+<span class="fc" id="L255">        painterName = painterName + &quot;_&quot; + layer.name();</span>
         // We clone the painter map:
-<span class="fc" id="L245">        Map&lt;String, PainterStyle&gt; newPainters = new HashMap&lt;&gt;(_painters);</span>
-<span class="fc" id="L246">        newPainters.put(painterName, PainterStyle.none().painter(painter).layer(layer)); // Existing painters are overwritten if they have the same name.</span>
-<span class="fc" id="L247">        return painter(newPainters);</span>
+<span class="fc" id="L257">        Map&lt;String, PainterStyle&gt; newPainters = new HashMap&lt;&gt;(_painters);</span>
+<span class="fc" id="L258">        newPainters.put(painterName, PainterStyle.none().painter(painter).layer(layer)); // Existing painters are overwritten if they have the same name.</span>
+<span class="fc" id="L259">        return painter(newPainters);</span>
     }
 
     Style scale( double scale ) {
-<span class="fc" id="L251">        return new Style(</span>
-<span class="fc" id="L252">                    _layout._scale(scale),</span>
-<span class="fc" id="L253">                    _border._scale(scale),</span>
+<span class="fc" id="L263">        return new Style(</span>
+<span class="fc" id="L264">                    _layout._scale(scale),</span>
+<span class="fc" id="L265">                    _border._scale(scale),</span>
                     _background,
                     _foreground,
-<span class="fc" id="L256">                    _font._scale(scale),</span>
-<span class="fc" id="L257">                    _dimensionality._scale(scale),</span>
-<span class="fc" id="L258">                    _shadows.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -&gt; e.getValue()._scale(scale))),</span>
+<span class="fc" id="L268">                    _font._scale(scale),</span>
+<span class="fc" id="L269">                    _dimensionality._scale(scale),</span>
+                    _cursor,
+<span class="fc" id="L271">                    _shadows.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -&gt; e.getValue()._scale(scale))),</span>
                     _painters,
                     _shades
                 );
@@ -263,103 +276,109 @@ public final class Style
 
     @Override
     public int hashCode() {
-<span class="fc" id="L266">        return Objects.hash(</span>
-                _layout, _border, _background, _foreground, _font,
-<span class="fc" id="L268">                StyleUtility.mapHash(_shadows), StyleUtility.mapHash(_painters), StyleUtility.mapHash(_shades),</span>
-                _dimensionality
+<span class="fc" id="L279">        return Objects.hash(</span>
+                _layout, _border, _background, _foreground, _font, _dimensionality, _cursor,
+<span class="fc" id="L281">                StyleUtility.mapHash(_shadows), StyleUtility.mapHash(_painters), StyleUtility.mapHash(_shades)</span>
             );
     }
 
     boolean hasEqualLayoutAs( Style otherStyle ) {
-<span class="fc" id="L274">        return Objects.equals(_layout, otherStyle._layout);</span>
+<span class="fc" id="L286">        return Objects.equals(_layout, otherStyle._layout);</span>
     }
 
     boolean hasEqualBorderAs( Style otherStyle ) {
-<span class="fc" id="L278">        return Objects.equals(_border, otherStyle._border);</span>
+<span class="fc" id="L290">        return Objects.equals(_border, otherStyle._border);</span>
     }
 
     boolean hasEqualBackgroundAs( Style otherStyle ) {
-<span class="fc" id="L282">        return Objects.equals(_background, otherStyle._background);</span>
+<span class="fc" id="L294">        return Objects.equals(_background, otherStyle._background);</span>
     }
 
     boolean hasEqualForegroundAs( Style otherStyle ) {
-<span class="fc" id="L286">        return Objects.equals(_foreground, otherStyle._foreground);</span>
+<span class="fc" id="L298">        return Objects.equals(_foreground, otherStyle._foreground);</span>
     }
 
     boolean hasEqualFontAs( Style otherStyle ) {
-<span class="fc" id="L290">        return Objects.equals(_font, otherStyle._font);</span>
+<span class="fc" id="L302">        return Objects.equals(_font, otherStyle._font);</span>
     }
 
     boolean hasEqualDimensionalityAs( Style otherStyle ) {
-<span class="fc" id="L294">        return Objects.equals(_dimensionality, otherStyle._dimensionality);</span>
+<span class="fc" id="L306">        return Objects.equals(_dimensionality, otherStyle._dimensionality);</span>
+    }
+
+    boolean hasEqualCursorAs( Style otherStyle ) {
+<span class="fc" id="L310">        return Objects.equals(_cursor, otherStyle._cursor);</span>
     }
 
     boolean hasEqualShadowsAs( Style otherStyle ) {
-<span class="fc" id="L298">        return StyleUtility.mapEquals(_shadows, otherStyle._shadows);</span>
+<span class="fc" id="L314">        return StyleUtility.mapEquals(_shadows, otherStyle._shadows);</span>
     }
 
     boolean hasEqualPaintersAs( Style otherStyle ) {
-<span class="fc" id="L302">        return StyleUtility.mapEquals(_painters, otherStyle._painters);</span>
+<span class="fc" id="L318">        return StyleUtility.mapEquals(_painters, otherStyle._painters);</span>
     }
 
     boolean hasEqualShadesAs( Style otherStyle ) {
-<span class="fc" id="L306">        return StyleUtility.mapEquals(_shades, otherStyle._shades);</span>
+<span class="fc" id="L322">        return StyleUtility.mapEquals(_shades, otherStyle._shades);</span>
     }
 
     @Override
     public boolean equals( Object obj ) {
-<span class="fc bfc" id="L311" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
-<span class="pc bpc" id="L312" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
-<span class="pc bpc" id="L313" title="1 of 2 branches missed.">        if ( !(obj instanceof Style) ) return false;</span>
-<span class="fc" id="L314">        Style other = (Style) obj;</span>
-<span class="fc bfc" id="L315" title="All 2 branches covered.">        return hasEqualLayoutAs(other)         &amp;&amp;</span>
-<span class="fc bfc" id="L316" title="All 2 branches covered.">               hasEqualBorderAs(other)         &amp;&amp;</span>
-<span class="pc bpc" id="L317" title="1 of 2 branches missed.">               hasEqualBackgroundAs(other)     &amp;&amp;</span>
-<span class="pc bpc" id="L318" title="1 of 2 branches missed.">               hasEqualForegroundAs(other)     &amp;&amp;</span>
-<span class="fc bfc" id="L319" title="All 2 branches covered.">               hasEqualFontAs(other)           &amp;&amp;</span>
-<span class="pc bpc" id="L320" title="1 of 2 branches missed.">               hasEqualDimensionalityAs(other) &amp;&amp;</span>
-<span class="fc bfc" id="L321" title="All 2 branches covered.">               hasEqualShadowsAs(other)        &amp;&amp;</span>
-<span class="pc bpc" id="L322" title="1 of 2 branches missed.">               hasEqualPaintersAs(other)       &amp;&amp;</span>
-<span class="fc bfc" id="L323" title="All 2 branches covered.">               hasEqualShadesAs(other);</span>
+<span class="fc bfc" id="L327" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L328" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="pc bpc" id="L329" title="1 of 2 branches missed.">        if ( !(obj instanceof Style) ) return false;</span>
+<span class="fc" id="L330">        Style other = (Style) obj;</span>
+<span class="fc bfc" id="L331" title="All 2 branches covered.">        return hasEqualLayoutAs(other)         &amp;&amp;</span>
+<span class="fc bfc" id="L332" title="All 2 branches covered.">               hasEqualBorderAs(other)         &amp;&amp;</span>
+<span class="fc bfc" id="L333" title="All 2 branches covered.">               hasEqualBackgroundAs(other)     &amp;&amp;</span>
+<span class="fc bfc" id="L334" title="All 2 branches covered.">               hasEqualForegroundAs(other)     &amp;&amp;</span>
+<span class="fc bfc" id="L335" title="All 2 branches covered.">               hasEqualFontAs(other)           &amp;&amp;</span>
+<span class="pc bpc" id="L336" title="1 of 2 branches missed.">               hasEqualDimensionalityAs(other) &amp;&amp;</span>
+<span class="fc bfc" id="L337" title="All 2 branches covered.">               hasEqualCursorAs(other)         &amp;&amp;</span>
+<span class="fc bfc" id="L338" title="All 2 branches covered.">               hasEqualShadowsAs(other)        &amp;&amp;</span>
+<span class="pc bpc" id="L339" title="1 of 2 branches missed.">               hasEqualPaintersAs(other)       &amp;&amp;</span>
+<span class="fc bfc" id="L340" title="All 2 branches covered.">               hasEqualShadesAs(other);</span>
     }
 
     @Override
     public String toString() {
         String shadowString;
-<span class="pc bpc" id="L329" title="1 of 2 branches missed.">        if ( _shadows.size() == 1 )</span>
-<span class="fc" id="L330">            shadowString = _shadows.get(StyleUtility.DEFAULT_KEY).toString();</span>
+<span class="pc bpc" id="L346" title="1 of 2 branches missed.">        if ( _shadows.size() == 1 )</span>
+<span class="fc" id="L347">            shadowString = _shadows.get(StyleUtility.DEFAULT_KEY).toString();</span>
         else
-<span class="nc" id="L332">            shadowString = _shadows.entrySet()</span>
-<span class="nc" id="L333">                                    .stream()</span>
-<span class="nc" id="L334">                                    .map(e -&gt; e.getKey() + &quot;: &quot; + e.getValue())</span>
-<span class="nc" id="L335">                                    .collect(Collectors.joining(&quot;, &quot;, &quot;shadows=[&quot;, &quot;]&quot;));</span>
+<span class="nc" id="L349">            shadowString = _shadows.entrySet()</span>
+<span class="nc" id="L350">                                    .stream()</span>
+<span class="nc" id="L351">                                    .map(e -&gt; e.getKey() + &quot;: &quot; + e.getValue())</span>
+<span class="nc" id="L352">                                    .collect(Collectors.joining(&quot;, &quot;, &quot;shadows=[&quot;, &quot;]&quot;));</span>
 
         String painterString;
-<span class="pc bpc" id="L338" title="1 of 2 branches missed.">        if ( _painters.size() == 1 )</span>
-<span class="fc" id="L339">            painterString = _painters.get(StyleUtility.DEFAULT_KEY + &quot;_&quot; + PainterStyle.none().layer().name()).toString();</span>
+<span class="pc bpc" id="L355" title="1 of 2 branches missed.">        if ( _painters.size() == 1 )</span>
+<span class="fc" id="L356">            painterString = _painters.get(StyleUtility.DEFAULT_KEY + &quot;_&quot; + PainterStyle.none().layer().name()).toString();</span>
         else
-<span class="nc" id="L341">            painterString = _painters.entrySet()</span>
-<span class="nc" id="L342">                                    .stream()</span>
-<span class="nc" id="L343">                                    .map(e -&gt; e.getKey() + &quot;: &quot; + e.getValue())</span>
-<span class="nc" id="L344">                                    .collect(Collectors.joining(&quot;, &quot;, &quot;painters=[&quot;, &quot;]&quot;));</span>
+<span class="nc" id="L358">            painterString = _painters.entrySet()</span>
+<span class="nc" id="L359">                                    .stream()</span>
+<span class="nc" id="L360">                                    .map(e -&gt; e.getKey() + &quot;: &quot; + e.getValue())</span>
+<span class="nc" id="L361">                                    .collect(Collectors.joining(&quot;, &quot;, &quot;painters=[&quot;, &quot;]&quot;));</span>
 
         String shadeString;
-<span class="pc bpc" id="L347" title="1 of 2 branches missed.">        if ( _shades.size() == 1 )</span>
-<span class="fc" id="L348">            shadeString = _shades.get(StyleUtility.DEFAULT_KEY).toString();</span>
+<span class="pc bpc" id="L364" title="1 of 2 branches missed.">        if ( _shades.size() == 1 )</span>
+<span class="fc" id="L365">            shadeString = _shades.get(StyleUtility.DEFAULT_KEY).toString();</span>
         else
-<span class="nc" id="L350">            shadeString = _shades.entrySet()</span>
-<span class="nc" id="L351">                    .stream()</span>
-<span class="nc" id="L352">                    .map(e -&gt; e.getKey() + &quot;: &quot; + e.getValue())</span>
-<span class="nc" id="L353">                    .collect(Collectors.joining(&quot;, &quot;, &quot;shades=[&quot;, &quot;]&quot;));</span>
+<span class="nc" id="L367">            shadeString = _shades.entrySet()</span>
+<span class="nc" id="L368">                    .stream()</span>
+<span class="nc" id="L369">                    .map(e -&gt; e.getKey() + &quot;: &quot; + e.getValue())</span>
+<span class="nc" id="L370">                    .collect(Collectors.joining(&quot;, &quot;, &quot;shades=[&quot;, &quot;]&quot;));</span>
 
-<span class="fc" id="L355">        return &quot;Style[&quot; +</span>
-                    _layout       + &quot;, &quot; +
-                    _border       + &quot;, &quot; +
-                    _background   + &quot;, &quot; +
-                    _foreground   + &quot;, &quot; +
-                    _font         + &quot;, &quot; +
-                    shadowString  + &quot;, &quot; +
-                    painterString + &quot;, &quot; +
+<span class="pc bpc" id="L372" title="1 of 2 branches missed.">        return &quot;Style[&quot; +</span>
+                    _layout         + &quot;, &quot; +
+                    _border         + &quot;, &quot; +
+                    _background     + &quot;, &quot; +
+                    _foreground     + &quot;, &quot; +
+                    _font           + &quot;, &quot; +
+                    _dimensionality + &quot;, &quot; +
+                    ( _cursor == null ? &quot;&quot; : _cursor ) +
+                    shadowString    + &quot;, &quot; +
+                    painterString   + &quot;, &quot; +
                     shadeString +
                 &quot;]&quot;;
     }

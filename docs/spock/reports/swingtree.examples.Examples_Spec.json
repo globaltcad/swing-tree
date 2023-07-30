@@ -269,7 +269,7 @@
       "blocks":[
         {"kind":"given","text":"We create the UI.","code":["var ui = new Calculator()","ui.setBackground(new Color(242, 242, 242))"]},
 
-        {"kind":"expect","text":"","code":["new Utility.Query(ui).find(JTextArea, \"input-text-area\").isPresent()","new Utility.Query(ui).find(JTextArea, \"input-text-area\").get().componentOrientation == ComponentOrientation.RIGHT_TO_LEFT"]},
+        {"kind":"expect","text":"","code":["new Utility.Query(ui).find(JTextField, \"input-text-area\").isPresent()","new Utility.Query(ui).find(JTextField, \"input-text-area\").get().horizontalAlignment == JTextField.RIGHT"]},
 
         {"kind":"and","text":"Its render state is as expected.","code":["Utility.similarityBetween(ui, \"views/calculator-UI.png\", 97.5) > 97.5"]}
       ],

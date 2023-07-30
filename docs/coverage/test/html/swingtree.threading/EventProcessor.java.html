@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EventProcessor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.threading</a> &gt; <span class="el_source">EventProcessor.java</span></div><h1>EventProcessor.java</h1><pre class="source lang-java linenums">package swingtree.threading;
 
-import swingtree.UI;
-
 /**
  * 	One of Swing's biggest drawback is that it is single threaded. This means that all
  * 	GUI events are processed on the same thread as the application logic. &lt;br&gt;
@@ -51,19 +49,20 @@ public interface EventProcessor
 	 *  {@link DecoupledEventProcessor#join()} at {@link EventProcessor#DECOUPLED}
 	 *  when using this processor, otherwise events will not be handled.
 	 */
-<span class="fc" id="L54">	EventProcessor COUPLED = new CoupledEventProcessor();</span>
+<span class="fc" id="L52">	EventProcessor COUPLED = new LenientAWTEventProcessor();</span>
 	/**
 	 *  This event processor runs the events immediately on the GUI thread.
 	 *  If the current thread is the GUI thread, the events are executed immediately,
-	 *  otherwise an exception is thrown.
+	 *  otherwise an exception is thrown, and it's stack trace is printed
+	 *  (but the application will not crash).
 	 */
-<span class="fc" id="L60">	EventProcessor COUPLED_STRICT = new AWTOnlyEventProcessor();</span>
+<span class="fc" id="L59">	EventProcessor COUPLED_STRICT = new AWTEventProcessor();</span>
 	/**
 	 *  This event processor makes a distinction between application events and UI events.
 	 *  Application events are executed on the application thread, whereas UI events are
 	 *  executed on the GUI thread (AWT Event Dispatch Thread).
 	 */
-<span class="fc" id="L66">	DecoupledEventProcessor DECOUPLED = DecoupledEventProcessor.INSTANCE();</span>
+<span class="fc" id="L65">	DecoupledEventProcessor DECOUPLED = DecoupledEventProcessor.INSTANCE();</span>
 
 	/**
 	 *   Adds the supplied task to an event queue for processing application events.
@@ -73,7 +72,7 @@ public interface EventProcessor
 	 *
 	 * @param runnable The task to be executed in the application thread.
 	 */
-	void registerAppEvent(Runnable runnable);
+	void registerAppEvent( Runnable runnable );
 
 	/**
 	 *   Adds the supplied task to an event queue for processing application events
