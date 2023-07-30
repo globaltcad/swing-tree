@@ -16,7 +16,7 @@ import swingtree.api.model.TableMapDataSource;
 import swingtree.components.JScrollPanels;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
-import swingtree.style.ComponentExtension;
+import swingtree.style.*;
 import swingtree.style.StyleSheet;
 import swingtree.threading.EventProcessor;
 
@@ -518,7 +518,64 @@ public final class UI
             throw new RuntimeException();
         }
     }
+    /**
+     *  Use this to target specific edges of a {@link JComponent} and apply
+     *  custom {@link Style} properties to them.
+     *  <br>
+     *  See {@link StyleDelegate#borderWidthAt(Edge, int)}
+     */
+    public enum Edge
+    {
+        TOP,    RIGHT,
+        BOTTOM, LEFT,
+        EVERY
+    }
 
+    /**
+     *  Instances of this enum are used to configure onto which
+     *  layer a particular style configuration should be applied.
+     */
+    public enum Layer
+    {
+        BACKGROUND,
+        CONTENT,
+        BORDER,
+        FOREGROUND
+    }
+
+    /**
+     *  Use these enum instances to specify the gradient type for various sub styles,
+     *  like for example {@link BackgroundStyle} or {@link BorderStyle} through the
+     *  {@link GradientStyle#type(GradientType)} method exposed by methods like
+     *  {@link StyleDelegate#gradient(String, Function)} or {@link StyleDelegate#borderGradient(String, Function)}.
+     */
+    public enum GradientType
+    {
+        LINEAR, RADIAL
+    }
+
+    /**
+     *  Use these enum instances to specify the gradient alignment for various sub styles,
+     *  like for example {@link BackgroundStyle} or {@link BorderStyle} through the
+     *  {@link GradientStyle#align(GradientAlignment)} method exposed by methods like
+     *  {@link StyleDelegate#gradient(String, Function)} or {@link StyleDelegate#borderGradient(String, Function)}.
+     */
+    public enum GradientAlignment
+    {
+        TOP_LEFT_TO_BOTTOM_RIGHT, BOTTOM_LEFT_TO_TOP_RIGHT,
+        TOP_RIGHT_TO_BOTTOM_LEFT, BOTTOM_RIGHT_TO_TOP_LEFT,
+
+        TOP_TO_BOTTOM, LEFT_TO_RIGHT,
+        BOTTOM_TO_TOP, RIGHT_TO_LEFT;
+
+        /**
+         * @return {@code true} if this alignment is diagonal, {@code false} otherwise.
+         */
+        public boolean isDiagonal() {
+            return this == TOP_LEFT_TO_BOTTOM_RIGHT || this == BOTTOM_LEFT_TO_TOP_RIGHT ||
+                    this == TOP_RIGHT_TO_BOTTOM_LEFT || this == BOTTOM_RIGHT_TO_TOP_LEFT;
+        }
+    }
 
     /**
      *  This returns an instance of a generic swing tree builder

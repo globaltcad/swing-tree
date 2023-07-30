@@ -324,7 +324,7 @@ public final class StyleDelegate<C extends JComponent>
      * @param width The border width in pixels.
      * @return A new {@link StyleDelegate} with the provided border width for the specified edge.
      */
-    public StyleDelegate<C> borderWidthAt( Edge edge, int width ) {
+    public StyleDelegate<C> borderWidthAt(UI.Edge edge, int width ) {
         return _withStyle(_style._withBorder(_style.border().widthAt(edge, width)));
     }
 
@@ -344,7 +344,7 @@ public final class StyleDelegate<C extends JComponent>
      * @param left The left border width in pixels.
      * @return A new {@link StyleDelegate} with the provided top, right, bottom and left border widths.
      * @see #borderWidth(int)
-     * @see #borderWidthAt(Edge, int)
+     * @see #borderWidthAt(UI.Edge, int)
      */
     public StyleDelegate<C> borderWidths( int top, int right, int bottom, int left ) {
         return _withStyle(_style._withBorder(_style.border().widths(Outline.of(top, right, bottom, left))));
@@ -362,7 +362,7 @@ public final class StyleDelegate<C extends JComponent>
      * @param leftRight The left and right border width in pixels.
      * @return A new {@link StyleDelegate} with the provided top/bottom and left/right border widths.
      * @see #borderWidth(int)
-     * @see #borderWidthAt(Edge, int)
+     * @see #borderWidthAt(UI.Edge, int)
      */
     public StyleDelegate<C> borderWidths( int topBottom, int leftRight ) {
         return _withStyle(_style._withBorder(_style.border().widths(Outline.of(topBottom, leftRight, topBottom, leftRight))));
@@ -533,7 +533,7 @@ public final class StyleDelegate<C extends JComponent>
      * @param renderer The background renderer.
      * @return A new {@link StyleDelegate} with the provided background renderer.
      */
-    public StyleDelegate<C> painter( Layer layer, Painter renderer ) {
+    public StyleDelegate<C> painter(UI.Layer layer, Painter renderer ) {
         return _withStyle(_style.painter(StyleUtility.DEFAULT_KEY, layer, renderer));
     }
 
@@ -550,7 +550,7 @@ public final class StyleDelegate<C extends JComponent>
      * @param renderer The background renderer.
      * @return A new {@link StyleDelegate} with the provided background renderer.
      */
-    public StyleDelegate<C> painter( Layer layer, String painterName, Painter renderer ) {
+    public StyleDelegate<C> painter(UI.Layer layer, String painterName, Painter renderer ) {
         return _withStyle(_style.painter(painterName, layer, renderer));
     }
 
@@ -712,11 +712,11 @@ public final class StyleDelegate<C extends JComponent>
 
     /**
      *  Use this to configure on which layer the shadow should be rendered. <br>
-     *  The default layer is {@link Layer#CONTENT}. <br>
+     *  The default layer is {@link UI.Layer#CONTENT}. <br>
      * @param layer The layer on which the shadow should be rendered.
      * @return A new {@link StyleDelegate} with the provided shadow layer.
      */
-    public StyleDelegate<C> shadowLayer( Layer layer ) {
+    public StyleDelegate<C> shadowLayer( UI.Layer layer ) {
         return _withStyle(_style._withShadow( shadow -> shadow.layer(layer)));
     }
 
@@ -1262,7 +1262,7 @@ public final class StyleDelegate<C extends JComponent>
     public float scale() { return UI.scale(); }
 
     /**
-     *  Use this method inside custom {@link Painter} implementations (see {@link #painter(Layer, Painter)})
+     *  Use this method inside custom {@link Painter} implementations (see {@link #painter(UI.Layer, Painter)})
      *  to scale an {@code int} value by the current UI scale factor to ensure
      *  that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
      *  @param value The {@code int} value to scale.
@@ -1271,7 +1271,7 @@ public final class StyleDelegate<C extends JComponent>
     public int scale( int value ) { return UI.scale(value); }
 
     /**
-     *  Use this method inside custom {@link Painter} implementations (see {@link #painter(Layer, Painter)})
+     *  Use this method inside custom {@link Painter} implementations (see {@link #painter(UI.Layer, Painter)})
      *  to scale a {@code float} value by the current UI scale factor to ensure
      *  that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
      *  @param value The {@code float} value to scale.
@@ -1280,7 +1280,7 @@ public final class StyleDelegate<C extends JComponent>
     public float scale( float value ) { return UI.scale(value); }
 
     /**
-     *  Use this method inside custom {@link Painter} implementations (see {@link #painter(Layer, Painter)})
+     *  Use this method inside custom {@link Painter} implementations (see {@link #painter(UI.Layer, Painter)})
      *  to scale a {@code double} value by the current UI scale factor to ensure
      *  that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
      *  @param value The {@code double} value to scale.

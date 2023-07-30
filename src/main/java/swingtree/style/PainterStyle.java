@@ -1,20 +1,22 @@
 package swingtree.style;
 
+import swingtree.UI;
+
 import java.util.Objects;
 
 public final class PainterStyle
 {
-    private static final PainterStyle _NONE = new PainterStyle(Painter.none(), Layer.BACKGROUND);
+    private static final PainterStyle _NONE = new PainterStyle(Painter.none(), UI.Layer.BACKGROUND);
 
 
     public static PainterStyle none() { return _NONE; }
 
 
     private final Painter _painter;
-    private final Layer _layer;
+    private final UI.Layer _layer;
 
 
-    private PainterStyle( Painter painter, Layer layer )
+    private PainterStyle( Painter painter, UI.Layer layer )
     {
         _painter = painter;
         _layer   = layer;
@@ -25,9 +27,9 @@ public final class PainterStyle
 
     public PainterStyle painter(Painter painter) { return new PainterStyle(painter, _layer); }
 
-    public Layer layer() { return _layer; }
+    public UI.Layer layer() { return _layer; }
 
-    public PainterStyle layer(Layer layer) { return new PainterStyle(_painter, layer); }
+    public PainterStyle layer(UI.Layer layer) { return new PainterStyle(_painter, layer); }
 
 
     @Override

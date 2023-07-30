@@ -2,7 +2,6 @@ package examples.games;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import swingtree.UI;
-import swingtree.style.Layer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -42,7 +41,7 @@ public class NoteGuesserView extends Panel
                  .shadowBlurRadius(6)
                  .shadowSpreadRadius(3)
                  .shadowIsInset(true)
-                 .painter(Layer.BACKGROUND, g2d -> {
+                 .painter(UI.Layer.BACKGROUND, g2d -> {
                      int w = it.component().getWidth() - 25 - 25 - 100;
                      int h = it.component().getHeight() - 20 - 20 - 30;
                      int x = 25 + 50;

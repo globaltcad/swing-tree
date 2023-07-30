@@ -1,5 +1,7 @@
 package swingtree.style;
 
+import swingtree.UI;
+
 import java.awt.*;
 import java.util.*;
 import java.util.List;
@@ -171,8 +173,8 @@ public final class BorderStyle
                    .arcHeightAt(Corner.BOTTOM_RIGHT, borderArcHeight);
     }
 
-    BorderStyle widthAt( Edge edge, int borderWidth ) {
-        if ( edge == Edge.EVERY )
+    BorderStyle widthAt(UI.Edge edge, int borderWidth ) {
+        if ( edge == UI.Edge.EVERY )
             return this.width(borderWidth);
         switch (edge) {
             case TOP:    return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.top(borderWidth), _borderColor, _shades);
@@ -185,10 +187,10 @@ public final class BorderStyle
     }
 
     BorderStyle width( int borderWidth ) {
-        return this.widthAt(Edge.TOP,    borderWidth)
-                   .widthAt(Edge.RIGHT,  borderWidth)
-                   .widthAt(Edge.BOTTOM, borderWidth)
-                   .widthAt(Edge.LEFT,   borderWidth);
+        return this.widthAt(UI.Edge.TOP,    borderWidth)
+                   .widthAt(UI.Edge.RIGHT,  borderWidth)
+                   .widthAt(UI.Edge.BOTTOM, borderWidth)
+                   .widthAt(UI.Edge.LEFT,   borderWidth);
     }
 
     BorderStyle color( Color borderColor ) { return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, borderColor, _shades); }

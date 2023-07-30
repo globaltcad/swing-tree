@@ -3,7 +3,6 @@ package examples.stylish;
 import com.formdev.flatlaf.FlatLightLaf;
 import swingtree.UI;
 import swingtree.style.Corner;
-import swingtree.style.Layer;
 
 import java.awt.*;
 import java.util.Optional;
@@ -127,7 +126,7 @@ public class BoxShadowPickerView extends UI.Panel
                     .withStyle( it -> it
                          .backgroundColor(vm.backgroundColor().get())
                          .foundationColor(vm.foundationColor().get())
-                         .painter(Layer.BACKGROUND, g2d -> {
+                         .painter(UI.Layer.BACKGROUND, g2d -> {
                              if ( vm.drawSmiley().is(false) ) return;
                              int w = it.component().getWidth() - vm.marginLeft().get() - vm.marginRight().get() - 100;
                              int h = it.component().getHeight() - vm.marginTop().get() - vm.marginBottom().get() - 100;

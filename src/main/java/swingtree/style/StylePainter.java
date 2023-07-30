@@ -60,7 +60,7 @@ final class StylePainter<C extends JComponent>
             g2d.fill(_getBaseArea());
         });
 
-        _paintStylesOn(Layer.BACKGROUND, g2d);
+        _paintStylesOn(UI.Layer.BACKGROUND, g2d);
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
@@ -69,7 +69,7 @@ final class StylePainter<C extends JComponent>
             g2d.setClip(_getBaseArea());
     }
 
-    private void _paintStylesOn( Layer layer, Graphics2D g2d ) {
+    private void _paintStylesOn(UI.Layer layer, Graphics2D g2d ) {
         // Every layer has 3 things:
         // 1. Shades, which are simple gradient effects
         for ( GradientStyle gradient : style.gradients(layer) )
@@ -115,13 +115,13 @@ final class StylePainter<C extends JComponent>
         if ( DO_ANTIALIASING() )
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
-        _paintStylesOn(Layer.CONTENT, g2d);
+        _paintStylesOn(UI.Layer.CONTENT, g2d);
 
         style.border().color().ifPresent( color -> {
             _drawBorder(style, color, g2d);
         });
 
-        _paintStylesOn(Layer.BORDER, g2d);
+        _paintStylesOn(UI.Layer.BORDER, g2d);
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
@@ -140,7 +140,7 @@ final class StylePainter<C extends JComponent>
         if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
             g2d.setFont( componentFont );
 
-        _paintStylesOn(Layer.FOREGROUND, g2d);
+        _paintStylesOn(UI.Layer.FOREGROUND, g2d);
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
@@ -435,10 +435,10 @@ final class StylePainter<C extends JComponent>
         _renderCornerShadow(shadow, Corner.BOTTOM_RIGHT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
 
         // Draw the edge shadows
-        _renderEdgeShadow(shadow, Edge.TOP,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
-        _renderEdgeShadow(shadow, Edge.RIGHT,  shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
-        _renderEdgeShadow(shadow, Edge.BOTTOM, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
-        _renderEdgeShadow(shadow, Edge.LEFT,   shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
+        _renderEdgeShadow(shadow, UI.Edge.TOP,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
+        _renderEdgeShadow(shadow, UI.Edge.RIGHT,  shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
+        _renderEdgeShadow(shadow, UI.Edge.BOTTOM, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
+        _renderEdgeShadow(shadow, UI.Edge.LEFT,   shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
 
         outerMostArea = new Area(outerShadowBox);
         // If the base rectangle and the outer shadow box are not equal, then we need to fill the area of the base rectangle that is not covered by the outer shadow box!
@@ -611,7 +611,7 @@ final class StylePainter<C extends JComponent>
 
     private static void _renderEdgeShadow(
             ShadowStyle shadowStyle,
-            Edge edge,
+            UI.Edge edge,
             Area contentArea,
             Rectangle innerShadowRect,
             Rectangle outerShadowRect,
@@ -782,7 +782,7 @@ final class StylePainter<C extends JComponent>
         Area specificArea
     ) {
         Color[] colors = gradient.colors();
-        GradientAlignment type = gradient.align();
+        UI.GradientAlignment type = gradient.align();
         Dimension size = component.getSize();
         size.width  -= (margin.right().orElse(0) + margin.left().orElse(0));
         size.height -= (margin.bottom().orElse(0) + margin.top().orElse(0));
@@ -801,13 +801,13 @@ final class StylePainter<C extends JComponent>
         int diagonalCorner2Y;
 
         boolean revertColors = false;
-        if ( type == GradientAlignment.TOP_RIGHT_TO_BOTTOM_LEFT ) {
-            type = GradientAlignment.BOTTOM_LEFT_TO_TOP_RIGHT;
+        if ( type == UI.GradientAlignment.TOP_RIGHT_TO_BOTTOM_LEFT ) {
+            type = UI.GradientAlignment.BOTTOM_LEFT_TO_TOP_RIGHT;
             // We revert the colors
             revertColors = true;
         }
-        if ( type == GradientAlignment.BOTTOM_RIGHT_TO_TOP_LEFT ) {
-            type = GradientAlignment.TOP_LEFT_TO_BOTTOM_RIGHT;
+        if ( type == UI.GradientAlignment.BOTTOM_RIGHT_TO_TOP_LEFT ) {
+            type = UI.GradientAlignment.TOP_LEFT_TO_BOTTOM_RIGHT;
             revertColors = true;
         }
 
@@ -825,7 +825,7 @@ final class StylePainter<C extends JComponent>
                 }
         }
 
-        if ( type == GradientAlignment.TOP_LEFT_TO_BOTTOM_RIGHT ) {
+        if ( type == UI.GradientAlignment.TOP_LEFT_TO_BOTTOM_RIGHT ) {
             corner1X = realX;
             corner1Y = realY;
             corner2X = realX + width;
@@ -834,7 +834,7 @@ final class StylePainter<C extends JComponent>
             diagonalCorner1Y = realY + height;
             diagonalCorner2X = realX + width;
             diagonalCorner2Y = realY;
-        } else if ( type == GradientAlignment.BOTTOM_LEFT_TO_TOP_RIGHT ) {
+        } else if ( type == UI.GradientAlignment.BOTTOM_LEFT_TO_TOP_RIGHT ) {
             corner1X = realX + width;
             corner1Y = realY;
             corner2X = realX;
@@ -854,9 +854,9 @@ final class StylePainter<C extends JComponent>
         for ( int i = 0; i < colors.length; i++ )
             fractions[i] = (float) i / (float) (colors.length - 1);
 
-        if ( gradient.type() == GradientType.RADIAL ) {
+        if ( gradient.type() == UI.GradientType.RADIAL ) {
             float startCornerX, startCornerY;
-            if ( type == GradientAlignment.TOP_LEFT_TO_BOTTOM_RIGHT ) {
+            if ( type == UI.GradientAlignment.TOP_LEFT_TO_BOTTOM_RIGHT ) {
                 startCornerX = corner1X;
                 startCornerY = corner1Y;
             } else {
@@ -882,7 +882,7 @@ final class StylePainter<C extends JComponent>
                         colors,
                         MultipleGradientPaint.CycleMethod.NO_CYCLE
                 ));
-        } else if ( gradient.type() == GradientType.LINEAR ) {
+        } else if ( gradient.type() == UI.GradientType.LINEAR ) {
             double vector1X = diagonalCorner1X - diagonalCenterX;
             double vector1Y = diagonalCorner1Y - diagonalCenterY;
             double vector2X = diagonalCorner2X - diagonalCenterX;
@@ -931,7 +931,7 @@ final class StylePainter<C extends JComponent>
         GradientStyle gradient,
         Area specificArea
     ) {
-        GradientAlignment type = gradient.align();
+        UI.GradientAlignment type = gradient.align();
         Color[] colors = gradient.colors();
         Dimension size = component.getSize();
         size.width  -= (margin.right().orElse(0) + margin.left().orElse(0));
@@ -946,22 +946,22 @@ final class StylePainter<C extends JComponent>
         int corner2X;
         int corner2Y;
 
-        if ( type == GradientAlignment.TOP_TO_BOTTOM ) {
+        if ( type == UI.GradientAlignment.TOP_TO_BOTTOM ) {
             corner1X = realX;
             corner1Y = realY;
             corner2X = realX;
             corner2Y = realY + height;
-        } else if ( type == GradientAlignment.LEFT_TO_RIGHT ) {
+        } else if ( type == UI.GradientAlignment.LEFT_TO_RIGHT ) {
             corner1X = realX;
             corner1Y = realY;
             corner2X = realX + width;
             corner2Y = realY;
-        } else if ( type == GradientAlignment.BOTTOM_TO_TOP ) {
+        } else if ( type == UI.GradientAlignment.BOTTOM_TO_TOP ) {
             corner1X = realX;
             corner1Y = realY + height;
             corner2X = realX;
             corner2Y = realY;
-        } else if ( type == GradientAlignment.RIGHT_TO_LEFT ) {
+        } else if ( type == UI.GradientAlignment.RIGHT_TO_LEFT ) {
             corner1X = realX + width;
             corner1Y = realY;
             corner2X = realX;
@@ -981,7 +981,7 @@ final class StylePainter<C extends JComponent>
             for ( int i = 0; i < colors.length; i++ )
                 fractions[i] = (float) i / (float) (colors.length - 1);
 
-            if ( gradient.type() == GradientType.LINEAR )
+            if ( gradient.type() == UI.GradientType.LINEAR )
                 g2d.setPaint(
                     new LinearGradientPaint(
                             corner1X, corner1Y,
@@ -989,7 +989,7 @@ final class StylePainter<C extends JComponent>
                             fractions, colors
                         )
                 );
-            else if ( gradient.type() == GradientType.RADIAL ) {
+            else if ( gradient.type() == UI.GradientType.RADIAL ) {
                 float radius = (float) Math.sqrt(
                                             (corner2X - corner1X) * (corner2X - corner1X) +
                                             (corner2Y - corner1Y) * (corner2Y - corner1Y)

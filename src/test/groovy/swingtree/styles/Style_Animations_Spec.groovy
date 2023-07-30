@@ -6,7 +6,6 @@ import spock.lang.Title
 import swingtree.SwingTreeContext
 import swingtree.threading.EventProcessor
 import swingtree.UI
-import swingtree.style.Layer
 
 import javax.swing.UIManager
 import javax.swing.border.CompoundBorder
@@ -166,7 +165,7 @@ class Style_Animations_Spec extends Specification
                                     .backgroundColor(new Color(255, 100, 0, (int) (255 * state.cycle())))
                                     .margin(12)
                                     .foundationColor(new Color(0, 100, 200))
-                                    .painter(Layer.BACKGROUND, g2d -> {
+                                    .painter(UI.Layer.BACKGROUND, g2d -> {
                                         boolean isMouseRollover = style.component().getModel().isRollover()
                                         // We draw a custom gradient:
                                         var gradient = new GradientPaint(

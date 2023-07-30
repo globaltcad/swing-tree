@@ -8,9 +8,9 @@ import swingtree.SwingTreeContext
 import swingtree.threading.EventProcessor
 import swingtree.UI
 import swingtree.style.Arc
-import swingtree.style.Layer
+
 import swingtree.style.Outline
-import swingtree.style.GradientAlignment
+
 import swingtree.style.Style
 import swingtree.style.StyleSheet
 
@@ -445,7 +445,7 @@ class Style_Sheet_Spec extends Specification
                 @Override
                 protected void configure() {
                     add(group("Gradient"), it ->
-                        it.painter(Layer.BACKGROUND, g2d -> {
+                        it.painter(UI.Layer.BACKGROUND, g2d -> {
                             // Let's render a gradient:
                             var gradient = new GradientPaint(0, 0, Color.RED, 0, 100, Color.BLUE);
                             g2d.setPaint(gradient);
@@ -453,7 +453,7 @@ class Style_Sheet_Spec extends Specification
                         })
                     );
                     add(group("ChessBoard"), it ->
-                        it.painter(Layer.BACKGROUND, g2d -> {
+                        it.painter(UI.Layer.BACKGROUND, g2d -> {
                             var w = it.component().getWidth() / 8;// We render a checkerboard pattern!
                             var h = it.component().getHeight() / 8;
                             for (var i = 0; i < 8; i++) {
@@ -506,7 +506,7 @@ class Style_Sheet_Spec extends Specification
                 protected void configure() {
                     add(group("A").inherits("B", "C"), it -> it
                         .borderGradient(s -> s
-                            .align(GradientAlignment.BOTTOM_TO_TOP)
+                            .align(UI.GradientAlignment.BOTTOM_TO_TOP)
                              .colors(Color.RED, Color.BLUE)
                         )
                     );
@@ -518,7 +518,7 @@ class Style_Sheet_Spec extends Specification
                         .borderWidth(20)
                         .borderColor(Color.YELLOW)
                         .borderGradient("named shade", s -> s
-                             .align(GradientAlignment.TOP_TO_BOTTOM)
+                             .align(UI.GradientAlignment.TOP_TO_BOTTOM)
                              .colors(Color.CYAN, Color.MAGENTA)
                         )
                     );
@@ -535,9 +535,9 @@ class Style_Sheet_Spec extends Specification
             s.border().widths().right().get() == 10
             s.border().color().get() == Color.GREEN
         and : 'Note that only the default border shade will be overridden, not the named one.'
-            s.border().gradient().align() == GradientAlignment.BOTTOM_TO_TOP
+            s.border().gradient().align() == UI.GradientAlignment.BOTTOM_TO_TOP
             s.border().gradient().colors() as java.util.List == [Color.RED, Color.BLUE]
-            s.border().gradient("named shade").align() == GradientAlignment.TOP_TO_BOTTOM
+            s.border().gradient("named shade").align() == UI.GradientAlignment.TOP_TO_BOTTOM
             s.border().gradient("named shade").colors() as java.util.List == [Color.CYAN, Color.MAGENTA]
     }
 
@@ -570,7 +570,7 @@ class Style_Sheet_Spec extends Specification
                         .borderWidth(5)
                         .backgroundColor(Color.RED)
                         .borderGradient(s -> s
-                            .align(GradientAlignment.BOTTOM_TO_TOP)
+                            .align(UI.GradientAlignment.BOTTOM_TO_TOP)
                             .colors(Color.RED, Color.BLUE)
                         )
                     );
@@ -618,7 +618,7 @@ class Style_Sheet_Spec extends Specification
             s.border().widths().right().get() == 5
             s.border().color().get() == Color.MAGENTA
             s.background().color().get() == Color.RED
-            s.border().gradient().align() == GradientAlignment.BOTTOM_TO_TOP
+            s.border().gradient().align() == UI.GradientAlignment.BOTTOM_TO_TOP
             s.border().gradient().colors() as java.util.List == [Color.RED, Color.BLUE]
             s.shadow("named shadow").spreadRadius() == 42
             s.shadow("named shadow").color().get() == Color.CYAN

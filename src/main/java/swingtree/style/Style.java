@@ -1,5 +1,7 @@
 package swingtree.style;
 
+import swingtree.UI;
+
 import java.awt.*;
 import java.util.List;
 import java.util.*;
@@ -152,7 +154,7 @@ public final class Style
     /**
      * @return An unmodifiable list of all shadow styles sorted by their names in ascending alphabetical order.
      */
-    List<ShadowStyle> shadows(Layer layer) {
+    List<ShadowStyle> shadows(UI.Layer layer) {
         return Collections.unmodifiableList(
                 _shadows.entrySet()
                         .stream()
@@ -179,7 +181,7 @@ public final class Style
     /**
      * @return An unmodifiable list of painters sorted by their names in ascending alphabetical order.
      */
-    List<Painter> painters(Layer layer) {
+    List<Painter> painters(UI.Layer layer) {
         return Collections.unmodifiableList(
                 _painters
                         .entrySet()
@@ -206,14 +208,14 @@ public final class Style
 
 
     boolean hasCustomBackgroundPainters() {
-        return _painters.values().stream().anyMatch(p -> p.layer() == Layer.BACKGROUND && !Painter.none().equals(p.painter()));
+        return _painters.values().stream().anyMatch(p -> p.layer() == UI.Layer.BACKGROUND && !Painter.none().equals(p.painter()));
     }
 
     boolean hasCustomForegroundPainters() {
-        return _painters.values().stream().anyMatch(p -> p.layer() == Layer.FOREGROUND && !Painter.none().equals(p.painter()));
+        return _painters.values().stream().anyMatch(p -> p.layer() == UI.Layer.FOREGROUND && !Painter.none().equals(p.painter()));
     }
 
-    List<GradientStyle> gradients(Layer layer) {
+    List<GradientStyle> gradients(UI.Layer layer) {
         return Collections.unmodifiableList(
                 _shades.entrySet().stream()
                         .sorted(Map.Entry.comparingByKey())
@@ -247,7 +249,7 @@ public final class Style
         return gradient(newShadows);
     }
 
-    Style painter( String painterName, Layer layer, Painter painter ) {
+    Style painter(String painterName, UI.Layer layer, Painter painter ) {
         Objects.requireNonNull(painterName);
         Objects.requireNonNull(painter);
         painterName = painterName + "_" + layer.name();

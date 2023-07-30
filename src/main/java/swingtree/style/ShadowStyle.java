@@ -1,5 +1,7 @@
 package swingtree.style;
 
+import swingtree.UI;
+
 import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
@@ -12,7 +14,7 @@ public final class ShadowStyle
 {
     private static final ShadowStyle _NONE = new ShadowStyle(
                                                     0,0,0,0,
-                                                    null, true, Layer.CONTENT
+                                                    null, true, UI.Layer.CONTENT
                                                 );
 
     public static ShadowStyle none() { return _NONE; }
@@ -23,7 +25,7 @@ public final class ShadowStyle
     private final int     _spreadRadius;
     private final Color   _color;
     private final boolean _isOutset;
-    private final Layer   _layer;
+    private final UI.Layer _layer;
 
 
     private ShadowStyle(
@@ -33,7 +35,7 @@ public final class ShadowStyle
         int     shadowSpreadRadius,
         Color   shadowColor,
         boolean isOutset,
-        Layer   layer
+        UI.Layer layer
     ) {
         _horizontalOffset = horizontalShadowOffset;
         _verticalOffset   = verticalShadowOffset;
@@ -58,7 +60,7 @@ public final class ShadowStyle
 
     public boolean isInset() { return !_isOutset; }
 
-    public Layer layer() { return _layer; }
+    public UI.Layer layer() { return _layer; }
 
     /**
      * @param horizontalShadowOffset The horizontal shadow offset, if positive the shadow will move to the right,
@@ -174,7 +176,7 @@ public final class ShadowStyle
      * @param shadowLayer The layer of the shadow, by default the shadow is drawn on the border layer.
      * @return A new {@link ShadowStyle} with the specified layer.
      */
-    public ShadowStyle layer( Layer shadowLayer ) {
+    public ShadowStyle layer( UI.Layer shadowLayer ) {
         return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, _color, _isOutset, shadowLayer);
     }
 

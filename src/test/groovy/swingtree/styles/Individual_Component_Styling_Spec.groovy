@@ -8,8 +8,7 @@ import spock.lang.Title
 import swingtree.SwingTreeContext
 import swingtree.threading.EventProcessor
 import swingtree.UI
-import swingtree.style.Layer
-import swingtree.style.GradientAlignment
+
 import utility.Utility
 
 import javax.swing.*
@@ -298,7 +297,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .margin(22)
                         .border(15, Color.CYAN)
                         .borderGradient(s -> s
-                            .align(GradientAlignment.BOTTOM_RIGHT_TO_TOP_LEFT)
+                            .align(UI.GradientAlignment.BOTTOM_RIGHT_TO_TOP_LEFT)
                             .colors(Color.YELLOW, new Color(255,255,255,0))
                         )
                         .shadowColor(new Color(0,0,0,100))
@@ -336,7 +335,7 @@ class Individual_Component_Styling_Spec extends Specification
                     .withStyle( it -> it
                         .size(205, 60)
                         .gradient(shade -> shade
-                           .align(GradientAlignment.TOP_LEFT_TO_BOTTOM_RIGHT)
+                           .align(UI.GradientAlignment.TOP_LEFT_TO_BOTTOM_RIGHT)
                            .colors(
                                it.component().getModel().isSelected()
                                    ? new Color[]{ Color.YELLOW, Color.CYAN   }
@@ -376,7 +375,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .padding(12)
                         .margin(6)
                         .gradient(shade -> shade
-                           .align(GradientAlignment.LEFT_TO_RIGHT)
+                           .align(UI.GradientAlignment.LEFT_TO_RIGHT)
                            .colors(
                               new Color(255,0,0,64),
                               new Color(0,255,0,64),
@@ -385,7 +384,7 @@ class Individual_Component_Styling_Spec extends Specification
                               new Color(255,0,255,64),
                               new Color(0,255,255,64)
                            )
-                           .layer(Layer.BACKGROUND)
+                           .layer(UI.Layer.BACKGROUND)
                         )
                     )
 
@@ -466,7 +465,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .shadowBlurRadius(4)
                         .shadowSpreadRadius(-2)
                         .shadowIsInset(true)
-                        .shadowLayer(Layer.BACKGROUND) // So that the slider track is not affected by the shadow.
+                        .shadowLayer(UI.Layer.BACKGROUND) // So that the slider track is not affected by the shadow.
                         .padding(6)
                         .margin(10)
                     )
@@ -588,19 +587,19 @@ class Individual_Component_Styling_Spec extends Specification
                         .size(120, 50)
                         .padding(6)
                         .margin(10)
-                        .painter(Layer.BACKGROUND, g -> {
+                        .painter(UI.Layer.BACKGROUND, g -> {
                             g.setColor(Color.RED);
                             g.fillRoundRect(10,15,20,20,5,5);
                         })
-                        .painter(Layer.CONTENT, g -> {
+                        .painter(UI.Layer.CONTENT, g -> {
                              g.setColor(Color.ORANGE);
                              g.fillRoundRect(25,15,20,20,5,5);
                         })
-                        .painter(Layer.BORDER, g -> {
+                        .painter(UI.Layer.BORDER, g -> {
                              g.setColor(Color.BLUE);
                              g.fillRoundRect(40,15,20,20,5,5);
                         })
-                        .painter(Layer.FOREGROUND, g -> {
+                        .painter(UI.Layer.FOREGROUND, g -> {
                              g.setColor(Color.MAGENTA);
                              g.fillRoundRect(55,15,20,20,5,5);
                         })

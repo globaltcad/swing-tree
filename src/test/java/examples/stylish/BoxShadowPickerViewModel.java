@@ -6,7 +6,6 @@ import sprouts.Var;
 import swingtree.UI;
 import swingtree.components.JBox;
 import swingtree.style.Corner;
-import swingtree.style.Edge;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,10 +30,10 @@ public class BoxShadowPickerViewModel
 
     // Border
     private final Var<Color>   borderColor     = Var.of(new Color(0,0.4f,1)).onAct( it -> repaint.fire() );
-    private final Var<Edge>    borderEdge      = Var.of(Edge.EVERY).onAct(it -> updateEdgeSelection(it.get()) );
+    private final Var<UI.Edge>    borderEdge      = Var.of(UI.Edge.EVERY).onAct(it -> updateEdgeSelection(it.get()) );
     private final Var<Corner>  borderCorner    = Var.of(Corner.EVERY).onAct(it -> updateCornerSelection(it.get()) );
 
-    private final Map<Edge, BorderEdgeViewModel> edgeModels = new HashMap<>();
+    private final Map<UI.Edge, BorderEdgeViewModel> edgeModels = new HashMap<>();
     private final Map<Corner, BorderCornerViewModel> cornerModels = new HashMap<>();
 
     private final Var<BorderEdgeViewModel> currentEdgeModel = Var.ofNullable(BorderEdgeViewModel.class, null);
@@ -88,10 +87,10 @@ public class BoxShadowPickerViewModel
 
     public BoxShadowPickerViewModel() {
         // Creating sub-view models
-        for (Edge edge : Edge.values()) {
+        for (UI.Edge edge : UI.Edge.values()) {
             BorderEdgeViewModel model = new BorderEdgeViewModel();
             edgeModels.put(edge, model);
-            if (edge == Edge.EVERY) {
+            if (edge == UI.Edge.EVERY) {
                 currentEdgeModel.set(model);
             }
         }
@@ -106,7 +105,7 @@ public class BoxShadowPickerViewModel
         createCode();
     }
 
-    private void updateEdgeSelection(Edge edge) {
+    private void updateEdgeSelection(UI.Edge edge) {
         currentEdgeModel.set(edgeModels.get(edge));
         repaint.fire();
     }
@@ -134,18 +133,18 @@ public class BoxShadowPickerViewModel
 
     public Var<Integer> marginBottom() { return marginBottom; }
     public Var<Corner> borderCorner() { return borderCorner; }
-    public Var<Edge> borderEdge() { return borderEdge; }
+    public Var<UI.Edge> borderEdge() { return borderEdge; }
 
     public Var<BorderEdgeViewModel> currentEdgeModel() { return currentEdgeModel; }
 
-    public int leftBorderWidth() { return getEdgeModel(Edge.LEFT).borderWidth.get(); }
-    public int rightBorderWidth() { return getEdgeModel(Edge.RIGHT).borderWidth.get(); }
-    public int topBorderWidth() { return getEdgeModel(Edge.TOP).borderWidth.get(); }
-    public int bottomBorderWidth() { return getEdgeModel(Edge.BOTTOM).borderWidth.get(); }
+    public int leftBorderWidth() { return getEdgeModel(UI.Edge.LEFT).borderWidth.get(); }
+    public int rightBorderWidth() { return getEdgeModel(UI.Edge.RIGHT).borderWidth.get(); }
+    public int topBorderWidth() { return getEdgeModel(UI.Edge.TOP).borderWidth.get(); }
+    public int bottomBorderWidth() { return getEdgeModel(UI.Edge.BOTTOM).borderWidth.get(); }
 
-    private BoxShadowPickerViewModel.BorderEdgeViewModel getEdgeModel(Edge edge) {
+    private BoxShadowPickerViewModel.BorderEdgeViewModel getEdgeModel(UI.Edge edge) {
         // We check if the
-        if ( currentEdgeModel.is(edgeModels.get(Edge.EVERY)) )
+        if ( currentEdgeModel.is(edgeModels.get(UI.Edge.EVERY)) )
             return currentEdgeModel.get();
 
         return edgeModels.get(edge);
@@ -202,7 +201,7 @@ public class BoxShadowPickerViewModel
                 "     .borderRadiusAt(Corner.BOTTOM_RIGHT, " + arcWidthAt(Corner.BOTTOM_RIGHT) + ", " + arcHeightAt(Corner.BOTTOM_RIGHT) + ")\n";
 
         String borderWidth = "";
-        if ( this.borderEdge.is(Edge.EVERY) ) {
+        if ( this.borderEdge.is(UI.Edge.EVERY) ) {
             if ( leftBorderWidth() == rightBorderWidth() && leftBorderWidth() == topBorderWidth() && leftBorderWidth() == bottomBorderWidth() )
                 borderWidth = leftBorderWidth() == 0 ? "" : "     .borderWidth(" + leftBorderWidth() + ")\n";
             else
