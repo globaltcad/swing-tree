@@ -19,7 +19,7 @@ import java.util.function.Function;
  */
 public final class GradientStyle
 {
-    private static final GradientStyle _NONE = new GradientStyle(UI.GradientAlignment.TOP_TO_BOTTOM, UI.GradientType.LINEAR, new Color[0], UI.Layer.BACKGROUND);
+    private static final GradientStyle _NONE = new GradientStyle(UI.Transition.TOP_TO_BOTTOM, UI.GradientType.LINEAR, new Color[0], UI.Layer.BACKGROUND);
 
     /**
      *  Use the returned instance as a representation of the absence of a gradient.
@@ -29,13 +29,13 @@ public final class GradientStyle
      */
     public static GradientStyle none() { return _NONE; }
 
-    private final UI.GradientAlignment _gradientAlignment;
+    private final UI.Transition _gradientAlignment;
     private final UI.GradientType _gradientType;
     private final Color[] _colors;
     private final UI.Layer _layer;
 
 
-    public GradientStyle(UI.GradientAlignment gradientAlignment, UI.GradientType type, Color[] colors, UI.Layer layer )
+    public GradientStyle(UI.Transition gradientAlignment, UI.GradientType type, Color[] colors, UI.Layer layer )
     {
         _gradientAlignment = Objects.requireNonNull(gradientAlignment);
         _gradientType      = Objects.requireNonNull(type);
@@ -43,7 +43,7 @@ public final class GradientStyle
         _layer             = Objects.requireNonNull(layer);
     }
 
-    UI.GradientAlignment align() { return _gradientAlignment; }
+    UI.Transition align() { return _gradientAlignment; }
 
     UI.GradientType type() { return _gradientType; }
 
@@ -71,21 +71,21 @@ public final class GradientStyle
     /**
      *  Define the alignment of the gradient which is one of the following:
      *  <ul>
-     *     <li>{@link UI.GradientAlignment#TOP_LEFT_TO_BOTTOM_RIGHT}</li>
-     *     <li>{@link UI.GradientAlignment#BOTTOM_LEFT_TO_TOP_RIGHT}</li>
-     *     <li>{@link UI.GradientAlignment#TOP_RIGHT_TO_BOTTOM_LEFT}</li>
-     *     <li>{@link UI.GradientAlignment#BOTTOM_RIGHT_TO_TOP_LEFT}</li>
-     *     <li>{@link UI.GradientAlignment#TOP_TO_BOTTOM}</li>
-     *     <li>{@link UI.GradientAlignment#LEFT_TO_RIGHT}</li>
-     *     <li>{@link UI.GradientAlignment#BOTTOM_TO_TOP}</li>
-     *     <li>{@link UI.GradientAlignment#RIGHT_TO_LEFT}</li>
+     *     <li>{@link UI.Transition#TOP_LEFT_TO_BOTTOM_RIGHT}</li>
+     *     <li>{@link UI.Transition#BOTTOM_LEFT_TO_TOP_RIGHT}</li>
+     *     <li>{@link UI.Transition#TOP_RIGHT_TO_BOTTOM_LEFT}</li>
+     *     <li>{@link UI.Transition#BOTTOM_RIGHT_TO_TOP_LEFT}</li>
+     *     <li>{@link UI.Transition#TOP_TO_BOTTOM}</li>
+     *     <li>{@link UI.Transition#LEFT_TO_RIGHT}</li>
+     *     <li>{@link UI.Transition#BOTTOM_TO_TOP}</li>
+     *     <li>{@link UI.Transition#RIGHT_TO_LEFT}</li>
      *  </ul>
      *
      * @param gradientAlignment The alignment of the gradient.
      * @return A new gradient style with the specified alignment.
      * @throws NullPointerException if the alignment is {@code null}.
      */
-    public GradientStyle align( UI.GradientAlignment gradientAlignment ) {
+    public GradientStyle align( UI.Transition gradientAlignment ) {
         Objects.requireNonNull(gradientAlignment);
         return new GradientStyle(gradientAlignment, _gradientType, _colors, _layer);
     }
@@ -134,7 +134,7 @@ public final class GradientStyle
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals( Object o ) {
         if ( this == o ) return true;
         if ( !(o instanceof GradientStyle) ) return false;
         GradientStyle that = (GradientStyle) o;

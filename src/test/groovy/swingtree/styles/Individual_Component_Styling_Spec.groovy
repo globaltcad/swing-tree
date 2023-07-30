@@ -297,7 +297,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .margin(22)
                         .border(15, Color.CYAN)
                         .borderGradient(s -> s
-                            .align(UI.GradientAlignment.BOTTOM_RIGHT_TO_TOP_LEFT)
+                            .align(UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT)
                             .colors(Color.YELLOW, new Color(255,255,255,0))
                         )
                         .shadowColor(new Color(0,0,0,100))
@@ -335,7 +335,7 @@ class Individual_Component_Styling_Spec extends Specification
                     .withStyle( it -> it
                         .size(205, 60)
                         .gradient(shade -> shade
-                           .align(UI.GradientAlignment.TOP_LEFT_TO_BOTTOM_RIGHT)
+                           .align(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT)
                            .colors(
                                it.component().getModel().isSelected()
                                    ? new Color[]{ Color.YELLOW, Color.CYAN   }
@@ -375,7 +375,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .padding(12)
                         .margin(6)
                         .gradient(shade -> shade
-                           .align(UI.GradientAlignment.LEFT_TO_RIGHT)
+                           .align(UI.Transition.LEFT_TO_RIGHT)
                            .colors(
                               new Color(255,0,0,64),
                               new Color(0,255,0,64),

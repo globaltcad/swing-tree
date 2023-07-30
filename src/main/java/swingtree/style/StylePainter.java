@@ -782,7 +782,7 @@ final class StylePainter<C extends JComponent>
         Area specificArea
     ) {
         Color[] colors = gradient.colors();
-        UI.GradientAlignment type = gradient.align();
+        UI.Transition type = gradient.align();
         Dimension size = component.getSize();
         size.width  -= (margin.right().orElse(0) + margin.left().orElse(0));
         size.height -= (margin.bottom().orElse(0) + margin.top().orElse(0));
@@ -801,13 +801,13 @@ final class StylePainter<C extends JComponent>
         int diagonalCorner2Y;
 
         boolean revertColors = false;
-        if ( type == UI.GradientAlignment.TOP_RIGHT_TO_BOTTOM_LEFT ) {
-            type = UI.GradientAlignment.BOTTOM_LEFT_TO_TOP_RIGHT;
+        if ( type == UI.Transition.TOP_RIGHT_TO_BOTTOM_LEFT ) {
+            type = UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT;
             // We revert the colors
             revertColors = true;
         }
-        if ( type == UI.GradientAlignment.BOTTOM_RIGHT_TO_TOP_LEFT ) {
-            type = UI.GradientAlignment.TOP_LEFT_TO_BOTTOM_RIGHT;
+        if ( type == UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT ) {
+            type = UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT;
             revertColors = true;
         }
 
@@ -825,7 +825,7 @@ final class StylePainter<C extends JComponent>
                 }
         }
 
-        if ( type == UI.GradientAlignment.TOP_LEFT_TO_BOTTOM_RIGHT ) {
+        if ( type == UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT ) {
             corner1X = realX;
             corner1Y = realY;
             corner2X = realX + width;
@@ -834,7 +834,7 @@ final class StylePainter<C extends JComponent>
             diagonalCorner1Y = realY + height;
             diagonalCorner2X = realX + width;
             diagonalCorner2Y = realY;
-        } else if ( type == UI.GradientAlignment.BOTTOM_LEFT_TO_TOP_RIGHT ) {
+        } else if ( type == UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT ) {
             corner1X = realX + width;
             corner1Y = realY;
             corner2X = realX;
@@ -856,7 +856,7 @@ final class StylePainter<C extends JComponent>
 
         if ( gradient.type() == UI.GradientType.RADIAL ) {
             float startCornerX, startCornerY;
-            if ( type == UI.GradientAlignment.TOP_LEFT_TO_BOTTOM_RIGHT ) {
+            if ( type == UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT ) {
                 startCornerX = corner1X;
                 startCornerY = corner1Y;
             } else {
@@ -931,7 +931,7 @@ final class StylePainter<C extends JComponent>
         GradientStyle gradient,
         Area specificArea
     ) {
-        UI.GradientAlignment type = gradient.align();
+        UI.Transition type = gradient.align();
         Color[] colors = gradient.colors();
         Dimension size = component.getSize();
         size.width  -= (margin.right().orElse(0) + margin.left().orElse(0));
@@ -946,22 +946,22 @@ final class StylePainter<C extends JComponent>
         int corner2X;
         int corner2Y;
 
-        if ( type == UI.GradientAlignment.TOP_TO_BOTTOM ) {
+        if ( type == UI.Transition.TOP_TO_BOTTOM ) {
             corner1X = realX;
             corner1Y = realY;
             corner2X = realX;
             corner2Y = realY + height;
-        } else if ( type == UI.GradientAlignment.LEFT_TO_RIGHT ) {
+        } else if ( type == UI.Transition.LEFT_TO_RIGHT ) {
             corner1X = realX;
             corner1Y = realY;
             corner2X = realX + width;
             corner2Y = realY;
-        } else if ( type == UI.GradientAlignment.BOTTOM_TO_TOP ) {
+        } else if ( type == UI.Transition.BOTTOM_TO_TOP ) {
             corner1X = realX;
             corner1Y = realY + height;
             corner2X = realX;
             corner2Y = realY;
-        } else if ( type == UI.GradientAlignment.RIGHT_TO_LEFT ) {
+        } else if ( type == UI.Transition.RIGHT_TO_LEFT ) {
             corner1X = realX + width;
             corner1Y = realY;
             corner2X = realX;

@@ -557,10 +557,10 @@ public final class UI
     /**
      *  Use these enum instances to specify the gradient alignment for various sub styles,
      *  like for example {@link BackgroundStyle} or {@link BorderStyle} through the
-     *  {@link GradientStyle#align(GradientAlignment)} method exposed by methods like
+     *  {@link GradientStyle#align(Transition)} method exposed by methods like
      *  {@link StyleDelegate#gradient(String, Function)} or {@link StyleDelegate#borderGradient(String, Function)}.
      */
-    public enum GradientAlignment
+    public enum Transition
     {
         TOP_LEFT_TO_BOTTOM_RIGHT, BOTTOM_LEFT_TO_TOP_RIGHT,
         TOP_RIGHT_TO_BOTTOM_LEFT, BOTTOM_RIGHT_TO_TOP_LEFT,
@@ -573,7 +573,7 @@ public final class UI
          */
         public boolean isDiagonal() {
             return this == TOP_LEFT_TO_BOTTOM_RIGHT || this == BOTTOM_LEFT_TO_TOP_RIGHT ||
-                    this == TOP_RIGHT_TO_BOTTOM_LEFT || this == BOTTOM_RIGHT_TO_TOP_LEFT;
+                   this == TOP_RIGHT_TO_BOTTOM_LEFT || this == BOTTOM_RIGHT_TO_TOP_LEFT;
         }
     }
 
