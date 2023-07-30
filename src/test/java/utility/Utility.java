@@ -1,12 +1,10 @@
 package utility;
 
-import swingtree.components.JSplitButton;
 import com.formdev.flatlaf.FlatLightLaf;
 import examples.mvvm.SomeSettingsView;
 import examples.mvvm.SomeSettingsViewModel;
 import swingtree.UI;
 import swingtree.UIForAnySwing;
-import swingtree.UIForSplitButton;
 
 import javax.swing.*;
 import java.awt.*;
