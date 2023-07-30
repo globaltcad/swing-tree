@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PainterStyle.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">PainterStyle.java</span></div><h1>PainterStyle.java</h1><pre class="source lang-java linenums">package swingtree.style;
 
 import swingtree.UI;
+import swingtree.api.Painter;
 
 import java.util.Objects;
 
 public final class PainterStyle
 {
-<span class="fc" id="L9">    private static final PainterStyle _NONE = new PainterStyle(Painter.none(), UI.Layer.BACKGROUND);</span>
+<span class="fc" id="L10">    private static final PainterStyle _NONE = new PainterStyle(Painter.none(), UI.Layer.BACKGROUND);</span>
 
 
-<span class="fc" id="L12">    public static PainterStyle none() { return _NONE; }</span>
+<span class="fc" id="L13">    public static PainterStyle none() { return _NONE; }</span>
 
 
     private final Painter _painter;
@@ -17,24 +18,24 @@ public final class PainterStyle
 
 
     private PainterStyle( Painter painter, UI.Layer layer )
-<span class="fc" id="L20">    {</span>
-<span class="fc" id="L21">        _painter = painter;</span>
-<span class="fc" id="L22">        _layer   = layer;</span>
-<span class="fc" id="L23">    }</span>
+<span class="fc" id="L21">    {</span>
+<span class="fc" id="L22">        _painter = painter;</span>
+<span class="fc" id="L23">        _layer   = layer;</span>
+<span class="fc" id="L24">    }</span>
 
 
-<span class="fc" id="L26">    public Painter painter() { return _painter; }</span>
+<span class="fc" id="L27">    public Painter painter() { return _painter; }</span>
 
-<span class="fc" id="L28">    public PainterStyle painter(Painter painter) { return new PainterStyle(painter, _layer); }</span>
+<span class="fc" id="L29">    public PainterStyle painter(Painter painter) { return new PainterStyle(painter, _layer); }</span>
 
-<span class="fc" id="L30">    public UI.Layer layer() { return _layer; }</span>
+<span class="fc" id="L31">    public UI.Layer layer() { return _layer; }</span>
 
-<span class="fc" id="L32">    public PainterStyle layer(UI.Layer layer) { return new PainterStyle(_painter, layer); }</span>
+<span class="fc" id="L33">    public PainterStyle layer(UI.Layer layer) { return new PainterStyle(_painter, layer); }</span>
 
 
     @Override
     public String toString() {
-<span class="fc" id="L37">        return &quot;PainterStyle[&quot; +</span>
+<span class="fc" id="L38">        return &quot;PainterStyle[&quot; +</span>
                     &quot;painter=&quot; + _painter + &quot;, &quot; +
                     &quot;layer=&quot;   + _layer   +
                 ']';
@@ -43,17 +44,17 @@ public final class PainterStyle
 
     @Override
     public boolean equals(Object o) {
-<span class="pc bpc" id="L46" title="1 of 2 branches missed.">        if ( this == o ) return true;</span>
-<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        if ( !(o instanceof PainterStyle) ) return false;</span>
-<span class="fc" id="L48">        PainterStyle that = (PainterStyle) o;</span>
-<span class="pc bpc" id="L49" title="3 of 4 branches missed.">        return _painter == that._painter &amp;&amp;</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        if ( this == o ) return true;</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        if ( !(o instanceof PainterStyle) ) return false;</span>
+<span class="fc" id="L49">        PainterStyle that = (PainterStyle) o;</span>
+<span class="pc bpc" id="L50" title="3 of 4 branches missed.">        return _painter == that._painter &amp;&amp;</span>
                _layer == that._layer;
     }
 
 
     @Override
     public int hashCode() {
-<span class="fc" id="L56">        return Objects.hash(_painter, _layer);</span>
+<span class="fc" id="L57">        return Objects.hash(_painter, _layer);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

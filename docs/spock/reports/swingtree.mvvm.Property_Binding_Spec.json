@@ -186,13 +186,13 @@
 
         {"kind":"and","text":"We create a UI to which we want to bind:","code":["var node = UI.splitButton(\"I am a split button\")","                .add(UI.splitItem(\"I am a button\").isEnabledIf(property))","                .add(UI.splitItem(\"I am a button\"))","                .add(UI.splitItem(\"I am a button\"))"]},
 
-        {"kind":"expect","text":"The first split item will be enabled.","code":["Utility.getSplitButtonPopup(node).components[0].enabled == true"]},
+        {"kind":"expect","text":"The first split item will be enabled.","code":["node.component.popupMenu.components[0].enabled == true"]},
 
         {"kind":"when","text":"We change the value of the property.","code":["property.set(false)"]},
 
         {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 
-        {"kind":"then","text":"The first split item will be disabled.","code":["Utility.getSplitButtonPopup(node).components[0].enabled == false"]}
+        {"kind":"then","text":"The first split item will be disabled.","code":["node.component.popupMenu.components[0].enabled == false"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

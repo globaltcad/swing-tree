@@ -1,0 +1,1316 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ComponentStyleDelegate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">ComponentStyleDelegate.java</span></div><h1>ComponentStyleDelegate.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import swingtree.UI;
+import swingtree.api.Painter;
+import swingtree.api.Peeker;
+import swingtree.api.Styler;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.util.*;
+import java.util.function.Function;
+
+/**
+ *  A {@link ComponentStyleDelegate} is a delegate for a {@link JComponent} and its {@link Style} configuration
+ *  used to apply further specify the style of said {@link JComponent}.
+ *  Instances of this will be exposed to you via the {@link swingtree.UIForAnySwing#withStyle(Styler)}
+ *  method, where you can specify a lambda that takes a {@link ComponentStyleDelegate} and returns a
+ *  transformed {@link Style} object, as well as inside of {@link StyleSheet} extensions
+ *  where you can declare similar styling lambdas for {@link StyleTrait}s, which are
+ *  styling rules... &lt;br&gt;
+ *
+ * @param &lt;C&gt; The type of {@link JComponent} this {@link ComponentStyleDelegate} is for.
+ */
+public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
+{
+    private final C _component;
+    private final Style _style;
+
+
+<span class="fc" id="L31">    public ComponentStyleDelegate(C component, Style style ) {</span>
+<span class="fc" id="L32">        _component = component;</span>
+<span class="fc" id="L33">        _style     = style;</span>
+<span class="fc" id="L34">    }</span>
+
+<span class="fc" id="L36">    ComponentStyleDelegate&lt;C&gt; _withStyle(Style style ) { return new ComponentStyleDelegate&lt;&gt;(_component, style); }</span>
+
+    /**
+     *  Returns the {@link JComponent} this {@link ComponentStyleDelegate} is defining a {@link Style} for.
+     *  This is useful if you want to make the styling of a component based on its state,
+     *  like for example determining the background color of a {@link JCheckBox} based on
+     *  whether it is selected or not...
+     * &lt;p&gt;
+     * @return The {@link JComponent} this {@link ComponentStyleDelegate} is for.
+     */
+<span class="fc" id="L46">    public C component() { return _component; }</span>
+
+    /**
+     *  Use this to peek at the {@link JComponent} of this {@link ComponentStyleDelegate}
+     *  to perform some style-related component specific actions on it
+     *  which are otherwise not found in the {@link ComponentStyleDelegate} API.
+     *
+     * @param peeker A {@link Peeker} that takes the {@link JComponent} of this {@link ComponentStyleDelegate}
+     * @return This {@link ComponentStyleDelegate} instance.
+     */
+    public ComponentStyleDelegate&lt;C&gt; peek( Peeker&lt;C&gt; peeker ) {
+        try {
+<span class="nc" id="L58">            peeker.accept(_component);</span>
+<span class="nc" id="L59">        } catch( Exception e ) {</span>
+<span class="nc" id="L60">            e.printStackTrace();</span>
+            // We don't want to crash the application if the peeker throws an exception.
+<span class="nc" id="L62">        }</span>
+<span class="nc" id="L63">        return this;</span>
+    }
+
+    /**
+     *  Returns the {@link Style} this {@link ComponentStyleDelegate} is defining for the {@link JComponent}
+     *  returned by {@link #component()}.
+     * &lt;p&gt;
+     * @return The {@link Style} this {@link ComponentStyleDelegate} is for.
+     */
+<span class="fc" id="L72">    Style style() { return _style; }</span>
+
+    /**
+     *  Creates a new {@link Style} with the provided top, right, left and bottom margin distances.
+     *  It determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     * &lt;p&gt;
+     * @param top The top padding distance in pixels.
+     * @param right The right padding distance in pixels.
+     * @param bottom The bottom padding distance in pixels.
+     * @param left The left padding distance in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided padding distances.
+     */
+    public ComponentStyleDelegate&lt;C&gt; margin( int top, int right, int bottom, int left ) {
+<span class="fc" id="L87">        return _withStyle(_style._withLayout(_style.layout().margin(_style.layout().margin().top(top).left(left).right(right).bottom(bottom))));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided margin distance for all sides of the component.
+     *  The margin determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     * &lt;p&gt;
+     * @param margin The margin distance in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
+     */
+    public ComponentStyleDelegate&lt;C&gt; margin( int margin ) {
+<span class="fc" id="L100">        return _withStyle(_style._withLayout(_style.layout().margin(_style.layout().margin().top(margin).left(margin).right(margin).bottom(margin))));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided margin distance for the top side of the component.
+     *  The margin determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     * &lt;p&gt;
+     * @param margin The margin distance in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
+     */
+    public ComponentStyleDelegate&lt;C&gt; marginTop( int margin ) {
+<span class="fc" id="L113">        return _withStyle(_style._withLayout(_style.layout().margin(_style.layout().margin().top(margin))));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided margin distance for the right side of the component.
+     *  The margin determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     * &lt;p&gt;
+     * @param margin The margin distance in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
+     */
+    public ComponentStyleDelegate&lt;C&gt; marginRight( int margin ) {
+<span class="fc" id="L126">        return _withStyle(_style._withLayout(_style.layout().margin(_style.layout().margin().right(margin))));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided margin distance for the bottom side of the component.
+     *  The margin determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     * &lt;p&gt;
+     * @param margin The margin distance in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
+     */
+    public ComponentStyleDelegate&lt;C&gt; marginBottom( int margin ) {
+<span class="nc" id="L139">        return _withStyle(_style._withLayout(_style.layout().margin(_style.layout().margin().bottom(margin))));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided margin distance for the left side of the component.
+     *  The margin determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     * &lt;p&gt;
+     * @param margin The margin distance in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
+     */
+    public ComponentStyleDelegate&lt;C&gt; marginLeft( int margin ) {
+<span class="fc" id="L152">        return _withStyle(_style._withLayout(_style.layout().margin(_style.layout().margin().left(margin))));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided margin distance for the top and bottom sides of the component.
+     *  The margin determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     * &lt;p&gt;
+     * @param margin The margin distance in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
+     */
+    public ComponentStyleDelegate&lt;C&gt; marginVertical( int margin ) {
+<span class="nc" id="L165">        return _withStyle(_style._withLayout(_style.layout().margin(_style.layout().margin().top(margin).bottom(margin))));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided margin distance for the left and right sides of the component.
+     *  The margin determines the amount of space between the component's outer bounds and the beginning
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     * &lt;p&gt;
+     * @param margin The margin distance in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
+     */
+    public ComponentStyleDelegate&lt;C&gt; marginHorizontal( int margin ) {
+<span class="nc" id="L178">        return _withStyle(_style._withLayout(_style.layout().margin(_style.layout().margin().left(margin).right(margin))));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided top, right, left and bottom pad distances.
+     *  It determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     * &lt;p&gt;
+     * @param top The top padding distance in pixels.
+     * @param right The right padding distance in pixels.
+     * @param bottom The bottom padding distance in pixels.
+     * @param left The left padding distance in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided padding distances.
+     */
+    public ComponentStyleDelegate&lt;C&gt; padding( int top, int right, int bottom, int left ) {
+<span class="fc" id="L194">        return _withStyle(_style._withLayout(_style.layout().padding(_style.layout().padding().top(top).left(left).right(right).bottom(bottom))));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided padding distance for all sides of the component.
+     *  It determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     * &lt;p&gt;
+     * @param padding The padding distance in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
+     */
+    public ComponentStyleDelegate&lt;C&gt; padding( int padding ) {
+<span class="fc" id="L207">        return _withStyle(_style._withLayout(_style.layout().padding(_style.layout().padding().top(padding).left(padding).right(padding).bottom(padding))));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided padding distance for the top side of the component.
+     *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     * &lt;p&gt;
+     * @param padding The padding distance in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
+     */
+    public ComponentStyleDelegate&lt;C&gt; paddingTop( int padding ) {
+<span class="fc" id="L220">        return _withStyle(_style._withLayout(_style.layout().padding(_style.layout().padding().top(padding))));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided padding distance for the right side of the component.
+     *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
+     *  of the inner border, background region and shadow frame
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     * &lt;p&gt;
+     * @param padding The padding distance in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
+     */
+    public ComponentStyleDelegate&lt;C&gt; paddingRight( int padding ) {
+<span class="fc" id="L234">        return _withStyle(_style._withLayout(_style.layout().padding(_style.layout().padding().right(padding))));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided padding distance for the bottom side of the component.
+     *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     * &lt;p&gt;
+     * @param padding The padding distance in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
+     */
+    public ComponentStyleDelegate&lt;C&gt; paddingBottom( int padding ) {
+<span class="fc" id="L247">        return _withStyle(_style._withLayout(_style.layout().padding(_style.layout().padding().bottom(padding))));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided padding distance for the left side of the component.
+     *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     * &lt;p&gt;
+     * @param padding The padding distance in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
+     */
+    public ComponentStyleDelegate&lt;C&gt; paddingLeft( int padding ) {
+<span class="fc" id="L260">        return _withStyle(_style._withLayout(_style.layout().padding(_style.layout().padding().left(padding))));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided padding distance for the top and bottom sides of the component.
+     *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     * &lt;p&gt;
+     * @param padding The padding distance in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
+     */
+    public ComponentStyleDelegate&lt;C&gt; paddingVertical( int padding ) {
+<span class="nc" id="L273">        return _withStyle(_style._withLayout(_style.layout().padding(_style.layout().padding().top(padding).bottom(padding))));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} with the provided padding distance for the left and right sides of the component.
+     *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
+     *  and the component's content.
+     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     * &lt;p&gt;
+     * @param padding The padding distance in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
+     */
+    public ComponentStyleDelegate&lt;C&gt; paddingHorizontal( int padding ) {
+<span class="nc" id="L286">        return _withStyle(_style._withLayout(_style.layout().padding(_style.layout().padding().left(padding).right(padding))));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided border width and border color.
+     *  The border will be rendered with an inset space based on the margin defined by the {@link Style}.
+     *
+     * @param width The border width in pixels.
+     * @param color The border color.
+     * @return A new {@link ComponentStyleDelegate} with the provided border width and border color.
+     */
+    public ComponentStyleDelegate&lt;C&gt; border( int width, Color color ) {
+<span class="fc" id="L298">        return _withStyle(_style._withBorder(_style.border().width(width).color(color)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided border widths and border color.
+     *  The border will be rendered with an inset space based on the margin defined by the {@link Style}.
+     *
+     * @param top The border width in pixels for the top side of the component.
+     * @param right The border width in pixels for the right side of the component.
+     * @param bottom The border width in pixels for the bottom side of the component.
+     * @param left The border width in pixels for the left side of the component.
+     * @param color The border color.
+     * @return A new {@link ComponentStyleDelegate} with the provided border widths and border color.
+     */
+    public ComponentStyleDelegate&lt;C&gt; border( int top, int right, int bottom, int left, Color color ) {
+<span class="fc" id="L313">        return _withStyle(_style._withBorder(_style.border().widths(Outline.of(top, right, bottom, left)).color(color)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided border width and border color in the form of a string.
+     *  The string can be either a hex color string, a color name or a color constant from the system properties.
+     *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
+     *
+     * @param width The border width in pixels.
+     * @param colorString The border color.
+     * @return A new {@link ComponentStyleDelegate} with the provided border width and border color.
+     */
+    public ComponentStyleDelegate&lt;C&gt; border( int width, String colorString ) {
+<span class="nc" id="L326">        return _withStyle(_style._withBorder(_style.border().width(width).color(StyleUtility.toColor(colorString))));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided border width.
+     *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
+     *
+     * @param width The border width in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided border width.
+     */
+    public ComponentStyleDelegate&lt;C&gt; borderWidth( int width ) {
+<span class="fc" id="L337">        return _withStyle(_style._withBorder(_style.border().width(width)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided border width for the specified edge.
+     *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
+     *
+     * @param edge The edge to set the border width for.
+     * @param width The border width in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided border width for the specified edge.
+     */
+    public ComponentStyleDelegate&lt;C&gt; borderWidthAt( UI.Edge edge, int width ) {
+<span class="nc" id="L349">        return _withStyle(_style._withBorder(_style.border().widthAt(edge, width)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided top, right, bottom and left border widths.
+     *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
+     *  &lt;p&gt;
+     *  The border widths are specified in the following order: top, right, bottom, left.
+     *  &lt;p&gt;
+     *  Example:
+     *  &lt;pre&gt;{@code
+     *      UI.panel().withStyle( it -&gt; it.borderWidths(1, 2, 3, 4) )
+     *  }&lt;/pre&gt;
+     * @param top The top border width in pixels.
+     * @param right The right border width in pixels.
+     * @param bottom The bottom border width in pixels.
+     * @param left The left border width in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided top, right, bottom and left border widths.
+     * @see #borderWidth(int)
+     * @see #borderWidthAt(UI.Edge, int)
+     */
+    public ComponentStyleDelegate&lt;C&gt; borderWidths( int top, int right, int bottom, int left ) {
+<span class="fc" id="L371">        return _withStyle(_style._withBorder(_style.border().widths(Outline.of(top, right, bottom, left))));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided top/bottom and left/right border widths.
+     *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
+     *  &lt;p&gt;
+     *  Example:
+     *  &lt;pre&gt;{@code
+     *      UI.panel().withStyle( it -&gt; it.borderWidths(1, 2) )
+     *  }&lt;/pre&gt;
+     * @param topBottom The top and bottom border width in pixels.
+     * @param leftRight The left and right border width in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided top/bottom and left/right border widths.
+     * @see #borderWidth(int)
+     * @see #borderWidthAt(UI.Edge, int)
+     */
+    public ComponentStyleDelegate&lt;C&gt; borderWidths( int topBottom, int leftRight ) {
+<span class="nc" id="L389">        return _withStyle(_style._withBorder(_style.border().widths(Outline.of(topBottom, leftRight, topBottom, leftRight))));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided border color.
+     *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
+     *
+     * @param color The border color.
+     * @return A new {@link ComponentStyleDelegate} with the provided border color.
+     */
+    public ComponentStyleDelegate&lt;C&gt; borderColor( Color color ) {
+<span class="fc" id="L400">        return _withStyle(_style._withBorder(_style.border().color(color)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided border color in the form of a string.
+     *  The string can be either a hex color string, a color name or a color constant from the system properties.
+     *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
+     *
+     * @param colorString The border color.
+     * @return A new {@link ComponentStyleDelegate} with the provided border color.
+     */
+    public ComponentStyleDelegate&lt;C&gt; borderColor( String colorString ) {
+<span class="fc" id="L412">        return _withStyle(_style._withBorder(_style.border().color(StyleUtility.toColor(colorString))));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided border radius.
+     *  This will override both the arc width and arc height of the border.
+     *  The border will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *
+     * @param radius The border radius in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided border radius.
+     */
+    public ComponentStyleDelegate&lt;C&gt; borderRadius( int radius ) {
+<span class="fc" id="L424">        return _withStyle(_style._withBorder(_style.border().arcWidth(radius).arcHeight(radius)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided border arc width and arc height.
+     *  Note that the border will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *
+     * @param arcWidth The border arc width in pixels.
+     * @param arcHeight The border arc height in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided border arc width and arc height.
+     */
+    public ComponentStyleDelegate&lt;C&gt; borderRadius( int arcWidth, int arcHeight ) {
+<span class="fc" id="L436">        return _withStyle(_style._withBorder(_style.border().arcWidth(arcWidth).arcHeight(arcHeight)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided border arc width and arc height for the specified corner.
+     *  Note that the border will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *
+     * @param corner The corner to apply the border radius to.
+     * @param arcWidth The border arc width in pixels.
+     * @param arcHeight The border arc height in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided border arc width and arc height for the specified corner.
+     */
+    public ComponentStyleDelegate&lt;C&gt; borderRadiusAt(UI.Corner corner, int arcWidth, int arcHeight ) {
+<span class="fc" id="L449">        return _withStyle(_style._withBorder(_style.border().arcWidthAt(corner, arcWidth).arcHeightAt(corner, arcHeight)));</span>
+    }
+
+    /**
+     *  This method makes it possible to define border shades for the border of your UI components.
+     *  This is useful when you want to do advanced border effects, such as neumorphism a.k.a. soft UI. &lt;br&gt;
+     *  Here is an example of how to use this method:
+     *  &lt;pre&gt;{@code
+     *    UI.panel()
+     *    .withStyle( it -&gt; it
+     *      .borderShade( grad -&gt; grad
+     *        .colors(&quot;#000000&quot;, &quot;#000000&quot;)
+     *        .align(GradientAlignment.TOP_TO_BOTTOM)
+     *      )
+     *    )
+     * }&lt;/pre&gt;
+     *
+     * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
+     * @return A new {@link ComponentStyleDelegate} with a border shade defined by the provided styler lambda.
+     */
+    public ComponentStyleDelegate&lt;C&gt; borderGradient( Function&lt;GradientStyle, GradientStyle&gt; styler ) {
+<span class="fc" id="L470">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L471">        return _withStyle(_style._withBorder(_style.border().gradient(StyleUtility.DEFAULT_KEY, styler)));</span>
+    }
+
+    /**
+     *  This method makes it possible to define multiple border shades through a unique name for said shading effect.
+     *  This is useful when you want to do advanced border effects, such as neumorphism a.k.a. soft UI. &lt;br&gt;
+     *  Here is an example of how to use this method:
+     *  &lt;pre&gt;{@code
+     *    UI.panel()
+     *    .withStyle( it -&gt; it
+     *      .borderGradient(&quot;dark shading&quot;, grad -&gt; grad
+     *        .colors(&quot;#000000&quot;, &quot;#000000&quot;)
+     *        .transition(UI.Transition.TOP_TO_BOTTOM)
+     *      )
+     *      .borderGradient(&quot;light shading&quot;, grad -&gt; grad
+     *        .colors(&quot;#ffffff&quot;, &quot;#ffffff&quot;)
+     *        .transition(UI.Transition.TOP_TO_BOTTOM)
+     *      )
+     *    )
+     * }&lt;/pre&gt;
+     * Note that the border shades will be rendered in alphabetical order based on the name of the shade.
+     *
+     * @param shadeName The name of the border shade.
+     * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
+     * @return A new {@link ComponentStyleDelegate} with a named border shade defined by the provided styler lambda.
+     */
+    public ComponentStyleDelegate&lt;C&gt; borderGradient( String shadeName, Function&lt;GradientStyle, GradientStyle&gt; styler ) {
+<span class="fc" id="L498">        Objects.requireNonNull(shadeName);</span>
+<span class="fc" id="L499">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L500">        return _withStyle(_style._withBorder(_style.border().gradient(shadeName, styler)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided inner Background color.
+     *  The inner background will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *
+     * @param color The inner background color.
+     * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
+     */
+    public ComponentStyleDelegate&lt;C&gt; backgroundColor( Color color ) {
+<span class="fc" id="L511">        return _withStyle(_style._withBackground(_style.background().color(color)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided inner Background color in the form of a string.
+     *  The string can be either a hex color string, a color name or a color constant from the system properties.
+     *  The inner background will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *
+     * @param colorString The inner background color.
+     * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
+     */
+    public ComponentStyleDelegate&lt;C&gt; backgroundColor( String colorString ) {
+<span class="fc" id="L523">        return _withStyle(_style._withBackground(_style.background().color(StyleUtility.toColor(colorString))));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided background foundation color.
+     *  The background color covers the entire component area, including the padding spaces.
+     *
+     * @param color The background color.
+     * @return A new {@link ComponentStyleDelegate} with the provided background color.
+     */
+    public ComponentStyleDelegate&lt;C&gt; foundationColor( Color color ) {
+<span class="fc" id="L534">        return _withStyle(_style._withBackground(_style.background().foundationColor(color)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided background foundation color in the form of a string.
+     *  The string can be either a hex color string, a color name or a color constant from the system properties.
+     *  The background color covers the entire component area, including the padding spaces.
+     *
+     * @param colorString The background color.
+     * @return A new {@link ComponentStyleDelegate} with the provided background color.
+     */
+    public ComponentStyleDelegate&lt;C&gt; foundationColor( String colorString ) {
+<span class="fc" id="L546">        return _withStyle(_style._withBackground(_style.background().foundationColor(StyleUtility.toColor(colorString))));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided custom {@link swingtree.api.Painter}, which
+     *  will be called using the {@link Graphics2D} of the current component.
+     *  You may use this to render a custom background for the component.
+     * @param layer The layer on which the painter should do its work.
+     * @param renderer The background renderer.
+     * @return A new {@link ComponentStyleDelegate} with the provided background renderer.
+     */
+    public ComponentStyleDelegate&lt;C&gt; painter( UI.Layer layer, swingtree.api.Painter renderer ) {
+<span class="fc" id="L558">        return _withStyle(_style.painter(StyleUtility.DEFAULT_KEY, layer, renderer));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided named {@link swingtree.api.Painter}, which
+     *  will be called using the {@link Graphics2D} instance of the current component.
+     *  You may use this to render custom styles for the component... &lt;br&gt;
+     *  The name can be used to override {@link swingtree.api.Painter} instances with that same name
+     *  or use a unique name to ensure that you style is not overridden by another style.
+     *  This allows you to attach an arbitrary number of custom painters to a component.
+     *
+     * @param layer The layer on which the painter should do its work.
+     * @param painterName The name of the painter.
+     * @param renderer The background renderer.
+     * @return A new {@link ComponentStyleDelegate} with the provided background renderer.
+     */
+    public ComponentStyleDelegate&lt;C&gt; painter( UI.Layer layer, String painterName, swingtree.api.Painter renderer ) {
+<span class="nc" id="L575">        return _withStyle(_style.painter(painterName, layer, renderer));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided foreground color.
+     *
+     * @param color The foreground color.
+     * @return A new {@link ComponentStyleDelegate} with the provided foreground color.
+     */
+    public ComponentStyleDelegate&lt;C&gt; foregroundColor( Color color ) {
+<span class="fc" id="L585">        return _withStyle(_style._withForeground(_style.foreground().color(color)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided foreground color in the form of a string.
+     *  The string can be either a hex color string, a color name or a color constant from the system properties.
+     *
+     * @param colorString The foreground color.
+     * @return A new {@link ComponentStyleDelegate} with the provided foreground color.
+     */
+    public ComponentStyleDelegate&lt;C&gt; foregroundColor( String colorString ) {
+<span class="fc" id="L596">        return _withStyle(_style._withForeground(_style.foreground().color(StyleUtility.toColor(colorString))));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided horizontal shadow offset.
+     *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(int)},
+     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}. &lt;br&gt;
+     *  Note that this property will not only be applied to the default shadow, but also any
+     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
+     *
+     * @param offset The shadow offset in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided horizontal shadow offset.
+     */
+    public ComponentStyleDelegate&lt;C&gt; shadowHorizontalOffset( int offset ) {
+<span class="fc" id="L611">        return _withStyle(_style._withShadow( shadow -&gt; shadow.horizontalOffset(offset)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided vertical shadow offset.
+     *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(int)},
+     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}. &lt;br&gt;
+     *  Note that this property will not only be applied to the default shadow, but also any
+     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
+     *
+     * @param offset The shadow offset in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided vertical shadow offset.
+     */
+    public ComponentStyleDelegate&lt;C&gt; shadowVerticalOffset( int offset ) {
+<span class="fc" id="L626">        return _withStyle(_style._withShadow( shadow -&gt; shadow.verticalOffset(offset)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided shadow offset.
+     *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(int)},
+     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}. &lt;br&gt;
+     *  Note that this property will not only be applied to the default shadow, but also any
+     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
+     *
+     * @param horizontalOffset The horizontal shadow offset in pixels.
+     * @param verticalOffset The vertical shadow offset in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided shadow offset.
+     */
+    public ComponentStyleDelegate&lt;C&gt; shadowOffset( int horizontalOffset, int verticalOffset ) {
+<span class="fc" id="L642">        return _withStyle(_style._withShadow( shadow -&gt; shadow.horizontalOffset(horizontalOffset).verticalOffset(verticalOffset)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided horizontal and vertical shadow offset.
+     *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(int)},
+     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}. &lt;br&gt;
+     *  Note that this property will not only be applied to the default shadow, but also any
+     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
+     *
+     * @param horizontalAndVerticalOffset The horizontal and vertical shadow offset in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided shadow offset.
+     */
+    public ComponentStyleDelegate&lt;C&gt; shadowOffset( int horizontalAndVerticalOffset ) {
+<span class="fc" id="L657">        return _withStyle(_style._withShadow( shadow -&gt; shadow.horizontalOffset(horizontalAndVerticalOffset).verticalOffset(horizontalAndVerticalOffset)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided shadow blur radius.
+     *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *  Note that in order to see the shadow, you may also need to call
+     *  {@link #shadowSpreadRadius(int)} and {@link #shadowColor(Color)}. &lt;br&gt;
+     *  Note that this property will not only be applied to the default shadow, but also any
+     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
+     *
+     * @param radius The shadow blur radius in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided shadow blur radius.
+     */
+    public ComponentStyleDelegate&lt;C&gt; shadowBlurRadius( int radius ) {
+<span class="fc" id="L672">        return _withStyle(_style._withShadow( shadow -&gt; shadow.blurRadius(radius)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided shadow spread radius.
+     *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *  Note that in order to see the shadow, you may also need to call
+     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}. &lt;br&gt;
+     *  Note that this property will not only be applied to the default shadow, but also any
+     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
+     *
+     * @param radius The shadow spread radius in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided shadow spread radius.
+     */
+    public ComponentStyleDelegate&lt;C&gt; shadowSpreadRadius( int radius ) {
+<span class="fc" id="L687">        return _withStyle(_style._withShadow( shadow -&gt; shadow.spreadRadius(radius)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided shadow color.
+     *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *  Note that in order to see the shadow, you may also need to call
+     *  {@link #shadowBlurRadius(int)} and {@link #shadowSpreadRadius(int)}. &lt;br&gt;
+     *  Note that this property will not only be applied to the default shadow, but also any
+     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
+     *
+     * @param color The shadow color.
+     * @return A new {@link ComponentStyleDelegate} with the provided shadow color.
+     */
+    public ComponentStyleDelegate&lt;C&gt; shadowColor( Color color ) {
+<span class="fc" id="L702">        return _withStyle(_style._withShadow( shadow -&gt; shadow.color(color)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided shadow color in the form of a string.
+     *  The string can be either a hex color string, a color name or a color constant from the system properties.
+     *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *  Note that in order to see the shadow, you may also need to call
+     *  {@link #shadowBlurRadius(int)} and {@link #shadowSpreadRadius(int)}. &lt;br&gt;
+     *  Note that this property will not only be applied to the default shadow, but also any
+     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
+     *
+     * @param colorString The shadow color.
+     * @return A new {@link ComponentStyleDelegate} with the provided shadow color.
+     */
+    public ComponentStyleDelegate&lt;C&gt; shadowColor( String colorString ) {
+<span class="fc" id="L718">        return _withStyle(_style._withShadow( shadow -&gt; shadow.color(StyleUtility.toColor(colorString))));</span>
+    }
+
+    /**
+     *  Use this to control whether the shadow should be rendered inwards or outwards. &lt;br&gt;
+     *  Note that this property will not only be applied to the default shadow, but also any
+     *  other named shadow that you may have defined using {@link #shadow(String, Function)}. &lt;br&gt;
+     *  (see {@link #shadow(String, Function)} for an example of how to use named shadows)
+     *
+     * @param inwards Whether the shadow should be rendered inwards or outwards.
+     * @return A new {@link ComponentStyleDelegate} with the provided shadow inset flag.
+     */
+    public ComponentStyleDelegate&lt;C&gt; shadowIsInset( boolean inwards ) {
+<span class="fc" id="L731">        return _withStyle(_style._withShadow( shadow -&gt; shadow.isInset(inwards)));</span>
+    }
+
+    /**
+     *  Use this to configure on which layer the shadow should be rendered. &lt;br&gt;
+     *  The default layer is {@link UI.Layer#CONTENT}. &lt;br&gt;
+     * @param layer The layer on which the shadow should be rendered.
+     * @return A new {@link ComponentStyleDelegate} with the provided shadow layer.
+     */
+    public ComponentStyleDelegate&lt;C&gt; shadowLayer( UI.Layer layer ) {
+<span class="fc" id="L741">        return _withStyle(_style._withShadow( shadow -&gt; shadow.layer(layer)));</span>
+    }
+
+    /**
+     *  This method makes it possible to define multiple shadows for a single component
+     *  through a unique name.
+     *  This is useful when you want to do advanced shadow effects, such as neumorphism a.k.a. soft UI. &lt;br&gt;
+     *  Here is an example of how to use this method:
+     *  &lt;pre&gt;{@code
+     *      UI.panel()
+     *      .withStyle( it -&gt; it
+     *          .shadow(&quot;dark shading&quot;, shadow -&gt; shadow
+     *              .color(&quot;#000000&quot;)
+     *              .horizontalOffset(5)
+     *              .verticalOffset(5)
+     *              .blurRadius(10)
+     *              .spreadRadius(0)
+     *          )
+     *          .shadow(&quot;light shading&quot;, shadow -&gt; shadow
+     *              .color(&quot;#ffffff&quot;)
+     *              .horizontalOffset(-5)
+     *              .verticalOffset(-5)
+     *              .blurRadius(10)
+     *              .spreadRadius(0)
+     *          )
+     *  }&lt;/pre&gt;
+     *  Note that shadows will be rendered in alphabetical order based on their name.
+     *
+     * @param shadowName The name of the shadow.
+     * @param styler A function that takes a {@link ShadowStyle} and returns a new {@link ShadowStyle}.
+     * @return A new {@link ComponentStyleDelegate} with a named shadow defined by the provided styler lambda.
+     */
+    public ComponentStyleDelegate&lt;C&gt; shadow( String shadowName, Function&lt;ShadowStyle, ShadowStyle&gt; styler ) {
+<span class="fc" id="L774">        Objects.requireNonNull(shadowName);</span>
+<span class="fc" id="L775">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L776">        ShadowStyle shadow = Optional.ofNullable(_style.shadow(shadowName)).orElse(ShadowStyle.none());</span>
+        // We clone the shadow map:
+<span class="fc" id="L778">        Map&lt;String, ShadowStyle&gt; newShadows = new HashMap&lt;&gt;(_style.shadowsMap());</span>
+<span class="fc" id="L779">        newShadows.put(shadowName, styler.apply(shadow));</span>
+<span class="fc" id="L780">        return _withStyle(_style._withShadow(newShadows));</span>
+    }
+
+    /**
+     *  This method makes it possible to define multiple background shades for a single component
+     *  through a unique name for said shading effect.
+     *  This is useful when you want to do advanced background effects, such as neumorphism a.k.a. soft UI. &lt;br&gt;
+     *  Here is an example of how to use this method:
+     *  &lt;pre&gt;{@code
+     *    UI.panel()
+     *    .withStyle( it -&gt; it
+     *      .gradient(&quot;dark shading&quot;, grad -&gt; grad
+     *        .colors(&quot;#000000&quot;, &quot;#000000&quot;)
+     *        .transition(UI.Transition.TOP_TO_BOTTOM)
+     *      )
+     *      .gradient(&quot;light shading&quot;, grad -&gt; grad
+     *        .colors(&quot;#ffffff&quot;, &quot;#ffffff&quot;)
+     *        .transition(UI.Transition.TOP_TO_BOTTOM))
+     *      )
+     *    )
+     * }&lt;/pre&gt;
+     * Note that the background shades will be rendered in alphabetical order based on the name of the shade.
+     *
+     * @param shadeName The name of the background shade.
+     * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
+     * @return A new {@link ComponentStyleDelegate} with a named background shade defined by the provided styler lambda.
+     */
+    public ComponentStyleDelegate&lt;C&gt; gradient(String shadeName, Function&lt;GradientStyle, GradientStyle&gt; styler ) {
+<span class="fc" id="L808">        Objects.requireNonNull(shadeName);</span>
+<span class="fc" id="L809">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L810">        return _withStyle(_style.gradient(shadeName, styler));</span>
+    }
+
+    /**
+     *  This method makes it possible to define a background shade for your components.
+     *  This is useful when you want to do advanced background effects, such as neumorphism a.k.a. soft UI. &lt;br&gt;
+     *  Here is an example of how to use this method:
+     *  &lt;pre&gt;{@code
+     *    UI.panel()
+     *    .withStyle( it -&gt; it
+     *        .gradient( grad -&gt; grad
+     *            .colors(&quot;#000000&quot;, &quot;#000000&quot;)
+     *            .transition(UI.Transition.TOP_TO_BOTTOM)
+     *        )
+     *    )
+     * }&lt;/pre&gt;
+     *
+     * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
+     * @return A new {@link ComponentStyleDelegate} with a background shade defined by the provided styler lambda.
+     */
+    public ComponentStyleDelegate&lt;C&gt; gradient( Function&lt;GradientStyle, GradientStyle&gt; styler ) {
+<span class="fc" id="L831">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L832">        return _withStyle(_style.gradient(StyleUtility.DEFAULT_KEY, styler));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided font name and size.
+     *  Note that the font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param name The font name.
+     * @param size The font size.
+     * @return A new {@link ComponentStyleDelegate} with the provided font name and size.
+     */
+    public ComponentStyleDelegate&lt;C&gt; font( String name, int size ) {
+<span class="fc" id="L845">        return _withStyle(_style._withFont(_style.font().name(name).size(size)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided font name.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param name The font name.
+     * @return A new {@link ComponentStyleDelegate} with the provided font name.
+     */
+    public ComponentStyleDelegate&lt;C&gt; fontName( String name ) {
+<span class="fc" id="L857">        return _withStyle(_style._withFont(_style.font().name(name)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided {@link Font}.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param font The {@link Font}.
+     * @return A new {@link ComponentStyleDelegate} with the provided {@link Font}.
+     */
+    public ComponentStyleDelegate&lt;C&gt; font( Font font ) {
+<span class="fc" id="L869">        return _withStyle(_style._withFont(_style.font().font(font)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided font size.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param size The font size.
+     * @return A new {@link ComponentStyleDelegate} with the provided font size.
+     */
+    public ComponentStyleDelegate&lt;C&gt; fontSize( int size ) {
+<span class="fc" id="L881">        return _withStyle(_style._withFont(_style.font().size(size)));</span>
+    }
+
+    /**
+     *  Makes the font bold or not bold depending on the value of the {@code isBold} parameter.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param bold Whether the font should be bold or not.
+     * @return A new {@link ComponentStyleDelegate} with the provided font boldness.
+     */
+    public ComponentStyleDelegate&lt;C&gt; fontBold( boolean bold ) {
+<span class="fc bfc" id="L893" title="All 2 branches covered.">        return _withStyle(_style._withFont(_style.font().weight( bold ? 2 : 1 )));</span>
+    }
+
+    /**
+     *  Makes the font italic or not italic depending on the value of the {@code italic} parameter.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param italic Whether the font should be italic or not.
+     * @return A new {@link ComponentStyleDelegate} with the provided font italicness.
+     */
+    public ComponentStyleDelegate&lt;C&gt; fontItalic( boolean italic ) {
+<span class="pc bpc" id="L905" title="1 of 2 branches missed.">        return _withStyle(_style._withFont(_style.font().posture( italic ? 0.2f : 0f )));</span>
+    }
+
+    /**
+     *  Makes the font underlined or not underlined depending on the value of the {@code underline} parameter.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param underline Whether the font should be underlined or not.
+     * @return A new {@link ComponentStyleDelegate} with the provided font underlinedness.
+     */
+    public ComponentStyleDelegate&lt;C&gt; fontUnderline( boolean underline ) {
+<span class="fc" id="L917">        return _withStyle(_style._withFont(_style.font().isUnderlined(underline)));</span>
+    }
+
+    /**
+     *  Makes the font struck through or not struck through depending on the value of the {@code strikeThrough} parameter.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param strikeThrough Whether the font should be struck through or not.
+     * @return A new {@link ComponentStyleDelegate} with the provided font struck throughness.
+     */
+    public ComponentStyleDelegate&lt;C&gt; fontStrikeThrough( boolean strikeThrough ) {
+<span class="fc" id="L929">        return _withStyle(_style._withFont(_style.font().isStrike(strikeThrough)));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} where the font color is set to the provided {@link Color}.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param color The {@link Color}.
+     * @return A new {@link ComponentStyleDelegate} with the provided font color.
+     */
+    public ComponentStyleDelegate&lt;C&gt; fontColor( Color color ) {
+<span class="fc" id="L941">        return _withStyle(_style._withFont(_style.font().color(color)));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} where the font color is set to a color parsed from the provided string.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param colorString The {@link Color} as a string.
+     * @return A new {@link ComponentStyleDelegate} with the provided font color.
+     */
+    public ComponentStyleDelegate&lt;C&gt; fontColor( String colorString ) {
+<span class="fc" id="L953">        return _withStyle(_style._withFont(_style.font().color(StyleUtility.toColor(colorString))));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} where the font background color is set to the provided {@link Color}.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param color The {@link Color}.
+     * @return A new {@link ComponentStyleDelegate} with the provided font background color.
+     */
+    public ComponentStyleDelegate&lt;C&gt; fontBackgroundColor( Color color ) {
+<span class="nc" id="L965">        return _withStyle(_style._withFont(_style.font().backgroundColor(color)));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} where the font color is set to a color parsed from the provided string.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param colorString The {@link Color} as a string.
+     * @return A new {@link ComponentStyleDelegate} with the provided font color.
+     */
+    public ComponentStyleDelegate&lt;C&gt; fontBackgroundColor( String colorString ) {
+<span class="nc" id="L977">        return _withStyle(_style._withFont(_style.font().backgroundColor(StyleUtility.toColor(colorString))));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} where the font selection color is set to the provided {@link Color}.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param color The {@link Color}.
+     * @return A new {@link ComponentStyleDelegate} with the provided font selection color.
+     */
+    public ComponentStyleDelegate&lt;C&gt; fontSelectionColor( Color color ) {
+<span class="fc" id="L989">        return _withStyle(_style._withFont(_style.font().selectionColor(color)));</span>
+    }
+
+    /**
+     *  Creates a new {@link Style} where the font selection color is set to a color parsed from the provided string.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     *
+     * @param colorString The {@link Color} as a string.
+     * @return A new {@link ComponentStyleDelegate} with the provided font selection color.
+     */
+    public ComponentStyleDelegate&lt;C&gt; fontSelectionColor( String colorString ) {
+<span class="fc" id="L1001">        return _withStyle(_style._withFont(_style.font().selectionColor(StyleUtility.toColor(colorString))));</span>
+    }
+
+    /**
+     * @param transform The {@link AffineTransform} to apply to the font.
+     * @return A new {@link ComponentStyleDelegate} with the provided font transform.
+     */
+    public ComponentStyleDelegate&lt;C&gt; fontTransform( AffineTransform transform ) {
+<span class="nc" id="L1009">        return _withStyle(_style._withFont(_style.font().transform(transform)));</span>
+    }
+
+    /**
+     * @param paint The {@link Paint} to use for the foreground of the font.
+     * @return A new {@link ComponentStyleDelegate} with the provided font paint.
+     */
+    public ComponentStyleDelegate&lt;C&gt; fontPaint( Paint paint ) {
+<span class="nc" id="L1017">        return _withStyle(_style._withFont(_style.font().paint(paint)));</span>
+    }
+
+    /**
+     *  Use this to define the weight of the default font of the component.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text.
+     * @param weight The weight of the font.
+     * @return A new {@link ComponentStyleDelegate} with the provided font weight.
+     */
+    public ComponentStyleDelegate&lt;C&gt; fontWeight( float weight ) {
+<span class="nc" id="L1028">        return _withStyle(_style._withFont(_style.font().weight(weight))); </span>
+    }
+
+    /**
+     *  Use this to define the horizontal alignment of the default font of the component.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text. &lt;br&gt;
+     *  Also note that not all text based components support text alignment.
+     *  @param alignment The horizontal alignment of the font.
+     *                   See {@link UI.HorizontalAlignment} for more information.
+     *  @return A new {@link ComponentStyleDelegate} with the provided font alignment.
+     */
+    public ComponentStyleDelegate&lt;C&gt; fontAlignment( UI.HorizontalAlignment alignment ) {
+<span class="fc" id="L1041">        return _withStyle(_style._withFont(_style.font().horizontalAlignment(alignment)));</span>
+    }
+
+    /**
+     *  Defines the minimum {@link Dimension} of this {@link JComponent}. &lt;br&gt;
+     *  This ultimately translates to {@link JComponent#setMinimumSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param minSize The minimum {@link Dimension}.
+     * @return A new {@link ComponentStyleDelegate} with the provided minimum {@link Dimension} set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public ComponentStyleDelegate&lt;C&gt; minSize( Dimension minSize ) {
+<span class="fc" id="L1052">        Objects.requireNonNull(minSize);</span>
+<span class="fc" id="L1053">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinWidth(minSize.width)._withMinHeight(minSize.height)));</span>
+    }
+
+    /**
+     *  Defines the minimum {@link Dimension} for this {@link JComponent}. &lt;br&gt;
+     *  This ultimately translates to {@link JComponent#setMinimumSize(Dimension)} on the underlying component,
+     *  which will be called when all the other styles are applied and rendered. &lt;br&gt;
+     * @param width The minimum width.
+     * @param height The minimum height.
+     * @return A new {@link ComponentStyleDelegate} with the provided minimum {@link Dimension} set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public ComponentStyleDelegate&lt;C&gt; minSize( int width, int height ) {
+<span class="fc" id="L1066">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinWidth(width)._withMinHeight(height)));</span>
+    }
+
+    /**
+     *  Defines the minimum width for this {@link JComponent}. &lt;br&gt;
+     *  This ultimately translates to {@link JComponent#setMinimumSize(Dimension)} on the underlying component,
+     *  which will be called when all the other styles are applied and rendered. &lt;br&gt;
+     * @param minWidth The minimum width.
+     * @return A new {@link ComponentStyleDelegate} with the provided minimum width set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public ComponentStyleDelegate&lt;C&gt; minWidth( int minWidth ) {
+<span class="fc" id="L1078">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinWidth(minWidth)));</span>
+    }
+
+    /**
+     *  Defines the minimum height for this {@link JComponent}. &lt;br&gt;
+     *  This ultimately translates to {@link JComponent#setMinimumSize(Dimension)} on the underlying component,
+     *  which will be called when all the other styles are applied and rendered. &lt;br&gt;
+     * @param minHeight The minimum height.
+     * @return A new {@link ComponentStyleDelegate} with the provided minimum height set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public ComponentStyleDelegate&lt;C&gt; minHeight( int minHeight ) {
+<span class="fc" id="L1090">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinHeight(minHeight)));</span>
+    }
+
+    /**
+     *  Defines the maximum {@link Dimension} for this {@link JComponent}. &lt;br&gt;
+     *  This ultimately translates to {@link JComponent#setMaximumSize(Dimension)} on the underlying component. &lt;br&gt;
+     *  The passed {@link Dimension} will be applied when all the other styles are applied and rendered. &lt;br&gt;
+     *
+     * @param maxSize The maximum {@link Dimension}.
+     * @return A new {@link ComponentStyleDelegate} with the provided maximum {@link Dimension} set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public ComponentStyleDelegate&lt;C&gt; maxSize( Dimension maxSize ) {
+<span class="fc" id="L1103">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(maxSize.width)._withMaxHeight(maxSize.height)));</span>
+    }
+
+    /**
+     *  Defines the maximum {@link Dimension} for this {@link JComponent}. &lt;br&gt;
+     *  This ultimately translates to {@link JComponent#setMaximumSize(Dimension)} on the underlying component. &lt;br&gt;
+     *  The passed {@link Dimension} will be applied when all the other styles are applied and rendered. &lt;br&gt;
+     *
+     * @param width The maximum width.
+     * @param height The maximum height.
+     * @return A new {@link ComponentStyleDelegate} with the provided maximum {@link Dimension} set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public ComponentStyleDelegate&lt;C&gt; maxSize( int width, int height ) {
+<span class="fc" id="L1117">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(width)._withMaxHeight(height)));</span>
+    }
+
+    /**
+     *  Defines the maximum width for this {@link JComponent}. &lt;br&gt;
+     *  This ultimately translates to {@link JComponent#setMaximumSize(Dimension)} on the underlying component. &lt;br&gt;
+     *  The passed width will be applied when all the other styles are applied and rendered. &lt;br&gt;
+     *
+     * @param maxWidth The maximum width.
+     * @return A new {@link ComponentStyleDelegate} with the provided maximum width set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public ComponentStyleDelegate&lt;C&gt; maxWidth( int maxWidth ) {
+<span class="fc" id="L1130">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(maxWidth)));</span>
+    }
+
+    /**
+     *  Defines the maximum height for this {@link JComponent}. &lt;br&gt;
+     *  This ultimately translates to {@link JComponent#setMaximumSize(Dimension)} on the underlying component. &lt;br&gt;
+     *  The passed height will be applied when all the other styles are applied and rendered. &lt;br&gt;
+     *
+     * @param maxHeight The maximum height.
+     * @return A new {@link ComponentStyleDelegate} with the provided maximum height set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public ComponentStyleDelegate&lt;C&gt; maxHeight( int maxHeight ) {
+<span class="fc" id="L1143">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxHeight(maxHeight)));</span>
+    }
+
+    /**
+     *  Defines the preferred {@link Dimension} for this {@link JComponent}. &lt;br&gt;
+     *  This ultimately translates to {@link JComponent#setPreferredSize(Dimension)} on the underlying component. &lt;br&gt;
+     *  The passed {@link Dimension} will be applied when all the other styles are applied and rendered. &lt;br&gt;
+     *
+     * @param preferredSize The preferred {@link Dimension}.
+     * @return A new {@link ComponentStyleDelegate} with the provided preferred {@link Dimension} set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public ComponentStyleDelegate&lt;C&gt; prefSize( Dimension preferredSize ) {
+<span class="fc" id="L1156">        Objects.requireNonNull(preferredSize);</span>
+<span class="fc" id="L1157">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredWidth(preferredSize.width)._withPreferredHeight(preferredSize.height)));</span>
+    }
+
+    /**
+     *  Defines the preferred {@link Dimension} for this {@link JComponent}. &lt;br&gt;
+     *  This ultimately translates to {@link JComponent#setPreferredSize(Dimension)} on the underlying component. &lt;br&gt;
+     *  The passed {@link Dimension} will be applied when all the other styles are applied and rendered. &lt;br&gt;
+     *
+     * @param width The preferred width.
+     * @param height The preferred height.
+     * @return A new {@link ComponentStyleDelegate} with the provided preferred {@link Dimension} set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public ComponentStyleDelegate&lt;C&gt; prefSize( int width, int height ) {
+<span class="fc" id="L1171">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredWidth(width)._withPreferredHeight(height)));</span>
+    }
+
+    /**
+     *  Defines the preferred width for this {@link JComponent}. &lt;br&gt;
+     *  This ultimately translates to {@link JComponent#setPreferredSize(Dimension)} on the underlying component. &lt;br&gt;
+     *  The passed width will be applied when all the other styles are applied and rendered. &lt;br&gt;
+     *
+     * @param preferredWidth The preferred width.
+     * @return A new {@link ComponentStyleDelegate} with the provided preferred width set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public ComponentStyleDelegate&lt;C&gt; prefWidth( int preferredWidth ) {
+<span class="fc" id="L1184">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredWidth(preferredWidth)));</span>
+    }
+
+    /**
+     *  Defines the preferred height for this {@link JComponent}. &lt;br&gt;
+     *  This ultimately translates to {@link JComponent#setPreferredSize(Dimension)} on the underlying component. &lt;br&gt;
+     *  The passed height will be applied when all the other styles are applied and rendered. &lt;br&gt;
+     *
+     * @param preferredHeight The preferred height.
+     * @return A new {@link ComponentStyleDelegate} with the provided preferred height set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public ComponentStyleDelegate&lt;C&gt; prefHeight( int preferredHeight ) {
+<span class="fc" id="L1197">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredHeight(preferredHeight)));</span>
+    }
+
+    /**
+     *  Defines the size of this {@link JComponent}. &lt;br&gt;
+     *  This ultimately translates to {@link JComponent#setSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param size The width and height size {@link Dimension}.
+     * @return A new {@link ComponentStyleDelegate} with the provided size (width and height) {@link Dimension} set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public ComponentStyleDelegate&lt;C&gt; size( Dimension size ) {
+<span class="fc" id="L1208">        Objects.requireNonNull(size);</span>
+<span class="fc" id="L1209">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withWidth(size.width)._withHeight(size.height)));</span>
+    }
+
+    /**
+     *  Defines the size of this {@link JComponent}. &lt;br&gt;
+     *  This ultimately translates to {@link JComponent#setSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param width The width.
+     * @param height The height.
+     * @return A new {@link ComponentStyleDelegate} with the provided size (width and height) {@link Dimension} set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public ComponentStyleDelegate&lt;C&gt; size( int width, int height ) {
+<span class="fc" id="L1221">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withWidth(width)._withHeight(height)));</span>
+    }
+
+
+    /**
+     *  Defines the width of this {@link JComponent}. &lt;br&gt;
+     *  This ultimately translates to {@link JComponent#setSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param width The width.
+     * @return A new {@link ComponentStyleDelegate} with the provided width set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public ComponentStyleDelegate&lt;C&gt; width( int width ) {
+<span class="fc" id="L1233">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withWidth(width)));</span>
+    }
+
+    /**
+     *  Defines the height of this {@link JComponent}. &lt;br&gt;
+     *  This ultimately translates to {@link JComponent#setSize(Dimension)} on the underlying component. &lt;br&gt;
+     * @param height The height.
+     * @return A new {@link ComponentStyleDelegate} with the provided height set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public ComponentStyleDelegate&lt;C&gt; height( int height ) {
+<span class="fc" id="L1244">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withHeight(height)));</span>
+    }
+
+    /**
+     *  Defines the cursor type for this {@link JComponent} based on
+     *  the predefined {@link UI.Cursor} values. &lt;br&gt;
+     *  If you want to specify a custom cursor implementation,
+     *  use {@link #cursor(Cursor)} instead. &lt;br&gt;
+     *
+     * @param cursor The {@link UI.Cursor} value.
+     * @return A new {@link ComponentStyleDelegate} with the provided cursor type set to be later
+     */
+    public ComponentStyleDelegate&lt;C&gt; cursor( UI.Cursor cursor ) {
+<span class="fc" id="L1257">        Objects.requireNonNull(cursor);</span>
+<span class="fc" id="L1258">        return _withStyle(_style._withCursor(cursor.toAWTCursor()));</span>
+    }
+
+    /**
+     *  Defines the cursor type for this {@link JComponent} based on
+     *  the provided {@link Cursor} value. &lt;br&gt;
+     *  Use this method if you want to specify a custom cursor implementation,
+     *  in case you merely want to pick one of the many predefined {@link UI.Cursor} values,
+     *  use {@link #cursor(UI.Cursor)} instead. &lt;br&gt;
+     *
+     * @param cursor The {@link Cursor} value.
+     * @return A new {@link ComponentStyleDelegate} with the provided cursor type set to be later
+     */
+    public ComponentStyleDelegate&lt;C&gt; cursor( Cursor cursor ) {
+<span class="nc" id="L1272">        Objects.requireNonNull(cursor);</span>
+<span class="nc" id="L1273">        return _withStyle(_style._withCursor(cursor));</span>
+    }
+
+    /**
+     * @return The current UI scale factor, which is used to scale the UI
+     *         for high resolution displays (high dots-per-inch, or DPI).
+     */
+<span class="nc" id="L1280">    public float getScale() { return UI.scale(); }</span>
+
+    /**
+     * @return The current UI scale factor, which is used to scale the UI
+     *         for high resolution displays (high dots-per-inch, or DPI).
+     */
+<span class="nc" id="L1286">    public float scale() { return UI.scale(); }</span>
+
+    /**
+     *  Use this method inside custom {@link swingtree.api.Painter} implementations (see {@link #painter(UI.Layer, swingtree.api.Painter)})
+     *  to scale an {@code int} value by the current UI scale factor to ensure
+     *  that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
+     *  @param value The {@code int} value to scale.
+     *  @return The scaled {@code int} value.
+     */
+<span class="nc" id="L1295">    public int scale( int value ) { return UI.scale(value); }</span>
+
+    /**
+     *  Use this method inside custom {@link swingtree.api.Painter} implementations (see {@link #painter(UI.Layer, swingtree.api.Painter)})
+     *  to scale a {@code float} value by the current UI scale factor to ensure
+     *  that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
+     *  @param value The {@code float} value to scale.
+     *  @return The scaled {@code float} value.
+     */
+<span class="nc" id="L1304">    public float scale( float value ) { return UI.scale(value); }</span>
+
+    /**
+     *  Use this method inside custom {@link swingtree.api.Painter} implementations (see {@link #painter(UI.Layer, Painter)})
+     *  to scale a {@code double} value by the current UI scale factor to ensure
+     *  that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
+     *  @param value The {@code double} value to scale.
+     *  @return The scaled {@code double} value.
+     */
+<span class="nc" id="L1313">    public double scale( double value ) { return UI.scale(value); }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

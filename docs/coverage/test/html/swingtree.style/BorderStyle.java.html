@@ -115,62 +115,62 @@ public final class BorderStyle
 <span class="fc" id="L115">        return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, borderWidths, _borderColor, _shades);</span>
     }
 
-    BorderStyle arcWidthAt( Corner corner, int borderArcWidth ) {
-<span class="pc bpc" id="L119" title="1 of 2 branches missed.">        if ( corner == Corner.EVERY )</span>
+    BorderStyle arcWidthAt(UI.Corner corner, int borderArcWidth ) {
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">        if ( corner == UI.Corner.EVERY )</span>
 <span class="nc" id="L120">            return this.arcWidth(borderArcWidth);</span>
         int arcHeight;
 <span class="pc bpc" id="L122" title="1 of 5 branches missed.">        switch ( corner ) {</span>
             case TOP_LEFT:
 <span class="fc bfc" id="L124" title="All 2 branches covered.">                arcHeight = _topLeftArc != null ? _topLeftArc.height() : 0;</span>
-<span class="fc" id="L125">                return new BorderStyle(new Arc(borderArcWidth, arcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _borderColor, _shades);</span>
+<span class="fc" id="L125">                return new BorderStyle(Arc.of(borderArcWidth, arcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _borderColor, _shades);</span>
             case TOP_RIGHT:
 <span class="fc bfc" id="L127" title="All 2 branches covered.">                arcHeight = _topRightArc != null ? _topRightArc.height() : 0;</span>
-<span class="fc" id="L128">                return new BorderStyle(_topLeftArc, new Arc(borderArcWidth, arcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _borderColor, _shades);</span>
+<span class="fc" id="L128">                return new BorderStyle(_topLeftArc, Arc.of(borderArcWidth, arcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _borderColor, _shades);</span>
             case BOTTOM_LEFT:
 <span class="fc bfc" id="L130" title="All 2 branches covered.">                arcHeight = _bottomLeftArc != null ? _bottomLeftArc.height() : 0;</span>
-<span class="fc" id="L131">                return new BorderStyle(_topLeftArc, _topRightArc, new Arc(borderArcWidth, arcHeight), _bottomRightArc, _borderWidths, _borderColor, _shades);</span>
+<span class="fc" id="L131">                return new BorderStyle(_topLeftArc, _topRightArc, Arc.of(borderArcWidth, arcHeight), _bottomRightArc, _borderWidths, _borderColor, _shades);</span>
             case BOTTOM_RIGHT:
 <span class="fc bfc" id="L133" title="All 2 branches covered.">                arcHeight = _bottomRightArc != null ? _bottomRightArc.height() : 0;</span>
-<span class="fc" id="L134">                return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, new Arc(borderArcWidth, arcHeight), _borderWidths, _borderColor, _shades);</span>
+<span class="fc" id="L134">                return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, Arc.of(borderArcWidth, arcHeight), _borderWidths, _borderColor, _shades);</span>
             default:
 <span class="nc" id="L136">                throw new IllegalArgumentException(&quot;Unknown corner: &quot; + corner);</span>
         }
     }
 
     BorderStyle arcWidth( int borderArcWidth ) {
-<span class="fc" id="L141">        return this.arcWidthAt(Corner.TOP_LEFT,     borderArcWidth)</span>
-<span class="fc" id="L142">                   .arcWidthAt(Corner.TOP_RIGHT,    borderArcWidth)</span>
-<span class="fc" id="L143">                   .arcWidthAt(Corner.BOTTOM_LEFT,  borderArcWidth)</span>
-<span class="fc" id="L144">                   .arcWidthAt(Corner.BOTTOM_RIGHT, borderArcWidth);</span>
+<span class="fc" id="L141">        return this.arcWidthAt(UI.Corner.TOP_LEFT,     borderArcWidth)</span>
+<span class="fc" id="L142">                   .arcWidthAt(UI.Corner.TOP_RIGHT,    borderArcWidth)</span>
+<span class="fc" id="L143">                   .arcWidthAt(UI.Corner.BOTTOM_LEFT,  borderArcWidth)</span>
+<span class="fc" id="L144">                   .arcWidthAt(UI.Corner.BOTTOM_RIGHT, borderArcWidth);</span>
     }
 
-    BorderStyle arcHeightAt( Corner corner, int borderArcHeight ) {
-<span class="pc bpc" id="L148" title="1 of 2 branches missed.">        if ( corner == Corner.EVERY )</span>
+    BorderStyle arcHeightAt(UI.Corner corner, int borderArcHeight ) {
+<span class="pc bpc" id="L148" title="1 of 2 branches missed.">        if ( corner == UI.Corner.EVERY )</span>
 <span class="nc" id="L149">            return this.arcHeight(borderArcHeight);</span>
         int arcWidth;
 <span class="pc bpc" id="L151" title="1 of 5 branches missed.">        switch ( corner ) {</span>
             case TOP_LEFT:
 <span class="pc bpc" id="L153" title="1 of 2 branches missed.">                arcWidth = _topLeftArc != null ? _topLeftArc.width() : 0;</span>
-<span class="fc" id="L154">                return new BorderStyle(new Arc(arcWidth, borderArcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _borderColor, _shades);</span>
+<span class="fc" id="L154">                return new BorderStyle(Arc.of(arcWidth, borderArcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _borderColor, _shades);</span>
             case TOP_RIGHT:
 <span class="pc bpc" id="L156" title="1 of 2 branches missed.">                arcWidth = _topRightArc != null ? _topRightArc.width() : 0;</span>
-<span class="fc" id="L157">                return new BorderStyle(_topLeftArc, new Arc(arcWidth, borderArcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _borderColor, _shades);</span>
+<span class="fc" id="L157">                return new BorderStyle(_topLeftArc, Arc.of(arcWidth, borderArcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _borderColor, _shades);</span>
             case BOTTOM_LEFT:
 <span class="pc bpc" id="L159" title="1 of 2 branches missed.">                arcWidth = _bottomLeftArc != null ? _bottomLeftArc.width() : 0;</span>
-<span class="fc" id="L160">                return new BorderStyle(_topLeftArc, _topRightArc, new Arc(arcWidth, borderArcHeight), _bottomRightArc, _borderWidths, _borderColor, _shades);</span>
+<span class="fc" id="L160">                return new BorderStyle(_topLeftArc, _topRightArc, Arc.of(arcWidth, borderArcHeight), _bottomRightArc, _borderWidths, _borderColor, _shades);</span>
             case BOTTOM_RIGHT:
 <span class="pc bpc" id="L162" title="1 of 2 branches missed.">                arcWidth = _bottomRightArc != null ? _bottomRightArc.width() : 0;</span>
-<span class="fc" id="L163">                return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, new Arc(arcWidth, borderArcHeight), _borderWidths, _borderColor, _shades);</span>
+<span class="fc" id="L163">                return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, Arc.of(arcWidth, borderArcHeight), _borderWidths, _borderColor, _shades);</span>
             default:
 <span class="nc" id="L165">                throw new IllegalArgumentException(&quot;Unknown corner: &quot; + corner);</span>
         }
     }
 
     BorderStyle arcHeight( int borderArcHeight ) {
-<span class="fc" id="L170">        return this.arcHeightAt(Corner.TOP_LEFT,     borderArcHeight)</span>
-<span class="fc" id="L171">                   .arcHeightAt(Corner.TOP_RIGHT,    borderArcHeight)</span>
-<span class="fc" id="L172">                   .arcHeightAt(Corner.BOTTOM_LEFT,  borderArcHeight)</span>
-<span class="fc" id="L173">                   .arcHeightAt(Corner.BOTTOM_RIGHT, borderArcHeight);</span>
+<span class="fc" id="L170">        return this.arcHeightAt(UI.Corner.TOP_LEFT,     borderArcHeight)</span>
+<span class="fc" id="L171">                   .arcHeightAt(UI.Corner.TOP_RIGHT,    borderArcHeight)</span>
+<span class="fc" id="L172">                   .arcHeightAt(UI.Corner.BOTTOM_LEFT,  borderArcHeight)</span>
+<span class="fc" id="L173">                   .arcHeightAt(UI.Corner.BOTTOM_RIGHT, borderArcHeight);</span>
     }
 
     BorderStyle widthAt(UI.Edge edge, int borderWidth ) {

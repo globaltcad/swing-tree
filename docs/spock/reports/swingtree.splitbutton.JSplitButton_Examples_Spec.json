@@ -42,11 +42,11 @@
       "blocks":[
         {"kind":"given","text":"We create split button displaying the current selection.","code":["var ui =","    UI.splitButton(\"I will be replaced!\")","    .onSelection( it -> it.displayCurrentItemText() )","    .add(UI.splitItem(\"first\"))","    .add(UI.splitItem(\"second\"))","    .add(UI.splitItem(\"third\"))"]},
 
-        {"kind":"expect","text":"The split button has the correct text displayed","code":["Utility.getSplitButtonText(ui) == \"I will be replaced!\""]},
+        {"kind":"expect","text":"The split button has the correct text displayed","code":["ui.component.text == \"I will be replaced!\""]},
 
         {"kind":"when","text":"","code":["((JMenuItem)ui.popupMenu.getComponent(1)).doClick()","UI.sync()"]},
 
-        {"kind":"then","text":"","code":["Utility.getSplitButtonText(ui) == \"second\""]}
+        {"kind":"then","text":"","code":["ui.component.text == \"second\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -61,19 +61,19 @@
       "blocks":[
         {"kind":"given","text":"We create split button displaying only selection \"second\".","code":["var ui =","    UI.splitButton(\"I may be replaced!\")","    .add(UI.splitItem(\"first\"))","    .add(UI.splitItem(\"second\").onSelection( it -> it.displayCurrentItemText() ))","    .add(UI.splitItem(\"third\"))"]},
 
-        {"kind":"expect","text":"The split button has the correct text displayed","code":["Utility.getSplitButtonText(ui) == \"I may be replaced!\""]},
+        {"kind":"expect","text":"The split button has the correct text displayed","code":["ui.component.text == \"I may be replaced!\""]},
 
         {"kind":"when","text":"We simulate a user selecting the first button item","code":["UI.runNow(()->((JMenuItem)ui.popupMenu.getComponent(0)).doClick())"]},
 
-        {"kind":"then","text":"The displayed button should still be as it was previously.","code":["Utility.getSplitButtonText(ui) == \"I may be replaced!\""]},
+        {"kind":"then","text":"The displayed button should still be as it was previously.","code":["ui.component.text == \"I may be replaced!\""]},
 
         {"kind":"when","text":"We now select the third button item","code":["((JMenuItem)ui.popupMenu.getComponent(2)).doClick()"]},
 
-        {"kind":"then","text":"Again the button text is still the same.","code":["Utility.getSplitButtonText(ui) == \"I may be replaced!\""]},
+        {"kind":"then","text":"Again the button text is still the same.","code":["ui.component.text == \"I may be replaced!\""]},
 
         {"kind":"when","text":"We now simulate a selection on the second item (for which we registered an action).","code":["UI.runNow(()->((JMenuItem)ui.popupMenu.getComponent(1)).doClick())"]},
 
-        {"kind":"then","text":"The displayed button text will have changed because of our selection lambda","code":["Utility.getSplitButtonText(ui) == \"second\""]}
+        {"kind":"then","text":"The displayed button text will have changed because of our selection lambda","code":["ui.component.text == \"second\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -88,19 +88,19 @@
       "blocks":[
         {"kind":"given","text":"We create split button with 2 different kinds of events.","code":["var ui =","    UI.splitButton(\"I may be replaced!\")","    .onSelection( it -> it.setButtonText(\"default text\")  )","    .add(UI.splitItem(\"first\"))","    .add(UI.splitItem(\"second\").onButtonClick( it -> it.setButtonText(\"text by second item\") ))","    .add(UI.splitItem(\"third\"))"]},
 
-        {"kind":"expect","text":"The split button has the correct text displayed","code":["Utility.getSplitButtonText(ui) == \"I may be replaced!\""]},
+        {"kind":"expect","text":"The split button has the correct text displayed","code":["ui.component.text == \"I may be replaced!\""]},
 
-        {"kind":"when","text":"We select the first item and click the button.","code":["((JMenuItem)ui.popupMenu.getComponent(0)).doClick()","Utility.click(ui)"]},
+        {"kind":"when","text":"We select the first item and click the button.","code":["((JMenuItem)ui.popupMenu.getComponent(0)).doClick()","UI.runNow( () -> ui.component.doClick() );"]},
 
-        {"kind":"then","text":"We expect that the button has the default text displayed according to the first action","code":["Utility.getSplitButtonText(ui) == \"default text\""]},
+        {"kind":"then","text":"We expect that the button has the default text displayed according to the first action","code":["ui.component.text == \"default text\""]},
 
-        {"kind":"when","text":"We select and click the third button.","code":["((JMenuItem)ui.popupMenu.getComponent(2)).doClick()","Utility.click(ui)"]},
+        {"kind":"when","text":"We select and click the third button.","code":["((JMenuItem)ui.popupMenu.getComponent(2)).doClick()","UI.runNow( () -> ui.component.doClick() );"]},
 
-        {"kind":"then","text":"This should have the same effect as previously.","code":["Utility.getSplitButtonText(ui) == \"default text\""]},
+        {"kind":"then","text":"This should have the same effect as previously.","code":["ui.component.text == \"default text\""]},
 
-        {"kind":"when","text":"We now select and click the second button item.","code":["((JMenuItem)ui.popupMenu.getComponent(1)).doClick()","Utility.click(ui)"]},
+        {"kind":"when","text":"We now select and click the second button item.","code":["((JMenuItem)ui.popupMenu.getComponent(1)).doClick()","UI.runNow( () -> ui.component.doClick() );"]},
 
-        {"kind":"then","text":"The split button text will be different because the button item action fired last.","code":["Utility.getSplitButtonText(ui) == \"text by second item\""]}
+        {"kind":"then","text":"The split button text will be different because the button item action fired last.","code":["ui.component.text == \"text by second item\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -115,9 +115,9 @@
       "blocks":[
         {"kind":"given","text":"We create split button with 3 button click events.","code":["var ui =","    UI.splitButton(\"I may be replaced!\")","    .add(UI.splitItem(\"first\").onButtonClick( it -> it.setButtonText(\"1\")) )","    .add(UI.splitItem(\"second\").makeSelected().onButtonClick( it -> it.setButtonText(\"2\") ))","    .add(UI.splitItem(\"third\").onButtonClick( it -> it.setButtonText(\"3\")) )"]},
 
-        {"kind":"when","text":"We click the button.","code":["Utility.click(ui)"]},
+        {"kind":"when","text":"We click the button.","code":["UI.runNow( () -> ui.component.doClick() );"]},
 
-        {"kind":"then","text":"The button has now \"2\" displayed on it, because of the second split item action.","code":["Utility.getSplitButtonText(ui) == \"2\""]}
+        {"kind":"then","text":"The button has now \"2\" displayed on it, because of the second split item action.","code":["ui.component.text == \"2\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -132,9 +132,9 @@
       "blocks":[
         {"kind":"given","text":"We create split button with 3 button click events.","code":["var ui =","    UI.splitButton(\"triggered:\")","    .add(UI.splitItem(\"first\").onButtonClick( it -> it.appendToButtonText(\" 1\") ))","    .add(UI.splitItem(\"second\").makeSelected().onButtonClick( it -> it.appendToButtonText(\" 2\") ))","    .add(UI.splitItem(\"third\").makeSelected().onButtonClick( it -> it.appendToButtonText(\" 3\") ))"]},
 
-        {"kind":"when","text":"We click the button.","code":["Utility.click(ui)"]},
+        {"kind":"when","text":"We click the button.","code":["UI.runNow( () -> ui.component.doClick() );"]},
 
-        {"kind":"then","text":"The button text now indicates which items were selected and triggered!","code":["Utility.getSplitButtonText(ui) == \"triggered: 2 3\""]}
+        {"kind":"then","text":"The button text now indicates which items were selected and triggered!","code":["ui.component.text == \"triggered: 2 3\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -149,17 +149,17 @@
       "blocks":[
         {"kind":"given","text":"We create split button with 3 button click events and a selection action.","code":["var ui =","    UI.splitButton(\"triggered:\")","    .add(UI.splitItem(\"first\").makeSelected().onButtonClick( it -> it.appendToButtonText(\" 1\") ))","    .add(","        UI.splitItem(\"second\")","        .onButtonClick( it -> it.setButtonText(it.buttonText+\" 2\") )","        .onSelection( it -> it.selectOnlyCurrentItem() )","    )","    .add(UI.splitItem(\"third\").makeSelected().onButtonClick( it -> it.appendToButtonText(\" 3\") ))"]},
 
-        {"kind":"when","text":"We click the button.","code":["Utility.click(ui)"]},
+        {"kind":"when","text":"We click the button.","code":["UI.runNow( () -> ui.component.doClick() );"]},
 
-        {"kind":"then","text":"The button text now indicates which items were selected and triggered!","code":["Utility.getSplitButtonText(ui) == \"triggered: 1 3\""]},
+        {"kind":"then","text":"The button text now indicates which items were selected and triggered!","code":["ui.component.text == \"triggered: 1 3\""]},
 
         {"kind":"when","text":"We now select the second button item.","code":["UI.runNow(()->((JMenuItem)ui.popupMenu.getComponent(1)).doClick())"]},
 
-        {"kind":"then","text":"The split button text will not have changed (internally the selection should be different however).","code":["Utility.getSplitButtonText(ui) == \"triggered: 1 3\""]},
+        {"kind":"then","text":"The split button text will not have changed (internally the selection should be different however).","code":["ui.component.text == \"triggered: 1 3\""]},
 
-        {"kind":"when","text":"We now click the second button item.","code":["Utility.click(ui)"]},
+        {"kind":"when","text":"We now click the second button item.","code":["UI.runNow( () -> ui.component.doClick() );"]},
 
-        {"kind":"then","text":"The split button text will indicate that now only the second split item button action was triggered!","code":["Utility.getSplitButtonText(ui) == \"triggered: 1 3 2\""]}
+        {"kind":"then","text":"The split button text will indicate that now only the second split item button action was triggered!","code":["ui.component.text == \"triggered: 1 3 2\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -240,7 +240,7 @@
 
         {"kind":"and","text":"The button text will have changed to the new selection.","code":["ui.component.text == \"Green\""]},
 
-        {"kind":"when","text":"We click the button.","code":["Utility.click(ui)"]},
+        {"kind":"when","text":"We click the button.","code":["UI.runNow( () -> ui.component.doClick() );"]},
 
         {"kind":"then","text":"The tracker will have recorded a button click event.","code":["tracker == [\"#\", \"!\"]"]}
       ],

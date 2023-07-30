@@ -29,7 +29,7 @@
 
         {"kind":"and","text":"","code":["new Utility.Query(ui).find(JSpinner, \"Light-Spinner\").isPresent()","new Utility.Query(ui).find(JSpinner, \"Light-Spinner\").get().getValue() == 0"]},
 
-        {"kind":"and","text":"","code":["new Utility.Query(ui).find(JSplitButton, \"con-split-button\").isPresent()","Utility.getSplitButtonPopup(new Utility.Query(ui).find(JSplitButton, \"con-split-button\").get()).components.length == 4"]}
+        {"kind":"and","text":"","code":["new Utility.Query(ui).find(JSplitButton, \"con-split-button\").isPresent()","new Utility.Query(ui).find(JSplitButton, \"con-split-button\").get().popupMenu.components.length == 4"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
