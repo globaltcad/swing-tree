@@ -85,7 +85,7 @@ class Examples_Spec extends Specification
             new Utility.Query(ui).find(JSpinner, "Light-Spinner").get().getValue() == 0
         and :
             new Utility.Query(ui).find(JSplitButton, "con-split-button").isPresent()
-            Utility.getSplitButtonPopup(new Utility.Query(ui).find(JSplitButton, "con-split-button").get()).components.length == 4
+            new Utility.Query(ui).find(JSplitButton, "con-split-button").get().popupMenu.components.length == 4
     }
 
     def 'The form UI defined in the examples has the expected state.'()

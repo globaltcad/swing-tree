@@ -24,26 +24,6 @@ public class Utility {
         DEFAULT, NIMBUS, FLAT_BRIGHT
     }
 
-    public static <B extends JSplitButton> String getSplitButtonText(UIForSplitButton<B> ui) {
-        return ui.getComponent().getText();
-    }
-
-    public static <B extends JSplitButton> JPopupMenu getSplitButtonPopup(UIForSplitButton<B> ui) {
-        return ui.getComponent().getPopupMenu();
-    }
-
-    public static <B extends JSplitButton> JPopupMenu getSplitButtonPopup(JSplitButton ui) {
-        return ui.getPopupMenu();
-    }
-
-    public static <B extends JSplitButton> void click(UIForSplitButton<B> ui) {
-        try {
-            UI.runNow(() -> ui.getComponent().doClick());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public static void setLaF(LaF lookAndFeel) {
         switch ( lookAndFeel ) {
             case DEFAULT: break;

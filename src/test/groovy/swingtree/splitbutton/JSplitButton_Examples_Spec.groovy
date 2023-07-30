@@ -88,13 +88,13 @@ class JSplitButton_Examples_Spec extends Specification
                 .add(UI.splitItem("second"))
                 .add(UI.splitItem("third"))
         expect : 'The split button has the correct text displayed'
-            Utility.getSplitButtonText(ui) == "I will be replaced!"
+            ui.component.text == "I will be replaced!"
 
         when :
             ((JMenuItem)ui.popupMenu.getComponent(1)).doClick()
             UI.sync()
         then :
-            Utility.getSplitButtonText(ui) == "second"
+            ui.component.text == "second"
     }
 
 
@@ -107,22 +107,22 @@ class JSplitButton_Examples_Spec extends Specification
                 .add(UI.splitItem("second").onSelection( it -> it.displayCurrentItemText() ))
                 .add(UI.splitItem("third"))
         expect : 'The split button has the correct text displayed'
-            Utility.getSplitButtonText(ui) == "I may be replaced!"
+            ui.component.text == "I may be replaced!"
 
         when : 'We simulate a user selecting the first button item'
             UI.runNow(()->((JMenuItem)ui.popupMenu.getComponent(0)).doClick())
         then : 'The displayed button should still be as it was previously.'
-            Utility.getSplitButtonText(ui) == "I may be replaced!"
+            ui.component.text == "I may be replaced!"
 
         when : 'We now select the third button item'
             ((JMenuItem)ui.popupMenu.getComponent(2)).doClick()
         then : 'Again the button text is still the same.'
-            Utility.getSplitButtonText(ui) == "I may be replaced!"
+            ui.component.text == "I may be replaced!"
 
         when : 'We now simulate a selection on the second item (for which we registered an action).'
             UI.runNow(()->((JMenuItem)ui.popupMenu.getComponent(1)).doClick())
         then : 'The displayed button text will have changed because of our selection lambda'
-            Utility.getSplitButtonText(ui) == "second"
+            ui.component.text == "second"
     }
 
 
@@ -136,25 +136,25 @@ class JSplitButton_Examples_Spec extends Specification
                 .add(UI.splitItem("second").onButtonClick( it -> it.setButtonText("text by second item") ))
                 .add(UI.splitItem("third"))
         expect : 'The split button has the correct text displayed'
-            Utility.getSplitButtonText(ui) == "I may be replaced!"
+            ui.component.text == "I may be replaced!"
 
         when : 'We select the first item and click the button.'
             ((JMenuItem)ui.popupMenu.getComponent(0)).doClick()
-            Utility.click(ui)
+            UI.runNow( () -> ui.component.doClick() );
         then : 'We expect that the button has the default text displayed according to the first action'
-            Utility.getSplitButtonText(ui) == "default text"
+            ui.component.text == "default text"
 
         when : 'We select and click the third button.'
             ((JMenuItem)ui.popupMenu.getComponent(2)).doClick()
-            Utility.click(ui)
+            UI.runNow( () -> ui.component.doClick() );
         then : 'This should have the same effect as previously.'
-            Utility.getSplitButtonText(ui) == "default text"
+            ui.component.text == "default text"
 
         when : 'We now select and click the second button item.'
             ((JMenuItem)ui.popupMenu.getComponent(1)).doClick()
-            Utility.click(ui)
+            UI.runNow( () -> ui.component.doClick() );
         then : 'The split button text will be different because the button item action fired last.'
-            Utility.getSplitButtonText(ui) == "text by second item"
+            ui.component.text == "text by second item"
     }
 
 
@@ -168,9 +168,9 @@ class JSplitButton_Examples_Spec extends Specification
                 .add(UI.splitItem("third").onButtonClick( it -> it.setButtonText("3")) )
 
         when : 'We click the button.'
-            Utility.click(ui)
+            UI.runNow( () -> ui.component.doClick() );
         then : 'The button has now "2" displayed on it, because of the second split item action.'
-            Utility.getSplitButtonText(ui) == "2"
+            ui.component.text == "2"
     }
 
 
@@ -184,9 +184,9 @@ class JSplitButton_Examples_Spec extends Specification
                 .add(UI.splitItem("third").makeSelected().onButtonClick( it -> it.appendToButtonText(" 3") ))
 
         when : 'We click the button.'
-            Utility.click(ui)
+            UI.runNow( () -> ui.component.doClick() );
         then : 'The button text now indicates which items were selected and triggered!'
-            Utility.getSplitButtonText(ui) == "triggered: 2 3"
+            ui.component.text == "triggered: 2 3"
     }
 
 
@@ -204,19 +204,19 @@ class JSplitButton_Examples_Spec extends Specification
                 .add(UI.splitItem("third").makeSelected().onButtonClick( it -> it.appendToButtonText(" 3") ))
 
         when : 'We click the button.'
-            Utility.click(ui)
+            UI.runNow( () -> ui.component.doClick() );
         then : 'The button text now indicates which items were selected and triggered!'
-            Utility.getSplitButtonText(ui) == "triggered: 1 3"
+            ui.component.text == "triggered: 1 3"
 
         when : 'We now select the second button item.'
             UI.runNow(()->((JMenuItem)ui.popupMenu.getComponent(1)).doClick())
         then : 'The split button text will not have changed (internally the selection should be different however).'
-            Utility.getSplitButtonText(ui) == "triggered: 1 3"
+            ui.component.text == "triggered: 1 3"
 
         when : 'We now click the second button item.'
-            Utility.click(ui)
+            UI.runNow( () -> ui.component.doClick() );
         then : 'The split button text will indicate that now only the second split item button action was triggered!'
-            Utility.getSplitButtonText(ui) == "triggered: 1 3 2"
+            ui.component.text == "triggered: 1 3 2"
     }
 
 
@@ -335,7 +335,7 @@ class JSplitButton_Examples_Spec extends Specification
         and : 'The button text will have changed to the new selection.'
             ui.component.text == "Green"
         when : 'We click the button.'
-            Utility.click(ui)
+            UI.runNow( () -> ui.component.doClick() );
         then : 'The tracker will have recorded a button click event.'
             tracker == ["#", "!"]
     }

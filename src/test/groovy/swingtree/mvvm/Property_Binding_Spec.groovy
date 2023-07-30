@@ -215,7 +215,7 @@ class Property_Binding_Spec extends Specification
                             .add(UI.splitItem("I am a button"))
 
         expect : 'The first split item will be enabled.'
-            Utility.getSplitButtonPopup(node).components[0].enabled == true
+            node.component.popupMenu.components[0].enabled == true
 
         when : 'We change the value of the property.'
             property.set(false)
@@ -223,7 +223,7 @@ class Property_Binding_Spec extends Specification
             UI.sync()
 
         then : 'The first split item will be disabled.'
-            Utility.getSplitButtonPopup(node).components[0].enabled == false
+            node.component.popupMenu.components[0].enabled == false
     }
 
     def 'The visibility of a UI component can be modelled dynamically using boolean properties.'()
