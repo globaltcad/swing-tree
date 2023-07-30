@@ -1,6 +1,7 @@
 package swingtree.style;
 
 import swingtree.UI;
+import swingtree.api.Painter;
 
 import java.awt.*;
 import java.util.List;

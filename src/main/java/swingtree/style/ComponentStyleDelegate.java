@@ -1,7 +1,9 @@
 package swingtree.style;
 
 import swingtree.UI;
+import swingtree.api.Painter;
 import swingtree.api.Peeker;
+import swingtree.api.Styler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -545,22 +547,22 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
-     *  Returns a new {@link Style} with the provided custom {@link Painter}, which
+     *  Returns a new {@link Style} with the provided custom {@link swingtree.api.Painter}, which
      *  will be called using the {@link Graphics2D} of the current component.
      *  You may use this to render a custom background for the component.
      * @param layer The layer on which the painter should do its work.
      * @param renderer The background renderer.
      * @return A new {@link ComponentStyleDelegate} with the provided background renderer.
      */
-    public ComponentStyleDelegate<C> painter( UI.Layer layer, Painter renderer ) {
+    public ComponentStyleDelegate<C> painter( UI.Layer layer, swingtree.api.Painter renderer ) {
         return _withStyle(_style.painter(StyleUtility.DEFAULT_KEY, layer, renderer));
     }
 
     /**
-     *  Returns a new {@link Style} with the provided named {@link Painter}, which
+     *  Returns a new {@link Style} with the provided named {@link swingtree.api.Painter}, which
      *  will be called using the {@link Graphics2D} instance of the current component.
      *  You may use this to render custom styles for the component... <br>
-     *  The name can be used to override {@link Painter} instances with that same name
+     *  The name can be used to override {@link swingtree.api.Painter} instances with that same name
      *  or use a unique name to ensure that you style is not overridden by another style.
      *  This allows you to attach an arbitrary number of custom painters to a component.
      *
@@ -569,7 +571,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param renderer The background renderer.
      * @return A new {@link ComponentStyleDelegate} with the provided background renderer.
      */
-    public ComponentStyleDelegate<C> painter( UI.Layer layer, String painterName, Painter renderer ) {
+    public ComponentStyleDelegate<C> painter( UI.Layer layer, String painterName, swingtree.api.Painter renderer ) {
         return _withStyle(_style.painter(painterName, layer, renderer));
     }
 
@@ -1284,7 +1286,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     public float scale() { return UI.scale(); }
 
     /**
-     *  Use this method inside custom {@link Painter} implementations (see {@link #painter(UI.Layer, Painter)})
+     *  Use this method inside custom {@link swingtree.api.Painter} implementations (see {@link #painter(UI.Layer, swingtree.api.Painter)})
      *  to scale an {@code int} value by the current UI scale factor to ensure
      *  that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
      *  @param value The {@code int} value to scale.
@@ -1293,7 +1295,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     public int scale( int value ) { return UI.scale(value); }
 
     /**
-     *  Use this method inside custom {@link Painter} implementations (see {@link #painter(UI.Layer, Painter)})
+     *  Use this method inside custom {@link swingtree.api.Painter} implementations (see {@link #painter(UI.Layer, swingtree.api.Painter)})
      *  to scale a {@code float} value by the current UI scale factor to ensure
      *  that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
      *  @param value The {@code float} value to scale.
@@ -1302,7 +1304,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     public float scale( float value ) { return UI.scale(value); }
 
     /**
-     *  Use this method inside custom {@link Painter} implementations (see {@link #painter(UI.Layer, Painter)})
+     *  Use this method inside custom {@link swingtree.api.Painter} implementations (see {@link #painter(UI.Layer, Painter)})
      *  to scale a {@code double} value by the current UI scale factor to ensure
      *  that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).
      *  @param value The {@code double} value to scale.

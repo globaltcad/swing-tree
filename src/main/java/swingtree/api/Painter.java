@@ -1,17 +1,18 @@
-package swingtree.style;
+package swingtree.api;
+
 
 import java.awt.*;
 
 @FunctionalInterface
 public interface Painter
 {
-    static Painter none() { return StyleUtility.PAINTER_NONE; }
+    static Painter none() { return Constants.PAINTER_NONE; }
 
     /**
      * Paints a custom style on a component using the given graphics context.
      * @param g2d the graphics context to use for painting.
      */
-    void paint(Graphics2D g2d);
+    void paint( Graphics2D g2d );
 
     /**
      * Returns a new painter that paints this painter's style and then the given painter's style.

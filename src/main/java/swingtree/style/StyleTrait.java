@@ -1,5 +1,7 @@
 package swingtree.style;
 
+import swingtree.api.Styler;
+
 import javax.swing.*;
 import java.util.Objects;
 

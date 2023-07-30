@@ -13,7 +13,7 @@ import swingtree.input.Keyboard;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
 import swingtree.style.ComponentExtension;
-import swingtree.style.Styler;
+import swingtree.api.Styler;
 
 import javax.swing.*;
 import javax.swing.border.Border;

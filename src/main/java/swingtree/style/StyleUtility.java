@@ -1,5 +1,7 @@
 package swingtree.style;
 
+import swingtree.api.Painter;
+
 import java.awt.*;
 import java.util.Map;
 import java.util.Objects;
@@ -7,14 +9,6 @@ import java.util.Objects;
 final class StyleUtility
 {
     static final String DEFAULT_KEY = "default";
-    static final Styler<?> STYLER_NONE = delegate -> delegate;
-    static final Painter PAINTER_NONE = new Painter() {
-                                            @Override
-                                            public void paint(Graphics2D g2d) {
-                                                // None
-                                            }
-                                            @Override public String toString() { return "none"; }
-                                        };
 
     private StyleUtility() {}
 

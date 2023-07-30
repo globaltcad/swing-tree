@@ -4,6 +4,8 @@ import swingtree.SwingTreeContext;
 import swingtree.UI;
 import swingtree.animation.AnimationState;
 import swingtree.animation.LifeTime;
+import swingtree.api.Painter;
+import swingtree.api.Styler;
 import swingtree.components.JBox;
 
 import javax.swing.*;
@@ -44,7 +46,7 @@ public final class ComponentExtension<C extends JComponent>
 
     private final C _owner;
 
-    private final Map<LifeTime, Painter>   _animationPainters = new LinkedHashMap<>(0);
+    private final Map<LifeTime, swingtree.api.Painter>   _animationPainters = new LinkedHashMap<>(0);
     private final Map<LifeTime, Styler<C>> _animationStylers  = new LinkedHashMap<>(0);
 
     private final List<String> _styleGroups = new ArrayList<>(0);
@@ -93,7 +95,7 @@ public final class ComponentExtension<C extends JComponent>
         _animationStylers.clear();
     }
 
-    public void addAnimationPainter( AnimationState state, Painter painter ) {
+    public void addAnimationPainter( AnimationState state, swingtree.api.Painter painter ) {
         _animationPainters.put(Objects.requireNonNull(state.lifetime()), Objects.requireNonNull(painter));
         _installCustomBorderBasedStyleAndAnimationRenderer();
     }

@@ -1,6 +1,8 @@
 package swingtree.style;
 
-import javax.swing.*;
+import swingtree.api.Styler;
+
+import javax.swing.JComponent;
 import java.util.*;
 import java.util.function.Function;
 
