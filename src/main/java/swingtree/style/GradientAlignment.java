@@ -16,6 +16,9 @@ public enum GradientAlignment
     TOP_TO_BOTTOM, LEFT_TO_RIGHT,
     BOTTOM_TO_TOP, RIGHT_TO_LEFT;
 
+    /**
+     * @return {@code true} if this alignment is diagonal, {@code false} otherwise.
+     */
     public boolean isDiagonal() {
         return this == TOP_LEFT_TO_BOTTOM_RIGHT || this == BOTTOM_LEFT_TO_TOP_RIGHT ||
                this == TOP_RIGHT_TO_BOTTOM_LEFT || this == BOTTOM_RIGHT_TO_TOP_LEFT;

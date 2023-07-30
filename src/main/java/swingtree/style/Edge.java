@@ -6,4 +6,9 @@ package swingtree.style;
  *  <br>
  *  See {@link StyleDelegate#borderWidthAt(Edge, int)}
  */
-public enum Edge {TOP, RIGHT, BOTTOM, LEFT, EVERY}
+public enum Edge
+{
+    TOP,    RIGHT,
+    BOTTOM, LEFT,
+    EVERY
+}

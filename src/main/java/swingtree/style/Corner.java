@@ -6,4 +6,9 @@ package swingtree.style;
  *  <br>
  *  See {@link StyleDelegate#borderRadiusAt(Corner, int, int)}.
  */
-public enum Corner { TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT, EVERY }
+public enum Corner
+{
+    TOP_LEFT,    TOP_RIGHT,
+    BOTTOM_LEFT, BOTTOM_RIGHT,
+    EVERY
+}
