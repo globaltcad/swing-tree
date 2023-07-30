@@ -980,26 +980,10 @@ public final class StyleDelegate<C extends JComponent>
     }
 
     /**
-     * @param underline Whether the font should be underlined or not.
-     * @return A new {@link StyleDelegate} with the provided flag defining whether the font should be underlined or not.
-     */
-    public StyleDelegate<C> underline( boolean underline ) {
-        return _withStyle(_style._withFont(_style.font().isUnderlined(underline)));
-    }
-
-    /**
-     * @param strikeThrough Whether the font should be struck through or not.
-     * @return A new {@link StyleDelegate} with the provided flag defining whether the font should be struck through or not.
-     */
-    public StyleDelegate<C> strikeThrough( boolean strikeThrough ) {
-        return _withStyle(_style._withFont(_style.font().isStrike(strikeThrough)));
-    }
-
-    /**
      * @param transform The {@link AffineTransform} to apply to the font.
      * @return A new {@link StyleDelegate} with the provided font transform.
      */
-    public StyleDelegate<C> transform( AffineTransform transform ) {
+    public StyleDelegate<C> fontTransform(AffineTransform transform ) {
         return _withStyle(_style._withFont(_style.font().transform(transform)));
     }
 
@@ -1007,7 +991,7 @@ public final class StyleDelegate<C extends JComponent>
      * @param paint The {@link Paint} to use for the foreground of the font.
      * @return A new {@link StyleDelegate} with the provided font paint.
      */
-    public StyleDelegate<C> paint( Paint paint ) {
+    public StyleDelegate<C> fontPaint(Paint paint ) {
         return _withStyle(_style._withFont(_style.font().paint(paint)));
     }
 
@@ -1020,6 +1004,19 @@ public final class StyleDelegate<C extends JComponent>
      */
     public StyleDelegate<C> fontWeight( float weight ) {
         return _withStyle(_style._withFont(_style.font().weight(weight))); 
+    }
+
+    /**
+     *  Use this to define the horizontal alignment of the default font of the component.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text. <br>
+     *  Also note that not all text based components support text alignment.
+     *  @param alignment The horizontal alignment of the font.
+     *                   See {@link UI.HorizontalAlignment} for more information.
+     *  @return A new {@link StyleDelegate} with the provided font alignment.
+     */
+    public StyleDelegate<C> fontAlignment( UI.HorizontalAlignment alignment ) {
+        return _withStyle(_style._withFont(_style.font().horizontalAlignment(alignment)));
     }
 
     /**

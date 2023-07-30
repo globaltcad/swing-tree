@@ -683,4 +683,26 @@ class Individual_Component_Styling_Spec extends Specification
             new JSpinner()   | Color.MAGENTA
     }
 
+    def 'The horizontal text alignment of many text based components can be configured through the style API.'(
+        JComponent component, UI.HorizontalAlignment alignment
+    ) {
+        reportInfo """
+            The horizontal text alignment of many text based components can be configured through the style API
+            exposed by the `withStyle` method. 
+        """
+        given : 'We create a SwingTree builder node using the `of`method and apply the horizontal text alignment in the style API.'
+            var ui = UI.of(component).withStyle( it -> it.fontAlignment(alignment) )
+
+        expect : 'The component indeed has the specified horizontal text alignment!'
+            ui.component.horizontalAlignment == alignment.forSwing()
+
+        where :
+            component               | alignment
+            new JButton()           | UI.HorizontalAlignment.LEFT
+            new JTextField()        | UI.HorizontalAlignment.RIGHT
+            new JPasswordField()    | UI.HorizontalAlignment.CENTER
+            new JMenuItem()         | UI.HorizontalAlignment.LEADING
+            new JCheckBoxMenuItem() | UI.HorizontalAlignment.TRAILING
+    }
+
 }

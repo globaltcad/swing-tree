@@ -390,6 +390,24 @@ public final class ComponentExtension<C extends JComponent>
                 _owner.setCursor( cursor );
         });
 
+        style.font().horizontalAlignment().ifPresent( alignment -> {
+            if ( _owner instanceof JLabel ) {
+                JLabel label = (JLabel) _owner;
+                if ( !Objects.equals( label.getHorizontalAlignment(), alignment.forSwing() ) )
+                    label.setHorizontalAlignment( alignment.forSwing() );
+            }
+            if ( _owner instanceof AbstractButton ) {
+                AbstractButton button = (AbstractButton) _owner;
+                if ( !Objects.equals( button.getHorizontalAlignment(), alignment.forSwing() ) )
+                    button.setHorizontalAlignment( alignment.forSwing() );
+            }
+            if ( _owner instanceof JTextField ) {
+                JTextField textField = (JTextField) _owner;
+                if ( !Objects.equals( textField.getHorizontalAlignment(), alignment.forSwing() ) )
+                    textField.setHorizontalAlignment( alignment.forSwing() );
+            }
+        });
+
         if ( !onlyDimensionalityIsStyled ) {
             _installCustomBorderBasedStyleAndAnimationRenderer();
             _establishLookAndFeel(style);

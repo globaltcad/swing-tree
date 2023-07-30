@@ -450,14 +450,17 @@ public final class UI
     /**
      *  Different positions along a horizontally aligned UI component.
      */
-    public enum HorizontalAlignment {
-        LEFT, CENTER, RIGHT;
+    public enum HorizontalAlignment
+    {
+        LEFT, CENTER, RIGHT, LEADING, TRAILING;
 
         public final int forSwing() {
             switch ( this ) {
-                case LEFT:   return SwingConstants.LEFT;
-                case CENTER: return SwingConstants.CENTER;
-                case RIGHT:  return SwingConstants.RIGHT;
+                case LEFT:     return SwingConstants.LEFT;
+                case CENTER:   return SwingConstants.CENTER;
+                case RIGHT:    return SwingConstants.RIGHT;
+                case LEADING:  return SwingConstants.LEADING;
+                case TRAILING: return SwingConstants.TRAILING;
             }
             throw new RuntimeException();
         }

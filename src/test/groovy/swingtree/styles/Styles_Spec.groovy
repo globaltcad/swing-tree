@@ -119,7 +119,7 @@ class Styles_Spec extends Specification
                                         "FontStyle[" +
                                             "name=Times New Roman, size=12, posture=0.0, weight=2.0, underlined=true, " +
                                             "strikeThrough=true, color=rgba(255,0,255,255), backgroundColor=?, " +
-                                            "selectionColor=rgba(0,255,255,255), transform=?, paint=?" +
+                                            "selectionColor=rgba(0,255,255,255), transform=?, paint=?, horizontalAlignment=?" +
                                         "], " +
                                         "DimensionalityStyle[" +
                                             "minWidth=?, minHeight=?, " +
