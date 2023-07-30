@@ -445,7 +445,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param arcHeight The border arc height in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided border arc width and arc height for the specified corner.
      */
-    public ComponentStyleDelegate<C> borderRadiusAt( Corner corner, int arcWidth, int arcHeight ) {
+    public ComponentStyleDelegate<C> borderRadiusAt(UI.Corner corner, int arcWidth, int arcHeight ) {
         return _withStyle(_style._withBorder(_style.border().arcWidthAt(corner, arcWidth).arcHeightAt(corner, arcHeight)));
     }
 

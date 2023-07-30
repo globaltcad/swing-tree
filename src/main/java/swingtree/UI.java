@@ -7,6 +7,7 @@ import swingtree.animation.Animate;
 import swingtree.animation.LifeTime;
 import swingtree.api.Buildable;
 import swingtree.api.MenuBuilder;
+import swingtree.api.Styler;
 import swingtree.api.SwingBuilder;
 import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
@@ -565,6 +566,20 @@ public final class UI
             return this == TOP_LEFT_TO_BOTTOM_RIGHT || this == BOTTOM_LEFT_TO_TOP_RIGHT ||
                    this == TOP_RIGHT_TO_BOTTOM_LEFT || this == BOTTOM_RIGHT_TO_TOP_LEFT;
         }
+    }
+
+    /**
+     *  Use this in the style API (see {@link UIForAnySwing#withStyle(Styler)})
+     *  to target specific corners of a {@link JComponent} and apply
+     *  custom {@link Style} properties to them.
+     *  <br>
+     *  See {@link ComponentStyleDelegate#borderRadiusAt(Corner, int, int)}.
+     */
+    public enum Corner
+    {
+        TOP_LEFT,    TOP_RIGHT,
+        BOTTOM_LEFT, BOTTOM_RIGHT,
+        EVERY
     }
 
     /**

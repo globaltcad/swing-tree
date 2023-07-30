@@ -430,10 +430,10 @@ final class StylePainter<C extends JComponent>
             shadowArea.intersect(baseArea);
 
         // Draw the corner shadows
-        _renderCornerShadow(shadow, Corner.TOP_LEFT,     shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
-        _renderCornerShadow(shadow, Corner.TOP_RIGHT,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
-        _renderCornerShadow(shadow, Corner.BOTTOM_LEFT,  shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
-        _renderCornerShadow(shadow, Corner.BOTTOM_RIGHT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
+        _renderCornerShadow(shadow, UI.Corner.TOP_LEFT,     shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
+        _renderCornerShadow(shadow, UI.Corner.TOP_RIGHT,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
+        _renderCornerShadow(shadow, UI.Corner.BOTTOM_LEFT,  shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
+        _renderCornerShadow(shadow, UI.Corner.BOTTOM_RIGHT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
 
         // Draw the edge shadows
         _renderEdgeShadow(shadow, UI.Edge.TOP,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
@@ -469,7 +469,7 @@ final class StylePainter<C extends JComponent>
 
     private static void _renderCornerShadow(
         ShadowStyle shadowStyle,
-        Corner corner,
+        UI.Corner corner,
         Area areaWhereShadowIsAllowed,
         Rectangle innerShadowRect,
         Rectangle outerShadowRect,

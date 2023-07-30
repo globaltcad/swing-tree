@@ -115,62 +115,62 @@ public final class BorderStyle
         return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, borderWidths, _borderColor, _shades);
     }
 
-    BorderStyle arcWidthAt( Corner corner, int borderArcWidth ) {
-        if ( corner == Corner.EVERY )
+    BorderStyle arcWidthAt(UI.Corner corner, int borderArcWidth ) {
+        if ( corner == UI.Corner.EVERY )
             return this.arcWidth(borderArcWidth);
         int arcHeight;
         switch ( corner ) {
             case TOP_LEFT:
                 arcHeight = _topLeftArc != null ? _topLeftArc.height() : 0;
-                return new BorderStyle(new Arc(borderArcWidth, arcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _borderColor, _shades);
+                return new BorderStyle(Arc.of(borderArcWidth, arcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _borderColor, _shades);
             case TOP_RIGHT:
                 arcHeight = _topRightArc != null ? _topRightArc.height() : 0;
-                return new BorderStyle(_topLeftArc, new Arc(borderArcWidth, arcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _borderColor, _shades);
+                return new BorderStyle(_topLeftArc, Arc.of(borderArcWidth, arcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _borderColor, _shades);
             case BOTTOM_LEFT:
                 arcHeight = _bottomLeftArc != null ? _bottomLeftArc.height() : 0;
-                return new BorderStyle(_topLeftArc, _topRightArc, new Arc(borderArcWidth, arcHeight), _bottomRightArc, _borderWidths, _borderColor, _shades);
+                return new BorderStyle(_topLeftArc, _topRightArc, Arc.of(borderArcWidth, arcHeight), _bottomRightArc, _borderWidths, _borderColor, _shades);
             case BOTTOM_RIGHT:
                 arcHeight = _bottomRightArc != null ? _bottomRightArc.height() : 0;
-                return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, new Arc(borderArcWidth, arcHeight), _borderWidths, _borderColor, _shades);
+                return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, Arc.of(borderArcWidth, arcHeight), _borderWidths, _borderColor, _shades);
             default:
                 throw new IllegalArgumentException("Unknown corner: " + corner);
         }
     }
 
     BorderStyle arcWidth( int borderArcWidth ) {
-        return this.arcWidthAt(Corner.TOP_LEFT,     borderArcWidth)
-                   .arcWidthAt(Corner.TOP_RIGHT,    borderArcWidth)
-                   .arcWidthAt(Corner.BOTTOM_LEFT,  borderArcWidth)
-                   .arcWidthAt(Corner.BOTTOM_RIGHT, borderArcWidth);
+        return this.arcWidthAt(UI.Corner.TOP_LEFT,     borderArcWidth)
+                   .arcWidthAt(UI.Corner.TOP_RIGHT,    borderArcWidth)
+                   .arcWidthAt(UI.Corner.BOTTOM_LEFT,  borderArcWidth)
+                   .arcWidthAt(UI.Corner.BOTTOM_RIGHT, borderArcWidth);
     }
 
-    BorderStyle arcHeightAt( Corner corner, int borderArcHeight ) {
-        if ( corner == Corner.EVERY )
+    BorderStyle arcHeightAt(UI.Corner corner, int borderArcHeight ) {
+        if ( corner == UI.Corner.EVERY )
             return this.arcHeight(borderArcHeight);
         int arcWidth;
         switch ( corner ) {
             case TOP_LEFT:
                 arcWidth = _topLeftArc != null ? _topLeftArc.width() : 0;
-                return new BorderStyle(new Arc(arcWidth, borderArcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _borderColor, _shades);
+                return new BorderStyle(Arc.of(arcWidth, borderArcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _borderColor, _shades);
             case TOP_RIGHT:
                 arcWidth = _topRightArc != null ? _topRightArc.width() : 0;
-                return new BorderStyle(_topLeftArc, new Arc(arcWidth, borderArcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _borderColor, _shades);
+                return new BorderStyle(_topLeftArc, Arc.of(arcWidth, borderArcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _borderColor, _shades);
             case BOTTOM_LEFT:
                 arcWidth = _bottomLeftArc != null ? _bottomLeftArc.width() : 0;
-                return new BorderStyle(_topLeftArc, _topRightArc, new Arc(arcWidth, borderArcHeight), _bottomRightArc, _borderWidths, _borderColor, _shades);
+                return new BorderStyle(_topLeftArc, _topRightArc, Arc.of(arcWidth, borderArcHeight), _bottomRightArc, _borderWidths, _borderColor, _shades);
             case BOTTOM_RIGHT:
                 arcWidth = _bottomRightArc != null ? _bottomRightArc.width() : 0;
-                return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, new Arc(arcWidth, borderArcHeight), _borderWidths, _borderColor, _shades);
+                return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, Arc.of(arcWidth, borderArcHeight), _borderWidths, _borderColor, _shades);
             default:
                 throw new IllegalArgumentException("Unknown corner: " + corner);
         }
     }
 
     BorderStyle arcHeight( int borderArcHeight ) {
-        return this.arcHeightAt(Corner.TOP_LEFT,     borderArcHeight)
-                   .arcHeightAt(Corner.TOP_RIGHT,    borderArcHeight)
-                   .arcHeightAt(Corner.BOTTOM_LEFT,  borderArcHeight)
-                   .arcHeightAt(Corner.BOTTOM_RIGHT, borderArcHeight);
+        return this.arcHeightAt(UI.Corner.TOP_LEFT,     borderArcHeight)
+                   .arcHeightAt(UI.Corner.TOP_RIGHT,    borderArcHeight)
+                   .arcHeightAt(UI.Corner.BOTTOM_LEFT,  borderArcHeight)
+                   .arcHeightAt(UI.Corner.BOTTOM_RIGHT, borderArcHeight);
     }
 
     BorderStyle widthAt(UI.Edge edge, int borderWidth ) {

@@ -5,7 +5,6 @@ import sprouts.Val;
 import sprouts.Var;
 import swingtree.UI;
 import swingtree.components.JBox;
-import swingtree.style.Corner;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,10 +30,10 @@ public class BoxShadowPickerViewModel
     // Border
     private final Var<Color>   borderColor     = Var.of(new Color(0,0.4f,1)).onAct( it -> repaint.fire() );
     private final Var<UI.Edge>    borderEdge      = Var.of(UI.Edge.EVERY).onAct(it -> updateEdgeSelection(it.get()) );
-    private final Var<Corner>  borderCorner    = Var.of(Corner.EVERY).onAct(it -> updateCornerSelection(it.get()) );
+    private final Var<UI.Corner>  borderCorner    = Var.of(UI.Corner.EVERY).onAct(it -> updateCornerSelection(it.get()) );
 
     private final Map<UI.Edge, BorderEdgeViewModel> edgeModels = new HashMap<>();
-    private final Map<Corner, BorderCornerViewModel> cornerModels = new HashMap<>();
+    private final Map<UI.Corner, BorderCornerViewModel> cornerModels = new HashMap<>();
 
     private final Var<BorderEdgeViewModel> currentEdgeModel = Var.ofNullable(BorderEdgeViewModel.class, null);
     private final Var<BorderCornerViewModel> currentCornerModel = Var.ofNullable(BorderCornerViewModel.class, null);
@@ -94,10 +93,10 @@ public class BoxShadowPickerViewModel
                 currentEdgeModel.set(model);
             }
         }
-        for (Corner corner : Corner.values()) {
+        for (UI.Corner corner : UI.Corner.values()) {
             BorderCornerViewModel model = new BorderCornerViewModel();
             cornerModels.put(corner, model);
-            if (corner == Corner.EVERY) {
+            if (corner == UI.Corner.EVERY) {
                 currentCornerModel.set(model);
             }
         }
@@ -110,7 +109,7 @@ public class BoxShadowPickerViewModel
         repaint.fire();
     }
 
-    private void updateCornerSelection(Corner corner) {
+    private void updateCornerSelection(UI.Corner corner) {
         currentCornerModel.set(cornerModels.get(corner));
         repaint.fire();
     }
@@ -132,7 +131,7 @@ public class BoxShadowPickerViewModel
     public Var<Integer> marginRight() { return marginRight; }
 
     public Var<Integer> marginBottom() { return marginBottom; }
-    public Var<Corner> borderCorner() { return borderCorner; }
+    public Var<UI.Corner> borderCorner() { return borderCorner; }
     public Var<UI.Edge> borderEdge() { return borderEdge; }
 
     public Var<BorderEdgeViewModel> currentEdgeModel() { return currentEdgeModel; }
@@ -152,12 +151,12 @@ public class BoxShadowPickerViewModel
 
     public Var<BorderCornerViewModel> currentCornerModel() { return currentCornerModel; }
 
-    public int arcWidthAt(Corner corner) { return getCornerModel(corner).borderArcWidth.get(); }
-    public int arcHeightAt(Corner corner) { return getCornerModel(corner).borderArcHeight.get(); }
+    public int arcWidthAt(UI.Corner corner) { return getCornerModel(corner).borderArcWidth.get(); }
+    public int arcHeightAt(UI.Corner corner) { return getCornerModel(corner).borderArcHeight.get(); }
 
-    private BoxShadowPickerViewModel.BorderCornerViewModel getCornerModel(Corner corner) {
+    private BoxShadowPickerViewModel.BorderCornerViewModel getCornerModel(UI.Corner corner) {
         // We check if the
-        if ( currentCornerModel.is(cornerModels.get(Corner.EVERY)) )
+        if ( currentCornerModel.is(cornerModels.get(UI.Corner.EVERY)) )
             return currentCornerModel.get();
 
         return cornerModels.get(corner);
@@ -187,18 +186,18 @@ public class BoxShadowPickerViewModel
 
     private void createCode() {
         String cornerRadius = "";
-        if ( this.borderCorner.is(Corner.EVERY) ) {
-            if ( arcWidthAt(Corner.TOP_LEFT) == arcHeightAt(Corner.TOP_LEFT) )
-                cornerRadius = "     .borderRadius(" + arcWidthAt(Corner.TOP_LEFT) + ")\n";
+        if ( this.borderCorner.is(UI.Corner.EVERY) ) {
+            if ( arcWidthAt(UI.Corner.TOP_LEFT) == arcHeightAt(UI.Corner.TOP_LEFT) )
+                cornerRadius = "     .borderRadius(" + arcWidthAt(UI.Corner.TOP_LEFT) + ")\n";
             else
-                cornerRadius = "     .borderRadius(" + arcWidthAt(Corner.TOP_LEFT) + ", " + arcHeightAt(Corner.TOP_LEFT) + ")\n";
+                cornerRadius = "     .borderRadius(" + arcWidthAt(UI.Corner.TOP_LEFT) + ", " + arcHeightAt(UI.Corner.TOP_LEFT) + ")\n";
         }
         else
             cornerRadius =
-                "     .borderRadiusAt(Corner.TOP_LEFT, " + arcWidthAt(Corner.TOP_LEFT) + ", " + arcHeightAt(Corner.TOP_LEFT) + ")\n" +
-                "     .borderRadiusAt(Corner.TOP_RIGHT, " + arcWidthAt(Corner.TOP_RIGHT) + ", " + arcHeightAt(Corner.TOP_RIGHT) + ")\n" +
-                "     .borderRadiusAt(Corner.BOTTOM_LEFT, " + arcWidthAt(Corner.BOTTOM_LEFT) + ", " + arcHeightAt(Corner.BOTTOM_LEFT) + ")\n" +
-                "     .borderRadiusAt(Corner.BOTTOM_RIGHT, " + arcWidthAt(Corner.BOTTOM_RIGHT) + ", " + arcHeightAt(Corner.BOTTOM_RIGHT) + ")\n";
+                "     .borderRadiusAt(Corner.TOP_LEFT, " + arcWidthAt(UI.Corner.TOP_LEFT) + ", " + arcHeightAt(UI.Corner.TOP_LEFT) + ")\n" +
+                "     .borderRadiusAt(Corner.TOP_RIGHT, " + arcWidthAt(UI.Corner.TOP_RIGHT) + ", " + arcHeightAt(UI.Corner.TOP_RIGHT) + ")\n" +
+                "     .borderRadiusAt(Corner.BOTTOM_LEFT, " + arcWidthAt(UI.Corner.BOTTOM_LEFT) + ", " + arcHeightAt(UI.Corner.BOTTOM_LEFT) + ")\n" +
+                "     .borderRadiusAt(Corner.BOTTOM_RIGHT, " + arcWidthAt(UI.Corner.BOTTOM_RIGHT) + ", " + arcHeightAt(UI.Corner.BOTTOM_RIGHT) + ")\n";
 
         String borderWidth = "";
         if ( this.borderEdge.is(UI.Edge.EVERY) ) {

@@ -5,10 +5,15 @@ package swingtree.style;
  */
 final class Arc
 {
+    static Arc of( int arcWidth, int arcHeight ) {
+        return new Arc( arcWidth, arcHeight );
+    }
+
+
     private final int _arcWidth;
     private final int _arcHeight;
 
-    public Arc( int arcWidth, int arcHeight ) {
+    private Arc( int arcWidth, int arcHeight ) {
         _arcWidth  = arcWidth;
         _arcHeight = arcHeight;
     }
@@ -18,10 +23,10 @@ final class Arc
     public int height() { return _arcHeight; }
 
     Arc scale( double scale ) {
-        return new Arc(
-                (int) Math.round( _arcWidth  * scale ),
-                (int) Math.round( _arcHeight * scale )
-            );
+        return Arc.of(
+                    (int) Math.round( _arcWidth  * scale ),
+                    (int) Math.round( _arcHeight * scale )
+                );
     }
 
     @Override

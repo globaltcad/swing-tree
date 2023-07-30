@@ -2,7 +2,6 @@ package examples.stylish;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import swingtree.UI;
-import swingtree.style.Corner;
 
 import java.awt.*;
 import java.util.Optional;
@@ -136,10 +135,10 @@ public class BoxShadowPickerView extends UI.Panel
                          })
                          .padding(vm.paddingTop().get(), vm.paddingRight().get(), vm.paddingBottom().get(), vm.paddingLeft().get())
                          .margin(vm.marginTop().get(), vm.marginRight().get(), vm.marginBottom().get(), vm.marginLeft().get())
-                         .borderRadiusAt(Corner.TOP_LEFT, vm.arcWidthAt(Corner.TOP_LEFT), vm.arcHeightAt(Corner.TOP_LEFT))
-                         .borderRadiusAt(Corner.TOP_RIGHT, vm.arcWidthAt(Corner.TOP_RIGHT), vm.arcHeightAt(Corner.TOP_RIGHT))
-                         .borderRadiusAt(Corner.BOTTOM_RIGHT, vm.arcWidthAt(Corner.BOTTOM_RIGHT), vm.arcHeightAt(Corner.BOTTOM_RIGHT))
-                         .borderRadiusAt(Corner.BOTTOM_LEFT, vm.arcWidthAt(Corner.BOTTOM_LEFT), vm.arcHeightAt(Corner.BOTTOM_LEFT))
+                         .borderRadiusAt(UI.Corner.TOP_LEFT, vm.arcWidthAt(UI.Corner.TOP_LEFT), vm.arcHeightAt(UI.Corner.TOP_LEFT))
+                         .borderRadiusAt(UI.Corner.TOP_RIGHT, vm.arcWidthAt(UI.Corner.TOP_RIGHT), vm.arcHeightAt(UI.Corner.TOP_RIGHT))
+                         .borderRadiusAt(UI.Corner.BOTTOM_RIGHT, vm.arcWidthAt(UI.Corner.BOTTOM_RIGHT), vm.arcHeightAt(UI.Corner.BOTTOM_RIGHT))
+                         .borderRadiusAt(UI.Corner.BOTTOM_LEFT, vm.arcWidthAt(UI.Corner.BOTTOM_LEFT), vm.arcHeightAt(UI.Corner.BOTTOM_LEFT))
                          .shadowColor(vm.shadowColor().get())
                          .shadowHorizontalOffset(vm.horizontalShadowOffset().get())
                          .shadowVerticalOffset(vm.verticalShadowOffset().get())
