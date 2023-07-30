@@ -318,8 +318,8 @@ class Examples_Spec extends Specification
             var ui = new Calculator()
             ui.setBackground(new Color(242, 242, 242))
         expect :
-            new Utility.Query(ui).find(JTextArea, "input-text-area").isPresent()
-            new Utility.Query(ui).find(JTextArea, "input-text-area").get().componentOrientation == ComponentOrientation.RIGHT_TO_LEFT
+            new Utility.Query(ui).find(JTextField, "input-text-area").isPresent()
+            new Utility.Query(ui).find(JTextField, "input-text-area").get().horizontalAlignment == JTextField.RIGHT
         and : 'Its render state is as expected.'
             Utility.similarityBetween(ui, "views/calculator-UI.png", 97.5) > 97.5
     }

@@ -5,6 +5,8 @@ import sprouts.Val;
 import sprouts.Var;
 
 import javax.swing.*;
+import javax.swing.text.JTextComponent;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.function.Consumer;
@@ -130,6 +132,25 @@ public class UIForTextField<F extends JTextField> extends UIForAnyTextComponent<
         NullUtil.nullArgCheck(number, "number", Var.class);
         _onShow( number, n -> _setTextSilently( getComponent(), n.toString() ) );
         return this;
+    }
+
+    /**
+     * The provided {@link UI.HorizontalAlignment} translates to {@link ComponentOrientation}
+     * instances which are used to align the elements or text within the wrapped {@link JTextComponent}.
+     * {@link LayoutManager} and {@link Component}
+     * subclasses will use this property to
+     * determine how to lay out and draw components.
+     * <p>
+     * Note: This method indirectly changes layout-related information, and therefore,
+     * invalidates the component hierarchy.
+     *
+     * @param direction The text orientation type which should be used.
+     * @return This very builder to allow for method chaining.
+     */
+    public final UIForTextField<F> withTextOrientation( UI.HorizontalAlignment direction ) {
+        NullUtil.nullArgCheck(direction, "direction", UI.HorizontalAlignment.class);
+        getComponent().setHorizontalAlignment(direction.forSwing());
+        return _this();
     }
 
 }

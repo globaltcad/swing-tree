@@ -5,7 +5,7 @@
 SwingTree is a Swing based UI framework for creating boilerplate free 
 and composition based Swing UIs fluently. <br>
 Think [Jetpack Compose](https://developer.android.com/jetpack/compose), [SwiftUI](https://developer.apple.com/xcode/swiftui/) or [Flutter](https://flutter.dev) but for Swing 
-(similar to [JetBrains UI DSL](https://plugins.jetbrains.com/docs/intellij/kotlin-ui-dsl-version-2.html#ui-dsl-basics)).
+(similar to [JetBrain's UI DSL](https://plugins.jetbrains.com/docs/intellij/kotlin-ui-dsl-version-2.html#ui-dsl-basics)).
 
 - [Motivation](docs/markdown/Motivation.md)
 - [Starter Tutorial](docs/markdown/Climbing-Swing-Tree.md)
@@ -54,7 +54,7 @@ UI.of(this/*JPanel subtype*/).withLayout("fill, insets 10")
       UI.label("42.0").with(UI.HorizontalAlignment.RIGHT)
       .withProperty("FlatLaf.styleClass", "large")
    )
-   .add("grow, span, wrap", UI.textArea(UI.HorizontalDirection.RIGHT_TO_LEFT, "13 - 73"))
+   .add("grow, span, wrap", UI.textField(HorizontalAlignment.RIGHT, "73 - 31"))
 )
 .add("growx", UI.radioButton("DEG"), UI.radioButton("RAD"))
 .add("shrinkx", UI.splitButton("sin"))

@@ -5,6 +5,7 @@ import sprouts.Action;
 import sprouts.Val;
 import sprouts.Var;
 
+import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
@@ -201,48 +202,6 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
         NullUtil.nullPropertyCheck(font, "font", "Use the default font of this component instead of null!");
         _onShow( font, v -> withFont(v) );
         return withFont( font.orElseThrow() );
-    }
-
-    /**
-     * The provided {@link UI.HorizontalDirection} translates to {@link ComponentOrientation}
-     * instances which are used to align the elements or text within the wrapped {@link JTextComponent}.
-     * {@link LayoutManager} and {@link Component}
-     * subclasses will use this property to
-     * determine how to lay out and draw components.
-     * <p>
-     * Note: This method indirectly changes layout-related information, and therefore,
-     * invalidates the component hierarchy.
-     *
-     * @param direction The text orientation type which should be used.
-     * @return This very builder to allow for method chaining.
-     */
-    public final I withTextOrientation( UI.HorizontalDirection direction ) {
-        NullUtil.nullArgCheck(direction, "direction", UI.HorizontalDirection.class);
-        getComponent().setComponentOrientation(direction.forTextOrientation());
-        return _this();
-    }
-
-    /**
-     * The provided {@link UI.HorizontalDirection} property translates to {@link ComponentOrientation}
-     * instances which are used to align the elements or text within the wrapped {@link JTextComponent}.
-     * {@link LayoutManager} and {@link Component}
-     * subclasses will use this property to
-     * determine how to lay out and draw components.
-     * <p>
-     * Note: This method indirectly changes layout-related information, and therefore,
-     * invalidates the component hierarchy.
-     *
-     * @param direction The text orientation type which should be used.
-     * @return This very builder to allow for method chaining.
-     */
-    public final I withHorizontalTextOrientation( Val<UI.HorizontalDirection> direction ) {
-        NullUtil.nullArgCheck( direction, "direction", Val.class );
-        NullUtil.nullPropertyCheck(direction, "direction", "Null is not a valid value for the text orientation!");
-        _onShow( direction, v -> {
-            withTextOrientation(v);
-            getComponent().validate();
-        });
-        return withTextOrientation(direction.orElseThrow());
     }
 
     /**

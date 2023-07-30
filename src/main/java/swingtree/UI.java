@@ -1,7 +1,5 @@
 package swingtree;
 
-import swingtree.components.JBox;
-import swingtree.components.JSplitButton;
 import net.miginfocom.swing.MigLayout;
 import sprouts.Event;
 import sprouts.*;
@@ -13,11 +11,12 @@ import swingtree.api.SwingBuilder;
 import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
+import swingtree.components.JBox;
 import swingtree.components.JScrollPanels;
+import swingtree.components.JSplitButton;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
 import swingtree.style.*;
-import swingtree.style.StyleSheet;
 import swingtree.threading.EventProcessor;
 
 import javax.swing.*;
@@ -459,18 +458,6 @@ public final class UI
                 case LEFT:   return SwingConstants.LEFT;
                 case CENTER: return SwingConstants.CENTER;
                 case RIGHT:  return SwingConstants.RIGHT;
-            }
-            throw new RuntimeException();
-        }
-    }
-
-    public enum HorizontalDirection {
-        LEFT_TO_RIGHT, RIGHT_TO_LEFT;
-
-        public final ComponentOrientation forTextOrientation() {
-            switch ( this ) {
-                case LEFT_TO_RIGHT: return ComponentOrientation.LEFT_TO_RIGHT;
-                case RIGHT_TO_LEFT: return ComponentOrientation.RIGHT_TO_LEFT;
             }
             throw new RuntimeException();
         }
@@ -3343,6 +3330,60 @@ public final class UI
     public static UIForTextField<JTextField> textField() { return of((JTextField) new TextField()); }
 
     /**
+     *  A convenience method for creating a builder for a {@link JTextField} with a certain text alignment.
+     *  This is a shortcut version for the following code:
+     *  <pre>{@code
+     *      UI.textField()
+     *          .withTextOrientation(UI.HorizontalDirection.RIGHT);
+     *  }</pre>
+     *
+     * @param direction The text orientation type which should be used.
+     * @return A builder instance for a new {@link JTextField}, which enables fluent method chaining.
+     */
+    public static UIForTextField<JTextField> textField( HorizontalAlignment direction ) {
+        NullUtil.nullArgCheck(direction, "direction", HorizontalAlignment.class);
+        return of((JTextField) new TextField()).withTextOrientation(direction);
+    }
+
+    /**
+     *  A convenience method for creating a builder for a {@link JTextField} with a certain text and text alignment.
+     *  This is a shortcut version for the following code:
+     *  <pre>{@code
+     *      UI.textField()
+     *          .withTextOrientation(UI.HorizontalDirection.LEFT)
+     *          .withText(text);
+     *  }</pre>
+     *
+     * @param direction The text orientation type which should be used.
+     * @param text The new text to be set for the wrapped text component type.
+     * @return A builder instance for a new {@link JTextField}, which enables fluent method chaining.
+     */
+    public static UIForTextField<JTextField> textField( HorizontalAlignment direction, String text ) {
+        NullUtil.nullArgCheck(direction, "direction", HorizontalAlignment.class);
+        return of((JTextField) new TextField()).withTextOrientation(direction).withText(text);
+    }
+
+    public static UIForTextField<JTextField> textField( HorizontalAlignment direction, Val<String> text ) {
+        NullUtil.nullArgCheck(direction, "direction", HorizontalAlignment.class);
+        NullUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
+        return of((JTextField) new TextField())
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
+                .withTextOrientation(direction)
+                .withText(text);
+    }
+
+    public static UIForTextField<JTextField> textField( HorizontalAlignment direction, Var<String> text ) {
+        NullUtil.nullArgCheck(direction, "direction", HorizontalAlignment.class);
+        NullUtil.nullArgCheck(text, "text", Var.class);
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
+        return of((JTextField) new TextField())
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
+                .withTextOrientation(direction)
+                .withText(text);
+    }
+
+    /**
      *  Use this to create a builder for a new {@link JTextField} instance with
      *  the provided number property dynamically displaying its value on the text field.
      *  The property is a {@link Var}, meaning that it can be modified by the user.
@@ -3723,70 +3764,6 @@ public final class UI
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         return of((JTextArea) new TextArea())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
-                .withText(text);
-    }
-
-    /**
-     *  A convenience method for creating a builder for a {@link JTextArea} with a certain text alignment.
-     *  This is a shortcut version for the following code:
-     *  <pre>{@code
-     *      UI.textArea()
-     *          .withTextOrientation(UI.HorizontalDirection.RIGHT_TO_LEFT);
-     *  }</pre>
-     * The provided {@link UI.HorizontalDirection} translates to {@link ComponentOrientation}
-     * instances which are used to align the elements or text within the wrapped {@link JTextComponent}.
-     * {@link LayoutManager} and {@link Component}
-     * subclasses will use this property to
-     * determine how to lay out and draw components.
-     *
-     * @param direction The text orientation type which should be used.
-     * @return A builder instance for a new {@link JTextArea}, which enables fluent method chaining.
-     */
-    public static UIForTextArea<JTextArea> textArea( UI.HorizontalDirection direction ) {
-        NullUtil.nullArgCheck(direction, "direction", HorizontalDirection.class);
-        return of((JTextArea) new TextArea()).withTextOrientation(direction);
-    }
-
-    /**
-     *  A convenience method for creating a builder for a {@link JTextArea} with a certain text and text alignment.
-     *  This is a shortcut version for the following code:
-     *  <pre>{@code
-     *      UI.textArea()
-     *          .withTextOrientation(UI.HorizontalDirection.RIGHT_TO_LEFT)
-     *          .withText(text);
-     *  }</pre>
-     * The provided {@link UI.HorizontalDirection} translates to {@link ComponentOrientation}
-     * instances which are used to align the elements or text within the wrapped {@link JTextComponent}.
-     * {@link LayoutManager} and {@link Component}
-     * subclasses will use this property to
-     * determine how to lay out and draw components.
-     *
-     * @param direction The text orientation type which should be used.
-     * @param text The new text to be set for the wrapped text component type.
-     * @return A builder instance for a new {@link JTextArea}, which enables fluent method chaining.
-     */
-    public static UIForTextArea<JTextArea> textArea( UI.HorizontalDirection direction, String text ) {
-        NullUtil.nullArgCheck(direction, "direction", HorizontalDirection.class);
-        return of((JTextArea) new TextArea()).withTextOrientation(direction).withText(text);
-    }
-
-    public static UIForTextArea<JTextArea> textArea( UI.HorizontalDirection direction, Val<String> text ) {
-        NullUtil.nullArgCheck(direction, "direction", HorizontalDirection.class);
-        NullUtil.nullArgCheck(text, "text", Val.class);
-        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of((JTextArea) new TextArea())
-                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
-                .withTextOrientation(direction)
-                .withText(text);
-    }
-
-    public static UIForTextArea<JTextArea> textArea( UI.HorizontalDirection direction, Var<String> text ) {
-        NullUtil.nullArgCheck(direction, "direction", HorizontalDirection.class);
-        NullUtil.nullArgCheck(text, "text", Var.class);
-        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of((JTextArea) new TextArea())
-                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
-                .withTextOrientation(direction)
                 .withText(text);
     }
 
