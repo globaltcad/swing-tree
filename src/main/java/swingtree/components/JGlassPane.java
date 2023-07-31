@@ -71,10 +71,16 @@ public class JGlassPane extends JPanel implements AWTEventListener
 
     private void attachToRootPane(JRootPane rootPane) {
         Objects.requireNonNull(rootPane);
-        if ( this.rootPane != null ) detachFromRootPane(this.rootPane);
+        if ( this.rootPane != null ) this.detachFromRootPane(this.rootPane);
+        this.setOpaque(false);
+        this.setVisible(true);
+        /*
+            Important:
+            The glass pane needs to be set opaque and visible before
+            attaching it to the root pane, otherwise
+            there might be weired side effects.
+         */
         ( this.rootPane = rootPane ).setGlassPane(this);
-        setOpaque(false);
-        setVisible(true);
     }
 
     private void detachFromRootPane( JRootPane rootPane ) {
