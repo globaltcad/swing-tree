@@ -362,10 +362,10 @@ final class StylePainter<C extends JComponent>
         int topBorderWidth    = style.border().widths().top().orElse(0);
         int rightBorderWidth  = style.border().widths().right().orElse(0);
         int bottomBorderWidth = style.border().widths().bottom().orElse(0);
-        int left      = Math.max(style.margin().left().orElse(0),   0) + ( style.shadow().isInset() ? leftBorderWidth   : 0 );
-        int top       = Math.max(style.margin().top().orElse(0),    0) + ( style.shadow().isInset() ? topBorderWidth    : 0 );
-        int right     = Math.max(style.margin().right().orElse(0),  0) + ( style.shadow().isInset() ? rightBorderWidth  : 0 );
-        int bottom    = Math.max(style.margin().bottom().orElse(0), 0) + ( style.shadow().isInset() ? bottomBorderWidth : 0 );
+        int left      = Math.max(style.margin().left().orElse(0),   0) + ( shadow.isInset() ? leftBorderWidth   : 0 );
+        int top       = Math.max(style.margin().top().orElse(0),    0) + ( shadow.isInset() ? topBorderWidth    : 0 );
+        int right     = Math.max(style.margin().right().orElse(0),  0) + ( shadow.isInset() ? rightBorderWidth  : 0 );
+        int bottom    = Math.max(style.margin().bottom().orElse(0), 0) + ( shadow.isInset() ? bottomBorderWidth : 0 );
         int topLeftRadius     = Math.max(style.border().topLeftRadius(), 0);
         int topRightRadius    = Math.max(style.border().topRightRadius(), 0);
         int bottomRightRadius = Math.max(style.border().bottomRightRadius(), 0);
