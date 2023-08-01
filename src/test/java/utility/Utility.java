@@ -42,6 +42,17 @@ public class Utility {
 
     }
 
+    public static BufferedImage loadImage(String location) {
+        try {
+            InputStream stream = Utility.class.getClassLoader().getResourceAsStream(location);
+            assert stream != null;
+            return javax.imageio.ImageIO.read(stream);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static class Query
     {
         private final Component _current;
@@ -218,6 +229,37 @@ public class Utility {
             }
         }
         return similarity;
+    }
+
+    /**
+     *  This method will merge the array if images into a single collage like image
+     *  which will then be compared to the provided imageFile.
+     * @param images The images to merge
+     * @param imageFile The image to compare to
+     * @param expectedSimilarity The expected similarity
+     * @return The similarity
+     */
+    public static double similarityBetween(BufferedImage[] images, String imageFile, double expectedSimilarity) {
+        int a = (int) Math.sqrt(images.length);
+        int b = images.length / a;
+        if ( a * b < images.length )
+            b++;
+
+        int width = images[0].getWidth();
+        int height = images[0].getHeight();
+        BufferedImage collage = new BufferedImage(width * a, height * b, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = collage.createGraphics();
+        int i = 0;
+        for ( int y = 0; y < b; y++ ) {
+            for ( int x = 0; x < a; x++ ) {
+                if ( i >= images.length )
+                    break;
+                g2d.drawImage(images[i], x * width, y * height, null);
+                i++;
+            }
+        }
+        g2d.dispose();
+        return similarityBetween(collage, imageFile, expectedSimilarity);
     }
 
     /**

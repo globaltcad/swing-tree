@@ -6,7 +6,9 @@ import swingtree.api.Painter;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.*;
+import java.awt.image.BufferedImage;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -70,8 +72,13 @@ final class StylePainter<C extends JComponent>
             g2d.setClip(_getBaseArea());
     }
 
-    private void _paintStylesOn(UI.Layer layer, Graphics2D g2d ) {
+    private void _paintStylesOn( UI.Layer layer, Graphics2D g2d ) {
         // Every layer has 3 things:
+        // 0. Grounding, which is a solid color or image
+        for ( GroundStyle ground : style.grounds(layer) )
+            if ( !ground.equals(GroundStyle.none()) )
+                _renderGround(ground, g2d, _comp, _getBaseArea());
+
         // 1. Shades, which are simple gradient effects
         for ( GradientStyle gradient : style.gradients(layer) )
             if ( gradient.colors().length > 0 ) {
@@ -159,7 +166,7 @@ final class StylePainter<C extends JComponent>
             g2d.setColor(color);
             g2d.fill(baseArea);
 
-            if ( style.border().gradients().size() > 0 )  {
+            if (!style.border().gradients().isEmpty() )  {
                 for ( GradientStyle gradient : style.border().gradients() ) {
                     if ( gradient.colors().length > 0 ) {
                         if ( gradient.transition().isDiagonal() )
@@ -169,7 +176,6 @@ final class StylePainter<C extends JComponent>
                     }
                 }
             }
-
         }
     }
 
@@ -1006,6 +1012,84 @@ final class StylePainter<C extends JComponent>
                 throw new IllegalArgumentException("Invalid gradient type: " + gradient.type());
         }
         g2d.fill(specificArea);
+    }
+
+    private void _renderGround(
+        GroundStyle ground,
+        Graphics2D g2d,
+        JComponent component,
+        Area specificArea
+    ) {
+        if ( ground.color().isPresent() ) {
+            g2d.setColor(ground.color().get());
+            g2d.fill(specificArea);
+        }
+
+        ground.image().ifPresent( image -> {
+            UI.Placement placement = ground.placement();
+            boolean repeat         = ground.repeat();
+            int componentWidth     = component.getWidth();
+            int componentHeight    = component.getHeight();
+            int imgWidth           = ground.width().orElse(image.getWidth(null));
+            int imgHeight          = ground.height().orElse(image.getHeight(null));
+            if ( ground.autofit() ) {
+                imgWidth  = ground.width().orElse(componentWidth);
+                imgHeight = ground.height().orElse(componentHeight);
+            }
+            int x = 0;
+            int y = 0;
+            float imgTransparency = ground.transparency();
+            switch ( placement ) {
+                case TOP:
+                    x = (componentWidth - imgWidth) / 2;
+                    break;
+                case LEFT:
+                    y = (componentHeight - imgHeight) / 2;
+                    break;
+                case BOTTOM:
+                    x = (componentWidth - imgWidth) / 2;
+                    y = componentHeight - imgHeight;
+                    break;
+                case RIGHT:
+                    x = componentWidth - imgWidth;
+                    y = (componentHeight - imgHeight) / 2;
+                    break;
+                case TOP_LEFT: break;
+                case TOP_RIGHT:
+                    x = componentWidth - imgWidth;
+                    break;
+                case BOTTOM_LEFT:
+                    y = componentHeight - imgHeight;
+                    break;
+                case BOTTOM_RIGHT:
+                    x = componentWidth - imgWidth;
+                    y = componentHeight - imgHeight;
+                    break;
+                case CENTER:
+                    x = (componentWidth - imgWidth) / 2;
+                    y = (componentHeight - imgHeight) / 2;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown placement: " + placement);
+            }
+            Composite oldComposite = g2d.getComposite();
+            try {
+                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, imgTransparency));
+                if (repeat) {
+                    Paint oldPaint = g2d.getPaint();
+                    try {
+                        g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));
+                        g2d.fill(specificArea);
+                    } finally {
+                        g2d.setPaint(oldPaint);
+                    }
+                } else {
+                    g2d.drawImage(image, x, y, imgWidth, imgHeight, null);
+                }
+            } finally {
+                g2d.setComposite(oldComposite);
+            }
+        });
     }
 
     public Insets calculateBorderInsets(Insets formerInsets) {

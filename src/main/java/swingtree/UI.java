@@ -582,6 +582,14 @@ public final class UI
         EVERY
     }
 
+    public enum Placement
+    {
+        TOP, LEFT, BOTTOM, RIGHT,
+        TOP_LEFT, TOP_RIGHT,
+        BOTTOM_LEFT, BOTTOM_RIGHT,
+        CENTER
+    }
+
     /**
      *  This returns an instance of a generic swing tree builder
      *  for anything extending the {@link JComponent} class.

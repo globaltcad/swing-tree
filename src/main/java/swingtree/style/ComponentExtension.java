@@ -256,6 +256,7 @@ public final class ComponentExtension<C extends JComponent>
         final boolean noPainters            = Style.none().hasEqualPaintersAs(style);
         final boolean noShades              = Style.none().hasEqualShadesAs(style);
         final boolean noCursor              = Style.none().hasEqualCursorAs(style);
+        final boolean noGrounds             = Style.none().hasEqualGroundsAs(style);
 
         boolean isNotStyled = noLayoutStyle          &&
                               noBorderStyle          &&
@@ -266,7 +267,8 @@ public final class ComponentExtension<C extends JComponent>
                               noShadowStyle          &&
                               noPainters             &&
                               noShades               &&
-                              noCursor;
+                              noCursor               &&
+                              noGrounds;
 
         boolean onlyDimensionalityIsStyled =
                               noLayoutStyle          &&
@@ -278,7 +280,8 @@ public final class ComponentExtension<C extends JComponent>
                               noShadowStyle          &&
                               noPainters             &&
                               noShades               &&
-                              noCursor;
+                              noCursor               &&
+                              noGrounds;
 
         if ( isNotStyled || onlyDimensionalityIsStyled ) {
             _uninstallCustomLaF();

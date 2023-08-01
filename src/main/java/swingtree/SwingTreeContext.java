@@ -61,6 +61,10 @@ public final class SwingTreeContext
         this.uiScale = new UIScale();
     }
 
+    /**
+     * @return The {@link UIScale} instance of this context, which defines
+     *         how and to what degree the SwingTree UI is scaled (for high DPI displays for example).
+     */
     public UIScale getUIScale() { return uiScale; }
 
 	/**

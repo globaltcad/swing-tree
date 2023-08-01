@@ -804,7 +804,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
      * @return A new {@link ComponentStyleDelegate} with a named background shade defined by the provided styler lambda.
      */
-    public ComponentStyleDelegate<C> gradient(String shadeName, Function<GradientStyle, GradientStyle> styler ) {
+    public ComponentStyleDelegate<C> gradient( String shadeName, Function<GradientStyle, GradientStyle> styler ) {
         Objects.requireNonNull(shadeName);
         Objects.requireNonNull(styler);
         return _withStyle(_style.gradient(shadeName, styler));
@@ -830,6 +830,58 @@ public final class ComponentStyleDelegate<C extends JComponent>
     public ComponentStyleDelegate<C> gradient( Function<GradientStyle, GradientStyle> styler ) {
         Objects.requireNonNull(styler);
         return _withStyle(_style.gradient(StyleUtility.DEFAULT_KEY, styler));
+    }
+
+    /**
+     *  This method makes it possible to define multiple background styles for a single component
+     *  through a unique name for said image.
+     *  This is useful when you want to do advanced backgrounds
+     *  displaying multiple images on top of each other. <br>
+     *  Here is an example of how to use this method:
+     *  <pre>{@code
+     *    UI.panel()
+     *    .withStyle( it -> it
+     *      .ground("ground 1", ground -> ground
+     *        .image(loadImageFrom("my/path/to/image1.png"))
+     *      )
+     *      .ground("ground 2", ground -> ground
+     *        .color("blue")
+     *      )
+     *    )
+     * }</pre>
+     * Note that the background images will be rendered in alphabetical order based on the name of the image.
+     *
+     * @param imageName The name of the background image.
+     * @param styler A function that takes a {@link GroundStyle} and returns a new {@link GroundStyle}.
+     * @return A new {@link ComponentStyleDelegate} with a named background image defined by the provided styler lambda.
+     */
+    public ComponentStyleDelegate<C> ground( String imageName, Function<GroundStyle, GroundStyle> styler ) {
+        Objects.requireNonNull(imageName);
+        Objects.requireNonNull(styler);
+        return _withStyle(_style.ground(imageName, styler));
+    }
+
+    /**
+     *  This method makes it possible to define a background image for your components.
+     *  This is useful when you want to do advanced backgrounds
+     *  displaying multiple images on top of each other. <br>
+     *  Here is an example of how to use this method:
+     *  <pre>{@code
+     *    UI.panel()
+     *    .withStyle( it -> it
+     *        .ground( ground -> ground
+     *            .image(loadImageFrom("my/path/to/image1.png"))
+     *            .color("green")
+     *        )
+     *    )
+     * }</pre>
+     *
+     * @param styler A function that takes a {@link GroundStyle} and returns a new {@link GroundStyle}.
+     * @return A new {@link ComponentStyleDelegate} with a background image defined by the provided styler lambda.
+     */
+    public ComponentStyleDelegate<C> ground( Function<GroundStyle, GroundStyle> styler ) {
+        Objects.requireNonNull(styler);
+        return _withStyle(_style.ground(StyleUtility.DEFAULT_KEY, styler));
     }
 
     /**

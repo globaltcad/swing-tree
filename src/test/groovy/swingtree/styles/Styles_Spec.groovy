@@ -132,13 +132,15 @@ class Styles_Spec extends Specification
                                             "blurRadius=0, " +
                                             "spreadRadius=0, " +
                                             "color=rgba(255,255,0,255), " +
-                                            "isInset=false, layer=CONTENT" +
+                                            "isInset=false, " +
+                                            "layer=CONTENT" +
                                         "], " +
                                         "PainterStyle[" +
                                             "painter=none, " +
                                             "layer=BACKGROUND" +
                                         "], " +
-                                        "GradientStyle[alignment=TOP_TO_BOTTOM, type=LINEAR, colors=[], layer=BACKGROUND]" +
+                                        "GradientStyle[alignment=TOP_TO_BOTTOM, type=LINEAR, colors=[], layer=BACKGROUND], " +
+                                        "GroundStyle[layer=BACKGROUND, color=?, image=?, placement=CENTER, repeat=false, autofit=false, width=?, height=?, transparency=1.0]" +
                                     "]"
     }
 
