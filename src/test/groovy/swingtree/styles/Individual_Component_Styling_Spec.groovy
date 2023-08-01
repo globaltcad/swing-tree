@@ -726,12 +726,12 @@ class Individual_Component_Styling_Spec extends Specification
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
-                            .ground( ground -> ground
+                            .image(ground -> ground
                                 .image(img)
                                 .size(60, 60)
                                 .placement(UI.Placement.TOP_LEFT)
-                                .transparency(0.5f)
-                                .color(new Color(100,200,230, 100))
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
                             )
                         )
            var ui2 =
@@ -739,12 +739,12 @@ class Individual_Component_Styling_Spec extends Specification
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
-                            .ground( ground -> ground
+                            .image(ground -> ground
                                 .image(img)
                                 .size(60, 60)
                                 .placement(UI.Placement.TOP_RIGHT)
-                                .transparency(0.5f)
-                                .color(new Color(100,200,230, 100))
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
                             )
                         )
             var ui3 =
@@ -752,12 +752,12 @@ class Individual_Component_Styling_Spec extends Specification
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
-                            .ground( ground -> ground
+                            .image(ground -> ground
                                 .image(img)
                                 .size(60, 60)
                                 .placement(UI.Placement.BOTTOM_LEFT)
-                                .transparency(0.5f)
-                                .color(new Color(100,200,230, 100))
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
                             )
                         )
             var ui4 =
@@ -765,12 +765,12 @@ class Individual_Component_Styling_Spec extends Specification
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
-                            .ground( ground -> ground
+                            .image(ground -> ground
                                 .image(img)
                                 .size(60, 60)
                                 .placement(UI.Placement.BOTTOM_RIGHT)
-                                .transparency(0.5f)
-                                .color(new Color(100,200,230, 100))
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
                             )
                         )
             var ui5 =
@@ -778,12 +778,12 @@ class Individual_Component_Styling_Spec extends Specification
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
-                            .ground( ground -> ground
+                            .image(ground -> ground
                                 .image(img)
                                 .size(60, 60)
                                 .placement(UI.Placement.CENTER)
-                                .transparency(0.5f)
-                                .color(new Color(100,200,230, 100))
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
                             )
                         )
             var ui6 =
@@ -791,12 +791,12 @@ class Individual_Component_Styling_Spec extends Specification
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
-                            .ground( ground -> ground
+                            .image(ground -> ground
                                 .image(img)
                                 .size(60, 60)
                                 .placement(UI.Placement.TOP)
-                                .transparency(0.5f)
-                                .color(new Color(100,200,230, 100))
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
                             )
                         )
             var ui7 =
@@ -804,12 +804,12 @@ class Individual_Component_Styling_Spec extends Specification
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
-                            .ground( ground -> ground
+                            .image(ground -> ground
                                 .image(img)
                                 .size(60, 60)
                                 .placement(UI.Placement.BOTTOM)
-                                .transparency(0.5f)
-                                .color(new Color(100,200,230, 100))
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
                             )
                         )
             var ui8 =
@@ -817,12 +817,12 @@ class Individual_Component_Styling_Spec extends Specification
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
-                            .ground( ground -> ground
+                            .image(ground -> ground
                                 .image(img)
                                 .size(60, 60)
                                 .placement(UI.Placement.LEFT)
-                                .transparency(0.5f)
-                                .color(new Color(100,200,230, 100))
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
                             )
                         )
             var ui9 =
@@ -830,12 +830,12 @@ class Individual_Component_Styling_Spec extends Specification
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
-                            .ground( ground -> ground
+                            .image(ground -> ground
                                 .image(img)
                                 .size(60, 60)
                                 .placement(UI.Placement.RIGHT)
-                                .transparency(0.5f)
-                                .color(new Color(100,200,230, 100))
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
                             )
                         )
             var ui10 =
@@ -843,10 +843,10 @@ class Individual_Component_Styling_Spec extends Specification
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
-                            .ground( ground -> ground
-                                .image(img).autofit(true)
-                                .transparency(0.5f)
-                                .color(new Color(100,200,230, 100))
+                            .image(ground -> ground
+                                .image(img).autoFit(true)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
                             )
                         )
             var ui11 =
@@ -854,8 +854,8 @@ class Individual_Component_Styling_Spec extends Specification
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
-                            .ground( ground -> ground
-                                .color(new Color(200,240,230, 200))
+                            .image(ground -> ground
+                                .primer(new Color(200,240,230, 200))
                             )
                         )
             var ui12 =
@@ -863,7 +863,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.GREEN)
                             .size(120, 120)
-                            .ground( ground -> ground
+                            .image(ground -> ground
                                 .image(img)
                                 .size(60, 60)
                             )

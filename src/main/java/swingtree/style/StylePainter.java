@@ -8,7 +8,6 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -75,9 +74,9 @@ final class StylePainter<C extends JComponent>
     private void _paintStylesOn( UI.Layer layer, Graphics2D g2d ) {
         // Every layer has 3 things:
         // 0. Grounding, which is a solid color or image
-        for ( GroundStyle ground : style.grounds(layer) )
-            if ( !ground.equals(GroundStyle.none()) )
-                _renderGround(ground, g2d, _comp, _getBaseArea());
+        for ( ImageStyle ground : style.grounds(layer) )
+            if ( !ground.equals(ImageStyle.none()) )
+                _renderImage( ground, g2d, _comp, _getBaseArea() );
 
         // 1. Shades, which are simple gradient effects
         for ( GradientStyle gradient : style.gradients(layer) )
@@ -1014,31 +1013,31 @@ final class StylePainter<C extends JComponent>
         g2d.fill(specificArea);
     }
 
-    private void _renderGround(
-        GroundStyle ground,
+    private void _renderImage(
+        ImageStyle style,
         Graphics2D g2d,
         JComponent component,
         Area specificArea
     ) {
-        if ( ground.color().isPresent() ) {
-            g2d.setColor(ground.color().get());
+        if ( style.primer().isPresent() ) {
+            g2d.setColor(style.primer().get());
             g2d.fill(specificArea);
         }
 
-        ground.image().ifPresent( image -> {
-            UI.Placement placement = ground.placement();
-            boolean repeat         = ground.repeat();
+        style.image().ifPresent( image -> {
+            UI.Placement placement = style.placement();
+            boolean repeat         = style.repeat();
             int componentWidth     = component.getWidth();
             int componentHeight    = component.getHeight();
-            int imgWidth           = ground.width().orElse(image.getWidth(null));
-            int imgHeight          = ground.height().orElse(image.getHeight(null));
-            if ( ground.autofit() ) {
-                imgWidth  = ground.width().orElse(componentWidth);
-                imgHeight = ground.height().orElse(componentHeight);
+            int imgWidth           = style.width().orElse(image.getWidth(null));
+            int imgHeight          = style.height().orElse(image.getHeight(null));
+            if ( style.autoFit() ) {
+                imgWidth  = style.width().orElse(componentWidth);
+                imgHeight = style.height().orElse(componentHeight);
             }
             int x = 0;
             int y = 0;
-            float imgTransparency = ground.transparency();
+            float imgTransparency = style.opacity();
             switch ( placement ) {
                 case TOP:
                     x = (componentWidth - imgWidth) / 2;
@@ -1075,7 +1074,7 @@ final class StylePainter<C extends JComponent>
             Composite oldComposite = g2d.getComposite();
             try {
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, imgTransparency));
-                if (repeat) {
+                if ( repeat ) {
                     Paint oldPaint = g2d.getPaint();
                     try {
                         g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));

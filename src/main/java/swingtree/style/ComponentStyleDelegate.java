@@ -841,7 +841,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  <pre>{@code
      *    UI.panel()
      *    .withStyle( it -> it
-     *      .ground("ground 1", ground -> ground
+     *      .image("ground 1", image -> image
      *        .image(loadImageFrom("my/path/to/image1.png"))
      *      )
      *      .ground("ground 2", ground -> ground
@@ -852,10 +852,10 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * Note that the background images will be rendered in alphabetical order based on the name of the image.
      *
      * @param imageName The name of the background image.
-     * @param styler A function that takes a {@link GroundStyle} and returns a new {@link GroundStyle}.
+     * @param styler A function that takes a {@link ImageStyle} and returns a new {@link ImageStyle}.
      * @return A new {@link ComponentStyleDelegate} with a named background image defined by the provided styler lambda.
      */
-    public ComponentStyleDelegate<C> ground( String imageName, Function<GroundStyle, GroundStyle> styler ) {
+    public ComponentStyleDelegate<C> image( String imageName, Function<ImageStyle, ImageStyle> styler ) {
         Objects.requireNonNull(imageName);
         Objects.requireNonNull(styler);
         return _withStyle(_style.ground(imageName, styler));
@@ -869,17 +869,17 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  <pre>{@code
      *    UI.panel()
      *    .withStyle( it -> it
-     *        .ground( ground -> ground
+     *        .image( image -> image
      *            .image(loadImageFrom("my/path/to/image1.png"))
      *            .color("green")
      *        )
      *    )
      * }</pre>
      *
-     * @param styler A function that takes a {@link GroundStyle} and returns a new {@link GroundStyle}.
+     * @param styler A function that takes a {@link ImageStyle} and returns a new {@link ImageStyle}.
      * @return A new {@link ComponentStyleDelegate} with a background image defined by the provided styler lambda.
      */
-    public ComponentStyleDelegate<C> ground( Function<GroundStyle, GroundStyle> styler ) {
+    public ComponentStyleDelegate<C> image( Function<ImageStyle, ImageStyle> styler ) {
         Objects.requireNonNull(styler);
         return _withStyle(_style.ground(StyleUtility.DEFAULT_KEY, styler));
     }

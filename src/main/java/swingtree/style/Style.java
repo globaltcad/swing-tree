@@ -48,7 +48,7 @@ public final class Style
                                             Collections.singletonMap(StyleUtility.DEFAULT_KEY,ShadowStyle.none()),
                                             Collections.singletonMap(StyleUtility.DEFAULT_KEY + "_" + PainterStyle.none().layer().name(),PainterStyle.none()),
                                             Collections.singletonMap(StyleUtility.DEFAULT_KEY, GradientStyle.none()),
-                                            Collections.singletonMap(StyleUtility.DEFAULT_KEY, GroundStyle.none())
+                                            Collections.singletonMap(StyleUtility.DEFAULT_KEY, ImageStyle.none())
     );
 
     public static Style none() { return _NONE; }
@@ -63,7 +63,7 @@ public final class Style
     private final Map<String, ShadowStyle>   _shadows  = new TreeMap<>();
     private final Map<String, PainterStyle>  _painters = new TreeMap<>();
     private final Map<String, GradientStyle> _shades   = new TreeMap<>();
-    private final Map<String, GroundStyle>   _grounds  = new TreeMap<>();
+    private final Map<String, ImageStyle>   _grounds  = new TreeMap<>();
 
 
 
@@ -79,7 +79,7 @@ public final class Style
             Map<String, ShadowStyle>   shadows,
             Map<String, PainterStyle>  painters,
             Map<String, GradientStyle> shades,
-            Map<String, GroundStyle>   grounds
+            Map<String, ImageStyle>   grounds
     ) {
         _layout         = layout;
         _border         = border;
@@ -129,12 +129,12 @@ public final class Style
         _shadows.forEach( (key, value) -> styledShadows.put(key, styler.apply(value)) );
         return _withShadow(styledShadows);
     }
-    Style _withGrounds( Map<String, GroundStyle> grounds ) {
+    Style _withGrounds( Map<String, ImageStyle> grounds ) {
         return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, _cursor, _shadows, _painters, _shades, grounds);
     }
-    Style _withGrounds( Function<GroundStyle, GroundStyle> styler ) {
+    Style _withGrounds( Function<ImageStyle, ImageStyle> styler ) {
         // A new map is created where all the styler is applied to all the values:
-        Map<String, GroundStyle> styledGrounds = new TreeMap<>();
+        Map<String, ImageStyle> styledGrounds = new TreeMap<>();
         _grounds.forEach( (key, value) -> styledGrounds.put(key, styler.apply(value)) );
         return _withGrounds(styledGrounds);
     }
@@ -272,22 +272,22 @@ public final class Style
         return gradient(newShadows);
     }
 
-    Style ground( Map<String, GroundStyle> grounds ) {
+    Style ground( Map<String, ImageStyle> grounds ) {
         Objects.requireNonNull(grounds);
         return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, _cursor, _shadows, _painters, _shades, grounds);
     }
 
-    Style ground( String groundName, Function<GroundStyle, GroundStyle> styler ) {
+    Style ground( String groundName, Function<ImageStyle, ImageStyle> styler ) {
         Objects.requireNonNull(groundName);
         Objects.requireNonNull(styler);
-        GroundStyle ground = Optional.ofNullable(_grounds.get(groundName)).orElse(GroundStyle.none());
+        ImageStyle ground = Optional.ofNullable(_grounds.get(groundName)).orElse(ImageStyle.none());
         // We clone the ground map:
-        Map<String, GroundStyle> newGrounds = new HashMap<>(_grounds);
+        Map<String, ImageStyle> newGrounds = new HashMap<>(_grounds);
         newGrounds.put(groundName, styler.apply(ground));
         return ground(newGrounds);
     }
 
-    List<GroundStyle> grounds(UI.Layer layer) {
+    List<ImageStyle> grounds(UI.Layer layer) {
         return Collections.unmodifiableList(
                 _grounds.entrySet()
                         .stream()
