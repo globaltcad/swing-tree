@@ -1174,5 +1174,94 @@ class Individual_Component_Styling_Spec extends Specification
             Utility.similarityBetween(images, "components/stretched-image-panels-collage.png", 99.95) > 99.95
     }
 
+    def 'A single image can be painted repeatedly in a panel.'()
+    {
+        given : 'A UI with a single image painted repeatedly in a panel.'
+            var img = Utility.loadImage("img/trees.png")
+            var ui1 =
+                        UI.label("Repeated Image").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .border(2, Color.BLACK).borderRadius(10)
+                            .size(120, 120)
+                            .image(ground -> ground
+                                .image(img)
+                                .size(30, 30)
+                                .repeat(true)
+                            )
+                        )
+            var ui2 =
+                        UI.label("Repeated Image").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .border(2, Color.BLACK).borderRadius(10)
+                            .size(120, 120)
+                            .image(ground -> ground
+                                .image(img)
+                                .size(30, 30)
+                                .repeat(true)
+                                .placement(UI.Placement.TOP_LEFT)
+                            )
+                        )
+            var ui3 =
+                        UI.label("Repeated Image").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .border(2, Color.BLACK).borderRadius(10)
+                            .size(120, 120)
+                            .image(ground -> ground
+                                .image(img).autoFit(true)
+                                .width(40)
+                                .repeat(true)
+                            )
+                        )
+            var ui4 =
+                        UI.label("Repeated Image").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .border(2, Color.BLACK).borderRadius(10)
+                            .size(120, 120)
+                            .image(ground -> ground
+                                .image(img).autoFit(true)
+                                .height(40)
+                                .repeat(true)
+                                .placement(UI.Placement.TOP_RIGHT)
+                            )
+                        )
+            var ui5 =
+                        UI.label("Repeated Image").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .border(2, Color.BLACK).borderRadius(10)
+                            .size(120, 120)
+                            .image(ground -> ground
+                                .image(img)
+                                .width(40)
+                                .repeat(true)
+                                .placement(UI.Placement.RIGHT)
+                            )
+                        )
+            var ui6 =
+                        UI.label("Repeated Image").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .border(2, Color.BLACK).borderRadius(10)
+                            .size(120, 120)
+                            .image(ground -> ground
+                                .image(img)
+                                .height(40)
+                                .repeat(true)
+                                .placement(UI.Placement.LEFT)
+                            )
+                        )
+
+
+        when : 'We paint the UIs into a BufferedImage instance.'
+            var image1 = Utility.renderSingleComponent(ui1.getComponent())
+            var image2 = Utility.renderSingleComponent(ui2.getComponent())
+            var image3 = Utility.renderSingleComponent(ui3.getComponent())
+            var image4 = Utility.renderSingleComponent(ui4.getComponent())
+            var image5 = Utility.renderSingleComponent(ui5.getComponent())
+            var image6 = Utility.renderSingleComponent(ui6.getComponent())
+            var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6}
+
+        then : 'The image is as expected.'
+            Utility.similarityBetween(images, "components/repeated-image-panel.png", 99.95) > 99.95
+    }
+
 
 }
