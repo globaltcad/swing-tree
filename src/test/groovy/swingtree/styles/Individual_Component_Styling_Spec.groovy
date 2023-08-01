@@ -890,4 +890,289 @@ class Individual_Component_Styling_Spec extends Specification
             Utility.similarityBetween(images, "components/image-panels-collage.png", 99.95) > 99.95
     }
 
+
+    def 'Paint automatically stretched images as component background through the style API.'()
+    {
+
+        reportInfo """
+                Inside your `Styler` lambdas you may access another sub style
+                for configuring the image style of a component, which
+                is a image background that may be configured for every style layer.
+                These images styles allows for rendering images as background
+                for the component which may be stretched to fit the component size, 
+                which is demonstrated in this example.
+                <br>
+                Note that a image dimension will only be stretched to fir the component
+                if no size was specified for a particular dimension (width or height).
+                Also note that here we actually configure 2 images for every component
+                which will both be rendered on top of the component.
+                Here you can see an example of a panel with a background image.
+                
+                ${Utility.linkSnapshot('components/stretched-image-panels-collage.png')}
+            """
+
+        given : 'We create various different UIs with different grounding styles.'
+            var imgLocation = "img/trees.png"
+            var img = Utility.loadImage(imgLocation)
+            var ui1 =
+                        UI.label("Top Left").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .border(2, Color.BLUE)
+                            .size(120, 120)
+                            .image("Image 1", ground -> ground
+                                .image(img)
+                                .autoFit(true)
+                                .width(40)
+                                .placement(UI.Placement.TOP_LEFT)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                            .image("Image 2", ground -> ground
+                                .image(img)
+                                .autoFit(true)
+                                .height(40)
+                                .placement(UI.Placement.TOP_LEFT)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                        )
+           var ui2 =
+                        UI.label("Top Right").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .border(2, Color.BLUE)
+                            .size(120, 120)
+                            .image("Image 1",  ground -> ground
+                                .image(img)
+                                .autoFit(true)
+                                .width(40)
+                                .placement(UI.Placement.TOP_RIGHT)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                            .image("Image 2",  ground -> ground
+                                .image(img)
+                                .autoFit(true)
+                                .height(40)
+                                .placement(UI.Placement.TOP_RIGHT)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                        )
+            var ui3 =
+                        UI.label("Bottom Left").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .border(2, Color.BLUE)
+                            .size(120, 120)
+                            .image("Image 1", ground -> ground
+                                .image(img)
+                                .autoFit(true)
+                                .width(40)
+                                .placement(UI.Placement.BOTTOM_LEFT)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                            .image("Image 2", ground -> ground
+                                .image(img)
+                                .autoFit(true)
+                                .height(40)
+                                .placement(UI.Placement.BOTTOM_LEFT)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                        )
+            var ui4 =
+                        UI.label("Bottom Right").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .border(2, Color.BLUE)
+                            .size(120, 120)
+                            .image("Image 1", ground -> ground
+                                .image(img)
+                                .autoFit(true)
+                                .width(40)
+                                .placement(UI.Placement.BOTTOM_RIGHT)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                            .image("Image 2", ground -> ground
+                                .image(img)
+                                .autoFit(true)
+                                .height(40)
+                                .placement(UI.Placement.BOTTOM_RIGHT)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                        )
+            var ui5 =
+                        UI.label("Center").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .border(2, Color.BLUE)
+                            .size(120, 120)
+                            .image("Image 1", ground -> ground
+                                .image(img)
+                                .autoFit(true)
+                                .width(40)
+                                .placement(UI.Placement.CENTER)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                            .image("Image 2", ground -> ground
+                                .image(img)
+                                .autoFit(true)
+                                .height(40)
+                                .placement(UI.Placement.CENTER)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                        )
+            var ui6 =
+                        UI.label("Top").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .border(2, Color.BLUE)
+                            .size(120, 120)
+                            .image("Image 1", ground -> ground
+                                .image(img)
+                                .autoFit(true)
+                                .width(40)
+                                .placement(UI.Placement.TOP)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                            .image("Image 2", ground -> ground
+                                .image(img)
+                                .autoFit(true)
+                                .height(40)
+                                .placement(UI.Placement.TOP)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+
+                        )
+            var ui7 =
+                        UI.label("Bottom").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .border(2, Color.BLUE)
+                            .size(120, 120)
+                            .image("Image 1", ground -> ground
+                                .image(img)
+                                .autoFit(true)
+                                .width(40)
+                                .placement(UI.Placement.BOTTOM)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                            .image("Image 2", ground -> ground
+                                .image(img)
+                                .autoFit(true)
+                                .height(40)
+                                .placement(UI.Placement.BOTTOM)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                        )
+            var ui8 =
+                        UI.label("Left").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .border(2, Color.BLUE)
+                            .size(120, 120)
+                            .image("Image 1", ground -> ground
+                                .image(img)
+                                .autoFit(true)
+                                .width(40)
+                                .placement(UI.Placement.LEFT)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                            .image("Image 2", ground -> ground
+                                .image(img)
+                                .autoFit(true)
+                                .height(40)
+                                .placement(UI.Placement.LEFT)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                        )
+            var ui9 =
+                        UI.label("Right").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .border(2, Color.BLUE)
+                            .size(120, 120)
+                            .image("Image 1", ground -> ground
+                                .image(img)
+                                .autoFit(true)
+                                .width(40)
+                                .placement(UI.Placement.RIGHT)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                            .image("Image 2", ground -> ground
+                                .image(img)
+                                .autoFit(true)
+                                .height(40)
+                                .placement(UI.Placement.RIGHT)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                        )
+            var ui10 =
+                        UI.label("Stretch").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .border(2, Color.BLUE)
+                            .size(120, 120)
+                            .image("Image 1", ground -> ground
+                                .image(img)
+                                .autoFit(true)
+                                .width(40)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                            .image("Image 2", ground -> ground
+                                .image(img)
+                                .autoFit(true)
+                                .height(40)
+                                .opacity(0.5f)
+                                .primer(new Color(100,200,230, 100))
+                            )
+                        )
+            var ui11 =
+                        UI.label("Only Color").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .border(2, Color.BLUE)
+                            .size(120, 120)
+                            .image(ground -> ground
+                                .primer(new Color(200,240,230, 200))
+                            )
+                        )
+            var ui12 =
+                        UI.label("Only Image").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .border(2, Color.BLUE)
+                            .size(120, 120)
+                            .image(ground -> ground
+                                .image(img)
+                                .size(60, 60)
+                            )
+                        )
+
+
+        when : 'We paint the UIs into BufferedImage instances.'
+            var image1  = Utility.renderSingleComponent(ui1.getComponent())
+            var image2  = Utility.renderSingleComponent(ui2.getComponent())
+            var image3  = Utility.renderSingleComponent(ui3.getComponent())
+            var image4  = Utility.renderSingleComponent(ui4.getComponent())
+            var image5  = Utility.renderSingleComponent(ui5.getComponent())
+            var image6  = Utility.renderSingleComponent(ui6.getComponent())
+            var image7  = Utility.renderSingleComponent(ui7.getComponent())
+            var image8  = Utility.renderSingleComponent(ui8.getComponent())
+            var image9  = Utility.renderSingleComponent(ui9.getComponent())
+            var image10 = Utility.renderSingleComponent(ui10.getComponent())
+            var image11 = Utility.renderSingleComponent(ui11.getComponent())
+            var image12 = Utility.renderSingleComponent(ui12.getComponent())
+            var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, image11, image12}
+
+
+        then : 'The image is as expected.'
+            Utility.similarityBetween(images, "components/stretched-image-panels-collage.png", 99.95) > 99.95
+    }
+
+
 }
