@@ -6,6 +6,12 @@ import sprouts.Var;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
+import javax.swing.text.*;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.Format;
+import java.text.NumberFormat;
+import java.util.Date;
 import java.util.function.Consumer;
 
 /**
@@ -13,6 +19,35 @@ import java.util.function.Consumer;
  */
 public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner<S>, S>
 {
+    private JFormattedTextField.AbstractFormatterFactory getDefaultFormatterFactory(Object type) {
+        if (type instanceof DateFormat) {
+            return new DefaultFormatterFactory(new DateFormatter
+                    ((DateFormat)type));
+        }
+        if (type instanceof NumberFormat) {
+            return new DefaultFormatterFactory(new NumberFormatter(
+                    (NumberFormat)type));
+        }
+        if (type instanceof Format) {
+            return new DefaultFormatterFactory(new InternationalFormatter(
+                    (Format)type));
+        }
+        if (type instanceof Date) {
+            return new DefaultFormatterFactory(new DateFormatter());
+        }
+        if (type instanceof Number) {
+            JFormattedTextField.AbstractFormatter displayFormatter = new NumberFormatter();
+            ((NumberFormatter)displayFormatter).setValueClass(type.getClass());
+            JFormattedTextField.AbstractFormatter editFormatter = new NumberFormatter(
+                    new DecimalFormat("#.#"));
+            ((NumberFormatter)editFormatter).setValueClass(type.getClass());
+
+            return new DefaultFormatterFactory(displayFormatter,
+                    displayFormatter,editFormatter);
+        }
+        return new DefaultFormatterFactory(new DefaultFormatter());
+    }
+
     /**
      * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
@@ -36,6 +71,12 @@ public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner
                     model.getMaximum(),
                     model.getStepSize()
                 ) {
+                    @Override public void setValue(Object value) {
+                        super.setValue(value);
+                        updateEditorFormatter();
+                    }
+                    @Override public Object getNextValue() { return incrValue(+1); }
+                    @Override public Object getPreviousValue() { return incrValue(-1); }
                     private Number incrValue(int dir)
                     {
                         Number newValue;
@@ -66,8 +107,18 @@ public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner
                         else
                             return newValue;
                     }
-                    @Override public Object getNextValue() { return incrValue(+1); }
-                    @Override public Object getPreviousValue() { return incrValue(-1); }
+                    private void updateEditorFormatter() {
+                        JComponent editor = component.getEditor();
+                        if (editor instanceof JSpinner.DefaultEditor) {
+                            ((JSpinner.DefaultEditor)editor).getTextField().setFormatterFactory(
+                                    new JFormattedTextField.AbstractFormatterFactory() {
+                                        @Override public JFormattedTextField.AbstractFormatter getFormatter(JFormattedTextField tf) {
+                                            return getDefaultFormatterFactory(getNumber().getClass()).getFormatter(tf);
+                                        }
+                                    }
+                            );
+                        }
+                    }
                 }
             );
         }
@@ -173,7 +224,8 @@ public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner
         SpinnerModel model = getComponent().getModel();
         if ( !(model instanceof SpinnerNumberModel) )
             throw new IllegalArgumentException(
-                    "This JSpinner can not have a numeric step size as it is not based on the SpinnerNumberModel!"
+                    "This JSpinner can not have a numeric step size as it is not " +
+                    "based on the SpinnerNumberModel!"
                 );
         SpinnerNumberModel numberModel = (SpinnerNumberModel) model;
         numberModel.setStepSize(n);
