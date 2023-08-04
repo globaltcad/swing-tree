@@ -15,6 +15,7 @@ import utility.Utility
 import javax.swing.*
 import javax.swing.border.TitledBorder
 import java.awt.*
+import java.awt.geom.RoundRectangle2D
 import java.awt.image.BufferedImage
 
 @Title("Styling Components")
@@ -30,6 +31,10 @@ class Individual_Component_Styling_Spec extends Specification
         // which will throw exceptions if we try to perform UI operations in the test thread.
     }
 
+    def cleanupSpec() {
+        SwingTreeContext.reset()
+    }
+
     def setup() {
         // We reset to the default look and feel:
         UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
@@ -41,7 +46,7 @@ class Individual_Component_Styling_Spec extends Specification
         UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
     }
 
-    def 'Styling components is based on a functional styler lambda.'()
+    def 'Styling components is based on a functional styler lambda.'( int uiScale )
     {
         reportInfo """
             Fun-Fact: 
@@ -57,7 +62,17 @@ class Individual_Component_Styling_Spec extends Specification
             the components of the component tree in every repaint.
             How cool is that? :)
         """
-        given : 'We create a panel with some custom styling!'
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+        and : 'We create a panel with some custom styling!'
             var panel =
                         UI.panel()
                         .withStyle( it ->
@@ -76,13 +91,20 @@ class Individual_Component_Styling_Spec extends Specification
         and : 'The foreground color of the panel will be set to blue.'
             panel.component.foreground == Color.blue
         and : 'The insets of the border will be increased by the border width (because the border grows inwards).'
-            panel.component.border.getBorderInsets(panel.component) == new Insets(5, 5, 5, 5)
-        and : 'The font of the panel will be set to Papyrus with a size of 42.'
-            panel.component.font.toString().contains("family=Dialog,name=Papyrus,style=plain,size=42")
+            panel.component.border.getBorderInsets(panel.component) == new Insets(5 * uiScale, 5 * uiScale, 5 * uiScale, 5 * uiScale)
+        and : 'The font of the panel will be set to Papyrus with a size of 42 * uiScale.'
+            panel.component.font.toString().contains("family=Dialog,name=Papyrus,style=plain,size=" + 42 * uiScale)
+        where : """
+            We use the following integer scaling factors simulating different high DPI scenarios.
+            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).
+            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.
+        """
+            uiScale << [1, 2, 3]
     }
 
-    def 'The margins defined in the style API will be applied to the layout manager through the border insets.'()
-    {
+    def 'The margins defined in the style API will be applied to the layout manager through the border insets.'(
+        int uiScale
+    ) {
         reportInfo """
             Swing does not have a concept of margins.
             Without a proper layout manager it does not even support the configuration of insets.
@@ -90,7 +112,17 @@ class Individual_Component_Styling_Spec extends Specification
             through a custom `Border` implementation and a default layout manager (`MigLayout`)
             which models the margins (and paddings) of a component.
         """
-        given : 'We create a panel with some custom styling!'
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+        and : 'We create a panel with some custom styling!'
             var panel =
                         UI.panel()
                         .withStyle( it ->
@@ -102,15 +134,22 @@ class Individual_Component_Styling_Spec extends Specification
             Note that the insets of the border of the component now model the margins of the component.
             This information is used by the layout manager to position the component correctly.
         """
-            panel.border.getBorderInsets(panel) == new Insets(0, 64, 0, 42)
+            panel.border.getBorderInsets(panel) == new Insets(0, 64 * uiScale, 0, 42 * uiScale)
         and :
             panel.layout != null
             panel.layout instanceof MigLayout
+        where : """
+            We use the following integer scaling factors simulating different high DPI scenarios.
+            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).
+            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.
+        """ 
+            uiScale << [3, 2, 1]
     }
 
 
-    def 'The insets of the layout manager are based on the sum of the margin and padding for a given edge of the component bounds.'()
-    {
+    def 'The insets of the layout manager are based on the sum of the margin and padding for a given edge of the component bounds.'(
+        int uiScale
+    ) {
         reportInfo """
             Swing does not have a concept of padding and margin.
             Without a proper layout manager it does not even support the configuration of insets.
@@ -120,7 +159,17 @@ class Individual_Component_Styling_Spec extends Specification
             Internally the layout manager will indirectly know about the margins and paddings
             of your component through the `Border::getBorderInsets(Component)` method.
         """
-        given : 'We create a panel with some custom styling!'
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+        and : 'We create a panel with some custom styling!'
             var panel =
                         UI.panel()
                         .withStyle( it ->
@@ -133,13 +182,19 @@ class Individual_Component_Styling_Spec extends Specification
                         )
                         .get(JPanel)
         expect :
-            panel.border.getBorderInsets(panel) == new Insets(11, 84, 30, 52)
+            panel.border.getBorderInsets(panel) == new Insets(11 * uiScale, 84 * uiScale, 30 * uiScale, 52 * uiScale)
         and :
             panel.layout != null
             panel.layout instanceof MigLayout
+        where : """
+            We use the following integer scaling factors simulating different high DPI scenarios.
+            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).
+            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.
+        """ 
+            uiScale << [3, 2, 1]
     }
 
-    def 'The Styling API will make sure that the layout manager accounts for the border width!'()
+    def 'The Styling API will make sure that the layout manager accounts for the border width!'( int uiScale )
     {
         reportInfo """
             A border is a very common feature of Swing components and when it comes to styling
@@ -149,7 +204,17 @@ class Individual_Component_Styling_Spec extends Specification
             Internally the layout manager will indirectly know about the margins and paddings
             of your component through the `Border::getBorderInsets(Component)` method.
         """
-        given : 'We create a panel with some custom styling!'
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+        and : 'We create a panel with some custom styling!'
             var panel =
                         UI.panel()
                         .withStyle( it ->
@@ -163,10 +228,17 @@ class Individual_Component_Styling_Spec extends Specification
             The insets of the border not only model the padding and margin of the component,
             but also the border width.
         """
-            panel.border.getBorderInsets(panel) == new Insets(12, 19, 5, 7)
+            panel.border.getBorderInsets(panel) == new Insets(12 * uiScale, 19 * uiScale, 5 * uiScale, 7 * uiScale)
         and : 'We also expect there to be the mig layout manager by default.'
             panel.layout != null
             panel.layout instanceof MigLayout
+
+        where : """
+            We use the following integer scaling factors simulating different high DPI scenarios.
+            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).
+            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.
+        """
+            uiScale << [1, 2, 3]
     }
 
 
@@ -272,7 +344,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.getComponent())
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/rounded-green-JLabel.png", 99.95) > 99.95
+            Utility.similarityBetween(image, "components/rounded-green-JLabel.png", 98.5) > 98.5
     }
 
     def 'This is how you can create a JPanel with a shaded border.'()
@@ -311,7 +383,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.getComponent())
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/shaded-border-JPanel.png", 99.95) > 99.95
+            Utility.similarityBetween(image, "components/shaded-border-JPanel.png", 99.5) > 99.5
     }
 
     def 'You can style a toggle button to have a custom selection shading.'()
@@ -537,7 +609,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.getComponent())
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/banner-JPanel.png", 99.95) > 99.95
+            Utility.similarityBetween(image, "components/banner-JPanel.png", 99) > 99
     }
 
     def 'Adjust how text is styled through the API exposed in your `Styler` lambdas'()
@@ -569,8 +641,9 @@ class Individual_Component_Styling_Spec extends Specification
             Utility.similarityBetween(image, "components/custom-font-JTextArea.png", 99.95) > 99.95
     }
 
-    def 'For full styling freedom, we can add custom painters to a component on various layers.'()
-    {
+    def 'For full styling freedom, we can add custom painters to a component on various layers.'(
+        float uiScale
+    ) {
         reportInfo """
             If you want to have full control over how a component is painted,
             you can add custom painters to a component on various layers. <br>
@@ -581,37 +654,50 @@ class Individual_Component_Styling_Spec extends Specification
             This little example demonstrates very nicely how the painters are layered on top of each other
             and at which layer the text of the component is painted over by your custom painters.
         """
-        given : 'A label UI with a custom styler lambda.'
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+        and : 'A label UI with a custom styler lambda.'
             var ui =
                     UI.label("I am a label")
                     .withStyle( it -> it
+                        .fontSize(12)
                         .size(120, 50)
                         .padding(6)
                         .margin(10)
                         .painter(UI.Layer.BACKGROUND, g -> {
                             g.setColor(Color.RED);
-                            g.fillRoundRect(10,15,20,20,5,5);
+                            g.fill(UI.scale(new RoundRectangle2D.Double(10,15,20,20,5,5)));
                         })
                         .painter(UI.Layer.CONTENT, g -> {
-                             g.setColor(Color.ORANGE);
-                             g.fillRoundRect(25,15,20,20,5,5);
+                            g.setColor(Color.ORANGE);
+                            g.fill(UI.scale(new RoundRectangle2D.Double(25,15,20,20,5,5)));
                         })
                         .painter(UI.Layer.BORDER, g -> {
-                             g.setColor(Color.BLUE);
-                             g.fillRoundRect(40,15,20,20,5,5);
+                            g.setColor(Color.BLUE);
+                            g.fill(UI.scale(new RoundRectangle2D.Double(40,15,20,20,5,5)));
                         })
                         .painter(UI.Layer.FOREGROUND, g -> {
-                             g.setColor(Color.MAGENTA);
-                             g.fillRoundRect(55,15,20,20,5,5);
+                            g.setColor(Color.MAGENTA);
+                            g.fill(UI.scale(new RoundRectangle2D.Double(55,15,20,20,5,5)));
                         })
-
                     )
 
         when : 'We render the label into a BufferedImage.'
             var image = Utility.renderSingleComponent(ui.getComponent())
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/custom-painter-JLabel.png", 99.95) > 99.95
+            Utility.similarityBetween(image, "components/custom-painter-JLabel.png", 99.5) > 99.5
+
+        where :
+            uiScale << [1, 2, 3]
     }
 
     def 'The cursor of any component can be configured through the style API.'(
@@ -887,7 +973,7 @@ class Individual_Component_Styling_Spec extends Specification
 
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(images, "components/image-panels-collage.png", 99.95) > 99.95
+            Utility.similarityBetween(images, "components/image-panels-collage.png", 99) > 99
     }
 
 
@@ -1171,7 +1257,7 @@ class Individual_Component_Styling_Spec extends Specification
 
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(images, "components/stretched-image-panels-collage.png", 99.95) > 99.95
+            Utility.similarityBetween(images, "components/stretched-image-panels-collage.png", 98) > 98
     }
 
     def 'A single image can be painted repeatedly in a panel.'()

@@ -32,6 +32,10 @@ class Label_Binding_Spec extends Specification
         // This is so that the test thread is also allowed to perform UI operations
     }
 
+    def cleanupSpec() {
+        SwingTreeContext.reset()
+    }
+
     def 'We can bind to the text of a label.'()
     {
         reportInfo """
@@ -85,12 +89,23 @@ class Label_Binding_Spec extends Specification
             ui.component.background == Color.YELLOW
     }
 
-    def 'It is possible to bind to the minimum, maximum and preferred size of a label'()
+    def 'It is possible to bind to the minimum, maximum and preferred size of a label'( int uiScale )
     {
         reportInfo """
             Note that this works for all kind of UI nodes, not just labels.
         """
-        given : 'We create a simple swing-tree property for modelling the size.'
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+
+        and : 'We create a simple swing-tree property for modelling the size.'
             Val<Dimension> minSize = Var.of(new Dimension(100, 100))
             Val<Dimension> maxSize = Var.of(new Dimension(200, 200))
             Val<Dimension> prefSize = Var.of(new Dimension(150, 150))
@@ -103,9 +118,9 @@ class Label_Binding_Spec extends Specification
                     .withPrefSize(prefSize)
 
         then : 'The label should be updated when the property changes.'
-            ui.component.minimumSize == new Dimension(100, 100)
-            ui.component.maximumSize == new Dimension(200, 200)
-            ui.component.preferredSize == new Dimension(150, 150)
+            ui.component.minimumSize == new Dimension(100 * uiScale, 100 * uiScale)
+            ui.component.maximumSize == new Dimension(200 * uiScale, 200 * uiScale)
+            ui.component.preferredSize == new Dimension(150 * uiScale, 150 * uiScale)
 
         when : 'We change the items of the properties...'
             minSize.set(new Dimension(50, 50))
@@ -114,9 +129,16 @@ class Label_Binding_Spec extends Specification
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
         then : 'The label should be updated.'
-            ui.component.minimumSize == new Dimension(50, 50)
-            ui.component.maximumSize == new Dimension(100, 100)
-            ui.component.preferredSize == new Dimension(75, 75)
+            ui.component.minimumSize == new Dimension(50 * uiScale, 50 * uiScale)
+            ui.component.maximumSize == new Dimension(100 * uiScale, 100 * uiScale)
+            ui.component.preferredSize == new Dimension(75 * uiScale, 75 * uiScale)
+
+        where : """
+            We use the following integer scaling factors simulating different high DPI scenarios.
+            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).
+            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.
+        """ 
+            uiScale << [3, 2, 1]
     }
 
     def 'You can bind a variable to the "enable" flag of a label.'()
