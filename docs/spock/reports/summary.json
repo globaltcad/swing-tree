@@ -1,13 +1,13 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Sun Jul 30 22:13:52 CEST 2023",
+  "created": "Sat Aug 05 01:14:06 CEST 2023",
   "statistics":{
     "runs":"40",
-    "passed":"39",
-    "failed":"1",
-    "featureFailures":"0",
-    "successRate":"0.975",
+    "passed":"37",
+    "failed":"3",
+    "featureFailures":"2",
+    "successRate":"0.925",
     "duration":"?"
   },
   "specifications": [{
@@ -363,10 +363,10 @@
       "title":"Animations",
       "narrative":"Animations are a great way to make your application more interactive and more fun to use.",
       "featureCount":"4",
-      "failures":"0",
+      "failures":"1",
       "errors":"0",
       "skipped":"0" ,
-      "successRate":"1.0",
+      "successRate":"0.75",
       "duration":"?",
       "executedFeatures":[{"id":"Animate the color of a label when it is clicked.","extraInfo":[]},{"id":"Implement the \"finish\" method in your animation to ensure that it is called at least once.","extraInfo":[]},{"id":"The event delegation object of a user event can be used to register animations.","extraInfo":[]},{"id":"Use the API exposed by \"UI.schedule(..)\" to schedule animations","extraInfo":[]}],
       "ignoredFeatures":[]
@@ -386,13 +386,13 @@
       "className":"swingtree.styles.Individual_Component_Styling_Spec",
       "title":"Styling Components",
       "narrative":"This specification demonstrates how you can use the styling\n    API to style Swing components in a functional and declarative fashion.",
-      "featureCount":"20",
-      "failures":"0",
+      "featureCount":"23",
+      "failures":"1",
       "errors":"0",
       "skipped":"0" ,
-      "successRate":"1.0",
+      "successRate":"0.9565217391304348",
       "duration":"?",
-      "executedFeatures":[{"id":"A text area background can be shaded from left to right with any number of colors.","extraInfo":[]},{"id":"Adjust how text is styled through the API exposed in your `Styler` lambdas","extraInfo":[]},{"id":"Create a soft UI slider that sinks into the background if you wish.","extraInfo":[]},{"id":"For full styling freedom, we can add custom painters to a component on various layers.","extraInfo":[]},{"id":"Make a text area look like it is sunken in the background using a shadow going inwards.","extraInfo":[]},{"id":"Styling components is based on a functional styler lambda.","extraInfo":[]},{"id":"SwingTree will re-install any borders overridden by the style API.","extraInfo":[]},{"id":"SwingTree will un-install any custom border if no styles are found.","extraInfo":[]},{"id":"The Styling API will make sure that the layout manager accounts for the border width!","extraInfo":[]},{"id":"The background color of any component can be configured through the style API.","extraInfo":[]},{"id":"The cursor of any component can be configured through the style API.","extraInfo":[]},{"id":"The foreground color of any component can be configured through the style API.","extraInfo":[]},{"id":"The horizontal text alignment of many text based components can be configured through the style API.","extraInfo":[]},{"id":"The insets of the layout manager are based on the sum of the margin and padding for a given edge of the component bounds.","extraInfo":[]},{"id":"The look of a component, like a button for example, will be preserved if possible, when doing custom styling.","extraInfo":[]},{"id":"The margins defined in the style API will be applied to the layout manager through the border insets.","extraInfo":[]},{"id":"This is how you can create a JPanel with a shaded border.","extraInfo":[]},{"id":"This is how you can create a rounded green label with a border at the bottom.","extraInfo":[]},{"id":"Turn a panel into a card like looking panel by giving it a round border, background color and some margins.","extraInfo":[]},{"id":"You can style a toggle button to have a custom selection shading.","extraInfo":[]}],
+      "executedFeatures":[{"id":"A single image can be painted repeatedly in a panel.","extraInfo":[]},{"id":"A text area background can be shaded from left to right with any number of colors.","extraInfo":[]},{"id":"Adjust how text is styled through the API exposed in your `Styler` lambdas","extraInfo":[]},{"id":"Create a soft UI slider that sinks into the background if you wish.","extraInfo":[]},{"id":"For full styling freedom, we can add custom painters to a component on various layers.","extraInfo":[]},{"id":"Make a text area look like it is sunken in the background using a shadow going inwards.","extraInfo":[]},{"id":"Paint automatically stretched images as component background through the style API.","extraInfo":[]},{"id":"Paint images as component background through the style API.","extraInfo":[]},{"id":"Styling components is based on a functional styler lambda.","extraInfo":[]},{"id":"SwingTree will re-install any borders overridden by the style API.","extraInfo":[]},{"id":"SwingTree will un-install any custom border if no styles are found.","extraInfo":[]},{"id":"The Styling API will make sure that the layout manager accounts for the border width!","extraInfo":[]},{"id":"The background color of any component can be configured through the style API.","extraInfo":[]},{"id":"The cursor of any component can be configured through the style API.","extraInfo":[]},{"id":"The foreground color of any component can be configured through the style API.","extraInfo":[]},{"id":"The horizontal text alignment of many text based components can be configured through the style API.","extraInfo":[]},{"id":"The insets of the layout manager are based on the sum of the margin and padding for a given edge of the component bounds.","extraInfo":[]},{"id":"The look of a component, like a button for example, will be preserved if possible, when doing custom styling.","extraInfo":[]},{"id":"The margins defined in the style API will be applied to the layout manager through the border insets.","extraInfo":[]},{"id":"This is how you can create a JPanel with a shaded border.","extraInfo":[]},{"id":"This is how you can create a rounded green label with a border at the bottom.","extraInfo":[]},{"id":"Turn a panel into a card like looking panel by giving it a round border, background color and some margins.","extraInfo":[]},{"id":"You can style a toggle button to have a custom selection shading.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.styles.Style_Sheet_Spec",

@@ -84,7 +84,9 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We create a split pane UI node with a divider size of 10.","code":["var ui = UI.splitPane(UI.Align.HORIZONTAL).withDividerSize(10)"]},
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a split pane UI node with a divider size of 10.","code":["var ui = UI.splitPane(UI.Align.HORIZONTAL).withDividerSize(10)"]},
 
         {"kind":"expect","text":"The split pane is not null.","code":["ui != null"]},
 
@@ -92,7 +94,9 @@
 
         {"kind":"and","text":"The split pane is horizontally aligned, meaning it splits vertically.","code":["ui.component.orientation == JSplitPane.VERTICAL_SPLIT"]},
 
-        {"kind":"and","text":"The divider size is 10.","code":["ui.component.dividerSize == 10"]}
+        {"kind":"and","text":"The divider size is 10.","code":["ui.component.dividerSize == (int) ( 10 * uiScale )"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1.0f","1.5f","2.0f"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -149,7 +153,9 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We create a split pane UI node with a division of 50%.","code":["var ui = UI.splitPane(UI.Align.HORIZONTAL)","            .withWidth(42)","            .withHeight(100)","            .withDivisionOf(0.5)"]},
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a split pane UI node with a division of 50%.","code":["var ui = UI.splitPane(UI.Align.HORIZONTAL)","            .withWidth(42)","            .withHeight(100)","            .withDivisionOf(0.5)"]},
 
         {"kind":"expect","text":"The split pane is not null.","code":["ui != null"]},
 
@@ -157,7 +163,9 @@
 
         {"kind":"and","text":"The split pane is horizontally aligned, meaning it splits vertically.","code":["ui.component.orientation == JSplitPane.VERTICAL_SPLIT"]},
 
-        {"kind":"and","text":"The divider location is 50.","code":["ui.component.dividerLocation == 50"]}
+        {"kind":"and","text":"The divider location is 50 * uiScale.","code":["ui.component.dividerLocation == (int) ( 50 * uiScale )"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1.0f","1.5f","2.0f"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -170,7 +178,9 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We create a split pane UI node with a division of 50%.","code":["var ui = UI.splitPane(UI.Align.VERTICAL)","            .withWidth(100)","            .withHeight(42)","            .withDivisionOf(0.5)"]},
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a split pane UI node with a division of 50%.","code":["var ui = UI.splitPane(UI.Align.VERTICAL)","            .withWidth(100)","            .withHeight(42)","            .withDivisionOf(0.5)"]},
 
         {"kind":"expect","text":"The split pane is not null.","code":["ui != null"]},
 
@@ -178,7 +188,9 @@
 
         {"kind":"and","text":"The split pane is vertically aligned, meaning it splits horizontally.","code":["ui.component.orientation == JSplitPane.HORIZONTAL_SPLIT"]},
 
-        {"kind":"and","text":"The divider location is 50.","code":["ui.component.dividerLocation == 50"]}
+        {"kind":"and","text":"The divider location is 50 * uiScale.","code":["ui.component.dividerLocation == (int) ( 50 * uiScale )"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1.0f","1.5f","2.0f"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -191,21 +203,25 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We create a simple view model property holding the division of our split pane.","code":["var divisionPercentage = Var.of(0.5d)"]},
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a simple view model property holding the division of our split pane.","code":["var divisionPercentage = Var.of(0.5d)"]},
 
         {"kind":"and","text":"We create a split pane UI node bound to the property.","code":["var ui = UI.splitPane(UI.Align.HORIZONTAL)","            .withWidth(42)","            .withHeight(100)","            .withDivisionOf(divisionPercentage)"]},
 
         {"kind":"expect","text":"The split pane is not null.","code":["ui != null"]},
 
-        {"kind":"and","text":"The split pane exists and it is indeed a horizontally aligned split pane splitting the vertical axis.","code":["ui.component instanceof JSplitPane","ui.component.orientation == JSplitPane.VERTICAL_SPLIT","ui.component.dividerLocation == 50"]},
+        {"kind":"and","text":"The split pane exists and it is indeed a horizontally aligned split pane splitting the vertical axis.","code":["ui.component instanceof JSplitPane","ui.component.orientation == JSplitPane.VERTICAL_SPLIT","ui.component.dividerLocation == (int)(50 * uiScale)"]},
 
         {"kind":"when","text":"We change the division property to 0.25.","code":["divisionPercentage.set(0.25d)","UI.sync()"]},
 
-        {"kind":"then","text":"The divider location is 25.","code":["ui.component.dividerLocation == 25"]},
+        {"kind":"then","text":"The divider location is 25.","code":["ui.component.dividerLocation == (int)(25 * uiScale)"]},
 
         {"kind":"when","text":"We change the division property to 0.75.","code":["divisionPercentage.set(0.75d)","UI.sync()"]},
 
-        {"kind":"then","text":"The divider location is 75.","code":["ui.component.dividerLocation == 75"]}
+        {"kind":"then","text":"The divider location is 75.","code":["ui.component.dividerLocation == (int)(75 * uiScale)"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1f","1.5f","2f"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -215,20 +231,24 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            In a fully application, the divider size property in this example would be part of your view model\n            containing the state of the UI as well as the business logic. So you can simply modify it as part of\n            your business logic and the split pane will automatically update its divider size based on an observer\n            registered on the property.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            In a fully application, the divider size property in this example would be part of your view model\n            containing the state of the UI as well as the business logic. So you can simply modify it as part of\n            your business logic and the split pane will automatically update its divider size based on an observer\n            registered on the property.\n        ","\n            In a fully application, the divider size property in this example would be part of your view model\n            containing the state of the UI as well as the business logic. So you can simply modify it as part of\n            your business logic and the split pane will automatically update its divider size based on an observer\n            registered on the property.\n        ","\n            In a fully application, the divider size property in this example would be part of your view model\n            containing the state of the UI as well as the business logic. So you can simply modify it as part of\n            your business logic and the split pane will automatically update its divider size based on an observer\n            registered on the property.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We create a simple view model property holding the divider size of our split pane.","code":["var dividerSize = Var.of(10)"]},
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a simple view model property holding the divider size of our split pane.","code":["var dividerSize = Var.of(10)"]},
 
         {"kind":"and","text":"We create a vertically aligned split pane UI node bound to the property.","code":["var ui = UI.splitPane(UI.Align.VERTICAL).withDividerSize(dividerSize)"]},
 
         {"kind":"expect","text":"The split pane exists and it is indeed a vertically aligned split pane splitting the horizontal axis.","code":["ui != null","ui.component instanceof JSplitPane","ui.component.orientation == JSplitPane.HORIZONTAL_SPLIT"]},
 
-        {"kind":"and","text":"The divider size is 10.","code":["ui.component.dividerSize == 10"]},
+        {"kind":"and","text":"The divider size is 10.","code":["ui.component.dividerSize == (int) ( 10 * uiScale )"]},
 
         {"kind":"when","text":"We change the divider size property to 42.","code":["dividerSize.set(42)","UI.sync()"]},
 
-        {"kind":"then","text":"The divider size is 42.","code":["ui.component.dividerSize == 42"]}
+        {"kind":"then","text":"The divider size is 42.","code":["ui.component.dividerSize == (int) ( 42 * uiScale )"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1f","1.5f","2f"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

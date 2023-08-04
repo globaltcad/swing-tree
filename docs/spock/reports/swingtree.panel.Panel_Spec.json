@@ -108,25 +108,29 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"A simple property modelling the width of a panel.","code":["var width = Var.of(300)"]},
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"A simple property modelling the width of a panel.","code":["var width = Var.of(300)"]},
 
         {"kind":"and","text":"A simple property modelling the height of a panel.","code":["var height = Var.of(200)"]},
 
         {"kind":"and","text":"A panel bound to both properties","code":["def ui = UI.panel()","            .withPrefWidth(width)","            .withPrefHeight(height)"]},
 
-        {"kind":"expect","text":"The panel has the correct width and height.","code":["ui.component.preferredSize.width == 300","ui.component.preferredSize.height == 200"]},
+        {"kind":"expect","text":"The panel has the correct width and height.","code":["ui.component.preferredSize.width == (int) ( 300 * uiScale )","ui.component.preferredSize.height == (int) ( 200 * uiScale )"]},
 
         {"kind":"when","text":"We change the width of the panel.","code":["width.set(400)"]},
 
         {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 
-        {"kind":"then","text":"The panel has the correct width and height.","code":["ui.component.preferredSize.width == 400","ui.component.preferredSize.height == 200"]},
+        {"kind":"then","text":"The panel has the correct width and height.","code":["ui.component.preferredSize.width == (int) ( 400 * uiScale )","ui.component.preferredSize.height == (int) ( 200 * uiScale )"]},
 
         {"kind":"when","text":"We change the height of the panel.","code":["height.set(300)"]},
 
         {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 
-        {"kind":"then","text":"The panel has the correct width and height.","code":["ui.component.preferredSize.width == 400","ui.component.preferredSize.height == 300"]}
+        {"kind":"then","text":"The panel has the correct width and height.","code":["ui.component.preferredSize.width == (int) ( 400 * uiScale )","ui.component.preferredSize.height == (int) ( 300 * uiScale )"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1.0f","1.5f","2.0f"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }
