@@ -25,6 +25,7 @@ import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.awt.geom.RoundRectangle2D;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
@@ -105,6 +106,10 @@ public final class UI
      * This is essentially a delegate for {@link SwingTreeContext.UIScale#scale(Dimension)}.
      */
     public static Dimension scale( Dimension dimension ) { return SwingTreeContext.get().getUIScale().scale(dimension); }
+
+    public static Rectangle scale( Rectangle rectangle ) { return SwingTreeContext.get().getUIScale().scale(rectangle); }
+
+    public static RoundRectangle2D scale( RoundRectangle2D rectangle ) { return SwingTreeContext.get().getUIScale().scale(rectangle); }
 
     /**
      * Scales the given insets with the user scale factor.

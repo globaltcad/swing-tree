@@ -94,7 +94,7 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSpl
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSplitPane<P> withDividerSize( int size ) {
-        getComponent().setDividerSize(size);
+        getComponent().setDividerSize(UI.scale(size));
         return this;
     }
 

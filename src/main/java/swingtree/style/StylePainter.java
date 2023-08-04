@@ -101,6 +101,7 @@ final class StylePainter<C extends JComponent>
         style.painters(layer).forEach( backgroundPainter -> {
             if ( backgroundPainter == Painter.none() ) return;
             g2d.setClip(_getBaseArea());
+            AffineTransform oldTransform = new AffineTransform(g2d.getTransform());
             try {
                 backgroundPainter.paint(g2d);
             } catch ( Exception e ) {
@@ -110,6 +111,8 @@ final class StylePainter<C extends JComponent>
                     mess up the rendering of the rest of the component, so we just
                     print the stack trace and move on.
                 */
+            } finally {
+                g2d.setTransform(oldTransform);
             }
         });
     }

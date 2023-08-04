@@ -29,7 +29,11 @@ class Property_Binding_Spec extends Specification
         // This is so that the test thread is also allowed to perform UI operations
     }
 
-    def 'We can bind a property to the size of a swing component.'()
+    def cleanupSpec() {
+        SwingTreeContext.reset()
+    }
+
+    def 'We can bind a property to the size of a swing component.'( float uiScale )
     {
         reportInfo"""
             Note that the binding of a Swing-Tree property will only have side effects
@@ -37,7 +41,18 @@ class Property_Binding_Spec extends Specification
             This is important to allow you to decide yourself when
             the state of a property is "ready" for display in the UI.
         """
-        given : 'We create a property representing the size of a component.'
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+
+        and : 'We create a property representing the size of a component.'
             Val<Dimension> size = Var.of(new Dimension(100, 100))
         and : 'We create a UI to which we want to bind:'
             var node = UI.panel("fill, wrap 1")
@@ -46,9 +61,9 @@ class Property_Binding_Spec extends Specification
                         .add(UI.textField("Hello World").withMaxSize(size))
 
         expect : 'The components will have the size of the property.'
-            node.component.components[0].preferredSize == new Dimension(100, 100)
-            node.component.components[1].minimumSize == new Dimension(100, 100)
-            node.component.components[2].maximumSize == new Dimension(100, 100)
+            node.component.components[0].preferredSize == new Dimension((int)(100 * uiScale), (int)(100 * uiScale))
+            node.component.components[1].minimumSize == new Dimension((int)(100 * uiScale), (int)(100 * uiScale))
+            node.component.components[2].maximumSize == new Dimension((int)(100 * uiScale), (int)(100 * uiScale))
 
         when : 'We change the value of the property.'
             size.set(new Dimension(200, 200))
@@ -56,14 +71,30 @@ class Property_Binding_Spec extends Specification
             UI.sync()
 
         then : 'The components will have the new sizes.'
-            node.component.components[0].preferredSize == new Dimension(200, 200)
-            node.component.components[1].minimumSize == new Dimension(200, 200)
-            node.component.components[2].maximumSize == new Dimension(200, 200)
+            node.component.components[0].preferredSize == new Dimension((int)(200 * uiScale), (int)(200 * uiScale))
+            node.component.components[1].minimumSize == new Dimension((int)(200 * uiScale), (int)(200 * uiScale))
+            node.component.components[2].maximumSize == new Dimension((int)(200 * uiScale), (int)(200 * uiScale))
+        where : """
+            We use the following integer scaling factors simulating different high DPI scenarios.
+            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).
+            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.
+        """ 
+            uiScale << [3, 2, 1]
     }
 
-    def 'Simple integer properties can be bound to the width or height of components.'()
+    def 'Simple integer properties can be bound to the width or height of components.'( float uiScale )
     {
-        given : 'We create properties representing the width and heights of a components.'
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+        and : 'We create properties representing the width and heights of a components.'
             Var<Integer> minWidth = Var.of(60)
             Var<Integer> prefHeight = Var.of(40)
             Var<Integer> maxWidth = Var.of(90)
@@ -73,9 +104,9 @@ class Property_Binding_Spec extends Specification
                         .add(UI.button("Click Me").withPrefHeight(prefHeight))
                         .add(UI.textField("Hello World").withMaxWidth(maxWidth))
         expect : 'The components will have the sizes of the properties.'
-            node.component.components[0].minimumSize.width == 60
-            node.component.components[1].preferredSize.height == 40
-            node.component.components[2].maximumSize.width == 90
+            node.component.components[0].minimumSize.width == (int) ( 60 * uiScale )
+            node.component.components[1].preferredSize.height == (int) ( 40 * uiScale )
+            node.component.components[2].maximumSize.width == (int) ( 90 * uiScale )
 
         when : 'We change the value of the properties.'
             minWidth.set(100)
@@ -85,14 +116,26 @@ class Property_Binding_Spec extends Specification
             UI.sync()
 
         then : 'The components will have the new sizes.'
-            node.component.components[0].minimumSize.width == 100
-            node.component.components[1].preferredSize.height == 80
-            node.component.components[2].maximumSize.width == 120
+            node.component.components[0].minimumSize.width == (int) ( 100 * uiScale )
+            node.component.components[1].preferredSize.height == (int) ( 80 * uiScale )
+            node.component.components[2].maximumSize.width == (int) ( 120 * uiScale )
+        where :
+            uiScale << [1f, 1.5f, 2f]
     }
 
-    def 'Bind to both width and height independently if you want to.'()
+    def 'Bind to both width and height independently if you want to.'( int uiScale )
     {
-        given : 'We create a property representing the width of a component.'
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+        and : 'We create a property representing the width of a component.'
             Var<Integer> width = Var.of(60)
             Var<Integer> height = Var.of(40)
         and : 'We create a UI to which we want to bind:'
@@ -101,9 +144,9 @@ class Property_Binding_Spec extends Specification
                         .add(UI.toggleButton("Click Me").withPrefSize(width, height))
                         .add(UI.textArea("Hello World").withMaxSize(width, height))
         expect : 'The components will have the sizes of the properties.'
-            node.component.components[0].minimumSize == new Dimension(60, 40)
-            node.component.components[1].preferredSize == new Dimension(60, 40)
-            node.component.components[2].maximumSize == new Dimension(60, 40)
+            node.component.components[0].minimumSize == new Dimension(60 * uiScale, 40 * uiScale)
+            node.component.components[1].preferredSize == new Dimension(60 * uiScale, 40 * uiScale)
+            node.component.components[2].maximumSize == new Dimension(60 * uiScale, 40 * uiScale)
 
         when : 'We change the value of the properties.'
             width.set(100)
@@ -112,9 +155,15 @@ class Property_Binding_Spec extends Specification
             UI.sync()
 
         then : 'The components will have the new sizes.'
-            node.component.components[0].minimumSize == new Dimension(100, 80)
-            node.component.components[1].preferredSize == new Dimension(100, 80)
-            node.component.components[2].maximumSize == new Dimension(100, 80)
+            node.component.components[0].minimumSize == new Dimension(100 * uiScale, 80 * uiScale)
+            node.component.components[1].preferredSize == new Dimension(100 * uiScale, 80 * uiScale)
+            node.component.components[2].maximumSize == new Dimension(100 * uiScale, 80 * uiScale)
+        where : """
+            We use the following integer scaling factors simulating different high DPI scenarios.
+            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).
+            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.
+        """ 
+            uiScale << [3, 2, 1]
     }
 
     def 'We can bind to the color of a component.'()
@@ -384,9 +433,19 @@ class Property_Binding_Spec extends Specification
             node.component.components[3].focusable == true
     }
 
-    def 'Minimum as well as maximum height of UI components can be modelled using integer properties.'()
+    def 'Minimum as well as maximum height of UI components can be modelled using integer properties.'( int uiScale )
     {
-        given : 'We create a property representing the minimum and maximum height.'
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+        and : 'We create a property representing the minimum and maximum height.'
             Val<Integer> property = Var.of(50)
         and : 'We create a UI to which we want to bind:'
             var node = UI.panel("fill, wrap 1")
@@ -395,26 +454,43 @@ class Property_Binding_Spec extends Specification
                         .add(UI.label("Below me is another text area!"))
                         .add(UI.textArea("Hey").withMaxHeight(property))
 
-        expect : 'The minimum height of the first text area will be 50.'
-            node.component.components[1].minimumSize.height == 50
-        and : 'The maximum height of the second text area will be 50.'
-            node.component.components[3].maximumSize.height == 50
+        expect : 'The minimum height of the first text area will be 50 * uiScale.'
+            node.component.components[1].minimumSize.height == 50 * uiScale
+        and : 'The maximum height of the second text area will be 50 * uiScale.'
+            node.component.components[3].maximumSize.height == 50 * uiScale
 
         when : 'We change the value of the property.'
             property.set(100)
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
 
-        then : 'The minimum height of the first text area will be 100.'
-            node.component.components[1].minimumSize.height == 100
-        and : 'The maximum height of the second text area will be 100.'
-            node.component.components[3].maximumSize.height == 100
+        then : 'The minimum height of the first text area will be 100 * uiScale.'
+            node.component.components[1].minimumSize.height == 100 * uiScale
+        and : 'The maximum height of the second text area will be 100 * uiScale.'
+            node.component.components[3].maximumSize.height == 100 * uiScale
+
+        where : """
+            We use the following integer scaling factors simulating different high DPI scenarios.
+            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).
+            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.
+        """ 
+            uiScale << [3, 2, 1]
     }
 
 
-    def 'The width and height of UI components can be modelled using integer properties.'()
+    def 'The width and height of UI components can be modelled using integer properties.'( int uiScale )
     {
-        given : 'We create a property representing the width and height.'
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+        and : 'We create a property representing the width and height.'
             Val<Integer> widthProperty = Var.of(50)
             Val<Integer> heightProperty = Var.of(100)
         and : 'We create a UI to which we want to bind:'
@@ -424,14 +500,14 @@ class Property_Binding_Spec extends Specification
                         .add(UI.label("Below me is another text area!"))
                         .add(UI.textArea("Hey").withWidth(heightProperty).withHeight(widthProperty))
 
-        expect : 'The width of the first text area will be 50.'
-            node.component.components[1].size.width == 50
-        and : 'The height of the first text area will be 100.'
-            node.component.components[1].size.height == 100
-        and : 'The width of the second text area will be 100.'
-            node.component.components[3].size.width == 100
-        and : 'The height of the second text area will be 50.'
-            node.component.components[3].size.height == 50
+        expect : 'The width of the first text area will be 50 * uiScale.'
+            node.component.components[1].size.width == 50 * uiScale
+        and : 'The height of the first text area will be 100 * uiScale.'
+            node.component.components[1].size.height == 100 * uiScale
+        and : 'The width of the second text area will be 100 * uiScale.'
+            node.component.components[3].size.width == 100 * uiScale
+        and : 'The height of the second text area will be 50 * uiScale.'
+            node.component.components[3].size.height == 50 * uiScale
 
         when : 'We change the value of the property.'
             widthProperty.set(100)
@@ -440,10 +516,17 @@ class Property_Binding_Spec extends Specification
             UI.sync()
 
         then : 'The dimensions of both UI components will be as expected.'
-            node.component.components[1].size.width == 100
-            node.component.components[1].size.height == 50
-            node.component.components[3].size.width == 50
-            node.component.components[3].size.height == 100
+            node.component.components[1].size.width == 100 * uiScale
+            node.component.components[1].size.height == 50 * uiScale
+            node.component.components[3].size.width == 50 * uiScale
+            node.component.components[3].size.height == 100 * uiScale
+
+        where : """
+            We use the following integer scaling factors simulating different high DPI scenarios.
+            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).
+            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.
+        """ 
+            uiScale << [3, 2, 1]
     }
 
     def 'Bind the foreground of a component to a conditional property and 2 color properties.'()

@@ -34,6 +34,10 @@ class Panel_Spec extends Specification
         // This is so that the test thread is also allowed to perform UI operations
     }
 
+    def cleanupSpec() {
+        SwingTreeContext.reset()
+    }
+
     def 'A panel node can be created using the UI.panel() factory method.'() {
         when : 'We create a panel...'
             def ui = UI.panel()
@@ -93,9 +97,19 @@ class Panel_Spec extends Specification
             ui.component.layout instanceof MigLayout
     }
 
-    def 'The dimensions of a panel can be bound to a property.'()
+    def 'The dimensions of a panel can be bound to a property.'( float uiScale )
     {
-        given : 'A simple property modelling the width of a panel.'
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+        and : 'A simple property modelling the width of a panel.'
             var width = Var.of(300)
         and : 'A simple property modelling the height of a panel.'
             var height = Var.of(200)
@@ -105,8 +119,8 @@ class Panel_Spec extends Specification
                         .withPrefHeight(height)
 
         expect : 'The panel has the correct width and height.'
-            ui.component.preferredSize.width == 300
-            ui.component.preferredSize.height == 200
+            ui.component.preferredSize.width == (int) ( 300 * uiScale )
+            ui.component.preferredSize.height == (int) ( 200 * uiScale )
 
         when : 'We change the width of the panel.'
             width.set(400)
@@ -114,16 +128,18 @@ class Panel_Spec extends Specification
             UI.sync()
 
         then : 'The panel has the correct width and height.'
-            ui.component.preferredSize.width == 400
-            ui.component.preferredSize.height == 200
+            ui.component.preferredSize.width == (int) ( 400 * uiScale )
+            ui.component.preferredSize.height == (int) ( 200 * uiScale )
 
         when : 'We change the height of the panel.'
             height.set(300)
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
         then : 'The panel has the correct width and height.'
-            ui.component.preferredSize.width == 400
-            ui.component.preferredSize.height == 300
+            ui.component.preferredSize.width == (int) ( 400 * uiScale )
+            ui.component.preferredSize.height == (int) ( 300 * uiScale )
+        where :
+            uiScale << [ 1.0f, 1.5f, 2.0f ]
     }
 
 }
