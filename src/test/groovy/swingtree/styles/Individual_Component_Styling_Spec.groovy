@@ -142,7 +142,7 @@ class Individual_Component_Styling_Spec extends Specification
             We use the following integer scaling factors simulating different high DPI scenarios.
             Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).
             A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.
-        """ 
+        """
             uiScale << [3, 2, 1]
     }
 
@@ -190,7 +190,7 @@ class Individual_Component_Styling_Spec extends Specification
             We use the following integer scaling factors simulating different high DPI scenarios.
             Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).
             A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.
-        """ 
+        """
             uiScale << [3, 2, 1]
     }
 
@@ -974,6 +974,9 @@ class Individual_Component_Styling_Spec extends Specification
 
         then : 'The image is as expected.'
             Utility.similarityBetween(images, "components/image-panels-collage.png", 99) > 99
+
+        where : 'We test this UI using the following scaling values:'
+            scale << [1f, 1.25f, 1.75f, 2f]
     }
 
 
@@ -1022,7 +1025,7 @@ class Individual_Component_Styling_Spec extends Specification
                                 .primer(new Color(100,200,230, 100))
                             )
                         )
-           var ui2 =
+            var ui2 =
                         UI.label("Top Right").withStyle( it -> it
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.BLUE)
@@ -1262,6 +1265,12 @@ class Individual_Component_Styling_Spec extends Specification
 
     def 'A single image can be painted repeatedly in a panel.'()
     {
+        reportInfo """
+            The image sub-style can be used to paint a single image repeatedly in a panel
+            by setting the `repeat` flag to true.
+            Here you can see various examples of this
+            where the image is painted in the center, top, bottom, left, right and stretched.
+        """
         given : 'A UI with a single image painted repeatedly in a panel.'
             var img = Utility.loadImage("img/trees.png")
             var ui1 =
