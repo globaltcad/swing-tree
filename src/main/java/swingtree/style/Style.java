@@ -310,7 +310,7 @@ public final class Style
                     _shadows.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue()._scale(scale))),
                     _painters,
                     _shades,
-                    _grounds
+                    _grounds.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue()._scale(scale)))
                 );
     }
 

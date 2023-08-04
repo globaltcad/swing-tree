@@ -96,6 +96,13 @@ public final class ImageStyle
 
     public ImageStyle opacity( float opacity ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _autoFit, _width, _height, opacity); }
 
+    ImageStyle _scale( double scaleFactor ) {
+        if ( _width == null && _height == null ) return this;
+        Integer width  = _width  == null ? null : (int) Math.round(_width  * scaleFactor);
+        Integer height = _height == null ? null : (int) Math.round(_height * scaleFactor);
+        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _autoFit, width, height, _opacity);
+    }
+
     @Override
     public int hashCode() { return Objects.hash(_layer, _primer, _image, _placement, _repeat, _autoFit, _width, _height, _opacity); }
 
