@@ -21,7 +21,7 @@ public class SomeSettingsView extends Panel
         of(this).withLayout(FILL.and(WRAP(1)))
         .add(label("Use this to configure something..."))
         .add(GROW_X,
-            panel(FILL.and(WRAP(1)))
+            panel(FILL.and(WRAP(1))).withStyle( it -> it.borderRadius(12) )
             .add(GROW,
                 panel(FILL.and(INS(0)).and(WRAP(1)))
                 .add(GROW, checkBox("Type:", vm.hasType()))
@@ -45,7 +45,7 @@ public class SomeSettingsView extends Panel
             .add(GROW, checkBox("Flipped", vm.flipped()))
         )
         .add(GROW_X,
-            panel(FILL.and(WRAP(3)))
+            panel(FILL.and(WRAP(3))).withStyle( it -> it.borderRadius(24) )
             .add(SHRINK, label("Speed:"))
             .add(GROW.and(PUSH),
                 numericTextField(vm.speed(), vm.speedIsValid()).id("speed-text-field")
