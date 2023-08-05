@@ -4,7 +4,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
-import swingtree.SwingTreeContext
+import swingtree.SwingTree
 import swingtree.threading.EventProcessor
 import swingtree.style.Style
 import swingtree.style.ComponentStyleDelegate
@@ -24,7 +24,7 @@ import java.awt.*
 class Styles_Spec extends Specification
 {
     def setupSpec() {
-        SwingTreeContext.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
+        SwingTree.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
         // In this specification we are using the strict event processor
         // which will throw exceptions if we try to perform UI operations in the test thread.
     }

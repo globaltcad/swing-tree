@@ -1,7 +1,7 @@
 package swingtree.threading
 
 import swingtree.ComponentDelegate
-import swingtree.SwingTreeContext
+import swingtree.SwingTree
 import swingtree.UI
 import sprouts.Action
 import spock.lang.Narrative
@@ -31,7 +31,7 @@ import java.awt.event.ActionEvent
 class Thread_Mode_Spec extends Specification
 {
     def setupSpec() {
-        SwingTreeContext.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
+        SwingTree.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
         // In this specification we are using the strict event processor
         // which will throw exceptions if we try to perform UI operations in the test thread.
         // We will override the processor in the tests where we need to.

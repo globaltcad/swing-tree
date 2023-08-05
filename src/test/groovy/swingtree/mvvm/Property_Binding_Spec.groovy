@@ -1,11 +1,11 @@
 package swingtree.mvvm
 
-import swingtree.SwingTreeContext
+
+import swingtree.SwingTree
 import swingtree.threading.EventProcessor
 import swingtree.UI
 import sprouts.Val
 import sprouts.Var
-import utility.Utility
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
@@ -25,12 +25,12 @@ class Property_Binding_Spec extends Specification
     enum Accept { YES, NO, MAYBE }
 
     def setupSpec() {
-        SwingTreeContext.get().setEventProcessor(EventProcessor.COUPLED)
+        SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         // This is so that the test thread is also allowed to perform UI operations
     }
 
     def cleanupSpec() {
-        SwingTreeContext.reset()
+        SwingTree.reset()
     }
 
     def 'We can bind a property to the size of a swing component.'( float uiScale )
@@ -50,7 +50,7 @@ class Property_Binding_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
 
         and : 'We create a property representing the size of a component.'
             Val<Dimension> size = Var.of(new Dimension(100, 100))
@@ -93,7 +93,7 @@ class Property_Binding_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
         and : 'We create properties representing the width and heights of a components.'
             Var<Integer> minWidth = Var.of(60)
             Var<Integer> prefHeight = Var.of(40)
@@ -134,7 +134,7 @@ class Property_Binding_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+        SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
         and : 'We create a property representing the width of a component.'
             Var<Integer> width = Var.of(60)
             Var<Integer> height = Var.of(40)
@@ -444,7 +444,7 @@ class Property_Binding_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
         and : 'We create a property representing the minimum and maximum height.'
             Val<Integer> property = Var.of(50)
         and : 'We create a UI to which we want to bind:'
@@ -489,7 +489,7 @@ class Property_Binding_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
         and : 'We create a property representing the width and height.'
             Val<Integer> widthProperty = Var.of(50)
             Val<Integer> heightProperty = Var.of(100)

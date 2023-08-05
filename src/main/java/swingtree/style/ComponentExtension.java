@@ -1,6 +1,6 @@
 package swingtree.style;
 
-import swingtree.SwingTreeContext;
+import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.animation.AnimationState;
 import swingtree.animation.LifeTime;
@@ -215,7 +215,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     private Style _calculateStyle() {
-        _styleSheet = _styleSheet != null ? _styleSheet : SwingTreeContext.get().getStyleSheet().orElse(null);
+        _styleSheet = _styleSheet != null ? _styleSheet : SwingTree.get().getStyleSheet().orElse(null);
         Style style = _styleSheet == null ? Style.none() : _styleSheet.applyTo( _owner );
         style = _styling.style(new ComponentStyleDelegate<>(_owner, style)).style();
 

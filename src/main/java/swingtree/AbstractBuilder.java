@@ -32,7 +32,7 @@ abstract class AbstractBuilder<I, C extends Component>
      * The thread mode determines how events are dispatched to the component.
      * And also which type of thread can access the component.
      */
-    protected final EventProcessor _eventProcessor = SwingTreeContext.get().getEventProcessor();
+    protected final EventProcessor _eventProcessor = SwingTree.get().getEventProcessor();
 
     /**
      *  The type class of the component wrapped by this builder node.

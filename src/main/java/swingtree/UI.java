@@ -58,44 +58,44 @@ public final class UI
     /**
      * @return The current UI scale factor, which is used for DPI aware painting and layouts.
      */
-    public static float scale() { return SwingTreeContext.get().getUIScale().getUserScaleFactor(); }
+    public static float scale() { return SwingTree.get().getUIScale().getUserScaleFactor(); }
 
     /**
      * Multiplies the given float value by the user scale factor.
-     * This is essentially a delegate for {@link SwingTreeContext.UIScale#scale(float)}.
+     * This is essentially a delegate for {@link SwingTree.UIScale#scale(float)}.
      */
-    public static float scale( float value ) { return SwingTreeContext.get().getUIScale().scale( value ); }
+    public static float scale( float value ) { return SwingTree.get().getUIScale().scale( value ); }
 
     /**
      * Multiplies the given double value by the user scale factor.
-     * This is essentially a delegate for {@link SwingTreeContext.UIScale#scale(double)}.
+     * This is essentially a delegate for {@link SwingTree.UIScale#scale(double)}.
      */
-    public static double scale( double value ) { return SwingTreeContext.get().getUIScale().scale( value ); }
+    public static double scale( double value ) { return SwingTree.get().getUIScale().scale( value ); }
 
     /**
      * Multiplies the given int value by the user scale factor and rounds the result.
-     * This is essentially a delegate for {@link SwingTreeContext.UIScale#scale(int)}.
+     * This is essentially a delegate for {@link SwingTree.UIScale#scale(int)}.
      */
-    public static int scale( int value ) { return SwingTreeContext.get().getUIScale().scale( value ); }
+    public static int scale( int value ) { return SwingTree.get().getUIScale().scale( value ); }
 
     /**
      * Divides the given float value by the user scale factor.
-     * This is essentially a delegate for {@link SwingTreeContext.UIScale#unscale(float)}.
+     * This is essentially a delegate for {@link SwingTree.UIScale#unscale(float)}.
      */
-    public static float unscale( float value ) { return SwingTreeContext.get().getUIScale().unscale( value ); }
+    public static float unscale( float value ) { return SwingTree.get().getUIScale().unscale( value ); }
 
     /**
      * Divides the given int value by the user scale factor and rounds the result.
-     * This is essentially a delegate for {@link SwingTreeContext.UIScale#unscale(int)}.
+     * This is essentially a delegate for {@link SwingTree.UIScale#unscale(int)}.
      */
-    public static int unscale( int value ) { return SwingTreeContext.get().getUIScale().unscale( value ); }
+    public static int unscale( int value ) { return SwingTree.get().getUIScale().unscale( value ); }
 
     /**
      * If user scale factor is not 1, scale the given graphics context by invoking
      * {@link Graphics2D#scale(double, double)} with user scale factor.
-     * This is essentially a delegate for {@link SwingTreeContext.UIScale#scaleGraphics(Graphics2D)} (Graphics2D)}.
+     * This is essentially a delegate for {@link SwingTree.UIScale#scaleGraphics(Graphics2D)} (Graphics2D)}.
      */
-    public static void scale( Graphics2D g ) { SwingTreeContext.get().getUIScale().scaleGraphics( g ); }
+    public static void scale( Graphics2D g ) { SwingTree.get().getUIScale().scaleGraphics( g ); }
 
     /**
      * Scales the given dimension with the user scale factor.
@@ -103,13 +103,13 @@ public final class UI
      * If user scale factor is 1, then the given dimension is simply returned.
      * Otherwise, a new instance of {@link Dimension} or {@link javax.swing.plaf.DimensionUIResource}
      * is returned, depending on whether the passed dimension implements {@link javax.swing.plaf.UIResource}.
-     * This is essentially a delegate for {@link SwingTreeContext.UIScale#scale(Dimension)}.
+     * This is essentially a delegate for {@link SwingTree.UIScale#scale(Dimension)}.
      */
-    public static Dimension scale( Dimension dimension ) { return SwingTreeContext.get().getUIScale().scale(dimension); }
+    public static Dimension scale( Dimension dimension ) { return SwingTree.get().getUIScale().scale(dimension); }
 
-    public static Rectangle scale( Rectangle rectangle ) { return SwingTreeContext.get().getUIScale().scale(rectangle); }
+    public static Rectangle scale( Rectangle rectangle ) { return SwingTree.get().getUIScale().scale(rectangle); }
 
-    public static RoundRectangle2D scale( RoundRectangle2D rectangle ) { return SwingTreeContext.get().getUIScale().scale(rectangle); }
+    public static RoundRectangle2D scale( RoundRectangle2D rectangle ) { return SwingTree.get().getUIScale().scale(rectangle); }
 
     /**
      * Scales the given insets with the user scale factor.
@@ -117,9 +117,9 @@ public final class UI
      * If user scale factor is 1, then the given insets is simply returned.
      * Otherwise, a new instance of {@link Insets} or {@link javax.swing.plaf.InsetsUIResource}
      * is returned, depending on whether the passed dimension implements {@link javax.swing.plaf.UIResource}.
-     * This is essentially a delegate for {@link SwingTreeContext.UIScale#scale(Insets)}.
+     * This is essentially a delegate for {@link SwingTree.UIScale#scale(Insets)}.
      */
-    public static Insets scale( Insets insets ) { return SwingTreeContext.get().getUIScale().scale(insets); }
+    public static Insets scale( Insets insets ) { return SwingTree.get().getUIScale().scale(insets); }
 
     /**
      *  Sets a {@link StyleSheet} which will be applied to all SwingTree UIs defined in the subsequent lambda scope.
@@ -149,7 +149,7 @@ public final class UI
                 throw new RuntimeException(e);
             }
 
-        SwingTreeContext swingTreeContext = SwingTreeContext.get();
+        SwingTree swingTreeContext = SwingTree.get();
         StyleSheet oldStyleSheet = swingTreeContext.getStyleSheet().orElse(null);
         swingTreeContext.setStyleSheet(styleSheet);
         try {
@@ -200,7 +200,7 @@ public final class UI
                 throw new RuntimeException(e);
             }
 
-        SwingTreeContext swingTreeContext = SwingTreeContext.get();
+        SwingTree swingTreeContext = SwingTree.get();
         EventProcessor oldProcessor = swingTreeContext.getEventProcessor();
         swingTreeContext.setEventProcessor(processor);
         try {
@@ -872,7 +872,7 @@ public final class UI
     public static UIForButton<JButton> button( int width, int height, ImageIcon icon, ImageIcon onHover ) {
         NullUtil.nullArgCheck(icon, "icon", ImageIcon.class);
         NullUtil.nullArgCheck(onHover, "onHover", ImageIcon.class);
-        float scale = SwingTreeContext.get().getUIScale().getUserScaleFactor();
+        float scale = SwingTree.get().getUIScale().getUserScaleFactor();
 
         int scaleHint = Image.SCALE_SMOOTH;
         if ( scale > 1.5f )
@@ -2869,7 +2869,7 @@ public final class UI
      */
     public static UIForLabel<JLabel> label( int width, int height, ImageIcon icon ) {
         NullUtil.nullArgCheck(icon, "icon", ImageIcon.class);
-        float scale = SwingTreeContext.get().getUIScale().getUserScaleFactor();
+        float scale = SwingTree.get().getUIScale().getUserScaleFactor();
 
         int scaleHint = Image.SCALE_SMOOTH;
         if ( scale > 1.5f )

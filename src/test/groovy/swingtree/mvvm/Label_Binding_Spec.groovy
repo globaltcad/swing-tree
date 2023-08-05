@@ -1,6 +1,7 @@
 package swingtree.mvvm
 
-import swingtree.SwingTreeContext
+
+import swingtree.SwingTree
 import swingtree.threading.EventProcessor
 import swingtree.UI
 import sprouts.Val
@@ -28,12 +29,12 @@ import java.awt.Dimension
 class Label_Binding_Spec extends Specification
 {
     def setupSpec() {
-        SwingTreeContext.get().setEventProcessor(EventProcessor.COUPLED)
+        SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         // This is so that the test thread is also allowed to perform UI operations
     }
 
     def cleanupSpec() {
-        SwingTreeContext.reset()
+        SwingTree.reset()
     }
 
     def 'We can bind to the text of a label.'()
@@ -103,7 +104,7 @@ class Label_Binding_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+        SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
 
         and : 'We create a simple swing-tree property for modelling the size.'
             Val<Dimension> minSize = Var.of(new Dimension(100, 100))

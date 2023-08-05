@@ -5,7 +5,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import sprouts.Var
-import swingtree.SwingTreeContext
+import swingtree.SwingTree
 import swingtree.UI
 import swingtree.threading.EventProcessor
 
@@ -37,16 +37,16 @@ import java.awt.*
 class UI_Scaling_Spec extends Specification
 {
     def setup() {
-        SwingTreeContext.get().setEventProcessor(EventProcessor.COUPLED)
+        SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
     }
 
     def cleanup() {
-        SwingTreeContext.reset()
+        SwingTree.reset()
     }
 
     def 'The dimensionality of components will be scaled by the scaling factor'() {
         given:
-            SwingTreeContext.get().getUIScale().setUserScaleFactor(2.0f)
+        SwingTree.get().getUIScale().setUserScaleFactor(2.0f)
 
         when : 'We build a simple panel with a number of various components and custom dimensions'
             var panel =
@@ -118,7 +118,7 @@ class UI_Scaling_Spec extends Specification
             How cool is that? :) 
         """
         given:
-            SwingTreeContext.get().getUIScale().setUserScaleFactor(2.0f)
+            SwingTree.get().getUIScale().setUserScaleFactor(2.0f)
 
         when : 'We build a simple panel with a number of various components and custom dimensions'
             var panel =
@@ -191,7 +191,7 @@ class UI_Scaling_Spec extends Specification
             scaling factor when applied to the UI components dynamically.
         """
         given : 'We set the scaling factor to 2.0'
-            SwingTreeContext.get().getUIScale().setUserScaleFactor(2.0f)
+            SwingTree.get().getUIScale().setUserScaleFactor(2.0f)
         and : 'We create a whole lot of properties:'
             var prefSize = Var.of(new Dimension(70, 50))
             var minSize  = Var.of(new Dimension(75, 25))

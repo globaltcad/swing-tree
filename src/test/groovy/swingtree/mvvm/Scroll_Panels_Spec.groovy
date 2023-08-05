@@ -6,7 +6,7 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import sprouts.Vars
-import swingtree.SwingTreeContext
+import swingtree.SwingTree
 import swingtree.components.JScrollPanels
 import swingtree.threading.EventProcessor
 import swingtree.UI
@@ -26,7 +26,7 @@ import utility.Utility
 class Scroll_Panels_Spec extends Specification
 {
     def setupSpec() {
-        SwingTreeContext.get().setEventProcessor(EventProcessor.COUPLED)
+        SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         // In this specification we are using the strict event processor
         // which will throw exceptions if we try to perform UI operations in the test thread.
     }

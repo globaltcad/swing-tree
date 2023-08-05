@@ -5,7 +5,7 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import sprouts.Event
-import swingtree.SwingTreeContext
+import swingtree.SwingTree
 import swingtree.threading.EventProcessor
 import swingtree.UI
 import swingtree.UIForTable
@@ -24,7 +24,7 @@ import javax.swing.*
 class Declarative_Tables_Spec extends Specification
 {
     def setupSpec() {
-        SwingTreeContext.get().setEventProcessor(EventProcessor.COUPLED)
+        SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         // This is so that the test thread is also allowed to perform UI operations
     }
 

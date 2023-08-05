@@ -1,6 +1,7 @@
 package swingtree.panel
 
-import swingtree.SwingTreeContext
+
+import swingtree.SwingTree
 import swingtree.UIForBox
 import swingtree.components.JBox
 import swingtree.threading.EventProcessor
@@ -30,12 +31,12 @@ import java.awt.FlowLayout
 class Panel_Spec extends Specification
 {
     def setupSpec() {
-        SwingTreeContext.get().setEventProcessor(EventProcessor.COUPLED)
+        SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         // This is so that the test thread is also allowed to perform UI operations
     }
 
     def cleanupSpec() {
-        SwingTreeContext.reset()
+        SwingTree.reset()
     }
 
     def 'A panel node can be created using the UI.panel() factory method.'() {
@@ -108,7 +109,7 @@ class Panel_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
         and : 'A simple property modelling the width of a panel.'
             var width = Var.of(300)
         and : 'A simple property modelling the height of a panel.'

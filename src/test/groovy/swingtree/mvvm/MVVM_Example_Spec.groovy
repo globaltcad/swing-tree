@@ -6,7 +6,7 @@ import spock.lang.Specification
 import spock.lang.Title
 import sprouts.Var
 import sprouts.Vars
-import swingtree.SwingTreeContext
+import swingtree.SwingTree
 import swingtree.UI
 import swingtree.api.mvvm.ViewSupplier
 import swingtree.threading.EventProcessor
@@ -35,7 +35,7 @@ import java.util.List
 class MVVM_Example_Spec extends Specification
 {
     def setupSpec() {
-        SwingTreeContext.get().setEventProcessor(EventProcessor.COUPLED)
+        SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         // This is so that the test thread is also allowed to perform UI operations
     }
 

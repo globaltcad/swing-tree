@@ -5,9 +5,8 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import sprouts.*
-import swingtree.SwingTreeContext
+import swingtree.SwingTree
 import swingtree.threading.EventProcessor
-import swingtree.UI
 
 @Title("Lists of Properties")
 @Narrative('''
@@ -26,7 +25,7 @@ import swingtree.UI
 class Properties_List_Spec extends Specification
 {
     def setupSpec() {
-        SwingTreeContext.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
+        SwingTree.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
         // In this specification we are using the strict event processor
         // which will throw exceptions if we try to perform UI operations in the test thread.
     }

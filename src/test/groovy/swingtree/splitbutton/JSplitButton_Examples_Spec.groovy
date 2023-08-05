@@ -1,13 +1,12 @@
 package swingtree.splitbutton
 
-import swingtree.SwingTreeContext
+import swingtree.SwingTree
 import swingtree.components.JSplitButton
 import sprouts.Event
 import sprouts.Listener
 import sprouts.Var
 import swingtree.threading.EventProcessor
 import swingtree.UI
-import utility.Utility
 import groovy.transform.CompileDynamic
 import spock.lang.Narrative
 import spock.lang.Specification
@@ -54,7 +53,7 @@ class JSplitButton_Examples_Spec extends Specification
     }
 
     def setupSpec() {
-        SwingTreeContext.get().setEventProcessor(EventProcessor.COUPLED)
+        SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         // This is so that the test thread is also allowed to perform UI operations
     }
 

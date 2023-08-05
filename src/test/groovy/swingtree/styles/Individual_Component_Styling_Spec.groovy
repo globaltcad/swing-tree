@@ -5,7 +5,7 @@ import net.miginfocom.swing.MigLayout
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
-import swingtree.SwingTreeContext
+import swingtree.SwingTree
 import swingtree.components.JBox
 import swingtree.threading.EventProcessor
 import swingtree.UI
@@ -26,13 +26,13 @@ import java.awt.image.BufferedImage
 class Individual_Component_Styling_Spec extends Specification
 {
     def setupSpec() {
-        SwingTreeContext.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
+        SwingTree.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
         // In this specification we are using the strict event processor
         // which will throw exceptions if we try to perform UI operations in the test thread.
     }
 
     def cleanupSpec() {
-        SwingTreeContext.reset()
+        SwingTree.reset()
     }
 
     def setup() {
@@ -71,7 +71,7 @@ class Individual_Component_Styling_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
         and : 'We create a panel with some custom styling!'
             var panel =
                         UI.panel()
@@ -121,7 +121,7 @@ class Individual_Component_Styling_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
         and : 'We create a panel with some custom styling!'
             var panel =
                         UI.panel()
@@ -168,7 +168,7 @@ class Individual_Component_Styling_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
         and : 'We create a panel with some custom styling!'
             var panel =
                         UI.panel()
@@ -213,7 +213,7 @@ class Individual_Component_Styling_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
         and : 'We create a panel with some custom styling!'
             var panel =
                         UI.panel()
@@ -663,7 +663,7 @@ class Individual_Component_Styling_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
         and : 'A label UI with a custom styler lambda.'
             var ui =
                     UI.label("I am a label")

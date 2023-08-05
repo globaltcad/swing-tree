@@ -5,7 +5,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import sprouts.Var
-import swingtree.SwingTreeContext
+import swingtree.SwingTree
 import swingtree.components.JBox
 import swingtree.threading.EventProcessor
 import swingtree.UI
@@ -31,7 +31,7 @@ import java.awt.event.KeyListener
 class Basic_UI_Builder_Examples_Spec extends Specification
 {
     def setupSpec() {
-        SwingTreeContext.get().setEventProcessor(EventProcessor.COUPLED)
+        SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         // This is so that the test thread is also allowed to perform UI operations
     }
 

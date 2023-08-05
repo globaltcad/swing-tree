@@ -25,27 +25,27 @@ import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
 
 /**
- *  A {@link SwingTreeContext} is a singleton that holds global configuration for the SwingTree library.
+ *  A {@link SwingTree} is a singleton that holds global configuration context for the SwingTree library.
  *  This includes the {@link EventProcessor} that is used to process events, as well as the
  *  {@link StyleSheet} that is used to style components.
  *
  * @author Daniel Nepp
  */
-public final class SwingTreeContext
+public final class SwingTree
 {
-	private static SwingTreeContext _INSTANCES = null;
+	private static SwingTree _INSTANCES = null;
 
 	/**
-	 * Returns the singleton instance of the {@link SwingTreeContext}.
+	 * Returns the singleton instance of the {@link SwingTree}.
 	 * Note that this method will create the singleton if it does not exist.
-	 * @return the singleton instance of the {@link SwingTreeContext}.
+	 * @return the singleton instance of the {@link SwingTree}.
 	 */
-	public static SwingTreeContext get() {
+	public static SwingTree get() {
 		// We make sure this method is thread-safe by using the double-checked locking idiom.
 		if ( _INSTANCES == null ) {
-			synchronized ( SwingTreeContext.class ) {
+			synchronized ( SwingTree.class ) {
 				if ( _INSTANCES == null ) {
-					_INSTANCES = new SwingTreeContext();
+					_INSTANCES = new SwingTree();
 				}
 			}
 		}
@@ -63,7 +63,7 @@ public final class SwingTreeContext
     private final LazyRef<UIScale> uiScale;
 
 
-	private SwingTreeContext() {
+	private SwingTree() {
         this.uiScale = new LazyRef<>(UIScale::new);
     }
 
