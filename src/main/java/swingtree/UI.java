@@ -62,38 +62,53 @@ public final class UI
 
     /**
      * Multiplies the given float value by the user scale factor.
-     * This is essentially a delegate for {@link SwingTree.UIScale#scale(float)}.
+     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
+     *
+     * @param value The float value to scale.
+     * @return The scaled float value.
      */
     public static float scale( float value ) { return SwingTree.get().getUIScale().scale( value ); }
 
     /**
      * Multiplies the given double value by the user scale factor.
-     * This is essentially a delegate for {@link SwingTree.UIScale#scale(double)}.
+     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
+     *
+     * @param value The double value to scale.
+     * @return The scaled double value.
      */
     public static double scale( double value ) { return SwingTree.get().getUIScale().scale( value ); }
 
     /**
      * Multiplies the given int value by the user scale factor and rounds the result.
-     * This is essentially a delegate for {@link SwingTree.UIScale#scale(int)}.
+     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
+     * @param value The int value to scale.
+     * @return The scaled int value.
      */
     public static int scale( int value ) { return SwingTree.get().getUIScale().scale( value ); }
 
     /**
      * Divides the given float value by the user scale factor.
-     * This is essentially a delegate for {@link SwingTree.UIScale#unscale(float)}.
+     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
+     *
+     * @param value The float value to unscale.
+     * @return The unscaled float value.
      */
     public static float unscale( float value ) { return SwingTree.get().getUIScale().unscale( value ); }
 
     /**
      * Divides the given int value by the user scale factor and rounds the result.
-     * This is essentially a delegate for {@link SwingTree.UIScale#unscale(int)}.
+     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
+     * @param value The int value to unscale.
+     * @return The unscaled int value.
      */
     public static int unscale( int value ) { return SwingTree.get().getUIScale().unscale( value ); }
 
     /**
      * If user scale factor is not 1, scale the given graphics context by invoking
      * {@link Graphics2D#scale(double, double)} with user scale factor.
-     * This is essentially a delegate for {@link SwingTree.UIScale#scaleGraphics(Graphics2D)} (Graphics2D)}.
+     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
+     *
+     * @param g The graphics context to scale.
      */
     public static void scale( Graphics2D g ) { SwingTree.get().getUIScale().scaleGraphics( g ); }
 
@@ -103,12 +118,34 @@ public final class UI
      * If user scale factor is 1, then the given dimension is simply returned.
      * Otherwise, a new instance of {@link Dimension} or {@link javax.swing.plaf.DimensionUIResource}
      * is returned, depending on whether the passed dimension implements {@link javax.swing.plaf.UIResource}.
-     * This is essentially a delegate for {@link SwingTree.UIScale#scale(Dimension)}.
+     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
+     *
+     * @param dimension The dimension to scale.
+     * @return The scaled dimension.
      */
     public static Dimension scale( Dimension dimension ) { return SwingTree.get().getUIScale().scale(dimension); }
 
+    /**
+     * Returns a rectangle from the given rectangle with the user scale factor applied.
+     * <p>
+     * If user scale factor is 1, then the given rectangle is simply returned.
+     * Otherwise, a new instance of {@link Rectangle} or {@link javax.swing.plaf.UIResource} is returned.
+     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
+     * @param rectangle The rectangle to scale.
+     * @return The scaled rectangle.
+     */
     public static Rectangle scale( Rectangle rectangle ) { return SwingTree.get().getUIScale().scale(rectangle); }
 
+    /**
+     * Returns a rectangle from the given rectangle with the user scale factor applied.
+     * <p>
+     * If user scale factor is 1, then the given rectangle is simply returned.
+     * Otherwise, a new instance of {@link Rectangle} or {@link javax.swing.plaf.UIResource} is returned.
+     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
+     *
+     * @param rectangle The rectangle to scale.
+     * @return The scaled rectangle.
+     */
     public static RoundRectangle2D scale( RoundRectangle2D rectangle ) { return SwingTree.get().getUIScale().scale(rectangle); }
 
     /**
@@ -118,6 +155,9 @@ public final class UI
      * Otherwise, a new instance of {@link Insets} or {@link javax.swing.plaf.InsetsUIResource}
      * is returned, depending on whether the passed dimension implements {@link javax.swing.plaf.UIResource}.
      * This is essentially a delegate for {@link SwingTree.UIScale#scale(Insets)}.
+     *
+     * @param insets The insets to scale.
+     * @return The scaled insets.
      */
     public static Insets scale( Insets insets ) { return SwingTree.get().getUIScale().scale(insets); }
 
