@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.List;
 import java.util.function.IntUnaryOperator;
+import java.util.function.Supplier;
 
 /**
  *  A {@link SwingTreeContext} is a singleton that holds global configuration for the SwingTree library.
@@ -59,18 +60,18 @@ public final class SwingTreeContext
 	private EventProcessor _eventProcessor = EventProcessor.COUPLED_STRICT;
 	private StyleSheet _styleSheet = null;
 
-    private final UIScale uiScale;
+    private final LazyRef<UIScale> uiScale;
 
 
 	private SwingTreeContext() {
-        this.uiScale = new UIScale();
+        this.uiScale = new LazyRef<>(UIScale::new);
     }
 
     /**
      * @return The {@link UIScale} instance of this context, which defines
      *         how and to what degree the SwingTree UI is scaled (for high DPI displays for example).
      */
-    public UIScale getUIScale() { return uiScale; }
+    public UIScale getUIScale() { return uiScale.get(); }
 
 	/**
 	 * @return The currently configured {@link EventProcessor} that is used to process
@@ -138,8 +139,6 @@ public final class SwingTreeContext
      */
     public static final class UIScale
     {
-        private final boolean DEBUG = false;
-
         private PropertyChangeSupport changeSupport;
 
         private static Boolean jreHiDPI;
@@ -148,82 +147,25 @@ public final class SwingTreeContext
         private boolean initialized;
 
 
-        private UIScale() {// prevent instantiation
+        private UIScale() {// private to prevent instantiation from outside
+            try {
+                _findDPIAwareDefaultFontAndCalculateScalingFactorBasedOnIt();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                // Usually there should be no exception, if there is one, the library will still work, but
+                // the UI may not be scaled correctly. Please report this exception to the library author.
+            }
+        }
+
+        private void _findDPIAwareDefaultFontAndCalculateScalingFactorBasedOnIt() {
+            UIDefaults defaults = UIManager.getDefaults();
             Font defaultFont = UIManager.getFont( "defaultFont" );
             if ( defaultFont == null ) {
-                UIDefaults defaults = UIManager.getDefaults();
                 Font highDPIFont = initDefaultFont(defaults);
                 defaults.put("defaultFont", highDPIFont);
-                defaultFont = highDPIFont;
             }
-            if ( defaultFont != null )
-                _scaleLaFFontsAccordingTo(defaultFont);
-        }
 
-        private static void _scaleLaFFontsAccordingTo( Font defaultFont ) {
-            Font referenceFont = UIManager.getFont( "Label.font" );
-            if ( referenceFont == null )
-                referenceFont = new JLabel().getFont();
-            if ( referenceFont == null )
-                referenceFont = defaultFont;
-
-            int referenceFontSize = referenceFont.getSize();
-            int defaultFontSize = defaultFont.getSize();
-            double scale = Math.floor( (double) defaultFontSize / referenceFontSize );
-
-            _scaleUIManagerFont( "ArrowButton.size", scale );
-            _scaleUIManagerFont( "Button.font", scale );
-            _scaleUIManagerFont( "CheckBox.font", scale );
-            _scaleUIManagerFont( "CheckBoxMenuItem.acceleratorFont", scale );
-            _scaleUIManagerFont( "CheckBoxMenuItem.font", scale );
-            _scaleUIManagerFont( "ColorChooser.font", scale );
-            _scaleUIManagerFont( "ComboBox.font", scale );
-            _scaleUIManagerFont( "DesktopIcon.font", scale );
-            _scaleUIManagerFont( "EditorPane.font", scale );
-            _scaleUIManagerFont( "FileChooser.listFont", scale );
-            _scaleUIManagerFont( "FileChooser.previewFont", scale );
-            _scaleUIManagerFont( "FileChooser.smallFont", scale );
-            _scaleUIManagerFont( "FormattedTextField.font", scale );
-            _scaleUIManagerFont( "InternalFrame.optionDialogTitleFont", scale );
-            _scaleUIManagerFont( "InternalFrame.titleFont", scale );
-            _scaleUIManagerFont( "Label.font", scale );
-            _scaleUIManagerFont( "List.font", scale );
-            _scaleUIManagerFont( "Menu.acceleratorFont", scale );
-            _scaleUIManagerFont( "Menu.font", scale );
-            _scaleUIManagerFont( "MenuBar.font", scale );
-            _scaleUIManagerFont( "MenuItem.acceleratorFont", scale );
-            _scaleUIManagerFont( "MenuItem.font", scale );
-            _scaleUIManagerFont( "OptionPane.buttonFont", scale );
-            _scaleUIManagerFont( "OptionPane.font", scale );
-            _scaleUIManagerFont( "OptionPane.messageFont", scale );
-            _scaleUIManagerFont( "Panel.font", scale );
-            _scaleUIManagerFont( "PasswordField.font", scale );
-            _scaleUIManagerFont( "PopupMenu.font", scale );
-            _scaleUIManagerFont( "ProgressBar.font", scale );
-            _scaleUIManagerFont( "RadioButton.font", scale );
-            _scaleUIManagerFont( "RadioButtonMenuItem.acceleratorFont", scale );
-            _scaleUIManagerFont( "RadioButtonMenuItem.font", scale );
-            _scaleUIManagerFont( "Spinner.font", scale );
-            _scaleUIManagerFont( "TabbedPane.font", scale );
-            _scaleUIManagerFont( "Table.font", scale );
-            _scaleUIManagerFont( "TableHeader.font", scale );
-            _scaleUIManagerFont( "TextArea.font", scale );
-            _scaleUIManagerFont( "TextField.font", scale );
-            _scaleUIManagerFont( "TextPane.font", scale );
-            _scaleUIManagerFont( "TitledBorder.font", scale );
-            _scaleUIManagerFont( "ToggleButton.font", scale );
-            _scaleUIManagerFont( "ToolBar.font", scale );
-            _scaleUIManagerFont( "ToolTip.font", scale );
-            _scaleUIManagerFont( "Tree.font", scale );
-            _scaleUIManagerFont( "Viewport.font", scale );
-        }
-
-        private static void _scaleUIManagerFont( String key, double scale ) {
-            Font font = UIManager.getFont( key );
-            if ( font != null ) {
-                font = font.deriveFont( (float) Math.floor(font.getSize2D() * scale) );
-                UIManager.put( key, font );
-            }
+            initialize();
         }
 
         private Font initDefaultFont( UIDefaults defaults ) {
@@ -565,12 +507,13 @@ public final class SwingTreeContext
          * Sets the user scale factor.
          */
         private void setUserScaleFactor( float scaleFactor, boolean normalize ) {
-            if( normalize ) {
-                if( scaleFactor < 1f ) {
+            if ( normalize ) {
+                if ( scaleFactor < 1f ) {
                     scaleFactor = SystemProperties.getBoolean( SystemProperties.UI_SCALE_ALLOW_SCALE_DOWN, false )
-                            ? Math.round( scaleFactor * 10f ) / 10f // round small scale factor to 1/10
-                            : 1f;
-                } else if( scaleFactor > 1f ) // round scale factor to 1/4
+                                    ? Math.round( scaleFactor * 10f ) / 10f // round small scale factor to 1/10
+                                    : 1f;
+                }
+                else if ( scaleFactor > 1f ) // round scale factor to 1/4
                     scaleFactor = Math.round( scaleFactor * 4f ) / 4f;
             }
 
@@ -584,10 +527,7 @@ public final class SwingTreeContext
             // MigLayout to scale its pixel values.
             UIManager.put( "laf.scaleFactor", scaleFactor );
 
-            if( DEBUG )
-                System.out.println( "HiDPI scale factor " + scaleFactor );
-
-            if( changeSupport != null )
+            if ( changeSupport != null )
                 changeSupport.firePropertyChange( "userScaleFactor", oldScaleFactor, scaleFactor );
         }
 
@@ -1324,4 +1264,24 @@ public final class SwingTreeContext
 
     }
 
+    private static class LazyRef<T> {
+        private final Supplier<T> supplier;
+        private volatile T value;
+
+        LazyRef( Supplier<T> supplier ) {
+            this.supplier = Objects.requireNonNull( supplier );
+        }
+
+        T get() {
+            T value = this.value;
+            if( value == null ) {
+                synchronized( this ) {
+                    value = this.value;
+                    if ( value == null )
+                        this.value = value = supplier.get();
+                }
+            }
+            return value;
+        }
+    }
 }
