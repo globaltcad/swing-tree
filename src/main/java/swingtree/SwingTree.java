@@ -19,9 +19,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.*;
 import java.util.List;
-import java.util.function.IntUnaryOperator;
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -100,7 +99,7 @@ public final class SwingTree
 	 * Sets the {@link StyleSheet} that is used to style components.
 	 * @param styleSheet the {@link StyleSheet} that is used to style components.
 	 */
-	public void setStyleSheet(StyleSheet styleSheet) {
+	public void setStyleSheet( StyleSheet styleSheet) {
 		_styleSheet = styleSheet;
 	}
 
@@ -214,19 +213,22 @@ public final class SwingTree
             if( uiFont == null )
                 uiFont = createCompositeFont( Font.SANS_SERIF, Font.PLAIN, 12 );
 
-            // get/remove "defaultFont" from defaults if set in properties files
-            // (use remove() to avoid that ActiveFont.createValue() gets invoked)
-            Object defaultFont = defaults.remove( "defaultFont" );
+            // Todo: Look at ActiveFont in FlatLaf to see if we need to do anything with it here.
+            // Comment from FlatLaf code base below:
+            /*
+                // get/remove "defaultFont" from defaults if set in properties files
+                // (use remove() to avoid that ActiveFont.createValue() gets invoked)
+                Object defaultFont = defaults.remove( "defaultFont" );
+                // use font from OS as base font and derive the UI font from it
+                if( defaultFont instanceof ActiveFont ) {
+                    Font baseFont = uiFont;
+                    uiFont = ((ActiveFont)defaultFont).derive( baseFont, fontSize -> {
+                        return Math.round( fontSize * computeFontScaleFactor( baseFont ) );
+                    } );
+                }
+            */
 
-            // use font from OS as base font and derive the UI font from it
-            if( defaultFont instanceof ActiveFont ) {
-                Font baseFont = uiFont;
-                uiFont = ((ActiveFont)defaultFont).derive( baseFont, fontSize -> {
-                    return Math.round( fontSize * computeFontScaleFactor( baseFont ) );
-                } );
-            }
-
-            // increase font size if system property "flatlaf.uiScale" is set
+            // increase font size if system property "swingtree.uiScale" is set
             uiFont = applyCustomScaleFactor( uiFont );
 
             return uiFont;
@@ -259,15 +261,15 @@ public final class SwingTree
          * Returns whether system scaling is enabled.
          */
         public static boolean isSystemScalingEnabled() {
-            if( jreHiDPI != null )
+            if ( jreHiDPI != null )
                 return jreHiDPI;
 
             jreHiDPI = false;
 
-            if( SystemInfo.isJava_9_orLater ) {
+            if ( SystemInfo.isJava_9_orLater ) {
                 // Java 9 and later supports per-monitor scaling
                 jreHiDPI = true;
-            } else if( SystemInfo.isJetBrainsJVM ) {
+            } else if ( SystemInfo.isJetBrainsJVM ) {
                 // IntelliJ IDEA ships its own JetBrains Java 8 JRE that may support per-monitor scaling
                 // see com.intellij.ui.JreHiDpiUtil.isJreHiDPIEnabled()
                 try {
@@ -344,7 +346,7 @@ public final class SwingTree
             if( !isUserScalingEnabled() )
                 return;
 
-            // apply custom scale factor specified in system property "style.uiScale"
+            // apply custom scale factor specified in system property "swingtree.uiScale"
             float customScaleFactor = getCustomScaleFactor();
             if( customScaleFactor > 0 ) {
                 setUserScaleFactor( customScaleFactor, false );
@@ -386,7 +388,7 @@ public final class SwingTree
                         if( isSystemScalingEnabled() ) {
                             // Do not apply own scaling if the JRE scales using Windows screen scale factor.
                             // If user increases font size in Windows 10 settings, desktop property
-                            // "win.messagebox.font" is changed and FlatLaf uses the larger font.
+                            // "win.messagebox.font" is changed and SwingTree uses the larger font.
                             return 1;
                         } else {
                             // If the JRE does not scale (Java 8), the size of the UI font
@@ -402,11 +404,11 @@ public final class SwingTree
                 }
 
                 // If font was explicitly set from outside (is not a UIResource),
-                // or was set in FlatLaf properties files (is a UIResource),
+                // or was set in SwingTree properties files (is a UIResource),
                 // use it to compute scale factor. This allows applications to
                 // use custom fonts (e.g. that the user can change in UI) and
                 // get scaling if a larger font size is used.
-                // E.g. FlatLaf Demo supports increasing font size in "Font" menu and UI scales.
+                // E.g. SwingTree Demo supports increasing font size in "Font" menu and UI scales.
             }
 
             return computeScaleFactor( font );
@@ -438,7 +440,7 @@ public final class SwingTree
         }
 
         /**
-         * Applies a custom scale factor given in system property "style.uiScale"
+         * Applies a custom scale factor given in system property "swingtree.uiScale"
          * to the given font.
          */
         public FontUIResource applyCustomScaleFactor(FontUIResource font ) {
@@ -458,7 +460,7 @@ public final class SwingTree
         }
 
         /**
-         * Get custom scale factor specified in system property "style.uiScale".
+         * Get custom scale factor specified in system property "swingtree.uiScale".
          */
         private static float getCustomScaleFactor() {
             return parseScaleFactor( System.getProperty( SystemProperties.UI_SCALE ) );
@@ -650,140 +652,6 @@ public final class SwingTree
                     : new Insets          ( scale( insets.top ), scale( insets.left ), scale( insets.bottom ), scale( insets.right ) ));
         }
 
-        //---- class ActiveFont ---------------------------------------------------
-
-        class ActiveFont
-                implements UIDefaults.ActiveValue
-        {
-            private final String baseFontKey;
-            private final java.util.List<String> families;
-            private final int style;
-            private final int styleChange;
-            private final int absoluteSize;
-            private final int relativeSize;
-            private final float scaleSize;
-
-            // cache (scaled/derived) font
-            private FontUIResource font;
-            private Font lastBaseFont;
-
-            private boolean inCreateValue;
-
-            /**
-             * @param families list of font families, or {@code null}
-             * @param style new style of font, or {@code -1}
-             * @param styleChange derive style of base font; or {@code 0}
-             *                    (the lower 16 bits are added; the upper 16 bits are removed)
-             * @param absoluteSize new size of font, or {@code 0}
-             * @param relativeSize added to size of base font, or {@code 0}
-             * @param scaleSize multiply size of base font, or {@code 0}
-             */
-            ActiveFont(String baseFontKey, List<String> families, int style, int styleChange,
-                       int absoluteSize, int relativeSize, float scaleSize )
-            {
-                this.baseFontKey = baseFontKey;
-                this.families = families;
-                this.style = style;
-                this.styleChange = styleChange;
-                this.absoluteSize = absoluteSize;
-                this.relativeSize = relativeSize;
-                this.scaleSize = scaleSize;
-            }
-
-            // using synchronized to avoid exception if invoked at the same time on multiple threads
-            @Override
-            public synchronized Object createValue( UIDefaults table ) {
-                if( inCreateValue )
-                    throw new IllegalStateException( "FlatLaf: endless recursion in font" );
-
-                Font baseFont = null;
-
-                inCreateValue = true;
-                try {
-                    if( baseFontKey != null )
-                        baseFont = (Font) lazyUIManagerGet( baseFontKey );
-
-                    if( baseFont == null )
-                        baseFont = UIManager.getFont( "defaultFont" );
-
-                    // fallback (to avoid NPE in case that this is used in another Laf)
-                    if( baseFont == null )
-                        baseFont = UIManager.getFont( "Label.font" );
-                } finally {
-                    inCreateValue = false;
-                }
-
-                if( lastBaseFont != baseFont ) {
-                    lastBaseFont = baseFont;
-
-                    font = derive( baseFont, fontSize -> scale( fontSize ) );
-                }
-
-                return font;
-            }
-
-
-            FontUIResource derive( Font baseFont, IntUnaryOperator scale ) {
-                int baseStyle = baseFont.getStyle();
-                int baseSize = baseFont.getSize();
-
-                // new style
-                int newStyle = (style != -1)
-                        ? style
-                        : (styleChange != 0)
-                        ? baseStyle & ~((styleChange >> 16) & 0xffff) | (styleChange & 0xffff)
-                        : baseStyle;
-
-                // new size
-                int newSize = (absoluteSize > 0)
-                        ? scale.applyAsInt( absoluteSize )
-                        : (relativeSize != 0)
-                        ? (baseSize + scale.applyAsInt( relativeSize ))
-                        : (scaleSize > 0)
-                        ? Math.round( baseSize * scaleSize )
-                        : baseSize;
-                if( newSize <= 0 )
-                    newSize = 1;
-
-                // create font for family
-                if( families != null && !families.isEmpty() ) {
-                    for( String family : families ) {
-                        Font font = createCompositeFont( family, newStyle, newSize );
-                        if( !isFallbackFont( font ) || family.equalsIgnoreCase( Font.DIALOG ) )
-                            return toUIResource( font );
-                    }
-                }
-
-                // derive font
-                if( newStyle != baseStyle || newSize != baseSize ) {
-                    // hack for font "Ubuntu Medium" on Linux, which curiously belongs
-                    // to family "Ubuntu Light" and using deriveFont() would create a light font
-                    if( "Ubuntu Medium".equalsIgnoreCase( baseFont.getName() ) &&
-                            "Ubuntu Light".equalsIgnoreCase( baseFont.getFamily() ) )
-                    {
-                        Font font = createCompositeFont( "Ubuntu Medium", newStyle, newSize );
-                        if( !isFallbackFont( font ) )
-                            return toUIResource( font );
-                    }
-
-                    return toUIResource( baseFont.deriveFont( newStyle, newSize ) );
-                } else
-                    return toUIResource( baseFont );
-            }
-
-            private FontUIResource toUIResource( Font font ) {
-                // make sure that font is a UIResource for LaF switching
-                return (font instanceof FontUIResource)
-                        ? (FontUIResource) font
-                        : new FontUIResource( font );
-            }
-
-            private boolean isFallbackFont( Font font ) {
-                return Font.DIALOG.equalsIgnoreCase( font.getFamily() );
-            }
-        }
-
-
         /**
          * Returns true if the JRE scales, which is the case if:
          *   - environment variable GDK_SCALE is set and running on Java 9 or later
@@ -800,25 +668,6 @@ public final class SwingTree
 
     }
 
-    private static final String OPTIONAL_PREFIX = "?";
-
-    /**
-     * For use in LazyValue to get value for given key from UIManager and report error
-     * if not found. If key is prefixed by '?', then no error is reported.
-     */
-    static Object lazyUIManagerGet( String uiKey ) {
-        boolean optional = false;
-        if( uiKey.startsWith( OPTIONAL_PREFIX ) ) {
-            uiKey = uiKey.substring( OPTIONAL_PREFIX.length() );
-            optional = true;
-        }
-
-        Object value = UIManager.get( uiKey );
-        if( value == null && !optional )
-            System.err.println( "SwingTree: '" + uiKey + "' not found in UI defaults." );
-        return value;
-    }
-
     /**
      * Defines/documents own system properties used in SwingTree.
      *
@@ -831,7 +680,7 @@ public final class SwingTree
          * <p>
          * If Java runtime scales (Java 9 or later), this scale factor is applied on top
          * of the Java system scale factor. Java 8 does not scale and this scale factor
-         * replaces the user scale factor that FlatLaf computes based on the font.
+         * replaces the user scale factor that SwingTree computes based on the font.
          * To replace the Java 9+ system scale factor, use system property "sun.java2d.uiScale",
          * which has the same syntax as this one.
          * <p>
@@ -873,7 +722,7 @@ public final class SwingTree
      * @author Daniel Nepp, but originally a derivative work of
      *         Karl Tauber (com.formdev.flatlaf.util.SystemInfo)
      */
-    static final class SystemInfo
+    private static final class SystemInfo
     {
         // platforms
         public static final boolean isWindows;
@@ -982,7 +831,7 @@ public final class SwingTree
         }
     }
 
-    static class LinuxFontPolicy
+    private static class LinuxFontPolicy
     {
         static Font getFont() {
             return SystemInfo.isKDE ? getKDEFont() : getGnomeFont();
@@ -1174,7 +1023,7 @@ public final class SwingTree
                         style |= Font.ITALIC;
                 } catch( RuntimeException ex ) {
                     ex.printStackTrace();
-                    //LoggingFacade.INSTANCE.logConfig( "FlatLaf: Failed to parse 'font=" + generalFont + "'.", ex );
+                    //LoggingFacade.INSTANCE.logConfig( "SwingTree: Failed to parse 'font=" + generalFont + "'.", ex );
                 }
             }
 
@@ -1189,7 +1038,7 @@ public final class SwingTree
                         dpi = 50;
                 } catch( NumberFormatException ex ) {
                     ex.printStackTrace();
-                    //LoggingFacade.INSTANCE.logConfig( "FlatLaf: Failed to parse 'forceFontDPI=" + forceFontDPI + "'.", ex );
+                    //LoggingFacade.INSTANCE.logConfig( "SwingTree: Failed to parse 'forceFontDPI=" + forceFontDPI + "'.", ex );
                 }
             }
 
@@ -1229,7 +1078,7 @@ public final class SwingTree
                     lines.add( line );
             } catch( IOException ex ) {
                 ex.printStackTrace();
-                //LoggingFacade.INSTANCE.logConfig( "FlatLaf: Failed to read '" + filename + "'.", ex );
+                //LoggingFacade.INSTANCE.logConfig( "SwingTree: Failed to read '" + filename + "'.", ex );
             }
             return lines;
         }
