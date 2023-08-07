@@ -248,8 +248,9 @@ public final class ComponentExtension<C extends JComponent>
 
         final Style.Report styleReport = style.getReport();
 
-        boolean isNotStyled                = styleReport.isNotStyled();
-        boolean onlyDimensionalityIsStyled = styleReport.onlyDimensionalityIsStyled();
+        boolean isNotStyled                     = styleReport.isNotStyled();
+        boolean onlyDimensionalityIsStyled      = styleReport.onlyDimensionalityIsStyled();
+        boolean styleCanBeRenderedThroughBorder = BorderStyleAndAnimationRenderer.canFullyPaint(styleReport);
 
         if ( isNotStyled || onlyDimensionalityIsStyled ) {
             _uninstallCustomLaF();
@@ -383,7 +384,8 @@ public final class ComponentExtension<C extends JComponent>
 
         if ( !onlyDimensionalityIsStyled ) {
             _installCustomBorderBasedStyleAndAnimationRenderer();
-            _establishLookAndFeel(style);
+            if ( !styleCanBeRenderedThroughBorder )
+                _establishLookAndFeel(style);
         }
 
         if ( !style.hasCustomForegroundPainters() )
@@ -579,6 +581,21 @@ public final class ComponentExtension<C extends JComponent>
 
     static final class BorderStyleAndAnimationRenderer<C extends JComponent> implements Border
     {
+        static boolean canFullyPaint(Style.Report report) {
+            boolean simple = report.onlyDimensionalityAndOrLayoutIsStyled();
+            if ( simple ) return true;
+            return report.noBorderStyle          &&
+                   report.noBackgroundStyle      &&
+                   report.noForegroundStyle      &&
+                   report.noFontStyle            &&
+                   report.noCursor               &&
+                   ( report.noShadowStyle || report.allShadowsAreBorderShadows     ) &&
+                   ( report.noPainters    || report.allPaintersAreBorderPainters   ) &&
+                   ( report.noShades      || report.allGradientsAreBorderGradients ) &&
+                   ( report.noGrounds     || report.allImagesAreBorderImages       );
+
+        }
+
         private final ComponentExtension<C> _compExt;
         private final Border _formerBorder;
         private final boolean _borderWasNotPainted;
@@ -609,10 +626,16 @@ public final class ComponentExtension<C extends JComponent>
 
             g.setClip(_compExt._mainClip);
 
-            if ( _compExt._currentStylePainter != null )
-                _compExt._currentStylePainter.paintBorderStyle((Graphics2D) g);
+            if ( _compExt._currentStylePainter != null ) {
+                _paintThisStyleAPIBasedBorder((Graphics2D) g);
+                if ( _formerBorder != null && !_borderWasNotPainted ) {
+                    Style.Report report = _compExt._currentStylePainter.getStyle().getReport();
+                    if ( canFullyPaint(report) )
+                        _paintFormerBorder(c, g, x, y, width, height);
+                }
+            }
             else if ( _formerBorder != null && !_borderWasNotPainted )
-                _formerBorder.paintBorder(c, g, x, y, width, height);
+                _paintFormerBorder(c, g, x, y, width, height);
 
             if ( g.getClip() != formerClip )
                 g.setClip(formerClip);
@@ -621,6 +644,29 @@ public final class ComponentExtension<C extends JComponent>
 
             if ( g.getClip() != formerClip )
                 g.setClip(formerClip);
+        }
+
+        private void _paintFormerBorder(Component c, Graphics g, int x, int y, int width, int height) {
+            try {
+                Insets insets = _currentMarginInsets == null ? new Insets(0, 0, 0, 0) : _currentMarginInsets;
+                _formerBorder.paintBorder(
+                        c, g,
+                        x + insets.left,
+                        y + insets.top,
+                        width - insets.left - insets.right,
+                        height - insets.top - insets.bottom
+                );
+            } catch ( Exception ex ) {
+                ex.printStackTrace();
+            }
+        }
+
+        private void _paintThisStyleAPIBasedBorder(Graphics2D g) {
+            try {
+                _compExt._currentStylePainter.paintBorderStyle(g);
+            } catch ( Exception ex ) {
+                ex.printStackTrace();
+            }
         }
 
         @Override
@@ -643,7 +689,7 @@ public final class ComponentExtension<C extends JComponent>
                                             .orElse(_currentMarginInsets);
 
             return _compExt._getOrCreateStylePainter()
-                            .map(r ->
+                            .map( r ->
                                 r.calculateBorderInsets(
                                     _formerBorder == null
                                         ? new Insets(0,0,0,0)
@@ -660,6 +706,7 @@ public final class ComponentExtension<C extends JComponent>
         public Insets getCurrentMarginInsets() { return _currentMarginInsets; }
 
         @Override public boolean isBorderOpaque() { return false; }
+
     }
 
     static class PanelStyler extends BasicPanelUI
@@ -682,8 +729,12 @@ public final class ComponentExtension<C extends JComponent>
 
         @Override public void paint( Graphics g, JComponent c ) {
             ComponentExtension.from(c)._paintBackground(g);
-            if ( _formerUI != null )
-                _formerUI.update(g, c);
+            try {
+                if (_formerUI != null)
+                    _formerUI.update(g, c);
+            } catch ( Exception ex ) {
+                ex.printStackTrace();
+            }
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
         @Override

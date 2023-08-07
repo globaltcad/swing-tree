@@ -457,6 +457,12 @@ public final class Style
         public final boolean noCursor;
         public final boolean noGrounds;
 
+        public final boolean allShadowsAreBorderShadows;
+        public final boolean allGradientsAreBorderGradients;
+        public final boolean allPaintersAreBorderPainters;
+        public final boolean allImagesAreBorderImages;
+
+
         private Report(Style style) {
             this.noLayoutStyle         = Style.none().hasEqualLayoutAs(style);
             this.noBorderStyle         = Style.none().hasEqualBorderAs(style);
@@ -469,6 +475,11 @@ public final class Style
             this.noShades              = Style.none().hasEqualShadesAs(style);
             this.noCursor              = Style.none().hasEqualCursorAs(style);
             this.noGrounds             = Style.none().hasEqualGroundsAs(style);
+
+            this.allShadowsAreBorderShadows = style._shadows.values().stream().allMatch( s -> s.layer() == UI.Layer.BORDER );
+            this.allGradientsAreBorderGradients = style._shades.values().stream().allMatch( s -> s.layer() == UI.Layer.BORDER );
+            this.allPaintersAreBorderPainters = style._painters.values().stream().allMatch( s -> s.layer() == UI.Layer.BORDER );
+            this.allImagesAreBorderImages = style._grounds.values().stream().allMatch( s -> s.layer() == UI.Layer.BORDER );
         }
 
         public boolean isNotStyled() {
@@ -485,8 +496,43 @@ public final class Style
                    noGrounds;
         }
 
+        public boolean onlyDimensionalityAndOrLayoutIsStyled() {
+            return this.onlyDimensionalityIsStyled() ||
+                   this.onlyLayoutIsStyled()         ||
+                   this.onlyLayoutAndDimensionalityIsStyled();
+        }
+
+        public boolean onlyLayoutIsStyled() {
+            return !noLayoutStyle          &&
+                    noBorderStyle          &&
+                    noBackgroundStyle      &&
+                    noForegroundStyle      &&
+                    noFontStyle            &&
+                    noDimensionalityStyle  &&
+                    noShadowStyle          &&
+                    noPainters             &&
+                    noShades               &&
+                    noCursor               &&
+                    noGrounds;
+        }
+
+
         public boolean onlyDimensionalityIsStyled() {
             return noLayoutStyle          &&
+                   noBorderStyle          &&
+                   noBackgroundStyle      &&
+                   noForegroundStyle      &&
+                   noFontStyle            &&
+                   !noDimensionalityStyle &&
+                   noShadowStyle          &&
+                   noPainters             &&
+                   noShades               &&
+                   noCursor               &&
+                   noGrounds;
+        }
+
+        public boolean onlyLayoutAndDimensionalityIsStyled() {
+            return !noLayoutStyle         &&
                    noBorderStyle          &&
                    noBackgroundStyle      &&
                    noForegroundStyle      &&
