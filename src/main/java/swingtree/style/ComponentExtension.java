@@ -783,7 +783,7 @@ public final class ComponentExtension<C extends JComponent>
     private static void _paintComponentThroughFormerIU(ComponentUI formerUI, Graphics g, JComponent c) {
         try {
             if ( formerUI != null )
-                formerUI.paint(g, c);
+                formerUI.update(g, c);
         } catch ( Exception ex ) {
             ex.printStackTrace();
         }
