@@ -23,24 +23,28 @@ final class StylePainter<C extends JComponent>
     }
 
     private final C _comp;
-    private final Style style;
-    private Area baseArea = null;
+    private final Style _style;
+
+    private Area _baseArea = null;
 
 
-    StylePainter(C comp, Style style ) {
-        _comp = Objects.requireNonNull(comp);
-        this.style = style;
+    StylePainter( C comp, Style style ) {
+        _comp  = Objects.requireNonNull(comp);
+        _style = Objects.requireNonNull(style);
     }
 
+    public Style getStyle() { return _style; }
+
     private Area _getBaseArea() {
-        if ( baseArea == null )
-            baseArea = _calculateBaseArea(style, 0, 0, 0, 0);
-        return baseArea;
+        if ( _baseArea == null )
+            _baseArea = _calculateBaseArea(_style, 0, 0, 0, 0);
+
+        return _baseArea;
     }
 
     public void renderBackgroundStyle(Graphics2D g2d )
     {
-        baseArea = null;
+        _baseArea = null;
 
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
@@ -53,10 +57,10 @@ final class StylePainter<C extends JComponent>
         if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
             g2d.setFont( componentFont );
 
-        style.background().foundationColor().ifPresent(outerColor -> {
+        _style.background().foundationColor().ifPresent(outerColor -> {
             _fillOuterFoundationBackground(outerColor, g2d);
         });
-        style.background().color().ifPresent(color -> {
+        _style.background().color().ifPresent(color -> {
             if ( color.getAlpha() == 0 ) return;
             g2d.setColor(color);
             g2d.fill(_getBaseArea());
@@ -67,38 +71,38 @@ final class StylePainter<C extends JComponent>
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
 
-        if ( baseArea != null )
+        if ( _baseArea != null )
             g2d.setClip(_getBaseArea());
     }
 
     private void _paintStylesOn( UI.Layer layer, Graphics2D g2d ) {
         // Every layer has 3 things:
         // 0. Grounding, which is a solid color or image
-        for ( ImageStyle ground : style.grounds(layer) )
+        for ( ImageStyle ground : _style.grounds(layer) )
             if ( !ground.equals(ImageStyle.none()) )
                 _renderImage( ground, g2d, _comp, _getBaseArea() );
 
         // 1. Shades, which are simple gradient effects
-        for ( GradientStyle gradient : style.gradients(layer) )
+        for ( GradientStyle gradient : _style.gradients(layer) )
             if ( gradient.colors().length > 0 ) {
                 if ( gradient.colors().length == 1 ) {
                     g2d.setColor(gradient.colors()[0]);
                     g2d.fill(_getBaseArea());
                 }
                 else if ( gradient.transition().isDiagonal() )
-                    _renderDiagonalGradient(g2d, _comp, style.margin(), gradient, _getBaseArea());
+                    _renderDiagonalGradient(g2d, _comp, _style.margin(), gradient, _getBaseArea());
                 else
-                    _renderVerticalOrHorizontalGradient(g2d, _comp, style.margin(), gradient, _getBaseArea());
+                    _renderVerticalOrHorizontalGradient(g2d, _comp, _style.margin(), gradient, _getBaseArea());
             }
 
         // 2. Shadows, which are simple drop shadows that cn go inwards or outwards
-        for ( ShadowStyle shadow : style.shadows(layer) )
+        for ( ShadowStyle shadow : _style.shadows(layer) )
             shadow.color().ifPresent(color -> {
-                _renderShadows(style, shadow, _comp, g2d, color);
+                _renderShadows(_style, shadow, _comp, g2d, color);
             });
 
         // 3. Painters, which are provided by the user and can be anything
-        style.painters(layer).forEach( backgroundPainter -> {
+        _style.painters(layer).forEach(backgroundPainter -> {
             if ( backgroundPainter == Painter.none() ) return;
             g2d.setClip(_getBaseArea());
             AffineTransform oldTransform = new AffineTransform(g2d.getTransform());
@@ -127,8 +131,8 @@ final class StylePainter<C extends JComponent>
 
         _paintStylesOn(UI.Layer.CONTENT, g2d);
 
-        style.border().color().ifPresent( color -> {
-            _drawBorder(style, color, g2d);
+        _style.border().color().ifPresent(color -> {
+            _drawBorder(_style, color, g2d);
         });
 
         _paintStylesOn(UI.Layer.BORDER, g2d);
@@ -1095,34 +1099,34 @@ final class StylePainter<C extends JComponent>
     }
 
     public Insets calculateBorderInsets(Insets formerInsets) {
-        int left      = style.margin().left().orElse(formerInsets.left);
-        int top       = style.margin().top().orElse(formerInsets.top);
-        int right     = style.margin().right().orElse(formerInsets.right);
-        int bottom    = style.margin().bottom().orElse(formerInsets.bottom);
+        int left      = _style.margin().left().orElse(formerInsets.left);
+        int top       = _style.margin().top().orElse(formerInsets.top);
+        int right     = _style.margin().right().orElse(formerInsets.right);
+        int bottom    = _style.margin().bottom().orElse(formerInsets.bottom);
         // Add padding:
-        left   += style.padding().left().orElse(0);
-        top    += style.padding().top().orElse(0);
-        right  += style.padding().right().orElse(0);
-        bottom += style.padding().bottom().orElse(0);
+        left   += _style.padding().left().orElse(0);
+        top    += _style.padding().top().orElse(0);
+        right  += _style.padding().right().orElse(0);
+        bottom += _style.padding().bottom().orElse(0);
         // Add border widths:
-        left   += Math.max(style.border().widths().left().orElse(0),   0);
-        top    += Math.max(style.border().widths().top().orElse(0),    0);
-        right  += Math.max(style.border().widths().right().orElse(0),  0);
-        bottom += Math.max(style.border().widths().bottom().orElse(0), 0);
+        left   += Math.max(_style.border().widths().left().orElse(0),   0);
+        top    += Math.max(_style.border().widths().top().orElse(0),    0);
+        right  += Math.max(_style.border().widths().right().orElse(0),  0);
+        bottom += Math.max(_style.border().widths().bottom().orElse(0), 0);
         return new Insets(top, left, bottom, right);
     }
 
     public Insets calculateMarginInsets() {
-        int left   = style.margin().left().orElse(0);
-        int top    = style.margin().top().orElse(0);
-        int right  = style.margin().right().orElse(0);
-        int bottom = style.margin().bottom().orElse(0);
+        int left   = _style.margin().left().orElse(0);
+        int top    = _style.margin().top().orElse(0);
+        int right  = _style.margin().right().orElse(0);
+        int bottom = _style.margin().bottom().orElse(0);
 
         // Add border widths:
-        left   += Math.max(style.border().widths().left().orElse(0),   0);
-        top    += Math.max(style.border().widths().top().orElse(0),    0);
-        right  += Math.max(style.border().widths().right().orElse(0),  0);
-        bottom += Math.max(style.border().widths().bottom().orElse(0), 0);
+        left   += Math.max(_style.border().widths().left().orElse(0),   0);
+        top    += Math.max(_style.border().widths().top().orElse(0),    0);
+        right  += Math.max(_style.border().widths().right().orElse(0),  0);
+        bottom += Math.max(_style.border().widths().bottom().orElse(0), 0);
 
         return new Insets(top, left, bottom, right);
     }
