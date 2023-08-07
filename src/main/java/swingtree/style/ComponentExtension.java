@@ -80,6 +80,11 @@ public final class ComponentExtension<C extends JComponent>
         _applyStyleToComponentState(_calculateStyle());
     }
 
+    private void _establishCurrentMainPaintClip(Graphics g) {
+        if ( _mainClip == null )
+            _mainClip = g.getClip();
+    }
+
     public void setStyleGroups( String... styleName ) {
         Objects.requireNonNull(styleName);
         if ( !_styleGroups.isEmpty() )
@@ -159,7 +164,7 @@ public final class ComponentExtension<C extends JComponent>
     private void _paintBackground( Graphics g )
     {
         _mainClip = null;
-        _mainClip = g.getClip();
+        _establishCurrentMainPaintClip(g);
 
         _currentStylePainter = _createStylePainter();
         if ( _currentStylePainter != null )
@@ -616,6 +621,7 @@ public final class ComponentExtension<C extends JComponent>
         private final boolean _borderWasNotPainted;
         private Insets _currentInsets;
         private Insets _currentMarginInsets = new Insets(0,0,0,0);
+        private Insets _currentPaddingInsets = new Insets(0,0,0,0);
 
         BorderStyleAndAnimationRenderer(ComponentExtension<C> compExt, Border formerBorder) {
             _compExt = compExt;
@@ -635,6 +641,8 @@ public final class ComponentExtension<C extends JComponent>
         @Override
         public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
             _checkIfInsetsChanged();
+
+            _compExt._establishCurrentMainPaintClip(g);
 
             // We remember the clip:
             Shape formerClip = g.getClip();
@@ -700,8 +708,12 @@ public final class ComponentExtension<C extends JComponent>
 
         private Insets _calculateInsets() {
             _currentMarginInsets = _compExt._getOrCreateStylePainter()
-                                            .map( r -> r.calculateMarginInsets() )
+                                            .map(StylePainter::calculateMarginInsets)
                                             .orElse(_currentMarginInsets);
+
+            _currentPaddingInsets = _compExt._getOrCreateStylePainter()
+                                            .map(StylePainter::calculatePaddingInsets)
+                                            .orElse(_currentPaddingInsets);
 
             return _compExt._getOrCreateStylePainter()
                             .map( r ->
@@ -719,6 +731,8 @@ public final class ComponentExtension<C extends JComponent>
         }
 
         public Insets getCurrentMarginInsets() { return _currentMarginInsets; }
+
+        public Insets getCurrentPaddingInsets() { return _currentPaddingInsets; }
 
         @Override public boolean isBorderOpaque() { return false; }
 
@@ -744,13 +758,7 @@ public final class ComponentExtension<C extends JComponent>
 
         @Override public void paint( Graphics g, JComponent c ) {
             ComponentExtension.from(c)._paintBackground(g);
-            try {
-                if ( _formerUI != null ) {
-                    _formerUI.update(g, c);
-                }
-            } catch ( Exception ex ) {
-                ex.printStackTrace();
-            }
+            _paintComponentThroughFormerIU(_formerUI, g, c);
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
         @Override
@@ -765,12 +773,20 @@ public final class ComponentExtension<C extends JComponent>
 
         @Override public void paint( Graphics g, JComponent c ) {
             ComponentExtension.from(c)._paintBackground(g);
-            if ( _formerUI != null )
-                _formerUI.update(g, c);
+            _paintComponentThroughFormerIU(_formerUI, g, c);
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
         @Override
         public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
+    }
+
+    private static void _paintComponentThroughFormerIU(ComponentUI formerUI, Graphics g, JComponent c) {
+        try {
+            if ( formerUI != null )
+                formerUI.paint(g, c);
+        } catch ( Exception ex ) {
+            ex.printStackTrace();
+        }
     }
 
     private static boolean _contains(JComponent c, int x, int y, Supplier<Boolean> superContains) {

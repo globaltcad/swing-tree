@@ -1138,4 +1138,12 @@ final class StylePainter<C extends JComponent>
 
         return new Insets(top, left, bottom, right);
     }
+
+    public Insets calculatePaddingInsets() {
+        int left   = _style.padding().left().orElse(0);
+        int top    = _style.padding().top().orElse(0);
+        int right  = _style.padding().right().orElse(0);
+        int bottom = _style.padding().bottom().orElse(0);
+        return new Insets(top, left, bottom, right);
+    }
 }
