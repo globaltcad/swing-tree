@@ -877,6 +877,24 @@ public final class UI
         return button().peek( it -> it.setIcon(icon) );
     }
 
+    public static UIForButton<JButton> button( int width, int height, ImageIcon icon ) {
+        NullUtil.nullArgCheck(icon, "icon", Icon.class);
+        if ( width != icon.getIconWidth() || height != icon.getIconHeight() ) {
+            float scale = SwingTree.get().getUIScale().getUserScaleFactor();
+
+            int scaleHint = Image.SCALE_SMOOTH;
+            if (scale > 1.5f)
+                scaleHint = Image.SCALE_FAST;
+
+            width = (int) (width * scale);
+            height = (int) (height * scale);
+
+            icon = new ImageIcon(icon.getImage().getScaledInstance(width, height, scaleHint));
+        }
+        ImageIcon finalIcon = icon;
+        return button().peek(it -> it.setIcon(finalIcon) );
+    }
+
     /**
      *  Use this to create a builder for the {@link JButton} UI component
      *  with a dynamically displayed icon on top.

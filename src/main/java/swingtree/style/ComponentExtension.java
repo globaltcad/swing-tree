@@ -80,6 +80,11 @@ public final class ComponentExtension<C extends JComponent>
         _applyStyleToComponentState(_calculateStyle());
     }
 
+    private void _establishCurrentMainPaintClip(Graphics g) {
+        if ( _mainClip == null )
+            _mainClip = g.getClip();
+    }
+
     public void setStyleGroups( String... styleName ) {
         Objects.requireNonNull(styleName);
         if ( !_styleGroups.isEmpty() )
@@ -159,7 +164,7 @@ public final class ComponentExtension<C extends JComponent>
     private void _paintBackground( Graphics g )
     {
         _mainClip = null;
-        _mainClip = g.getClip();
+        _establishCurrentMainPaintClip(g);
 
         _currentStylePainter = _createStylePainter();
         if ( _currentStylePainter != null )
@@ -246,42 +251,11 @@ public final class ComponentExtension<C extends JComponent>
     {
         Objects.requireNonNull(style);
 
-        final boolean noLayoutStyle         = Style.none().hasEqualLayoutAs(style);
-        final boolean noBorderStyle         = Style.none().hasEqualBorderAs(style);
-        final boolean noBackgroundStyle     = Style.none().hasEqualBackgroundAs(style);
-        final boolean noForegroundStyle     = Style.none().hasEqualForegroundAs(style);
-        final boolean noFontStyle           = Style.none().hasEqualFontAs(style);
-        final boolean noDimensionalityStyle = Style.none().hasEqualDimensionalityAs(style);
-        final boolean noShadowStyle         = Style.none().hasEqualShadowsAs(style);
-        final boolean noPainters            = Style.none().hasEqualPaintersAs(style);
-        final boolean noShades              = Style.none().hasEqualShadesAs(style);
-        final boolean noCursor              = Style.none().hasEqualCursorAs(style);
-        final boolean noGrounds             = Style.none().hasEqualGroundsAs(style);
+        final Style.Report styleReport = style.getReport();
 
-        boolean isNotStyled = noLayoutStyle          &&
-                              noBorderStyle          &&
-                              noBackgroundStyle      &&
-                              noForegroundStyle      &&
-                              noFontStyle            &&
-                              noDimensionalityStyle  &&
-                              noShadowStyle          &&
-                              noPainters             &&
-                              noShades               &&
-                              noCursor               &&
-                              noGrounds;
-
-        boolean onlyDimensionalityIsStyled =
-                              noLayoutStyle          &&
-                              noBorderStyle          &&
-                              noBackgroundStyle      &&
-                              noForegroundStyle      &&
-                              noFontStyle            &&
-                              !noDimensionalityStyle &&
-                              noShadowStyle          &&
-                              noPainters             &&
-                              noShades               &&
-                              noCursor               &&
-                              noGrounds;
+        boolean isNotStyled                     = styleReport.isNotStyled();
+        boolean onlyDimensionalityIsStyled      = styleReport.onlyDimensionalityIsStyled();
+        boolean styleCanBeRenderedThroughBorder = BorderStyleAndAnimationRenderer.canFullyPaint(styleReport);
 
         if ( isNotStyled || onlyDimensionalityIsStyled ) {
             _uninstallCustomLaF();
@@ -415,7 +389,8 @@ public final class ComponentExtension<C extends JComponent>
 
         if ( !onlyDimensionalityIsStyled ) {
             _installCustomBorderBasedStyleAndAnimationRenderer();
-            _establishLookAndFeel(style);
+            if ( !styleCanBeRenderedThroughBorder )
+                _establishLookAndFeel(style);
         }
 
         if ( !style.hasCustomForegroundPainters() )
@@ -520,6 +495,11 @@ public final class ComponentExtension<C extends JComponent>
             PanelStyler laf = PanelStyler.INSTANCE;
             p.setUI(laf);
             _styleLaF = laf;
+            if ( _formerLaF instanceof BasicPanelUI ) {
+                BasicPanelUI panelUI = (BasicPanelUI) _formerLaF;
+                panelUI.installUI(p);
+                // We make the former LaF believe that it is still in charge of the component.
+            }
             return true;
         }
         if ( _owner instanceof JBox ) {
@@ -535,6 +515,11 @@ public final class ComponentExtension<C extends JComponent>
             _formerLaF = b.getUI();
             ButtonStyler laf = new ButtonStyler(b.getUI());
             b.setUI(laf);
+            if ( _formerLaF instanceof BasicButtonUI ) {
+                BasicButtonUI buttonUI = (BasicButtonUI) _formerLaF;
+                buttonUI.installUI(b);
+                // We make the former LaF believe that it is still in charge of the component.
+            }
             _styleLaF = laf;
             return true;
         }
@@ -543,6 +528,11 @@ public final class ComponentExtension<C extends JComponent>
             _formerLaF = l.getUI();
             LabelStyler laf = new LabelStyler(l.getUI());
             l.setUI(laf);
+            if ( _formerLaF instanceof BasicLabelUI ) {
+                BasicLabelUI labelUI = (BasicLabelUI) _formerLaF;
+                labelUI.installUI(l);
+                // We make the former LaF believe that it is still in charge of the component.
+            }
             _styleLaF = laf;
             return true;
         }
@@ -611,11 +601,27 @@ public final class ComponentExtension<C extends JComponent>
 
     static final class BorderStyleAndAnimationRenderer<C extends JComponent> implements Border
     {
+        static boolean canFullyPaint(Style.Report report) {
+            boolean simple = report.onlyDimensionalityAndOrLayoutIsStyled();
+            if ( simple ) return true;
+            return report.noBorderStyle          &&
+                   report.noBackgroundStyle      &&
+                   report.noForegroundStyle      &&
+                   report.noFontStyle            &&
+                   report.noCursor               &&
+                   ( report.noShadowStyle || report.allShadowsAreBorderShadows     ) &&
+                   ( report.noPainters    || report.allPaintersAreBorderPainters   ) &&
+                   ( report.noShades      || report.allGradientsAreBorderGradients ) &&
+                   ( report.noGrounds     || report.allImagesAreBorderImages       );
+
+        }
+
         private final ComponentExtension<C> _compExt;
         private final Border _formerBorder;
         private final boolean _borderWasNotPainted;
         private Insets _currentInsets;
         private Insets _currentMarginInsets = new Insets(0,0,0,0);
+        private Insets _currentPaddingInsets = new Insets(0,0,0,0);
 
         BorderStyleAndAnimationRenderer(ComponentExtension<C> compExt, Border formerBorder) {
             _compExt = compExt;
@@ -636,15 +642,23 @@ public final class ComponentExtension<C extends JComponent>
         public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
             _checkIfInsetsChanged();
 
+            _compExt._establishCurrentMainPaintClip(g);
+
             // We remember the clip:
             Shape formerClip = g.getClip();
 
             g.setClip(_compExt._mainClip);
 
-            if ( _compExt._currentStylePainter != null )
-                _compExt._currentStylePainter.paintBorderStyle((Graphics2D) g);
+            if ( _compExt._currentStylePainter != null ) {
+                _paintThisStyleAPIBasedBorder((Graphics2D) g);
+                if ( _formerBorder != null && !_borderWasNotPainted ) {
+                    Style.Report report = _compExt._currentStylePainter.getStyle().getReport();
+                    if ( canFullyPaint(report) )
+                        _paintFormerBorder(c, g, x, y, width, height);
+                }
+            }
             else if ( _formerBorder != null && !_borderWasNotPainted )
-                _formerBorder.paintBorder(c, g, x, y, width, height);
+                _paintFormerBorder(c, g, x, y, width, height);
 
             if ( g.getClip() != formerClip )
                 g.setClip(formerClip);
@@ -653,6 +667,29 @@ public final class ComponentExtension<C extends JComponent>
 
             if ( g.getClip() != formerClip )
                 g.setClip(formerClip);
+        }
+
+        private void _paintFormerBorder(Component c, Graphics g, int x, int y, int width, int height) {
+            try {
+                Insets insets = _currentMarginInsets == null ? new Insets(0, 0, 0, 0) : _currentMarginInsets;
+                _formerBorder.paintBorder(
+                        c, g,
+                        x + insets.left,
+                        y + insets.top,
+                        width - insets.left - insets.right,
+                        height - insets.top - insets.bottom
+                );
+            } catch ( Exception ex ) {
+                ex.printStackTrace();
+            }
+        }
+
+        private void _paintThisStyleAPIBasedBorder(Graphics2D g) {
+            try {
+                _compExt._currentStylePainter.paintBorderStyle(g);
+            } catch ( Exception ex ) {
+                ex.printStackTrace();
+            }
         }
 
         @Override
@@ -671,11 +708,15 @@ public final class ComponentExtension<C extends JComponent>
 
         private Insets _calculateInsets() {
             _currentMarginInsets = _compExt._getOrCreateStylePainter()
-                                            .map( r -> r.calculateMarginInsets() )
+                                            .map(StylePainter::calculateMarginInsets)
                                             .orElse(_currentMarginInsets);
 
+            _currentPaddingInsets = _compExt._getOrCreateStylePainter()
+                                            .map(StylePainter::calculatePaddingInsets)
+                                            .orElse(_currentPaddingInsets);
+
             return _compExt._getOrCreateStylePainter()
-                            .map(r ->
+                            .map( r ->
                                 r.calculateBorderInsets(
                                     _formerBorder == null
                                         ? new Insets(0,0,0,0)
@@ -691,7 +732,10 @@ public final class ComponentExtension<C extends JComponent>
 
         public Insets getCurrentMarginInsets() { return _currentMarginInsets; }
 
+        public Insets getCurrentPaddingInsets() { return _currentPaddingInsets; }
+
         @Override public boolean isBorderOpaque() { return false; }
+
     }
 
     static class PanelStyler extends BasicPanelUI
@@ -714,8 +758,7 @@ public final class ComponentExtension<C extends JComponent>
 
         @Override public void paint( Graphics g, JComponent c ) {
             ComponentExtension.from(c)._paintBackground(g);
-            if ( _formerUI != null )
-                _formerUI.update(g, c);
+            _paintComponentThroughFormerIU(_formerUI, g, c);
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
         @Override
@@ -730,12 +773,20 @@ public final class ComponentExtension<C extends JComponent>
 
         @Override public void paint( Graphics g, JComponent c ) {
             ComponentExtension.from(c)._paintBackground(g);
-            if ( _formerUI != null )
-                _formerUI.update(g, c);
+            _paintComponentThroughFormerIU(_formerUI, g, c);
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
         @Override
         public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
+    }
+
+    private static void _paintComponentThroughFormerIU(ComponentUI formerUI, Graphics g, JComponent c) {
+        try {
+            if ( formerUI != null )
+                formerUI.update(g, c);
+        } catch ( Exception ex ) {
+            ex.printStackTrace();
+        }
     }
 
     private static boolean _contains(JComponent c, int x, int y, Supplier<Boolean> superContains) {
