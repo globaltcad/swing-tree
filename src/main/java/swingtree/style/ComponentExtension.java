@@ -490,6 +490,11 @@ public final class ComponentExtension<C extends JComponent>
             PanelStyler laf = PanelStyler.INSTANCE;
             p.setUI(laf);
             _styleLaF = laf;
+            if ( _formerLaF instanceof BasicPanelUI ) {
+                BasicPanelUI panelUI = (BasicPanelUI) _formerLaF;
+                panelUI.installUI(p);
+                // We make the former LaF believe that it is still in charge of the component.
+            }
             return true;
         }
         if ( _owner instanceof JBox ) {
@@ -505,6 +510,11 @@ public final class ComponentExtension<C extends JComponent>
             _formerLaF = b.getUI();
             ButtonStyler laf = new ButtonStyler(b.getUI());
             b.setUI(laf);
+            if ( _formerLaF instanceof BasicButtonUI ) {
+                BasicButtonUI buttonUI = (BasicButtonUI) _formerLaF;
+                buttonUI.installUI(b);
+                // We make the former LaF believe that it is still in charge of the component.
+            }
             _styleLaF = laf;
             return true;
         }
@@ -513,6 +523,11 @@ public final class ComponentExtension<C extends JComponent>
             _formerLaF = l.getUI();
             LabelStyler laf = new LabelStyler(l.getUI());
             l.setUI(laf);
+            if ( _formerLaF instanceof BasicLabelUI ) {
+                BasicLabelUI labelUI = (BasicLabelUI) _formerLaF;
+                labelUI.installUI(l);
+                // We make the former LaF believe that it is still in charge of the component.
+            }
             _styleLaF = laf;
             return true;
         }
@@ -730,8 +745,9 @@ public final class ComponentExtension<C extends JComponent>
         @Override public void paint( Graphics g, JComponent c ) {
             ComponentExtension.from(c)._paintBackground(g);
             try {
-                if (_formerUI != null)
+                if ( _formerUI != null ) {
                     _formerUI.update(g, c);
+                }
             } catch ( Exception ex ) {
                 ex.printStackTrace();
             }
