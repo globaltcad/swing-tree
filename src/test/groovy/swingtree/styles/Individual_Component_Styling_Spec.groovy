@@ -1,6 +1,7 @@
 package swingtree.styles
 
 import com.formdev.flatlaf.FlatLightLaf
+import examples.FancyTextField
 import net.miginfocom.swing.MigLayout
 import spock.lang.Narrative
 import spock.lang.Specification
@@ -12,6 +13,7 @@ import swingtree.UI
 
 import utility.Utility
 
+import javax.imageio.ImageIO
 import javax.swing.*
 import javax.swing.border.TitledBorder
 import java.awt.*
@@ -1356,6 +1358,78 @@ class Individual_Component_Styling_Spec extends Specification
 
         then : 'The image is as expected.'
             Utility.similarityBetween(images, "components/repeated-image-panel.png", 99.95) > 99.95
+    }
+
+    def 'Create fancy text fields with custom icons and a button.'(
+        float uiScale
+    ) {
+        reportInfo """
+            Creating heavily customized components in a way which prefers composition over inheritance
+            is one of the main goals of SwingTree and this little example demonstrates this very nicely.
+            <br>
+            Here you can see an example of a text field with a custom icon and a button:
+            ${Utility.linkSnapshot('components/heavily-customized-text-field.png')}
+
+            As you can see, the resulting text field looks nothing like the default text field
+            and we did not need to extend any Swing class to achieve this.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
+        and : 'Now we create a text field UI with a custom styler lambda and a button.'
+            var seed = ImageIO.read(getClass().getResourceAsStream("/img/seed.png"))
+            var ui =
+                    UI.textField().withLayout("fill, ins 0").withPrefWidth(120)
+                    .withStyle( it -> it
+                        .padding(0, 0, 0, 18)
+                        .marginRight(25)
+                        .paddingRight(-20)
+                        .image(image -> image
+                            .layer(UI.Layer.BORDER)
+                            .image(seed)
+                            .placement(UI.Placement.LEFT)
+                            .height(it.component().getHeight())
+                            .width(30)
+                            .padding(5)
+                        )
+                    )
+                    .add("right",
+                        UI.button(20, 20, UI.icon("img/trees.png"))
+                        .withStyle( it -> it
+                            .margin(0)
+                            .cursor(UI.Cursor.HAND)
+                            .painter(UI.Layer.BACKGROUND, g2d -> {
+                                boolean isHovered = it.component().getModel().isRollover();
+                                boolean isPressed = it.component().getModel().isPressed();
+                                if ( isPressed ) {
+                                    g2d.setColor(new Color(0,100,200));
+                                    g2d.fillRoundRect(0, 0, it.component().getWidth(), it.component().getHeight(), 5, 5);
+                                }
+                                else if ( isHovered ) {
+                                    g2d.setColor(new Color(120,220,100));
+                                    g2d.fillRoundRect(0, 0, it.component().getWidth(), it.component().getHeight(), 5, 5);
+                                }
+                            })
+                        )
+                        .makePlain()
+                    );
+
+        when : 'We render the text field into a BufferedImage.'
+            Utility.setLaF(Utility.LaF.NIMBUS);
+            var image = Utility.renderSingleComponent(ui.getComponent())
+
+        then : 'The image is as expected.'
+            Utility.similarityBetween(image, "components/heavily-customized-text-field.png", 99.5) > 99.5
+
+        where :
+            uiScale << [1, 2, 3]
     }
 
 
