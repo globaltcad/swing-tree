@@ -1034,6 +1034,7 @@ final class StylePainter<C extends JComponent>
         style.image().ifPresent( image -> {
             UI.Placement placement = style.placement();
             boolean repeat         = style.repeat();
+            Outline padding        = style.padding();
             int componentWidth     = component.getWidth();
             int componentHeight    = component.getHeight();
             int imgWidth           = style.width().orElse(image.getWidth(null));
@@ -1078,6 +1079,12 @@ final class StylePainter<C extends JComponent>
                 default:
                     throw new IllegalArgumentException("Unknown placement: " + placement);
             }
+            // We apply the padding:
+            x += padding.left().orElse(0);
+            y += padding.top().orElse(0);
+            imgWidth  -= padding.left().orElse(0) + padding.right().orElse(0);
+            imgHeight -= padding.top().orElse(0) + padding.bottom().orElse(0);
+
             Composite oldComposite = g2d.getComposite();
             try {
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, imgTransparency));
@@ -1089,9 +1096,10 @@ final class StylePainter<C extends JComponent>
                     } finally {
                         g2d.setPaint(oldPaint);
                     }
-                } else {
-                    g2d.drawImage(image, x, y, imgWidth, imgHeight, null);
                 }
+                else
+                    g2d.drawImage(image, x, y, imgWidth, imgHeight, null);
+
             } finally {
                 g2d.setComposite(oldComposite);
             }
