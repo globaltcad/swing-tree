@@ -255,7 +255,7 @@ public final class ImageStyle
                     ", autoFit="    + _autoFit +
                     ", width="      + ( _width == null ? "?" : _width.toString() ) +
                     ", height="     + ( _height == null ? "?" : _height.toString() ) +
-                    ", transparency=" + _opacity +
+                    ", opacity="    + _opacity +
                     ", padding="    + _padding +
                 "]";
     }

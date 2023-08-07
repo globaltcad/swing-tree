@@ -140,7 +140,7 @@ class Styles_Spec extends Specification
                                             "layer=BACKGROUND" +
                                         "], " +
                                         "GradientStyle[alignment=TOP_TO_BOTTOM, type=LINEAR, colors=[], layer=BACKGROUND], " +
-                                        "ImageStyle[layer=BACKGROUND, primer=?, image=?, placement=CENTER, repeat=false, autoFit=false, width=?, height=?, transparency=1.0]" +
+                                        "ImageStyle[layer=BACKGROUND, primer=?, image=?, placement=CENTER, repeat=false, autoFit=false, width=?, height=?, opacity=1.0, padding=Outline[top=?, right=?, bottom=?, left=?]]" +
                                     "]"
     }
 
