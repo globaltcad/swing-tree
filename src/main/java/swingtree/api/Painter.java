@@ -33,7 +33,11 @@ import java.util.concurrent.TimeUnit;
  *      <li>{@link UI#scale(Dimension)} - scales the given dimension according to the current UI scale factor.</li>
  *      <li>{@link UI#scale(Rectangle)} - scales the given rectangle according to the current UI scale factor.</li>
  *      <li>{@link UI#scale(RoundRectangle2D)} - scales the given round rectangle according to the current UI scale factor.</li>
- *  </ul>
+ *  </ul><br>
+ *
+ *  <b>Also consider taking a look at the <br> <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
+ *  where you can browse a large collection of examples demonstrating how to use the API of Swing-Tree in general.</b>
+ *
  */
 @FunctionalInterface
 public interface Painter

@@ -11,8 +11,12 @@ import javax.swing.*;
  *
  * @param <C> The UI component type built by implementations of this.
  */
-public interface SwingBuilder<C extends JComponent> {
-
+public interface SwingBuilder<C extends JComponent>
+{
+    /**
+     *  Build the component.
+     *
+     * @return The built {@link JComponent} type.
+     */
     C build();
-
 }

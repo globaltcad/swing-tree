@@ -9,7 +9,7 @@ import java.awt.event.ComponentEvent;
 /**
  *  A functional interface for doing swing component validity verification.
  *  Passing this to the {@link UIForAnySwing#isValidIf(UIVerifier)} method will
- *  lead to the creation and attachment of a {@link InputVerifier} to the component, which will
+ *  lead to the creation and attachment of an {@link InputVerifier} to the component, which will
  *  be called when the component is validated.
  *
  * @param <C> The component type which should be verified.
