@@ -246,42 +246,10 @@ public final class ComponentExtension<C extends JComponent>
     {
         Objects.requireNonNull(style);
 
-        final boolean noLayoutStyle         = Style.none().hasEqualLayoutAs(style);
-        final boolean noBorderStyle         = Style.none().hasEqualBorderAs(style);
-        final boolean noBackgroundStyle     = Style.none().hasEqualBackgroundAs(style);
-        final boolean noForegroundStyle     = Style.none().hasEqualForegroundAs(style);
-        final boolean noFontStyle           = Style.none().hasEqualFontAs(style);
-        final boolean noDimensionalityStyle = Style.none().hasEqualDimensionalityAs(style);
-        final boolean noShadowStyle         = Style.none().hasEqualShadowsAs(style);
-        final boolean noPainters            = Style.none().hasEqualPaintersAs(style);
-        final boolean noShades              = Style.none().hasEqualShadesAs(style);
-        final boolean noCursor              = Style.none().hasEqualCursorAs(style);
-        final boolean noGrounds             = Style.none().hasEqualGroundsAs(style);
+        final Style.Report styleReport = style.getReport();
 
-        boolean isNotStyled = noLayoutStyle          &&
-                              noBorderStyle          &&
-                              noBackgroundStyle      &&
-                              noForegroundStyle      &&
-                              noFontStyle            &&
-                              noDimensionalityStyle  &&
-                              noShadowStyle          &&
-                              noPainters             &&
-                              noShades               &&
-                              noCursor               &&
-                              noGrounds;
-
-        boolean onlyDimensionalityIsStyled =
-                              noLayoutStyle          &&
-                              noBorderStyle          &&
-                              noBackgroundStyle      &&
-                              noForegroundStyle      &&
-                              noFontStyle            &&
-                              !noDimensionalityStyle &&
-                              noShadowStyle          &&
-                              noPainters             &&
-                              noShades               &&
-                              noCursor               &&
-                              noGrounds;
+        boolean isNotStyled                = styleReport.isNotStyled();
+        boolean onlyDimensionalityIsStyled = styleReport.onlyDimensionalityIsStyled();
 
         if ( isNotStyled || onlyDimensionalityIsStyled ) {
             _uninstallCustomLaF();

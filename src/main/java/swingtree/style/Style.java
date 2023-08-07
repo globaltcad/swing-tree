@@ -358,6 +358,10 @@ public final class Style
         return StyleUtility.mapEquals(_grounds, otherStyle._grounds);
     }
 
+    Report getReport() {
+        return new Report(this);
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(
@@ -437,6 +441,63 @@ public final class Style
                     shadeString     + ", " +
                     groundsString   +
                 "]";
+    }
+
+    static class Report
+    {
+        public final boolean noLayoutStyle;
+        public final boolean noBorderStyle;
+        public final boolean noBackgroundStyle;
+        public final boolean noForegroundStyle;
+        public final boolean noFontStyle;
+        public final boolean noDimensionalityStyle;
+        public final boolean noShadowStyle;
+        public final boolean noPainters;
+        public final boolean noShades;
+        public final boolean noCursor;
+        public final boolean noGrounds;
+
+        private Report(Style style) {
+            this.noLayoutStyle         = Style.none().hasEqualLayoutAs(style);
+            this.noBorderStyle         = Style.none().hasEqualBorderAs(style);
+            this.noBackgroundStyle     = Style.none().hasEqualBackgroundAs(style);
+            this.noForegroundStyle     = Style.none().hasEqualForegroundAs(style);
+            this.noFontStyle           = Style.none().hasEqualFontAs(style);
+            this.noDimensionalityStyle = Style.none().hasEqualDimensionalityAs(style);
+            this.noShadowStyle         = Style.none().hasEqualShadowsAs(style);
+            this.noPainters            = Style.none().hasEqualPaintersAs(style);
+            this.noShades              = Style.none().hasEqualShadesAs(style);
+            this.noCursor              = Style.none().hasEqualCursorAs(style);
+            this.noGrounds             = Style.none().hasEqualGroundsAs(style);
+        }
+
+        public boolean isNotStyled() {
+            return noLayoutStyle          &&
+                   noBorderStyle          &&
+                   noBackgroundStyle      &&
+                   noForegroundStyle      &&
+                   noFontStyle            &&
+                   noDimensionalityStyle  &&
+                   noShadowStyle          &&
+                   noPainters             &&
+                   noShades               &&
+                   noCursor               &&
+                   noGrounds;
+        }
+
+        public boolean onlyDimensionalityIsStyled() {
+            return noLayoutStyle          &&
+                   noBorderStyle          &&
+                   noBackgroundStyle      &&
+                   noForegroundStyle      &&
+                   noFontStyle            &&
+                   !noDimensionalityStyle &&
+                   noShadowStyle          &&
+                   noPainters             &&
+                   noShades               &&
+                   noCursor               &&
+                   noGrounds;
+        }
     }
 
 }
