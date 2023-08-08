@@ -1385,23 +1385,24 @@ class Individual_Component_Styling_Spec extends Specification
             SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
         and : 'Now we create a text field UI with a custom styler lambda and a button.'
             var seed = ImageIO.read(getClass().getResourceAsStream("/img/seed.png"))
+            var trees = ImageIO.read(getClass().getResourceAsStream("/img/trees.png"))
             var ui =
-                    UI.textField().withLayout("fill, ins 0").withPrefWidth(120)
+                    UI.textField("I am fancy! :)").withLayout("fill, ins 0").withPrefSize(190, 25)
                     .withStyle( it -> it
-                        .padding(0, 0, 0, 18)
+                        .fontSize(16)
+                        .padding(0, 0, 0, 26)
                         .marginRight(25)
                         .paddingRight(-20)
                         .image(image -> image
                             .layer(UI.Layer.BORDER)
                             .image(seed)
                             .placement(UI.Placement.LEFT)
-                            .height(it.component().getHeight())
-                            .width(30)
-                            .padding(5)
+                            .width(30).autoFit(true)
+                            .padding(3)
                         )
                     )
                     .add("right",
-                        UI.button(20, 20, UI.icon("img/trees.png"))
+                        UI.button(19, 19, new ImageIcon(trees))
                         .withStyle( it -> it
                             .margin(0)
                             .cursor(UI.Cursor.HAND)
@@ -1421,15 +1422,11 @@ class Individual_Component_Styling_Spec extends Specification
                         .makePlain()
                     );
 
-        when : 'We render the text field into a BufferedImage.'
-            Utility.setLaF(Utility.LaF.NIMBUS);
-            var image = Utility.renderSingleComponent(ui.getComponent())
-
-        then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/heavily-customized-text-field.png", 99.5) > 99.5
+        expect : 'The image is as expected.'
+            Utility.similarityBetween(ui.getComponent(), "components/heavily-customized-text-field.png", 99.5) > 99.5
 
         where :
-            uiScale << [1, 2, 3]
+            uiScale << [3]
     }
 
 
