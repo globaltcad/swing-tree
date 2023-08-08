@@ -248,8 +248,14 @@ public final class Style
         );
     }
 
-    boolean hasCustomBackgroundShades() {
+    boolean hasCustomGradients() {
         return !( _shades.size() == 1 && GradientStyle.none().equals(_shades.get(StyleUtility.DEFAULT_KEY)) );
+    }
+
+    boolean hasActiveBackgroundGradients() {
+        List<GradientStyle> gradients = gradients(UI.Layer.BACKGROUND);
+        if ( gradients.isEmpty() ) return false;
+        return gradients.stream().anyMatch( s -> s.colors().length > 0 );
     }
 
     Style painter( Map<String, PainterStyle> painters ) {

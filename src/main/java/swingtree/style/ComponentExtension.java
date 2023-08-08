@@ -318,7 +318,7 @@ public final class ComponentExtension<C extends JComponent>
 
             Dimension newPrefSize = new Dimension(prefWidth, prefHeight);
 
-            if ( ! newPrefSize.equals(prefSize) )
+            if ( !newPrefSize.equals(prefSize) )
                 _owner.setPreferredSize(newPrefSize);
         }
 
@@ -393,8 +393,11 @@ public final class ComponentExtension<C extends JComponent>
                 _establishLookAndFeel(style);
         }
 
-        if ( !style.hasCustomForegroundPainters() )
+        if ( style.hasCustomForegroundPainters() )
             _makeAllChildrenTransparent(_owner);
+
+        if ( style.hasActiveBackgroundGradients() && _owner.isOpaque() )
+            _owner.setOpaque(false);
 
         return style;
     }
@@ -434,7 +437,7 @@ public final class ComponentExtension<C extends JComponent>
         boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();
         boolean hasMargin = style.margin().isPositive();
         boolean hasBackgroundPainter = style.hasCustomBackgroundPainters();
-        boolean hasBackgroundShades  = style.hasCustomBackgroundShades();
+        boolean hasBackgroundShades  = style.hasCustomGradients();
 
         if ( hasBorderRadius )
             weNeedToOverrideLaF = true;
@@ -607,8 +610,6 @@ public final class ComponentExtension<C extends JComponent>
             return report.noBorderStyle          &&
                    report.noBackgroundStyle      &&
                    report.noForegroundStyle      &&
-                   report.noFontStyle            &&
-                   report.noCursor               &&
                    ( report.noShadowStyle || report.allShadowsAreBorderShadows     ) &&
                    ( report.noPainters    || report.allPaintersAreBorderPainters   ) &&
                    ( report.noShades      || report.allGradientsAreBorderGradients ) &&

@@ -42,7 +42,7 @@ final class StylePainter<C extends JComponent>
         return _baseArea;
     }
 
-    public void renderBackgroundStyle(Graphics2D g2d )
+    public void renderBackgroundStyle( Graphics2D g2d )
     {
         _baseArea = null;
 
