@@ -1045,7 +1045,7 @@ final class StylePainter<C extends JComponent>
             }
             int x = 0;
             int y = 0;
-            float imgTransparency = style.opacity();
+            float opacity = style.opacity();
             switch ( placement ) {
                 case TOP:
                     x = (componentWidth - imgWidth) / 2;
@@ -1083,11 +1083,11 @@ final class StylePainter<C extends JComponent>
             x += padding.left().orElse(0);
             y += padding.top().orElse(0);
             imgWidth  -= padding.left().orElse(0) + padding.right().orElse(0);
-            imgHeight -= padding.top().orElse(0) + padding.bottom().orElse(0);
+            imgHeight -= padding.top().orElse(0)  + padding.bottom().orElse(0);
 
             Composite oldComposite = g2d.getComposite();
             try {
-                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, imgTransparency));
+                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
                 if ( repeat ) {
                     Paint oldPaint = g2d.getPaint();
                     try {

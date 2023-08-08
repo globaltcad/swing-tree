@@ -10,13 +10,8 @@ import swingtree.components.JBox;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.plaf.ButtonUI;
-import javax.swing.plaf.ComponentUI;
-import javax.swing.plaf.LabelUI;
-import javax.swing.plaf.PanelUI;
-import javax.swing.plaf.basic.BasicButtonUI;
-import javax.swing.plaf.basic.BasicLabelUI;
-import javax.swing.plaf.basic.BasicPanelUI;
+import javax.swing.plaf.*;
+import javax.swing.plaf.basic.*;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.List;
@@ -257,6 +252,9 @@ public final class ComponentExtension<C extends JComponent>
         boolean onlyDimensionalityIsStyled      = styleReport.onlyDimensionalityIsStyled();
         boolean styleCanBeRenderedThroughBorder = BorderStyleAndAnimationRenderer.canFullyPaint(styleReport);
 
+        if ( _owner instanceof JTextField && style.margin().isPositive() )
+            styleCanBeRenderedThroughBorder = false;
+
         if ( isNotStyled || onlyDimensionalityIsStyled ) {
             _uninstallCustomLaF();
             if ( _animationStylers.isEmpty() && _animationPainters.isEmpty() )
@@ -468,7 +466,8 @@ public final class ComponentExtension<C extends JComponent>
                                                         .orElse(true)
                                                     );
 
-            _owner.setOpaque( !hasBorderRadius && !hasMargin && !foundationIsTransparent );
+            if ( _owner.isOpaque() )
+                _owner.setOpaque( !hasBorderRadius && !hasMargin && !foundationIsTransparent );
             /* ^
                 If our style reveals what is behind it, then we need
                 to make the component non-opaque so that the previous rendering get's flushed out!
@@ -539,6 +538,19 @@ public final class ComponentExtension<C extends JComponent>
             _styleLaF = laf;
             return true;
         }
+        else if ( _owner instanceof JTextField && !(_owner instanceof JPasswordField) ) {
+            JTextField t = (JTextField) _owner;
+            _formerLaF = t.getUI();
+            TextFieldStyler laf = new TextFieldStyler(t.getUI());
+            t.setUI(laf);
+            if ( _formerLaF instanceof TextUI ) {
+                TextUI textFieldUI = (TextUI) _formerLaF;
+                textFieldUI.installUI(t);
+                // We make the former LaF believe that it is still in charge of the component.
+            }
+            _styleLaF = laf;
+            return true;
+        }
 
         return false;
     }
@@ -563,6 +575,11 @@ public final class ComponentExtension<C extends JComponent>
             else if ( _owner instanceof JLabel ) {
                 JLabel l = (JLabel) _owner;
                 l.setUI((LabelUI) _formerLaF);
+                _styleLaF = null;
+            }
+            else if ( _owner instanceof JTextField && !(_owner instanceof JPasswordField) ) {
+                JTextField t = (JTextField) _owner;
+                t.setUI((TextUI) _formerLaF);
                 _styleLaF = null;
             }
         }
@@ -776,6 +793,49 @@ public final class ComponentExtension<C extends JComponent>
             ComponentExtension.from(c)._paintBackground(g);
             _paintComponentThroughFormerIU(_formerUI, g, c);
         }
+        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
+        @Override
+        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
+    }
+
+    static class TextFieldStyler extends BasicTextFieldUI
+    {
+        private final TextUI _formerUI;
+
+        private TextFieldStyler(TextUI formerUI) { _formerUI = formerUI; }
+        @Override protected void paintSafely(Graphics g) {
+            if ( !getComponent().isOpaque() )
+                paintBackground(g);
+            super.paintSafely(g);
+        }
+        @Override protected void paintBackground(Graphics g) {
+            JComponent c = getComponent();
+            //if ( c.isOpaque() ) {
+                int insetTop    = 0;
+                int insetLeft   = 0;
+                int insetBottom = 0;
+                int insetRight  = 0;
+                if ( c.getBorder() instanceof BorderStyleAndAnimationRenderer ) {
+                    BorderStyleAndAnimationRenderer styleBorder = (BorderStyleAndAnimationRenderer) c.getBorder();
+                    Insets insets = styleBorder.getCurrentMarginInsets();
+                    if ( insets != null ) {
+                        insetTop    = insets.top;
+                        insetLeft   = insets.left;
+                        insetBottom = insets.bottom;
+                        insetRight  = insets.right;
+                    }
+                }
+                g.setColor(c.getBackground());
+                g.fillRect(
+                        insetLeft, insetTop,
+                        c.getWidth() - insetLeft - insetRight, c.getHeight() - insetTop - insetBottom
+                    );
+            //}
+            ComponentExtension.from(c)._paintBackground(g);
+            if ( insetLeft == 0 && insetRight == 0 && insetTop == 0 && insetBottom == 0 )
+                _paintComponentThroughFormerIU(_formerUI, g, c);
+        }
+
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
         @Override
         public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }

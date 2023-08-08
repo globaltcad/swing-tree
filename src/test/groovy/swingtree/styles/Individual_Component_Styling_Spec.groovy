@@ -807,8 +807,7 @@ class Individual_Component_Styling_Spec extends Specification
             """
 
         given : 'We create various different UIs with different grounding styles.'
-            var imgLocation = "img/swing.png"
-            var img = Utility.loadImage(imgLocation)
+            var img = Utility.loadImage("img/swing.png")
             var ui1 =
                         UI.label("Top Left").withStyle( it -> it
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
@@ -1003,8 +1002,7 @@ class Individual_Component_Styling_Spec extends Specification
             """
 
         given : 'We create various different UIs with different grounding styles.'
-            var imgLocation = "img/trees.png"
-            var img = Utility.loadImage(imgLocation)
+            var img = Utility.loadImage("img/trees.png")
             var ui1 =
                         UI.label("Top Left").withStyle( it -> it
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
@@ -1384,8 +1382,8 @@ class Individual_Component_Styling_Spec extends Specification
         """
             SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
         and : 'Now we create a text field UI with a custom styler lambda and a button.'
-            var seed = ImageIO.read(getClass().getResourceAsStream("/img/seed.png"))
-            var trees = ImageIO.read(getClass().getResourceAsStream("/img/trees.png"))
+            var seed = Utility.loadImage("img/seed.png")
+            var trees = Utility.loadImage("img/trees.png")
             var ui =
                     UI.textField("I am fancy! :)").withLayout("fill, ins 0").withPrefSize(190, 25)
                     .withStyle( it -> it
