@@ -858,7 +858,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     public ComponentStyleDelegate<C> image( String imageName, Function<ImageStyle, ImageStyle> styler ) {
         Objects.requireNonNull(imageName);
         Objects.requireNonNull(styler);
-        return _withStyle(_style.ground(imageName, styler));
+        return _withStyle(_style.images(imageName, styler));
     }
 
     /**
@@ -881,7 +881,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> image( Function<ImageStyle, ImageStyle> styler ) {
         Objects.requireNonNull(styler);
-        return _withStyle(_style.ground(StyleUtility.DEFAULT_KEY, styler));
+        return _withStyle(_style.images(StyleUtility.DEFAULT_KEY, styler));
     }
 
     /**

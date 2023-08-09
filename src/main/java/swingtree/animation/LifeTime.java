@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
- *  A schedule defines when an animation should start and for how long it should run.
+ *  The lifetime object defines when an animation should start and for how long it should run.
  */
 public final class LifeTime
 {
@@ -21,7 +21,7 @@ public final class LifeTime
      * @param unit The time unit of the duration.
      * @return A new schedule that will start immediately and run for the given duration.
      */
-    public static LifeTime of(long time, TimeUnit unit ) {
+    public static LifeTime of( long time, TimeUnit unit ) {
         return new LifeTime(0, unit.toMillis(time));
     }
 
@@ -31,7 +31,7 @@ public final class LifeTime
      * @param unit The time unit of the duration.
      * @return A new schedule that will start immediately and run for the given duration.
      */
-    public static LifeTime of(double time, TimeUnit unit ) {
+    public static LifeTime of( double time, TimeUnit unit ) {
         long millis = _convertTimeFromDoublePrecisely(time, unit, TimeUnit.MILLISECONDS);
         return new LifeTime(0, millis);
     }
@@ -44,7 +44,7 @@ public final class LifeTime
      * @param durationUnit The time unit of the duration.
      * @return A new schedule that will start after the given delay and run for the given duration.
      */
-    public static LifeTime of(long startDelay, TimeUnit startUnit, long duration, TimeUnit durationUnit ) {
+    public static LifeTime of( long startDelay, TimeUnit startUnit, long duration, TimeUnit durationUnit ) {
         return new LifeTime(startUnit.toMillis(startDelay), durationUnit.toMillis(duration));
     }
 
@@ -56,7 +56,7 @@ public final class LifeTime
      * @param durationUnit The time unit of the duration.
      * @return A new schedule that will start after the given delay and run for the given duration.
      */
-    public static LifeTime of(double startDelay, TimeUnit startUnit, double duration, TimeUnit durationUnit ) {
+    public static LifeTime of( double startDelay, TimeUnit startUnit, double duration, TimeUnit durationUnit ) {
         long startMillis    = _convertTimeFromDoublePrecisely(startDelay, startUnit, TimeUnit.MILLISECONDS);
         long durationMillis = _convertTimeFromDoublePrecisely(duration, durationUnit, TimeUnit.MILLISECONDS);
         return new LifeTime(startMillis, durationMillis);
@@ -69,7 +69,7 @@ public final class LifeTime
     }
 
 
-    private LifeTime(long delay, long duration ) {
+    private LifeTime( long delay, long duration ) {
         _delay     = delay;
         _duration  = duration;
         _startTime = System.currentTimeMillis() + _delay;
@@ -118,7 +118,7 @@ public final class LifeTime
     }
 
     /**
-     * @return Weather the animation is expired or not.
+     * @return {@code true} if the animation is expired, {@code false} otherwise.
      */
     public boolean isExpired() {
         return System.currentTimeMillis() >= _startTime + _duration;

@@ -78,9 +78,9 @@ final class StylePainter<C extends JComponent>
     private void _paintStylesOn( UI.Layer layer, Graphics2D g2d ) {
         // Every layer has 3 things:
         // 0. Grounding, which is a solid color or image
-        for ( ImageStyle ground : _style.grounds(layer) )
-            if ( !ground.equals(ImageStyle.none()) )
-                _renderImage( ground, g2d, _comp, _getBaseArea() );
+        for ( ImageStyle imageStyle : _style.images(layer) )
+            if ( !imageStyle.equals(ImageStyle.none()) )
+                _renderImage( imageStyle, g2d, _comp, _getBaseArea() );
 
         // 1. Shades, which are simple gradient effects
         for ( GradientStyle gradient : _style.gradients(layer) )

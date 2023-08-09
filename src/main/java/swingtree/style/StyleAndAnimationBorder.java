@@ -25,8 +25,8 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
                 report.noForegroundStyle &&
                 (report.noShadowStyle || report.allShadowsAreBorderShadows) &&
                 (report.noPainters || report.allPaintersAreBorderPainters) &&
-                (report.noShades || report.allGradientsAreBorderGradients) &&
-                (report.noGrounds || report.allImagesAreBorderImages);
+                (report.noGradients || report.allGradientsAreBorderGradients) &&
+                (report.noImages || report.allImagesAreBorderImages);
     }
 
     private final ComponentExtension<C> _compExt;
