@@ -47,8 +47,9 @@ public final class ComponentExtension<C extends JComponent>
     private final List<String> _styleGroups = new ArrayList<>(0);
 
     private StylePainter<C> _currentStylePainter = null;
-    private ComponentUI _styleLaF = null;
-    private ComponentUI _formerLaF = null;
+
+    private final DynamicLaF _laf = DynamicLaF.none();
+
     private Styler<C> _styling = Styler.none();
     private StyleSheet _styleSheet = null;
 
@@ -60,8 +61,6 @@ public final class ComponentExtension<C extends JComponent>
     private ComponentExtension( C owner ) {
         _owner = Objects.requireNonNull(owner);
     }
-
-    private boolean _customLookAndFeelIsInstalled() { return _styleLaF != null; }
 
     public void addStyling( Styler<C> styler ) {
         Objects.requireNonNull(styler);
@@ -147,7 +146,7 @@ public final class ComponentExtension<C extends JComponent>
 
     public void paintBackgroundStyle( Graphics g )
     {
-        if ( _customLookAndFeelIsInstalled() )
+        if ( _laf.customLookAndFeelIsInstalled() )
             return; // We render through the custom installed UI!
 
         if ( _componentIsDeclaredInUI(_owner) )
@@ -256,7 +255,7 @@ public final class ComponentExtension<C extends JComponent>
             styleCanBeRenderedThroughBorder = false;
 
         if ( isNotStyled || onlyDimensionalityIsStyled ) {
-            _uninstallCustomLaF();
+            _laf._uninstallCustomLaF(_owner);
             if ( _animationStylers.isEmpty() && _animationPainters.isEmpty() )
                 _uninstallCustomBorderBasedStyleAndAnimationRenderer();
             if ( _initialBackgroundColor != null ) {
@@ -388,7 +387,7 @@ public final class ComponentExtension<C extends JComponent>
         if ( !onlyDimensionalityIsStyled ) {
             _installCustomBorderBasedStyleAndAnimationRenderer();
             if ( !styleCanBeRenderedThroughBorder )
-                _establishLookAndFeel(style);
+                _laf.establishLookAndFeelFor(style, _owner);
         }
 
         if ( style.hasCustomForegroundPainters() )
@@ -424,163 +423,6 @@ public final class ComponentExtension<C extends JComponent>
             if ( child instanceof JComponent ) {
                 JComponent jChild = (JComponent) child;
                 _makeAllChildrenTransparent(jChild);
-            }
-        }
-    }
-
-    private void _establishLookAndFeel( Style style ) {
-
-        // For panels mostly:
-        boolean weNeedToOverrideLaF = false;
-        boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();
-        boolean hasMargin = style.margin().isPositive();
-        boolean hasBackgroundPainter = style.hasCustomBackgroundPainters();
-        boolean hasBackgroundShades  = style.hasCustomGradients();
-
-        if ( hasBorderRadius )
-            weNeedToOverrideLaF = true;
-
-        if ( hasMargin )
-            weNeedToOverrideLaF = true;
-
-        if ( hasBackgroundPainter )
-            weNeedToOverrideLaF = true;
-
-        if ( hasBackgroundShades )
-            weNeedToOverrideLaF = true;
-
-        if ( style.hasCustomBackgroundPainters() )
-            weNeedToOverrideLaF = true;
-
-        if ( style.anyVisibleShadows() )
-            weNeedToOverrideLaF = true;
-
-        if ( weNeedToOverrideLaF ) {
-            boolean foundationIsTransparent = style.background()
-                                                    .foundationColor()
-                                                    .map( c -> c.getAlpha() < 255 )
-                                                    .orElse(
-                                                        Optional
-                                                        .ofNullable(_owner.getBackground())
-                                                        .map( c -> c.getAlpha() < 255 )
-                                                        .orElse(true)
-                                                    );
-
-            if ( _owner.isOpaque() )
-                _owner.setOpaque( !hasBorderRadius && !hasMargin && !foundationIsTransparent );
-            /* ^
-                If our style reveals what is behind it, then we need
-                to make the component non-opaque so that the previous rendering get's flushed out!
-             */
-            boolean success = _installCustomLaF();
-            if ( !success && _owner.isOpaque() ) {
-                _owner.setOpaque(false);
-            }
-
-            if ( _owner instanceof AbstractButton ) {
-                AbstractButton b = (AbstractButton) _owner;
-                b.setContentAreaFilled(!hasBackgroundShades && !hasBackgroundPainter);
-            }
-        }
-        else if ( _customLookAndFeelIsInstalled() )
-            _uninstallCustomLaF();
-    }
-
-    private boolean _installCustomLaF() {
-        // First we check if we already have a custom LaF installed:
-        if ( _customLookAndFeelIsInstalled() )
-            return true;
-
-        if ( _owner instanceof JPanel ) {
-            JPanel p = (JPanel) _owner;
-            _formerLaF = p.getUI();
-            PanelStyler laf = PanelStyler.INSTANCE;
-            p.setUI(laf);
-            _styleLaF = laf;
-            if ( _formerLaF instanceof BasicPanelUI ) {
-                BasicPanelUI panelUI = (BasicPanelUI) _formerLaF;
-                panelUI.installUI(p);
-                // We make the former LaF believe that it is still in charge of the component.
-            }
-            return true;
-        }
-        if ( _owner instanceof JBox ) {
-            JBox p = (JBox) _owner;
-            _formerLaF = p.getUI();
-            //PanelUI laf = createJBoxUI();
-            //p.setUI(laf);
-            _styleLaF = _formerLaF;
-            return true;
-        }
-        else if ( _owner instanceof AbstractButton ) {
-            AbstractButton b = (AbstractButton) _owner;
-            _formerLaF = b.getUI();
-            ButtonStyler laf = new ButtonStyler(b.getUI());
-            b.setUI(laf);
-            if ( _formerLaF instanceof BasicButtonUI ) {
-                BasicButtonUI buttonUI = (BasicButtonUI) _formerLaF;
-                buttonUI.installUI(b);
-                // We make the former LaF believe that it is still in charge of the component.
-            }
-            _styleLaF = laf;
-            return true;
-        }
-        else if ( _owner instanceof JLabel ) {
-            JLabel l = (JLabel) _owner;
-            _formerLaF = l.getUI();
-            LabelStyler laf = new LabelStyler(l.getUI());
-            l.setUI(laf);
-            if ( _formerLaF instanceof BasicLabelUI ) {
-                BasicLabelUI labelUI = (BasicLabelUI) _formerLaF;
-                labelUI.installUI(l);
-                // We make the former LaF believe that it is still in charge of the component.
-            }
-            _styleLaF = laf;
-            return true;
-        }
-        else if ( _owner instanceof JTextField && !(_owner instanceof JPasswordField) ) {
-            JTextField t = (JTextField) _owner;
-            _formerLaF = t.getUI();
-            TextFieldStyler laf = new TextFieldStyler(t.getUI());
-            t.setUI(laf);
-            if ( _formerLaF instanceof TextUI ) {
-                TextUI textFieldUI = (TextUI) _formerLaF;
-                textFieldUI.installUI(t);
-                // We make the former LaF believe that it is still in charge of the component.
-            }
-            _styleLaF = laf;
-            return true;
-        }
-
-        return false;
-    }
-
-    private void _uninstallCustomLaF() {
-        if ( _customLookAndFeelIsInstalled() ) {
-            if ( _owner instanceof JPanel ) {
-                JPanel p = (JPanel) _owner;
-                p.setUI((PanelUI) _formerLaF);
-                _styleLaF = null;
-            }
-            if ( _owner instanceof JBox ) {
-                //JBox p = (JBox) _owner;
-                //p.setUI((PanelUI) _formerLaF);
-                _styleLaF = null;
-            }
-            else if ( _owner instanceof AbstractButton ) {
-                AbstractButton b = (AbstractButton) _owner;
-                b.setUI((ButtonUI) _formerLaF);
-                _styleLaF = null;
-            }
-            else if ( _owner instanceof JLabel ) {
-                JLabel l = (JLabel) _owner;
-                l.setUI((LabelUI) _formerLaF);
-                _styleLaF = null;
-            }
-            else if ( _owner instanceof JTextField && !(_owner instanceof JPasswordField) ) {
-                JTextField t = (JTextField) _owner;
-                t.setUI((TextUI) _formerLaF);
-                _styleLaF = null;
             }
         }
     }
@@ -787,7 +629,7 @@ public final class ComponentExtension<C extends JComponent>
     {
         private final LabelUI _formerUI;
 
-        private LabelStyler(LabelUI formerUI) { _formerUI = formerUI; }
+        LabelStyler(LabelUI formerUI) { _formerUI = formerUI; }
 
         @Override public void paint( Graphics g, JComponent c ) {
             ComponentExtension.from(c)._paintBackground(g);
@@ -802,7 +644,7 @@ public final class ComponentExtension<C extends JComponent>
     {
         private final TextUI _formerUI;
 
-        private TextFieldStyler(TextUI formerUI) { _formerUI = formerUI; }
+        TextFieldStyler(TextUI formerUI) { _formerUI = formerUI; }
         @Override protected void paintSafely(Graphics g) {
             if ( !getComponent().isOpaque() )
                 paintBackground(g);
