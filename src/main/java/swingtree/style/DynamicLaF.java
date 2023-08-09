@@ -250,8 +250,8 @@ class DynamicLaF
                 int insetLeft   = 0;
                 int insetBottom = 0;
                 int insetRight  = 0;
-                if ( c.getBorder() instanceof ComponentExtension.BorderStyleAndAnimationRenderer) {
-                    ComponentExtension.BorderStyleAndAnimationRenderer styleBorder = (ComponentExtension.BorderStyleAndAnimationRenderer) c.getBorder();
+                if ( c.getBorder() instanceof StyleAndAnimationBorder ) {
+                    StyleAndAnimationBorder styleBorder = (StyleAndAnimationBorder) c.getBorder();
                     Insets insets = styleBorder.getCurrentMarginInsets();
                     if ( insets != null ) {
                         insetTop    = insets.top;
@@ -288,8 +288,8 @@ class DynamicLaF
 
     private static boolean _contains(JComponent c, int x, int y, Supplier<Boolean> superContains) {
         Border border = c.getBorder();
-        if ( border instanceof ComponentExtension.BorderStyleAndAnimationRenderer) {
-            ComponentExtension.BorderStyleAndAnimationRenderer<?> b = (ComponentExtension.BorderStyleAndAnimationRenderer<?>) border;
+        if ( border instanceof StyleAndAnimationBorder ) {
+            StyleAndAnimationBorder<?> b = (StyleAndAnimationBorder<?>) border;
             Insets margins = b.getCurrentMarginInsets();
             int width  = c.getWidth();
             int height = c.getHeight();

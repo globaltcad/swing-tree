@@ -15,7 +15,6 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
-import java.util.function.Supplier;
 
 /**
  *  Is attached to UI components in the form of a client property.
@@ -45,7 +44,7 @@ public final class ComponentExtension<C extends JComponent>
 
     private final List<String> _styleGroups = new ArrayList<>(0);
 
-    private StylePainter<C> _currentStylePainter = null;
+    StylePainter<C> _currentStylePainter = null;
 
     private final DynamicLaF _laf = DynamicLaF.none();
 
@@ -54,12 +53,14 @@ public final class ComponentExtension<C extends JComponent>
 
     private Color _initialBackgroundColor = null;
 
-    private Shape _mainClip = null;
+    Shape _mainClip = null;
 
 
     private ComponentExtension( C owner ) {
         _owner = Objects.requireNonNull(owner);
     }
+
+    C getOwner() { return _owner; }
 
     public void addStyling( Styler<C> styler ) {
         Objects.requireNonNull(styler);
@@ -73,7 +74,7 @@ public final class ComponentExtension<C extends JComponent>
         _applyStyleToComponentState(_calculateStyle());
     }
 
-    private void _establishCurrentMainPaintClip(Graphics g) {
+    void _establishCurrentMainPaintClip(Graphics g) {
         if ( _mainClip == null )
             _mainClip = g.getClip();
     }
@@ -136,7 +137,7 @@ public final class ComponentExtension<C extends JComponent>
         return style.equals(Style.none()) ? null : new StylePainter<>(_owner, style);
     }
 
-    private Optional<StylePainter<C>> _getOrCreateStylePainter() {
+    Optional<StylePainter<C>> _getOrCreateStylePainter() {
         if ( _currentStylePainter == null )
             _currentStylePainter = _createStylePainter();
 
@@ -248,7 +249,7 @@ public final class ComponentExtension<C extends JComponent>
 
         boolean isNotStyled                     = styleReport.isNotStyled();
         boolean onlyDimensionalityIsStyled      = styleReport.onlyDimensionalityIsStyled();
-        boolean styleCanBeRenderedThroughBorder = BorderStyleAndAnimationRenderer.canFullyPaint(styleReport);
+        boolean styleCanBeRenderedThroughBorder = StyleAndAnimationBorder.canFullyPaint(styleReport);
 
         if ( _owner instanceof JTextField && style.margin().isPositive() )
             styleCanBeRenderedThroughBorder = false;
@@ -428,14 +429,14 @@ public final class ComponentExtension<C extends JComponent>
 
     private void _installCustomBorderBasedStyleAndAnimationRenderer() {
         Border currentBorder = _owner.getBorder();
-        if ( !(currentBorder instanceof ComponentExtension.BorderStyleAndAnimationRenderer) )
-            _owner.setBorder(new BorderStyleAndAnimationRenderer<>(this, currentBorder));
+        if ( !(currentBorder instanceof StyleAndAnimationBorder) )
+            _owner.setBorder(new StyleAndAnimationBorder<>(this, currentBorder));
     }
 
     private void _uninstallCustomBorderBasedStyleAndAnimationRenderer() {
         Border currentBorder = _owner.getBorder();
-        if ( currentBorder instanceof ComponentExtension.BorderStyleAndAnimationRenderer ) {
-            BorderStyleAndAnimationRenderer<?> border = (BorderStyleAndAnimationRenderer<?>) currentBorder;
+        if ( currentBorder instanceof StyleAndAnimationBorder) {
+            StyleAndAnimationBorder<?> border = (StyleAndAnimationBorder<?>) currentBorder;
             _owner.setBorder(border.getFormerBorder());
         }
     }
@@ -457,144 +458,6 @@ public final class ComponentExtension<C extends JComponent>
             clazz = clazz.getSuperclass();
         }
         return isSwingTreeComponent;
-    }
-
-
-    static final class BorderStyleAndAnimationRenderer<C extends JComponent> implements Border
-    {
-        static boolean canFullyPaint(Style.Report report) {
-            boolean simple = report.onlyDimensionalityAndOrLayoutIsStyled();
-            if ( simple ) return true;
-            return report.noBorderStyle          &&
-                   report.noBackgroundStyle      &&
-                   report.noForegroundStyle      &&
-                   ( report.noShadowStyle || report.allShadowsAreBorderShadows     ) &&
-                   ( report.noPainters    || report.allPaintersAreBorderPainters   ) &&
-                   ( report.noShades      || report.allGradientsAreBorderGradients ) &&
-                   ( report.noGrounds     || report.allImagesAreBorderImages       );
-
-        }
-
-        private final ComponentExtension<C> _compExt;
-        private final Border _formerBorder;
-        private final boolean _borderWasNotPainted;
-        private Insets _currentInsets;
-        private Insets _currentMarginInsets = new Insets(0,0,0,0);
-        private Insets _currentPaddingInsets = new Insets(0,0,0,0);
-
-        BorderStyleAndAnimationRenderer(ComponentExtension<C> compExt, Border formerBorder) {
-            _compExt = compExt;
-            _currentInsets = null;
-            _formerBorder = formerBorder;
-            if ( _compExt._owner instanceof AbstractButton ) {
-                AbstractButton b = (AbstractButton) _compExt._owner;
-                _borderWasNotPainted = !b.isBorderPainted();
-                b.setBorderPainted(true);
-            }
-            else
-                _borderWasNotPainted = false;
-        }
-
-        Border getFormerBorder() { return _formerBorder; }
-
-        @Override
-        public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-            _checkIfInsetsChanged();
-
-            _compExt._establishCurrentMainPaintClip(g);
-
-            // We remember the clip:
-            Shape formerClip = g.getClip();
-
-            g.setClip(_compExt._mainClip);
-
-            if ( _compExt._currentStylePainter != null ) {
-                _paintThisStyleAPIBasedBorder((Graphics2D) g);
-                if ( _formerBorder != null && !_borderWasNotPainted ) {
-                    Style.Report report = _compExt._currentStylePainter.getStyle().getReport();
-                    if ( canFullyPaint(report) )
-                        _paintFormerBorder(c, g, x, y, width, height);
-                }
-            }
-            else if ( _formerBorder != null && !_borderWasNotPainted )
-                _paintFormerBorder(c, g, x, y, width, height);
-
-            if ( g.getClip() != formerClip )
-                g.setClip(formerClip);
-
-            _compExt._renderAnimations( (Graphics2D) g );
-
-            if ( g.getClip() != formerClip )
-                g.setClip(formerClip);
-        }
-
-        private void _paintFormerBorder(Component c, Graphics g, int x, int y, int width, int height) {
-            try {
-                Insets insets = _currentMarginInsets == null ? new Insets(0, 0, 0, 0) : _currentMarginInsets;
-                _formerBorder.paintBorder(
-                        c, g,
-                        x + insets.left,
-                        y + insets.top,
-                        width - insets.left - insets.right,
-                        height - insets.top - insets.bottom
-                );
-            } catch ( Exception ex ) {
-                ex.printStackTrace();
-            }
-        }
-
-        private void _paintThisStyleAPIBasedBorder(Graphics2D g) {
-            try {
-                _compExt._currentStylePainter.paintBorderStyle(g);
-            } catch ( Exception ex ) {
-                ex.printStackTrace();
-            }
-        }
-
-        @Override
-        public Insets getBorderInsets(Component c) {
-            _checkIfInsetsChanged();
-            return _currentInsets;
-        }
-
-        private void _checkIfInsetsChanged() {
-            Insets insets = _calculateInsets();
-            if ( !insets.equals(_currentInsets) ) {
-                _currentInsets = insets;
-                _compExt._owner.revalidate();
-            }
-        }
-
-        private Insets _calculateInsets() {
-            _currentMarginInsets = _compExt._getOrCreateStylePainter()
-                                            .map(StylePainter::calculateMarginInsets)
-                                            .orElse(_currentMarginInsets);
-
-            _currentPaddingInsets = _compExt._getOrCreateStylePainter()
-                                            .map(StylePainter::calculatePaddingInsets)
-                                            .orElse(_currentPaddingInsets);
-
-            return _compExt._getOrCreateStylePainter()
-                            .map( r ->
-                                r.calculateBorderInsets(
-                                    _formerBorder == null
-                                        ? new Insets(0,0,0,0)
-                                        : _formerBorder.getBorderInsets(_compExt._owner)
-                                )
-                            )
-                            .orElseGet(()->
-                                _formerBorder == null
-                                    ? new Insets(0,0,0,0)
-                                    : _formerBorder.getBorderInsets(_compExt._owner)
-                            );
-        }
-
-        public Insets getCurrentMarginInsets() { return _currentMarginInsets; }
-
-        public Insets getCurrentPaddingInsets() { return _currentPaddingInsets; }
-
-        @Override public boolean isBorderOpaque() { return false; }
-
     }
 
 }
