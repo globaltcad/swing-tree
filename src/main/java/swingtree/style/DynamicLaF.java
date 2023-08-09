@@ -59,7 +59,7 @@ class DynamicLaF
             weNeedToOverrideLaF = true;
 
         if ( weNeedToOverrideLaF ) {
-            boolean foundationIsTransparent = style.background()
+            boolean foundationIsTransparent = style.base()
                     .foundationColor()
                     .map( c -> c.getAlpha() < 255 )
                     .orElse(

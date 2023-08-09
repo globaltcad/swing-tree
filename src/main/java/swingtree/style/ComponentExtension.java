@@ -267,11 +267,11 @@ public final class ComponentExtension<C extends JComponent>
         }
 
         boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();
-        boolean hasBackground   = style.background().color().isPresent();
+        boolean hasBackground   = style.base().backgroundColor().isPresent();
 
-        if ( hasBackground && !Objects.equals( _owner.getBackground(), style.background().color().get() ) ) {
+        if ( hasBackground && !Objects.equals( _owner.getBackground(), style.base().backgroundColor().get() ) ) {
             _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor :  _owner.getBackground();
-            _owner.setBackground( style.background().color().get() );
+            _owner.setBackground( style.base().backgroundColor().get() );
         }
 
         // If the style has a border radius set we need to make sure that we have a background color:
@@ -280,8 +280,8 @@ public final class ComponentExtension<C extends JComponent>
             style = style.backgroundColor(_initialBackgroundColor);
         }
 
-        if ( style.foreground().color().isPresent() && !Objects.equals( _owner.getForeground(), style.foreground().color().get() ) )
-            _owner.setForeground( style.foreground().color().get() );
+        if ( style.base().foregroundColo().isPresent() && !Objects.equals( _owner.getForeground(), style.base().foregroundColo().get() ) )
+            _owner.setForeground( style.base().foregroundColo().get() );
 
         if ( style.dimensionality().minWidth().isPresent() || style.dimensionality().minHeight().isPresent() ) {
             Dimension minSize = _owner.getMinimumSize();
@@ -361,7 +361,7 @@ public final class ComponentExtension<C extends JComponent>
                         _owner.setFont( newFont );
                 });
 
-        style.cursor().ifPresent( cursor -> {
+        style.base().cursor().ifPresent( cursor -> {
             if ( !Objects.equals( _owner.getCursor(), cursor ) )
                 _owner.setCursor( cursor );
         });

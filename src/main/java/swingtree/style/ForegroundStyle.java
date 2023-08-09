@@ -19,9 +19,9 @@ public final class ForegroundStyle
         _color   = color;
     }
 
-    public Optional<Color> color() { return Optional.ofNullable(_color); }
+    public Optional<Color> foregroundColo() { return Optional.ofNullable(_color); }
 
-    ForegroundStyle color( Color color ) { return new ForegroundStyle(color); }
+    ForegroundStyle foregroundColo(Color color ) { return new ForegroundStyle(color); }
 
     @Override
     public int hashCode() { return Objects.hash(_color); }

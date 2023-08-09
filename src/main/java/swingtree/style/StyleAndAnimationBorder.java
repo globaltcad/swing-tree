@@ -21,12 +21,11 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         boolean simple = report.onlyDimensionalityAndOrLayoutIsStyled();
         if (simple) return true;
         return report.noBorderStyle &&
-                report.noBackgroundStyle &&
-                report.noForegroundStyle &&
+                report.noBaseStyle  &&
                 (report.noShadowStyle || report.allShadowsAreBorderShadows) &&
-                (report.noPainters || report.allPaintersAreBorderPainters) &&
-                (report.noGradients || report.allGradientsAreBorderGradients) &&
-                (report.noImages || report.allImagesAreBorderImages);
+                (report.noPainters    || report.allPaintersAreBorderPainters) &&
+                (report.noGradients   || report.allGradientsAreBorderGradients) &&
+                (report.noImages      || report.allImagesAreBorderImages);
     }
 
     private final ComponentExtension<C> _compExt;

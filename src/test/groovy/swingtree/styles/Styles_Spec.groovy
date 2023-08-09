@@ -42,8 +42,8 @@ class Styles_Spec extends Specification
                                 .fontColor(colorString)
                                 .style()
         expect :
-            style.background().foundationColor().get() == expectedColor
-            style.background().color().get() == expectedColor
+            style.base().foundationColor().get() == expectedColor
+            style.base().backgroundColor().get() == expectedColor
             style.border().color().get() == expectedColor
             style.shadow().color().get() == expectedColor
             style.font().selectionColor().get() == expectedColor
@@ -111,10 +111,12 @@ class Styles_Spec extends Specification
                                             "color=rgba(0,0,255,255), " +
                                             "GradientStyle[alignment=TOP_TO_BOTTOM, type=LINEAR, colors=[], layer=BACKGROUND]" +
                                         "], " +
-                                        "BackgroundStyle[" +
-                                            "color=rgba(0,255,0,255), foundationColor=rgba(255,0,0,255)" +
+                                        "BaseStyle[" +
+                                            "backgroundColor=rgba(0,255,0,255), " +
+                                            "foundationColor=rgba(255,0,0,255), " +
+                                            "foregroundColor=?, " +
+                                            "cursor=?" +
                                         "], " +
-                                        "ForegroundStyle[color=?], " +
                                         "FontStyle[" +
                                             "name=Times New Roman, size=12, posture=0.0, weight=2.0, underlined=true, " +
                                             "strikeThrough=true, color=rgba(255,0,255,255), backgroundColor=?, " +

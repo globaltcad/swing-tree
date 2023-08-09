@@ -508,7 +508,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
      */
     public ComponentStyleDelegate<C> backgroundColor( Color color ) {
-        return _withStyle(_style._withBackground(_style.background().color(color)));
+        return _withStyle(_style._withBackground(_style.base().backgroundColor(color)));
     }
 
     /**
@@ -520,7 +520,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
      */
     public ComponentStyleDelegate<C> backgroundColor( String colorString ) {
-        return _withStyle(_style._withBackground(_style.background().color(StyleUtility.toColor(colorString))));
+        return _withStyle(_style._withBackground(_style.base().backgroundColor(StyleUtility.toColor(colorString))));
     }
 
     /**
@@ -531,7 +531,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided background color.
      */
     public ComponentStyleDelegate<C> foundationColor( Color color ) {
-        return _withStyle(_style._withBackground(_style.background().foundationColor(color)));
+        return _withStyle(_style._withBackground(_style.base().foundationColor(color)));
     }
 
     /**
@@ -543,7 +543,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided background color.
      */
     public ComponentStyleDelegate<C> foundationColor( String colorString ) {
-        return _withStyle(_style._withBackground(_style.background().foundationColor(StyleUtility.toColor(colorString))));
+        return _withStyle(_style._withBackground(_style.base().foundationColor(StyleUtility.toColor(colorString))));
     }
 
     /**
@@ -582,7 +582,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided foreground color.
      */
     public ComponentStyleDelegate<C> foregroundColor( Color color ) {
-        return _withStyle(_style._withForeground(_style.foreground().color(color)));
+        return _withStyle(_style._withBackground(_style.base().foregroundColo(color)));
     }
 
     /**
@@ -593,7 +593,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided foreground color.
      */
     public ComponentStyleDelegate<C> foregroundColor( String colorString ) {
-        return _withStyle(_style._withForeground(_style.foreground().color(StyleUtility.toColor(colorString))));
+        return _withStyle(_style._withBackground(_style.base().foregroundColo(StyleUtility.toColor(colorString))));
     }
 
     /**
@@ -1307,7 +1307,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> cursor( UI.Cursor cursor ) {
         Objects.requireNonNull(cursor);
-        return _withStyle(_style._withCursor(cursor.toAWTCursor()));
+        return this.cursor(cursor.toAWTCursor());
     }
 
     /**
@@ -1322,7 +1322,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> cursor( Cursor cursor ) {
         Objects.requireNonNull(cursor);
-        return _withStyle(_style._withCursor(cursor));
+        return _withStyle(_style._withBackground(_style.base().cursor(cursor)));
     }
 
     /**

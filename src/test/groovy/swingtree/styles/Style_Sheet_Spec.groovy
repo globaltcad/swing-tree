@@ -200,10 +200,10 @@ class Style_Sheet_Spec extends Specification
             var s2 = ss.applyTo(toggle.component)
             var s3 = ss.applyTo(panel.component)
         then :
-            s1.background().color().get() == Color.BLUE
-            s2.background().foundationColor().get() == Color.CYAN
-            s3.background().color().get() == Color.BLUE
-            s3.background().foundationColor().get() == Color.CYAN
+            s1.base().backgroundColor().get() == Color.BLUE
+            s2.base().foundationColor().get() == Color.CYAN
+            s3.base().backgroundColor().get() == Color.BLUE
+            s3.base().foundationColor().get() == Color.CYAN
     }
 
     def 'The `group` style trait allows for inheritance, meaning a group can inherit from other ones.'()
@@ -235,7 +235,7 @@ class Style_Sheet_Spec extends Specification
         then :
             s1.padding() == Outline.of(1, 2, 3, 4)
             s2.padding() == Outline.of(1, 2, 3, 4)
-            s2.background().foundationColor().get() == Color.CYAN
+            s2.base().foundationColor().get() == Color.CYAN
     }
 
     def 'Nonsensical style trait group inheritance rules will throw an exception!'()
@@ -333,7 +333,7 @@ class Style_Sheet_Spec extends Specification
             var s4 = ss.applyTo(label1.component)
             var s5 = ss.applyTo(label2.component)
         then : '...and we check the results'
-            s1.background().foundationColor().get() == Color.BLUE
+            s1.base().foundationColor().get() == Color.BLUE
             s1.border().widths().top().get() == 11
             s1.border().widths().left().get() == 11
             s1.border().widths().bottom().get() == 11
@@ -347,7 +347,7 @@ class Style_Sheet_Spec extends Specification
             s1.shadow().isInset() == true
             s1.shadow().blurRadius() == 22
             s1.shadow().spreadRadius() == 6
-            s2.background().foundationColor().get() == Color.RED
+            s2.base().foundationColor().get() == Color.RED
             s2.border().widths().top().get() == 11
             s2.border().widths().left().get() == 11
             s2.border().widths().bottom().get() == 11
@@ -361,7 +361,7 @@ class Style_Sheet_Spec extends Specification
             s2.shadow().isInset() == false
             s2.shadow().blurRadius() == 22
             s2.shadow().spreadRadius() == 6
-            s3.background().foundationColor().get() == Color.BLUE
+            s3.base().foundationColor().get() == Color.BLUE
             s3.border().widths().top().get() == 11
             s3.border().widths().left().get() == 11
             s3.border().widths().bottom().get() == 11
@@ -375,7 +375,7 @@ class Style_Sheet_Spec extends Specification
             s3.shadow().isInset() == true
             s3.shadow().blurRadius() == 22
             s3.shadow().spreadRadius() == 6
-            s4.background().foundationColor().get() == Color.RED
+            s4.base().foundationColor().get() == Color.RED
             s4.border().widths().top().get() == 11
             s4.border().widths().left().get() == 11
             s4.border().widths().bottom().get() == 11
@@ -389,7 +389,7 @@ class Style_Sheet_Spec extends Specification
             s4.shadow().isInset() == false
             s4.shadow().blurRadius() == 22
             s4.shadow().spreadRadius() == 6
-            s5.background().foundationColor().get() == Color.RED
+            s5.base().foundationColor().get() == Color.RED
             s5.border().widths().top().get() == 11
             s5.border().widths().left().get() == 11
             s5.border().widths().bottom().get() == 11
@@ -638,7 +638,7 @@ class Style_Sheet_Spec extends Specification
             s.border().widths().bottom().get() == 5
             s.border().widths().right().get() == 5
             s.border().color().get() == Color.MAGENTA
-            s.background().color().get() == Color.RED
+            s.base().backgroundColor().get() == Color.RED
             s.border().gradient().transition() == UI.Transition.BOTTOM_TO_TOP
             s.border().gradient().colors() as java.util.List == [Color.RED, Color.BLUE]
             s.shadow("named shadow").spreadRadius() == 42

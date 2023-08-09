@@ -57,10 +57,10 @@ final class StylePainter<C extends JComponent>
         if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
             g2d.setFont( componentFont );
 
-        _style.background().foundationColor().ifPresent(outerColor -> {
+        _style.base().foundationColor().ifPresent(outerColor -> {
             _fillOuterFoundationBackground(outerColor, g2d);
         });
-        _style.background().color().ifPresent(color -> {
+        _style.base().backgroundColor().ifPresent(color -> {
             if ( color.getAlpha() == 0 ) return;
             g2d.setColor(color);
             g2d.fill(_getBaseArea());

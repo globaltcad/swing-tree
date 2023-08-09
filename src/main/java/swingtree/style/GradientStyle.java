@@ -9,7 +9,7 @@ import java.util.function.Function;
 
 /**
  *  Use this class to specify a gradient style for various sub styles,
- *  like for example {@link BackgroundStyle} or {@link BorderStyle} through the
+ *  like for example {@link BaseStyle} or {@link BorderStyle} through the
  *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#borderGradient(String, Function)}
  *  methods.
  *  <p>

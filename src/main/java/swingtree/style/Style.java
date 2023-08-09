@@ -42,11 +42,9 @@ public final class Style
     private static final Style _NONE = new Style(
                                             LayoutStyle.none(),
                                             BorderStyle.none(),
-                                            BackgroundStyle.none(),
-                                            ForegroundStyle.none(),
+                                            BaseStyle.none(),
                                             FontStyle.none(),
                                             DimensionalityStyle.none(),
-                                            null,
                                             Collections.singletonMap(StyleUtility.DEFAULT_KEY,ShadowStyle.none()),
                                             Collections.singletonMap(StyleUtility.DEFAULT_KEY + "_" + PainterStyle.none().layer().name(),PainterStyle.none()),
                                             Collections.singletonMap(StyleUtility.DEFAULT_KEY, GradientStyle.none()),
@@ -57,11 +55,9 @@ public final class Style
 
     private final LayoutStyle                _layout;
     private final BorderStyle                _border;
-    private final BackgroundStyle            _background;
-    private final ForegroundStyle            _foreground;
+    private final BaseStyle                  _base;
     private final FontStyle                  _font;
     private final DimensionalityStyle        _dimensionality;
-    private final Cursor                     _cursor;
     private final Map<String, ShadowStyle>   _shadows   = new TreeMap<>();
     private final Map<String, PainterStyle>  _painters  = new TreeMap<>();
     private final Map<String, GradientStyle> _gradients = new TreeMap<>();
@@ -71,11 +67,9 @@ public final class Style
     private Style(
         LayoutStyle                layout,
         BorderStyle                border,
-        BackgroundStyle            background,
-        ForegroundStyle            foreground,
+        BaseStyle                  base,
         FontStyle                  font,
         DimensionalityStyle        dimensionality,
-        Cursor                     cursor,
         Map<String, ShadowStyle>   shadows,
         Map<String, PainterStyle>  painters,
         Map<String, GradientStyle> gradients,
@@ -83,11 +77,9 @@ public final class Style
     ) {
         _layout         = layout;
         _border         = border;
-        _background     = background;
-        _foreground     = foreground;
+        _base           = base;
         _font           = font;
         _dimensionality = dimensionality;
-        _cursor         = cursor;
         _shadows.putAll(shadows);
         _painters.putAll(painters);
         _gradients.putAll(gradients);
@@ -95,43 +87,42 @@ public final class Style
     }
 
     Style _withLayout( LayoutStyle layout ) {
-        return new Style(layout, _border, _background, _foreground, _font, _dimensionality, _cursor, _shadows, _painters, _gradients, _images);
+        return new Style(layout, _border, _base, _font, _dimensionality, _shadows, _painters, _gradients, _images);
     }
     Style _withBorder( BorderStyle border ) {
-        return new Style(_layout, border, _background, _foreground, _font, _dimensionality, _cursor, _shadows, _painters, _gradients, _images);
+        return new Style(_layout, border, _base, _font, _dimensionality, _shadows, _painters, _gradients, _images);
     }
-    Style _withBackground( BackgroundStyle background ) {
-        return new Style(_layout, _border, background, _foreground, _font, _dimensionality, _cursor, _shadows, _painters, _gradients, _images);
-    }
-    Style _withForeground( ForegroundStyle foreground ) {
-        return new Style(_layout, _border, _background, foreground, _font, _dimensionality, _cursor, _shadows, _painters, _gradients, _images);
+    Style _withBackground( BaseStyle background ) {
+        return new Style(_layout, _border, background, _font, _dimensionality, _shadows, _painters, _gradients, _images);
     }
 
-    public Style foundationColor( Color color ) { return _withBackground(background().foundationColor(color)); }
+    public Style foundationColor( Color color ) { return _withBackground(base().foundationColor(color)); }
 
-    public Style backgroundColor( Color color ) { return _withBackground(background().color(color)); }
+    public Style backgroundColor( Color color ) { return _withBackground(base().backgroundColor(color)); }
 
     Style _withFont( FontStyle font ) {
-        return new Style(_layout, _border, _background, _foreground, font, _dimensionality, _cursor, _shadows, _painters, _gradients, _images);
+        return new Style(_layout, _border, _base, font, _dimensionality, _shadows, _painters, _gradients, _images);
     }
+
     Style _withDimensionality( DimensionalityStyle dimensionality ) {
-        return new Style(_layout, _border, _background, _foreground, _font, dimensionality, _cursor, _shadows, _painters, _gradients, _images);
+        return new Style(_layout, _border, _base, _font, dimensionality, _shadows, _painters, _gradients, _images);
     }
-    Style _withCursor( Cursor cursor ) {
-        return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, cursor, _shadows, _painters, _gradients, _images);
-    }
+
     Style _withShadow( Map<String, ShadowStyle> shadows ) {
-        return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, _cursor, shadows, _painters, _gradients, _images);
+        return new Style(_layout, _border, _base, _font, _dimensionality, shadows, _painters, _gradients, _images);
     }
+
     Style _withShadow( Function<ShadowStyle, ShadowStyle> styler ) {
         // A new map is created where all the styler is applied to all the values:
         Map<String, ShadowStyle> styledShadows = new TreeMap<>();
         _shadows.forEach( (key, value) -> styledShadows.put(key, styler.apply(value)) );
         return _withShadow(styledShadows);
     }
+
     Style _withImages( Map<String, ImageStyle> grounds ) {
-        return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, _cursor, _shadows, _painters, _gradients, grounds);
+        return new Style(_layout, _border, _base, _font, _dimensionality, _shadows, _painters, _gradients, grounds);
     }
+
     Style _withImages( Function<ImageStyle, ImageStyle> styler ) {
         // A new map is created where all the styler is applied to all the values:
         Map<String, ImageStyle> styledGrounds = new TreeMap<>();
@@ -147,13 +138,11 @@ public final class Style
 
     public BorderStyle border() { return _border; }
 
-    public BackgroundStyle background() { return _background; }
+    public BaseStyle base() { return _base; }
 
-    public ForegroundStyle foreground() { return _foreground; }
 
     public DimensionalityStyle dimensionality() { return _dimensionality; }
 
-    public Optional<Cursor> cursor() { return Optional.ofNullable(_cursor); }
 
     /**
      * @return The default shadow style.
@@ -164,7 +153,7 @@ public final class Style
      * @param shadowName The name of the shadow style to retrieve.
      * @return The shadow style with the provided name.
      */
-    public ShadowStyle shadow(String shadowName) {
+    public ShadowStyle shadow( String shadowName ) {
         Objects.requireNonNull(shadowName);
         return _shadows.get(shadowName);
     }
@@ -172,7 +161,7 @@ public final class Style
     /**
      * @return An unmodifiable list of all shadow styles sorted by their names in ascending alphabetical order.
      */
-    List<ShadowStyle> shadows(UI.Layer layer) {
+    List<ShadowStyle> shadows( UI.Layer layer ) {
         return Collections.unmodifiableList(
                 _shadows.entrySet()
                         .stream()
@@ -194,7 +183,7 @@ public final class Style
     /**
      * @return An unmodifiable list of painters sorted by their names in ascending alphabetical order.
      */
-    List<Painter> painters(UI.Layer layer) {
+    List<Painter> painters( UI.Layer layer ) {
         return Collections.unmodifiableList(
                 _painters
                         .entrySet()
@@ -260,12 +249,12 @@ public final class Style
 
     Style painter( Map<String, PainterStyle> painters ) {
         Objects.requireNonNull(painters);
-        return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, _cursor, _shadows, painters, _gradients, _images);
+        return new Style(_layout, _border, _base, _font, _dimensionality, _shadows, painters, _gradients, _images);
     }
 
     Style gradient( Map<String, GradientStyle> shades ) {
         Objects.requireNonNull(shades);
-        return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, _cursor, _shadows, _painters, shades, _images);
+        return new Style(_layout, _border, _base, _font, _dimensionality, _shadows, _painters, shades, _images);
     }
 
     Style gradient( String shadeName, Function<GradientStyle, GradientStyle> styler ) {
@@ -280,7 +269,7 @@ public final class Style
 
     Style images( Map<String, ImageStyle> images ) {
         Objects.requireNonNull(images);
-        return new Style(_layout, _border, _background, _foreground, _font, _dimensionality, _cursor, _shadows, _painters, _gradients, images);
+        return new Style(_layout, _border, _base, _font, _dimensionality, _shadows, _painters, _gradients, images);
     }
 
     Style images( String imageName, Function<ImageStyle, ImageStyle> styler ) {
@@ -308,11 +297,9 @@ public final class Style
         return new Style(
                     _layout._scale(scale),
                     _border._scale(scale),
-                    _background, // Just color
-                    _foreground, // Just color
+                    _base, // Just colors and the cursor
                     _font._scale(scale),
                     _dimensionality._scale(scale),
-                    _cursor, // The system knows best
                     _shadows.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue()._scale(scale))),
                     _painters, // This is the users problem...
                     _gradients, // Scaling does not make sense
@@ -328,12 +315,8 @@ public final class Style
         return Objects.equals(_border, otherStyle._border);
     }
 
-    boolean hasEqualBackgroundAs( Style otherStyle ) {
-        return Objects.equals(_background, otherStyle._background);
-    }
-
-    boolean hasEqualForegroundAs( Style otherStyle ) {
-        return Objects.equals(_foreground, otherStyle._foreground);
+    boolean hasEqualBaseAs( Style otherStyle ) {
+        return Objects.equals(_base, otherStyle._base);
     }
 
     boolean hasEqualFontAs( Style otherStyle ) {
@@ -344,9 +327,6 @@ public final class Style
         return Objects.equals(_dimensionality, otherStyle._dimensionality);
     }
 
-    boolean hasEqualCursorAs( Style otherStyle ) {
-        return Objects.equals(_cursor, otherStyle._cursor);
-    }
 
     boolean hasEqualShadowsAs( Style otherStyle ) {
         return StyleUtility.mapEquals(_shadows, otherStyle._shadows);
@@ -356,7 +336,7 @@ public final class Style
         return StyleUtility.mapEquals(_painters, otherStyle._painters);
     }
 
-    boolean hasEqualGradientsAs(Style otherStyle ) {
+    boolean hasEqualGradientsAs( Style otherStyle ) {
         return StyleUtility.mapEquals(_gradients, otherStyle._gradients);
     }
 
@@ -371,7 +351,7 @@ public final class Style
     @Override
     public int hashCode() {
         return Objects.hash(
-                    _layout, _border, _background, _foreground, _font, _dimensionality, _cursor,
+                    _layout, _border, _base, _font, _dimensionality,
                     StyleUtility.mapHash(_shadows), StyleUtility.mapHash(_painters),
                     StyleUtility.mapHash(_gradients),  StyleUtility.mapHash(_images)
                 );
@@ -385,11 +365,9 @@ public final class Style
         Style other = (Style) obj;
         return hasEqualLayoutAs(other)         &&
                hasEqualBorderAs(other)         &&
-               hasEqualBackgroundAs(other)     &&
-               hasEqualForegroundAs(other)     &&
+               hasEqualBaseAs(other)           &&
                hasEqualFontAs(other)           &&
                hasEqualDimensionalityAs(other) &&
-               hasEqualCursorAs(other)         &&
                hasEqualShadowsAs(other)        &&
                hasEqualPaintersAs(other)       &&
                hasEqualGradientsAs(other)      &&
@@ -437,14 +415,12 @@ public final class Style
         return "Style[" +
                     _layout         + ", " +
                     _border         + ", " +
-                    _background     + ", " +
-                    _foreground     + ", " +
+                    _base           + ", " +
                     _font           + ", " +
                     _dimensionality + ", " +
-                    ( _cursor == null ? "" : _cursor ) +
                     shadowString    + ", " +
                     painterString   + ", " +
-                    gradientString     + ", " +
+                    gradientString  + ", " +
                     imagesString   +
                 "]";
     }
@@ -453,14 +429,12 @@ public final class Style
     {
         public final boolean noLayoutStyle;
         public final boolean noBorderStyle;
-        public final boolean noBackgroundStyle;
-        public final boolean noForegroundStyle;
+        public final boolean noBaseStyle;
         public final boolean noFontStyle;
         public final boolean noDimensionalityStyle;
         public final boolean noShadowStyle;
         public final boolean noPainters;
         public final boolean noGradients;
-        public final boolean noCursor;
         public final boolean noImages;
 
         public final boolean allShadowsAreBorderShadows;
@@ -469,17 +443,15 @@ public final class Style
         public final boolean allImagesAreBorderImages;
 
 
-        private Report(Style style) {
+        private Report( Style style ) {
             this.noLayoutStyle         = Style.none().hasEqualLayoutAs(style);
             this.noBorderStyle         = Style.none().hasEqualBorderAs(style);
-            this.noBackgroundStyle     = Style.none().hasEqualBackgroundAs(style);
-            this.noForegroundStyle     = Style.none().hasEqualForegroundAs(style);
+            this.noBaseStyle           = Style.none().hasEqualBaseAs(style);
             this.noFontStyle           = Style.none().hasEqualFontAs(style);
             this.noDimensionalityStyle = Style.none().hasEqualDimensionalityAs(style);
             this.noShadowStyle         = Style.none().hasEqualShadowsAs(style);
             this.noPainters            = Style.none().hasEqualPaintersAs(style);
             this.noGradients           = Style.none().hasEqualGradientsAs(style);
-            this.noCursor              = Style.none().hasEqualCursorAs(style);
             this.noImages              = Style.none().hasEqualGroundsAs(style);
 
             this.allShadowsAreBorderShadows     = style._shadows.values().stream().allMatch( s -> s.layer() == UI.Layer.BORDER );
@@ -491,14 +463,12 @@ public final class Style
         public boolean isNotStyled() {
             return noLayoutStyle          &&
                    noBorderStyle          &&
-                   noBackgroundStyle      &&
-                   noForegroundStyle      &&
+                   noBaseStyle            &&
                    noFontStyle            &&
                    noDimensionalityStyle  &&
                    noShadowStyle          &&
                    noPainters             &&
                    noGradients            &&
-                   noCursor               &&
                    noImages;
         }
 
@@ -511,14 +481,12 @@ public final class Style
         public boolean onlyLayoutIsStyled() {
             return !noLayoutStyle          &&
                     noBorderStyle          &&
-                    noBackgroundStyle      &&
-                    noForegroundStyle      &&
+                    noBaseStyle            &&
                     noFontStyle            &&
                     noDimensionalityStyle  &&
                     noShadowStyle          &&
                     noPainters             &&
                     noGradients            &&
-                    noCursor               &&
                     noImages;
         }
 
@@ -526,28 +494,24 @@ public final class Style
         public boolean onlyDimensionalityIsStyled() {
             return noLayoutStyle          &&
                    noBorderStyle          &&
-                   noBackgroundStyle      &&
-                   noForegroundStyle      &&
+                    noBaseStyle &&
                    noFontStyle            &&
                    !noDimensionalityStyle &&
                    noShadowStyle          &&
                    noPainters             &&
                    noGradients            &&
-                   noCursor               &&
                    noImages;
         }
 
         public boolean onlyLayoutAndDimensionalityIsStyled() {
             return !noLayoutStyle         &&
                    noBorderStyle          &&
-                   noBackgroundStyle      &&
-                   noForegroundStyle      &&
+                   noBaseStyle            &&
                    noFontStyle            &&
                    !noDimensionalityStyle &&
                    noShadowStyle          &&
                    noPainters             &&
                    noGradients            &&
-                   noCursor               &&
                    noImages;
         }
     }
