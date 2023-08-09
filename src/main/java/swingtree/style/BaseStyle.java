@@ -23,7 +23,6 @@ public final class BaseStyle
 
     private final Color _backgroundColor;
     private final Color _foundationColor;
-
     private final Color _foregroundColor;
     private final Cursor _cursor;
 
