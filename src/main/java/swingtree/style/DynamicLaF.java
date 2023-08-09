@@ -251,14 +251,18 @@ class DynamicLaF
                 int insetBottom = 0;
                 int insetRight  = 0;
                 if ( c.getBorder() instanceof StyleAndAnimationBorder ) {
-                    StyleAndAnimationBorder styleBorder = (StyleAndAnimationBorder) c.getBorder();
-                    Insets insets = styleBorder.getCurrentMarginInsets();
-                    if ( insets != null ) {
-                        insetTop    = insets.top;
-                        insetLeft   = insets.left;
-                        insetBottom = insets.bottom;
-                        insetRight  = insets.right;
-                    }
+                    StyleAndAnimationBorder<?> styleBorder = (StyleAndAnimationBorder<?>) c.getBorder();
+                    Insets margins = styleBorder.getCurrentMarginInsets();
+                    Insets oldLaFBorder = styleBorder.getFormerBorderInsets();
+                    insetTop    = margins.top    + oldLaFBorder.top    / 2;
+                    insetLeft   = margins.left   + oldLaFBorder.left   / 2;
+                    insetBottom = margins.bottom + oldLaFBorder.bottom / 2;
+                    insetRight  = margins.right  + oldLaFBorder.right  / 2; /*
+                        Here we divide by 2 because in nimbus the border is partially consisting of
+                        a shadow going inwards! If we don't divide by 2, the background will
+                        not fill the whole inner component area.
+                        TODO: investigate how this works in other LaFs.
+                    */
                 }
                 g.setColor(c.getBackground());
                 g.fillRect(

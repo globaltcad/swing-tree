@@ -151,6 +151,15 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         return _currentPaddingInsets;
     }
 
+    public Insets getFormerBorderInsets() {
+        if ( _borderWasNotPainted )
+            return new Insets(0, 0, 0, 0);
+        else
+            return _formerBorder == null
+                        ? new Insets(0, 0, 0, 0)
+                        : _formerBorder.getBorderInsets(_compExt.getOwner());
+    }
+
     @Override
     public boolean isBorderOpaque() {
         return false;
