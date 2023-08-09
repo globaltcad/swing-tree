@@ -3,11 +3,15 @@ package swingtree.style;
 import swingtree.components.JBox;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.plaf.*;
 import javax.swing.plaf.basic.BasicButtonUI;
 import javax.swing.plaf.basic.BasicLabelUI;
 import javax.swing.plaf.basic.BasicPanelUI;
+import javax.swing.plaf.basic.BasicTextFieldUI;
+import java.awt.*;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 class DynamicLaF
 {
@@ -96,7 +100,7 @@ class DynamicLaF
         if ( owner instanceof JPanel ) {
             JPanel p = (JPanel) owner;
             _formerLaF = p.getUI();
-            ComponentExtension.PanelStyler laf = ComponentExtension.PanelStyler.INSTANCE;
+            PanelStyler laf = PanelStyler.INSTANCE;
             p.setUI(laf);
             _styleLaF = laf;
             if ( _formerLaF instanceof BasicPanelUI ) {
@@ -117,7 +121,7 @@ class DynamicLaF
         else if ( owner instanceof AbstractButton ) {
             AbstractButton b = (AbstractButton) owner;
             _formerLaF = b.getUI();
-            ComponentExtension.ButtonStyler laf = new ComponentExtension.ButtonStyler(b.getUI());
+            ButtonStyler laf = new ButtonStyler(b.getUI());
             b.setUI(laf);
             if ( _formerLaF instanceof BasicButtonUI) {
                 BasicButtonUI buttonUI = (BasicButtonUI) _formerLaF;
@@ -130,7 +134,7 @@ class DynamicLaF
         else if ( owner instanceof JLabel ) {
             JLabel l = (JLabel) owner;
             _formerLaF = l.getUI();
-            ComponentExtension.LabelStyler laf = new ComponentExtension.LabelStyler(l.getUI());
+            LabelStyler laf = new LabelStyler(l.getUI());
             l.setUI(laf);
             if ( _formerLaF instanceof BasicLabelUI) {
                 BasicLabelUI labelUI = (BasicLabelUI) _formerLaF;
@@ -143,7 +147,7 @@ class DynamicLaF
         else if ( owner instanceof JTextField && !(owner instanceof JPasswordField) ) {
             JTextField t = (JTextField) owner;
             _formerLaF = t.getUI();
-            ComponentExtension.TextFieldStyler laf = new ComponentExtension.TextFieldStyler(t.getUI());
+            TextFieldStyler laf = new TextFieldStyler(t.getUI());
             t.setUI(laf);
             if ( _formerLaF instanceof TextUI) {
                 TextUI textFieldUI = (TextUI) _formerLaF;
@@ -185,6 +189,113 @@ class DynamicLaF
                 _styleLaF = null;
             }
         }
+    }
+
+    static class PanelStyler extends BasicPanelUI
+    {
+        static final PanelStyler INSTANCE = new PanelStyler();
+
+        PanelStyler() {}
+
+        @Override public void paint(Graphics g, JComponent c ) { ComponentExtension.from(c)._paintBackground(g); }
+        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
+        @Override
+        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
+    }
+
+    static class ButtonStyler extends BasicButtonUI
+    {
+        private final ButtonUI _formerUI;
+
+        ButtonStyler(ButtonUI formerUI) { _formerUI = formerUI; }
+
+        @Override public void paint( Graphics g, JComponent c ) {
+            ComponentExtension.from(c)._paintBackground(g);
+            _paintComponentThroughFormerIU(_formerUI, g, c);
+        }
+        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
+        @Override
+        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
+    }
+
+    static class LabelStyler extends BasicLabelUI
+    {
+        private final LabelUI _formerUI;
+
+        LabelStyler(LabelUI formerUI) { _formerUI = formerUI; }
+
+        @Override public void paint( Graphics g, JComponent c ) {
+            ComponentExtension.from(c)._paintBackground(g);
+            _paintComponentThroughFormerIU(_formerUI, g, c);
+        }
+        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
+        @Override
+        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
+    }
+
+    static class TextFieldStyler extends BasicTextFieldUI
+    {
+        private final TextUI _formerUI;
+
+        TextFieldStyler(TextUI formerUI) { _formerUI = formerUI; }
+        @Override protected void paintSafely(Graphics g) {
+            if ( !getComponent().isOpaque() )
+                paintBackground(g);
+            super.paintSafely(g);
+        }
+        @Override protected void paintBackground(Graphics g) {
+            JComponent c = getComponent();
+            //if ( c.isOpaque() ) {
+                int insetTop    = 0;
+                int insetLeft   = 0;
+                int insetBottom = 0;
+                int insetRight  = 0;
+                if ( c.getBorder() instanceof ComponentExtension.BorderStyleAndAnimationRenderer) {
+                    ComponentExtension.BorderStyleAndAnimationRenderer styleBorder = (ComponentExtension.BorderStyleAndAnimationRenderer) c.getBorder();
+                    Insets insets = styleBorder.getCurrentMarginInsets();
+                    if ( insets != null ) {
+                        insetTop    = insets.top;
+                        insetLeft   = insets.left;
+                        insetBottom = insets.bottom;
+                        insetRight  = insets.right;
+                    }
+                }
+                g.setColor(c.getBackground());
+                g.fillRect(
+                        insetLeft, insetTop,
+                        c.getWidth() - insetLeft - insetRight, c.getHeight() - insetTop - insetBottom
+                    );
+            //}
+            ComponentExtension.from(c)._paintBackground(g);
+            if ( insetLeft == 0 && insetRight == 0 && insetTop == 0 && insetBottom == 0 )
+                _paintComponentThroughFormerIU(_formerUI, g, c);
+        }
+
+        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
+        @Override
+        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
+    }
+
+
+    private static void _paintComponentThroughFormerIU(ComponentUI formerUI, Graphics g, JComponent c) {
+        try {
+            if ( formerUI != null )
+                formerUI.update(g, c);
+        } catch ( Exception ex ) {
+            ex.printStackTrace();
+        }
+    }
+
+    private static boolean _contains(JComponent c, int x, int y, Supplier<Boolean> superContains) {
+        Border border = c.getBorder();
+        if ( border instanceof ComponentExtension.BorderStyleAndAnimationRenderer) {
+            ComponentExtension.BorderStyleAndAnimationRenderer<?> b = (ComponentExtension.BorderStyleAndAnimationRenderer<?>) border;
+            Insets margins = b.getCurrentMarginInsets();
+            int width  = c.getWidth();
+            int height = c.getHeight();
+            return (x >= margins.left) && (x < width - margins.right) && (y >= margins.top) && (y < height - margins.bottom);
+        }
+        return superContains.get();
     }
 
 }

@@ -11,7 +11,6 @@ import swingtree.components.JBox;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.plaf.*;
-import javax.swing.plaf.basic.*;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.List;
@@ -105,7 +104,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     public PanelUI createJBoxUI() {
-        return new PanelStyler() {
+        return new DynamicLaF.PanelStyler() {
             @Override
             public void installUI(JComponent c) {
                 JBox b = (JBox)c;
@@ -155,7 +154,7 @@ public final class ComponentExtension<C extends JComponent>
             _currentStylePainter = null; // custom style rendering unfortunately not possible for this component :/
     }
 
-    private void _paintBackground( Graphics g )
+    void _paintBackground(Graphics g)
     {
         _mainClip = null;
         _establishCurrentMainPaintClip(g);
@@ -596,112 +595,6 @@ public final class ComponentExtension<C extends JComponent>
 
         @Override public boolean isBorderOpaque() { return false; }
 
-    }
-
-    static class PanelStyler extends BasicPanelUI
-    {
-        static final PanelStyler INSTANCE = new PanelStyler();
-
-        private PanelStyler() {}
-
-        @Override public void paint( Graphics g, JComponent c ) { ComponentExtension.from(c)._paintBackground(g); }
-        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
-        @Override
-        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
-    }
-
-    static class ButtonStyler extends BasicButtonUI
-    {
-        private final ButtonUI _formerUI;
-
-        ButtonStyler(ButtonUI formerUI) { _formerUI = formerUI; }
-
-        @Override public void paint( Graphics g, JComponent c ) {
-            ComponentExtension.from(c)._paintBackground(g);
-            _paintComponentThroughFormerIU(_formerUI, g, c);
-        }
-        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
-        @Override
-        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
-    }
-
-    static class LabelStyler extends BasicLabelUI
-    {
-        private final LabelUI _formerUI;
-
-        LabelStyler(LabelUI formerUI) { _formerUI = formerUI; }
-
-        @Override public void paint( Graphics g, JComponent c ) {
-            ComponentExtension.from(c)._paintBackground(g);
-            _paintComponentThroughFormerIU(_formerUI, g, c);
-        }
-        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
-        @Override
-        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
-    }
-
-    static class TextFieldStyler extends BasicTextFieldUI
-    {
-        private final TextUI _formerUI;
-
-        TextFieldStyler(TextUI formerUI) { _formerUI = formerUI; }
-        @Override protected void paintSafely(Graphics g) {
-            if ( !getComponent().isOpaque() )
-                paintBackground(g);
-            super.paintSafely(g);
-        }
-        @Override protected void paintBackground(Graphics g) {
-            JComponent c = getComponent();
-            //if ( c.isOpaque() ) {
-                int insetTop    = 0;
-                int insetLeft   = 0;
-                int insetBottom = 0;
-                int insetRight  = 0;
-                if ( c.getBorder() instanceof BorderStyleAndAnimationRenderer ) {
-                    BorderStyleAndAnimationRenderer styleBorder = (BorderStyleAndAnimationRenderer) c.getBorder();
-                    Insets insets = styleBorder.getCurrentMarginInsets();
-                    if ( insets != null ) {
-                        insetTop    = insets.top;
-                        insetLeft   = insets.left;
-                        insetBottom = insets.bottom;
-                        insetRight  = insets.right;
-                    }
-                }
-                g.setColor(c.getBackground());
-                g.fillRect(
-                        insetLeft, insetTop,
-                        c.getWidth() - insetLeft - insetRight, c.getHeight() - insetTop - insetBottom
-                    );
-            //}
-            ComponentExtension.from(c)._paintBackground(g);
-            if ( insetLeft == 0 && insetRight == 0 && insetTop == 0 && insetBottom == 0 )
-                _paintComponentThroughFormerIU(_formerUI, g, c);
-        }
-
-        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
-        @Override
-        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
-    }
-
-    private static void _paintComponentThroughFormerIU(ComponentUI formerUI, Graphics g, JComponent c) {
-        try {
-            if ( formerUI != null )
-                formerUI.update(g, c);
-        } catch ( Exception ex ) {
-            ex.printStackTrace();
-        }
-    }
-
-    private static boolean _contains(JComponent c, int x, int y, Supplier<Boolean> superContains) {
-        Border border = c.getBorder();
-        if ( border instanceof BorderStyleAndAnimationRenderer ) {
-            BorderStyleAndAnimationRenderer<?> b = (BorderStyleAndAnimationRenderer<?>) border;
-            Insets margins = b.getCurrentMarginInsets();
-            int width  = c.getWidth();
-            int height = c.getHeight();
-            return (x >= margins.left) && (x < width - margins.right) && (y >= margins.top) && (y < height - margins.bottom);
-        }
-        return superContains.get();
     }
 
 }
