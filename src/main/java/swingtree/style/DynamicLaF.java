@@ -286,14 +286,49 @@ class DynamicLaF
         }
     }
 
-    private static boolean _contains(JComponent c, int x, int y, Supplier<Boolean> superContains) {
+    /**
+     *  Determines whether the given point, in the parent's coordinate space, is within this component.
+     *  This method accounts for the current SwingTree border and style insets (padding, border widths and margin)
+     *  as well as subcomponents outside the inner component area.
+     * @param c the component
+     * @param x the x coordinate
+     * @param y the y coordinate
+     * @param superContains the super.contains() method
+     * @return true if the point is within the component
+     */
+    private static boolean _contains(JComponent c, int x, int y, Supplier<Boolean> superContains)
+    {
         Border border = c.getBorder();
         if ( border instanceof StyleAndAnimationBorder ) {
             StyleAndAnimationBorder<?> b = (StyleAndAnimationBorder<?>) border;
             Insets margins = b.getCurrentMarginInsets();
             int width  = c.getWidth();
             int height = c.getHeight();
-            return (x >= margins.left) && (x < width - margins.right) && (y >= margins.top) && (y < height - margins.bottom);
+            boolean isInside = (x >= margins.left) && (x < width - margins.right) && (y >= margins.top) && (y < height - margins.bottom);
+
+            if ( isInside )
+                return true;
+            else
+            {/*
+                You might be thinking that we should return false here, but that would be wrong in certain cases!
+                A child component might be outside the border, but still be a subcomponent of the parent component.
+                This is the case for example, when the padding is negative, and the child component is inside the border.
+                So, if there are negative paddings, we loop through the subcomponents and see if any of
+                them contains the point.                                                                               */
+
+                Insets padding = b.getCurrentPaddingInsets();
+
+                if ( padding.top < 0 || padding.left < 0 || padding.bottom < 0 || padding.right < 0 )
+                    for ( Component child : c.getComponents() ) {
+                        if ( child instanceof JComponent ) {
+                            JComponent jc = (JComponent) child;
+                            if ( jc.contains(x, y) )
+                                return true;
+                        }
+                    }
+                else
+                    return false;
+            }
         }
         return superContains.get();
     }

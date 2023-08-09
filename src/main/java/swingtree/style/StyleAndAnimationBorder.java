@@ -121,12 +121,12 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
 
     private Insets _calculateInsets() {
         _currentMarginInsets = _compExt._getOrCreateStylePainter()
-                .map(StylePainter::calculateMarginInsets)
-                .orElse(_currentMarginInsets);
+                                        .map(StylePainter::calculateMarginInsets)
+                                        .orElse(_currentMarginInsets);
 
         _currentPaddingInsets = _compExt._getOrCreateStylePainter()
-                .map(StylePainter::calculatePaddingInsets)
-                .orElse(_currentPaddingInsets);
+                                        .map(StylePainter::calculatePaddingInsets)
+                                        .orElse(_currentPaddingInsets);
 
         return _compExt._getOrCreateStylePainter()
                 .map(r ->
