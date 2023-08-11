@@ -171,7 +171,7 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      *  A convenience method to avoid peeking into this builder like so:
      *  <pre>{@code
      *     UI.label("Something")
-     *         .peek( label -> label.setHorizontalAlignment(...) );
+     *     .peek( label -> label.setHorizontalAlignment(...) );
      *  }</pre>
      * This sets the horizontal alignment of the label's content (icon and text).
      *
@@ -179,7 +179,7 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
-    public UIForLabel<L> with( UI.HorizontalAlignment horizontalAlign ) {
+    public UIForLabel<L> withHorizontalAlignment( UI.HorizontalAlignment horizontalAlign ) {
         NullUtil.nullArgCheck( horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class );
         getComponent().setHorizontalAlignment(horizontalAlign.forSwing());
         return this;
@@ -199,7 +199,7 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
         NullUtil.nullArgCheck( horizontalAlign, "horizontalAlign", Val.class );
         NullUtil.nullPropertyCheck( horizontalAlign, "horizontalAlign", "Null is not a valid alignment." );
         _onShow( horizontalAlign, v -> getComponent().setHorizontalAlignment(v.forSwing()) );
-        return with(horizontalAlign.orElseThrow());
+        return withHorizontalAlignment(horizontalAlign.orElseThrow());
     }
 
     /**
@@ -214,7 +214,7 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
-    public UIForLabel<L> with( UI.VerticalAlignment verticalAlign ) {
+    public UIForLabel<L> withVerticalAlignment( UI.VerticalAlignment verticalAlign ) {
         NullUtil.nullArgCheck( verticalAlign, "verticalAlign", UI.VerticalAlignment.class );
         getComponent().setVerticalAlignment(verticalAlign.forSwing());
         return this;
@@ -233,7 +233,7 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
         NullUtil.nullArgCheck( verticalAlign, "verticalAlign", Val.class );
         NullUtil.nullPropertyCheck( verticalAlign, "verticalAlign", "Null is not a valid alignment." );
         _onShow( verticalAlign, v -> getComponent().setVerticalAlignment(v.forSwing()) );
-        return with(verticalAlign.orElseThrow());
+        return withVerticalAlignment(verticalAlign.orElseThrow());
     }
 
     /**
@@ -316,7 +316,7 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      * @param icon The {@link Icon} which should be displayed on the label.
      * @return This very builder to allow for method chaining.
      */
-    public UIForLabel<L> with( Icon icon ) {
+    public UIForLabel<L> withIcon( Icon icon ) {
         getComponent().setIcon(icon);
         return this;
     }
@@ -333,7 +333,7 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
     public UIForLabel<L> withIcon( Val<Icon> icon ) {
         NullUtil.nullArgCheck(icon,"icon",Val.class);
         _onShow( icon, i -> getComponent().setIcon(i) );
-        return with(icon.orElseNull());
+        return withIcon(icon.orElseNull());
     }
 
     /**
