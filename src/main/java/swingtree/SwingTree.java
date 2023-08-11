@@ -60,10 +60,15 @@ public final class SwingTree
 	private StyleSheet _styleSheet = null;
 
     private final LazyRef<UIScale> uiScale;
+    private final Map<String, ImageIcon> _iconCache = new HashMap<>();
 
 
 	private SwingTree() {
         this.uiScale = new LazyRef<>(UIScale::new);
+    }
+
+    public Map<String, ImageIcon> getIconCache() {
+        return _iconCache;
     }
 
     /**

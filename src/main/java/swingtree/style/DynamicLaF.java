@@ -1,6 +1,7 @@
 package swingtree.style;
 
 import swingtree.components.JBox;
+import swingtree.components.JIcon;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -97,7 +98,23 @@ class DynamicLaF
         if ( customLookAndFeelIsInstalled() )
             return true;
 
-        if ( owner instanceof JPanel ) {
+        if ( owner instanceof JBox ) { // This is a SwinTree component, so it already has a custom LaF.
+            JBox p = (JBox) owner;
+            _formerLaF = p.getUI();
+            //PanelUI laf = createJBoxUI();
+            //p.setUI(laf);
+            _styleLaF = _formerLaF;
+            return true;
+        }
+        else if ( owner instanceof JIcon ) { // This is a SwinTree component, so it already has a custom LaF.
+            JIcon i = (JIcon) owner;
+            _formerLaF = i.getUI();
+            //LabelUI laf = createJIconUI();
+            //i.setUI(laf);
+            _styleLaF = _formerLaF;
+            return true;
+        }
+        else if ( owner instanceof JPanel ) {
             JPanel p = (JPanel) owner;
             _formerLaF = p.getUI();
             PanelStyler laf = PanelStyler.INSTANCE;
@@ -108,14 +125,6 @@ class DynamicLaF
                 panelUI.installUI(p);
                 // We make the former LaF believe that it is still in charge of the component.
             }
-            return true;
-        }
-        if ( owner instanceof JBox) {
-            JBox p = (JBox) owner;
-            _formerLaF = p.getUI();
-            //PanelUI laf = createJBoxUI();
-            //p.setUI(laf);
-            _styleLaF = _formerLaF;
             return true;
         }
         else if ( owner instanceof AbstractButton ) {
@@ -173,6 +182,11 @@ class DynamicLaF
                 //p.setUI((PanelUI) _formerLaF);
                 _styleLaF = null;
             }
+            if ( _owner instanceof JIcon ) {
+                //JBox p = (JBox) _owner;
+                //p.setUI((PanelUI) _formerLaF);
+                _styleLaF = null;
+            }
             else if ( _owner instanceof AbstractButton ) {
                 AbstractButton b = (AbstractButton) _owner;
                 b.setUI((ButtonUI) _formerLaF);
@@ -189,6 +203,25 @@ class DynamicLaF
                 _styleLaF = null;
             }
         }
+    }
+
+    public void updateUIFor(JComponent owner )
+    {
+        if ( owner instanceof JBox )
+            ((JBox)owner).setUI(new DynamicLaF.PanelStyler() {
+                @Override public void installUI(JComponent c) { installDefaults((JBox)c); }
+                @Override public void uninstallUI(JComponent c) { uninstallDefaults((JBox)c); }
+                private void installDefaults(JBox b) {
+                    LookAndFeel.installColorsAndFont(b, "Box.background", "Box.foreground", "Box.font");
+                    LookAndFeel.installBorder(b,"Box.border");
+                    LookAndFeel.installProperty(b, "opaque", Boolean.FALSE);
+                }
+                private void uninstallDefaults(JBox b) { LookAndFeel.uninstallBorder(b); }
+            });
+        else if ( owner instanceof JIcon )
+            ((JIcon)owner).setUI(new DynamicLaF.LabelStyler(null));
+
+        // Other types of components are not supported yet!
     }
 
     static class PanelStyler extends BasicPanelUI
@@ -226,7 +259,10 @@ class DynamicLaF
 
         @Override public void paint( Graphics g, JComponent c ) {
             ComponentExtension.from(c)._paintBackground(g);
-            _paintComponentThroughFormerIU(_formerUI, g, c);
+            if ( _formerUI != null )
+                _paintComponentThroughFormerIU(_formerUI, g, c);
+            else
+                super.paint(g, c);
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
         @Override

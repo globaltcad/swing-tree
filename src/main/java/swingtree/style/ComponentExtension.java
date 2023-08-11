@@ -6,11 +6,9 @@ import swingtree.animation.AnimationState;
 import swingtree.animation.LifeTime;
 import swingtree.api.Painter;
 import swingtree.api.Styler;
-import swingtree.components.JBox;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.plaf.*;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.List;
@@ -104,33 +102,7 @@ public final class ComponentExtension<C extends JComponent>
         _installCustomBorderBasedStyleAndAnimationRenderer();
     }
 
-    public PanelUI createJBoxUI() {
-        return new DynamicLaF.PanelStyler() {
-            @Override
-            public void installUI(JComponent c) {
-                JBox b = (JBox)c;
-                installDefaults(b);
-            }
-            @Override
-            public void uninstallUI(JComponent c) {
-                JBox b = (JBox)c;
-                uninstallDefaults(b);
-            }
-
-            private void installDefaults(JBox b) {
-                LookAndFeel.installColorsAndFont(b,
-                        "Box.background",
-                        "Box.foreground",
-                        "Box.font");
-                LookAndFeel.installBorder(b,"Box.border");
-                LookAndFeel.installProperty(b, "opaque", Boolean.FALSE);
-            }
-
-            private void uninstallDefaults(JBox b) {
-                LookAndFeel.uninstallBorder(b);
-            }
-        };
-    }
+    public void updateUI() { _laf.updateUIFor(_owner); }
 
     private StylePainter<C> _createStylePainter() {
         Style style = _applyStyleToComponentState(_calculateStyle());

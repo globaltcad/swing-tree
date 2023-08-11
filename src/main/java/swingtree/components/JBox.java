@@ -38,7 +38,7 @@ public class JBox extends JComponent implements Accessible
      *        uses additional memory space to achieve fast, flicker-free
      *        updates
      */
-    public JBox(LayoutManager layout, boolean isDoubleBuffered) {
+    public JBox( LayoutManager layout, boolean isDoubleBuffered ) {
         setLayout(layout);
         setDoubleBuffered(isDoubleBuffered);
         setOpaque(false);
@@ -82,7 +82,7 @@ public class JBox extends JComponent implements Accessible
      * @see JComponent#updateUI
      */
     public void updateUI() {
-        setUI(ComponentExtension.from(this).createJBoxUI());
+        ComponentExtension.from(this).updateUI();
     }
 
     /**
