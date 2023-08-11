@@ -290,7 +290,7 @@ class Label_Binding_Spec extends Specification
             behave and look like depending on your business logic.
         """
         given : 'We create a simple swing-tree property for modelling the size.'
-            Val<Icon> icon = Var.of(UI.icon("img/seed.png"))
+            Val<Icon> icon = Var.of(UI.loadIcon("img/seed.png"))
             var originalIcon = icon.orElseThrow()
 
         when : 'We create and bind to a label UI node...'
@@ -305,7 +305,7 @@ class Label_Binding_Spec extends Specification
             ui.component.icon.iconWidth == 512
 
         when : 'We change the items of the properties...'
-            icon.set(UI.icon("img/swing.png"))
+            icon.set(UI.loadIcon("img/swing.png"))
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
         then : 'The label should be a different one.'

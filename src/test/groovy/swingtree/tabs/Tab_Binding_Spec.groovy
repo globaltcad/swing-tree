@@ -121,14 +121,14 @@ class Tab_Binding_Spec extends Specification
             You can bind an icon property to the icon of a tab.
         """
         given : 'An icon property and a tabbed pane UI node.'
-            var icon = Var.of(UI.icon("swing.png"))
+            var icon = Var.of(UI.loadIcon("swing.png"))
             def tabbedPane =
                 UI.tabbedPane(UI.Position.TOP)
                 .add(UI.tab("Tab 1").withIcon(icon))
                 .get(JTabbedPane)
 
         when : 'We change the icon.'
-            var newIcon = UI.icon("seed.png")
+            var newIcon = UI.loadIcon("seed.png")
             icon.set(newIcon)
             UI.sync()
 

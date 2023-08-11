@@ -40,7 +40,7 @@ public class SoftUIView extends Panel
                         });
                     })
                     .add(
-                        label(50,50,icon("img/trees.png")).group(Soft.BANNER)
+                        label(50,50, loadIcon("img/trees.png")).group(Soft.BANNER)
                     )
                 )
                 .add( SHRINK.and(SPAN).and(ALIGN_CENTER),
@@ -92,7 +92,7 @@ public class SoftUIView extends Panel
                 )
             )
             .add(
-                label(512, 512, icon("img/swing.png")).withStyle( it -> it.padding(24) )
+                label(512, 512, loadIcon("img/swing.png")).withStyle(it -> it.padding(24) )
             )
             .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
                 it.paint(state, g -> {
