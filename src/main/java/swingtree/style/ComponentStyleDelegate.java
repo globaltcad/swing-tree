@@ -1094,6 +1094,32 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
+     *  Use this to define the vertical alignment of the default font of the component.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text. <br>
+     *  Also note that not all text based components support text alignment.
+     *  @param alignment The vertical alignment of the font.
+     *                   See {@link UI.VerticalAlignment} for more information.
+     *  @return A new {@link ComponentStyleDelegate} with the provided font alignment.
+     */
+    public ComponentStyleDelegate<C> fontAlignment( UI.VerticalAlignment alignment ) {
+        return _withStyle(_style._withFont(_style.font().verticalAlignment(alignment)));
+    }
+
+    /**
+     *  Use this to define the horizontal and vertical alignment of the default font of the component.
+     *  Note that font styles will only apply if the component that is being rendered
+     *  also supports displaying text. <br>
+     *  Also note that not all text based components support text alignment.
+     *  @param alignment The horizontal and vertical alignment of the font.
+     *                   See {@link UI.Alignment} for more information.
+     *  @return A new {@link ComponentStyleDelegate} with the provided font alignment.
+     */
+    public ComponentStyleDelegate<C> fontAlignment( UI.Alignment alignment ) {
+        return fontAlignment(alignment.getHorizontal()).fontAlignment(alignment.getVertical());
+    }
+
+    /**
      *  Defines the minimum {@link Dimension} of this {@link JComponent}. <br>
      *  This ultimately translates to {@link JComponent#setMinimumSize(Dimension)} on the underlying component. <br>
      * @param minSize The minimum {@link Dimension}.

@@ -355,6 +355,18 @@ public final class ComponentExtension<C extends JComponent>
                     textField.setHorizontalAlignment( alignment.forSwing() );
             }
         });
+        style.font().verticalAlignment().ifPresent( alignment -> {
+            if ( _owner instanceof JLabel ) {
+                JLabel label = (JLabel) _owner;
+                if ( !Objects.equals( label.getVerticalAlignment(), alignment.forSwing() ) )
+                    label.setVerticalAlignment( alignment.forSwing() );
+            }
+            if ( _owner instanceof AbstractButton ) {
+                AbstractButton button = (AbstractButton) _owner;
+                if ( !Objects.equals( button.getVerticalAlignment(), alignment.forSwing() ) )
+                    button.setVerticalAlignment( alignment.forSwing() );
+            }
+        });
 
         if ( !onlyDimensionalityIsStyled ) {
             _installCustomBorderBasedStyleAndAnimationRenderer();

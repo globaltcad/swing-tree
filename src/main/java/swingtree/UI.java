@@ -499,11 +499,19 @@ public final class UI
     public enum VerticalAlignment {
         TOP, CENTER, BOTTOM;
 
-        int forSwing() {
+        public int forSwing() {
             switch ( this ) {
                 case TOP:    return SwingConstants.TOP;
                 case CENTER: return SwingConstants.CENTER;
                 case BOTTOM: return SwingConstants.BOTTOM;
+            }
+            throw new RuntimeException();
+        }
+        public float forY() {
+            switch ( this ) {
+                case TOP:    return 0f;
+                case CENTER: return 0.5f;
+                case BOTTOM: return 1f;
             }
             throw new RuntimeException();
         }
@@ -523,6 +531,17 @@ public final class UI
                 case RIGHT:    return SwingConstants.RIGHT;
                 case LEADING:  return SwingConstants.LEADING;
                 case TRAILING: return SwingConstants.TRAILING;
+            }
+            throw new RuntimeException();
+        }
+        public final float forX() {
+            switch ( this ) {
+                case LEFT: case LEADING:
+                    return 0f;
+                case CENTER:
+                    return 0.5f;
+                case RIGHT: case TRAILING:
+                    return 1f;
             }
             throw new RuntimeException();
         }
