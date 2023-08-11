@@ -237,6 +237,45 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
     }
 
     /**
+     *  Use this to set the horizontal and vertical alignment of the label's content (icon and text).
+     *  This is a convenience method to avoid peeking into this builder like so:
+     *  <pre>{@code
+     *     UI.label("Something")
+     *     .peek( label -> label.setHorizontalAlignment(...); label.setVerticalAlignment(...) );
+     *  }</pre>
+     *
+     * @param alignment The alignment which should be applied to the underlying component.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code alignment} is {@code null}.
+     */
+    public UIForLabel<L> withAlignment( UI.Alignment alignment ) {
+        NullUtil.nullArgCheck( alignment, "alignment", UI.Alignment.class );
+        getComponent().setHorizontalAlignment(alignment.getHorizontal().forSwing());
+        getComponent().setVerticalAlignment(alignment.getVertical().forSwing());
+        return this;
+    }
+
+    /**
+     *  This binds to a property defining the horizontal and vertical alignment of the label's content (icon and text).
+     *  When the alignment enum wrapped by the provided property changes,
+     *  then so does the alignment of this label.
+     *
+     * @param alignment The alignment property which should be applied to the underlying component.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code alignment} is {@code null}.
+     */
+    public UIForLabel<L> withAlignment( Val<UI.Alignment> alignment ) {
+        NullUtil.nullArgCheck( alignment, "alignment", Val.class );
+        NullUtil.nullPropertyCheck( alignment, "alignment", "Null is not a valid alignment." );
+        _onShow( alignment, v -> {
+            getComponent().setHorizontalAlignment(v.getHorizontal().forSwing());
+            getComponent().setVerticalAlignment(v.getVertical().forSwing());
+        });
+        return withAlignment(alignment.orElseThrow());
+    }
+
+
+    /**
      *  Use this to set the horizontal position of the label's text, relative to its image.
      *  A convenience method to avoid peeking into this builder like so:
      *  <pre>{@code

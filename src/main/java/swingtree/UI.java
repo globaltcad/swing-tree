@@ -528,6 +528,43 @@ public final class UI
         }
     }
 
+    /**
+     *  The logical combination of a vertical and horizontal alignment.
+     */
+    public enum Alignment {
+        TOP_LEFT,    TOP_CENTER, TOP_RIGHT, TOP_LEADING, TOP_TRAILING,
+        CENTER_LEFT, CENTER, CENTER_RIGHT, CENTER_LEADING, CENTER_TRAILING,
+        BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT, BOTTOM_LEADING, BOTTOM_TRAILING;
+
+        public VerticalAlignment getVertical() {
+            switch ( this ) {
+                case TOP_LEFT: case TOP_CENTER: case TOP_RIGHT: case TOP_LEADING: case TOP_TRAILING:
+                    return VerticalAlignment.TOP;
+                case CENTER_LEFT: case CENTER: case CENTER_RIGHT: case CENTER_LEADING: case CENTER_TRAILING:
+                    return VerticalAlignment.CENTER;
+                case BOTTOM_LEFT: case BOTTOM_CENTER: case BOTTOM_RIGHT: case BOTTOM_LEADING: case BOTTOM_TRAILING:
+                    return VerticalAlignment.BOTTOM;
+            }
+            throw new RuntimeException();
+        }
+
+        public HorizontalAlignment getHorizontal() {
+            switch ( this ) {
+                case TOP_LEFT: case CENTER_LEFT: case BOTTOM_LEFT:
+                    return HorizontalAlignment.LEFT;
+                case TOP_CENTER: case CENTER: case BOTTOM_CENTER:
+                    return HorizontalAlignment.CENTER;
+                case TOP_RIGHT: case CENTER_RIGHT: case BOTTOM_RIGHT:
+                    return HorizontalAlignment.RIGHT;
+                case TOP_LEADING: case CENTER_LEADING: case BOTTOM_LEADING:
+                    return HorizontalAlignment.LEADING;
+                case TOP_TRAILING: case CENTER_TRAILING: case BOTTOM_TRAILING:
+                    return HorizontalAlignment.TRAILING;
+            }
+            throw new RuntimeException();
+        }
+    }
+
     public enum ListData {
         COLUMN_MAJOR,
         ROW_MAJOR,
@@ -2905,7 +2942,21 @@ public final class UI
      */
     public static UIForLabel<JLabel> label( String text, HorizontalAlignment alignment ) {
         NullUtil.nullArgCheck(text, "text", String.class);
+        NullUtil.nullArgCheck(alignment, "alignment", HorizontalAlignment.class);
         return of((JLabel) new Label()).withText(text).withHorizontalAlignment( alignment );
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JLabel} UI component.
+     *
+     * @param text The text which should be displayed on the label.
+     * @param alignment The vertical and horizontal alignment of the text.
+     * @return A builder instance for the label, which enables fluent method chaining.
+     */
+    public static UIForLabel<JLabel> label( String text, Alignment alignment ) {
+        NullUtil.nullArgCheck(text, "text", String.class);
+        NullUtil.nullArgCheck(alignment, "alignment", Alignment.class);
+        return of((JLabel) new Label()).withText(text).withAlignment( alignment );
     }
 
     /**
@@ -2934,6 +2985,7 @@ public final class UI
     public static UIForLabel<JLabel> label( Val<String> text, HorizontalAlignment alignment ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
+        NullUtil.nullArgCheck(alignment, "alignment", HorizontalAlignment.class);
         return of((JLabel) new Label())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text)
