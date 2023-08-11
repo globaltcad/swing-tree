@@ -16,7 +16,7 @@ public class Calculator extends JPanel
             UI.panel("fill, ins 0")
             .add("shrink", UI.label("Result:"))
             .add("grow, wrap",
-                UI.label("42.0").with(UI.HorizontalAlignment.RIGHT).withProperty("FlatLaf.styleClass", "large")
+                UI.label("42.0", UI.HorizontalAlignment.RIGHT).withProperty("FlatLaf.styleClass", "large")
             )
             .add("grow, span, wrap",
                 UI.textField(UI.HorizontalAlignment.RIGHT, "73 - 31").id("input-text-area")

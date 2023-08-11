@@ -13,6 +13,7 @@ import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
 import swingtree.components.JBox;
+import swingtree.components.JIcon;
 import swingtree.components.JScrollPanels;
 import swingtree.components.JSplitButton;
 import swingtree.layout.CompAttr;
@@ -327,6 +328,21 @@ public final class UI
      * @return The icon.
      */
     public static ImageIcon loadIcon( String path ) {
+        Map<String, ImageIcon> cache = SwingTree.get().getIconCache();
+        ImageIcon icon = cache.get(path);
+        if ( icon == null ) {
+            icon = _loadIcon(path);
+            cache.put(path, icon);
+        }
+        return icon;
+    }
+
+    /**
+     * Loads an icon from the classpath or from a file.
+     * @param path The path to the icon. It can be a classpath resource or a file path.
+     * @return The icon.
+     */
+    public static ImageIcon _loadIcon( String path ) {
         // First we make the path platform independent:
         path = path.replace('\\', '/');
         // Then we try to load the icon url from the classpath:
@@ -2881,6 +2897,19 @@ public final class UI
 
     /**
      *  Use this to create a builder for the {@link JLabel} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JLabel(text, alignment)}.
+     *
+     * @param text The text which should be displayed on the label.
+     * @param alignment The horizontal alignment of the text.
+     * @return A builder instance for the label, which enables fluent method chaining.
+     */
+    public static UIForLabel<JLabel> label( String text, HorizontalAlignment alignment ) {
+        NullUtil.nullArgCheck(text, "text", String.class);
+        return of((JLabel) new Label()).withText(text).withHorizontalAlignment( alignment );
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JLabel} UI component.
      *  This is in essence a convenience method for {@code UI.of(new JLabel(Val<String> text)}.
      *
      * @param text The text property which should be bound to the label.
@@ -2895,6 +2924,23 @@ public final class UI
     }
 
     /**
+     *  Use this to create a builder for the {@link JLabel} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JLabel(Val<String> text, alignment)}.
+     *
+     * @param text The text property which should be bound to the label.
+     * @param alignment The horizontal alignment of the text.
+     * @return A builder instance for the label, which enables fluent method chaining.
+     */
+    public static UIForLabel<JLabel> label( Val<String> text, HorizontalAlignment alignment ) {
+        NullUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
+        return of((JLabel) new Label())
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
+                .withText(text)
+                .withHorizontalAlignment( alignment );
+    }
+
+    /**
      *  Use this to create a UI builder for a text-less label containing and displaying an icon.
      *
      * @param icon The icon which should be placed into a {@link JLabel}.
@@ -2902,7 +2948,7 @@ public final class UI
      */
     public static UIForLabel<JLabel> label( Icon icon ) {
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
-        return of((JLabel) new Label()).with(icon);
+        return of((JLabel) new Label()).withIcon(icon);
     }
 
     /**
@@ -2938,7 +2984,7 @@ public final class UI
 
         Image scaled = icon.getImage().getScaledInstance(width, height, scaleHint);
         return of((JLabel) new Label())
-                .with(new ImageIcon(scaled));
+                .withIcon(new ImageIcon(scaled));
     }
 
     /**
@@ -2988,6 +3034,85 @@ public final class UI
         return of((JLabel) new Label())
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text.view( it -> "<html>" + it + "</html>"));
+    }
+
+    /**
+     *  Use this to create a builder for the provided {@link swingtree.components.JIcon} instance.
+     *
+     * @param icon The {@link swingtree.components.JIcon} instance to be used by the builder.
+     * @return A builder instance for the provided {@link swingtree.components.JIcon}, which enables fluent method chaining.
+     */
+    public static <I extends JIcon> UIForIcon<I> of( I icon ) {
+        NullUtil.nullArgCheck(icon, "icon", JIcon.class);
+        return new UIForIcon<>(icon);
+    }
+
+    /**
+     *  Creates a builder node wrapping a new {@link JIcon} instance with the provided
+     *  icon displayed on it.
+     *
+     * @param icon The icon which should be displayed on the {@link JIcon}.
+     * @return A builder instance for the icon, which enables fluent method chaining.
+     * @throws IllegalArgumentException If the provided icon is null.
+     */
+    public static UIForIcon<JIcon> icon( Icon icon ) {
+        NullUtil.nullArgCheck(icon, "icon", Icon.class);
+        return of(new JIcon(icon));
+    }
+
+    /**
+     *  Creates a builder node wrapping a new {@link JIcon} instance with the
+     *  provided icon scaled to the provided width and height.
+     *
+     * @param width The width of the icon when displayed on the {@link JIcon}.
+     * @param height The height of the icon when displayed on the {@link JIcon}.
+     * @param icon The icon which should be placed into a {@link JIcon} for display.
+     * @return A builder instance for the icon, which enables fluent method chaining.
+     * @throws IllegalArgumentException If the provided icon is null.
+     */
+    public static UIForIcon<JIcon> icon( int width, int height, Icon icon ) {
+        NullUtil.nullArgCheck(icon, "icon", Icon.class);
+        float scale = SwingTree.get().getUIScale().getUserScaleFactor();
+
+        int scaleHint = Image.SCALE_SMOOTH;
+        if ( scale > 1.5f )
+            scaleHint = Image.SCALE_FAST;
+
+        width  = (int) (width * scale);
+        height = (int) (height * scale);
+
+        Image scaled = ((ImageIcon) icon).getImage().getScaledInstance(width, height, scaleHint);
+        return of(new JIcon(new ImageIcon(scaled)));
+    }
+
+    /**
+     *  Creates a builder node wrapping a new {@link JIcon} instance with the icon found at the provided
+     *  path displayed on it and scaled to the provided width and height.
+     *  Note that the icon will be cached by the {@link JIcon} instance, so that it will not be reloaded.
+     *
+     * @param width The width of the icon when displayed on the {@link JIcon}.
+     * @param height The height of the icon when displayed on the {@link JIcon}.
+     * @param iconPath The path to the icon which should be displayed on the {@link JIcon}.
+     * @return A builder instance for the icon, which enables fluent method chaining.
+     * @throws IllegalArgumentException If the provided icon path is null.
+     */
+    public static UIForIcon<JIcon> icon( int width, int height, String iconPath ) {
+        NullUtil.nullArgCheck(iconPath, "iconPath", String.class);
+        return icon(width, height, loadIcon(iconPath));
+    }
+
+    /**
+     *  Creates a builder node wrapping a new {@link JIcon} instance with the icon found at the provided
+     *  path displayed on it.
+     *  Note that the icon will be cached by the {@link JIcon} instance, so that it will not be reloaded.
+     *
+     * @param iconPath The path to the icon which should be displayed on the {@link JIcon}.
+     * @return A builder instance for the icon, which enables fluent method chaining.
+     * @throws IllegalArgumentException If the provided icon path is null.
+     */
+    public static UIForIcon<JIcon> icon( String iconPath ) {
+        NullUtil.nullArgCheck(iconPath, "iconPath", String.class);
+        return of(new JIcon(iconPath));
     }
 
     /**

@@ -195,7 +195,7 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
-    public UIForLabel<L> withHorizontalAlignment( Val<UI.HorizontalAlignment> horizontalAlign ) {
+    public UIForLabel<L> withHorizontalAlignment(Val<UI.HorizontalAlignment> horizontalAlign ) {
         NullUtil.nullArgCheck( horizontalAlign, "horizontalAlign", Val.class );
         NullUtil.nullPropertyCheck( horizontalAlign, "horizontalAlign", "Null is not a valid alignment." );
         _onShow( horizontalAlign, v -> getComponent().setHorizontalAlignment(v.forSwing()) );
