@@ -42,7 +42,7 @@ public final class ComponentExtension<C extends JComponent>
 
     private final List<String> _styleGroups = new ArrayList<>(0);
 
-    StylePainter<C> _currentStylePainter = null;
+    StylePainter<C> _currentStylePainter = StylePainter.none();
 
     private final DynamicLaF _laf = DynamicLaF.none();
 
@@ -108,14 +108,14 @@ public final class ComponentExtension<C extends JComponent>
 
     private StylePainter<C> _createStylePainter() {
         Style style = _applyStyleToComponentState(_calculateStyle());
-        return style.equals(Style.none()) ? null : new StylePainter<>(_owner, style);
+        return _currentStylePainter.with( _owner, style );
     }
 
-    Optional<StylePainter<C>> _getOrCreateStylePainter() {
-        if ( _currentStylePainter == null )
+    StylePainter<C> _getOrCreateStylePainter() {
+        if ( _currentStylePainter.equals(StylePainter.none()) )
             _currentStylePainter = _createStylePainter();
 
-        return Optional.ofNullable(_currentStylePainter);
+        return _currentStylePainter;
     }
 
     public void paintBackgroundStyle( Graphics g )
@@ -126,7 +126,7 @@ public final class ComponentExtension<C extends JComponent>
         if ( _componentIsDeclaredInUI(_owner) )
             _paintBackground(g);
         else
-            _currentStylePainter = null; // custom style rendering unfortunately not possible for this component :/
+            _currentStylePainter = StylePainter.none(); // custom style rendering unfortunately not possible for this component :/
     }
 
     void _paintBackground(Graphics g)
@@ -135,8 +135,7 @@ public final class ComponentExtension<C extends JComponent>
         _establishCurrentMainPaintClip(g);
 
         _currentStylePainter = _createStylePainter();
-        if ( _currentStylePainter != null )
-            _currentStylePainter.renderBackgroundStyle( (Graphics2D) g );
+        _currentStylePainter.renderBackgroundStyle( (Graphics2D) g );
     }
 
 
@@ -176,8 +175,7 @@ public final class ComponentExtension<C extends JComponent>
         // We remember the clip:
         Shape formerClip = g2d.getClip();
 
-        if ( _currentStylePainter != null )
-            _currentStylePainter.paintForegroundStyle(g2d);
+        _currentStylePainter.paintForegroundStyle(g2d);
 
         // We restore the clip:
         if ( g2d.getClip() != formerClip )

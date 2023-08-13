@@ -62,7 +62,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
 
         g.setClip(_compExt._mainClip);
 
-        if (_compExt._currentStylePainter != null) {
+        if ( !_compExt._currentStylePainter.equals(StylePainter.none()) ) {
             _paintThisStyleAPIBasedBorder((Graphics2D) g);
             if (_formerBorder != null && !_borderWasNotPainted) {
                 Style.Report report = _compExt._currentStylePainter.getStyle().getReport();
@@ -120,26 +120,24 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
 
     private Insets _calculateInsets() {
         _currentMarginInsets = _compExt._getOrCreateStylePainter()
-                                        .map(StylePainter::calculateMarginInsets)
+                                        .calculateMarginInsets()
                                         .orElse(_currentMarginInsets);
 
         _currentPaddingInsets = _compExt._getOrCreateStylePainter()
-                                        .map(StylePainter::calculatePaddingInsets)
+                                        .calculatePaddingInsets()
                                         .orElse(_currentPaddingInsets);
 
         return _compExt._getOrCreateStylePainter()
-                .map(r ->
-                        r.calculateBorderInsets(
-                                _formerBorder == null
-                                        ? new Insets(0, 0, 0, 0)
-                                        : _formerBorder.getBorderInsets(_compExt.getOwner())
+                        .calculateBorderInsets(
+                            _formerBorder == null
+                                    ? new Insets(0, 0, 0, 0)
+                                    : _formerBorder.getBorderInsets(_compExt.getOwner())
                         )
-                )
-                .orElseGet(() ->
-                        _formerBorder == null
+                        .orElseGet(() ->
+                            _formerBorder == null
                                 ? new Insets(0, 0, 0, 0)
                                 : _formerBorder.getBorderInsets(_compExt.getOwner())
-                );
+                        );
     }
 
     public Insets getCurrentMarginInsets() {

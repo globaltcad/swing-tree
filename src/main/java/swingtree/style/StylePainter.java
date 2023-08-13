@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -18,6 +19,10 @@ import java.util.function.Function;
  */
 final class StylePainter<C extends JComponent>
 {
+    private static final StylePainter<?> _NONE = new StylePainter<>(null, Style.none());
+
+    public static <C extends JComponent> StylePainter<C> none() { return (StylePainter<C>) _NONE; }
+
     static boolean DO_ANTIALIASING(){
         return UI.scale() < 1.5;
     }
@@ -28,9 +33,14 @@ final class StylePainter<C extends JComponent>
     private Area _baseArea = null;
 
 
-    StylePainter( C comp, Style style ) {
-        _comp  = Objects.requireNonNull(comp);
+    private StylePainter( C comp, Style style ) {
+        _comp  = comp;
         _style = Objects.requireNonNull(style);
+    }
+
+    StylePainter<C> with( C component, Style style ) {
+        if ( Style.none().equals(style) ) return none();
+        return new StylePainter<>( component, style );
     }
 
     public Style getStyle() { return _style; }
@@ -44,6 +54,9 @@ final class StylePainter<C extends JComponent>
 
     public void renderBackgroundStyle( Graphics2D g2d )
     {
+        if ( this.equals(none()) )
+            return;
+
         _baseArea = null;
 
         // We remember if antialiasing was enabled before we render:
@@ -121,7 +134,11 @@ final class StylePainter<C extends JComponent>
         });
     }
 
-    public void paintBorderStyle( Graphics2D g2d ) {
+    public void paintBorderStyle( Graphics2D g2d )
+    {
+        if ( this.equals(none()) )
+            return;
+
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
 
@@ -143,6 +160,9 @@ final class StylePainter<C extends JComponent>
 
     public void paintForegroundStyle(Graphics2D g2d)
     {
+        if ( this.equals(none()) )
+            return;
+
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
 
@@ -1106,7 +1126,11 @@ final class StylePainter<C extends JComponent>
         });
     }
 
-    public Insets calculateBorderInsets(Insets formerInsets) {
+    public Optional<Insets> calculateBorderInsets(Insets formerInsets)
+    {
+        if ( this.equals(none()) )
+            return Optional.empty();
+
         int left      = _style.margin().left().orElse(formerInsets.left);
         int top       = _style.margin().top().orElse(formerInsets.top);
         int right     = _style.margin().right().orElse(formerInsets.right);
@@ -1121,10 +1145,15 @@ final class StylePainter<C extends JComponent>
         top    += Math.max(_style.border().widths().top().orElse(0),    0);
         right  += Math.max(_style.border().widths().right().orElse(0),  0);
         bottom += Math.max(_style.border().widths().bottom().orElse(0), 0);
-        return new Insets(top, left, bottom, right);
+
+        return Optional.of(new Insets(top, left, bottom, right));
     }
 
-    public Insets calculateMarginInsets() {
+    public Optional<Insets> calculateMarginInsets()
+    {
+        if ( this.equals(none()) )
+            return Optional.empty();
+
         int left   = _style.margin().left().orElse(0);
         int top    = _style.margin().top().orElse(0);
         int right  = _style.margin().right().orElse(0);
@@ -1136,14 +1165,18 @@ final class StylePainter<C extends JComponent>
         right  += Math.max(_style.border().widths().right().orElse(0),  0);
         bottom += Math.max(_style.border().widths().bottom().orElse(0), 0);
 
-        return new Insets(top, left, bottom, right);
+        return Optional.of(new Insets(top, left, bottom, right));
     }
 
-    public Insets calculatePaddingInsets() {
+    public Optional<Insets> calculatePaddingInsets()
+    {
+        if ( this.equals(none()) )
+            return Optional.empty();
+
         int left   = _style.padding().left().orElse(0);
         int top    = _style.padding().top().orElse(0);
         int right  = _style.padding().right().orElse(0);
         int bottom = _style.padding().bottom().orElse(0);
-        return new Insets(top, left, bottom, right);
+        return Optional.of(new Insets(top, left, bottom, right));
     }
 }
