@@ -108,7 +108,7 @@ public final class ComponentExtension<C extends JComponent>
 
     private StylePainter<C> _createStylePainter() {
         Style style = _applyStyleToComponentState(_calculateStyle());
-        return _currentStylePainter.with( _owner, style );
+        return _currentStylePainter.with( style );
     }
 
     StylePainter<C> _getOrCreateStylePainter() {
@@ -135,7 +135,7 @@ public final class ComponentExtension<C extends JComponent>
         _establishCurrentMainPaintClip(g);
 
         _currentStylePainter = _createStylePainter();
-        _currentStylePainter.renderBackgroundStyle( (Graphics2D) g );
+        _currentStylePainter.renderBackgroundStyle( (Graphics2D) g, _owner );
     }
 
 
@@ -175,7 +175,7 @@ public final class ComponentExtension<C extends JComponent>
         // We remember the clip:
         Shape formerClip = g2d.getClip();
 
-        _currentStylePainter.paintForegroundStyle(g2d);
+        _currentStylePainter.paintForegroundStyle(g2d, _owner);
 
         // We restore the clip:
         if ( g2d.getClip() != formerClip )
