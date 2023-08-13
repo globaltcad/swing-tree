@@ -49,6 +49,8 @@ public final class ComponentExtension<C extends JComponent>
     private Styler<C> _styling = Styler.none();
     private StyleSheet _styleSheet = null;
 
+    private Style _lastStyle = null;
+
     private Color _initialBackgroundColor = null;
 
     Shape _mainClip = null;
@@ -217,6 +219,9 @@ public final class ComponentExtension<C extends JComponent>
     {
         Objects.requireNonNull(style);
 
+        if ( _lastStyle != null && _lastStyle.equals(style) )
+            return style;
+
         final Style.Report styleReport = style.getReport();
 
         boolean isNotStyled                     = styleReport.isNotStyled();
@@ -234,8 +239,10 @@ public final class ComponentExtension<C extends JComponent>
                 _owner.setBackground(_initialBackgroundColor);
                 _initialBackgroundColor = null;
             }
-            if ( isNotStyled )
+            if ( isNotStyled ) {
+                _lastStyle = null;
                 return style;
+            }
         }
 
         boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();
@@ -379,6 +386,8 @@ public final class ComponentExtension<C extends JComponent>
 
         if ( style.hasActiveBackgroundGradients() && _owner.isOpaque() )
             _owner.setOpaque(false);
+
+        _lastStyle = style;
 
         return style;
     }
