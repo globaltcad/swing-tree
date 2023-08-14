@@ -37,7 +37,7 @@ public final class ComponentExtension<C extends JComponent>
 
     private final C _owner;
 
-    private final Map<LifeTime, swingtree.api.Painter>   _animationPainters = new LinkedHashMap<>(0);
+    private final Map<LifeTime, swingtree.api.Painter> _animationPainters = new LinkedHashMap<>(0);
     private final Map<LifeTime, Styler<C>> _animationStylers  = new LinkedHashMap<>(0);
 
     private final List<String> _styleGroups = new ArrayList<>(0);
@@ -53,7 +53,7 @@ public final class ComponentExtension<C extends JComponent>
 
     private Color _initialBackgroundColor = null;
 
-    Shape _mainClip = null;
+    private Shape _mainClip = null;
 
 
     private ComponentExtension( C owner ) {
@@ -63,6 +63,8 @@ public final class ComponentExtension<C extends JComponent>
     C getOwner() { return _owner; }
 
     StylePainter<C> getCurrentStylePainter() { return _currentStylePainter; }
+
+    Shape getMainClip() { return _mainClip; }
 
     public void addStyling( Styler<C> styler ) {
         Objects.requireNonNull(styler);
