@@ -44,7 +44,7 @@ public final class ComponentExtension<C extends JComponent>
 
     private StylePainter<C> _currentStylePainter = StylePainter.none();
 
-    private final DynamicLaF _laf = DynamicLaF.none();
+    private DynamicLaF _laf = DynamicLaF.none();
 
     private Styler<C> _styling = Styler.none();
     private StyleSheet _styleSheet = null;
@@ -232,7 +232,7 @@ public final class ComponentExtension<C extends JComponent>
             styleCanBeRenderedThroughBorder = false;
 
         if ( isNotStyled || onlyDimensionalityIsStyled ) {
-            _laf._uninstallCustomLaF(_owner);
+            _laf = _laf._uninstallCustomLaF(_owner);
             if ( _animationStylers.isEmpty() && _animationPainters.isEmpty() )
                 _uninstallCustomBorderBasedStyleAndAnimationRenderer();
             if ( _initialBackgroundColor != null ) {
@@ -378,7 +378,7 @@ public final class ComponentExtension<C extends JComponent>
         if ( !onlyDimensionalityIsStyled ) {
             _installCustomBorderBasedStyleAndAnimationRenderer();
             if ( !styleCanBeRenderedThroughBorder )
-                _laf.establishLookAndFeelFor(style, _owner);
+                _laf = _laf.establishLookAndFeelFor(style, _owner);
         }
 
         if ( style.hasCustomForegroundPainters() )
