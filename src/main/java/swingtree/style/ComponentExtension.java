@@ -38,17 +38,14 @@ public final class ComponentExtension<C extends JComponent>
     private final C _owner;
 
     private final Map<LifeTime, swingtree.api.Painter> _animationPainters = new LinkedHashMap<>(0);
-    private final Map<LifeTime, Styler<C>> _animationStylers  = new LinkedHashMap<>(0);
 
     private final List<String> _styleGroups = new ArrayList<>(0);
-
-    private final StyleSheet _styleSheet = SwingTree.get().getStyleSheet().orElse(null);
 
     private StylePainter<C> _currentStylePainter = StylePainter.none();
 
     private DynamicLaF _laf = DynamicLaF.none();
 
-    private Styler<C> _localStyler = Styler.none();
+    private StyleSource<C> _styleSource = StyleSource.create();
 
     private Color _initialBackgroundColor = null;
 
@@ -67,9 +64,7 @@ public final class ComponentExtension<C extends JComponent>
 
     public void addStyling( Styler<C> styler ) {
         Objects.requireNonNull(styler);
-
-        _localStyler = _localStyler.andThen(s -> styler.style(new ComponentStyleDelegate<>(_owner, s.style())) );
-
+        _styleSource = _styleSource.withLocalStyler(styler, _owner);
         establishStyle();
     }
 
@@ -94,7 +89,7 @@ public final class ComponentExtension<C extends JComponent>
 
     public void clearAnimationRenderer() {
         _animationPainters.clear();
-        _animationStylers.clear();
+        _styleSource = _styleSource.withoutAnimationStylers();
     }
 
     public void addAnimationPainter( AnimationState state, swingtree.api.Painter painter ) {
@@ -103,7 +98,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     public void addAnimationStyler( AnimationState state, Styler<C> styler ) {
-        _animationStylers.put(Objects.requireNonNull(state.lifetime()), Objects.requireNonNull(styler));
+        _styleSource = _styleSource.withAnimationStyler(state.lifetime(), styler);
         _installCustomBorderBasedStyleAndAnimationRenderer();
     }
 
@@ -184,35 +179,8 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     private Style _calculateAndApplyStyle() {
-        Style style = _calculateStyle();
+        Style style = _styleSource.calculateStyle(_owner);
         return _applyStyleToComponentState(style);
-    }
-
-    private Style _calculateStyle() {
-        Style style = _styleSheet == null ? Style.none() : _styleSheet.applyTo( _owner );
-        style = _localStyler.style(new ComponentStyleDelegate<>(_owner, style)).style();
-
-        // Animations styles are last: they override everything else:
-        for ( Map.Entry<LifeTime, Styler<C>> entry : new ArrayList<>(_animationStylers.entrySet()) )
-            if ( entry.getKey().isExpired() )
-                _animationStylers.remove(entry.getKey());
-            else {
-                try {
-                    style = entry.getValue().style(new ComponentStyleDelegate<>(_owner, style)).style();
-                } catch ( Exception e ) {
-                    e.printStackTrace();
-                    // An exception inside a styler should not prevent other stylers from being applied!
-                }
-            }
-
-        return _applyDPIScaling(style);
-    }
-
-    private static Style _applyDPIScaling( Style style ) {
-        if ( UI.scale() == 1f )
-            return style;
-
-        return style.scale( UI.scale() );
     }
 
     private Style _applyStyleToComponentState( Style style )
@@ -233,7 +201,7 @@ public final class ComponentExtension<C extends JComponent>
 
         if ( isNotStyled || onlyDimensionalityIsStyled ) {
             _laf = _laf._uninstallCustomLaF(_owner);
-            if ( _animationStylers.isEmpty() && _animationPainters.isEmpty() )
+            if ( _styleSource.getAnimationStylers().isEmpty() && _animationPainters.isEmpty() )
                 _uninstallCustomBorderBasedStyleAndAnimationRenderer();
             if ( _initialBackgroundColor != null ) {
                 _owner.setBackground(_initialBackgroundColor);
