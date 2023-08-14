@@ -62,10 +62,10 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
 
         g.setClip(_compExt._mainClip);
 
-        if ( !_compExt._currentStylePainter.equals(StylePainter.none()) ) {
+        if ( !_compExt.getCurrentStylePainter().equals(StylePainter.none()) ) {
             _paintThisStyleAPIBasedBorder((Graphics2D) g);
             if (_formerBorder != null && !_borderWasNotPainted) {
-                Style.Report report = _compExt._currentStylePainter.getStyle().getReport();
+                Style.Report report = _compExt.getCurrentStylePainter().getStyle().getReport();
                 if (canFullyPaint(report))
                     _paintFormerBorder(c, g, x, y, width, height);
             }
@@ -98,7 +98,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
 
     private void _paintThisStyleAPIBasedBorder(Graphics2D g) {
         try {
-            _compExt._currentStylePainter.paintBorderStyle( g, _compExt.getOwner() );
+            _compExt.getCurrentStylePainter().paintBorderStyle( g, _compExt.getOwner() );
         } catch (Exception ex) {
             ex.printStackTrace();
         }

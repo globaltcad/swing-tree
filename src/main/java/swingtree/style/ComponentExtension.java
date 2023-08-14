@@ -42,7 +42,7 @@ public final class ComponentExtension<C extends JComponent>
 
     private final List<String> _styleGroups = new ArrayList<>(0);
 
-    StylePainter<C> _currentStylePainter = StylePainter.none();
+    private StylePainter<C> _currentStylePainter = StylePainter.none();
 
     private final DynamicLaF _laf = DynamicLaF.none();
 
@@ -61,6 +61,8 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     C getOwner() { return _owner; }
+
+    StylePainter<C> getCurrentStylePainter() { return _currentStylePainter; }
 
     public void addStyling( Styler<C> styler ) {
         Objects.requireNonNull(styler);
