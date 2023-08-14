@@ -74,7 +74,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     public void establishStyle() {
-        _currentStylePainter = _currentStylePainter.update(_applyStyleToComponentState(_calculateStyle()));
+        _currentStylePainter = _currentStylePainter.update(_calculateAndApplyStyle());
     }
 
     void _establishCurrentMainPaintClip(Graphics g) {
@@ -109,14 +109,9 @@ public final class ComponentExtension<C extends JComponent>
 
     public void updateUI() { _laf.updateUIFor(_owner); }
 
-    private StylePainter<C> _createStylePainter() {
-        Style style = _applyStyleToComponentState(_calculateStyle());
-        return _currentStylePainter.beginPaintingWith( style );
-    }
-
     StylePainter<C> _getOrCreateStylePainter() {
         if ( !_currentStylePainter.isPainting() )
-            _currentStylePainter = _createStylePainter();
+            _currentStylePainter = _currentStylePainter.beginPaintingWith( _calculateAndApplyStyle() );
 
         return _currentStylePainter;
     }
@@ -137,7 +132,7 @@ public final class ComponentExtension<C extends JComponent>
         _mainClip = null;
         _establishCurrentMainPaintClip(g);
 
-        _currentStylePainter = _createStylePainter();
+        _currentStylePainter = _currentStylePainter.beginPaintingWith( _calculateAndApplyStyle() );
         _currentStylePainter.renderBackgroundStyle( (Graphics2D) g, _owner );
     }
 
@@ -186,6 +181,11 @@ public final class ComponentExtension<C extends JComponent>
 
         // Enable antialiasing again:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+    }
+
+    private Style _calculateAndApplyStyle() {
+        Style style = _calculateStyle();
+        return _applyStyleToComponentState(style);
     }
 
     private Style _calculateStyle() {
