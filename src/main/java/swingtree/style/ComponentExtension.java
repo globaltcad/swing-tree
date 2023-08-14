@@ -49,8 +49,6 @@ public final class ComponentExtension<C extends JComponent>
     private Styler<C> _styling = Styler.none();
     private StyleSheet _styleSheet = null;
 
-    private Style _lastStyle = null;
-
     private Color _initialBackgroundColor = null;
 
     private Shape _mainClip = null;
@@ -75,7 +73,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     public void establishStyle() {
-        _applyStyleToComponentState(_calculateStyle());
+        _currentStylePainter = _currentStylePainter.update(_applyStyleToComponentState(_calculateStyle()));
     }
 
     void _establishCurrentMainPaintClip(Graphics g) {
@@ -221,7 +219,7 @@ public final class ComponentExtension<C extends JComponent>
     {
         Objects.requireNonNull(style);
 
-        if ( _lastStyle != null && _lastStyle.equals(style) )
+        if ( _currentStylePainter.getStyle().equals(style) )
             return style;
 
         final Style.Report styleReport = style.getReport();
@@ -242,7 +240,7 @@ public final class ComponentExtension<C extends JComponent>
                 _initialBackgroundColor = null;
             }
             if ( isNotStyled ) {
-                _lastStyle = null;
+                //_lastStyle = null;
                 return style;
             }
         }
@@ -389,7 +387,7 @@ public final class ComponentExtension<C extends JComponent>
         if ( style.hasActiveBackgroundGradients() && _owner.isOpaque() )
             _owner.setOpaque(false);
 
-        _lastStyle = style;
+        //_lastStyle = style;
 
         return style;
     }

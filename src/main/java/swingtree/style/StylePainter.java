@@ -47,6 +47,11 @@ final class StylePainter<C extends JComponent>
         return new StylePainter<>( _style, false );
     }
 
+    StylePainter<C> update( Style style ) {
+        if ( Style.none().equals(style) ) return none();
+        return new StylePainter<>( style, _isPainting );
+    }
+
     public Style getStyle() { return _style; }
 
     public boolean isPainting() { return _isPainting; }
