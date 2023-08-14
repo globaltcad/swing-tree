@@ -67,7 +67,7 @@ final class StyleSource<C extends JComponent>
     }
 
 
-    Style calculateStyle( C owner ) {
+    Style calculateStyleFor( C owner ) {
         Style style = _styleSheet == null ? Style.none() : _styleSheet.applyTo( owner );
         style = _localStyler.style(new ComponentStyleDelegate<>(owner, style)).style();
 

@@ -103,7 +103,7 @@ public final class ComponentExtension<C extends JComponent>
 
     public void updateUI() { _laf.updateUIFor(_owner); }
 
-    StylePainter<C> _getOrCreateStylePainter() {
+    StylePainter<C> _establishStyleAndBeginPainting() {
         if ( !_currentStylePainter.isPainting() )
             _currentStylePainter = _currentStylePainter.beginPaintingWith( _calculateAndApplyStyle() );
 
@@ -178,7 +178,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     private Style _calculateAndApplyStyle() {
-        Style style = _styleSource.calculateStyle(_owner);
+        Style style = _styleSource.calculateStyleFor(_owner);
         return _applyStyleToComponentState(style);
     }
 
@@ -206,10 +206,8 @@ public final class ComponentExtension<C extends JComponent>
                 _owner.setBackground(_initialBackgroundColor);
                 _initialBackgroundColor = null;
             }
-            if ( isNotStyled ) {
-                //_lastStyle = null;
+            if ( isNotStyled )
                 return style;
-            }
         }
 
         boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();
@@ -353,8 +351,6 @@ public final class ComponentExtension<C extends JComponent>
 
         if ( style.hasActiveBackgroundGradients() && _owner.isOpaque() )
             _owner.setOpaque(false);
-
-        //_lastStyle = style;
 
         return style;
     }
