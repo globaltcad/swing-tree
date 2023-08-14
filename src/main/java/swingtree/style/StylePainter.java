@@ -19,7 +19,7 @@ import java.util.function.Function;
  */
 final class StylePainter<C extends JComponent>
 {
-    private static final StylePainter<?> _NONE = new StylePainter<>(Style.none());
+    private static final StylePainter<?> _NONE = new StylePainter<>(Style.none(), false);
 
     public static <C extends JComponent> StylePainter<C> none() { return (StylePainter<C>) _NONE; }
 
@@ -28,20 +28,28 @@ final class StylePainter<C extends JComponent>
     }
 
     private final Style _style;
+    private final boolean _isPainting;
 
     private Area _baseArea = null;
 
 
-    private StylePainter( Style style ) {
+    private StylePainter( Style style, boolean isPainting ) {
         _style = Objects.requireNonNull(style);
+        _isPainting = isPainting;
     }
 
-    StylePainter<C> with( Style style ) {
+    StylePainter<C> beginPaintingWith( Style style ) {
         if ( Style.none().equals(style) ) return none();
-        return new StylePainter<>(style );
+        return new StylePainter<>( style, true );
+    }
+
+    StylePainter<C> endPainting() {
+        return new StylePainter<>( _style, false );
     }
 
     public Style getStyle() { return _style; }
+
+    public boolean isPainting() { return _isPainting; }
 
     private Area _getBaseArea(JComponent comp)
     {
@@ -53,7 +61,7 @@ final class StylePainter<C extends JComponent>
 
     public void renderBackgroundStyle( Graphics2D g2d, JComponent comp )
     {
-        if ( this.equals(none()) )
+        if ( !this.isPainting() )
             return;
 
         _baseArea = null;
@@ -135,7 +143,7 @@ final class StylePainter<C extends JComponent>
 
     public void paintBorderStyle( Graphics2D g2d, JComponent component )
     {
-        if ( this.equals(none()) )
+        if ( !this.isPainting() )
             return;
 
         // We remember if antialiasing was enabled before we render:
@@ -159,7 +167,7 @@ final class StylePainter<C extends JComponent>
 
     public void paintForegroundStyle( Graphics2D g2d, JComponent component )
     {
-        if ( this.equals(none()) )
+        if ( !this.isPainting() )
             return;
 
         // We remember if antialiasing was enabled before we render:
@@ -1138,7 +1146,7 @@ final class StylePainter<C extends JComponent>
 
     public Optional<Insets> calculateBorderInsets(Insets formerInsets)
     {
-        if ( this.equals(none()) )
+        if ( !this.isPainting() )
             return Optional.empty();
 
         int left      = _style.margin().left().orElse(formerInsets.left);
@@ -1161,7 +1169,7 @@ final class StylePainter<C extends JComponent>
 
     public Optional<Insets> calculateMarginInsets()
     {
-        if ( this.equals(none()) )
+        if ( !this.isPainting() )
             return Optional.empty();
 
         int left   = _style.margin().left().orElse(0);
@@ -1180,7 +1188,7 @@ final class StylePainter<C extends JComponent>
 
     public Optional<Insets> calculatePaddingInsets()
     {
-        if ( this.equals(none()) )
+        if ( !this.isPainting() )
             return Optional.empty();
 
         int left   = _style.padding().left().orElse(0);

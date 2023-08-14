@@ -112,11 +112,11 @@ public final class ComponentExtension<C extends JComponent>
 
     private StylePainter<C> _createStylePainter() {
         Style style = _applyStyleToComponentState(_calculateStyle());
-        return _currentStylePainter.with( style );
+        return _currentStylePainter.beginPaintingWith( style );
     }
 
     StylePainter<C> _getOrCreateStylePainter() {
-        if ( _currentStylePainter.equals(StylePainter.none()) )
+        if ( !_currentStylePainter.isPainting() )
             _currentStylePainter = _createStylePainter();
 
         return _currentStylePainter;
@@ -130,7 +130,7 @@ public final class ComponentExtension<C extends JComponent>
         if ( _componentIsDeclaredInUI(_owner) )
             _paintBackground(g);
         else
-            _currentStylePainter = StylePainter.none(); // custom style rendering unfortunately not possible for this component :/
+            _currentStylePainter = _currentStylePainter.endPainting(); // custom style rendering unfortunately not possible for this component :/
     }
 
     void _paintBackground(Graphics g)

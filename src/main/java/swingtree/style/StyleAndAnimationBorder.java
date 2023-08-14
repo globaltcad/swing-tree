@@ -62,7 +62,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
 
         g.setClip(_compExt.getMainClip());
 
-        if ( !_compExt.getCurrentStylePainter().equals(StylePainter.none()) ) {
+        if ( _compExt.getCurrentStylePainter().isPainting() ) {
             _paintThisStyleAPIBasedBorder((Graphics2D) g);
             if (_formerBorder != null && !_borderWasNotPainted) {
                 Style.Report report = _compExt.getCurrentStylePainter().getStyle().getReport();
