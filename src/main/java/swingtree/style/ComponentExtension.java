@@ -42,12 +42,13 @@ public final class ComponentExtension<C extends JComponent>
 
     private final List<String> _styleGroups = new ArrayList<>(0);
 
+    private final StyleSheet _styleSheet = SwingTree.get().getStyleSheet().orElse(null);
+
     private StylePainter<C> _currentStylePainter = StylePainter.none();
 
     private DynamicLaF _laf = DynamicLaF.none();
 
-    private Styler<C> _styling = Styler.none();
-    private StyleSheet _styleSheet = null;
+    private Styler<C> _localStyler = Styler.none();
 
     private Color _initialBackgroundColor = null;
 
@@ -67,7 +68,7 @@ public final class ComponentExtension<C extends JComponent>
     public void addStyling( Styler<C> styler ) {
         Objects.requireNonNull(styler);
 
-        _styling = _styling.andThen( s -> styler.style(new ComponentStyleDelegate<>(_owner, s.style())) );
+        _localStyler = _localStyler.andThen(s -> styler.style(new ComponentStyleDelegate<>(_owner, s.style())) );
 
         establishStyle();
     }
@@ -188,9 +189,8 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     private Style _calculateStyle() {
-        _styleSheet = _styleSheet != null ? _styleSheet : SwingTree.get().getStyleSheet().orElse(null);
         Style style = _styleSheet == null ? Style.none() : _styleSheet.applyTo( _owner );
-        style = _styling.style(new ComponentStyleDelegate<>(_owner, style)).style();
+        style = _localStyler.style(new ComponentStyleDelegate<>(_owner, style)).style();
 
         // Animations styles are last: they override everything else:
         for ( Map.Entry<LifeTime, Styler<C>> entry : new ArrayList<>(_animationStylers.entrySet()) )
