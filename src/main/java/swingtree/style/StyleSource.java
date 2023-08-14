@@ -42,12 +42,12 @@ final class StyleSource<C extends JComponent>
         _localStyler = localStyler;
         Map<LifeTime, Styler<C>> newAnimationStylers = new LinkedHashMap<>(1 + (animationStylers.size()-1)*4/3);
         newAnimationStylers.putAll(animationStylers);
-        _animationStylers = Collections.unmodifiableMap(newAnimationStylers);
+        _animationStylers = newAnimationStylers;
         _styleSheet = styleSheet;
     }
 
-    public Map<LifeTime, Styler<C>> getAnimationStylers() {
-        return _animationStylers;
+    public boolean hasNoAnimationStylers() {
+        return _animationStylers.isEmpty();
     }
 
     StyleSource<C> withLocalStyler( Styler<C> styler, C owner ) {

@@ -1,6 +1,5 @@
 package swingtree.style;
 
-import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.animation.AnimationState;
 import swingtree.animation.LifeTime;
@@ -201,7 +200,7 @@ public final class ComponentExtension<C extends JComponent>
 
         if ( isNotStyled || onlyDimensionalityIsStyled ) {
             _laf = _laf._uninstallCustomLaF(_owner);
-            if ( _styleSource.getAnimationStylers().isEmpty() && _animationPainters.isEmpty() )
+            if ( _styleSource.hasNoAnimationStylers() && _animationPainters.isEmpty() )
                 _uninstallCustomBorderBasedStyleAndAnimationRenderer();
             if ( _initialBackgroundColor != null ) {
                 _owner.setBackground(_initialBackgroundColor);
