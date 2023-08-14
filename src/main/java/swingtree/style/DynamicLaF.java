@@ -14,6 +14,10 @@ import java.awt.*;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+/**
+ *   This class is responsible for installing and uninstalling custom look and feel
+ *   implementations so that SwingTree can apply custom styles to components.
+ */
 class DynamicLaF
 {
     private static final DynamicLaF _NONE = new DynamicLaF(null, null);
@@ -25,7 +29,7 @@ class DynamicLaF
     private final ComponentUI _formerLaF; // Nullable
 
 
-    private DynamicLaF(ComponentUI styleLaF, ComponentUI formerLaF) {
+    private DynamicLaF( ComponentUI styleLaF, ComponentUI formerLaF ) {
         _styleLaF  = styleLaF;
         _formerLaF = formerLaF;
     }
@@ -97,8 +101,8 @@ class DynamicLaF
     private DynamicLaF _installCustomLaF( JComponent owner ) {
         // First we check if we already have a custom LaF installed:
         boolean success;
-        ComponentUI formerLaF = null;
-        ComponentUI styleLaF = null;
+        ComponentUI formerLaF = _formerLaF;
+        ComponentUI styleLaF  = _styleLaF;
 
         if ( customLookAndFeelIsInstalled() )
             success = true;
@@ -213,7 +217,7 @@ class DynamicLaF
         return new DynamicLaF(styleLaF, _formerLaF);
     }
 
-    public void updateUIFor(JComponent owner )
+    public void updateUIFor( JComponent owner )
     {
         if ( owner instanceof JBox )
             ((JBox)owner).setUI(new DynamicLaF.PanelStyler() {

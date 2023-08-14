@@ -43,7 +43,8 @@ final class StylePainter<C extends JComponent>
 
     public Style getStyle() { return _style; }
 
-    private Area _getBaseArea(JComponent comp) {
+    private Area _getBaseArea(JComponent comp)
+    {
         if ( _baseArea == null )
             _baseArea = _calculateBaseArea(0, 0, 0, 0, comp);
 
@@ -205,6 +206,11 @@ final class StylePainter<C extends JComponent>
 
     private Area _calculateBaseArea( int insTop, int insLeft, int insBottom, int insRight, JComponent comp )
     {
+        if ( _style.equals(Style.none()) ) {
+            // If there is no style, we just return the component's bounds:
+            return new Area(new Rectangle(0, 0, comp.getWidth(), comp.getHeight()));
+        }
+
         // The background box is calculated from the margins and border radius:
         int left      = Math.max(_style.margin().left().orElse(0), 0)   + insLeft  ;
         int top       = Math.max(_style.margin().top().orElse(0), 0)    + insTop   ;
@@ -415,8 +421,14 @@ final class StylePainter<C extends JComponent>
         int blurRadius   = Math.max(shadow.blurRadius(), 0);
         int spreadRadius = !shadow.isOutset() ? shadow.spreadRadius() : -shadow.spreadRadius();
 
-        int artifactAdjustment = shadow.isOutset() ? +1 : 0;
-        Area baseArea = _calculateBaseArea(artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment, comp);
+        Area baseArea;
+
+        if ( shadow.isOutset() ) {
+            int artifactAdjustment = 1;
+            baseArea = _calculateBaseArea(artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment, comp);
+        }
+        else
+            baseArea = new Area(_getBaseArea(comp));
 
         int shadowInset  = blurRadius;
         int shadowOutset = blurRadius;
