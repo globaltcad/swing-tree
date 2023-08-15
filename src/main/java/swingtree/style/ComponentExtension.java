@@ -36,7 +36,7 @@ public final class ComponentExtension<C extends JComponent>
 
     private final C _owner;
 
-    private final Map<LifeTime, swingtree.api.Painter> _animationPainters = new LinkedHashMap<>(0);
+    private final List<Pair<LifeTime, swingtree.api.Painter>> _animationPainters = new ArrayList<>(0);
 
     private final List<String> _styleGroups = new ArrayList<>(0);
 
@@ -92,7 +92,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     public void addAnimationPainter( AnimationState state, swingtree.api.Painter painter ) {
-        _animationPainters.put(Objects.requireNonNull(state.lifetime()), Objects.requireNonNull(painter));
+        _animationPainters.add(new Pair<>(Objects.requireNonNull(state.lifetime()), Objects.requireNonNull(painter)));
         _installCustomBorderBasedStyleAndAnimationRenderer();
     }
 
@@ -141,12 +141,12 @@ public final class ComponentExtension<C extends JComponent>
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         // Animations are last: they are rendered on top of everything else:
-        for ( Map.Entry<LifeTime, Painter> entry : new ArrayList<>(_animationPainters.entrySet()) )
-            if ( entry.getKey().isExpired() )
-                _animationPainters.remove(entry.getKey());
+        for ( Pair<LifeTime, Painter> entry : _animationPainters )
+            if ( entry.first().isExpired() )
+                _animationPainters.remove(entry);
             else {
                 try {
-                    entry.getValue().paint(g2d);
+                    entry.second().paint(g2d);
                 } catch ( Exception e ) {
                     e.printStackTrace();
                     // An exception inside a painter should not prevent everything else from being painted!
