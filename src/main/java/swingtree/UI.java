@@ -1216,7 +1216,7 @@ public final class UI
      *      UI.tabbedPane()
      *      .add(UI.tab("one").add(UI.panel().add(..)))
      *      .add(UI.tab("two").withTip("I give info!").add(UI.label("read me")))
-     *      .add(UI.tab("three").with(someIcon).add(UI.button("click me")))
+     *      .add(UI.tab("three").withIcon(someIcon).add(UI.button("click me")))
      *  }</pre>
      *
      *
@@ -1235,7 +1235,7 @@ public final class UI
      *      UI.tabbedPane(Position.RIGHT)
      *      .add(UI.tab("first").add(UI.panel().add(..)))
      *      .add(UI.tab("second").withTip("I give info!").add(UI.label("read me")))
-     *      .add(UI.tab("third").with(someIcon).add(UI.button("click me")))
+     *      .add(UI.tab("third").withIcon(someIcon).add(UI.button("click me")))
      *  }</pre>
      *
      * @param tabsPosition The position of the tab buttons which may be {@link Position#TOP}, {@link Position#RIGHT}, {@link Position#BOTTOM}, {@link Position#LEFT}.
@@ -1257,7 +1257,7 @@ public final class UI
      *      UI.tabbedPane(Position.LEFT, OverflowPolicy.WRAP)
      *      .add(UI.tab("First").add(UI.panel().add(..)))
      *      .add(UI.tab("second").withTip("I give info!").add(UI.label("read me")))
-     *      .add(UI.tab("third").with(someIcon).add(UI.button("click me")))
+     *      .add(UI.tab("third").withIcon(someIcon).add(UI.button("click me")))
      *  }</pre>
      *
      * @param tabsPosition The position of the tab buttons which may be {@link Position#TOP}, {@link Position#RIGHT}, {@link Position#BOTTOM}, {@link Position#LEFT}.
@@ -1280,7 +1280,7 @@ public final class UI
      *      UI.tabbedPane(OverflowPolicy.SCROLL)
      *      .add(UI.tab("First").add(UI.panel().add(..)))
      *      .add(UI.tab("second").withTip("I give info!").add(UI.label("read me")))
-     *      .add(UI.tab("third").with(someIcon).add(UI.button("click me")))
+     *      .add(UI.tab("third").withIcon(someIcon).add(UI.button("click me")))
      *  }</pre>
      *  
      * @param tabsPolicy The overflow policy of the tab button which can either be {@link OverflowPolicy#SCROLL} or {@link OverflowPolicy#WRAP}.
@@ -1303,7 +1303,7 @@ public final class UI
      *      UI.tabbedPane(vm.getSelectionIndex())
      *      .add(UI.tab("First").add(UI.panel().add(..)))
      *      .add(UI.tab("second").withTip("I give info!").add(UI.label("read me")))
-     *      .add(UI.tab("third").with(someIcon).add(UI.button("click me")))
+     *      .add(UI.tab("third").withIcon(someIcon).add(UI.button("click me")))
      *  }</pre>
      *  Note that contrary to method {@link #tabbedPane(Var)}, this method receives a {@link Val}
      *  property which may not be changed by the GUI user. If you want to allow the user to change
@@ -1327,7 +1327,7 @@ public final class UI
      *      UI.tabbedPane(vm.getSelectionIndex())
      *      .add(UI.tab("First").add(UI.panel().add(..)))
      *      .add(UI.tab("second").withTip("I give info!").add(UI.label("read me")))
-     *      .add(UI.tab("third").with(someIcon).add(UI.button("click me")))
+     *      .add(UI.tab("third").withIcon(someIcon).add(UI.button("click me")))
      *  }</pre>
      *
      * @param selectedIndex The index of the tab to select.
@@ -1345,7 +1345,7 @@ public final class UI
      *      UI.tabbedPane()
      *      .add(UI.tab("First").add(UI.panel().add(..)))
      *      .add(UI.tab("second").withTip("I give info!").add(UI.label("read me")))
-     *      .add(UI.tab("third").with(someIcon).add(UI.button("click me")))
+     *      .add(UI.tab("third").withIcon(someIcon).add(UI.button("click me")))
      *  }</pre>
      *
      * @param title The text displayed on the tab button.
@@ -1366,7 +1366,7 @@ public final class UI
      *      UI.tabbedPane()
      *      .add(UI.tab(property1).add(UI.panel().add(..)))
      *      .add(UI.tab(property2).withTip("I give info!").add(UI.label("read me")))
-     *      .add(UI.tab(property3).with(someIcon).add(UI.button("click me")))
+     *      .add(UI.tab(property3).withIcon(someIcon).add(UI.button("click me")))
      *  }</pre>
      *
      * @param title The text property dynamically changing the title of the tab button when the property changes.
@@ -1404,7 +1404,7 @@ public final class UI
      *      UI.tabbedPane()
      *      .add(UI.tab(UI.button("X")).add(UI.panel().add(..)))
      *      .add(UI.tab(UI.label("Hi!")).withTip("I give info!").add(UI.label("read me")))
-     *      .add(UI.tab(UI.of(...)).with(someIcon).add(UI.button("click me")))
+     *      .add(UI.tab(UI.of(...)).withIcon(someIcon).add(UI.button("click me")))
      *  }</pre>
      *
      * @param builder The builder wrapping the component displayed on the tab button.

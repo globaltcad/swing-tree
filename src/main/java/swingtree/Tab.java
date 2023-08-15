@@ -18,7 +18,7 @@ import java.util.Optional;
  *      UI.tabbedPane()
  *      .add(UI.tab("one").add(UI.panel().add(..)))
  *      .add(UI.tab("two").withTip("I give info!").add(UI.label("read me")))
- *      .add(UI.tab("three").with(someIcon).add(UI.button("click me")))
+ *      .add(UI.tab("three").withIcon(someIcon).add(UI.button("click me")))
  *  }</pre>
  * 	<p>
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>

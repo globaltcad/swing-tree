@@ -1253,7 +1253,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *  <br>
      *  Here an example of how to use this method:
      *  <pre>{@code
-     *      UI.button("Click me!").with(UI.Cursor.HAND);
+     *      UI.button("Click me!").withCursor(UI.Cursor.HAND);
      *  }</pre>
      *
      * @param type The {@link UI.Cursor} type defined by a simple enum exposed by this API.
