@@ -92,13 +92,13 @@ public final class Style
     Style _withBorder( BorderStyle border ) {
         return new Style(_layout, border, _base, _font, _dimensionality, _shadows, _painters, _gradients, _images);
     }
-    Style _withBackground( BaseStyle background ) {
+    Style _withBase( BaseStyle background ) {
         return new Style(_layout, _border, background, _font, _dimensionality, _shadows, _painters, _gradients, _images);
     }
 
-    public Style foundationColor( Color color ) { return _withBackground(base().foundationColor(color)); }
+    public Style foundationColor( Color color ) { return _withBase(base().foundationColor(color)); }
 
-    public Style backgroundColor( Color color ) { return _withBackground(base().backgroundColor(color)); }
+    public Style backgroundColor( Color color ) { return _withBase(base().backgroundColor(color)); }
 
     Style _withFont( FontStyle font ) {
         return new Style(_layout, _border, _base, font, _dimensionality, _shadows, _painters, _gradients, _images);

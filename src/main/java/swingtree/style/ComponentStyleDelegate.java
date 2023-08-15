@@ -508,7 +508,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
      */
     public ComponentStyleDelegate<C> backgroundColor( Color color ) {
-        return _withStyle(_style._withBackground(_style.base().backgroundColor(color)));
+        return _withStyle(_style._withBase(_style.base().backgroundColor(color)));
     }
 
     /**
@@ -520,7 +520,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
      */
     public ComponentStyleDelegate<C> backgroundColor( String colorString ) {
-        return _withStyle(_style._withBackground(_style.base().backgroundColor(StyleUtility.toColor(colorString))));
+        return _withStyle(_style._withBase(_style.base().backgroundColor(StyleUtility.toColor(colorString))));
     }
 
     /**
@@ -531,7 +531,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided background color.
      */
     public ComponentStyleDelegate<C> foundationColor( Color color ) {
-        return _withStyle(_style._withBackground(_style.base().foundationColor(color)));
+        return _withStyle(_style._withBase(_style.base().foundationColor(color)));
     }
 
     /**
@@ -543,7 +543,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided background color.
      */
     public ComponentStyleDelegate<C> foundationColor( String colorString ) {
-        return _withStyle(_style._withBackground(_style.base().foundationColor(StyleUtility.toColor(colorString))));
+        return _withStyle(_style._withBase(_style.base().foundationColor(StyleUtility.toColor(colorString))));
     }
 
     /**
@@ -582,7 +582,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided foreground color.
      */
     public ComponentStyleDelegate<C> foregroundColor( Color color ) {
-        return _withStyle(_style._withBackground(_style.base().foregroundColo(color)));
+        return _withStyle(_style._withBase(_style.base().foregroundColo(color)));
     }
 
     /**
@@ -593,7 +593,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided foreground color.
      */
     public ComponentStyleDelegate<C> foregroundColor( String colorString ) {
-        return _withStyle(_style._withBackground(_style.base().foregroundColo(StyleUtility.toColor(colorString))));
+        return _withStyle(_style._withBase(_style.base().foregroundColo(StyleUtility.toColor(colorString))));
     }
 
     /**
@@ -1348,7 +1348,31 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> cursor( Cursor cursor ) {
         Objects.requireNonNull(cursor);
-        return _withStyle(_style._withBackground(_style.base().cursor(cursor)));
+        return _withStyle(_style._withBase(_style.base().cursor(cursor)));
+    }
+
+    /**
+     *  Defines the alignment percentage alongside the X axis for a component (see {@link JComponent#setAlignmentX(float)}). <br>
+     *  Note that the alignment may not have an effect on all components
+     *  as it depends on the layout manager of the component. <br>
+     *
+     * @param percentage The alignment percentage in terms of a number between 0 and 1 alongside the X axis.
+     * @return A new {@link ComponentStyleDelegate} with the provided alignment percentage alongside the X axis set to be later
+     */
+    public ComponentStyleDelegate<C> alignmentX( float percentage ) {
+        return _withStyle(_style._withBase(_style.base().alignmentX(percentage)));
+    }
+
+    /**
+     *  Defines the alignment percentage alongside the Y axis for a component (see {@link JComponent#setAlignmentY(float)}). <br>
+     *  Note that the alignment may not have an effect on all components
+     *  as it depends on the layout manager of the component. <br>
+     *
+     * @param percentage The alignment percentage in terms of a number between 0 and 1 alongside the Y axis.
+     * @return A new {@link ComponentStyleDelegate} with the provided alignment percentage alongside the Y axis set to be later
+     */
+    public ComponentStyleDelegate<C> alignmentY( float percentage ) {
+        return _withStyle(_style._withBase(_style.base().alignmentY(percentage)));
     }
 
     /**

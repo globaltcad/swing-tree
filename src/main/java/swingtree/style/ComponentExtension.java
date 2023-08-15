@@ -1,5 +1,8 @@
 package swingtree.style;
 
+import net.miginfocom.layout.CC;
+import net.miginfocom.layout.ConstraintParser;
+import net.miginfocom.swing.MigLayout;
 import swingtree.UI;
 import swingtree.animation.AnimationState;
 import swingtree.api.Painter;
@@ -232,6 +235,18 @@ public final class ComponentExtension<C extends JComponent>
                 _owner.setCursor( cursor );
         });
 
+        style.base().alignmentX().ifPresent( alignmentX -> {
+            if ( !Objects.equals( _owner.getAlignmentX(), alignmentX ) )
+                _owner.setAlignmentX( alignmentX );
+        });
+
+        style.base().alignmentY().ifPresent( alignmentY -> {
+            if ( !Objects.equals( _owner.getAlignmentY(), alignmentY ) )
+                _owner.setAlignmentY( alignmentY );
+        });
+
+        _applyAlignmentToMigLayoutIfItExists(style.base());
+
         if ( style.dimensionality().minWidth().isPresent() || style.dimensionality().minHeight().isPresent() ) {
             Dimension minSize = _owner.getMinimumSize();
 
@@ -353,6 +368,39 @@ public final class ComponentExtension<C extends JComponent>
             _owner.setOpaque(false);
 
         return style;
+    }
+
+    private void _applyAlignmentToMigLayoutIfItExists(BaseStyle style)
+    {
+        Optional<Float> alignmentX = style.alignmentX();
+        Optional<Float> alignmentY = style.alignmentY();
+
+        if ( !alignmentX.isPresent() && !alignmentY.isPresent() )
+            return;
+
+        LayoutManager layout = ( _owner.getParent() == null ? null : _owner.getParent().getLayout() );
+        if ( layout instanceof MigLayout ) {
+            MigLayout migLayout = (MigLayout) layout;
+            Object rawComponentConstraints = migLayout.getComponentConstraints(_owner);
+            if ( rawComponentConstraints instanceof String )
+                rawComponentConstraints = ConstraintParser.parseComponentConstraint(rawComponentConstraints.toString());
+
+            CC componentConstraints = (rawComponentConstraints instanceof CC ? (CC) rawComponentConstraints : null);
+
+            final CC finalComponentConstraints = ( componentConstraints == null ? new CC() : componentConstraints );
+
+            alignmentX.map( a -> (int) ( a * 100f ) )
+                      .map( a -> a + "%" )
+                      .ifPresent( a -> {
+                           finalComponentConstraints.alignX(a);
+                      });
+
+            alignmentY.map( a -> (int) ( a * 100f ) )
+                      .map( a -> a + "%" )
+                      .ifPresent( a -> {
+                         finalComponentConstraints.alignY(a);
+                      });
+        }
     }
 
     /**
