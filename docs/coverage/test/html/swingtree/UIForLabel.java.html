@@ -171,7 +171,7 @@ public class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;UIForLa
      *  A convenience method to avoid peeking into this builder like so:
      *  &lt;pre&gt;{@code
      *     UI.label(&quot;Something&quot;)
-     *         .peek( label -&gt; label.setHorizontalAlignment(...) );
+     *     .peek( label -&gt; label.setHorizontalAlignment(...) );
      *  }&lt;/pre&gt;
      * This sets the horizontal alignment of the label's content (icon and text).
      *
@@ -179,7 +179,7 @@ public class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;UIForLa
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
-    public UIForLabel&lt;L&gt; with( UI.HorizontalAlignment horizontalAlign ) {
+    public UIForLabel&lt;L&gt; withHorizontalAlignment( UI.HorizontalAlignment horizontalAlign ) {
 <span class="fc" id="L183">        NullUtil.nullArgCheck( horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class );</span>
 <span class="fc" id="L184">        getComponent().setHorizontalAlignment(horizontalAlign.forSwing());</span>
 <span class="fc" id="L185">        return this;</span>
@@ -195,11 +195,11 @@ public class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;UIForLa
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
-    public UIForLabel&lt;L&gt; withHorizontalAlignment( Val&lt;UI.HorizontalAlignment&gt; horizontalAlign ) {
+    public UIForLabel&lt;L&gt; withHorizontalAlignment(Val&lt;UI.HorizontalAlignment&gt; horizontalAlign ) {
 <span class="fc" id="L199">        NullUtil.nullArgCheck( horizontalAlign, &quot;horizontalAlign&quot;, Val.class );</span>
 <span class="fc" id="L200">        NullUtil.nullPropertyCheck( horizontalAlign, &quot;horizontalAlign&quot;, &quot;Null is not a valid alignment.&quot; );</span>
 <span class="fc" id="L201">        _onShow( horizontalAlign, v -&gt; getComponent().setHorizontalAlignment(v.forSwing()) );</span>
-<span class="fc" id="L202">        return with(horizontalAlign.orElseThrow());</span>
+<span class="fc" id="L202">        return withHorizontalAlignment(horizontalAlign.orElseThrow());</span>
     }
 
     /**
@@ -214,7 +214,7 @@ public class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;UIForLa
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
-    public UIForLabel&lt;L&gt; with( UI.VerticalAlignment verticalAlign ) {
+    public UIForLabel&lt;L&gt; withVerticalAlignment( UI.VerticalAlignment verticalAlign ) {
 <span class="fc" id="L218">        NullUtil.nullArgCheck( verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class );</span>
 <span class="fc" id="L219">        getComponent().setVerticalAlignment(verticalAlign.forSwing());</span>
 <span class="fc" id="L220">        return this;</span>
@@ -233,8 +233,47 @@ public class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;UIForLa
 <span class="fc" id="L233">        NullUtil.nullArgCheck( verticalAlign, &quot;verticalAlign&quot;, Val.class );</span>
 <span class="fc" id="L234">        NullUtil.nullPropertyCheck( verticalAlign, &quot;verticalAlign&quot;, &quot;Null is not a valid alignment.&quot; );</span>
 <span class="fc" id="L235">        _onShow( verticalAlign, v -&gt; getComponent().setVerticalAlignment(v.forSwing()) );</span>
-<span class="fc" id="L236">        return with(verticalAlign.orElseThrow());</span>
+<span class="fc" id="L236">        return withVerticalAlignment(verticalAlign.orElseThrow());</span>
     }
+
+    /**
+     *  Use this to set the horizontal and vertical alignment of the label's content (icon and text).
+     *  This is a convenience method to avoid peeking into this builder like so:
+     *  &lt;pre&gt;{@code
+     *     UI.label(&quot;Something&quot;)
+     *     .peek( label -&gt; label.setHorizontalAlignment(...); label.setVerticalAlignment(...) );
+     *  }&lt;/pre&gt;
+     *
+     * @param alignment The alignment which should be applied to the underlying component.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code alignment} is {@code null}.
+     */
+    public UIForLabel&lt;L&gt; withAlignment( UI.Alignment alignment ) {
+<span class="nc" id="L252">        NullUtil.nullArgCheck( alignment, &quot;alignment&quot;, UI.Alignment.class );</span>
+<span class="nc" id="L253">        getComponent().setHorizontalAlignment(alignment.getHorizontal().forSwing());</span>
+<span class="nc" id="L254">        getComponent().setVerticalAlignment(alignment.getVertical().forSwing());</span>
+<span class="nc" id="L255">        return this;</span>
+    }
+
+    /**
+     *  This binds to a property defining the horizontal and vertical alignment of the label's content (icon and text).
+     *  When the alignment enum wrapped by the provided property changes,
+     *  then so does the alignment of this label.
+     *
+     * @param alignment The alignment property which should be applied to the underlying component.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code alignment} is {@code null}.
+     */
+    public UIForLabel&lt;L&gt; withAlignment( Val&lt;UI.Alignment&gt; alignment ) {
+<span class="nc" id="L268">        NullUtil.nullArgCheck( alignment, &quot;alignment&quot;, Val.class );</span>
+<span class="nc" id="L269">        NullUtil.nullPropertyCheck( alignment, &quot;alignment&quot;, &quot;Null is not a valid alignment.&quot; );</span>
+<span class="nc" id="L270">        _onShow( alignment, v -&gt; {</span>
+<span class="nc" id="L271">            getComponent().setHorizontalAlignment(v.getHorizontal().forSwing());</span>
+<span class="nc" id="L272">            getComponent().setVerticalAlignment(v.getVertical().forSwing());</span>
+<span class="nc" id="L273">        });</span>
+<span class="nc" id="L274">        return withAlignment(alignment.orElseThrow());</span>
+    }
+
 
     /**
      *  Use this to set the horizontal position of the label's text, relative to its image.
@@ -249,9 +288,9 @@ public class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;UIForLa
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public UIForLabel&lt;L&gt; withImageRelative( UI.HorizontalAlignment horizontalAlign ) {
-<span class="fc" id="L252">        NullUtil.nullArgCheck( horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class );</span>
-<span class="fc" id="L253">        getComponent().setHorizontalTextPosition(horizontalAlign.forSwing());</span>
-<span class="fc" id="L254">        return this;</span>
+<span class="fc" id="L291">        NullUtil.nullArgCheck( horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class );</span>
+<span class="fc" id="L292">        getComponent().setHorizontalTextPosition(horizontalAlign.forSwing());</span>
+<span class="fc" id="L293">        return this;</span>
     }
 
     /**
@@ -264,10 +303,10 @@ public class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;UIForLa
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public UIForLabel&lt;L&gt; withImageRelativeHorizontalAlignment( Val&lt;UI.HorizontalAlignment&gt; horizontalAlign ) {
-<span class="fc" id="L267">        NullUtil.nullArgCheck( horizontalAlign, &quot;horizontalAlign&quot;, Val.class );</span>
-<span class="fc" id="L268">        NullUtil.nullPropertyCheck( horizontalAlign, &quot;horizontalAlign&quot;, &quot;Null is not a valid alignment.&quot; );</span>
-<span class="fc" id="L269">        _onShow( horizontalAlign, v -&gt; getComponent().setHorizontalTextPosition(v.forSwing()) );</span>
-<span class="fc" id="L270">        return withImageRelative(horizontalAlign.orElseThrow());</span>
+<span class="fc" id="L306">        NullUtil.nullArgCheck( horizontalAlign, &quot;horizontalAlign&quot;, Val.class );</span>
+<span class="fc" id="L307">        NullUtil.nullPropertyCheck( horizontalAlign, &quot;horizontalAlign&quot;, &quot;Null is not a valid alignment.&quot; );</span>
+<span class="fc" id="L308">        _onShow( horizontalAlign, v -&gt; getComponent().setHorizontalTextPosition(v.forSwing()) );</span>
+<span class="fc" id="L309">        return withImageRelative(horizontalAlign.orElseThrow());</span>
     }
 
     /**
@@ -283,9 +322,9 @@ public class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;UIForLa
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public UIForLabel&lt;L&gt; withImageRelative( UI.VerticalAlignment verticalAlign ) {
-<span class="fc" id="L286">        NullUtil.nullArgCheck( verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class );</span>
-<span class="fc" id="L287">        getComponent().setVerticalTextPosition(verticalAlign.forSwing());</span>
-<span class="fc" id="L288">        return this;</span>
+<span class="fc" id="L325">        NullUtil.nullArgCheck( verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class );</span>
+<span class="fc" id="L326">        getComponent().setVerticalTextPosition(verticalAlign.forSwing());</span>
+<span class="fc" id="L327">        return this;</span>
     }
 
     /**
@@ -298,10 +337,10 @@ public class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;UIForLa
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public UIForLabel&lt;L&gt; withImageRelativeVerticalAlignment( Val&lt;UI.VerticalAlignment&gt; verticalAlign ) {
-<span class="fc" id="L301">        NullUtil.nullArgCheck( verticalAlign, &quot;verticalAlign&quot;, Val.class );</span>
-<span class="fc" id="L302">        NullUtil.nullPropertyCheck( verticalAlign, &quot;verticalAlign&quot;, &quot;Null is not a valid alignment.&quot; );</span>
-<span class="fc" id="L303">        _onShow( verticalAlign, v -&gt; getComponent().setVerticalTextPosition(v.forSwing()) );</span>
-<span class="fc" id="L304">        return withImageRelative(verticalAlign.orElseThrow());</span>
+<span class="fc" id="L340">        NullUtil.nullArgCheck( verticalAlign, &quot;verticalAlign&quot;, Val.class );</span>
+<span class="fc" id="L341">        NullUtil.nullPropertyCheck( verticalAlign, &quot;verticalAlign&quot;, &quot;Null is not a valid alignment.&quot; );</span>
+<span class="fc" id="L342">        _onShow( verticalAlign, v -&gt; getComponent().setVerticalTextPosition(v.forSwing()) );</span>
+<span class="fc" id="L343">        return withImageRelative(verticalAlign.orElseThrow());</span>
     }
 
     /**
@@ -316,9 +355,9 @@ public class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;UIForLa
      * @param icon The {@link Icon} which should be displayed on the label.
      * @return This very builder to allow for method chaining.
      */
-    public UIForLabel&lt;L&gt; with( Icon icon ) {
-<span class="fc" id="L320">        getComponent().setIcon(icon);</span>
-<span class="fc" id="L321">        return this;</span>
+    public UIForLabel&lt;L&gt; withIcon( Icon icon ) {
+<span class="fc" id="L359">        getComponent().setIcon(icon);</span>
+<span class="fc" id="L360">        return this;</span>
     }
 
     /**
@@ -331,9 +370,9 @@ public class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;UIForLa
      * @throws IllegalArgumentException if {@code icon} is {@code null}.
      */
     public UIForLabel&lt;L&gt; withIcon( Val&lt;Icon&gt; icon ) {
-<span class="fc" id="L334">        NullUtil.nullArgCheck(icon,&quot;icon&quot;,Val.class);</span>
-<span class="fc" id="L335">        _onShow( icon, i -&gt; getComponent().setIcon(i) );</span>
-<span class="fc" id="L336">        return with(icon.orElseNull());</span>
+<span class="fc" id="L373">        NullUtil.nullArgCheck(icon,&quot;icon&quot;,Val.class);</span>
+<span class="fc" id="L374">        _onShow( icon, i -&gt; getComponent().setIcon(i) );</span>
+<span class="fc" id="L375">        return withIcon(icon.orElseNull());</span>
     }
 
     /**
@@ -342,10 +381,10 @@ public class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;UIForLa
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel&lt;L&gt; withFontSize( int size ) {
-<span class="fc" id="L345">        L label = getComponent();</span>
-<span class="fc" id="L346">        Font old = label.getFont();</span>
-<span class="fc" id="L347">        label.setFont(new Font(old.getName(), old.getStyle(), size));</span>
-<span class="fc" id="L348">        return this;</span>
+<span class="fc" id="L384">        L label = getComponent();</span>
+<span class="fc" id="L385">        Font old = label.getFont();</span>
+<span class="fc" id="L386">        label.setFont(new Font(old.getName(), old.getStyle(), size));</span>
+<span class="fc" id="L387">        return this;</span>
     }
 
     /**
@@ -359,9 +398,9 @@ public class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;UIForLa
      * @throws IllegalArgumentException if {@code size} is {@code null}.
      */
     public UIForLabel&lt;L&gt; withFontSize( Val&lt;Integer&gt; size ) {
-<span class="fc" id="L362">        NullUtil.nullArgCheck( size, &quot;size&quot;, Val.class );</span>
-<span class="fc" id="L363">        _onShow( size, this::withFontSize );</span>
-<span class="fc" id="L364">        return withFontSize(size.orElseThrow());</span>
+<span class="fc" id="L401">        NullUtil.nullArgCheck( size, &quot;size&quot;, Val.class );</span>
+<span class="fc" id="L402">        _onShow( size, this::withFontSize );</span>
+<span class="fc" id="L403">        return withFontSize(size.orElseThrow());</span>
     }
 
     /**
@@ -371,9 +410,9 @@ public class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;UIForLa
      * @throws IllegalArgumentException if {@code font} is {@code null}.
      */
     public final UIForLabel&lt;L&gt; withFont( Font font ) {
-<span class="fc" id="L374">        NullUtil.nullArgCheck(font, &quot;font&quot;, Font.class);</span>
-<span class="fc" id="L375">        this.getComponent().setFont( font );</span>
-<span class="fc" id="L376">        return _this();</span>
+<span class="fc" id="L413">        NullUtil.nullArgCheck(font, &quot;font&quot;, Font.class);</span>
+<span class="fc" id="L414">        this.getComponent().setFont( font );</span>
+<span class="fc" id="L415">        return _this();</span>
     }
 
     /**
@@ -388,10 +427,10 @@ public class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;UIForLa
      * @throws IllegalArgumentException if {@code font} is a property which can wrap {@code null}.
      */
     public final UIForLabel&lt;L&gt; withFont( Val&lt;Font&gt; font ) {
-<span class="nc" id="L391">        NullUtil.nullArgCheck(font, &quot;font&quot;, Val.class);</span>
-<span class="nc" id="L392">        NullUtil.nullPropertyCheck(font, &quot;font&quot;, &quot;Use the default font of this component instead of null!&quot;);</span>
-<span class="nc" id="L393">        _onShow( font, v -&gt; withFont(v) );</span>
-<span class="nc" id="L394">        return withFont( font.orElseThrow() );</span>
+<span class="nc" id="L430">        NullUtil.nullArgCheck(font, &quot;font&quot;, Val.class);</span>
+<span class="nc" id="L431">        NullUtil.nullPropertyCheck(font, &quot;font&quot;, &quot;Use the default font of this component instead of null!&quot;);</span>
+<span class="nc" id="L432">        _onShow( font, v -&gt; withFont(v) );</span>
+<span class="nc" id="L433">        return withFont( font.orElseThrow() );</span>
     }
 
 }

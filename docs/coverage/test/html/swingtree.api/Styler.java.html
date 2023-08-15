@@ -8,46 +8,57 @@ import java.util.Objects;
 
 /**
  * A {@link Styler} is a function that takes a {@link ComponentStyleDelegate} and then
- * transforms and returns it with some new style properties.
- * Note that all of this is done in a functional way, so the original {@link ComponentStyleDelegate}
- * as well as the delegated {@link Style} object is not modified.
+ * transforms and returns it with some new style properties (see {@link swingtree.UIForAnySwing#withStyle(Styler)}). &lt;br&gt;
+ * Note that all of this is done in a functional manner, so the original {@link ComponentStyleDelegate}
+ * as well as the delegated {@link Style} object is not modified
+ * because {@link ComponentStyleDelegate} is an immutable object. &lt;br&gt;
  * This design makes the underlying style engine of SwingTree very flexible and scalable
  * because it allows for the composition of styles and reuse of style logic across many components
- * (see {@link swingtree.style.StyleSheet}).
+ * (see {@link swingtree.style.StyleSheet} for more advanced usage).
  *
  * @param &lt;C&gt; the type of the {@link JComponent} that the {@link ComponentStyleDelegate} is delegating to.
  */
 @FunctionalInterface
 public interface Styler&lt;C extends JComponent&gt;
 {
-<span class="fc" id="L23">    static &lt;C extends JComponent&gt; Styler&lt;C&gt; none() { return (Styler&lt;C&gt;) Constants.STYLER_NONE; }</span>
+    /**
+     * A {@link Styler} that does nothing, meaning it simply returns the given {@link ComponentStyleDelegate}
+     * without applying any style to it.
+     *
+     * @param &lt;C&gt; The type of the {@link JComponent} that the {@link ComponentStyleDelegate} is delegating to.
+     * @return A {@link Styler} that does nothing.
+     */
+<span class="fc" id="L31">    static &lt;C extends JComponent&gt; Styler&lt;C&gt; none() { return (Styler&lt;C&gt;) Constants.STYLER_NONE; }</span>
 
     /**
      * Applies some style to the given {@link ComponentStyleDelegate} and returns a new {@link ComponentStyleDelegate}
-     * that has the style applied.
-     * @param delegate the {@link ComponentStyleDelegate} to apply the style to.
-     * @return a new {@link ComponentStyleDelegate} that has the style applied.
+     * that has the style applied (if any).
+     * @param delegate The {@link ComponentStyleDelegate} to apply the style to.
+     * @return A new {@link ComponentStyleDelegate} that has the style applied.
      */
-    ComponentStyleDelegate&lt;C&gt; style(ComponentStyleDelegate&lt;C&gt; delegate );
+    ComponentStyleDelegate&lt;C&gt; style( ComponentStyleDelegate&lt;C&gt; delegate );
 
     /**
      * Returns a new {@link Styler} that applies the style of this {@link Styler} and then applies the style
-     * of the given {@link Styler}.
+     * of the given {@link Styler}. &lt;br&gt;
+     * This method is conceptually equivalent to the
+     * {@link java.util.function.Function#andThen(java.util.function.Function)}.
+     *
      * @param other the {@link Styler} to apply after this {@link Styler}.
      * @return a new {@link Styler} that applies the style of this {@link Styler} and then applies the style
      * of the given {@link Styler}.
      */
     default Styler&lt;C&gt; andThen( Styler&lt;C&gt; other ) {
-<span class="fc" id="L41">        Objects.requireNonNull(other);</span>
-<span class="fc" id="L42">        return delegate -&gt; {</span>
-<span class="fc" id="L43">            ComponentStyleDelegate&lt;C&gt; result = delegate;</span>
+<span class="fc" id="L52">        Objects.requireNonNull(other);</span>
+<span class="fc" id="L53">        return delegate -&gt; {</span>
+<span class="fc" id="L54">            ComponentStyleDelegate&lt;C&gt; result = delegate;</span>
             try {
-<span class="fc" id="L45">                result = style( delegate );</span>
-<span class="nc" id="L46">            } catch ( Exception e ) {</span>
-<span class="nc" id="L47">                e.printStackTrace();</span>
+<span class="fc" id="L56">                result = style( delegate );</span>
+<span class="nc" id="L57">            } catch ( Exception e ) {</span>
+<span class="nc" id="L58">                e.printStackTrace();</span>
                 // Exceptions inside a styler should not be fatal.
-<span class="fc" id="L49">            }</span>
-<span class="fc" id="L50">            return other.style( result );</span>
+<span class="fc" id="L60">            }</span>
+<span class="fc" id="L61">            return other.style( result );</span>
         };
     }
 }

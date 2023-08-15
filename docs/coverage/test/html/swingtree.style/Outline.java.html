@@ -87,11 +87,11 @@ final class Outline
      * @return A new {@link Outline} with the outline values scaled by the specified factor.
      */
     Outline scale( double scale ) {
-<span class="pc bpc" id="L90" title="1 of 2 branches missed.">        return new Outline(</span>
-<span class="pc bpc" id="L91" title="1 of 2 branches missed.">                    top    == null ? null : (int) Math.round( top    * scale ),</span>
-<span class="pc bpc" id="L92" title="1 of 2 branches missed.">                    right  == null ? null : (int) Math.round( right  * scale ),</span>
-<span class="pc bpc" id="L93" title="1 of 2 branches missed.">                    bottom == null ? null : (int) Math.round( bottom * scale ),</span>
-<span class="pc" id="L94">                    left   == null ? null : (int) Math.round( left   * scale )</span>
+<span class="fc" id="L90">        return new Outline(</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">                    top    == null ? null : (int) Math.round( top    * scale ),</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">                    right  == null ? null : (int) Math.round( right  * scale ),</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">                    bottom == null ? null : (int) Math.round( bottom * scale ),</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">                    left   == null ? null : (int) Math.round( left   * scale )</span>
                 );
     }
 
@@ -100,10 +100,10 @@ final class Outline
      *         {@code false} otherwise.
      */
     public boolean isPositive() {
-<span class="pc bpc" id="L103" title="1 of 6 branches missed.">        return top    != null &amp;&amp; top    &gt; 0 ||</span>
-<span class="pc bpc" id="L104" title="2 of 4 branches missed.">               right  != null &amp;&amp; right  &gt; 0 ||</span>
-<span class="pc bpc" id="L105" title="3 of 4 branches missed.">               bottom != null &amp;&amp; bottom &gt; 0 ||</span>
-<span class="pc bnc" id="L106" title="All 2 branches missed.">               left   != null &amp;&amp; left   &gt; 0;</span>
+<span class="fc bfc" id="L103" title="All 6 branches covered.">        return top    != null &amp;&amp; top    &gt; 0 ||</span>
+<span class="fc bfc" id="L104" title="All 4 branches covered.">               right  != null &amp;&amp; right  &gt; 0 ||</span>
+<span class="pc bpc" id="L105" title="1 of 4 branches missed.">               bottom != null &amp;&amp; bottom &gt; 0 ||</span>
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">               left   != null &amp;&amp; left   &gt; 0;</span>
     }
 
     @Override
@@ -130,11 +130,11 @@ final class Outline
 
     @Override
     public String toString() {
-<span class="pc bpc" id="L133" title="4 of 8 branches missed.">        return &quot;Outline[&quot; +</span>
-                    &quot;top=&quot;    + ( top    == null ? &quot;?&quot; : top    ) + &quot;, &quot; +
-                    &quot;right=&quot;  + ( right  == null ? &quot;?&quot; : right  ) + &quot;, &quot; +
-                    &quot;bottom=&quot; + ( bottom == null ? &quot;?&quot; : bottom ) + &quot;, &quot; +
-                    &quot;left=&quot;   + ( left   == null ? &quot;?&quot; : left   ) +
+<span class="fc" id="L133">        return &quot;Outline[&quot; +</span>
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">                    &quot;top=&quot;    + ( top    == null ? &quot;?&quot; : top    ) + &quot;, &quot; +</span>
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">                    &quot;right=&quot;  + ( right  == null ? &quot;?&quot; : right  ) + &quot;, &quot; +</span>
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">                    &quot;bottom=&quot; + ( bottom == null ? &quot;?&quot; : bottom ) + &quot;, &quot; +</span>
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">                    &quot;left=&quot;   + ( left   == null ? &quot;?&quot; : left   ) +</span>
                 &quot;]&quot;;
     }
 

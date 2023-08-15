@@ -21,13 +21,13 @@
       "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for your business logic\n            but it should also contain state relevant for your view and how it should\n            behave and look like depending on the state of the view model\n            and your business logic.\n            This is why Swing-Tree allows you to bind properties to the scroll\n            bar policy of your scroll panes.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A property holding a vertical scroll bar policy.","code":["var policy = Var.of(UI.ScrollBarPolicy.NEVER)"]},
+        {"kind":"given","text":"A property holding a vertical scroll bar policy.","code":["var policy = Var.of(UI.Active.NEVER)"]},
 
         {"kind":"when","text":"We create a scroll panel and bind the property to it.","code":["var ui = UI.scrollPane().withVerticalScrollBarPolicy(policy)"]},
 
         {"kind":"then","text":"The property was successfully bound to the UI.","code":["ui != null"]},
 
-        {"kind":"when","text":"We change and show the property value.","code":["policy.set(UI.ScrollBarPolicy.ALWAYS)","UI.sync()"]},
+        {"kind":"when","text":"We change and show the property value.","code":["policy.set(UI.Active.ALWAYS)","UI.sync()"]},
 
         {"kind":"then","text":"The UI was updated.","code":["ui.component.verticalScrollBarPolicy == ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS"]}
       ],
@@ -42,13 +42,13 @@
       "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for your business logic\n            but it should also contain state relevant for your view and how it should\n            behave and look like depending on the state of the view model\n            and your business logic.\n            This is why Swing-Tree allows you to bind properties to the scroll\n            bar policy of your scroll panes.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A property holding a horizontal scroll bar policy.","code":["var policy = Var.of(UI.ScrollBarPolicy.ALWAYS)"]},
+        {"kind":"given","text":"A property holding a horizontal scroll bar policy.","code":["var policy = Var.of(UI.Active.ALWAYS)"]},
 
         {"kind":"when","text":"We create a scroll panel and bind the property to it.","code":["var ui = UI.scrollPane().withHorizontalScrollBarPolicy(policy)"]},
 
         {"kind":"then","text":"The property was successfully bound to the UI.","code":["ui != null"]},
 
-        {"kind":"when","text":"We change and show the property value.","code":["policy.set(UI.ScrollBarPolicy.AS_NEEDED)","UI.sync()"]},
+        {"kind":"when","text":"We change and show the property value.","code":["policy.set(UI.Active.AS_NEEDED)","UI.sync()"]},
 
         {"kind":"then","text":"The UI was updated.","code":["ui.component.horizontalScrollBarPolicy == ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED"]}
       ],

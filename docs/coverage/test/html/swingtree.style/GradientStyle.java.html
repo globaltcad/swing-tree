@@ -9,7 +9,7 @@ import java.util.function.Function;
 
 /**
  *  Use this class to specify a gradient style for various sub styles,
- *  like for example {@link BackgroundStyle} or {@link BorderStyle} through the
+ *  like for example {@link BaseStyle} or {@link BorderStyle} through the
  *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#borderGradient(String, Function)}
  *  methods.
  *  &lt;p&gt;
@@ -156,9 +156,9 @@ public final class GradientStyle
 <span class="fc bfc" id="L156" title="All 2 branches covered.">        if ( this == o ) return true;</span>
 <span class="pc bpc" id="L157" title="1 of 2 branches missed.">        if ( !(o instanceof GradientStyle) ) return false;</span>
 <span class="fc" id="L158">        GradientStyle that = (GradientStyle) o;</span>
-<span class="pc bpc" id="L159" title="3 of 4 branches missed.">        return _transition == that._transition &amp;&amp;</span>
+<span class="pc bpc" id="L159" title="1 of 4 branches missed.">        return _transition == that._transition &amp;&amp;</span>
                _type == that._type &amp;&amp;
-<span class="pc bnc" id="L161" title="All 4 branches missed.">               Arrays.equals(_colors, that._colors)          &amp;&amp;</span>
+<span class="pc bpc" id="L161" title="1 of 4 branches missed.">               Arrays.equals(_colors, that._colors)          &amp;&amp;</span>
                _layer == that._layer;
     }
 

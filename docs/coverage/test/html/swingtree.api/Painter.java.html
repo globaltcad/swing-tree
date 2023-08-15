@@ -1,12 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Painter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.api</a> &gt; <span class="el_source">Painter.java</span></div><h1>Painter.java</h1><pre class="source lang-java linenums">package swingtree.api;
 
 
-import java.awt.*;
+import swingtree.UI;
+import swingtree.animation.Animation;
+import swingtree.animation.AnimationState;
 
+import java.awt.*;
+import java.awt.geom.RoundRectangle2D;
+import java.util.concurrent.TimeUnit;
+
+/**
+ *  Implement this functional interface to either paint &lt;b&gt;custom styles on components&lt;/b&gt;
+ *  by registering painters on the style API using methods like &lt;br&gt;
+ *  {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, Painter)} and &lt;br&gt;
+ *  {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, String, Painter)} &lt;br&gt;
+ *  or &lt;br&gt;
+ *  for &lt;b&gt;defining custom animations&lt;/b&gt; by registering painters in the animation API using the
+ *  {@link swingtree.ComponentDelegate#paint(AnimationState, Painter)} method
+ *  inside of an {@link Animation} registered through
+ *  {@link swingtree.ComponentDelegate#animateOnce(double, TimeUnit, Animation)}.
+ *  &lt;br&gt;&lt;br&gt;
+ *  Note that inside the painter the {@link Graphics2D} context may not
+ *  be scaled according to the current UI scale factor (for high DPI displays). &lt;br&gt;
+ *  Check out the following methods for scaling you paint operations: &lt;br&gt;
+ *  &lt;ul&gt;
+ *      &lt;li&gt;{@link UI#scale()} - returns the current UI scale factor.&lt;/li&gt;
+ *      &lt;li&gt;{@link UI#scale(Graphics2D)} - scales the given graphics context according to the current UI scale factor.&lt;/li&gt;
+ *      &lt;li&gt;{@link UI#scale(double)} - scales the given value according to the current UI scale factor.&lt;/li&gt;
+ *      &lt;li&gt;{@link UI#scale(float)} - scales the given value according to the current UI scale factor.&lt;/li&gt;
+ *      &lt;li&gt;{@link UI#scale(int)} - scales the given value according to the current UI scale factor.&lt;/li&gt;
+ *      &lt;li&gt;{@link UI#scale(Insets)} - scales the given insets according to the current UI scale factor.&lt;/li&gt;
+ *      &lt;li&gt;{@link UI#scale(Dimension)} - scales the given dimension according to the current UI scale factor.&lt;/li&gt;
+ *      &lt;li&gt;{@link UI#scale(Rectangle)} - scales the given rectangle according to the current UI scale factor.&lt;/li&gt;
+ *      &lt;li&gt;{@link UI#scale(RoundRectangle2D)} - scales the given round rectangle according to the current UI scale factor.&lt;/li&gt;
+ *  &lt;/ul&gt;&lt;br&gt;
+ *
+ *  &lt;b&gt;Also consider taking a look at the &lt;br&gt; &lt;a href=&quot;https://globaltcad.github.io/swing-tree/&quot;&gt;living swing-tree documentation&lt;/a&gt;
+ *  where you can browse a large collection of examples demonstrating how to use the API of Swing-Tree in general.&lt;/b&gt;
+ *
+ */
 @FunctionalInterface
 public interface Painter
 {
-<span class="fc" id="L9">    static Painter none() { return Constants.PAINTER_NONE; }</span>
+<span class="fc" id="L45">    static Painter none() { return Constants.PAINTER_NONE; }</span>
 
     /**
      * Paints a custom style on a component using the given graphics context.
@@ -20,20 +56,20 @@ public interface Painter
      * @return a new painter that paints this painter's style and then the given painter's style.
      */
     default Painter andThen(Painter after) {
-<span class="nc" id="L23">        return g2d -&gt; {</span>
+<span class="nc" id="L59">        return g2d -&gt; {</span>
                     try {
-<span class="nc" id="L25">                        paint(g2d);</span>
-<span class="nc" id="L26">                    } catch ( Exception e ) {</span>
-<span class="nc" id="L27">                        e.printStackTrace();</span>
+<span class="nc" id="L61">                        paint(g2d);</span>
+<span class="nc" id="L62">                    } catch ( Exception e ) {</span>
+<span class="nc" id="L63">                        e.printStackTrace();</span>
                         // Exceptions inside a painter should not be fatal.
-<span class="nc" id="L29">                    }</span>
+<span class="nc" id="L65">                    }</span>
                     try {
-<span class="nc" id="L31">                        after.paint(g2d);</span>
-<span class="nc" id="L32">                    } catch ( Exception e ) {</span>
-<span class="nc" id="L33">                        e.printStackTrace();</span>
+<span class="nc" id="L67">                        after.paint(g2d);</span>
+<span class="nc" id="L68">                    } catch ( Exception e ) {</span>
+<span class="nc" id="L69">                        e.printStackTrace();</span>
                         // Exceptions inside a painter should not cripple the rest of the painting.
-<span class="nc" id="L35">                    }</span>
-<span class="nc" id="L36">                };</span>
+<span class="nc" id="L71">                    }</span>
+<span class="nc" id="L72">                };</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -14,18 +14,22 @@ public class UIForToolBar&lt;T extends JToolBar&gt; extends UIForAnySwing&lt;UIF
      */
 <span class="fc" id="L15">    public UIForToolBar(T component) { super(component); }</span>
 
-
-    public final UIForToolBar&lt;T&gt; with(UI.Align alignment) {
-<span class="nc" id="L19">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, UI.Align.class);</span>
-<span class="nc" id="L20">        getComponent().setOrientation(alignment.forToolBar());</span>
-<span class="nc" id="L21">        return this;</span>
+    /**
+     * @param alignment The {@link UI.Align} value mapping to the {@link JToolBar}'s orientation.
+     *                  See {@link JToolBar#setOrientation(int)}.
+     * @return This builder node.
+     */
+    public final UIForToolBar&lt;T&gt; withOrientation( UI.Align alignment ) {
+<span class="nc" id="L23">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, UI.Align.class);</span>
+<span class="nc" id="L24">        getComponent().setOrientation(alignment.forToolBar());</span>
+<span class="nc" id="L25">        return this;</span>
     }
 
-    public final UIForToolBar&lt;T&gt; withAlignment( Val&lt;UI.Align&gt; alignment ) {
-<span class="nc" id="L25">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, Val.class);</span>
-<span class="nc" id="L26">        NullUtil.nullPropertyCheck(alignment, &quot;alignment&quot;, &quot;Null is not a valid alignment.&quot;);</span>
-<span class="nc" id="L27">        _onShow( alignment, a -&gt; with(a) );</span>
-<span class="nc" id="L28">        return with(alignment.get());</span>
+    public final UIForToolBar&lt;T&gt; withOrientation( Val&lt;UI.Align&gt; alignment ) {
+<span class="nc" id="L29">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, Val.class);</span>
+<span class="nc" id="L30">        NullUtil.nullPropertyCheck(alignment, &quot;alignment&quot;, &quot;Null is not a valid alignment.&quot;);</span>
+<span class="nc" id="L31">        _onShow( alignment, a -&gt; withOrientation(a) );</span>
+<span class="nc" id="L32">        return withOrientation(alignment.get());</span>
     }
 
 }

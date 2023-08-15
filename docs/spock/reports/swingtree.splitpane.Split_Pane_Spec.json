@@ -84,7 +84,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)"]},
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().getUIScale().setUserScaleFactor(uiScale)"]},
 
         {"kind":"and","text":"We create a split pane UI node with a divider size of 10.","code":["var ui = UI.splitPane(UI.Align.HORIZONTAL).withDividerSize(10)"]},
 
@@ -153,7 +153,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)"]},
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().getUIScale().setUserScaleFactor(uiScale)"]},
 
         {"kind":"and","text":"We create a split pane UI node with a division of 50%.","code":["var ui = UI.splitPane(UI.Align.HORIZONTAL)","            .withWidth(42)","            .withHeight(100)","            .withDivisionOf(0.5)"]},
 
@@ -178,7 +178,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)"]},
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().getUIScale().setUserScaleFactor(uiScale)"]},
 
         {"kind":"and","text":"We create a split pane UI node with a division of 50%.","code":["var ui = UI.splitPane(UI.Align.VERTICAL)","            .withWidth(100)","            .withHeight(42)","            .withDivisionOf(0.5)"]},
 
@@ -203,7 +203,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)"]},
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().getUIScale().setUserScaleFactor(uiScale)"]},
 
         {"kind":"and","text":"We create a simple view model property holding the division of our split pane.","code":["var divisionPercentage = Var.of(0.5d)"]},
 
@@ -234,7 +234,7 @@
       "tags":{},"see":[],"extraInfo":["\n            In a fully application, the divider size property in this example would be part of your view model\n            containing the state of the UI as well as the business logic. So you can simply modify it as part of\n            your business logic and the split pane will automatically update its divider size based on an observer\n            registered on the property.\n        ","\n            In a fully application, the divider size property in this example would be part of your view model\n            containing the state of the UI as well as the business logic. So you can simply modify it as part of\n            your business logic and the split pane will automatically update its divider size based on an observer\n            registered on the property.\n        ","\n            In a fully application, the divider size property in this example would be part of your view model\n            containing the state of the UI as well as the business logic. So you can simply modify it as part of\n            your business logic and the split pane will automatically update its divider size based on an observer\n            registered on the property.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTreeContext.get().getUIScale().setUserScaleFactor(uiScale)"]},
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().getUIScale().setUserScaleFactor(uiScale)"]},
 
         {"kind":"and","text":"We create a simple view model property holding the divider size of our split pane.","code":["var dividerSize = Var.of(10)"]},
 

@@ -96,7 +96,7 @@ public final class DimensionalityStyle
 <span class="fc" id="L96">    public Optional&lt;Integer&gt; height() { return Optional.ofNullable(_height); }</span>
 
     DimensionalityStyle _scale( double scale ) {
-<span class="fc bfc" id="L99" title="All 2 branches covered.">        return new DimensionalityStyle(</span>
+<span class="fc" id="L99">        return new DimensionalityStyle(</span>
 <span class="fc bfc" id="L100" title="All 2 branches covered.">                    _minWidth        == null ? null : (int) Math.round( _minWidth        * scale ),</span>
 <span class="fc bfc" id="L101" title="All 2 branches covered.">                    _minHeight       == null ? null : (int) Math.round( _minHeight       * scale ),</span>
 <span class="fc bfc" id="L102" title="All 2 branches covered.">                    _maxWidth        == null ? null : (int) Math.round( _maxWidth        * scale ),</span>
@@ -104,22 +104,22 @@ public final class DimensionalityStyle
 <span class="fc bfc" id="L104" title="All 2 branches covered.">                    _preferredWidth  == null ? null : (int) Math.round( _preferredWidth  * scale ),</span>
 <span class="fc bfc" id="L105" title="All 2 branches covered.">                    _preferredHeight == null ? null : (int) Math.round( _preferredHeight * scale ),</span>
 <span class="fc bfc" id="L106" title="All 2 branches covered.">                    _width           == null ? null : (int) Math.round( _width           * scale ),</span>
-<span class="fc" id="L107">                    _height          == null ? null : (int) Math.round( _height          * scale )</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">                    _height          == null ? null : (int) Math.round( _height          * scale )</span>
                 );
     }
 
     @Override
     public String toString() {
-<span class="pc bpc" id="L113" title="8 of 16 branches missed.">        return</span>
+<span class="fc" id="L113">        return</span>
             &quot;DimensionalityStyle[&quot; +
-                    &quot;minWidth=&quot;        + (_minWidth        == null ? &quot;?&quot; : _minWidth        ) + &quot;, &quot; +
-                    &quot;minHeight=&quot;       + (_minHeight       == null ? &quot;?&quot; : _minHeight       ) + &quot;, &quot; +
-                    &quot;maxWidth=&quot;        + (_maxWidth        == null ? &quot;?&quot; : _maxWidth        ) + &quot;, &quot; +
-                    &quot;maxHeight=&quot;       + (_maxHeight       == null ? &quot;?&quot; : _maxHeight       ) + &quot;, &quot; +
-                    &quot;preferredWidth=&quot;  + (_preferredWidth  == null ? &quot;?&quot; : _preferredWidth  ) + &quot;, &quot; +
-                    &quot;preferredHeight=&quot; + (_preferredHeight == null ? &quot;?&quot; : _preferredHeight ) + &quot;, &quot; +
-                    &quot;width=&quot;           + (_width           == null ? &quot;?&quot; : _width           ) + &quot;, &quot; +
-                    &quot;height=&quot;          + (_height          == null ? &quot;?&quot; : _height          ) +
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">                    &quot;minWidth=&quot;        + (_minWidth        == null ? &quot;?&quot; : _minWidth        ) + &quot;, &quot; +</span>
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">                    &quot;minHeight=&quot;       + (_minHeight       == null ? &quot;?&quot; : _minHeight       ) + &quot;, &quot; +</span>
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">                    &quot;maxWidth=&quot;        + (_maxWidth        == null ? &quot;?&quot; : _maxWidth        ) + &quot;, &quot; +</span>
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">                    &quot;maxHeight=&quot;       + (_maxHeight       == null ? &quot;?&quot; : _maxHeight       ) + &quot;, &quot; +</span>
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">                    &quot;preferredWidth=&quot;  + (_preferredWidth  == null ? &quot;?&quot; : _preferredWidth  ) + &quot;, &quot; +</span>
+<span class="pc bpc" id="L120" title="1 of 2 branches missed.">                    &quot;preferredHeight=&quot; + (_preferredHeight == null ? &quot;?&quot; : _preferredHeight ) + &quot;, &quot; +</span>
+<span class="pc bpc" id="L121" title="1 of 2 branches missed.">                    &quot;width=&quot;           + (_width           == null ? &quot;?&quot; : _width           ) + &quot;, &quot; +</span>
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">                    &quot;height=&quot;          + (_height          == null ? &quot;?&quot; : _height          ) +</span>
                 &quot;]&quot;;
     }
 

@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JGlassPane.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.components</a> &gt; <span class="el_source">JGlassPane.java</span></div><h1>JGlassPane.java</h1><pre class="source lang-java linenums">package swingtree.components;
+
+
+import static java.awt.AWTEvent.MOUSE_EVENT_MASK;
+import static java.awt.AWTEvent.MOUSE_MOTION_EVENT_MASK;
+import static java.awt.AWTEvent.MOUSE_WHEEL_EVENT_MASK;
+import static java.awt.event.MouseEvent.MOUSE_CLICKED;
+import static java.awt.event.MouseEvent.MOUSE_DRAGGED;
+import static java.awt.event.MouseEvent.MOUSE_ENTERED;
+import static java.awt.event.MouseEvent.MOUSE_EXITED;
+import static java.awt.event.MouseEvent.MOUSE_MOVED;
+import static java.awt.event.MouseEvent.MOUSE_PRESSED;
+import static java.awt.event.MouseEvent.MOUSE_RELEASED;
+import static java.awt.event.MouseEvent.MOUSE_WHEEL;
+import static javax.swing.SwingUtilities.convertMouseEvent;
+import static javax.swing.SwingUtilities.convertPoint;
+import static javax.swing.SwingUtilities.getDeepestComponentAt;
+
+import java.awt.AWTEvent;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Cursor;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.event.AWTEventListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+import java.util.Objects;
+
+import javax.swing.JPanel;
+import javax.swing.JRootPane;
+import javax.swing.SwingUtilities;
+import javax.swing.event.EventListenerList;
+
+import net.miginfocom.swing.MigLayout;
+
+/**
+ *  A more advanced glass pane implementation than the default Swing
+ *  glass pane of a {@link JRootPane} object (A regular {@link JPanel}.
+ *  In contrast to the default glass pane ({@link JPanel}) of a {@link JRootPane},
+ *  this pane &lt;b&gt;handles any mouse events, without interrupting the controls underneath
+ *  the glass pane (in the content pane of the root pane)&lt;/b&gt;.
+ *  Also, cursors are handled as if the glass pane was invisible
+ *  (if no cursor gets explicitly set to the glass pane).
+ */
+public class JGlassPane extends JPanel implements AWTEventListener
+{
+    private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L53">    private final EventListenerList listeners = new EventListenerList();</span>
+
+    private JRootPane rootPane;
+
+<span class="nc" id="L57">    public JGlassPane() {</span>
+<span class="nc" id="L58">        setLayout(new MigLayout(&quot;fill, ins 0&quot;));</span>
+<span class="nc" id="L59">        Toolkit.getDefaultToolkit()</span>
+<span class="nc" id="L60">                .addAWTEventListener(</span>
+                    this,
+                    MOUSE_WHEEL_EVENT_MASK | MOUSE_MOTION_EVENT_MASK | MOUSE_EVENT_MASK
+                );
+<span class="nc" id="L64">    }</span>
+
+    public JGlassPane(JRootPane rootPane) {
+<span class="nc" id="L67">        this();</span>
+<span class="nc" id="L68">        Objects.requireNonNull(rootPane);</span>
+<span class="nc" id="L69">        attachToRootPane(rootPane);</span>
+<span class="nc" id="L70">    }</span>
+
+    private void attachToRootPane(JRootPane rootPane) {
+<span class="nc" id="L73">        Objects.requireNonNull(rootPane);</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">        if ( this.rootPane != null ) this.detachFromRootPane(this.rootPane);</span>
+<span class="nc" id="L75">        this.setOpaque(false);</span>
+<span class="nc" id="L76">        this.setVisible(true);</span>
+        /*
+            Important:
+            The glass pane needs to be set opaque and visible before
+            attaching it to the root pane, otherwise
+            there might be weired side effects.
+         */
+<span class="nc" id="L83">        ( this.rootPane = rootPane ).setGlassPane(this);</span>
+<span class="nc" id="L84">    }</span>
+
+    private void detachFromRootPane( JRootPane rootPane ) {
+<span class="nc" id="L87">        Objects.requireNonNull(rootPane);</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        if ( rootPane.getGlassPane() == this ) {</span>
+<span class="nc" id="L89">            rootPane.setGlassPane(null);</span>
+<span class="nc" id="L90">            setVisible(false);</span>
+        }
+<span class="nc" id="L92">    }</span>
+
+    public void toRootPane(JRootPane pane) {
+<span class="nc bnc" id="L95" title="All 2 branches missed.">        if( pane != null )</span>
+<span class="nc" id="L96">            attachToRootPane(pane);</span>
+        else
+<span class="nc" id="L98">            detachFromRootPane(rootPane);</span>
+<span class="nc" id="L99">    }</span>
+
+    @Override public synchronized MouseListener[] getMouseListeners() {
+<span class="nc" id="L102">        return listeners.getListeners(MouseListener.class);</span>
+    }
+    @Override public synchronized void addMouseListener(MouseListener listener) {
+<span class="nc" id="L105">        listeners.add(MouseListener.class,listener);</span>
+<span class="nc" id="L106">    }</span>
+    @Override public synchronized void removeMouseListener(MouseListener listener) {
+<span class="nc" id="L108">        listeners.remove(MouseListener.class,listener);</span>
+<span class="nc" id="L109">    }</span>
+
+    @Override public synchronized MouseMotionListener[] getMouseMotionListeners() {
+<span class="nc" id="L112">        return listeners.getListeners(MouseMotionListener.class);</span>
+    }
+    @Override public synchronized void addMouseMotionListener(MouseMotionListener listener) {
+<span class="nc" id="L115">        listeners.add(MouseMotionListener.class,listener);</span>
+<span class="nc" id="L116">    }</span>
+    @Override public synchronized void removeMouseMotionListener(MouseMotionListener listener) {
+<span class="nc" id="L118">        listeners.remove(MouseMotionListener.class,listener);</span>
+<span class="nc" id="L119">    }</span>
+
+    @Override public synchronized MouseWheelListener[] getMouseWheelListeners() {
+<span class="nc" id="L122">        return listeners.getListeners(MouseWheelListener.class);</span>
+    }
+    @Override public synchronized void addMouseWheelListener(MouseWheelListener listener) {
+<span class="nc" id="L125">        listeners.add(MouseWheelListener.class,listener);</span>
+<span class="nc" id="L126">    }</span>
+    @Override public synchronized void removeMouseWheelListener(MouseWheelListener listener) {
+<span class="nc" id="L128">        listeners.remove(MouseWheelListener.class,listener);</span>
+<span class="nc" id="L129">    }</span>
+
+    @Override
+    public void eventDispatched( AWTEvent event ) {
+<span class="nc bnc" id="L133" title="All 4 branches missed.">        if ( rootPane != null &amp;&amp; event instanceof MouseEvent ) {</span>
+<span class="nc" id="L134">            MouseEvent mouseEvent = (MouseEvent)event, newMouseEvent;</span>
+
+<span class="nc" id="L136">            Object source = event.getSource();</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">            if ( source instanceof Component ) {</span>
+<span class="nc" id="L138">                Component sourceComponent = (Component) source;</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">                if ( SwingUtilities.getRootPane(sourceComponent) != rootPane )</span>
+<span class="nc" id="L140">                    return; //it's not our root pane (e.g. different window)</span>
+
+                /* change source and coordinate system of event to glass pane, DON'T use setSource on AWTEvent's! */
+<span class="nc" id="L143">                newMouseEvent = convertMouseEvent(sourceComponent, mouseEvent, this);</span>
+<span class="nc" id="L144">            } else newMouseEvent = convertMouseEvent(null, mouseEvent, this);</span>
+
+<span class="nc bnc" id="L146" title="All 9 branches missed.">            switch( event.getID() ) {</span>
+                case MOUSE_CLICKED:
+<span class="nc bnc" id="L148" title="All 2 branches missed.">                    for(MouseListener listener:listeners.getListeners(MouseListener.class))</span>
+<span class="nc" id="L149">                        listener.mouseClicked(newMouseEvent);</span>
+<span class="nc" id="L150">                    break;</span>
+                case MOUSE_PRESSED:
+<span class="nc bnc" id="L152" title="All 2 branches missed.">                    for(MouseListener listener:listeners.getListeners(MouseListener.class))</span>
+<span class="nc" id="L153">                        listener.mousePressed(newMouseEvent);</span>
+<span class="nc" id="L154">                    break;</span>
+                case MOUSE_RELEASED:
+<span class="nc bnc" id="L156" title="All 2 branches missed.">                    for(MouseListener listener:listeners.getListeners(MouseListener.class))</span>
+<span class="nc" id="L157">                        listener.mouseReleased(newMouseEvent);</span>
+<span class="nc" id="L158">                    break;</span>
+                case MOUSE_MOVED:
+<span class="nc bnc" id="L160" title="All 2 branches missed.">                    for(MouseMotionListener listener:listeners.getListeners(MouseMotionListener.class))</span>
+<span class="nc" id="L161">                        listener.mouseMoved(newMouseEvent);</span>
+<span class="nc" id="L162">                    break;</span>
+                case MOUSE_ENTERED:
+<span class="nc bnc" id="L164" title="All 2 branches missed.">                    for(MouseListener listener:listeners.getListeners(MouseListener.class))</span>
+<span class="nc" id="L165">                        listener.mouseEntered(newMouseEvent);</span>
+<span class="nc" id="L166">                    break;</span>
+                case MOUSE_EXITED:
+<span class="nc bnc" id="L168" title="All 2 branches missed.">                    for(MouseListener listener:listeners.getListeners(MouseListener.class))</span>
+<span class="nc" id="L169">                        listener.mouseExited(newMouseEvent);</span>
+<span class="nc" id="L170">                    break;</span>
+                case MOUSE_DRAGGED:
+<span class="nc bnc" id="L172" title="All 2 branches missed.">                    for(MouseMotionListener listener:listeners.getListeners(MouseMotionListener.class))</span>
+<span class="nc" id="L173">                        listener.mouseDragged(newMouseEvent);</span>
+<span class="nc" id="L174">                    break;</span>
+                case MOUSE_WHEEL:
+<span class="nc bnc" id="L176" title="All 2 branches missed.">                    for(MouseWheelListener listener:listeners.getListeners(MouseWheelListener.class))</span>
+<span class="nc" id="L177">                        listener.mouseWheelMoved((MouseWheelEvent)newMouseEvent);</span>
+                    break;
+            }
+
+            /* consume the original mouse event, if the new mouse event was consumed */
+<span class="nc bnc" id="L182" title="All 2 branches missed.">            if ( newMouseEvent.isConsumed() )</span>
+<span class="nc" id="L183">                mouseEvent.consume();</span>
+        }
+<span class="nc" id="L185">    }</span>
+
+
+    /**
+     * If someone sets a new cursor to the GlassPane
+     * we expect that they know what they are doing
+     * and return the super.contains(x,y)
+     * otherwise we return false to respect the cursors
+     * for the underneath components
+     */
+    @Override
+    public boolean contains(int x, int y) {
+<span class="nc" id="L197">        Container container = rootPane.getContentPane();</span>
+<span class="nc" id="L198">        Point containerPoint = convertPoint(this, x, y, container);</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">        if ( containerPoint.y &gt; 0 ) {</span>
+<span class="nc" id="L200">            Component component = getDeepestComponentAt(</span>
+                                        container,
+                                        containerPoint.x,
+                                        containerPoint.y
+                                    );
+
+<span class="nc bnc" id="L206" title="All 4 branches missed.">            return component == null || component.getCursor() == Cursor.getDefaultCursor();</span>
+        }
+<span class="nc" id="L208">        else return true;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

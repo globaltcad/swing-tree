@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StyleAndAnimationBorder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">StyleAndAnimationBorder.java</span></div><h1>StyleAndAnimationBorder.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import swingtree.api.Styler;
+
+import javax.swing.*;
+import javax.swing.border.Border;
+import java.awt.*;
+
+/**
+ *  A custom {@link Border} implementation which is capable of painting large parts of
+ *  the styles defined by SwingTree user through the style API (see {@link swingtree.UIForAnySwing#withStyle(Styler)}).
+ *  Not only does it paint borders, shadows and animation lambda but it also
+ *  calculates the border insets of the component based on the margins, paddings and border widths
+ *  specified by the user of the style API.
+ *
+ * @param &lt;C&gt; The type of the component that is being styled, animated or sized in a particular way...
+ */
+final class StyleAndAnimationBorder&lt;C extends JComponent&gt; implements Border
+{
+    static boolean canFullyPaint( Style.Report report ) {
+<span class="fc" id="L21">        boolean simple = report.onlyDimensionalityAndOrLayoutIsStyled();</span>
+<span class="fc bfc" id="L22" title="All 2 branches covered.">        if (simple) return true;</span>
+<span class="pc bpc" id="L23" title="6 of 20 branches missed.">        return report.noBorderStyle &amp;&amp;</span>
+               report.noBaseStyle  &amp;&amp;
+               (report.noShadowStyle || report.allShadowsAreBorderShadows) &amp;&amp;
+               (report.noPainters    || report.allPaintersAreBorderPainters) &amp;&amp;
+               (report.noGradients   || report.allGradientsAreBorderGradients) &amp;&amp;
+               (report.noImages      || report.allImagesAreBorderImages);
+    }
+
+    private final ComponentExtension&lt;C&gt; _compExt;
+    private final Border _formerBorder;
+    private final boolean _borderWasNotPainted;
+    private Insets _currentInsets;
+<span class="fc" id="L35">    private Insets _currentMarginInsets = new Insets(0, 0, 0, 0);</span>
+<span class="fc" id="L36">    private Insets _currentPaddingInsets = new Insets(0, 0, 0, 0);</span>
+
+<span class="fc" id="L38">    StyleAndAnimationBorder(ComponentExtension&lt;C&gt; compExt, Border formerBorder) {</span>
+<span class="fc" id="L39">        _compExt = compExt;</span>
+<span class="fc" id="L40">        _currentInsets = null;</span>
+<span class="fc" id="L41">        _formerBorder = formerBorder;</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        if (_compExt.getOwner() instanceof AbstractButton) {</span>
+<span class="fc" id="L43">            AbstractButton b = (AbstractButton) _compExt.getOwner();</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">            _borderWasNotPainted = !b.isBorderPainted();</span>
+<span class="fc" id="L45">            b.setBorderPainted(true);</span>
+<span class="fc" id="L46">        } else</span>
+<span class="fc" id="L47">            _borderWasNotPainted = false;</span>
+<span class="fc" id="L48">    }</span>
+
+    Border getFormerBorder() {
+<span class="fc" id="L51">        return _formerBorder;</span>
+    }
+
+    @Override
+    public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+<span class="fc" id="L56">        _checkIfInsetsChanged();</span>
+
+<span class="fc" id="L58">        _compExt._establishCurrentMainPaintClip(g);</span>
+
+        // We remember the clip:
+<span class="fc" id="L61">        Shape formerClip = g.getClip();</span>
+
+<span class="fc" id="L63">        g.setClip(_compExt.getMainClip());</span>
+
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        if ( _compExt.getCurrentStylePainter().isPainting() ) {</span>
+<span class="fc" id="L66">            _paintThisStyleAPIBasedBorder((Graphics2D) g);</span>
+<span class="fc bfc" id="L67" title="All 4 branches covered.">            if (_formerBorder != null &amp;&amp; !_borderWasNotPainted) {</span>
+<span class="fc" id="L68">                Style.Report report = _compExt.getCurrentStylePainter().getStyle().getReport();</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">                if (canFullyPaint(report))</span>
+<span class="fc" id="L70">                    _paintFormerBorder(c, g, x, y, width, height);</span>
+<span class="fc" id="L71">            }</span>
+<span class="nc bnc" id="L72" title="All 4 branches missed.">        } else if (_formerBorder != null &amp;&amp; !_borderWasNotPainted)</span>
+<span class="nc" id="L73">            _paintFormerBorder(c, g, x, y, width, height);</span>
+
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">        if (g.getClip() != formerClip)</span>
+<span class="fc" id="L76">            g.setClip(formerClip);</span>
+
+<span class="fc" id="L78">        _compExt._renderAnimations((Graphics2D) g);</span>
+
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">        if (g.getClip() != formerClip)</span>
+<span class="fc" id="L81">            g.setClip(formerClip);</span>
+<span class="fc" id="L82">    }</span>
+
+    private void _paintFormerBorder(Component c, Graphics g, int x, int y, int width, int height) {
+        try {
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">            Insets insets = _currentMarginInsets == null ? new Insets(0, 0, 0, 0) : _currentMarginInsets;</span>
+<span class="fc" id="L87">            _formerBorder.paintBorder(</span>
+                    c, g,
+                    x + insets.left,
+                    y + insets.top,
+                    width - insets.left - insets.right,
+                    height - insets.top - insets.bottom
+            );
+<span class="nc" id="L94">        } catch (Exception ex) {</span>
+<span class="nc" id="L95">            ex.printStackTrace();</span>
+<span class="fc" id="L96">        }</span>
+<span class="fc" id="L97">    }</span>
+
+    private void _paintThisStyleAPIBasedBorder(Graphics2D g) {
+        try {
+<span class="fc" id="L101">            _compExt.getCurrentStylePainter().paintBorderStyle( g, _compExt.getOwner() );</span>
+<span class="nc" id="L102">        } catch (Exception ex) {</span>
+<span class="nc" id="L103">            ex.printStackTrace();</span>
+<span class="fc" id="L104">        }</span>
+<span class="fc" id="L105">    }</span>
+
+    @Override
+    public Insets getBorderInsets(Component c) {
+<span class="fc" id="L109">        _checkIfInsetsChanged();</span>
+<span class="fc" id="L110">        return _currentInsets;</span>
+    }
+
+    private void _checkIfInsetsChanged() {
+<span class="fc" id="L114">        Insets insets = _calculateInsets();</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">        if (!insets.equals(_currentInsets)) {</span>
+<span class="fc" id="L116">            _currentInsets = insets;</span>
+<span class="fc" id="L117">            _compExt.getOwner().revalidate();</span>
+        }
+<span class="fc" id="L119">    }</span>
+
+    private Insets _calculateInsets() {
+<span class="fc" id="L122">        _compExt._establishStyleAndBeginPainting();</span>
+
+<span class="fc" id="L124">        _currentMarginInsets = _compExt.getCurrentStylePainter()</span>
+<span class="fc" id="L125">                                        .calculateMarginInsets()</span>
+<span class="fc" id="L126">                                        .orElse(_currentMarginInsets);</span>
+
+<span class="fc" id="L128">        _currentPaddingInsets = _compExt.getCurrentStylePainter()</span>
+<span class="fc" id="L129">                                        .calculatePaddingInsets()</span>
+<span class="fc" id="L130">                                        .orElse(_currentPaddingInsets);</span>
+
+<span class="fc" id="L132">        return _compExt.getCurrentStylePainter()</span>
+<span class="fc" id="L133">                        .calculateBorderInsets(</span>
+<span class="fc bfc" id="L134" title="All 2 branches covered.">                            _formerBorder == null</span>
+<span class="fc" id="L135">                                    ? new Insets(0, 0, 0, 0)</span>
+<span class="fc" id="L136">                                    : _formerBorder.getBorderInsets(_compExt.getOwner())</span>
+                        )
+<span class="fc" id="L138">                        .orElseGet(() -&gt;</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">                            _formerBorder == null</span>
+<span class="nc" id="L140">                                ? new Insets(0, 0, 0, 0)</span>
+<span class="nc" id="L141">                                : _formerBorder.getBorderInsets(_compExt.getOwner())</span>
+                        );
+    }
+
+    public Insets getCurrentMarginInsets() {
+<span class="fc" id="L146">        return _currentMarginInsets;</span>
+    }
+
+    public Insets getCurrentPaddingInsets() {
+<span class="nc" id="L150">        return _currentPaddingInsets;</span>
+    }
+
+    public Insets getFormerBorderInsets() {
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">        if ( _borderWasNotPainted )</span>
+<span class="nc" id="L155">            return new Insets(0, 0, 0, 0);</span>
+        else
+<span class="pc bpc" id="L157" title="1 of 2 branches missed.">            return _formerBorder == null</span>
+<span class="nc" id="L158">                        ? new Insets(0, 0, 0, 0)</span>
+<span class="fc" id="L159">                        : _formerBorder.getBorderInsets(_compExt.getOwner());</span>
+    }
+
+    @Override
+    public boolean isBorderOpaque() {
+<span class="nc" id="L164">        return false;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

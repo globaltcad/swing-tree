@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BaseStyle.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">BaseStyle.java</span></div><h1>BaseStyle.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import java.awt.*;
+import java.util.Objects;
+import java.util.Optional;
+
+/**
+ *  An immutable, wither-like cloner method based settings class for basic component style
+ *  properties like background color, foundation color, foreground color and the cursor.
+ *  Instances of this are part of the full {@link Style} configuration that is used to
+ *  style a component in all kinds of ways.
+ */
+public final class BaseStyle
+{
+<span class="fc" id="L15">    private static final BaseStyle _NONE = new BaseStyle(</span>
+                                                     null,
+                                                     null,
+                                                     null,
+                                                     null
+                                                 );
+
+<span class="fc" id="L22">    public static BaseStyle none() { return _NONE; }</span>
+
+    private final Color _backgroundColor;
+    private final Color _foundationColor;
+    private final Color _foregroundColor;
+    private final Cursor _cursor;
+
+
+
+    private BaseStyle(
+        Color color,
+        Color foundation,
+        Color foregroundColor,
+        Cursor cursor
+<span class="fc" id="L36">    ) {</span>
+<span class="fc" id="L37">        _backgroundColor = color;</span>
+<span class="fc" id="L38">        _foundationColor = foundation;</span>
+<span class="fc" id="L39">        _foregroundColor = foregroundColor;</span>
+<span class="fc" id="L40">        _cursor          = cursor;</span>
+<span class="fc" id="L41">    }</span>
+
+<span class="fc" id="L43">    public Optional&lt;Color&gt; backgroundColor() { return Optional.ofNullable(_backgroundColor); }</span>
+
+<span class="fc" id="L45">    public Optional&lt;Color&gt; foundationColor() { return Optional.ofNullable(_foundationColor); }</span>
+
+<span class="fc" id="L47">    public Optional&lt;Color&gt; foregroundColo() { return Optional.ofNullable(_foregroundColor); }</span>
+
+<span class="fc" id="L49">    public Optional&lt;Cursor&gt; cursor() { return Optional.ofNullable(_cursor); }</span>
+
+<span class="fc" id="L51">    BaseStyle backgroundColor(Color color ) { return new BaseStyle(color, _foundationColor, _foregroundColor, _cursor); }</span>
+
+<span class="fc" id="L53">    BaseStyle foundationColor(Color foundation ) { return new BaseStyle(_backgroundColor, foundation, _foregroundColor, _cursor); }</span>
+
+<span class="fc" id="L55">    BaseStyle foregroundColo(Color color ) { return new BaseStyle(_backgroundColor, _foundationColor, color, _cursor); }</span>
+
+<span class="fc" id="L57">    BaseStyle cursor(Cursor cursor ) { return new BaseStyle(_backgroundColor, _foundationColor, _foregroundColor, cursor); }</span>
+
+    @Override
+<span class="fc" id="L60">    public int hashCode() { return Objects.hash(_backgroundColor, _foundationColor, _foregroundColor, _cursor); }</span>
+
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L67">        BaseStyle rhs = (BaseStyle) obj;</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        return Objects.equals(_backgroundColor, rhs._backgroundColor) &amp;&amp;</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">               Objects.equals(_foundationColor, rhs._foundationColor) &amp;&amp;</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">               Objects.equals(_foregroundColor, rhs._foregroundColor) &amp;&amp;</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">               Objects.equals(_cursor, rhs._cursor);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L76">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="fc" id="L77">                    &quot;backgroundColor=&quot; + StyleUtility.toString(_backgroundColor) + &quot;, &quot; +</span>
+<span class="fc" id="L78">                    &quot;foundationColor=&quot; + StyleUtility.toString(_foundationColor) + &quot;, &quot; +</span>
+<span class="fc" id="L79">                    &quot;foregroundColor=&quot; + StyleUtility.toString(_foregroundColor) + &quot;, &quot; +</span>
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">                    &quot;cursor=&quot;          + ( _cursor == null ? &quot;?&quot; : _cursor.toString() ) +</span>
+                &quot;]&quot;;
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

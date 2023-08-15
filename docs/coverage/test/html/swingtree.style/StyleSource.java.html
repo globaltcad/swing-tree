@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StyleSource.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">StyleSource.java</span></div><h1>StyleSource.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import swingtree.SwingTree;
+import swingtree.UI;
+import swingtree.animation.LifeTime;
+import swingtree.api.Styler;
+
+import javax.swing.*;
+import java.util.*;
+
+/**
+ *  A style source is a container for a local styler, animation stylers and a style sheet
+ *  which are all used to calculate the final style of a component.
+ *
+ * @param &lt;C&gt; The type of the component that is being styled, animated or sized in a particular way...
+ */
+final class StyleSource&lt;C extends JComponent&gt;
+{
+    static &lt;C extends JComponent&gt; StyleSource&lt;C&gt; create() {
+<span class="fc" id="L20">        return new StyleSource&lt;&gt;(</span>
+<span class="fc" id="L21">                        Styler.none(),</span>
+                        new Expirable[0],
+<span class="fc" id="L23">                        SwingTree.get().getStyleSheet().orElse(null)</span>
+                    );
+    }
+
+    private final Styler&lt;C&gt; _localStyler;
+
+    private final Expirable&lt;Styler&lt;C&gt;&gt;[] _animationStylers;
+
+    private final StyleSheet _styleSheet;
+
+
+    private StyleSource(
+        Styler&lt;C&gt; localStyler,
+        Expirable&lt;Styler&lt;C&gt;&gt;[] animationStylers,
+        StyleSheet styleSheet
+<span class="fc" id="L38">    ) {</span>
+<span class="fc" id="L39">        _localStyler = localStyler;</span>
+<span class="fc" id="L40">        _animationStylers = animationStylers;</span>
+<span class="fc" id="L41">        _styleSheet = styleSheet;</span>
+<span class="fc" id="L42">    }</span>
+
+    public boolean hasNoAnimationStylers() {
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">        return _animationStylers.length == 0;</span>
+    }
+
+    StyleSource&lt;C&gt; withLocalStyler( Styler&lt;C&gt; styler, C owner ) {
+<span class="fc" id="L49">        Styler&lt;C&gt; compositeStyler = _localStyler.andThen( s -&gt; styler.style(new ComponentStyleDelegate&lt;&gt;(owner, s.style())) );</span>
+<span class="fc" id="L50">        return new StyleSource&lt;&gt;(compositeStyler, _animationStylers, _styleSheet);</span>
+    }
+
+    StyleSource&lt;C&gt; withAnimationStyler(LifeTime lifeTime, Styler&lt;C&gt; animationStyler) {
+<span class="fc" id="L54">        List&lt;Expirable&lt;Styler&lt;C&gt;&gt;&gt; animationStylers = new ArrayList&lt;&gt;(Arrays.asList(_animationStylers));</span>
+<span class="fc" id="L55">        animationStylers.add(new Expirable&lt;&gt;(lifeTime, animationStyler));</span>
+<span class="fc" id="L56">        return new StyleSource&lt;&gt;(_localStyler, animationStylers.toArray(new Expirable[0]), _styleSheet);</span>
+    }
+
+    StyleSource&lt;C&gt; withoutAnimationStylers() {
+<span class="fc" id="L60">        return new StyleSource&lt;&gt;(_localStyler, new Expirable[0], _styleSheet);</span>
+    }
+
+
+    Style calculateStyleFor( C owner ) {
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        Style style = _styleSheet == null ? Style.none() : _styleSheet.applyTo( owner );</span>
+<span class="fc" id="L66">        style = _localStyler.style(new ComponentStyleDelegate&lt;&gt;(owner, style)).style();</span>
+
+        // Animation styles are last: they override everything else:
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        for ( Expirable&lt;Styler&lt;C&gt;&gt; expirableStyler : _animationStylers )</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">            if ( !expirableStyler.isExpired() )</span>
+                try {
+<span class="fc" id="L72">                    style = expirableStyler.get().style(new ComponentStyleDelegate&lt;&gt;(owner, style)).style();</span>
+<span class="nc" id="L73">                } catch ( Exception e ) {</span>
+<span class="nc" id="L74">                    e.printStackTrace();</span>
+                    // An exception inside a styler should not prevent other stylers from being applied!
+<span class="fc" id="L76">                }</span>
+
+<span class="fc" id="L78">        return _applyDPIScaling(style);</span>
+    }
+
+    private static Style _applyDPIScaling( Style style ) {
+<span class="fc bfc" id="L82" title="All 2 branches covered.">        if ( UI.scale() == 1f )</span>
+<span class="fc" id="L83">            return style;</span>
+
+<span class="fc" id="L85">        return style.scale( UI.scale() );</span>
+    }
+
+    StyleSource&lt;C&gt; withoutExpiredAnimationStylers() {
+<span class="fc" id="L89">        List&lt;Expirable&lt;Styler&lt;C&gt;&gt;&gt; animationStylers = new ArrayList&lt;&gt;(Arrays.asList(_animationStylers));</span>
+<span class="fc" id="L90">        animationStylers.removeIf(Expirable::isExpired);</span>
+<span class="fc" id="L91">        return new StyleSource&lt;&gt;(_localStyler, animationStylers.toArray(new Expirable[0]), _styleSheet);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
