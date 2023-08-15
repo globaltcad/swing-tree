@@ -175,7 +175,7 @@ class AdvancedUI {
                                 .add("cell 0 0, aligny top, growx", UI.button("REFRIDE"))
                                 .add("cell 0 1, aligny top, alignx center",
                                     UI.button("<html><i>...</i><html>")
-                                    .with(UI.Cursor.HAND)
+                                    .withCursor(UI.Cursor.HAND)
                                     .makePlain()
                                     .doUpdates(1234, it -> {
                                         var raw = it.component.text

@@ -175,6 +175,12 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
         return this;
     }
 
+    /**
+     *  Dynamically sets the selected tab based on the given index property.
+     *  So when the index property changes, the selected tab will change accordingly.
+     * @param index The index property of the tab to select.
+     * @return This builder node.
+     */
     public final UIForTabbedPane<P> withSelectedIndex( Val<Integer> index ) {
         NullUtil.nullArgCheck( index, "index", Val.class );
         NullUtil.nullPropertyCheck( index, "index", "Null is not a valid state for modelling a selected index." );
@@ -182,6 +188,12 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
         return withSelectedIndex(index.get());
     }
 
+    /**
+     *  Dynamically sets the selected tab based on the given index property.
+     *  So when the index property changes, the selected tab will change accordingly.
+     * @param index The index property of the tab to select.
+     * @return This builder node.
+     */
     public final UIForTabbedPane<P> withSelectedIndex( Var<Integer> index ) {
         NullUtil.nullArgCheck( index, "index", Var.class );
         NullUtil.nullPropertyCheck( index, "index", "Null is not a valid state for modelling a selected index." );
@@ -199,28 +211,44 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
         return withSelectedIndex(index.get());
     }
 
-    public final UIForTabbedPane<P> with( UI.Position position ) {
+    /**
+     * @param position The position to use for the tabs.
+     * @return This builder node.
+     */
+    public final UIForTabbedPane<P> withTabPlacement( UI.Position position ) {
         NullUtil.nullArgCheck( position, "position", UI.Position.class );
         getComponent().setTabPlacement(position.forTabbedPane());
         return this;
     }
 
-    public final UIForTabbedPane<P> withPosition( Val<UI.Position> position ) {
+    /**
+     * @param position The position property to use for the tabs.
+     * @return This builder node.
+     */
+    public final UIForTabbedPane<P> withTabPlacement( Val<UI.Position> position ) {
         NullUtil.nullArgCheck(position, "position", Var.class);
-        _onShow(position, v -> with(position.orElseThrow()));
-        return with(position.get());
+        _onShow( position, v -> withTabPlacement(position.orElseThrow()) );
+        return withTabPlacement(position.get());
     }
 
-    public final UIForTabbedPane<P> with( UI.OverflowPolicy policy ) {
+    /**
+     * @param policy The overflow policy to use for the tabs.
+     * @return This builder node.
+     */
+    public final UIForTabbedPane<P> withOverflowPolicy( UI.OverflowPolicy policy ) {
         NullUtil.nullArgCheck( policy, "policy", UI.OverflowPolicy.class );
         getComponent().setTabLayoutPolicy(policy.forTabbedPane());
         return this;
     }
 
+    /**
+     * @param policy The overflow policy property to use for the tabs.
+     * @return This builder node.
+     */
     public final UIForTabbedPane<P> withOverflowPolicy( Val<UI.OverflowPolicy> policy ) {
         NullUtil.nullArgCheck(policy, "policy", Var.class);
-        _onShow(policy, v -> with(policy.orElseThrow()));
-        return with(policy.orElseThrow());
+        _onShow(policy, v -> withOverflowPolicy(policy.orElseThrow()));
+        return withOverflowPolicy(policy.orElseThrow());
     }
 
     private Supplier<Integer> _indexFinderFor(

@@ -13,6 +13,10 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import java.util.*;
 
+/**
+ *  A swing tree builder node for {@link JTable} instances allowing
+ *  for a fluent API to build tables in a declarative way.
+ */
 public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T>
 {
     /**
@@ -147,14 +151,14 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
      *      is a {@link List} and the list is modified), the table model will not be updated automatically!
      *      Use {@link #updateTableOn(Event)} to bind an update {@link Event} to the table model.</b>
      *
-     * @param model An enum which configures the layout as well as modifiability of the table in a readable fashion.
+     * @param mode An enum which configures the layout as well as modifiability of the table in a readable fashion.
      * @param dataSource The {@link TableListDataSource} returning a list matrix which will be used to populate the table.
      * @return This builder node.
      * @param <E> The type of the table entry {@link Object}s.
      */
-    public final <E> UIForTable<T> with( UI.ListData model, TableListDataSource<E> dataSource ) {
-        boolean isRowMajor = model.isRowMajor();
-        boolean isEditable = model.isEditable();
+    public final <E> UIForTable<T> withModel( UI.ListData mode, TableListDataSource<E> dataSource ) {
+        boolean isRowMajor = mode.isRowMajor();
+        boolean isEditable = mode.isEditable();
         if ( isRowMajor ) {
             getComponent().setModel(new ListBasedTableModel<E>(isEditable, dataSource)
             {
@@ -206,13 +210,13 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
      *      is a {@link Map} which gets modified), the table model will not be updated automatically!
      *      Use {@link #updateTableOn(Event)} to bind an update {@link Event} to the table model.</b>
      *
-     * @param model An enum which configures the modifiability of the table in a readable fashion.
+     * @param mode An enum which configures the modifiability of the table in a readable fashion.
      * @param dataSource The {@link TableMapDataSource} returning a column major map based matrix which will be used to populate the table.
      * @return This builder node.
      * @param <E> The type of the table entry {@link Object}s.
      */
-    public final <E> UIForTable<T> with( UI.MapData model, TableMapDataSource<E> dataSource ) {
-        getComponent().setModel(new MapBasedColumnMajorTableModel<>(model.isEditable(), dataSource));
+    public final <E> UIForTable<T> withModel( UI.MapData mode, TableMapDataSource<E> dataSource ) {
+        getComponent().setModel(new MapBasedColumnMajorTableModel<>(mode.isEditable(), dataSource));
         return this;
     }
 

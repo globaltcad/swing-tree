@@ -1259,7 +1259,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param type The {@link UI.Cursor} type defined by a simple enum exposed by this API.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I with( UI.Cursor type ) {
+    public final I withCursor( UI.Cursor type ) {
         getComponent().setCursor( new java.awt.Cursor( type.type ) );
         return _this();
     }
@@ -1276,7 +1276,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck( type, "type", Val.class );
         NullUtil.nullPropertyCheck(type, "type", "Null is not allowed to model a cursor type.");
         _onShow( type, t -> getComponent().setCursor( new java.awt.Cursor( t.type ) ) );
-        return with( type.orElseThrow() );
+        return withCursor( type.orElseThrow() );
     }
 
     /**
@@ -1294,7 +1294,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck( type, "type", UI.Cursor.class );
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the cursor selection state.");
         _onShow( condition, c -> getComponent().setCursor( new java.awt.Cursor( c ? type.type : UI.Cursor.DEFAULT.type ) ) );
-        return with( condition.orElseThrow() ? type : UI.Cursor.DEFAULT );
+        return withCursor( condition.orElseThrow() ? type : UI.Cursor.DEFAULT );
     }
 
     /**
@@ -1318,7 +1318,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
             if (baseCursor[0] == null) baseCursor[0] = getComponent().getCursor();
             getComponent().setCursor( new java.awt.Cursor( condition.get() ? c.type : baseCursor[0].getType() ) );
         });
-        return with( condition.orElseThrow() ? type.orElseThrow() : UI.Cursor.DEFAULT );
+        return withCursor( condition.orElseThrow() ? type.orElseThrow() : UI.Cursor.DEFAULT );
     }
 
     /**

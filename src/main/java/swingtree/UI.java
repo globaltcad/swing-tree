@@ -1244,7 +1244,7 @@ public final class UI
      */
     public static UIForTabbedPane<JTabbedPane> tabbedPane( Position tabsPosition ) {
         NullUtil.nullArgCheck(tabsPosition, "tabsPosition", Position.class);
-        return tabbedPane().with(tabsPosition);
+        return tabbedPane().withTabPlacement(tabsPosition);
     }
 
     /**
@@ -1268,7 +1268,7 @@ public final class UI
     public static UIForTabbedPane<JTabbedPane> tabbedPane( Position tabsPosition, OverflowPolicy tabsPolicy ) {
         NullUtil.nullArgCheck(tabsPosition, "tabsPosition", Position.class);
         NullUtil.nullArgCheck(tabsPolicy, "tabsPolicy", OverflowPolicy.class);
-        return tabbedPane().with(tabsPosition).with(tabsPolicy);
+        return tabbedPane().withTabPlacement(tabsPosition).withOverflowPolicy(tabsPolicy);
     }
 
     /**
@@ -1289,7 +1289,7 @@ public final class UI
      */
     public static UIForTabbedPane<JTabbedPane> tabbedPane( OverflowPolicy tabsPolicy ) {
         NullUtil.nullArgCheck(tabsPolicy, "tabsPolicy", OverflowPolicy.class);
-        return tabbedPane().with(Position.TOP).with(tabsPolicy);
+        return tabbedPane().withTabPlacement(Position.TOP).withOverflowPolicy(tabsPolicy);
     }
 
 
@@ -4174,7 +4174,7 @@ public final class UI
     public static <E> UIForTable<JTable> table( ListData dataFormat, TableListDataSource<E> dataSource ) {
         NullUtil.nullArgCheck(dataFormat, "dataFormat", ListData.class);
         NullUtil.nullArgCheck(dataSource, "dataSource", TableListDataSource.class);
-        return of((JTable) new Table()).with(dataFormat, dataSource);
+        return of((JTable) new Table()).withModel(dataFormat, dataSource);
     }
 
     /**
@@ -4194,7 +4194,7 @@ public final class UI
     public static <E> UIForTable<JTable> table( MapData dataFormat, TableMapDataSource<E> dataSource ) {
         NullUtil.nullArgCheck(dataFormat, "dataFormat", ListData.class);
         NullUtil.nullArgCheck(dataSource, "dataSource", TableMapDataSource.class);
-        return of((JTable) new Table()).with(dataFormat, dataSource);
+        return of((JTable) new Table()).withModel(dataFormat, dataSource);
     }
 
     public static UIForTable<JTable> table( Buildable<BasicTableModel> tableModelBuildable ) {

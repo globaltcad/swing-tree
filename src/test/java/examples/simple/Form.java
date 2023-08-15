@@ -48,7 +48,7 @@ public class Form extends JPanel
 				)
 				.add("cell 1 0",
 					UI.button(50, 50, pdfIcon, pdfHover).id("hover-icon-button")
-					.with(UI.Cursor.HAND)
+					.withCursor(UI.Cursor.HAND)
 					.makePlain()
 					.onClick( e -> {/* does something */} )
 				)
