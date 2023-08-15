@@ -154,14 +154,14 @@ public final class ComponentExtension<C extends JComponent>
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
-
     }
 
     public void paintForegroundStyle( Graphics2D g2d ) {
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
         // Reset antialiasing to its previous state:
-        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
+        if ( StylePainter.DO_ANTIALIASING() )
+            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         // We remember the clip:
         Shape formerClip = g2d.getClip();
@@ -172,8 +172,8 @@ public final class ComponentExtension<C extends JComponent>
         if ( g2d.getClip() != formerClip )
             g2d.setClip(formerClip);
 
-        // Enable antialiasing again:
-        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+        // Reset antialiasing to its previous state:
+        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
     private Style _calculateAndApplyStyle() {
@@ -226,6 +226,11 @@ public final class ComponentExtension<C extends JComponent>
 
         if ( style.base().foregroundColo().isPresent() && !Objects.equals( _owner.getForeground(), style.base().foregroundColo().get() ) )
             _owner.setForeground( style.base().foregroundColo().get() );
+
+        style.base().cursor().ifPresent( cursor -> {
+            if ( !Objects.equals( _owner.getCursor(), cursor ) )
+                _owner.setCursor( cursor );
+        });
 
         if ( style.dimensionality().minWidth().isPresent() || style.dimensionality().minHeight().isPresent() ) {
             Dimension minSize = _owner.getMinimumSize();
@@ -305,11 +310,6 @@ public final class ComponentExtension<C extends JComponent>
                         _owner.setFont( newFont );
                 });
 
-        style.base().cursor().ifPresent( cursor -> {
-            if ( !Objects.equals( _owner.getCursor(), cursor ) )
-                _owner.setCursor( cursor );
-        });
-
         style.font().horizontalAlignment().ifPresent( alignment -> {
             if ( _owner instanceof JLabel ) {
                 JLabel label = (JLabel) _owner;
@@ -364,7 +364,7 @@ public final class ComponentExtension<C extends JComponent>
      *  by {@link JComponent#paintImmediately(int, int, int, int)} when certain events occur
      *  (like a child component is a text field with a blinking cursor, or a button with hover effect).
      *  This type of repaint does unfortunately not call {@code JComponent::paintChildren(Graphics)},
-     *  in fact it completely ignores bypasses the rendering of this current component!
+     *  in fact it completely bypasses the rendering of this current component!
      *  In order to ensure that the stuff painted by the foreground painter is not overwritten
      *  in these types of cases,
      *  we make all children transparent (non-opaque) so that the foreground painter is always visible.

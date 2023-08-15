@@ -17,15 +17,15 @@ import java.awt.*;
  */
 final class StyleAndAnimationBorder<C extends JComponent> implements Border
 {
-    static boolean canFullyPaint(Style.Report report) {
+    static boolean canFullyPaint( Style.Report report ) {
         boolean simple = report.onlyDimensionalityAndOrLayoutIsStyled();
         if (simple) return true;
         return report.noBorderStyle &&
-                report.noBaseStyle  &&
-                (report.noShadowStyle || report.allShadowsAreBorderShadows) &&
-                (report.noPainters    || report.allPaintersAreBorderPainters) &&
-                (report.noGradients   || report.allGradientsAreBorderGradients) &&
-                (report.noImages      || report.allImagesAreBorderImages);
+               report.noBaseStyle  &&
+               (report.noShadowStyle || report.allShadowsAreBorderShadows) &&
+               (report.noPainters    || report.allPaintersAreBorderPainters) &&
+               (report.noGradients   || report.allGradientsAreBorderGradients) &&
+               (report.noImages      || report.allImagesAreBorderImages);
     }
 
     private final ComponentExtension<C> _compExt;
