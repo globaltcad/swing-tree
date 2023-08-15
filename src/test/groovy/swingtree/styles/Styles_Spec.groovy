@@ -115,7 +115,9 @@ class Styles_Spec extends Specification
                                             "backgroundColor=rgba(0,255,0,255), " +
                                             "foundationColor=rgba(255,0,0,255), " +
                                             "foregroundColor=?, " +
-                                            "cursor=?" +
+                                            "cursor=?, " +
+                                            "alignmentX=?, " +
+                                            "alignmentY=?" +
                                         "], " +
                                         "FontStyle[" +
                                             "name=Times New Roman, size=12, posture=0.0, weight=2.0, underlined=true, " +

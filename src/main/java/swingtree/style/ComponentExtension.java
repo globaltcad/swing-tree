@@ -2,6 +2,8 @@ package swingtree.style;
 
 import net.miginfocom.layout.CC;
 import net.miginfocom.layout.ConstraintParser;
+import net.miginfocom.layout.DimConstraint;
+import net.miginfocom.layout.UnitValue;
 import net.miginfocom.swing.MigLayout;
 import swingtree.UI;
 import swingtree.animation.AnimationState;
@@ -389,17 +391,33 @@ public final class ComponentExtension<C extends JComponent>
 
             final CC finalComponentConstraints = ( componentConstraints == null ? new CC() : componentConstraints );
 
-            alignmentX.map( a -> (int) ( a * 100f ) )
-                      .map( a -> a + "%" )
-                      .ifPresent( a -> {
-                           finalComponentConstraints.alignX(a);
-                      });
+            String x = alignmentX.map( a -> (int) ( a * 100f ) )
+                                  .map( a -> a + "%" )
+                                  .orElse("");
 
-            alignmentY.map( a -> (int) ( a * 100f ) )
-                      .map( a -> a + "%" )
-                      .ifPresent( a -> {
-                         finalComponentConstraints.alignY(a);
-                      });
+            String y = alignmentY.map( a -> (int) ( a * 100f ) )
+                                  .map( a -> a + "%" )
+                                  .orElse("");
+
+            DimConstraint horizontalDimConstraint = finalComponentConstraints.getHorizontal();
+            DimConstraint verticalDimConstraint   = finalComponentConstraints.getVertical();
+
+            UnitValue xAlign = horizontalDimConstraint.getAlign();
+            UnitValue yAlign = verticalDimConstraint.getAlign();
+
+            boolean xChange = !x.equals( xAlign == null ? "" : xAlign.getConstraintString() );
+            boolean yChange = !y.equals( yAlign == null ? "" : yAlign.getConstraintString() );
+
+            if ( !x.isEmpty() && xChange )
+                finalComponentConstraints.alignX(x);
+
+            if ( !y.isEmpty() && yChange )
+                finalComponentConstraints.alignY(y);
+
+            if ( xChange || yChange ) {
+                migLayout.setComponentConstraints(_owner, finalComponentConstraints);
+                _owner.getParent().revalidate();
+            }
         }
     }
 
