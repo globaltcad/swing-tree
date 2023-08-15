@@ -26,7 +26,7 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSpl
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if the provided alignment is null.
      */
-    public final UIForSplitPane<P> with( UI.Align align ) {
+    public final UIForSplitPane<P> withOrientation( UI.Align align ) {
         NullUtil.nullArgCheck( align, "split", UI.Align.class );
         getComponent().setOrientation( align.forSplitPane() );
         return this;
@@ -41,11 +41,11 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSpl
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if the provided alignment is null or the property is allowed to wrap a null value.
      */
-    public final UIForSplitPane<P> withAlignment( Val<UI.Align> align ) {
+    public final UIForSplitPane<P> withOrientation( Val<UI.Align> align ) {
         NullUtil.nullArgCheck( align, "align", Val.class );
         NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment." );
-        _onShow( align, v -> with(align.orElseThrow()) );
-        return this;
+        _onShow( align, v -> withOrientation(align.orElseThrow()) );
+        return withOrientation(align.get());
     }
 
     /**

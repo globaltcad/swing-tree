@@ -40,8 +40,8 @@ class AdvancedUI {
                             UI.panel("fill, insets 3")
                             .add("height 50:150:200, width 50:550:550, grow, push",
                                UI.scrollPane()
-                               .with(UI.ScrollBarPolicy.NEVER)
-                               .with(UI.ScrollBarPolicy.AS_NEEDED)
+                               .withScrollBarPolicy(UI.Active.NEVER)
+                               .withScrollBarPolicy(UI.Active.AS_NEEDED)
                                .add(UI.editorPane().withForeground(Color.DARK_GRAY).withText((Data.explain.trim().replace("\n", " "))).isEditableIf(false)))
                         )
                         .add("width 480!, shrink, aligny bottom",
@@ -82,7 +82,7 @@ class AdvancedUI {
                                             inner
                                             .add("width 50:425:625, pushx, growx, shrinky",
                                                 UI.scrollPane()
-                                                .with(UI.ScrollBarPolicy.NEVER)
+                                                .withScrollBarPolicy(UI.Active.NEVER)
                                                 .add(UI.editorPane().withText(text).isEditableIf(false))
                                             )
                                             .add("align right, shrink", UI.button(label).withProperty("JButton.buttonType", "roundRect").isEnabledIf(false))

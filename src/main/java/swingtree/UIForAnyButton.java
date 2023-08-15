@@ -55,25 +55,6 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         _onShow( text, v -> getComponent().setText(v) );
         return withText( text.orElseThrow() );
     }
-    
-    /**
-     *  Use this to set the icon for the wrapped button type. 
-     *  This is in essence a convenience method to avoid peeking into this builder like so:
-     *  <pre>{@code
-     *     UI.button("Something")
-     *         .peek( button -> button.setIcon(...) );
-     *  }</pre>
-     *
-     *
-     * @param icon The {@link Icon} which should be displayed on the button.
-     * @return This very builder to allow for method chaining.
-     * @throws IllegalArgumentException if {@code icon} is {@code null}.
-     */
-    public I with( Icon icon ) {
-        NullUtil.nullArgCheck(icon,"icon",Icon.class);
-        getComponent().setIcon(icon);
-        return _this();
-    }
 
     /**
      *  Use this to set the icon for the wrapped button type.
@@ -107,7 +88,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         NullUtil.nullArgCheck(icon, "icon", Val.class);
         NullUtil.nullPropertyCheck(icon, "icon");
         _onShow( icon, i -> getComponent().setIcon(i) );
-        return with(icon.orElseThrow());
+        return withIcon(icon.orElseThrow());
     }
 
     /**
@@ -472,7 +453,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
-    public final I with( UI.HorizontalAlignment horizontalAlign ) {
+    public final I withHorizontalAlignment( UI.HorizontalAlignment horizontalAlign ) {
         NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class);
         getComponent().setHorizontalAlignment(horizontalAlign.forSwing());
         return _this();
@@ -498,7 +479,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I withHorizontalAlignment( Val<UI.HorizontalAlignment> horizontalAlign ) {
         NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", Val.class);
         _onShow(horizontalAlign, align -> getComponent().setHorizontalAlignment(align.forSwing()) );
-        return with(horizontalAlign.orElseThrow());
+        return withHorizontalAlignment(horizontalAlign.orElseThrow());
     }
 
     /**
@@ -513,7 +494,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
-    public final I with( UI.VerticalAlignment verticalAlign ) {
+    public final I withHorizontalAlignment(UI.VerticalAlignment verticalAlign ) {
         NullUtil.nullArgCheck(verticalAlign, "verticalAlign", UI.VerticalAlignment.class);
         getComponent().setVerticalAlignment(verticalAlign.forSwing());
         return _this();
@@ -539,7 +520,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I withVerticalAlignment( Val<UI.VerticalAlignment> verticalAlign ) {
         NullUtil.nullArgCheck(verticalAlign, "verticalAlign", Val.class);
         _onShow(verticalAlign, align -> getComponent().setVerticalAlignment(align.forSwing()) );
-        return with(verticalAlign.orElseThrow());
+        return withHorizontalAlignment(verticalAlign.orElseThrow());
     }
 
     /**
@@ -554,7 +535,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
-    public final I withImageRelative( UI.HorizontalAlignment horizontalAlign ) {
+    public final I withHorizontalTextAlignment( UI.HorizontalAlignment horizontalAlign ) {
         NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class);
         getComponent().setHorizontalTextPosition(horizontalAlign.forSwing());
         return _this();
@@ -577,10 +558,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
-    public final I withImageRelativeHorizontalAlignment( Val<UI.HorizontalAlignment> horizontalAlign ) {
+    public final I withHorizontalTextAlignment( Val<UI.HorizontalAlignment> horizontalAlign ) {
         NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", Val.class);
         _onShow(horizontalAlign, align -> getComponent().setHorizontalTextPosition(align.forSwing()) );
-        return withImageRelative(horizontalAlign.orElseThrow());
+        return withHorizontalTextAlignment(horizontalAlign.orElseThrow());
     }
 
     /**
@@ -595,7 +576,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
-    public final I withImageRelative( UI.VerticalAlignment verticalAlign ) {
+    public final I withVerticalTextAlignment( UI.VerticalAlignment verticalAlign ) {
         NullUtil.nullArgCheck(verticalAlign, "verticalAlign", UI.VerticalAlignment.class);
         getComponent().setVerticalTextPosition(verticalAlign.forSwing());
         return _this();
@@ -618,10 +599,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
-    public final I withImageRelativeVerticalAlignment( Val<UI.VerticalAlignment> verticalAlign ) {
+    public final I withVerticalTextAlignment( Val<UI.VerticalAlignment> verticalAlign ) {
         NullUtil.nullArgCheck(verticalAlign, "verticalAlign", Val.class);
         _onShow( verticalAlign, align -> getComponent().setVerticalTextPosition(align.forSwing()) );
-        return withImageRelative(verticalAlign.orElseThrow());
+        return withVerticalTextAlignment(verticalAlign.orElseThrow());
     }
 
     /**

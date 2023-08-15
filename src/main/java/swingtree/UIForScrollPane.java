@@ -39,9 +39,9 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAnySwing<UIForS
      * @param scrollPolicy The scroll policy to use.
      * @return This builder node.
      */
-    public final UIForScrollPane<P> with( UI.ScrollBarPolicy scrollPolicy ) {
-        this.withVertical(scrollPolicy);
-        this.withHorizontal(scrollPolicy);
+    public final UIForScrollPane<P> withScrollBarPolicy( UI.Active scrollPolicy ) {
+        this.withVerticalScrollBarPolicy(scrollPolicy);
+        this.withHorizontalScrollBarPolicy(scrollPolicy);
         return this;
     }
 
@@ -51,7 +51,7 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAnySwing<UIForS
      * @param scrollBarPolicy The scroll policy to use.
      * @return This builder node.
      */
-    public final UIForScrollPane<P> withVertical( UI.ScrollBarPolicy scrollBarPolicy ) {
+    public final UIForScrollPane<P> withVerticalScrollBarPolicy( UI.Active scrollBarPolicy ) {
         P pane = getComponent();
         switch ( scrollBarPolicy )
         {
@@ -68,9 +68,9 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAnySwing<UIForS
      * @param scrollBarPolicy The scroll policy property to use.
      * @return This builder node.
      */
-    public final UIForScrollPane<P> withVerticalScrollBarPolicy( Val<UI.ScrollBarPolicy> scrollBarPolicy ) {
+    public final UIForScrollPane<P> withVerticalScrollBarPolicy( Val<UI.Active> scrollBarPolicy ) {
         NullUtil.nullArgCheck(scrollBarPolicy, "scrollBarPolicy", Val.class);
-        _onShow(scrollBarPolicy, v -> withVertical(v));
+        _onShow(scrollBarPolicy, v -> withVerticalScrollBarPolicy(v));
         return this;
     }
 
@@ -80,7 +80,7 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAnySwing<UIForS
      * @param scrollBarPolicy The scroll policy to use.
      * @return This builder node.
      */
-    public final UIForScrollPane<P> withHorizontal( UI.ScrollBarPolicy scrollBarPolicy ) {
+    public final UIForScrollPane<P> withHorizontalScrollBarPolicy(UI.Active scrollBarPolicy ) {
         P pane = getComponent();
         switch ( scrollBarPolicy )
         {
@@ -97,9 +97,9 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAnySwing<UIForS
      * @param scrollBarPolicy The scroll policy property to use.
      * @return This builder node.
      */
-    public final UIForScrollPane<P> withHorizontalScrollBarPolicy( Val<UI.ScrollBarPolicy> scrollBarPolicy ) {
+    public final UIForScrollPane<P> withHorizontalScrollBarPolicy( Val<UI.Active> scrollBarPolicy ) {
         NullUtil.nullArgCheck(scrollBarPolicy, "scrollBarPolicy", Val.class);
-        _onShow(scrollBarPolicy, v -> withHorizontal(v) );
+        _onShow(scrollBarPolicy, v -> withHorizontalScrollBarPolicy(v) );
         return this;
     }
 

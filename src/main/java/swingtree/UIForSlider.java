@@ -24,7 +24,7 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
      *  @param align The orientation of the slider.
      *  @return This builder node.
      */
-    public final UIForSlider<S> with( UI.Align align ) {
+    public final UIForSlider<S> withOrientation( UI.Align align ) {
         NullUtil.nullArgCheck( align, "align", UI.Align.class );
         _doWithoutListeners(()->getComponent().setOrientation(align.forSlider()));
         return this;
@@ -35,11 +35,11 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
      *  @param align The orientation of the slider.
      *  @return This builder node.
      */
-    public final UIForSlider<S> withAlignment( Val<UI.Align> align ) {
+    public final UIForSlider<S> withOrientation( Val<UI.Align> align ) {
         NullUtil.nullArgCheck( align, "align", Val.class );
         NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment" );
-        _onShow( align, v -> with(align.orElseThrow()) );
-        return with(align.orElseThrow());
+        _onShow( align, v -> withOrientation(align.orElseThrow()) );
+        return withOrientation(align.orElseThrow());
     }
 
     /**

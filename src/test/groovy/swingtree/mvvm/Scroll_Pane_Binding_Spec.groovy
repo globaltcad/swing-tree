@@ -39,13 +39,13 @@ class Scroll_Pane_Binding_Spec extends Specification
             bar policy of your scroll panes.
         """
         given : 'A property holding a vertical scroll bar policy.'
-            var policy = Var.of(UI.ScrollBarPolicy.NEVER)
+            var policy = Var.of(UI.Active.NEVER)
         when : 'We create a scroll panel and bind the property to it.'
             var ui = UI.scrollPane().withVerticalScrollBarPolicy(policy)
         then : 'The property was successfully bound to the UI.'
             ui != null
         when : 'We change and show the property value.'
-            policy.set(UI.ScrollBarPolicy.ALWAYS)
+            policy.set(UI.Active.ALWAYS)
             UI.sync()
         then : 'The UI was updated.'
             ui.component.verticalScrollBarPolicy == ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS
@@ -62,13 +62,13 @@ class Scroll_Pane_Binding_Spec extends Specification
             bar policy of your scroll panes.
         """
         given : 'A property holding a horizontal scroll bar policy.'
-            var policy = Var.of(UI.ScrollBarPolicy.ALWAYS)
+            var policy = Var.of(UI.Active.ALWAYS)
         when : 'We create a scroll panel and bind the property to it.'
             var ui = UI.scrollPane().withHorizontalScrollBarPolicy(policy)
         then : 'The property was successfully bound to the UI.'
             ui != null
         when : 'We change and show the property value.'
-            policy.set(UI.ScrollBarPolicy.AS_NEEDED)
+            policy.set(UI.Active.AS_NEEDED)
             UI.sync()
         then : 'The UI was updated.'
             ui.component.horizontalScrollBarPolicy == ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED

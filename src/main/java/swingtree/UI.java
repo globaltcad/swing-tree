@@ -395,9 +395,10 @@ public final class UI
     }
 
     /**
-     *  The scroll policy for UI components with scroll behaviour.
+     *  A general purpose enum describing if something is never, always or sometimes active.
+     *  This is mostly used to configure the scroll bar policy for UI components with scroll behaviour.
      */
-    public enum ScrollBarPolicy { NEVER, AS_NEEDED, ALWAYS }
+    public enum Active { NEVER, AS_NEEDED, ALWAYS }
 
     /**
      *  The position of a UI component in terms of directions.
@@ -882,7 +883,7 @@ public final class UI
      */
     public static UIForSeparator<JSeparator> separator( Align align ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
-        return separator().with(align);
+        return separator().withOrientation(align);
     }
 
     /**
@@ -894,7 +895,7 @@ public final class UI
      */
     public static UIForSeparator<JSeparator> separator( Val<Align> align ) {
         NullUtil.nullArgCheck(align, "align", Val.class);
-        return separator().withAlignment(align);
+        return separator().withOrientation(align);
     }
 
     /**
@@ -1927,7 +1928,7 @@ public final class UI
      */
     public static UIForToolBar<JToolBar> toolBar( Align align ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
-        return new UIForToolBar<>((JToolBar) new ToolBar()).with(align);
+        return new UIForToolBar<>((JToolBar) new ToolBar()).withOrientation(align);
     }
 
     /**
@@ -1941,7 +1942,7 @@ public final class UI
      */
     public static UIForToolBar<JToolBar> toolBar( Val<Align> align ) {
         NullUtil.nullArgCheck(align, "align", Val.class);
-        return new UIForToolBar<>((JToolBar) new ToolBar()).withAlignment(align);
+        return new UIForToolBar<>((JToolBar) new ToolBar()).withOrientation(align);
     }
 
     /**
@@ -2381,7 +2382,7 @@ public final class UI
      */
     public static UIForSplitPane<JSplitPane> splitPane( Align align ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
-        return of(new JSplitPane(align.forSplitPane()));
+        return of((JSplitPane) new SplitPane(align)).withOrientation(align);
     }
 
     /**
@@ -2408,8 +2409,8 @@ public final class UI
     public static UIForSplitPane<JSplitPane> splitPane( Val<Align> align ) {
         NullUtil.nullArgCheck(align, "align", Val.class);
         NullUtil.nullPropertyCheck(align, "align", "Null is not a valid alignment.");
-        return of(new JSplitPane(align.get().forSplitPane()))
-                .withAlignment(align);
+        return of((JSplitPane) new SplitPane(align.get()))
+                .withOrientation(align);
     }
 
     /**
@@ -2478,7 +2479,7 @@ public final class UI
      */
     public static UIForSlider<JSlider> slider( Align align ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
-        return of((JSlider) new Slider()).with(align);
+        return of((JSlider) new Slider()).withOrientation(align);
     }
 
     /**
@@ -2494,7 +2495,7 @@ public final class UI
      */
     public static UIForSlider<JSlider> slider( Val<Align> align ) {
         NullUtil.nullArgCheck( align, "align", Val.class );
-        return of((JSlider) new Slider()).withAlignment(align);
+        return of((JSlider) new Slider()).withOrientation(align);
     }
 
     /**
@@ -2515,7 +2516,7 @@ public final class UI
     public static UIForSlider<JSlider> slider( Align align, int min, int max ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
         return of((JSlider) new Slider())
-                    .with(align)
+                    .withOrientation(align)
                     .withMin(min)
                     .withMax(max)
                     .withValue((min + max) / 2);
@@ -2540,7 +2541,7 @@ public final class UI
     public static UIForSlider<JSlider> slider( Align align, int min, int max, int value ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
         return of((JSlider) new Slider())
-                .with(align)
+                .withOrientation(align)
                 .withMin(min)
                 .withMax(max)
                 .withValue(value);
@@ -2566,7 +2567,7 @@ public final class UI
         NullUtil.nullArgCheck(align, "align", Align.class);
         NullUtil.nullPropertyCheck(value, "value", "The state of the slider should not be null!");
         return of((JSlider) new Slider())
-                .with(align)
+                .withOrientation(align)
                 .withMin(min)
                 .withMax(max)
                 .withValue(value);
@@ -2592,7 +2593,7 @@ public final class UI
         NullUtil.nullArgCheck(align, "align", Align.class);
         NullUtil.nullPropertyCheck(value, "value", "The state of the slider should not be null!");
         return of((JSlider) new Slider())
-                .with(align)
+                .withOrientation(align)
                 .withMin(min)
                 .withMax(max)
                 .withValue(value);
@@ -3904,7 +3905,7 @@ public final class UI
      */
     public static UIForProgressBar<JProgressBar> progressBar( Align align, int min, int max ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
-        return progressBar().with(align).withMin(min).withMax(max);
+        return progressBar().withOrientation(align).withMin(min).withMax(max);
     }
 
     /**
@@ -3921,7 +3922,7 @@ public final class UI
      */
     public static UIForProgressBar<JProgressBar> progressBar( Align align, int min, int max, int value ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
-        return progressBar().with(align).withMin(min).withMax(max).withValue(value);
+        return progressBar().withOrientation(align).withMin(min).withMax(max).withValue(value);
     }
 
     /**
@@ -3940,7 +3941,7 @@ public final class UI
         NullUtil.nullArgCheck(align, "align", Align.class);
         NullUtil.nullArgCheck(value, "value", Val.class);
         NullUtil.nullPropertyCheck(value, "value", "Null is not a valid value for the value property of a progress bar.");
-        return progressBar().with(align).withMin(min).withMax(max).withValue(value);
+        return progressBar().withOrientation(align).withMin(min).withMax(max).withValue(value);
     }
 
     /**
@@ -3958,7 +3959,7 @@ public final class UI
         NullUtil.nullArgCheck(align, "align", Align.class);
         NullUtil.nullArgCheck(progress, "progress", Val.class);
         NullUtil.nullPropertyCheck(progress, "progress", "Null is not a valid value for the progress property of a progress bar.");
-        return progressBar().with(align).withMin(0).withMax(100).withProgress(progress);
+        return progressBar().withOrientation(align).withMin(0).withMax(100).withProgress(progress);
     }
 
     /**
@@ -3974,7 +3975,7 @@ public final class UI
      */
     public static UIForProgressBar<JProgressBar> progressBar( Align align, double progress ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
-        return progressBar().with(align).withMin(0).withMax(100).withProgress(progress);
+        return progressBar().withOrientation(align).withMin(0).withMax(100).withProgress(progress);
     }
 
     /**
@@ -3994,7 +3995,7 @@ public final class UI
         NullUtil.nullArgCheck(align, "align", Align.class);
         NullUtil.nullArgCheck(progress, "progress", Val.class);
         NullUtil.nullPropertyCheck(progress, "progress", "Null is not a valid value for the progress property of a progress bar.");
-        return progressBar().withAlignment(align).withMin(0).withMax(100).withProgress(progress);
+        return progressBar().withOrientation(align).withMin(0).withMax(100).withProgress(progress);
     }
 
     /**
@@ -5093,6 +5094,7 @@ public final class UI
     }
     /** {inheritDoc} */
     public static class SplitPane extends JSplitPane {
+        SplitPane( Align align ) { super(align.forSplitPane()); }
         @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
     }

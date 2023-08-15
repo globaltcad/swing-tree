@@ -31,7 +31,7 @@ public class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UIForSep
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code align} is {@code null}.
      */
-    public final UIForSeparator<S> with( UI.Align align ) {
+    public final UIForSeparator<S> withOrientation( UI.Align align ) {
         NullUtil.nullArgCheck( align, "align", Val.class );
         getComponent().setOrientation(align.forSeparator());
         return this;
@@ -42,11 +42,11 @@ public class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UIForSep
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code align} is {@code null}.
      */
-    public final UIForSeparator<S> withAlignment( Val<UI.Align> align ) {
+    public final UIForSeparator<S> withOrientation( Val<UI.Align> align ) {
         NullUtil.nullArgCheck( align, "align", Val.class );
         NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment." );
         _onShow( align, v -> getComponent().setOrientation(v.forSeparator()) );
-        return with(align.get());
+        return withOrientation(align.get());
     }
 
     /**

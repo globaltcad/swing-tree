@@ -24,7 +24,7 @@ public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIFo
      *  @param align The orientation of the slider.
      *  @return This builder node.
      */
-    public final UIForProgressBar<P> with( UI.Align align ) {
+    public final UIForProgressBar<P> withOrientation( UI.Align align ) {
         NullUtil.nullArgCheck( align, "align", UI.Align.class );
         getComponent().setOrientation(align.forProgressBar());
         return this;
@@ -35,11 +35,11 @@ public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIFo
      *  @param align The orientation of the slider.
      *  @return This builder node.
      */
-    public final UIForProgressBar<P> withAlignment( Val<UI.Align> align ) {
+    public final UIForProgressBar<P> withOrientation( Val<UI.Align> align ) {
         NullUtil.nullArgCheck( align, "align", Val.class );
         NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment" );
-        _onShow( align, v -> with(align.orElseThrow()) );
-        return with(align.orElseThrow());
+        _onShow( align, v -> withOrientation(align.orElseThrow()) );
+        return withOrientation(align.orElseThrow());
     }
 
     /**

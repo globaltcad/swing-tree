@@ -55,7 +55,7 @@ class Scroll_Pane_Spec extends Specification
         given : 'We create a scroll pane with a custom scroll bar policy.'
             var ui =
                     UI.scrollPane()
-                    .with(UI.ScrollBarPolicy.NEVER)
+                    .withScrollBarPolicy(UI.Active.NEVER)
 
         expect : 'The scroll pane has the expected scroll bar policies.'
             ui.component.getHorizontalScrollBarPolicy() == JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
@@ -76,8 +76,8 @@ class Scroll_Pane_Spec extends Specification
         given : 'We create a scroll pane with a custom scroll bar policy.'
             var ui =
                     UI.scrollPane()
-                    .withHorizontal(UI.ScrollBarPolicy.NEVER)
-                    .withVertical(UI.ScrollBarPolicy.ALWAYS)
+                    .withHorizontalScrollBarPolicy(UI.Active.NEVER)
+                    .withVerticalScrollBarPolicy(UI.Active.ALWAYS)
 
         expect : 'The scroll pane has the expected scroll bar policies.'
             ui.component.getHorizontalScrollBarPolicy() == JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
