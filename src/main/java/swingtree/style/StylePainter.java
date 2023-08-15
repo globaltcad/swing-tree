@@ -30,6 +30,7 @@ final class StylePainter<C extends JComponent>
     private final Style _style;
     private final boolean _isPainting;
 
+    // Cached Area object representing the inner component area:
     private Area _baseArea = null;
 
 

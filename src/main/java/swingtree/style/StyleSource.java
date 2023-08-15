@@ -6,10 +6,7 @@ import swingtree.animation.LifeTime;
 import swingtree.api.Styler;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  *  A style source is a container for a local styler, animation stylers and a style sheet
@@ -22,32 +19,30 @@ final class StyleSource<C extends JComponent>
     static <C extends JComponent> StyleSource<C> create() {
         return new StyleSource<>(
                     Styler.none(),
-                    Collections.emptyMap(),
+                    new Pair[0],
                     SwingTree.get().getStyleSheet().orElse(null)
                 );
     }
 
     private final Styler<C> _localStyler;
 
-    private final Map<LifeTime, Styler<C>> _animationStylers;
+    private final Pair<LifeTime, Styler<C>>[] _animationStylers;
 
     private final StyleSheet _styleSheet;
 
 
     private StyleSource(
         Styler<C> localStyler,
-        Map<LifeTime, Styler<C>> animationStylers,
+        Pair<LifeTime, Styler<C>>[] animationStylers,
         StyleSheet styleSheet
     ) {
         _localStyler = localStyler;
-        Map<LifeTime, Styler<C>> newAnimationStylers = new LinkedHashMap<>(1 + (animationStylers.size()-1)*4/3);
-        newAnimationStylers.putAll(animationStylers);
-        _animationStylers = newAnimationStylers;
+        _animationStylers = animationStylers;
         _styleSheet = styleSheet;
     }
 
     public boolean hasNoAnimationStylers() {
-        return _animationStylers.isEmpty();
+        return _animationStylers.length == 0;
     }
 
     StyleSource<C> withLocalStyler( Styler<C> styler, C owner ) {
@@ -56,14 +51,13 @@ final class StyleSource<C extends JComponent>
     }
 
     StyleSource<C> withAnimationStyler(LifeTime lifeTime, Styler<C> animationStyler) {
-        Map<LifeTime, Styler<C>> newAnimationStylers = new LinkedHashMap<>(1 + (_animationStylers.size()-1)*4/3);
-        newAnimationStylers.putAll(_animationStylers);
-        newAnimationStylers.put(lifeTime, animationStyler);
-        return new StyleSource<>(_localStyler, newAnimationStylers, _styleSheet);
+        List<Pair<LifeTime, Styler<C>>> animationStylers = new ArrayList<>(Arrays.asList(_animationStylers));
+        animationStylers.add(new Pair<>(lifeTime, animationStyler));
+        return new StyleSource<>(_localStyler, animationStylers.toArray(new Pair[0]), _styleSheet);
     }
 
     StyleSource<C> withoutAnimationStylers() {
-        return new StyleSource<>(_localStyler, Collections.emptyMap(), _styleSheet);
+        return new StyleSource<>(_localStyler, new Pair[0], _styleSheet);
     }
 
 
@@ -71,18 +65,15 @@ final class StyleSource<C extends JComponent>
         Style style = _styleSheet == null ? Style.none() : _styleSheet.applyTo( owner );
         style = _localStyler.style(new ComponentStyleDelegate<>(owner, style)).style();
 
-        // Animations styles are last: they override everything else:
-        for ( Map.Entry<LifeTime, Styler<C>> entry : new ArrayList<>(_animationStylers.entrySet()) )
-            if ( entry.getKey().isExpired() )
-                _animationStylers.remove(entry.getKey());
-            else {
+        // Animation styles are last: they override everything else:
+        for ( Pair<LifeTime, Styler<C>> entry : _animationStylers )
+            if ( !entry.first().isExpired() )
                 try {
-                    style = entry.getValue().style(new ComponentStyleDelegate<>(owner, style)).style();
+                    style = entry.second().style(new ComponentStyleDelegate<>(owner, style)).style();
                 } catch ( Exception e ) {
                     e.printStackTrace();
                     // An exception inside a styler should not prevent other stylers from being applied!
                 }
-            }
 
         return _applyDPIScaling(style);
     }
@@ -92,6 +83,12 @@ final class StyleSource<C extends JComponent>
             return style;
 
         return style.scale( UI.scale() );
+    }
+
+    StyleSource<C> withoutExpiredAnimationStylers() {
+        List<Pair<LifeTime, Styler<C>>> animationStylers = new ArrayList<>(Arrays.asList(_animationStylers));
+        animationStylers.removeIf( p -> p.first().isExpired() );
+        return new StyleSource<>(_localStyler, animationStylers.toArray(new Pair[0]), _styleSheet);
     }
 
 }

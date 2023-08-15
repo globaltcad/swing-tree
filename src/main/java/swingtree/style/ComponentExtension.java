@@ -179,6 +179,7 @@ public final class ComponentExtension<C extends JComponent>
 
     private Style _calculateAndApplyStyle() {
         Style style = _styleSource.calculateStyleFor(_owner);
+        _styleSource = _styleSource.withoutExpiredAnimationStylers(); // Clean up expired animation stylers!
         return _applyStyleToComponentState(style);
     }
 
