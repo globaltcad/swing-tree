@@ -83,8 +83,14 @@ public final class FancyTextField extends TextField
             ex.printStackTrace();
         }
         UI.show(
-            panel(FILL)
-            .add(GROW_X, new FancyTextField())
+            panel(FILL).withPrefSize(500,500)
+            .add(GROW_X,
+                UI.of(new FancyTextField()).withMaxWidth(80)
+                .withStyle( it -> it
+                    .alignmentX(0.8f)
+                    .alignmentY(0.25f)
+                )
+            )
         );
     }
 }

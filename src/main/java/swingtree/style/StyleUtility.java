@@ -24,7 +24,7 @@ final class StyleUtility
 
     static String toString( Painter painter ) {
         if ( painter == null ) return "?";
-        if ( painter == Painter.none() ) return "null";
+        if ( painter == Painter.none() ) return "none";
         return "Painter@" + Integer.toHexString(Objects.hashCode(painter));
     }
 
