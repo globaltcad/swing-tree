@@ -21,7 +21,11 @@ import java.util.stream.Stream;
  */
 class NamedStyles<S>
 {
+    private static final NamedStyles<?> EMPTY = new NamedStyles<>();
+
     static <S> NamedStyles<S> of( NamedStyle<S> defaultStyle ) { return new NamedStyles<>( defaultStyle ); }
+
+    static <S> NamedStyles<S> empty() { return (NamedStyles<S>) EMPTY; }
 
     private final NamedStyle<S>[] _styles;
 

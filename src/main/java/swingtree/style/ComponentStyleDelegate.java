@@ -884,6 +884,20 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
+     *  Allow for the specification of client properties on the styled component.
+     *  This is useful when you want to store arbitrary configuration data on the component,
+     *  which is usually read and used by look and feel implementations to
+     *  apply custom appearance and behavior to the component. <br>
+     *
+     * @param key The key of the property.
+     * @param value The value of the property.
+     * @return A new {@link ComponentStyleDelegate} with the provided client property.
+     */
+    public ComponentStyleDelegate<C> property( String key, String value ) {
+        return _withStyle(_style.property(key, value));
+    }
+
+    /**
      *  Returns a new {@link Style} with the provided font name and size.
      *  Note that the font styles will only apply if the component that is being rendered
      *  also supports displaying text.

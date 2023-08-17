@@ -369,6 +369,18 @@ public final class ComponentExtension<C extends JComponent>
         if ( style.hasActiveBackgroundGradients() && _owner.isOpaque() )
             _owner.setOpaque(false);
 
+        style.properties().forEach( property -> {
+
+            Object oldValue = _owner.getClientProperty(property.name());
+            if ( property.style().equals(oldValue) )
+                return;
+
+            if ( property.style().isEmpty() )
+                _owner.putClientProperty(property.name(), null); // remove property
+            else
+                _owner.putClientProperty(property.name(), property.style());
+        });
+
         return style;
     }
 
