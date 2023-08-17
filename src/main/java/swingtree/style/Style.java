@@ -161,7 +161,7 @@ public final class Style
      */
     List<ShadowStyle> shadows( UI.Layer layer ) {
         return Collections.unmodifiableList(
-                _shadows.styles()
+                _shadows.namedStyles()
                         .stream()
                         .sorted(Comparator.comparing(NamedStyle::name))
                         .map(NamedStyle::style)
@@ -173,7 +173,7 @@ public final class Style
     NamedStyles<ShadowStyle> shadowsMap() { return _shadows; }
 
     boolean anyVisibleShadows() {
-        return _shadows.styles().stream().map(NamedStyle::style).anyMatch(s -> s.color().isPresent() && s.color().get().getAlpha() > 0 );
+        return _shadows.stylesStream().anyMatch(s -> s.color().isPresent() && s.color().get().getAlpha() > 0 );
     }
 
     public FontStyle font() { return _font; }
@@ -183,21 +183,17 @@ public final class Style
      */
     List<Painter> painters( UI.Layer layer ) {
         return Collections.unmodifiableList(
-                _painters
-                        .styles()
+                        _painters.sortedByNamesAndFilteredBy( s -> s.layer() == layer )
                         .stream()
-                        .sorted(Comparator.comparing(NamedStyle::name))
-                        .map(NamedStyle::style)
-                        .filter( s -> s.layer() == layer )
                         .map(PainterStyle::painter)
                         .collect(Collectors.toList())
-        );
+                    );
     }
 
     public List<Painter> painters() {
         return Collections.unmodifiableList(
                                 _painters
-                                    .styles()
+                                    .namedStyles()
                                     .stream()
                                     .sorted(Comparator.comparing(NamedStyle::name))
                                     .map(NamedStyle::style)
@@ -220,22 +216,15 @@ public final class Style
 
 
     boolean hasCustomBackgroundPainters() {
-        return _painters.styles().stream().map(NamedStyle::style).anyMatch(p -> p.layer() == UI.Layer.BACKGROUND && !Painter.none().equals(p.painter()));
+        return _painters.stylesStream().anyMatch(p -> p.layer() == UI.Layer.BACKGROUND && !Painter.none().equals(p.painter()));
     }
 
     boolean hasCustomForegroundPainters() {
-        return _painters.styles().stream().map(NamedStyle::style).anyMatch(p -> p.layer() == UI.Layer.FOREGROUND && !Painter.none().equals(p.painter()));
+        return _painters.stylesStream().anyMatch(p -> p.layer() == UI.Layer.FOREGROUND && !Painter.none().equals(p.painter()));
     }
 
     List<GradientStyle> gradients(UI.Layer layer) {
-        return Collections.unmodifiableList(
-                _gradients.styles()
-                        .stream()
-                        .sorted(Comparator.comparing(NamedStyle::name))
-                        .map(NamedStyle::style)
-                        .filter( s -> s.layer() == layer )
-                        .collect(Collectors.toList())
-        );
+        return _gradients.sortedByNamesAndFilteredBy( s -> s.layer() == layer );
     }
 
     boolean hasCustomGradients() {
@@ -282,14 +271,7 @@ public final class Style
     }
 
     List<ImageStyle> images( UI.Layer layer ) {
-        return Collections.unmodifiableList(
-                _images.styles()
-                        .stream()
-                        .sorted(Comparator.comparing(NamedStyle::name))
-                        .map(NamedStyle::style)
-                        .filter( s -> s.layer() == layer )
-                        .collect(Collectors.toList())
-        );
+        return _images.sortedByNamesAndFilteredBy( s -> s.layer() == layer );
     }
 
     Style scale( double scale ) {
@@ -374,41 +356,10 @@ public final class Style
 
     @Override
     public String toString() {
-        String shadowString;
-        if ( _shadows.size() == 1 )
-            shadowString = _shadows.get(StyleUtility.DEFAULT_KEY).toString();
-        else
-            shadowString = _shadows.styles()
-                                    .stream()
-                                    .map(e -> e.name() + ": " + e.style())
-                                    .collect(Collectors.joining(", ", "shadows=[", "]"));
-
-        String painterString;
-        if ( _painters.size() == 1 )
-            painterString = _painters.get(StyleUtility.DEFAULT_KEY + "_" + PainterStyle.none().layer().name()).toString();
-        else
-            painterString = _painters.styles()
-                                    .stream()
-                                    .map(e -> e.name() + ": " + e.style())
-                                    .collect(Collectors.joining(", ", "painters=[", "]"));
-
-        String gradientString;
-        if ( _gradients.size() == 1 )
-            gradientString = _gradients.get(StyleUtility.DEFAULT_KEY).toString();
-        else
-            gradientString = _gradients.styles()
-                                        .stream()
-                                        .map(e -> e.name() + ": " + e.style())
-                                        .collect(Collectors.joining(", ", "gradients=[", "]"));
-
-        String imagesString;
-        if ( _images.size() == 1 )
-            imagesString = _images.get(StyleUtility.DEFAULT_KEY).toString();
-        else
-            imagesString = _images.styles()
-                                    .stream()
-                                    .map(e -> e.name() + ": " + e.style())
-                                    .collect(Collectors.joining(", ", "images=[", "]"));
+        String shadowString   = _images.toString(StyleUtility.DEFAULT_KEY, "shadows");
+        String painterString  = _painters.toString(StyleUtility.DEFAULT_KEY + "_" + PainterStyle.none().layer().name(), "painters");
+        String gradientString = _gradients.toString(StyleUtility.DEFAULT_KEY, "gradients");
+        String imagesString   = _images.toString(StyleUtility.DEFAULT_KEY, "images");
 
         return "Style[" +
                     _layout         + ", " +
@@ -419,7 +370,7 @@ public final class Style
                     shadowString    + ", " +
                     painterString   + ", " +
                     gradientString  + ", " +
-                    imagesString   +
+                    imagesString    +
                 "]";
     }
 
@@ -452,10 +403,10 @@ public final class Style
             this.noGradients           = Style.none().hasEqualGradientsAs(style);
             this.noImages              = Style.none().hasEqualGroundsAs(style);
 
-            this.allShadowsAreBorderShadows     = style._shadows.styles().stream().map(NamedStyle::style).allMatch( s -> s.layer() == UI.Layer.BORDER );
-            this.allGradientsAreBorderGradients = style._gradients.styles().stream().map(NamedStyle::style).allMatch( s -> s.layer() == UI.Layer.BORDER );
-            this.allPaintersAreBorderPainters   = style._painters.styles().stream().map(NamedStyle::style).allMatch( s -> s.layer() == UI.Layer.BORDER );
-            this.allImagesAreBorderImages       = style._images.styles().stream().map(NamedStyle::style).allMatch( s -> s.layer() == UI.Layer.BORDER );
+            this.allShadowsAreBorderShadows     = style._shadows.stylesStream().allMatch(s -> s.layer() == UI.Layer.BORDER );
+            this.allGradientsAreBorderGradients = style._gradients.stylesStream().allMatch(s -> s.layer() == UI.Layer.BORDER );
+            this.allPaintersAreBorderPainters   = style._painters.stylesStream().allMatch(s -> s.layer() == UI.Layer.BORDER );
+            this.allImagesAreBorderImages       = style._images.stylesStream().allMatch(s -> s.layer() == UI.Layer.BORDER );
         }
 
         public boolean isNotStyled() {

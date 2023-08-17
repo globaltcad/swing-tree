@@ -2,6 +2,9 @@ package swingtree.style;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *  An immutable value container that stores {@link NamedStyle} instances
@@ -38,7 +41,13 @@ class NamedStyles<S>
 
     public int size() { return _styles.length; }
 
-    public List<NamedStyle<S>> styles() { return Collections.unmodifiableList(Arrays.asList(_styles)); }
+    public List<NamedStyle<S>> namedStyles() { return Collections.unmodifiableList(Arrays.asList(_styles)); }
+
+    public Stream<S> stylesStream() {
+        return namedStyles()
+                .stream()
+                .map(NamedStyle::style);
+    }
 
     public NamedStyles<S> withNamedStyle( String name, S style ) {
         Objects.requireNonNull(name);
@@ -89,6 +98,27 @@ class NamedStyles<S>
     public Optional<S> style( String name ) {
         Objects.requireNonNull(name);
         return Optional.ofNullable(get(name));
+    }
+
+    public List<S> sortedByNamesAndFilteredBy( Predicate<S> filter ) {
+        return Collections.unmodifiableList(
+                    namedStyles()
+                    .stream()
+                    .sorted(Comparator.comparing(NamedStyle::name))
+                    .map(NamedStyle::style)
+                    .filter( filter )
+                    .collect(Collectors.toList())
+                );
+    }
+
+    public String toString( String defaultName, String styleType ) {
+        if ( this.size() == 1 )
+            return this.get(defaultName).toString();
+        else
+            return this.namedStyles()
+                    .stream()
+                    .map(e -> e.name() + ": " + e.style())
+                    .collect(Collectors.joining(", ", styleType+"=[", "]"));
     }
 
     @Override
