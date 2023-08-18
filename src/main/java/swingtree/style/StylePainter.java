@@ -457,8 +457,10 @@ final class StylePainter<C extends JComponent>
 
         Function<Integer, Integer> offsetFunction = (radius) -> (int)((radius * 2) / ( shadow.isInset() ? 4.5 : 3.79) + ( shadow.isInset() ? 0 : borderWidth ));
 
-        int cornerRadius = ( topLeftRadius + topRightRadius + bottomRightRadius + bottomLeftRadius ) / 4;
-        int gradientStartOffset = 1 + offsetFunction.apply(cornerRadius);
+        int averageCornerRadius = ( topLeftRadius + topRightRadius + bottomRightRadius + bottomLeftRadius ) / 4;
+        int averageBorderWidth  = ( leftBorderWidth + topBorderWidth + rightBorderWidth +  bottomBorderWidth ) / 4;
+        int shadowCornerRadius  = Math.max( 0, averageCornerRadius - averageBorderWidth );
+        int gradientStartOffset = 1 + offsetFunction.apply(shadowCornerRadius);
 
         Rectangle innerShadowRect = new Rectangle(
                                         x + shadowInset + gradientStartOffset + spreadRadius + borderWidthOffset,
