@@ -20,7 +20,7 @@ public final class BorderStyle
                                                 Outline.none(),
                                                 Outline.none(),
                                                 null,
-                                                Collections.singletonMap(StyleUtility.DEFAULT_KEY, GradientStyle.none())
+                                                NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY, GradientStyle.none()))
                                             );
 
     public static BorderStyle none() { return _NONE; }
@@ -35,7 +35,7 @@ public final class BorderStyle
     private final Outline _padding;
 
     private final Color _borderColor;
-    private final Map<String, GradientStyle> _gradients = new TreeMap<>();
+    private final NamedStyles<GradientStyle> _gradients;
 
 
     private BorderStyle(
@@ -47,7 +47,7 @@ public final class BorderStyle
         Outline margin,
         Outline padding,
         Color borderColor,
-        Map<String, GradientStyle> shades
+        NamedStyles<GradientStyle> gradients
     ) {
         _topLeftArc      = topLeftArc;
         _topRightArc     = topRightArc;
@@ -57,7 +57,7 @@ public final class BorderStyle
         _margin          = Objects.requireNonNull(margin);
         _padding         = Objects.requireNonNull(padding);
         _borderColor     = borderColor;
-        _gradients.putAll(shades);
+        _gradients       = Objects.requireNonNull(gradients);
     }
 
     public Optional<Arc> topLeftArc() { return Optional.ofNullable(_topLeftArc); }
@@ -91,16 +91,20 @@ public final class BorderStyle
 
     public Optional<Color> color() { return Optional.ofNullable(_borderColor); }
 
+    /**
+     * @return A list of all named gradient styles sorted by their name.
+     */
     public List<GradientStyle> gradients() {
         return Collections.unmodifiableList(
-                _gradients.entrySet().stream()
-                        .sorted(Map.Entry.comparingByKey())
-                        .map(Map.Entry::getValue)
-                        .collect(Collectors.toList())
+                _gradients.namedStyles()
+                            .stream()
+                            .sorted(Comparator.comparing(NamedStyle::name))
+                            .map(NamedStyle::style)
+                            .collect(Collectors.toList())
             );
     }
 
-    BorderStyle gradient( Map<String, GradientStyle> shades ) {
+    BorderStyle gradient( NamedStyles<GradientStyle> shades ) {
         Objects.requireNonNull(shades);
         return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColor, shades);
     }
@@ -109,10 +113,7 @@ public final class BorderStyle
         Objects.requireNonNull(shadeName);
         Objects.requireNonNull(styler);
         GradientStyle shadow = Optional.ofNullable(_gradients.get(shadeName)).orElse(GradientStyle.none());
-        // We clone the shadow map:
-        Map<String, GradientStyle> newShadows = new HashMap<>(_gradients);
-        newShadows.put(shadeName, styler.apply(shadow));
-        return gradient(newShadows);
+        return gradient(_gradients.withNamedStyle(shadeName, styler.apply(shadow)));
     }
 
     public GradientStyle gradient( String shadeName ) {
@@ -232,7 +233,7 @@ public final class BorderStyle
         boolean hasAnyNonZeroArcs      = hasAnyNonZeroArcs();
         boolean hasAnyNonZeroWidths    = _borderWidths.isPositive();
         boolean hasAVisibleColor       = _borderColor != null && _borderColor.getAlpha() > 0;
-        boolean hasAnyVisibleGradients = _gradients.values().stream().anyMatch(gradient -> !gradient.equals(GradientStyle.none()) );
+        boolean hasAnyVisibleGradients = _gradients.stylesStream().anyMatch(gradient -> !gradient.equals(GradientStyle.none()) );
         return hasAnyNonZeroArcs || hasAnyNonZeroWidths || hasAVisibleColor || hasAnyVisibleGradients;
     }
 
@@ -261,7 +262,7 @@ public final class BorderStyle
         hash = 97 * hash + _borderWidths.hashCode();
         hash = 97 * hash + _margin.hashCode();
         hash = 97 * hash + _padding.hashCode();
-        hash = 97 * hash + StyleUtility.mapHash(_gradients);
+        hash = 97 * hash + _gradients.hashCode();
         return hash;
     }
 
@@ -280,7 +281,7 @@ public final class BorderStyle
             Objects.equals(_borderWidths,   rhs._borderWidths)   &&
             Objects.equals(_margin,         rhs._margin)         &&
             Objects.equals(_padding,        rhs._padding)        &&
-            StyleUtility.mapEquals(_gradients, rhs._gradients);
+            Objects.equals(_gradients,      rhs._gradients);
     }
 
     @Override
@@ -313,14 +314,7 @@ public final class BorderStyle
                     ", leftWidth="   + _borderWidths.left().map(Objects::toString).orElse("?");
         }
 
-        String shadesString;
-        if ( _gradients.size() == 1 )
-            shadesString = _gradients.get(StyleUtility.DEFAULT_KEY).toString();
-        else
-            shadesString = _gradients.entrySet()
-                                    .stream()
-                                    .map(e -> e.getKey() + ": " + e.getValue())
-                                    .collect(Collectors.joining(", ", "shades=[", "]"));
+        String shadesString = _gradients.toString(StyleUtility.DEFAULT_KEY, "gradients");
 
         return "BorderStyle[" +
                     arcsString + ", " +

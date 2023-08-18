@@ -184,17 +184,4 @@ final class StyleUtility
 
         throw new IllegalArgumentException("Could not parse or find color value: " + colorString);
     }
-
-    public static  <T> boolean mapEquals( Map<String, T> map1, Map<String, T> map2 ) {
-        if ( map1.size() != map2.size() ) return false;
-        for ( Map.Entry<String, T> entry : map1.entrySet() ) {
-            if ( !map2.containsKey(entry.getKey()) ) return false;
-            if ( !Objects.equals(entry.getValue(), map2.get(entry.getKey())) ) return false;
-        }
-        return true;
-    }
-
-    public static <T> int mapHash( Map<String, T> map ) {
-        return map.entrySet().stream().mapToInt(e -> Objects.hash(e.getKey(), e.getValue())).sum();
-    }
 }

@@ -405,6 +405,7 @@ public final class Style
 
     static class Report
     {
+        public final boolean noLayoutStyle;
         public final boolean noPaddingAndMarginStyle;
         public final boolean noBorderStyle;
         public final boolean borderIsVisible;
@@ -424,6 +425,7 @@ public final class Style
 
 
         private Report( Style style ) {
+            this.noLayoutStyle           = Style.none().hasEqualLayoutAs(style);
             this.noPaddingAndMarginStyle = Style.none().hasEqualMarginAndPaddingAs(style);
             this.noBorderStyle           = Style.none().hasEqualBorderAs(style);
             this.noBaseStyle             = Style.none().hasEqualBaseAs(style);
@@ -444,28 +446,32 @@ public final class Style
         }
 
         public boolean isNotStyled() {
-            return noPaddingAndMarginStyle &&
-                   noBorderStyle          &&
-                   noBaseStyle            &&
-                   noFontStyle            &&
-                   noDimensionalityStyle  &&
-                   noShadowStyle          &&
-                   noPainters             &&
-                   noGradients            &&
-                   noImages               &&
+            return
+                   noLayoutStyle           &&
+                   noPaddingAndMarginStyle &&
+                   noBorderStyle           &&
+                   noBaseStyle             &&
+                   noFontStyle             &&
+                   noDimensionalityStyle   &&
+                   noShadowStyle           &&
+                   noPainters              &&
+                   noGradients             &&
+                   noImages                &&
                    noProperties;
         }
 
         public boolean onlyDimensionalityIsStyled() {
-            return noPaddingAndMarginStyle &&
-                   noBorderStyle          &&
-                   noBaseStyle            &&
-                   noFontStyle            &&
-                   !noDimensionalityStyle &&
-                   noShadowStyle          &&
-                   noPainters             &&
-                   noGradients            &&
-                   noImages               &&
+            return
+                   noLayoutStyle           &&
+                   noPaddingAndMarginStyle &&
+                   noBorderStyle           &&
+                   noBaseStyle             &&
+                   noFontStyle             &&
+                   !noDimensionalityStyle  &&
+                   noShadowStyle           &&
+                   noPainters              &&
+                   noGradients             &&
+                   noImages                &&
                    noProperties;
         }
 
