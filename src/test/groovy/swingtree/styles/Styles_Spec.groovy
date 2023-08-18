@@ -101,13 +101,15 @@ class Styles_Spec extends Specification
         expect :
                 style.toString() == "Style[" +
                                         "LayoutStyle[" +
-                                            "margin=Outline[top=?, right=?, bottom=?, left=?], " +
-                                            "padding=Outline[top=?, right=?, bottom=?, left=?]" +
+                                            "alignmentX=?, " +
+                                            "alignmentY=?" +
                                         "], " +
                                         "BorderStyle[" +
                                             "arcWidth=12, " +
                                             "arcHeight=18, " +
                                             "width=?, " +
+                                            "margin=Outline[top=?, right=?, bottom=?, left=?], " +
+                                            "padding=Outline[top=?, right=?, bottom=?, left=?], " +
                                             "color=rgba(0,0,255,255), " +
                                             "GradientStyle[alignment=TOP_TO_BOTTOM, type=LINEAR, colors=[], layer=BACKGROUND]" +
                                         "], " +
@@ -115,9 +117,7 @@ class Styles_Spec extends Specification
                                             "backgroundColor=rgba(0,255,0,255), " +
                                             "foundationColor=rgba(255,0,0,255), " +
                                             "foregroundColor=?, " +
-                                            "cursor=?, " +
-                                            "alignmentX=?, " +
-                                            "alignmentY=?" +
+                                            "cursor=?" +
                                         "], " +
                                         "FontStyle[" +
                                             "name=Times New Roman, size=12, posture=0.0, weight=2.0, underlined=true, " +

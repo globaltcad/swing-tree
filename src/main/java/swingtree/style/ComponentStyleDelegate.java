@@ -1379,7 +1379,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided alignment percentage alongside the X axis set to be later
      */
     public ComponentStyleDelegate<C> alignmentX( float percentage ) {
-        return _withStyle(_style._withBase(_style.base().alignmentX(percentage)));
+        return _withStyle(_style._withLayout(_style.layout().alignmentX(percentage)));
     }
 
     /**
@@ -1391,7 +1391,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided alignment percentage alongside the Y axis set to be later
      */
     public ComponentStyleDelegate<C> alignmentY( float percentage ) {
-        return _withStyle(_style._withBase(_style.base().alignmentY(percentage)));
+        return _withStyle(_style._withLayout(_style.layout().alignmentY(percentage)));
     }
 
     /**

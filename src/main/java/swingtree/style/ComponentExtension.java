@@ -245,17 +245,17 @@ public final class ComponentExtension<C extends JComponent>
                 _owner.setCursor( cursor );
         });
 
-        style.base().alignmentX().ifPresent( alignmentX -> {
+        style.layout().alignmentX().ifPresent( alignmentX -> {
             if ( !Objects.equals( _owner.getAlignmentX(), alignmentX ) )
                 _owner.setAlignmentX( alignmentX );
         });
 
-        style.base().alignmentY().ifPresent( alignmentY -> {
+        style.layout().alignmentY().ifPresent( alignmentY -> {
             if ( !Objects.equals( _owner.getAlignmentY(), alignmentY ) )
                 _owner.setAlignmentY( alignmentY );
         });
 
-        _applyAlignmentToMigLayoutIfItExists(style.base());
+        _applyAlignmentToMigLayoutIfItExists(style.layout());
 
         if ( style.dimensionality().minWidth().isPresent() || style.dimensionality().minHeight().isPresent() ) {
             Dimension minSize = _owner.getMinimumSize();
@@ -392,7 +392,7 @@ public final class ComponentExtension<C extends JComponent>
         return style;
     }
 
-    private void _applyAlignmentToMigLayoutIfItExists(BaseStyle style)
+    private void _applyAlignmentToMigLayoutIfItExists(LayoutStyle style)
     {
         Optional<Float> alignmentX = style.alignmentX();
         Optional<Float> alignmentY = style.alignmentY();

@@ -16,8 +16,6 @@ public final class BaseStyle
                                                      null,
                                                      null,
                                                      null,
-                                                     null,
-                                                     null,
                                                      null
                                                  );
 
@@ -27,8 +25,6 @@ public final class BaseStyle
     private final Color _foundationColor;
     private final Color _foregroundColor;
     private final Cursor _cursor;
-    private final Float  _alignmentX;
-    private final Float  _alignmentY;
 
 
 
@@ -36,16 +32,12 @@ public final class BaseStyle
         Color color,
         Color foundation,
         Color foregroundColor,
-        Cursor cursor,
-        Float alignmentX,
-        Float alignmentY
+        Cursor cursor
     ) {
         _backgroundColor = color;
         _foundationColor = foundation;
         _foregroundColor = foregroundColor;
         _cursor          = cursor;
-        _alignmentX      = alignmentX;
-        _alignmentY      = alignmentY;
     }
 
     public Optional<Color> backgroundColor() { return Optional.ofNullable(_backgroundColor); }
@@ -56,21 +48,13 @@ public final class BaseStyle
 
     public Optional<Cursor> cursor() { return Optional.ofNullable(_cursor); }
 
-    public Optional<Float> alignmentX() { return Optional.ofNullable(_alignmentX); }
+    BaseStyle backgroundColor( Color color ) { return new BaseStyle(color, _foundationColor, _foregroundColor, _cursor); }
 
-    public Optional<Float> alignmentY() { return Optional.ofNullable(_alignmentY); }
+    BaseStyle foundationColor( Color foundation ) { return new BaseStyle(_backgroundColor, foundation, _foregroundColor, _cursor); }
 
-    BaseStyle backgroundColor( Color color ) { return new BaseStyle(color, _foundationColor, _foregroundColor, _cursor, _alignmentX, _alignmentY); }
+    BaseStyle foregroundColo( Color color ) { return new BaseStyle(_backgroundColor, _foundationColor, color, _cursor); }
 
-    BaseStyle foundationColor( Color foundation ) { return new BaseStyle(_backgroundColor, foundation, _foregroundColor, _cursor, _alignmentX, _alignmentY); }
-
-    BaseStyle foregroundColo( Color color ) { return new BaseStyle(_backgroundColor, _foundationColor, color, _cursor, _alignmentX, _alignmentY); }
-
-    BaseStyle cursor( Cursor cursor ) { return new BaseStyle(_backgroundColor, _foundationColor, _foregroundColor, cursor, _alignmentX, _alignmentY); }
-
-    BaseStyle alignmentX( Float alignmentX ) { return new BaseStyle(_backgroundColor, _foundationColor, _foregroundColor, _cursor, alignmentX, _alignmentY); }
-
-    BaseStyle alignmentY( Float alignmentY ) { return new BaseStyle(_backgroundColor, _foundationColor, _foregroundColor, _cursor, _alignmentX, alignmentY); }
+    BaseStyle cursor( Cursor cursor ) { return new BaseStyle(_backgroundColor, _foundationColor, _foregroundColor, cursor); }
 
     @Override
     public int hashCode() { return Objects.hash(_backgroundColor, _foundationColor, _foregroundColor, _cursor); }
@@ -84,9 +68,7 @@ public final class BaseStyle
         return Objects.equals(_backgroundColor, rhs._backgroundColor) &&
                Objects.equals(_foundationColor, rhs._foundationColor) &&
                Objects.equals(_foregroundColor, rhs._foregroundColor) &&
-               Objects.equals(_cursor,     rhs._cursor)               &&
-               Objects.equals(_alignmentX, rhs._alignmentX)           &&
-               Objects.equals(_alignmentY, rhs._alignmentY);
+               Objects.equals(_cursor,          rhs._cursor);
     }
 
     @Override
@@ -95,9 +77,7 @@ public final class BaseStyle
                     "backgroundColor=" + StyleUtility.toString(_backgroundColor) + ", " +
                     "foundationColor=" + StyleUtility.toString(_foundationColor) + ", " +
                     "foregroundColor=" + StyleUtility.toString(_foregroundColor) + ", " +
-                    "cursor="          + ( _cursor     == null ? "?" : _cursor.toString()     ) + ", " +
-                    "alignmentX="      + ( _alignmentX == null ? "?" : _alignmentX.toString() ) + ", " +
-                    "alignmentY="      + ( _alignmentY == null ? "?" : _alignmentY.toString() ) +
+                    "cursor="          + ( _cursor     == null ? "?" : _cursor.toString()     ) +
                 "]";
     }
 }
