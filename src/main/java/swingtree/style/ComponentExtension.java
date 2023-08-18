@@ -72,6 +72,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     public void establishStyle() {
+        _currentStylePainter = StylePainter.none(); // We reset the style painter so that the style is applied again!
         _currentStylePainter = _currentStylePainter.update(_calculateAndApplyStyle());
     }
 
@@ -198,7 +199,14 @@ public final class ComponentExtension<C extends JComponent>
 
         boolean isNotStyled                     = styleReport.isNotStyled();
         boolean onlyDimensionalityIsStyled      = styleReport.onlyDimensionalityIsStyled();
-        boolean styleCanBeRenderedThroughBorder = StyleAndAnimationBorder.canFullyPaint(styleReport);
+        boolean styleCanBeRenderedThroughBorder = (
+                                                       //styleReport.noBorderStyle  &&
+                                                       styleReport.noBaseStyle    &&
+                                                       (styleReport.noShadowStyle || styleReport.allShadowsAreBorderShadows) &&
+                                                       (styleReport.noPainters    || styleReport.allPaintersAreBorderPainters) &&
+                                                       (styleReport.noGradients   || styleReport.allGradientsAreBorderGradients) &&
+                                                       (styleReport.noImages      || styleReport.allImagesAreBorderImages)
+                                                   );
 
         if ( _owner instanceof JTextField && style.margin().isPositive() )
             styleCanBeRenderedThroughBorder = false;

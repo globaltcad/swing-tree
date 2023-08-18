@@ -92,9 +92,9 @@ public final class Style
 
     public LayoutStyle layout() { return _layout; }
 
-    public Outline padding() { return _layout.padding(); }
+    public Outline padding() { return _border.padding(); }
 
-    public Outline margin() { return _layout.margin(); }
+    public Outline margin() { return _border.margin(); }
 
     public BorderStyle border() { return _border; }
 
@@ -292,7 +292,7 @@ public final class Style
 
     Style scale( double scale ) {
         return new Style(
-                    _layout._scale(scale),
+                    _layout,
                     _border._scale(scale),
                     _base, // Just colors and the cursor
                     _font._scale(scale),
@@ -307,6 +307,11 @@ public final class Style
 
     boolean hasEqualLayoutAs( Style otherStyle ) {
         return Objects.equals(_layout, otherStyle._layout);
+    }
+
+    boolean hasEqualMarginAndPaddingAs( Style otherStyle ) {
+        return Objects.equals(_border.margin(), otherStyle._border.margin()) &&
+               Objects.equals(_border.padding(), otherStyle._border.padding());
     }
 
     boolean hasEqualBorderAs( Style otherStyle ) {
@@ -400,8 +405,9 @@ public final class Style
 
     static class Report
     {
-        public final boolean noLayoutStyle;
+        public final boolean noPaddingAndMarginStyle;
         public final boolean noBorderStyle;
+        public final boolean borderIsVisible;
         public final boolean noBaseStyle;
         public final boolean noFontStyle;
         public final boolean noDimensionalityStyle;
@@ -418,16 +424,18 @@ public final class Style
 
 
         private Report( Style style ) {
-            this.noLayoutStyle         = Style.none().hasEqualLayoutAs(style);
-            this.noBorderStyle         = Style.none().hasEqualBorderAs(style);
-            this.noBaseStyle           = Style.none().hasEqualBaseAs(style);
-            this.noFontStyle           = Style.none().hasEqualFontAs(style);
-            this.noDimensionalityStyle = Style.none().hasEqualDimensionalityAs(style);
-            this.noShadowStyle         = Style.none().hasEqualShadowsAs(style);
-            this.noPainters            = Style.none().hasEqualPaintersAs(style);
-            this.noGradients           = Style.none().hasEqualGradientsAs(style);
-            this.noImages              = Style.none().hasEqualImagesAs(style);
-            this.noProperties          = Style.none().hasEqualPropertiesAs(style);
+            this.noPaddingAndMarginStyle = Style.none().hasEqualMarginAndPaddingAs(style);
+            this.noBorderStyle           = Style.none().hasEqualBorderAs(style);
+            this.noBaseStyle             = Style.none().hasEqualBaseAs(style);
+            this.noFontStyle             = Style.none().hasEqualFontAs(style);
+            this.noDimensionalityStyle   = Style.none().hasEqualDimensionalityAs(style);
+            this.noShadowStyle           = Style.none().hasEqualShadowsAs(style);
+            this.noPainters              = Style.none().hasEqualPaintersAs(style);
+            this.noGradients             = Style.none().hasEqualGradientsAs(style);
+            this.noImages                = Style.none().hasEqualImagesAs(style);
+            this.noProperties            = Style.none().hasEqualPropertiesAs(style);
+
+            this.borderIsVisible = style.border().isVisible();
 
             this.allShadowsAreBorderShadows     = style._shadows.stylesStream().allMatch(s -> s.layer() == UI.Layer.BORDER );
             this.allGradientsAreBorderGradients = style._gradients.stylesStream().allMatch(s -> s.layer() == UI.Layer.BORDER );
@@ -436,7 +444,7 @@ public final class Style
         }
 
         public boolean isNotStyled() {
-            return noLayoutStyle          &&
+            return noPaddingAndMarginStyle &&
                    noBorderStyle          &&
                    noBaseStyle            &&
                    noFontStyle            &&
@@ -444,42 +452,12 @@ public final class Style
                    noShadowStyle          &&
                    noPainters             &&
                    noGradients            &&
-                   noImages;
+                   noImages               &&
+                   noProperties;
         }
-
-        public boolean onlyDimensionalityAndOrLayoutIsStyled() {
-            return this.onlyDimensionalityIsStyled() ||
-                   this.onlyLayoutIsStyled()         ||
-                   this.onlyLayoutAndDimensionalityIsStyled();
-        }
-
-        public boolean onlyLayoutIsStyled() {
-            return !noLayoutStyle          &&
-                    noBorderStyle          &&
-                    noBaseStyle            &&
-                    noFontStyle            &&
-                    noDimensionalityStyle  &&
-                    noShadowStyle          &&
-                    noPainters             &&
-                    noGradients            &&
-                    noImages;
-        }
-
 
         public boolean onlyDimensionalityIsStyled() {
-            return noLayoutStyle          &&
-                   noBorderStyle          &&
-                    noBaseStyle &&
-                   noFontStyle            &&
-                   !noDimensionalityStyle &&
-                   noShadowStyle          &&
-                   noPainters             &&
-                   noGradients            &&
-                   noImages;
-        }
-
-        public boolean onlyLayoutAndDimensionalityIsStyled() {
-            return !noLayoutStyle         &&
+            return noPaddingAndMarginStyle &&
                    noBorderStyle          &&
                    noBaseStyle            &&
                    noFontStyle            &&
@@ -487,8 +465,10 @@ public final class Style
                    noShadowStyle          &&
                    noPainters             &&
                    noGradients            &&
-                   noImages;
+                   noImages               &&
+                   noProperties;
         }
+
     }
 
 }

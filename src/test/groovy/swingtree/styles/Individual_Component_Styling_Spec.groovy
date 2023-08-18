@@ -1427,5 +1427,25 @@ class Individual_Component_Styling_Spec extends Specification
             uiScale << [3]
     }
 
+    def 'You can use the style API to configure client properties for components.'()
+    {
+        reportInfo """
+            The style API allows you to configure client properties for components.
+            Client properties are a way to attach custom data to a component.
+            Usually the purpose of client properties is to give a particular look and feel
+            implementation a way to configure how a particular component should be painted.
+        """
+        given : 'We create a simple toggle button with a few abitrary properties.'
+            var ui =
+                    UI.toggleButton("Toggle Me").withStyle( it -> it
+                        .property("my.custom.property.1", "Hello World!")
+                        .property("my.custom.property.2", "42")
+                        .property("my.custom.property.3", "true")
+                    )
+        expect : 'The component indeed has the specified client properties!'
+            ui.component.getClientProperty("my.custom.property.1") == "Hello World!"
+            ui.component.getClientProperty("my.custom.property.2") == "42"
+            ui.component.getClientProperty("my.custom.property.3") == "true"
+    }
 
 }

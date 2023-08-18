@@ -106,6 +106,17 @@ final class Outline
                left   != null && left   > 0;
     }
 
+    /**
+     * @return {@code true} if any of the outline values are not null and positive,
+     *         {@code false} otherwise.
+     */
+    public boolean isAbsPositive() {
+        return top    != null && Math.abs(top   ) > 0 ||
+                right  != null && Math.abs(right ) > 0 ||
+                bottom != null && Math.abs(bottom) > 0 ||
+                left   != null && Math.abs(left  ) > 0;
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;

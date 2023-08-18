@@ -17,17 +17,6 @@ import java.awt.*;
  */
 final class StyleAndAnimationBorder<C extends JComponent> implements Border
 {
-    static boolean canFullyPaint( Style.Report report ) {
-        boolean simple = report.onlyDimensionalityAndOrLayoutIsStyled();
-        if (simple) return true;
-        return report.noBorderStyle &&
-               report.noBaseStyle   &&
-               (report.noShadowStyle || report.allShadowsAreBorderShadows) &&
-               (report.noPainters    || report.allPaintersAreBorderPainters) &&
-               (report.noGradients   || report.allGradientsAreBorderGradients) &&
-               (report.noImages      || report.allImagesAreBorderImages);
-    }
-
     private final ComponentExtension<C> _compExt;
     private final Border _formerBorder;
     private final boolean _borderWasNotPainted;
@@ -57,7 +46,8 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     Insets getCurrentPaddingInsets() { return _currentPaddingInsets; }
 
     @Override
-    public void paintBorder( Component c, Graphics g, int x, int y, int width, int height ) {
+    public void paintBorder( Component c, Graphics g, int x, int y, int width, int height )
+    {
         _checkIfInsetsChanged();
 
         _compExt._establishCurrentMainPaintClip(g);
@@ -68,13 +58,13 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         g.setClip(_compExt.getMainClip());
 
         if ( _compExt.getCurrentStylePainter().isPainting() ) {
-            _paintThisStyleAPIBasedBorder((Graphics2D) g);
-            if (_formerBorder != null && !_borderWasNotPainted) {
-                Style.Report report = _compExt.getCurrentStylePainter().getStyle().getReport();
-                if (canFullyPaint(report))
+            _paintBorderAndBorderLayerStyles( (Graphics2D) g );
+            if ( _formerBorder != null && !_borderWasNotPainted ) {
+                BorderStyle borderStyle = _compExt.getCurrentStylePainter().getStyle().border();
+                if ( !borderStyle.isVisible() )
                     _paintFormerBorder(c, g, x, y, width, height);
             }
-        } else if (_formerBorder != null && !_borderWasNotPainted)
+        } else if ( _formerBorder != null && !_borderWasNotPainted )
             _paintFormerBorder(c, g, x, y, width, height);
 
         if ( g.getClip() != formerClip )
@@ -101,7 +91,13 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         }
     }
 
-    private void _paintThisStyleAPIBasedBorder( Graphics2D g ) {
+    /**
+     *  Not only paints the border but also styles which are configured to be painted
+     *  on the border layer (see {@link swingtree.UI.Layer#BORDER}).
+     *
+     * @param g The graphics context that is used for painting.
+     */
+    private void _paintBorderAndBorderLayerStyles( Graphics2D g ) {
         try {
             _compExt.getCurrentStylePainter().paintBorderStyle( g, _compExt.getOwner() );
         } catch ( Exception ex ) {
