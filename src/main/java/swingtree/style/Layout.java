@@ -8,10 +8,21 @@ import java.awt.*;
 import java.util.Objects;
 
 /**
- *    This interface represents a layout for a component
- *    whose implementations are expected to be immutable
- *    value objects holding necessary information for
- *    installing the layout for a component.
+ *    Implementations of this are layout configuration for a component,
+ *    which are value objects that can be created through
+ *    various factory methods like {@link Layout#border()}, {@link Layout#flow()}, {@link Layout#grid(int, int)}...
+ *    and then supplied to the style API through {@link ComponentStyleDelegate#layout(Layout)}
+ *    so that the layout can then be installed onto a component dynamically.
+ *    <p>
+ *    The various layout types hold necessary information
+ *    and implementation logic required for installing the layout of a component
+ *    through the {@link #installFor(JComponent)} method,
+ *    which will be used by the style engine of SwingTree
+ *    every time the layout object state changes compared to the previous state
+ *    effectively making the layout mechanics of a component fully dynamic.
+ *    <p>
+ *    You may implement this interface to create custom layout configurations
+ *    for other kinds of {@link LayoutManager} implementations.
  */
 public interface Layout
 {
@@ -26,8 +37,6 @@ public interface Layout
      *         that is equal to this layout, {@code false} otherwise.
      */
     boolean equals( Object o );
-
-    String toString();
 
     /**
      * Installs this layout for the supplied component.

@@ -30,7 +30,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     private final Style _style;
 
 
-    public ComponentStyleDelegate(C component, Style style ) {
+    public ComponentStyleDelegate( C component, Style style ) {
         _component = component;
         _style     = style;
     }
@@ -86,7 +86,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided padding distances.
      */
     public ComponentStyleDelegate<C> margin( int top, int right, int bottom, int left ) {
-        return _withStyle(_style._withBorder(_style.border().margin(_style.border().margin().top(top).left(left).right(right).bottom(bottom))));
+        return _withStyle(_style._withBorder(_style.border().margin(Outline.of(top, right, bottom, left))));
     }
 
     /**
@@ -99,7 +99,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
     public ComponentStyleDelegate<C> margin( int margin ) {
-        return _withStyle(_style._withBorder(_style.border().margin(_style.border().margin().top(margin).left(margin).right(margin).bottom(margin))));
+        return _withStyle(_style._withBorder(_style.border().margin(Outline.of(margin))));
     }
 
     /**
@@ -193,7 +193,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided padding distances.
      */
     public ComponentStyleDelegate<C> padding( int top, int right, int bottom, int left ) {
-        return _withStyle(_style._withBorder(_style.border().padding(_style.border().padding().top(top).left(left).right(right).bottom(bottom))));
+        return _withStyle(_style._withBorder(_style.border().padding(Outline.of(top, right, bottom, left))));
     }
 
     /**
@@ -206,7 +206,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
     public ComponentStyleDelegate<C> padding( int padding ) {
-        return _withStyle(_style._withBorder(_style.border().padding(_style.border().padding().top(padding).left(padding).right(padding).bottom(padding))));
+        return _withStyle(_style._withBorder(_style.border().padding(Outline.of(padding))));
     }
 
     /**
@@ -447,7 +447,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param arcHeight The border arc height in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided border arc width and arc height for the specified corner.
      */
-    public ComponentStyleDelegate<C> borderRadiusAt(UI.Corner corner, int arcWidth, int arcHeight ) {
+    public ComponentStyleDelegate<C> borderRadiusAt( UI.Corner corner, int arcWidth, int arcHeight ) {
         return _withStyle(_style._withBorder(_style.border().arcWidthAt(corner, arcWidth).arcHeightAt(corner, arcHeight)));
     }
 
@@ -458,7 +458,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  <pre>{@code
      *    UI.panel()
      *    .withStyle( it -> it
-     *      .borderShade( grad -> grad
+     *      .borderGradient( grad -> grad
      *        .colors("#000000", "#000000")
      *        .align(GradientAlignment.TOP_TO_BOTTOM)
      *      )

@@ -22,6 +22,11 @@ final class Outline
         return new Outline(top, right, bottom, left);
     }
 
+    public static Outline of( int allSides ) {
+        return new Outline(allSides, allSides, allSides, allSides);
+    }
+
+
     private final Integer top;
     private final Integer right;
     private final Integer bottom;

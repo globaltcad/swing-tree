@@ -19,7 +19,12 @@ import java.util.function.Function;
  */
 public final class GradientStyle
 {
-    private static final GradientStyle _NONE = new GradientStyle(UI.Transition.TOP_TO_BOTTOM, UI.GradientType.LINEAR, new Color[0], UI.Layer.BACKGROUND);
+    private static final GradientStyle _NONE = new GradientStyle(
+                                                        UI.Transition.TOP_TO_BOTTOM,
+                                                        UI.GradientType.LINEAR,
+                                                        new Color[0],
+                                                        UI.Layer.BACKGROUND
+                                                    );
 
     /**
      *  Use the returned instance as a representation of the absence of a gradient.
@@ -29,10 +34,11 @@ public final class GradientStyle
      */
     public static GradientStyle none() { return _NONE; }
 
-    private final UI.Transition _transition;
+
+    private final UI.Transition   _transition;
     private final UI.GradientType _type;
-    private final Color[] _colors;
-    private final UI.Layer _layer;
+    private final Color[]         _colors;
+    private final UI.Layer        _layer;
 
 
     public GradientStyle( UI.Transition transition, UI.GradientType type, Color[] colors, UI.Layer layer )
@@ -144,10 +150,10 @@ public final class GradientStyle
     @Override
     public String toString() {
         return getClass().getSimpleName() + "[" +
-                    "alignment=" + _transition + ", " +
-                    "type="      + _type + ", " +
-                    "colors="    + Arrays.toString(_colors) + ", " +
-                    "layer="     + _layer                   +
+                    "transition=" + _transition + ", " +
+                    "type="       + _type + ", " +
+                    "colors="     + Arrays.toString(_colors) + ", " +
+                    "layer="      + _layer                   +
                 ']';
     }
 
@@ -156,10 +162,10 @@ public final class GradientStyle
         if ( this == o ) return true;
         if ( !(o instanceof GradientStyle) ) return false;
         GradientStyle that = (GradientStyle) o;
-        return _transition == that._transition &&
-               _type == that._type &&
-               Arrays.equals(_colors, that._colors)          &&
-               _layer == that._layer;
+        return _transition == that._transition       &&
+               _type       == that._type             &&
+               Arrays.equals(_colors, that._colors)  &&
+               _layer      == that._layer;
     }
 
     @Override

@@ -526,9 +526,9 @@ class Style_Sheet_Spec extends Specification
                 @Override
                 protected void configure() {
                     add(group("A").inherits("B", "C"), it -> it
-                        .borderGradient(s -> s
+                        .borderGradient(g -> g
                             .transition(UI.Transition.BOTTOM_TO_TOP)
-                             .colors(Color.RED, Color.BLUE)
+                            .colors(Color.RED, Color.BLUE)
                         )
                     );
                     add(group("B"), it -> it
@@ -539,8 +539,8 @@ class Style_Sheet_Spec extends Specification
                         .borderWidth(20)
                         .borderColor(Color.YELLOW)
                         .borderGradient("named shade", s -> s
-                             .transition(UI.Transition.TOP_TO_BOTTOM)
-                             .colors(Color.CYAN, Color.MAGENTA)
+                            .transition(UI.Transition.TOP_TO_BOTTOM)
+                            .colors(Color.CYAN, Color.MAGENTA)
                         )
                     );
                 }
