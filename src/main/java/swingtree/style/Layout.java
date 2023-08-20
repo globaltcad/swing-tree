@@ -63,8 +63,8 @@ public interface Layout
      */
     static Layout mig(
         String constr,
-        String rowConstr,
-        String colConstr
+        String colConstr,
+        String rowConstr
     ) {
         return new ForMigLayout( constr, colConstr, rowConstr );
     }
