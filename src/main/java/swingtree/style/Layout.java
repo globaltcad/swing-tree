@@ -50,22 +50,6 @@ public interface Layout
      * @param constr The layout constraints for the layout.
      * @param rowConstr The row constraints for the layout.
      * @param colConstr The column constraints for the layout.
-     * @param componentConstr The component constraints for the layout.
-     * @return A layout that uses the MigLayout.
-     */
-    static Layout mig(
-        String constr, 
-        String rowConstr, 
-        String colConstr,
-        String componentConstr
-    ) {
-        return new ForMigLayout( constr, rowConstr, colConstr, componentConstr );
-    }
-
-    /**
-     * @param constr The layout constraints for the layout.
-     * @param rowConstr The row constraints for the layout.
-     * @param colConstr The column constraints for the layout.
      * @return A layout that uses the MigLayout.
      */
     static Layout mig(
@@ -73,7 +57,7 @@ public interface Layout
         String rowConstr,
         String colConstr
     ) {
-        return new ForMigLayout( constr, rowConstr, colConstr, "" );
+        return new ForMigLayout( constr, colConstr, rowConstr );
     }
 
     /**
@@ -85,7 +69,7 @@ public interface Layout
         String constr,
         String rowConstr
     ) {
-        return new ForMigLayout( constr, rowConstr, "", "" );
+        return new ForMigLayout( constr, "", rowConstr );
     }
 
     /**
@@ -93,7 +77,7 @@ public interface Layout
      * @return A layout that uses the MigLayout.
      */
     static Layout mig( String constr ) {
-        return new ForMigLayout( constr, "", "", "" );
+        return new ForMigLayout( constr, "", "" );
     }
 
     /**
@@ -272,35 +256,34 @@ public interface Layout
     class ForMigLayout implements Layout
     {
         private final String _constr;
-        private final String _rowConstr;
         private final String _colConstr;
-        private final String _componentConstr;
+        private final String _rowConstr;
 
-        ForMigLayout( String constr, String rowConstr, String colConstr, String componentConstr ) {
+
+        ForMigLayout( String constr, String colConstr, String rowConstr ) {
             _constr          = Objects.requireNonNull(constr);
-            _rowConstr       = Objects.requireNonNull(rowConstr);
             _colConstr       = Objects.requireNonNull(colConstr);
-            _componentConstr = Objects.requireNonNull(componentConstr);
+            _rowConstr       = Objects.requireNonNull(rowConstr);
         }
 
         ForMigLayout withConstraint( String constr ) {
-            return new ForMigLayout( constr, _rowConstr, _colConstr, _componentConstr );
+            return new ForMigLayout( constr, _colConstr, _rowConstr );
         }
 
         ForMigLayout withRowConstraint( String rowConstr ) {
-            return new ForMigLayout( _constr, rowConstr, _colConstr, _componentConstr );
+            return new ForMigLayout( _constr, _colConstr, rowConstr );
         }
 
         ForMigLayout withColumnConstraint( String colConstr ) {
-            return new ForMigLayout( _constr, _rowConstr, colConstr, _componentConstr );
+            return new ForMigLayout( _constr, colConstr, _rowConstr );
         }
 
         ForMigLayout withComponentConstraint( String componentConstr ) {
-            return new ForMigLayout( _constr, _rowConstr, _colConstr, componentConstr );
+            return new ForMigLayout( _constr, _colConstr, _rowConstr );
         }
 
 
-        @Override public int hashCode() { return Objects.hash(_constr, _rowConstr, _colConstr, _componentConstr); }
+        @Override public int hashCode() { return Objects.hash(_constr, _rowConstr, _colConstr); }
 
         @Override
         public boolean equals(Object o) {
@@ -310,18 +293,19 @@ public interface Layout
             ForMigLayout other = (ForMigLayout) o;
             return _constr.equals( other._constr) &&
                    _rowConstr.equals( other._rowConstr) &&
-                   _colConstr.equals( other._colConstr) &&
-                   _componentConstr.equals( other._componentConstr);
+                   _colConstr.equals( other._colConstr);
         }
 
         @Override
         public void installFor( JComponent component ) {
-            if ( !_componentConstr.isEmpty() ) {
+            ComponentExtension<?> extension = ComponentExtension.from(component);
+            Style style = extension.getCurrentStylePainter().getStyle();
+            if ( style.layout().constraint().isPresent() ) {
                 // We ensure that the parent layout has the correct component constraints for the component:
                 LayoutManager parentLayout = ( component.getParent() == null ? null : component.getParent().getLayout() );
                 if ( parentLayout instanceof MigLayout) {
                     MigLayout migLayout = (MigLayout) parentLayout;
-                    String componentConstraints = _componentConstr;
+                    Object componentConstraints = style.layout().constraint().get();
                     Object currentComponentConstraints = migLayout.getComponentConstraints(component);
                     //     ^ can be a String or a CC object, we want to compare it to the new constraints:
                     if ( !componentConstraints.equals(currentComponentConstraints) ) {

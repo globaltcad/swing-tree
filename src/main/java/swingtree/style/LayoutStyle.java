@@ -39,6 +39,8 @@ public final class LayoutStyle
 
     LayoutStyle layout(Layout installer ) { return new LayoutStyle(installer, _constraint, _alignmentX, _alignmentY); }
 
+    LayoutStyle constraint( Object constraint ) { return new LayoutStyle(_layout, constraint, _alignmentX, _alignmentY); }
+
     LayoutStyle alignmentX( Float alignmentX ) { return new LayoutStyle(_layout, _constraint, alignmentX, _alignmentY); }
 
     LayoutStyle alignmentY( Float alignmentY ) { return new LayoutStyle(_layout, _constraint, _alignmentX, alignmentY); }

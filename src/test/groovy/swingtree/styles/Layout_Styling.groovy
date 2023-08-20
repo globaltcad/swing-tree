@@ -8,7 +8,7 @@ import spock.lang.Title
 import swingtree.UI
 import swingtree.style.Layout
 
-import java.awt.FlowLayout
+import java.awt.*
 
 @Title("Layout Styling")
 @Narrative('''
@@ -73,9 +73,7 @@ class Layout_Styling extends Specification
             var ui =
                     UI.panel("fill")
                     .withStyle( it -> it
-                        .layout("flowy, insets 10 20 30 40")
-                        .layoutColumns("[grow, fill] 10 [grow, fill]")
-                        .layoutRows("[shrink] 12 [shrink]")
+                        .layout("flowy, insets 10 20 30 40", "[grow, fill] 10 [grow, fill]", "[shrink] 12 [shrink]")
                     )
                     .add(
                         UI.button().withStyle( it -> it
@@ -125,6 +123,52 @@ class Layout_Styling extends Specification
         and : 'The button has the alignment values we specified in the styling API:'
             button.alignmentX == 0.33f
             button.alignmentY == 0.66f
+    }
+
+    def 'Define a border layout for a parent component and the corresponding constraints for their child components through the style API.'()
+    {
+        reportInfo """
+            The style API allows you to define a border layout for a parent component
+            as well as the corresponding constraints for their child components.
+            So for example in case of a component having a `BorderLayout`, 
+            the constraints for the child components may be `BorderLayout.NORTH`, `BorderLayout.SOUTH`, etc.
+            and they can all be specified through the style API. 
+        """
+        given :
+            var ui =
+                    UI.panel("fill")
+                    .withStyle( it -> it
+                        .layout(Layout.border())
+                    )
+                    .add(
+                        UI.slider(UI.Align.VERTICAL).withStyle( it -> it
+                            .addConstraint(BorderLayout.WEST)
+                        )
+                    )
+                    .add(
+                        UI.textArea("Some content").withStyle( it -> it
+                            .addConstraint(BorderLayout.CENTER)
+                        )
+                    )
+                    .add(
+                        UI.button("Click me").withStyle( it -> it
+                            .addConstraint(BorderLayout.SOUTH)
+                        )
+                    )
+        and : 'We unpack the Swing tree:'
+            var panel = ui.component
+            var slider = panel.getComponent(0)
+            var textArea = panel.getComponent(1)
+            var button = panel.getComponent(2)
+            var layout = panel.layout
+
+        expect : 'The layout manager of the panel is a BorderLayout manager:'
+            layout instanceof BorderLayout
+
+        and : 'The box layout manager will associate the constraints we specified in the styling API with the child components:'
+            ((BorderLayout)layout).getLayoutComponent(BorderLayout.WEST) == slider
+            ((BorderLayout)layout).getLayoutComponent(BorderLayout.CENTER) == textArea
+            ((BorderLayout)layout).getLayoutComponent(BorderLayout.SOUTH) == button
     }
 
     def 'If you do not want a component to be managed by a layout manager, you can set the layout manager to `Layout.none()`.'()
