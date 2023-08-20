@@ -113,7 +113,7 @@ class Styles_Spec extends Specification
                                             "margin=Outline[top=?, right=?, bottom=?, left=?], " +
                                             "padding=Outline[top=?, right=?, bottom=?, left=?], " +
                                             "color=rgba(0,0,255,255), " +
-                                            "GradientStyle[alignment=TOP_TO_BOTTOM, type=LINEAR, colors=[], layer=BACKGROUND]" +
+                                            "GradientStyle[transition=TOP_TO_BOTTOM, type=LINEAR, colors=[], layer=BACKGROUND]" +
                                         "], " +
                                         "BaseStyle[" +
                                             "backgroundColor=rgba(0,255,0,255), " +
@@ -145,7 +145,7 @@ class Styles_Spec extends Specification
                                             "painter=none, " +
                                             "layer=BACKGROUND" +
                                         "], " +
-                                        "GradientStyle[alignment=TOP_TO_BOTTOM, type=LINEAR, colors=[], layer=BACKGROUND], " +
+                                        "GradientStyle[transition=TOP_TO_BOTTOM, type=LINEAR, colors=[], layer=BACKGROUND], " +
                                         "ImageStyle[" +
                                             "layer=BACKGROUND, " +
                                             "primer=?, " +
