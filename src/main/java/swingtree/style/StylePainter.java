@@ -195,25 +195,39 @@ final class StylePainter<C extends JComponent>
 
     private void _drawBorder( Color color, Graphics2D g2d, JComponent comp ) {
         if ( !Outline.none().equals(_style.border().widths()) ) {
-            int leftBorderWidth   = _style.border().widths().left().orElse(0);
-            int topBorderWidth    = _style.border().widths().top().orElse(0);
-            int rightBorderWidth  = _style.border().widths().right().orElse(0);
-            int bottomBorderWidth = _style.border().widths().bottom().orElse(0);
-            Area baseArea = _getBaseArea(comp);
-            Area innerArea = _calculateBaseArea(topBorderWidth, leftBorderWidth, bottomBorderWidth, rightBorderWidth, comp);
-            baseArea.subtract(innerArea);
-            g2d.setColor(color);
-            g2d.fill(baseArea);
+            /*
+                The border should not be clipped as it can not be drawn outside the component's bounds,
+                and it will also cover up ugly artifacts between the inner component area
+                and the area around the component (margin), which is not covered by the border.
+                Resetting the clip here is visually especially very important for rounded borders and shadows.
+            */
+            Shape formerClip = g2d.getClip();
+            g2d.setClip(null);
+            try {
+                int leftBorderWidth   = _style.border().widths().left().orElse(0);
+                int topBorderWidth    = _style.border().widths().top().orElse(0);
+                int rightBorderWidth  = _style.border().widths().right().orElse(0);
+                int bottomBorderWidth = _style.border().widths().bottom().orElse(0);
 
-            if (!_style.border().gradients().isEmpty() )  {
-                for ( GradientStyle gradient : _style.border().gradients() ) {
-                    if ( gradient.colors().length > 0 ) {
-                        if ( gradient.transition().isDiagonal() )
-                            _renderDiagonalGradient(g2d, comp, _style.margin(), gradient, baseArea);
-                        else
-                            _renderVerticalOrHorizontalGradient(g2d, comp, _style.margin(), gradient, baseArea);
+                Area innerComponentArea = _calculateBaseArea(topBorderWidth, leftBorderWidth, bottomBorderWidth, rightBorderWidth, comp);
+                Area borderArea = new Area(_getBaseArea(comp));
+                borderArea.subtract(innerComponentArea);
+
+                g2d.setColor(color);
+                g2d.fill(borderArea);
+
+                if (!_style.border().gradients().isEmpty()) {
+                    for ( GradientStyle gradient : _style.border().gradients() ) {
+                        if ( gradient.colors().length > 0 ) {
+                            if ( gradient.transition().isDiagonal() )
+                                _renderDiagonalGradient(g2d, comp, _style.margin(), gradient, borderArea);
+                            else
+                                _renderVerticalOrHorizontalGradient(g2d, comp, _style.margin(), gradient, borderArea);
+                        }
                     }
                 }
+            } finally {
+                g2d.setClip(formerClip);
             }
         }
     }
@@ -238,12 +252,17 @@ final class StylePainter<C extends JComponent>
         if ( _style.border().allCornersShareTheSameArc() && insAllTheSame ) {
             int arcWidth  = _style.border().topLeftArc().map( a -> Math.max(0,a.width() ) ).orElse(0);
             int arcHeight = _style.border().topLeftArc().map( a -> Math.max(0,a.height()) ).orElse(0);
+            arcWidth  = Math.max(0, arcWidth  - insTop);
+            arcHeight = Math.max(0, arcHeight - insTop);
+            if ( arcWidth == 0 || arcHeight == 0 )
+                return new Area(new Rectangle(left, top, width - left - right, height - top - bottom));
+
             // We can return a simple round rectangle:
             return new Area(new RoundRectangle2D.Float(
-                    left, top, width - left - right, height - top - bottom,
-                    Math.max(0, arcWidth  - insTop),
-                    Math.max(0, arcHeight - insTop)
-                ));
+                                left, top,
+                                width - left - right, height - top - bottom,
+                                arcWidth, arcHeight
+                            ));
         } else {
             Arc topLeftArc     = _style.border().topLeftArc().orElse(null);
             Arc topRightArc    = _style.border().topRightArc().orElse(null);
