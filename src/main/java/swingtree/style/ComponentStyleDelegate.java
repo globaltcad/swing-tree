@@ -1503,7 +1503,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param constraints The component constraints as a {@link String}.
      * @return A new {@link ComponentStyleDelegate} with the provided component constraints set to be later
      */
-    public ComponentStyleDelegate<C> layoutComponent( String constraints ) {
+    public ComponentStyleDelegate<C> addConstraint( String constraints ) {
         if ( _style.layout().layout() instanceof Layout.ForMigLayout) {
             Layout.ForMigLayout migInstaller = (Layout.ForMigLayout) _style.layout().layout();
             migInstaller = migInstaller.withComponentConstraint(constraints);

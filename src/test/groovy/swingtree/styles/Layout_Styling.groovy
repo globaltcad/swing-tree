@@ -6,6 +6,9 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import swingtree.UI
+import swingtree.style.Layout
+
+import java.awt.FlowLayout
 
 @Title("Layout Styling")
 @Narrative('''
@@ -57,5 +60,93 @@ class Layout_Styling extends Specification
         """
             ((CC)((MigLayout)panel.layout).constraintMap[button]).horizontal.getAlign().value == 27f
             ((CC)((MigLayout)panel.layout).constraintMap[button]).vertical.getAlign().value == 73f
+    }
+
+    def 'Use the style API to configure the MigLayout manager for your components.'()
+    {
+        reportInfo """
+            The style API allows you to configure MigLayout managers for your components
+            by exposing various methods for specifying layout constraints
+            in a way that is more readable than the vanilla MigLayout API.
+        """
+        given :
+            var ui =
+                    UI.panel("fill")
+                    .withStyle( it -> it
+                        .layout("flowy, insets 10 20 30 40")
+                        .layoutColumns("[grow, fill] 10 [grow, fill]")
+                        .layoutRows("[shrink] 12 [shrink]")
+                    )
+                    .add(
+                        UI.button().withStyle( it -> it
+                            .addConstraint("grow, span 2")
+                        )
+                    )
+        and : 'We unpack the Swing tree:'
+            var panel = ui.component
+            var button = panel.getComponent(0)
+
+        expect : 'The layout manager of the panel is a MigLayout manager:'
+            panel.layout instanceof MigLayout
+
+        and : 'The layout manager of the panel has the layout constraints we specified in the styling API:'
+            panel.layout.layoutConstraints == "flowy, insets 10 20 30 40"
+            panel.layout.columnConstraints == "[grow, fill] 10 [grow, fill]"
+            panel.layout.rowConstraints == "[shrink] 12 [shrink]"
+
+        and : 'Finally, the button has the layout constraints we specified in the styling API:'
+            ((MigLayout)panel.layout).constraintMap[button] == "grow, span 2"
+    }
+
+    def 'The style Allows you to configure the flow layout as layout manager for components.'()
+    {
+        reportInfo """
+            The style API allows you to configure the flow layout as layout manager for components.
+        """
+        given :
+            var ui =
+                    UI.panel("fill")
+                    .withStyle( it -> it
+                        .layout(Layout.flow())
+                    )
+                    .add(
+                        UI.toggleButton().withStyle( it -> it
+                            .alignmentX(0.33f)
+                            .alignmentY(0.66f)
+                        )
+                    )
+        and : 'We unpack the Swing tree:'
+            var panel = ui.component
+            var button = panel.getComponent(0)
+
+        expect : 'The layout manager of the panel is a FlowLayout manager:'
+            panel.layout instanceof FlowLayout
+
+        and : 'The button has the alignment values we specified in the styling API:'
+            button.alignmentX == 0.33f
+            button.alignmentY == 0.66f
+    }
+
+    def 'If you do not want a component to be managed by a layout manager, you can set the layout manager to `Layout.none()`.'()
+    {
+        reportInfo """
+            If you do not want a component to be managed by a layout manager, you can set the layout manager to
+            the `Layout.none()` value, which is a `Layout` implementation that 
+            installs a `null` layout manager on the component.
+        """
+        given :
+            var ui =
+                    UI.panel("fill")
+                    .withStyle( it -> it
+                        .layout(Layout.none())
+                    )
+                    .add(
+                        UI.button()
+                    )
+        and : 'We unpack the Swing tree:'
+            var panel = ui.component
+
+        expect : 'The layout manager of the panel is null:'
+            panel.layout == null
     }
 }
