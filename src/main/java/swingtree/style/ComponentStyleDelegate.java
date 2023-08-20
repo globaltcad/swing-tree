@@ -4,11 +4,13 @@ import swingtree.UI;
 import swingtree.api.Painter;
 import swingtree.api.Peeker;
 import swingtree.api.Styler;
+import swingtree.layout.LayoutAttr;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.util.*;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -1368,6 +1370,163 @@ public final class ComponentStyleDelegate<C extends JComponent>
     public ComponentStyleDelegate<C> cursor( Cursor cursor ) {
         Objects.requireNonNull(cursor);
         return _withStyle(_style._withBase(_style.base().cursor(cursor)));
+    }
+
+    /**
+     * @param installer The {@link Layout} to use for installing the layout.
+     * @return A new {@link ComponentStyleDelegate} with the provided {@link Layout} set to be later
+     */
+    public ComponentStyleDelegate<C> layout( Layout installer ) {
+        return _withStyle(_style._withLayout(_style.layout().layout(installer)));
+    }
+
+    /**
+     *  Defines the layout {@link net.miginfocom.swing.MigLayout} constraints for
+     *  this {@link JComponent} in the form of a {@link String}. <br>
+     *  This ultimately translates to {@link net.miginfocom.swing.MigLayout#setLayoutConstraints(Object)}
+     *  on the underlying component. <br>
+     *  <br>
+     *  Note that if this property is specified, the style engine will automatically
+     *  install a {@link net.miginfocom.swing.MigLayout} on the component if it does not already have one. <br>
+     *
+     * @param constraints The layout constraints as a {@link String}.
+     * @return A new {@link ComponentStyleDelegate} with the provided layout constraints set to be later
+     */
+    public ComponentStyleDelegate<C> layout( String constraints ) {
+        if ( _style.layout().layout() instanceof Layout.ForMigLayout ) {
+            Layout.ForMigLayout migInstaller = (Layout.ForMigLayout) _style.layout().layout();
+            migInstaller = migInstaller.withConstraint(constraints);
+            return _withStyle(_style._withLayout(_style.layout().layout(migInstaller)));
+        }
+        return _withStyle(_style._withLayout(_style.layout().layout(Layout.mig(constraints, "", "", ""))));
+    }
+
+    /**
+     *  Defines the {@link net.miginfocom.swing.MigLayout} based column layout constraints for
+     *  this {@link JComponent} in the form of a {@link String}. <br>
+     *  This ultimately translates to {@link net.miginfocom.swing.MigLayout#setColumnConstraints(Object)}
+     *  on the underlying component. <br>
+     *  <br>
+     *  Note that if this property is specified, the style engine will automatically
+     *  install a {@link net.miginfocom.swing.MigLayout} on the component if it does not already have one. <br>
+     *
+     * @param constraints The column constraints as a {@link String}.
+     * @return A new {@link ComponentStyleDelegate} with the provided column constraints set to be later
+     */
+    public ComponentStyleDelegate<C> layoutColumns( String constraints ) {
+        if ( _style.layout().layout() instanceof Layout.ForMigLayout ) {
+            Layout.ForMigLayout migInstaller = (Layout.ForMigLayout) _style.layout().layout();
+            migInstaller = migInstaller.withColumnConstraint(constraints);
+            return _withStyle(_style._withLayout(_style.layout().layout(migInstaller)));
+        }
+        return _withStyle(_style._withLayout(_style.layout().layout(Layout.mig("", "", constraints, ""))));
+    }
+
+    /**
+     *  Defines the {@link net.miginfocom.swing.MigLayout} based row layout constraints for
+     *  this {@link JComponent} in the form of a {@link String}. <br>
+     *  This ultimately translates to {@link net.miginfocom.swing.MigLayout#setRowConstraints(Object)}
+     *  on the underlying component. <br>
+     *  <br>
+     *  Note that if this property is specified, the style engine will automatically
+     *  install a {@link net.miginfocom.swing.MigLayout} on the component if it does not already have one. <br>
+     *
+     * @param constraints The row constraints as a {@link String}.
+     * @return A new {@link ComponentStyleDelegate} with the provided row constraints set to be later
+     */
+    public ComponentStyleDelegate<C> layoutRows(String constraints ) {
+        if ( _style.layout().layout() instanceof Layout.ForMigLayout ) {
+            Layout.ForMigLayout migInstaller = (Layout.ForMigLayout) _style.layout().layout();
+            migInstaller = migInstaller.withRowConstraint(constraints);
+            return _withStyle(_style._withLayout(_style.layout().layout(migInstaller)));
+        }
+        return _withStyle(_style._withLayout(_style.layout().layout(Layout.mig("", constraints, "", ""))));
+    }
+
+    /**
+     *  Defines the {@link net.miginfocom.swing.MigLayout} based layout constraints
+     *  and column layout constraints of this {@link JComponent} in the form of a {@link String}. <br>
+     *  This ultimately translates to {@link net.miginfocom.swing.MigLayout#setLayoutConstraints(Object)}
+     *  as well as {@link net.miginfocom.swing.MigLayout#setColumnConstraints(Object)}
+     *  on the layout manager of the underlying component. <br>
+     *  <br>
+     *  Note that if this property is specified, the style engine will automatically
+     *  install a {@link net.miginfocom.swing.MigLayout} on the component if it does not already have one. <br>
+     *
+     * @param constraints The layout constraints as a {@link String}.
+     * @param columnConstraints The column constraints as a {@link String}.
+     * @return A new {@link ComponentStyleDelegate} with the provided layout constraints set to be later
+     */
+    public ComponentStyleDelegate<C> layout( String constraints, String columnConstraints ) {
+        if ( _style.layout().layout() instanceof Layout.ForMigLayout) {
+            Layout.ForMigLayout migInstaller = (Layout.ForMigLayout) _style.layout().layout();
+            migInstaller = migInstaller.withConstraint(constraints).withColumnConstraint(columnConstraints);
+            return _withStyle(_style._withLayout(_style.layout().layout(migInstaller)));
+        }
+        return _withStyle(_style._withLayout(_style.layout().layout(Layout.mig(constraints, columnConstraints, "", ""))));
+    }
+
+    /**
+     *  Defines the {@link net.miginfocom.swing.MigLayout} based layout constraints
+     *  column layout constraints and row layout constraints of this {@link JComponent} in the form of a {@link String}. <br>
+     *  This ultimately translates to {@link net.miginfocom.swing.MigLayout#setLayoutConstraints(Object)}
+     *  as well as {@link net.miginfocom.swing.MigLayout#setColumnConstraints(Object)}
+     *  and {@link net.miginfocom.swing.MigLayout#setRowConstraints(Object)}
+     *  on the layout manager of the underlying component. <br>
+     *  <br>
+     *  Note that if this property is specified, the style engine will automatically
+     *  install a {@link net.miginfocom.swing.MigLayout} on the component if it does not already have one. <br>
+     *
+     * @param constraints The layout constraints as a {@link String}.
+     * @param columnConstraints The column constraints as a {@link String}.
+     * @param rowConstraints The row constraints as a {@link String}.
+     * @return A new {@link ComponentStyleDelegate} with the provided layout constraints set to be later
+     */
+    public ComponentStyleDelegate<C> layout( String constraints, String columnConstraints, String rowConstraints ) {
+        if ( _style.layout().layout() instanceof Layout.ForMigLayout) {
+            Layout.ForMigLayout migInstaller = (Layout.ForMigLayout) _style.layout().layout();
+            migInstaller = migInstaller.withConstraint(constraints).withColumnConstraint(columnConstraints).withRowConstraint(rowConstraints);
+            return _withStyle(_style._withLayout(_style.layout().layout(migInstaller)));
+        }
+        return _withStyle(_style._withLayout(_style.layout().layout(Layout.mig(constraints, columnConstraints, rowConstraints, ""))));
+    }
+
+    /**
+     *  Defines the component constraints of this component with respect to the parent component
+     *  and its layout manager, in the form of a {@link String}. <br>
+     *  This ultimately translates to {@link net.miginfocom.swing.MigLayout#setComponentConstraints(Component, Object)}
+     *  on the layout manager of the parent component. <br>
+     *  <br>
+     *  Note that if this property is specified, the style engine will automatically
+     *  install a {@link net.miginfocom.swing.MigLayout} on the parent component if it does not already have one. <br>
+     *
+     * @param constraints The component constraints as a {@link String}.
+     * @return A new {@link ComponentStyleDelegate} with the provided component constraints set to be later
+     */
+    public ComponentStyleDelegate<C> layoutComponent( String constraints ) {
+        if ( _style.layout().layout() instanceof Layout.ForMigLayout) {
+            Layout.ForMigLayout migInstaller = (Layout.ForMigLayout) _style.layout().layout();
+            migInstaller = migInstaller.withComponentConstraint(constraints);
+            return _withStyle(_style._withLayout(_style.layout().layout(migInstaller)));
+        }
+        return _withStyle(_style._withLayout(_style.layout().layout(Layout.mig("", "", "", constraints))));
+    }
+
+    /**
+     *  Defines the layout {@link net.miginfocom.swing.MigLayout} constraints for
+     *  this {@link JComponent} in the form of a {@link LayoutAttr}
+     *  (see {@link UI#FILL}, {@link UI#FILL_X}, {@link UI#FILL_Y}...). <br>
+     *  This ultimately translates to {@link net.miginfocom.swing.MigLayout#setLayoutConstraints(Object)}
+     *  on the underlying component. <br>
+     *  <br>
+     *  Note that if this property is specified, the style engine will automatically
+     *  install a {@link net.miginfocom.swing.MigLayout} on the component if it does not already have one. <br>
+     *
+     * @param constraintAttr The layout constraints as a {@link LayoutAttr}.
+     * @return A new {@link ComponentStyleDelegate} with the provided layout constraints set to be later
+     */
+    public ComponentStyleDelegate<C> layout( LayoutAttr constraintAttr ) {
+        return layout(constraintAttr.toString());
     }
 
     /**

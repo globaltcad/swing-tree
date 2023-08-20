@@ -196,9 +196,9 @@ public final class UI
         try {
             T result = scope.get();
             if ( result instanceof JComponent )
-                ComponentExtension.from((JComponent) result).establishStyle();
+                ComponentExtension.from((JComponent) result).calculateApplyAndInstallStyle(true);
             if ( result instanceof UIForAnySwing )
-                ComponentExtension.from(((UIForAnySwing<?,?>) result).getComponent()).establishStyle();
+                ComponentExtension.from(((UIForAnySwing<?,?>) result).getComponent()).calculateApplyAndInstallStyle(true);
 
             return result;
         } finally {
@@ -546,6 +546,17 @@ public final class UI
             }
             throw new RuntimeException();
         }
+
+        public final int forFlowLayout() {
+            switch ( this ) {
+                case LEFT:     return FlowLayout.LEFT;
+                case CENTER:   return FlowLayout.CENTER;
+                case RIGHT:    return FlowLayout.RIGHT;
+                case LEADING:  return FlowLayout.LEADING;
+                case TRAILING: return FlowLayout.TRAILING;
+            }
+            throw new RuntimeException();
+        }
     }
 
     /**
@@ -706,6 +717,39 @@ public final class UI
         TOP_LEFT, TOP_RIGHT,
         BOTTOM_LEFT, BOTTOM_RIGHT,
         CENTER
+    }
+
+    public enum Axis {
+        /**
+         * Specifies that something is laid out left to right.
+         */
+        X,
+        /**
+         * Specifies that something is laid out top to bottom.
+         */
+        Y,
+        /**
+         * Specifies that something is laid out in the direction of
+         * a line of text as determined by the target container's
+         * {@code ComponentOrientation} property.
+         */
+        LINE,
+        /**
+         * Specifies that something is laid out in the direction that
+         * lines flow across a page as determined by the target container's
+         * {@code ComponentOrientation} property.
+         */
+        PAGE;
+
+        public int forBoxLayout() {
+            switch ( this ) {
+                case X:    return BoxLayout.X_AXIS;
+                case Y:    return BoxLayout.Y_AXIS;
+                case LINE: return BoxLayout.LINE_AXIS;
+                case PAGE: return BoxLayout.PAGE_AXIS;
+            }
+            throw new RuntimeException();
+        }
     }
 
     /**

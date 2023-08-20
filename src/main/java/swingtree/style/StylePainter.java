@@ -469,8 +469,6 @@ final class StylePainter<C extends JComponent>
                                         h - shadowInset * 2 - gradientStartOffset * 2 - spreadRadius * 2
                                     );
 
-        Area outerMostArea;
-
         // Create the shadow shape based on the box bounds and corner arc widths/heights
         Rectangle outerShadowBox = new Rectangle(
                                         outerShadowRect.x,
@@ -499,7 +497,7 @@ final class StylePainter<C extends JComponent>
         _renderEdgeShadow(shadow, UI.Edge.BOTTOM, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
         _renderEdgeShadow(shadow, UI.Edge.LEFT,   shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
 
-        outerMostArea = new Area(outerShadowBox);
+        Area outerMostArea = new Area(outerShadowBox);
         // If the base rectangle and the outer shadow box are not equal, then we need to fill the area of the base rectangle that is not covered by the outer shadow box!
         _renderShadowBody(shadow, baseArea, innerShadowRect, outerMostArea, g2d);
 
@@ -932,7 +930,7 @@ final class StylePainter<C extends JComponent>
                         radius,
                         fractions,
                         colors
-                ));
+                    ));
             else
                 g2d.setPaint(new RadialGradientPaint(
                         new Point2D.Float(startCornerX, startCornerY),
@@ -940,7 +938,7 @@ final class StylePainter<C extends JComponent>
                         fractions,
                         colors,
                         MultipleGradientPaint.CycleMethod.NO_CYCLE
-                ));
+                    ));
         } else if ( gradient.type() == UI.GradientType.LINEAR ) {
             double vector1X = diagonalCorner1X - diagonalCenterX;
             double vector1Y = diagonalCorner1Y - diagonalCenterY;

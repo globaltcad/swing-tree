@@ -1,6 +1,7 @@
 package swingtree;
 
 import swingtree.style.ComponentExtension;
+import swingtree.style.Style;
 import swingtree.threading.EventProcessor;
 
 import javax.swing.*;
@@ -108,10 +109,22 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
 
         builder._parent = this;
 
-        _add( component, conf );
+        if ( component instanceof JComponent ) {
+            JComponent c = (JComponent) component;
 
-        if ( component instanceof JComponent )
-            ComponentExtension.from((JComponent) component).establishStyle();
+            Style style = ( conf != null ? null : ComponentExtension.from(c).calculateStyle() );
+            if ( style != null )
+                conf = style.layout().constraint().orElse(null);
+
+            _add(component, conf);
+
+            if ( style != null )
+                ComponentExtension.from(c).applyAndInstallStyle(style, true);
+            else
+                ComponentExtension.from(c).calculateApplyAndInstallStyle(true);
+        }
+        else
+            _add(component, conf);
 
         _detachStrongRef(); // Detach strong reference to the component to allow it to be garbage collected.
     }

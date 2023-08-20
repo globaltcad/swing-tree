@@ -101,6 +101,7 @@ class Styles_Spec extends Specification
         expect :
                 style.toString() == "Style[" +
                                         "LayoutStyle[" +
+                                            "layout=Unspecific[], "
                                             "alignmentX=?, " +
                                             "alignmentY=?" +
                                         "], " +

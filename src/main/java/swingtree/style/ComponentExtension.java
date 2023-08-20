@@ -68,12 +68,28 @@ public final class ComponentExtension<C extends JComponent>
     public void addStyling( Styler<C> styler ) {
         Objects.requireNonNull(styler);
         _styleSource = _styleSource.withLocalStyler(styler, _owner);
-        establishStyle();
+        calculateApplyAndInstallStyle(false);
     }
 
-    public void establishStyle() {
+    public Style calculateStyle() {
+        return _styleSource.calculateStyleFor(_owner);
+    }
+
+    private Style _calculateAndApplyStyle(boolean force) {
+        return applyStyleToComponentState(calculateStyle(), force);
+    }
+
+    public void calculateApplyAndInstallStyle( boolean force ) {
+        installStyle(_calculateAndApplyStyle(force));
+    }
+
+    public void applyAndInstallStyle( Style style, boolean force ) {
+        installStyle(applyStyleToComponentState(style, force));
+    }
+
+    public void installStyle( Style style ) {
         _currentStylePainter = StylePainter.none(); // We reset the style painter so that the style is applied again!
-        _currentStylePainter = _currentStylePainter.update(_calculateAndApplyStyle());
+        _currentStylePainter = _currentStylePainter.update(style);
     }
 
     void _establishCurrentMainPaintClip(Graphics g) {
@@ -110,7 +126,7 @@ public final class ComponentExtension<C extends JComponent>
 
     StylePainter<C> _establishStyleAndBeginPainting() {
         if ( !_currentStylePainter.isPainting() )
-            _currentStylePainter = _currentStylePainter.beginPaintingWith( _calculateAndApplyStyle() );
+            _currentStylePainter = _currentStylePainter.beginPaintingWith( _calculateAndApplyStyle(false) );
 
         return _currentStylePainter;
     }
@@ -131,7 +147,7 @@ public final class ComponentExtension<C extends JComponent>
         _mainClip = null;
         _establishCurrentMainPaintClip(g);
 
-        _currentStylePainter = _currentStylePainter.beginPaintingWith( _calculateAndApplyStyle() );
+        _currentStylePainter = _currentStylePainter.beginPaintingWith( _calculateAndApplyStyle(false) );
         _currentStylePainter.renderBackgroundStyle( (Graphics2D) g, _owner );
     }
 
@@ -182,17 +198,13 @@ public final class ComponentExtension<C extends JComponent>
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    private Style _calculateAndApplyStyle() {
-        Style style = _styleSource.calculateStyleFor(_owner);
-        _styleSource = _styleSource.withoutExpiredAnimationStylers(); // Clean up expired animation stylers!
-        return _applyStyleToComponentState(style);
-    }
-
-    private Style _applyStyleToComponentState( Style style )
+    public Style applyStyleToComponentState( Style style, boolean force )
     {
+        _styleSource = _styleSource.withoutExpiredAnimationStylers(); // Clean up expired animation stylers!
+
         Objects.requireNonNull(style);
 
-        if ( _currentStylePainter.getStyle().equals(style) )
+        if ( _currentStylePainter.getStyle().equals(style) && !force )
             return style;
 
         final Style.Report styleReport = style.getReport();
@@ -254,6 +266,8 @@ public final class ComponentExtension<C extends JComponent>
             if ( !Objects.equals( _owner.getAlignmentY(), alignmentY ) )
                 _owner.setAlignmentY( alignmentY );
         });
+
+        style.layout().layout().installFor( _owner );
 
         _applyAlignmentToMigLayoutIfItExists(style.layout());
 
