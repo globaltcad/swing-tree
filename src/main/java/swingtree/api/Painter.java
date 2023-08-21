@@ -69,6 +69,18 @@ public interface Painter
                         e.printStackTrace();
                         // Exceptions inside a painter should not cripple the rest of the painting.
                     }
+                    /*
+                         Note that if any exceptions happen in the above Painter implementations,
+                         then we don't want to mess up the execution of the test of the component painting...
+                         Therefore, we catch any exceptions that happen in the above code.
+
+                         Ideally this would be logged in the logging framework of a user of the SwingTree
+                         library, but we don't know which logging framework that is, so we just print
+                         the stack trace to the console so that developers can see what went wrong.
+
+                         Hi there! If you are reading this, you are probably a developer using the SwingTree
+                         library, thank you for using it! Good luck finding out what went wrong! :)
+                    */
                 };
     }
 }

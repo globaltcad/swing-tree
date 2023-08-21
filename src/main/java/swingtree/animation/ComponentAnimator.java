@@ -63,6 +63,18 @@ class ComponentAnimator
             shouldContinue = _condition.check(state);
         } catch ( Exception e ) {
             e.printStackTrace();
+            /*
+                 If exceptions happen in user provided animation stop conditions,
+                 then we don't want to mess up the rest of the animation logic, so we catch
+                 any exceptions right here!
+
+                 Ideally this would be logged in the logging framework of a user of the SwingTree
+                 library, but we don't know which logging framework that is, so we just print
+                 the stack trace to the console so that developers can see what went wrong.
+
+                 Hi there! If you are reading this, you are probably a developer using the SwingTree
+                 library, thank you for using it! Good luck finding out what went wrong! :)
+            */
         }
 
         Component component = _compRef == null ? null : _compRef.get();
@@ -75,6 +87,18 @@ class ComponentAnimator
                 _animation.finish(state); // An animation may want to do something when it is finished (e.g. reset the component to its original state).
             } catch ( Exception e ) {
                 e.printStackTrace();
+                /*
+                     If exceptions happen in the finishing procedure of animations provided by the user,
+                     then we don't want to mess up the execution of the test of the animations,
+                     so we catch any exceptions right here!
+
+                     Ideally this would be logged in the logging framework of a user of the SwingTree
+                     library, but we don't know which logging framework that is, so we just print
+                     the stack trace to the console so that developers can see what went wrong.
+
+                     Hi there! If you are reading this, you are probably a developer using the SwingTree
+                     library, thank you for using it! Good luck finding out what went wrong! :)
+                */
             }
             return false;
         }
@@ -83,6 +107,18 @@ class ComponentAnimator
             _animation.run(state);
         } catch ( Exception e ) {
             e.printStackTrace();
+            /*
+                 If exceptions happen in the animations provided by the user,
+                 then we don't want to mess up the execution of the test of the animations,
+                 so we catch any exceptions right here!
+
+                 Ideally this would be logged in the logging framework of a user of the SwingTree
+                 library, but we don't know which logging framework that is, so we just print
+                 the stack trace to the console so that developers can see what went wrong.
+
+                 Hi there! If you are reading this, you are probably a developer using the SwingTree
+                 library, thank you for using it! Good luck finding out what went wrong! :)
+            */
         }
 
         if ( component != null ) {
