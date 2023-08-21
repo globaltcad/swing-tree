@@ -102,13 +102,14 @@ final class StylePainter<C extends JComponent>
     }
 
     private void _paintStylesOn( UI.Layer layer, Graphics2D g2d , JComponent comp ) {
-        // Every layer has 3 things:
-        // 0. Grounding, which is a solid color or image
+        // Every layer has 4 things:
+        // 1. A grounding serving as a base background, which is a filled color and/or an image:
         for ( ImageStyle imageStyle : _style.images(layer) )
             if ( !imageStyle.equals(ImageStyle.none()) )
                 _renderImage( imageStyle, g2d, comp, _getBaseArea(comp) );
 
-        // 1. Shades, which are simple gradient effects
+        // 2. Gradients, which are best used to give a component a nice surface lighting effect.
+        // They may transition vertically, horizontally or diagonally over various different colors:
         for ( GradientStyle gradient : _style.gradients(layer) )
             if ( gradient.colors().length > 0 ) {
                 if ( gradient.colors().length == 1 ) {
@@ -121,13 +122,13 @@ final class StylePainter<C extends JComponent>
                     _renderVerticalOrHorizontalGradient(g2d, comp, _style.margin(), gradient, _getBaseArea(comp));
             }
 
-        // 2. Shadows, which are simple drop shadows that cn go inwards or outwards
+        // 3. Shadows, which are simple gradient based drop shadows that cn go inwards or outwards
         for ( ShadowStyle shadow : _style.shadows(layer) )
             shadow.color().ifPresent(color -> {
                 _renderShadows(_style, shadow, comp, g2d, color);
             });
 
-        // 3. Painters, which are provided by the user and can be anything
+        // 4. Painters, which are provided by the user and can be anything
         _style.painters(layer).forEach(backgroundPainter -> {
             if ( backgroundPainter == Painter.none() ) return;
             g2d.setClip(_getBaseArea(comp));
@@ -138,8 +139,14 @@ final class StylePainter<C extends JComponent>
                 e.printStackTrace();
                 /*
                     If exceptions happen in user provided painters, we don't want to
-                    mess up the rendering of the rest of the component, so we just
-                    print the stack trace and move on.
+                    mess up the rendering of the rest of the component, so we catch them here!
+
+                    Ideally this would be logged in the logging framework of a user of the SwingTree
+                    library, but we don't know which logging framework that is, so we just print
+                    the stack trace to the console so that developers can see what went wrong.
+
+                    Hi there! If you are reading this, you are probably a developer using the SwingTree
+                    library, thank you for using it! Good luck finding out what went wrong! :)
                 */
             } finally {
                 g2d.setTransform(oldTransform);
@@ -202,7 +209,7 @@ final class StylePainter<C extends JComponent>
                 Resetting the clip here is visually especially very important for rounded borders and shadows.
             */
             Shape formerClip = g2d.getClip();
-            g2d.setClip(null);
+            g2d.setClip(ComponentExtension.from(comp).getMainClip());
             try {
                 int leftBorderWidth   = _style.border().widths().left().orElse(0);
                 int topBorderWidth    = _style.border().widths().top().orElse(0);
