@@ -103,7 +103,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             ui.component.components[0].isOpaque() == false
             ui.component.components[1].isOpaque() == false
             ui.component.components[2].isOpaque() == false
-            ui.component.layout.layoutConstraints == "ins 0, hidemode 2"
+            ui.component.layout.layoutConstraints == "ins 0, hidemode 2, gap 0"
             ui.component.components[0].layout.layoutConstraints == "ins 0, hidemode 2"
             ui.component.components[1].layout.layoutConstraints == "ins 0, hidemode 2"
             ui.component.components[2].layout.layoutConstraints == "ins 0, hidemode 2"

@@ -53,6 +53,7 @@ public final class ComponentExtension<C extends JComponent>
     private Color _initialBackgroundColor = null;
 
     private Shape _mainClip = null;
+    private boolean _mainClipEstablished = false;
 
 
     private ComponentExtension( C owner ) {
@@ -93,8 +94,10 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     void _establishCurrentMainPaintClip(Graphics g) {
-        if ( _mainClip == null )
+        if ( !_mainClipEstablished ) {
             _mainClip = g.getClip();
+            _mainClipEstablished = true;
+        }
     }
 
     public void setStyleGroups( String... styleName ) {
@@ -145,6 +148,7 @@ public final class ComponentExtension<C extends JComponent>
     void _paintBackground(Graphics g)
     {
         _mainClip = null;
+        _mainClipEstablished = false;
         _establishCurrentMainPaintClip(g);
 
         _currentStylePainter = _currentStylePainter.beginPaintingWith( _calculateAndApplyStyle(false) );
