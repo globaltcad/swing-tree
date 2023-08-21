@@ -1,5 +1,6 @@
 package swingtree.components;
 
+import net.miginfocom.swing.MigLayout;
 import swingtree.style.ComponentExtension;
 
 import javax.accessibility.Accessible;
@@ -55,8 +56,9 @@ public class JBox extends JComponent implements Accessible
     }
 
     /**
-     * Creates a new <code>JBox</code> with <code>FlowLayout</code>
-     * and the specified buffering strategy.
+     * Creates a new <code>JBox</code> with the specified buffering strategy
+     * qnd a default <code>MigLayout</code> instance
+     * configured to be without insets and gaps between components.
      * If <code>isDoubleBuffered</code> is true, the <code>JBox</code>
      * will use a double buffer.
      *
@@ -65,7 +67,7 @@ public class JBox extends JComponent implements Accessible
      *        updates
      */
     public JBox(boolean isDoubleBuffered) {
-        this(new FlowLayout(), isDoubleBuffered);
+        this(new MigLayout("ins 0, hidemode 2, gap 0"), isDoubleBuffered);
     }
 
     /**
@@ -81,8 +83,13 @@ public class JBox extends JComponent implements Accessible
      *
      * @see JComponent#updateUI
      */
+    @Override
     public void updateUI() {
         ComponentExtension.from(this).updateUI();
+        /*
+            The JBox is a SwingTree native type, so it also
+            enjoys the perks of having a SwingTree look and feel!
+        */
     }
 
     /**
@@ -90,6 +97,7 @@ public class JBox extends JComponent implements Accessible
      *
      * @return the PanelUI object that renders this component
      */
+    @Override
     public PanelUI getUI() { return (PanelUI) ui; }
 
 
@@ -104,7 +112,7 @@ public class JBox extends JComponent implements Accessible
      *    attribute: visualUpdate true
      *  description: The UI object that implements the Component's LookAndFeel.
      */
-    public void setUI(PanelUI ui) {
+    public void setUI( PanelUI ui ) {
         super.setUI(ui);
     }
 

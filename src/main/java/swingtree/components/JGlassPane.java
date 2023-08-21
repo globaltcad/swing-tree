@@ -30,12 +30,11 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.Objects;
 
-import javax.swing.JPanel;
-import javax.swing.JRootPane;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.event.EventListenerList;
 
 import net.miginfocom.swing.MigLayout;
+import swingtree.style.ComponentExtension;
 
 /**
  *  A more advanced glass pane implementation than the default Swing
@@ -67,6 +66,20 @@ public class JGlassPane extends JPanel implements AWTEventListener
         this();
         Objects.requireNonNull(rootPane);
         attachToRootPane(rootPane);
+    }
+
+    /**
+     * Resets the UI property with a value from the current look and feel.
+     *
+     * @see JComponent#updateUI
+     */
+    @Override
+    public void updateUI() {
+        ComponentExtension.from(this).updateUI();
+        /*
+            The JGlassPane is a SwingTree native type, so it also
+            enjoys the perks of having a SwingTree based look and feel!
+        */
     }
 
     private void attachToRootPane(JRootPane rootPane) {

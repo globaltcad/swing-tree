@@ -2153,7 +2153,7 @@ public final class UI
      *
      * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.
      */
-    public static UIForBox<JBox> box() { return of((JBox)new Box()).withLayout(new MigLayout("ins 0, hidemode 2")); }
+    public static UIForBox<JBox> box() { return of((JBox)new Box()); }
 
     /**
      *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
