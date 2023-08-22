@@ -49,7 +49,7 @@ class AnimationRunner
 
 <span class="fc bfc" id="L50" title="All 2 branches covered.">        for ( ComponentAnimator animator : new ArrayList&lt;&gt;(_animators) )</span>
 <span class="fc" id="L51">            animator.component().ifPresent( component -&gt; {</span>
-<span class="fc" id="L52">                ComponentExtension.from(component).clearAnimationRenderer();</span>
+<span class="fc" id="L52">                ComponentExtension.from(component).clearAnimations();</span>
 <span class="fc" id="L53">            });</span>
 
 <span class="fc" id="L55">        long now = System.currentTimeMillis();</span>

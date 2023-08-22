@@ -1253,13 +1253,13 @@ public abstract class UIForAnySwing&lt;I, C extends JComponent&gt; extends Abstr
      *  &lt;br&gt;
      *  Here an example of how to use this method:
      *  &lt;pre&gt;{@code
-     *      UI.button(&quot;Click me!&quot;).with(UI.Cursor.HAND);
+     *      UI.button(&quot;Click me!&quot;).withCursor(UI.Cursor.HAND);
      *  }&lt;/pre&gt;
      *
      * @param type The {@link UI.Cursor} type defined by a simple enum exposed by this API.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I with( UI.Cursor type ) {
+    public final I withCursor( UI.Cursor type ) {
 <span class="fc" id="L1263">        getComponent().setCursor( new java.awt.Cursor( type.type ) );</span>
 <span class="fc" id="L1264">        return _this();</span>
     }
@@ -1276,7 +1276,7 @@ public abstract class UIForAnySwing&lt;I, C extends JComponent&gt; extends Abstr
 <span class="fc" id="L1276">        NullUtil.nullArgCheck( type, &quot;type&quot;, Val.class );</span>
 <span class="fc" id="L1277">        NullUtil.nullPropertyCheck(type, &quot;type&quot;, &quot;Null is not allowed to model a cursor type.&quot;);</span>
 <span class="fc" id="L1278">        _onShow( type, t -&gt; getComponent().setCursor( new java.awt.Cursor( t.type ) ) );</span>
-<span class="fc" id="L1279">        return with( type.orElseThrow() );</span>
+<span class="fc" id="L1279">        return withCursor( type.orElseThrow() );</span>
     }
 
     /**
@@ -1294,7 +1294,7 @@ public abstract class UIForAnySwing&lt;I, C extends JComponent&gt; extends Abstr
 <span class="nc" id="L1294">        NullUtil.nullArgCheck( type, &quot;type&quot;, UI.Cursor.class );</span>
 <span class="nc" id="L1295">        NullUtil.nullPropertyCheck(condition, &quot;condition&quot;, &quot;Null is not allowed to model the cursor selection state.&quot;);</span>
 <span class="nc bnc" id="L1296" title="All 2 branches missed.">        _onShow( condition, c -&gt; getComponent().setCursor( new java.awt.Cursor( c ? type.type : UI.Cursor.DEFAULT.type ) ) );</span>
-<span class="nc bnc" id="L1297" title="All 2 branches missed.">        return with( condition.orElseThrow() ? type : UI.Cursor.DEFAULT );</span>
+<span class="nc bnc" id="L1297" title="All 2 branches missed.">        return withCursor( condition.orElseThrow() ? type : UI.Cursor.DEFAULT );</span>
     }
 
     /**
@@ -1318,7 +1318,7 @@ public abstract class UIForAnySwing&lt;I, C extends JComponent&gt; extends Abstr
 <span class="nc bnc" id="L1318" title="All 2 branches missed.">            if (baseCursor[0] == null) baseCursor[0] = getComponent().getCursor();</span>
 <span class="nc bnc" id="L1319" title="All 2 branches missed.">            getComponent().setCursor( new java.awt.Cursor( condition.get() ? c.type : baseCursor[0].getType() ) );</span>
 <span class="nc" id="L1320">        });</span>
-<span class="nc bnc" id="L1321" title="All 2 branches missed.">        return with( condition.orElseThrow() ? type.orElseThrow() : UI.Cursor.DEFAULT );</span>
+<span class="nc bnc" id="L1321" title="All 2 branches missed.">        return withCursor( condition.orElseThrow() ? type.orElseThrow() : UI.Cursor.DEFAULT );</span>
     }
 
     /**

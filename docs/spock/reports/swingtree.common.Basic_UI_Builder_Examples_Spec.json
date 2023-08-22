@@ -48,7 +48,7 @@
 
         {"kind":"and","text":"We can also traverse the tree to find the children of the children.","code":["ui.component.components[1].components[0] instanceof JPanel","ui.component.components[1].components[1] instanceof JPanel"]},
 
-        {"kind":"and","text":"All the JPanel instances created with the `box()` factory methods are non-opacque and without insets!","code":["ui.component.isOpaque() == false","ui.component.components[0].isOpaque() == false","ui.component.components[1].isOpaque() == false","ui.component.components[2].isOpaque() == false","ui.component.layout.layoutConstraints == \"ins 0, hidemode 2\"","ui.component.components[0].layout.layoutConstraints == \"ins 0, hidemode 2\"","ui.component.components[1].layout.layoutConstraints == \"ins 0, hidemode 2\"","ui.component.components[2].layout.layoutConstraints == \"ins 0, hidemode 2\""]},
+        {"kind":"and","text":"All the JPanel instances created with the `box()` factory methods are non-opacque and without insets!","code":["ui.component.isOpaque() == false","ui.component.components[0].isOpaque() == false","ui.component.components[1].isOpaque() == false","ui.component.components[2].isOpaque() == false","ui.component.layout.layoutConstraints == \"ins 0, hidemode 2, gap 0\"","ui.component.components[0].layout.layoutConstraints == \"ins 0, hidemode 2, gap 0\"","ui.component.components[1].layout.layoutConstraints == \"ins 0, hidemode 2, gap 0\"","ui.component.components[2].layout.layoutConstraints == \"ins 0, hidemode 2, gap 0\""]},
 
         {"kind":"and","text":"The 2 innermost panels are opaque and have insets:","code":["ui.component.components[1].components[0].isOpaque() == true","ui.component.components[1].components[1].isOpaque() == true","ui.component.components[1].components[0].layout.layoutConstraints == \"hidemode 2\"","ui.component.components[1].components[1].layout.layoutConstraints == \"hidemode 2\""]}
       ],
@@ -117,7 +117,7 @@
 
         {"kind":"expect","text":"At the beginning the default cursor will be set.","code":["ui.component.cursor.type == Cursor.DEFAULT_CURSOR"]},
 
-        {"kind":"when","text":"We set the cursor of the button to be something else...","code":["ui.with(UI.Cursor.RESIZE_SOUTH_EAST)"]},
+        {"kind":"when","text":"We set the cursor of the button to be something else...","code":["ui.withCursor(UI.Cursor.RESIZE_SOUTH_EAST)"]},
 
         {"kind":"then","text":"This will lead to the correct cursor being chosen.","code":["ui.component.cursor.type == Cursor.SE_RESIZE_CURSOR"]}
       ],

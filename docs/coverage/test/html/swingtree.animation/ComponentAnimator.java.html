@@ -63,34 +63,70 @@ class ComponentAnimator
 <span class="fc" id="L63">            shouldContinue = _condition.check(state);</span>
 <span class="nc" id="L64">        } catch ( Exception e ) {</span>
 <span class="nc" id="L65">            e.printStackTrace();</span>
-<span class="fc" id="L66">        }</span>
+            /*
+                 If exceptions happen in user provided animation stop conditions,
+                 then we don't want to mess up the rest of the animation logic, so we catch
+                 any exceptions right here!
 
-<span class="fc bfc" id="L68" title="All 2 branches covered.">        Component component = _compRef == null ? null : _compRef.get();</span>
+                 Ideally this would be logged in the logging framework of a user of the SwingTree
+                 library, but we don't know which logging framework that is, so we just print
+                 the stack trace to the console so that developers can see what went wrong.
 
-<span class="pc bpc" id="L70" title="1 of 4 branches missed.">        if ( _compRef != null &amp;&amp; component == null )</span>
-<span class="nc" id="L71">            return false; // There was a component but it has been garbage collected.</span>
+                 Hi there! If you are reading this, you are probably a developer using the SwingTree
+                 library, thank you for using it! Good luck finding out what went wrong! :)
+            */
+<span class="fc" id="L78">        }</span>
 
-<span class="fc bfc" id="L73" title="All 2 branches covered.">        if ( !shouldContinue ) {</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">        Component component = _compRef == null ? null : _compRef.get();</span>
+
+<span class="pc bpc" id="L82" title="1 of 4 branches missed.">        if ( _compRef != null &amp;&amp; component == null )</span>
+<span class="nc" id="L83">            return false; // There was a component but it has been garbage collected.</span>
+
+<span class="fc bfc" id="L85" title="All 2 branches covered.">        if ( !shouldContinue ) {</span>
             try {
-<span class="fc" id="L75">                _animation.finish(state); // An animation may want to do something when it is finished (e.g. reset the component to its original state).</span>
-<span class="nc" id="L76">            } catch ( Exception e ) {</span>
-<span class="nc" id="L77">                e.printStackTrace();</span>
-<span class="fc" id="L78">            }</span>
-<span class="fc" id="L79">            return false;</span>
+<span class="fc" id="L87">                _animation.finish(state); // An animation may want to do something when it is finished (e.g. reset the component to its original state).</span>
+<span class="nc" id="L88">            } catch ( Exception e ) {</span>
+<span class="nc" id="L89">                e.printStackTrace();</span>
+                /*
+                     If exceptions happen in the finishing procedure of animations provided by the user,
+                     then we don't want to mess up the execution of the rest of the animations,
+                     so we catch any exceptions right here!
+
+                     Ideally this would be logged in the logging framework of a user of the SwingTree
+                     library, but we don't know which logging framework that is, so we just print
+                     the stack trace to the console so that developers can see what went wrong.
+
+                     Hi there! If you are reading this, you are probably a developer using the SwingTree
+                     library, thank you for using it! Good luck finding out what went wrong! :)
+                */
+<span class="fc" id="L102">            }</span>
+<span class="fc" id="L103">            return false;</span>
         }
 
         try {
-<span class="fc" id="L83">            _animation.run(state);</span>
-<span class="nc" id="L84">        } catch ( Exception e ) {</span>
-<span class="nc" id="L85">            e.printStackTrace();</span>
-<span class="fc" id="L86">        }</span>
+<span class="fc" id="L107">            _animation.run(state);</span>
+<span class="nc" id="L108">        } catch ( Exception e ) {</span>
+<span class="nc" id="L109">            e.printStackTrace();</span>
+            /*
+                 If exceptions happen in the animations provided by the user,
+                 then we don't want to mess up the execution of the rest of the animations,
+                 so we catch any exceptions right here!
 
-<span class="fc bfc" id="L88" title="All 2 branches covered.">        if ( component != null ) {</span>
-<span class="fc" id="L89">            component.revalidate();</span>
-<span class="fc" id="L90">            component.repaint();</span>
+                 Ideally this would be logged in the logging framework of a user of the SwingTree
+                 library, but we don't know which logging framework that is, so we just print
+                 the stack trace to the console so that developers can see what went wrong.
+
+                 Hi there! If you are reading this, you are probably a developer using the SwingTree
+                 library, thank you for using it! Good luck finding out what went wrong! :)
+            */
+<span class="fc" id="L122">        }</span>
+
+<span class="fc bfc" id="L124" title="All 2 branches covered.">        if ( component != null ) {</span>
+<span class="fc" id="L125">            component.revalidate();</span>
+<span class="fc" id="L126">            component.repaint();</span>
         }
 
-<span class="fc" id="L93">        return true;</span>
+<span class="fc" id="L129">        return true;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -30,13 +30,13 @@ public final class PainterStyle
 
 <span class="fc" id="L31">    public UI.Layer layer() { return _layer; }</span>
 
-<span class="fc" id="L33">    public PainterStyle layer(UI.Layer layer) { return new PainterStyle(_painter, layer); }</span>
+<span class="fc" id="L33">    public PainterStyle layer( UI.Layer layer ) { return new PainterStyle(_painter, layer); }</span>
 
 
     @Override
     public String toString() {
 <span class="fc" id="L38">        return &quot;PainterStyle[&quot; +</span>
-                    &quot;painter=&quot; + _painter + &quot;, &quot; +
+<span class="fc" id="L39">                    &quot;painter=&quot; + StyleUtility.toString(_painter) + &quot;, &quot; +</span>
                     &quot;layer=&quot;   + _layer   +
                 ']';
     }

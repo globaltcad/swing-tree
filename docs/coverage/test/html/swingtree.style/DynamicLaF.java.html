@@ -300,7 +300,7 @@ class DynamicLaF
 <span class="fc" id="L300">                int insetRight  = 0;</span>
 <span class="pc bpc" id="L301" title="1 of 2 branches missed.">                if ( c.getBorder() instanceof StyleAndAnimationBorder ) {</span>
 <span class="fc" id="L302">                    StyleAndAnimationBorder&lt;?&gt; styleBorder = (StyleAndAnimationBorder&lt;?&gt;) c.getBorder();</span>
-<span class="fc" id="L303">                    Insets margins = styleBorder.getCurrentMarginInsets();</span>
+<span class="fc" id="L303">                    Insets margins = styleBorder.getMarginInsets();</span>
 <span class="fc" id="L304">                    Insets oldLaFBorder = styleBorder.getFormerBorderInsets();</span>
 <span class="fc" id="L305">                    insetTop    = margins.top    + oldLaFBorder.top    / 2;</span>
 <span class="fc" id="L306">                    insetLeft   = margins.left   + oldLaFBorder.left   / 2;</span>
@@ -353,7 +353,7 @@ class DynamicLaF
 <span class="nc" id="L353">        Border border = c.getBorder();</span>
 <span class="nc bnc" id="L354" title="All 2 branches missed.">        if ( border instanceof StyleAndAnimationBorder ) {</span>
 <span class="nc" id="L355">            StyleAndAnimationBorder&lt;?&gt; b = (StyleAndAnimationBorder&lt;?&gt;) border;</span>
-<span class="nc" id="L356">            Insets margins = b.getCurrentMarginInsets();</span>
+<span class="nc" id="L356">            Insets margins = b.getMarginInsets();</span>
 <span class="nc" id="L357">            int width  = c.getWidth();</span>
 <span class="nc" id="L358">            int height = c.getHeight();</span>
 <span class="nc bnc" id="L359" title="All 8 branches missed.">            boolean isInside = (x &gt;= margins.left) &amp;&amp; (x &lt; width - margins.right) &amp;&amp; (y &gt;= margins.top) &amp;&amp; (y &lt; height - margins.bottom);</span>
@@ -368,7 +368,7 @@ class DynamicLaF
                 So, if there are negative paddings, we loop through the subcomponents and see if any of
                 them contains the point.                                                                               */
 
-<span class="nc" id="L371">                Insets padding = b.getCurrentPaddingInsets();</span>
+<span class="nc" id="L371">                Insets padding = b.getPaddingInsets();</span>
 
 <span class="nc bnc" id="L373" title="All 8 branches missed.">                if ( padding.top &lt; 0 || padding.left &lt; 0 || padding.bottom &lt; 0 || padding.right &lt; 0 )</span>
 <span class="nc bnc" id="L374" title="All 2 branches missed.">                    for ( Component child : c.getComponents() ) {</span>

@@ -175,176 +175,204 @@ public class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAnySwing&
 <span class="fc" id="L175">        return this;</span>
     }
 
+    /**
+     *  Dynamically sets the selected tab based on the given index property.
+     *  So when the index property changes, the selected tab will change accordingly.
+     * @param index The index property of the tab to select.
+     * @return This builder node.
+     */
     public final UIForTabbedPane&lt;P&gt; withSelectedIndex( Val&lt;Integer&gt; index ) {
-<span class="nc" id="L179">        NullUtil.nullArgCheck( index, &quot;index&quot;, Val.class );</span>
-<span class="nc" id="L180">        NullUtil.nullPropertyCheck( index, &quot;index&quot;, &quot;Null is not a valid state for modelling a selected index.&quot; );</span>
-<span class="nc" id="L181">        _onShow( index, i -&gt; getComponent().setSelectedIndex(i) );</span>
-<span class="nc" id="L182">        return withSelectedIndex(index.get());</span>
+<span class="nc" id="L185">        NullUtil.nullArgCheck( index, &quot;index&quot;, Val.class );</span>
+<span class="nc" id="L186">        NullUtil.nullPropertyCheck( index, &quot;index&quot;, &quot;Null is not a valid state for modelling a selected index.&quot; );</span>
+<span class="nc" id="L187">        _onShow( index, i -&gt; getComponent().setSelectedIndex(i) );</span>
+<span class="nc" id="L188">        return withSelectedIndex(index.get());</span>
     }
 
+    /**
+     *  Dynamically sets the selected tab based on the given index property.
+     *  So when the index property changes, the selected tab will change accordingly.
+     * @param index The index property of the tab to select.
+     * @return This builder node.
+     */
     public final UIForTabbedPane&lt;P&gt; withSelectedIndex( Var&lt;Integer&gt; index ) {
-<span class="fc" id="L186">        NullUtil.nullArgCheck( index, &quot;index&quot;, Var.class );</span>
-<span class="fc" id="L187">        NullUtil.nullPropertyCheck( index, &quot;index&quot;, &quot;Null is not a valid state for modelling a selected index.&quot; );</span>
-<span class="pc bpc" id="L188" title="1 of 2 branches missed.">        if ( _selectedTabIndex != null )</span>
-<span class="nc" id="L189">            throw new IllegalStateException(&quot;A selected index property has already been set for this tabbed pane.&quot;);</span>
-<span class="fc" id="L190">        _selectedTabIndex = index;</span>
-<span class="fc" id="L191">        _onShow( index, i -&gt; {</span>
-<span class="fc" id="L192">            getComponent().setSelectedIndex(i);</span>
-<span class="fc" id="L193">            _selectionListeners.forEach( l -&gt; l.accept(i) );</span>
-<span class="fc" id="L194">        });</span>
-<span class="fc" id="L195">        _onChange( e -&gt; _doApp(()-&gt;{</span>
-<span class="fc" id="L196">            index.act(getComponent().getSelectedIndex());</span>
-<span class="fc" id="L197">            _selectionListeners.forEach( l -&gt; l.accept(getComponent().getSelectedIndex()) );</span>
-<span class="fc" id="L198">        }) );</span>
-<span class="fc" id="L199">        return withSelectedIndex(index.get());</span>
+<span class="fc" id="L198">        NullUtil.nullArgCheck( index, &quot;index&quot;, Var.class );</span>
+<span class="fc" id="L199">        NullUtil.nullPropertyCheck( index, &quot;index&quot;, &quot;Null is not a valid state for modelling a selected index.&quot; );</span>
+<span class="pc bpc" id="L200" title="1 of 2 branches missed.">        if ( _selectedTabIndex != null )</span>
+<span class="nc" id="L201">            throw new IllegalStateException(&quot;A selected index property has already been set for this tabbed pane.&quot;);</span>
+<span class="fc" id="L202">        _selectedTabIndex = index;</span>
+<span class="fc" id="L203">        _onShow( index, i -&gt; {</span>
+<span class="fc" id="L204">            getComponent().setSelectedIndex(i);</span>
+<span class="fc" id="L205">            _selectionListeners.forEach( l -&gt; l.accept(i) );</span>
+<span class="fc" id="L206">        });</span>
+<span class="fc" id="L207">        _onChange( e -&gt; _doApp(()-&gt;{</span>
+<span class="fc" id="L208">            index.act(getComponent().getSelectedIndex());</span>
+<span class="fc" id="L209">            _selectionListeners.forEach( l -&gt; l.accept(getComponent().getSelectedIndex()) );</span>
+<span class="fc" id="L210">        }) );</span>
+<span class="fc" id="L211">        return withSelectedIndex(index.get());</span>
     }
 
-    public final UIForTabbedPane&lt;P&gt; with( UI.Position position ) {
-<span class="fc" id="L203">        NullUtil.nullArgCheck( position, &quot;position&quot;, UI.Position.class );</span>
-<span class="fc" id="L204">        getComponent().setTabPlacement(position.forTabbedPane());</span>
-<span class="fc" id="L205">        return this;</span>
+    /**
+     * @param position The position to use for the tabs.
+     * @return This builder node.
+     */
+    public final UIForTabbedPane&lt;P&gt; withTabPlacement( UI.Position position ) {
+<span class="fc" id="L219">        NullUtil.nullArgCheck( position, &quot;position&quot;, UI.Position.class );</span>
+<span class="fc" id="L220">        getComponent().setTabPlacement(position.forTabbedPane());</span>
+<span class="fc" id="L221">        return this;</span>
     }
 
-    public final UIForTabbedPane&lt;P&gt; withPosition( Val&lt;UI.Position&gt; position ) {
-<span class="nc" id="L209">        NullUtil.nullArgCheck(position, &quot;position&quot;, Var.class);</span>
-<span class="nc" id="L210">        _onShow(position, v -&gt; with(position.orElseThrow()));</span>
-<span class="nc" id="L211">        return with(position.get());</span>
+    /**
+     * @param position The position property to use for the tabs.
+     * @return This builder node.
+     */
+    public final UIForTabbedPane&lt;P&gt; withTabPlacement( Val&lt;UI.Position&gt; position ) {
+<span class="nc" id="L229">        NullUtil.nullArgCheck(position, &quot;position&quot;, Var.class);</span>
+<span class="nc" id="L230">        _onShow( position, v -&gt; withTabPlacement(position.orElseThrow()) );</span>
+<span class="nc" id="L231">        return withTabPlacement(position.get());</span>
     }
 
-    public final UIForTabbedPane&lt;P&gt; with( UI.OverflowPolicy policy ) {
-<span class="nc" id="L215">        NullUtil.nullArgCheck( policy, &quot;policy&quot;, UI.OverflowPolicy.class );</span>
-<span class="nc" id="L216">        getComponent().setTabLayoutPolicy(policy.forTabbedPane());</span>
-<span class="nc" id="L217">        return this;</span>
+    /**
+     * @param policy The overflow policy to use for the tabs.
+     * @return This builder node.
+     */
+    public final UIForTabbedPane&lt;P&gt; withOverflowPolicy( UI.OverflowPolicy policy ) {
+<span class="nc" id="L239">        NullUtil.nullArgCheck( policy, &quot;policy&quot;, UI.OverflowPolicy.class );</span>
+<span class="nc" id="L240">        getComponent().setTabLayoutPolicy(policy.forTabbedPane());</span>
+<span class="nc" id="L241">        return this;</span>
     }
 
+    /**
+     * @param policy The overflow policy property to use for the tabs.
+     * @return This builder node.
+     */
     public final UIForTabbedPane&lt;P&gt; withOverflowPolicy( Val&lt;UI.OverflowPolicy&gt; policy ) {
-<span class="nc" id="L221">        NullUtil.nullArgCheck(policy, &quot;policy&quot;, Var.class);</span>
-<span class="nc" id="L222">        _onShow(policy, v -&gt; with(policy.orElseThrow()));</span>
-<span class="nc" id="L223">        return with(policy.orElseThrow());</span>
+<span class="nc" id="L249">        NullUtil.nullArgCheck(policy, &quot;policy&quot;, Var.class);</span>
+<span class="nc" id="L250">        _onShow(policy, v -&gt; withOverflowPolicy(policy.orElseThrow()));</span>
+<span class="nc" id="L251">        return withOverflowPolicy(policy.orElseThrow());</span>
     }
 
     private Supplier&lt;Integer&gt; _indexFinderFor(
         WeakReference&lt;P&gt; paneRef,
         WeakReference&lt;JComponent&gt; contentRef
     ) {
-<span class="fc" id="L230">        return ()-&gt;{</span>
-<span class="fc" id="L231">            P foundPane = paneRef.get();</span>
-<span class="fc" id="L232">            JComponent foundContent = contentRef.get();</span>
-<span class="pc bpc" id="L233" title="2 of 4 branches missed.">            if ( foundPane != null &amp;&amp; foundContent != null ) {</span>
-<span class="pc bpc" id="L234" title="1 of 2 branches missed.">                for ( int i = 0; i &lt; foundPane.getTabCount(); i++ ) {</span>
-<span class="fc bfc" id="L235" title="All 2 branches covered.">                    if ( foundContent == foundPane.getComponentAt(i) ) return i;</span>
+<span class="fc" id="L258">        return ()-&gt;{</span>
+<span class="fc" id="L259">            P foundPane = paneRef.get();</span>
+<span class="fc" id="L260">            JComponent foundContent = contentRef.get();</span>
+<span class="pc bpc" id="L261" title="2 of 4 branches missed.">            if ( foundPane != null &amp;&amp; foundContent != null ) {</span>
+<span class="pc bpc" id="L262" title="1 of 2 branches missed.">                for ( int i = 0; i &lt; foundPane.getTabCount(); i++ ) {</span>
+<span class="fc bfc" id="L263" title="All 2 branches covered.">                    if ( foundContent == foundPane.getComponentAt(i) ) return i;</span>
                 }
             }
-<span class="nc" id="L238">            return -1;</span>
+<span class="nc" id="L266">            return -1;</span>
         };
     }
 
     public final UIForTabbedPane&lt;P&gt; add( Tab tab ) {
 
-<span class="fc" id="L244">        JComponent dummyContent = new JPanel();</span>
-<span class="fc" id="L245">        WeakReference&lt;P&gt; paneRef = new WeakReference&lt;&gt;(getComponent());</span>
-<span class="fc" id="L246">        WeakReference&lt;JComponent&gt; contentRef = new WeakReference&lt;&gt;(tab.contents().orElse(dummyContent));</span>
-<span class="fc" id="L247">        Supplier&lt;Integer&gt; indexFinder = _indexFinderFor(paneRef, contentRef);</span>
-<span class="fc" id="L248">        tab.onSelection()</span>
-<span class="fc" id="L249">           .ifPresent(</span>
+<span class="fc" id="L272">        JComponent dummyContent = new JPanel();</span>
+<span class="fc" id="L273">        WeakReference&lt;P&gt; paneRef = new WeakReference&lt;&gt;(getComponent());</span>
+<span class="fc" id="L274">        WeakReference&lt;JComponent&gt; contentRef = new WeakReference&lt;&gt;(tab.contents().orElse(dummyContent));</span>
+<span class="fc" id="L275">        Supplier&lt;Integer&gt; indexFinder = _indexFinderFor(paneRef, contentRef);</span>
+<span class="fc" id="L276">        tab.onSelection()</span>
+<span class="fc" id="L277">           .ifPresent(</span>
                onSelection -&gt;
-<span class="fc" id="L251">                   getComponent().addChangeListener(e -&gt; {</span>
-<span class="nc" id="L252">                       JTabbedPane tabbedPane = paneRef.get();</span>
-<span class="nc bnc" id="L253" title="All 2 branches missed.">                       if ( tabbedPane == null ) return;</span>
-<span class="nc" id="L254">                       int index = indexFinder.get();</span>
-<span class="nc bnc" id="L255" title="All 4 branches missed.">                       if (index &gt;= 0 &amp;&amp; index == tabbedPane.getSelectedIndex())</span>
-<span class="nc" id="L256">                           _doApp(()-&gt;onSelection.accept(new ComponentDelegate&lt;&gt;(tabbedPane, e, this::getSiblinghood)));</span>
-<span class="nc" id="L257">                   })</span>
+<span class="fc" id="L279">                   getComponent().addChangeListener(e -&gt; {</span>
+<span class="nc" id="L280">                       JTabbedPane tabbedPane = paneRef.get();</span>
+<span class="nc bnc" id="L281" title="All 2 branches missed.">                       if ( tabbedPane == null ) return;</span>
+<span class="nc" id="L282">                       int index = indexFinder.get();</span>
+<span class="nc bnc" id="L283" title="All 4 branches missed.">                       if (index &gt;= 0 &amp;&amp; index == tabbedPane.getSelectedIndex())</span>
+<span class="nc" id="L284">                           _doApp(()-&gt;onSelection.accept(new ComponentDelegate&lt;&gt;(tabbedPane, e, this::getSiblinghood)));</span>
+<span class="nc" id="L285">                   })</span>
            );
 
-<span class="fc" id="L260">        TabMouseClickListener mouseListener = new TabMouseClickListener(getComponent(), indexFinder, tab.onMouseClick().orElse(null));</span>
+<span class="fc" id="L288">        TabMouseClickListener mouseListener = new TabMouseClickListener(getComponent(), indexFinder, tab.onMouseClick().orElse(null));</span>
 
         // Initial tab setup:
-<span class="fc" id="L263">        _doWithoutListeners(()-&gt;</span>
-<span class="fc" id="L264">            getComponent().addTab(</span>
-<span class="fc" id="L265">                tab.title().map(Val::orElseNull).orElse(null),</span>
-<span class="fc" id="L266">                tab.icon().map(Val::orElseNull).orElse(null),</span>
-<span class="fc" id="L267">                tab.contents().orElse(dummyContent),</span>
-<span class="fc" id="L268">                tab.tip().map(Val::orElseNull).orElse(null)</span>
+<span class="fc" id="L291">        _doWithoutListeners(()-&gt;</span>
+<span class="fc" id="L292">            getComponent().addTab(</span>
+<span class="fc" id="L293">                tab.title().map(Val::orElseNull).orElse(null),</span>
+<span class="fc" id="L294">                tab.icon().map(Val::orElseNull).orElse(null),</span>
+<span class="fc" id="L295">                tab.contents().orElse(dummyContent),</span>
+<span class="fc" id="L296">                tab.tip().map(Val::orElseNull).orElse(null)</span>
             )
         );
-<span class="fc" id="L271">        tab.isEnabled().ifPresent( isEnabled -&gt; getComponent().setEnabledAt(indexFinder.get(), isEnabled.get()) );</span>
-<span class="fc" id="L272">        tab.isSelected().ifPresent( isSelected -&gt; {</span>
-<span class="fc" id="L273">            _selectTab( indexFinder.get(), isSelected.get() );</span>
-<span class="fc" id="L274">            _selectionListeners.add( i -&gt; isSelected.act(Objects.equals(i, indexFinder.get())) );</span>
+<span class="fc" id="L299">        tab.isEnabled().ifPresent( isEnabled -&gt; getComponent().setEnabledAt(indexFinder.get(), isEnabled.get()) );</span>
+<span class="fc" id="L300">        tab.isSelected().ifPresent( isSelected -&gt; {</span>
+<span class="fc" id="L301">            _selectTab( indexFinder.get(), isSelected.get() );</span>
+<span class="fc" id="L302">            _selectionListeners.add( i -&gt; isSelected.act(Objects.equals(i, indexFinder.get())) );</span>
             /*
                 The above listener will ensure that the isSelected property of the tab is updated when
                 the selection index property changes.
              */
-<span class="fc" id="L279">        });</span>
+<span class="fc" id="L307">        });</span>
 
         // Now on to binding:
-<span class="fc" id="L282">        tab.title()     .ifPresent( title      -&gt; _onShow(title,      t -&gt; getComponent().setTitleAt(indexFinder.get(), t)) );</span>
-<span class="fc" id="L283">        tab.icon()      .ifPresent( icon       -&gt; _onShow(icon,       i -&gt; getComponent().setIconAt(indexFinder.get(), i)) );</span>
-<span class="fc" id="L284">        tab.tip()       .ifPresent( tip        -&gt; _onShow(tip,        t -&gt; getComponent().setToolTipTextAt(indexFinder.get(), t)) );</span>
-<span class="fc" id="L285">        tab.isEnabled() .ifPresent( enabled    -&gt; _onShow(enabled,    e -&gt; getComponent().setEnabledAt(indexFinder.get(), e)) );</span>
-<span class="fc" id="L286">        tab.isSelected().ifPresent( isSelected -&gt; _onShow(isSelected, s -&gt; _selectTab(indexFinder.get(), s) ));</span>
+<span class="fc" id="L310">        tab.title()     .ifPresent( title      -&gt; _onShow(title,      t -&gt; getComponent().setTitleAt(indexFinder.get(), t)) );</span>
+<span class="fc" id="L311">        tab.icon()      .ifPresent( icon       -&gt; _onShow(icon,       i -&gt; getComponent().setIconAt(indexFinder.get(), i)) );</span>
+<span class="fc" id="L312">        tab.tip()       .ifPresent( tip        -&gt; _onShow(tip,        t -&gt; getComponent().setToolTipTextAt(indexFinder.get(), t)) );</span>
+<span class="fc" id="L313">        tab.isEnabled() .ifPresent( enabled    -&gt; _onShow(enabled,    e -&gt; getComponent().setEnabledAt(indexFinder.get(), e)) );</span>
+<span class="fc" id="L314">        tab.isSelected().ifPresent( isSelected -&gt; _onShow(isSelected, s -&gt; _selectTab(indexFinder.get(), s) ));</span>
 
-<span class="fc" id="L288">        tab.headerContents().ifPresent( c -&gt;</span>
-<span class="fc" id="L289">            getComponent()</span>
-<span class="fc" id="L290">            .setTabComponentAt(</span>
-<span class="fc" id="L291">                getComponent().getTabCount()-1,</span>
-<span class="fc" id="L292">                _buildTabHeader( tab, mouseListener )</span>
+<span class="fc" id="L316">        tab.headerContents().ifPresent( c -&gt;</span>
+<span class="fc" id="L317">            getComponent()</span>
+<span class="fc" id="L318">            .setTabComponentAt(</span>
+<span class="fc" id="L319">                getComponent().getTabCount()-1,</span>
+<span class="fc" id="L320">                _buildTabHeader( tab, mouseListener )</span>
             )
         );
-<span class="fc" id="L295">        return this;</span>
+<span class="fc" id="L323">        return this;</span>
     }
 
     private void _doWithoutListeners( Runnable r ) {
-<span class="fc" id="L299">        ChangeListener[] listeners = getComponent().getChangeListeners();</span>
-<span class="fc bfc" id="L300" title="All 2 branches covered.">        for ( ChangeListener l : listeners ) getComponent().removeChangeListener(l);</span>
-<span class="fc" id="L301">        r.run();</span>
-<span class="fc bfc" id="L302" title="All 2 branches covered.">        for ( ChangeListener l : listeners ) getComponent().addChangeListener(l);</span>
+<span class="fc" id="L327">        ChangeListener[] listeners = getComponent().getChangeListeners();</span>
+<span class="fc bfc" id="L328" title="All 2 branches covered.">        for ( ChangeListener l : listeners ) getComponent().removeChangeListener(l);</span>
+<span class="fc" id="L329">        r.run();</span>
+<span class="fc bfc" id="L330" title="All 2 branches covered.">        for ( ChangeListener l : listeners ) getComponent().addChangeListener(l);</span>
         /*
             This is important because the tabbed pane will fire a change event when a tab is added.
             This is not desirable because the tabbed pane is not yet fully initialized at that point.
         */
-<span class="fc" id="L307">    }</span>
+<span class="fc" id="L335">    }</span>
 
     private void _selectTab( int tabIndex, boolean isSelected ) {
-<span class="fc bfc" id="L310" title="All 2 branches covered.">        int selectedIndex = ( isSelected ? tabIndex : getComponent().getSelectedIndex() );</span>
-<span class="pc bpc" id="L311" title="1 of 2 branches missed.">        if ( _selectedTabIndex != null )</span>
-<span class="fc" id="L312">            _selectedTabIndex.act(selectedIndex);</span>
+<span class="fc bfc" id="L338" title="All 2 branches covered.">        int selectedIndex = ( isSelected ? tabIndex : getComponent().getSelectedIndex() );</span>
+<span class="pc bpc" id="L339" title="1 of 2 branches missed.">        if ( _selectedTabIndex != null )</span>
+<span class="fc" id="L340">            _selectedTabIndex.act(selectedIndex);</span>
         else
-<span class="nc" id="L314">            getComponent().setSelectedIndex(selectedIndex);</span>
+<span class="nc" id="L342">            getComponent().setSelectedIndex(selectedIndex);</span>
 
-<span class="fc" id="L316">        _selectionListeners.forEach(l -&gt; l.accept(selectedIndex));</span>
-<span class="fc" id="L317">    }</span>
+<span class="fc" id="L344">        _selectionListeners.forEach(l -&gt; l.accept(selectedIndex));</span>
+<span class="fc" id="L345">    }</span>
 
     private JComponent _buildTabHeader( Tab tab, TabMouseClickListener mouseListener )
     {
-<span class="fc" id="L321">        return</span>
-<span class="fc" id="L322">            tab.title().map( title -&gt;</span>
+<span class="fc" id="L349">        return</span>
+<span class="fc" id="L350">            tab.title().map( title -&gt;</span>
                 // We want both title and user component in the header!
-<span class="fc" id="L324">                UI.panel(&quot;fill, ins 0&quot;).withBackground(new Color(0,0,0,0))</span>
-<span class="pc" id="L325">                .applyIfPresent( tab.tip().map( tip -&gt; panel -&gt; panel.withTooltip(tip) ) )</span>
-<span class="fc" id="L326">                .peek( it -&gt; {</span>
-<span class="fc" id="L327">                    it.addMouseListener(mouseListener);</span>
-<span class="fc" id="L328">                    mouseListener.addOwner(it);</span>
-<span class="fc" id="L329">                })</span>
-<span class="fc" id="L330">                .add(&quot;shrink&quot;,</span>
-<span class="fc" id="L331">                    UI.label(title).withBackground(new Color(0,0,0,0))</span>
-<span class="pc" id="L332">                    .applyIfPresent( tab.tip().map( tip -&gt; label -&gt; label.withTooltip(tip) ) )</span>
-<span class="fc" id="L333">                    .peek( it -&gt; {</span>
-<span class="fc" id="L334">                        it.addMouseListener(mouseListener);</span>
-<span class="fc" id="L335">                        mouseListener.addOwner(it);</span>
-<span class="fc" id="L336">                    })</span>
+<span class="fc" id="L352">                UI.panel(&quot;fill, ins 0&quot;).withBackground(new Color(0,0,0,0))</span>
+<span class="pc" id="L353">                .applyIfPresent( tab.tip().map( tip -&gt; panel -&gt; panel.withTooltip(tip) ) )</span>
+<span class="fc" id="L354">                .peek( it -&gt; {</span>
+<span class="fc" id="L355">                    it.addMouseListener(mouseListener);</span>
+<span class="fc" id="L356">                    mouseListener.addOwner(it);</span>
+<span class="fc" id="L357">                })</span>
+<span class="fc" id="L358">                .add(&quot;shrink&quot;,</span>
+<span class="fc" id="L359">                    UI.label(title).withBackground(new Color(0,0,0,0))</span>
+<span class="pc" id="L360">                    .applyIfPresent( tab.tip().map( tip -&gt; label -&gt; label.withTooltip(tip) ) )</span>
+<span class="fc" id="L361">                    .peek( it -&gt; {</span>
+<span class="fc" id="L362">                        it.addMouseListener(mouseListener);</span>
+<span class="fc" id="L363">                        mouseListener.addOwner(it);</span>
+<span class="fc" id="L364">                    })</span>
                 )
-<span class="fc" id="L338">                .add(&quot;grow&quot;, tab.headerContents().orElse(new JPanel()))</span>
-<span class="fc" id="L339">                .getComponent()</span>
+<span class="fc" id="L366">                .add(&quot;grow&quot;, tab.headerContents().orElse(new JPanel()))</span>
+<span class="fc" id="L367">                .getComponent()</span>
             )
-<span class="fc" id="L341">            .map( p -&gt; (JComponent) p )</span>
-<span class="fc" id="L342">            .orElse(tab.headerContents().orElse(new JPanel()));</span>
+<span class="fc" id="L369">            .map( p -&gt; (JComponent) p )</span>
+<span class="fc" id="L370">            .orElse(tab.headerContents().orElse(new JPanel()));</span>
     }
 
     private class TabMouseClickListener extends MouseAdapter
     {
-<span class="fc" id="L347">        private final List&lt;WeakReference&lt;JComponent&gt;&gt; ownerRefs = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L375">        private final List&lt;WeakReference&lt;JComponent&gt;&gt; ownerRefs = new ArrayList&lt;&gt;();</span>
         private final WeakReference&lt;JTabbedPane&gt; paneRef;
         private final Supplier&lt;Integer&gt; indexFinder;
         private final Action&lt;ComponentDelegate&lt;JTabbedPane, MouseEvent&gt;&gt; mouseClickAction;
@@ -354,61 +382,61 @@ public class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAnySwing&
             JTabbedPane pane,
             Supplier&lt;Integer&gt; indexFinder,
             Action&lt;ComponentDelegate&lt;JTabbedPane, MouseEvent&gt;&gt; mouseClickAction
-<span class="fc" id="L357">        ) {</span>
-<span class="fc" id="L358">            this.paneRef = new WeakReference&lt;&gt;(pane);</span>
-<span class="fc" id="L359">            this.indexFinder = indexFinder;</span>
-<span class="fc" id="L360">            this.mouseClickAction = mouseClickAction;</span>
-<span class="fc bfc" id="L361" title="All 2 branches covered.">            if ( mouseClickAction != null ) {</span>
-<span class="fc" id="L362">                pane.addMouseListener(new java.awt.event.MouseAdapter() {</span>
+<span class="fc" id="L385">        ) {</span>
+<span class="fc" id="L386">            this.paneRef = new WeakReference&lt;&gt;(pane);</span>
+<span class="fc" id="L387">            this.indexFinder = indexFinder;</span>
+<span class="fc" id="L388">            this.mouseClickAction = mouseClickAction;</span>
+<span class="fc bfc" id="L389" title="All 2 branches covered.">            if ( mouseClickAction != null ) {</span>
+<span class="fc" id="L390">                pane.addMouseListener(new java.awt.event.MouseAdapter() {</span>
                     @Override
                     public void mouseClicked( MouseEvent e ) {
-<span class="nc" id="L365">                        JTabbedPane pane = paneRef.get();</span>
-<span class="nc bnc" id="L366" title="All 2 branches missed.">                        if ( pane == null ) return;</span>
-<span class="nc" id="L367">                        int indexOfThis = indexOfThisTab();</span>
-<span class="nc bnc" id="L368" title="All 2 branches missed.">                        if ( indexOfThis &lt; 0 ) return;</span>
-<span class="nc" id="L369">                        int indexClicked = _indexOfClick(pane, e.getPoint());</span>
-<span class="nc bnc" id="L370" title="All 2 branches missed.">                        if ( indexClicked &lt; 0 ) return;</span>
-<span class="nc bnc" id="L371" title="All 2 branches missed.">                        if ( indexOfThis == indexClicked )</span>
-<span class="nc" id="L372">                            _doApp(()-&gt; mouseClickAction.accept(new ComponentDelegate&lt;&gt;(pane, e, UIForTabbedPane.this::getSiblinghood)));</span>
-<span class="nc" id="L373">                    }</span>
+<span class="nc" id="L393">                        JTabbedPane pane = paneRef.get();</span>
+<span class="nc bnc" id="L394" title="All 2 branches missed.">                        if ( pane == null ) return;</span>
+<span class="nc" id="L395">                        int indexOfThis = indexOfThisTab();</span>
+<span class="nc bnc" id="L396" title="All 2 branches missed.">                        if ( indexOfThis &lt; 0 ) return;</span>
+<span class="nc" id="L397">                        int indexClicked = _indexOfClick(pane, e.getPoint());</span>
+<span class="nc bnc" id="L398" title="All 2 branches missed.">                        if ( indexClicked &lt; 0 ) return;</span>
+<span class="nc bnc" id="L399" title="All 2 branches missed.">                        if ( indexOfThis == indexClicked )</span>
+<span class="nc" id="L400">                            _doApp(()-&gt; mouseClickAction.accept(new ComponentDelegate&lt;&gt;(pane, e, UIForTabbedPane.this::getSiblinghood)));</span>
+<span class="nc" id="L401">                    }</span>
                 });
             }
-<span class="fc" id="L376">        }</span>
+<span class="fc" id="L404">        }</span>
 
         private void doAction(JTabbedPane pane, MouseEvent e) {
-<span class="nc" id="L379">            Point p = e.getPoint();</span>
-<span class="nc bnc" id="L380" title="All 2 branches missed.">            if ( e.getSource() != pane ) {</span>
+<span class="nc" id="L407">            Point p = e.getPoint();</span>
+<span class="nc bnc" id="L408" title="All 2 branches missed.">            if ( e.getSource() != pane ) {</span>
                // We need to find the point relative to the tabbed pane:
-<span class="nc" id="L382">                p = traversePosition((Component) e.getSource(), pane, p);</span>
+<span class="nc" id="L410">                p = traversePosition((Component) e.getSource(), pane, p);</span>
             }
-<span class="nc" id="L384">            int indexOfThis = indexOfThisTab();</span>
-<span class="nc bnc" id="L385" title="All 2 branches missed.">            if ( indexOfThis &lt; 0 ) return;</span>
-<span class="nc" id="L386">            int indexClicked = _indexOfClick( pane, p );</span>
-<span class="nc bnc" id="L387" title="All 2 branches missed.">            if ( indexClicked &lt; 0 ) return;</span>
-<span class="nc bnc" id="L388" title="All 4 branches missed.">            if ( indexOfThis == indexClicked &amp;&amp; mouseClickAction != null )</span>
-<span class="nc" id="L389">                _doApp(()-&gt; { mouseClickAction.accept(new ComponentDelegate&lt;&gt;(pane, e, UIForTabbedPane.this::getSiblinghood)); });</span>
-<span class="nc bnc" id="L390" title="All 2 branches missed.">            if ( indexOfThis &lt; pane.getTabCount() )</span>
-<span class="nc" id="L391">                pane.setSelectedIndex(indexOfThis);</span>
-<span class="nc" id="L392">        }</span>
+<span class="nc" id="L412">            int indexOfThis = indexOfThisTab();</span>
+<span class="nc bnc" id="L413" title="All 2 branches missed.">            if ( indexOfThis &lt; 0 ) return;</span>
+<span class="nc" id="L414">            int indexClicked = _indexOfClick( pane, p );</span>
+<span class="nc bnc" id="L415" title="All 2 branches missed.">            if ( indexClicked &lt; 0 ) return;</span>
+<span class="nc bnc" id="L416" title="All 4 branches missed.">            if ( indexOfThis == indexClicked &amp;&amp; mouseClickAction != null )</span>
+<span class="nc" id="L417">                _doApp(()-&gt; { mouseClickAction.accept(new ComponentDelegate&lt;&gt;(pane, e, UIForTabbedPane.this::getSiblinghood)); });</span>
+<span class="nc bnc" id="L418" title="All 2 branches missed.">            if ( indexOfThis &lt; pane.getTabCount() )</span>
+<span class="nc" id="L419">                pane.setSelectedIndex(indexOfThis);</span>
+<span class="nc" id="L420">        }</span>
 
         private int indexOfThisTab() {
-<span class="nc" id="L395">            return indexFinder.get();</span>
+<span class="nc" id="L423">            return indexFinder.get();</span>
         }
 
-<span class="fc" id="L398">        public void addOwner(JComponent c) { this.ownerRefs.add(new WeakReference&lt;&gt;(c)); }</span>
+<span class="fc" id="L426">        public void addOwner(JComponent c) { this.ownerRefs.add(new WeakReference&lt;&gt;(c)); }</span>
 
         @Override
         public void mouseClicked( MouseEvent e ) {
-<span class="nc" id="L402">            JTabbedPane pane = this.paneRef.get();</span>
-<span class="nc bnc" id="L403" title="All 2 branches missed.">            if ( pane == null ) {</span>
-<span class="nc bnc" id="L404" title="All 2 branches missed.">                for ( WeakReference&lt;JComponent&gt; compRef : this.ownerRefs) {</span>
-<span class="nc" id="L405">                    JComponent owner = compRef.get();</span>
-<span class="nc bnc" id="L406" title="All 2 branches missed.">                    if ( owner != null )</span>
-<span class="nc" id="L407">                        owner.removeMouseListener(this);</span>
-<span class="nc" id="L408">                }</span>
+<span class="nc" id="L430">            JTabbedPane pane = this.paneRef.get();</span>
+<span class="nc bnc" id="L431" title="All 2 branches missed.">            if ( pane == null ) {</span>
+<span class="nc bnc" id="L432" title="All 2 branches missed.">                for ( WeakReference&lt;JComponent&gt; compRef : this.ownerRefs) {</span>
+<span class="nc" id="L433">                    JComponent owner = compRef.get();</span>
+<span class="nc bnc" id="L434" title="All 2 branches missed.">                    if ( owner != null )</span>
+<span class="nc" id="L435">                        owner.removeMouseListener(this);</span>
+<span class="nc" id="L436">                }</span>
             }
-<span class="nc" id="L410">            else doAction( pane, e );</span>
-<span class="nc" id="L411">        }</span>
+<span class="nc" id="L438">            else doAction( pane, e );</span>
+<span class="nc" id="L439">        }</span>
 
     }
 
@@ -423,10 +451,10 @@ public class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAnySwing&
      * @return The relative position to the end component!
      */
     private static Point traversePosition( Component current, Component end, Point p ) {
-<span class="nc bnc" id="L426" title="All 2 branches missed.">        if ( current == end ) return p;</span>
-<span class="nc" id="L427">        Component parent = current.getParent();</span>
-<span class="nc" id="L428">        Point relativeToParent = SwingUtilities.convertPoint(current, p, parent);</span>
-<span class="nc" id="L429">        return traversePosition(parent, end, relativeToParent);</span>
+<span class="nc bnc" id="L454" title="All 2 branches missed.">        if ( current == end ) return p;</span>
+<span class="nc" id="L455">        Component parent = current.getParent();</span>
+<span class="nc" id="L456">        Point relativeToParent = SwingUtilities.convertPoint(current, p, parent);</span>
+<span class="nc" id="L457">        return traversePosition(parent, end, relativeToParent);</span>
     }
 
     /**
@@ -439,15 +467,15 @@ public class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAnySwing&
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForTabbedPane&lt;P&gt; onChange( Action&lt;ComponentDelegate&lt;P, ChangeEvent&gt;&gt; onChange ) {
-<span class="nc" id="L442">        NullUtil.nullArgCheck(onChange, &quot;onChange&quot;, Action.class);</span>
-<span class="nc" id="L443">        P pane = getComponent();</span>
-<span class="nc" id="L444">        _onChange(e -&gt; _doApp(()-&gt;onChange.accept(new ComponentDelegate&lt;&gt;(pane, e, this::getSiblinghood))));</span>
-<span class="nc" id="L445">        return this;</span>
+<span class="nc" id="L470">        NullUtil.nullArgCheck(onChange, &quot;onChange&quot;, Action.class);</span>
+<span class="nc" id="L471">        P pane = getComponent();</span>
+<span class="nc" id="L472">        _onChange(e -&gt; _doApp(()-&gt;onChange.accept(new ComponentDelegate&lt;&gt;(pane, e, this::getSiblinghood))));</span>
+<span class="nc" id="L473">        return this;</span>
     }
 
     private void _onChange( Consumer&lt;ChangeEvent&gt; action ) {
-<span class="fc" id="L449">        getComponent().addChangeListener(action::accept);</span>
-<span class="fc" id="L450">    }</span>
+<span class="fc" id="L477">        getComponent().addChangeListener(action::accept);</span>
+<span class="fc" id="L478">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

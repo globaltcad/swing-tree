@@ -4,7 +4,7 @@
   "narrative":"This specification demonstrates how you can use the styling\n    API to style Swing components in a functional and declarative fashion.",
   "subjects":[],
   "statistics":{
-    "runs":"24",
+    "runs":"25",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -455,6 +455,21 @@
         {"kind":"expect","text":"The image is as expected.","code":["Utility.similarityBetween(ui.getComponent(), \"components/heavily-customized-text-field.png\", 99.5) > 99.5"]},
 
         {"kind":"where","text":"","code":{"uiScale":["3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can use the style API to configure client properties for components.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The style API allows you to configure client properties for components.\n            Client properties are a way to attach custom data to a component.\n            Usually the purpose of client properties is to give a particular look and feel\n            implementation a way to configure how a particular component should be painted.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple toggle button with a few abitrary properties.","code":["var ui =","        UI.toggleButton(\"Toggle Me\").withStyle( it -> it","            .property(\"my.custom.property.1\", \"Hello World!\")","            .property(\"my.custom.property.2\", \"42\")","            .property(\"my.custom.property.3\", \"true\")","        )"]},
+
+        {"kind":"expect","text":"The component indeed has the specified client properties!","code":["ui.component.getClientProperty(\"my.custom.property.1\") == \"Hello World!\"","ui.component.getClientProperty(\"my.custom.property.2\") == \"42\"","ui.component.getClientProperty(\"my.custom.property.3\") == \"true\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }
