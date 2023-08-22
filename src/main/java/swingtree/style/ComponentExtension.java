@@ -128,10 +128,8 @@ public final class ComponentExtension<C extends JComponent>
             }
         }
 
-        if ( !_stylePainter.isPainting() ) {
-            Style style = _calculateAndApplyStyle(false);
-            _stylePainter = _stylePainter.beginPaintingWith( style );
-        }
+        Style style = _calculateAndApplyStyle(false);
+        _stylePainter = _stylePainter.beginPaintingWith( style );
     }
 
     public void endPainting() {

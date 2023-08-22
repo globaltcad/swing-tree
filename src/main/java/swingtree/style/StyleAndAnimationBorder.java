@@ -22,7 +22,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     private final Border _formerBorder;
     private final boolean _borderWasNotPainted;
 
-    private Insets _currentInsets;
+    private Insets _currentInsets = null;
     private Insets _currentMarginInsets = new Insets(0, 0, 0, 0);
     private Insets _currentPaddingInsets = new Insets(0, 0, 0, 0);
 
@@ -51,23 +51,17 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     {
         _compExt.establishStyleAndBeginPainting(g);
 
-        _checkIfInsetsChanged();
-
-
         // We remember the clip:
         Shape formerClip = g.getClip();
 
         g.setClip(_compExt.getMainClip());
 
-        if ( _compExt.getCurrentStylePainter().isPainting() ) {
-            _paintBorderAndBorderLayerStyles( (Graphics2D) g );
-            if ( _formerBorder != null && !_borderWasNotPainted ) {
-                BorderStyle borderStyle = _compExt.getCurrentStylePainter().getStyle().border();
-                if ( !borderStyle.isVisible() )
-                    _paintFormerBorder(c, g, x, y, width, height);
-            }
-        } else if ( _formerBorder != null && !_borderWasNotPainted )
-            _paintFormerBorder(c, g, x, y, width, height);
+        _paintBorderAndBorderLayerStyles( (Graphics2D) g );
+        if ( _formerBorder != null && !_borderWasNotPainted ) {
+            BorderStyle borderStyle = _compExt.getCurrentStylePainter().getStyle().border();
+            if ( !borderStyle.isVisible() )
+                _paintFormerBorder(c, g, x, y, width, height);
+        }
 
         if ( g.getClip() != formerClip )
             g.setClip(formerClip);
@@ -109,12 +103,9 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
 
     @Override
     public Insets getBorderInsets( Component c ) {
-        _checkIfInsetsChanged();
+        if ( _currentInsets == null )
+            _compExt.calculateApplyAndInstallStyle(false);
         return _currentInsets;
-    }
-
-    private void _checkIfInsetsChanged() {
-        _compExt.establishStyleAndBeginPainting(null);
     }
 
     void recalculateInsets(Style style)

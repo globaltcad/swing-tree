@@ -8,7 +8,6 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -19,7 +18,7 @@ import java.util.function.Function;
  */
 final class StylePainter<C extends JComponent>
 {
-    private static final StylePainter<?> _NONE = new StylePainter<>(Style.none(), false);
+    private static final StylePainter<?> _NONE = new StylePainter<>(Style.none());
 
     public static <C extends JComponent> StylePainter<C> none() { return (StylePainter<C>) _NONE; }
 
@@ -28,34 +27,30 @@ final class StylePainter<C extends JComponent>
     }
 
     private final Style _style;
-    private final boolean _isPainting;
 
     // Cached Area object representing the inner component area:
     private Area _baseArea = null;
 
 
-    private StylePainter( Style style, boolean isPainting ) {
+    private StylePainter( Style style ) {
         _style = Objects.requireNonNull(style);
-        _isPainting = isPainting;
     }
 
     StylePainter<C> beginPaintingWith( Style style ) {
         if ( Style.none().equals(style) ) return none();
-        return new StylePainter<>( style, true );
+        return new StylePainter<>( style);
     }
 
     StylePainter<C> endPainting() {
-        return new StylePainter<>( _style, false );
+        return new StylePainter<>( _style);
     }
 
     StylePainter<C> update( Style style ) {
         if ( Style.none().equals(style) ) return none();
-        return new StylePainter<>( style, _isPainting );
+        return new StylePainter<>( style);
     }
 
     public Style getStyle() { return _style; }
-
-    public boolean isPainting() { return _isPainting; }
 
     private Area _getBaseArea(JComponent comp)
     {
@@ -67,9 +62,6 @@ final class StylePainter<C extends JComponent>
 
     public void renderBackgroundStyle( Graphics2D g2d, JComponent comp )
     {
-        if ( !this.isPainting() )
-            return;
-
         _baseArea = null;
 
         // We remember if antialiasing was enabled before we render:
@@ -156,9 +148,6 @@ final class StylePainter<C extends JComponent>
 
     public void paintBorderStyle( Graphics2D g2d, JComponent component )
     {
-        if ( !this.isPainting() )
-            return;
-
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
 
@@ -180,9 +169,6 @@ final class StylePainter<C extends JComponent>
 
     public void paintForegroundStyle( Graphics2D g2d, JComponent component )
     {
-        if ( !this.isPainting() )
-            return;
-
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
 
