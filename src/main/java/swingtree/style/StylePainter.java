@@ -18,7 +18,7 @@ import java.util.function.Function;
  */
 final class StylePainter<C extends JComponent>
 {
-    private static final StylePainter<?> _NONE = new StylePainter<>(Style.none());
+    private static final StylePainter<?> _NONE = new StylePainter<>(Style.none(), null, false);
 
     public static <C extends JComponent> StylePainter<C> none() { return (StylePainter<C>) _NONE; }
 
@@ -26,31 +26,44 @@ final class StylePainter<C extends JComponent>
         return UI.scale() < 1.5;
     }
 
+
     private final Style _style;
+    private final Shape _mainClip;
+    private final boolean _mainClipEstablished;
+
 
     // Cached Area object representing the inner component area:
     private Area _baseArea = null;
 
 
-    private StylePainter( Style style ) {
+    private StylePainter( Style style, Shape mainClip, boolean mainClipEstablished ) {
         _style = Objects.requireNonNull(style);
+        _mainClip = mainClip;
+        _mainClipEstablished = mainClipEstablished;
     }
 
-    StylePainter<C> beginPaintingWith( Style style ) {
+    StylePainter<C> beginPaintingWith( Style style, Graphics g ) {
         if ( Style.none().equals(style) ) return none();
-        return new StylePainter<>( style);
+        if ( !_mainClipEstablished ) {
+            Shape mainClip = g.getClip();
+            boolean mainClipEstablished = true;
+            return new StylePainter<>( style, mainClip, mainClipEstablished);
+        }
+        return new StylePainter<>( style, _mainClip, _mainClipEstablished);
     }
 
     StylePainter<C> endPainting() {
-        return new StylePainter<>( _style);
+        return new StylePainter<>( _style, null, false);
     }
 
     StylePainter<C> update( Style style ) {
         if ( Style.none().equals(style) ) return none();
-        return new StylePainter<>( style);
+        return new StylePainter<>( style, _mainClip, _mainClipEstablished);
     }
 
     public Style getStyle() { return _style; }
+
+    public Shape getMainClip() { return _mainClip; }
 
     private Area _getBaseArea(JComponent comp)
     {
@@ -195,7 +208,7 @@ final class StylePainter<C extends JComponent>
                 Resetting the clip here is visually especially very important for rounded borders and shadows.
             */
             Shape formerClip = g2d.getClip();
-            g2d.setClip(ComponentExtension.from(comp).getMainClip());
+            g2d.setClip(_mainClip);
             try {
                 int leftBorderWidth   = _style.border().widths().left().orElse(0);
                 int topBorderWidth    = _style.border().widths().top().orElse(0);

@@ -52,9 +52,6 @@ public final class ComponentExtension<C extends JComponent>
 
     private Color _initialBackgroundColor = null;
 
-    private Shape _mainClip = null;
-    private boolean _mainClipEstablished = false;
-
 
     private ComponentExtension( C owner ) {
         _owner = Objects.requireNonNull(owner);
@@ -64,7 +61,7 @@ public final class ComponentExtension<C extends JComponent>
 
     StylePainter<C> getCurrentStylePainter() { return _stylePainter; }
 
-    Shape getMainClip() { return _mainClip; }
+    Shape getMainClip() { return _stylePainter.getMainClip(); }
 
     public void addStyling( Styler<C> styler ) {
         Objects.requireNonNull(styler);
@@ -121,20 +118,11 @@ public final class ComponentExtension<C extends JComponent>
     public void updateUI() { _laf.updateUIFor(_owner); }
 
     void establishStyleAndBeginPainting( Graphics g ) {
-        if ( g != null ) {
-            if ( !_mainClipEstablished ) {
-                _mainClip = g.getClip();
-                _mainClipEstablished = true;
-            }
-        }
-
         Style style = _calculateAndApplyStyle(false);
-        _stylePainter = _stylePainter.beginPaintingWith( style );
+        _stylePainter = _stylePainter.beginPaintingWith( style, g );
     }
 
     public void endPainting() {
-        _mainClip = null;
-        _mainClipEstablished = false;
         _stylePainter = _stylePainter.endPainting();
     }
 
