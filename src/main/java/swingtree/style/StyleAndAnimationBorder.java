@@ -48,9 +48,10 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     @Override
     public void paintBorder( Component c, Graphics g, int x, int y, int width, int height )
     {
+        _compExt.establishStyleAndBeginPainting(g);
+
         _checkIfInsetsChanged();
 
-        _compExt._establishCurrentMainPaintClip(g);
 
         // We remember the clip:
         Shape formerClip = g.getClip();
@@ -120,7 +121,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     }
 
     private Insets _calculateInsets() {
-        _compExt._establishStyleAndBeginPainting();
+        _compExt.establishStyleAndBeginPainting(null);
 
         _currentMarginInsets = _compExt.getCurrentStylePainter()
                                         .calculateMarginInsets()

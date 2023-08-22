@@ -1201,8 +1201,8 @@ final class StylePainter<C extends JComponent>
 
     public Optional<Insets> calculateMarginInsets()
     {
-        if ( !this.isPainting() )
-            return Optional.empty();
+        //if ( !this.isPainting() )
+        //    return Optional.empty();
 
         int left   = _style.margin().left().orElse(0);
         int top    = _style.margin().top().orElse(0);
@@ -1220,8 +1220,8 @@ final class StylePainter<C extends JComponent>
 
     public Optional<Insets> calculatePaddingInsets()
     {
-        if ( !this.isPainting() )
-            return Optional.empty();
+        //if ( !this.isPainting() )
+        //    return Optional.empty();
 
         int left   = _style.padding().left().orElse(0);
         int top    = _style.padding().top().orElse(0);

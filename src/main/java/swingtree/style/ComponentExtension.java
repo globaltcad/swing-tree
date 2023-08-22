@@ -44,7 +44,7 @@ public final class ComponentExtension<C extends JComponent>
 
     private final List<String> _styleGroups = new ArrayList<>(0);
 
-    private StylePainter<C> _currentStylePainter = StylePainter.none();
+    private StylePainter<C> _stylePainter = StylePainter.none();
 
     private DynamicLaF _laf = DynamicLaF.none();
 
@@ -62,7 +62,7 @@ public final class ComponentExtension<C extends JComponent>
 
     C getOwner() { return _owner; }
 
-    StylePainter<C> getCurrentStylePainter() { return _currentStylePainter; }
+    StylePainter<C> getCurrentStylePainter() { return _stylePainter; }
 
     Shape getMainClip() { return _mainClip; }
 
@@ -89,15 +89,8 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     public void installStyle( Style style ) {
-        _currentStylePainter = StylePainter.none(); // We reset the style painter so that the style is applied again!
-        _currentStylePainter = _currentStylePainter.update(style);
-    }
-
-    void _establishCurrentMainPaintClip(Graphics g) {
-        if ( !_mainClipEstablished ) {
-            _mainClip = g.getClip();
-            _mainClipEstablished = true;
-        }
+        _stylePainter = StylePainter.none(); // We reset the style painter so that the style is applied again!
+        _stylePainter = _stylePainter.update(style);
     }
 
     public void setStyleGroups( String... styleName ) {
@@ -127,11 +120,24 @@ public final class ComponentExtension<C extends JComponent>
 
     public void updateUI() { _laf.updateUIFor(_owner); }
 
-    StylePainter<C> _establishStyleAndBeginPainting() {
-        if ( !_currentStylePainter.isPainting() )
-            _currentStylePainter = _currentStylePainter.beginPaintingWith( _calculateAndApplyStyle(false) );
+    void establishStyleAndBeginPainting( Graphics g ) {
+        if ( g != null ) {
+            if ( !_mainClipEstablished ) {
+                _mainClip = g.getClip();
+                _mainClipEstablished = true;
+            }
+        }
 
-        return _currentStylePainter;
+        if ( !_stylePainter.isPainting() ) {
+            Style style = _calculateAndApplyStyle(false);
+            _stylePainter = _stylePainter.beginPaintingWith( style );
+        }
+    }
+
+    public void endPainting() {
+        _mainClip = null;
+        _mainClipEstablished = false;
+        _stylePainter = _stylePainter.endPainting();
     }
 
     public void paintBackgroundStyle( Graphics g )
@@ -142,17 +148,17 @@ public final class ComponentExtension<C extends JComponent>
         if ( _componentIsDeclaredInUI(_owner) )
             _paintBackground(g);
         else
-            _currentStylePainter = _currentStylePainter.endPainting(); // custom style rendering unfortunately not possible for this component :/
+            endPainting(); // custom style rendering unfortunately not possible for this component :/
     }
 
     void _paintBackground(Graphics g)
     {
-        _mainClip = null;
-        _mainClipEstablished = false;
-        _establishCurrentMainPaintClip(g);
+        // If end the painting of the last painting cycle if it was not already ended:
+        endPainting();
 
-        _currentStylePainter = _currentStylePainter.beginPaintingWith( _calculateAndApplyStyle(false) );
-        _currentStylePainter.renderBackgroundStyle( (Graphics2D) g, _owner );
+        establishStyleAndBeginPainting(g);
+
+        _stylePainter.renderBackgroundStyle( (Graphics2D) g, _owner );
     }
 
 
@@ -182,7 +188,10 @@ public final class ComponentExtension<C extends JComponent>
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    public void paintForegroundStyle( Graphics2D g2d ) {
+    public void paintForegroundStyle( Graphics2D g2d )
+    {
+        establishStyleAndBeginPainting(g2d);
+
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
         // Reset antialiasing to its previous state:
@@ -192,7 +201,7 @@ public final class ComponentExtension<C extends JComponent>
         // We remember the clip:
         Shape formerClip = g2d.getClip();
 
-        _currentStylePainter.paintForegroundStyle(g2d, _owner);
+        _stylePainter.paintForegroundStyle(g2d, _owner);
 
         // We restore the clip:
         if ( g2d.getClip() != formerClip )
@@ -208,7 +217,7 @@ public final class ComponentExtension<C extends JComponent>
 
         Objects.requireNonNull(style);
 
-        if ( _currentStylePainter.getStyle().equals(style) && !force )
+        if ( _stylePainter.getStyle().equals(style) && !force )
             return style;
 
         final Style.Report styleReport = style.getReport();
