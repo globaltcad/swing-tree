@@ -217,6 +217,11 @@ public final class ComponentExtension<C extends JComponent>
 
         Objects.requireNonNull(style);
 
+        if ( _owner.getBorder() instanceof StyleAndAnimationBorder<?> ) {
+            StyleAndAnimationBorder<C> border = (StyleAndAnimationBorder<C>) _owner.getBorder();
+            border.recalculateInsets(style);
+        }
+
         if ( _stylePainter.getStyle().equals(style) && !force )
             return style;
 

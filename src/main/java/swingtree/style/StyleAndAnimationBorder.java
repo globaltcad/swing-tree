@@ -5,6 +5,7 @@ import swingtree.api.Styler;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
+import java.util.Optional;
 
 /**
  *  A custom {@link Border} implementation which is capable of painting large parts of
@@ -113,35 +114,29 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     }
 
     private void _checkIfInsetsChanged() {
-        Insets insets = _calculateInsets();
+        _compExt.establishStyleAndBeginPainting(null);
+    }
+
+    void recalculateInsets(Style style)
+    {
+        _currentMarginInsets  = calculateMarginInsets(style).orElse(_currentMarginInsets);
+        _currentPaddingInsets = calculatePaddingInsets(style).orElse(_currentPaddingInsets);
+
+        Insets insets = calculateBorderInsets(style,
+                                _formerBorder == null
+                                    ? new Insets(0, 0, 0, 0)
+                                    : _formerBorder.getBorderInsets(_compExt.getOwner())
+                            )
+                            .orElseGet(() ->
+                                _formerBorder == null
+                                    ? new Insets(0, 0, 0, 0)
+                                    : _formerBorder.getBorderInsets(_compExt.getOwner())
+                            );
+
         if ( !insets.equals(_currentInsets) ) {
             _currentInsets = insets;
             _compExt.getOwner().revalidate();
         }
-    }
-
-    private Insets _calculateInsets() {
-        _compExt.establishStyleAndBeginPainting(null);
-
-        _currentMarginInsets = _compExt.getCurrentStylePainter()
-                                        .calculateMarginInsets()
-                                        .orElse(_currentMarginInsets);
-
-        _currentPaddingInsets = _compExt.getCurrentStylePainter()
-                                        .calculatePaddingInsets()
-                                        .orElse(_currentPaddingInsets);
-
-        return _compExt.getCurrentStylePainter()
-                        .calculateBorderInsets(
-                            _formerBorder == null
-                                ? new Insets(0, 0, 0, 0)
-                                : _formerBorder.getBorderInsets(_compExt.getOwner())
-                        )
-                        .orElseGet(() ->
-                            _formerBorder == null
-                                ? new Insets(0, 0, 0, 0)
-                                : _formerBorder.getBorderInsets(_compExt.getOwner())
-                        );
     }
 
     Insets getFormerBorderInsets() {
@@ -155,5 +150,51 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
 
     @Override
     public boolean isBorderOpaque() { return false; }
+
+
+    public static Optional<Insets> calculateBorderInsets( Style style, Insets formerInsets )
+    {
+        int left      = style.margin().left().orElse(formerInsets.left);
+        int top       = style.margin().top().orElse(formerInsets.top);
+        int right     = style.margin().right().orElse(formerInsets.right);
+        int bottom    = style.margin().bottom().orElse(formerInsets.bottom);
+        // Add padding:
+        left   += style.padding().left().orElse(0);
+        top    += style.padding().top().orElse(0);
+        right  += style.padding().right().orElse(0);
+        bottom += style.padding().bottom().orElse(0);
+        // Add border widths:
+        left   += Math.max(style.border().widths().left().orElse(0),   0);
+        top    += Math.max(style.border().widths().top().orElse(0),    0);
+        right  += Math.max(style.border().widths().right().orElse(0),  0);
+        bottom += Math.max(style.border().widths().bottom().orElse(0), 0);
+
+        return Optional.of(new Insets(top, left, bottom, right));
+    }
+
+    public static Optional<Insets> calculateMarginInsets( Style style )
+    {
+        int left   = style.margin().left().orElse(0);
+        int top    = style.margin().top().orElse(0);
+        int right  = style.margin().right().orElse(0);
+        int bottom = style.margin().bottom().orElse(0);
+
+        // Add border widths:
+        left   += Math.max(style.border().widths().left().orElse(0),   0);
+        top    += Math.max(style.border().widths().top().orElse(0),    0);
+        right  += Math.max(style.border().widths().right().orElse(0),  0);
+        bottom += Math.max(style.border().widths().bottom().orElse(0), 0);
+
+        return Optional.of(new Insets(top, left, bottom, right));
+    }
+
+    public static Optional<Insets> calculatePaddingInsets( Style style )
+    {
+        int left   = style.padding().left().orElse(0);
+        int top    = style.padding().top().orElse(0);
+        int right  = style.padding().right().orElse(0);
+        int bottom = style.padding().bottom().orElse(0);
+        return Optional.of(new Insets(top, left, bottom, right));
+    }
 
 }
