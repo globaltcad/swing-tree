@@ -56,208 +56,13 @@ import java.util.function.Supplier;
  */
 public final class UI
 {
-    /**
-     * @return The current UI scale factor, which is used for DPI aware painting and layouts.
-     */
-    public static float scale() { return SwingTree.get().getUIScale().getUserScaleFactor(); }
-
-    /**
-     * Multiplies the given float value by the user scale factor.
-     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
-     *
-     * @param value The float value to scale.
-     * @return The scaled float value.
-     */
-    public static float scale( float value ) { return SwingTree.get().getUIScale().scale( value ); }
-
-    /**
-     * Multiplies the given double value by the user scale factor.
-     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
-     *
-     * @param value The double value to scale.
-     * @return The scaled double value.
-     */
-    public static double scale( double value ) { return SwingTree.get().getUIScale().scale( value ); }
-
-    /**
-     * Multiplies the given int value by the user scale factor and rounds the result.
-     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
-     * @param value The int value to scale.
-     * @return The scaled int value.
-     */
-    public static int scale( int value ) { return SwingTree.get().getUIScale().scale( value ); }
-
-    /**
-     * Divides the given float value by the user scale factor.
-     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
-     *
-     * @param value The float value to unscale.
-     * @return The unscaled float value.
-     */
-    public static float unscale( float value ) { return SwingTree.get().getUIScale().unscale( value ); }
-
-    /**
-     * Divides the given int value by the user scale factor and rounds the result.
-     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
-     * @param value The int value to unscale.
-     * @return The unscaled int value.
-     */
-    public static int unscale( int value ) { return SwingTree.get().getUIScale().unscale( value ); }
-
-    /**
-     * If user scale factor is not 1, scale the given graphics context by invoking
-     * {@link Graphics2D#scale(double, double)} with user scale factor.
-     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
-     *
-     * @param g The graphics context to scale.
-     */
-    public static void scale( Graphics2D g ) { SwingTree.get().getUIScale().scaleGraphics( g ); }
-
-    /**
-     * Scales the given dimension with the user scale factor.
-     * <p>
-     * If user scale factor is 1, then the given dimension is simply returned.
-     * Otherwise, a new instance of {@link Dimension} or {@link javax.swing.plaf.DimensionUIResource}
-     * is returned, depending on whether the passed dimension implements {@link javax.swing.plaf.UIResource}.
-     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
-     *
-     * @param dimension The dimension to scale.
-     * @return The scaled dimension.
-     */
-    public static Dimension scale( Dimension dimension ) { return SwingTree.get().getUIScale().scale(dimension); }
-
-    /**
-     * Returns a rectangle from the given rectangle with the user scale factor applied.
-     * <p>
-     * If user scale factor is 1, then the given rectangle is simply returned.
-     * Otherwise, a new instance of {@link Rectangle} or {@link javax.swing.plaf.UIResource} is returned.
-     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
-     * @param rectangle The rectangle to scale.
-     * @return The scaled rectangle.
-     */
-    public static Rectangle scale( Rectangle rectangle ) { return SwingTree.get().getUIScale().scale(rectangle); }
-
-    /**
-     * Returns a rectangle from the given rectangle with the user scale factor applied.
-     * <p>
-     * If user scale factor is 1, then the given rectangle is simply returned.
-     * Otherwise, a new instance of {@link Rectangle} or {@link javax.swing.plaf.UIResource} is returned.
-     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
-     *
-     * @param rectangle The rectangle to scale.
-     * @return The scaled rectangle.
-     */
-    public static RoundRectangle2D scale( RoundRectangle2D rectangle ) { return SwingTree.get().getUIScale().scale(rectangle); }
-
-    /**
-     * Scales the given insets with the user scale factor.
-     * <p>
-     * If user scale factor is 1, then the given insets is simply returned.
-     * Otherwise, a new instance of {@link Insets} or {@link javax.swing.plaf.InsetsUIResource}
-     * is returned, depending on whether the passed dimension implements {@link javax.swing.plaf.UIResource}.
-     * This is essentially a delegate for {@link SwingTree.UIScale#scale(Insets)}.
-     *
-     * @param insets The insets to scale.
-     * @return The scaled insets.
-     */
-    public static Insets scale( Insets insets ) { return SwingTree.get().getUIScale().scale(insets); }
-
-    /**
-     *  Sets a {@link StyleSheet} which will be applied to all SwingTree UIs defined in the subsequent lambda scope.
-     *  This method allows to switch between different style sheets.
-     *  <p>
-     * 	You can switch to a style sheet like so: <br>
-     * 	<pre>{@code
-     * 	use(new MyCustomStyeSheet(), ()->
-     *      UI.panel("fill")
-     *      .add( "shrink", UI.label( "Username:" ) )
-     *      .add( "grow, pushx", UI.textField("User1234..42") )
-     *      .add( label( "Password:" ) )
-     *      .add( "grow, pushx", UI.passwordField("child-birthday") )
-     *      .add( "span",
-     *          UI.button("Login!").onClick( it -> {...} )
-     *      )
-     *  );
-     *  }</pre>
-     *
-     * @return the result of the given scope, usually a {@link JComponent} or SwingTree UI.
-     */
-    public static <T> T use( StyleSheet styleSheet, Supplier<T> scope ) {
-        if ( !UI.thisIsUIThread() )
-            try {
-                return runAndGet( ()-> use(styleSheet, scope) );
-            } catch (InvocationTargetException | InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-
-        SwingTree swingTreeContext = SwingTree.get();
-        StyleSheet oldStyleSheet = swingTreeContext.getStyleSheet().orElse(null);
-        swingTreeContext.setStyleSheet(styleSheet);
-        try {
-            T result = scope.get();
-            if ( result instanceof JComponent )
-                ComponentExtension.from((JComponent) result).calculateApplyAndInstallStyle(true);
-            if ( result instanceof UIForAnySwing )
-                ComponentExtension.from(((UIForAnySwing<?,?>) result).getComponent()).calculateApplyAndInstallStyle(true);
-
-            return result;
-        } finally {
-            swingTreeContext.setStyleSheet(oldStyleSheet);
-        }
-    }
-
-    /**
-     *  Sets the {@link EventProcessor} to be used for all subsequent UI building operations.
-     *  This method allows to switch between different event processing strategies.
-     *  In particular, the {@link EventProcessor#DECOUPLED} is recommended to be used for
-     *  proper decoupling of the UI thread from the application logic.
-     *  <p>
-     * 	You can switch to the decoupled event processor like so: <br>
-     * 	<pre>{@code
-     * 	use(EventProcessor.DECOUPLED, ()->
-     *      UI.panel("fill")
-     *      .add( "shrink", UI.label( "Username:" ) )
-     *      .add( "grow, pushx", UI.textField("User1234..42") )
-     *      .add( label( "Password:" ) )
-     *      .add( "grow, pushx", UI.passwordField("child-birthday") )
-     *      .add( "span",
-     *          UI.button("Login!").onClick( it -> {...} )
-     *      )
-     *  );
-     *  }</pre>
-     *
-     * @param processor The event processor to be used for all subsequent UI building operations
-     * @param scope The scope of the event processor to be used for all subsequent UI building operations.
-     *              The value returned by the given scope is returned by this method.
-     * @return The value returned by the given scope.
-     * @param <T> The type of the value returned by the given scope.
-     */
-    public static <T> T use( EventProcessor processor, Supplier<T> scope )
-    {
-        if ( !UI.thisIsUIThread() )
-            try {
-                return runAndGet(()-> use(processor, scope));
-            } catch (InvocationTargetException | InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-
-        SwingTree swingTreeContext = SwingTree.get();
-        EventProcessor oldProcessor = swingTreeContext.getEventProcessor();
-        swingTreeContext.setEventProcessor(processor);
-        try {
-            return scope.get();
-        } finally {
-            swingTreeContext.setEventProcessor(oldProcessor);
-        }
-    }
-
     // Common Mig layout constants:
     public static LayoutAttr FILL     = LayoutAttr.of("fill");
     public static LayoutAttr FILL_X     = LayoutAttr.of("fillx");
     public static LayoutAttr FILL_Y     = LayoutAttr.of("filly");
-    public static LayoutAttr INS(int insets) { return LayoutAttr.of("ins " + insets); }
+    public static LayoutAttr INS(int insets) { return INSETS(insets); }
     public static LayoutAttr INSETS(int insets) { return LayoutAttr.of("insets " + insets); }
-    public static LayoutAttr INS(int top, int left, int bottom, int right) { return LayoutAttr.of("insets " + top + " " + left + " " + bottom + " " + right); }
+    public static LayoutAttr INS(int top, int left, int bottom, int right) { return INSETS(top, left, bottom, right); }
     public static LayoutAttr INSETS(int top, int left, int bottom, int right) { return LayoutAttr.of("insets " + top + " " + left + " " + bottom + " " + right); }
     public static LayoutAttr WRAP(int times) { return LayoutAttr.of( "wrap " + times ); }
     public static LayoutAttr GAP_REL(int size) { return LayoutAttr.of( "gap rel " + size ); }
@@ -309,9 +114,10 @@ public final class UI
     public static CompAttr ALIGN_Y_TOP = CompAttr.of("aligny top");
     public static CompAttr ALIGN( Position pos ) { return CompAttr.of(pos.toMigAlign()); }
     public static CompAttr TOP = CompAttr.of("top");
+    public static CompAttr RIGHT = CompAttr.of("right");
     public static CompAttr BOTTOM = CompAttr.of("bottom");
     public static CompAttr LEFT = CompAttr.of("left");
-    public static CompAttr RIGHT = CompAttr.of("right");
+    public static CompAttr CENTER = CompAttr.of("center");
     public static CompAttr GAP_LEFT_PUSH = CompAttr.of("gapleft push");
     public static CompAttr GAP_RIGHT_PUSH = CompAttr.of("gapright push");
     public static CompAttr GAP_TOP_PUSH = CompAttr.of("gaptop push");
@@ -321,49 +127,6 @@ public final class UI
     public static CompAttr DOCK_EAST  = CompAttr.of("dock east");
     public static CompAttr DOCK_WEST  = CompAttr.of("dock west");
     public static CompAttr DOCK( Position pos ) { return CompAttr.of("dock " + pos.toDirectionString()); }
-
-    /**
-     * Loads an icon from the classpath or from a file.
-     * @param path The path to the icon. It can be a classpath resource or a file path.
-     * @return The icon.
-     */
-    public static ImageIcon loadIcon( String path ) {
-        Map<String, ImageIcon> cache = SwingTree.get().getIconCache();
-        ImageIcon icon = cache.get(path);
-        if ( icon == null ) {
-            icon = _loadIcon(path);
-            cache.put(path, icon);
-        }
-        return icon;
-    }
-
-    /**
-     * Loads an icon from the classpath or from a file.
-     * @param path The path to the icon. It can be a classpath resource or a file path.
-     * @return The icon.
-     */
-    public static ImageIcon _loadIcon( String path ) {
-        // First we make the path platform independent:
-        path = path.replace('\\', '/');
-        // Then we try to load the icon url from the classpath:
-        URL url = UI.class.getResource(path);
-        // We check if the url is null:
-        if ( url == null ) {
-            // It is, let's do some troubleshooting:
-            if ( !path.startsWith("/") )
-                url = UI.class.getResource("/" + path);
-
-            if ( url == null ) // Still null? Let's try to load it as a file:
-                try {
-                    url = new File(path).toURI().toURL();
-                } catch (MalformedURLException e) {
-                    throw new RuntimeException(e);
-                }
-        }
-        return new ImageIcon(url);
-    }
-
-    private UI(){} // This is a static API
 
     /**
      *  An enum set of all the available swing cursors which
@@ -711,6 +474,10 @@ public final class UI
         EVERY
     }
 
+    /**
+     *  Use this to specify the placement of an image as part of the {@link ImageStyle} through
+     *  the {@link ImageStyle#placement(Placement)} method exposed by the style API (see {@link UIForAnySwing#withStyle(Styler)}).
+     */
     public enum Placement
     {
         TOP, LEFT, BOTTOM, RIGHT,
@@ -751,6 +518,244 @@ public final class UI
             throw new RuntimeException();
         }
     }
+
+    /**
+     * @return The current UI scale factor, which is used for DPI aware painting and layouts.
+     */
+    public static float scale() { return SwingTree.get().getUIScale().getUserScaleFactor(); }
+
+    /**
+     * Multiplies the given float value by the user scale factor.
+     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
+     *
+     * @param value The float value to scale.
+     * @return The scaled float value.
+     */
+    public static float scale( float value ) { return SwingTree.get().getUIScale().scale( value ); }
+
+    /**
+     * Multiplies the given double value by the user scale factor.
+     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
+     *
+     * @param value The double value to scale.
+     * @return The scaled double value.
+     */
+    public static double scale( double value ) { return SwingTree.get().getUIScale().scale( value ); }
+
+    /**
+     * Multiplies the given int value by the user scale factor and rounds the result.
+     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
+     * @param value The int value to scale.
+     * @return The scaled int value.
+     */
+    public static int scale( int value ) { return SwingTree.get().getUIScale().scale( value ); }
+
+    /**
+     * Divides the given float value by the user scale factor.
+     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
+     *
+     * @param value The float value to unscale.
+     * @return The unscaled float value.
+     */
+    public static float unscale( float value ) { return SwingTree.get().getUIScale().unscale( value ); }
+
+    /**
+     * Divides the given int value by the user scale factor and rounds the result.
+     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
+     * @param value The int value to unscale.
+     * @return The unscaled int value.
+     */
+    public static int unscale( int value ) { return SwingTree.get().getUIScale().unscale( value ); }
+
+    /**
+     * If user scale factor is not 1, scale the given graphics context by invoking
+     * {@link Graphics2D#scale(double, double)} with user scale factor.
+     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
+     *
+     * @param g The graphics context to scale.
+     */
+    public static void scale( Graphics2D g ) { SwingTree.get().getUIScale().scaleGraphics( g ); }
+
+    /**
+     * Scales the given dimension with the user scale factor.
+     * <p>
+     * If user scale factor is 1, then the given dimension is simply returned.
+     * Otherwise, a new instance of {@link Dimension} or {@link javax.swing.plaf.DimensionUIResource}
+     * is returned, depending on whether the passed dimension implements {@link javax.swing.plaf.UIResource}.
+     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
+     *
+     * @param dimension The dimension to scale.
+     * @return The scaled dimension.
+     */
+    public static Dimension scale( Dimension dimension ) { return SwingTree.get().getUIScale().scale(dimension); }
+
+    /**
+     * Returns a rectangle from the given rectangle with the user scale factor applied.
+     * <p>
+     * If user scale factor is 1, then the given rectangle is simply returned.
+     * Otherwise, a new instance of {@link Rectangle} or {@link javax.swing.plaf.UIResource} is returned.
+     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
+     * @param rectangle The rectangle to scale.
+     * @return The scaled rectangle.
+     */
+    public static Rectangle scale( Rectangle rectangle ) { return SwingTree.get().getUIScale().scale(rectangle); }
+
+    /**
+     * Returns a rectangle from the given rectangle with the user scale factor applied.
+     * <p>
+     * If user scale factor is 1, then the given rectangle is simply returned.
+     * Otherwise, a new instance of {@link Rectangle} or {@link javax.swing.plaf.UIResource} is returned.
+     * See {@link swingtree.SwingTree.UIScale} for more information about how the user scale factor is determined.
+     *
+     * @param rectangle The rectangle to scale.
+     * @return The scaled rectangle.
+     */
+    public static RoundRectangle2D scale( RoundRectangle2D rectangle ) { return SwingTree.get().getUIScale().scale(rectangle); }
+
+    /**
+     * Scales the given insets with the user scale factor.
+     * <p>
+     * If user scale factor is 1, then the given insets is simply returned.
+     * Otherwise, a new instance of {@link Insets} or {@link javax.swing.plaf.InsetsUIResource}
+     * is returned, depending on whether the passed dimension implements {@link javax.swing.plaf.UIResource}.
+     * This is essentially a delegate for {@link SwingTree.UIScale#scale(Insets)}.
+     *
+     * @param insets The insets to scale.
+     * @return The scaled insets.
+     */
+    public static Insets scale( Insets insets ) { return SwingTree.get().getUIScale().scale(insets); }
+
+    /**
+     *  Sets a {@link StyleSheet} which will be applied to all SwingTree UIs defined in the subsequent lambda scope.
+     *  This method allows to switch between different style sheets.
+     *  <p>
+     * 	You can switch to a style sheet like so: <br>
+     * 	<pre>{@code
+     * 	use(new MyCustomStyeSheet(), ()->
+     *      UI.panel("fill")
+     *      .add( "shrink", UI.label( "Username:" ) )
+     *      .add( "grow, pushx", UI.textField("User1234..42") )
+     *      .add( label( "Password:" ) )
+     *      .add( "grow, pushx", UI.passwordField("child-birthday") )
+     *      .add( "span",
+     *          UI.button("Login!").onClick( it -> {...} )
+     *      )
+     *  );
+     *  }</pre>
+     *
+     * @return the result of the given scope, usually a {@link JComponent} or SwingTree UI.
+     */
+    public static <T> T use( StyleSheet styleSheet, Supplier<T> scope ) {
+        if ( !UI.thisIsUIThread() )
+            try {
+                return runAndGet( ()-> use(styleSheet, scope) );
+            } catch (InvocationTargetException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+        SwingTree swingTreeContext = SwingTree.get();
+        StyleSheet oldStyleSheet = swingTreeContext.getStyleSheet().orElse(null);
+        swingTreeContext.setStyleSheet(styleSheet);
+        try {
+            T result = scope.get();
+            if ( result instanceof JComponent )
+                ComponentExtension.from((JComponent) result).calculateApplyAndInstallStyle(true);
+            if ( result instanceof UIForAnySwing )
+                ComponentExtension.from(((UIForAnySwing<?,?>) result).getComponent()).calculateApplyAndInstallStyle(true);
+
+            return result;
+        } finally {
+            swingTreeContext.setStyleSheet(oldStyleSheet);
+        }
+    }
+
+    /**
+     *  Sets the {@link EventProcessor} to be used for all subsequent UI building operations.
+     *  This method allows to switch between different event processing strategies.
+     *  In particular, the {@link EventProcessor#DECOUPLED} is recommended to be used for
+     *  proper decoupling of the UI thread from the application logic.
+     *  <p>
+     * 	You can switch to the decoupled event processor like so: <br>
+     * 	<pre>{@code
+     * 	use(EventProcessor.DECOUPLED, ()->
+     *      UI.panel("fill")
+     *      .add( "shrink", UI.label( "Username:" ) )
+     *      .add( "grow, pushx", UI.textField("User1234..42") )
+     *      .add( label( "Password:" ) )
+     *      .add( "grow, pushx", UI.passwordField("child-birthday") )
+     *      .add( "span",
+     *          UI.button("Login!").onClick( it -> {...} )
+     *      )
+     *  );
+     *  }</pre>
+     *
+     * @param processor The event processor to be used for all subsequent UI building operations
+     * @param scope The scope of the event processor to be used for all subsequent UI building operations.
+     *              The value returned by the given scope is returned by this method.
+     * @return The value returned by the given scope.
+     * @param <T> The type of the value returned by the given scope.
+     */
+    public static <T> T use( EventProcessor processor, Supplier<T> scope )
+    {
+        if ( !UI.thisIsUIThread() )
+            try {
+                return runAndGet(()-> use(processor, scope));
+            } catch (InvocationTargetException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+        SwingTree swingTreeContext = SwingTree.get();
+        EventProcessor oldProcessor = swingTreeContext.getEventProcessor();
+        swingTreeContext.setEventProcessor(processor);
+        try {
+            return scope.get();
+        } finally {
+            swingTreeContext.setEventProcessor(oldProcessor);
+        }
+    }
+
+    /**
+     * Loads an icon from the classpath or from a file.
+     * @param path The path to the icon. It can be a classpath resource or a file path.
+     * @return The icon.
+     */
+    public static ImageIcon loadIcon( String path ) {
+        Map<String, ImageIcon> cache = SwingTree.get().getIconCache();
+        ImageIcon icon = cache.get(path);
+        if ( icon == null ) {
+            icon = _loadIcon(path);
+            cache.put(path, icon);
+        }
+        return icon;
+    }
+
+    /**
+     * Loads an icon from the classpath or from a file.
+     * @param path The path to the icon. It can be a classpath resource or a file path.
+     * @return The icon.
+     */
+    public static ImageIcon _loadIcon( String path ) {
+        // First we make the path platform independent:
+        path = path.replace('\\', '/');
+        // Then we try to load the icon url from the classpath:
+        URL url = UI.class.getResource(path);
+        // We check if the url is null:
+        if ( url == null ) {
+            // It is, let's do some troubleshooting:
+            if ( !path.startsWith("/") )
+                url = UI.class.getResource("/" + path);
+
+            if ( url == null ) // Still null? Let's try to load it as a file:
+                try {
+                    url = new File(path).toURI().toURL();
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                }
+        }
+        return new ImageIcon(url);
+    }
+
+    private UI(){} // This is a static API
 
     /**
      *  This returns an instance of a generic swing tree builder
