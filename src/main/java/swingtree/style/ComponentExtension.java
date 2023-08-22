@@ -53,13 +53,9 @@ public final class ComponentExtension<C extends JComponent>
     private Color _initialBackgroundColor = null;
 
 
-    private ComponentExtension( C owner ) {
-        _owner = Objects.requireNonNull(owner);
-    }
+    private ComponentExtension( C owner ) { _owner = Objects.requireNonNull(owner); }
 
     C getOwner() { return _owner; }
-
-    StylePainter<C> getCurrentStylePainter() { return _stylePainter; }
 
     Shape getMainClip() { return _stylePainter.getMainClip(); }
 
@@ -100,7 +96,9 @@ public final class ComponentExtension<C extends JComponent>
 
     public List<String> getStyleGroups() { return Collections.unmodifiableList(_styleGroups); }
 
-    public void clearAnimationRenderer() {
+    public Style getStyle() { return _stylePainter.getStyle(); }
+
+    public void clearAnimations() {
         _animationPainters.clear();
         _styleSource = _styleSource.withoutAnimationStylers();
     }
@@ -122,10 +120,6 @@ public final class ComponentExtension<C extends JComponent>
         _stylePainter = _stylePainter.beginPaintingWith( style, g );
     }
 
-    public void endPainting() {
-        _stylePainter = _stylePainter.endPainting();
-    }
-
     public void paintBackgroundStyle( Graphics g )
     {
         if ( _laf.customLookAndFeelIsInstalled() )
@@ -134,19 +128,22 @@ public final class ComponentExtension<C extends JComponent>
         if ( _componentIsDeclaredInUI(_owner) )
             _paintBackground(g);
         else
-            endPainting(); // custom style rendering unfortunately not possible for this component :/
+            _stylePainter = _stylePainter.endPainting(); // custom style rendering unfortunately not possible for this component :/
     }
 
     void _paintBackground(Graphics g)
     {
         // If end the painting of the last painting cycle if it was not already ended:
-        endPainting();
+        _stylePainter = _stylePainter.endPainting();
 
         establishStyleAndBeginPainting(g);
 
         _stylePainter.renderBackgroundStyle( (Graphics2D) g, _owner );
     }
 
+    void paintBorderStyle( Graphics2D g2d, JComponent component ) {
+        _stylePainter.paintBorderStyle(g2d, component);
+    }
 
     public void _renderAnimations( Graphics2D g2d )
     {
@@ -217,8 +214,8 @@ public final class ComponentExtension<C extends JComponent>
         boolean onlyDimensionalityIsStyled      = styleReport.onlyDimensionalityIsStyled();
         boolean styleCanBeRenderedThroughBorder = (
                                                        styleReport.noBaseStyle    &&
-                                                       (styleReport.noShadowStyle || styleReport.allShadowsAreBorderShadows) &&
-                                                       (styleReport.noPainters    || styleReport.allPaintersAreBorderPainters) &&
+                                                       (styleReport.noShadowStyle || styleReport.allShadowsAreBorderShadows)     &&
+                                                       (styleReport.noPainters    || styleReport.allPaintersAreBorderPainters)   &&
                                                        (styleReport.noGradients   || styleReport.allGradientsAreBorderGradients) &&
                                                        (styleReport.noImages      || styleReport.allImagesAreBorderImages)
                                                    );

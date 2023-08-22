@@ -308,7 +308,7 @@ public interface Layout
         @Override
         public void installFor( JComponent component ) {
             ComponentExtension<?> extension = ComponentExtension.from(component);
-            Style style = extension.getCurrentStylePainter().getStyle();
+            Style style = extension.getStyle();
             if ( style.layout().constraint().isPresent() ) {
                 // We ensure that the parent layout has the correct component constraints for the component:
                 LayoutManager parentLayout = ( component.getParent() == null ? null : component.getParent().getLayout() );

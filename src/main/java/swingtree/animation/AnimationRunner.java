@@ -49,7 +49,7 @@ class AnimationRunner
 
         for ( ComponentAnimator animator : new ArrayList<>(_animators) )
             animator.component().ifPresent( component -> {
-                ComponentExtension.from(component).clearAnimationRenderer();
+                ComponentExtension.from(component).clearAnimations();
             });
 
         long now = System.currentTimeMillis();
