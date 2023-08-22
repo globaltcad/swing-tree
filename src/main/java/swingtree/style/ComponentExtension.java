@@ -158,7 +158,7 @@ public final class ComponentExtension<C extends JComponent>
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         // Animations are last: they are rendered on top of everything else:
-        for ( Expirable<Painter> expirablePainter : _animationPainters )
+        for ( Expirable<Painter> expirablePainter : new ArrayList<>(_animationPainters) )
             if ( expirablePainter.isExpired() )
                 _animationPainters.remove(expirablePainter);
             else {
