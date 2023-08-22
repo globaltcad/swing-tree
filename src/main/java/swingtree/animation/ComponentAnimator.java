@@ -89,7 +89,7 @@ class ComponentAnimator
                 e.printStackTrace();
                 /*
                      If exceptions happen in the finishing procedure of animations provided by the user,
-                     then we don't want to mess up the execution of the test of the animations,
+                     then we don't want to mess up the execution of the rest of the animations,
                      so we catch any exceptions right here!
 
                      Ideally this would be logged in the logging framework of a user of the SwingTree
@@ -109,7 +109,7 @@ class ComponentAnimator
             e.printStackTrace();
             /*
                  If exceptions happen in the animations provided by the user,
-                 then we don't want to mess up the execution of the test of the animations,
+                 then we don't want to mess up the execution of the rest of the animations,
                  so we catch any exceptions right here!
 
                  Ideally this would be logged in the logging framework of a user of the SwingTree

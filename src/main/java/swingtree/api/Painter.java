@@ -71,7 +71,7 @@ public interface Painter
                     }
                     /*
                          Note that if any exceptions happen in the above Painter implementations,
-                         then we don't want to mess up the execution of the test of the component painting...
+                         then we don't want to mess up the execution of the rest of the component painting...
                          Therefore, we catch any exceptions that happen in the above code.
 
                          Ideally this would be logged in the logging framework of a user of the SwingTree

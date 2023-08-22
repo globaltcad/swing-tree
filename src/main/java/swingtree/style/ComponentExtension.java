@@ -216,7 +216,6 @@ public final class ComponentExtension<C extends JComponent>
         boolean isNotStyled                     = styleReport.isNotStyled();
         boolean onlyDimensionalityIsStyled      = styleReport.onlyDimensionalityIsStyled();
         boolean styleCanBeRenderedThroughBorder = (
-                                                       //styleReport.noBorderStyle  &&
                                                        styleReport.noBaseStyle    &&
                                                        (styleReport.noShadowStyle || styleReport.allShadowsAreBorderShadows) &&
                                                        (styleReport.noPainters    || styleReport.allPaintersAreBorderPainters) &&

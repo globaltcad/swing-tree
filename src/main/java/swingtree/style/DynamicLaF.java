@@ -300,7 +300,7 @@ class DynamicLaF
                 int insetRight  = 0;
                 if ( c.getBorder() instanceof StyleAndAnimationBorder ) {
                     StyleAndAnimationBorder<?> styleBorder = (StyleAndAnimationBorder<?>) c.getBorder();
-                    Insets margins = styleBorder.getCurrentMarginInsets();
+                    Insets margins = styleBorder.getMarginInsets();
                     Insets oldLaFBorder = styleBorder.getFormerBorderInsets();
                     insetTop    = margins.top    + oldLaFBorder.top    / 2;
                     insetLeft   = margins.left   + oldLaFBorder.left   / 2;
@@ -353,7 +353,7 @@ class DynamicLaF
         Border border = c.getBorder();
         if ( border instanceof StyleAndAnimationBorder ) {
             StyleAndAnimationBorder<?> b = (StyleAndAnimationBorder<?>) border;
-            Insets margins = b.getCurrentMarginInsets();
+            Insets margins = b.getMarginInsets();
             int width  = c.getWidth();
             int height = c.getHeight();
             boolean isInside = (x >= margins.left) && (x < width - margins.right) && (y >= margins.top) && (y < height - margins.bottom);
@@ -368,7 +368,7 @@ class DynamicLaF
                 So, if there are negative paddings, we loop through the subcomponents and see if any of
                 them contains the point.                                                                               */
 
-                Insets padding = b.getCurrentPaddingInsets();
+                Insets padding = b.getPaddingInsets();
 
                 if ( padding.top < 0 || padding.left < 0 || padding.bottom < 0 || padding.right < 0 )
                     for ( Component child : c.getComponents() ) {
