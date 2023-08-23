@@ -106,11 +106,6 @@ public class JBox extends JComponent implements Accessible
      *
      * @param ui  the PanelUI L&amp;F object
      * @see UIDefaults#getUI
-     * @beaninfo
-     *        bound: true
-     *       hidden: true
-     *    attribute: visualUpdate true
-     *  description: The UI object that implements the Component's LookAndFeel.
      */
     public void setUI( PanelUI ui ) {
         super.setUI(ui);
@@ -123,9 +118,6 @@ public class JBox extends JComponent implements Accessible
      * @return "PanelUI"
      * @see JComponent#getUIClassID
      * @see UIDefaults#getUI
-     * @beaninfo
-     *        expert: true
-     *   description: A string that specifies the name of the L&amp;F class.
      */
     @Override public String getUIClassID() { return uiClassID; }
 

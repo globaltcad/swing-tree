@@ -18,7 +18,15 @@ import swingtree.api.Styler;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.LayoutManager;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.GridBagLayout;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Component;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -57,7 +65,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public UIForAnySwing( C component ) { super(component); }
 
     /**
-     *  This method exposes a concise way to bind a {@link Noticeable} (usually an {@link Event) to the
+     *  This method exposes a concise way to bind a {@link Noticeable} (usually a sprouts.Event to the
      *  {@link JComponent#repaint()} method of the component wrapped by this {@link UI}!
      *  This means that the component will be repainted whenever the event is fired.
      *  <p>
@@ -114,24 +122,23 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *  This is conceptually similar to CSS classes, with the difference that
      *  style groups can inherit from each other inside {@link swingtree.style.StyleSheet}s. <br>
      *  Here an example of how to define styles for a style group:
-     *  <pre>{@code
+     *  <pre><code>
      *  new StyleSheet() {
-     *      @Override
+     *      {@literal @}Override
      *      protected void build() {
-     *          add(group("A").inherits("B", "C"),
-     *            it ->
-     *              it.backgroundColor(Color.RED)
+     *          add(group("A").inherits("B", "C"), it -&gt; it
+     *              .backgroundColor(Color.RED)
      *          );
-     *          add(group("B"), it ->
-     *              it.borderWidth(12)
+     *          add(group("B"), it -&gt; it
+     *              .borderWidth(12)
      *          );
-     *          add(group("C"), it ->
-     *              it.borderWidth(16)
-     *                .borderColor(Color.YELLOW)
+     *          add(group("C"), it -&gt; it
+     *              .borderWidth(16)
+     *              .borderColor(Color.YELLOW)
      *          );
      *      }
      *    }
-     *  }</pre>
+     *  </code></pre>
      *  <br>
      *  The style sheet in the above example code can be applied to a component like so:
      *  <pre>{@code
@@ -155,24 +162,23 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *  This is conceptually similar to CSS classes, with the difference that
      *  style groups can inherit from each other inside {@link swingtree.style.StyleSheet}s. <br>
      *  Here an example of how to define styles for a style group:
-     *  <pre>{@code
+     *  <pre><code>
      *  new StyleSheet() {
-     *          @Override
+     *          {@literal @}Override
      *          protected void build() {
-     *              add(group(MyGroups.A).inherits("B", "C"),
-     *                it ->
-     *                  it.backgroundColor(Color.RED)
+     *              add(group(MyGroups.A).inherits("B", "C"), it -&gt; it
+     *                  .backgroundColor(Color.RED)
      *              );
-     *              add(group(MyGroups.B), it ->
-     *                  it.borderWidth(12)
+     *              add(group(MyGroups.B), it -&gt; it
+     *                  .borderWidth(12)
      *              );
-     *              add(group(MyGroups.C), it ->
-     *                  it.borderWidth(16)
-     *                    .borderColor(Color.YELLOW)
+     *              add(group(MyGroups.C), it -&gt; it
+     *                  .borderWidth(16)
+     *                  .borderColor(Color.YELLOW)
      *              );
      *          }
      *      }
-     *  }</pre>
+     *  </code></pre>
      *  <br>
      *  The style sheet in the above example code can be applied to a component like so:
      *  <pre>{@code

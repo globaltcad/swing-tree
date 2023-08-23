@@ -112,6 +112,7 @@ public class Animate
      *
      * @param shouldStop The stop condition for the animation, i.e. the animation will be executed
      *                   until this condition is true.
+     * @return A new {@link Animate} instance that will be executed until the given stop condition is true.
      */
     public Animate until( Predicate<AnimationState> shouldStop ) {
         return this.asLongAs( shouldStop.negate() );
@@ -122,6 +123,7 @@ public class Animate
      *
      * @param shouldRun The running condition for the animation, i.e. the animation will be executed
      *                  as long as this condition is true.
+     * @return A new {@link Animate} instance that will be executed as long as the given running condition is true.
      */
     public Animate asLongAs( Predicate<AnimationState> shouldRun ) {
         return new Animate( _component, _lifeTime, state -> {

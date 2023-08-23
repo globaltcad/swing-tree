@@ -106,15 +106,10 @@ public class JBox extends JComponent implements Accessible
      *
      * @param ui  the PanelUI L&amp;amp;F object
      * @see UIDefaults#getUI
-     * @beaninfo
-     *        bound: true
-     *       hidden: true
-     *    attribute: visualUpdate true
-     *  description: The UI object that implements the Component's LookAndFeel.
      */
     public void setUI( PanelUI ui ) {
-<span class="fc" id="L116">        super.setUI(ui);</span>
-<span class="fc" id="L117">    }</span>
+<span class="fc" id="L111">        super.setUI(ui);</span>
+<span class="fc" id="L112">    }</span>
 
     /**
      * Returns a string that specifies the name of the L&amp;amp;F class
@@ -123,11 +118,8 @@ public class JBox extends JComponent implements Accessible
      * @return &quot;PanelUI&quot;
      * @see JComponent#getUIClassID
      * @see UIDefaults#getUI
-     * @beaninfo
-     *        expert: true
-     *   description: A string that specifies the name of the L&amp;amp;F class.
      */
-<span class="nc" id="L130">    @Override public String getUIClassID() { return uiClassID; }</span>
+<span class="nc" id="L122">    @Override public String getUIClassID() { return uiClassID; }</span>
 
     /**
      * Returns a string representation of this JBox. This method
@@ -138,7 +130,7 @@ public class JBox extends JComponent implements Accessible
      *
      * @return  a string representation of this JBox.
      */
-<span class="fc" id="L141">    protected String paramString() { return super.paramString(); }</span>
+<span class="fc" id="L133">    protected String paramString() { return super.paramString(); }</span>
 
 /////////////////
 // Accessibility support
@@ -154,10 +146,10 @@ public class JBox extends JComponent implements Accessible
      *         AccessibleContext of this JBox
      */
     public AccessibleContext getAccessibleContext() {
-<span class="nc bnc" id="L157" title="All 2 branches missed.">        if ( accessibleContext == null )</span>
-<span class="nc" id="L158">            accessibleContext = new AccessibleJBox();</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">        if ( accessibleContext == null )</span>
+<span class="nc" id="L150">            accessibleContext = new AccessibleJBox();</span>
 
-<span class="nc" id="L160">        return accessibleContext;</span>
+<span class="nc" id="L152">        return accessibleContext;</span>
     }
 
     /**
@@ -174,7 +166,7 @@ public class JBox extends JComponent implements Accessible
      * has been added to the &lt;code&gt;java.beans&lt;/code&gt; package.
      * Please see {@link java.beans.XMLEncoder}.
      */
-<span class="nc" id="L177">    protected class AccessibleJBox extends JComponent.AccessibleJComponent {</span>
+<span class="nc" id="L169">    protected class AccessibleJBox extends JComponent.AccessibleJComponent {</span>
 
         /**
          * Get the role of this object.
@@ -182,7 +174,7 @@ public class JBox extends JComponent implements Accessible
          * @return an instance of AccessibleRole describing the role of the
          * object
          */
-<span class="nc" id="L185">        public AccessibleRole getAccessibleRole() { return AccessibleRole.PANEL; }</span>
+<span class="nc" id="L177">        public AccessibleRole getAccessibleRole() { return AccessibleRole.PANEL; }</span>
     }
 }
 

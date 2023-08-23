@@ -77,6 +77,7 @@ public final class LifeTime
 
     /**
      *  Returns the duration of the animation in the given time unit.
+     * @param unit The time unit in which the duration should be returned.
      * @return The duration of the animation.
      */
     public long getDurationIn( TimeUnit unit ) {
@@ -86,6 +87,7 @@ public final class LifeTime
 
     /**
      *  Returns the delay after which the animation should start in the given time unit.
+     * @param unit The time unit in which the delay should be returned.
      * @return The delay after which the animation should start.
      */
     public long getDelayIn( TimeUnit unit ) {
@@ -95,6 +97,7 @@ public final class LifeTime
 
     /**
      *  Returns the time when the animation should start in the given time unit.
+     * @param unit The time unit in which the start time should be returned.
      * @return The time when the animation should start.
      */
     public long getStartTimeIn( TimeUnit unit ) {

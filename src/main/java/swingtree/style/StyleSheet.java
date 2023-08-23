@@ -117,15 +117,15 @@ public abstract class StyleSheet
      *  and a corresponding {@link Styler} lambda which will be applied to the components targeted by the {@link StyleTrait}.
      *  <br><br>
      *  Here an example of how to use this method in the {@link #configure()} method:
-     *  <pre>{@code
-     *  @Override
+     *  <pre><code>
+     *  {@literal @}Override
      *  protected void configure() {
-     *      add(id("arial-button"), it -> it.font(new Font("Arial", Font.BOLD, 12)));
-     *      add(type(JButton).group("FooBar"), it -> it.borderRadius(5));
-     *      add(group(Group.ERROR), it -> it.backgroundColor(Color.RED));
+     *      add(id("arial-button"), it -&gt; it.font(new Font("Arial", Font.BOLD, 12)));
+     *      add(type(JButton).group("FooBar"), it -&gt; it.borderRadius(5));
+     *      add(group(Group.ERROR), it -&gt; it.backgroundColor(Color.RED));
      *      // ...
      *  }
-     *  }</pre>
+     *  </code></pre>
      *
      * @param rule The {@link StyleTrait} targeting the components you want to style.
      * @param traitStyler The {@link Styler} lambda which will be applied to the components targeted by the {@link StyleTrait}.
@@ -148,25 +148,25 @@ public abstract class StyleSheet
      *  to the style sheet through the {@link #add(StyleTrait, Styler)} method. <br>
      *  <br>
      *  Example:
-     *  <pre>{@code
-     *  @Override
+     *  <pre><code>
+     *  {@literal @}Override
      *  protected void configure() {
-     *      add(type(JComponent.class), it -> it
+     *      add(type(JComponent.class), it -&gt; it
      *        .backgroundColor(new Color(0.7f, 0.85f, 1f))
      *        .padding(4)
      *        .margin(5)
      *      );
-     *      add(type(JButton.class), it -> it
+     *      add(type(JButton.class), it -&gt; it
      *         .padding(12)
      *         .margin(16)
-     *         .gradient("default", shade -> shade
+     *         .gradient("default", shade -&gt; shade
      *             .strategy(ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT)
      *             .colors(it.component().getBackground().brighter(), Color.CYAN)
      *         )
      *      );
      *      // ...
      *   }
-     * }</pre>
+     * </code></pre>
      */
     protected abstract void configure();
 

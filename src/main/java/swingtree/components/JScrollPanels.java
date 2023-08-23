@@ -118,6 +118,7 @@ public class JScrollPanels extends JScrollPane
 	 *
 	 * @param entryViewModel A view model which ought to be added.
 	 * @param viewSupplier A provider lambda which ought to turn a context object into a fitting UI.
+	 * @param <M> The type of the entry view model.
 	 */
 	public <M extends EntryViewModel> void addEntry( M entryViewModel, ViewSupplier<M> viewSupplier) {
 		Objects.requireNonNull(entryViewModel);
@@ -135,6 +136,7 @@ public class JScrollPanels extends JScrollPane
 	 * @param constraints The constraints which ought to be applied to the entry.
 	 * @param entryViewModel The entry model which ought to be added.
 	 * @param viewSupplier A provider lambda which ought to turn a context object into a fitting UI.
+	 * @param <M> The type of the entry view model.
 	 */
 	public <M extends EntryViewModel> void addEntry( String constraints, M entryViewModel, ViewSupplier<M> viewSupplier) {
 		Objects.requireNonNull(entryViewModel);

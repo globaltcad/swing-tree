@@ -643,6 +643,9 @@ public final class UI
      *  );
      *  }</pre>
      *
+     * @param styleSheet The style sheet to be used for all subsequent UI building operations.
+     * @param scope A lambda scope in which the style sheet is active for all subsequent UI building operations.
+     * @param <T> The type of the result of the given scope.
      * @return the result of the given scope, usually a {@link JComponent} or SwingTree UI.
      */
     public static <T> T use( StyleSheet styleSheet, Supplier<T> scope ) {
@@ -905,6 +908,7 @@ public final class UI
      *  responsible for building a {@link JSeparator} by exposing helpful utility methods for it.
      *
      * @param separator The new {@link JSeparator} instance which ought to be part of the Swing UI.
+     * @param <S> The concrete type of this new component.
      * @return A {@link UIForSeparator} UI builder instance which wraps the {@link JSeparator} and exposes helpful methods.
      */
     public static <S extends JSeparator> UIForSeparator<S> of( S separator )
@@ -951,6 +955,7 @@ public final class UI
      *  This returns a {@link JButton} swing tree builder.
      *
      * @param component The button component which ought to be wrapped by the swing tree UI builder.
+     * @param <T> The concrete type of this new component.
      * @return A basic UI {@link JButton} builder instance.
      */
     public static <T extends AbstractButton> UIForButton<T> of( T component )
@@ -980,6 +985,7 @@ public final class UI
      *  Create a builder for the {@link JButton} UI component where the text of the provided
      *  property is dynamically displayed on top.
      *
+     * @param text The text property to be displayed on top of the button.
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
     public static UIForButton<JButton> button( Val<String> text ) {
@@ -992,6 +998,7 @@ public final class UI
      *  with an icon displayed on top.
      *  This is in essence a convenience method for {@code UI.of(new JButton()).peek( it -> it.setIcon(icon) )}.
      *
+     * @param icon The icon to be displayed on top of the button.
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
     public static UIForButton<JButton> button( Icon icon ) {
@@ -1022,6 +1029,7 @@ public final class UI
      *  with a dynamically displayed icon on top.
      *  This is in essence a convenience method for {@code UI.of(new JButton()).withIcon(icon) )}.
      *
+     * @param icon The icon property whose value ought to be displayed on top of the button.
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
     public static UIForButton<JButton> buttonWithIcon( Val<Icon> icon ) {
@@ -1034,6 +1042,8 @@ public final class UI
      *  Use this to create a builder for the {@link JButton} UI component
      *  with a default icon as well as a hover icon displayed on top.
      *
+     * @param icon The default icon to be displayed on top of the button.
+     * @param onHover The hover icon to be displayed on top of the button.
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
     public static UIForButton<JButton> button( Icon icon, Icon onHover ) {
@@ -1047,6 +1057,10 @@ public final class UI
      *  with a default icon as well as a hover icon displayed on top
      *  which should both be scaled to the provided dimensions.
      *
+     * @param width The width the icons should be scaled to.
+     * @param height The height the icons should be scaled to.
+     * @param icon The default icon to be displayed on top of the button.
+     * @param onHover The hover icon to be displayed on top of the button.
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
     public static UIForButton<JButton> button( int width, int height, ImageIcon icon, ImageIcon onHover ) {
@@ -1078,6 +1092,9 @@ public final class UI
      *      })
      *  }</pre>
      *
+     * @param icon The default icon to be displayed on top of the button.
+     * @param onHover The hover icon to be displayed on top of the button.
+     * @param onPress The pressed icon to be displayed on top of the button.
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
     public static UIForButton<JButton> button( Icon icon, Icon onHover, Icon onPress ) {
@@ -1093,6 +1110,8 @@ public final class UI
      *  Use this to create a builder for the {@link JSplitButton} UI component.
      *  This is in essence a convenience method for {@code UI.of(new JSplitButton())}.
      *
+     * @param splitButton The split button component which ought to be wrapped by the swing tree UI builder.
+     * @param <B> The concrete type of this new component.
      * @return A builder instance for a {@link JSplitButton}, which enables fluent method chaining.
      */
     public static <B extends JSplitButton> UIForSplitButton<B> of( B splitButton ) {

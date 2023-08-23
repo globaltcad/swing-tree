@@ -117,15 +117,15 @@ public abstract class StyleSheet
      *  and a corresponding {@link Styler} lambda which will be applied to the components targeted by the {@link StyleTrait}.
      *  &lt;br&gt;&lt;br&gt;
      *  Here an example of how to use this method in the {@link #configure()} method:
-     *  &lt;pre&gt;{@code
-     *  @Override
+     *  &lt;pre&gt;&lt;code&gt;
+     *  {@literal @}Override
      *  protected void configure() {
-     *      add(id(&quot;arial-button&quot;), it -&gt; it.font(new Font(&quot;Arial&quot;, Font.BOLD, 12)));
-     *      add(type(JButton).group(&quot;FooBar&quot;), it -&gt; it.borderRadius(5));
-     *      add(group(Group.ERROR), it -&gt; it.backgroundColor(Color.RED));
+     *      add(id(&quot;arial-button&quot;), it -&amp;gt; it.font(new Font(&quot;Arial&quot;, Font.BOLD, 12)));
+     *      add(type(JButton).group(&quot;FooBar&quot;), it -&amp;gt; it.borderRadius(5));
+     *      add(group(Group.ERROR), it -&amp;gt; it.backgroundColor(Color.RED));
      *      // ...
      *  }
-     *  }&lt;/pre&gt;
+     *  &lt;/code&gt;&lt;/pre&gt;
      *
      * @param rule The {@link StyleTrait} targeting the components you want to style.
      * @param traitStyler The {@link Styler} lambda which will be applied to the components targeted by the {@link StyleTrait}.
@@ -148,25 +148,25 @@ public abstract class StyleSheet
      *  to the style sheet through the {@link #add(StyleTrait, Styler)} method. &lt;br&gt;
      *  &lt;br&gt;
      *  Example:
-     *  &lt;pre&gt;{@code
-     *  @Override
+     *  &lt;pre&gt;&lt;code&gt;
+     *  {@literal @}Override
      *  protected void configure() {
-     *      add(type(JComponent.class), it -&gt; it
+     *      add(type(JComponent.class), it -&amp;gt; it
      *        .backgroundColor(new Color(0.7f, 0.85f, 1f))
      *        .padding(4)
      *        .margin(5)
      *      );
-     *      add(type(JButton.class), it -&gt; it
+     *      add(type(JButton.class), it -&amp;gt; it
      *         .padding(12)
      *         .margin(16)
-     *         .gradient(&quot;default&quot;, shade -&gt; shade
+     *         .gradient(&quot;default&quot;, shade -&amp;gt; shade
      *             .strategy(ShadingStrategy.TOP_LEFT_TO_BOTTOM_RIGHT)
      *             .colors(it.component().getBackground().brighter(), Color.CYAN)
      *         )
      *      );
      *      // ...
      *   }
-     * }&lt;/pre&gt;
+     * &lt;/code&gt;&lt;/pre&gt;
      */
     protected abstract void configure();
 

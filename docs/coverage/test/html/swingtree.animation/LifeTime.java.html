@@ -77,29 +77,32 @@ public final class LifeTime
 
     /**
      *  Returns the duration of the animation in the given time unit.
+     * @param unit The time unit in which the duration should be returned.
      * @return The duration of the animation.
      */
     public long getDurationIn( TimeUnit unit ) {
-<span class="fc" id="L83">        Objects.requireNonNull(unit);</span>
-<span class="fc" id="L84">        return unit.convert(_duration, TimeUnit.MILLISECONDS);</span>
+<span class="fc" id="L84">        Objects.requireNonNull(unit);</span>
+<span class="fc" id="L85">        return unit.convert(_duration, TimeUnit.MILLISECONDS);</span>
     }
 
     /**
      *  Returns the delay after which the animation should start in the given time unit.
+     * @param unit The time unit in which the delay should be returned.
      * @return The delay after which the animation should start.
      */
     public long getDelayIn( TimeUnit unit ) {
-<span class="nc" id="L92">        Objects.requireNonNull(unit);</span>
-<span class="nc" id="L93">        return unit.convert(_delay, TimeUnit.MILLISECONDS);</span>
+<span class="nc" id="L94">        Objects.requireNonNull(unit);</span>
+<span class="nc" id="L95">        return unit.convert(_delay, TimeUnit.MILLISECONDS);</span>
     }
 
     /**
      *  Returns the time when the animation should start in the given time unit.
+     * @param unit The time unit in which the start time should be returned.
      * @return The time when the animation should start.
      */
     public long getStartTimeIn( TimeUnit unit ) {
-<span class="fc" id="L101">        Objects.requireNonNull(unit);</span>
-<span class="fc" id="L102">        return unit.convert(_startTime, TimeUnit.MILLISECONDS);</span>
+<span class="fc" id="L104">        Objects.requireNonNull(unit);</span>
+<span class="fc" id="L105">        return unit.convert(_startTime, TimeUnit.MILLISECONDS);</span>
     }
 
     /**
@@ -113,30 +116,30 @@ public final class LifeTime
      * @return The end time of the specified iteration in the given time unit.
      */
     public long getIterationEndTimeIn( TimeUnit unit, int iteration ) {
-<span class="nc" id="L116">        Objects.requireNonNull(unit);</span>
-<span class="nc" id="L117">        return unit.convert(_startTime + _duration * iteration, TimeUnit.MILLISECONDS);</span>
+<span class="nc" id="L119">        Objects.requireNonNull(unit);</span>
+<span class="nc" id="L120">        return unit.convert(_startTime + _duration * iteration, TimeUnit.MILLISECONDS);</span>
     }
 
     /**
      * @return {@code true} if the animation is expired, {@code false} otherwise.
      */
     public boolean isExpired() {
-<span class="pc bpc" id="L124" title="1 of 2 branches missed.">        return System.currentTimeMillis() &gt;= _startTime + _duration;</span>
+<span class="pc bpc" id="L127" title="1 of 2 branches missed.">        return System.currentTimeMillis() &gt;= _startTime + _duration;</span>
     }
 
     @Override
     public boolean equals( Object o ) {
-<span class="nc bnc" id="L129" title="All 2 branches missed.">        if ( this == o ) return true;</span>
-<span class="nc bnc" id="L130" title="All 2 branches missed.">        if ( !(o instanceof LifeTime) ) return false;</span>
-<span class="nc" id="L131">        LifeTime lifeTime = (LifeTime) o;</span>
-<span class="nc bnc" id="L132" title="All 8 branches missed.">        return _id        == lifeTime._id       &amp;&amp;</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        if ( this == o ) return true;</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">        if ( !(o instanceof LifeTime) ) return false;</span>
+<span class="nc" id="L134">        LifeTime lifeTime = (LifeTime) o;</span>
+<span class="nc bnc" id="L135" title="All 8 branches missed.">        return _id        == lifeTime._id       &amp;&amp;</span>
                _delay     == lifeTime._delay    &amp;&amp;
                _duration  == lifeTime._duration &amp;&amp;
                _startTime == lifeTime._startTime;
     }
 
     @Override
-<span class="nc" id="L139">    public int hashCode() { return Objects.hash(_id, _delay, _duration, _startTime); }</span>
+<span class="nc" id="L142">    public int hashCode() { return Objects.hash(_id, _delay, _duration, _startTime); }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

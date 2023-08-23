@@ -2,7 +2,7 @@ package swingtree.animation;
 
 /**
  *  Implementations of this interface are used to define when an animation should stop
- *  running based on the current {@linkn AnimationState}.
+ *  running based on the current {@link AnimationState}.
  */
 @FunctionalInterface
 public interface StopCondition {

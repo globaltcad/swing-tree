@@ -112,9 +112,10 @@ public class Animate
      *
      * @param shouldStop The stop condition for the animation, i.e. the animation will be executed
      *                   until this condition is true.
+     * @return A new {@link Animate} instance that will be executed until the given stop condition is true.
      */
     public Animate until( Predicate&lt;AnimationState&gt; shouldStop ) {
-<span class="nc" id="L117">        return this.asLongAs( shouldStop.negate() );</span>
+<span class="nc" id="L118">        return this.asLongAs( shouldStop.negate() );</span>
     }
 
     /**
@@ -122,12 +123,13 @@ public class Animate
      *
      * @param shouldRun The running condition for the animation, i.e. the animation will be executed
      *                  as long as this condition is true.
+     * @return A new {@link Animate} instance that will be executed as long as the given running condition is true.
      */
     public Animate asLongAs( Predicate&lt;AnimationState&gt; shouldRun ) {
-<span class="fc" id="L127">        return new Animate( _component, _lifeTime, state -&gt; {</span>
-<span class="fc bfc" id="L128" title="All 2 branches covered.">            if ( shouldRun.test(state) )</span>
-<span class="fc" id="L129">                return _condition.check(state);</span>
-<span class="fc" id="L130">            return false;</span>
+<span class="fc" id="L129">        return new Animate( _component, _lifeTime, state -&gt; {</span>
+<span class="fc bfc" id="L130" title="All 2 branches covered.">            if ( shouldRun.test(state) )</span>
+<span class="fc" id="L131">                return _condition.check(state);</span>
+<span class="fc" id="L132">            return false;</span>
         });
     }
 
@@ -138,8 +140,8 @@ public class Animate
      * @param animation The animation that should be executed.
      */
     public void go( Animation animation ) {
-<span class="fc" id="L141">        AnimationRunner.add( new ComponentAnimator( _component, _lifeTime, _condition, animation ) );</span>
-<span class="fc" id="L142">    }</span>
+<span class="fc" id="L143">        AnimationRunner.add( new ComponentAnimator( _component, _lifeTime, _condition, animation ) );</span>
+<span class="fc" id="L144">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

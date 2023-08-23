@@ -118,7 +118,7 @@ public final class ImageStyle
 
     /**
      *  Here you can specify the <b>placement</b> of the image onto the component.
-     *  The default placement is {@link swingtree.UI.Placement#CENTER}. <br
+     *  The default placement is {@link swingtree.UI.Placement#CENTER}. <br>
      *  Here a list of available options and their effect:
      *  <ul>
      *      <li>{@link swingtree.UI.Placement#CENTER} -
@@ -172,7 +172,7 @@ public final class ImageStyle
     public ImageStyle repeat( boolean repeat ) { return new ImageStyle(_layer, _primer, _image, _placement, repeat, _autoFit, _width, _height, _opacity, _padding); }
 
     /**
-     *  If this flag is set to {@link true}, then the image will be stretched or shrunk
+     *  If this flag is set to {@code true}, then the image will be stretched or shrunk
      *  to fill the inner component area dependent on the specified width and height,
      *  meaning that if the width was not specified explicitly through {@link #width(Integer)}
      *  then the image will be scaled to fit the inner component width,

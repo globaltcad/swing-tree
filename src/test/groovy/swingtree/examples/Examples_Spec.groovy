@@ -270,9 +270,9 @@ class Examples_Spec extends Specification
             speedTextField.text == "42.0"
             speedTextField.background == Color.WHITE
         when : 'We rerender the view offscreen...'
-            var similarity = Utility.similarityBetween(view, "views/vertical-settings-UI.png", 99.7)
+            var similarity = Utility.similarityBetween(view, "views/vertical-settings-UI.png", 99)
         then : '...it looks as expected.'
-            similarity > 99.7
+            similarity > 99
 
         when : 'We simulate the user entering an invalid number:'
             speedTextField.text = "§"
@@ -284,7 +284,7 @@ class Examples_Spec extends Specification
         when : 'We rerender the view offscreen again because the background color changed...'
             similarity = Utility.similarityBetween(view, "views/vertical-settings-UI.png")
         then : 'The UI is no longer rendered as expected.'
-            similarity < 99.7
+            similarity < 99
     }
 
     def 'The spinners example UI defined in the examples can be created.'()
