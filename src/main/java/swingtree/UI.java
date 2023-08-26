@@ -755,7 +755,10 @@ public final class UI
                     throw new RuntimeException(e);
                 }
         }
-        return new ImageIcon(url);
+        if ( path.endsWith(".svg") )
+            return new SVGIcon(url);
+        else
+            return new ImageIcon(url);
     }
 
     private UI(){} // This is a static API

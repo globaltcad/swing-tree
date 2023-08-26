@@ -31,8 +31,9 @@ repositories {
 dependencies {
 
     // Main dependencies:
-    api group: 'com.miglayout', name: 'miglayout-swing', version: '5.3' // https://mvnrepository.com/artifact/com.miglayout/miglayout-swing
-    api 'io.github.globaltcad:sprouts:0.3.1'
+    api group: 'com.miglayout',        name: 'miglayout-swing', version: '5.3' // https://mvnrepository.com/artifact/com.miglayout/miglayout-swing
+    api group: 'io.github.globaltcad', name: 'sprouts',         version: '0.3.1'
+    api group: 'com.github.weisj',     name: 'jsvg',            version: '1.0.0'
 
     // Logging :
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
@@ -50,7 +51,7 @@ dependencies {
     testCompileOnly 'org.slf4j:slf4j-simple:1.7.30'
 
     testRuntimeOnly group: 'net.bytebuddy', name: 'byte-buddy', version: '1.11.15' // allows mocking of classes (in addition to interfaces)
-    testRuntimeOnly group: 'org.objenesis', name: 'objenesis', version: '3.2'      // allows mocking of classes without default constructor (together with ByteBuddy or CGLIB)
+    testRuntimeOnly group: 'org.objenesis', name: 'objenesis',  version: '3.2'     // allows mocking of classes without default constructor (together with ByteBuddy or CGLIB)
 
 
     testImplementation 'com.formdev:flatlaf-intellij-themes:2.2'

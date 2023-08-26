@@ -13,24 +13,31 @@ public class TodoApp extends Panel
 {
     public TodoApp() {
         of(this).withLayout(FILL)
-        .add(GROW.and(SPAN).and(WRAP), label("Todo List"))
-        .add(GROW.and(SPAN).and(WRAP),
-            panel(FILL).add(SHRINK, button("Add"), button("Remove"))
-        )
         .add(
-            GROW.and(SPAN).and(WRAP),
-            panel()
-            .apply(it -> {
-                String[] tasks = {"Get up in the morning", "Make coffee", "Drink coffee", "Code something in swingtree"};
-                for (int i = 0; i < tasks.length; i++) {
-                    it.add( WRAP,
-                        panel().id("task-"+i)
-                        .add(SHRINK_X, label("Task "+i+":"))
-                        .add(PUSH_X, checkBox(tasks[i]))
-                    );
-                }
-            })
-        );
+            panel(FILL)
+            .add(GROW.and(SPAN).and(WRAP), label("Todo List"))
+            .add(GROW.and(SPAN).and(WRAP),
+                panel(FILL).add(SHRINK, button("Add"), button("Remove"))
+            )
+            .add(
+                GROW.and(SPAN).and(WRAP),
+                panel()
+                .apply(it -> {
+                    String[] tasks = {"Get up in the morning", "Make coffee", "Drink coffee", "Code something in swingtree"};
+                    for (int i = 0; i < tasks.length; i++) {
+                        it.add( WRAP,
+                            panel().id("task-"+i)
+                            .add(SHRINK_X, label("Task "+i+":"))
+                            .add(PUSH_X, checkBox(tasks[i]))
+                        );
+                    }
+                })
+            )
+        )
+        .add(GROW.and(PUSH),
+            icon("img/dandelion.svg").withPrefWidth(200)
+        )
+        ;
     }
 
     // Use this to test the above UI.
