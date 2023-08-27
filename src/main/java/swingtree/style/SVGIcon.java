@@ -8,7 +8,9 @@ import swingtree.UI;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Insets;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.net.URL;
@@ -20,6 +22,11 @@ import java.util.Optional;
  */
 public class SVGIcon extends ImageIcon
 {
+    /**
+     *  This enum is used to specify how the SVG image should be scaled to fit the
+     *  dimensions of the component that it is being rendered into
+     *  using the {@link SVGIcon#paintIcon(java.awt.Component, java.awt.Graphics, int, int, int, int)} method.
+     */
     public enum FitComponent {
         WIDTH,
         HEIGHT,
@@ -30,14 +37,18 @@ public class SVGIcon extends ImageIcon
 
     private final SVGDocument svgDocument;
 
-    private int width = -1;
-    private int height = -1;
-    private FitComponent fitComponent = FitComponent.WIDTH_AND_HEIGHT;
+    private int _width;
+    private int _height;
 
-    public SVGIcon( URL svgUrl, int width, int height ) {
+    private FitComponent _fitComponent;
+
+
+    public SVGIcon( URL svgUrl, int width, int height, FitComponent fitComponent ) {
         super();
-        this.width  = width;
-        this.height = height;
+        _width = width;
+        _height = height;
+        _fitComponent = fitComponent;
+
         SVGDocument tempSVGDocument = null;
         try {
             SVGLoader loader = new SVGLoader();
@@ -48,16 +59,50 @@ public class SVGIcon extends ImageIcon
         this.svgDocument = tempSVGDocument;
     }
 
+    public SVGIcon( URL svgUrl, int width, int height ) {
+        this(svgUrl, width, height, FitComponent.MIN_DIM);
+    }
+
     public SVGIcon( String path, int width, int height ) {
         this(SVGIcon.class.getResource(path), width, height);
     }
 
-    public SVGIcon( String path ) {
-        this(path, -1, -1);
+    public SVGIcon( String path ) { this(path, -1, -1); }
+
+    public SVGIcon( URL svgUrl ) { this(svgUrl, -1, -1); }
+
+
+    @Override
+    public int getIconWidth() { return _width; }
+
+    public void setIconWidth( int width ) { _width = width; }
+
+    @Override
+    public int getIconHeight() { return _height; }
+
+    public void setIconHeight( int height ) { _height = height; }
+
+    public void setFitComponent( FitComponent fit ) { _fitComponent = fit; }
+
+    public FitComponent getFitComponent() { return _fitComponent; }
+
+    @Override
+    public Image getImage() {
+        // We create a new buffered image, render into it, and then return it.
+        BufferedImage image = new BufferedImage(getIconWidth(), getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+        if ( svgDocument != null )
+            svgDocument.render(
+                    null,
+                    image.createGraphics(),
+                    new ViewBox(0, 0, getIconWidth(), getIconHeight())
+                );
+
+        return image;
     }
 
-    public SVGIcon( URL svgUrl ) {
-        this(svgUrl, -1, -1);
+    @Override
+    public void setImage( Image image ) {
+        // We don't support this.
     }
 
     @Override
@@ -72,8 +117,8 @@ public class SVGIcon extends ImageIcon
         x = insets.left;
         y = insets.top;
 
-        int width  = this.width;
-        int height = this.height;
+        int width  = _width;
+        int height = _height;
 
         width  = width  < 0 ? c.getWidth()  : width;
         height = height < 0 ? c.getHeight() : height;
@@ -102,18 +147,48 @@ public class SVGIcon extends ImageIcon
         float scaleX = imgRefWidth  / svgRefWidth;
         float scaleY = imgRefHeight / svgRefHeight;
 
-        if ( this.fitComponent == FitComponent.MIN_DIM || this.fitComponent == FitComponent.MAX_DIM ) {
+        if ( _fitComponent == FitComponent.MIN_DIM || _fitComponent == FitComponent.MAX_DIM ) {
             if ( width < height )
                 scaleX = 1f;
             if ( height < width )
                 scaleY = 1f;
         }
 
-        if ( this.fitComponent == FitComponent.WIDTH )
+        if ( _fitComponent == FitComponent.WIDTH )
             scaleX = 1f;
 
-        if ( this.fitComponent == FitComponent.HEIGHT )
+        if ( _fitComponent == FitComponent.HEIGHT )
             scaleY = 1f;
+
+        ViewBox viewBox = new ViewBox(x, y, width, height);
+        float boxX      = viewBox.x  / scaleX;
+        float boxY      = viewBox.y  / scaleY;
+        float boxWidth  = viewBox.width  / scaleX;
+        float boxHeight = viewBox.height / scaleY;
+        if ( _fitComponent == FitComponent.MAX_DIM ) {
+            // We now want to make sure that the
+            if ( boxWidth < boxHeight ) {
+                // We find the scale factor of the heights between the two rectangles:
+                float scaleHeight = ( viewBox.height / svgSize.height );
+                // We now want to scale the view box so that both have the same heights:
+                float newWidth  = svgSize.width  * scaleHeight;
+                float newHeight = svgSize.height * scaleHeight;
+                float newX = viewBox.x + (viewBox.width - newWidth) / 2f;
+                float newY = viewBox.y;
+                viewBox = new ViewBox(newX, newY, newWidth, newHeight);
+            } else {
+                // We find the scale factor of the widths between the two rectangles:
+                float scaleWidth = ( viewBox.width / svgSize.width );
+                // We now want to scale the view box so that both have the same widths:
+                float newWidth  = svgSize.width  * scaleWidth;
+                float newHeight = svgSize.height * scaleWidth;
+                float newX = viewBox.x;
+                float newY = viewBox.y + (viewBox.height - newHeight) / 2f;
+                viewBox = new ViewBox(newX, newY, newWidth, newHeight);
+            }
+        }
+        else
+            viewBox = new ViewBox(boxX, boxY, boxWidth, boxHeight);
 
         AffineTransform oldTransform = g2d.getTransform();
         AffineTransform newTransform = new AffineTransform(oldTransform);
@@ -123,8 +198,6 @@ public class SVGIcon extends ImageIcon
 
         // We also have to scale x and y, this is because the SVGDocument does not
         // account for the scale of the transform with respect to the view box!
-        ViewBox viewBox = new ViewBox(x, y, width, height);
-        viewBox = _calculateViewBoxFor(viewBox, scaleX, scaleY);
         svgDocument.render( (JComponent) c, g2d, viewBox );
 
         g2d.setTransform(oldTransform);
@@ -132,57 +205,6 @@ public class SVGIcon extends ImageIcon
         if (doAntiAliasing && !wasAntiAliasing) {
             g2d.setRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_OFF );
         }
-    }
-
-    private ViewBox _calculateViewBoxFor(
-            ViewBox viewBox,
-            float scaleX,
-            float scaleY
-    ) {
-        float boxX      = viewBox.x  / scaleX;
-        float boxY      = viewBox.y  / scaleY;
-        float boxWidth  = viewBox.width  / scaleX;
-        float boxHeight = viewBox.height / scaleY;
-
-        //if ( this.fitComponent == FitComponent.MAX_DIM ) {
-        //    // We have 2 boxes, a scaled box and an unscaled box,
-        //    // and we want to fit the scaled box so that it fills the unscaled box.
-        //    // The unsaceld box should also be centered inside the unscaled box
-        //    if ( boxWidth > viewBox.width ) {
-        //        // We
-        //    }
-        //}
-        return new ViewBox(boxX, boxY, boxWidth, boxHeight);
-    }
-
-
-    @Override
-    public int getIconWidth() { return width; }
-
-    public void setIconWidth( int width ) { this.width = width; }
-
-    @Override
-    public int getIconHeight() { return height; }
-
-    public void setIconHeight( int height ) { this.height = height; }
-
-    @Override
-    public Image getImage() {
-        // We create a new buffered image we can render into and return it.
-        BufferedImage image = new BufferedImage(getIconWidth(), getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-        if (svgDocument != null)
-            svgDocument.render(
-                    null,
-                    image.createGraphics(),
-                    new ViewBox(0, 0, getIconWidth(), getIconHeight())
-                );
-
-        return image;
-    }
-
-    @Override
-    public void setImage( Image image ) {
-        // We don't support this.
     }
 
 }

@@ -1155,17 +1155,26 @@ final class StylePainter<C extends JComponent>
             y += padding.top().orElse(0);
             imgWidth  -= padding.left().orElse(0) + padding.right().orElse(0);
             imgHeight -= padding.top().orElse(0)  + padding.bottom().orElse(0);
-            //if ( !repeat && imageIcon instanceof SVGIcon ) {
-            //    SVGIcon svgIcon = (SVGIcon) imageIcon;
-            //    svgIcon.paintIcon(component, g2d, x, y, imgWidth, imgHeight);
-            //} else
+            if ( !repeat && imageIcon instanceof SVGIcon ) {
+                SVGIcon svgIcon = (SVGIcon) imageIcon;
+                svgIcon.setFitComponent(SVGIcon.FitComponent.WIDTH_AND_HEIGHT);
+                svgIcon.paintIcon(component, g2d, x, y, imgWidth, imgHeight);
+            } else
             {
+                Image image;
                 if ( imageIcon instanceof SVGIcon ) {
                     SVGIcon svgIcon = (SVGIcon) imageIcon;
+                    int oldWidth  = svgIcon.getIconWidth();
+                    int oldHeight = svgIcon.getIconHeight();
                     svgIcon.setIconWidth(imgWidth);
                     svgIcon.setIconHeight(imgHeight);
+                    image = imageIcon.getImage(); // This will render the SVGIcon with the new size
+                    svgIcon.setIconWidth(oldWidth);
+                    svgIcon.setIconHeight(oldHeight);
                 }
-                Image image = imageIcon.getImage();
+                else
+                    image = imageIcon.getImage();
+
                 Composite oldComposite = g2d.getComposite();
                 try {
                     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
