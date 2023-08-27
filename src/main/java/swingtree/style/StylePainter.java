@@ -1100,18 +1100,20 @@ final class StylePainter<C extends JComponent>
             g2d.fill(specificArea);
         }
 
-        style.image().ifPresent( image -> {
+        style.image().ifPresent( imageIcon -> {
             UI.Placement placement = style.placement();
             boolean repeat         = style.repeat();
             Outline padding        = style.padding();
             int componentWidth     = component.getWidth();
             int componentHeight    = component.getHeight();
-            int imgWidth           = style.width().orElse(image.getWidth(null));
-            int imgHeight          = style.height().orElse(image.getHeight(null));
+            int imgWidth           = style.width().orElse(imageIcon.getIconWidth());
+            int imgHeight          = style.height().orElse(imageIcon.getIconHeight());
             if ( style.autoFit() ) {
                 imgWidth  = style.width().orElse(componentWidth);
                 imgHeight = style.height().orElse(componentHeight);
             }
+            if ( imgWidth  < 0 ) imgWidth  = componentWidth;
+            if ( imgHeight < 0 ) imgHeight = componentHeight;
             int x = 0;
             int y = 0;
             float opacity = style.opacity();
@@ -1153,24 +1155,34 @@ final class StylePainter<C extends JComponent>
             y += padding.top().orElse(0);
             imgWidth  -= padding.left().orElse(0) + padding.right().orElse(0);
             imgHeight -= padding.top().orElse(0)  + padding.bottom().orElse(0);
-
-            Composite oldComposite = g2d.getComposite();
-            try {
-                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
-                if ( repeat ) {
-                    Paint oldPaint = g2d.getPaint();
-                    try {
-                        g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));
-                        g2d.fill(specificArea);
-                    } finally {
-                        g2d.setPaint(oldPaint);
-                    }
+            //if ( !repeat && imageIcon instanceof SVGIcon ) {
+            //    SVGIcon svgIcon = (SVGIcon) imageIcon;
+            //    svgIcon.paintIcon(component, g2d, x, y, imgWidth, imgHeight);
+            //} else
+            {
+                if ( imageIcon instanceof SVGIcon ) {
+                    SVGIcon svgIcon = (SVGIcon) imageIcon;
+                    svgIcon.setIconWidth(imgWidth);
+                    svgIcon.setIconHeight(imgHeight);
                 }
-                else
-                    g2d.drawImage(image, x, y, imgWidth, imgHeight, null);
+                Image image = imageIcon.getImage();
+                Composite oldComposite = g2d.getComposite();
+                try {
+                    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+                    if (repeat) {
+                        Paint oldPaint = g2d.getPaint();
+                        try {
+                            g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));
+                            g2d.fill(specificArea);
+                        } finally {
+                            g2d.setPaint(oldPaint);
+                        }
+                    } else
+                        g2d.drawImage(image, x, y, imgWidth, imgHeight, null);
 
-            } finally {
-                g2d.setComposite(oldComposite);
+                } finally {
+                    g2d.setComposite(oldComposite);
+                }
             }
         });
     }

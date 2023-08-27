@@ -2,6 +2,7 @@ package swingtree.style;
 
 import swingtree.UI;
 
+import javax.swing.ImageIcon;
 import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
@@ -26,7 +27,7 @@ public final class ImageStyle
     private final UI.Layer     _layer;
     private final Color        _primer;
 
-    private final Image        _image;
+    private final ImageIcon    _image;
     private final UI.Placement _placement;
     private final boolean      _repeat;
     private final boolean      _autoFit;
@@ -38,7 +39,7 @@ public final class ImageStyle
     public ImageStyle(
         UI.Layer     layer,
         Color        primer,
-        Image        image,
+        ImageIcon    image,
         UI.Placement placement,
         boolean      repeat,
         boolean      autoFit,
@@ -65,7 +66,7 @@ public final class ImageStyle
 
     public Optional<Color> primer() { return Optional.ofNullable(_primer); }
 
-    public Optional<Image> image() { return Optional.ofNullable(_image); }
+    public Optional<ImageIcon> image() { return Optional.ofNullable(_image); }
 
     public UI.Placement placement() { return _placement; }
 
@@ -114,7 +115,16 @@ public final class ImageStyle
      * @param image The image which will be drawn onto the component.
      * @return A new {@link ImageStyle} instance with the specified image.
      */
-    public ImageStyle image( Image image ) { return new ImageStyle(_layer, _primer, image, _placement, _repeat, _autoFit, _width, _height, _opacity, _padding); }
+    public ImageStyle image( Image image ) { return new ImageStyle(_layer, _primer, new ImageIcon(image), _placement, _repeat, _autoFit, _width, _height, _opacity, _padding); }
+
+    /**
+     *  Here you can specify the <b>image icon</b> which will be drawn onto the component.
+     *  The supplied object must be an instance of {@link ImageIcon} implementation.
+     *
+     * @param image The image icon which will be drawn onto the component.
+     * @return A new {@link ImageStyle} instance with the specified image.
+     */
+    public ImageStyle image( ImageIcon image ) { return new ImageStyle(_layer, _primer, image, _placement, _repeat, _autoFit, _width, _height, _opacity, _padding); }
 
     /**
      *  Here you can specify the <b>placement</b> of the image onto the component.
