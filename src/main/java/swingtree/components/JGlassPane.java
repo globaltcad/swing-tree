@@ -82,21 +82,15 @@ public class JGlassPane extends JPanel implements AWTEventListener
         */
     }
 
-    private void attachToRootPane(JRootPane rootPane) {
+    protected void attachToRootPane(JRootPane rootPane) {
         Objects.requireNonNull(rootPane);
         if ( this.rootPane != null ) this.detachFromRootPane(this.rootPane);
         this.setOpaque(false);
-        this.setVisible(true);
-        /*
-            Important:
-            The glass pane needs to be set opaque and visible before
-            attaching it to the root pane, otherwise
-            there might be weired side effects.
-         */
         ( this.rootPane = rootPane ).setGlassPane(this);
+        this.setVisible(true);
     }
 
-    private void detachFromRootPane( JRootPane rootPane ) {
+    protected void detachFromRootPane( JRootPane rootPane ) {
         Objects.requireNonNull(rootPane);
         if ( rootPane.getGlassPane() == this ) {
             rootPane.setGlassPane(null);
@@ -111,33 +105,33 @@ public class JGlassPane extends JPanel implements AWTEventListener
             detachFromRootPane(rootPane);
     }
 
-    @Override public synchronized MouseListener[] getMouseListeners() {
+    @Override public final synchronized MouseListener[] getMouseListeners() {
         return listeners.getListeners(MouseListener.class);
     }
-    @Override public synchronized void addMouseListener(MouseListener listener) {
+    @Override public final synchronized void addMouseListener(MouseListener listener) {
         listeners.add(MouseListener.class,listener);
     }
-    @Override public synchronized void removeMouseListener(MouseListener listener) {
+    @Override public final synchronized void removeMouseListener(MouseListener listener) {
         listeners.remove(MouseListener.class,listener);
     }
 
-    @Override public synchronized MouseMotionListener[] getMouseMotionListeners() {
+    @Override public final synchronized MouseMotionListener[] getMouseMotionListeners() {
         return listeners.getListeners(MouseMotionListener.class);
     }
-    @Override public synchronized void addMouseMotionListener(MouseMotionListener listener) {
+    @Override public final synchronized void addMouseMotionListener(MouseMotionListener listener) {
         listeners.add(MouseMotionListener.class,listener);
     }
-    @Override public synchronized void removeMouseMotionListener(MouseMotionListener listener) {
+    @Override public final synchronized void removeMouseMotionListener(MouseMotionListener listener) {
         listeners.remove(MouseMotionListener.class,listener);
     }
 
-    @Override public synchronized MouseWheelListener[] getMouseWheelListeners() {
+    @Override public final synchronized MouseWheelListener[] getMouseWheelListeners() {
         return listeners.getListeners(MouseWheelListener.class);
     }
-    @Override public synchronized void addMouseWheelListener(MouseWheelListener listener) {
+    @Override public final synchronized void addMouseWheelListener(MouseWheelListener listener) {
         listeners.add(MouseWheelListener.class,listener);
     }
-    @Override public synchronized void removeMouseWheelListener(MouseWheelListener listener) {
+    @Override public final synchronized void removeMouseWheelListener(MouseWheelListener listener) {
         listeners.remove(MouseWheelListener.class,listener);
     }
 
