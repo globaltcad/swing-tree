@@ -16,6 +16,7 @@ import swingtree.components.JBox;
 import swingtree.components.JIcon;
 import swingtree.components.JScrollPanels;
 import swingtree.components.JSplitButton;
+import swingtree.dialogs.*;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
 import swingtree.style.*;
@@ -34,6 +35,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -722,14 +724,14 @@ public final class UI
      * @param path The path to the icon. It can be a classpath resource or a file path.
      * @return The icon.
      */
-    public static ImageIcon loadIcon( String path ) {
+    public static Optional<ImageIcon> findIcon( String path ) {
         Map<String, ImageIcon> cache = SwingTree.get().getIconCache();
         ImageIcon icon = cache.get(path);
         if ( icon == null ) {
             icon = _loadIcon(path);
             cache.put(path, icon);
         }
-        return icon;
+        return Optional.ofNullable(icon);
     }
 
     /**
@@ -3241,7 +3243,7 @@ public final class UI
      */
     public static UIForIcon<JIcon> icon( int width, int height, String iconPath ) {
         NullUtil.nullArgCheck(iconPath, "iconPath", String.class);
-        return icon(width, height, loadIcon(iconPath));
+        return icon(width, height, findIcon(iconPath).orElse(null));
     }
 
     /**
@@ -4778,32 +4780,29 @@ public final class UI
     /**
      *  Shows a conformation dialog with the given message.
      * @param message the message to show
-     * @return true if the user clicked "Yes", false otherwise
+     * @return {@code Answer.YES} if the user clicked "Yes", {@code Answer.NO} if the user clicked "No", {@code Answer.CANCEL} otherwise.
      */
-    public static boolean confirm( String message ) { return confirm("Confirm", message); }
+    public static ConfirmAnswer confirm( String message ) { return confirm("Confirm", message); }
 
     /**
      * Shows a conformation dialog with the given message.
      *
      * @param title   the title of the dialog
      * @param message the message to show
-     * @return true if the user clicked "Yes", false otherwise
+     * @return {@code Answer.YES} if the user clicked "Yes", {@code Answer.NO} if the user clicked "No", {@code Answer.CANCEL} otherwise.
      */
-    public static boolean confirm( String title, String message ) { return confirm(title, message, null ); }
-
-    /**
-     * Shows a conformation dialog with the given message.
-     *
-     * @param title   the title of the dialog
-     * @param message the message to show
-     * @param icon    the icon to show
-     * @return true if the user clicked "Yes", false otherwise
-     */
-    public static boolean confirm( String title, String message, Icon icon ) {
-        Objects.requireNonNull( message );
-        Objects.requireNonNull( title );
-        return JOptionPane.showConfirmDialog( null, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, icon ) == JOptionPane.YES_OPTION;
+    public static ConfirmAnswer confirm( String title, String message ) {
+        return
+            ConfirmDialogBuilder.get()
+            .title(title)
+            .message(message)
+            .show();
     }
+
+    /**
+     * @return A builder for creating a confirmation dialog.
+     */
+    public static ConfirmDialogBuilder confirm() { return ConfirmDialogBuilder.get(); }
 
     /**
      *  Shows an error dialog with the given message.
@@ -4817,20 +4816,17 @@ public final class UI
      * @param title   The title of the dialog.
      * @param message The error message to show in the dialog.
      */
-    public static void error( String title, String message ) { error(title, message, null ); }
+    public static void error( String title, String message ) {
+        error()
+            .title(title)
+            .message(message)
+            .show();
+    }
 
     /**
-     * Shows an error dialog with the given message, dialog title and icon.
-     *
-     * @param title   The title of the dialog.
-     * @param message The error message to show in the dialog.
-     * @param icon    The icon to show in the dialog.
+     * @return A builder for creating an error dialog.
      */
-    public static void error( String title, String message, Icon icon ) {
-        Objects.requireNonNull( message );
-        Objects.requireNonNull( title );
-        JOptionPane.showMessageDialog( null, message, title, JOptionPane.ERROR_MESSAGE, icon );
-    }
+    public static ErrorDialogBuilder error() { return ErrorDialogBuilder.get(); }
 
     /**
      *  Shows an info dialog with the given message.
@@ -4845,23 +4841,16 @@ public final class UI
      * @param message The message to show in the dialog.
      */
     public static void info( String title, String message ) {
-        Objects.requireNonNull( message );
-        Objects.requireNonNull( title );
-        info(title, message, null );
+        info()
+            .title(title)
+            .message(message)
+            .show();
     }
 
     /**
-     * Shows an info dialog with the given message, dialog title and icon.
-     *
-     * @param title   The title of the dialog.
-     * @param message The message to show in the dialog.
-     * @param icon    The icon to show in the dialog.
+     * @return A builder for creating an info dialog.
      */
-    public static void info( String title, String message, Icon icon ) {
-        Objects.requireNonNull( message );
-        Objects.requireNonNull( title );
-        JOptionPane.showMessageDialog( null, message, title, JOptionPane.INFORMATION_MESSAGE, icon );
-    }
+    public static InfoDialogBuilder info() { return InfoDialogBuilder.get(); }
 
     /**
      *  Shows a warning dialog with the given message.
@@ -4875,20 +4864,17 @@ public final class UI
      * @param title   The title of the dialog.
      * @param message The warning message to show in the dialog.
      */
-    public static void warn( String title, String message ) { warn(title, message, null ); }
+    public static void warn( String title, String message ) {
+        warn()
+            .title(title)
+            .message(message)
+            .show();
+    }
 
     /**
-     * Shows a warning dialog with the given message, dialog title and icon.
-     *
-     * @param title   The title of the dialog.
-     * @param message The warning message to show in the dialog.
-     * @param icon    The icon to show in the dialog.
+     * @return A builder for creating a warning dialog.
      */
-    public static void warn( String title, String message, Icon icon ) {
-        Objects.requireNonNull( message );
-        Objects.requireNonNull( title );
-        JOptionPane.showMessageDialog( null, message, title, JOptionPane.WARNING_MESSAGE, icon );
-    }
+    public static WarnDialogBuilder warn() { return WarnDialogBuilder.get(); }
 
     /**
      *  Shows a dialog where the user can select a value from a list of options

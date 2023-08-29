@@ -5,7 +5,6 @@ import swingtree.UI;
 import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
-import javax.swing.plaf.LabelUI;
 import java.util.Map;
 
 /**
@@ -59,8 +58,9 @@ public class JIcon extends JLabel
         Map<String, ImageIcon> cache = SwingTree.get().getIconCache();
         ImageIcon icon = cache.get(path);
         if ( icon == null ) {
-            icon = UI.loadIcon(path);
-            cache.put(path, icon);
+            icon = UI.findIcon(path).orElse(null);
+            if ( icon != null )
+                cache.put(path, icon);
         }
         return icon;
     }

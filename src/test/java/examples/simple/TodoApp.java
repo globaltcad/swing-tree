@@ -3,6 +3,8 @@ package examples.simple;
 
 import swingtree.UI;
 
+import java.awt.Color;
+
 import static swingtree.UI.*;
 
 /**
@@ -14,7 +16,7 @@ public class TodoApp extends Panel
     public TodoApp() {
         of(this).withLayout(FILL)
         .add(
-            panel(FILL)
+            panel(FILL).makeNonOpaque()
             .add(GROW.and(SPAN).and(WRAP), label("Todo List"))
             .add(GROW.and(SPAN).and(WRAP),
                 panel(FILL).add(SHRINK, button("Add"), button("Remove"))
@@ -36,6 +38,11 @@ public class TodoApp extends Panel
         )
         .add(GROW.and(PUSH),
             icon("img/dandelion.svg").withPrefWidth(200)
+            .withStyle( it -> it
+                .border(4, Color.BLACK)
+                .borderRadius(24)
+                .margin(5)
+            )
         )
         ;
     }

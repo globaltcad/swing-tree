@@ -38,7 +38,7 @@ public final class FancyTextField extends TextField
             )
         )
         .add("right",
-            button(20, 20, loadIcon("img/trees.png"))
+            button(20, 20, findIcon("img/trees.png").orElse(null))
             .withStyle( it -> it
                 .margin(0)
                 .cursor(Cursor.HAND)
