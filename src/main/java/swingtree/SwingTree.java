@@ -32,29 +32,42 @@ import java.util.function.Supplier;
  */
 public final class SwingTree
 {
-	private static SwingTree _INSTANCES = null;
+    private static final String _DEFAULT_FONT = "defaultFont";
+
+	private static LazyRef<SwingTree> _INSTANCE = new LazyRef<>(()->new SwingTree(null));
 
 	/**
 	 * Returns the singleton instance of the {@link SwingTree}.
 	 * Note that this method will create the singleton if it does not exist.
 	 * @return the singleton instance of the {@link SwingTree}.
 	 */
-	public static SwingTree get() {
-		// We make sure this method is thread-safe by using the double-checked locking idiom.
-		if ( _INSTANCES == null ) {
-			synchronized ( SwingTree.class ) {
-				if ( _INSTANCES == null ) {
-					_INSTANCES = new SwingTree();
-				}
-			}
-		}
-		return _INSTANCES;
-	}
+	public static SwingTree get() { return _INSTANCE.get(); }
 
+    /**
+     *  Resets the singleton instance of the {@link SwingTree}
+     *  causing it to be recreated the next time it is requested.
+     *  This is useful for testing purposes, also in cases where
+     *  the UI scale changes (through the reference font).<br>
+     *  Also see {@link #resetUsingDefaultFont(Font)}.
+     */
     public static void reset() {
-        _INSTANCES = null;
+        _INSTANCE = new LazyRef<>(()->new SwingTree(null));
     }
 
+    /**
+     *  Resets the singleton instance of the {@link SwingTree}
+     *  causing it to be recreated the next time it is requested,
+     *  but with a reference font as a basis for the UI scale.
+     *  This is useful for testing purposes, also in cases where
+     *  the UI scale changes (through the reference font).<br>
+     *  Also see {@link #reset()}.
+     *
+     * @param uiScaleReferenceFont The font to use as a basis for
+     *                             calculating the UI scale factor.
+     */
+    public static void resetUsingDefaultFont(Font uiScaleReferenceFont ) {
+        _INSTANCE = new LazyRef<>(()->new SwingTree(uiScaleReferenceFont));
+    }
 
 	private EventProcessor _eventProcessor = EventProcessor.COUPLED_STRICT;
 	private StyleSheet _styleSheet = null;
@@ -63,13 +76,15 @@ public final class SwingTree
     private final Map<String, ImageIcon> _iconCache = new HashMap<>();
 
 
-	private SwingTree() {
-        this.uiScale = new LazyRef<>(UIScale::new);
+	private SwingTree( Font uiScaleReferenceFont ) {
+        this.uiScale = new LazyRef<>( () -> new UIScale(uiScaleReferenceFont) );
     }
 
-    public Map<String, ImageIcon> getIconCache() {
-        return _iconCache;
-    }
+    /**
+     * @return The icon cache of this context, which is used to cache icons
+     *         that are loaded from the file system.
+     */
+    public Map<String, ImageIcon> getIconCache() { return _iconCache; }
 
     /**
      * @return The {@link UIScale} instance of this context, which defines
@@ -151,9 +166,23 @@ public final class SwingTree
         private boolean initialized;
 
 
-        private UIScale() {// private to prevent instantiation from outside
+        private UIScale( Font uiScaleReferenceFont ) {// private to prevent instantiation from outside
             try {
-                _findDPIAwareDefaultFontAndCalculateScalingFactorBasedOnIt();
+                UIDefaults defaults = UIManager.getDefaults();
+
+                if ( uiScaleReferenceFont != null )
+                    defaults.put(_DEFAULT_FONT, null);
+
+                if ( uiScaleReferenceFont == null )
+                    uiScaleReferenceFont = UIManager.getFont( _DEFAULT_FONT );
+
+                if ( uiScaleReferenceFont == null ) {
+                    Font highDPIFont = calculateDPIAwarePlatformFont();
+                    defaults.put(_DEFAULT_FONT, highDPIFont);
+                }
+
+                initialize();
+
             } catch (Exception ex) {
                 ex.printStackTrace();
                 // Usually there should be no exception, if there is one, the library will still work, but
@@ -161,19 +190,9 @@ public final class SwingTree
             }
         }
 
-        private void _findDPIAwareDefaultFontAndCalculateScalingFactorBasedOnIt() {
-            UIDefaults defaults = UIManager.getDefaults();
-            Font defaultFont = UIManager.getFont( "defaultFont" );
-            if ( defaultFont == null ) {
-                Font highDPIFont = initDefaultFont(defaults);
-                defaults.put("defaultFont", highDPIFont);
-            }
-
-            initialize();
-        }
-
-        private Font initDefaultFont( UIDefaults defaults ) {
-            FontUIResource uiFont = null;
+        private Font calculateDPIAwarePlatformFont()
+        {
+            FontUIResource dpiAwareFont = null;
 
             // determine UI font based on operating system
             if( SystemInfo.isWindows ) {
@@ -183,16 +202,17 @@ public final class SwingTree
                         // on WinPE use "win.defaultGUI.font", which is usually Tahoma,
                         // because Segoe UI font is not available on WinPE
                         Font winPEFont = (Font) Toolkit.getDefaultToolkit().getDesktopProperty( "win.defaultGUI.font" );
-                        if( winPEFont != null )
-                            uiFont = createCompositeFont( winPEFont.getFamily(), winPEFont.getStyle(), winFont.getSize() );
-                    } else
-                        uiFont = createCompositeFont( winFont.getFamily(), winFont.getStyle(), winFont.getSize() );
+                        if ( winPEFont != null )
+                            dpiAwareFont = _createCompositeFont( winPEFont.getFamily(), winPEFont.getStyle(), winFont.getSize() );
+                    }
+                    else
+                        dpiAwareFont = _createCompositeFont( winFont.getFamily(), winFont.getStyle(), winFont.getSize() );
                 }
 
-            } else if( SystemInfo.isMacOS ) {
+            } else if ( SystemInfo.isMacOS ) {
                 String fontName;
                 if( SystemInfo.isMacOS_10_15_Catalina_orLater ) {
-                    if (SystemInfo.isJetBrainsJVM_11_orLater) {
+                    if ( SystemInfo.isJetBrainsJVM_11_orLater ) {
                         // See https://youtrack.jetbrains.com/issue/JBR-1915
                         fontName = ".AppleSystemUIFont";
                     } else {
@@ -207,23 +227,23 @@ public final class SwingTree
                     fontName = "Lucida Grande";
                 }
 
-                uiFont = createCompositeFont( fontName, Font.PLAIN, 13 );
+                dpiAwareFont = _createCompositeFont( fontName, Font.PLAIN, 13 );
 
             } else if( SystemInfo.isLinux ) {
                 Font font = LinuxFontPolicy.getFont();
-                uiFont = (font instanceof FontUIResource) ? (FontUIResource) font : new FontUIResource( font );
+                dpiAwareFont = (font instanceof FontUIResource) ? (FontUIResource) font : new FontUIResource( font );
             }
 
             // fallback
-            if( uiFont == null )
-                uiFont = createCompositeFont( Font.SANS_SERIF, Font.PLAIN, 12 );
+            if( dpiAwareFont == null )
+                dpiAwareFont = _createCompositeFont( Font.SANS_SERIF, Font.PLAIN, 12 );
 
             // Todo: Look at ActiveFont in FlatLaf to see if we need to do anything with it here.
             // Comment from FlatLaf code base below:
             /*
                 // get/remove "defaultFont" from defaults if set in properties files
                 // (use remove() to avoid that ActiveFont.createValue() gets invoked)
-                Object defaultFont = defaults.remove( "defaultFont" );
+                Object defaultFont = defaults.remove( _DEFAULT_FONT );
                 // use font from OS as base font and derive the UI font from it
                 if( defaultFont instanceof ActiveFont ) {
                     Font baseFont = uiFont;
@@ -234,12 +254,12 @@ public final class SwingTree
             */
 
             // increase font size if system property "swingtree.uiScale" is set
-            uiFont = applyCustomScaleFactor( uiFont );
+            dpiAwareFont = applyCustomScaleFactor( dpiAwareFont );
 
-            return uiFont;
+            return dpiAwareFont;
         }
 
-        static FontUIResource createCompositeFont( String family, int style, int size ) {
+        private static FontUIResource _createCompositeFont( String family, int style, int size ) {
             // using StyleContext.getFont() here because it uses
             // sun.font.FontUtilities.getCompositeFontUIResource()
             // and creates a composite font that is able to display all Unicode characters
@@ -264,8 +284,12 @@ public final class SwingTree
 
         /**
          * Returns whether system scaling is enabled.
+         * System scaling means that the JRE scales everything
+         * through the {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
+         * If this is the case, then we do not have to do scaled painting
+         * and can use the original size of icons, gaps, etc.
          */
-        public static boolean isSystemScalingEnabled() {
+        private static boolean _isSystemScalingEnabled() {
             if ( jreHiDPI != null )
                 return jreHiDPI;
 
@@ -296,19 +320,20 @@ public final class SwingTree
          * Returns the system scale factor for the given graphics context.
          */
         public double getSystemScaleFactor( Graphics2D g ) {
-            return isSystemScalingEnabled() ? getSystemScaleFactor( g.getDeviceConfiguration() ) : 1;
+            return _isSystemScalingEnabled() ? getSystemScaleFactor( g.getDeviceConfiguration() ) : 1;
         }
 
         /**
          * Returns the system scale factor for the given graphics configuration.
          */
         public static double getSystemScaleFactor( GraphicsConfiguration gc ) {
-            return (isSystemScalingEnabled() && gc != null) ? gc.getDefaultTransform().getScaleX() : 1;
+            return (_isSystemScalingEnabled() && gc != null) ? gc.getDefaultTransform().getScaleX() : 1;
         }
 
         //---- user scaling (Java 8) ----------------------------------------------
 
-        private void initialize() {
+        private void initialize()
+        {
             if( initialized )
                 return;
             initialized = true;
@@ -328,7 +353,7 @@ public final class SwingTree
                             updateScaleFactor();
                             break;
 
-                        case "defaultFont":
+                        case _DEFAULT_FONT:
                         case "Label.font":
                             updateScaleFactor();
                             break;
@@ -362,7 +387,7 @@ public final class SwingTree
             // because even if we are on a HiDPI display it is not sure
             // that a larger font size is set by the current LaF
             // (e.g. can avoid large icons with small text)
-            Font font = UIManager.getFont( "defaultFont" );
+            Font font = UIManager.getFont( _DEFAULT_FONT );
             if( font == null )
                 font = UIManager.getFont( "Label.font" );
 
@@ -390,7 +415,7 @@ public final class SwingTree
                 if( font instanceof UIResource) {
                     Font uiFont = (Font) Toolkit.getDefaultToolkit().getDesktopProperty( "win.messagebox.font" );
                     if( uiFont == null || uiFont.getSize() == font.getSize() ) {
-                        if( isSystemScalingEnabled() ) {
+                        if( _isSystemScalingEnabled() ) {
                             // Do not apply own scaling if the JRE scales using Windows screen scale factor.
                             // If user increases font size in Windows 10 settings, desktop property
                             // "win.messagebox.font" is changed and SwingTree uses the larger font.
@@ -951,7 +976,7 @@ public final class SwingTree
         }
 
         private static Font createFont( String family, int style, int size, double dsize ) {
-            Font font = UIScale.createCompositeFont( family, style, size );
+            Font font = UIScale._createCompositeFont( family, style, size );
 
             // set font size in floating points
             font = font.deriveFont( style, (float) dsize );
