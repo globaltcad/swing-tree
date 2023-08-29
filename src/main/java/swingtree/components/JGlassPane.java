@@ -51,7 +51,7 @@ public class JGlassPane extends JPanel implements AWTEventListener
 
     private final EventListenerList listeners = new EventListenerList();
 
-    private JRootPane rootPane;
+    protected JRootPane rootPane;
 
     public JGlassPane() {
         setLayout(new MigLayout("fill, ins 0"));
