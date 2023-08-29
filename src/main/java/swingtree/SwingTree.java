@@ -177,7 +177,7 @@ public final class SwingTree
                     uiScaleReferenceFont = UIManager.getFont( _DEFAULT_FONT );
 
                 if ( uiScaleReferenceFont == null ) {
-                    Font highDPIFont = calculateDPIAwarePlatformFont();
+                    Font highDPIFont = _calculateDPIAwarePlatformFont();
                     defaults.put(_DEFAULT_FONT, highDPIFont);
                 }
 
@@ -190,7 +190,7 @@ public final class SwingTree
             }
         }
 
-        private Font calculateDPIAwarePlatformFont()
+        private Font _calculateDPIAwarePlatformFont()
         {
             FontUIResource dpiAwareFont = null;
 
@@ -254,7 +254,7 @@ public final class SwingTree
             */
 
             // increase font size if system property "swingtree.uiScale" is set
-            dpiAwareFont = applyCustomScaleFactor( dpiAwareFont );
+            dpiAwareFont = _applyCustomScaleFactor( dpiAwareFont );
 
             return dpiAwareFont;
         }
@@ -334,11 +334,12 @@ public final class SwingTree
 
         private void initialize()
         {
-            if( initialized )
+            if ( initialized )
                 return;
+
             initialized = true;
 
-            if( !isUserScalingEnabled() )
+            if ( !isUserScalingEnabled() )
                 return;
 
             // listener to update scale factor if LaF changed, "defaultFont" or "Label.font" changed
@@ -373,12 +374,12 @@ public final class SwingTree
         }
 
         private void updateScaleFactor() {
-            if( !isUserScalingEnabled() )
+            if ( !isUserScalingEnabled() )
                 return;
 
             // apply custom scale factor specified in system property "swingtree.uiScale"
             float customScaleFactor = getCustomScaleFactor();
-            if( customScaleFactor > 0 ) {
+            if ( customScaleFactor > 0 ) {
                 setUserScaleFactor( customScaleFactor, false );
                 return;
             }
@@ -388,10 +389,10 @@ public final class SwingTree
             // that a larger font size is set by the current LaF
             // (e.g. can avoid large icons with small text)
             Font font = UIManager.getFont( _DEFAULT_FONT );
-            if( font == null )
+            if ( font == null )
                 font = UIManager.getFont( "Label.font" );
 
-            float newScale = computeFontScaleFactor( font );
+            float newScale = _computeScaleFactorFrom( font );
 
             setUserScaleFactor( newScale, true );
         }
@@ -401,8 +402,8 @@ public final class SwingTree
          * @param font font to compute scale factor from
          * @return scale factor
          */
-        private float computeFontScaleFactor( Font font ) {
-            if( SystemInfo.isWindows ) {
+        private float _computeScaleFactorFrom( Font font ) {
+            if ( SystemInfo.isWindows ) {
                 // Special handling for Windows to be compatible with OS scaling,
                 // which distinguish between "screen scaling" and "text scaling".
                 //  - Windows "screen scaling" scales everything (text, icon, gaps, etc)
@@ -428,7 +429,7 @@ public final class SwingTree
                             // scaled with the Windows screen scale factor. So use it to compute
                             // our scale factor that is equal to Windows screen scale factor.
                             Font winFont = (Font) Toolkit.getDefaultToolkit().getDesktopProperty( "win.defaultGUI.font" );
-                            return computeScaleFactor( (winFont != null) ? winFont : font );
+                            return _computeScaleFactorFromFontSize( (winFont != null) ? winFont : font );
                         }
                     }
                 }
@@ -441,10 +442,10 @@ public final class SwingTree
                 // E.g. SwingTree Demo supports increasing font size in "Font" menu and UI scales.
             }
 
-            return computeScaleFactor( font );
+            return _computeScaleFactorFromFontSize( font );
         }
 
-        private static float computeScaleFactor( Font font ) {
+        private static float _computeScaleFactorFromFontSize(Font font ) {
             // default font size
             float fontSizeDivider = 12f;
 
@@ -473,16 +474,17 @@ public final class SwingTree
          * Applies a custom scale factor given in system property "swingtree.uiScale"
          * to the given font.
          */
-        public FontUIResource applyCustomScaleFactor(FontUIResource font ) {
-            if( !isUserScalingEnabled() )
+        private FontUIResource _applyCustomScaleFactor( FontUIResource font )
+        {
+            if ( !isUserScalingEnabled() )
                 return font;
 
             float scaleFactor = getCustomScaleFactor();
-            if( scaleFactor <= 0 )
+            if ( scaleFactor <= 0 )
                 return font;
 
-            float fontScaleFactor = computeScaleFactor( font );
-            if( scaleFactor == fontScaleFactor )
+            float fontScaleFactor = _computeScaleFactorFromFontSize( font );
+            if ( scaleFactor == fontScaleFactor )
                 return font;
 
             int newFontSize = Math.max( Math.round( (font.getSize() / fontScaleFactor) * scaleFactor ), 1 );
@@ -500,16 +502,16 @@ public final class SwingTree
          * Similar to sun.java2d.SunGraphicsEnvironment.getScaleFactor(String)
          */
         private static float parseScaleFactor( String s ) {
-            if( s == null )
+            if ( s == null )
                 return -1;
 
             float units = 1;
-            if( s.endsWith( "x" ) )
+            if ( s.endsWith( "x" ) )
                 s = s.substring( 0, s.length() - 1 );
-            else if( s.endsWith( "dpi" ) ) {
+            else if ( s.endsWith( "dpi" ) ) {
                 units = 96;
                 s = s.substring( 0, s.length() - 3 );
-            } else if( s.endsWith( "%" ) ) {
+            } else if ( s.endsWith( "%" ) ) {
                 units = 100;
                 s = s.substring( 0, s.length() - 1 );
             }
@@ -584,7 +586,7 @@ public final class SwingTree
          */
         public int scale( int value ) {
             initialize();
-            return (scaleFactor == 1) ? value : Math.round( value * scaleFactor );
+            return ( scaleFactor == 1 ? value : Math.round( value * scaleFactor ) );
         }
 
         /**
@@ -592,9 +594,9 @@ public final class SwingTree
          * <p>
          * For use in special cases. {@link #scale(int)} is the preferred method.
          */
-        public int scale2( int value ) {
+        public int scaleRoundedDown( int value ) {
             initialize();
-            return (scaleFactor == 1) ? value : (int) (value * scaleFactor);
+            return ( scaleFactor == 1 ? value : (int) (value * scaleFactor) );
         }
 
         /**
