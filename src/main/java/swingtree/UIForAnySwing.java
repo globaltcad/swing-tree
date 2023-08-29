@@ -110,6 +110,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *           simply translate to {@link JComponent#setName(String)}
      *
      * @return The JComponent type which will be wrapped by this builder node.
+     * @param <E> The enum type.
      */
     public final <E extends Enum<E>> I id( E id ) {
         Objects.requireNonNull(id);
@@ -190,6 +191,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *
      * @param groupName The enum based style group to which this component should be added.
      * @return This very instance, which enables builder-style method chaining.
+     * @param <E> The enum type.
      */
     @SafeVarargs
     public final <E extends Enum<E>> I group( E... groupName ) {
@@ -2862,6 +2864,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param attr The additional layout information which should be passed to the UI tree.
      * @param components A {@link JComponent}s array which ought to be added to the wrapped component type.
      * @return This very instance, which enables builder-style method chaining.
+     * @param <E> The type of the {@link JComponent} which is wrapped by the provided builder.
      */
     @SafeVarargs
     public final <E extends JComponent> I add( String attr, E... components ) {
@@ -2884,6 +2887,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param attr The first layout information which should be passed to the UI tree.
      * @param components A {@link JComponent}s array which ought to be added to the wrapped component type.
      * @return This very instance, which enables builder-style method chaining.
+     * @param <E> The type of the {@link JComponent} which is wrapped by the provided builder.
      */
     @SafeVarargs
     public final <E extends JComponent> I add( CompAttr attr, E... components ) {
@@ -2901,6 +2905,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *                 preferably a view model instance.
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for the value held by the property.
      * @return This very instance, which enables builder-style method chaining.
+     * @param <M> The type of the value held by the {@link Val} property.
      */
     public final <M> I add( Val<M> viewable, ViewSupplier<M> viewSupplier) {
         NullUtil.nullArgCheck(viewable, "viewable", Val.class);
@@ -2920,6 +2925,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the list.
      *               The views will be added to the component wrapped by this builder instance.
      * @return This very instance, which enables builder-style method chaining.
+     * @param <M> The type of the items in the {@link Vals} list.
      */
     public final <M> I add( Vals<M> viewables, ViewSupplier<M> viewSupplier) {
         NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
@@ -2939,6 +2945,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *                 preferably a view model instance.
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for the value held by the property.
      * @return This very instance, which enables builder-style method chaining.
+     * @param <M> The type of the value held by the {@link Val} property.
      */
     public final <M> I add( String attr, Val<M> viewable, ViewSupplier<M> viewSupplier) {
         NullUtil.nullArgCheck(attr, "attr", Object.class);
@@ -2960,6 +2967,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the list.
      *               The views will be added to the component wrapped by this builder instance.
      * @return This very instance, which enables builder-style method chaining.
+     * @param <M> The type of the items in the {@link Vals} list.
      */
     public final <M> I add( String attr, Vals<M> viewables, ViewSupplier<M> viewSupplier) {
         NullUtil.nullArgCheck(attr, "attr", Object.class);
@@ -2980,6 +2988,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *                 preferably a view model instance.
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for the value held by the property.
      * @return This very instance, which enables builder-style method chaining.
+     * @param <M> The type of the value held by the {@link Val} property.
      */
     public final <M> I add( CompAttr attr, Val<M> viewable, ViewSupplier<M> viewSupplier) {
         return this.add(attr.toString(), viewable, viewSupplier);
@@ -2998,6 +3007,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param viewSupplier A {@link ViewSupplier} instance which will be used to generate the view for each item in the list.
      *               The views will be added to the component wrapped by this builder instance.
      * @return This very instance, which enables builder-style method chaining.
+     * @param <M> The type of the items in the {@link Vals} list.
      */
     public final <M> I add( CompAttr attr, Vals<M> viewables, ViewSupplier<M> viewSupplier) {
         return this.add(attr.toString(), viewables, viewSupplier);

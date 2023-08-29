@@ -4884,6 +4884,7 @@ public final class UI
      *
      * @param message The message to show in the dialog.
      * @param selected The enum based property to store the selected value in.
+     * @param <E> The enum type.
      */
     public static <E extends Enum<E>> void select( String message, Var<E> selected ) {
         select("Select", message, selected );
@@ -4898,6 +4899,7 @@ public final class UI
      * @param title    The title of the dialog.
      * @param message  The message to show in the dialog.
      * @param selected The enum based property to store the selected value in.
+     * @param <E> The enum type.
      */
     public static <E extends Enum<E>> void select( String title, String message, Var<E> selected ) {
         select(title, message, null, selected );

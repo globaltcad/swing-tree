@@ -7,8 +7,8 @@ import swingtree.UI;
     @Override protected void _tryRunning( Runnable runnable ) {
         try {
 <span class="fc" id="L9">            _checkIfThreadIsCorrect();</span>
-<span class="nc" id="L10">        } catch (Exception e) {</span>
-<span class="nc" id="L11">            e.printStackTrace(); // If a user wants better logging, they can implement their own EventProcessor.</span>
+<span class="fc" id="L10">        } catch (Exception e) {</span>
+<span class="fc" id="L11">            e.printStackTrace(); // If a user wants better logging, they can implement their own EventProcessor.</span>
 <span class="fc" id="L12">        }</span>
         try {
 <span class="fc" id="L14">            runnable.run();</span>
@@ -18,15 +18,15 @@ import swingtree.UI;
 <span class="fc" id="L18">    }</span>
 
     private void _checkIfThreadIsCorrect() {
-<span class="pc bpc" id="L21" title="1 of 2 branches missed.">        if ( !UI.thisIsUIThread() ) {</span>
-<span class="nc" id="L22">            Thread currentThread = Thread.currentThread();</span>
-<span class="nc" id="L23">            String threadName    = currentThread.getName();</span>
-<span class="nc" id="L24">            String problem       = &quot;The current thread is not the UI thread!&quot;;</span>
-<span class="nc" id="L25">            String requirement   = &quot;The current event processor is the '&quot; + AWTEventProcessor.class.getSimpleName() + &quot;' which &quot; +</span>
+<span class="fc bfc" id="L21" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() ) {</span>
+<span class="fc" id="L22">            Thread currentThread = Thread.currentThread();</span>
+<span class="fc" id="L23">            String threadName    = currentThread.getName();</span>
+<span class="fc" id="L24">            String problem       = &quot;The current thread is not the UI thread!&quot;;</span>
+<span class="fc" id="L25">            String requirement   = &quot;The current event processor is the '&quot; + AWTEventProcessor.class.getSimpleName() + &quot;' which &quot; +</span>
                                    &quot;only supports running tasks in the UI thread.  The current thread however is '&quot; + threadName + &quot;' which &quot; +
                                    &quot;is not the UI thread (the AWT thread).&quot;;
 
-<span class="nc" id="L29">            throw new RuntimeException( problem + &quot;  &quot; + requirement );</span>
+<span class="fc" id="L29">            throw new RuntimeException( problem + &quot;  &quot; + requirement );</span>
         }
 <span class="fc" id="L31">    }</span>
 }

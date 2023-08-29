@@ -266,8 +266,8 @@ public final class SwingTree
          * Returns whether system scaling is enabled.
          */
         public static boolean isSystemScalingEnabled() {
-<span class="pc bpc" id="L269" title="1 of 2 branches missed.">            if ( jreHiDPI != null )</span>
-<span class="nc" id="L270">                return jreHiDPI;</span>
+<span class="fc bfc" id="L269" title="All 2 branches covered.">            if ( jreHiDPI != null )</span>
+<span class="fc" id="L270">                return jreHiDPI;</span>
 
 <span class="fc" id="L272">            jreHiDPI = false;</span>
 
@@ -372,11 +372,11 @@ public final class SwingTree
 <span class="fc" id="L372">        }</span>
 
         /**
-         * For internal use only.
-         *
-         * @since 2
+         * Computes the scale factor based on the given font.
+         * @param font font to compute scale factor from
+         * @return scale factor
          */
-        public float computeFontScaleFactor( Font font ) {
+        private float computeFontScaleFactor( Font font ) {
 <span class="pc bpc" id="L380" title="1 of 2 branches missed.">            if( SystemInfo.isWindows ) {</span>
                 // Special handling for Windows to be compatible with OS scaling,
                 // which distinguish between &quot;screen scaling&quot; and &quot;text scaling&quot;.

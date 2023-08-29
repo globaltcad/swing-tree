@@ -199,7 +199,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The vertical settings view from the examples looks like this:\n            ![views/vertical-settings-UI.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/views/vertical-settings-UI.png)\n\n            It demonstrates how UI components can easily be placed vertically\n            and with some slight indentation, to indicate a certain grouping\n            which is especially useful for settings dialogs.\n\n            If you want to see the code, just\n            <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/mvvm/SomeSettingsView.java\" target=\"_blank\">navigate to the class</a> and run it yourself, \n            it has a main method for that purpose already.\n\n            Here we will only test the UI.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["var view = new SomeSettingsView(new SomeSettingsViewModel())","var speedTextField = new Utility.Query(view).find(JTextField, \"speed-text-field\").orElse(null)"]},
+        {"kind":"given","text":"","code":["UIManager.put(\"defaultFont\", new Font(\"DejaVu Sans\", Font.PLAIN, 12))","SwingTree.reset()","var view = new SomeSettingsView(new SomeSettingsViewModel())","var speedTextField = new Utility.Query(view).find(JTextField, \"speed-text-field\").orElse(null)"]},
 
         {"kind":"expect","text":"","code":["view != null","speedTextField != null"]},
 
@@ -215,7 +215,9 @@
 
         {"kind":"when","text":"We rerender the view offscreen again because the background color changed...","code":["similarity = Utility.similarityBetween(view, \"views/vertical-settings-UI.png\")"]},
 
-        {"kind":"then","text":"The UI is no longer rendered as expected.","code":["similarity < 99"]}
+        {"kind":"then","text":"The UI is no longer rendered as expected.","code":["similarity < 99"]},
+
+        {"kind":"cleanup","text":"","code":["UIManager.put(\"defaultFont\", null)"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

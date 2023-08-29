@@ -162,10 +162,11 @@ public class UIForList&lt;E, L extends JList&lt;E&gt;&gt; extends UIForAnySwing&
      * &lt;p&gt;
      * @param renderBuilder The {@link Render.Builder} instance.
      * @return This very instance, which enables builder-style method chaining.
+     * @param &lt;V&gt; The type of the values that will be rendered.
      */
     public final &lt;V extends E&gt; UIForList&lt;E, L&gt; withRenderer( Render.Builder&lt;L,V&gt; renderBuilder ) {
-<span class="fc" id="L167">        NullUtil.nullArgCheck(renderBuilder, &quot;renderBuilder&quot;, Render.Builder.class);</span>
-<span class="fc" id="L168">        return withRenderer((ListCellRenderer&lt;E&gt;) renderBuilder.getForList());</span>
+<span class="fc" id="L168">        NullUtil.nullArgCheck(renderBuilder, &quot;renderBuilder&quot;, Render.Builder.class);</span>
+<span class="fc" id="L169">        return withRenderer((ListCellRenderer&lt;E&gt;) renderBuilder.getForList());</span>
     }
 
     /**
@@ -175,8 +176,8 @@ public class UIForList&lt;E, L extends JList&lt;E&gt;&gt; extends UIForAnySwing&
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForList&lt;E, L&gt; withRenderer( ListCellRenderer&lt;E&gt; renderer ) {
-<span class="fc" id="L178">        getComponent().setCellRenderer(renderer);</span>
-<span class="fc" id="L179">        return this;</span>
+<span class="fc" id="L179">        getComponent().setCellRenderer(renderer);</span>
+<span class="fc" id="L180">        return this;</span>
     }
 
 }

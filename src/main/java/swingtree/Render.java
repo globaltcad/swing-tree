@@ -324,6 +324,9 @@ public final class Render<C extends JComponent,E> {
 
 	/**
 	 * 	A builder for building simple customized {@link javax.swing.table.TableCellRenderer}!
+	 *
+	 * @param <C> The type of the component which is used to render the cell.
+	 * @param <E> The type of the value of the cell.
 	 */
 	public static class Builder<C extends JComponent, E> {
 

@@ -96,6 +96,7 @@ task deploy() {
 */
 
 task releaseJDocs(type: Copy) {
+    // must run after javadoc task
     from "$rootDir/build/docs/javadoc"
     into "$rootDir/docs/jdocs"
 }

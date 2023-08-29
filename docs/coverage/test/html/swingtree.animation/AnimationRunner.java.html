@@ -42,9 +42,9 @@ class AnimationRunner
 <span class="fc" id="L42">    private AnimationRunner() {}</span>
 
     private void _run( ActionEvent event ) {
-<span class="pc bpc" id="L45" title="1 of 2 branches missed.">        if ( _animators.isEmpty() ) {</span>
-<span class="nc" id="L46">            _timer.stop();</span>
-<span class="nc" id="L47">            return;</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        if ( _animators.isEmpty() ) {</span>
+<span class="fc" id="L46">            _timer.stop();</span>
+<span class="fc" id="L47">            return;</span>
         }
 
 <span class="fc bfc" id="L50" title="All 2 branches covered.">        for ( ComponentAnimator animator : new ArrayList&lt;&gt;(_animators) )</span>

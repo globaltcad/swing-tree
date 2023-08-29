@@ -727,7 +727,7 @@ public final class UI
     public static Optional&lt;ImageIcon&gt; findIcon( String path ) {
 <span class="fc" id="L728">        Map&lt;String, ImageIcon&gt; cache = SwingTree.get().getIconCache();</span>
 <span class="fc" id="L729">        ImageIcon icon = cache.get(path);</span>
-<span class="fc bfc" id="L730" title="All 2 branches covered.">        if ( icon == null ) {</span>
+<span class="pc bpc" id="L730" title="1 of 2 branches missed.">        if ( icon == null ) {</span>
 <span class="fc" id="L731">            icon = _loadIcon(path);</span>
 <span class="fc" id="L732">            cache.put(path, icon);</span>
         }
@@ -4884,10 +4884,11 @@ public final class UI
      *
      * @param message The message to show in the dialog.
      * @param selected The enum based property to store the selected value in.
+     * @param &lt;E&gt; The enum type.
      */
     public static &lt;E extends Enum&lt;E&gt;&gt; void select( String message, Var&lt;E&gt; selected ) {
-<span class="nc" id="L4889">        select(&quot;Select&quot;, message, selected );</span>
-<span class="nc" id="L4890">    }</span>
+<span class="nc" id="L4890">        select(&quot;Select&quot;, message, selected );</span>
+<span class="nc" id="L4891">    }</span>
 
     /**
      * Shows a dialog where the user can select a value from a list of options
@@ -4898,10 +4899,11 @@ public final class UI
      * @param title    The title of the dialog.
      * @param message  The message to show in the dialog.
      * @param selected The enum based property to store the selected value in.
+     * @param &lt;E&gt; The enum type.
      */
     public static &lt;E extends Enum&lt;E&gt;&gt; void select( String title, String message, Var&lt;E&gt; selected ) {
-<span class="nc" id="L4903">        select(title, message, null, selected );</span>
-<span class="nc" id="L4904">    }</span>
+<span class="nc" id="L4905">        select(title, message, null, selected );</span>
+<span class="nc" id="L4906">    }</span>
 
     /**
      * Shows a dialog where the user can select a value from a list of options
@@ -4915,17 +4917,17 @@ public final class UI
      * @param selected The enum based property to store the selected value in.
      */
     public static &lt;E extends Enum&lt;E&gt;&gt; void select( String title, String message, Icon icon, Var&lt;E&gt; selected ) {
-<span class="nc" id="L4918">        Objects.requireNonNull( message );</span>
-<span class="nc" id="L4919">        Objects.requireNonNull( title );</span>
-<span class="nc" id="L4920">        Objects.requireNonNull( selected );</span>
-<span class="nc" id="L4921">        E[] options = selected.type().getEnumConstants();</span>
-<span class="nc" id="L4922">        String[] asStr = new String[options.length];</span>
-<span class="nc bnc" id="L4923" title="All 2 branches missed.">        for ( int i = 0; i &lt; options.length; i++ )</span>
-<span class="nc" id="L4924">            asStr[i] = options[i].toString();</span>
+<span class="nc" id="L4920">        Objects.requireNonNull( message );</span>
+<span class="nc" id="L4921">        Objects.requireNonNull( title );</span>
+<span class="nc" id="L4922">        Objects.requireNonNull( selected );</span>
+<span class="nc" id="L4923">        E[] options = selected.type().getEnumConstants();</span>
+<span class="nc" id="L4924">        String[] asStr = new String[options.length];</span>
+<span class="nc bnc" id="L4925" title="All 2 branches missed.">        for ( int i = 0; i &lt; options.length; i++ )</span>
+<span class="nc" id="L4926">            asStr[i] = options[i].toString();</span>
 
-<span class="nc" id="L4926">        int selectedIdx = JOptionPane.showOptionDialog( null, message, title, JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, icon, asStr, asStr[0] );</span>
-<span class="nc" id="L4927">        selected.act( options[selectedIdx] );</span>
-<span class="nc" id="L4928">    }</span>
+<span class="nc" id="L4928">        int selectedIdx = JOptionPane.showOptionDialog( null, message, title, JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, icon, asStr, asStr[0] );</span>
+<span class="nc" id="L4929">        selected.act( options[selectedIdx] );</span>
+<span class="nc" id="L4930">    }</span>
 
     /**
      *  Use this to quickly launch a UI component in a {@link JFrame} window
@@ -4934,9 +4936,9 @@ public final class UI
      * @param component The component to show in the window.
      */
     public static void show( Component component ) {
-<span class="nc" id="L4937">        Objects.requireNonNull( component );</span>
-<span class="nc" id="L4938">        new UI.TestWindow( &quot;&quot;, f -&gt; component );</span>
-<span class="nc" id="L4939">    }</span>
+<span class="nc" id="L4939">        Objects.requireNonNull( component );</span>
+<span class="nc" id="L4940">        new UI.TestWindow( &quot;&quot;, f -&gt; component );</span>
+<span class="nc" id="L4941">    }</span>
 
     /**
      *  Use this to quickly launch a UI component in a titled {@link JFrame} window
@@ -4946,9 +4948,9 @@ public final class UI
      * @param component The component to show in the window.
      */
     public static void show( String title, Component component ) {
-<span class="nc" id="L4949">        Objects.requireNonNull( component );</span>
-<span class="nc" id="L4950">        new UI.TestWindow( title, f -&gt; component );</span>
-<span class="nc" id="L4951">    }</span>
+<span class="nc" id="L4951">        Objects.requireNonNull( component );</span>
+<span class="nc" id="L4952">        new UI.TestWindow( title, f -&gt; component );</span>
+<span class="nc" id="L4953">    }</span>
 
     /**
      *  Use this to quickly launch a UI component in a {@link JFrame} window
@@ -4958,8 +4960,8 @@ public final class UI
      * @param &lt;C&gt; The type of the component to show in the window.
      */
     public static &lt;C extends JComponent&gt; void show( UIForAnySwing&lt;?, C&gt; ui ) {
-<span class="nc" id="L4961">        new UI.TestWindow( &quot;&quot;, f -&gt; ui.getComponent() );</span>
-<span class="nc" id="L4962">    }</span>
+<span class="nc" id="L4963">        new UI.TestWindow( &quot;&quot;, f -&gt; ui.getComponent() );</span>
+<span class="nc" id="L4964">    }</span>
 
     /**
      *  Use this to quickly launch a UI component in a titled {@link JFrame} window
@@ -4970,8 +4972,8 @@ public final class UI
      * @param &lt;C&gt; The type of the component to show in the window.
      */
     public static &lt;C extends JComponent&gt; void show( String title, UIForAnySwing&lt;?, C&gt; ui ) {
-<span class="nc" id="L4973">        new UI.TestWindow( title, f -&gt; ui.getComponent() );</span>
-<span class="nc" id="L4974">    }</span>
+<span class="nc" id="L4975">        new UI.TestWindow( title, f -&gt; ui.getComponent() );</span>
+<span class="nc" id="L4976">    }</span>
 
     /**
      *  Use this to quickly launch a UI component in a {@link JFrame} window
@@ -4982,9 +4984,9 @@ public final class UI
      *                   and returns the component to be shown.
      */
     public static void show( Function&lt;JFrame, Component&gt; uiSupplier ) {
-<span class="nc" id="L4985">        Objects.requireNonNull( uiSupplier );</span>
-<span class="nc" id="L4986">        new UI.TestWindow( &quot;&quot;, frame -&gt; uiSupplier.apply(frame) );</span>
-<span class="nc" id="L4987">    }</span>
+<span class="nc" id="L4987">        Objects.requireNonNull( uiSupplier );</span>
+<span class="nc" id="L4988">        new UI.TestWindow( &quot;&quot;, frame -&gt; uiSupplier.apply(frame) );</span>
+<span class="nc" id="L4989">    }</span>
 
     /**
      *  Use this to quickly launch a UI component in a titled {@link JFrame} window
@@ -4996,9 +4998,9 @@ public final class UI
      *                   and returns the component to be shown.
      */
     public static void show( String title, Function&lt;JFrame, Component&gt; uiSupplier ) {
-<span class="nc" id="L4999">        Objects.requireNonNull( uiSupplier );</span>
-<span class="nc" id="L5000">        new UI.TestWindow( title, frame -&gt; uiSupplier.apply(frame) );</span>
-<span class="nc" id="L5001">    }</span>
+<span class="nc" id="L5001">        Objects.requireNonNull( uiSupplier );</span>
+<span class="nc" id="L5002">        new UI.TestWindow( title, frame -&gt; uiSupplier.apply(frame) );</span>
+<span class="nc" id="L5003">    }</span>
 
     /**
      *  Use this to quickly launch a UI component with a custom event processor
@@ -5008,10 +5010,10 @@ public final class UI
      * @param uiSupplier The component supplier which builds the UI and supplies the component to be shown.
      */
     public static void showUsing( EventProcessor eventProcessor, Function&lt;JFrame, Component&gt; uiSupplier ) {
-<span class="nc" id="L5011">        Objects.requireNonNull( eventProcessor );</span>
-<span class="nc" id="L5012">        Objects.requireNonNull( uiSupplier );</span>
-<span class="nc" id="L5013">        show(frame -&gt; use(eventProcessor, () -&gt; uiSupplier.apply(frame)));</span>
-<span class="nc" id="L5014">    }</span>
+<span class="nc" id="L5013">        Objects.requireNonNull( eventProcessor );</span>
+<span class="nc" id="L5014">        Objects.requireNonNull( uiSupplier );</span>
+<span class="nc" id="L5015">        show(frame -&gt; use(eventProcessor, () -&gt; uiSupplier.apply(frame)));</span>
+<span class="nc" id="L5016">    }</span>
 
     /**
      *  Use this to quickly launch a UI component with a custom event processor
@@ -5022,10 +5024,10 @@ public final class UI
      * @param uiSupplier The component supplier which builds the UI and supplies the component to be shown.
      */
     public static void showUsing( EventProcessor eventProcessor, String title, Function&lt;JFrame, Component&gt; uiSupplier ) {
-<span class="nc" id="L5025">        Objects.requireNonNull( eventProcessor );</span>
-<span class="nc" id="L5026">        Objects.requireNonNull( uiSupplier );</span>
-<span class="nc" id="L5027">        show(title, frame -&gt; use(eventProcessor, () -&gt; uiSupplier.apply(frame)));</span>
-<span class="nc" id="L5028">    }</span>
+<span class="nc" id="L5027">        Objects.requireNonNull( eventProcessor );</span>
+<span class="nc" id="L5028">        Objects.requireNonNull( uiSupplier );</span>
+<span class="nc" id="L5029">        show(title, frame -&gt; use(eventProcessor, () -&gt; uiSupplier.apply(frame)));</span>
+<span class="nc" id="L5030">    }</span>
 
     /**
      *  Use this to quickly create and inspect a test window for a UI component.
@@ -5035,45 +5037,45 @@ public final class UI
         private final JFrame frame;
         private final Component component;
 
-<span class="nc" id="L5038">        private TestWindow( String title, Function&lt;JFrame, Component&gt; uiSupplier ) {</span>
-<span class="nc" id="L5039">            Objects.requireNonNull( title );</span>
-<span class="nc" id="L5040">            Objects.requireNonNull( uiSupplier );</span>
-<span class="nc" id="L5041">            this.frame = new JFrame();</span>
-<span class="nc bnc" id="L5042" title="All 2 branches missed.">            if ( !title.isEmpty() ) this.frame.setTitle(title);</span>
-<span class="nc" id="L5043">            frame.setLocationRelativeTo(null); // Initial centering!</span>
-<span class="nc" id="L5044">            Component c = null;</span>
-<span class="nc bnc" id="L5045" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
+<span class="nc" id="L5040">        private TestWindow( String title, Function&lt;JFrame, Component&gt; uiSupplier ) {</span>
+<span class="nc" id="L5041">            Objects.requireNonNull( title );</span>
+<span class="nc" id="L5042">            Objects.requireNonNull( uiSupplier );</span>
+<span class="nc" id="L5043">            this.frame = new JFrame();</span>
+<span class="nc bnc" id="L5044" title="All 2 branches missed.">            if ( !title.isEmpty() ) this.frame.setTitle(title);</span>
+<span class="nc" id="L5045">            frame.setLocationRelativeTo(null); // Initial centering!</span>
+<span class="nc" id="L5046">            Component c = null;</span>
+<span class="nc bnc" id="L5047" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() ) {</span>
                 try {
-<span class="nc" id="L5047">                    c = UI.runAndGet(() -&gt; uiSupplier.apply(frame));</span>
-<span class="nc" id="L5048">                } catch (Exception e) {</span>
-<span class="nc" id="L5049">                    e.printStackTrace();</span>
-<span class="nc" id="L5050">                }</span>
+<span class="nc" id="L5049">                    c = UI.runAndGet(() -&gt; uiSupplier.apply(frame));</span>
+<span class="nc" id="L5050">                } catch (Exception e) {</span>
+<span class="nc" id="L5051">                    e.printStackTrace();</span>
+<span class="nc" id="L5052">                }</span>
             }
             else
-<span class="nc" id="L5053">                c = uiSupplier.apply(frame);</span>
+<span class="nc" id="L5055">                c = uiSupplier.apply(frame);</span>
 
-<span class="nc" id="L5055">            this.component = c;</span>
-<span class="nc" id="L5056">            frame.add(component);</span>
-<span class="nc" id="L5057">            frame.pack(); // Otherwise some components resize strangely or are not shown at all...</span>
+<span class="nc" id="L5057">            this.component = c;</span>
+<span class="nc" id="L5058">            frame.add(component);</span>
+<span class="nc" id="L5059">            frame.pack(); // Otherwise some components resize strangely or are not shown at all...</span>
             // Make sure that the window is centered on the screen again but with the component:
-<span class="nc" id="L5059">            frame.setLocationRelativeTo(null);</span>
+<span class="nc" id="L5061">            frame.setLocationRelativeTo(null);</span>
             // We set the size to fit the component:
-<span class="nc" id="L5061">            _determineSize();</span>
-<span class="nc" id="L5062">            frame.setVisible(true);</span>
-<span class="nc" id="L5063">        }</span>
+<span class="nc" id="L5063">            _determineSize();</span>
+<span class="nc" id="L5064">            frame.setVisible(true);</span>
+<span class="nc" id="L5065">        }</span>
         private void _determineSize() {
-<span class="nc" id="L5065">            Dimension size = frame.getSize();</span>
-<span class="nc bnc" id="L5066" title="All 2 branches missed.">            if ( size == null ) // The frame has no size! It is best to set the size to the preferred size of the component:</span>
-<span class="nc" id="L5067">                size = component.getPreferredSize();</span>
+<span class="nc" id="L5067">            Dimension size = frame.getSize();</span>
+<span class="nc bnc" id="L5068" title="All 2 branches missed.">            if ( size == null ) // The frame has no size! It is best to set the size to the preferred size of the component:</span>
+<span class="nc" id="L5069">                size = component.getPreferredSize();</span>
 
-<span class="nc bnc" id="L5069" title="All 2 branches missed.">            if ( size == null ) // The component has no preferred size! It is best to set the size to the minimum size of the component:</span>
-<span class="nc" id="L5070">                size = component.getMinimumSize();</span>
+<span class="nc bnc" id="L5071" title="All 2 branches missed.">            if ( size == null ) // The component has no preferred size! It is best to set the size to the minimum size of the component:</span>
+<span class="nc" id="L5072">                size = component.getMinimumSize();</span>
 
-<span class="nc bnc" id="L5072" title="All 2 branches missed.">            if ( size == null ) // The component has no minimum size! Let's just look up the size of the component:</span>
-<span class="nc" id="L5073">                size = component.getSize();</span>
+<span class="nc bnc" id="L5074" title="All 2 branches missed.">            if ( size == null ) // The component has no minimum size! Let's just look up the size of the component:</span>
+<span class="nc" id="L5075">                size = component.getSize();</span>
 
-<span class="nc" id="L5075">            frame.setSize(size);</span>
-<span class="nc" id="L5076">        }</span>
+<span class="nc" id="L5077">            frame.setSize(size);</span>
+<span class="nc" id="L5078">        }</span>
     }
 
 
@@ -5085,172 +5087,172 @@ public final class UI
     */
 
     private static &lt;C extends JComponent&gt; void _paintBackground( C comp, Graphics g ) {
-<span class="fc" id="L5088">        ComponentExtension.from(comp).paintBackgroundStyle( g );</span>
-<span class="fc" id="L5089">    }</span>
+<span class="fc" id="L5090">        ComponentExtension.from(comp).paintBackgroundStyle( g );</span>
+<span class="fc" id="L5091">    }</span>
     private static &lt;C extends JComponent&gt; void _paintForeground( C comp, Graphics g ) {
-<span class="fc" id="L5091">        ComponentExtension.from(comp).paintForegroundStyle( (Graphics2D) g );</span>
-<span class="fc" id="L5092">    }</span>
+<span class="fc" id="L5093">        ComponentExtension.from(comp).paintForegroundStyle( (Graphics2D) g );</span>
+<span class="fc" id="L5094">    }</span>
 
     /** {inheritDoc} */
-<span class="fc" id="L5095">    public static class Panel extends JPanel {</span>
-<span class="fc" id="L5096">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="fc" id="L5097">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5097">    public static class Panel extends JPanel {</span>
+<span class="fc" id="L5098">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L5099">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L5100">    public static class Box extends JBox {</span>
-<span class="fc" id="L5101">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="fc" id="L5102">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5102">    public static class Box extends JBox {</span>
+<span class="fc" id="L5103">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L5104">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L5105">    public static class Label extends JLabel {</span>
-<span class="fc" id="L5106">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="fc" id="L5107">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5107">    public static class Label extends JLabel {</span>
+<span class="fc" id="L5108">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L5109">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L5110">    public static class TextField extends JTextField {</span>
-<span class="fc" id="L5111">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="fc" id="L5112">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5112">    public static class TextField extends JTextField {</span>
+<span class="fc" id="L5113">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L5114">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L5115">    public static class TextArea extends JTextArea {</span>
-<span class="fc" id="L5116">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="fc" id="L5117">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5117">    public static class TextArea extends JTextArea {</span>
+<span class="fc" id="L5118">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L5119">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L5120">    public static class CheckBox extends JCheckBox {</span>
-<span class="fc" id="L5121">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="fc" id="L5122">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5122">    public static class CheckBox extends JCheckBox {</span>
+<span class="fc" id="L5123">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L5124">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L5125">    public static class Button extends JButton {</span>
-<span class="fc" id="L5126">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="fc" id="L5127">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5127">    public static class Button extends JButton {</span>
+<span class="fc" id="L5128">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L5129">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L5130">    public static class ToggleButton extends JToggleButton {</span>
-<span class="fc" id="L5131">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="fc" id="L5132">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5132">    public static class ToggleButton extends JToggleButton {</span>
+<span class="fc" id="L5133">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L5134">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L5135">    public static class RadioButton extends JRadioButton {</span>
-<span class="fc" id="L5136">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="fc" id="L5137">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5137">    public static class RadioButton extends JRadioButton {</span>
+<span class="fc" id="L5138">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L5139">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L5140">    public static class ComboBox&lt;E&gt; extends JComboBox&lt;E&gt; {</span>
-<span class="fc" id="L5141">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="fc" id="L5142">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5142">    public static class ComboBox&lt;E&gt; extends JComboBox&lt;E&gt; {</span>
+<span class="fc" id="L5143">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L5144">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L5145">    public static class List&lt;E&gt; extends JList&lt;E&gt; {</span>
-<span class="nc" id="L5146">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L5147">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5147">    public static class List&lt;E&gt; extends JList&lt;E&gt; {</span>
+<span class="nc" id="L5148">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L5149">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L5150">    public static class Table extends JTable {</span>
-<span class="nc" id="L5151">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L5152">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5152">    public static class Table extends JTable {</span>
+<span class="nc" id="L5153">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L5154">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L5155">    public static class Slider extends JSlider {</span>
-<span class="fc" id="L5156">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="fc" id="L5157">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5157">    public static class Slider extends JSlider {</span>
+<span class="fc" id="L5158">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L5159">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L5160">    public static class PopupMenu extends JPopupMenu {</span>
-<span class="nc" id="L5161">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L5162">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5162">    public static class PopupMenu extends JPopupMenu {</span>
+<span class="nc" id="L5163">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L5164">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L5165">    public static class MenuItem extends JMenuItem {</span>
-<span class="nc" id="L5166">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L5167">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5167">    public static class MenuItem extends JMenuItem {</span>
+<span class="nc" id="L5168">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L5169">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="nc" id="L5170">    public static class RadioButtonMenuItem extends JRadioButtonMenuItem {</span>
-<span class="nc" id="L5171">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L5172">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="nc" id="L5172">    public static class RadioButtonMenuItem extends JRadioButtonMenuItem {</span>
+<span class="nc" id="L5173">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L5174">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="nc" id="L5175">     public static class CheckBoxMenuItem extends JCheckBoxMenuItem {</span>
-<span class="nc" id="L5176">         @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L5177">         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="nc" id="L5177">     public static class CheckBoxMenuItem extends JCheckBoxMenuItem {</span>
+<span class="nc" id="L5178">         @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L5179">         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
      }
     /** {inheritDoc} */
-<span class="nc" id="L5180">    public static class Menu extends JMenu {</span>
-<span class="nc" id="L5181">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L5182">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="nc" id="L5182">    public static class Menu extends JMenu {</span>
+<span class="nc" id="L5183">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L5184">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="nc" id="L5185">    public static class MenuBar extends JMenuBar {</span>
-<span class="nc" id="L5186">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L5187">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="nc" id="L5187">    public static class MenuBar extends JMenuBar {</span>
+<span class="nc" id="L5188">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L5189">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L5190">    public static class ScrollPane extends JScrollPane {</span>
-<span class="nc" id="L5191">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L5192">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5192">    public static class ScrollPane extends JScrollPane {</span>
+<span class="nc" id="L5193">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L5194">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L5195">    public static class TabbedPane extends JTabbedPane {</span>
-<span class="nc" id="L5196">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L5197">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5197">    public static class TabbedPane extends JTabbedPane {</span>
+<span class="nc" id="L5198">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L5199">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L5200">    public static class ToolBar extends JToolBar {</span>
-<span class="nc" id="L5201">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L5202">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5202">    public static class ToolBar extends JToolBar {</span>
+<span class="nc" id="L5203">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L5204">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="nc" id="L5205">    public static class ToolTip extends JToolTip {</span>
-<span class="nc" id="L5206">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L5207">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="nc" id="L5207">    public static class ToolTip extends JToolTip {</span>
+<span class="nc" id="L5208">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L5209">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="nc" id="L5210">    public static class Tree extends JTree {</span>
-<span class="nc" id="L5211">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L5212">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="nc" id="L5212">    public static class Tree extends JTree {</span>
+<span class="nc" id="L5213">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L5214">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L5215">    public static class Spinner extends JSpinner {</span>
-<span class="fc" id="L5216">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="fc" id="L5217">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5217">    public static class Spinner extends JSpinner {</span>
+<span class="fc" id="L5218">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L5219">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
     public static class SplitPane extends JSplitPane {
-<span class="fc" id="L5221">        SplitPane( Align align ) { super(align.forSplitPane()); }</span>
-<span class="nc" id="L5222">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L5223">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5223">        SplitPane( Align align ) { super(align.forSplitPane()); }</span>
+<span class="nc" id="L5224">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L5225">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L5226">    public static class PasswordField extends JPasswordField {</span>
-<span class="fc" id="L5227">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="fc" id="L5228">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5228">    public static class PasswordField extends JPasswordField {</span>
+<span class="fc" id="L5229">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L5230">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L5231">    public static class ProgressBar extends JProgressBar {</span>
-<span class="fc" id="L5232">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="fc" id="L5233">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5233">    public static class ProgressBar extends JProgressBar {</span>
+<span class="fc" id="L5234">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L5235">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="nc" id="L5236">    public static class TextPane extends JTextPane {</span>
-<span class="nc" id="L5237">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L5238">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="nc" id="L5238">    public static class TextPane extends JTextPane {</span>
+<span class="nc" id="L5239">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L5240">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L5241">    public static class EditorPane extends JEditorPane {</span>
-<span class="nc" id="L5242">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L5243">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5243">    public static class EditorPane extends JEditorPane {</span>
+<span class="nc" id="L5244">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L5245">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {@inheritDoc} */
-<span class="nc" id="L5246">    public static class FormattedTextField extends JFormattedTextField {</span>
-<span class="nc" id="L5247">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L5248">        @Override public void paintChildren(Graphics g){ super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="nc" id="L5248">    public static class FormattedTextField extends JFormattedTextField {</span>
+<span class="nc" id="L5249">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L5250">        @Override public void paintChildren(Graphics g){ super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {@inheritDoc} */
-<span class="fc" id="L5251">    public static class SplitButton extends JSplitButton {</span>
-<span class="fc" id="L5252">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="fc" id="L5253">        @Override public void paintChildren(Graphics g){ super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L5253">    public static class SplitButton extends JSplitButton {</span>
+<span class="fc" id="L5254">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L5255">        @Override public void paintChildren(Graphics g){ super.paintChildren(g); _paintForeground(this, g); }</span>
     }
 
 }

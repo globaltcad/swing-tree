@@ -372,11 +372,11 @@ public final class SwingTree
         }
 
         /**
-         * For internal use only.
-         *
-         * @since 2
+         * Computes the scale factor based on the given font.
+         * @param font font to compute scale factor from
+         * @return scale factor
          */
-        public float computeFontScaleFactor( Font font ) {
+        private float computeFontScaleFactor( Font font ) {
             if( SystemInfo.isWindows ) {
                 // Special handling for Windows to be compatible with OS scaling,
                 // which distinguish between "screen scaling" and "text scaling".

@@ -162,6 +162,7 @@ public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E,
      * <p>
      * @param renderBuilder The {@link Render.Builder} instance.
      * @return This very instance, which enables builder-style method chaining.
+     * @param <V> The type of the values that will be rendered.
      */
     public final <V extends E> UIForList<E, L> withRenderer( Render.Builder<L,V> renderBuilder ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
