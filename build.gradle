@@ -83,6 +83,7 @@ check.dependsOn jacocoTestReport
 
 // 1:
 task deploy() {
+    dependsOn 'clean'
     dependsOn 'check'
     dependsOn 'jar'
     dependsOn 'javadoc'
