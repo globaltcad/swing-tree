@@ -209,13 +209,13 @@
       "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Icon> icon = Var.of(UI.loadIcon(\"img/seed.png\"))","var originalIcon = icon.orElseThrow()"]},
+        {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Icon> icon = Var.of(UI.findIcon(\"img/seed.png\").orElse(null))","var originalIcon = icon.orElseThrow()"]},
 
         {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withIcon(icon)"]},
 
         {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.icon != null","ui.component.icon === originalIcon","ui.component.icon.iconHeight == 512","ui.component.icon.iconWidth == 512"]},
 
-        {"kind":"when","text":"We change the items of the properties...","code":["icon.set(UI.loadIcon(\"img/swing.png\"))"]},
+        {"kind":"when","text":"We change the items of the properties...","code":["icon.set(UI.findIcon(\"img/swing.png\").orElse(null))"]},
 
         {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 

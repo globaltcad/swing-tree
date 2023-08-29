@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConfirmDialogBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.dialogs</a> &gt; <span class="el_source">ConfirmDialogBuilder.java</span></div><h1>ConfirmDialogBuilder.java</h1><pre class="source lang-java linenums">package swingtree.dialogs;
+
+import swingtree.UI;
+
+import javax.swing.Icon;
+import javax.swing.JOptionPane;
+import java.awt.Component;
+import java.util.Objects;
+
+/**
+ *  An immutable builder class for creating simple confirmation dialogs
+ *  based on the {@link JOptionPane} class, more specifically the
+ *  {@link JOptionPane#showOptionDialog(Component, Object, String, int, int, Icon, Object[], Object)}
+ *  method.
+ *  &lt;p&gt;
+ *  This class is intended to be used as part of the {@link UI} API
+ *  by calling the {@link UI#confirm()} factory method.
+ */
+public final class ConfirmDialogBuilder
+{
+
+<span class="nc" id="L22">    private static final ConfirmDialogBuilder _NONE = new ConfirmDialogBuilder(&quot;&quot;, &quot;&quot;, &quot;Yes&quot;, &quot;No&quot;, &quot;Yes&quot;, null, null);</span>
+
+    /**
+     * @return A {@link ConfirmDialogBuilder} instance that is not configured in any way.
+     */
+<span class="nc" id="L27">    public static ConfirmDialogBuilder get() { return _NONE; }</span>
+
+    private final String   _title;
+    private final String   _message;
+    private final String   _yesOption;
+    private final String   _noOption;
+    private final String   _defaultOption;
+    private final Icon     _icon;
+    private final Component _parent;
+
+
+    private ConfirmDialogBuilder(
+        String title,
+        String message,
+        String yesOption,
+        String noOption,
+        String defaultOption,
+        Icon icon,
+        Component parent
+<span class="nc" id="L46">    ) {</span>
+<span class="nc" id="L47">        _title         = Objects.requireNonNull(title);</span>
+<span class="nc" id="L48">        _message       = Objects.requireNonNull(message);</span>
+<span class="nc" id="L49">        _yesOption     = Objects.requireNonNull(yesOption);</span>
+<span class="nc" id="L50">        _noOption      = Objects.requireNonNull(noOption);</span>
+<span class="nc" id="L51">        _defaultOption = Objects.requireNonNull(defaultOption);</span>
+<span class="nc" id="L52">        _icon          = icon;</span>
+<span class="nc" id="L53">        _parent        = parent;</span>
+<span class="nc" id="L54">    }</span>
+
+    /**
+     * @param title The title of the dialog.
+     * @return A new {@link ConfirmDialogBuilder} instance with the specified title.
+     */
+    public ConfirmDialogBuilder title(String title ) {
+<span class="nc" id="L61">        return new ConfirmDialogBuilder(title, _message, _yesOption, _noOption, _defaultOption, _icon, _parent);</span>
+    }
+
+    /**
+     * @param message The message of the dialog.
+     * @return A new {@link ConfirmDialogBuilder} instance with the specified message.
+     */
+    public ConfirmDialogBuilder message(String message ) {
+<span class="nc" id="L69">        return new ConfirmDialogBuilder(_title, message, _yesOption, _noOption, _defaultOption, _icon, _parent);</span>
+    }
+
+    /**
+     * @param yesOption The text of the &quot;yes&quot; option.
+     * @return A new {@link ConfirmDialogBuilder} instance with the specified &quot;yes&quot; option text.
+     */
+    public ConfirmDialogBuilder yesOption(String yesOption ) {
+<span class="nc" id="L77">        return new ConfirmDialogBuilder(_title, _message, yesOption, _noOption, _defaultOption, _icon, _parent);</span>
+    }
+
+    /**
+     * @param noOption The text of the &quot;no&quot; option.
+     * @return A new {@link ConfirmDialogBuilder} instance with the specified &quot;no&quot; option text.
+     */
+    public ConfirmDialogBuilder noOption(String noOption ) {
+<span class="nc" id="L85">        return new ConfirmDialogBuilder(_title, _message, _yesOption, noOption, _defaultOption, _icon, _parent);</span>
+    }
+
+    /**
+     * @param defaultOption The text of the default option.
+     * @return A new {@link ConfirmDialogBuilder} instance with the specified default option text.
+     */
+    public ConfirmDialogBuilder defaultOption(String defaultOption ) {
+<span class="nc" id="L93">        return new ConfirmDialogBuilder(_title, _message, _yesOption, _noOption, defaultOption, _icon, _parent);</span>
+    }
+
+    /**
+     * @param icon The icon of the dialog.
+     * @return A new {@link ConfirmDialogBuilder} instance with the specified icon.
+     */
+    public ConfirmDialogBuilder icon(Icon icon ) {
+<span class="nc" id="L101">        return new ConfirmDialogBuilder(_title, _message, _yesOption, _noOption, _defaultOption, icon, _parent);</span>
+    }
+
+    /**
+     * @param path The path to the icon of the dialog.
+     * @return A new {@link ConfirmDialogBuilder} instance with the specified icon.
+     */
+    public ConfirmDialogBuilder icon(String path ) {
+<span class="nc" id="L109">        return new ConfirmDialogBuilder(_title, _message, _yesOption, _noOption, _defaultOption, UI.findIcon(path).orElse(null), _parent);</span>
+    }
+
+    /**
+     * @param parent The parent component of the dialog.
+     * @return A new {@link ConfirmDialogBuilder} instance with the specified parent component.
+     */
+    public ConfirmDialogBuilder parent(Component parent ) {
+<span class="nc" id="L117">        return new ConfirmDialogBuilder(_title, _message, _yesOption, _noOption, _defaultOption, _icon, parent);</span>
+    }
+
+    /**
+     * @return The {@link ConfirmAnswer} that the user selected in the dialog.
+     */
+    public ConfirmAnswer show() {
+        try {
+<span class="nc" id="L125">            return UI.runAndGet(() -&gt; {</span>
+<span class="nc" id="L126">                Object[] options = new Object[]{_yesOption, _noOption};</span>
+
+<span class="nc" id="L128">                int result = JOptionPane.showOptionDialog(</span>
+                                _parent, _message, _title, JOptionPane.YES_NO_CANCEL_OPTION,
+                                JOptionPane.QUESTION_MESSAGE, _icon, options, _defaultOption
+                            );
+
+<span class="nc bnc" id="L133" title="All 2 branches missed.">                if ( result == JOptionPane.YES_OPTION ) return ConfirmAnswer.YES;</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">                if ( result == JOptionPane.NO_OPTION  ) return ConfirmAnswer.NO;</span>
+<span class="nc" id="L135">                return ConfirmAnswer.CANCEL;</span>
+            });
+<span class="nc" id="L137">        } catch (Exception e) {</span>
+<span class="nc" id="L138">            e.printStackTrace();</span>
+<span class="nc" id="L139">            return ConfirmAnswer.CANCEL;</span>
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ErrorDialogBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.dialogs</a> &gt; <span class="el_source">ErrorDialogBuilder.java</span></div><h1>ErrorDialogBuilder.java</h1><pre class="source lang-java linenums">package swingtree.dialogs;
+
+
+import swingtree.UI;
+
+import javax.swing.Icon;
+import javax.swing.JOptionPane;
+import java.awt.Component;
+
+/**
+ *  An immutable builder class for creating simple error info dialogs
+ *  based on the {@link JOptionPane} class, more specifically the
+ *  {@link JOptionPane#showMessageDialog(Component, Object, String, int, Icon)}
+ *  method.
+ *  &lt;p&gt;
+ *  This class is intended to be used as part of the {@link UI} API
+ *  by calling the {@link UI#error()} factory method.
+ */
+public final class ErrorDialogBuilder
+{
+<span class="nc" id="L21">    private static final ErrorDialogBuilder _NONE = new ErrorDialogBuilder(&quot;&quot;, &quot;&quot;, null, null);</span>
+
+    /**
+     * @return A {@link ErrorDialogBuilder} instance that is not configured in any way.
+     */
+<span class="nc" id="L26">    public static ErrorDialogBuilder get() { return _NONE; }</span>
+
+    private final String   _title;
+    private final String   _message;
+    private final Icon     _icon;
+    private final Component _parent;
+
+
+    private ErrorDialogBuilder(
+        String title,
+        String message,
+        Icon icon,
+        Component parent
+<span class="nc" id="L39">    ) {</span>
+<span class="nc" id="L40">        _title   = title;</span>
+<span class="nc" id="L41">        _message = message;</span>
+<span class="nc" id="L42">        _icon    = icon;</span>
+<span class="nc" id="L43">        _parent  = parent;</span>
+<span class="nc" id="L44">    }</span>
+
+    /**
+     *  Set the title of the dialog.
+     *  @param title The title of the dialog.
+     *  @return A new {@link ErrorDialogBuilder} instance with the specified title.
+     */
+    public ErrorDialogBuilder title( String title ) {
+<span class="nc" id="L52">        return new ErrorDialogBuilder(title, _message, _icon, _parent);</span>
+    }
+
+    /**
+     *  Set the message of the dialog.
+     *  @param message The message of the dialog.
+     *  @return A new {@link ErrorDialogBuilder} instance with the specified message.
+     */
+    public ErrorDialogBuilder message( String message ) {
+<span class="nc" id="L61">        return new ErrorDialogBuilder(_title, message, _icon, _parent);</span>
+    }
+
+    /**
+     *  Set the icon of the dialog.
+     *  @param icon The icon of the dialog.
+     *  @return A new {@link ErrorDialogBuilder} instance with the specified icon.
+     */
+    public ErrorDialogBuilder icon( Icon icon ) {
+<span class="nc" id="L70">        return new ErrorDialogBuilder(_title, _message, icon, _parent);</span>
+    }
+
+    /**
+     *  Set the icon of the dialog.
+     *  @param path The path to the icon of the dialog.
+     *  @return A new {@link ErrorDialogBuilder} instance with the specified icon.
+     */
+    public ErrorDialogBuilder icon( String path ) {
+<span class="nc" id="L79">        return new ErrorDialogBuilder(_title, _message, UI.findIcon(path).orElse(null), _parent);</span>
+    }
+
+    /**
+     *  Set the parent component of the dialog.
+     *  @param parent The parent component of the dialog.
+     *  @return A new {@link ErrorDialogBuilder} instance with the specified parent component.
+     */
+    public ErrorDialogBuilder parent( Component parent ) {
+<span class="nc" id="L88">        return new ErrorDialogBuilder(_title, _message, _icon, parent);</span>
+    }
+
+    /**
+     *  Show the error dialog.
+     */
+    public void show() {
+<span class="nc" id="L95">        UI.run(() -&gt; {</span>
+<span class="nc" id="L96">            JOptionPane.showMessageDialog(_parent, _message, _title, JOptionPane.ERROR_MESSAGE, _icon);</span>
+<span class="nc" id="L97">        });</span>
+<span class="nc" id="L98">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -73,9 +73,9 @@
       "tags":{},"see":[],"extraInfo":["\n            You can bind an icon property to the icon of a tab.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"An icon property and a tabbed pane UI node.","code":["var icon = Var.of(UI.loadIcon(\"swing.png\"))","def tabbedPane =","    UI.tabbedPane(UI.Position.TOP)","    .add(UI.tab(\"Tab 1\").withIcon(icon))","    .get(JTabbedPane)"]},
+        {"kind":"given","text":"An icon property and a tabbed pane UI node.","code":["var icon = Var.of(UI.findIcon(\"swing.png\").orElse(null))","def tabbedPane =","    UI.tabbedPane(UI.Position.TOP)","    .add(UI.tab(\"Tab 1\").withIcon(icon))","    .get(JTabbedPane)"]},
 
-        {"kind":"when","text":"We change the icon.","code":["var newIcon = UI.loadIcon(\"seed.png\")","icon.set(newIcon)","UI.sync()"]},
+        {"kind":"when","text":"We change the icon.","code":["var newIcon = UI.findIcon(\"seed.png\").orElse(null)","icon.set(newIcon)","UI.sync()"]},
 
         {"kind":"then","text":"The icon of the tab is updated.","code":["tabbedPane.getIconAt(0) == newIcon"]}
       ],

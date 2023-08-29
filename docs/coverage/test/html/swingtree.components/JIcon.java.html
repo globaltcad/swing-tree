@@ -5,7 +5,6 @@ import swingtree.UI;
 import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
-import javax.swing.plaf.LabelUI;
 import java.util.Map;
 
 /**
@@ -17,52 +16,53 @@ import java.util.Map;
 public class JIcon extends JLabel
 {
     public JIcon(String path) {
-<span class="nc" id="L20">        super(_getFromCacheOrLoadFrom(path));</span>
-<span class="nc" id="L21">        updateUI();</span>
-<span class="nc" id="L22">    }</span>
+<span class="fc" id="L19">        super(_getFromCacheOrLoadFrom(path));</span>
+<span class="fc" id="L20">        updateUI();</span>
+<span class="fc" id="L21">    }</span>
 
     public JIcon(Icon icon) {
-<span class="fc" id="L25">        super(icon);</span>
-<span class="fc" id="L26">        updateUI();</span>
-<span class="fc" id="L27">    }</span>
+<span class="fc" id="L24">        super(icon);</span>
+<span class="fc" id="L25">        updateUI();</span>
+<span class="fc" id="L26">    }</span>
 
     public JIcon(Icon icon, String text, int horizontalAlignment) {
-<span class="nc" id="L30">        super(text, icon, horizontalAlignment);</span>
-<span class="nc" id="L31">        updateUI();</span>
-<span class="nc" id="L32">    }</span>
+<span class="nc" id="L29">        super(text, icon, horizontalAlignment);</span>
+<span class="nc" id="L30">        updateUI();</span>
+<span class="nc" id="L31">    }</span>
 
     public JIcon(String text, int horizontalAlignment) {
-<span class="nc" id="L35">        super(text, horizontalAlignment);</span>
-<span class="nc" id="L36">        updateUI();</span>
-<span class="nc" id="L37">    }</span>
+<span class="nc" id="L34">        super(text, horizontalAlignment);</span>
+<span class="nc" id="L35">        updateUI();</span>
+<span class="nc" id="L36">    }</span>
 
     public JIcon(String path, String text) {
-<span class="nc" id="L40">        super(text, _getFromCacheOrLoadFrom(path), CENTER);</span>
-<span class="nc" id="L41">        updateUI();</span>
-<span class="nc" id="L42">    }</span>
+<span class="nc" id="L39">        super(text, _getFromCacheOrLoadFrom(path), CENTER);</span>
+<span class="nc" id="L40">        updateUI();</span>
+<span class="nc" id="L41">    }</span>
 
     public JIcon() {
-<span class="nc" id="L45">        super();</span>
-<span class="nc" id="L46">        updateUI();</span>
-<span class="nc" id="L47">    }</span>
+<span class="nc" id="L44">        super();</span>
+<span class="nc" id="L45">        updateUI();</span>
+<span class="nc" id="L46">    }</span>
 
     @Override
     public void updateUI() {
-<span class="fc" id="L51">        ComponentExtension.from(this).updateUI();</span>
+<span class="fc" id="L50">        ComponentExtension.from(this).updateUI();</span>
         /*
             The JIcon is a SwingTree native component type, so it also
             enjoys the perks of having a SwingTree based look and feel!
         */
-<span class="fc" id="L56">    }</span>
+<span class="fc" id="L55">    }</span>
 
     private static ImageIcon _getFromCacheOrLoadFrom( String path ) {
-<span class="nc" id="L59">        Map&lt;String, ImageIcon&gt; cache = SwingTree.get().getIconCache();</span>
-<span class="nc" id="L60">        ImageIcon icon = cache.get(path);</span>
-<span class="nc bnc" id="L61" title="All 2 branches missed.">        if ( icon == null ) {</span>
-<span class="nc" id="L62">            icon = UI.loadIcon(path);</span>
-<span class="nc" id="L63">            cache.put(path, icon);</span>
+<span class="fc" id="L58">        Map&lt;String, ImageIcon&gt; cache = SwingTree.get().getIconCache();</span>
+<span class="fc" id="L59">        ImageIcon icon = cache.get(path);</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        if ( icon == null ) {</span>
+<span class="fc" id="L61">            icon = UI.findIcon(path).orElse(null);</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">            if ( icon != null )</span>
+<span class="fc" id="L63">                cache.put(path, icon);</span>
         }
-<span class="nc" id="L65">        return icon;</span>
+<span class="fc" id="L65">        return icon;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

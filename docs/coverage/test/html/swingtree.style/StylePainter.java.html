@@ -1100,79 +1100,100 @@ final class StylePainter&lt;C extends JComponent&gt;
 <span class="fc" id="L1100">            g2d.fill(specificArea);</span>
         }
 
-<span class="fc" id="L1103">        style.image().ifPresent( image -&gt; {</span>
+<span class="fc" id="L1103">        style.image().ifPresent( imageIcon -&gt; {</span>
 <span class="fc" id="L1104">            UI.Placement placement = style.placement();</span>
 <span class="fc" id="L1105">            boolean repeat         = style.repeat();</span>
 <span class="fc" id="L1106">            Outline padding        = style.padding();</span>
 <span class="fc" id="L1107">            int componentWidth     = component.getWidth();</span>
 <span class="fc" id="L1108">            int componentHeight    = component.getHeight();</span>
-<span class="fc" id="L1109">            int imgWidth           = style.width().orElse(image.getWidth(null));</span>
-<span class="fc" id="L1110">            int imgHeight          = style.height().orElse(image.getHeight(null));</span>
+<span class="fc" id="L1109">            int imgWidth           = style.width().orElse(imageIcon.getIconWidth());</span>
+<span class="fc" id="L1110">            int imgHeight          = style.height().orElse(imageIcon.getIconHeight());</span>
 <span class="fc bfc" id="L1111" title="All 2 branches covered.">            if ( style.autoFit() ) {</span>
 <span class="fc" id="L1112">                imgWidth  = style.width().orElse(componentWidth);</span>
 <span class="fc" id="L1113">                imgHeight = style.height().orElse(componentHeight);</span>
             }
-<span class="fc" id="L1115">            int x = 0;</span>
-<span class="fc" id="L1116">            int y = 0;</span>
-<span class="fc" id="L1117">            float opacity = style.opacity();</span>
-<span class="pc bpc" id="L1118" title="1 of 10 branches missed.">            switch ( placement ) {</span>
+<span class="pc bpc" id="L1115" title="1 of 2 branches missed.">            if ( imgWidth  &lt; 0 ) imgWidth  = componentWidth;</span>
+<span class="pc bpc" id="L1116" title="1 of 2 branches missed.">            if ( imgHeight &lt; 0 ) imgHeight = componentHeight;</span>
+<span class="fc" id="L1117">            int x = 0;</span>
+<span class="fc" id="L1118">            int y = 0;</span>
+<span class="fc" id="L1119">            float opacity = style.opacity();</span>
+<span class="pc bpc" id="L1120" title="1 of 10 branches missed.">            switch ( placement ) {</span>
                 case TOP:
-<span class="fc" id="L1120">                    x = (componentWidth - imgWidth) / 2;</span>
-<span class="fc" id="L1121">                    break;</span>
+<span class="fc" id="L1122">                    x = (componentWidth - imgWidth) / 2;</span>
+<span class="fc" id="L1123">                    break;</span>
                 case LEFT:
-<span class="fc" id="L1123">                    y = (componentHeight - imgHeight) / 2;</span>
-<span class="fc" id="L1124">                    break;</span>
+<span class="fc" id="L1125">                    y = (componentHeight - imgHeight) / 2;</span>
+<span class="fc" id="L1126">                    break;</span>
                 case BOTTOM:
-<span class="fc" id="L1126">                    x = (componentWidth - imgWidth) / 2;</span>
-<span class="fc" id="L1127">                    y = componentHeight - imgHeight;</span>
-<span class="fc" id="L1128">                    break;</span>
+<span class="fc" id="L1128">                    x = (componentWidth - imgWidth) / 2;</span>
+<span class="fc" id="L1129">                    y = componentHeight - imgHeight;</span>
+<span class="fc" id="L1130">                    break;</span>
                 case RIGHT:
-<span class="fc" id="L1130">                    x = componentWidth - imgWidth;</span>
-<span class="fc" id="L1131">                    y = (componentHeight - imgHeight) / 2;</span>
-<span class="fc" id="L1132">                    break;</span>
-<span class="fc" id="L1133">                case TOP_LEFT: break;</span>
+<span class="fc" id="L1132">                    x = componentWidth - imgWidth;</span>
+<span class="fc" id="L1133">                    y = (componentHeight - imgHeight) / 2;</span>
+<span class="fc" id="L1134">                    break;</span>
+<span class="fc" id="L1135">                case TOP_LEFT: break;</span>
                 case TOP_RIGHT:
-<span class="fc" id="L1135">                    x = componentWidth - imgWidth;</span>
-<span class="fc" id="L1136">                    break;</span>
+<span class="fc" id="L1137">                    x = componentWidth - imgWidth;</span>
+<span class="fc" id="L1138">                    break;</span>
                 case BOTTOM_LEFT:
-<span class="fc" id="L1138">                    y = componentHeight - imgHeight;</span>
-<span class="fc" id="L1139">                    break;</span>
+<span class="fc" id="L1140">                    y = componentHeight - imgHeight;</span>
+<span class="fc" id="L1141">                    break;</span>
                 case BOTTOM_RIGHT:
-<span class="fc" id="L1141">                    x = componentWidth - imgWidth;</span>
-<span class="fc" id="L1142">                    y = componentHeight - imgHeight;</span>
-<span class="fc" id="L1143">                    break;</span>
+<span class="fc" id="L1143">                    x = componentWidth - imgWidth;</span>
+<span class="fc" id="L1144">                    y = componentHeight - imgHeight;</span>
+<span class="fc" id="L1145">                    break;</span>
                 case CENTER:
-<span class="fc" id="L1145">                    x = (componentWidth - imgWidth) / 2;</span>
-<span class="fc" id="L1146">                    y = (componentHeight - imgHeight) / 2;</span>
-<span class="fc" id="L1147">                    break;</span>
+<span class="fc" id="L1147">                    x = (componentWidth - imgWidth) / 2;</span>
+<span class="fc" id="L1148">                    y = (componentHeight - imgHeight) / 2;</span>
+<span class="fc" id="L1149">                    break;</span>
                 default:
-<span class="nc" id="L1149">                    throw new IllegalArgumentException(&quot;Unknown placement: &quot; + placement);</span>
+<span class="nc" id="L1151">                    throw new IllegalArgumentException(&quot;Unknown placement: &quot; + placement);</span>
             }
             // We apply the padding:
-<span class="fc" id="L1152">            x += padding.left().orElse(0);</span>
-<span class="fc" id="L1153">            y += padding.top().orElse(0);</span>
-<span class="fc" id="L1154">            imgWidth  -= padding.left().orElse(0) + padding.right().orElse(0);</span>
-<span class="fc" id="L1155">            imgHeight -= padding.top().orElse(0)  + padding.bottom().orElse(0);</span>
-
-<span class="fc" id="L1157">            Composite oldComposite = g2d.getComposite();</span>
-            try {
-<span class="fc" id="L1159">                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));</span>
-<span class="fc bfc" id="L1160" title="All 2 branches covered.">                if ( repeat ) {</span>
-<span class="fc" id="L1161">                    Paint oldPaint = g2d.getPaint();</span>
-                    try {
-<span class="fc" id="L1163">                        g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));</span>
-<span class="fc" id="L1164">                        g2d.fill(specificArea);</span>
-                    } finally {
-<span class="fc" id="L1166">                        g2d.setPaint(oldPaint);</span>
-                    }
-<span class="fc" id="L1168">                }</span>
+<span class="fc" id="L1154">            x += padding.left().orElse(0);</span>
+<span class="fc" id="L1155">            y += padding.top().orElse(0);</span>
+<span class="fc" id="L1156">            imgWidth  -= padding.left().orElse(0) + padding.right().orElse(0);</span>
+<span class="fc" id="L1157">            imgHeight -= padding.top().orElse(0)  + padding.bottom().orElse(0);</span>
+<span class="pc bpc" id="L1158" title="1 of 4 branches missed.">            if ( !repeat &amp;&amp; imageIcon instanceof SVGIcon ) {</span>
+<span class="nc" id="L1159">                SVGIcon svgIcon = (SVGIcon) imageIcon;</span>
+<span class="nc" id="L1160">                svgIcon.setFitComponent(SVGIcon.FitComponent.WIDTH_AND_HEIGHT);</span>
+<span class="nc" id="L1161">                svgIcon.paintIcon(component, g2d, x, y, imgWidth, imgHeight);</span>
+<span class="nc" id="L1162">            } else</span>
+            {
+                Image image;
+<span class="pc bpc" id="L1165" title="1 of 2 branches missed.">                if ( imageIcon instanceof SVGIcon ) {</span>
+<span class="nc" id="L1166">                    SVGIcon svgIcon = (SVGIcon) imageIcon;</span>
+<span class="nc" id="L1167">                    int oldWidth  = svgIcon.getIconWidth();</span>
+<span class="nc" id="L1168">                    int oldHeight = svgIcon.getIconHeight();</span>
+<span class="nc" id="L1169">                    svgIcon.setIconWidth(imgWidth);</span>
+<span class="nc" id="L1170">                    svgIcon.setIconHeight(imgHeight);</span>
+<span class="nc" id="L1171">                    image = imageIcon.getImage(); // This will render the SVGIcon with the new size</span>
+<span class="nc" id="L1172">                    svgIcon.setIconWidth(oldWidth);</span>
+<span class="nc" id="L1173">                    svgIcon.setIconHeight(oldHeight);</span>
+<span class="nc" id="L1174">                }</span>
                 else
-<span class="fc" id="L1170">                    g2d.drawImage(image, x, y, imgWidth, imgHeight, null);</span>
+<span class="fc" id="L1176">                    image = imageIcon.getImage();</span>
 
-            } finally {
-<span class="fc" id="L1173">                g2d.setComposite(oldComposite);</span>
+<span class="fc" id="L1178">                Composite oldComposite = g2d.getComposite();</span>
+                try {
+<span class="fc" id="L1180">                    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));</span>
+<span class="fc bfc" id="L1181" title="All 2 branches covered.">                    if (repeat) {</span>
+<span class="fc" id="L1182">                        Paint oldPaint = g2d.getPaint();</span>
+                        try {
+<span class="fc" id="L1184">                            g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));</span>
+<span class="fc" id="L1185">                            g2d.fill(specificArea);</span>
+                        } finally {
+<span class="fc" id="L1187">                            g2d.setPaint(oldPaint);</span>
+                        }
+<span class="fc" id="L1189">                    } else</span>
+<span class="fc" id="L1190">                        g2d.drawImage(image, x, y, imgWidth, imgHeight, null);</span>
+
+                } finally {
+<span class="fc" id="L1193">                    g2d.setComposite(oldComposite);</span>
+                }
             }
-<span class="fc" id="L1175">        });</span>
-<span class="fc" id="L1176">    }</span>
+<span class="fc" id="L1196">        });</span>
+<span class="fc" id="L1197">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
