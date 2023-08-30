@@ -26,6 +26,10 @@ public final class ComponentExtension<C extends JComponent>
     /**
      * Returns the {@link ComponentExtension} associated with the given component.
      * If the component does not have an extension, a new one is created and associated with the component.
+     *
+     * @param comp The component for which to get the extension.
+     * @return The extension associated with the component.
+     * @param <C> The type of the component.
      */
     public static <C extends JComponent> ComponentExtension<C> from( C comp ) {
         ComponentExtension<C> ext = (ComponentExtension<C>) comp.getClientProperty( ComponentExtension.class );

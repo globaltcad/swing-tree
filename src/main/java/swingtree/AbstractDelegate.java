@@ -339,6 +339,7 @@ abstract class AbstractDelegate<C extends JComponent>
      *           This is relative to the component's parent.
      *  @param width The new width of the component.
      *  @param height The new height of the component.
+     *  @return The delegate itself, so you can chain calls to this method.
      */
     public final AbstractDelegate<C> setBounds( int x, int y, int width, int height ) {
         _component().setBounds(x, y, width, height);
@@ -355,6 +356,7 @@ abstract class AbstractDelegate<C extends JComponent>
      *
      *  @param bounds The new bounds of the component.
      *                  This is relative to the component's parent.
+     * @return The delegate itself, so you can chain calls to this method.
      */
     public final AbstractDelegate<C> setBounds( Rectangle bounds ) {
         _component().setBounds(bounds);

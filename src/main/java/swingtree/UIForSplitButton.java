@@ -65,6 +65,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
      *                  This will be updated when the user selects a new value.
      * @param clickEvent The {@link Event} which will be fired when the user clicks on the button.
      * @return A UI builder instance wrapping a {@link JSplitButton}.
+     * @param <E> The {@link Enum} type defining the selectable options.
      */
     public <E extends Enum<E>> UIForSplitButton<B> withSelection( Var<E> selection, Event clickEvent ) {
         NullUtil.nullArgCheck(selection, "selection", Var.class);

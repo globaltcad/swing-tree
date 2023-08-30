@@ -238,6 +238,8 @@ public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner
      *
      * @param val The {@link sprouts.Val} wrapper whose step size should be set.
      * @return This very instance, which enables builder-style method chaining.
+     * @param <N> The type of the number.
+     * @throws IllegalArgumentException if {@code val} is {@code null}.
      */
     public final <N extends Number> UIForSpinner<S> withStepSize( Val<N> val ) {
         NullUtil.nullArgCheck(val, "val", Val.class);

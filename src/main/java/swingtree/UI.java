@@ -1173,6 +1173,7 @@ public final class UI
      *                  This will be updated when the user selects a new value.
      * @param clickEvent The {@link Event} which will be fired when the user clicks on the button.
      * @return A UI builder instance wrapping a {@link JSplitButton}.
+     * @param <E> The type of the {@link Enum} representing the selectable options.
      */
     public static <E extends Enum<E>> UIForSplitButton<JSplitButton> splitButton( Var<E> selection, Event clickEvent ) {
         return splitButton("").withSelection(selection, clickEvent);
@@ -1202,6 +1203,7 @@ public final class UI
      * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
      *                  This will be updated when the user selects a new value.
      * @return A UI builder instance wrapping a {@link JSplitButton}.
+     * @param <E> The type of the {@link Enum} representing the selectable options.
      */
     public static <E extends Enum<E>> UIForSplitButton<JSplitButton> splitButton( Var<E> selection ) {
         return splitButton("").withSelection(selection);
@@ -1492,7 +1494,9 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JMenu} instance.
      *
+     * @param component The {@link JMenu} component which should be wrapped by the swing tree UI builder designed for menus.
      * @return A builder instance for the provided {@link JMenu}, which enables fluent method chaining.
+     * @param <M> The concrete type of the menu.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static <M extends JMenu> UIForMenu<M> of( M component ) {
@@ -1503,7 +1507,9 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JMenuItem} instance.
      *
+     * @param component The {@link JMenuItem} component which should be wrapped by the swing tree UI builder designed for menu items.
      * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
+     * @param <M> The type parameter of the concrete menu item component.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static <M extends JMenuItem> UIForMenuItem<M> of( M component ) {
@@ -1724,6 +1730,8 @@ public final class UI
      * @param state The fixed enum value which will be used as the text of the menu item and
      * @param property The variable enum property which will be used to select the menu item.
      * @return A builder instance for the provided {@link JRadioButtonMenuItem}, which enables fluent method chaining.
+     * @param <E> The type of the enum.
+     * @throws IllegalArgumentException if {@code state} or {@code property} are {@code null}.
      */
     public static <E extends Enum<E>> UIForRadioButtonMenuItem<JRadioButtonMenuItem> radioButtonMenuItem( E state, Var<E> property ) {
         NullUtil.nullArgCheck(state, "state", Enum.class);
@@ -2021,7 +2029,9 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JPanel} instance.
      *
+     * @param component The {@link JPanel} instance to be wrapped by a swing tree UI builder for panel components.
      * @return A builder instance for the provided {@link JPanel}, which enables fluent method chaining.
+     * @param <P> The type parameter of the concrete {@link JPanel} type to be wrapped.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static <P extends JPanel> UIForPanel<P> of( P component ) {

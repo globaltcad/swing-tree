@@ -46,21 +46,29 @@ public class ComponentMouseEventDelegate<C extends JComponent> extends Component
 
     /**
      * Returns whether the Alt modifier is down on the event of this delegate.
+     *
+     * @return true if the alt modifier is down
      */
     public boolean isAltDown() { return getEvent().isAltDown(); }
 
     /**
      * Returns whether the Control modifier is down on the event of this delegate.
+     *
+     * @return true if the control modifier is down
      */
     public boolean isCtrlDown() { return getEvent().isControlDown(); }
 
     /**
      * Returns whether the Shift modifier is down on the event of this delegate.
+     *
+     * @return true if the shift modifier is down
      */
     public boolean isShiftDown() { return getEvent().isShiftDown(); }
 
     /**
      * Returns whether the Meta modifier is down on the event of this delegate.
+     *
+     * @return true if the meta modifier is down
      */
     public boolean isMetaDown() { return getEvent().isMetaDown(); }
 

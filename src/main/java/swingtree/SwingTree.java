@@ -318,6 +318,11 @@ public final class SwingTree
 
         /**
          * Returns the system scale factor for the given graphics context.
+         * The system scale factor is the scale factor that the JRE uses
+         * to scale everything (text, icons, gaps, etc).
+         *
+         * @param g The graphics context to get the system scale factor for.
+         * @return The system scale factor for the given graphics context.
          */
         public double getSystemScaleFactor( Graphics2D g ) {
             return _isSystemScalingEnabled() ? getSystemScaleFactor( g.getDeviceConfiguration() ) : 1;
@@ -618,6 +623,8 @@ public final class SwingTree
         /**
          * If user scale factor is not 1, scale the given graphics context by invoking
          * {@link Graphics2D#scale(double, double)} with user scale factor.
+         *
+         * @param g The graphics context to scale.
          */
         public void scaleGraphics( Graphics2D g ) {
             initialize();
@@ -631,6 +638,9 @@ public final class SwingTree
          * If user scale factor is 1, then the given dimension is simply returned.
          * Otherwise, a new instance of {@link Dimension} or {@link DimensionUIResource}
          * is returned, depending on whether the passed dimension implements {@link UIResource}.
+         *
+         * @param dimension The dimension whose width and height should be scaled.
+         * @return A new instance of {@link Dimension} or {@link DimensionUIResource} with scaled width and height.
          */
         public Dimension scale( Dimension dimension ) {
             initialize();
@@ -674,6 +684,9 @@ public final class SwingTree
          * If user scale factor is 1, then the given insets is simply returned.
          * Otherwise, a new instance of {@link Insets} or {@link InsetsUIResource}
          * is returned, depending on whether the passed dimension implements {@link UIResource}.
+         *
+         * @param insets The insets whose top, left, bottom and right values should be scaled.
+         * @return A new instance of {@link Insets} or {@link InsetsUIResource} with scaled values.
          */
         public Insets scale( Insets insets ) {
             initialize();

@@ -91,6 +91,7 @@ public abstract class StyleSheet
      *
      * @param group The group to target in the form of an enum.
      * @return A {@link StyleTrait} targeting components belonging to the given group.
+     * @param <E> The type of the enum defining the group to target.
      */
     protected <E extends Enum<E>> StyleTrait<JComponent> group( E group ) { return new StyleTrait<>().group(group); }
 
@@ -108,6 +109,7 @@ public abstract class StyleSheet
      *
      * @param type The type of the component to target.
      * @return A {@link StyleTrait} targeting components of the given type.
+     * @param <C> The type of the components to target for styling.
      */
     protected <C extends JComponent> StyleTrait<C> type( Class<C> type ) { return new StyleTrait<>().type(type); }
 
@@ -183,6 +185,7 @@ public abstract class StyleSheet
      * }</pre>
      *
      * @param toBeStyled The component to apply the style sheet to.
+     * @return The {@link Style} that was applied to the component.
      */
     public Style applyTo( JComponent toBeStyled ) { return applyTo( toBeStyled, _defaultStyle.apply(toBeStyled) ); }
 
@@ -200,6 +203,7 @@ public abstract class StyleSheet
      *
      * @param toBeStyled The component to apply the style sheet to.
      * @param startingStyle The {@link Style} to start with when applying the style sheet.
+     * @return The {@link Style} that was applied to the component.
      */
     Style applyTo( JComponent toBeStyled, Style startingStyle ) {
         if ( !_traitGraphBuilt )
