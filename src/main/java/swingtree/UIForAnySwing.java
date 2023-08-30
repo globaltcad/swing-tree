@@ -2281,10 +2281,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-     *  Use this to register and catch generic {@link MouseListener} based mouse click events on this UI component.
-     *  This method adds the provided consumer lambda to
-     *  a {@link MouseListener} instance to the component.
+     *  Calls the provided action event handler when the mouse gets pressed and then released.
+     *  This delegates to a {@link MouseListener} based mouse click event listener registered in the UI component.
      *  <br><br>
+     *  Note that a click is defined as the combination of the <b>mouse being pressed
+     *  and then released on the same position as it was pressed.</b>
+     *  If the mouse moves between the press and the release events, then the
+     *  event is considered a drag event instead of a mouse click! (see {@link #onMouseDrag(Action)})
      *
      * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.

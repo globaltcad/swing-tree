@@ -2172,6 +2172,9 @@ public final class UI
      *  as well as with a {@link MigLayout} as its default layout manager.
      *
      * @return A builder instance for the provided {@link JBox}, which enables fluent method chaining.
+     * @param component The box component type for which a builder should be created.
+     * @param <B> THe type parameter defining the concrete {@link JBox} type.
+     * @return A builder for the provided box component.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static <B extends JBox> UIForBox<B> of( B component ) {
@@ -2345,6 +2348,7 @@ public final class UI
      *  Use this to create a builder for the provided {@link JScrollPane} component.
      *
      * @param component The {@link JScrollPane} component which should be represented by the returned builder.
+     * @param <P> The type parameter defining the concrete scroll pane type.
      * @return A {@link UIForScrollPane} builder representing the provided component.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
@@ -4211,6 +4215,8 @@ public final class UI
      *  as data model.
      *  This is functionally equivalent to {@link #listOf(java.util.List)}.
      *
+     * @param entries The list of entries used for populating a new {@link JList} component.
+     * @param <E> The type parameter defining the concrete type of the list entries.
      * @return A builder instance for a new {@link JList} with the provided {@link List} as data model.
      */
     public static <E> UIForList<E, JList<E>> list( java.util.List<E> entries ) {
@@ -4507,6 +4513,8 @@ public final class UI
     /**
      *  Use this to create a builder for anything.
      *
+     * @param component The component which should be wrapped by the builder.
+     * @param <T> The type parameter defining the concrete type of the component.
      * @return A builder instance for the provided object, which enables fluent method chaining.
      */
     public static <T extends Component> UIForAnything<T> of( T component ) {
@@ -4720,7 +4728,11 @@ public final class UI
      *        });
      *     appThread.start();
      * }</pre>
-     *
+     * @param supplier The supplier which should be executed on the UI thread.
+     * @param <T> The return type of the result value produced by the supplier.
+     * @return The result provided by the supplier.
+     * @throws InterruptedException if the current thread is interrupted
+     * @throws InvocationTargetException if the UI thread throws an exception
      */
     public static <T> T runAndGet( Supplier<T> supplier ) throws InterruptedException, InvocationTargetException {
         NullUtil.nullArgCheck(supplier, "callable", Supplier.class);
@@ -4762,6 +4774,10 @@ public final class UI
      *          someComponent.repaint();
      *       });
      *  }</pre>
+     *  @param duration The duration of the animation.
+     *                  This is the time it takes for the animation to reach 100% progress.
+     *  @param unit The time unit of the duration.
+     *  @return An {@link Animate} instance which allows you to configure the animation.
      */
     public static Animate schedule( long duration, TimeUnit unit ) {
         Objects.requireNonNull(unit, "unit");
@@ -4782,6 +4798,10 @@ public final class UI
      *          someComponent.repaint();
      *       });
      *  }</pre>
+     *  @param duration The duration of the animation.
+     *                  This is the time it takes for the animation to reach 100% progress.
+     *  @param unit The time unit of the duration.
+     *  @return An {@link Animate} instance which allows you to configure the animation.
      */
     public static Animate schedule( double duration, TimeUnit unit ) {
         return Animate.on( LifeTime.of(duration, unit) );
@@ -4925,6 +4945,7 @@ public final class UI
      * @param message  The message to show in the dialog.
      * @param icon     The icon to show in the dialog.
      * @param selected The enum based property to store the selected value in.
+     * @param <E> The type parameter defining the concrete enum type.
      */
     public static <E extends Enum<E>> void select( String title, String message, Icon icon, Var<E> selected ) {
         Objects.requireNonNull( message );

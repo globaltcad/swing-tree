@@ -1,5 +1,6 @@
 package swingtree;
 
+import swingtree.api.Painter;
 import swingtree.style.StyleSheet;
 import swingtree.threading.EventProcessor;
 
@@ -329,7 +330,8 @@ public final class SwingTree
         }
 
         /**
-         * Returns the system scale factor for the given graphics configuration.
+         * @param gc The graphics configuration to get the system scale factor for.
+         * @return The system scale factor for the given graphics configuration.
          */
         public static double getSystemScaleFactor( GraphicsConfiguration gc ) {
             return (_isSystemScalingEnabled() && gc != null) ? gc.getDefaultTransform().getScaleX() : 1;
@@ -530,7 +532,17 @@ public final class SwingTree
         }
 
         /**
-         * Returns the user scale factor.
+         * Returns the user scale factor is a scaling factor is used by SwingTree's
+         * style engine to scale the UI during painting.
+         * Note that this is different from the system scale factor, which is
+         * the scale factor that the JRE uses to scale everything through the
+         * {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
+         * <p>
+         * Use this scaling factor for painting operations that are not performed
+         * by SwingTree's style engine, e.g. custom painting
+         * (see {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, Painter)}).
+         *
+         * @return The user scale factor.
          */
         public float getUserScaleFactor() {
             initialize();
@@ -572,6 +584,9 @@ public final class SwingTree
 
         /**
          * Multiplies the given value by the user scale factor.
+         *
+         * @param value The value to scale.
+         * @return The scaled value.
          */
         public float scale( float value ) {
             initialize();
@@ -580,6 +595,9 @@ public final class SwingTree
 
         /**
          * Multiplies the given value by the user scale factor.
+         *
+         * @param value The value to scale.
+         * @return The scaled value.
          */
         public double scale( double value ) {
             initialize();
@@ -588,6 +606,9 @@ public final class SwingTree
 
         /**
          * Multiplies the given value by the user scale factor and rounds the result.
+         *
+         * @param value The value to scale and then round if the scaled result is not a whole number.
+         * @return The scaled and rounded value.
          */
         public int scale( int value ) {
             initialize();
@@ -598,6 +619,9 @@ public final class SwingTree
          * Similar as {@link #scale(int)} but always "rounds down".
          * <p>
          * For use in special cases. {@link #scale(int)} is the preferred method.
+         *
+         * @param value The value to scale and then round down if the scaled result is not a whole number.
+         * @return The scaled and rounded down value.
          */
         public int scaleRoundedDown( int value ) {
             initialize();
@@ -606,6 +630,9 @@ public final class SwingTree
 
         /**
          * Divides the given value by the user scale factor.
+         *
+         * @param value The value to un-scale.
+         * @return The resulting un-scaled floating point number.
          */
         public float unscale( float value ) {
             initialize();
@@ -614,6 +641,9 @@ public final class SwingTree
 
         /**
          * Divides the given value by the user scale factor and rounds the result.
+         *
+         * @param value The value to un-scale and then round if the un-scaled result is not a whole number.
+         * @return The un-scaled and rounded value.
          */
         public int unscale( int value ) {
             initialize();
