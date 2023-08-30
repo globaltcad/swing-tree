@@ -2171,7 +2171,6 @@ public final class UI
      *  a generic component wrapper type which is transparent and without any insets
      *  as well as with a {@link MigLayout} as its default layout manager.
      *
-     * @return A builder instance for the provided {@link JBox}, which enables fluent method chaining.
      * @param component The box component type for which a builder should be created.
      * @param <B> THe type parameter defining the concrete {@link JBox} type.
      * @return A builder for the provided box component.
@@ -2375,6 +2374,7 @@ public final class UI
      *  Use this to create a builder for the provided {@link JScrollPanels} component.
      *
      * @param component The {@link JScrollPanels} component which should be represented by the returned builder.
+     * @param <P> The type parameter defining the concrete scroll panels type.
      * @return A {@link UIForScrollPanels} builder representing the provided component.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
@@ -2443,6 +2443,8 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JSplitPane} instance.
      *
+     * @param component The {@link JSplitPane} instance to create a builder for.
+     * @param <P> The type of the {@link JSplitPane} instance.
      * @return A builder instance for the provided {@link JSplitPane}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
@@ -2545,6 +2547,8 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JSlider} instance.
      *
+     * @param component The {@link JSlider} instance to create a builder for.
+     * @param <S> The type of the {@link JSlider} instance.
      * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
@@ -2617,6 +2621,7 @@ public final class UI
      * @param min The minimum possible value of the slider.
      * @param max The maximum possible value of the slider.
      * @param value  the initial value of the slider
+     * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
      *
      * @throws IllegalArgumentException if {@code align} is {@code null}.
      *
@@ -2642,6 +2647,7 @@ public final class UI
      * @param min The minimum possible value of the slider.
      * @param max The maximum possible value of the slider.
      * @param value The property holding the value of the slider
+     * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
      *
      * @throws IllegalArgumentException if {@code align} is {@code null}.
      *
@@ -2668,6 +2674,7 @@ public final class UI
      * @param min The minimum possible value of the slider.
      * @param max The maximum possible value of the slider.
      * @param value The property holding the value of the slider
+     * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
      *
      * @throws IllegalArgumentException if {@code align} is {@code null}.
      *
@@ -2689,6 +2696,9 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JComboBox} instance.
      *
+     * @param component The {@link JComboBox} instance to create a builder for.
+     * @param <E> The type of the elements in the {@link JComboBox}.
+     * @param <C> The type of the {@link JComboBox} instance.
      * @return A builder instance for the provided {@link JComboBox}, which enables fluent method chaining.
      */
     public static <E, C extends JComboBox<E>> UIForCombo<E,C> of( C component ) {
@@ -2725,6 +2735,7 @@ public final class UI
      *  may not be modified by the user.
      *
      * @param items The unmodifiable array of elements to be selectable in the {@link JList}.
+     * @param <E> The type of the elements in the {@link JComboBox}.
      * @return A builder instance for the new {@link JComboBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
@@ -2776,6 +2787,7 @@ public final class UI
      *  with the provided list of elements as selectable items.
      *
      * @param items The list of elements to be selectable in the {@link JComboBox}.
+     * @param <E> The type of the elements in the list.
      * @return A builder instance for the provided {@link JComboBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
@@ -2824,6 +2836,7 @@ public final class UI
      *  with the provided properties list object as selectable (and mutable) items.
      *
      * @param items The {@link Vars} properties of elements to be selectable in the {@link JComboBox}.
+     * @param <E> The type of the elements in the list.
      * @return A builder instance for the provided {@link JComboBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
@@ -2949,7 +2962,11 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JSpinner} instance.
      *
+     * @param spinner The {@link JSpinner} instance to create a builder for.
+     *                The provided {@link JSpinner} instance must not be {@code null}.
+     * @param <S> The type parameter of the concrete {@link JSpinner} subclass to be used by the builder.
      * @return A builder instance for the provided {@link JSpinner}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code spinner} is {@code null}.
      */
     public static <S extends JSpinner> UIForSpinner<S> of( S spinner ) {
         NullUtil.nullArgCheck(spinner, "spinner", JSpinner.class);
@@ -3020,6 +3037,7 @@ public final class UI
      *  Use this to create a builder for the provided {@link JLabel} instance.
      *
      * @param label The {@link JLabel} instance to be used by the builder.
+     * @param <L> The type parameter of the concrete {@link JLabel} subclass to be used by the builder.
      * @return A builder instance for the provided {@link JLabel}, which enables fluent method chaining.
      */
     public static <L extends JLabel> UIForLabel<L> of( L label ) {
@@ -3199,6 +3217,7 @@ public final class UI
      *  Use this to create a builder for the provided {@link swingtree.components.JIcon} instance.
      *
      * @param icon The {@link swingtree.components.JIcon} instance to be used by the builder.
+     * @param <I> The type of the {@link swingtree.components.JIcon} instance.
      * @return A builder instance for the provided {@link swingtree.components.JIcon}, which enables fluent method chaining.
      */
     public static <I extends JIcon> UIForIcon<I> of( I icon ) {
@@ -3349,6 +3368,8 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JCheckBox} instance.
      *
+     * @param component The {@link JCheckBox} instance to be used by the builder.
+     * @param <B> The type parameter of the concrete {@link JCheckBox} subclass to be used by the builder.
      * @return A builder instance for the provided {@link JCheckBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException If the provided checkbox is null.
      */
@@ -3460,6 +3481,7 @@ public final class UI
      * @param state The reference {@link Enum} which this {@link JToggleButton} should represent.
      * @param selection The {@link sprouts.Var} instance which will be used
      *                  to dynamically model the selection state of the wrapped {@link JToggleButton} type.
+     * @param <E> The type of the enum which this {@link JToggleButton} should represent.
      * @return A builder instance for the radio button, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
@@ -3476,6 +3498,7 @@ public final class UI
      *  Use this to create a builder for the provided {@link JRadioButton} instance.
      *
      * @param component The {@link JRadioButton} instance which should be wrapped by the builder.
+     * @param <R> The type of the {@link JRadioButton} instance which should be wrapped by the builder.
      * @return A builder instance for the provided {@link JRadioButton}, which enables fluent method chaining.
      */
     public static <R extends JRadioButton> UIForRadioButton<R> of( R component ) {
@@ -3505,7 +3528,12 @@ public final class UI
     /**
      *  Use this to create a builder for a new {@link JToggleButton} instance
      *  where the provided text property dynamically displays its value on the toggle button.
+     *  <p>
+     *  Note that the provided text property may not be null,
+     *  and it is also not permitted to contain null values,
+     *  instead use an empty string instead of null.
      *
+     * @param text The text property which should be bound to the toggle button.
      * @return A builder instance for a new {@link JToggleButton}, which enables fluent method chaining.
      */
     public static UIForToggleButton<JToggleButton> toggleButton( Val<String> text ) {
@@ -3632,6 +3660,8 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JToggleButton} instance.
      *
+     * @param component The {@link JToggleButton} instance which should be wrapped by the builder.
+     * @param <B> The type of the {@link JToggleButton} instance which should be wrapped by the builder.
      * @return A builder instance for the provided {@link JToggleButton}, which enables fluent method chaining.
      */
     public static <B extends JToggleButton> UIForToggleButton<B> of( B component ) {
@@ -3642,7 +3672,10 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JTextField} instance.
      *
+     * @param component The {@link JTextField} instance which should be wrapped by the builder.
+     * @param <F> The type of the {@link JTextField} instance which should be wrapped by the builder.
      * @return A builder instance for the provided {@link JTextField}, which enables fluent method chaining.
+     * @throws IllegalArgumentException If the provided text field is null.
      */
     public static <F extends JTextField> UIForTextField<F> of( F component ) {
         NullUtil.nullArgCheck(component, "component", JTextComponent.class);
@@ -3762,8 +3795,12 @@ public final class UI
      *  The property is a {@link Var}, meaning that it can be modified by the user.
      *  <p>
      *  The number property will only receive values if the text field contains a valid number.
+     *  <p>
+     *  Also note that the provided property is not allowed to contain {@code null} values,
+     *  as this would lead to a {@link NullPointerException} being thrown.
      *
      * @param number The number property which should be bound to the text field.
+     * @param <N> The type of the number property which should be bound to the text field.
      * @return A builder instance for the provided {@link JTextField}, which enables fluent method chaining.
      */
     public static <N extends Number> UIForTextField<JTextField> numericTextField( Var<N> number ) {
@@ -3782,15 +3819,23 @@ public final class UI
      *  <p>
      *  The number property will only receive values if the text in the text field can be parsed as a number,
      *  in which case the provided {@link Var} will be set to {@code true}, otherwise it will be set to {@code false}.
+     *  <p>
+     *  Note that the two provided properties are not permitted to
+     *  contain {@code null} values, as this would lead to a {@link NullPointerException} being thrown.
      *
      * @param number The number property which should be bound to the text field.
      * @param isValid A {@link Var} which will be set to {@code true} if the text field contains a valid number,
      *                and {@code false} otherwise.
+     * @param <N> The type of the number property which should be bound to the text field.
      * @return A builder instance for the provided {@link JTextField}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code number} is {@code null}.
+     * @throws IllegalArgumentException if {@code isValid} is {@code null}.
      */
     public static <N extends Number> UIForTextField<JTextField> numericTextField( Var<N> number, Var<Boolean> isValid ) {
         NullUtil.nullArgCheck(number, "number", Var.class);
         NullUtil.nullPropertyCheck(number, "number", "Please use 0 instead of null!");
+        NullUtil.nullArgCheck(isValid, "isValid", Var.class);
+        NullUtil.nullPropertyCheck(isValid, "isValid", "Please use false instead of null!");
         return of((JTextField) new TextField())
                 .applyIf( !number.hasNoID(), it -> it.id(number.id()) )
                 .withNumber(number, isValid);
@@ -3800,7 +3845,9 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JFormattedTextField} instance.
      *
+     * @param component The {@link JFormattedTextField} instance which should be wrapped by the builder.
      * @return A builder instance for the provided {@link JFormattedTextField}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static UIForFormattedTextField of( JFormattedTextField component ) {
         NullUtil.nullArgCheck(component, "component", JFormattedTextField.class);
@@ -3863,7 +3910,10 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JPasswordField} instance.
      *
+     * @param component The {@link JPasswordField} instance which should be wrapped by the builder.
+     * @param <F> The type of the {@link JPasswordField} instance which should be wrapped by the builder.
      * @return A builder instance for the provided {@link JPasswordField}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static <F extends JPasswordField> UIForPasswordField<F> of( F component ) {
         NullUtil.nullArgCheck(component, "component", JPasswordField.class);
@@ -3926,7 +3976,10 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JProgressBar} instance.
      *
+     * @param component The {@link JProgressBar} instance which should be wrapped by the builder.
+     * @param <P> The type of the {@link JProgressBar} instance which should be wrapped by the builder.
      * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static <P extends JProgressBar> UIForProgressBar<P> of( P component ) {
         NullUtil.nullArgCheck(component, "component", JProgressBar.class);
@@ -4088,6 +4141,8 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JTextArea} instance.
      *
+     * @param area The {@link JTextArea} which should be wrapped by the builder.
+     * @param <A> The type of the {@link JTextArea} for which the builder should be created.
      * @return A builder instance for the provided {@link JTextArea}, which enables fluent method chaining.
      */
     public static <A extends JTextArea> UIForTextArea<A> of( A area ) {
@@ -4141,6 +4196,7 @@ public final class UI
     }
 
     /**
+     * @param list The {@link JList} which should be wrapped by the builder.
      * @param <E> The type of the elements in the list.
      * @return A builder instance for the provided {@link JList}.
      */
@@ -4150,6 +4206,7 @@ public final class UI
     }
 
     /**
+     * @param <E> The type of the elements in the list.
      * @return A builder instance for a new {@link JList}.
      */
     public static <E> UIForList<E, JList<E>> list() { return of(new List<>()); }
