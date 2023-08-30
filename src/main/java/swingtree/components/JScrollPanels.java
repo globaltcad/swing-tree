@@ -4,6 +4,7 @@ import net.miginfocom.swing.MigLayout;
 import swingtree.UI;
 import swingtree.api.mvvm.EntryViewModel;
 import swingtree.api.mvvm.ViewSupplier;
+import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
 import java.awt.*;
@@ -102,6 +103,18 @@ public class JScrollPanels extends JScrollPane
 	private JScrollPanels(InternalPanel listWrapper) {
 		super(listWrapper);
 		_internal = listWrapper;
+	}
+
+	/** {@inheritDoc} */
+	@Override public void paint(Graphics g){
+		ComponentExtension.from(this).paintBackgroundStyle( g );
+		super.paint(g);
+	}
+
+	/** {@inheritDoc} */
+	@Override public void paintChildren(Graphics g){
+		super.paintChildren(g);
+		ComponentExtension.from(this).paintForegroundStyle( (Graphics2D) g );
 	}
 
 	/**

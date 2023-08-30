@@ -5130,11 +5130,6 @@ public final class UI
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
     }
     /** {inheritDoc} */
-    public static class Box extends JBox {
-        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }
-        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
-    }
-    /** {inheritDoc} */
     public static class Label extends JLabel {
         @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
@@ -5280,10 +5275,9 @@ public final class UI
         @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g){ super.paintChildren(g); _paintForeground(this, g); }
     }
+    /** {inheritDoc} */
+    public static class Box extends JBox {/* Already implemented */}
     /** {@inheritDoc} */
-    public static class SplitButton extends JSplitButton {
-        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }
-        @Override public void paintChildren(Graphics g){ super.paintChildren(g); _paintForeground(this, g); }
-    }
+    public static class SplitButton extends JSplitButton {/* Already implemented */}
 
 }

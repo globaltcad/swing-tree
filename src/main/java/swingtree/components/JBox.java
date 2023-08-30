@@ -78,6 +78,18 @@ public class JBox extends JComponent implements Accessible
         this(true);
     }
 
+    /** {@inheritDoc} */
+    @Override public void paint(Graphics g){
+        ComponentExtension.from(this).paintBackgroundStyle( g );
+        super.paint(g);
+    }
+
+    /** {@inheritDoc} */
+    @Override public void paintChildren(Graphics g){
+        super.paintChildren(g);
+        ComponentExtension.from(this).paintForegroundStyle( (Graphics2D) g );
+    }
+
     /**
      * Resets the UI property with a value from the current look and feel.
      *
