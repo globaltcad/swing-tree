@@ -145,12 +145,12 @@ Which will create a Swing UI that looks like this:
 <img src="../img/tutorial/wrapping-up-letters-2.png" style = "width: 17em; margin: 0.5em; -webkit-box-shadow: 0px 0px 18px -2px rgba(0,0,0,0.75); -moz-box-shadow: 0px 0px 18px -2px rgba(0,0,0,0.75); box-shadow: 0px 0px 18px -2px rgba(0,0,0,0.75);">
 
 Now this is a little bit more complicated than the previous example,
-but understanding how the layout manager works is the key to
-building beautiful Swing UIs.
+but trust me, understanding how the above layout mechanic works is the key to
+building Swing UIs with the most ease.
 
-Instead of specifying the layout constraints for the whole
+**Instead of specifying the layout constraints for the whole
 container we have now specified the layout constraints for
-each component individually.
+each component individually.**
 
 The `wrap` keyword tells the layout manager to start a new row which
 causes the next component to be placed on the next row.
