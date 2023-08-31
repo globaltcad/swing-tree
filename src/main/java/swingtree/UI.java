@@ -2027,7 +2027,33 @@ public final class UI
     }
 
     /**
-     *  Use this to create a builder for the provided {@link JPanel} instance.
+     *  Use this to create a builder for the provided {@link JPanel} type. <br>
+     *  This method is typically used to enable declarative UI design for custom
+     *  {@link JPanel} based components either within the constructor of a custom
+     *  subclass, like so: <br>
+     *  <pre>{@code
+     *  class MyCustomPanel extends JPanel {
+     *      public MyCustomPanel() {
+     *          UI.of(this)
+     *          .add(UI.label("Hello Swing!"))
+     *          .add(UI.button("Click Me"))
+     *          .add(UI.button("Or Me") );
+     *      }
+     *  }
+     *  }</pre>
+     *  <br>
+     *  ... or as part of a UI declaration, where the custom {@link JPanel} type
+     *  is added to the components tree, like so: <br>
+     *  <pre>{@code
+     *  UI.show(
+     *      UI.panel()
+     *      .add(
+     *          new MyCustomPanel()
+     *      )
+     *      .add(..more stuff..)
+     *  );
+     *  }</pre>
+     *  <br>
      *
      * @param component The {@link JPanel} instance to be wrapped by a swing tree UI builder for panel components.
      * @return A builder instance for the provided {@link JPanel}, which enables fluent method chaining.
@@ -2168,8 +2194,49 @@ public final class UI
 
     /**
      *  Use this to create a builder for the provided {@link JBox} instance,
-     *  a generic component wrapper type which is transparent and without any insets
-     *  as well as with a {@link MigLayout} as its default layout manager.
+     *  which is a general purpose component wrapper type with the following properties:
+     *  <ul>
+     *      <li>
+     *          It is transparent, meaning that it does not paint its background.
+     *      </l>
+     *      <li>
+     *          The default layout manager is a {@link MigLayout}.
+     *      </li>
+     *      <li>
+     *          The insets (the space between the wrapped component and the box's border)
+     *          are set to zero.
+     *      </li>
+     *      <li>
+     *          There the gap size between the components added to the box is set to zero.
+     *          So they will be tightly packed.
+     *      </li>
+     *  </ul>
+     *  This method is typically used to enable declarative UI design for custom
+     *  {@link JBox} based components either within the constructor of a custom
+     *  subclass, like so: <br>
+     *  <pre>{@code
+     *  class MyCustomBox extends JBox {
+     *      public MyCustomBox() {
+     *          UI.of(this)
+     *          .add(UI.label("Hello Swing!"))
+     *          .add(UI.button("Click Me"))
+     *          .add(UI.button("Or Me") );
+     *      }
+     *  }
+     *  }</pre>
+     *  <br>
+     *  ... or as part of a UI declaration, where the custom {@link JBox} type
+     *  is added to the components tree, like so: <br>
+     *  <pre>{@code
+     *  UI.show(
+     *      UI.panel()
+     *      .add(
+     *          new MyCustomBox()
+     *      )
+     *      .add(..more stuff..)
+     *  );
+     *  }</pre>
+     *  <br>
      *
      * @param component The box component type for which a builder should be created.
      * @param <B> THe type parameter defining the concrete {@link JBox} type.
@@ -2182,15 +2249,30 @@ public final class UI
     }
 
     /**
-     *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
-     *  which is transparent and without any insets as well as with a {@link MigLayout}
-     *  as its layout manager.
+     *  Use this to create a builder for a {@link JBox} instance,
+     *  which is a general purpose component wrapper type with the following properties:
+     *  <ul>
+     *      <li>
+     *          It is transparent, meaning that it does not paint its background.
+     *      </l>
+     *      <li>
+     *          The default layout manager is a {@link MigLayout}.
+     *      </li>
+     *      <li>
+     *          The insets (the space between the wrapped component and the box's border)
+     *          are set to zero.
+     *      </li>
+     *      <li>
+     *          There the gap size between the components added to the box is set to zero.
+     *          So they will be tightly packed.
+     *      </li>
+     *  </ul>
      *  This factory method is especially useful for when you simply want to nest components
      *  tightly without having to worry about the layout manager or the background
      *  color covering the background of the parent component.
      *  <br>
      *  Note that you can also emulate the {@link JBox} type with a {@link JPanel} using
-     *  {@code UI.panel("ins 0").makeNonOpaque()}.
+     *  {@code UI.panel("ins 0, gap 0").makeNonOpaque()}.
      *
      * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.
      */
