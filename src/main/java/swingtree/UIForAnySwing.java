@@ -1407,6 +1407,45 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withGridLayout( int rows, int cols ) { return this.withLayout(new GridLayout(rows, cols)); }
 
     /**
+     *  Use this to set a {@link GridLayout} for the component wrapped by this builder. <br>
+     *  This is in essence a more convenient way than the alternative usage pattern involving
+     *  the {@link #peek(Peeker)} method to peek into the builder's component like so: <br>
+     *  <pre>{@code
+     *      UI.panel()
+     *      .peek( panel -> panel.setLayout(new GridLayout(rows, cols, hgap, vgap)) );
+     *  }</pre>
+     *
+     * @param rows The number of rows in the grid.
+     * @param cols The number of columns in the grid.
+     * @param hgap The horizontal gap between cells.
+     * @param vgap The vertical gap between cells.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withGridLayout( int rows, int cols, int hgap, int vgap ) {
+        return this.withLayout(new GridLayout(rows, cols, hgap, vgap));
+    }
+
+    /**
+     *  Use this to set a {@link BoxLayout} for the component wrapped by this builder. <br>
+     *  This is in essence a more convenient way than the alternative usage pattern involving
+     *  the {@link #peek(Peeker)} method to peek into the builder's component like so: <br>
+     *  <pre>{@code
+     *      UI.panel()
+     *      .peek( panel -> panel.setLayout(new BoxLayout(panel, axis.forBoxLayout())) );
+     *  }</pre>
+     *
+     * @param axis The axis for the box layout.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException If the provided axis is {@code null}.
+     * @see UI.Axis
+     * @see BoxLayout
+     */
+    public final I withBoxLayout( UI.Axis axis ) {
+        NullUtil.nullArgCheck( axis, "axis", UI.Axis.class );
+        return this.withLayout(new BoxLayout(getComponent(), axis.forBoxLayout()));
+    }
+
+    /**
      *  Passes the provided string to the layout manager of the wrapped component.
      *  By default, a {@link MigLayout} is used for the component wrapped by this UI builder.
      *
