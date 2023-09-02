@@ -774,6 +774,18 @@ public final class UI
     private UI(){} // This is a static API
 
     /**
+     *  Use this to create a builder for anything.
+     *
+     * @param component The component which should be wrapped by the builder.
+     * @param <T> The type parameter defining the concrete type of the component.
+     * @return A builder instance for the provided object, which enables fluent method chaining.
+     */
+    public static <T extends Component> UIForAnything<T> of( T component ) {
+        NullUtil.nullArgCheck(component, "component", Component.class);
+        return new UIForAnything<>(component);
+    }
+
+    /**
      *  This returns an instance of a generic swing tree builder
      *  for anything extending the {@link JComponent} class.
      *  <br><br>
@@ -1341,83 +1353,6 @@ public final class UI
         NullUtil.nullArgCheck(attr, "attr", Val.class);
         NullUtil.nullPropertyCheck(attr, "attr", "Null is not a valid layout attribute.");
         return box().withLayout(attr.view( it -> it.and("ins 0")));
-    }
-
-    /**
-     *  This returns an instance of a Swing-Tree builder for a {@link JFrame} type.
-     * @param frame The new frame instance which ought to be part of the Swing UI.
-     * @return A basic UI builder instance wrapping a {@link JFrame}.
-     * @param <F> The concrete type of this new frame.
-     */
-    public static <F extends JFrame> UIForJFrame<F> of( F frame ) {
-        return new UIForJFrame<>(frame);
-    }
-
-    /**
-     *  Use this to create a builder for the supplied {@link JFrame}. <br>
-     *  This is in essence a convenience method for {@code UI.of(new JFrame()) )}.
-     *
-     * @return A basic UI builder instance wrapping a {@link JFrame}.
-     */
-    public static UIForJFrame<JFrame> frame() {
-        return new UIForJFrame<>(new JFrame());
-    }
-
-    /**
-     *  Use this to create a builder for the supplied {@link JFrame} with the supplied title. <br>
-     * @param title The title for the new frame.
-     * @return A basic UI builder instance wrapping a {@link JFrame}.
-     */
-    public static UIForJFrame<JFrame> frame( String title ) {
-        return new UIForJFrame<>(new JFrame()).withTitle(title);
-    }
-
-    /**
-     *  This returns an instance of a Swing-Tree builder for a {@link JDialog} type.
-     * @param dialog The new dialog instance which ought to be part of the Swing UI.
-     * @return A basic UI builder instance wrapping a {@link JDialog}.
-     * @param <D> The concrete type of this new dialog.
-     */
-    public static <D extends JDialog> UIForJDialog<D> of( D dialog ) {
-        return new UIForJDialog<>(dialog);
-    }
-
-    /**
-     *  Use this to create a builder for the supplied {@link JDialog}. <br>
-     *  This is in essence a convenience method for {@code UI.of(new JDialog()) )}.
-     *
-     * @return A basic UI builder instance wrapping a {@link JDialog}.
-     */
-    public static UIForJDialog<JDialog> dialog() {
-        return new UIForJDialog<>(new JDialog());
-    }
-
-    /**
-     *  Use this to create a builder for the supplied {@link JDialog} with the supplied owner. <br>
-     * @param owner The owner for the new dialog.
-     * @return A basic UI builder instance wrapping a {@link JDialog}.
-     */
-    public static UIForJDialog<JDialog> dialog( Window owner ) {
-        return new UIForJDialog<>(new JDialog(owner));
-    }
-
-    /**
-     *  Use this to create a builder for the supplied {@link JDialog} with the supplied title. <br>
-     * @param title The title for the new dialog.
-     * @return A basic UI builder instance wrapping a {@link JDialog}.
-     */
-    public static UIForJDialog<JDialog> dialog( String title ) {
-        return new UIForJDialog<>(new JDialog()).withTitle(title);
-    }
-
-    /**
-     *  Use this to create a builder for the supplied {@link JDialog} with the supplied owner and title. <br>
-     * @param owner The owner for the new dialog.
-     * @param title The title for the new dialog.
-     * @return A basic UI builder instance wrapping a {@link JDialog}.
-     */
-    public static UIForJDialog<JDialog> dialog( Window owner, String title ) {
-        return new UIForJDialog<>(new JDialog(owner)).withTitle(title);
     }
 
     /**
@@ -4814,15 +4749,80 @@ public final class UI
     }
 
     /**
-     *  Use this to create a builder for anything.
-     *
-     * @param component The component which should be wrapped by the builder.
-     * @param <T> The type parameter defining the concrete type of the component.
-     * @return A builder instance for the provided object, which enables fluent method chaining.
+     *  This returns an instance of a Swing-Tree builder for a {@link JFrame} type.
+     * @param frame The new frame instance which ought to be part of the Swing UI.
+     * @return A basic UI builder instance wrapping a {@link JFrame}.
+     * @param <F> The concrete type of this new frame.
      */
-    public static <T extends Component> UIForAnything<T> of( T component ) {
-        NullUtil.nullArgCheck(component, "component", Component.class);
-        return new UIForAnything<>(component);
+    public static <F extends JFrame> UIForJFrame<F> of( F frame ) {
+        return new UIForJFrame<>(frame);
+    }
+
+    /**
+     *  Use this to create a builder for the supplied {@link JFrame}. <br>
+     *  This is in essence a convenience method for {@code UI.of(new JFrame()) )}.
+     *
+     * @return A basic UI builder instance wrapping a {@link JFrame}.
+     */
+    public static UIForJFrame<JFrame> frame() {
+        return new UIForJFrame<>(new JFrame());
+    }
+
+    /**
+     *  Use this to create a builder for the supplied {@link JFrame} with the supplied title. <br>
+     * @param title The title for the new frame.
+     * @return A basic UI builder instance wrapping a {@link JFrame}.
+     */
+    public static UIForJFrame<JFrame> frame( String title ) {
+        return new UIForJFrame<>(new JFrame()).withTitle(title);
+    }
+
+    /**
+     *  This returns an instance of a Swing-Tree builder for a {@link JDialog} type.
+     * @param dialog The new dialog instance which ought to be part of the Swing UI.
+     * @return A basic UI builder instance wrapping a {@link JDialog}.
+     * @param <D> The concrete type of this new dialog.
+     */
+    public static <D extends JDialog> UIForJDialog<D> of( D dialog ) {
+        return new UIForJDialog<>(dialog);
+    }
+
+    /**
+     *  Use this to create a builder for the supplied {@link JDialog}. <br>
+     *  This is in essence a convenience method for {@code UI.of(new JDialog()) )}.
+     *
+     * @return A basic UI builder instance wrapping a {@link JDialog}.
+     */
+    public static UIForJDialog<JDialog> dialog() {
+        return new UIForJDialog<>(new JDialog());
+    }
+
+    /**
+     *  Use this to create a builder for the supplied {@link JDialog} with the supplied owner. <br>
+     * @param owner The owner for the new dialog.
+     * @return A basic UI builder instance wrapping a {@link JDialog}.
+     */
+    public static UIForJDialog<JDialog> dialog( Window owner ) {
+        return new UIForJDialog<>(new JDialog(owner));
+    }
+
+    /**
+     *  Use this to create a builder for the supplied {@link JDialog} with the supplied title. <br>
+     * @param title The title for the new dialog.
+     * @return A basic UI builder instance wrapping a {@link JDialog}.
+     */
+    public static UIForJDialog<JDialog> dialog( String title ) {
+        return new UIForJDialog<>(new JDialog()).withTitle(title);
+    }
+
+    /**
+     *  Use this to create a builder for the supplied {@link JDialog} with the supplied owner and title. <br>
+     * @param owner The owner for the new dialog.
+     * @param title The title for the new dialog.
+     * @return A basic UI builder instance wrapping a {@link JDialog}.
+     */
+    public static UIForJDialog<JDialog> dialog( Window owner, String title ) {
+        return new UIForJDialog<>(new JDialog(owner)).withTitle(title);
     }
 
     /**
