@@ -36,7 +36,7 @@ This is all you need to start building Swing UIs with the tree. :tada:
 No matter which UI framework you use, **all UIs essentially consist
 of a tree structure made up of components**. <br>
 Swing is no different, which is why the SwingTree
-library allows you to **build Swing UIs in a declarative fashion**,
+library allows you to **build Swing UIs in a declarative manner**,
 just like you would declare your UI structure in HTML or in other XML-based
 UI frameworks.
 
@@ -529,6 +529,8 @@ ready to start building your own Swing UIs with Swing-Tree.
 Here some more reading material to get you started:
 
 - [Simple Dialogs](./Simple-Dialogs.md)
+- [Writing Tables](./Writing-Tables.md)
+- [Advanced MVVM](./Advanced-MVVM.md)
 
 If you want to learn more about Swing-Tree
 check out the [API documentation](../jdocs/index.html)

@@ -8,7 +8,7 @@ Think [Jetpack Compose](https://developer.android.com/jetpack/compose), [SwiftUI
 (similar to [JetBrain's UI DSL](https://plugins.jetbrains.com/docs/intellij/kotlin-ui-dsl-version-2.html#ui-dsl-basics)).
 
 - [Motivation](docs/markdown/Motivation.md)
-- [Starter Tutorial](docs/markdown/Climbing-Swing-Tree.md)
+- [Getting Started](docs/markdown/Climbing-Swing-Tree.md)
 - [Living Documentation](https://globaltcad.github.io/swing-tree/)
 
 <table>
