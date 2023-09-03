@@ -119,7 +119,7 @@ public final class UI
     public static CompAttr ALIGN_Y_CENTER = CompAttr.of("aligny center");
     public static CompAttr ALIGN_Y_BOTTOM = CompAttr.of("aligny bottom");
     public static CompAttr ALIGN_Y_TOP = CompAttr.of("aligny top");
-    public static CompAttr ALIGN( Position pos ) { return CompAttr.of(pos.toMigAlign()); }
+    public static CompAttr ALIGN( Side pos ) { return CompAttr.of(pos.toMigAlign()); }
     public static CompAttr TOP = CompAttr.of("top");
     public static CompAttr RIGHT = CompAttr.of("right");
     public static CompAttr BOTTOM = CompAttr.of("bottom");
@@ -133,7 +133,7 @@ public final class UI
     public static CompAttr DOCK_SOUTH = CompAttr.of("dock south");
     public static CompAttr DOCK_EAST  = CompAttr.of("dock east");
     public static CompAttr DOCK_WEST  = CompAttr.of("dock west");
-    public static CompAttr DOCK( Position pos ) { return CompAttr.of("dock " + pos.toDirectionString()); }
+    public static CompAttr DOCK( Side pos ) { return CompAttr.of("dock " + pos.toDirectionString()); }
 
     public static LC LC() { return new LC().fill(); }
     public static AC AC() { return new AC(); }
@@ -176,9 +176,13 @@ public final class UI
     public enum Active { NEVER, AS_NEEDED, ALWAYS }
 
     /**
-     *  The position of a UI component in terms of directions.
+     *  All UI components are at their core rectangular, meaning they
+     *  always have exactly 4 uniquely identifiable sides.
+     *  This enum is used to target specific sides of a {@link JComponent}
+     *  in various API methods like for example {@link UIForTabbedPane#withTabPlacementAt(Side)}
+     *  or the tapped pane factory method {@link UI#tabbedPane(Side)}.
      */
-    public enum Position {
+    public enum Side {
         TOP, LEFT, BOTTOM, RIGHT;
         int forTabbedPane() {
             switch ( this ) {
@@ -1801,7 +1805,7 @@ public final class UI
 
     /**
      *  Use this to create a builder for a new {@link JTabbedPane} UI component
-     *  with the provided {@link Position} applied to the tab buttons
+     *  with the provided {@link Side} applied to the tab buttons
      *  (see {@link JTabbedPane#setTabLayoutPolicy(int)}).
      *  In order to add tabs to this builder use the tab object returned by {@link #tab(String)}
      *  like so:
@@ -1813,18 +1817,18 @@ public final class UI
      *      .add(UI.tab("third").withIcon(someIcon).add(UI.button("click me")))
      *  }</pre>
      *
-     * @param tabsPosition The position of the tab buttons which may be {@link Position#TOP}, {@link Position#RIGHT}, {@link Position#BOTTOM}, {@link Position#LEFT}.
+     * @param tabsSide The position of the tab buttons which may be {@link Side#TOP}, {@link Side#RIGHT}, {@link Side#BOTTOM}, {@link Side#LEFT}.
      * @return A builder instance wrapping a new {@link JTabbedPane}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code tabsPosition} is {@code null}.
      */
-    public static UIForTabbedPane<JTabbedPane> tabbedPane( Position tabsPosition ) {
-        NullUtil.nullArgCheck(tabsPosition, "tabsPosition", Position.class);
-        return tabbedPane().withTabPlacement(tabsPosition);
+    public static UIForTabbedPane<JTabbedPane> tabbedPane( Side tabsSide) {
+        NullUtil.nullArgCheck(tabsSide, "tabsPosition", Side.class);
+        return tabbedPane().withTabPlacementAt(tabsSide);
     }
 
     /**
      *  Use this to create a builder for a new {@link JTabbedPane} UI component
-     *  with the provided {@link OverflowPolicy} and {@link Position} applied to the tab buttons 
+     *  with the provided {@link OverflowPolicy} and {@link Side} applied to the tab buttons
      *  (see {@link JTabbedPane#setTabLayoutPolicy(int)} and {@link JTabbedPane#setTabPlacement(int)}).
      *  In order to add tabs to this builder use the tab object returned by {@link #tab(String)}
      *  like so:
@@ -1835,15 +1839,15 @@ public final class UI
      *      .add(UI.tab("third").withIcon(someIcon).add(UI.button("click me")))
      *  }</pre>
      *
-     * @param tabsPosition The position of the tab buttons which may be {@link Position#TOP}, {@link Position#RIGHT}, {@link Position#BOTTOM}, {@link Position#LEFT}.
+     * @param tabsSide The position of the tab buttons which may be {@link Side#TOP}, {@link Side#RIGHT}, {@link Side#BOTTOM}, {@link Side#LEFT}.
      * @param tabsPolicy The overflow policy of the tab buttons which can either be {@link OverflowPolicy#SCROLL} or {@link OverflowPolicy#WRAP}.
      * @return A builder instance wrapping a new {@link JTabbedPane}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code tabsPosition} or {@code tabsPolicy} are {@code null}.
      */
-    public static UIForTabbedPane<JTabbedPane> tabbedPane( Position tabsPosition, OverflowPolicy tabsPolicy ) {
-        NullUtil.nullArgCheck(tabsPosition, "tabsPosition", Position.class);
+    public static UIForTabbedPane<JTabbedPane> tabbedPane(Side tabsSide, OverflowPolicy tabsPolicy ) {
+        NullUtil.nullArgCheck(tabsSide, "tabsPosition", Side.class);
         NullUtil.nullArgCheck(tabsPolicy, "tabsPolicy", OverflowPolicy.class);
-        return tabbedPane().withTabPlacement(tabsPosition).withOverflowPolicy(tabsPolicy);
+        return tabbedPane().withTabPlacementAt(tabsSide).withOverflowPolicy(tabsPolicy);
     }
 
     /**
@@ -1864,7 +1868,7 @@ public final class UI
      */
     public static UIForTabbedPane<JTabbedPane> tabbedPane( OverflowPolicy tabsPolicy ) {
         NullUtil.nullArgCheck(tabsPolicy, "tabsPolicy", OverflowPolicy.class);
-        return tabbedPane().withTabPlacement(Position.TOP).withOverflowPolicy(tabsPolicy);
+        return tabbedPane().withTabPlacementAt(Side.TOP).withOverflowPolicy(tabsPolicy);
     }
 
 

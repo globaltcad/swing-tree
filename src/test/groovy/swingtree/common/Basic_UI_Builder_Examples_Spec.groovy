@@ -380,7 +380,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
         """
         when : 'We create a tabbed pane UI node and attach various kinds of tabs with custom actions to it.'
             def tabbedPane =
-                UI.tabbedPane(UI.Position.LEFT).id("Tabs")
+                UI.tabbedPane(UI.Side.LEFT).id("Tabs")
                 .add(
                     UI.tab("Tab 1")
                     .onSelection(it -> {/*something*/})
@@ -417,7 +417,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
         """
         when : 'We create a tabbed pane UI node and attach tabs with custom tab header components to it.'
             def tabbedPane =
-                UI.tabbedPane(UI.Position.RIGHT).id("Tabs")
+                UI.tabbedPane(UI.Side.RIGHT).id("Tabs")
                 .add(
                     UI.tab("Tab 1")
                     .withHeader(UI.label("Tab 1 header"))
@@ -453,7 +453,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
         """
         when : 'We create a tabbed pane UI node and attach tabs with custom tab header components to it.'
             def tabbedPane =
-                UI.tabbedPane(UI.Position.BOTTOM).id("Tabs")
+                UI.tabbedPane(UI.Side.BOTTOM).id("Tabs")
                 .add(
                     UI.tab(UI.label("Tab 1 header"))
                     .add(UI.label("Tab 1 content"))
