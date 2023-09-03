@@ -519,4 +519,19 @@ which are very similar to each other.
 The only difference is that the radius of the expanding circle
 is far larger when the user clicks the button.
 
+---
+
+# Conclusion #
+
+I hope you enjoyed this tutorial and that you are now
+ready to start building your own Swing UIs with Swing-Tree.
+
+Here some more reading material to get you started:
+
+- [Simple Dialogs](./Simple-Dialogs.md)
+
+If you want to learn more about Swing-Tree
+check out the [API documentation](../jdocs/index.html)
+and the [examples](../../src/test/java/examples/README.md).
+
 
