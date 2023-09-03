@@ -19,7 +19,9 @@ import swingtree.components.JBox;
 import swingtree.components.JIcon;
 import swingtree.components.JScrollPanels;
 import swingtree.components.JSplitButton;
-import swingtree.dialogs.*;
+import swingtree.dialogs.ConfirmAnswer;
+import swingtree.dialogs.ConfirmDialogBuilder;
+import swingtree.dialogs.MessageDialogBuilder;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
 import swingtree.style.*;
@@ -62,9 +64,9 @@ import java.util.function.Supplier;
 public final class UI
 {
     // Common Mig layout constants:
-    public static LayoutAttr FILL     = LayoutAttr.of("fill");
-    public static LayoutAttr FILL_X     = LayoutAttr.of("fillx");
-    public static LayoutAttr FILL_Y     = LayoutAttr.of("filly");
+    public static LayoutAttr FILL   = LayoutAttr.of("fill");
+    public static LayoutAttr FILL_X = LayoutAttr.of("fillx");
+    public static LayoutAttr FILL_Y = LayoutAttr.of("filly");
     public static LayoutAttr INS(int insets) { return INSETS(insets); }
     public static LayoutAttr INSETS(int insets) { return LayoutAttr.of("insets " + insets); }
     public static LayoutAttr INS(int top, int left, int bottom, int right) { return INSETS(top, left, bottom, right); }
@@ -77,15 +79,15 @@ public final class UI
     public static LayoutAttr NO_CACHE = LayoutAttr.of("nocache");
     public static LayoutAttr DEBUG    = LayoutAttr.of("debug");
 
-    public static CompAttr WRAP     = CompAttr.of("wrap");
-    public static CompAttr SPAN     = CompAttr.of("SPAN");
+    public static CompAttr WRAP = CompAttr.of("wrap");
+    public static CompAttr SPAN = CompAttr.of("SPAN");
     public static CompAttr SPAN( int times ) { return CompAttr.of( "span " + times ); }
     public static CompAttr SPAN( int xTimes, int yTimes ) { return CompAttr.of( "span " + xTimes + " " + yTimes ); }
     public static CompAttr SPAN_X( int times ) { return CompAttr.of( "spanx " + times ); }
     public static CompAttr SPAN_Y( int times ) { return CompAttr.of( "spany " + times ); }
-    public static CompAttr GROW     = CompAttr.of("grow");
-    public static CompAttr GROW_X   = CompAttr.of("growx");
-    public static CompAttr GROW_Y   = CompAttr.of("growy");
+    public static CompAttr GROW   = CompAttr.of("grow");
+    public static CompAttr GROW_X = CompAttr.of("growx");
+    public static CompAttr GROW_Y = CompAttr.of("growy");
     public static CompAttr GROW( int weight ) { return CompAttr.of( "grow " + weight ); }
     public static CompAttr GROW_X( int weight ) { return CompAttr.of( "growx " + weight ); }
     public static CompAttr GROW_Y( int weight ) { return CompAttr.of( "growy " + weight ); }
@@ -5126,16 +5128,40 @@ public final class UI
      */
     public static ConfirmAnswer confirm( String title, String message ) {
         return
-            ConfirmDialogBuilder.get()
+            ConfirmDialogBuilder.question()
             .title(title)
             .message(message)
             .show();
     }
 
     /**
-     * @return A builder for creating a confirmation dialog.
+     * @return A builder for creating a confirmation dialog designed to ask a question.
      */
-    public static ConfirmDialogBuilder confirm() { return ConfirmDialogBuilder.get(); }
+    public static ConfirmDialogBuilder confirm() { return ConfirmDialogBuilder.question(); }
+
+    /**
+     * @return A builder for creating a confirmation dialog designed to show an error
+     *         and ask the user to confirm it through yes, no or cancel options.
+     */
+    public static ConfirmDialogBuilder confirmError() { return ConfirmDialogBuilder.error(); }
+    
+    /**
+     * @return A builder for creating a confirmation dialog designed to show an info
+     *         and ask the user to confirm it through yes, no or cancel options.
+     */
+    public static ConfirmDialogBuilder confirmInfo() { return ConfirmDialogBuilder.info(); }
+    
+    /**
+     * @return A builder for creating a confirmation dialog designed to show a warning
+     *         and ask the user to confirm it through yes, no or cancel options.
+     */
+    public static ConfirmDialogBuilder confirmWarning() { return ConfirmDialogBuilder.warning(); }
+
+    /**
+     * @return A builder for creating a confirmation dialog designed to show a plain message (no icon)
+     *         and ask the user to confirm it through yes, no or cancel options.
+     */
+    public static ConfirmDialogBuilder confirmPlain() { return ConfirmDialogBuilder.plain(); }
 
     /**
      *  Shows an error dialog with the given message.
@@ -5159,7 +5185,7 @@ public final class UI
     /**
      * @return A builder for creating an error dialog.
      */
-    public static ErrorDialogBuilder error() { return ErrorDialogBuilder.get(); }
+    public static MessageDialogBuilder error() { return MessageDialogBuilder.error(); }
 
     /**
      *  Shows an info dialog with the given message.
@@ -5183,7 +5209,7 @@ public final class UI
     /**
      * @return A builder for creating an info dialog.
      */
-    public static InfoDialogBuilder info() { return InfoDialogBuilder.get(); }
+    public static MessageDialogBuilder info() { return MessageDialogBuilder.info(); }
 
     /**
      *  Shows a warning dialog with the given message.
@@ -5207,7 +5233,7 @@ public final class UI
     /**
      * @return A builder for creating a warning dialog.
      */
-    public static WarnDialogBuilder warn() { return WarnDialogBuilder.get(); }
+    public static MessageDialogBuilder warn() { return MessageDialogBuilder.warning(); }
 
     /**
      *  Shows a dialog where the user can select a value from a list of options
