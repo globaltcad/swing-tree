@@ -23,7 +23,7 @@
       "blocks":[
         {"kind":"given","text":"4 different properties, 1 for each tab and then the selected index property.","code":["var tab1Selected = Var.of(false)","var tab2Selected = Var.of(false)","var tab3Selected = Var.of(false)","var selectedIndex = Var.of(-1)"]},
 
-        {"kind":"and","text":"We create a tabbed pane UI node and attach tabs with custom tab header components to it.","code":["def tabbedPane =","    UI.tabbedPane(UI.Position.TOP).withSelectedIndex(selectedIndex)","    .add(UI.tab(\"Tab 1\").isSelectedIf(tab1Selected))","    .add(UI.tab(\"Tab 2\").isSelectedIf(tab2Selected))","    .add(UI.tab(\"Tab 3\").isSelectedIf(tab3Selected))","    .get(JTabbedPane)"]},
+        {"kind":"and","text":"We create a tabbed pane UI node and attach tabs with custom tab header components to it.","code":["def tabbedPane =","    UI.tabbedPane(UI.Side.TOP).withSelectedIndex(selectedIndex)","    .add(UI.tab(\"Tab 1\").isSelectedIf(tab1Selected))","    .add(UI.tab(\"Tab 2\").isSelectedIf(tab2Selected))","    .add(UI.tab(\"Tab 3\").isSelectedIf(tab3Selected))","    .get(JTabbedPane)"]},
 
         {"kind":"when","text":"We select the first tab.","code":["tabbedPane.selectedIndex = 0"]},
 
@@ -56,7 +56,7 @@
       "tags":{},"see":[],"extraInfo":["\n            You can bind a string property to the title of a tab.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A string property and a tabbed pane UI node.","code":["var title = Var.of(\"Tab 1\")","def tabbedPane =","    UI.tabbedPane(UI.Position.TOP)","    .add(UI.tab(title))","    .get(JTabbedPane)"]},
+        {"kind":"given","text":"A string property and a tabbed pane UI node.","code":["var title = Var.of(\"Tab 1\")","def tabbedPane =","    UI.tabbedPane(UI.Side.TOP)","    .add(UI.tab(title))","    .get(JTabbedPane)"]},
 
         {"kind":"when","text":"We change the title.","code":["title.set(\"Tab 2\")","UI.sync()"]},
 
@@ -73,7 +73,7 @@
       "tags":{},"see":[],"extraInfo":["\n            You can bind an icon property to the icon of a tab.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"An icon property and a tabbed pane UI node.","code":["var icon = Var.of(UI.findIcon(\"swing.png\").orElse(null))","def tabbedPane =","    UI.tabbedPane(UI.Position.TOP)","    .add(UI.tab(\"Tab 1\").withIcon(icon))","    .get(JTabbedPane)"]},
+        {"kind":"given","text":"An icon property and a tabbed pane UI node.","code":["var icon = Var.of(UI.findIcon(\"swing.png\").orElse(null))","def tabbedPane =","    UI.tabbedPane(UI.Side.TOP)","    .add(UI.tab(\"Tab 1\").withIcon(icon))","    .get(JTabbedPane)"]},
 
         {"kind":"when","text":"We change the icon.","code":["var newIcon = UI.findIcon(\"seed.png\").orElse(null)","icon.set(newIcon)","UI.sync()"]},
 
@@ -90,7 +90,7 @@
       "tags":{},"see":[],"extraInfo":["\n            You can bind a boolean property to the enabled state of a tab.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"2 properties and a tabbed pane UI node.","code":["var enabled1 = Var.of(true)","var enabled2 = Var.of(true)","def tabbedPane =","    UI.tabbedPane(UI.Position.TOP)","    .add(UI.tab(\"Tab 1\").isEnabledIf(enabled1))","    .add(UI.tab(\"Tab 2\").isEnabledIf(enabled2))","    .get(JTabbedPane)"]},
+        {"kind":"given","text":"2 properties and a tabbed pane UI node.","code":["var enabled1 = Var.of(true)","var enabled2 = Var.of(true)","def tabbedPane =","    UI.tabbedPane(UI.Side.TOP)","    .add(UI.tab(\"Tab 1\").isEnabledIf(enabled1))","    .add(UI.tab(\"Tab 2\").isEnabledIf(enabled2))","    .get(JTabbedPane)"]},
 
         {"kind":"when","text":"We disable the first tab.","code":["enabled1.set(false)","UI.sync()"]},
 
@@ -119,7 +119,7 @@
       "tags":{},"see":[],"extraInfo":["\n            You can bind a string property to the tooltip of a tab.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A string property and a tabbed pane UI node.","code":["var tooltip = Var.of(\"I am a tooltip!\")","def tabbedPane =","    UI.tabbedPane(UI.Position.TOP)","    .add(UI.tab(\"Tab 1\").withTip(tooltip))","    .get(JTabbedPane)"]},
+        {"kind":"given","text":"A string property and a tabbed pane UI node.","code":["var tooltip = Var.of(\"I am a tooltip!\")","def tabbedPane =","    UI.tabbedPane(UI.Side.TOP)","    .add(UI.tab(\"Tab 1\").withTip(tooltip))","    .get(JTabbedPane)"]},
 
         {"kind":"when","text":"We change the tooltip.","code":["tooltip.set(\"I am a new tooltip!\")","UI.sync()"]},
 
