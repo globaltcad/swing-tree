@@ -7,7 +7,7 @@ import spock.lang.Title
 import swingtree.SwingTree
 import swingtree.threading.EventProcessor
 import swingtree.UI
-import swingtree.animation.Animate
+import swingtree.animation.Animator
 import swingtree.animation.Animation
 import swingtree.animation.AnimationState
 import swingtree.animation.LifeTime
@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit
     Animations are a great way to make your application more interactive and more fun to use.
 
 ''')
-@Subject([Animate, UI, LifeTime])
+@Subject([Animator, UI, LifeTime])
 class Animations_Spec extends Specification
 {
     def setupSpec() {
@@ -42,10 +42,10 @@ class Animations_Spec extends Specification
             var progressValues = [0:[],1:[],2:[]]
 
         when : 'We schedule an animation that will run 3 times and has a duration of 0.1 seconds.'
-            UI.schedule(0.1, TimeUnit.SECONDS)
-                .asLongAs({ it.currentIteration() < 3 })
+            UI.animateFor(0.1, TimeUnit.SECONDS)
+                .asLongAs({ it.repeats() < 3 })
                 .go({
-                    progressValues[(int)it.currentIteration()] << it.progress()
+                    progressValues[(int)it.repeats()] << it.progress()
                 })
         and : 'We wait for the animation to finish'
             TimeUnit.MILLISECONDS.sleep(500)
@@ -81,11 +81,11 @@ class Animations_Spec extends Specification
             var button =
                     UI.button("Click me! Or don't.")
                     .onClick({
-                        it.animate(0.05, TimeUnit.SECONDS)
-                            .asLongAs({ it.currentIteration() < 4 })
+                        it.animateFor(0.05, TimeUnit.SECONDS)
+                            .asLongAs({ it.repeats() < 4 })
                             .go(state -> {
-                                if ( !iterations.contains(state.currentIteration()) )
-                                    iterations << state.currentIteration()
+                                if ( !iterations.contains(state.repeats()) )
+                                    iterations << state.repeats()
                                 progresses    << state.progress()
                                 cycles        << state.cycle()
                                 cyclesPlus42  << state.cyclePlus(0.42)
@@ -139,8 +139,8 @@ class Animations_Spec extends Specification
         given :
             int wasFinished = 0
         when :
-            UI.schedule(1, TimeUnit.MILLISECONDS)
-              .asLongAs({ it.currentIteration() < 4 })
+            UI.animateFor(1, TimeUnit.MILLISECONDS)
+              .asLongAs({ it.repeats() < 4 })
               .go(new Animation() {
                   @Override void run(AnimationState state) {}
                   @Override void finish(AnimationState state) { wasFinished++ }
@@ -158,7 +158,7 @@ class Animations_Spec extends Specification
             var label =
                     UI.label("Some text! :)")
                     .onMouseClick(it -> {
-                        it.animateOnce(1, TimeUnit.SECONDS, state ->{
+                        it.animateFor(1, TimeUnit.SECONDS, state ->{
                             float highlight = (float) (1f - (float) state.progress())
                             it.component.setForeground(new Color(highlight, 1, highlight))
                           })

@@ -6,7 +6,7 @@ import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
 import sprouts.Event;
 import sprouts.*;
-import swingtree.animation.Animate;
+import swingtree.animation.Animator;
 import swingtree.animation.LifeTime;
 import swingtree.api.Buildable;
 import swingtree.api.MenuBuilder;
@@ -5071,10 +5071,10 @@ public final class UI
 
     /**
      *  Exposes an API for scheduling periodic animation updates.
-     *  This is a convenience method for {@link Animate#on(LifeTime)}. <br>
+     *  This is a convenience method for {@link Animator#animateFor(LifeTime)}. <br>
      *  A typical usage would be:
      *  <pre>{@code
-     *    UI.schedule( 100, TimeUnit.MILLISECONDS )
+     *    UI.animate( 100, TimeUnit.MILLISECONDS )
      *       .until( it -> it.progress() >= 0.75 && someOtherCondition() )
      *       .go( it -> {
      *          // do something
@@ -5086,19 +5086,19 @@ public final class UI
      *  @param duration The duration of the animation.
      *                  This is the time it takes for the animation to reach 100% progress.
      *  @param unit The time unit of the duration.
-     *  @return An {@link Animate} instance which allows you to configure the animation.
+     *  @return An {@link Animator} instance which allows you to configure the animation.
      */
-    public static Animate schedule( long duration, TimeUnit unit ) {
+    public static Animator animateFor(long duration, TimeUnit unit ) {
         Objects.requireNonNull(unit, "unit");
-        return Animate.on( LifeTime.of(duration, unit) );
+        return Animator.animateFor( LifeTime.of(duration, unit) );
     }
 
     /**
-     *  Exposes an API for scheduling periodic animation updates.
-     *  This is a convenience method for {@link Animate#on(LifeTime)}. <br>
+     *  Exposes a builder API for creating and scheduling periodic animation updates.
+     *  This is a convenience method for {@link Animator#animateFor(LifeTime)}. <br>
      *  A typical usage would be:
      *  <pre>{@code
-     *    UI.schedule( 0.1, TimeUnit.MINUTES )
+     *    UI.animateFor( 0.1, TimeUnit.MINUTES )
      *       .until( it -> it.progress() >= 0.75 && someOtherCondition() )
      *       .go( it -> {
      *          // do something
@@ -5110,11 +5110,82 @@ public final class UI
      *  @param duration The duration of the animation.
      *                  This is the time it takes for the animation to reach 100% progress.
      *  @param unit The time unit of the duration.
-     *  @return An {@link Animate} instance which allows you to configure the animation.
+     *  @return An {@link Animator} instance which allows you to configure the animation.
      */
-    public static Animate schedule( double duration, TimeUnit unit ) {
-        return Animate.on( LifeTime.of(duration, unit) );
+    public static Animator animateFor( double duration, TimeUnit unit ) {
+        return Animator.animateFor( LifeTime.of(duration, unit) );
     }
+
+    /**
+     *  Exposes an API for scheduling periodic animation updates.
+     *  This is a convenience method for {@link Animator#animateFor(LifeTime)}. <br>
+     *  A typical usage would be:
+     *  <pre>{@code
+     *    UI.animateFor( LifeTime.of(0.1, TimeUnit.MINUTES) )
+     *       .until( it -> it.progress() >= 0.75 && someOtherCondition() )
+     *       .go( it -> {
+     *          // do something
+     *          someComponent.setBackground( new Color( 0, 0, 0, (int)(it.progress()*255) ) );
+     *          // ...
+     *          someComponent.repaint();
+     *       });
+     *  }</pre>
+     *  @param duration The duration of the animation.
+     *                  This is the time it takes for the animation to reach 100% progress.
+     *
+     *  @return An {@link Animator} instance which allows you to configure the animation.
+     */
+    public static Animator animateFor( LifeTime duration ) {
+        return Animator.animateFor( duration );
+    }
+
+    /**
+     * Exposes an API for scheduling periodic animation updates
+     * for a specific component whose {@link Component#repaint()}
+     * method should be called after every animation update.
+     * This is a convenience method for {@link Animator#animateFor(LifeTime)}. <br>
+     * A typical usage would be:
+     * <pre>{@code
+     *    UI.animateFor( UI.lifeTime(0.1, TimeUnit.MINUTES), someComponent )
+     *       .until( it -> it.progress() >= 0.75 && someOtherCondition() )
+     *       .go( it -> {
+     *          // do something
+     *          someComponent.setBackground( new Color( 0, 0, 0, (int)(it.progress()*255) ) );
+     *       });
+     *  }</pre>
+     *
+     * @param duration  The duration of the animation.
+     *                  This is the time it takes for the animation to reach 100% progress.
+     * @param component The component which should be repainted after every animation update.
+     * @return An {@link Animator} instance which allows you to configure the animation.
+     */
+    public static Animator animateFor( LifeTime duration, Component component ) {
+        return Animator.animateFor( duration, component );
+    }
+
+    /**
+     *  A factory method for creating a {@link LifeTime} instance
+     *  with the given duration and time unit.
+     *  This is a convenience method for {@link LifeTime#of(long, TimeUnit)}.
+     *  The {@link LifeTime} instance is an immutable value type
+     *  which is used for scheduling animations, usually through
+     *  {@link Animator#animateFor(LifeTime)} or the convenience methods
+     *  {@link UI#animateFor(long, TimeUnit)}, {@link UI#animateFor(double, TimeUnit)},
+     *  {@link UI#animateFor(LifeTime)} or {@link UI#animateFor(LifeTime, Component)}.
+     *  A typical usage would be:
+     *  <pre>{@code
+     *      UI.animateFor( UI.lifeTime(0.1, TimeUnit.MINUTES) )
+     *      .until( it -> it.progress() >= 0.75 && someOtherCondition() )
+     *      .go( it -> {
+     *          // do something
+     *      });
+     *  }</pre>
+     *
+     * @param duration The duration of the animation.
+     * @param unit The time unit of the duration.
+     * @return A {@link LifeTime} instance.
+     */
+    public static LifeTime lifeTime( long duration, TimeUnit unit ) { return LifeTime.of(duration, unit); }
 
     /**
      *  Shows a conformation dialog with the given message.

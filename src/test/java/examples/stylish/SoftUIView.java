@@ -29,7 +29,7 @@ public class SoftUIView extends Panel
                         )
                     )
                     .onMouseMove( it -> {
-                        it.animateOnce(1, TimeUnit.SECONDS, state -> {
+                        it.animateFor(1, TimeUnit.SECONDS, state -> {
                             double r = 30 * state.fadeIn() * it.getScale();
                             double x = it.mouseX() - r / 2.0;
                             double y = it.mouseY() - r / 2.0;
@@ -94,7 +94,7 @@ public class SoftUIView extends Panel
             .add(
                 icon(512, 512, "img/swing.png").withStyle( it -> it.padding(24) )
             )
-            .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
+            .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, state -> {
                 it.paint(state, g -> {
                     g.setColor(new Color(0.1f, 0.25f, 0.5f, (float) state.fadeOut()));
                     for ( int i = 0; i < 5; i++ ) {

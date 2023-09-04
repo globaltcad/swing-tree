@@ -1,6 +1,6 @@
 package swingtree;
 
-import swingtree.animation.Animate;
+import swingtree.animation.Animator;
 import swingtree.animation.Animation;
 import swingtree.animation.AnimationState;
 import swingtree.animation.LifeTime;
@@ -938,38 +938,66 @@ abstract class AbstractDelegate<C extends JComponent>
     }
 
     /**
-     *  Use this to access the animation API and schedule an animation.
-     *  The animation will be executed on the EDT.
+     *  Exposes access the animation builder API, where you can define the conditions
+     *  under which the animation should be executed and then dispatch the animation to the EDT
+     *  through the {@link Animator#go(Animation)} method.
+     *
      *  @param duration The duration of the animation.
      *  @param unit The time unit of the duration.
-     *  @return An {@link Animate} instance which can be used to define how the animation should be executed.
+     *  @return An {@link Animator} instance which can be used to define how the animation should be executed.
      */
-    public final Animate animate( double duration, TimeUnit unit ) {
-        return Animate.on( _component(), LifeTime.of(duration, unit) );
+    public final Animator animateFor( double duration, TimeUnit unit ) {
+        return Animator.animateFor(LifeTime.of(duration, unit), _component());
     }
 
     /**
-     *  Use this to schedule a single animation iteration
-     *  that will be executed on the EDT multiple times for the given duration.
+     *  Exposes access the animation builder API, where you can define the conditions
+     *  under which the animation should be executed and then dispatch the animation to the EDT
+     *  through the {@link Animator#go(Animation)} method.
+     *
+     *  @param lifeTime The lifetime of the animation.
+     *  @return An {@link Animator} instance which can be used to define how the animation should be executed.
+     */
+    public final Animator animateFor( LifeTime lifeTime ) {
+        return Animator.animateFor(lifeTime, _component());
+    }
+
+    /**
+     *  Use this to schedule and run the provided animation
+     *  to be executed on the EDT.
+     *  A single animation iteration may be executed multiple times
+     *  for the given duration in order to achieve a smooth transition. <br>
+     *  Here an example of how to use this method:
+     *  <pre>{@code
+     *    UI.button("Click me").withPrefSize(400, 400)
+     *    .onMouseClick( it -> it
+     *        .animateFor(
+     *            UI.lifetime(1, TimeUnit.SECONDS)
+     *            .startingIn( 0.5, TimeUnit.SECONDS )
+     *        )
+     *        .go( myAnimation )
+     *    )
+     *
+     *
+     *  @param lifeTime The lifetime of the animation.
+     *  @param animation The animation that should be executed.
+     */
+    public final void animateFor( LifeTime lifeTime, Animation animation ) {
+        Animator.animateFor(lifeTime, _component()).go(animation);
+    }
+
+    /**
+     *  Use this to schedule and run the provided animation
+     *  to be executed on the EDT.
+     *  A single animation iteration may be executed multiple times
+     *  for the given duration in order to achieve a smooth transition.
      *
      *  @param duration The duration of the animation.
      *  @param unit The time unit of the duration.
      *  @param animation The animation that should be executed.
      */
-    public final void animateOnce( double duration, TimeUnit unit, Animation animation ) {
-        this.animate(duration, unit).goOnce(animation);
-    }
-
-    /**
-     *  Use this to schedule 2 animation iterations
-     *  that will be executed on the EDT multiple times for the given duration.
-     *
-     *  @param duration The duration of the animation.
-     *  @param unit The time unit of the duration.
-     *  @param animation The animation that should be executed.
-     */
-    public final void animateTwice( double duration, TimeUnit unit, Animation animation ) {
-        this.animate(duration, unit).goTwice(animation);
+    public final void animateFor( double duration, TimeUnit unit, Animation animation ) {
+        this.animateFor(duration, unit).go(animation);
     }
 
     /**

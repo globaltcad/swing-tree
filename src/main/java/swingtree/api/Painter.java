@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  *  for <b>defining custom animations</b> by registering painters in the animation API using the
  *  {@link swingtree.ComponentDelegate#paint(AnimationState, Painter)} method
  *  inside of an {@link Animation} registered through
- *  {@link swingtree.ComponentDelegate#animateOnce(double, TimeUnit, Animation)}.
+ *  {@link swingtree.ComponentDelegate#animateFor(double, TimeUnit, Animation)}.
  *  <br><br>
  *  Note that inside the painter the {@link Graphics2D} context may not
  *  be scaled according to the current UI scale factor (for high DPI displays). <br>

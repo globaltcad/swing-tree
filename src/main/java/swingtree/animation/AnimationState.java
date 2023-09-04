@@ -253,8 +253,11 @@ public interface AnimationState
 
     /**
      * @return The number of times the animation has been repeated.
+     *         This number is guaranteed to be 0 at the beginning of the animation,
+     *         and for most animations it will be 0 at the end of the animation as well.
+     *         An animation may be repeated if it is explicitly scheduled to run for a longer time.
      */
-    long currentIteration();
+    long repeats();
     /**
      * @return The schedule of the animation, i.e. the time when the animation started and how long it should run.
      */
