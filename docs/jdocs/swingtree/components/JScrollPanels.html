@@ -27,7 +27,7 @@
     catch(err) {
     }
 //-->
-var data = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":9,"i9":10,"i10":10,"i11":10,"i12":10};
+var data = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":9,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -374,19 +374,27 @@ extends javax.swing.JScrollPane</pre>
 </tr>
 <tr id="i9" class="rowColor">
 <td class="colFirst"><code>void</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#paint(java.awt.Graphics)">paint</a></span>&#8203;(java.awt.Graphics&nbsp;g)</code></th>
+</tr>
+<tr id="i10" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#paintChildren(java.awt.Graphics)">paintChildren</a></span>&#8203;(java.awt.Graphics&nbsp;g)</code></th>
+</tr>
+<tr id="i11" class="rowColor">
+<td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#removeAllEntries()">removeAllEntries</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Use this to remove all entries.</div>
 </td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i12" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#removeEntryAt(int)">removeEntryAt</a></span>&#8203;(int&nbsp;index)</code></th>
 <td class="colLast">
 <div class="block">Use this to remove an entry at a certain index.</div>
 </td>
 </tr>
-<tr id="i11" class="rowColor">
+<tr id="i13" class="rowColor">
 <td class="colFirst"><code>&lt;M extends <a href="../api/mvvm/EntryViewModel.html" title="interface in swingtree.api.mvvm">EntryViewModel</a>&gt;<br>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setEntryAt(int,java.lang.String,M,swingtree.api.mvvm.ViewSupplier)">setEntryAt</a></span>&#8203;(int&nbsp;index,
           java.lang.String&nbsp;attr,
@@ -396,7 +404,7 @@ extends javax.swing.JScrollPane</pre>
 <div class="block">Use this to replace an entry at a certain index.</div>
 </td>
 </tr>
-<tr id="i12" class="altColor">
+<tr id="i14" class="altColor">
 <td class="colFirst"><code>&lt;T extends javax.swing.JComponent&gt;<br>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setSelectedFor(java.lang.Class,java.util.function.Predicate)">setSelectedFor</a></span>&#8203;(java.lang.Class&lt;T&gt;&nbsp;type,
               java.util.function.Predicate&lt;T&gt;&nbsp;condition)</code></th>
@@ -417,7 +425,7 @@ extends javax.swing.JScrollPane</pre>
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;javax.swing.JComponent</h3>
-<code>addAncestorListener, addNotify, addVetoableChangeListener, computeVisibleRect, contains, createToolTip, disable, enable, firePropertyChange, firePropertyChange, firePropertyChange, fireVetoableChange, getActionForKeyStroke, getActionMap, getAlignmentX, getAlignmentY, getAncestorListeners, getAutoscrolls, getBaseline, getBaselineResizeBehavior, getBorder, getBounds, getClientProperty, getComponentGraphics, getComponentPopupMenu, getConditionForKeyStroke, getDebugGraphicsOptions, getDefaultLocale, getFontMetrics, getGraphics, getHeight, getInheritsPopupMenu, getInputMap, getInputMap, getInputVerifier, getInsets, getInsets, getListeners, getLocation, getMaximumSize, getMinimumSize, getNextFocusableComponent, getPopupLocation, getPreferredSize, getRegisteredKeyStrokes, getRootPane, getSize, getToolTipLocation, getToolTipText, getToolTipText, getTopLevelAncestor, getTransferHandler, getVerifyInputWhenFocusTarget, getVetoableChangeListeners, getVisibleRect, getWidth, getX, getY, grabFocus, hide, isDoubleBuffered, isLightweightComponent, isManagingFocus, isOpaque, isOptimizedDrawingEnabled, isPaintingForPrint, isPaintingOrigin, isPaintingTile, isRequestFocusEnabled, paint, paintBorder, paintChildren, paintComponent, paintImmediately, paintImmediately, print, printAll, printBorder, printChildren, printComponent, processComponentKeyEvent, processKeyBinding, processKeyEvent, processMouseEvent, processMouseMotionEvent, putClientProperty, registerKeyboardAction, registerKeyboardAction, removeAncestorListener, removeNotify, removeVetoableChangeListener, repaint, repaint, requestDefaultFocus, requestFocus, requestFocus, requestFocusInWindow, requestFocusInWindow, resetKeyboardActions, reshape, revalidate, scrollRectToVisible, setActionMap, setAlignmentX, setAlignmentY, setAutoscrolls, setBackground, setBorder, setComponentPopupMenu, setDebugGraphicsOptions, setDefaultLocale, setDoubleBuffered, setEnabled, setFocusTraversalKeys, setFont, setForeground, setInheritsPopupMenu, setInputMap, setInputVerifier, setMaximumSize, setMinimumSize, setNextFocusableComponent, setOpaque, setPreferredSize, setRequestFocusEnabled, setToolTipText, setTransferHandler, setUI, setVerifyInputWhenFocusTarget, setVisible, unregisterKeyboardAction, update</code></li>
+<code>addAncestorListener, addNotify, addVetoableChangeListener, computeVisibleRect, contains, createToolTip, disable, enable, firePropertyChange, firePropertyChange, firePropertyChange, fireVetoableChange, getActionForKeyStroke, getActionMap, getAlignmentX, getAlignmentY, getAncestorListeners, getAutoscrolls, getBaseline, getBaselineResizeBehavior, getBorder, getBounds, getClientProperty, getComponentGraphics, getComponentPopupMenu, getConditionForKeyStroke, getDebugGraphicsOptions, getDefaultLocale, getFontMetrics, getGraphics, getHeight, getInheritsPopupMenu, getInputMap, getInputMap, getInputVerifier, getInsets, getInsets, getListeners, getLocation, getMaximumSize, getMinimumSize, getNextFocusableComponent, getPopupLocation, getPreferredSize, getRegisteredKeyStrokes, getRootPane, getSize, getToolTipLocation, getToolTipText, getToolTipText, getTopLevelAncestor, getTransferHandler, getVerifyInputWhenFocusTarget, getVetoableChangeListeners, getVisibleRect, getWidth, getX, getY, grabFocus, hide, isDoubleBuffered, isLightweightComponent, isManagingFocus, isOpaque, isOptimizedDrawingEnabled, isPaintingForPrint, isPaintingOrigin, isPaintingTile, isRequestFocusEnabled, paintBorder, paintComponent, paintImmediately, paintImmediately, print, printAll, printBorder, printChildren, printComponent, processComponentKeyEvent, processKeyBinding, processKeyEvent, processMouseEvent, processMouseMotionEvent, putClientProperty, registerKeyboardAction, registerKeyboardAction, removeAncestorListener, removeNotify, removeVetoableChangeListener, repaint, repaint, requestDefaultFocus, requestFocus, requestFocus, requestFocusInWindow, requestFocusInWindow, resetKeyboardActions, reshape, revalidate, scrollRectToVisible, setActionMap, setAlignmentX, setAlignmentY, setAutoscrolls, setBackground, setBorder, setComponentPopupMenu, setDebugGraphicsOptions, setDefaultLocale, setDoubleBuffered, setEnabled, setFocusTraversalKeys, setFont, setForeground, setInheritsPopupMenu, setInputMap, setInputVerifier, setMaximumSize, setMinimumSize, setNextFocusableComponent, setOpaque, setPreferredSize, setRequestFocusEnabled, setToolTipText, setTransferHandler, setUI, setVerifyInputWhenFocusTarget, setVisible, unregisterKeyboardAction, update</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a id="methods.inherited.from.class.java.awt.Container">
@@ -472,6 +480,32 @@ extends javax.swing.JScrollPane</pre>
 <dd><code>size</code> - The size of the entries in this <a href="JScrollPanels.html" title="class in swingtree.components"><code>JScrollPanels</code></a> instance.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>A new <a href="JScrollPanels.html" title="class in swingtree.components"><code>JScrollPanels</code></a> instance.</dd>
+</dl>
+</li>
+</ul>
+<a id="paint(java.awt.Graphics)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>paint</h4>
+<pre class="methodSignature">public&nbsp;void&nbsp;paint&#8203;(java.awt.Graphics&nbsp;g)</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
+<dd><code>paint</code>&nbsp;in class&nbsp;<code>javax.swing.JComponent</code></dd>
+</dl>
+</li>
+</ul>
+<a id="paintChildren(java.awt.Graphics)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>paintChildren</h4>
+<pre class="methodSignature">public&nbsp;void&nbsp;paintChildren&#8203;(java.awt.Graphics&nbsp;g)</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
+<dd><code>paintChildren</code>&nbsp;in class&nbsp;<code>javax.swing.JComponent</code></dd>
 </dl>
 </li>
 </ul>
@@ -549,6 +583,8 @@ extends javax.swing.JScrollPane</pre>
                                                      <a href="../api/mvvm/ViewSupplier.html" title="interface in swingtree.api.mvvm">ViewSupplier</a>&lt;M&gt;&nbsp;viewSupplier)</pre>
 <div class="block">Adds multiple entries at once to this <a href="JScrollPanels.html" title="class in swingtree.components"><code>JScrollPanels</code></a>.</div>
 <dl>
+<dt><span class="paramLabel">Type Parameters:</span></dt>
+<dd><code>M</code> - The type of the entry view model.</dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>constraints</code> - The constraints which ought to be applied to the entry.</dd>
 <dd><code>entryViewModels</code> - A list of entry models which ought to be added.</dd>
@@ -619,6 +655,8 @@ extends javax.swing.JScrollPane</pre>
 <div class="block">Use this to replace an entry at a certain index. <br>
         Note: This method will replace an existing entry at the given index.</div>
 <dl>
+<dt><span class="paramLabel">Type Parameters:</span></dt>
+<dd><code>M</code> - The type of the entry view model.</dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>index</code> - The index at which the entry ought to be placed.</dd>
 <dd><code>attr</code> - The constraints which ought to be applied to the entry, may be null.</dd>

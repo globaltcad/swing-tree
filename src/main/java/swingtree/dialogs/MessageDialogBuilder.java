@@ -22,6 +22,7 @@ public final class MessageDialogBuilder
     private static final MessageDialogBuilder _ERROR   = get(JOptionPane.ERROR_MESSAGE).title("Error");
 
     /**
+     * @param type The type of the dialog (error, warning, info... see {@link JOptionPane#showMessageDialog(Component, Object, String, int, Icon)}).
      * @return A {@link MessageDialogBuilder} instance that is not configured in any way.
      */
     public static MessageDialogBuilder get( int type ) { return new MessageDialogBuilder(type, "", "", null, null); }

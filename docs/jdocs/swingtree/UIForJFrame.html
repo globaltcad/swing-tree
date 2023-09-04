@@ -495,6 +495,7 @@ extends <a href="UIForAnyWindow.html" title="class in swingtree">UIForAnyWindow<
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>component</code> - A component instance which ought to be added to the wrapped component type.</dd>
+<dd><code>conf</code> - The layout constraint which ought to be used to add the component to the wrapped component type.</dd>
 </dl>
 </li>
 </ul>
@@ -618,6 +619,8 @@ public final&nbsp;&lt;B extends swingtree.AbstractNestedBuilder&lt;?,&#8203;?,&#
   calling it internally for you. <br>
   This helps to improve readability, especially when the degree of nesting is very low.</div>
 <dl>
+<dt><span class="paramLabel">Type Parameters:</span></dt>
+<dd><code>B</code> - The type of the builder instances which are used to configure the components that will be added to the component wrapped by this builder.</dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>builders</code> - An array of builder instances whose JComponents ought to be added to the one wrapped by this builder.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
@@ -777,6 +780,14 @@ public final&nbsp;&lt;B extends swingtree.AbstractNestedBuilder&lt;?,&#8203;?,&#
 <h4>getComponent</h4>
 <pre class="methodSignature">public final&nbsp;C&nbsp;getComponent()</pre>
 <div class="block">The component wrapped by this builder node.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The component wrapped by this builder node.</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.lang.IllegalStateException</code> - if this method is called from a thread other than the EDT
+                                and this UI is configured to be decoupled from the application thread.
+                                See <a href="UI.html#use(swingtree.threading.EventProcessor,java.util.function.Supplier)"><code>UI.use(EventProcessor, Supplier)</code></a>.</dd>
+</dl>
 </li>
 </ul>
 <a id="component()">
@@ -787,6 +798,13 @@ public final&nbsp;&lt;B extends swingtree.AbstractNestedBuilder&lt;?,&#8203;?,&#
 <h4>component</h4>
 <pre class="methodSignature">public final&nbsp;<a href="OptionalUI.html" title="class in swingtree">OptionalUI</a>&lt;C&gt;&nbsp;component()</pre>
 <div class="block">The optional component wrapped by this builder node.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>An <a href="OptionalUI.html" title="class in swingtree"><code>OptionalUI</code></a> wrapping a component or null.
+         This optional will throw an exception if the
+         application has an application thread (see <a href="UI.html#use(swingtree.threading.EventProcessor,java.util.function.Supplier)"><code>UI.use(EventProcessor, Supplier)</code></a>)
+         and this method is called from a thread other than the EDT.</dd>
+</dl>
 </li>
 </ul>
 <a id="getType()">

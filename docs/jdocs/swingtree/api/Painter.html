@@ -137,7 +137,7 @@ public interface <span class="typeNameLabel">Painter</span></pre>
   for <b>defining custom animations</b> by registering painters in the animation API using the
   <code>AbstractDelegate.paint(AnimationState, Painter)</code> method
   inside of an <a href="../animation/Animation.html" title="interface in swingtree.animation"><code>Animation</code></a> registered through
-  <code>AbstractDelegate.animateOnce(double, TimeUnit, Animation)</code>.
+  <code>AbstractDelegate.animateFor(double, TimeUnit, Animation)</code>.
   <br><br>
   Note that inside the painter the <code>Graphics2D</code> context may not
   be scaled according to the current UI scale factor (for high DPI displays). <br>

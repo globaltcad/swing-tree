@@ -27,7 +27,7 @@
     catch(err) {
     }
 //-->
-var data = {"i0":6,"i1":18,"i2":18,"i3":18,"i4":6,"i5":18,"i6":18,"i7":18,"i8":18,"i9":18,"i10":18,"i11":18,"i12":18,"i13":6,"i14":6,"i15":18,"i16":18,"i17":18,"i18":18,"i19":18};
+var data = {"i0":18,"i1":18,"i2":18,"i3":6,"i4":18,"i5":18,"i6":18,"i7":18,"i8":18,"i9":18,"i10":18,"i11":18,"i12":6,"i13":6,"i14":18,"i15":18,"i16":18,"i17":18,"i18":18,"i19":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"],16:["t5","Default Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -146,11 +146,6 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <th class="colLast" scope="col">Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code>long</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#currentIteration()">currentIteration</a></span>()</code></th>
-<td class="colLast">&nbsp;</td>
-</tr>
-<tr id="i1" class="rowColor">
 <td class="colFirst"><code>default double</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#cycle()">cycle</a></span>()</code></th>
 <td class="colLast">
@@ -159,7 +154,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
   and when it is finished, the value is 0 again.</div>
 </td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i1" class="rowColor">
 <td class="colFirst"><code>default double</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#cycleMinus(double)">cycleMinus</a></span>&#8203;(double&nbsp;offset)</code></th>
 <td class="colLast">
@@ -168,7 +163,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
   and when it is finished, the value is 0 again.</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i2" class="altColor">
 <td class="colFirst"><code>default double</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#cyclePlus(double)">cyclePlus</a></span>&#8203;(double&nbsp;offset)</code></th>
 <td class="colLast">
@@ -177,12 +172,12 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
   and when it is finished, the value is 0 again.</div>
 </td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>java.awt.event.ActionEvent</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#event()">event</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code>default double</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#fadeIn()">fadeIn</a></span>()</code></th>
 <td class="colLast">
@@ -195,7 +190,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
    grows according to a sine wave, which makes certain animations look more natural.</div>
 </td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>default double</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#fadeIn(double,double)">fadeIn</a></span>&#8203;(double&nbsp;start,
       double&nbsp;end)</code></th>
@@ -204,7 +199,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
    based on the equation <code>start + (end - start) * fadeIn()</code>.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>default double</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#fadeOut()">fadeOut</a></span>()</code></th>
 <td class="colLast">
@@ -212,7 +207,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
    based on the equation <code>1 - fadeIn()</code>.</div>
 </td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>default double</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#fadeOut(double,double)">fadeOut</a></span>&#8203;(double&nbsp;end,
        double&nbsp;start)</code></th>
@@ -221,7 +216,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
    based on the equation <code>end + (start - end) * fadeOut()</code>.</div>
 </td>
 </tr>
-<tr id="i9" class="rowColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code>default double</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#jumpIn()">jumpIn</a></span>()</code></th>
 <td class="colLast">
@@ -229,7 +224,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
    based on the equation <code>sin(PI * progress() / 2)</code>.</div>
 </td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code>default double</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#jumpIn(double,double)">jumpIn</a></span>&#8203;(double&nbsp;start,
       double&nbsp;end)</code></th>
@@ -238,7 +233,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
    based on the equation <code>start + (end - start) * jumpIn()</code>.</div>
 </td>
 </tr>
-<tr id="i11" class="rowColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>default double</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#jumpOut()">jumpOut</a></span>()</code></th>
 <td class="colLast">
@@ -246,7 +241,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
    based on the equation <code>sin(PI * (1 - progress()) / 2)</code>.</div>
 </td>
 </tr>
-<tr id="i12" class="altColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code>default double</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#jumpOut(double,double)">jumpOut</a></span>&#8203;(double&nbsp;end,
        double&nbsp;start)</code></th>
@@ -256,17 +251,17 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
    based on the equation <code>end + (start - end) * jumpOut()</code>.</div>
 </td>
 </tr>
-<tr id="i13" class="rowColor">
+<tr id="i12" class="altColor">
 <td class="colFirst"><code><a href="LifeTime.html" title="class in swingtree.animation">LifeTime</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#lifetime()">lifetime</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i14" class="altColor">
+<tr id="i13" class="rowColor">
 <td class="colFirst"><code>double</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#progress()">progress</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i15" class="rowColor">
+<tr id="i14" class="altColor">
 <td class="colFirst"><code>default double</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#progress(double,double)">progress</a></span>&#8203;(double&nbsp;start,
         double&nbsp;end)</code></th>
@@ -275,14 +270,14 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
   based on the equation <code>start + (end - start) * progress()</code>.</div>
 </td>
 </tr>
-<tr id="i16" class="altColor">
+<tr id="i15" class="rowColor">
 <td class="colFirst"><code>default double</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#pulse()">pulse</a></span>()</code></th>
 <td class="colLast">
 <div class="block">A sine wave oscillating between 0 and 1 and back to 0 once per iteration.</div>
 </td>
 </tr>
-<tr id="i17" class="rowColor">
+<tr id="i16" class="altColor">
 <td class="colFirst"><code>default double</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#pulse(double,double)">pulse</a></span>&#8203;(double&nbsp;start,
      double&nbsp;peak)</code></th>
@@ -290,7 +285,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <div class="block">A sine wave oscillating between <code>start</code> and <code>peak</code> and back to <code>start</code> once per iteration.</div>
 </td>
 </tr>
-<tr id="i18" class="altColor">
+<tr id="i17" class="rowColor">
 <td class="colFirst"><code>default double</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#regress()">regress</a></span>()</code></th>
 <td class="colLast">
@@ -298,13 +293,18 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
   based on the equation <code>1 - progress()</code>.</div>
 </td>
 </tr>
-<tr id="i19" class="rowColor">
+<tr id="i18" class="altColor">
 <td class="colFirst"><code>default double</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#regress(double,double)">regress</a></span>&#8203;(double&nbsp;end,
        double&nbsp;start)</code></th>
 <td class="colLast">
 <div class="block">The animation regression in the form of a value linearly growing from <code>start</code> to <code>end</code>.</div>
 </td>
+</tr>
+<tr id="i19" class="rowColor">
+<td class="colFirst"><code>long</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#repeats()">repeats</a></span>()</code></th>
+<td class="colLast">&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -688,16 +688,19 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 </dl>
 </li>
 </ul>
-<a id="currentIteration()">
+<a id="repeats()">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>currentIteration</h4>
-<pre class="methodSignature">long&nbsp;currentIteration()</pre>
+<h4>repeats</h4>
+<pre class="methodSignature">long&nbsp;repeats()</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>The number of times the animation has been repeated.</dd>
+<dd>The number of times the animation has been repeated.
+         This number is guaranteed to be 0 at the beginning of the animation,
+         and for most animations it will be 0 at the end of the animation as well.
+         An animation may be repeated if it is explicitly scheduled to run for a longer time.</dd>
 </dl>
 </li>
 </ul>

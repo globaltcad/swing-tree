@@ -528,6 +528,14 @@ extends java.lang.Object</pre>
 <h4>getComponent</h4>
 <pre class="methodSignature">public final&nbsp;C&nbsp;getComponent()</pre>
 <div class="block">The component wrapped by this builder node.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The component wrapped by this builder node.</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.lang.IllegalStateException</code> - if this method is called from a thread other than the EDT
+                                and this UI is configured to be decoupled from the application thread.
+                                See <a href="UI.html#use(swingtree.threading.EventProcessor,java.util.function.Supplier)"><code>UI.use(EventProcessor, Supplier)</code></a>.</dd>
+</dl>
 </li>
 </ul>
 <a id="component()">
@@ -538,6 +546,13 @@ extends java.lang.Object</pre>
 <h4>component</h4>
 <pre class="methodSignature">public final&nbsp;<a href="OptionalUI.html" title="class in swingtree">OptionalUI</a>&lt;C&gt;&nbsp;component()</pre>
 <div class="block">The optional component wrapped by this builder node.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>An <a href="OptionalUI.html" title="class in swingtree"><code>OptionalUI</code></a> wrapping a component or null.
+         This optional will throw an exception if the
+         application has an application thread (see <a href="UI.html#use(swingtree.threading.EventProcessor,java.util.function.Supplier)"><code>UI.use(EventProcessor, Supplier)</code></a>)
+         and this method is called from a thread other than the EDT.</dd>
+</dl>
 </li>
 </ul>
 <a id="getType()">

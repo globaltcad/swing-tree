@@ -27,7 +27,7 @@
     catch(err) {
     }
 //-->
-var data = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":9,"i8":9,"i9":9,"i10":9};
+var data = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":9,"i8":9,"i9":9,"i10":9,"i11":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -234,6 +234,14 @@ extends java.lang.Object</pre>
 <div class="block">Creates a new schedule that will start after the given delay and run for the given duration.</div>
 </td>
 </tr>
+<tr id="i11" class="rowColor">
+<td class="colFirst"><code><a href="LifeTime.html" title="class in swingtree.animation">LifeTime</a></code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#startingIn(long,java.util.concurrent.TimeUnit)">startingIn</a></span>&#8203;(long&nbsp;delay,
+          java.util.concurrent.TimeUnit&nbsp;unit)</code></th>
+<td class="colLast">
+<div class="block">Creates a new schedule that will start after the given delay and run for the given duration.</div>
+</td>
+</tr>
 </table>
 <ul class="blockList">
 <li class="blockList"><a id="methods.inherited.from.class.java.lang.Object">
@@ -335,6 +343,24 @@ extends java.lang.Object</pre>
 <dd><code>durationUnit</code> - The time unit of the duration.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>A new schedule that will start after the given delay and run for the given duration.</dd>
+</dl>
+</li>
+</ul>
+<a id="startingIn(long,java.util.concurrent.TimeUnit)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>startingIn</h4>
+<pre class="methodSignature">public&nbsp;<a href="LifeTime.html" title="class in swingtree.animation">LifeTime</a>&nbsp;startingIn&#8203;(long&nbsp;delay,
+                           java.util.concurrent.TimeUnit&nbsp;unit)</pre>
+<div class="block">Creates a new schedule that will start after the given delay and run for the given duration.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>delay</code> - The delay after which the animation should start.</dd>
+<dd><code>unit</code> - The time unit of the delay.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>A new schedule that will start after the given delay.</dd>
 </dl>
 </li>
 </ul>

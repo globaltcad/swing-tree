@@ -27,7 +27,7 @@
     catch(err) {
     }
 //-->
-var data = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10,"i17":10,"i18":10,"i19":10,"i20":10,"i21":10,"i22":10,"i23":10,"i24":10,"i25":10,"i26":10,"i27":10,"i28":10,"i29":10,"i30":10,"i31":10,"i32":10,"i33":10,"i34":10,"i35":10,"i36":10,"i37":10,"i38":10,"i39":10,"i40":10,"i41":10,"i42":10,"i43":10,"i44":10,"i45":10,"i46":10,"i47":10,"i48":10,"i49":10,"i50":10,"i51":10,"i52":10,"i53":10,"i54":10,"i55":10,"i56":10,"i57":10,"i58":10,"i59":10,"i60":10,"i61":10,"i62":10,"i63":10,"i64":10,"i65":10,"i66":10,"i67":10,"i68":10,"i69":10};
+var data = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10,"i17":10,"i18":10,"i19":10,"i20":10,"i21":10,"i22":10,"i23":10,"i24":10,"i25":10,"i26":10,"i27":10,"i28":10,"i29":10,"i30":10,"i31":10,"i32":10,"i33":10,"i34":10,"i35":10,"i36":10,"i37":10,"i38":10,"i39":10,"i40":10,"i41":10,"i42":10,"i43":10,"i44":10,"i45":10,"i46":10,"i47":10,"i48":10,"i49":10,"i50":10,"i51":10,"i52":10,"i53":10,"i54":10,"i55":10,"i56":10,"i57":10,"i58":10,"i59":10,"i60":10,"i61":10,"i62":10,"i63":10,"i64":10,"i65":10,"i66":10,"i67":10,"i68":10,"i69":10,"i70":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -199,34 +199,44 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code><a href="animation/Animate.html" title="class in swingtree.animation">Animate</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#animate(double,java.util.concurrent.TimeUnit)">animate</a></span>&#8203;(double&nbsp;duration,
-       java.util.concurrent.TimeUnit&nbsp;unit)</code></th>
+<td class="colFirst"><code><a href="animation/Animator.html" title="class in swingtree.animation">Animator</a></code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#animateFor(double,java.util.concurrent.TimeUnit)">animateFor</a></span>&#8203;(double&nbsp;duration,
+          java.util.concurrent.TimeUnit&nbsp;unit)</code></th>
 <td class="colLast">
-<div class="block">Use this to access the animation API and schedule an animation.</div>
+<div class="block">Exposes access the animation builder API, where you can define the conditions
+  under which the animation should be executed and then dispatch the animation to the EDT
+  through the <a href="animation/Animator.html#go(swingtree.animation.Animation)"><code>Animator.go(Animation)</code></a> method.</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#animateOnce(double,java.util.concurrent.TimeUnit,swingtree.animation.Animation)">animateOnce</a></span>&#8203;(double&nbsp;duration,
-           java.util.concurrent.TimeUnit&nbsp;unit,
-           <a href="animation/Animation.html" title="interface in swingtree.animation">Animation</a>&nbsp;animation)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#animateFor(double,java.util.concurrent.TimeUnit,swingtree.animation.Animation)">animateFor</a></span>&#8203;(double&nbsp;duration,
+          java.util.concurrent.TimeUnit&nbsp;unit,
+          <a href="animation/Animation.html" title="interface in swingtree.animation">Animation</a>&nbsp;animation)</code></th>
 <td class="colLast">
-<div class="block">Use this to schedule a single animation iteration
-  that will be executed on the EDT multiple times for the given duration.</div>
+<div class="block">Use this to schedule and run the provided animation
+  to be executed on the EDT.</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#animateTwice(double,java.util.concurrent.TimeUnit,swingtree.animation.Animation)">animateTwice</a></span>&#8203;(double&nbsp;duration,
-            java.util.concurrent.TimeUnit&nbsp;unit,
-            <a href="animation/Animation.html" title="interface in swingtree.animation">Animation</a>&nbsp;animation)</code></th>
+<td class="colFirst"><code><a href="animation/Animator.html" title="class in swingtree.animation">Animator</a></code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#animateFor(swingtree.animation.LifeTime)">animateFor</a></span>&#8203;(<a href="animation/LifeTime.html" title="class in swingtree.animation">LifeTime</a>&nbsp;lifeTime)</code></th>
 <td class="colLast">
-<div class="block">Use this to schedule 2 animation iterations
-  that will be executed on the EDT multiple times for the given duration.</div>
+<div class="block">Exposes access the animation builder API, where you can define the conditions
+  under which the animation should be executed and then dispatch the animation to the EDT
+  through the <a href="animation/Animator.html#go(swingtree.animation.Animation)"><code>Animator.go(Animation)</code></a> method.</div>
 </td>
 </tr>
 <tr id="i4" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#animateFor(swingtree.animation.LifeTime,swingtree.animation.Animation)">animateFor</a></span>&#8203;(<a href="animation/LifeTime.html" title="class in swingtree.animation">LifeTime</a>&nbsp;lifeTime,
+          <a href="animation/Animation.html" title="interface in swingtree.animation">Animation</a>&nbsp;animation)</code></th>
+<td class="colLast">
+<div class="block">Use this to schedule and run the provided animation
+  to be executed on the EDT.</div>
+</td>
+</tr>
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>&lt;T extends javax.swing.JComponent&gt;<br><a href="OptionalUI.html" title="class in swingtree">OptionalUI</a>&lt;T&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#find(java.lang.Class,java.lang.String)">find</a></span>&#8203;(java.lang.Class&lt;T&gt;&nbsp;type,
     java.lang.String&nbsp;id)</code></th>
@@ -234,7 +244,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
 <div class="block">Use this to query the UI tree and find any <code>JComponent</code>.</div>
 </td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>C</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#get()">get</a></span>()</code></th>
 <td class="colLast">
@@ -242,7 +252,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   is delegated.</div>
 </td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>java.awt.Color</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getBackground()">getBackground</a></span>()</code></th>
 <td class="colLast">
@@ -250,7 +260,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently get the background color of the component.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code>java.awt.Rectangle</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getBounds()">getBounds</a></span>()</code></th>
 <td class="colLast">
@@ -258,7 +268,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently get the bounds of the component.</div>
 </td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code>java.awt.Cursor</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getCursor()">getCursor</a></span>()</code></th>
 <td class="colLast">
@@ -266,7 +276,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently get the <code>Cursor</code> of the component.</div>
 </td>
 </tr>
-<tr id="i9" class="rowColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>java.awt.Font</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getFont()">getFont</a></span>()</code></th>
 <td class="colLast">
@@ -274,7 +284,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently get the font of the component.</div>
 </td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code>java.awt.Color</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getForeground()">getForeground</a></span>()</code></th>
 <td class="colLast">
@@ -282,7 +292,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently get the foreground color of the component.</div>
 </td>
 </tr>
-<tr id="i11" class="rowColor">
+<tr id="i12" class="altColor">
 <td class="colFirst"><code>int</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getHeight()">getHeight</a></span>()</code></th>
 <td class="colLast">
@@ -290,7 +300,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently get the height of the component.</div>
 </td>
 </tr>
-<tr id="i12" class="altColor">
+<tr id="i13" class="rowColor">
 <td class="colFirst"><code>java.awt.Point</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getLocation()">getLocation</a></span>()</code></th>
 <td class="colLast">
@@ -299,7 +309,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   in the form of a <code>Point</code> object.</div>
 </td>
 </tr>
-<tr id="i13" class="rowColor">
+<tr id="i14" class="altColor">
 <td class="colFirst"><code>java.awt.Dimension</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getMaxSize()">getMaxSize</a></span>()</code></th>
 <td class="colLast">
@@ -307,7 +317,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently get the maximum size of the component.</div>
 </td>
 </tr>
-<tr id="i14" class="altColor">
+<tr id="i15" class="rowColor">
 <td class="colFirst"><code>java.awt.Dimension</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getMinSize()">getMinSize</a></span>()</code></th>
 <td class="colLast">
@@ -315,7 +325,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently get the minimum size of the component.</div>
 </td>
 </tr>
-<tr id="i15" class="rowColor">
+<tr id="i16" class="altColor">
 <td class="colFirst"><code>java.awt.Container</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getParent()">getParent</a></span>()</code></th>
 <td class="colLast">
@@ -323,7 +333,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   the API of a wrapped component.</div>
 </td>
 </tr>
-<tr id="i16" class="altColor">
+<tr id="i17" class="rowColor">
 <td class="colFirst"><code>java.awt.Dimension</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getPrefSize()">getPrefSize</a></span>()</code></th>
 <td class="colLast">
@@ -331,7 +341,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently get the preferred size of the component.</div>
 </td>
 </tr>
-<tr id="i17" class="rowColor">
+<tr id="i18" class="altColor">
 <td class="colFirst"><code>float</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getScale()">getScale</a></span>()</code></th>
 <td class="colLast">
@@ -339,7 +349,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   to ensure that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).</div>
 </td>
 </tr>
-<tr id="i18" class="altColor">
+<tr id="i19" class="rowColor">
 <td class="colFirst"><code>java.awt.Dimension</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getSize()">getSize</a></span>()</code></th>
 <td class="colLast">
@@ -347,7 +357,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently get the size of the component.</div>
 </td>
 </tr>
-<tr id="i19" class="rowColor">
+<tr id="i20" class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getTooltip()">getTooltip</a></span>()</code></th>
 <td class="colLast">
@@ -355,7 +365,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently get the tooltip of the component.</div>
 </td>
 </tr>
-<tr id="i20" class="altColor">
+<tr id="i21" class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getWidth()">getWidth</a></span>()</code></th>
 <td class="colLast">
@@ -363,7 +373,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently get the width of the component.</div>
 </td>
 </tr>
-<tr id="i21" class="rowColor">
+<tr id="i22" class="altColor">
 <td class="colFirst"><code>int</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getX()">getX</a></span>()</code></th>
 <td class="colLast">
@@ -371,7 +381,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently access the x-coordinate of the component relative to its parent.</div>
 </td>
 </tr>
-<tr id="i22" class="altColor">
+<tr id="i23" class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getY()">getY</a></span>()</code></th>
 <td class="colLast">
@@ -379,7 +389,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently access the y-coordinate of the component relative to its parent.</div>
 </td>
 </tr>
-<tr id="i23" class="rowColor">
+<tr id="i24" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isEnabled()">isEnabled</a></span>()</code></th>
 <td class="colLast">
@@ -387,7 +397,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently check if the component is enabled.</div>
 </td>
 </tr>
-<tr id="i24" class="altColor">
+<tr id="i25" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isOpaque()">isOpaque</a></span>()</code></th>
 <td class="colLast">
@@ -395,7 +405,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently check if the component is opaque.</div>
 </td>
 </tr>
-<tr id="i25" class="rowColor">
+<tr id="i26" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isVisible()">isVisible</a></span>()</code></th>
 <td class="colLast">
@@ -403,7 +413,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently check if the component is visible.</div>
 </td>
 </tr>
-<tr id="i26" class="altColor">
+<tr id="i27" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#paint(swingtree.animation.AnimationState,swingtree.api.Painter)">paint</a></span>&#8203;(<a href="animation/AnimationState.html" title="interface in swingtree.animation">AnimationState</a>&nbsp;state,
      <a href="api/Painter.html" title="interface in swingtree.api">Painter</a>&nbsp;painter)</code></th>
@@ -412,7 +422,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   using the <code>Graphics2D</code> instance of the component.</div>
 </td>
 </tr>
-<tr id="i27" class="rowColor">
+<tr id="i28" class="altColor">
 <td class="colFirst"><code>float</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#scale()">scale</a></span>()</code></th>
 <td class="colLast">
@@ -420,7 +430,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   to ensure that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).</div>
 </td>
 </tr>
-<tr id="i28" class="altColor">
+<tr id="i29" class="rowColor">
 <td class="colFirst"><code>double</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#scale(double)">scale</a></span>&#8203;(double&nbsp;value)</code></th>
 <td class="colLast">
@@ -429,7 +439,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).</div>
 </td>
 </tr>
-<tr id="i29" class="rowColor">
+<tr id="i30" class="altColor">
 <td class="colFirst"><code>float</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#scale(float)">scale</a></span>&#8203;(float&nbsp;value)</code></th>
 <td class="colLast">
@@ -438,7 +448,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).</div>
 </td>
 </tr>
-<tr id="i30" class="altColor">
+<tr id="i31" class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#scale(int)">scale</a></span>&#8203;(int&nbsp;value)</code></th>
 <td class="colLast">
@@ -447,7 +457,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   that the UI is scaled properly for high resolution displays (high dots-per-inch, or DPI).</div>
 </td>
 </tr>
-<tr id="i31" class="rowColor">
+<tr id="i32" class="altColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setBackground(java.awt.Color)">setBackground</a></span>&#8203;(java.awt.Color&nbsp;color)</code></th>
 <td class="colLast">
@@ -455,7 +465,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the background color of the component.</div>
 </td>
 </tr>
-<tr id="i32" class="altColor">
+<tr id="i33" class="rowColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setBackgroundColor(double,double,double)">setBackgroundColor</a></span>&#8203;(double&nbsp;r,
                   double&nbsp;g,
@@ -465,7 +475,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the background color of the component.</div>
 </td>
 </tr>
-<tr id="i33" class="rowColor">
+<tr id="i34" class="altColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setBackgroundColor(double,double,double,double)">setBackgroundColor</a></span>&#8203;(double&nbsp;r,
                   double&nbsp;g,
@@ -476,7 +486,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the background color of the component.</div>
 </td>
 </tr>
-<tr id="i34" class="altColor">
+<tr id="i35" class="rowColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setBackgroundColor(int,int,int)">setBackgroundColor</a></span>&#8203;(int&nbsp;r,
                   int&nbsp;g,
@@ -486,7 +496,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the background color of the component.</div>
 </td>
 </tr>
-<tr id="i35" class="rowColor">
+<tr id="i36" class="altColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setBackgroundColor(int,int,int,int)">setBackgroundColor</a></span>&#8203;(int&nbsp;r,
                   int&nbsp;g,
@@ -497,7 +507,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the background color of the component.</div>
 </td>
 </tr>
-<tr id="i36" class="altColor">
+<tr id="i37" class="rowColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setBounds(int,int,int,int)">setBounds</a></span>&#8203;(int&nbsp;x,
          int&nbsp;y,
@@ -508,7 +518,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the bounds of the component.</div>
 </td>
 </tr>
-<tr id="i37" class="rowColor">
+<tr id="i38" class="altColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setBounds(java.awt.Rectangle)">setBounds</a></span>&#8203;(java.awt.Rectangle&nbsp;bounds)</code></th>
 <td class="colLast">
@@ -516,7 +526,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the bounds of the component.</div>
 </td>
 </tr>
-<tr id="i38" class="altColor">
+<tr id="i39" class="rowColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setCursor(java.awt.Cursor)">setCursor</a></span>&#8203;(java.awt.Cursor&nbsp;cursor)</code></th>
 <td class="colLast">
@@ -524,7 +534,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the <code>Cursor</code> of the component.</div>
 </td>
 </tr>
-<tr id="i39" class="rowColor">
+<tr id="i40" class="altColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setCursor(swingtree.UI.Cursor)">setCursor</a></span>&#8203;(<a href="UI.Cursor.html" title="enum in swingtree">UI.Cursor</a>&nbsp;cursor)</code></th>
 <td class="colLast">
@@ -532,7 +542,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the <a href="UI.Cursor.html" title="enum in swingtree"><code>UI.Cursor</code></a> of the component.</div>
 </td>
 </tr>
-<tr id="i40" class="altColor">
+<tr id="i41" class="rowColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setEnabled(boolean)">setEnabled</a></span>&#8203;(boolean&nbsp;enabled)</code></th>
 <td class="colLast">
@@ -540,7 +550,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently enable or disable the component.</div>
 </td>
 </tr>
-<tr id="i41" class="rowColor">
+<tr id="i42" class="altColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setFont(java.awt.Font)">setFont</a></span>&#8203;(java.awt.Font&nbsp;font)</code></th>
 <td class="colLast">
@@ -548,7 +558,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the font of the component.</div>
 </td>
 </tr>
-<tr id="i42" class="altColor">
+<tr id="i43" class="rowColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setForeground(java.awt.Color)">setForeground</a></span>&#8203;(java.awt.Color&nbsp;color)</code></th>
 <td class="colLast">
@@ -556,7 +566,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the foreground color of the component.</div>
 </td>
 </tr>
-<tr id="i43" class="rowColor">
+<tr id="i44" class="altColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setForegroundColor(double,double,double)">setForegroundColor</a></span>&#8203;(double&nbsp;r,
                   double&nbsp;g,
@@ -566,7 +576,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the foreground color of the component.</div>
 </td>
 </tr>
-<tr id="i44" class="altColor">
+<tr id="i45" class="rowColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setForegroundColor(double,double,double,double)">setForegroundColor</a></span>&#8203;(double&nbsp;r,
                   double&nbsp;g,
@@ -577,7 +587,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the foreground color of the component.</div>
 </td>
 </tr>
-<tr id="i45" class="rowColor">
+<tr id="i46" class="altColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setForegroundColor(int,int,int)">setForegroundColor</a></span>&#8203;(int&nbsp;r,
                   int&nbsp;g,
@@ -587,7 +597,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the foreground color of the component.</div>
 </td>
 </tr>
-<tr id="i46" class="altColor">
+<tr id="i47" class="rowColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setForegroundColor(int,int,int,int)">setForegroundColor</a></span>&#8203;(int&nbsp;r,
                   int&nbsp;g,
@@ -598,7 +608,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the foreground color of the component.</div>
 </td>
 </tr>
-<tr id="i47" class="rowColor">
+<tr id="i48" class="altColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setHeight(int)">setHeight</a></span>&#8203;(int&nbsp;height)</code></th>
 <td class="colLast">
@@ -606,7 +616,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the height of the component.</div>
 </td>
 </tr>
-<tr id="i48" class="altColor">
+<tr id="i49" class="rowColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setMaxHeight(int)">setMaxHeight</a></span>&#8203;(int&nbsp;height)</code></th>
 <td class="colLast">
@@ -614,7 +624,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the maximum height of the component.</div>
 </td>
 </tr>
-<tr id="i49" class="rowColor">
+<tr id="i50" class="altColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setMaxSize(int,int)">setMaxSize</a></span>&#8203;(int&nbsp;width,
           int&nbsp;height)</code></th>
@@ -623,7 +633,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the maximum size of the component.</div>
 </td>
 </tr>
-<tr id="i50" class="altColor">
+<tr id="i51" class="rowColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setMaxSize(java.awt.Dimension)">setMaxSize</a></span>&#8203;(java.awt.Dimension&nbsp;size)</code></th>
 <td class="colLast">
@@ -631,7 +641,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the maximum size of the component.</div>
 </td>
 </tr>
-<tr id="i51" class="rowColor">
+<tr id="i52" class="altColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setMaxWidth(int)">setMaxWidth</a></span>&#8203;(int&nbsp;width)</code></th>
 <td class="colLast">
@@ -639,7 +649,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the maximum width of the component.</div>
 </td>
 </tr>
-<tr id="i52" class="altColor">
+<tr id="i53" class="rowColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setMinHeight(int)">setMinHeight</a></span>&#8203;(int&nbsp;height)</code></th>
 <td class="colLast">
@@ -647,7 +657,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the minimum height of the component.</div>
 </td>
 </tr>
-<tr id="i53" class="rowColor">
+<tr id="i54" class="altColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setMinSize(int,int)">setMinSize</a></span>&#8203;(int&nbsp;width,
           int&nbsp;height)</code></th>
@@ -656,7 +666,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the minimum size of the component.</div>
 </td>
 </tr>
-<tr id="i54" class="altColor">
+<tr id="i55" class="rowColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setMinSize(java.awt.Dimension)">setMinSize</a></span>&#8203;(java.awt.Dimension&nbsp;size)</code></th>
 <td class="colLast">
@@ -664,7 +674,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the minimum size of the component.</div>
 </td>
 </tr>
-<tr id="i55" class="rowColor">
+<tr id="i56" class="altColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setMinWidth(int)">setMinWidth</a></span>&#8203;(int&nbsp;width)</code></th>
 <td class="colLast">
@@ -672,7 +682,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the minimum width of the component.</div>
 </td>
 </tr>
-<tr id="i56" class="altColor">
+<tr id="i57" class="rowColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setOpaque(boolean)">setOpaque</a></span>&#8203;(boolean&nbsp;opaque)</code></th>
 <td class="colLast">
@@ -680,7 +690,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently make the component opaque or transparent.</div>
 </td>
 </tr>
-<tr id="i57" class="rowColor">
+<tr id="i58" class="altColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setPrefHeight(int)">setPrefHeight</a></span>&#8203;(int&nbsp;height)</code></th>
 <td class="colLast">
@@ -688,7 +698,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the preferred height of the component.</div>
 </td>
 </tr>
-<tr id="i58" class="altColor">
+<tr id="i59" class="rowColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setPrefSize(int,int)">setPrefSize</a></span>&#8203;(int&nbsp;width,
            int&nbsp;height)</code></th>
@@ -697,7 +707,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the preferred size of the component.</div>
 </td>
 </tr>
-<tr id="i59" class="rowColor">
+<tr id="i60" class="altColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setPrefSize(java.awt.Dimension)">setPrefSize</a></span>&#8203;(java.awt.Dimension&nbsp;size)</code></th>
 <td class="colLast">
@@ -705,7 +715,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the preferred size of the component.</div>
 </td>
 </tr>
-<tr id="i60" class="altColor">
+<tr id="i61" class="rowColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setPrefWidth(int)">setPrefWidth</a></span>&#8203;(int&nbsp;width)</code></th>
 <td class="colLast">
@@ -713,7 +723,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the preferred width of the component.</div>
 </td>
 </tr>
-<tr id="i61" class="rowColor">
+<tr id="i62" class="altColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setSize(int,int)">setSize</a></span>&#8203;(int&nbsp;width,
        int&nbsp;height)</code></th>
@@ -722,7 +732,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the size of the component.</div>
 </td>
 </tr>
-<tr id="i62" class="altColor">
+<tr id="i63" class="rowColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setSize(java.awt.Dimension)">setSize</a></span>&#8203;(java.awt.Dimension&nbsp;size)</code></th>
 <td class="colLast">
@@ -730,7 +740,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the size of the component.</div>
 </td>
 </tr>
-<tr id="i63" class="rowColor">
+<tr id="i64" class="altColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setTooltip(java.lang.String)">setTooltip</a></span>&#8203;(java.lang.String&nbsp;text)</code></th>
 <td class="colLast">
@@ -738,7 +748,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the tooltip of the component.</div>
 </td>
 </tr>
-<tr id="i64" class="altColor">
+<tr id="i65" class="rowColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setVisible(boolean)">setVisible</a></span>&#8203;(boolean&nbsp;visible)</code></th>
 <td class="colLast">
@@ -746,7 +756,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently enable or disable the component.</div>
 </td>
 </tr>
-<tr id="i65" class="rowColor">
+<tr id="i66" class="altColor">
 <td class="colFirst"><code>swingtree.AbstractDelegate&lt;C&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setWidth(int)">setWidth</a></span>&#8203;(int&nbsp;width)</code></th>
 <td class="colLast">
@@ -754,7 +764,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   conveniently set the width of the component.</div>
 </td>
 </tr>
-<tr id="i66" class="altColor">
+<tr id="i67" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#style(swingtree.animation.AnimationState,swingtree.api.Styler)">style</a></span>&#8203;(<a href="animation/AnimationState.html" title="interface in swingtree.animation">AnimationState</a>&nbsp;state,
      <a href="api/Styler.html" title="interface in swingtree.api">Styler</a>&lt;C&gt;&nbsp;styler)</code></th>
@@ -762,17 +772,17 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
 <div class="block">A common use case is to style the component based on the current animation state.</div>
 </td>
 </tr>
-<tr id="i67" class="rowColor">
+<tr id="i68" class="altColor">
 <td class="colFirst"><code>javax.swing.JComponent</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#tabComponent()">tabComponent</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i68" class="altColor">
+<tr id="i69" class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#tabIndex()">tabIndex</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i69" class="rowColor">
+<tr id="i70" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#tabIsSelected()">tabIsSelected</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
@@ -1325,6 +1335,8 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
            This is relative to the component's parent.</dd>
 <dd><code>width</code> - The new width of the component.</dd>
 <dd><code>height</code> - The new height of the component.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The delegate itself, so you can chain calls to this method.</dd>
 </dl>
 </li>
 </ul>
@@ -1345,6 +1357,8 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>bounds</code> - The new bounds of the component.
                   This is relative to the component's parent.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The delegate itself, so you can chain calls to this method.</dd>
 </dl>
 </li>
 </ul>
@@ -2084,7 +2098,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   Here is an example of how to use this method as part of a fancy button animation:
   <pre><code>
       UI.button("Click me").withPrefSize(400, 400)
-      .onMouseClick( it -&gt; it.animateOnce(2, TimeUnit.SECONDS, state -&gt; {
+      .onMouseClick( it -&gt; it.animateFor(2, TimeUnit.SECONDS, state -&gt; {
           double r = 300 * state.progress() * it.getScale();
           double x = it.mouseX() - r / 2;
           double y = it.mouseY() - r / 2;
@@ -2119,7 +2133,7 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
   Here is an example of how to use this method as part of a fancy styling animation:
   <pre><code>
       UI.button("Click me").withPrefSize(400, 400)
-      .onMouseClick( it -&gt; it.animateOnce(2, TimeUnit.SECONDS, state -&gt; {
+      .onMouseClick( it -&gt; it.animateFor(2, TimeUnit.SECONDS, state -&gt; {
           it.style(state, style -&gt; style
               .borderWidth((int)(10 * state.progress()))
               .borderColor(new Color(1f, 1f, 0f, (float) (1 - state.progress())))
@@ -2134,55 +2148,88 @@ extends <a href="ComponentMouseEventDelegate.html" title="class in swingtree">Co
 </dl>
 </li>
 </ul>
-<a id="animate(double,java.util.concurrent.TimeUnit)">
+<a id="animateFor(double,java.util.concurrent.TimeUnit)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>animate</h4>
-<pre class="methodSignature">public final&nbsp;<a href="animation/Animate.html" title="class in swingtree.animation">Animate</a>&nbsp;animate&#8203;(double&nbsp;duration,
-                             java.util.concurrent.TimeUnit&nbsp;unit)</pre>
-<div class="block">Use this to access the animation API and schedule an animation.
-  The animation will be executed on the EDT.</div>
+<h4>animateFor</h4>
+<pre class="methodSignature">public final&nbsp;<a href="animation/Animator.html" title="class in swingtree.animation">Animator</a>&nbsp;animateFor&#8203;(double&nbsp;duration,
+                                 java.util.concurrent.TimeUnit&nbsp;unit)</pre>
+<div class="block">Exposes access the animation builder API, where you can define the conditions
+  under which the animation should be executed and then dispatch the animation to the EDT
+  through the <a href="animation/Animator.html#go(swingtree.animation.Animation)"><code>Animator.go(Animation)</code></a> method.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>duration</code> - The duration of the animation.</dd>
 <dd><code>unit</code> - The time unit of the duration.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>An <a href="animation/Animate.html" title="class in swingtree.animation"><code>Animate</code></a> instance which can be used to define how the animation should be executed.</dd>
+<dd>An <a href="animation/Animator.html" title="class in swingtree.animation"><code>Animator</code></a> instance which can be used to define how the animation should be executed.</dd>
 </dl>
 </li>
 </ul>
-<a id="animateOnce(double,java.util.concurrent.TimeUnit,swingtree.animation.Animation)">
+<a id="animateFor(swingtree.animation.LifeTime)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>animateOnce</h4>
-<pre class="methodSignature">public final&nbsp;void&nbsp;animateOnce&#8203;(double&nbsp;duration,
-                              java.util.concurrent.TimeUnit&nbsp;unit,
-                              <a href="animation/Animation.html" title="interface in swingtree.animation">Animation</a>&nbsp;animation)</pre>
-<div class="block">Use this to schedule a single animation iteration
-  that will be executed on the EDT multiple times for the given duration.</div>
+<h4>animateFor</h4>
+<pre class="methodSignature">public final&nbsp;<a href="animation/Animator.html" title="class in swingtree.animation">Animator</a>&nbsp;animateFor&#8203;(<a href="animation/LifeTime.html" title="class in swingtree.animation">LifeTime</a>&nbsp;lifeTime)</pre>
+<div class="block">Exposes access the animation builder API, where you can define the conditions
+  under which the animation should be executed and then dispatch the animation to the EDT
+  through the <a href="animation/Animator.html#go(swingtree.animation.Animation)"><code>Animator.go(Animation)</code></a> method.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>duration</code> - The duration of the animation.</dd>
-<dd><code>unit</code> - The time unit of the duration.</dd>
+<dd><code>lifeTime</code> - The lifetime of the animation.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>An <a href="animation/Animator.html" title="class in swingtree.animation"><code>Animator</code></a> instance which can be used to define how the animation should be executed.</dd>
+</dl>
+</li>
+</ul>
+<a id="animateFor(swingtree.animation.LifeTime,swingtree.animation.Animation)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>animateFor</h4>
+<pre class="methodSignature">public final&nbsp;void&nbsp;animateFor&#8203;(<a href="animation/LifeTime.html" title="class in swingtree.animation">LifeTime</a>&nbsp;lifeTime,
+                             <a href="animation/Animation.html" title="interface in swingtree.animation">Animation</a>&nbsp;animation)</pre>
+<div class="block">Use this to schedule and run the provided animation
+  to be executed on the EDT.
+  A single animation iteration may be executed multiple times
+  for the given duration in order to achieve a smooth transition. <br>
+  Here an example of how to use this method
+  on a "Save" button:
+  <pre><code>
+  UI.button("Save").withPrefSize(400, 400)
+  .onMouseClick( it -&gt; it
+    .animateFor(
+      UI.lifetime(1, TimeUnit.SECONDS)
+      .startingIn( 0.5, TimeUnit.SECONDS )
+    )
+    .go( myAnimation )
+  )
+  </code></pre></div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>lifeTime</code> - The lifetime of the animation.</dd>
 <dd><code>animation</code> - The animation that should be executed.</dd>
 </dl>
 </li>
 </ul>
-<a id="animateTwice(double,java.util.concurrent.TimeUnit,swingtree.animation.Animation)">
+<a id="animateFor(double,java.util.concurrent.TimeUnit,swingtree.animation.Animation)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>animateTwice</h4>
-<pre class="methodSignature">public final&nbsp;void&nbsp;animateTwice&#8203;(double&nbsp;duration,
-                               java.util.concurrent.TimeUnit&nbsp;unit,
-                               <a href="animation/Animation.html" title="interface in swingtree.animation">Animation</a>&nbsp;animation)</pre>
-<div class="block">Use this to schedule 2 animation iterations
-  that will be executed on the EDT multiple times for the given duration.</div>
+<h4>animateFor</h4>
+<pre class="methodSignature">public final&nbsp;void&nbsp;animateFor&#8203;(double&nbsp;duration,
+                             java.util.concurrent.TimeUnit&nbsp;unit,
+                             <a href="animation/Animation.html" title="interface in swingtree.animation">Animation</a>&nbsp;animation)</pre>
+<div class="block">Use this to schedule and run the provided animation
+  to be executed on the EDT.
+  A single animation iteration may be executed multiple times
+  for the given duration in order to achieve a smooth transition.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>duration</code> - The duration of the animation.</dd>

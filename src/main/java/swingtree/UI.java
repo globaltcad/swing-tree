@@ -1046,7 +1046,7 @@ public final class UI
      *  <ul>
      *      <li>
      *          It is transparent, meaning that it does not paint its background.
-     *      </l>
+     *      </li>
      *      <li>
      *          The default layout manager is a {@link MigLayout}.
      *      </li>
@@ -1102,7 +1102,7 @@ public final class UI
      *  <ul>
      *      <li>
      *          It is transparent, meaning that it does not paint its background.
-     *      </l>
+     *      </li>
      *      <li>
      *          The default layout manager is a {@link MigLayout}.
      *      </li>

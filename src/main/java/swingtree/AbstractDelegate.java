@@ -967,16 +967,18 @@ abstract class AbstractDelegate<C extends JComponent>
      *  to be executed on the EDT.
      *  A single animation iteration may be executed multiple times
      *  for the given duration in order to achieve a smooth transition. <br>
-     *  Here an example of how to use this method:
+     *  Here an example of how to use this method
+     *  on a "Save" button:
      *  <pre>{@code
-     *    UI.button("Click me").withPrefSize(400, 400)
-     *    .onMouseClick( it -> it
-     *        .animateFor(
-     *            UI.lifetime(1, TimeUnit.SECONDS)
-     *            .startingIn( 0.5, TimeUnit.SECONDS )
-     *        )
-     *        .go( myAnimation )
+     *  UI.button("Save").withPrefSize(400, 400)
+     *  .onMouseClick( it -> it
+     *    .animateFor(
+     *      UI.lifetime(1, TimeUnit.SECONDS)
+     *      .startingIn( 0.5, TimeUnit.SECONDS )
      *    )
+     *    .go( myAnimation )
+     *  )
+     *  }</pre>
      *
      *
      *  @param lifeTime The lifetime of the animation.

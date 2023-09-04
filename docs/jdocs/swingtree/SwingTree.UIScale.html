@@ -27,7 +27,7 @@
     catch(err) {
     }
 //-->
-var data = {"i0":10,"i1":10,"i2":10,"i3":9,"i4":10,"i5":9,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10,"i17":10,"i18":10,"i19":10};
+var data = {"i0":10,"i1":10,"i2":9,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10,"i17":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -192,104 +192,81 @@ extends java.lang.Object</pre>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code>javax.swing.plaf.FontUIResource</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#applyCustomScaleFactor(javax.swing.plaf.FontUIResource)">applyCustomScaleFactor</a></span>&#8203;(javax.swing.plaf.FontUIResource&nbsp;font)</code></th>
-<td class="colLast">
-<div class="block">Applies a custom scale factor given in system property "swingtree.uiScale"
- to the given font.</div>
-</td>
-</tr>
-<tr id="i2" class="altColor">
 <td class="colFirst"><code>double</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getSystemScaleFactor(java.awt.Graphics2D)">getSystemScaleFactor</a></span>&#8203;(java.awt.Graphics2D&nbsp;g)</code></th>
 <td class="colLast">
 <div class="block">Returns the system scale factor for the given graphics context.</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i2" class="altColor">
 <td class="colFirst"><code>static double</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getSystemScaleFactor(java.awt.GraphicsConfiguration)">getSystemScaleFactor</a></span>&#8203;(java.awt.GraphicsConfiguration&nbsp;gc)</code></th>
-<td class="colLast">
-<div class="block">Returns the system scale factor for the given graphics configuration.</div>
-</td>
+<td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>float</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getUserScaleFactor()">getUserScaleFactor</a></span>()</code></th>
 <td class="colLast">
-<div class="block">Returns the user scale factor.</div>
+<div class="block">Returns the user scale factor is a scaling factor is used by SwingTree's
+ style engine to scale the UI during painting.</div>
 </td>
 </tr>
-<tr id="i5" class="rowColor">
-<td class="colFirst"><code>static boolean</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isSystemScalingEnabled()">isSystemScalingEnabled</a></span>()</code></th>
-<td class="colLast">
-<div class="block">Returns whether system scaling is enabled.</div>
-</td>
-</tr>
-<tr id="i6" class="altColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#removePropertyChangeListener(java.beans.PropertyChangeListener)">removePropertyChangeListener</a></span>&#8203;(java.beans.PropertyChangeListener&nbsp;listener)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#reset()">reset</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>double</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#scale(double)">scale</a></span>&#8203;(double&nbsp;value)</code></th>
 <td class="colLast">
 <div class="block">Multiplies the given value by the user scale factor.</div>
 </td>
 </tr>
-<tr id="i9" class="rowColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>float</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#scale(float)">scale</a></span>&#8203;(float&nbsp;value)</code></th>
 <td class="colLast">
 <div class="block">Multiplies the given value by the user scale factor.</div>
 </td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code>int</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#scale(int)">scale</a></span>&#8203;(int&nbsp;value)</code></th>
 <td class="colLast">
 <div class="block">Multiplies the given value by the user scale factor and rounds the result.</div>
 </td>
 </tr>
-<tr id="i11" class="rowColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code>java.awt.Dimension</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#scale(java.awt.Dimension)">scale</a></span>&#8203;(java.awt.Dimension&nbsp;dimension)</code></th>
 <td class="colLast">
 <div class="block">Scales the given dimension with the user scale factor.</div>
 </td>
 </tr>
-<tr id="i12" class="altColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>java.awt.geom.RoundRectangle2D</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#scale(java.awt.geom.RoundRectangle2D)">scale</a></span>&#8203;(java.awt.geom.RoundRectangle2D&nbsp;rectangle)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i13" class="rowColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code>java.awt.Insets</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#scale(java.awt.Insets)">scale</a></span>&#8203;(java.awt.Insets&nbsp;insets)</code></th>
 <td class="colLast">
 <div class="block">Scales the given insets with the user scale factor.</div>
 </td>
 </tr>
-<tr id="i14" class="altColor">
+<tr id="i12" class="altColor">
 <td class="colFirst"><code>java.awt.Rectangle</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#scale(java.awt.Rectangle)">scale</a></span>&#8203;(java.awt.Rectangle&nbsp;rectangle)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i15" class="rowColor">
-<td class="colFirst"><code>int</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#scale2(int)">scale2</a></span>&#8203;(int&nbsp;value)</code></th>
-<td class="colLast">
-<div class="block">Similar as <a href="#scale(int)"><code>scale(int)</code></a> but always "rounds down".</div>
-</td>
-</tr>
-<tr id="i16" class="altColor">
+<tr id="i13" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#scaleGraphics(java.awt.Graphics2D)">scaleGraphics</a></span>&#8203;(java.awt.Graphics2D&nbsp;g)</code></th>
 <td class="colLast">
@@ -297,19 +274,26 @@ extends java.lang.Object</pre>
  <code>Graphics2D.scale(double, double)</code> with user scale factor.</div>
 </td>
 </tr>
-<tr id="i17" class="rowColor">
+<tr id="i14" class="altColor">
+<td class="colFirst"><code>int</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#scaleRoundedDown(int)">scaleRoundedDown</a></span>&#8203;(int&nbsp;value)</code></th>
+<td class="colLast">
+<div class="block">Similar as <a href="#scale(int)"><code>scale(int)</code></a> but always "rounds down".</div>
+</td>
+</tr>
+<tr id="i15" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setUserScaleFactor(float)">setUserScaleFactor</a></span>&#8203;(float&nbsp;scaleFactor)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr id="i18" class="altColor">
+<tr id="i16" class="altColor">
 <td class="colFirst"><code>float</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#unscale(float)">unscale</a></span>&#8203;(float&nbsp;value)</code></th>
 <td class="colLast">
 <div class="block">Divides the given value by the user scale factor.</div>
 </td>
 </tr>
-<tr id="i19" class="rowColor">
+<tr id="i17" class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#unscale(int)">unscale</a></span>&#8203;(int&nbsp;value)</code></th>
 <td class="colLast">
@@ -358,16 +342,6 @@ extends java.lang.Object</pre>
 <pre class="methodSignature">public&nbsp;void&nbsp;removePropertyChangeListener&#8203;(java.beans.PropertyChangeListener&nbsp;listener)</pre>
 </li>
 </ul>
-<a id="isSystemScalingEnabled()">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>isSystemScalingEnabled</h4>
-<pre class="methodSignature">public static&nbsp;boolean&nbsp;isSystemScalingEnabled()</pre>
-<div class="block">Returns whether system scaling is enabled.</div>
-</li>
-</ul>
 <a id="getSystemScaleFactor(java.awt.Graphics2D)">
 <!--   -->
 </a>
@@ -375,7 +349,15 @@ extends java.lang.Object</pre>
 <li class="blockList">
 <h4>getSystemScaleFactor</h4>
 <pre class="methodSignature">public&nbsp;double&nbsp;getSystemScaleFactor&#8203;(java.awt.Graphics2D&nbsp;g)</pre>
-<div class="block">Returns the system scale factor for the given graphics context.</div>
+<div class="block">Returns the system scale factor for the given graphics context.
+ The system scale factor is the scale factor that the JRE uses
+ to scale everything (text, icons, gaps, etc).</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>g</code> - The graphics context to get the system scale factor for.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The system scale factor for the given graphics context.</dd>
+</dl>
 </li>
 </ul>
 <a id="getSystemScaleFactor(java.awt.GraphicsConfiguration)">
@@ -385,7 +367,12 @@ extends java.lang.Object</pre>
 <li class="blockList">
 <h4>getSystemScaleFactor</h4>
 <pre class="methodSignature">public static&nbsp;double&nbsp;getSystemScaleFactor&#8203;(java.awt.GraphicsConfiguration&nbsp;gc)</pre>
-<div class="block">Returns the system scale factor for the given graphics configuration.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>gc</code> - The graphics configuration to get the system scale factor for.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The system scale factor for the given graphics configuration.</dd>
+</dl>
 </li>
 </ul>
 <a id="reset()">
@@ -397,17 +384,6 @@ extends java.lang.Object</pre>
 <pre class="methodSignature">public&nbsp;void&nbsp;reset()</pre>
 </li>
 </ul>
-<a id="applyCustomScaleFactor(javax.swing.plaf.FontUIResource)">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>applyCustomScaleFactor</h4>
-<pre class="methodSignature">public&nbsp;javax.swing.plaf.FontUIResource&nbsp;applyCustomScaleFactor&#8203;(javax.swing.plaf.FontUIResource&nbsp;font)</pre>
-<div class="block">Applies a custom scale factor given in system property "swingtree.uiScale"
- to the given font.</div>
-</li>
-</ul>
 <a id="getUserScaleFactor()">
 <!--   -->
 </a>
@@ -415,7 +391,19 @@ extends java.lang.Object</pre>
 <li class="blockList">
 <h4>getUserScaleFactor</h4>
 <pre class="methodSignature">public&nbsp;float&nbsp;getUserScaleFactor()</pre>
-<div class="block">Returns the user scale factor.</div>
+<div class="block">Returns the user scale factor is a scaling factor is used by SwingTree's
+ style engine to scale the UI during painting.
+ Note that this is different from the system scale factor, which is
+ the scale factor that the JRE uses to scale everything through the
+ <code>AffineTransform</code> of the <code>Graphics2D</code>.
+ <p>
+ Use this scaling factor for painting operations that are not performed
+ by SwingTree's style engine, e.g. custom painting
+ (see <a href="style/ComponentStyleDelegate.html#painter(swingtree.UI.Layer,swingtree.api.Painter)"><code>ComponentStyleDelegate.painter(UI.Layer, Painter)</code></a>).</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The user scale factor.</dd>
+</dl>
 </li>
 </ul>
 <a id="setUserScaleFactor(float)">
@@ -435,6 +423,12 @@ extends java.lang.Object</pre>
 <h4>scale</h4>
 <pre class="methodSignature">public&nbsp;float&nbsp;scale&#8203;(float&nbsp;value)</pre>
 <div class="block">Multiplies the given value by the user scale factor.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The value to scale.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The scaled value.</dd>
+</dl>
 </li>
 </ul>
 <a id="scale(double)">
@@ -445,6 +439,12 @@ extends java.lang.Object</pre>
 <h4>scale</h4>
 <pre class="methodSignature">public&nbsp;double&nbsp;scale&#8203;(double&nbsp;value)</pre>
 <div class="block">Multiplies the given value by the user scale factor.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The value to scale.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The scaled value.</dd>
+</dl>
 </li>
 </ul>
 <a id="scale(int)">
@@ -455,18 +455,30 @@ extends java.lang.Object</pre>
 <h4>scale</h4>
 <pre class="methodSignature">public&nbsp;int&nbsp;scale&#8203;(int&nbsp;value)</pre>
 <div class="block">Multiplies the given value by the user scale factor and rounds the result.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The value to scale and then round if the scaled result is not a whole number.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The scaled and rounded value.</dd>
+</dl>
 </li>
 </ul>
-<a id="scale2(int)">
+<a id="scaleRoundedDown(int)">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>scale2</h4>
-<pre class="methodSignature">public&nbsp;int&nbsp;scale2&#8203;(int&nbsp;value)</pre>
+<h4>scaleRoundedDown</h4>
+<pre class="methodSignature">public&nbsp;int&nbsp;scaleRoundedDown&#8203;(int&nbsp;value)</pre>
 <div class="block">Similar as <a href="#scale(int)"><code>scale(int)</code></a> but always "rounds down".
  <p>
  For use in special cases. <a href="#scale(int)"><code>scale(int)</code></a> is the preferred method.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The value to scale and then round down if the scaled result is not a whole number.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The scaled and rounded down value.</dd>
+</dl>
 </li>
 </ul>
 <a id="unscale(float)">
@@ -477,6 +489,12 @@ extends java.lang.Object</pre>
 <h4>unscale</h4>
 <pre class="methodSignature">public&nbsp;float&nbsp;unscale&#8203;(float&nbsp;value)</pre>
 <div class="block">Divides the given value by the user scale factor.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The value to un-scale.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The resulting un-scaled floating point number.</dd>
+</dl>
 </li>
 </ul>
 <a id="unscale(int)">
@@ -487,6 +505,12 @@ extends java.lang.Object</pre>
 <h4>unscale</h4>
 <pre class="methodSignature">public&nbsp;int&nbsp;unscale&#8203;(int&nbsp;value)</pre>
 <div class="block">Divides the given value by the user scale factor and rounds the result.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>value</code> - The value to un-scale and then round if the un-scaled result is not a whole number.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The un-scaled and rounded value.</dd>
+</dl>
 </li>
 </ul>
 <a id="scaleGraphics(java.awt.Graphics2D)">
@@ -498,6 +522,10 @@ extends java.lang.Object</pre>
 <pre class="methodSignature">public&nbsp;void&nbsp;scaleGraphics&#8203;(java.awt.Graphics2D&nbsp;g)</pre>
 <div class="block">If user scale factor is not 1, scale the given graphics context by invoking
  <code>Graphics2D.scale(double, double)</code> with user scale factor.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>g</code> - The graphics context to scale.</dd>
+</dl>
 </li>
 </ul>
 <a id="scale(java.awt.Dimension)">
@@ -512,6 +540,12 @@ extends java.lang.Object</pre>
  If user scale factor is 1, then the given dimension is simply returned.
  Otherwise, a new instance of <code>Dimension</code> or <code>DimensionUIResource</code>
  is returned, depending on whether the passed dimension implements <code>UIResource</code>.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>dimension</code> - The dimension whose width and height should be scaled.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>A new instance of <code>Dimension</code> or <code>DimensionUIResource</code> with scaled width and height.</dd>
+</dl>
 </li>
 </ul>
 <a id="scale(java.awt.Rectangle)">
@@ -544,6 +578,12 @@ extends java.lang.Object</pre>
  If user scale factor is 1, then the given insets is simply returned.
  Otherwise, a new instance of <code>Insets</code> or <code>InsetsUIResource</code>
  is returned, depending on whether the passed dimension implements <code>UIResource</code>.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>insets</code> - The insets whose top, left, bottom and right values should be scaled.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>A new instance of <code>Insets</code> or <code>InsetsUIResource</code> with scaled values.</dd>
+</dl>
 </li>
 </ul>
 </li>
