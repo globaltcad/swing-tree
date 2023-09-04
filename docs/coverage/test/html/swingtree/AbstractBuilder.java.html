@@ -162,31 +162,41 @@ import java.util.function.Supplier;
 
     /**
      *  The component wrapped by this builder node.
+     *
+     *  @throws IllegalStateException if this method is called from a thread other than the EDT
+     *                                and this UI is configured to be decoupled from the application thread.
+     *                                See {@link UI#use(EventProcessor, Supplier)}.
+     *  @return The component wrapped by this builder node.
      */
     public final C getComponent() {
-<span class="fc bfc" id="L167" title="All 2 branches covered.">        boolean isCoupled       = _eventProcessor == EventProcessor.COUPLED;</span>
-<span class="fc bfc" id="L168" title="All 2 branches covered.">        boolean isCoupledStrict = _eventProcessor == EventProcessor.COUPLED_STRICT;</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">        boolean isCoupled       = _eventProcessor == EventProcessor.COUPLED;</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">        boolean isCoupledStrict = _eventProcessor == EventProcessor.COUPLED_STRICT;</span>
 
-<span class="fc bfc" id="L170" title="All 6 branches covered.">        if ( !isCoupled &amp;&amp; !isCoupledStrict &amp;&amp; !UI.thisIsUIThread() )</span>
-<span class="fc" id="L171">            throw new IllegalStateException(</span>
+<span class="fc bfc" id="L175" title="All 6 branches covered.">        if ( !isCoupled &amp;&amp; !isCoupledStrict &amp;&amp; !UI.thisIsUIThread() )</span>
+<span class="fc" id="L176">            throw new IllegalStateException(</span>
                     &quot;This UI is configured to be decoupled from the application thread, &quot; +
                     &quot;which means that it can only be modified from the EDT. &quot; +
                     &quot;Please use 'UI.run(()-&gt;...)' method to execute your modifications on the EDT.&quot;
                 );
-<span class="fc" id="L176">        return _component.get();</span>
+<span class="fc" id="L181">        return _component.get();</span>
     }
 
     /**
      *  The optional component wrapped by this builder node.
+     *
+     * @return An {@link OptionalUI} wrapping a component or null.
+     *         This optional will throw an exception if the
+     *         application has an application thread (see {@link UI#use(EventProcessor, Supplier)})
+     *         and this method is called from a thread other than the EDT.
      */
-<span class="fc" id="L182">    public final OptionalUI&lt;C&gt; component() { return OptionalUI.ofNullable(_component.get()); }</span>
+<span class="fc" id="L192">    public final OptionalUI&lt;C&gt; component() { return OptionalUI.ofNullable(_component.get()); }</span>
 
     /**
      *  The type class of the component wrapped by this builder node.
      *  See documentation for method &quot;build&quot; for more information.
      * @return The type class of the component wrapped by this builder node.
      */
-<span class="nc" id="L189">    public final Class&lt;C&gt; getType() { return _type; }</span>
+<span class="nc" id="L199">    public final Class&lt;C&gt; getType() { return _type; }</span>
 
     /**
      *  Use this if you wish to access the component wrapped by this builder directly.
@@ -208,8 +218,8 @@ import java.util.function.Supplier;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I peek( Peeker&lt;C&gt; action ) {
-<span class="fc" id="L211">        action.accept(getComponent());</span>
-<span class="fc" id="L212">        return _this();</span>
+<span class="fc" id="L221">        action.accept(getComponent());</span>
+<span class="fc" id="L222">        return _this();</span>
     }
 
     /**
@@ -243,10 +253,10 @@ import java.util.function.Supplier;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I applyIf( boolean condition, Consumer&lt;I&gt; building ) {
-<span class="fc" id="L246">        NullUtil.nullArgCheck(building, &quot;building&quot;, Consumer.class);</span>
-<span class="fc" id="L247">        I builder = _this();</span>
-<span class="fc bfc" id="L248" title="All 2 branches covered.">        if ( condition ) building.accept(builder);</span>
-<span class="fc" id="L249">        return builder;</span>
+<span class="fc" id="L256">        NullUtil.nullArgCheck(building, &quot;building&quot;, Consumer.class);</span>
+<span class="fc" id="L257">        I builder = _this();</span>
+<span class="fc bfc" id="L258" title="All 2 branches covered.">        if ( condition ) building.accept(builder);</span>
+<span class="fc" id="L259">        return builder;</span>
     }
 
 
@@ -265,10 +275,10 @@ import java.util.function.Supplier;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I applyIfPresent( Optional&lt;Consumer&lt;I&gt;&gt; building ) {
-<span class="fc" id="L268">        NullUtil.nullArgCheck(building, &quot;building&quot;, Optional.class);</span>
-<span class="fc" id="L269">        I builder = _this();</span>
-<span class="pc" id="L270">        building.ifPresent( buildingLambda -&gt; buildingLambda.accept(builder) );</span>
-<span class="fc" id="L271">        return builder;</span>
+<span class="fc" id="L278">        NullUtil.nullArgCheck(building, &quot;building&quot;, Optional.class);</span>
+<span class="fc" id="L279">        I builder = _this();</span>
+<span class="pc" id="L280">        building.ifPresent( buildingLambda -&gt; buildingLambda.accept(builder) );</span>
+<span class="fc" id="L281">        return builder;</span>
     }
 
     /**
@@ -307,8 +317,8 @@ import java.util.function.Supplier;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I apply( Consumer&lt;I&gt; building ) {
-<span class="fc" id="L310">        NullUtil.nullArgCheck(building, &quot;building&quot;, Consumer.class);</span>
-<span class="fc" id="L311">        return applyIf(true, building);</span>
+<span class="fc" id="L320">        NullUtil.nullArgCheck(building, &quot;building&quot;, Consumer.class);</span>
+<span class="fc" id="L321">        return applyIf(true, building);</span>
     }
 
     /**
@@ -346,8 +356,8 @@ import java.util.function.Supplier;
      * @return The result of the building process, namely: a type of JComponent.
      */
     public &lt;T extends C&gt; T get( Class&lt;T&gt; type ) {
-<span class="pc bpc" id="L349" title="2 of 6 branches missed.">        assert type == _type || type.isAssignableFrom(_type);</span>
-<span class="fc" id="L350">        return (T) _component.get();</span>
+<span class="pc bpc" id="L359" title="2 of 6 branches missed.">        assert type == _type || type.isAssignableFrom(_type);</span>
+<span class="fc" id="L360">        return (T) _component.get();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

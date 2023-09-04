@@ -186,21 +186,22 @@ public class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIForAnySw
      * For more information see {@link JComboBox#addActionListener(ActionListener)}.
      * &lt;p&gt;
      * @param action The {@link Action} that will be notified.
+     * @return This very builder instance, which allows for method chaining.
      **/
     public UIForCombo&lt;E,C&gt; onEnter( Action&lt;ComponentDelegate&lt;C, ActionEvent&gt;&gt; action ) {
-<span class="nc" id="L191">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="nc" id="L192">        C combo = (C) getComponent();</span>
-<span class="nc" id="L193">        _onEnter(e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( combo, e, this::getSiblinghood ))) );</span>
-<span class="nc" id="L194">        return this;</span>
+<span class="nc" id="L192">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="nc" id="L193">        C combo = (C) getComponent();</span>
+<span class="nc" id="L194">        _onEnter(e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( combo, e, this::getSiblinghood ))) );</span>
+<span class="nc" id="L195">        return this;</span>
     }
 
     private void _onEnter( Consumer&lt;ActionEvent&gt; consumer ) {
-<span class="nc" id="L198">        Component editor = getComponent().getEditor().getEditorComponent();</span>
-<span class="nc bnc" id="L199" title="All 2 branches missed.">        if ( editor instanceof JTextField ) {</span>
-<span class="nc" id="L200">            JTextField field = (JTextField) editor;</span>
-<span class="nc" id="L201">            UI.of(field).onEnter( it -&gt; consumer.accept(it.getEvent()) );</span>
+<span class="nc" id="L199">        Component editor = getComponent().getEditor().getEditorComponent();</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">        if ( editor instanceof JTextField ) {</span>
+<span class="nc" id="L201">            JTextField field = (JTextField) editor;</span>
+<span class="nc" id="L202">            UI.of(field).onEnter( it -&gt; consumer.accept(it.getEvent()) );</span>
         }
-<span class="nc" id="L203">    }</span>
+<span class="nc" id="L204">    }</span>
 
     /**
      *  Use this to enable or disable editing for the wrapped UI component.
@@ -209,8 +210,8 @@ public class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIForAnySw
      * @return This very instance, which enables builder-style method chaining.
      */
     public UIForCombo&lt;E,C&gt; isEditableIf( boolean isEditable ) {
-<span class="fc" id="L212">        getComponent().setEditable(isEditable);</span>
-<span class="fc" id="L213">        return this;</span>
+<span class="fc" id="L213">        getComponent().setEditable(isEditable);</span>
+<span class="fc" id="L214">        return this;</span>
     }
 
     /**
@@ -222,8 +223,8 @@ public class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIForAnySw
      * @throws IllegalArgumentException if {@code isEditable} is {@code null}.
      */
     public UIForCombo&lt;E,C&gt; isEditableIf( Var&lt;Boolean&gt; isEditable ) {
-<span class="nc" id="L225">        _onShow( isEditable, this::isEditableIf );</span>
-<span class="nc" id="L226">        return this;</span>
+<span class="nc" id="L226">        _onShow( isEditable, this::isEditableIf );</span>
+<span class="nc" id="L227">        return this;</span>
     }
 
     /**
@@ -234,8 +235,8 @@ public class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIForAnySw
      * @param &lt;V&gt; The type of the value to be rendered.
      */
     public final &lt;V extends E&gt; UIForCombo&lt;E,C&gt; withRenderer( Render.Builder&lt;C,V&gt; renderBuilder ) {
-<span class="fc" id="L237">        NullUtil.nullArgCheck(renderBuilder, &quot;renderBuilder&quot;, Render.Builder.class);</span>
-<span class="fc" id="L238">        return withRenderer((ListCellRenderer&lt;E&gt;) renderBuilder.getForCombo());</span>
+<span class="fc" id="L238">        NullUtil.nullArgCheck(renderBuilder, &quot;renderBuilder&quot;, Render.Builder.class);</span>
+<span class="fc" id="L239">        return withRenderer((ListCellRenderer&lt;E&gt;) renderBuilder.getForCombo());</span>
     }
 
     /**
@@ -243,15 +244,15 @@ public class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIForAnySw
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForCombo&lt;E,C&gt; withModel( ComboBoxModel&lt;E&gt; model ) {
-<span class="pc bpc" id="L246" title="1 of 2 branches missed.">        if ( model instanceof AbstractComboModel )</span>
-<span class="fc" id="L247">            _bindComboModelToEditor((AbstractComboModel&lt;E&gt;) model);</span>
-<span class="fc" id="L248">        getComponent().setModel(model);</span>
-<span class="fc" id="L249">        return this;</span>
+<span class="pc bpc" id="L247" title="1 of 2 branches missed.">        if ( model instanceof AbstractComboModel )</span>
+<span class="fc" id="L248">            _bindComboModelToEditor((AbstractComboModel&lt;E&gt;) model);</span>
+<span class="fc" id="L249">        getComponent().setModel(model);</span>
+<span class="fc" id="L250">        return this;</span>
     }
 
     public final UIForCombo&lt;E,C&gt; withRenderer( ListCellRenderer&lt;E&gt; renderer ) {
-<span class="fc" id="L253">        getComponent().setRenderer(renderer);</span>
-<span class="fc" id="L254">        return this;</span>
+<span class="fc" id="L254">        getComponent().setRenderer(renderer);</span>
+<span class="fc" id="L255">        return this;</span>
     }
 
     /**
@@ -261,23 +262,23 @@ public class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIForAnySw
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForCombo&lt;E,C&gt; withSelectedItem( Var&lt;E&gt; item ) {
-<span class="fc" id="L264">        NullUtil.nullArgCheck(item, &quot;item&quot;, Var.class);</span>
-<span class="fc" id="L265">        ComboBoxModel&lt;E&gt; model = getComponent().getModel();</span>
-<span class="pc bpc" id="L266" title="1 of 2 branches missed.">        if ( model instanceof AbstractComboModel )</span>
-<span class="fc" id="L267">            withModel(((AbstractComboModel&lt;E&gt;)model).withVar(item));</span>
+<span class="fc" id="L265">        NullUtil.nullArgCheck(item, &quot;item&quot;, Var.class);</span>
+<span class="fc" id="L266">        ComboBoxModel&lt;E&gt; model = getComponent().getModel();</span>
+<span class="pc bpc" id="L267" title="1 of 2 branches missed.">        if ( model instanceof AbstractComboModel )</span>
+<span class="fc" id="L268">            withModel(((AbstractComboModel&lt;E&gt;)model).withVar(item));</span>
         else {
             // The user has a custom model AND wants to bind to a property:
-<span class="nc" id="L270">            _onShow( item, this::_setSelectedItem );</span>
-<span class="nc" id="L271">            _onSelection(</span>
-<span class="nc" id="L272">                e -&gt; _doApp( (E)getComponent().getSelectedItem(), item::act )</span>
+<span class="nc" id="L271">            _onShow( item, this::_setSelectedItem );</span>
+<span class="nc" id="L272">            _onSelection(</span>
+<span class="nc" id="L273">                e -&gt; _doApp( (E)getComponent().getSelectedItem(), item::act )</span>
             );
         }
-<span class="fc" id="L275">        return withSelectedItem(item.get());</span>
+<span class="fc" id="L276">        return withSelectedItem(item.get());</span>
     }
 
     public final UIForCombo&lt;E,C&gt; withSelectedItem( E item ) {
-<span class="fc" id="L279">        _setSelectedItem(item);</span>
-<span class="fc" id="L280">        return this;</span>
+<span class="fc" id="L280">        _setSelectedItem(item);</span>
+<span class="fc" id="L281">        return this;</span>
     }
 
     private void _setSelectedItem( E item ) {
@@ -285,47 +286,47 @@ public class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIForAnySw
         // This is a problem, because we don't want to trigger the action listener.
         // So we temporarily remove the action listener(s), and then add them back.
         // 1. Get the action listener(s)
-<span class="fc" id="L288">        Component editor = getComponent().getEditor().getEditorComponent();</span>
-<span class="fc" id="L289">        AbstractDocument abstractDocument = null;</span>
-<span class="fc" id="L290">        ActionListener[]   listeners    = getComponent().getActionListeners();</span>
-<span class="fc" id="L291">        DocumentListener[] docListeners = {};</span>
-<span class="pc bpc" id="L292" title="1 of 2 branches missed.">        if ( editor instanceof JTextField ) {</span>
-<span class="fc" id="L293">            JTextField field = (JTextField) editor;</span>
-<span class="fc" id="L294">            Document doc = field.getDocument();</span>
-<span class="pc bpc" id="L295" title="1 of 2 branches missed.">            if ( doc instanceof AbstractDocument ) {</span>
-<span class="fc" id="L296">                abstractDocument = (AbstractDocument) doc;</span>
-<span class="fc" id="L297">                docListeners = ((AbstractDocument)doc).getDocumentListeners();</span>
+<span class="fc" id="L289">        Component editor = getComponent().getEditor().getEditorComponent();</span>
+<span class="fc" id="L290">        AbstractDocument abstractDocument = null;</span>
+<span class="fc" id="L291">        ActionListener[]   listeners    = getComponent().getActionListeners();</span>
+<span class="fc" id="L292">        DocumentListener[] docListeners = {};</span>
+<span class="pc bpc" id="L293" title="1 of 2 branches missed.">        if ( editor instanceof JTextField ) {</span>
+<span class="fc" id="L294">            JTextField field = (JTextField) editor;</span>
+<span class="fc" id="L295">            Document doc = field.getDocument();</span>
+<span class="pc bpc" id="L296" title="1 of 2 branches missed.">            if ( doc instanceof AbstractDocument ) {</span>
+<span class="fc" id="L297">                abstractDocument = (AbstractDocument) doc;</span>
+<span class="fc" id="L298">                docListeners = ((AbstractDocument)doc).getDocumentListeners();</span>
             }
         }
 
         // 2. Remove them
-<span class="pc bpc" id="L302" title="1 of 2 branches missed.">        for ( ActionListener listener : listeners )</span>
-<span class="nc" id="L303">            getComponent().removeActionListener(listener);</span>
-<span class="pc bpc" id="L304" title="1 of 2 branches missed.">        if ( abstractDocument != null ) {</span>
-<span class="fc bfc" id="L305" title="All 2 branches covered.">            for (DocumentListener listener : docListeners) {</span>
-<span class="fc" id="L306">                abstractDocument.removeDocumentListener(listener);</span>
+<span class="pc bpc" id="L303" title="1 of 2 branches missed.">        for ( ActionListener listener : listeners )</span>
+<span class="nc" id="L304">            getComponent().removeActionListener(listener);</span>
+<span class="pc bpc" id="L305" title="1 of 2 branches missed.">        if ( abstractDocument != null ) {</span>
+<span class="fc bfc" id="L306" title="All 2 branches covered.">            for (DocumentListener listener : docListeners) {</span>
+<span class="fc" id="L307">                abstractDocument.removeDocumentListener(listener);</span>
             }
         }
 
         try {
             // 3. Set the selected item
-<span class="fc" id="L312">            getComponent().setSelectedItem(item);</span>
+<span class="fc" id="L313">            getComponent().setSelectedItem(item);</span>
             // 3.1 We make sure the editor also gets an update!
-<span class="fc" id="L314">            getComponent().getEditor().setItem(item);</span>
+<span class="fc" id="L315">            getComponent().getEditor().setItem(item);</span>
 
-<span class="nc" id="L316">        } catch ( Exception e ) {</span>
-<span class="nc" id="L317">            throw new RuntimeException(e);</span>
-<span class="fc" id="L318">        }</span>
+<span class="nc" id="L317">        } catch ( Exception e ) {</span>
+<span class="nc" id="L318">            throw new RuntimeException(e);</span>
+<span class="fc" id="L319">        }</span>
 
         // 4. Add them back
-<span class="pc bpc" id="L321" title="1 of 2 branches missed.">        for ( ActionListener listener : listeners )</span>
-<span class="nc" id="L322">            getComponent().addActionListener(listener);</span>
-<span class="pc bpc" id="L323" title="1 of 2 branches missed.">        if ( abstractDocument != null ) {</span>
-<span class="fc bfc" id="L324" title="All 2 branches covered.">            for (DocumentListener listener : docListeners) {</span>
-<span class="fc" id="L325">                abstractDocument.addDocumentListener(listener);</span>
+<span class="pc bpc" id="L322" title="1 of 2 branches missed.">        for ( ActionListener listener : listeners )</span>
+<span class="nc" id="L323">            getComponent().addActionListener(listener);</span>
+<span class="pc bpc" id="L324" title="1 of 2 branches missed.">        if ( abstractDocument != null ) {</span>
+<span class="fc bfc" id="L325" title="All 2 branches covered.">            for (DocumentListener listener : docListeners) {</span>
+<span class="fc" id="L326">                abstractDocument.addDocumentListener(listener);</span>
             }
         }
-<span class="fc" id="L328">    }</span>
+<span class="fc" id="L329">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -5,6 +5,8 @@ import swingtree.UI;
 import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.Map;
 
 /**
@@ -16,53 +18,65 @@ import java.util.Map;
 public class JIcon extends JLabel
 {
     public JIcon(String path) {
-<span class="fc" id="L19">        super(_getFromCacheOrLoadFrom(path));</span>
-<span class="fc" id="L20">        updateUI();</span>
-<span class="fc" id="L21">    }</span>
+<span class="fc" id="L21">        super(_getFromCacheOrLoadFrom(path));</span>
+<span class="fc" id="L22">        updateUI();</span>
+<span class="fc" id="L23">    }</span>
 
     public JIcon(Icon icon) {
-<span class="fc" id="L24">        super(icon);</span>
-<span class="fc" id="L25">        updateUI();</span>
-<span class="fc" id="L26">    }</span>
+<span class="fc" id="L26">        super(icon);</span>
+<span class="fc" id="L27">        updateUI();</span>
+<span class="fc" id="L28">    }</span>
 
     public JIcon(Icon icon, String text, int horizontalAlignment) {
-<span class="nc" id="L29">        super(text, icon, horizontalAlignment);</span>
-<span class="nc" id="L30">        updateUI();</span>
-<span class="nc" id="L31">    }</span>
+<span class="nc" id="L31">        super(text, icon, horizontalAlignment);</span>
+<span class="nc" id="L32">        updateUI();</span>
+<span class="nc" id="L33">    }</span>
 
     public JIcon(String text, int horizontalAlignment) {
-<span class="nc" id="L34">        super(text, horizontalAlignment);</span>
-<span class="nc" id="L35">        updateUI();</span>
-<span class="nc" id="L36">    }</span>
+<span class="nc" id="L36">        super(text, horizontalAlignment);</span>
+<span class="nc" id="L37">        updateUI();</span>
+<span class="nc" id="L38">    }</span>
 
     public JIcon(String path, String text) {
-<span class="nc" id="L39">        super(text, _getFromCacheOrLoadFrom(path), CENTER);</span>
-<span class="nc" id="L40">        updateUI();</span>
-<span class="nc" id="L41">    }</span>
+<span class="nc" id="L41">        super(text, _getFromCacheOrLoadFrom(path), CENTER);</span>
+<span class="nc" id="L42">        updateUI();</span>
+<span class="nc" id="L43">    }</span>
 
     public JIcon() {
-<span class="nc" id="L44">        super();</span>
-<span class="nc" id="L45">        updateUI();</span>
-<span class="nc" id="L46">    }</span>
+<span class="nc" id="L46">        super();</span>
+<span class="nc" id="L47">        updateUI();</span>
+<span class="nc" id="L48">    }</span>
+
+    /** {@inheritDoc} */
+    @Override public void paint(Graphics g){
+<span class="fc" id="L52">        ComponentExtension.from(this).paintBackgroundStyle( g );</span>
+<span class="fc" id="L53">        super.paint(g);</span>
+<span class="fc" id="L54">    }</span>
+
+    /** {@inheritDoc} */
+    @Override public void paintChildren(Graphics g){
+<span class="fc" id="L58">        super.paintChildren(g);</span>
+<span class="fc" id="L59">        ComponentExtension.from(this).paintForegroundStyle( (Graphics2D) g );</span>
+<span class="fc" id="L60">    }</span>
 
     @Override
     public void updateUI() {
-<span class="fc" id="L50">        ComponentExtension.from(this).updateUI();</span>
+<span class="fc" id="L64">        ComponentExtension.from(this).updateUI();</span>
         /*
             The JIcon is a SwingTree native component type, so it also
             enjoys the perks of having a SwingTree based look and feel!
         */
-<span class="fc" id="L55">    }</span>
+<span class="fc" id="L69">    }</span>
 
     private static ImageIcon _getFromCacheOrLoadFrom( String path ) {
-<span class="fc" id="L58">        Map&lt;String, ImageIcon&gt; cache = SwingTree.get().getIconCache();</span>
-<span class="fc" id="L59">        ImageIcon icon = cache.get(path);</span>
-<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        if ( icon == null ) {</span>
-<span class="fc" id="L61">            icon = UI.findIcon(path).orElse(null);</span>
-<span class="pc bpc" id="L62" title="1 of 2 branches missed.">            if ( icon != null )</span>
-<span class="fc" id="L63">                cache.put(path, icon);</span>
+<span class="fc" id="L72">        Map&lt;String, ImageIcon&gt; cache = SwingTree.get().getIconCache();</span>
+<span class="fc" id="L73">        ImageIcon icon = cache.get(path);</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        if ( icon == null ) {</span>
+<span class="fc" id="L75">            icon = UI.findIcon(path).orElse(null);</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">            if ( icon != null )</span>
+<span class="fc" id="L77">                cache.put(path, icon);</span>
         }
-<span class="fc" id="L65">        return icon;</span>
+<span class="fc" id="L79">        return icon;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -22,7 +22,8 @@ public final class LifeTime
      * @return A new schedule that will start immediately and run for the given duration.
      */
     public static LifeTime of( long time, TimeUnit unit ) {
-<span class="fc" id="L25">        return new LifeTime(0, unit.toMillis(time));</span>
+<span class="fc" id="L25">        Objects.requireNonNull(unit);</span>
+<span class="fc" id="L26">        return new LifeTime(0, unit.toMillis(time));</span>
     }
 
     /**
@@ -32,8 +33,8 @@ public final class LifeTime
      * @return A new schedule that will start immediately and run for the given duration.
      */
     public static LifeTime of( double time, TimeUnit unit ) {
-<span class="fc" id="L35">        long millis = _convertTimeFromDoublePrecisely(time, unit, TimeUnit.MILLISECONDS);</span>
-<span class="fc" id="L36">        return new LifeTime(0, millis);</span>
+<span class="fc" id="L36">        long millis = _convertTimeFromDoublePrecisely(time, unit, TimeUnit.MILLISECONDS);</span>
+<span class="fc" id="L37">        return new LifeTime(0, millis);</span>
     }
 
     /**
@@ -45,7 +46,7 @@ public final class LifeTime
      * @return A new schedule that will start after the given delay and run for the given duration.
      */
     public static LifeTime of( long startDelay, TimeUnit startUnit, long duration, TimeUnit durationUnit ) {
-<span class="nc" id="L48">        return new LifeTime(startUnit.toMillis(startDelay), durationUnit.toMillis(duration));</span>
+<span class="nc" id="L49">        return new LifeTime(startUnit.toMillis(startDelay), durationUnit.toMillis(duration));</span>
     }
 
     /**
@@ -57,23 +58,37 @@ public final class LifeTime
      * @return A new schedule that will start after the given delay and run for the given duration.
      */
     public static LifeTime of( double startDelay, TimeUnit startUnit, double duration, TimeUnit durationUnit ) {
-<span class="nc" id="L60">        long startMillis    = _convertTimeFromDoublePrecisely(startDelay, startUnit, TimeUnit.MILLISECONDS);</span>
-<span class="nc" id="L61">        long durationMillis = _convertTimeFromDoublePrecisely(duration, durationUnit, TimeUnit.MILLISECONDS);</span>
-<span class="nc" id="L62">        return new LifeTime(startMillis, durationMillis);</span>
+<span class="nc" id="L61">        long startMillis    = _convertTimeFromDoublePrecisely(startDelay, startUnit, TimeUnit.MILLISECONDS);</span>
+<span class="nc" id="L62">        long durationMillis = _convertTimeFromDoublePrecisely(duration, durationUnit, TimeUnit.MILLISECONDS);</span>
+<span class="nc" id="L63">        return new LifeTime(startMillis, durationMillis);</span>
     }
 
     private static long _convertTimeFromDoublePrecisely( double time, TimeUnit from, TimeUnit to ) {
-<span class="fc" id="L66">        long millis = (long) (time * from.toMillis(1));</span>
-<span class="fc" id="L67">        long remainderMillis = (long) (time * from.toMillis(1) - millis);</span>
-<span class="fc" id="L68">        return to.convert(millis + remainderMillis, TimeUnit.MILLISECONDS);</span>
+<span class="fc" id="L67">        long millis = (long) (time * from.toMillis(1));</span>
+<span class="fc" id="L68">        long remainderMillis = (long) (time * from.toMillis(1) - millis);</span>
+<span class="fc" id="L69">        return to.convert(millis + remainderMillis, TimeUnit.MILLISECONDS);</span>
     }
 
 
-<span class="fc" id="L72">    private LifeTime( long delay, long duration ) {</span>
-<span class="fc" id="L73">        _delay     = delay;</span>
-<span class="fc" id="L74">        _duration  = duration;</span>
-<span class="fc" id="L75">        _startTime = System.currentTimeMillis() + _delay;</span>
-<span class="fc" id="L76">    }</span>
+<span class="fc" id="L73">    private LifeTime( long delay, long duration ) {</span>
+<span class="fc" id="L74">        _delay     = delay;</span>
+<span class="fc" id="L75">        _duration  = duration;</span>
+<span class="fc" id="L76">        _startTime = System.currentTimeMillis() + _delay;</span>
+<span class="fc" id="L77">    }</span>
+
+    /**
+     *  Creates a new schedule that will start after the given delay and run for the given duration.
+     * @param delay The delay after which the animation should start.
+     * @param unit The time unit of the delay.
+     * @return A new schedule that will start after the given delay.
+     */
+    public LifeTime startingIn( long delay, TimeUnit unit ) {
+<span class="nc" id="L86">        long offset = unit.toMillis( delay );</span>
+<span class="nc" id="L87">        return LifeTime.of(</span>
+                    offset,    TimeUnit.MILLISECONDS,
+                    _duration, TimeUnit.MILLISECONDS
+                );
+    }
 
     /**
      *  Returns the duration of the animation in the given time unit.
@@ -81,8 +96,8 @@ public final class LifeTime
      * @return The duration of the animation.
      */
     public long getDurationIn( TimeUnit unit ) {
-<span class="fc" id="L84">        Objects.requireNonNull(unit);</span>
-<span class="fc" id="L85">        return unit.convert(_duration, TimeUnit.MILLISECONDS);</span>
+<span class="fc" id="L99">        Objects.requireNonNull(unit);</span>
+<span class="fc" id="L100">        return unit.convert(_duration, TimeUnit.MILLISECONDS);</span>
     }
 
     /**
@@ -91,8 +106,8 @@ public final class LifeTime
      * @return The delay after which the animation should start.
      */
     public long getDelayIn( TimeUnit unit ) {
-<span class="nc" id="L94">        Objects.requireNonNull(unit);</span>
-<span class="nc" id="L95">        return unit.convert(_delay, TimeUnit.MILLISECONDS);</span>
+<span class="nc" id="L109">        Objects.requireNonNull(unit);</span>
+<span class="nc" id="L110">        return unit.convert(_delay, TimeUnit.MILLISECONDS);</span>
     }
 
     /**
@@ -101,8 +116,8 @@ public final class LifeTime
      * @return The time when the animation should start.
      */
     public long getStartTimeIn( TimeUnit unit ) {
-<span class="fc" id="L104">        Objects.requireNonNull(unit);</span>
-<span class="fc" id="L105">        return unit.convert(_startTime, TimeUnit.MILLISECONDS);</span>
+<span class="fc" id="L119">        Objects.requireNonNull(unit);</span>
+<span class="fc" id="L120">        return unit.convert(_startTime, TimeUnit.MILLISECONDS);</span>
     }
 
     /**
@@ -116,30 +131,30 @@ public final class LifeTime
      * @return The end time of the specified iteration in the given time unit.
      */
     public long getIterationEndTimeIn( TimeUnit unit, int iteration ) {
-<span class="nc" id="L119">        Objects.requireNonNull(unit);</span>
-<span class="nc" id="L120">        return unit.convert(_startTime + _duration * iteration, TimeUnit.MILLISECONDS);</span>
+<span class="nc" id="L134">        Objects.requireNonNull(unit);</span>
+<span class="nc" id="L135">        return unit.convert(_startTime + _duration * iteration, TimeUnit.MILLISECONDS);</span>
     }
 
     /**
      * @return {@code true} if the animation is expired, {@code false} otherwise.
      */
     public boolean isExpired() {
-<span class="pc bpc" id="L127" title="1 of 2 branches missed.">        return System.currentTimeMillis() &gt;= _startTime + _duration;</span>
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">        return System.currentTimeMillis() &gt;= _startTime + _duration;</span>
     }
 
     @Override
     public boolean equals( Object o ) {
-<span class="nc bnc" id="L132" title="All 2 branches missed.">        if ( this == o ) return true;</span>
-<span class="nc bnc" id="L133" title="All 2 branches missed.">        if ( !(o instanceof LifeTime) ) return false;</span>
-<span class="nc" id="L134">        LifeTime lifeTime = (LifeTime) o;</span>
-<span class="nc bnc" id="L135" title="All 8 branches missed.">        return _id        == lifeTime._id       &amp;&amp;</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">        if ( this == o ) return true;</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">        if ( !(o instanceof LifeTime) ) return false;</span>
+<span class="nc" id="L149">        LifeTime lifeTime = (LifeTime) o;</span>
+<span class="nc bnc" id="L150" title="All 8 branches missed.">        return _id        == lifeTime._id       &amp;&amp;</span>
                _delay     == lifeTime._delay    &amp;&amp;
                _duration  == lifeTime._duration &amp;&amp;
                _startTime == lifeTime._startTime;
     }
 
     @Override
-<span class="nc" id="L142">    public int hashCode() { return Objects.hash(_id, _delay, _duration, _startTime); }</span>
+<span class="nc" id="L157">    public int hashCode() { return Objects.hash(_id, _delay, _duration, _startTime); }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -80,54 +80,55 @@ abstract class AbstractNestedBuilder&lt;I, C extends E, E extends Component&gt; 
      *  &lt;br&gt;&lt;br&gt;
      *
      * @param component A component instance which ought to be added to the wrapped component type.
+     * @param conf The layout constraint which ought to be used to add the component to the wrapped component type.
      */
     protected abstract void _add( E component, Object conf );
 
     protected final void _doAdd( AbstractNestedBuilder&lt;?, ?, ?&gt; builder, Object conf)
     {
-<span class="fc" id="L88">        NullUtil.nullArgCheck(builder, &quot;builder&quot;, AbstractNestedBuilder.class);</span>
+<span class="fc" id="L89">        NullUtil.nullArgCheck(builder, &quot;builder&quot;, AbstractNestedBuilder.class);</span>
 
-<span class="fc bfc" id="L90" title="All 2 branches covered.">        boolean isCoupled       = _eventProcessor == EventProcessor.COUPLED;</span>
-<span class="fc bfc" id="L91" title="All 2 branches covered.">        boolean isCoupledStrict = _eventProcessor == EventProcessor.COUPLED_STRICT;</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        boolean isCoupled       = _eventProcessor == EventProcessor.COUPLED;</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        boolean isCoupledStrict = _eventProcessor == EventProcessor.COUPLED_STRICT;</span>
 
-<span class="pc bpc" id="L93" title="1 of 6 branches missed.">        if ( !isCoupled &amp;&amp; !isCoupledStrict &amp;&amp; !UI.thisIsUIThread() )</span>
-<span class="nc" id="L94">            throw new IllegalStateException(</span>
+<span class="pc bpc" id="L94" title="1 of 6 branches missed.">        if ( !isCoupled &amp;&amp; !isCoupledStrict &amp;&amp; !UI.thisIsUIThread() )</span>
+<span class="nc" id="L95">            throw new IllegalStateException(</span>
                     &quot;This UI is configured to be decoupled from the application thread, &quot; +
                     &quot;which means that it can only be modified from the EDT. &quot; +
                     &quot;Please use 'UI.run(()-&gt;...)' method to execute your modifications on the EDT.&quot;
                 );
 
-<span class="pc bpc" id="L100" title="1 of 2 branches missed.">        if ( _children.contains(builder) )</span>
-<span class="nc" id="L101">            throw new IllegalArgumentException(&quot;Builder already used!&quot;);</span>
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">        if ( _children.contains(builder) )</span>
+<span class="nc" id="L102">            throw new IllegalArgumentException(&quot;Builder already used!&quot;);</span>
 
-<span class="fc" id="L103">        _children.add(builder);</span>
+<span class="fc" id="L104">        _children.add(builder);</span>
 
-<span class="pc bpc" id="L105" title="1 of 2 branches missed.">        if ( builder._parent != null )</span>
-<span class="nc" id="L106">            throw new IllegalArgumentException(&quot;Builder already used!&quot;);</span>
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">        if ( builder._parent != null )</span>
+<span class="nc" id="L107">            throw new IllegalArgumentException(&quot;Builder already used!&quot;);</span>
 
-<span class="fc" id="L108">        E component = (E) builder.getComponent();</span>
+<span class="fc" id="L109">        E component = (E) builder.getComponent();</span>
 
-<span class="fc" id="L110">        builder._parent = this;</span>
+<span class="fc" id="L111">        builder._parent = this;</span>
 
-<span class="pc bpc" id="L112" title="1 of 2 branches missed.">        if ( component instanceof JComponent ) {</span>
-<span class="fc" id="L113">            JComponent c = (JComponent) component;</span>
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">        if ( component instanceof JComponent ) {</span>
+<span class="fc" id="L114">            JComponent c = (JComponent) component;</span>
 
-<span class="fc bfc" id="L115" title="All 2 branches covered.">            Style style = ( conf != null ? null : ComponentExtension.from(c).calculateStyle() );</span>
-<span class="fc bfc" id="L116" title="All 2 branches covered.">            if ( style != null )</span>
-<span class="fc" id="L117">                conf = style.layout().constraint().orElse(null);</span>
+<span class="fc bfc" id="L116" title="All 2 branches covered.">            Style style = ( conf != null ? null : ComponentExtension.from(c).calculateStyle() );</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">            if ( style != null )</span>
+<span class="fc" id="L118">                conf = style.layout().constraint().orElse(null);</span>
 
-<span class="fc" id="L119">            _add(component, conf);</span>
+<span class="fc" id="L120">            _add(component, conf);</span>
 
-<span class="fc bfc" id="L121" title="All 2 branches covered.">            if ( style != null )</span>
-<span class="fc" id="L122">                ComponentExtension.from(c).applyAndInstallStyle(style, true);</span>
+<span class="fc bfc" id="L122" title="All 2 branches covered.">            if ( style != null )</span>
+<span class="fc" id="L123">                ComponentExtension.from(c).applyAndInstallStyle(style, true);</span>
             else
-<span class="fc" id="L124">                ComponentExtension.from(c).calculateApplyAndInstallStyle(true);</span>
-<span class="fc" id="L125">        }</span>
+<span class="fc" id="L125">                ComponentExtension.from(c).calculateApplyAndInstallStyle(true);</span>
+<span class="fc" id="L126">        }</span>
         else
-<span class="nc" id="L127">            _add(component, conf);</span>
+<span class="nc" id="L128">            _add(component, conf);</span>
 
-<span class="fc" id="L129">        _detachStrongRef(); // Detach strong reference to the component to allow it to be garbage collected.</span>
-<span class="fc" id="L130">    }</span>
+<span class="fc" id="L130">        _detachStrongRef(); // Detach strong reference to the component to allow it to be garbage collected.</span>
+<span class="fc" id="L131">    }</span>
 
     /**
      *  This method provides the same functionality as the other &quot;add&quot; methods.
@@ -136,18 +137,19 @@ abstract class AbstractNestedBuilder&lt;I, C extends E, E extends Component&gt; 
      *  This helps to improve readability, especially when the degree of nesting is very low.
      *
      * @param builders An array of builder instances whose JComponents ought to be added to the one wrapped by this builder.
+     * @param &lt;B&gt; The type of the builder instances which are used to configure the components that will be added to the component wrapped by this builder.
      * @return This very instance, which enables builder-style method chaining.
      */
     @SafeVarargs
     @SuppressWarnings(&quot;varargs&quot;)
     public final &lt;B extends AbstractNestedBuilder&lt;?, ?, JComponent&gt;&gt; I add( B... builders ) {
-<span class="pc bpc" id="L144" title="1 of 2 branches missed.">        if ( builders == null )</span>
-<span class="nc" id="L145">            throw new IllegalArgumentException(&quot;Swing tree builders may not be null!&quot;);</span>
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">        if ( builders == null )</span>
+<span class="nc" id="L147">            throw new IllegalArgumentException(&quot;Swing tree builders may not be null!&quot;);</span>
 
-<span class="fc bfc" id="L147" title="All 2 branches covered.">        for ( AbstractNestedBuilder&lt;?, ?, ?&gt; b : builders )</span>
-<span class="fc" id="L148">            _doAdd( b, null );</span>
+<span class="fc bfc" id="L149" title="All 2 branches covered.">        for ( AbstractNestedBuilder&lt;?, ?, ?&gt; b : builders )</span>
+<span class="fc" id="L150">            _doAdd( b, null );</span>
 
-<span class="fc" id="L150">        return _this();</span>
+<span class="fc" id="L152">        return _this();</span>
     }
 
     /**
@@ -160,13 +162,13 @@ abstract class AbstractNestedBuilder&lt;I, C extends E, E extends Component&gt; 
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I add( List&lt;E&gt; components ) {
-<span class="fc bfc" id="L163" title="All 2 branches covered.">        for ( E component : components )</span>
-<span class="fc" id="L164">            _doAdd(UI.of((JComponent) component), null);</span>
+<span class="fc bfc" id="L165" title="All 2 branches covered.">        for ( E component : components )</span>
+<span class="fc" id="L166">            _doAdd(UI.of((JComponent) component), null);</span>
 
-<span class="fc" id="L166">        return _this();</span>
+<span class="fc" id="L168">        return _this();</span>
     }
 
-<span class="fc" id="L169">    protected final int _childCount() { return _children.size(); }</span>
+<span class="fc" id="L171">    protected final int _childCount() { return _children.size(); }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

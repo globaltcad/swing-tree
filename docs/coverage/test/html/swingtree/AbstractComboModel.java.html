@@ -86,7 +86,7 @@ abstract class AbstractComboModel&lt;E&gt; implements ComboBoxModel&lt;E&gt;
     void doQuietly( Runnable task ) {
 <span class="fc bfc" id="L87" title="All 2 branches covered.">    	boolean alreadyWithinQuietTask = !_acceptsEditorChanges;</span>
 <span class="fc" id="L88">		_acceptsEditorChanges = false;</span>
-<span class="fc" id="L89">		try { task.run(); } catch ( Exception e ) { e.printStackTrace(); }</span>
+<span class="pc" id="L89">		try { task.run(); } catch ( Exception e ) { e.printStackTrace(); }</span>
 <span class="fc bfc" id="L90" title="All 2 branches covered.">		if ( !alreadyWithinQuietTask )</span>
 <span class="fc" id="L91">			_acceptsEditorChanges = true;</span>
 <span class="fc" id="L92">    }</span>
