@@ -967,24 +967,26 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  to be executed on the EDT.
      *  A single animation iteration may be executed multiple times
      *  for the given duration in order to achieve a smooth transition. &lt;br&gt;
-     *  Here an example of how to use this method:
+     *  Here an example of how to use this method
+     *  on a &quot;Save&quot; button:
      *  &lt;pre&gt;{@code
-     *    UI.button(&quot;Click me&quot;).withPrefSize(400, 400)
-     *    .onMouseClick( it -&gt; it
-     *        .animateFor(
-     *            UI.lifetime(1, TimeUnit.SECONDS)
-     *            .startingIn( 0.5, TimeUnit.SECONDS )
-     *        )
-     *        .go( myAnimation )
+     *  UI.button(&quot;Save&quot;).withPrefSize(400, 400)
+     *  .onMouseClick( it -&gt; it
+     *    .animateFor(
+     *      UI.lifetime(1, TimeUnit.SECONDS)
+     *      .startingIn( 0.5, TimeUnit.SECONDS )
      *    )
+     *    .go( myAnimation )
+     *  )
+     *  }&lt;/pre&gt;
      *
      *
      *  @param lifeTime The lifetime of the animation.
      *  @param animation The animation that should be executed.
      */
     public final void animateFor( LifeTime lifeTime, Animation animation ) {
-<span class="nc" id="L986">        Animator.animateFor(lifeTime, _component()).go(animation);</span>
-<span class="nc" id="L987">    }</span>
+<span class="nc" id="L988">        Animator.animateFor(lifeTime, _component()).go(animation);</span>
+<span class="nc" id="L989">    }</span>
 
     /**
      *  Use this to schedule and run the provided animation
@@ -997,8 +999,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @param animation The animation that should be executed.
      */
     public final void animateFor( double duration, TimeUnit unit, Animation animation ) {
-<span class="fc" id="L1000">        this.animateFor(duration, unit).go(animation);</span>
-<span class="fc" id="L1001">    }</span>
+<span class="fc" id="L1002">        this.animateFor(duration, unit).go(animation);</span>
+<span class="fc" id="L1003">    }</span>
 
     /**
      *  The number returned by this method is used to scale the UI
@@ -1009,7 +1011,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The current UI scale factor, which is used to scale the UI
      *         for high resolution displays (high dots-per-inch, or DPI).
      */
-<span class="nc" id="L1012">    public float getScale() { return UI.scale(); }</span>
+<span class="nc" id="L1014">    public float getScale() { return UI.scale(); }</span>
 
     /**
      *  The number returned by this method is used to scale the UI
@@ -1020,7 +1022,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The current UI scale factor, which is used to scale the UI
      *         for high resolution displays (high dots-per-inch, or DPI).
      */
-<span class="nc" id="L1023">    public float scale() { return UI.scale(); }</span>
+<span class="nc" id="L1025">    public float scale() { return UI.scale(); }</span>
 
     /**
      *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationState, Painter)})
@@ -1029,7 +1031,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @param value The {@code int} value to scale.
      *  @return The scaled {@code int} value.
      */
-<span class="nc" id="L1032">    public int scale( int value ) { return UI.scale(value); }</span>
+<span class="nc" id="L1034">    public int scale( int value ) { return UI.scale(value); }</span>
 
     /**
      *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationState, Painter)})
@@ -1038,7 +1040,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @param value The {@code float} value to scale.
      *  @return The scaled {@code float} value.
      */
-<span class="nc" id="L1041">    public float scale( float value ) { return UI.scale(value); }</span>
+<span class="nc" id="L1043">    public float scale( float value ) { return UI.scale(value); }</span>
 
     /**
      *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationState, Painter)})
@@ -1047,7 +1049,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @param value The {@code double} value to scale.
      *  @return The scaled {@code double} value.
      */
-<span class="nc" id="L1050">    public double scale( double value ) { return UI.scale(value); }</span>
+<span class="nc" id="L1052">    public double scale( double value ) { return UI.scale(value); }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

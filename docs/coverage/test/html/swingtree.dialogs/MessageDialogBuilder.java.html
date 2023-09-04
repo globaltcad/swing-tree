@@ -22,15 +22,16 @@ public final class MessageDialogBuilder
 <span class="nc" id="L22">    private static final MessageDialogBuilder _ERROR   = get(JOptionPane.ERROR_MESSAGE).title(&quot;Error&quot;);</span>
 
     /**
+     * @param type The type of the dialog (error, warning, info... see {@link JOptionPane#showMessageDialog(Component, Object, String, int, Icon)}).
      * @return A {@link MessageDialogBuilder} instance that is not configured in any way.
      */
-<span class="nc" id="L27">    public static MessageDialogBuilder get( int type ) { return new MessageDialogBuilder(type, &quot;&quot;, &quot;&quot;, null, null); }</span>
+<span class="nc" id="L28">    public static MessageDialogBuilder get( int type ) { return new MessageDialogBuilder(type, &quot;&quot;, &quot;&quot;, null, null); }</span>
 
-<span class="nc" id="L29">    public static MessageDialogBuilder warning() { return _WARNING; }</span>
+<span class="nc" id="L30">    public static MessageDialogBuilder warning() { return _WARNING; }</span>
 
-<span class="nc" id="L31">    public static MessageDialogBuilder info() { return _INFO; }</span>
+<span class="nc" id="L32">    public static MessageDialogBuilder info() { return _INFO; }</span>
 
-<span class="nc" id="L33">    public static MessageDialogBuilder error() { return _ERROR; }</span>
+<span class="nc" id="L34">    public static MessageDialogBuilder error() { return _ERROR; }</span>
 
     private final int       _type;
     private final String    _title;
@@ -45,13 +46,13 @@ public final class MessageDialogBuilder
         String message,
         Icon icon,
         Component parent
-<span class="nc" id="L48">    ) {</span>
-<span class="nc" id="L49">        _type    = type;</span>
-<span class="nc" id="L50">        _title   = title;</span>
-<span class="nc" id="L51">        _message = message;</span>
-<span class="nc" id="L52">        _icon    = icon;</span>
-<span class="nc" id="L53">        _parent  = parent;</span>
-<span class="nc" id="L54">    }</span>
+<span class="nc" id="L49">    ) {</span>
+<span class="nc" id="L50">        _type    = type;</span>
+<span class="nc" id="L51">        _title   = title;</span>
+<span class="nc" id="L52">        _message = message;</span>
+<span class="nc" id="L53">        _icon    = icon;</span>
+<span class="nc" id="L54">        _parent  = parent;</span>
+<span class="nc" id="L55">    }</span>
 
     /**
      *  Set the title of the dialog.
@@ -59,7 +60,7 @@ public final class MessageDialogBuilder
      *  @return A new {@link MessageDialogBuilder} instance with the specified title.
      */
     public MessageDialogBuilder title( String title ) {
-<span class="nc" id="L62">        return new MessageDialogBuilder(_type, title, _message, _icon, _parent);</span>
+<span class="nc" id="L63">        return new MessageDialogBuilder(_type, title, _message, _icon, _parent);</span>
     }
 
     /**
@@ -68,7 +69,7 @@ public final class MessageDialogBuilder
      *  @return A new {@link MessageDialogBuilder} instance with the specified message.
      */
     public MessageDialogBuilder message(String message ) {
-<span class="nc" id="L71">        return new MessageDialogBuilder(_type, _title, message, _icon, _parent);</span>
+<span class="nc" id="L72">        return new MessageDialogBuilder(_type, _title, message, _icon, _parent);</span>
     }
 
     /**
@@ -77,7 +78,7 @@ public final class MessageDialogBuilder
      *  @return A new {@link MessageDialogBuilder} instance with the specified icon.
      */
     public MessageDialogBuilder icon(Icon icon ) {
-<span class="nc" id="L80">        return new MessageDialogBuilder(_type, _title, _message, icon, _parent);</span>
+<span class="nc" id="L81">        return new MessageDialogBuilder(_type, _title, _message, icon, _parent);</span>
     }
 
     /**
@@ -86,22 +87,22 @@ public final class MessageDialogBuilder
      *  @return A new {@link MessageDialogBuilder} instance with the specified parent.
      */
     public MessageDialogBuilder parent(Component parent ) {
-<span class="nc" id="L89">        return new MessageDialogBuilder(_type, _title, _message, _icon, parent);</span>
+<span class="nc" id="L90">        return new MessageDialogBuilder(_type, _title, _message, _icon, parent);</span>
     }
 
     /**
      *  Show the dialog with the specified configuration.
      */
     public void show() {
-<span class="nc" id="L96">        UI.run(() -&gt; {</span>
-<span class="nc" id="L97">            JOptionPane.showMessageDialog(</span>
+<span class="nc" id="L97">        UI.run(() -&gt; {</span>
+<span class="nc" id="L98">            JOptionPane.showMessageDialog(</span>
                 _parent,  // parent component, if this is not null then the dialog will be centered on it
                 _message, // message to display
                 _title,   // title of the dialog displayed in the title bar of the dialog window
                 _type,    // type of the dialog (error, warning, info...)
                 _icon     // icon to display in the dialog
             );
-<span class="nc" id="L104">        });</span>
-<span class="nc" id="L105">    }</span>
+<span class="nc" id="L105">        });</span>
+<span class="nc" id="L106">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
