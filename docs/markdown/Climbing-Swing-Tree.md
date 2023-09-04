@@ -414,13 +414,13 @@ Which is based on the following code:
 ```java
   button("I turn green when you hover over me")
   .onMouseEnter( it -> 
-      it.animateOnce(0.5, TimeUnit.SECONDS, state -> {
+      it.animateFor(0.5, TimeUnit.SECONDS, state -> {
           double highlight = 1 - state.progress() * 0.5;
           it.setBackgroundColor(highlight, 1, highlight);
       })
   )
   .onMouseExit( it ->
-      it.animateOnce(0.5, TimeUnit.SECONDS, state -> {
+      it.animateFor(0.5, TimeUnit.SECONDS, state -> {
           double highlight = 0.5 + state.progress() * 0.5;
           it.setBackgroundColor(highlight, 1f, highlight);
       })
@@ -428,7 +428,7 @@ Which is based on the following code:
 ```
 
 As you can see, animations are very easy to create, 
-especially when you use the `animateOnce` method
+especially when you use the `animateFor` method
 on the previously
 mentioned event/component delegate object, 
 which in the above example
@@ -466,7 +466,7 @@ Which is based on this code:
 
 ```java
   button("I have a click ripple effect")
-  .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
+  .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, state -> {
       it.paint(state, g -> {
           g.setColor(new Color(0.1f, 0.25f, 0.5f, (float) state.fadeOut()));
           for ( int i = 0; i < 5; i++ ) {
@@ -493,7 +493,7 @@ here is a more complex example:
 ```java
   button("I show many little mouse move explosions when you move your mouse over me")
   .withPrefHeight(100)
-  .onMouseMove( it -> it.animateOnce(1, TimeUnit.SECONDS, state -> {
+  .onMouseMove( it -> it.animateFor(1, TimeUnit.SECONDS, state -> {
       double r = 30 * state.fadeIn() * it.getScale();
       double x = it.mouseX() - r / 2.0;
       double y = it.mouseY() - r / 2.0;
@@ -502,7 +502,7 @@ here is a more complex example:
           g.fillOval((int) x, (int) y, (int) r, (int) r);
       });
   }))
-  .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
+  .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, state -> {
       double r = 300 * state.fadeIn() * it.getScale();
       double x = it.mouseX() - r / 2;
       double y = it.mouseY() - r / 2;

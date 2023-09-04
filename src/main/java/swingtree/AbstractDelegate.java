@@ -886,7 +886,7 @@ abstract class AbstractDelegate<C extends JComponent>
      *  Here is an example of how to use this method as part of a fancy button animation:
      *  <pre>{@code
      *      UI.button("Click me").withPrefSize(400, 400)
-     *      .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
+     *      .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, state -> {
      *          double r = 300 * state.progress() * it.getScale();
      *          double x = it.mouseX() - r / 2;
      *          double y = it.mouseY() - r / 2;
@@ -918,7 +918,7 @@ abstract class AbstractDelegate<C extends JComponent>
      *  Here is an example of how to use this method as part of a fancy styling animation:
      *  <pre>{@code
      *      UI.button("Click me").withPrefSize(400, 400)
-     *      .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
+     *      .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, state -> {
      *          it.style(state, style -> style
      *              .borderWidth((int)(10 * state.progress()))
      *              .borderColor(new Color(1f, 1f, 0f, (float) (1 - state.progress())))
