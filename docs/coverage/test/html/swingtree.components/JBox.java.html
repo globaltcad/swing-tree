@@ -78,6 +78,18 @@ public class JBox extends JComponent implements Accessible
 <span class="fc" id="L78">        this(true);</span>
 <span class="fc" id="L79">    }</span>
 
+    /** {@inheritDoc} */
+    @Override public void paint(Graphics g){
+<span class="fc" id="L83">        ComponentExtension.from(this).paintBackgroundStyle( g );</span>
+<span class="fc" id="L84">        super.paint(g);</span>
+<span class="fc" id="L85">    }</span>
+
+    /** {@inheritDoc} */
+    @Override public void paintChildren(Graphics g){
+<span class="fc" id="L89">        super.paintChildren(g);</span>
+<span class="fc" id="L90">        ComponentExtension.from(this).paintForegroundStyle( (Graphics2D) g );</span>
+<span class="fc" id="L91">    }</span>
+
     /**
      * Resets the UI property with a value from the current look and feel.
      *
@@ -85,12 +97,12 @@ public class JBox extends JComponent implements Accessible
      */
     @Override
     public void updateUI() {
-<span class="fc" id="L88">        ComponentExtension.from(this).updateUI();</span>
+<span class="fc" id="L100">        ComponentExtension.from(this).updateUI();</span>
         /*
             The JBox is a SwingTree native type, so it also
             enjoys the perks of having a SwingTree look and feel!
         */
-<span class="fc" id="L93">    }</span>
+<span class="fc" id="L105">    }</span>
 
     /**
      * Returns the look and feel (L&amp;amp;amp;F) object that renders this component.
@@ -98,7 +110,7 @@ public class JBox extends JComponent implements Accessible
      * @return the PanelUI object that renders this component
      */
     @Override
-<span class="fc" id="L101">    public PanelUI getUI() { return (PanelUI) ui; }</span>
+<span class="fc" id="L113">    public PanelUI getUI() { return (PanelUI) ui; }</span>
 
 
     /**
@@ -108,8 +120,8 @@ public class JBox extends JComponent implements Accessible
      * @see UIDefaults#getUI
      */
     public void setUI( PanelUI ui ) {
-<span class="fc" id="L111">        super.setUI(ui);</span>
-<span class="fc" id="L112">    }</span>
+<span class="fc" id="L123">        super.setUI(ui);</span>
+<span class="fc" id="L124">    }</span>
 
     /**
      * Returns a string that specifies the name of the L&amp;amp;F class
@@ -119,7 +131,7 @@ public class JBox extends JComponent implements Accessible
      * @see JComponent#getUIClassID
      * @see UIDefaults#getUI
      */
-<span class="nc" id="L122">    @Override public String getUIClassID() { return uiClassID; }</span>
+<span class="nc" id="L134">    @Override public String getUIClassID() { return uiClassID; }</span>
 
     /**
      * Returns a string representation of this JBox. This method
@@ -130,7 +142,7 @@ public class JBox extends JComponent implements Accessible
      *
      * @return  a string representation of this JBox.
      */
-<span class="fc" id="L133">    protected String paramString() { return super.paramString(); }</span>
+<span class="fc" id="L145">    protected String paramString() { return super.paramString(); }</span>
 
 /////////////////
 // Accessibility support
@@ -146,10 +158,10 @@ public class JBox extends JComponent implements Accessible
      *         AccessibleContext of this JBox
      */
     public AccessibleContext getAccessibleContext() {
-<span class="nc bnc" id="L149" title="All 2 branches missed.">        if ( accessibleContext == null )</span>
-<span class="nc" id="L150">            accessibleContext = new AccessibleJBox();</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">        if ( accessibleContext == null )</span>
+<span class="nc" id="L162">            accessibleContext = new AccessibleJBox();</span>
 
-<span class="nc" id="L152">        return accessibleContext;</span>
+<span class="nc" id="L164">        return accessibleContext;</span>
     }
 
     /**
@@ -166,7 +178,7 @@ public class JBox extends JComponent implements Accessible
      * has been added to the &lt;code&gt;java.beans&lt;/code&gt; package.
      * Please see {@link java.beans.XMLEncoder}.
      */
-<span class="nc" id="L169">    protected class AccessibleJBox extends JComponent.AccessibleJComponent {</span>
+<span class="nc" id="L181">    protected class AccessibleJBox extends JComponent.AccessibleJComponent {</span>
 
         /**
          * Get the role of this object.
@@ -174,7 +186,7 @@ public class JBox extends JComponent implements Accessible
          * @return an instance of AccessibleRole describing the role of the
          * object
          */
-<span class="nc" id="L177">        public AccessibleRole getAccessibleRole() { return AccessibleRole.PANEL; }</span>
+<span class="nc" id="L189">        public AccessibleRole getAccessibleRole() { return AccessibleRole.PANEL; }</span>
     }
 }
 

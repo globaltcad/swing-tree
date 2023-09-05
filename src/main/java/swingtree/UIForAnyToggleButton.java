@@ -24,6 +24,8 @@ public abstract class UIForAnyToggleButton<I, B extends JToggleButton> extends U
      * @param state The reference {@link Enum} which this {@link JToggleButton} should represent.
      * @param selection The {@link sprouts.Var} instance which will be used
      *                  to dynamically model the selection state of the wrapped {@link JToggleButton} type.
+     * @param <E> The type of the enum.
+     * @return This builder node.
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final <E extends Enum<E>> I isSelectedIf( E state, Var<E> selection ) {

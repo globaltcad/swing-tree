@@ -20,11 +20,11 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import swingtree.SwingTree
-import swingtree.threading.EventProcessor
 import swingtree.UI
 import swingtree.components.JSplitButton
 import swingtree.examples.advanced.AdvancedUI
 import swingtree.examples.simple.TableUI
+import swingtree.threading.EventProcessor
 import utility.Utility
 
 import javax.swing.*
@@ -261,8 +261,7 @@ class Examples_Spec extends Specification
             Here we will only test the UI.
         """
         given :
-            UIManager.put("defaultFont", new Font("DejaVu Sans", Font.PLAIN, 12))
-            SwingTree.reset()
+            SwingTree.resetUsingDefaultFont(new Font("DejaVu Sans", Font.PLAIN, 12))
             var view = new SomeSettingsView(new SomeSettingsViewModel())
             var speedTextField = new Utility.Query(view).find(JTextField, "speed-text-field").orElse(null)
         expect :
@@ -287,9 +286,6 @@ class Examples_Spec extends Specification
             similarity = Utility.similarityBetween(view, "views/vertical-settings-UI.png")
         then : 'The UI is no longer rendered as expected.'
             similarity < 99
-
-        cleanup:
-            UIManager.put("defaultFont", null)
     }
 
     def 'The spinners example UI defined in the examples can be created.'()

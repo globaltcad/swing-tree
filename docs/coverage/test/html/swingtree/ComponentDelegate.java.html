@@ -20,13 +20,13 @@ import java.util.stream.Collectors;
  *  &lt;pre&gt;{@code
  *      button(&quot;I turn green when you hover over me&quot;)
  *      .onMouseEnter( it -&gt;
- *          it.animateOnce(0.5, TimeUnit.SECONDS, state -&gt; {
+ *          it.animateFor(0.5, TimeUnit.SECONDS, state -&gt; {
  *              double highlight = 1 - state.progress() * 0.5;
  *              it.setBackgroundColor(highlight, 1, highlight);
  *          })
  *      )
  *      .onMouseExit( it -&gt;
- *          it.animateOnce(0.5, TimeUnit.SECONDS, state -&gt; {
+ *          it.animateFor(0.5, TimeUnit.SECONDS, state -&gt; {
  *              double highlight = 0.5 + state.progress() * 0.5;
  *              it.setBackgroundColor(highlight, 1, highlight);
  *          })

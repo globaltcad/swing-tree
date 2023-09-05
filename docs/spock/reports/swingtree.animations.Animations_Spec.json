@@ -2,7 +2,7 @@
   "className":"swingtree.animations.Animations_Spec",
   "title":"Animations",
   "narrative":"Animations are a great way to make your application more interactive and more fun to use.",
-  "subjects":["swingtree.animation.Animate","swingtree.UI","swingtree.animation.LifeTime"],
+  "subjects":["swingtree.animation.Animator","swingtree.UI","swingtree.animation.LifeTime"],
   "statistics":{
     "runs":"4",
     "successRate":"100.0%",
@@ -23,7 +23,7 @@
       "blocks":[
         {"kind":"given","text":"A list which we will use to store the animation states.","code":["var progressValues = [0:[],1:[],2:[]]"]},
 
-        {"kind":"when","text":"We schedule an animation that will run 3 times and has a duration of 0.1 seconds.","code":["UI.schedule(0.1, TimeUnit.SECONDS)","    .asLongAs({ it.currentIteration() < 3 })","    .go({","        progressValues[(int)it.currentIteration()] << it.progress()","    })"]},
+        {"kind":"when","text":"We schedule an animation that will run 3 times and has a duration of 0.1 seconds.","code":["UI.animateFor(0.1, TimeUnit.SECONDS)","    .asLongAs({ it.repeats() < 3 })","    .go({","        progressValues[(int)it.repeats()] << it.progress()","    })"]},
 
         {"kind":"and","text":"We wait for the animation to finish","code":["TimeUnit.MILLISECONDS.sleep(500)"]},
 
@@ -46,7 +46,7 @@
       "blocks":[
         {"kind":"given","text":"","code":["var iterations = [] // An iteration is when the progress goes from 0 to 1","var progresses = [] // The progress of an animation iteration is always between 0 and 1","var cycles = []     // The cycle value reaches 1 when the progress reaches 0.5 and then decreases to 0","var cyclesPlus42 = [] // The cycle value can be offset by any value","var cyclesMinus42 = [] // ..."]},
 
-        {"kind":"when","text":"","code":["var button =","        UI.button(\"Click me! Or don't.\")","        .onClick({","            it.animate(0.05, TimeUnit.SECONDS)","                .asLongAs({ it.currentIteration() < 4 })","                .go(state -> {","                    if ( !iterations.contains(state.currentIteration()) )","                        iterations << state.currentIteration()","                    progresses    << state.progress()","                    cycles        << state.cycle()","                    cyclesPlus42  << state.cyclePlus(0.42)","                    cyclesMinus42 << state.cycleMinus(0.42)","                })","        })","        .get(JButton)"]},
+        {"kind":"when","text":"","code":["var button =","        UI.button(\"Click me! Or don't.\")","        .onClick({","            it.animateFor(0.05, TimeUnit.SECONDS)","                .asLongAs({ it.repeats() < 4 })","                .go(state -> {","                    if ( !iterations.contains(state.repeats()) )","                        iterations << state.repeats()","                    progresses    << state.progress()","                    cycles        << state.cycle()","                    cyclesPlus42  << state.cyclePlus(0.42)","                    cyclesMinus42 << state.cycleMinus(0.42)","                })","        })","        .get(JButton)"]},
 
         {"kind":"and","text":"","code":["TimeUnit.MILLISECONDS.sleep(200)"]},
 
@@ -75,7 +75,7 @@
       "blocks":[
         {"kind":"given","text":"","code":["int wasFinished = 0"]},
 
-        {"kind":"when","text":"","code":["UI.schedule(1, TimeUnit.MILLISECONDS)","  .asLongAs({ it.currentIteration() < 4 })","  .go(new Animation() {","      @Override void run(AnimationState state) {}","      @Override void finish(AnimationState state) { wasFinished++ }","  })"]},
+        {"kind":"when","text":"","code":["UI.animateFor(1, TimeUnit.MILLISECONDS)","  .asLongAs({ it.repeats() < 4 })","  .go(new Animation() {","      @Override void run(AnimationState state) {}","      @Override void finish(AnimationState state) { wasFinished++ }","  })"]},
 
         {"kind":"and","text":"","code":["TimeUnit.MILLISECONDS.sleep(100)"]},
 
@@ -92,7 +92,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"A JLabel that will animate its color when it is clicked.","code":["var label =","        UI.label(\"Some text! :)\")","        .onMouseClick(it -> {","            it.animateOnce(1, TimeUnit.SECONDS, state ->{","                float highlight = (float) (1f - (float) state.progress())","                it.component.setForeground(new Color(highlight, 1, highlight))","              })","        })","        .get(JLabel)"]},
+        {"kind":"given","text":"A JLabel that will animate its color when it is clicked.","code":["var label =","        UI.label(\"Some text! :)\")","        .onMouseClick(it -> {","            it.animateFor(1, TimeUnit.SECONDS, state ->{","                float highlight = (float) (1f - (float) state.progress())","                it.component.setForeground(new Color(highlight, 1, highlight))","              })","        })","        .get(JLabel)"]},
 
         {"kind":"expect","text":"The label text is (almost) black.","code":["label.getForeground().getRed() < 60","label.getForeground().getGreen() < 60","label.getForeground().getBlue() < 60"]},
 

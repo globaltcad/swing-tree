@@ -27,6 +27,7 @@ import swingtree.UI;
 import swingtree.components.action.ButtonClickedActionListener;
 import swingtree.components.action.SplitButtonActionListener;
 import swingtree.components.action.SplitButtonClickedActionListener;
+import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
 import java.awt.*;
@@ -110,6 +111,18 @@ public class JSplitButton extends JButton implements Serializable {
      */
     public JSplitButton() {
         this(null, null);
+    }
+
+    /** {@inheritDoc} */
+    @Override public void paint(Graphics g){
+        ComponentExtension.from(this).paintBackgroundStyle( g );
+        super.paint(g);
+    }
+
+    /** {@inheritDoc} */
+    @Override public void paintChildren(Graphics g){
+        super.paintChildren(g);
+        ComponentExtension.from(this).paintForegroundStyle( (Graphics2D) g );
     }
 
     /**

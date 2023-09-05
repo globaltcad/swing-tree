@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MessageDialogBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.dialogs</a> &gt; <span class="el_source">MessageDialogBuilder.java</span></div><h1>MessageDialogBuilder.java</h1><pre class="source lang-java linenums">package swingtree.dialogs;
+
+import swingtree.UI;
+
+import javax.swing.Icon;
+import javax.swing.JOptionPane;
+import java.awt.Component;
+
+/**
+ *  An immutable builder class for creating simple message dialogs (errors, warnings, infos...)
+ *  based on the {@link JOptionPane} class, more specifically the
+ *  {@link JOptionPane#showMessageDialog(Component, Object, String, int, Icon)}
+ *  method.
+ *  &lt;p&gt;
+ *  This class is intended to be used as part of the {@link UI} API
+ *  by calling the {@link UI#warn()}, {@link UI#error()}, {@link UI#info()} factory methods.
+ */
+public final class MessageDialogBuilder
+{
+<span class="nc" id="L20">    private static final MessageDialogBuilder _WARNING = get(JOptionPane.WARNING_MESSAGE).title(&quot;Warning&quot;);</span>
+<span class="nc" id="L21">    private static final MessageDialogBuilder _INFO    = get(JOptionPane.INFORMATION_MESSAGE).title(&quot;Info&quot;);</span>
+<span class="nc" id="L22">    private static final MessageDialogBuilder _ERROR   = get(JOptionPane.ERROR_MESSAGE).title(&quot;Error&quot;);</span>
+
+    /**
+     * @param type The type of the dialog (error, warning, info... see {@link JOptionPane#showMessageDialog(Component, Object, String, int, Icon)}).
+     * @return A {@link MessageDialogBuilder} instance that is not configured in any way.
+     */
+<span class="nc" id="L28">    public static MessageDialogBuilder get( int type ) { return new MessageDialogBuilder(type, &quot;&quot;, &quot;&quot;, null, null); }</span>
+
+<span class="nc" id="L30">    public static MessageDialogBuilder warning() { return _WARNING; }</span>
+
+<span class="nc" id="L32">    public static MessageDialogBuilder info() { return _INFO; }</span>
+
+<span class="nc" id="L34">    public static MessageDialogBuilder error() { return _ERROR; }</span>
+
+    private final int       _type;
+    private final String    _title;
+    private final String    _message;
+    private final Icon      _icon;
+    private final Component _parent;
+
+
+    private MessageDialogBuilder(
+        int type,
+        String title,
+        String message,
+        Icon icon,
+        Component parent
+<span class="nc" id="L49">    ) {</span>
+<span class="nc" id="L50">        _type    = type;</span>
+<span class="nc" id="L51">        _title   = title;</span>
+<span class="nc" id="L52">        _message = message;</span>
+<span class="nc" id="L53">        _icon    = icon;</span>
+<span class="nc" id="L54">        _parent  = parent;</span>
+<span class="nc" id="L55">    }</span>
+
+    /**
+     *  Set the title of the dialog.
+     *  @param title The title of the dialog.
+     *  @return A new {@link MessageDialogBuilder} instance with the specified title.
+     */
+    public MessageDialogBuilder title( String title ) {
+<span class="nc" id="L63">        return new MessageDialogBuilder(_type, title, _message, _icon, _parent);</span>
+    }
+
+    /**
+     *  Set the message of the dialog.
+     *  @param message The message of the dialog.
+     *  @return A new {@link MessageDialogBuilder} instance with the specified message.
+     */
+    public MessageDialogBuilder message(String message ) {
+<span class="nc" id="L72">        return new MessageDialogBuilder(_type, _title, message, _icon, _parent);</span>
+    }
+
+    /**
+     *  Set the icon of the dialog.
+     *  @param icon The icon of the dialog.
+     *  @return A new {@link MessageDialogBuilder} instance with the specified icon.
+     */
+    public MessageDialogBuilder icon(Icon icon ) {
+<span class="nc" id="L81">        return new MessageDialogBuilder(_type, _title, _message, icon, _parent);</span>
+    }
+
+    /**
+     *  Set the parent of the dialog.
+     *  @param parent The parent of the dialog.
+     *  @return A new {@link MessageDialogBuilder} instance with the specified parent.
+     */
+    public MessageDialogBuilder parent(Component parent ) {
+<span class="nc" id="L90">        return new MessageDialogBuilder(_type, _title, _message, _icon, parent);</span>
+    }
+
+    /**
+     *  Show the dialog with the specified configuration.
+     */
+    public void show() {
+<span class="nc" id="L97">        UI.run(() -&gt; {</span>
+<span class="nc" id="L98">            JOptionPane.showMessageDialog(</span>
+                _parent,  // parent component, if this is not null then the dialog will be centered on it
+                _message, // message to display
+                _title,   // title of the dialog displayed in the title bar of the dialog window
+                _type,    // type of the dialog (error, warning, info...)
+                _icon     // icon to display in the dialog
+            );
+<span class="nc" id="L105">        });</span>
+<span class="nc" id="L106">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

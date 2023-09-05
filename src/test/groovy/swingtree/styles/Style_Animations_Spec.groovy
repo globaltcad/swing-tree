@@ -52,7 +52,7 @@ class Style_Animations_Spec extends Specification
         given : 'We create a simple `JLabel` UI component with a style animation.'
             var label = UI.label("Click me!")
                         .onMouseClick(it ->
-                            it.animateOnce(1, TimeUnit.MINUTES, state ->
+                            it.animateFor(1, TimeUnit.MINUTES, state ->
                                 it.style(state, style -> style
                                     .borderWidth((int) (10 * state.cycle()))
                                     .borderColor(new Color(0, 100,200))
@@ -100,7 +100,7 @@ class Style_Animations_Spec extends Specification
         given : 'We create a simple `JLabel` UI component with a style animation.'
             var label = UI.label("Click me!")
                         .onMouseClick(it ->
-                            it.animateOnce(1, TimeUnit.SECONDS, state ->
+                            it.animateFor(1, TimeUnit.SECONDS, state ->
                                 it.style(state, style -> style
                                     .borderWidth((int) (10 * state.cycle()))
                                     .backgroundColor(new Color(255, 100, 0, (int) (255 * state.cycle())))
@@ -159,7 +159,7 @@ class Style_Animations_Spec extends Specification
         given : 'We create a simple `JButton` UI component with a style animation.'
             var button = UI.button("Click me!")
                         .onClick(it ->
-                            it.animateOnce(300, TimeUnit.MILLISECONDS, state ->
+                            it.animateFor(300, TimeUnit.MILLISECONDS, state ->
                                 it.style(state, style -> style
                                     .border((int) (12 * state.cycle()), Color.RED)
                                     .backgroundColor(new Color(255, 100, 0, (int) (255 * state.cycle())))

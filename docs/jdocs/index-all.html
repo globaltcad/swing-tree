@@ -101,6 +101,8 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UIForAnyTextComponent.AbstractDelegate.html#%3Cinit%3E(javax.swing.text.JTextComponent,javax.swing.text.DocumentFilter.FilterBypass,int,int)">AbstractDelegate(JTextComponent, DocumentFilter.FilterBypass, int, int)</a></span> - Constructor for class swingtree.<a href="swingtree/UIForAnyTextComponent.AbstractDelegate.html" title="class in swingtree">UIForAnyTextComponent.AbstractDelegate</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UI.html#AC()">AC()</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/api/Peeker.html#accept(C)">accept(C)</a></span> - Method in interface swingtree.api.<a href="swingtree/api/Peeker.html" title="interface in swingtree.api">Peeker</a></dt>
 <dd>
 <div class="block">Applies an action to the current component.</div>
@@ -144,6 +146,12 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UIForPopup.html#add(javax.swing.JSeparator)">add(JSeparator)</a></span> - Method in class swingtree.<a href="swingtree/UIForPopup.html" title="class in swingtree">UIForPopup</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UIForAnySwing.html#add(net.miginfocom.layout.CC,B...)">add(CC, B...)</a></span> - Method in class swingtree.<a href="swingtree/UIForAnySwing.html" title="class in swingtree">UIForAnySwing</a></dt>
+<dd>
+<div class="block">Use this to nest builder types into this builder to effectively plug the <code>JComponent</code>s
+  wrapped by the provided builders
+  into the <code>JComponent</code> type wrapped by this builder instance.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UIForAnySwing.html#add(sprouts.Val,swingtree.api.mvvm.ViewSupplier)">add(Val&lt;M&gt;, ViewSupplier&lt;M&gt;)</a></span> - Method in class swingtree.<a href="swingtree/UIForAnySwing.html" title="class in swingtree">UIForAnySwing</a></dt>
 <dd>
 <div class="block">This allows you to dynamically generate a view for the item of a property (usually a property
@@ -255,7 +263,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dt><span class="memberNameLink"><a href="swingtree/style/ComponentExtension.html#addStyling(swingtree.api.Styler)">addStyling(Styler&lt;C&gt;)</a></span> - Method in class swingtree.style.<a href="swingtree/style/ComponentExtension.html" title="class in swingtree.style">ComponentExtension</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/api/model/BasicTableModel.html#addTableModelListener(javax.swing.event.TableModelListener)">addTableModelListener(TableModelListener)</a></span> - Method in interface swingtree.api.model.<a href="swingtree/api/model/BasicTableModel.html" title="interface in swingtree.api.model">BasicTableModel</a></dt>
-<dt><span class="memberNameLink"><a href="swingtree/UI.html#ALIGN(swingtree.UI.Position)">ALIGN(UI.Position)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/UI.html#ALIGN(swingtree.UI.Side)">ALIGN(UI.Side)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#ALIGN_CENTER">ALIGN_CENTER</a></span> - Static variable in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>&nbsp;</dd>
@@ -316,18 +324,48 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <div class="block">Returns a new <a href="swingtree/api/Styler.html" title="interface in swingtree.api"><code>Styler</code></a> that applies the style of this <a href="swingtree/api/Styler.html" title="interface in swingtree.api"><code>Styler</code></a> and then applies the style
  of the given <a href="swingtree/api/Styler.html" title="interface in swingtree.api"><code>Styler</code></a>.</div>
 </dd>
-<dt><a href="swingtree/animation/Animate.html" title="class in swingtree.animation"><span class="typeNameLink">Animate</span></a> - Class in <a href="swingtree/animation/package-summary.html">swingtree.animation</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/UI.html#animateFor(double,java.util.concurrent.TimeUnit)">animateFor(double, TimeUnit)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>
-<div class="block">An API for creating an <a href="swingtree/animation/Animation.html" title="interface in swingtree.animation"><code>Animation</code></a> and defining how it should be executed.</div>
+<div class="block">Exposes a builder API for creating and scheduling periodic animation updates.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UI.html#animateFor(long,java.util.concurrent.TimeUnit)">animateFor(long, TimeUnit)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
+<dd>
+<div class="block">Exposes an API for scheduling periodic animation updates.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="swingtree/animation/Animator.html#animateFor(swingtree.animation.LifeTime)">animateFor(LifeTime)</a></span> - Static method in class swingtree.animation.<a href="swingtree/animation/Animator.html" title="class in swingtree.animation">Animator</a></dt>
+<dd>
+<div class="block">Creates an <a href="swingtree/animation/Animator.html" title="class in swingtree.animation"><code>Animator</code></a> instance which allows you to define the stop condition
+ for an animation as well as an <a href="swingtree/animation/Animation.html" title="interface in swingtree.animation"><code>Animation</code></a> that will be executed
+ when passed to the <a href="swingtree/animation/Animator.html#go(swingtree.animation.Animation)"><code>Animator.go(Animation)</code></a> method.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UI.html#animateFor(swingtree.animation.LifeTime)">animateFor(LifeTime)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
+<dd>
+<div class="block">Exposes an API for scheduling periodic animation updates.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="swingtree/animation/Animator.html#animateFor(swingtree.animation.LifeTime,java.awt.Component)">animateFor(LifeTime, Component)</a></span> - Static method in class swingtree.animation.<a href="swingtree/animation/Animator.html" title="class in swingtree.animation">Animator</a></dt>
+<dd>
+<div class="block">Creates an <a href="swingtree/animation/Animator.html" title="class in swingtree.animation"><code>Animator</code></a> instance which allows you to define the stop condition
+ for an animation as well as an <a href="swingtree/animation/Animation.html" title="interface in swingtree.animation"><code>Animation</code></a> that will be executed
+ when passed to the <a href="swingtree/animation/Animator.html#go(swingtree.animation.Animation)"><code>Animator.go(Animation)</code></a> method.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UI.html#animateFor(swingtree.animation.LifeTime,java.awt.Component)">animateFor(LifeTime, Component)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
+<dd>
+<div class="block">Exposes an API for scheduling periodic animation updates
+ for a specific component whose <code>Component.repaint()</code>
+ method should be called after every animation update.</div>
 </dd>
 <dt><a href="swingtree/animation/Animation.html" title="interface in swingtree.animation"><span class="typeNameLink">Animation</span></a> - Interface in <a href="swingtree/animation/package-summary.html">swingtree.animation</a></dt>
 <dd>
 <div class="block">An animation is a function which is called repeatedly during its lifetime,
- which is determined by a <a href="swingtree/animation/LifeTime.html" title="class in swingtree.animation"><code>LifeTime</code></a> and a <a href="swingtree/animation/StopCondition.html" title="interface in swingtree.animation"><code>StopCondition</code></a>.</div>
+ which is determined by a <a href="swingtree/animation/LifeTime.html" title="class in swingtree.animation"><code>LifeTime</code></a> and a <code>RunCondition</code>.</div>
 </dd>
 <dt><a href="swingtree/animation/AnimationState.html" title="interface in swingtree.animation"><span class="typeNameLink">AnimationState</span></a> - Interface in <a href="swingtree/animation/package-summary.html">swingtree.animation</a></dt>
 <dd>
 <div class="block">The state of an animation at a given point in time.</div>
+</dd>
+<dt><a href="swingtree/animation/Animator.html" title="class in swingtree.animation"><span class="typeNameLink">Animator</span></a> - Class in <a href="swingtree/animation/package-summary.html">swingtree.animation</a></dt>
+<dd>
+<div class="block">An API for creating an <a href="swingtree/animation/Animation.html" title="interface in swingtree.animation"><code>Animation</code></a> and defining how it should be executed.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/SplitButtonDelegate.html#appendToButtonText(java.lang.String)">appendToButtonText(String)</a></span> - Method in class swingtree.<a href="swingtree/SplitButtonDelegate.html" title="class in swingtree">SplitButtonDelegate</a></dt>
 <dd>&nbsp;</dd>
@@ -335,11 +373,6 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/style/ComponentExtension.html#applyAndInstallStyle(swingtree.style.Style,boolean)">applyAndInstallStyle(Style, boolean)</a></span> - Method in class swingtree.style.<a href="swingtree/style/ComponentExtension.html" title="class in swingtree.style">ComponentExtension</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/SwingTree.UIScale.html#applyCustomScaleFactor(javax.swing.plaf.FontUIResource)">applyCustomScaleFactor(FontUIResource)</a></span> - Method in class swingtree.<a href="swingtree/SwingTree.UIScale.html" title="class in swingtree">SwingTree.UIScale</a></dt>
-<dd>
-<div class="block">Applies a custom scale factor given in system property "swingtree.uiScale"
- to the given font.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="swingtree/style/ComponentExtension.html#applyStyleToComponentState(swingtree.style.Style,boolean)">applyStyleToComponentState(Style, boolean)</a></span> - Method in class swingtree.style.<a href="swingtree/style/ComponentExtension.html" title="class in swingtree.style">ComponentExtension</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/style/StyleSheet.html#applyTo(javax.swing.JComponent)">applyTo(JComponent)</a></span> - Method in class swingtree.style.<a href="swingtree/style/StyleSheet.html" title="class in swingtree.style">StyleSheet</a></dt>
@@ -358,7 +391,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <div class="block">Specify a lambda which receives a <a href="swingtree/Render.Cell.html" title="interface in swingtree"><code>Render.Cell</code></a> instance
         and return a <code>Component</code> which is then used to render the cell.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="swingtree/animation/Animate.html#asLongAs(java.util.function.Predicate)">asLongAs(Predicate&lt;AnimationState&gt;)</a></span> - Method in class swingtree.animation.<a href="swingtree/animation/Animate.html" title="class in swingtree.animation">Animate</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/animation/Animator.html#asLongAs(java.util.function.Predicate)">asLongAs(Predicate&lt;AnimationState&gt;)</a></span> - Method in class swingtree.animation.<a href="swingtree/animation/Animator.html" title="class in swingtree.animation">Animator</a></dt>
 <dd>
 <div class="block">Use this to define a running condition for the animation.</div>
 </dd>
@@ -557,7 +590,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.Placement.html#BOTTOM">BOTTOM</a></span> - swingtree.<a href="swingtree/UI.Placement.html" title="enum in swingtree">UI.Placement</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/UI.Position.html#BOTTOM">BOTTOM</a></span> - swingtree.<a href="swingtree/UI.Position.html" title="enum in swingtree">UI.Position</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/UI.Side.html#BOTTOM">BOTTOM</a></span> - swingtree.<a href="swingtree/UI.Side.html" title="enum in swingtree">UI.Side</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.VerticalAlignment.html#BOTTOM">BOTTOM</a></span> - swingtree.<a href="swingtree/UI.VerticalAlignment.html" title="enum in swingtree">UI.VerticalAlignment</a></dt>
 <dd>&nbsp;</dd>
@@ -602,9 +635,11 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#box()">box()</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>
-<div class="block">Use this to create a builder for a <a href="swingtree/components/JBox.html" title="class in swingtree.components"><code>JBox</code></a>, a generic component wrapper type
-  which is transparent and without any insets as well as with a <code>MigLayout</code>
-  as its layout manager.</div>
+<div class="block">Use this to create a builder for a <a href="swingtree/components/JBox.html" title="class in swingtree.components"><code>JBox</code></a> instance,
+  which is a general purpose component wrapper type with the following properties:
+  
+      
+          It is transparent, meaning that it does not paint its background.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#box(java.lang.String)">box(String)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>
@@ -623,6 +658,24 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <div class="block">Use this to create a builder for a <a href="swingtree/components/JBox.html" title="class in swingtree.components"><code>JBox</code></a>, a generic component wrapper type
   which is transparent and without any insets as well as with a <code>MigLayout</code>
   as its layout manager.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UI.html#box(net.miginfocom.layout.LC)">box(LC)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
+<dd>
+<div class="block">Use this to create a builder for a <a href="swingtree/components/JBox.html" title="class in swingtree.components"><code>JBox</code></a>, a generic component wrapper type
+  which is transparent and without any insets as well as with a <code>MigLayout</code>
+  as its layout manager.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UI.html#box(net.miginfocom.layout.LC,java.lang.String)">box(LC, String)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
+<dd>
+<div class="block">Use this to create a builder for a <a href="swingtree/components/JBox.html" title="class in swingtree.components"><code>JBox</code></a>, a generic component wrapper type
+  which is transparent and without any insets as well as with a <code>MigLayout</code>
+  as its layout manager.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UI.html#box(net.miginfocom.layout.LC,java.lang.String,java.lang.String)">box(LC, String, String)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
+<dd>
+<div class="block">Use this to create a builder for a <a href="swingtree/components/JBox.html" title="class in swingtree.components"><code>JBox</code></a>, conceptually the same as a
+  transparent <code>JPanel</code> without any insets
+  and a <code>MigLayout</code> constructed using the provided constraints.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#box(sprouts.Val)">box(Val&lt;LayoutAttr&gt;)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>
@@ -743,6 +796,10 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/dialogs/ConfirmAnswer.html#CANCEL">CANCEL</a></span> - swingtree.dialogs.<a href="swingtree/dialogs/ConfirmAnswer.html" title="enum in swingtree.dialogs">ConfirmAnswer</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="swingtree/dialogs/ConfirmDialogBuilder.html#cancelOption(java.lang.String)">cancelOption(String)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/ConfirmDialogBuilder.html" title="class in swingtree.dialogs">ConfirmDialogBuilder</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UI.html#CC()">CC()</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.Alignment.html#CENTER">CENTER</a></span> - swingtree.<a href="swingtree/UI.Alignment.html" title="enum in swingtree">UI.Alignment</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.HorizontalAlignment.html#CENTER">CENTER</a></span> - swingtree.<a href="swingtree/UI.HorizontalAlignment.html" title="enum in swingtree">UI.HorizontalAlignment</a></dt>
@@ -761,10 +818,6 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.Alignment.html#CENTER_TRAILING">CENTER_TRAILING</a></span> - swingtree.<a href="swingtree/UI.Alignment.html" title="enum in swingtree">UI.Alignment</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/animation/StopCondition.html#check(swingtree.animation.AnimationState)">check(AnimationState)</a></span> - Method in interface swingtree.animation.<a href="swingtree/animation/StopCondition.html" title="interface in swingtree.animation">StopCondition</a></dt>
-<dd>
-<div class="block">Checks if the animation should stop running based on the current <a href="swingtree/animation/AnimationState.html" title="interface in swingtree.animation"><code>AnimationState</code></a>.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#checkBox(java.lang.String)">checkBox(String)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>
 <div class="block">Creates a builder node wrapping a new <code>JCheckBox</code> instance with the provided
@@ -835,6 +888,8 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>
 <div class="block">Returns the number of mouse clicks associated with the event of this delegate.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="swingtree/dialogs/ConfirmAnswer.html#CLOSE">CLOSE</a></span> - swingtree.dialogs.<a href="swingtree/dialogs/ConfirmAnswer.html" title="enum in swingtree.dialogs">ConfirmAnswer</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/input/Keyboard.Key.html#code">code</a></span> - Variable in enum swingtree.input.<a href="swingtree/input/Keyboard.Key.html" title="enum in swingtree.input">Keyboard.Key</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/api/model/BasicTableModel.Builder.html#colClass(swingtree.api.model.BasicTableModel.ColumnClass)">colClass(BasicTableModel.ColumnClass)</a></span> - Method in class swingtree.api.model.<a href="swingtree/api/model/BasicTableModel.Builder.html" title="class in swingtree.api.model">BasicTableModel.Builder</a></dt>
@@ -1035,6 +1090,14 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
   <code>JOptionPane.showOptionDialog(Component, Object, String, int, int, Icon, Object[], Object)</code>
   method.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="swingtree/UI.html#confirmError()">confirmError()</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UI.html#confirmInfo()">confirmInfo()</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UI.html#confirmPlain()">confirmPlain()</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UI.html#confirmWarning()">confirmWarning()</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/style/LayoutStyle.html#constraint()">constraint()</a></span> - Method in class swingtree.style.<a href="swingtree/style/LayoutStyle.html" title="class in swingtree.style">LayoutStyle</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/components/JGlassPane.html#contains(int,int)">contains(int, int)</a></span> - Method in class swingtree.components.<a href="swingtree/components/JGlassPane.html" title="class in swingtree.components">JGlassPane</a></dt>
@@ -1066,8 +1129,6 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dt><span class="memberNameLink"><a href="swingtree/UI.Cursor.html#CROSS">CROSS</a></span> - swingtree.<a href="swingtree/UI.Cursor.html" title="enum in swingtree">UI.Cursor</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/input/Keyboard.Key.html#CTRL">CTRL</a></span> - swingtree.input.<a href="swingtree/input/Keyboard.Key.html" title="enum in swingtree.input">Keyboard.Key</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/animation/AnimationState.html#currentIteration()">currentIteration()</a></span> - Method in interface swingtree.animation.<a href="swingtree/animation/AnimationState.html" title="interface in swingtree.animation">AnimationState</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/style/BaseStyle.html#cursor()">cursor()</a></span> - Method in class swingtree.style.<a href="swingtree/style/BaseStyle.html" title="class in swingtree.style">BaseStyle</a></dt>
 <dd>&nbsp;</dd>
@@ -1157,7 +1218,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <div class="block">Use this to conveniently make the <a href="swingtree/components/JSplitButton.html" title="class in swingtree.components"><code>JSplitButton</code></a> display the text
   of the currently selected <code>JMenuItem</code> (button item).</div>
 </dd>
-<dt><span class="memberNameLink"><a href="swingtree/UI.html#DOCK(swingtree.UI.Position)">DOCK(UI.Position)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/UI.html#DOCK(swingtree.UI.Side)">DOCK(UI.Side)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#DOCK_EAST">DOCK_EAST</a></span> - Static variable in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>&nbsp;</dd>
@@ -1251,6 +1312,10 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/input/Keyboard.Key.html#EQUALS">EQUALS</a></span> - swingtree.input.<a href="swingtree/input/Keyboard.Key.html" title="enum in swingtree.input">Keyboard.Key</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="swingtree/dialogs/ConfirmDialogBuilder.html#error()">error()</a></span> - Static method in class swingtree.dialogs.<a href="swingtree/dialogs/ConfirmDialogBuilder.html" title="class in swingtree.dialogs">ConfirmDialogBuilder</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="swingtree/dialogs/MessageDialogBuilder.html#error()">error()</a></span> - Static method in class swingtree.dialogs.<a href="swingtree/dialogs/MessageDialogBuilder.html" title="class in swingtree.dialogs">MessageDialogBuilder</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#error()">error()</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#error(java.lang.String)">error(String)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
@@ -1260,13 +1325,6 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#error(java.lang.String,java.lang.String)">error(String, String)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>
 <div class="block">Shows an error dialog with the given message and dialog title.</div>
-</dd>
-<dt><a href="swingtree/dialogs/ErrorDialogBuilder.html" title="class in swingtree.dialogs"><span class="typeNameLink">ErrorDialogBuilder</span></a> - Class in <a href="swingtree/dialogs/package-summary.html">swingtree.dialogs</a></dt>
-<dd>
-<div class="block">An immutable builder class for creating simple error info dialogs
-  based on the <code>JOptionPane</code> class, more specifically the
-  <code>JOptionPane.showMessageDialog(Component, Object, String, int, Icon)</code>
-  method.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/input/Keyboard.Key.html#ESCAPE">ESCAPE</a></span> - swingtree.input.<a href="swingtree/input/Keyboard.Key.html" title="enum in swingtree.input">Keyboard.Key</a></dt>
 <dd>&nbsp;</dd>
@@ -1569,14 +1627,6 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/api/model/TableMapDataSource.html#get()">get()</a></span> - Method in interface swingtree.api.model.<a href="swingtree/api/model/TableMapDataSource.html" title="interface in swingtree.api.model">TableMapDataSource</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/dialogs/ConfirmDialogBuilder.html#get()">get()</a></span> - Static method in class swingtree.dialogs.<a href="swingtree/dialogs/ConfirmDialogBuilder.html" title="class in swingtree.dialogs">ConfirmDialogBuilder</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/dialogs/ErrorDialogBuilder.html#get()">get()</a></span> - Static method in class swingtree.dialogs.<a href="swingtree/dialogs/ErrorDialogBuilder.html" title="class in swingtree.dialogs">ErrorDialogBuilder</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/dialogs/InfoDialogBuilder.html#get()">get()</a></span> - Static method in class swingtree.dialogs.<a href="swingtree/dialogs/InfoDialogBuilder.html" title="class in swingtree.dialogs">InfoDialogBuilder</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/dialogs/WarnDialogBuilder.html#get()">get()</a></span> - Static method in class swingtree.dialogs.<a href="swingtree/dialogs/WarnDialogBuilder.html" title="class in swingtree.dialogs">WarnDialogBuilder</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/input/Keyboard.html#get()">get()</a></span> - Static method in class swingtree.input.<a href="swingtree/input/Keyboard.html" title="class in swingtree.input">Keyboard</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/SwingTree.html#get()">get()</a></span> - Static method in class swingtree.<a href="swingtree/SwingTree.html" title="class in swingtree">SwingTree</a></dt>
@@ -1588,6 +1638,8 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dt><span class="memberNameLink"><a href="swingtree/api/model/BasicTableModel.ColumnClass.html#get(int)">get(int)</a></span> - Method in interface swingtree.api.model.<a href="swingtree/api/model/BasicTableModel.ColumnClass.html" title="interface in swingtree.api.model">BasicTableModel.ColumnClass</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/api/model/BasicTableModel.ColumnName.html#get(int)">get(int)</a></span> - Method in interface swingtree.api.model.<a href="swingtree/api/model/BasicTableModel.ColumnName.html" title="interface in swingtree.api.model">BasicTableModel.ColumnName</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="swingtree/dialogs/MessageDialogBuilder.html#get(int)">get(int)</a></span> - Static method in class swingtree.dialogs.<a href="swingtree/dialogs/MessageDialogBuilder.html" title="class in swingtree.dialogs">MessageDialogBuilder</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/api/model/BasicTableModel.ValueAt.html#get(int,int)">get(int, int)</a></span> - Method in interface swingtree.api.model.<a href="swingtree/api/model/BasicTableModel.ValueAt.html" title="interface in swingtree.api.model">BasicTableModel.ValueAt</a></dt>
 <dd>&nbsp;</dd>
@@ -1750,9 +1802,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <div class="block">Returns the system scale factor for the given graphics context.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/SwingTree.UIScale.html#getSystemScaleFactor(java.awt.GraphicsConfiguration)">getSystemScaleFactor(GraphicsConfiguration)</a></span> - Static method in class swingtree.<a href="swingtree/SwingTree.UIScale.html" title="class in swingtree">SwingTree.UIScale</a></dt>
-<dd>
-<div class="block">Returns the system scale factor for the given graphics configuration.</div>
-</dd>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/api/model/BasicTableModel.Builder.html#getter(swingtree.api.model.BasicTableModel.ValueAt)">getter(BasicTableModel.ValueAt)</a></span> - Method in class swingtree.api.model.<a href="swingtree/api/model/BasicTableModel.Builder.html" title="class in swingtree.api.model">BasicTableModel.Builder</a></dt>
 <dd>
 <div class="block">Accepts a lambda allowing the <code>JTable</code> to dynamically determines the value at a given row and column.</div>
@@ -1776,24 +1826,15 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/SwingTree.UIScale.html#getUserScaleFactor()">getUserScaleFactor()</a></span> - Method in class swingtree.<a href="swingtree/SwingTree.UIScale.html" title="class in swingtree">SwingTree.UIScale</a></dt>
 <dd>
-<div class="block">Returns the user scale factor.</div>
+<div class="block">Returns the user scale factor is a scaling factor is used by SwingTree's
+ style engine to scale the UI during painting.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/api/model/BasicTableModel.html#getValueAt(int,int)">getValueAt(int, int)</a></span> - Method in interface swingtree.api.model.<a href="swingtree/api/model/BasicTableModel.html" title="interface in swingtree.api.model">BasicTableModel</a></dt>
 <dt><span class="memberNameLink"><a href="swingtree/UI.Alignment.html#getVertical()">getVertical()</a></span> - Method in enum swingtree.<a href="swingtree/UI.Alignment.html" title="enum in swingtree">UI.Alignment</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/animation/Animate.html#go(swingtree.animation.Animation)">go(Animation)</a></span> - Method in class swingtree.animation.<a href="swingtree/animation/Animate.html" title="class in swingtree.animation">Animate</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/animation/Animator.html#go(swingtree.animation.Animation)">go(Animation)</a></span> - Method in class swingtree.animation.<a href="swingtree/animation/Animator.html" title="class in swingtree.animation">Animator</a></dt>
 <dd>
-<div class="block">Runs the given animation based on the stop condition defined by <a href="swingtree/animation/Animate.html#until(java.util.function.Predicate)"><code>Animate.until(Predicate)</code></a> or <a href="swingtree/animation/Animate.html#asLongAs(java.util.function.Predicate)"><code>Animate.asLongAs(Predicate)</code></a>.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="swingtree/animation/Animate.html#goOnce(swingtree.animation.Animation)">goOnce(Animation)</a></span> - Method in class swingtree.animation.<a href="swingtree/animation/Animate.html" title="class in swingtree.animation">Animate</a></dt>
-<dd>
-<div class="block">Runs the given animation once
-  based on the stop condition <code>state -&gt; state.currentIteration() == 0</code></div>
-</dd>
-<dt><span class="memberNameLink"><a href="swingtree/animation/Animate.html#goTwice(swingtree.animation.Animation)">goTwice(Animation)</a></span> - Method in class swingtree.animation.<a href="swingtree/animation/Animate.html" title="class in swingtree.animation">Animate</a></dt>
-<dd>
-<div class="block">Runs the given animation twice
-  based on the stop condition <code>state -&gt; state.currentIteration() &lt; 2</code></div>
+<div class="block">Runs the given animation based on the stop condition defined by <a href="swingtree/animation/Animator.html#until(java.util.function.Predicate)"><code>Animator.until(Predicate)</code></a> or <a href="swingtree/animation/Animator.html#asLongAs(java.util.function.Predicate)"><code>Animator.asLongAs(Predicate)</code></a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/style/BorderStyle.html#gradient()">gradient()</a></span> - Method in class swingtree.style.<a href="swingtree/style/BorderStyle.html" title="class in swingtree.style">BorderStyle</a></dt>
 <dd>&nbsp;</dd>
@@ -1988,14 +2029,6 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/dialogs/ConfirmDialogBuilder.html#icon(java.lang.String)">icon(String)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/ConfirmDialogBuilder.html" title="class in swingtree.dialogs">ConfirmDialogBuilder</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/dialogs/ErrorDialogBuilder.html#icon(java.lang.String)">icon(String)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/ErrorDialogBuilder.html" title="class in swingtree.dialogs">ErrorDialogBuilder</a></dt>
-<dd>
-<div class="block">Set the icon of the dialog.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="swingtree/dialogs/InfoDialogBuilder.html#icon(java.lang.String)">icon(String)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/InfoDialogBuilder.html" title="class in swingtree.dialogs">InfoDialogBuilder</a></dt>
-<dd>
-<div class="block">Set the icon of the dialog.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#icon(java.lang.String)">icon(String)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>
 <div class="block">Creates a builder node wrapping a new <a href="swingtree/components/JIcon.html" title="class in swingtree.components"><code>JIcon</code></a> instance with the icon found at the provided
@@ -2003,15 +2036,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/dialogs/ConfirmDialogBuilder.html#icon(javax.swing.Icon)">icon(Icon)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/ConfirmDialogBuilder.html" title="class in swingtree.dialogs">ConfirmDialogBuilder</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/dialogs/ErrorDialogBuilder.html#icon(javax.swing.Icon)">icon(Icon)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/ErrorDialogBuilder.html" title="class in swingtree.dialogs">ErrorDialogBuilder</a></dt>
-<dd>
-<div class="block">Set the icon of the dialog.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="swingtree/dialogs/InfoDialogBuilder.html#icon(javax.swing.Icon)">icon(Icon)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/InfoDialogBuilder.html" title="class in swingtree.dialogs">InfoDialogBuilder</a></dt>
-<dd>
-<div class="block">Set the icon of the dialog.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="swingtree/dialogs/WarnDialogBuilder.html#icon(javax.swing.Icon)">icon(Icon)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/WarnDialogBuilder.html" title="class in swingtree.dialogs">WarnDialogBuilder</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/dialogs/MessageDialogBuilder.html#icon(javax.swing.Icon)">icon(Icon)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/MessageDialogBuilder.html" title="class in swingtree.dialogs">MessageDialogBuilder</a></dt>
 <dd>
 <div class="block">Set the icon of the dialog.</div>
 </dd>
@@ -2086,6 +2111,10 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/api/ListEntryDelegate.html#index()">index()</a></span> - Method in interface swingtree.api.<a href="swingtree/api/ListEntryDelegate.html" title="interface in swingtree.api">ListEntryDelegate</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="swingtree/dialogs/ConfirmDialogBuilder.html#info()">info()</a></span> - Static method in class swingtree.dialogs.<a href="swingtree/dialogs/ConfirmDialogBuilder.html" title="class in swingtree.dialogs">ConfirmDialogBuilder</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="swingtree/dialogs/MessageDialogBuilder.html#info()">info()</a></span> - Static method in class swingtree.dialogs.<a href="swingtree/dialogs/MessageDialogBuilder.html" title="class in swingtree.dialogs">MessageDialogBuilder</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#info()">info()</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#info(java.lang.String)">info(String)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
@@ -2095,13 +2124,6 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#info(java.lang.String,java.lang.String)">info(String, String)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>
 <div class="block">Shows an info dialog with the given message and dialog title.</div>
-</dd>
-<dt><a href="swingtree/dialogs/InfoDialogBuilder.html" title="class in swingtree.dialogs"><span class="typeNameLink">InfoDialogBuilder</span></a> - Class in <a href="swingtree/dialogs/package-summary.html">swingtree.dialogs</a></dt>
-<dd>
-<div class="block">An immutable builder class for creating simple info dialogs
-  based on the <code>JOptionPane</code> class, more specifically the
-  <code>JOptionPane.showMessageDialog(Component, Object, String, int, Icon)</code>
-  method.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/style/StyleTrait.html#inherits(E...)">inherits(E...)</a></span> - Method in class swingtree.style.<a href="swingtree/style/StyleTrait.html" title="class in swingtree.style">StyleTrait</a></dt>
 <dd>
@@ -2175,7 +2197,11 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/dialogs/ConfirmAnswer.html#isCancel()">isCancel()</a></span> - Method in enum swingtree.dialogs.<a href="swingtree/dialogs/ConfirmAnswer.html" title="enum in swingtree.dialogs">ConfirmAnswer</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="swingtree/dialogs/ConfirmAnswer.html#isCancelOrClose()">isCancelOrClose()</a></span> - Method in enum swingtree.dialogs.<a href="swingtree/dialogs/ConfirmAnswer.html" title="enum in swingtree.dialogs">ConfirmAnswer</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/api/model/BasicTableModel.html#isCellEditable(int,int)">isCellEditable(int, int)</a></span> - Method in interface swingtree.api.model.<a href="swingtree/api/model/BasicTableModel.html" title="interface in swingtree.api.model">BasicTableModel</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/dialogs/ConfirmAnswer.html#isClose()">isClose()</a></span> - Method in enum swingtree.dialogs.<a href="swingtree/dialogs/ConfirmAnswer.html" title="enum in swingtree.dialogs">ConfirmAnswer</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/ComponentMouseEventDelegate.html#isCtrlDown()">isCtrlDown()</a></span> - Method in class swingtree.<a href="swingtree/ComponentMouseEventDelegate.html" title="class in swingtree">ComponentMouseEventDelegate</a></dt>
 <dd>
 <div class="block">Returns whether the Control modifier is down on the event of this delegate.</div>
@@ -2394,10 +2420,6 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dt><span class="memberNameLink"><a href="swingtree/ComponentMouseEventDelegate.html#isShiftDown()">isShiftDown()</a></span> - Method in class swingtree.<a href="swingtree/ComponentMouseEventDelegate.html" title="class in swingtree">ComponentMouseEventDelegate</a></dt>
 <dd>
 <div class="block">Returns whether the Shift modifier is down on the event of this delegate.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="swingtree/SwingTree.UIScale.html#isSystemScalingEnabled()">isSystemScalingEnabled()</a></span> - Static method in class swingtree.<a href="swingtree/SwingTree.UIScale.html" title="class in swingtree">SwingTree.UIScale</a></dt>
-<dd>
-<div class="block">Returns whether system scaling is enabled.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/style/FontStyle.html#isUnderlined()">isUnderlined()</a></span> - Method in class swingtree.style.<a href="swingtree/style/FontStyle.html" title="class in swingtree.style">FontStyle</a></dt>
 <dd>&nbsp;</dd>
@@ -2717,6 +2739,8 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 </dd>
 <dt><a href="swingtree/style/LayoutStyle.html" title="class in swingtree.style"><span class="typeNameLink">LayoutStyle</span></a> - Class in <a href="swingtree/style/package-summary.html">swingtree.style</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UI.html#LC()">LC()</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.HorizontalAlignment.html#LEADING">LEADING</a></span> - swingtree.<a href="swingtree/UI.HorizontalAlignment.html" title="enum in swingtree">UI.HorizontalAlignment</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.Edge.html#LEFT">LEFT</a></span> - swingtree.<a href="swingtree/UI.Edge.html" title="enum in swingtree">UI.Edge</a></dt>
@@ -2725,7 +2749,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.Placement.html#LEFT">LEFT</a></span> - swingtree.<a href="swingtree/UI.Placement.html" title="enum in swingtree">UI.Placement</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/UI.Position.html#LEFT">LEFT</a></span> - swingtree.<a href="swingtree/UI.Position.html" title="enum in swingtree">UI.Position</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/UI.Side.html#LEFT">LEFT</a></span> - swingtree.<a href="swingtree/UI.Side.html" title="enum in swingtree">UI.Side</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#LEFT">LEFT</a></span> - Static variable in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>&nbsp;</dd>
@@ -2733,6 +2757,11 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/animation/AnimationState.html#lifetime()">lifetime()</a></span> - Method in interface swingtree.animation.<a href="swingtree/animation/AnimationState.html" title="interface in swingtree.animation">AnimationState</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UI.html#lifeTime(long,java.util.concurrent.TimeUnit)">lifeTime(long, TimeUnit)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
+<dd>
+<div class="block">A factory method for creating a <a href="swingtree/animation/LifeTime.html" title="class in swingtree.animation"><code>LifeTime</code></a> instance
+  with the given duration and time unit.</div>
+</dd>
 <dt><a href="swingtree/animation/LifeTime.html" title="class in swingtree.animation"><span class="typeNameLink">LifeTime</span></a> - Class in <a href="swingtree/animation/package-summary.html">swingtree.animation</a></dt>
 <dd>
 <div class="block">The lifetime object defines when an animation should start and for how long it should run.</div>
@@ -2935,17 +2964,16 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/dialogs/ConfirmDialogBuilder.html#message(java.lang.String)">message(String)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/ConfirmDialogBuilder.html" title="class in swingtree.dialogs">ConfirmDialogBuilder</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/dialogs/ErrorDialogBuilder.html#message(java.lang.String)">message(String)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/ErrorDialogBuilder.html" title="class in swingtree.dialogs">ErrorDialogBuilder</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/dialogs/MessageDialogBuilder.html#message(java.lang.String)">message(String)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/MessageDialogBuilder.html" title="class in swingtree.dialogs">MessageDialogBuilder</a></dt>
 <dd>
 <div class="block">Set the message of the dialog.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="swingtree/dialogs/InfoDialogBuilder.html#message(java.lang.String)">message(String)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/InfoDialogBuilder.html" title="class in swingtree.dialogs">InfoDialogBuilder</a></dt>
+<dt><a href="swingtree/dialogs/MessageDialogBuilder.html" title="class in swingtree.dialogs"><span class="typeNameLink">MessageDialogBuilder</span></a> - Class in <a href="swingtree/dialogs/package-summary.html">swingtree.dialogs</a></dt>
 <dd>
-<div class="block">Set the message of the dialog.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="swingtree/dialogs/WarnDialogBuilder.html#message(java.lang.String)">message(String)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/WarnDialogBuilder.html" title="class in swingtree.dialogs">WarnDialogBuilder</a></dt>
-<dd>
-<div class="block">Set the message of the dialog.</div>
+<div class="block">An immutable builder class for creating simple message dialogs (errors, warnings, infos...)
+  based on the <code>JOptionPane</code> class, more specifically the
+  <code>JOptionPane.showMessageDialog(Component, Object, String, int, Icon)</code>
+  method.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/style/Layout.html#mig(java.lang.String)">mig(String)</a></span> - Static method in interface swingtree.style.<a href="swingtree/style/Layout.html" title="interface in swingtree.style">Layout</a></dt>
 <dd>&nbsp;</dd>
@@ -3090,7 +3118,11 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#of(B)">of(B)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>
-<div class="block">Use this to create a builder for the <a href="swingtree/components/JSplitButton.html" title="class in swingtree.components"><code>JSplitButton</code></a> UI component.</div>
+<div class="block">Use this to create a builder for the provided <a href="swingtree/components/JBox.html" title="class in swingtree.components"><code>JBox</code></a> instance,
+  which is a general purpose component wrapper type with the following properties:
+  
+      
+          It is transparent, meaning that it does not paint its background.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#of(C)">of(C)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>
@@ -3102,7 +3134,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#of(F)">of(F)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>
-<div class="block">This returns an instance of a Swing-Tree builder for a <code>JFrame</code> type.</div>
+<div class="block">Use this to create a builder for the provided <code>JTextField</code> instance.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/SplitItem.html#of(I)">of(I)</a></span> - Static method in class swingtree.<a href="swingtree/SplitItem.html" title="class in swingtree">SplitItem</a></dt>
 <dd>&nbsp;</dd>
@@ -3134,7 +3166,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#of(P)">of(P)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>
-<div class="block">Use this to create a swing tree builder node for the <code>JPopupMenu</code> UI component.</div>
+<div class="block">Use this to create a builder for the provided <code>JPanel</code> type.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#of(R)">of(R)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>
@@ -3167,8 +3199,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#of(T)">of(T)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>
-<div class="block">This returns an instance of a generic swing tree builder
-  for anything extending the <code>JComponent</code> class.</div>
+<div class="block">Use this to create a builder for anything.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/style/ShadowStyle.html#offset(int)">offset(int)</a></span> - Method in class swingtree.style.<a href="swingtree/style/ShadowStyle.html" title="class in swingtree.style">ShadowStyle</a></dt>
 <dd>
@@ -3176,18 +3207,6 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/style/ShadowStyle.html#offset(int,int)">offset(int, int)</a></span> - Method in class swingtree.style.<a href="swingtree/style/ShadowStyle.html" title="class in swingtree.style">ShadowStyle</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/animation/Animate.html#on(java.awt.Component,swingtree.animation.LifeTime)">on(Component, LifeTime)</a></span> - Static method in class swingtree.animation.<a href="swingtree/animation/Animate.html" title="class in swingtree.animation">Animate</a></dt>
-<dd>
-<div class="block">Creates an <a href="swingtree/animation/Animate.html" title="class in swingtree.animation"><code>Animate</code></a> instance which allows you to define the stop condition
- for an animation as well as an <a href="swingtree/animation/Animation.html" title="interface in swingtree.animation"><code>Animation</code></a> that will be executed
- when passed to the <a href="swingtree/animation/Animate.html#go(swingtree.animation.Animation)"><code>Animate.go(Animation)</code></a> or <a href="swingtree/animation/Animate.html#goOnce(swingtree.animation.Animation)"><code>Animate.goOnce(Animation)</code></a> methods.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="swingtree/animation/Animate.html#on(swingtree.animation.LifeTime)">on(LifeTime)</a></span> - Static method in class swingtree.animation.<a href="swingtree/animation/Animate.html" title="class in swingtree.animation">Animate</a></dt>
-<dd>
-<div class="block">Creates an <a href="swingtree/animation/Animate.html" title="class in swingtree.animation"><code>Animate</code></a> instance which allows you to define the stop condition
- for an animation as well as an <a href="swingtree/animation/Animation.html" title="interface in swingtree.animation"><code>Animation</code></a> that will be executed
- when passed to the <a href="swingtree/animation/Animate.html#go(swingtree.animation.Animation)"><code>Animate.go(Animation)</code></a> or <a href="swingtree/animation/Animate.html#goOnce(swingtree.animation.Animation)"><code>Animate.goOnce(Animation)</code></a> methods.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="swingtree/SplitItem.html#onButtonClick(sprouts.Action)">onButtonClick(Action&lt;SplitItem.Delegate&lt;I&gt;&gt;)</a></span> - Method in class swingtree.<a href="swingtree/SplitItem.html" title="class in swingtree">SplitItem</a></dt>
 <dd>
 <div class="block">Use this to register an action which will be called when the <a href="swingtree/components/JSplitButton.html" title="class in swingtree.components"><code>JSplitButton</code></a>
@@ -3330,7 +3349,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/UIForAnySwing.html#onMouseClick(sprouts.Action)">onMouseClick(Action&lt;ComponentMouseEventDelegate&lt;C&gt;&gt;)</a></span> - Method in class swingtree.<a href="swingtree/UIForAnySwing.html" title="class in swingtree">UIForAnySwing</a></dt>
 <dd>
-<div class="block">Use this to register and catch generic <code>MouseListener</code> based mouse click events on this UI component.</div>
+<div class="block">Calls the provided action event handler when the mouse gets pressed and then released.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/UIForAnySwing.html#onMouseDrag(sprouts.Action)">onMouseDrag(Action&lt;ComponentDragEventDelegate&lt;C&gt;&gt;)</a></span> - Method in class swingtree.<a href="swingtree/UIForAnySwing.html" title="class in swingtree">UIForAnySwing</a></dt>
 <dd>
@@ -3586,8 +3605,11 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/style/FontStyle.html#paint()">paint()</a></span> - Method in class swingtree.style.<a href="swingtree/style/FontStyle.html" title="class in swingtree.style">FontStyle</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/UI.Box.html#paint(java.awt.Graphics)">paint(Graphics)</a></span> - Method in class swingtree.<a href="swingtree/UI.Box.html" title="class in swingtree">UI.Box</a></dt>
-<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="swingtree/components/JBox.html#paint(java.awt.Graphics)">paint(Graphics)</a></span> - Method in class swingtree.components.<a href="swingtree/components/JBox.html" title="class in swingtree.components">JBox</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/components/JGlassPane.html#paint(java.awt.Graphics)">paint(Graphics)</a></span> - Method in class swingtree.components.<a href="swingtree/components/JGlassPane.html" title="class in swingtree.components">JGlassPane</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/components/JIcon.html#paint(java.awt.Graphics)">paint(Graphics)</a></span> - Method in class swingtree.components.<a href="swingtree/components/JIcon.html" title="class in swingtree.components">JIcon</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/components/JScrollPanels.html#paint(java.awt.Graphics)">paint(Graphics)</a></span> - Method in class swingtree.components.<a href="swingtree/components/JScrollPanels.html" title="class in swingtree.components">JScrollPanels</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/components/JSplitButton.html#paint(java.awt.Graphics)">paint(Graphics)</a></span> - Method in class swingtree.components.<a href="swingtree/components/JSplitButton.html" title="class in swingtree.components">JSplitButton</a></dt>
 <dt><span class="memberNameLink"><a href="swingtree/UI.Button.html#paint(java.awt.Graphics)">paint(Graphics)</a></span> - Method in class swingtree.<a href="swingtree/UI.Button.html" title="class in swingtree">UI.Button</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.CheckBox.html#paint(java.awt.Graphics)">paint(Graphics)</a></span> - Method in class swingtree.<a href="swingtree/UI.CheckBox.html" title="class in swingtree">UI.CheckBox</a></dt>
@@ -3628,8 +3650,6 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.Spinner.html#paint(java.awt.Graphics)">paint(Graphics)</a></span> - Method in class swingtree.<a href="swingtree/UI.Spinner.html" title="class in swingtree">UI.Spinner</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/UI.SplitButton.html#paint(java.awt.Graphics)">paint(Graphics)</a></span> - Method in class swingtree.<a href="swingtree/UI.SplitButton.html" title="class in swingtree">UI.SplitButton</a></dt>
-<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.SplitPane.html#paint(java.awt.Graphics)">paint(Graphics)</a></span> - Method in class swingtree.<a href="swingtree/UI.SplitPane.html" title="class in swingtree">UI.SplitPane</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.TabbedPane.html#paint(java.awt.Graphics)">paint(Graphics)</a></span> - Method in class swingtree.<a href="swingtree/UI.TabbedPane.html" title="class in swingtree">UI.TabbedPane</a></dt>
@@ -3656,8 +3676,11 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/style/ComponentExtension.html#paintBackgroundStyle(java.awt.Graphics)">paintBackgroundStyle(Graphics)</a></span> - Method in class swingtree.style.<a href="swingtree/style/ComponentExtension.html" title="class in swingtree.style">ComponentExtension</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/UI.Box.html#paintChildren(java.awt.Graphics)">paintChildren(Graphics)</a></span> - Method in class swingtree.<a href="swingtree/UI.Box.html" title="class in swingtree">UI.Box</a></dt>
-<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="swingtree/components/JBox.html#paintChildren(java.awt.Graphics)">paintChildren(Graphics)</a></span> - Method in class swingtree.components.<a href="swingtree/components/JBox.html" title="class in swingtree.components">JBox</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/components/JGlassPane.html#paintChildren(java.awt.Graphics)">paintChildren(Graphics)</a></span> - Method in class swingtree.components.<a href="swingtree/components/JGlassPane.html" title="class in swingtree.components">JGlassPane</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/components/JIcon.html#paintChildren(java.awt.Graphics)">paintChildren(Graphics)</a></span> - Method in class swingtree.components.<a href="swingtree/components/JIcon.html" title="class in swingtree.components">JIcon</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/components/JScrollPanels.html#paintChildren(java.awt.Graphics)">paintChildren(Graphics)</a></span> - Method in class swingtree.components.<a href="swingtree/components/JScrollPanels.html" title="class in swingtree.components">JScrollPanels</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/components/JSplitButton.html#paintChildren(java.awt.Graphics)">paintChildren(Graphics)</a></span> - Method in class swingtree.components.<a href="swingtree/components/JSplitButton.html" title="class in swingtree.components">JSplitButton</a></dt>
 <dt><span class="memberNameLink"><a href="swingtree/UI.Button.html#paintChildren(java.awt.Graphics)">paintChildren(Graphics)</a></span> - Method in class swingtree.<a href="swingtree/UI.Button.html" title="class in swingtree">UI.Button</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.CheckBox.html#paintChildren(java.awt.Graphics)">paintChildren(Graphics)</a></span> - Method in class swingtree.<a href="swingtree/UI.CheckBox.html" title="class in swingtree">UI.CheckBox</a></dt>
@@ -3697,8 +3720,6 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dt><span class="memberNameLink"><a href="swingtree/UI.Slider.html#paintChildren(java.awt.Graphics)">paintChildren(Graphics)</a></span> - Method in class swingtree.<a href="swingtree/UI.Slider.html" title="class in swingtree">UI.Slider</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.Spinner.html#paintChildren(java.awt.Graphics)">paintChildren(Graphics)</a></span> - Method in class swingtree.<a href="swingtree/UI.Spinner.html" title="class in swingtree">UI.Spinner</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/UI.SplitButton.html#paintChildren(java.awt.Graphics)">paintChildren(Graphics)</a></span> - Method in class swingtree.<a href="swingtree/UI.SplitButton.html" title="class in swingtree">UI.SplitButton</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.SplitPane.html#paintChildren(java.awt.Graphics)">paintChildren(Graphics)</a></span> - Method in class swingtree.<a href="swingtree/UI.SplitPane.html" title="class in swingtree">UI.SplitPane</a></dt>
 <dd>&nbsp;</dd>
@@ -3746,7 +3767,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
   for <b>defining custom animations</b> by registering painters in the animation API using the
   <code>AbstractDelegate.paint(AnimationState, Painter)</code> method
   inside of an <a href="swingtree/animation/Animation.html" title="interface in swingtree.animation"><code>Animation</code></a> registered through
-  <code>AbstractDelegate.animateOnce(double, TimeUnit, Animation)</code>.</div>
+  <code>AbstractDelegate.animateFor(double, TimeUnit, Animation)</code>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/style/Style.html#painters()">painters()</a></span> - Method in class swingtree.style.<a href="swingtree/style/Style.html" title="class in swingtree.style">Style</a></dt>
 <dd>&nbsp;</dd>
@@ -3772,6 +3793,20 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <div class="block">Use this to create a builder for the <code>JPanel</code> UI component.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#panel(java.lang.String,java.lang.String,java.lang.String)">panel(String, String, String)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
+<dd>
+<div class="block">Use this to create a builder for a new <code>JPanel</code> UI component
+  with a <code>MigLayout</code> as its layout manager and the provided constraints.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UI.html#panel(net.miginfocom.layout.LC)">panel(LC)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
+<dd>
+<div class="block">Use this to create a builder for the <code>JPanel</code> UI component.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UI.html#panel(net.miginfocom.layout.LC,java.lang.String)">panel(LC, String)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
+<dd>
+<div class="block">Use this to create a builder for a new <code>JPanel</code> UI component
+  with a <code>MigLayout</code> as its layout manager and the provided constraints.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UI.html#panel(net.miginfocom.layout.LC,java.lang.String,java.lang.String)">panel(LC, String, String)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>
 <div class="block">Use this to create a builder for a new <code>JPanel</code> UI component
   with a <code>MigLayout</code> as its layout manager and the provided constraints.</div>
@@ -3802,15 +3837,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/dialogs/ConfirmDialogBuilder.html#parent(java.awt.Component)">parent(Component)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/ConfirmDialogBuilder.html" title="class in swingtree.dialogs">ConfirmDialogBuilder</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/dialogs/ErrorDialogBuilder.html#parent(java.awt.Component)">parent(Component)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/ErrorDialogBuilder.html" title="class in swingtree.dialogs">ErrorDialogBuilder</a></dt>
-<dd>
-<div class="block">Set the parent component of the dialog.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="swingtree/dialogs/InfoDialogBuilder.html#parent(java.awt.Component)">parent(Component)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/InfoDialogBuilder.html" title="class in swingtree.dialogs">InfoDialogBuilder</a></dt>
-<dd>
-<div class="block">Set the parent of the dialog.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="swingtree/dialogs/WarnDialogBuilder.html#parent(java.awt.Component)">parent(Component)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/WarnDialogBuilder.html" title="class in swingtree.dialogs">WarnDialogBuilder</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/dialogs/MessageDialogBuilder.html#parent(java.awt.Component)">parent(Component)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/MessageDialogBuilder.html" title="class in swingtree.dialogs">MessageDialogBuilder</a></dt>
 <dd>
 <div class="block">Set the parent of the dialog.</div>
 </dd>
@@ -3856,6 +3883,8 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>
 <div class="block">Here you can specify the <b>placement</b> of the image onto the component.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="swingtree/dialogs/ConfirmDialogBuilder.html#plain()">plain()</a></span> - Static method in class swingtree.dialogs.<a href="swingtree/dialogs/ConfirmDialogBuilder.html" title="class in swingtree.dialogs">ConfirmDialogBuilder</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#popupMenu()">popupMenu()</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>
 <div class="block">Use this to create a swing tree builder node for the <code>JPopupMenu</code> UI component.</div>
@@ -3997,6 +4026,8 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <h2 class="title">Q</h2>
 <dl>
 <dt><span class="memberNameLink"><a href="swingtree/input/Keyboard.Key.html#Q">Q</a></span> - swingtree.input.<a href="swingtree/input/Keyboard.Key.html" title="enum in swingtree.input">Keyboard.Key</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="swingtree/dialogs/ConfirmDialogBuilder.html#question()">question()</a></span> - Static method in class swingtree.dialogs.<a href="swingtree/dialogs/ConfirmDialogBuilder.html" title="class in swingtree.dialogs">ConfirmDialogBuilder</a></dt>
 <dd>&nbsp;</dd>
 </dl>
 <a id="I:R">
@@ -4246,10 +4277,21 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <div class="block">If this flag is set to <code>true</code>, then the image may be painted
   multiple times so that it fills up the entire inner component area.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="swingtree/SwingTree.html#reset()">reset()</a></span> - Static method in class swingtree.<a href="swingtree/SwingTree.html" title="class in swingtree">SwingTree</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/animation/AnimationState.html#repeats()">repeats()</a></span> - Method in interface swingtree.animation.<a href="swingtree/animation/AnimationState.html" title="interface in swingtree.animation">AnimationState</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="swingtree/SwingTree.html#reset()">reset()</a></span> - Static method in class swingtree.<a href="swingtree/SwingTree.html" title="class in swingtree">SwingTree</a></dt>
+<dd>
+<div class="block">Resets the singleton instance of the <a href="swingtree/SwingTree.html" title="class in swingtree"><code>SwingTree</code></a>
+  causing it to be recreated the next time it is requested.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="swingtree/SwingTree.UIScale.html#reset()">reset()</a></span> - Method in class swingtree.<a href="swingtree/SwingTree.UIScale.html" title="class in swingtree">SwingTree.UIScale</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="swingtree/SwingTree.html#resetUsingDefaultFont(java.awt.Font)">resetUsingDefaultFont(Font)</a></span> - Static method in class swingtree.<a href="swingtree/SwingTree.html" title="class in swingtree">SwingTree</a></dt>
+<dd>
+<div class="block">Resets the singleton instance of the <a href="swingtree/SwingTree.html" title="class in swingtree"><code>SwingTree</code></a>
+  causing it to be recreated the next time it is requested,
+  but with a reference font as a basis for the UI scale.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.Cursor.html#RESIZE_EAST">RESIZE_EAST</a></span> - swingtree.<a href="swingtree/UI.Cursor.html" title="enum in swingtree">UI.Cursor</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.Cursor.html#RESIZE_NORTH">RESIZE_NORTH</a></span> - swingtree.<a href="swingtree/UI.Cursor.html" title="enum in swingtree">UI.Cursor</a></dt>
@@ -4272,7 +4314,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.Placement.html#RIGHT">RIGHT</a></span> - swingtree.<a href="swingtree/UI.Placement.html" title="enum in swingtree">UI.Placement</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/UI.Position.html#RIGHT">RIGHT</a></span> - swingtree.<a href="swingtree/UI.Position.html" title="enum in swingtree">UI.Position</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/UI.Side.html#RIGHT">RIGHT</a></span> - swingtree.<a href="swingtree/UI.Side.html" title="enum in swingtree">UI.Side</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.html#RIGHT">RIGHT</a></span> - Static variable in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>&nbsp;</dd>
@@ -4413,22 +4455,14 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>
 <div class="block">Returns a rectangle from the given rectangle with the user scale factor applied.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="swingtree/SwingTree.UIScale.html#scale2(int)">scale2(int)</a></span> - Method in class swingtree.<a href="swingtree/SwingTree.UIScale.html" title="class in swingtree">SwingTree.UIScale</a></dt>
-<dd>
-<div class="block">Similar as <a href="swingtree/SwingTree.UIScale.html#scale(int)"><code>SwingTree.UIScale.scale(int)</code></a> but always "rounds down".</div>
-</dd>
 <dt><span class="memberNameLink"><a href="swingtree/SwingTree.UIScale.html#scaleGraphics(java.awt.Graphics2D)">scaleGraphics(Graphics2D)</a></span> - Method in class swingtree.<a href="swingtree/SwingTree.UIScale.html" title="class in swingtree">SwingTree.UIScale</a></dt>
 <dd>
 <div class="block">If user scale factor is not 1, scale the given graphics context by invoking
  <code>Graphics2D.scale(double, double)</code> with user scale factor.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="swingtree/UI.html#schedule(double,java.util.concurrent.TimeUnit)">schedule(double, TimeUnit)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/SwingTree.UIScale.html#scaleRoundedDown(int)">scaleRoundedDown(int)</a></span> - Method in class swingtree.<a href="swingtree/SwingTree.UIScale.html" title="class in swingtree">SwingTree.UIScale</a></dt>
 <dd>
-<div class="block">Exposes an API for scheduling periodic animation updates.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="swingtree/UI.html#schedule(long,java.util.concurrent.TimeUnit)">schedule(long, TimeUnit)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
-<dd>
-<div class="block">Exposes an API for scheduling periodic animation updates.</div>
+<div class="block">Similar as <a href="swingtree/SwingTree.UIScale.html#scale(int)"><code>SwingTree.UIScale.scale(int)</code></a> but always "rounds down".</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.OverflowPolicy.html#SCROLL">SCROLL</a></span> - swingtree.<a href="swingtree/UI.OverflowPolicy.html" title="enum in swingtree">UI.OverflowPolicy</a></dt>
 <dd>&nbsp;</dd>
@@ -4686,15 +4720,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/dialogs/ConfirmDialogBuilder.html#show()">show()</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/ConfirmDialogBuilder.html" title="class in swingtree.dialogs">ConfirmDialogBuilder</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/dialogs/ErrorDialogBuilder.html#show()">show()</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/ErrorDialogBuilder.html" title="class in swingtree.dialogs">ErrorDialogBuilder</a></dt>
-<dd>
-<div class="block">Show the error dialog.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="swingtree/dialogs/InfoDialogBuilder.html#show()">show()</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/InfoDialogBuilder.html" title="class in swingtree.dialogs">InfoDialogBuilder</a></dt>
-<dd>
-<div class="block">Build the dialog and display it.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="swingtree/dialogs/WarnDialogBuilder.html#show()">show()</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/WarnDialogBuilder.html" title="class in swingtree.dialogs">WarnDialogBuilder</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/dialogs/MessageDialogBuilder.html#show()">show()</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/MessageDialogBuilder.html" title="class in swingtree.dialogs">MessageDialogBuilder</a></dt>
 <dd>
 <div class="block">Show the dialog with the specified configuration.</div>
 </dd>
@@ -4926,14 +4952,9 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/style/ShadowStyle.html#spreadRadius(int)">spreadRadius(int)</a></span> - Method in class swingtree.style.<a href="swingtree/style/ShadowStyle.html" title="class in swingtree.style">ShadowStyle</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/animation/Animate.html#startingIn(long,java.util.concurrent.TimeUnit)">startingIn(long, TimeUnit)</a></span> - Method in class swingtree.animation.<a href="swingtree/animation/Animate.html" title="class in swingtree.animation">Animate</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/animation/LifeTime.html#startingIn(long,java.util.concurrent.TimeUnit)">startingIn(long, TimeUnit)</a></span> - Method in class swingtree.animation.<a href="swingtree/animation/LifeTime.html" title="class in swingtree.animation">LifeTime</a></dt>
 <dd>
-<div class="block">Creates a new <a href="swingtree/animation/Animate.html" title="class in swingtree.animation"><code>Animate</code></a> instance that will be executed after the given delay.</div>
-</dd>
-<dt><a href="swingtree/animation/StopCondition.html" title="interface in swingtree.animation"><span class="typeNameLink">StopCondition</span></a> - Interface in <a href="swingtree/animation/package-summary.html">swingtree.animation</a></dt>
-<dd>
-<div class="block">Implementations of this interface are used to define when an animation should stop
-  running based on the current <a href="swingtree/animation/AnimationState.html" title="interface in swingtree.animation"><code>AnimationState</code></a>.</div>
+<div class="block">Creates a new schedule that will start after the given delay and run for the given duration.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/api/Styler.html#style(swingtree.style.ComponentStyleDelegate)">style(ComponentStyleDelegate&lt;C&gt;)</a></span> - Method in interface swingtree.api.<a href="swingtree/api/Styler.html" title="interface in swingtree.api">Styler</a></dt>
 <dd>
@@ -5083,16 +5104,16 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <div class="block">Use this to create a builder for a new <code>JTabbedPane</code> UI component
   with the provided <a href="swingtree/UI.OverflowPolicy.html" title="enum in swingtree"><code>UI.OverflowPolicy</code></a> applied to the tab buttons (see <code>JTabbedPane.setTabLayoutPolicy(int)</code>).</div>
 </dd>
-<dt><span class="memberNameLink"><a href="swingtree/UI.html#tabbedPane(swingtree.UI.Position)">tabbedPane(UI.Position)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/UI.html#tabbedPane(swingtree.UI.Side)">tabbedPane(UI.Side)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>
 <div class="block">Use this to create a builder for a new <code>JTabbedPane</code> UI component
-  with the provided <a href="swingtree/UI.Position.html" title="enum in swingtree"><code>UI.Position</code></a> applied to the tab buttons
+  with the provided <a href="swingtree/UI.Side.html" title="enum in swingtree"><code>UI.Side</code></a> applied to the tab buttons
   (see <code>JTabbedPane.setTabLayoutPolicy(int)</code>).</div>
 </dd>
-<dt><span class="memberNameLink"><a href="swingtree/UI.html#tabbedPane(swingtree.UI.Position,swingtree.UI.OverflowPolicy)">tabbedPane(UI.Position, UI.OverflowPolicy)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/UI.html#tabbedPane(swingtree.UI.Side,swingtree.UI.OverflowPolicy)">tabbedPane(UI.Side, UI.OverflowPolicy)</a></span> - Static method in class swingtree.<a href="swingtree/UI.html" title="class in swingtree">UI</a></dt>
 <dd>
 <div class="block">Use this to create a builder for a new <code>JTabbedPane</code> UI component
-  with the provided <a href="swingtree/UI.OverflowPolicy.html" title="enum in swingtree"><code>UI.OverflowPolicy</code></a> and <a href="swingtree/UI.Position.html" title="enum in swingtree"><code>UI.Position</code></a> applied to the tab buttons 
+  with the provided <a href="swingtree/UI.OverflowPolicy.html" title="enum in swingtree"><code>UI.OverflowPolicy</code></a> and <a href="swingtree/UI.Side.html" title="enum in swingtree"><code>UI.Side</code></a> applied to the tab buttons
   (see <code>JTabbedPane.setTabLayoutPolicy(int)</code> and <code>JTabbedPane.setTabPlacement(int)</code>).</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.TabbedPane.html#%3Cinit%3E()">TabbedPane()</a></span> - Constructor for class swingtree.<a href="swingtree/UI.TabbedPane.html" title="class in swingtree">UI.TabbedPane</a></dt>
@@ -5207,15 +5228,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/dialogs/ConfirmDialogBuilder.html#title(java.lang.String)">title(String)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/ConfirmDialogBuilder.html" title="class in swingtree.dialogs">ConfirmDialogBuilder</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/dialogs/ErrorDialogBuilder.html#title(java.lang.String)">title(String)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/ErrorDialogBuilder.html" title="class in swingtree.dialogs">ErrorDialogBuilder</a></dt>
-<dd>
-<div class="block">Set the title of the dialog.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="swingtree/dialogs/InfoDialogBuilder.html#title(java.lang.String)">title(String)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/InfoDialogBuilder.html" title="class in swingtree.dialogs">InfoDialogBuilder</a></dt>
-<dd>
-<div class="block">Set the title of the dialog.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="swingtree/dialogs/WarnDialogBuilder.html#title(java.lang.String)">title(String)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/WarnDialogBuilder.html" title="class in swingtree.dialogs">WarnDialogBuilder</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/dialogs/MessageDialogBuilder.html#title(java.lang.String)">title(String)</a></span> - Method in class swingtree.dialogs.<a href="swingtree/dialogs/MessageDialogBuilder.html" title="class in swingtree.dialogs">MessageDialogBuilder</a></dt>
 <dd>
 <div class="block">Set the title of the dialog.</div>
 </dd>
@@ -5304,7 +5317,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.Placement.html#TOP">TOP</a></span> - swingtree.<a href="swingtree/UI.Placement.html" title="enum in swingtree">UI.Placement</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/UI.Position.html#TOP">TOP</a></span> - swingtree.<a href="swingtree/UI.Position.html" title="enum in swingtree">UI.Position</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/UI.Side.html#TOP">TOP</a></span> - swingtree.<a href="swingtree/UI.Side.html" title="enum in swingtree">UI.Side</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UI.VerticalAlignment.html#TOP">TOP</a></span> - swingtree.<a href="swingtree/UI.VerticalAlignment.html" title="enum in swingtree">UI.VerticalAlignment</a></dt>
 <dd>&nbsp;</dd>
@@ -5548,10 +5561,6 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>
 <div class="block">{inheritDoc}</div>
 </dd>
-<dt><a href="swingtree/UI.Position.html" title="enum in swingtree"><span class="typeNameLink">UI.Position</span></a> - Enum in <a href="swingtree/package-summary.html">swingtree</a></dt>
-<dd>
-<div class="block">The position of a UI component in terms of directions.</div>
-</dd>
 <dt><a href="swingtree/UI.ProgressBar.html" title="class in swingtree"><span class="typeNameLink">UI.ProgressBar</span></a> - Class in <a href="swingtree/package-summary.html">swingtree</a></dt>
 <dd>
 <div class="block">{inheritDoc}</div>
@@ -5567,6 +5576,11 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dt><a href="swingtree/UI.ScrollPane.html" title="class in swingtree"><span class="typeNameLink">UI.ScrollPane</span></a> - Class in <a href="swingtree/package-summary.html">swingtree</a></dt>
 <dd>
 <div class="block">{inheritDoc}</div>
+</dd>
+<dt><a href="swingtree/UI.Side.html" title="enum in swingtree"><span class="typeNameLink">UI.Side</span></a> - Enum in <a href="swingtree/package-summary.html">swingtree</a></dt>
+<dd>
+<div class="block">All UI components are at their core rectangular, meaning they
+  always have exactly 4 uniquely identifiable sides.</div>
 </dd>
 <dt><a href="swingtree/UI.Slider.html" title="class in swingtree"><span class="typeNameLink">UI.Slider</span></a> - Class in <a href="swingtree/package-summary.html">swingtree</a></dt>
 <dd>
@@ -5990,7 +6004,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/style/Layout.html#unspecific()">unspecific()</a></span> - Static method in interface swingtree.style.<a href="swingtree/style/Layout.html" title="interface in swingtree.style">Layout</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/animation/Animate.html#until(java.util.function.Predicate)">until(Predicate&lt;AnimationState&gt;)</a></span> - Method in class swingtree.animation.<a href="swingtree/animation/Animate.html" title="class in swingtree.animation">Animate</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/animation/Animator.html#until(java.util.function.Predicate)">until(Predicate&lt;AnimationState&gt;)</a></span> - Method in class swingtree.animation.<a href="swingtree/animation/Animator.html" title="class in swingtree.animation">Animator</a></dt>
 <dd>
 <div class="block">Use this to define a stop condition for the animation.</div>
 </dd>
@@ -6103,7 +6117,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <dd>
 <div class="block">Returns the enum constant of this type with the specified name.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="swingtree/UI.Position.html#valueOf(java.lang.String)">valueOf(String)</a></span> - Static method in enum swingtree.<a href="swingtree/UI.Position.html" title="enum in swingtree">UI.Position</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/UI.Side.html#valueOf(java.lang.String)">valueOf(String)</a></span> - Static method in enum swingtree.<a href="swingtree/UI.Side.html" title="enum in swingtree">UI.Side</a></dt>
 <dd>
 <div class="block">Returns the enum constant of this type with the specified name.</div>
 </dd>
@@ -6200,7 +6214,7 @@ the order they are declared.</div>
 <div class="block">Returns an array containing the constants of this enum type, in
 the order they are declared.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="swingtree/UI.Position.html#values()">values()</a></span> - Static method in enum swingtree.<a href="swingtree/UI.Position.html" title="enum in swingtree">UI.Position</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/UI.Side.html#values()">values()</a></span> - Static method in enum swingtree.<a href="swingtree/UI.Side.html" title="enum in swingtree">UI.Side</a></dt>
 <dd>
 <div class="block">Returns an array containing the constants of this enum type, in
 the order they are declared.</div>
@@ -6249,13 +6263,10 @@ the order they are declared.</div>
 <dd>
 <div class="block">Shows a warning dialog with the given message and dialog title.</div>
 </dd>
-<dt><a href="swingtree/dialogs/WarnDialogBuilder.html" title="class in swingtree.dialogs"><span class="typeNameLink">WarnDialogBuilder</span></a> - Class in <a href="swingtree/dialogs/package-summary.html">swingtree.dialogs</a></dt>
-<dd>
-<div class="block">An immutable builder class for creating simple warning dialogs
-  based on the <code>JOptionPane</code> class, more specifically the
-  <code>JOptionPane.showMessageDialog(Component, Object, String, int, Icon)</code>
-  method.</div>
-</dd>
+<dt><span class="memberNameLink"><a href="swingtree/dialogs/ConfirmDialogBuilder.html#warning()">warning()</a></span> - Static method in class swingtree.dialogs.<a href="swingtree/dialogs/ConfirmDialogBuilder.html" title="class in swingtree.dialogs">ConfirmDialogBuilder</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="swingtree/dialogs/MessageDialogBuilder.html#warning()">warning()</a></span> - Static method in class swingtree.dialogs.<a href="swingtree/dialogs/MessageDialogBuilder.html" title="class in swingtree.dialogs">MessageDialogBuilder</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/style/FontStyle.html#weight()">weight()</a></span> - Method in class swingtree.style.<a href="swingtree/style/FontStyle.html" title="class in swingtree.style">FontStyle</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/Render.Builder.html#when(java.lang.Class)">when(Class&lt;T&gt;)</a></span> - Method in class swingtree.<a href="swingtree/Render.Builder.html" title="class in swingtree">Render.Builder</a></dt>
@@ -6357,6 +6368,10 @@ the order they are declared.</div>
 <dd>
 <div class="block">Use this to attach a <code>TitledBorder</code> with the
   provided title property dynamically setting the title String.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UIForAnySwing.html#withBoxLayout(swingtree.UI.Axis)">withBoxLayout(UI.Axis)</a></span> - Method in class swingtree.<a href="swingtree/UIForAnySwing.html" title="class in swingtree">UIForAnySwing</a></dt>
+<dd>
+<div class="block">Use this to set a <code>BoxLayout</code> for the component wrapped by this builder.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/UIForAnyButton.html#withButtonGroup(javax.swing.ButtonGroup)">withButtonGroup(ButtonGroup)</a></span> - Method in class swingtree.<a href="swingtree/UIForAnyButton.html" title="class in swingtree">UIForAnyButton</a></dt>
 <dd>
@@ -6589,6 +6604,10 @@ the order they are declared.</div>
 <dd>
 <div class="block">Use this to set a <code>GridLayout</code> for the component wrapped by this builder.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="swingtree/UIForAnySwing.html#withGridLayout(int,int,int,int)">withGridLayout(int, int, int, int)</a></span> - Method in class swingtree.<a href="swingtree/UIForAnySwing.html" title="class in swingtree">UIForAnySwing</a></dt>
+<dd>
+<div class="block">Use this to set a <code>GridLayout</code> for the component wrapped by this builder.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="swingtree/Tab.html#withHeader(javax.swing.JComponent)">withHeader(JComponent)</a></span> - Method in class swingtree.<a href="swingtree/Tab.html" title="class in swingtree">Tab</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/Tab.html#withHeader(swingtree.UIForAnySwing)">withHeader(UIForAnySwing&lt;?, ?&gt;)</a></span> - Method in class swingtree.<a href="swingtree/Tab.html" title="class in swingtree">Tab</a></dt>
@@ -6701,13 +6720,43 @@ the order they are declared.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/UIForAnySwing.html#withLayout(java.lang.String)">withLayout(String)</a></span> - Method in class swingtree.<a href="swingtree/UIForAnySwing.html" title="class in swingtree">UIForAnySwing</a></dt>
 <dd>
-<div class="block">Passes the provided string to the layout manager of the wrapped component.</div>
+<div class="block">Creates a new <code>MigLayout</code> for the component wrapped by this UI builder,
+  based on the provided layout constraints in the form of a string.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/UIForAnySwing.html#withLayout(java.lang.String,java.lang.String)">withLayout(String, String)</a></span> - Method in class swingtree.<a href="swingtree/UIForAnySwing.html" title="class in swingtree">UIForAnySwing</a></dt>
 <dd>
-<div class="block">This creates a <code>MigLayout</code> for the component wrapped by this UI builder.</div>
+<div class="block">This creates a <code>MigLayout</code> for the component wrapped by this UI builder
+  based on the provided layout constraints in the form of a string.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/UIForAnySwing.html#withLayout(java.lang.String,java.lang.String,java.lang.String)">withLayout(String, String, String)</a></span> - Method in class swingtree.<a href="swingtree/UIForAnySwing.html" title="class in swingtree">UIForAnySwing</a></dt>
+<dd>
+<div class="block">This creates a <code>MigLayout</code> for the component wrapped by this UI builder.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UIForAnySwing.html#withLayout(net.miginfocom.layout.LC)">withLayout(LC)</a></span> - Method in class swingtree.<a href="swingtree/UIForAnySwing.html" title="class in swingtree">UIForAnySwing</a></dt>
+<dd>
+<div class="block">Creates a new <code>MigLayout</code> for the component wrapped by this UI builder,
+  based on the provided layout constraints in the form of a <code>LC</code> instance,
+  which is a builder for the layout constraints.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UIForAnySwing.html#withLayout(net.miginfocom.layout.LC,java.lang.String)">withLayout(LC, String)</a></span> - Method in class swingtree.<a href="swingtree/UIForAnySwing.html" title="class in swingtree">UIForAnySwing</a></dt>
+<dd>
+<div class="block">This creates a <code>MigLayout</code> for the component wrapped by this UI builder
+ based on the provided layout constraints in the form of a <code>LC</code> instance
+ and column constraints in the form of a simple string.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UIForAnySwing.html#withLayout(net.miginfocom.layout.LC,java.lang.String,java.lang.String)">withLayout(LC, String, String)</a></span> - Method in class swingtree.<a href="swingtree/UIForAnySwing.html" title="class in swingtree">UIForAnySwing</a></dt>
+<dd>
+<div class="block">This creates a <code>MigLayout</code> for the component wrapped by this UI builder
+ based on the provided layout constraints in the form of a <code>LC</code> instance
+ and column and row constraints in the form of a simple string.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UIForAnySwing.html#withLayout(net.miginfocom.layout.LC,net.miginfocom.layout.AC)">withLayout(LC, AC)</a></span> - Method in class swingtree.<a href="swingtree/UIForAnySwing.html" title="class in swingtree">UIForAnySwing</a></dt>
+<dd>
+<div class="block">This creates a <code>MigLayout</code> for the component wrapped by this UI builder
+ based on the provided layout constraints in the form of a <code>LC</code> instance
+ and column constraints in the form of a <code>AC</code> instance.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="swingtree/UIForAnySwing.html#withLayout(net.miginfocom.layout.LC,net.miginfocom.layout.AC,net.miginfocom.layout.AC)">withLayout(LC, AC, AC)</a></span> - Method in class swingtree.<a href="swingtree/UIForAnySwing.html" title="class in swingtree">UIForAnySwing</a></dt>
 <dd>
 <div class="block">This creates a <code>MigLayout</code> for the component wrapped by this UI builder.</div>
 </dd>
@@ -6721,7 +6770,9 @@ the order they are declared.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/UIForAnySwing.html#withLayout(swingtree.layout.LayoutAttr)">withLayout(LayoutAttr)</a></span> - Method in class swingtree.<a href="swingtree/UIForAnySwing.html" title="class in swingtree">UIForAnySwing</a></dt>
 <dd>
-<div class="block">Passes the provided string to the <code>MigLayout</code> manager of the wrapped component.</div>
+<div class="block">Creates a new <code>MigLayout</code> for the component wrapped by this UI builder,
+  based on the provided layout constraints in the form of a <a href="swingtree/layout/LayoutAttr.html" title="class in swingtree.layout"><code>LayoutAttr</code></a> instance,
+  which is an immutable string wrapper for the layout constraints.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/UIForAnySwing.html#withLayout(swingtree.layout.LayoutAttr,java.lang.String)">withLayout(LayoutAttr, String)</a></span> - Method in class swingtree.<a href="swingtree/UIForAnySwing.html" title="class in swingtree">UIForAnySwing</a></dt>
 <dd>&nbsp;</dd>
@@ -7197,9 +7248,9 @@ the order they are declared.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="swingtree/UIForAnySwing.html#withStyle(swingtree.api.Styler)">withStyle(Styler&lt;C&gt;)</a></span> - Method in class swingtree.<a href="swingtree/UIForAnySwing.html" title="class in swingtree">UIForAnySwing</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/UIForTabbedPane.html#withTabPlacement(sprouts.Val)">withTabPlacement(Val&lt;UI.Position&gt;)</a></span> - Method in class swingtree.<a href="swingtree/UIForTabbedPane.html" title="class in swingtree">UIForTabbedPane</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/UIForTabbedPane.html#withTabPlacementAt(sprouts.Val)">withTabPlacementAt(Val&lt;UI.Side&gt;)</a></span> - Method in class swingtree.<a href="swingtree/UIForTabbedPane.html" title="class in swingtree">UIForTabbedPane</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="swingtree/UIForTabbedPane.html#withTabPlacement(swingtree.UI.Position)">withTabPlacement(UI.Position)</a></span> - Method in class swingtree.<a href="swingtree/UIForTabbedPane.html" title="class in swingtree">UIForTabbedPane</a></dt>
+<dt><span class="memberNameLink"><a href="swingtree/UIForTabbedPane.html#withTabPlacementAt(swingtree.UI.Side)">withTabPlacementAt(UI.Side)</a></span> - Method in class swingtree.<a href="swingtree/UIForTabbedPane.html" title="class in swingtree">UIForTabbedPane</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="swingtree/UIForAnyButton.html#withText(java.lang.String)">withText(String)</a></span> - Method in class swingtree.<a href="swingtree/UIForAnyButton.html" title="class in swingtree">UIForAnyButton</a></dt>
 <dd>

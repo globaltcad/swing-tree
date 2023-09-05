@@ -1,9 +1,12 @@
 package swingtree;
 
+import net.miginfocom.layout.AC;
+import net.miginfocom.layout.CC;
+import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
 import sprouts.Event;
 import sprouts.*;
-import swingtree.animation.Animate;
+import swingtree.animation.Animator;
 import swingtree.animation.LifeTime;
 import swingtree.api.Buildable;
 import swingtree.api.MenuBuilder;
@@ -16,7 +19,9 @@ import swingtree.components.JBox;
 import swingtree.components.JIcon;
 import swingtree.components.JScrollPanels;
 import swingtree.components.JSplitButton;
-import swingtree.dialogs.*;
+import swingtree.dialogs.ConfirmAnswer;
+import swingtree.dialogs.ConfirmDialogBuilder;
+import swingtree.dialogs.MessageDialogBuilder;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
 import swingtree.style.*;
@@ -59,9 +64,9 @@ import java.util.function.Supplier;
 public final class UI
 {
     // Common Mig layout constants:
-    public static LayoutAttr FILL     = LayoutAttr.of("fill");
-    public static LayoutAttr FILL_X     = LayoutAttr.of("fillx");
-    public static LayoutAttr FILL_Y     = LayoutAttr.of("filly");
+    public static LayoutAttr FILL   = LayoutAttr.of("fill");
+    public static LayoutAttr FILL_X = LayoutAttr.of("fillx");
+    public static LayoutAttr FILL_Y = LayoutAttr.of("filly");
     public static LayoutAttr INS(int insets) { return INSETS(insets); }
     public static LayoutAttr INSETS(int insets) { return LayoutAttr.of("insets " + insets); }
     public static LayoutAttr INS(int top, int left, int bottom, int right) { return INSETS(top, left, bottom, right); }
@@ -74,15 +79,15 @@ public final class UI
     public static LayoutAttr NO_CACHE = LayoutAttr.of("nocache");
     public static LayoutAttr DEBUG    = LayoutAttr.of("debug");
 
-    public static CompAttr WRAP     = CompAttr.of("wrap");
-    public static CompAttr SPAN     = CompAttr.of("SPAN");
+    public static CompAttr WRAP = CompAttr.of("wrap");
+    public static CompAttr SPAN = CompAttr.of("SPAN");
     public static CompAttr SPAN( int times ) { return CompAttr.of( "span " + times ); }
     public static CompAttr SPAN( int xTimes, int yTimes ) { return CompAttr.of( "span " + xTimes + " " + yTimes ); }
     public static CompAttr SPAN_X( int times ) { return CompAttr.of( "spanx " + times ); }
     public static CompAttr SPAN_Y( int times ) { return CompAttr.of( "spany " + times ); }
-    public static CompAttr GROW     = CompAttr.of("grow");
-    public static CompAttr GROW_X   = CompAttr.of("growx");
-    public static CompAttr GROW_Y   = CompAttr.of("growy");
+    public static CompAttr GROW   = CompAttr.of("grow");
+    public static CompAttr GROW_X = CompAttr.of("growx");
+    public static CompAttr GROW_Y = CompAttr.of("growy");
     public static CompAttr GROW( int weight ) { return CompAttr.of( "grow " + weight ); }
     public static CompAttr GROW_X( int weight ) { return CompAttr.of( "growx " + weight ); }
     public static CompAttr GROW_Y( int weight ) { return CompAttr.of( "growy " + weight ); }
@@ -114,7 +119,7 @@ public final class UI
     public static CompAttr ALIGN_Y_CENTER = CompAttr.of("aligny center");
     public static CompAttr ALIGN_Y_BOTTOM = CompAttr.of("aligny bottom");
     public static CompAttr ALIGN_Y_TOP = CompAttr.of("aligny top");
-    public static CompAttr ALIGN( Position pos ) { return CompAttr.of(pos.toMigAlign()); }
+    public static CompAttr ALIGN( Side pos ) { return CompAttr.of(pos.toMigAlign()); }
     public static CompAttr TOP = CompAttr.of("top");
     public static CompAttr RIGHT = CompAttr.of("right");
     public static CompAttr BOTTOM = CompAttr.of("bottom");
@@ -128,7 +133,12 @@ public final class UI
     public static CompAttr DOCK_SOUTH = CompAttr.of("dock south");
     public static CompAttr DOCK_EAST  = CompAttr.of("dock east");
     public static CompAttr DOCK_WEST  = CompAttr.of("dock west");
-    public static CompAttr DOCK( Position pos ) { return CompAttr.of("dock " + pos.toDirectionString()); }
+    public static CompAttr DOCK( Side pos ) { return CompAttr.of("dock " + pos.toDirectionString()); }
+
+    public static LC LC() { return new LC().fill(); }
+    public static AC AC() { return new AC(); }
+    public static CC CC() { return new CC(); }
+
 
     /**
      *  An enum set of all the available swing cursors which
@@ -166,9 +176,13 @@ public final class UI
     public enum Active { NEVER, AS_NEEDED, ALWAYS }
 
     /**
-     *  The position of a UI component in terms of directions.
+     *  All UI components are at their core rectangular, meaning they
+     *  always have exactly 4 uniquely identifiable sides.
+     *  This enum is used to target specific sides of a {@link JComponent}
+     *  in various API methods like for example {@link UIForTabbedPane#withTabPlacementAt(Side)}
+     *  or the tapped pane factory method {@link UI#tabbedPane(Side)}.
      */
-    public enum Position {
+    public enum Side {
         TOP, LEFT, BOTTOM, RIGHT;
         int forTabbedPane() {
             switch ( this ) {
@@ -766,6 +780,18 @@ public final class UI
     private UI(){} // This is a static API
 
     /**
+     *  Use this to create a builder for anything.
+     *
+     * @param component The component which should be wrapped by the builder.
+     * @param <T> The type parameter defining the concrete type of the component.
+     * @return A builder instance for the provided object, which enables fluent method chaining.
+     */
+    public static <T extends Component> UIForAnything<T> of( T component ) {
+        NullUtil.nullArgCheck(component, "component", Component.class);
+        return new UIForAnything<>(component);
+    }
+
+    /**
      *  This returns an instance of a generic swing tree builder
      *  for anything extending the {@link JComponent} class.
      *  <br><br>
@@ -781,80 +807,558 @@ public final class UI
     }
 
     /**
-     *  This returns an instance of a Swing-Tree builder for a {@link JFrame} type.
-     * @param frame The new frame instance which ought to be part of the Swing UI.
-     * @return A basic UI builder instance wrapping a {@link JFrame}.
-     * @param <F> The concrete type of this new frame.
-     */
-    public static <F extends JFrame> UIForJFrame<F> of( F frame ) {
-        return new UIForJFrame<>(frame);
-    }
-
-    /**
-     *  Use this to create a builder for the supplied {@link JFrame}. <br>
-     *  This is in essence a convenience method for {@code UI.of(new JFrame()) )}.
+     *  Use this to create a builder for the provided {@link JPanel} type. <br>
+     *  This method is typically used to enable declarative UI design for custom
+     *  {@link JPanel} based components either within the constructor of a custom
+     *  subclass, like so: <br>
+     *  <pre>{@code
+     *  class MyCustomPanel extends JPanel {
+     *      public MyCustomPanel() {
+     *          UI.of(this)
+     *          .add(UI.label("Hello Swing!"))
+     *          .add(UI.button("Click Me"))
+     *          .add(UI.button("Or Me") );
+     *      }
+     *  }
+     *  }</pre>
+     *  <br>
+     *  ... or as part of a UI declaration, where the custom {@link JPanel} type
+     *  is added to the components tree, like so: <br>
+     *  <pre>{@code
+     *  UI.show(
+     *      UI.panel()
+     *      .add(
+     *          new MyCustomPanel()
+     *      )
+     *      .add(..more stuff..)
+     *  );
+     *  }</pre>
+     *  <br>
      *
-     * @return A basic UI builder instance wrapping a {@link JFrame}.
+     * @param component The {@link JPanel} instance to be wrapped by a swing tree UI builder for panel components.
+     * @return A builder instance for the provided {@link JPanel}, which enables fluent method chaining.
+     * @param <P> The type parameter of the concrete {@link JPanel} type to be wrapped.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
-    public static UIForJFrame<JFrame> frame() {
-        return new UIForJFrame<>(new JFrame());
+    public static <P extends JPanel> UIForPanel<P> of( P component ) {
+        NullUtil.nullArgCheck(component, "component", JPanel.class);
+        return new UIForPanel<>(component);
     }
 
     /**
-     *  Use this to create a builder for the supplied {@link JFrame} with the supplied title. <br>
-     * @param title The title for the new frame.
-     * @return A basic UI builder instance wrapping a {@link JFrame}.
-     */
-    public static UIForJFrame<JFrame> frame( String title ) {
-        return new UIForJFrame<>(new JFrame()).withTitle(title);
-    }
-
-    /**
-     *  This returns an instance of a Swing-Tree builder for a {@link JDialog} type.
-     * @param dialog The new dialog instance which ought to be part of the Swing UI.
-     * @return A basic UI builder instance wrapping a {@link JDialog}.
-     * @param <D> The concrete type of this new dialog.
-     */
-    public static <D extends JDialog> UIForJDialog<D> of( D dialog ) {
-        return new UIForJDialog<>(dialog);
-    }
-
-    /**
-     *  Use this to create a builder for the supplied {@link JDialog}. <br>
-     *  This is in essence a convenience method for {@code UI.of(new JDialog()) )}.
+     *  Use this to create a builder for a new {@link JPanel} UI component
+     *  with a {@link MigLayout} as its layout manager.
+     *  This is in essence a convenience method for {@code UI.of(new JPanel(new MigLayout()))}.
      *
-     * @return A basic UI builder instance wrapping a {@link JDialog}.
+     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      */
-    public static UIForJDialog<JDialog> dialog() {
-        return new UIForJDialog<>(new JDialog());
+    public static UIForPanel<JPanel> panel() { return of((JPanel) new Panel()).withLayout(new MigLayout("hidemode 2")); }
+
+    /**
+     *  Use this to create a builder for the {@link JPanel} UI component.
+     *  This is essentially a convenience method for the following: <br>
+     *  <pre>{@code
+     *      UI.of(new JPanel(new MigLayout(attr)))
+     *  }</pre>
+     *  <br>
+     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
+     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code attr} is {@code null}.
+     */
+    public static UIForPanel<JPanel> panel( String attr ) {
+        NullUtil.nullArgCheck(attr, "attr", String.class);
+        return of((JPanel) new Panel()).withLayout(attr);
     }
 
     /**
-     *  Use this to create a builder for the supplied {@link JDialog} with the supplied owner. <br>
-     * @param owner The owner for the new dialog.
-     * @return A basic UI builder instance wrapping a {@link JDialog}.
+     *  Use this to create a builder for the {@link JPanel} UI component.
+     *  This is essentially a convenience method for the following: <br>
+     *  <pre>{@code
+     *      UI.of(new JPanel(new MigLayout(attr, colConstraints)))
+     *  }</pre>
+     *  <br>
+     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
+     * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
+     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      */
-    public static UIForJDialog<JDialog> dialog( Window owner ) {
-        return new UIForJDialog<>(new JDialog(owner));
+    public static UIForPanel<JPanel> panel( String attr, String colConstraints ) {
+        NullUtil.nullArgCheck(attr, "attr", String.class);
+        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
+        return of((JPanel) new Panel()).withLayout(attr, colConstraints);
     }
 
     /**
-     *  Use this to create a builder for the supplied {@link JDialog} with the supplied title. <br>
-     * @param title The title for the new dialog.
-     * @return A basic UI builder instance wrapping a {@link JDialog}.
+     *  Use this to create a builder for a new {@link JPanel} UI component
+     *  with a {@link MigLayout} as its layout manager and the provided constraints.
+     *  This is essentially a convenience method for the following: <br>
+     *  <pre>{@code
+     *      UI.of(new JPanel(new MigLayout(attr, colConstraints, rowConstraints)))
+     *  }</pre>
+     *  <br>
+     * @param attr The layout attributes.
+     * @param colConstraints The column constraints.
+     * @param rowConstraints The row constraints.
+     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      */
-    public static UIForJDialog<JDialog> dialog( String title ) {
-        return new UIForJDialog<>(new JDialog()).withTitle(title);
+    public static UIForPanel<JPanel> panel( String attr, String colConstraints, String rowConstraints ) {
+        NullUtil.nullArgCheck(attr, "attr", String.class);
+        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
+        NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class);
+        return of((JPanel) new Panel()).withLayout(attr, colConstraints, rowConstraints);
     }
 
     /**
-     *  Use this to create a builder for the supplied {@link JDialog} with the supplied owner and title. <br>
-     * @param owner The owner for the new dialog.
-     * @param title The title for the new dialog.
-     * @return A basic UI builder instance wrapping a {@link JDialog}.
+     *  Use this to create a builder for the {@link JPanel} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr)}.
+     *
+     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
+     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code attr} is {@code null}.
      */
-    public static UIForJDialog<JDialog> dialog( Window owner, String title ) {
-        return new UIForJDialog<>(new JDialog(owner)).withTitle(title);
+    public static UIForPanel<JPanel> panel( LayoutAttr attr ) {
+        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
+        return panel(attr.toString());
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JPanel} UI component.
+     *  This is essentially a convenience method for the following: <br>
+     *  <pre>{@code
+     *      UI.of(new JPanel(new MigLayout(attr, colConstraints)))
+     *  }</pre>
+     *  <br>
+     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
+     * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
+     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     */
+    public static UIForPanel<JPanel> panel( LayoutAttr attr, String colConstraints ) {
+        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
+        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
+        return of((JPanel)new Panel()).withLayout(attr, colConstraints);
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JPanel} UI component
+     *  with a {@link MigLayout} as its layout manager and the provided constraints.
+     *  This is essentially a convenience method for the following: <br>
+     *  <pre>{@code
+     *      UI.of(new JPanel(new MigLayout(attr, colConstraints, rowConstraints)))
+     *  }</pre>
+     *  <br>
+     * @param attr The layout attributes in the form of a {@link LayoutAttr} constants.
+     * @param colConstraints The column constraints.
+     * @param rowConstraints The row constraints.
+     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     */
+    public static UIForPanel<JPanel> panel( LayoutAttr attr, String colConstraints, String rowConstraints ) {
+        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
+        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
+        NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class);
+        return of((JPanel) new Panel()).withLayout(attr, colConstraints, rowConstraints);
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JPanel} UI component.
+     *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr)}. <br>
+     *  This method is typiclly used alongside the {@link UI#LC()} factory
+     *  method to create a layout attributes/constraints builder, like so: <br>
+     *  <pre>{@code
+     *      UI.panel(
+     *          UI.LC()
+     *          .insets("10 10 10 10")
+     *          .debug()
+     *      )
+     *      .add(..)
+     *      .add(..)
+     *  }</pre>
+     *
+     * @param attr The layout attributes in the form of a {@link LC} instance.
+     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code attr} is {@code null}.
+     */
+    public static UIForPanel<JPanel> panel( LC attr ) {
+        NullUtil.nullArgCheck(attr, "attr", LC.class);
+        return panel().withLayout( attr );
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JPanel} UI component
+     *  with a {@link MigLayout} as its layout manager and the provided constraints.
+     *  This is essentially a convenience method for the following: <br>
+     *  <pre>{@code
+     *      UI.of(new JPanel(new MigLayout(attr, ConstraintParser.parseColumnConstraints(colConstraints))))
+     *  }</pre>
+     *  <br>
+     * @param attr The layout attributes in the form of a {@link LC} constants.
+     * @param colConstraints The column constraints in the form of a {@link String} instance.
+     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     */
+    public static UIForPanel<JPanel> panel( LC attr, String colConstraints ) {
+        NullUtil.nullArgCheck(attr, "attr", LC.class);
+        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
+        return of((JPanel) new Panel()).withLayout( attr, colConstraints );
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JPanel} UI component
+     *  with a {@link MigLayout} as its layout manager and the provided constraints.
+     *  This is essentially a convenience method for the following: <br>
+     *  <pre>{@code
+     *      UI.of(new JPanel(
+     *          new MigLayout(
+     *              attr,
+     *              ConstraintParser.parseColumnConstraints(colConstraints),
+     *              ConstraintParser.parseRowConstraints(rowConstraints)
+     *          )
+     *      ))
+     *  }</pre>
+     *  <br>
+     * @param attr The layout attributes in the form of a {@link LC} instance.
+     * @param colConstraints The column constraints in the form of a {@link String} instance.
+     * @param rowConstraints The row constraints in the form of a {@link String} instance.
+     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     */
+    public static UIForPanel<JPanel> panel( LC attr, String colConstraints, String rowConstraints ) {
+        NullUtil.nullArgCheck(attr, "attr", LC.class);
+        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
+        NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class);
+        return of((JPanel) new Panel()).withLayout(attr, colConstraints, rowConstraints);
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JPanel} UI component with a
+     *  dynamically updated set of {@link MigLayout} attributes.
+     *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr)}.
+     *
+     * @param attr The layout attributes property which will be passed to the {@link MigLayout} constructor as first argument.
+     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code attr} is {@code null}.
+     */
+    public static UIForPanel<JPanel> panel( Val<LayoutAttr> attr ) {
+        NullUtil.nullArgCheck(attr, "attr", Val.class);
+        NullUtil.nullPropertyCheck(attr, "attr", "Null is not a valid layout attribute.");
+        return panel(attr.get().toString()).withLayout(attr);
+    }
+
+    /**
+     *  Use this to create a builder for the provided {@link JBox} instance,
+     *  which is a general purpose component wrapper type with the following properties:
+     *  <ul>
+     *      <li>
+     *          It is transparent, meaning that it does not paint its background.
+     *      </li>
+     *      <li>
+     *          The default layout manager is a {@link MigLayout}.
+     *      </li>
+     *      <li>
+     *          The insets (the space between the wrapped component and the box's border)
+     *          are set to zero.
+     *      </li>
+     *      <li>
+     *          There the gap size between the components added to the box is set to zero.
+     *          So they will be tightly packed.
+     *      </li>
+     *  </ul>
+     *  This method is typically used to enable declarative UI design for custom
+     *  {@link JBox} based components either within the constructor of a custom
+     *  subclass, like so: <br>
+     *  <pre>{@code
+     *  class MyCustomBox extends JBox {
+     *      public MyCustomBox() {
+     *          UI.of(this)
+     *          .add(UI.label("Hello Swing!"))
+     *          .add(UI.button("Click Me"))
+     *          .add(UI.button("Or Me") );
+     *      }
+     *  }
+     *  }</pre>
+     *  <br>
+     *  ... or as part of a UI declaration, where the custom {@link JBox} type
+     *  is added to the components tree, like so: <br>
+     *  <pre>{@code
+     *  UI.show(
+     *      UI.panel()
+     *      .add(
+     *          new MyCustomBox()
+     *      )
+     *      .add(..more stuff..)
+     *  );
+     *  }</pre>
+     *  <br>
+     *
+     * @param component The box component type for which a builder should be created.
+     * @param <B> THe type parameter defining the concrete {@link JBox} type.
+     * @return A builder for the provided box component.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
+     */
+    public static <B extends JBox> UIForBox<B> of( B component ) {
+        NullUtil.nullArgCheck(component, "component", JPanel.class);
+        return new UIForBox<>(component);
+    }
+
+    /**
+     *  Use this to create a builder for a {@link JBox} instance,
+     *  which is a general purpose component wrapper type with the following properties:
+     *  <ul>
+     *      <li>
+     *          It is transparent, meaning that it does not paint its background.
+     *      </li>
+     *      <li>
+     *          The default layout manager is a {@link MigLayout}.
+     *      </li>
+     *      <li>
+     *          The insets (the space between the wrapped component and the box's border)
+     *          are set to zero.
+     *      </li>
+     *      <li>
+     *          There the gap size between the components added to the box is set to zero.
+     *          So they will be tightly packed.
+     *      </li>
+     *  </ul>
+     *  This factory method is especially useful for when you simply want to nest components
+     *  tightly without having to worry about the layout manager or the background
+     *  color covering the background of the parent component.
+     *  <br>
+     *  Note that you can also emulate the {@link JBox} type with a {@link JPanel} using
+     *  {@code UI.panel("ins 0, gap 0").makeNonOpaque()}.
+     *
+     * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.
+     */
+    public static UIForBox<JBox> box() { return of((JBox)new Box()); }
+
+    /**
+     *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
+     *  which is transparent and without any insets as well as with a {@link MigLayout}
+     *  as its layout manager.
+     *  This is conceptually the same as a
+     *  transparent {@link JPanel} without any insets
+     *  and a {@link MigLayout} constructed using the provided constraints.
+     *  <br>
+     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
+     * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code attr} is {@code null}.
+     */
+    public static UIForBox<JBox> box( String attr ) {
+        NullUtil.nullArgCheck(attr, "attr", String.class);
+        if ( attr.isEmpty() ) attr = "ins 0";
+        else if ( !attr.contains("ins") ) attr += ", ins 0";
+        return box().withLayout(attr);
+    }
+
+    /**
+     *  Use this to create a builder for a {@link JBox}, conceptually the same as a
+     *  transparent {@link JPanel} without any insets
+     *  and a {@link MigLayout} constructed using the provided constraints.
+     *  <br>
+     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
+     * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
+     * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
+     */
+    public static UIForBox<JBox> box( String attr, String colConstraints ) {
+        NullUtil.nullArgCheck(attr, "attr", String.class);
+        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
+        if (attr.isEmpty()) attr = "ins 0";
+        else if (!attr.contains("ins")) attr += ", ins 0";
+        return box().withLayout(attr, colConstraints);
+    }
+
+    /**
+     *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
+     *  which is transparent and without any insets as well as with a {@link MigLayout}
+     *  as its layout manager.
+     *  This factory method is especially useful for when you simply want to nest components
+     *  tightly without having to worry about the layout manager or the background
+     *  color covering the background of the parent component.
+     *  <br>
+     *  Note that you can also emulate the {@link JBox} type with a {@link JPanel} using
+     *  <pre>{@code
+     *      UI.panel(attr, colConstraints, rowConstraints).makeNonOpaque()
+     *  }</pre>
+     *  <br>
+     * @param attr The layout attributes.
+     * @param colConstraints The column constraints.
+     * @param rowConstraints The row constraints.
+     * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.
+     */
+    public static UIForBox<JBox> box( String attr, String colConstraints, String rowConstraints ) {
+        NullUtil.nullArgCheck(attr, "attr", String.class);
+        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
+        NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class);
+        if (attr.isEmpty()) attr = "ins 0";
+        else if (!attr.contains("ins")) attr += ", ins 0";
+        return box().withLayout(attr, colConstraints, rowConstraints);
+    }
+
+    /**
+     *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
+     *  which is transparent and without any insets as well as with a {@link MigLayout}
+     *  as its layout manager.
+     *  This is conceptually the same as a
+     *  transparent {@link JPanel} without any insets
+     *  and a {@link MigLayout} constructed using the provided constraints.
+     *  <br>
+     *  This method allows you to pass a {@link LayoutAttr} constants as the layout attributes,
+     *  which is an instance typically chosen from the {@link UI} class constants
+     *  like for example {@link UI#FILL}, {@link UI#FILL_X}, {@link UI#FILL_Y}... <br>
+     *  A typical usage example would be: <br>
+     *  <pre>{@code
+     *      UI.box(UI.FILL_X.and(UI.WRAP(2)))
+     *      .add(..)
+     *      .add(..)
+     *  }</pre>
+     *  In this code snippet the creates a {@link JBox} with a {@link MigLayout} as its layout manager
+     *  where the box will fill the parent component horizontally and
+     *  the components added to the box will be wrapped after every two components.
+     *
+     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
+     * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code attr} is {@code null}.
+     */
+    public static UIForBox<JBox> box( LayoutAttr attr ) {
+        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
+        return box(attr.toString());
+    }
+
+    /**
+     *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
+     *  which is transparent and without any insets as well as with a {@link MigLayout}
+     *  as its layout manager.
+     *  This is conceptually the same as a
+     *  transparent {@link JPanel} without any insets
+     *  and a {@link MigLayout} constructed using the provided constraints. <br>
+     *  This method allows you to pass a {@link LayoutAttr} constants as the layout attributes,
+     *  which is an instance typically chosen from the {@link UI} class constants
+     *  like for example {@link UI#FILL}, {@link UI#FILL_X}, {@link UI#FILL_Y}... <br>
+     *  A typical usage example would be: <br>
+     *  <pre>{@code
+     *      UI.box(UI.FILL, "[shrink]6[grow]")
+     *      .add(..)
+     *      .add(..)
+     *  }</pre>
+     *  In this code snippet the creates a {@link JBox} with a {@link MigLayout} as its layout manager
+     *  where the box will fill the parent component horizontally and vertically
+     *  and the first column of components will be shrunk to their preferred size
+     *  and the second column will grow to fill the available space.
+     *  Both columns will have a gap of 6 pixels between them.
+     *
+     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
+     * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
+     * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
+     */
+    public static UIForBox<JBox> box( LayoutAttr attr, String colConstraints ) {
+        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
+        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
+        return box(attr.toString(), colConstraints);
+    }
+
+    /**
+     *  Use this to create a builder for a {@link JBox}, conceptually the same as a
+     *  transparent {@link JPanel} without any insets
+     *  and a {@link MigLayout} constructed using the provided constraints.
+     *  This is essentially a convenience method for the following: <br>
+     *  <pre>{@code
+     *      UI.of(new JBox(new MigLayout(attr, colConstraints, rowConstraints)))
+     *  }</pre>
+     *  <br>
+     * @param attr The layout attributes in the form of a {@link LayoutAttr} constants.
+     * @param colConstraints The column constraints.
+     * @param rowConstraints The row constraints.
+     * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
+     */
+    public static UIForBox<JBox> box( LayoutAttr attr, String colConstraints, String rowConstraints ) {
+        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
+        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
+        NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class);
+        return box(attr.toString(), colConstraints, rowConstraints);
+    }
+
+    /**
+     *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
+     *  which is transparent and without any insets as well as with a {@link MigLayout}
+     *  as its layout manager.
+     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
+     * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code attr} is {@code null}.
+     */
+    public static UIForBox<JBox> box( LC attr ) {
+        NullUtil.nullArgCheck(attr, "attr", LC.class);
+        return box().withLayout(attr);
+    }
+
+    /**
+     *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
+     *  which is transparent and without any insets as well as with a {@link MigLayout}
+     *  as its layout manager.
+     *  This is conceptually the same as a
+     *  transparent {@link JPanel} without any insets
+     *  and a {@link MigLayout} constructed using the provided constraints.
+     *  This is essentially a convenience method for the following: <br>
+     *  <pre>{@code
+     *      UI.of(new JBox(new MigLayout(attr, colConstraints)))
+     *  }</pre>
+     *  <br>
+     * @param attr The layout attributes in the form of a {@link LayoutAttr} constants.
+     * @param colConstraints The column constraints.
+     * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
+     */
+    public static UIForBox<JBox> box( LC attr, String colConstraints ) {
+        NullUtil.nullArgCheck(attr, "attr", LC.class);
+        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
+        return box().withLayout( attr, colConstraints )           ;
+    }
+
+    /**
+     *  Use this to create a builder for a {@link JBox}, conceptually the same as a
+     *  transparent {@link JPanel} without any insets
+     *  and a {@link MigLayout} constructed using the provided constraints.
+     *  This is essentially a convenience method for the following: <br>
+     *  <pre>{@code
+     *      UI.of(new JBox())
+     *      .peek( box -> {
+     *          box.setLayout(
+     *              new MigLayout(
+     *                  attr,
+     *                  ConstraintParser.parseColumnConstraints(colConstraints),
+     *                  ConstraintParser.parseRowConstraints(rowConstraints)
+     *              )
+     *          )
+     *      })
+     *  }</pre>
+     *  <br>
+     * @param attr The layout attributes in the form of a {@link LayoutAttr} constants.
+     * @param colConstraints The column constraints.
+     * @param rowConstraints The row constraints.
+     * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
+     */
+    public static UIForBox<JBox> box( LC attr, String colConstraints, String rowConstraints ) {
+        NullUtil.nullArgCheck(attr, "attr", LC.class);
+        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
+        NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class);
+        return box().withLayout(attr, colConstraints, rowConstraints);
+    }
+
+    /**
+     *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
+     *  which is transparent and without any insets as well as with a {@link MigLayout}
+     *  as its layout manager.
+     *  This is conceptually the same as a
+     *  transparent {@link JPanel} without any insets
+     *  and a {@link MigLayout} constructed using the provided constraints.
+     *  This method allows you to dynamically determine the {@link LayoutAttr} constants
+     *  of the {@link MigLayout} instance, by passing a {@link Val} property which
+     *  will be observed and its value passed to the {@link MigLayout} constructor
+     *  whenever it changes.
+     *  This is in essence a convenience method for:
+     *  {@code UI.box().withLayout(attr.viewAsString( it -> it+", ins 0"))}.
+     *
+     * @param attr The layout attributes property which will be passed to the {@link MigLayout} constructor as first argument.
+     * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code attr} is {@code null}.
+     */
+    public static UIForBox<JBox> box( Val<LayoutAttr> attr ) {
+        NullUtil.nullArgCheck(attr, "attr", Val.class);
+        NullUtil.nullPropertyCheck(attr, "attr", "Null is not a valid layout attribute.");
+        return box().withLayout(attr.view( it -> it.and("ins 0")));
     }
 
     /**
@@ -1173,6 +1677,7 @@ public final class UI
      *                  This will be updated when the user selects a new value.
      * @param clickEvent The {@link Event} which will be fired when the user clicks on the button.
      * @return A UI builder instance wrapping a {@link JSplitButton}.
+     * @param <E> The type of the {@link Enum} representing the selectable options.
      */
     public static <E extends Enum<E>> UIForSplitButton<JSplitButton> splitButton( Var<E> selection, Event clickEvent ) {
         return splitButton("").withSelection(selection, clickEvent);
@@ -1202,6 +1707,7 @@ public final class UI
      * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
      *                  This will be updated when the user selects a new value.
      * @return A UI builder instance wrapping a {@link JSplitButton}.
+     * @param <E> The type of the {@link Enum} representing the selectable options.
      */
     public static <E extends Enum<E>> UIForSplitButton<JSplitButton> splitButton( Var<E> selection ) {
         return splitButton("").withSelection(selection);
@@ -1299,7 +1805,7 @@ public final class UI
 
     /**
      *  Use this to create a builder for a new {@link JTabbedPane} UI component
-     *  with the provided {@link Position} applied to the tab buttons
+     *  with the provided {@link Side} applied to the tab buttons
      *  (see {@link JTabbedPane#setTabLayoutPolicy(int)}).
      *  In order to add tabs to this builder use the tab object returned by {@link #tab(String)}
      *  like so:
@@ -1311,18 +1817,18 @@ public final class UI
      *      .add(UI.tab("third").withIcon(someIcon).add(UI.button("click me")))
      *  }</pre>
      *
-     * @param tabsPosition The position of the tab buttons which may be {@link Position#TOP}, {@link Position#RIGHT}, {@link Position#BOTTOM}, {@link Position#LEFT}.
+     * @param tabsSide The position of the tab buttons which may be {@link Side#TOP}, {@link Side#RIGHT}, {@link Side#BOTTOM}, {@link Side#LEFT}.
      * @return A builder instance wrapping a new {@link JTabbedPane}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code tabsPosition} is {@code null}.
      */
-    public static UIForTabbedPane<JTabbedPane> tabbedPane( Position tabsPosition ) {
-        NullUtil.nullArgCheck(tabsPosition, "tabsPosition", Position.class);
-        return tabbedPane().withTabPlacement(tabsPosition);
+    public static UIForTabbedPane<JTabbedPane> tabbedPane( Side tabsSide) {
+        NullUtil.nullArgCheck(tabsSide, "tabsPosition", Side.class);
+        return tabbedPane().withTabPlacementAt(tabsSide);
     }
 
     /**
      *  Use this to create a builder for a new {@link JTabbedPane} UI component
-     *  with the provided {@link OverflowPolicy} and {@link Position} applied to the tab buttons 
+     *  with the provided {@link OverflowPolicy} and {@link Side} applied to the tab buttons
      *  (see {@link JTabbedPane#setTabLayoutPolicy(int)} and {@link JTabbedPane#setTabPlacement(int)}).
      *  In order to add tabs to this builder use the tab object returned by {@link #tab(String)}
      *  like so:
@@ -1333,15 +1839,15 @@ public final class UI
      *      .add(UI.tab("third").withIcon(someIcon).add(UI.button("click me")))
      *  }</pre>
      *
-     * @param tabsPosition The position of the tab buttons which may be {@link Position#TOP}, {@link Position#RIGHT}, {@link Position#BOTTOM}, {@link Position#LEFT}.
+     * @param tabsSide The position of the tab buttons which may be {@link Side#TOP}, {@link Side#RIGHT}, {@link Side#BOTTOM}, {@link Side#LEFT}.
      * @param tabsPolicy The overflow policy of the tab buttons which can either be {@link OverflowPolicy#SCROLL} or {@link OverflowPolicy#WRAP}.
      * @return A builder instance wrapping a new {@link JTabbedPane}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code tabsPosition} or {@code tabsPolicy} are {@code null}.
      */
-    public static UIForTabbedPane<JTabbedPane> tabbedPane( Position tabsPosition, OverflowPolicy tabsPolicy ) {
-        NullUtil.nullArgCheck(tabsPosition, "tabsPosition", Position.class);
+    public static UIForTabbedPane<JTabbedPane> tabbedPane(Side tabsSide, OverflowPolicy tabsPolicy ) {
+        NullUtil.nullArgCheck(tabsSide, "tabsPosition", Side.class);
         NullUtil.nullArgCheck(tabsPolicy, "tabsPolicy", OverflowPolicy.class);
-        return tabbedPane().withTabPlacement(tabsPosition).withOverflowPolicy(tabsPolicy);
+        return tabbedPane().withTabPlacementAt(tabsSide).withOverflowPolicy(tabsPolicy);
     }
 
     /**
@@ -1362,7 +1868,7 @@ public final class UI
      */
     public static UIForTabbedPane<JTabbedPane> tabbedPane( OverflowPolicy tabsPolicy ) {
         NullUtil.nullArgCheck(tabsPolicy, "tabsPolicy", OverflowPolicy.class);
-        return tabbedPane().withTabPlacement(Position.TOP).withOverflowPolicy(tabsPolicy);
+        return tabbedPane().withTabPlacementAt(Side.TOP).withOverflowPolicy(tabsPolicy);
     }
 
 
@@ -1492,7 +1998,9 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JMenu} instance.
      *
+     * @param component The {@link JMenu} component which should be wrapped by the swing tree UI builder designed for menus.
      * @return A builder instance for the provided {@link JMenu}, which enables fluent method chaining.
+     * @param <M> The concrete type of the menu.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static <M extends JMenu> UIForMenu<M> of( M component ) {
@@ -1503,7 +2011,9 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JMenuItem} instance.
      *
+     * @param component The {@link JMenuItem} component which should be wrapped by the swing tree UI builder designed for menu items.
      * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
+     * @param <M> The type parameter of the concrete menu item component.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static <M extends JMenuItem> UIForMenuItem<M> of( M component ) {
@@ -1724,6 +2234,8 @@ public final class UI
      * @param state The fixed enum value which will be used as the text of the menu item and
      * @param property The variable enum property which will be used to select the menu item.
      * @return A builder instance for the provided {@link JRadioButtonMenuItem}, which enables fluent method chaining.
+     * @param <E> The type of the enum.
+     * @throws IllegalArgumentException if {@code state} or {@code property} are {@code null}.
      */
     public static <E extends Enum<E>> UIForRadioButtonMenuItem<JRadioButtonMenuItem> radioButtonMenuItem( E state, Var<E> property ) {
         NullUtil.nullArgCheck(state, "state", Enum.class);
@@ -2019,322 +2531,10 @@ public final class UI
     }
 
     /**
-     *  Use this to create a builder for the provided {@link JPanel} instance.
-     *
-     * @return A builder instance for the provided {@link JPanel}, which enables fluent method chaining.
-     * @throws IllegalArgumentException if {@code component} is {@code null}.
-     */
-    public static <P extends JPanel> UIForPanel<P> of( P component ) {
-        NullUtil.nullArgCheck(component, "component", JPanel.class);
-        return new UIForPanel<>(component);
-    }
-
-    /**
-     *  Use this to create a builder for a new {@link JPanel} UI component
-     *  with a {@link MigLayout} as its layout manager.
-     *  This is in essence a convenience method for {@code UI.of(new JPanel(new MigLayout()))}.
-     *
-     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
-     */
-    public static UIForPanel<JPanel> panel() { return of((JPanel) new Panel()).withLayout(new MigLayout("hidemode 2")); }
-
-    /**
-     *  Use this to create a builder for a new {@link JPanel} UI component
-     *  with a {@link MigLayout} as its layout manager and the provided constraints.
-     *  This is essentially a convenience method for the following: <br>
-     *  <pre>{@code
-     *      UI.of(new JPanel(new MigLayout(attr, colConstraints, rowConstraints)))
-     *  }</pre>
-     *  <br>
-     * @param attr The layout attributes.
-     * @param colConstraints The column constraints.
-     * @param rowConstraints The row constraints.
-     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
-     */
-    public static UIForPanel<JPanel> panel( String attr, String colConstraints, String rowConstraints ) {
-        NullUtil.nullArgCheck(attr, "attr", String.class);
-        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
-        NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class);
-        return of((JPanel) new Panel()).withLayout(attr, colConstraints, rowConstraints);
-    }
-
-    /**
-     *  Use this to create a builder for a new {@link JPanel} UI component
-     *  with a {@link MigLayout} as its layout manager and the provided constraints.
-     *  This is essentially a convenience method for the following: <br>
-     *  <pre>{@code
-     *      UI.of(new JPanel(new MigLayout(attr, colConstraints, rowConstraints)))
-     *  }</pre>
-     *  <br>
-     * @param attr The layout attributes in the form of a {@link LayoutAttr} constants.
-     * @param colConstraints The column constraints.
-     * @param rowConstraints The row constraints.
-     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
-     */
-    public static UIForPanel<JPanel> panel( LayoutAttr attr, String colConstraints, String rowConstraints ) {
-        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
-        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
-        NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class);
-        return of((JPanel) new Panel()).withLayout(attr, colConstraints, rowConstraints);
-    }
-
-    /**
-     *  Use this to create a builder for the {@link JPanel} UI component.
-     *  This is essentially a convenience method for the following: <br>
-     *  <pre>{@code
-     *      UI.of(new JPanel(new MigLayout(attr, colConstraints)))
-     *  }</pre>
-     *  <br>
-     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
-     * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
-     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
-     */
-    public static UIForPanel<JPanel> panel( String attr, String colConstraints ) {
-        NullUtil.nullArgCheck(attr, "attr", String.class);
-        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
-        return of((JPanel) new Panel()).withLayout(attr, colConstraints);
-    }
-
-    /**
-     *  Use this to create a builder for the {@link JPanel} UI component.
-     *  This is essentially a convenience method for the following: <br>
-     *  <pre>{@code
-     *      UI.of(new JPanel(new MigLayout(attr, colConstraints)))
-     *  }</pre>
-     *  <br>
-     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
-     * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
-     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
-     */
-    public static UIForPanel<JPanel> panel( LayoutAttr attr, String colConstraints ) {
-        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
-        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
-        return of((JPanel)new Panel()).withLayout(attr, colConstraints);
-    }
-
-    /**
-     *  Use this to create a builder for the {@link JPanel} UI component.
-     *  This is essentially a convenience method for the following: <br>
-     *  <pre>{@code
-     *      UI.of(new JPanel(new MigLayout(attr)))
-     *  }</pre>
-     *  <br>
-     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
-     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
-     * @throws IllegalArgumentException if {@code attr} is {@code null}.
-     */
-    public static UIForPanel<JPanel> panel( String attr ) {
-        NullUtil.nullArgCheck(attr, "attr", String.class);
-        return of((JPanel) new Panel()).withLayout(attr);
-    }
-
-    /**
-     *  Use this to create a builder for the {@link JPanel} UI component.
-     *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr)}.
-     *
-     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
-     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
-     * @throws IllegalArgumentException if {@code attr} is {@code null}.
-     */
-    public static UIForPanel<JPanel> panel( LayoutAttr attr ) {
-        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
-        return panel(attr.toString());
-    }
-
-    /**
-     *  Use this to create a builder for the {@link JPanel} UI component with a
-     *  dynamically updated set of {@link MigLayout} attributes.
-     *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr)}.
-     *
-     * @param attr The layout attributes property which will be passed to the {@link MigLayout} constructor as first argument.
-     * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
-     * @throws IllegalArgumentException if {@code attr} is {@code null}.
-     */
-    public static UIForPanel<JPanel> panel( Val<LayoutAttr> attr ) {
-        NullUtil.nullArgCheck(attr, "attr", Val.class);
-        NullUtil.nullPropertyCheck(attr, "attr", "Null is not a valid layout attribute.");
-        return panel(attr.get().toString()).withLayout(attr);
-    }
-
-    /**
-     *  Use this to create a builder for the provided {@link JBox} instance,
-     *  a generic component wrapper type which is transparent and without any insets
-     *  as well as with a {@link MigLayout} as its default layout manager.
-     *
-     * @return A builder instance for the provided {@link JBox}, which enables fluent method chaining.
-     * @throws IllegalArgumentException if {@code component} is {@code null}.
-     */
-    public static <B extends JBox> UIForBox<B> of( B component ) {
-        NullUtil.nullArgCheck(component, "component", JPanel.class);
-        return new UIForBox<>(component);
-    }
-
-    /**
-     *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
-     *  which is transparent and without any insets as well as with a {@link MigLayout}
-     *  as its layout manager.
-     *  This factory method is especially useful for when you simply want to nest components
-     *  tightly without having to worry about the layout manager or the background
-     *  color covering the background of the parent component.
-     *  <br>
-     *  Note that you can also emulate the {@link JBox} type with a {@link JPanel} using
-     *  {@code UI.panel("ins 0").makeNonOpaque()}.
-     *
-     * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.
-     */
-    public static UIForBox<JBox> box() { return of((JBox)new Box()); }
-
-    /**
-     *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
-     *  which is transparent and without any insets as well as with a {@link MigLayout}
-     *  as its layout manager.
-     *  This factory method is especially useful for when you simply want to nest components
-     *  tightly without having to worry about the layout manager or the background
-     *  color covering the background of the parent component.
-     *  <br>
-     *  Note that you can also emulate the {@link JBox} type with a {@link JPanel} using
-     *  <pre>{@code
-     *      UI.panel(attr, colConstraints, rowConstraints).makeNonOpaque()
-     *  }</pre>
-     *  <br>
-     * @param attr The layout attributes.
-     * @param colConstraints The column constraints.
-     * @param rowConstraints The row constraints.
-     * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.
-     */
-    public static UIForBox<JBox> box( String attr, String colConstraints, String rowConstraints ) {
-        NullUtil.nullArgCheck(attr, "attr", String.class);
-        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
-        NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class);
-        if (attr.isEmpty()) attr = "ins 0";
-        else if (!attr.contains("ins")) attr += ", ins 0";
-        return box().withLayout(attr, colConstraints, rowConstraints);
-    }
-
-    /**
-     *  Use this to create a builder for a {@link JBox}, conceptually the same as a
-     *  transparent {@link JPanel} without any insets
-     *  and a {@link MigLayout} constructed using the provided constraints.
-     *  This is essentially a convenience method for the following: <br>
-     *  <pre>{@code
-     *      UI.of(new JBox(new MigLayout(attr, colConstraints, rowConstraints)))
-     *  }</pre>
-     *  <br>
-     * @param attr The layout attributes in the form of a {@link LayoutAttr} constants.
-     * @param colConstraints The column constraints.
-     * @param rowConstraints The row constraints.
-     * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
-     */
-    public static UIForBox<JBox> box( LayoutAttr attr, String colConstraints, String rowConstraints ) {
-        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
-        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
-        NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class);
-        return box(attr.toString(), colConstraints, rowConstraints);
-    }
-
-    /**
-     *  Use this to create a builder for a {@link JBox}, conceptually the same as a
-     *  transparent {@link JPanel} without any insets
-     *  and a {@link MigLayout} constructed using the provided constraints.
-     *  <br>
-     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
-     * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
-     * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
-     */
-    public static UIForBox<JBox> box( String attr, String colConstraints ) {
-        NullUtil.nullArgCheck(attr, "attr", String.class);
-        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
-        if (attr.isEmpty()) attr = "ins 0";
-        else if (!attr.contains("ins")) attr += ", ins 0";
-        return box().withLayout(attr, colConstraints);
-    }
-
-    /**
-     *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
-     *  which is transparent and without any insets as well as with a {@link MigLayout}
-     *  as its layout manager.
-     *  This is conceptually the same as a
-     *  transparent {@link JPanel} without any insets
-     *  and a {@link MigLayout} constructed using the provided constraints.
-     *
-     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
-     * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
-     * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
-     */
-    public static UIForBox<JBox> box( LayoutAttr attr, String colConstraints ) {
-        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
-        NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
-        return box(attr.toString(), colConstraints);
-    }
-
-    /**
-     *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
-     *  which is transparent and without any insets as well as with a {@link MigLayout}
-     *  as its layout manager.
-     *  This is conceptually the same as a
-     *  transparent {@link JPanel} without any insets
-     *  and a {@link MigLayout} constructed using the provided constraints.
-     *  <br>
-     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
-     * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.
-     * @throws IllegalArgumentException if {@code attr} is {@code null}.
-     */
-    public static UIForBox<JBox> box( String attr ) {
-        NullUtil.nullArgCheck(attr, "attr", String.class);
-        if ( attr.isEmpty() ) attr = "ins 0";
-        else if ( !attr.contains("ins") ) attr += ", ins 0";
-        return box().withLayout(attr);
-    }
-
-    /**
-     *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
-     *  which is transparent and without any insets as well as with a {@link MigLayout}
-     *  as its layout manager.
-     *  This is conceptually the same as a
-     *  transparent {@link JPanel} without any insets
-     *  and a {@link MigLayout} constructed using the provided constraints.
-     *  <br>
-     *  This method allows you to pass a {@link LayoutAttr} constants as the layout attributes,
-     *  which is an instance typically chosen from the {@link UI} class constants
-     *  like for example {@link UI#FILL}, {@link UI#FILL_X}, {@link UI#FILL_Y}...
-     *
-     * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
-     * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
-     * @throws IllegalArgumentException if {@code attr} is {@code null}.
-     */
-    public static UIForBox<JBox> box( LayoutAttr attr ) {
-        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
-        return box(attr.toString());
-    }
-
-    /**
-     *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
-     *  which is transparent and without any insets as well as with a {@link MigLayout}
-     *  as its layout manager.
-     *  This is conceptually the same as a
-     *  transparent {@link JPanel} without any insets
-     *  and a {@link MigLayout} constructed using the provided constraints.
-     *  This method allows you to dynamically determine the {@link LayoutAttr} constants
-     *  of the {@link MigLayout} instance, by passing a {@link Val} property which
-     *  will be observed and its value passed to the {@link MigLayout} constructor
-     *  whenever it changes.
-     *  This is in essence a convenience method for:
-     *  {@code UI.box().withLayout(attr.viewAsString( it -> it+", ins 0"))}.
-     *
-     * @param attr The layout attributes property which will be passed to the {@link MigLayout} constructor as first argument.
-     * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.
-     * @throws IllegalArgumentException if {@code attr} is {@code null}.
-     */
-    public static UIForBox<JBox> box( Val<LayoutAttr> attr ) {
-        NullUtil.nullArgCheck(attr, "attr", Val.class);
-        NullUtil.nullPropertyCheck(attr, "attr", "Null is not a valid layout attribute.");
-        return box().withLayout(attr.view( it -> it.and("ins 0")));
-    }
-
-    /**
      *  Use this to create a builder for the provided {@link JScrollPane} component.
      *
      * @param component The {@link JScrollPane} component which should be represented by the returned builder.
+     * @param <P> The type parameter defining the concrete scroll pane type.
      * @return A {@link UIForScrollPane} builder representing the provided component.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
@@ -2361,6 +2561,7 @@ public final class UI
      *  Use this to create a builder for the provided {@link JScrollPanels} component.
      *
      * @param component The {@link JScrollPanels} component which should be represented by the returned builder.
+     * @param <P> The type parameter defining the concrete scroll panels type.
      * @return A {@link UIForScrollPanels} builder representing the provided component.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
@@ -2429,6 +2630,8 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JSplitPane} instance.
      *
+     * @param component The {@link JSplitPane} instance to create a builder for.
+     * @param <P> The type of the {@link JSplitPane} instance.
      * @return A builder instance for the provided {@link JSplitPane}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
@@ -2531,6 +2734,8 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JSlider} instance.
      *
+     * @param component The {@link JSlider} instance to create a builder for.
+     * @param <S> The type of the {@link JSlider} instance.
      * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
@@ -2603,6 +2808,7 @@ public final class UI
      * @param min The minimum possible value of the slider.
      * @param max The maximum possible value of the slider.
      * @param value  the initial value of the slider
+     * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
      *
      * @throws IllegalArgumentException if {@code align} is {@code null}.
      *
@@ -2628,6 +2834,7 @@ public final class UI
      * @param min The minimum possible value of the slider.
      * @param max The maximum possible value of the slider.
      * @param value The property holding the value of the slider
+     * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
      *
      * @throws IllegalArgumentException if {@code align} is {@code null}.
      *
@@ -2654,6 +2861,7 @@ public final class UI
      * @param min The minimum possible value of the slider.
      * @param max The maximum possible value of the slider.
      * @param value The property holding the value of the slider
+     * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
      *
      * @throws IllegalArgumentException if {@code align} is {@code null}.
      *
@@ -2675,6 +2883,9 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JComboBox} instance.
      *
+     * @param component The {@link JComboBox} instance to create a builder for.
+     * @param <E> The type of the elements in the {@link JComboBox}.
+     * @param <C> The type of the {@link JComboBox} instance.
      * @return A builder instance for the provided {@link JComboBox}, which enables fluent method chaining.
      */
     public static <E, C extends JComboBox<E>> UIForCombo<E,C> of( C component ) {
@@ -2711,6 +2922,7 @@ public final class UI
      *  may not be modified by the user.
      *
      * @param items The unmodifiable array of elements to be selectable in the {@link JList}.
+     * @param <E> The type of the elements in the {@link JComboBox}.
      * @return A builder instance for the new {@link JComboBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
@@ -2762,6 +2974,7 @@ public final class UI
      *  with the provided list of elements as selectable items.
      *
      * @param items The list of elements to be selectable in the {@link JComboBox}.
+     * @param <E> The type of the elements in the list.
      * @return A builder instance for the provided {@link JComboBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
@@ -2810,6 +3023,7 @@ public final class UI
      *  with the provided properties list object as selectable (and mutable) items.
      *
      * @param items The {@link Vars} properties of elements to be selectable in the {@link JComboBox}.
+     * @param <E> The type of the elements in the list.
      * @return A builder instance for the provided {@link JComboBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
@@ -2935,7 +3149,11 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JSpinner} instance.
      *
+     * @param spinner The {@link JSpinner} instance to create a builder for.
+     *                The provided {@link JSpinner} instance must not be {@code null}.
+     * @param <S> The type parameter of the concrete {@link JSpinner} subclass to be used by the builder.
      * @return A builder instance for the provided {@link JSpinner}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code spinner} is {@code null}.
      */
     public static <S extends JSpinner> UIForSpinner<S> of( S spinner ) {
         NullUtil.nullArgCheck(spinner, "spinner", JSpinner.class);
@@ -3006,6 +3224,7 @@ public final class UI
      *  Use this to create a builder for the provided {@link JLabel} instance.
      *
      * @param label The {@link JLabel} instance to be used by the builder.
+     * @param <L> The type parameter of the concrete {@link JLabel} subclass to be used by the builder.
      * @return A builder instance for the provided {@link JLabel}, which enables fluent method chaining.
      */
     public static <L extends JLabel> UIForLabel<L> of( L label ) {
@@ -3185,6 +3404,7 @@ public final class UI
      *  Use this to create a builder for the provided {@link swingtree.components.JIcon} instance.
      *
      * @param icon The {@link swingtree.components.JIcon} instance to be used by the builder.
+     * @param <I> The type of the {@link swingtree.components.JIcon} instance.
      * @return A builder instance for the provided {@link swingtree.components.JIcon}, which enables fluent method chaining.
      */
     public static <I extends JIcon> UIForIcon<I> of( I icon ) {
@@ -3335,6 +3555,8 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JCheckBox} instance.
      *
+     * @param component The {@link JCheckBox} instance to be used by the builder.
+     * @param <B> The type parameter of the concrete {@link JCheckBox} subclass to be used by the builder.
      * @return A builder instance for the provided {@link JCheckBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException If the provided checkbox is null.
      */
@@ -3446,6 +3668,7 @@ public final class UI
      * @param state The reference {@link Enum} which this {@link JToggleButton} should represent.
      * @param selection The {@link sprouts.Var} instance which will be used
      *                  to dynamically model the selection state of the wrapped {@link JToggleButton} type.
+     * @param <E> The type of the enum which this {@link JToggleButton} should represent.
      * @return A builder instance for the radio button, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
@@ -3462,6 +3685,7 @@ public final class UI
      *  Use this to create a builder for the provided {@link JRadioButton} instance.
      *
      * @param component The {@link JRadioButton} instance which should be wrapped by the builder.
+     * @param <R> The type of the {@link JRadioButton} instance which should be wrapped by the builder.
      * @return A builder instance for the provided {@link JRadioButton}, which enables fluent method chaining.
      */
     public static <R extends JRadioButton> UIForRadioButton<R> of( R component ) {
@@ -3491,7 +3715,12 @@ public final class UI
     /**
      *  Use this to create a builder for a new {@link JToggleButton} instance
      *  where the provided text property dynamically displays its value on the toggle button.
+     *  <p>
+     *  Note that the provided text property may not be null,
+     *  and it is also not permitted to contain null values,
+     *  instead use an empty string instead of null.
      *
+     * @param text The text property which should be bound to the toggle button.
      * @return A builder instance for a new {@link JToggleButton}, which enables fluent method chaining.
      */
     public static UIForToggleButton<JToggleButton> toggleButton( Val<String> text ) {
@@ -3618,6 +3847,8 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JToggleButton} instance.
      *
+     * @param component The {@link JToggleButton} instance which should be wrapped by the builder.
+     * @param <B> The type of the {@link JToggleButton} instance which should be wrapped by the builder.
      * @return A builder instance for the provided {@link JToggleButton}, which enables fluent method chaining.
      */
     public static <B extends JToggleButton> UIForToggleButton<B> of( B component ) {
@@ -3628,7 +3859,10 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JTextField} instance.
      *
+     * @param component The {@link JTextField} instance which should be wrapped by the builder.
+     * @param <F> The type of the {@link JTextField} instance which should be wrapped by the builder.
      * @return A builder instance for the provided {@link JTextField}, which enables fluent method chaining.
+     * @throws IllegalArgumentException If the provided text field is null.
      */
     public static <F extends JTextField> UIForTextField<F> of( F component ) {
         NullUtil.nullArgCheck(component, "component", JTextComponent.class);
@@ -3748,8 +3982,12 @@ public final class UI
      *  The property is a {@link Var}, meaning that it can be modified by the user.
      *  <p>
      *  The number property will only receive values if the text field contains a valid number.
+     *  <p>
+     *  Also note that the provided property is not allowed to contain {@code null} values,
+     *  as this would lead to a {@link NullPointerException} being thrown.
      *
      * @param number The number property which should be bound to the text field.
+     * @param <N> The type of the number property which should be bound to the text field.
      * @return A builder instance for the provided {@link JTextField}, which enables fluent method chaining.
      */
     public static <N extends Number> UIForTextField<JTextField> numericTextField( Var<N> number ) {
@@ -3768,15 +4006,23 @@ public final class UI
      *  <p>
      *  The number property will only receive values if the text in the text field can be parsed as a number,
      *  in which case the provided {@link Var} will be set to {@code true}, otherwise it will be set to {@code false}.
+     *  <p>
+     *  Note that the two provided properties are not permitted to
+     *  contain {@code null} values, as this would lead to a {@link NullPointerException} being thrown.
      *
      * @param number The number property which should be bound to the text field.
      * @param isValid A {@link Var} which will be set to {@code true} if the text field contains a valid number,
      *                and {@code false} otherwise.
+     * @param <N> The type of the number property which should be bound to the text field.
      * @return A builder instance for the provided {@link JTextField}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code number} is {@code null}.
+     * @throws IllegalArgumentException if {@code isValid} is {@code null}.
      */
     public static <N extends Number> UIForTextField<JTextField> numericTextField( Var<N> number, Var<Boolean> isValid ) {
         NullUtil.nullArgCheck(number, "number", Var.class);
         NullUtil.nullPropertyCheck(number, "number", "Please use 0 instead of null!");
+        NullUtil.nullArgCheck(isValid, "isValid", Var.class);
+        NullUtil.nullPropertyCheck(isValid, "isValid", "Please use false instead of null!");
         return of((JTextField) new TextField())
                 .applyIf( !number.hasNoID(), it -> it.id(number.id()) )
                 .withNumber(number, isValid);
@@ -3786,7 +4032,9 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JFormattedTextField} instance.
      *
+     * @param component The {@link JFormattedTextField} instance which should be wrapped by the builder.
      * @return A builder instance for the provided {@link JFormattedTextField}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static UIForFormattedTextField of( JFormattedTextField component ) {
         NullUtil.nullArgCheck(component, "component", JFormattedTextField.class);
@@ -3849,7 +4097,10 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JPasswordField} instance.
      *
+     * @param component The {@link JPasswordField} instance which should be wrapped by the builder.
+     * @param <F> The type of the {@link JPasswordField} instance which should be wrapped by the builder.
      * @return A builder instance for the provided {@link JPasswordField}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static <F extends JPasswordField> UIForPasswordField<F> of( F component ) {
         NullUtil.nullArgCheck(component, "component", JPasswordField.class);
@@ -3912,7 +4163,10 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JProgressBar} instance.
      *
+     * @param component The {@link JProgressBar} instance which should be wrapped by the builder.
+     * @param <P> The type of the {@link JProgressBar} instance which should be wrapped by the builder.
      * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static <P extends JProgressBar> UIForProgressBar<P> of( P component ) {
         NullUtil.nullArgCheck(component, "component", JProgressBar.class);
@@ -4074,6 +4328,8 @@ public final class UI
     /**
      *  Use this to create a builder for the provided {@link JTextArea} instance.
      *
+     * @param area The {@link JTextArea} which should be wrapped by the builder.
+     * @param <A> The type of the {@link JTextArea} for which the builder should be created.
      * @return A builder instance for the provided {@link JTextArea}, which enables fluent method chaining.
      */
     public static <A extends JTextArea> UIForTextArea<A> of( A area ) {
@@ -4127,6 +4383,7 @@ public final class UI
     }
 
     /**
+     * @param list The {@link JList} which should be wrapped by the builder.
      * @param <E> The type of the elements in the list.
      * @return A builder instance for the provided {@link JList}.
      */
@@ -4136,6 +4393,7 @@ public final class UI
     }
 
     /**
+     * @param <E> The type of the elements in the list.
      * @return A builder instance for a new {@link JList}.
      */
     public static <E> UIForList<E, JList<E>> list() { return of(new List<>()); }
@@ -4201,6 +4459,8 @@ public final class UI
      *  as data model.
      *  This is functionally equivalent to {@link #listOf(java.util.List)}.
      *
+     * @param entries The list of entries used for populating a new {@link JList} component.
+     * @param <E> The type parameter defining the concrete type of the list entries.
      * @return A builder instance for a new {@link JList} with the provided {@link List} as data model.
      */
     public static <E> UIForList<E, JList<E>> list( java.util.List<E> entries ) {
@@ -4495,13 +4755,80 @@ public final class UI
     }
 
     /**
-     *  Use this to create a builder for anything.
-     *
-     * @return A builder instance for the provided object, which enables fluent method chaining.
+     *  This returns an instance of a Swing-Tree builder for a {@link JFrame} type.
+     * @param frame The new frame instance which ought to be part of the Swing UI.
+     * @return A basic UI builder instance wrapping a {@link JFrame}.
+     * @param <F> The concrete type of this new frame.
      */
-    public static <T extends Component> UIForAnything<T> of( T component ) {
-        NullUtil.nullArgCheck(component, "component", Component.class);
-        return new UIForAnything<>(component);
+    public static <F extends JFrame> UIForJFrame<F> of( F frame ) {
+        return new UIForJFrame<>(frame);
+    }
+
+    /**
+     *  Use this to create a builder for the supplied {@link JFrame}. <br>
+     *  This is in essence a convenience method for {@code UI.of(new JFrame()) )}.
+     *
+     * @return A basic UI builder instance wrapping a {@link JFrame}.
+     */
+    public static UIForJFrame<JFrame> frame() {
+        return new UIForJFrame<>(new JFrame());
+    }
+
+    /**
+     *  Use this to create a builder for the supplied {@link JFrame} with the supplied title. <br>
+     * @param title The title for the new frame.
+     * @return A basic UI builder instance wrapping a {@link JFrame}.
+     */
+    public static UIForJFrame<JFrame> frame( String title ) {
+        return new UIForJFrame<>(new JFrame()).withTitle(title);
+    }
+
+    /**
+     *  This returns an instance of a Swing-Tree builder for a {@link JDialog} type.
+     * @param dialog The new dialog instance which ought to be part of the Swing UI.
+     * @return A basic UI builder instance wrapping a {@link JDialog}.
+     * @param <D> The concrete type of this new dialog.
+     */
+    public static <D extends JDialog> UIForJDialog<D> of( D dialog ) {
+        return new UIForJDialog<>(dialog);
+    }
+
+    /**
+     *  Use this to create a builder for the supplied {@link JDialog}. <br>
+     *  This is in essence a convenience method for {@code UI.of(new JDialog()) )}.
+     *
+     * @return A basic UI builder instance wrapping a {@link JDialog}.
+     */
+    public static UIForJDialog<JDialog> dialog() {
+        return new UIForJDialog<>(new JDialog());
+    }
+
+    /**
+     *  Use this to create a builder for the supplied {@link JDialog} with the supplied owner. <br>
+     * @param owner The owner for the new dialog.
+     * @return A basic UI builder instance wrapping a {@link JDialog}.
+     */
+    public static UIForJDialog<JDialog> dialog( Window owner ) {
+        return new UIForJDialog<>(new JDialog(owner));
+    }
+
+    /**
+     *  Use this to create a builder for the supplied {@link JDialog} with the supplied title. <br>
+     * @param title The title for the new dialog.
+     * @return A basic UI builder instance wrapping a {@link JDialog}.
+     */
+    public static UIForJDialog<JDialog> dialog( String title ) {
+        return new UIForJDialog<>(new JDialog()).withTitle(title);
+    }
+
+    /**
+     *  Use this to create a builder for the supplied {@link JDialog} with the supplied owner and title. <br>
+     * @param owner The owner for the new dialog.
+     * @param title The title for the new dialog.
+     * @return A basic UI builder instance wrapping a {@link JDialog}.
+     */
+    public static UIForJDialog<JDialog> dialog( Window owner, String title ) {
+        return new UIForJDialog<>(new JDialog(owner)).withTitle(title);
     }
 
     /**
@@ -4711,7 +5038,11 @@ public final class UI
      *        });
      *     appThread.start();
      * }</pre>
-     *
+     * @param supplier The supplier which should be executed on the UI thread.
+     * @param <T> The return type of the result value produced by the supplier.
+     * @return The result provided by the supplier.
+     * @throws InterruptedException if the current thread is interrupted
+     * @throws InvocationTargetException if the UI thread throws an exception
      */
     public static <T> T runAndGet( Supplier<T> supplier ) {
         NullUtil.nullArgCheck(supplier, "callable", Supplier.class);
@@ -4738,10 +5069,10 @@ public final class UI
 
     /**
      *  Exposes an API for scheduling periodic animation updates.
-     *  This is a convenience method for {@link Animate#on(LifeTime)}. <br>
+     *  This is a convenience method for {@link Animator#animateFor(LifeTime)}. <br>
      *  A typical usage would be:
      *  <pre>{@code
-     *    UI.schedule( 100, TimeUnit.MILLISECONDS )
+     *    UI.animate( 100, TimeUnit.MILLISECONDS )
      *       .until( it -> it.progress() >= 0.75 && someOtherCondition() )
      *       .go( it -> {
      *          // do something
@@ -4750,18 +5081,22 @@ public final class UI
      *          someComponent.repaint();
      *       });
      *  }</pre>
+     *  @param duration The duration of the animation.
+     *                  This is the time it takes for the animation to reach 100% progress.
+     *  @param unit The time unit of the duration.
+     *  @return An {@link Animator} instance which allows you to configure the animation.
      */
-    public static Animate schedule( long duration, TimeUnit unit ) {
+    public static Animator animateFor(long duration, TimeUnit unit ) {
         Objects.requireNonNull(unit, "unit");
-        return Animate.on( LifeTime.of(duration, unit) );
+        return Animator.animateFor( LifeTime.of(duration, unit) );
     }
 
     /**
-     *  Exposes an API for scheduling periodic animation updates.
-     *  This is a convenience method for {@link Animate#on(LifeTime)}. <br>
+     *  Exposes a builder API for creating and scheduling periodic animation updates.
+     *  This is a convenience method for {@link Animator#animateFor(LifeTime)}. <br>
      *  A typical usage would be:
      *  <pre>{@code
-     *    UI.schedule( 0.1, TimeUnit.MINUTES )
+     *    UI.animateFor( 0.1, TimeUnit.MINUTES )
      *       .until( it -> it.progress() >= 0.75 && someOtherCondition() )
      *       .go( it -> {
      *          // do something
@@ -4770,10 +5105,85 @@ public final class UI
      *          someComponent.repaint();
      *       });
      *  }</pre>
+     *  @param duration The duration of the animation.
+     *                  This is the time it takes for the animation to reach 100% progress.
+     *  @param unit The time unit of the duration.
+     *  @return An {@link Animator} instance which allows you to configure the animation.
      */
-    public static Animate schedule( double duration, TimeUnit unit ) {
-        return Animate.on( LifeTime.of(duration, unit) );
+    public static Animator animateFor( double duration, TimeUnit unit ) {
+        return Animator.animateFor( LifeTime.of(duration, unit) );
     }
+
+    /**
+     *  Exposes an API for scheduling periodic animation updates.
+     *  This is a convenience method for {@link Animator#animateFor(LifeTime)}. <br>
+     *  A typical usage would be:
+     *  <pre>{@code
+     *    UI.animateFor( LifeTime.of(0.1, TimeUnit.MINUTES) )
+     *       .until( it -> it.progress() >= 0.75 && someOtherCondition() )
+     *       .go( it -> {
+     *          // do something
+     *          someComponent.setBackground( new Color( 0, 0, 0, (int)(it.progress()*255) ) );
+     *          // ...
+     *          someComponent.repaint();
+     *       });
+     *  }</pre>
+     *  @param duration The duration of the animation.
+     *                  This is the time it takes for the animation to reach 100% progress.
+     *
+     *  @return An {@link Animator} instance which allows you to configure the animation.
+     */
+    public static Animator animateFor( LifeTime duration ) {
+        return Animator.animateFor( duration );
+    }
+
+    /**
+     * Exposes an API for scheduling periodic animation updates
+     * for a specific component whose {@link Component#repaint()}
+     * method should be called after every animation update.
+     * This is a convenience method for {@link Animator#animateFor(LifeTime)}. <br>
+     * A typical usage would be:
+     * <pre>{@code
+     *    UI.animateFor( UI.lifeTime(0.1, TimeUnit.MINUTES), someComponent )
+     *       .until( it -> it.progress() >= 0.75 && someOtherCondition() )
+     *       .go( it -> {
+     *          // do something
+     *          someComponent.setBackground( new Color( 0, 0, 0, (int)(it.progress()*255) ) );
+     *       });
+     *  }</pre>
+     *
+     * @param duration  The duration of the animation.
+     *                  This is the time it takes for the animation to reach 100% progress.
+     * @param component The component which should be repainted after every animation update.
+     * @return An {@link Animator} instance which allows you to configure the animation.
+     */
+    public static Animator animateFor( LifeTime duration, Component component ) {
+        return Animator.animateFor( duration, component );
+    }
+
+    /**
+     *  A factory method for creating a {@link LifeTime} instance
+     *  with the given duration and time unit.
+     *  This is a convenience method for {@link LifeTime#of(long, TimeUnit)}.
+     *  The {@link LifeTime} instance is an immutable value type
+     *  which is used for scheduling animations, usually through
+     *  {@link Animator#animateFor(LifeTime)} or the convenience methods
+     *  {@link UI#animateFor(long, TimeUnit)}, {@link UI#animateFor(double, TimeUnit)},
+     *  {@link UI#animateFor(LifeTime)} or {@link UI#animateFor(LifeTime, Component)}.
+     *  A typical usage would be:
+     *  <pre>{@code
+     *      UI.animateFor( UI.lifeTime(0.1, TimeUnit.MINUTES) )
+     *      .until( it -> it.progress() >= 0.75 && someOtherCondition() )
+     *      .go( it -> {
+     *          // do something
+     *      });
+     *  }</pre>
+     *
+     * @param duration The duration of the animation.
+     * @param unit The time unit of the duration.
+     * @return A {@link LifeTime} instance.
+     */
+    public static LifeTime lifeTime( long duration, TimeUnit unit ) { return LifeTime.of(duration, unit); }
 
     /**
      *  Shows a conformation dialog with the given message.
@@ -4791,16 +5201,40 @@ public final class UI
      */
     public static ConfirmAnswer confirm( String title, String message ) {
         return
-            ConfirmDialogBuilder.get()
+            ConfirmDialogBuilder.question()
             .title(title)
             .message(message)
             .show();
     }
 
     /**
-     * @return A builder for creating a confirmation dialog.
+     * @return A builder for creating a confirmation dialog designed to ask a question.
      */
-    public static ConfirmDialogBuilder confirm() { return ConfirmDialogBuilder.get(); }
+    public static ConfirmDialogBuilder confirm() { return ConfirmDialogBuilder.question(); }
+
+    /**
+     * @return A builder for creating a confirmation dialog designed to show an error
+     *         and ask the user to confirm it through yes, no or cancel options.
+     */
+    public static ConfirmDialogBuilder confirmError() { return ConfirmDialogBuilder.error(); }
+    
+    /**
+     * @return A builder for creating a confirmation dialog designed to show an info
+     *         and ask the user to confirm it through yes, no or cancel options.
+     */
+    public static ConfirmDialogBuilder confirmInfo() { return ConfirmDialogBuilder.info(); }
+    
+    /**
+     * @return A builder for creating a confirmation dialog designed to show a warning
+     *         and ask the user to confirm it through yes, no or cancel options.
+     */
+    public static ConfirmDialogBuilder confirmWarning() { return ConfirmDialogBuilder.warning(); }
+
+    /**
+     * @return A builder for creating a confirmation dialog designed to show a plain message (no icon)
+     *         and ask the user to confirm it through yes, no or cancel options.
+     */
+    public static ConfirmDialogBuilder confirmPlain() { return ConfirmDialogBuilder.plain(); }
 
     /**
      *  Shows an error dialog with the given message.
@@ -4824,7 +5258,7 @@ public final class UI
     /**
      * @return A builder for creating an error dialog.
      */
-    public static ErrorDialogBuilder error() { return ErrorDialogBuilder.get(); }
+    public static MessageDialogBuilder error() { return MessageDialogBuilder.error(); }
 
     /**
      *  Shows an info dialog with the given message.
@@ -4848,7 +5282,7 @@ public final class UI
     /**
      * @return A builder for creating an info dialog.
      */
-    public static InfoDialogBuilder info() { return InfoDialogBuilder.get(); }
+    public static MessageDialogBuilder info() { return MessageDialogBuilder.info(); }
 
     /**
      *  Shows a warning dialog with the given message.
@@ -4872,7 +5306,7 @@ public final class UI
     /**
      * @return A builder for creating a warning dialog.
      */
-    public static WarnDialogBuilder warn() { return WarnDialogBuilder.get(); }
+    public static MessageDialogBuilder warn() { return MessageDialogBuilder.warning(); }
 
     /**
      *  Shows a dialog where the user can select a value from a list of options
@@ -4913,6 +5347,7 @@ public final class UI
      * @param message  The message to show in the dialog.
      * @param icon     The icon to show in the dialog.
      * @param selected The enum based property to store the selected value in.
+     * @param <E> The type parameter defining the concrete enum type.
      */
     public static <E extends Enum<E>> void select( String title, String message, Icon icon, Var<E> selected ) {
         Objects.requireNonNull( message );
@@ -5097,11 +5532,6 @@ public final class UI
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
     }
     /** {inheritDoc} */
-    public static class Box extends JBox {
-        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }
-        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
-    }
-    /** {inheritDoc} */
     public static class Label extends JLabel {
         @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
@@ -5247,10 +5677,9 @@ public final class UI
         @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g){ super.paintChildren(g); _paintForeground(this, g); }
     }
+    /** {inheritDoc} */
+    public static class Box extends JBox {/* Already implemented */}
     /** {@inheritDoc} */
-    public static class SplitButton extends JSplitButton {
-        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }
-        @Override public void paintChildren(Graphics g){ super.paintChildren(g); _paintForeground(this, g); }
-    }
+    public static class SplitButton extends JSplitButton {/* Already implemented */}
 
 }

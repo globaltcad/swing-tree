@@ -46,6 +46,7 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
      *
      * @param columnIndex The index of the column for which the cell renderer will be built.
      * @param renderBuilder The builder API for a cell renderer.
+     * @return This builder node.
      */
     public final UIForTable<T> withRendererForColumn( int columnIndex, Render.Builder<JTable, ?> renderBuilder ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
@@ -56,6 +57,7 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
      * Use this to register a table cell renderer for a particular column.
      * @param columnName The name of the column for which the cell renderer will be registered.
      * @param renderer The cell renderer to be registered.
+     * @return This builder node, to allow for builder-style method chaining.
      */
     public final UIForTable<T> withRendererForColumn( String columnName, TableCellRenderer renderer ) {
         NullUtil.nullArgCheck(columnName, "columnName", String.class);
@@ -68,6 +70,7 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
      * Use this to register a table cell renderer for a particular column.
      * @param columnIndex The index of the column for which the cell renderer will be registered.
      * @param renderer The cell renderer to be registered.
+     * @return This builder node.
      */
     public final UIForTable<T> withRendererForColumn( int columnIndex, TableCellRenderer renderer ) {
         NullUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
@@ -100,6 +103,7 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
      * Use this to register a table cell editor for a particular column.
      * @param columnName The name of the column for which the cell editor will be registered.
      * @param editor The cell editor to be registered.
+     * @return This builder instance, to allow for method chaining.
      */
     public final UIForTable<T> withCellEditorForColumn( String columnName, TableCellEditor editor ) {
         NullUtil.nullArgCheck(columnName, "columnName", String.class);
@@ -112,6 +116,7 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
      * Use this to register a table cell editor for a particular column.
      * @param columnIndex The index of the column for which the cell editor will be registered.
      * @param editor The cell editor to be registered.
+     * @return This builder node, to allow for builder-style method chaining.
      */
     public final UIForTable<T> withCellEditorForColumn( int columnIndex, TableCellEditor editor ) {
         NullUtil.nullArgCheck(editor, "editor", TableCellEditor.class);
@@ -226,6 +231,7 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
      *  This is useful if you want to update the table when the data source changes.
      *
      * @param event The event to be bound.
+     * @return This builder node, for chaining.
      */
     public final UIForTable<T> updateTableOn( Event event ) {
         NullUtil.nullArgCheck(event, "event", Event.class);

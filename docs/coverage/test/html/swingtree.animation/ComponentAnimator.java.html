@@ -9,24 +9,24 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
- *  Runs an {@link Animation} on a {@link Component} according to a {@link LifeTime} and a {@link StopCondition}.
+ *  Runs an {@link Animation} on a {@link Component} according to a {@link LifeTime} and a {@link RunCondition}.
  */
 class ComponentAnimator
 {
     private final WeakReference&lt;Component&gt; _compRef;
     private final LifeTime      _lifeTime;
-    private final StopCondition _condition;
+    private final RunCondition _condition;
     private final Animation     _animation;
 
 
     ComponentAnimator(
         Component     component, // may be null if the animation is not associated with a specific component
-        LifeTime lifeTime,
-        StopCondition condition,
+        LifeTime      lifeTime,
+        RunCondition condition,
         Animation     animation
 <span class="fc" id="L27">    ) {</span>
 <span class="fc bfc" id="L28" title="All 2 branches covered.">        _compRef   = component == null ? null : new WeakReference&lt;&gt;(component);</span>
-<span class="fc" id="L29">        _lifeTime = Objects.requireNonNull(lifeTime);</span>
+<span class="fc" id="L29">        _lifeTime  = Objects.requireNonNull(lifeTime);</span>
 <span class="fc" id="L30">        _condition = Objects.requireNonNull(condition);</span>
 <span class="fc" id="L31">        _animation = Objects.requireNonNull(animation);</span>
 <span class="fc" id="L32">    }</span>
@@ -44,10 +44,10 @@ class ComponentAnimator
 <span class="fc" id="L44">        long howManyLoops       = howLongIsRunning / duration;</span>
 <span class="fc" id="L45">        double progress         = howLongCurrentLoop / (double) duration;</span>
 <span class="fc" id="L46">        return new AnimationState() {</span>
-<span class="fc" id="L47">            @Override public double progress()       { return progress;     }</span>
-<span class="fc" id="L48">            @Override public long currentIteration() { return howManyLoops; }</span>
-<span class="fc" id="L49">            @Override public LifeTime lifetime()     { return _lifeTime;    }</span>
-<span class="nc" id="L50">            @Override public ActionEvent event()     { return event;        }</span>
+<span class="fc" id="L47">            @Override public double     progress()  { return progress;     }</span>
+<span class="fc" id="L48">            @Override public long        repeats()  { return howManyLoops; }</span>
+<span class="fc" id="L49">            @Override public LifeTime    lifetime() { return _lifeTime;    }</span>
+<span class="nc" id="L50">            @Override public ActionEvent event()    { return event;        }</span>
         };
     }
 
@@ -60,7 +60,7 @@ class ComponentAnimator
 <span class="fc" id="L60">        boolean shouldContinue = false;</span>
 
         try {
-<span class="fc" id="L63">            shouldContinue = _condition.check(state);</span>
+<span class="fc" id="L63">            shouldContinue = _condition.shouldContinue(state);</span>
 <span class="nc" id="L64">        } catch ( Exception e ) {</span>
 <span class="nc" id="L65">            e.printStackTrace();</span>
             /*

@@ -212,23 +212,23 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
     }
 
     /**
-     * @param position The position to use for the tabs.
+     * @param side The position to use for the tabs.
      * @return This builder node.
      */
-    public final UIForTabbedPane<P> withTabPlacement( UI.Position position ) {
-        NullUtil.nullArgCheck( position, "position", UI.Position.class );
-        getComponent().setTabPlacement(position.forTabbedPane());
+    public final UIForTabbedPane<P> withTabPlacementAt( UI.Side side ) {
+        NullUtil.nullArgCheck(side, "side", UI.Side.class );
+        getComponent().setTabPlacement(side.forTabbedPane());
         return this;
     }
 
     /**
-     * @param position The position property to use for the tabs.
+     * @param side The position property to use for the tabs.
      * @return This builder node.
      */
-    public final UIForTabbedPane<P> withTabPlacement( Val<UI.Position> position ) {
-        NullUtil.nullArgCheck(position, "position", Var.class);
-        _onShow( position, v -> withTabPlacement(position.orElseThrow()) );
-        return withTabPlacement(position.get());
+    public final UIForTabbedPane<P> withTabPlacementAt( Val<UI.Side> side ) {
+        NullUtil.nullArgCheck(side, "side", Var.class);
+        _onShow( side, v -> withTabPlacementAt(side.orElseThrow()) );
+        return withTabPlacementAt(side.get());
     }
 
     /**

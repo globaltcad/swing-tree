@@ -2,6 +2,8 @@ package swingtree.dialogs;
 
 import swingtree.UI;
 
+import javax.swing.JOptionPane;
+
 /**
  *  An enum representing the possible answers to a confirmation dialog.
  *  <p>
@@ -12,7 +14,8 @@ public enum ConfirmAnswer
 {
     YES,
     NO,
-    CANCEL;
+    CANCEL,
+    CLOSE;
 
     /**
      * @return {@code true} if the user selected the "yes" option, {@code false} otherwise.
@@ -28,4 +31,27 @@ public enum ConfirmAnswer
      * @return {@code true} if the user selected the "cancel" option, {@code false} otherwise.
      */
     public boolean isCancel() { return this == CANCEL; }
+
+    /**
+     * @return {@code true} if the user selected the "close" option, {@code false} otherwise.
+     */
+    public boolean isClose() { return this == CLOSE; }
+
+    /**
+     * @return {@code true} if the user selected the "cancel" option, ot they closed the dialog, {@code false} otherwise.
+     */
+    public boolean isCancelOrClose() { return isCancel() || isClose(); }
+
+    /**
+     * @return The {@link JOptionPane} constant corresponding to this answer.
+     */
+    static ConfirmAnswer from( int option ) {
+        switch ( option ) {
+            case JOptionPane.YES_OPTION:    return YES;
+            case JOptionPane.NO_OPTION:     return NO;
+            case JOptionPane.CLOSED_OPTION: return CLOSE;
+            default:
+                return CANCEL;
+        }
+    }
 }

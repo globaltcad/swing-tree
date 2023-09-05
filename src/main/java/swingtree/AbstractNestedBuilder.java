@@ -80,6 +80,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
      *  <br><br>
      *
      * @param component A component instance which ought to be added to the wrapped component type.
+     * @param conf The layout constraint which ought to be used to add the component to the wrapped component type.
      */
     protected abstract void _add( E component, Object conf );
 
@@ -136,6 +137,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
      *  This helps to improve readability, especially when the degree of nesting is very low.
      *
      * @param builders An array of builder instances whose JComponents ought to be added to the one wrapped by this builder.
+     * @param <B> The type of the builder instances which are used to configure the components that will be added to the component wrapped by this builder.
      * @return This very instance, which enables builder-style method chaining.
      */
     @SafeVarargs

@@ -27,7 +27,7 @@
     catch(err) {
     }
 //-->
-var data = {"i0":9,"i1":10,"i2":10,"i3":10,"i4":10,"i5":9,"i6":10,"i7":10};
+var data = {"i0":9,"i1":10,"i2":10,"i3":10,"i4":10,"i5":9,"i6":9,"i7":10,"i8":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -211,16 +211,28 @@ extends java.lang.Object</pre>
 <tr id="i5" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#reset()">reset</a></span>()</code></th>
-<td class="colLast">&nbsp;</td>
+<td class="colLast">
+<div class="block">Resets the singleton instance of the <a href="SwingTree.html" title="class in swingtree"><code>SwingTree</code></a>
+  causing it to be recreated the next time it is requested.</div>
+</td>
 </tr>
 <tr id="i6" class="altColor">
+<td class="colFirst"><code>static void</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#resetUsingDefaultFont(java.awt.Font)">resetUsingDefaultFont</a></span>&#8203;(java.awt.Font&nbsp;uiScaleReferenceFont)</code></th>
+<td class="colLast">
+<div class="block">Resets the singleton instance of the <a href="SwingTree.html" title="class in swingtree"><code>SwingTree</code></a>
+  causing it to be recreated the next time it is requested,
+  but with a reference font as a basis for the UI scale.</div>
+</td>
+</tr>
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setEventProcessor(swingtree.threading.EventProcessor)">setEventProcessor</a></span>&#8203;(<a href="threading/EventProcessor.html" title="interface in swingtree.threading">EventProcessor</a>&nbsp;eventProcessor)</code></th>
 <td class="colLast">
 <div class="block">Sets the <a href="threading/EventProcessor.html" title="interface in swingtree.threading"><code>EventProcessor</code></a> that is used to process GUI and application events.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setStyleSheet(swingtree.style.StyleSheet)">setStyleSheet</a></span>&#8203;(<a href="style/StyleSheet.html" title="class in swingtree.style">StyleSheet</a>&nbsp;styleSheet)</code></th>
 <td class="colLast">
@@ -273,6 +285,31 @@ extends java.lang.Object</pre>
 <li class="blockList">
 <h4>reset</h4>
 <pre class="methodSignature">public static&nbsp;void&nbsp;reset()</pre>
+<div class="block">Resets the singleton instance of the <a href="SwingTree.html" title="class in swingtree"><code>SwingTree</code></a>
+  causing it to be recreated the next time it is requested.
+  This is useful for testing purposes, also in cases where
+  the UI scale changes (through the reference font).<br>
+  Also see <a href="#resetUsingDefaultFont(java.awt.Font)"><code>resetUsingDefaultFont(Font)</code></a>.</div>
+</li>
+</ul>
+<a id="resetUsingDefaultFont(java.awt.Font)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>resetUsingDefaultFont</h4>
+<pre class="methodSignature">public static&nbsp;void&nbsp;resetUsingDefaultFont&#8203;(java.awt.Font&nbsp;uiScaleReferenceFont)</pre>
+<div class="block">Resets the singleton instance of the <a href="SwingTree.html" title="class in swingtree"><code>SwingTree</code></a>
+  causing it to be recreated the next time it is requested,
+  but with a reference font as a basis for the UI scale.
+  This is useful for testing purposes, also in cases where
+  the UI scale changes (through the reference font).<br>
+  Also see <a href="#reset()"><code>reset()</code></a>.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>uiScaleReferenceFont</code> - The font to use as a basis for
+                             calculating the UI scale factor.</dd>
+</dl>
 </li>
 </ul>
 <a id="getIconCache()">
@@ -282,6 +319,11 @@ extends java.lang.Object</pre>
 <li class="blockList">
 <h4>getIconCache</h4>
 <pre class="methodSignature">public&nbsp;java.util.Map&lt;java.lang.String,&#8203;javax.swing.ImageIcon&gt;&nbsp;getIconCache()</pre>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The icon cache of this context, which is used to cache icons
+         that are loaded from the file system.</dd>
+</dl>
 </li>
 </ul>
 <a id="getUIScale()">

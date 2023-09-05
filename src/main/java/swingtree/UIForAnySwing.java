@@ -1,32 +1,27 @@
 package swingtree;
 
 
+import net.miginfocom.layout.AC;
+import net.miginfocom.layout.CC;
+import net.miginfocom.layout.ConstraintParser;
+import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 import sprouts.Action;
-import sprouts.Event;
 import sprouts.*;
 import swingtree.api.Peeker;
+import swingtree.api.Styler;
 import swingtree.api.UIVerifier;
 import swingtree.api.mvvm.ViewSupplier;
 import swingtree.input.Keyboard;
 import swingtree.layout.CompAttr;
 import swingtree.layout.LayoutAttr;
 import swingtree.style.ComponentExtension;
-import swingtree.api.Styler;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.LayoutManager;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
-import java.awt.GridBagLayout;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Component;
+import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -1407,8 +1402,47 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withGridLayout( int rows, int cols ) { return this.withLayout(new GridLayout(rows, cols)); }
 
     /**
-     *  Passes the provided string to the layout manager of the wrapped component.
-     *  By default, a {@link MigLayout} is used for the component wrapped by this UI builder.
+     *  Use this to set a {@link GridLayout} for the component wrapped by this builder. <br>
+     *  This is in essence a more convenient way than the alternative usage pattern involving
+     *  the {@link #peek(Peeker)} method to peek into the builder's component like so: <br>
+     *  <pre>{@code
+     *      UI.panel()
+     *      .peek( panel -> panel.setLayout(new GridLayout(rows, cols, hgap, vgap)) );
+     *  }</pre>
+     *
+     * @param rows The number of rows in the grid.
+     * @param cols The number of columns in the grid.
+     * @param hgap The horizontal gap between cells.
+     * @param vgap The vertical gap between cells.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withGridLayout( int rows, int cols, int hgap, int vgap ) {
+        return this.withLayout(new GridLayout(rows, cols, hgap, vgap));
+    }
+
+    /**
+     *  Use this to set a {@link BoxLayout} for the component wrapped by this builder. <br>
+     *  This is in essence a more convenient way than the alternative usage pattern involving
+     *  the {@link #peek(Peeker)} method to peek into the builder's component like so: <br>
+     *  <pre>{@code
+     *      UI.panel()
+     *      .peek( panel -> panel.setLayout(new BoxLayout(panel, axis.forBoxLayout())) );
+     *  }</pre>
+     *
+     * @param axis The axis for the box layout.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException If the provided axis is {@code null}.
+     * @see UI.Axis
+     * @see BoxLayout
+     */
+    public final I withBoxLayout( UI.Axis axis ) {
+        NullUtil.nullArgCheck( axis, "axis", UI.Axis.class );
+        return this.withLayout(new BoxLayout(getComponent(), axis.forBoxLayout()));
+    }
+
+    /**
+     *  Creates a new {@link MigLayout} for the component wrapped by this UI builder,
+     *  based on the provided layout constraints in the form of a string.
      *
      * @param attr A string defining the layout (usually mig layout).
      * @return This very instance, which enables builder-style method chaining.
@@ -1416,7 +1450,21 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withLayout( String attr ) { return withLayout(attr, null); }
 
     /**
-     *  Passes the provided string to the {@link MigLayout} manager of the wrapped component.
+     *  Creates a new {@link MigLayout} for the component wrapped by this UI builder,
+     *  based on the provided layout constraints in the form of a {@link LC} instance,
+     *  which is a builder for the layout constraints.
+     *
+     * @param attr A string defining the layout (usually mig layout).
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLayout( LC attr ) { return withLayout(attr, (AC) null, (AC) null); }
+
+    /**
+     *  Creates a new {@link MigLayout} for the component wrapped by this UI builder,
+     *  based on the provided layout constraints in the form of a {@link LayoutAttr} instance,
+     *  which is an immutable string wrapper for the layout constraints.
+     *  Instances of this are usually obtained from the {@link UI} namespace like
+     *  {@link UI#FILL} or {@link UI#FILL_X}...
      *
      * @param attr Essentially an immutable string wrapper defining the mig layout.
      * @return This very instance, which enables builder-style method chaining.
@@ -1424,7 +1472,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withLayout( LayoutAttr attr ) { return withLayout(attr.toString(), null); }
 
     /**
-     *  This creates a {@link MigLayout} for the component wrapped by this UI builder.
+     *  This creates a {@link MigLayout} for the component wrapped by this UI builder
+     *  based on the provided layout constraints in the form of a string.
      *
      * @param attr The constraints for the layout.
      * @param colConstrains The column layout for the {@link MigLayout} instance.
@@ -1432,6 +1481,49 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withLayout( String attr, String colConstrains ) {
         return withLayout(attr, colConstrains, null);
+    }
+
+    /**
+     * This creates a {@link MigLayout} for the component wrapped by this UI builder
+     * based on the provided layout constraints in the form of a {@link LC} instance
+     * and column constraints in the form of a {@link AC} instance.
+     *
+     * @param attr The constraints for the layout, a {@link LC} instance.
+     * @param colConstrains The column layout for the {@link MigLayout} instance as a {@link AC} instance.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLayout( LC attr, AC colConstrains ) {
+        return withLayout(attr, colConstrains, null);
+    }
+
+    /**
+     * This creates a {@link MigLayout} for the component wrapped by this UI builder
+     * based on the provided layout constraints in the form of a {@link LC} instance
+     * and column constraints in the form of a simple string.
+     *
+     * @param attr The constraints for the layout, a {@link LC} instance.
+     * @param colConstrains The column layout for the {@link MigLayout} instance as a simple string.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLayout( LC attr, String colConstrains ) {
+        AC parsedColConstrains = colConstrains == null ? null : ConstraintParser.parseColumnConstraints(colConstrains);
+        return withLayout(attr, parsedColConstrains, null);
+    }
+
+    /**
+     * This creates a {@link MigLayout} for the component wrapped by this UI builder
+     * based on the provided layout constraints in the form of a {@link LC} instance
+     * and column and row constraints in the form of a simple string.
+     *
+     * @param attr The constraints for the layout, a {@link LC} instance.
+     * @param colConstrains The column layout for the {@link MigLayout} instance as a simple string.
+     * @param rowConstraints The row layout for the {@link MigLayout} instance as a simple string.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLayout( LC attr, String colConstrains, String rowConstraints ) {
+        AC parsedColConstrains = colConstrains == null ? null : ConstraintParser.parseColumnConstraints(colConstrains);
+        AC parsedRowConstrains = rowConstraints == null ? null : ConstraintParser.parseRowConstraints(rowConstraints);
+        return withLayout(attr, parsedColConstrains, parsedRowConstrains);
     }
 
     /**
@@ -1446,7 +1538,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     /**
      *  This creates a {@link MigLayout} for the component wrapped by this UI builder.
      *
-     * @param attr The constraints for the layout.
+     * @param attr The constraints for the layout in the form of a {@link LayoutAttr} instance.
      * @param colConstrains The column layout for the {@link MigLayout} instance.
      * @param rowConstraints The row layout for the {@link MigLayout} instance.
      * @return This very instance, which enables builder-style method chaining.
@@ -1474,6 +1566,30 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
             constraints += ", hidemode 2";
 
         MigLayout migLayout = new MigLayout(constraints, colConstrains, rowConstraints);
+        getComponent().setLayout(migLayout);
+        _migAlreadySet = true;
+        return _this();
+    }
+
+    /**
+     *  This creates a {@link MigLayout} for the component wrapped by this UI builder.
+     *
+     * @param attr The constraints for the layout.
+     * @param colConstrains The column layout for the {@link MigLayout} instance.
+     * @param rowConstraints The row layout for the {@link MigLayout} instance.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withLayout( LC attr, AC colConstrains, AC rowConstraints ) {
+        if ( _migAlreadySet )
+            throw new IllegalArgumentException("The mig layout has already been specified for this component!");
+
+        // We make sure the default hidemode is 2 instead of 3 (which sucks because it takes up too much space)
+        if ( attr == null )
+            attr = new LC().hideMode(2);
+        else if ( attr.getHideMode() == 0 )
+            attr = attr.hideMode(2);
+
+        MigLayout migLayout = new MigLayout(attr, colConstrains, rowConstraints);
         getComponent().setLayout(migLayout);
         _migAlreadySet = true;
         return _this();
@@ -2281,10 +2397,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-     *  Use this to register and catch generic {@link MouseListener} based mouse click events on this UI component.
-     *  This method adds the provided consumer lambda to
-     *  a {@link MouseListener} instance to the component.
+     *  Calls the provided action event handler when the mouse gets pressed and then released.
+     *  This delegates to a {@link MouseListener} based mouse click event listener registered in the UI component.
      *  <br><br>
+     *  Note that a click is defined as the combination of the <b>mouse being pressed
+     *  and then released on the same position as it was pressed.</b>
+     *  If the mouse moves between the press and the release events, then the
+     *  event is considered a drag event instead of a mouse click! (see {@link #onMouseDrag(Action)})
      *
      * @param onClick The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
@@ -2850,8 +2969,33 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     @SafeVarargs
-    public final <B extends UIForAnySwing<?, ?>> I add(CompAttr attr, B... builders ) {
+    public final <B extends UIForAnySwing<?, ?>> I add( CompAttr attr, B... builders ) {
         return this.add(attr.toString(), builders);
+    }
+
+    /**
+     *  Use this to nest builder types into this builder to effectively plug the {@link JComponent}s
+     *  wrapped by the provided builders
+     *  into the {@link JComponent} type wrapped by this builder instance.
+     *  The first argument represents placement constraints for the provided components which will
+     *  be passed to the {@link MigLayout} of the underlying {@link JComponent}.
+     *  through the {@link JComponent#add(Component, Object)} method.
+     *  <br><br>
+     *
+     * @param attr The additional mig-layout information which should be passed to the UI tree.
+     * @param builders An array of builders for a corresponding number of {@link JComponent}
+     *                  type which ought to be added to the wrapped component type of this builder.
+     * @param <B> The builder type parameter, a subtype of {@link UIForAnySwing}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    @SafeVarargs
+    public final <B extends UIForAnySwing<?, ?>> I add( CC attr, B... builders ) {
+        LayoutManager layout = getComponent().getLayout();
+        if ( !(layout instanceof MigLayout) )
+            log.warn("Layout ambiguity detected! Mig layout constraint cannot be added to '{}'.", layout.getClass().getSimpleName());
+
+        for ( UIForAnySwing<?, ?> b : builders ) _doAdd( b, attr );
+        return _this();
     }
 
     /**

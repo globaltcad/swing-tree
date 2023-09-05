@@ -238,19 +238,21 @@ public class UIForSpinner&lt;S extends JSpinner&gt; extends UIForAnySwing&lt;UIF
      *
      * @param val The {@link sprouts.Val} wrapper whose step size should be set.
      * @return This very instance, which enables builder-style method chaining.
+     * @param &lt;N&gt; The type of the number.
+     * @throws IllegalArgumentException if {@code val} is {@code null}.
      */
     public final &lt;N extends Number&gt; UIForSpinner&lt;S&gt; withStepSize( Val&lt;N&gt; val ) {
-<span class="nc" id="L243">        NullUtil.nullArgCheck(val, &quot;val&quot;, Val.class);</span>
-<span class="nc" id="L244">        NullUtil.nullPropertyCheck(val, &quot;val&quot;, &quot;Null is not a valid spinner step size!&quot;);</span>
-<span class="nc" id="L245">        SpinnerModel model = getComponent().getModel();</span>
-<span class="nc bnc" id="L246" title="All 2 branches missed.">        if ( !(model instanceof SpinnerNumberModel) )</span>
-<span class="nc" id="L247">            throw new IllegalArgumentException(</span>
+<span class="nc" id="L245">        NullUtil.nullArgCheck(val, &quot;val&quot;, Val.class);</span>
+<span class="nc" id="L246">        NullUtil.nullPropertyCheck(val, &quot;val&quot;, &quot;Null is not a valid spinner step size!&quot;);</span>
+<span class="nc" id="L247">        SpinnerModel model = getComponent().getModel();</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">        if ( !(model instanceof SpinnerNumberModel) )</span>
+<span class="nc" id="L249">            throw new IllegalArgumentException(</span>
                     &quot;This JSpinner can not have a numeric step size as it is not based on the SpinnerNumberModel!&quot;
                 );
-<span class="nc" id="L250">        SpinnerNumberModel numberModel = (SpinnerNumberModel) model;</span>
-<span class="nc" id="L251">        _onShow(val, numberModel::setStepSize);</span>
-<span class="nc" id="L252">        numberModel.setStepSize(val.get());</span>
-<span class="nc" id="L253">        return this;</span>
+<span class="nc" id="L252">        SpinnerNumberModel numberModel = (SpinnerNumberModel) model;</span>
+<span class="nc" id="L253">        _onShow(val, numberModel::setStepSize);</span>
+<span class="nc" id="L254">        numberModel.setStepSize(val.get());</span>
+<span class="nc" id="L255">        return this;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -8,7 +8,7 @@ Think [Jetpack Compose](https://developer.android.com/jetpack/compose), [SwiftUI
 (similar to [JetBrain's UI DSL](https://plugins.jetbrains.com/docs/intellij/kotlin-ui-dsl-version-2.html#ui-dsl-basics)).
 
 - [Motivation](docs/markdown/Motivation.md)
-- [Starter Tutorial](docs/markdown/Climbing-Swing-Tree.md)
+- [Getting Started](docs/markdown/Climbing-Swing-Tree.md)
 - [Living Documentation](https://globaltcad.github.io/swing-tree/)
 
 <table>
@@ -120,7 +120,7 @@ For more examples take a look at the <a href="src/test/groovy/swingtree/examples
 <dependency>
   <groupId>io.github.globaltcad</groupId>
   <artifactId>swing-tree</artifactId>
-  <version>0.3.0</version>
+  <version>0.7.0</version>
 </dependency>
 ```
 
@@ -129,11 +129,11 @@ For more examples take a look at the <a href="src/test/groovy/swingtree/examples
 ## Getting started with Gradle ##
 Groovy DSL:
 ```
-implementation 'io.github.globaltcad:swing-tree:0.3.0'
+implementation 'io.github.globaltcad:swing-tree:0.7.0'
 ```
 Kotlin DSL:
 ```
-implementation("io.github.globaltcad:swing-tree:0.3.0")
+implementation("io.github.globaltcad:swing-tree:0.7.0")
 ```
 ---
 
@@ -152,13 +152,13 @@ allprojects {
 ...either by specifiying the version tag:
 ```
 dependencies {
-	implementation 'com.github.globaltcad:swing-tree:v0.0.1'
+	implementation 'com.github.globaltcad:swing-tree:v0.7.0'
 }
 ```
 ...or by using a custom commit hash instead:
 ```
 dependencies {
-	implementation 'com.github.globaltcad:swing-tree:7c74811'//Any commit hash...
+	implementation 'com.github.globaltcad:swing-tree:17fe50ad'//Any commit hash...
 }
 ```
 ---

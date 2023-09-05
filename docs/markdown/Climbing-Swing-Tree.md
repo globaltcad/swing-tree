@@ -36,7 +36,7 @@ This is all you need to start building Swing UIs with the tree. :tada:
 No matter which UI framework you use, **all UIs essentially consist
 of a tree structure made up of components**. <br>
 Swing is no different, which is why the SwingTree
-library allows you to **build Swing UIs in a declarative fashion**,
+library allows you to **build Swing UIs in a declarative manner**,
 just like you would declare your UI structure in HTML or in other XML-based
 UI frameworks.
 
@@ -145,12 +145,12 @@ Which will create a Swing UI that looks like this:
 <img src="../img/tutorial/wrapping-up-letters-2.png" style = "width: 17em; margin: 0.5em; -webkit-box-shadow: 0px 0px 18px -2px rgba(0,0,0,0.75); -moz-box-shadow: 0px 0px 18px -2px rgba(0,0,0,0.75); box-shadow: 0px 0px 18px -2px rgba(0,0,0,0.75);">
 
 Now this is a little bit more complicated than the previous example,
-but understanding how the layout manager works is the key to
-building beautiful Swing UIs.
+but trust me, understanding how the above layout mechanic works is the key to
+building Swing UIs with the most ease.
 
-Instead of specifying the layout constraints for the whole
+**Instead of specifying the layout constraints for the whole
 container we have now specified the layout constraints for
-each component individually.
+each component individually.**
 
 The `wrap` keyword tells the layout manager to start a new row which
 causes the next component to be placed on the next row.
@@ -414,13 +414,13 @@ Which is based on the following code:
 ```java
   button("I turn green when you hover over me")
   .onMouseEnter( it -> 
-      it.animateOnce(0.5, TimeUnit.SECONDS, state -> {
+      it.animateFor(0.5, TimeUnit.SECONDS, state -> {
           double highlight = 1 - state.progress() * 0.5;
           it.setBackgroundColor(highlight, 1, highlight);
       })
   )
   .onMouseExit( it ->
-      it.animateOnce(0.5, TimeUnit.SECONDS, state -> {
+      it.animateFor(0.5, TimeUnit.SECONDS, state -> {
           double highlight = 0.5 + state.progress() * 0.5;
           it.setBackgroundColor(highlight, 1f, highlight);
       })
@@ -428,7 +428,7 @@ Which is based on the following code:
 ```
 
 As you can see, animations are very easy to create, 
-especially when you use the `animateOnce` method
+especially when you use the `animateFor` method
 on the previously
 mentioned event/component delegate object, 
 which in the above example
@@ -466,7 +466,7 @@ Which is based on this code:
 
 ```java
   button("I have a click ripple effect")
-  .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
+  .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, state -> {
       it.paint(state, g -> {
           g.setColor(new Color(0.1f, 0.25f, 0.5f, (float) state.fadeOut()));
           for ( int i = 0; i < 5; i++ ) {
@@ -493,7 +493,7 @@ here is a more complex example:
 ```java
   button("I show many little mouse move explosions when you move your mouse over me")
   .withPrefHeight(100)
-  .onMouseMove( it -> it.animateOnce(1, TimeUnit.SECONDS, state -> {
+  .onMouseMove( it -> it.animateFor(1, TimeUnit.SECONDS, state -> {
       double r = 30 * state.fadeIn() * it.getScale();
       double x = it.mouseX() - r / 2.0;
       double y = it.mouseY() - r / 2.0;
@@ -502,7 +502,7 @@ here is a more complex example:
           g.fillOval((int) x, (int) y, (int) r, (int) r);
       });
   }))
-  .onMouseClick( it -> it.animateOnce(2, TimeUnit.SECONDS, state -> {
+  .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, state -> {
       double r = 300 * state.fadeIn() * it.getScale();
       double x = it.mouseX() - r / 2;
       double y = it.mouseY() - r / 2;
@@ -518,5 +518,22 @@ that has both a mouse move and a mouse click animation
 which are very similar to each other.
 The only difference is that the radius of the expanding circle
 is far larger when the user clicks the button.
+
+---
+
+# Conclusion #
+
+I hope you enjoyed this tutorial and that you are now
+ready to start building your own Swing UIs with Swing-Tree.
+
+Here some more reading material to get you started:
+
+- [Simple Dialogs](./Simple-Dialogs.md)
+- [Writing Tables](./Writing-Tables.md)
+- [Advanced MVVM](./Advanced-MVVM.md)
+
+If you want to learn more about Swing-Tree
+check out the [API documentation](../jdocs/index.html)
+and the [examples](../../src/test/java/examples/README.md).
 
 

@@ -162,6 +162,11 @@ abstract class AbstractBuilder<I, C extends Component>
 
     /**
      *  The component wrapped by this builder node.
+     *
+     *  @throws IllegalStateException if this method is called from a thread other than the EDT
+     *                                and this UI is configured to be decoupled from the application thread.
+     *                                See {@link UI#use(EventProcessor, Supplier)}.
+     *  @return The component wrapped by this builder node.
      */
     public final C getComponent() {
         boolean isCoupled       = _eventProcessor == EventProcessor.COUPLED;
@@ -178,6 +183,11 @@ abstract class AbstractBuilder<I, C extends Component>
 
     /**
      *  The optional component wrapped by this builder node.
+     *
+     * @return An {@link OptionalUI} wrapping a component or null.
+     *         This optional will throw an exception if the
+     *         application has an application thread (see {@link UI#use(EventProcessor, Supplier)})
+     *         and this method is called from a thread other than the EDT.
      */
     public final OptionalUI<C> component() { return OptionalUI.ofNullable(_component.get()); }
 

@@ -16,12 +16,7 @@ import static javax.swing.SwingUtilities.convertMouseEvent;
 import static javax.swing.SwingUtilities.convertPoint;
 import static javax.swing.SwingUtilities.getDeepestComponentAt;
 
-import java.awt.AWTEvent;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Cursor;
-import java.awt.Point;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.AWTEventListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -66,6 +61,18 @@ public class JGlassPane extends JPanel implements AWTEventListener
         this();
         Objects.requireNonNull(rootPane);
         attachToRootPane(rootPane);
+    }
+
+    /** {@inheritDoc} */
+    @Override public void paint(Graphics g){
+        ComponentExtension.from(this).paintBackgroundStyle( g );
+        super.paint(g);
+    }
+
+    /** {@inheritDoc} */
+    @Override public void paintChildren(Graphics g){
+        super.paintChildren(g);
+        ComponentExtension.from(this).paintForegroundStyle( (Graphics2D) g );
     }
 
     /**

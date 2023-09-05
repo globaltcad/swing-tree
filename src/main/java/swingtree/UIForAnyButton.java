@@ -182,6 +182,9 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  Use this to bind to a {@link sprouts.Var}
      *  instance which will be used to dynamically model the selection state of the
      *  wrapped {@link AbstractButton} type.
+     *
+     * @param selected The {@link sprouts.Var} instance which will be used to model the selection state of the wrapped button type.
+     * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final I isSelectedIf( Val<Boolean> selected ) {
@@ -198,6 +201,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *
      * @param selected The {@link sprouts.Var} instance which will be used to
      *                 model the inverse selection state of the wrapped button type.
+     * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final I isSelectedIfNot( Val<Boolean> selected ) {
@@ -213,6 +217,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  wrapped {@link AbstractButton} type.
      *
      * @param selected The {@link sprouts.Var} instance which will be used to model the selection state of the wrapped button type.
+     * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final I isSelectedIf( Var<Boolean> selected ) {
@@ -235,6 +240,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *
      * @param selected The {@link sprouts.Var} instance which will be used to
      *                 model the inverse selection state of the wrapped button type.
+     * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final I isSelectedIfNot( Var<Boolean> selected ) {
@@ -269,6 +275,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *
      * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component selected.
      * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component selected.
+     * @param <E> The type of the enum.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final <E extends Enum<E>> I isSelectedIf( E enumValue, Val<E> enumProperty ) {
@@ -286,6 +293,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *
      * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component deselected.
      * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component deselected.
+     * @param <E> The type of the enum.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final <E extends Enum<E>> I isSelectedIfNot( E enumValue, Val<E> enumProperty ) {
@@ -299,6 +307,9 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  Use this to dynamically bind to a {@link sprouts.Var}
      *  instance which will be used to dynamically model the pressed state of the
      *  wrapped {@link AbstractButton} type.
+     *
+     * @param var The {@link sprouts.Var} instance which will be used to model the pressed state of the wrapped button type.
+     * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code var} is {@code null}.
      */
     public final I isPressedIf( Var<Boolean> var ) {

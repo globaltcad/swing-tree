@@ -9,24 +9,24 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
- *  Runs an {@link Animation} on a {@link Component} according to a {@link LifeTime} and a {@link StopCondition}.
+ *  Runs an {@link Animation} on a {@link Component} according to a {@link LifeTime} and a {@link RunCondition}.
  */
 class ComponentAnimator
 {
     private final WeakReference<Component> _compRef;
     private final LifeTime      _lifeTime;
-    private final StopCondition _condition;
+    private final RunCondition _condition;
     private final Animation     _animation;
 
 
     ComponentAnimator(
         Component     component, // may be null if the animation is not associated with a specific component
-        LifeTime lifeTime,
-        StopCondition condition,
+        LifeTime      lifeTime,
+        RunCondition condition,
         Animation     animation
     ) {
         _compRef   = component == null ? null : new WeakReference<>(component);
-        _lifeTime = Objects.requireNonNull(lifeTime);
+        _lifeTime  = Objects.requireNonNull(lifeTime);
         _condition = Objects.requireNonNull(condition);
         _animation = Objects.requireNonNull(animation);
     }
@@ -44,10 +44,10 @@ class ComponentAnimator
         long howManyLoops       = howLongIsRunning / duration;
         double progress         = howLongCurrentLoop / (double) duration;
         return new AnimationState() {
-            @Override public double progress()       { return progress;     }
-            @Override public long currentIteration() { return howManyLoops; }
-            @Override public LifeTime lifetime()     { return _lifeTime;    }
-            @Override public ActionEvent event()     { return event;        }
+            @Override public double     progress()  { return progress;     }
+            @Override public long        repeats()  { return howManyLoops; }
+            @Override public LifeTime    lifetime() { return _lifeTime;    }
+            @Override public ActionEvent event()    { return event;        }
         };
     }
 
@@ -60,7 +60,7 @@ class ComponentAnimator
         boolean shouldContinue = false;
 
         try {
-            shouldContinue = _condition.check(state);
+            shouldContinue = _condition.shouldContinue(state);
         } catch ( Exception e ) {
             e.printStackTrace();
             /*

@@ -5,6 +5,8 @@ import swingtree.UI;
 import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.Map;
 
 /**
@@ -43,6 +45,18 @@ public class JIcon extends JLabel
     public JIcon() {
         super();
         updateUI();
+    }
+
+    /** {@inheritDoc} */
+    @Override public void paint(Graphics g){
+        ComponentExtension.from(this).paintBackgroundStyle( g );
+        super.paint(g);
+    }
+
+    /** {@inheritDoc} */
+    @Override public void paintChildren(Graphics g){
+        super.paintChildren(g);
+        ComponentExtension.from(this).paintForegroundStyle( (Graphics2D) g );
     }
 
     @Override

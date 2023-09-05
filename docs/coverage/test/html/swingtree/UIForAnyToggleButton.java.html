@@ -24,29 +24,31 @@ public abstract class UIForAnyToggleButton&lt;I, B extends JToggleButton&gt; ext
      * @param state The reference {@link Enum} which this {@link JToggleButton} should represent.
      * @param selection The {@link sprouts.Var} instance which will be used
      *                  to dynamically model the selection state of the wrapped {@link JToggleButton} type.
+     * @param &lt;E&gt; The type of the enum.
+     * @return This builder node.
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final &lt;E extends Enum&lt;E&gt;&gt; I isSelectedIf( E state, Var&lt;E&gt; selection ) {
-<span class="nc" id="L30">        NullUtil.nullArgCheck(state, &quot;state&quot;, Enum.class);</span>
-<span class="nc" id="L31">        NullUtil.nullArgCheck(selection, &quot;selection&quot;, Var.class);</span>
-<span class="nc" id="L32">        NullUtil.nullPropertyCheck(selection, &quot;selection&quot;, &quot;Null is not a valid selection state.&quot;);</span>
-<span class="nc" id="L33">        this.isSelectedIf( state.equals(selection.get()) );</span>
-<span class="nc" id="L34">        _onShow( selection, s -&gt; isSelectedIf( state.equals(selection.get()) ) );</span>
-<span class="nc" id="L35">        B component = getComponent();</span>
-<span class="nc" id="L36">        String currentText = component.getText();</span>
-<span class="nc bnc" id="L37" title="All 4 branches missed.">        if ( currentText == null || currentText.isEmpty() )</span>
-<span class="nc" id="L38">            component.setText( state.toString() );</span>
+<span class="nc" id="L32">        NullUtil.nullArgCheck(state, &quot;state&quot;, Enum.class);</span>
+<span class="nc" id="L33">        NullUtil.nullArgCheck(selection, &quot;selection&quot;, Var.class);</span>
+<span class="nc" id="L34">        NullUtil.nullPropertyCheck(selection, &quot;selection&quot;, &quot;Null is not a valid selection state.&quot;);</span>
+<span class="nc" id="L35">        this.isSelectedIf( state.equals(selection.get()) );</span>
+<span class="nc" id="L36">        _onShow( selection, s -&gt; isSelectedIf( state.equals(selection.get()) ) );</span>
+<span class="nc" id="L37">        B component = getComponent();</span>
+<span class="nc" id="L38">        String currentText = component.getText();</span>
+<span class="nc bnc" id="L39" title="All 4 branches missed.">        if ( currentText == null || currentText.isEmpty() )</span>
+<span class="nc" id="L40">            component.setText( state.toString() );</span>
 
         // When the user clicks the button, we update the selection property!
         // But only if the button is selected, otherwise we'll ignore the click.
         // And we also trigger &quot;set&quot; events for the button, so that other buttons
         // can be updated to reflect the new selection state.
-<span class="nc" id="L44">        _onChange( event -&gt; {</span>
-<span class="nc bnc" id="L45" title="All 2 branches missed.">            if ( component.isSelected() )</span>
-<span class="nc" id="L46">                selection.act( state ).fireSet();</span>
-<span class="nc" id="L47">        });</span>
+<span class="nc" id="L46">        _onChange( event -&gt; {</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">            if ( component.isSelected() )</span>
+<span class="nc" id="L48">                selection.act( state ).fireSet();</span>
+<span class="nc" id="L49">        });</span>
 
-<span class="nc" id="L49">        return (I) this;</span>
+<span class="nc" id="L51">        return (I) this;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

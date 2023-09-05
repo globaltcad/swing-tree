@@ -22,6 +22,7 @@ public final class LifeTime
      * @return A new schedule that will start immediately and run for the given duration.
      */
     public static LifeTime of( long time, TimeUnit unit ) {
+        Objects.requireNonNull(unit);
         return new LifeTime(0, unit.toMillis(time));
     }
 
@@ -73,6 +74,20 @@ public final class LifeTime
         _delay     = delay;
         _duration  = duration;
         _startTime = System.currentTimeMillis() + _delay;
+    }
+
+    /**
+     *  Creates a new schedule that will start after the given delay and run for the given duration.
+     * @param delay The delay after which the animation should start.
+     * @param unit The time unit of the delay.
+     * @return A new schedule that will start after the given delay.
+     */
+    public LifeTime startingIn( long delay, TimeUnit unit ) {
+        long offset = unit.toMillis( delay );
+        return LifeTime.of(
+                    offset,    TimeUnit.MILLISECONDS,
+                    _duration, TimeUnit.MILLISECONDS
+                );
     }
 
     /**

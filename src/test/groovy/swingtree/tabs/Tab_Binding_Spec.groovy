@@ -40,7 +40,7 @@ class Tab_Binding_Spec extends Specification
             var selectedIndex = Var.of(-1)
         and : 'We create a tabbed pane UI node and attach tabs with custom tab header components to it.'
             def tabbedPane =
-                UI.tabbedPane(UI.Position.TOP).withSelectedIndex(selectedIndex)
+                UI.tabbedPane(UI.Side.TOP).withSelectedIndex(selectedIndex)
                 .add(UI.tab("Tab 1").isSelectedIf(tab1Selected))
                 .add(UI.tab("Tab 2").isSelectedIf(tab2Selected))
                 .add(UI.tab("Tab 3").isSelectedIf(tab3Selected))
@@ -103,7 +103,7 @@ class Tab_Binding_Spec extends Specification
         given : 'A string property and a tabbed pane UI node.'
             var title = Var.of("Tab 1")
             def tabbedPane =
-                UI.tabbedPane(UI.Position.TOP)
+                UI.tabbedPane(UI.Side.TOP)
                 .add(UI.tab(title))
                 .get(JTabbedPane)
 
@@ -123,7 +123,7 @@ class Tab_Binding_Spec extends Specification
         given : 'An icon property and a tabbed pane UI node.'
             var icon = Var.of(UI.findIcon("swing.png").orElse(null))
             def tabbedPane =
-                UI.tabbedPane(UI.Position.TOP)
+                UI.tabbedPane(UI.Side.TOP)
                 .add(UI.tab("Tab 1").withIcon(icon))
                 .get(JTabbedPane)
 
@@ -145,7 +145,7 @@ class Tab_Binding_Spec extends Specification
             var enabled1 = Var.of(true)
             var enabled2 = Var.of(true)
             def tabbedPane =
-                UI.tabbedPane(UI.Position.TOP)
+                UI.tabbedPane(UI.Side.TOP)
                 .add(UI.tab("Tab 1").isEnabledIf(enabled1))
                 .add(UI.tab("Tab 2").isEnabledIf(enabled2))
                 .get(JTabbedPane)
@@ -187,7 +187,7 @@ class Tab_Binding_Spec extends Specification
         given : 'A string property and a tabbed pane UI node.'
             var tooltip = Var.of("I am a tooltip!")
             def tabbedPane =
-                UI.tabbedPane(UI.Position.TOP)
+                UI.tabbedPane(UI.Side.TOP)
                 .add(UI.tab("Tab 1").withTip(tooltip))
                 .get(JTabbedPane)
 

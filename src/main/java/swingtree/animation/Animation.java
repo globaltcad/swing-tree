@@ -2,7 +2,7 @@ package swingtree.animation;
 
 /**
  * An animation is a function which is called repeatedly during its lifetime,
- * which is determined by a {@link LifeTime} and a {@link StopCondition}.
+ * which is determined by a {@link LifeTime} and a {@link RunCondition}.
  */
 @FunctionalInterface
 public interface Animation

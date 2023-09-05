@@ -182,13 +182,16 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
      *  Use this to bind to a {@link sprouts.Var}
      *  instance which will be used to dynamically model the selection state of the
      *  wrapped {@link AbstractButton} type.
+     *
+     * @param selected The {@link sprouts.Var} instance which will be used to model the selection state of the wrapped button type.
+     * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final I isSelectedIf( Val&lt;Boolean&gt; selected ) {
-<span class="nc" id="L188">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Val.class);</span>
-<span class="nc" id="L189">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
-<span class="nc" id="L190">        _onShow(selected, v -&gt; _setSelectedSilently(v) );</span>
-<span class="nc" id="L191">        return isSelectedIf( selected.orElseThrow() );</span>
+<span class="nc" id="L191">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Val.class);</span>
+<span class="nc" id="L192">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
+<span class="nc" id="L193">        _onShow(selected, v -&gt; _setSelectedSilently(v) );</span>
+<span class="nc" id="L194">        return isSelectedIf( selected.orElseThrow() );</span>
     }
 
     /**
@@ -198,13 +201,14 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
      *
      * @param selected The {@link sprouts.Var} instance which will be used to
      *                 model the inverse selection state of the wrapped button type.
+     * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final I isSelectedIfNot( Val&lt;Boolean&gt; selected ) {
-<span class="nc" id="L204">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Val.class);</span>
-<span class="nc" id="L205">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
-<span class="nc bnc" id="L206" title="All 2 branches missed.">        _onShow(selected, v -&gt; _setSelectedSilently(!v) );</span>
-<span class="nc bnc" id="L207" title="All 2 branches missed.">        return isSelectedIf( !selected.orElseThrow() );</span>
+<span class="nc" id="L208">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Val.class);</span>
+<span class="nc" id="L209">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">        _onShow(selected, v -&gt; _setSelectedSilently(!v) );</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">        return isSelectedIf( !selected.orElseThrow() );</span>
     }
 
     /**
@@ -213,19 +217,20 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
      *  wrapped {@link AbstractButton} type.
      *
      * @param selected The {@link sprouts.Var} instance which will be used to model the selection state of the wrapped button type.
+     * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final I isSelectedIf( Var&lt;Boolean&gt; selected ) {
-<span class="fc" id="L219">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Var.class);</span>
-<span class="fc" id="L220">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
-<span class="fc" id="L221">        _onShow(selected, v -&gt; _setSelectedSilently(v) );</span>
-<span class="fc" id="L222">        _onClick(</span>
-<span class="fc" id="L223">            e -&gt; _doApp(getComponent().isSelected(), selected::act)</span>
+<span class="fc" id="L224">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Var.class);</span>
+<span class="fc" id="L225">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
+<span class="fc" id="L226">        _onShow(selected, v -&gt; _setSelectedSilently(v) );</span>
+<span class="fc" id="L227">        _onClick(</span>
+<span class="fc" id="L228">            e -&gt; _doApp(getComponent().isSelected(), selected::act)</span>
         );
-<span class="fc" id="L225">        _onChange(</span>
-<span class="fc" id="L226">            v -&gt; _doApp(getComponent().isSelected(), selected::act)</span>
+<span class="fc" id="L230">        _onChange(</span>
+<span class="fc" id="L231">            v -&gt; _doApp(getComponent().isSelected(), selected::act)</span>
         );
-<span class="fc" id="L228">        return isSelectedIf( selected.orElseThrow() );</span>
+<span class="fc" id="L233">        return isSelectedIf( selected.orElseThrow() );</span>
     }
 
     /**
@@ -235,19 +240,20 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
      *
      * @param selected The {@link sprouts.Var} instance which will be used to
      *                 model the inverse selection state of the wrapped button type.
+     * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final I isSelectedIfNot( Var&lt;Boolean&gt; selected ) {
-<span class="fc" id="L241">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Var.class);</span>
-<span class="nc" id="L242">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
-<span class="nc bnc" id="L243" title="All 2 branches missed.">        _onShow(selected, v -&gt; _setSelectedSilently(!v) );</span>
-<span class="nc" id="L244">        _onClick(</span>
-<span class="nc bnc" id="L245" title="All 2 branches missed.">            e -&gt; _doApp(!getComponent().isSelected(), selected::act)</span>
+<span class="fc" id="L247">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Var.class);</span>
+<span class="nc" id="L248">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
+<span class="nc bnc" id="L249" title="All 2 branches missed.">        _onShow(selected, v -&gt; _setSelectedSilently(!v) );</span>
+<span class="nc" id="L250">        _onClick(</span>
+<span class="nc bnc" id="L251" title="All 2 branches missed.">            e -&gt; _doApp(!getComponent().isSelected(), selected::act)</span>
         );
-<span class="nc" id="L247">        _onChange(</span>
-<span class="nc bnc" id="L248" title="All 2 branches missed.">            v -&gt; _doApp(!getComponent().isSelected(), selected::act)</span>
+<span class="nc" id="L253">        _onChange(</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">            v -&gt; _doApp(!getComponent().isSelected(), selected::act)</span>
         );
-<span class="nc bnc" id="L250" title="All 2 branches missed.">        return isSelectedIf( !selected.orElseThrow() );</span>
+<span class="nc bnc" id="L256" title="All 2 branches missed.">        return isSelectedIf( !selected.orElseThrow() );</span>
     }
 
     /**
@@ -269,13 +275,14 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
      *
      * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component selected.
      * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component selected.
+     * @param &lt;E&gt; The type of the enum.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final &lt;E extends Enum&lt;E&gt;&gt; I isSelectedIf( E enumValue, Val&lt;E&gt; enumProperty ) {
-<span class="fc" id="L275">        NullUtil.nullArgCheck(enumValue, &quot;enumValue&quot;, Enum.class);</span>
-<span class="fc" id="L276">        NullUtil.nullArgCheck(enumProperty, &quot;enumProperty&quot;, Val.class);</span>
-<span class="fc" id="L277">        _onShow( enumProperty, v -&gt; _setSelectedSilently(enumValue.equals(v)) );</span>
-<span class="fc" id="L278">        return isSelectedIf( enumValue.equals(enumProperty.orElseThrow()) );</span>
+<span class="fc" id="L282">        NullUtil.nullArgCheck(enumValue, &quot;enumValue&quot;, Enum.class);</span>
+<span class="fc" id="L283">        NullUtil.nullArgCheck(enumProperty, &quot;enumProperty&quot;, Val.class);</span>
+<span class="fc" id="L284">        _onShow( enumProperty, v -&gt; _setSelectedSilently(enumValue.equals(v)) );</span>
+<span class="fc" id="L285">        return isSelectedIf( enumValue.equals(enumProperty.orElseThrow()) );</span>
     }
 
     /**
@@ -286,32 +293,36 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
      *
      * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component deselected.
      * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component deselected.
+     * @param &lt;E&gt; The type of the enum.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final &lt;E extends Enum&lt;E&gt;&gt; I isSelectedIfNot( E enumValue, Val&lt;E&gt; enumProperty ) {
-<span class="fc" id="L292">        NullUtil.nullArgCheck(enumValue, &quot;enumValue&quot;, Enum.class);</span>
-<span class="fc" id="L293">        NullUtil.nullArgCheck(enumProperty, &quot;enumProperty&quot;, Val.class);</span>
-<span class="pc bpc" id="L294" title="1 of 2 branches missed.">        _onShow( enumProperty, v -&gt; _setSelectedSilently(!enumValue.equals(v)) );</span>
-<span class="pc bpc" id="L295" title="1 of 2 branches missed.">        return isSelectedIf( !enumValue.equals(enumProperty.orElseThrow()) );</span>
+<span class="fc" id="L300">        NullUtil.nullArgCheck(enumValue, &quot;enumValue&quot;, Enum.class);</span>
+<span class="fc" id="L301">        NullUtil.nullArgCheck(enumProperty, &quot;enumProperty&quot;, Val.class);</span>
+<span class="pc bpc" id="L302" title="1 of 2 branches missed.">        _onShow( enumProperty, v -&gt; _setSelectedSilently(!enumValue.equals(v)) );</span>
+<span class="pc bpc" id="L303" title="1 of 2 branches missed.">        return isSelectedIf( !enumValue.equals(enumProperty.orElseThrow()) );</span>
     }
 
     /**
      *  Use this to dynamically bind to a {@link sprouts.Var}
      *  instance which will be used to dynamically model the pressed state of the
      *  wrapped {@link AbstractButton} type.
+     *
+     * @param var The {@link sprouts.Var} instance which will be used to model the pressed state of the wrapped button type.
+     * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code var} is {@code null}.
      */
     public final I isPressedIf( Var&lt;Boolean&gt; var ) {
-<span class="fc" id="L305">        NullUtil.nullArgCheck(var, &quot;var&quot;, Var.class);</span>
-<span class="fc" id="L306">        _onShow( var, v -&gt; getComponent().getModel().setPressed(v) );</span>
-<span class="fc" id="L307">        _onClick(</span>
-<span class="fc" id="L308">            e -&gt; _doApp(getComponent().getModel().isPressed(), pressed-&gt;{</span>
-<span class="fc" id="L309">                var.act(true);</span>
-<span class="fc" id="L310">                var.act(pressed);</span>
-<span class="fc" id="L311">            })</span>
+<span class="fc" id="L316">        NullUtil.nullArgCheck(var, &quot;var&quot;, Var.class);</span>
+<span class="fc" id="L317">        _onShow( var, v -&gt; getComponent().getModel().setPressed(v) );</span>
+<span class="fc" id="L318">        _onClick(</span>
+<span class="fc" id="L319">            e -&gt; _doApp(getComponent().getModel().isPressed(), pressed-&gt;{</span>
+<span class="fc" id="L320">                var.act(true);</span>
+<span class="fc" id="L321">                var.act(pressed);</span>
+<span class="fc" id="L322">            })</span>
         );
         // on change is not needed because the pressed state is only changed by the user.
-<span class="fc" id="L314">        return isSelectedIf( var.orElseThrow() );</span>
+<span class="fc" id="L325">        return isSelectedIf( var.orElseThrow() );</span>
     }
 
     /**
@@ -319,8 +330,8 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
      * @return This very instance, which enables builder-style method chaining.
      */
     public I isBorderPaintedIf( boolean borderPainted ) {
-<span class="fc" id="L322">        getComponent().setBorderPainted(borderPainted);</span>
-<span class="fc" id="L323">        return _this();</span>
+<span class="fc" id="L333">        getComponent().setBorderPainted(borderPainted);</span>
+<span class="fc" id="L334">        return _this();</span>
     }
 
     /**
@@ -328,8 +339,8 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
      * @return This very instance, which enables builder-style method chaining.
      */
     public I isBorderPaintedIf( Val&lt;Boolean&gt; val ) {
-<span class="nc" id="L331">        _onShow(val, v -&gt; isBorderPaintedIf(v) );</span>
-<span class="nc" id="L332">        return isBorderPaintedIf( val.get() );</span>
+<span class="nc" id="L342">        _onShow(val, v -&gt; isBorderPaintedIf(v) );</span>
+<span class="nc" id="L343">        return isBorderPaintedIf( val.get() );</span>
     }
 
     /**
@@ -340,14 +351,14 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I makePlain() {
-<span class="fc" id="L343">        peek( it -&gt; {</span>
-<span class="fc" id="L344">            it.setBorderPainted(false);</span>
-<span class="fc" id="L345">            it.setContentAreaFilled(false);</span>
-<span class="fc" id="L346">            it.setOpaque(false);</span>
-<span class="fc" id="L347">            it.setFocusPainted(false);</span>
-<span class="fc" id="L348">            it.setMargin(new Insets(0,0,0,0));</span>
-<span class="fc" id="L349">        });</span>
-<span class="fc" id="L350">        return _this();</span>
+<span class="fc" id="L354">        peek( it -&gt; {</span>
+<span class="fc" id="L355">            it.setBorderPainted(false);</span>
+<span class="fc" id="L356">            it.setContentAreaFilled(false);</span>
+<span class="fc" id="L357">            it.setOpaque(false);</span>
+<span class="fc" id="L358">            it.setFocusPainted(false);</span>
+<span class="fc" id="L359">            it.setMargin(new Insets(0,0,0,0));</span>
+<span class="fc" id="L360">        });</span>
+<span class="fc" id="L361">        return _this();</span>
     }
 
     /**
@@ -360,9 +371,9 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public final I onChange( Action&lt;ComponentDelegate&lt;B, ItemEvent&gt;&gt; action ) {
-<span class="fc" id="L363">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L364">        _onChange( e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;(getComponent(), e, this::getSiblinghood))) );</span>
-<span class="fc" id="L365">        return _this();</span>
+<span class="fc" id="L374">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L375">        _onChange( e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;(getComponent(), e, this::getSiblinghood))) );</span>
+<span class="fc" id="L376">        return _this();</span>
     }
 
     protected final void _onChange( Consumer&lt;ItemEvent&gt; action ) {
@@ -377,14 +388,14 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
             To solve this problem, we do the revers by making sure that our listener is added
             at the first position in the list of listeners inside the button.
         */
-<span class="fc" id="L380">        ItemListener[] listeners = getComponent().getItemListeners();</span>
-<span class="fc bfc" id="L381" title="All 2 branches covered.">        for (ItemListener listener : listeners)</span>
-<span class="fc" id="L382">            getComponent().removeItemListener(listener);</span>
+<span class="fc" id="L391">        ItemListener[] listeners = getComponent().getItemListeners();</span>
+<span class="fc bfc" id="L392" title="All 2 branches covered.">        for (ItemListener listener : listeners)</span>
+<span class="fc" id="L393">            getComponent().removeItemListener(listener);</span>
 
-<span class="fc" id="L384">        getComponent().addItemListener(action::accept);</span>
+<span class="fc" id="L395">        getComponent().addItemListener(action::accept);</span>
 
-<span class="fc bfc" id="L386" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
-<span class="fc" id="L387">            getComponent().addItemListener(listeners[i]);</span>
+<span class="fc bfc" id="L397" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
+<span class="fc" id="L398">            getComponent().addItemListener(listeners[i]);</span>
         /*
             The reasoning behind why Swing calls item listeners from last to first is
             the assumption that the last listener added is more interested in the event
@@ -394,7 +405,7 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
             simply because it was added first.
             This is especially true in the context of declarative UI design.
          */
-<span class="fc" id="L397">    }</span>
+<span class="fc" id="L408">    }</span>
 
     /**
      *  This method enables a more readable way of adding
@@ -409,14 +420,14 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public I onClick( Action&lt;ComponentDelegate&lt;B, ActionEvent&gt;&gt; action ) {
-<span class="fc" id="L412">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L413">        B button = getComponent();</span>
-<span class="fc" id="L414">        _onClick(</span>
-<span class="fc" id="L415">           e -&gt; _doApp(()-&gt;action.accept(</span>
+<span class="fc" id="L423">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L424">        B button = getComponent();</span>
+<span class="fc" id="L425">        _onClick(</span>
+<span class="fc" id="L426">           e -&gt; _doApp(()-&gt;action.accept(</span>
                            new ComponentDelegate&lt;&gt;(button, e, this::getSiblinghood)
                        ))
         );
-<span class="fc" id="L419">        return _this();</span>
+<span class="fc" id="L430">        return _this();</span>
     }
 
     protected final void _onClick( Consumer&lt;ActionEvent&gt; action ) {
@@ -431,15 +442,15 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
             simply because it was added first.
             This is especially true in the context of declarative UI design.
         */
-<span class="fc" id="L434">        ActionListener[] listeners = getComponent().getActionListeners();</span>
-<span class="fc bfc" id="L435" title="All 2 branches covered.">        for (ActionListener listener : listeners)</span>
-<span class="fc" id="L436">            getComponent().removeActionListener(listener);</span>
+<span class="fc" id="L445">        ActionListener[] listeners = getComponent().getActionListeners();</span>
+<span class="fc bfc" id="L446" title="All 2 branches covered.">        for (ActionListener listener : listeners)</span>
+<span class="fc" id="L447">            getComponent().removeActionListener(listener);</span>
 
-<span class="fc" id="L438">        getComponent().addActionListener(action::accept);</span>
+<span class="fc" id="L449">        getComponent().addActionListener(action::accept);</span>
 
-<span class="fc bfc" id="L440" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
-<span class="fc" id="L441">            getComponent().addActionListener(listeners[i]);</span>
-<span class="fc" id="L442">    }</span>
+<span class="fc bfc" id="L451" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
+<span class="fc" id="L452">            getComponent().addActionListener(listeners[i]);</span>
+<span class="fc" id="L453">    }</span>
 
     /**
      *  A convenience method to avoid peeking into this builder like so:
@@ -454,9 +465,9 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public final I withHorizontalAlignment( UI.HorizontalAlignment horizontalAlign ) {
-<span class="nc" id="L457">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class);</span>
-<span class="nc" id="L458">        getComponent().setHorizontalAlignment(horizontalAlign.forSwing());</span>
-<span class="nc" id="L459">        return _this();</span>
+<span class="nc" id="L468">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class);</span>
+<span class="nc" id="L469">        getComponent().setHorizontalAlignment(horizontalAlign.forSwing());</span>
+<span class="nc" id="L470">        return _this();</span>
     }
 
     /**
@@ -477,9 +488,9 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public final I withHorizontalAlignment( Val&lt;UI.HorizontalAlignment&gt; horizontalAlign ) {
-<span class="nc" id="L480">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, Val.class);</span>
-<span class="nc" id="L481">        _onShow(horizontalAlign, align -&gt; getComponent().setHorizontalAlignment(align.forSwing()) );</span>
-<span class="nc" id="L482">        return withHorizontalAlignment(horizontalAlign.orElseThrow());</span>
+<span class="nc" id="L491">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, Val.class);</span>
+<span class="nc" id="L492">        _onShow(horizontalAlign, align -&gt; getComponent().setHorizontalAlignment(align.forSwing()) );</span>
+<span class="nc" id="L493">        return withHorizontalAlignment(horizontalAlign.orElseThrow());</span>
     }
 
     /**
@@ -495,9 +506,9 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public final I withHorizontalAlignment(UI.VerticalAlignment verticalAlign ) {
-<span class="nc" id="L498">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class);</span>
-<span class="nc" id="L499">        getComponent().setVerticalAlignment(verticalAlign.forSwing());</span>
-<span class="nc" id="L500">        return _this();</span>
+<span class="nc" id="L509">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class);</span>
+<span class="nc" id="L510">        getComponent().setVerticalAlignment(verticalAlign.forSwing());</span>
+<span class="nc" id="L511">        return _this();</span>
     }
 
     /**
@@ -518,9 +529,9 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public final I withVerticalAlignment( Val&lt;UI.VerticalAlignment&gt; verticalAlign ) {
-<span class="nc" id="L521">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, Val.class);</span>
-<span class="nc" id="L522">        _onShow(verticalAlign, align -&gt; getComponent().setVerticalAlignment(align.forSwing()) );</span>
-<span class="nc" id="L523">        return withHorizontalAlignment(verticalAlign.orElseThrow());</span>
+<span class="nc" id="L532">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, Val.class);</span>
+<span class="nc" id="L533">        _onShow(verticalAlign, align -&gt; getComponent().setVerticalAlignment(align.forSwing()) );</span>
+<span class="nc" id="L534">        return withHorizontalAlignment(verticalAlign.orElseThrow());</span>
     }
 
     /**
@@ -536,9 +547,9 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public final I withHorizontalTextAlignment( UI.HorizontalAlignment horizontalAlign ) {
-<span class="nc" id="L539">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class);</span>
-<span class="nc" id="L540">        getComponent().setHorizontalTextPosition(horizontalAlign.forSwing());</span>
-<span class="nc" id="L541">        return _this();</span>
+<span class="nc" id="L550">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class);</span>
+<span class="nc" id="L551">        getComponent().setHorizontalTextPosition(horizontalAlign.forSwing());</span>
+<span class="nc" id="L552">        return _this();</span>
     }
 
     /**
@@ -559,9 +570,9 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public final I withHorizontalTextAlignment( Val&lt;UI.HorizontalAlignment&gt; horizontalAlign ) {
-<span class="nc" id="L562">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, Val.class);</span>
-<span class="nc" id="L563">        _onShow(horizontalAlign, align -&gt; getComponent().setHorizontalTextPosition(align.forSwing()) );</span>
-<span class="nc" id="L564">        return withHorizontalTextAlignment(horizontalAlign.orElseThrow());</span>
+<span class="nc" id="L573">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, Val.class);</span>
+<span class="nc" id="L574">        _onShow(horizontalAlign, align -&gt; getComponent().setHorizontalTextPosition(align.forSwing()) );</span>
+<span class="nc" id="L575">        return withHorizontalTextAlignment(horizontalAlign.orElseThrow());</span>
     }
 
     /**
@@ -577,9 +588,9 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public final I withVerticalTextAlignment( UI.VerticalAlignment verticalAlign ) {
-<span class="nc" id="L580">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class);</span>
-<span class="nc" id="L581">        getComponent().setVerticalTextPosition(verticalAlign.forSwing());</span>
-<span class="nc" id="L582">        return _this();</span>
+<span class="nc" id="L591">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class);</span>
+<span class="nc" id="L592">        getComponent().setVerticalTextPosition(verticalAlign.forSwing());</span>
+<span class="nc" id="L593">        return _this();</span>
     }
 
     /**
@@ -600,9 +611,9 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public final I withVerticalTextAlignment( Val&lt;UI.VerticalAlignment&gt; verticalAlign ) {
-<span class="nc" id="L603">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, Val.class);</span>
-<span class="nc" id="L604">        _onShow( verticalAlign, align -&gt; getComponent().setVerticalTextPosition(align.forSwing()) );</span>
-<span class="nc" id="L605">        return withVerticalTextAlignment(verticalAlign.orElseThrow());</span>
+<span class="nc" id="L614">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, Val.class);</span>
+<span class="nc" id="L615">        _onShow( verticalAlign, align -&gt; getComponent().setVerticalTextPosition(align.forSwing()) );</span>
+<span class="nc" id="L616">        return withVerticalTextAlignment(verticalAlign.orElseThrow());</span>
     }
 
     /**
@@ -612,19 +623,19 @@ public abstract class UIForAnyButton&lt;I, B extends AbstractButton&gt; extends 
      * @return This very builder to allow for method chaining.
      */
     public final I withButtonGroup( ButtonGroup group ) {
-<span class="fc" id="L615">        NullUtil.nullArgCheck(group, &quot;group&quot;, ButtonGroup.class);</span>
-<span class="fc" id="L616">        group.add(getComponent());</span>
-<span class="fc" id="L617">        return _this();</span>
+<span class="fc" id="L626">        NullUtil.nullArgCheck(group, &quot;group&quot;, ButtonGroup.class);</span>
+<span class="fc" id="L627">        group.add(getComponent());</span>
+<span class="fc" id="L628">        return _this();</span>
     }
 
     public final I withMargin( Insets insets ) {
-<span class="nc" id="L621">        NullUtil.nullArgCheck(insets, &quot;insets&quot;, Insets.class);</span>
-<span class="nc" id="L622">        getComponent().setMargin( insets );</span>
-<span class="nc" id="L623">        return _this();</span>
+<span class="nc" id="L632">        NullUtil.nullArgCheck(insets, &quot;insets&quot;, Insets.class);</span>
+<span class="nc" id="L633">        getComponent().setMargin( insets );</span>
+<span class="nc" id="L634">        return _this();</span>
     }
 
     public final I withMargin( int top, int left, int bottom, int right ) {
-<span class="nc" id="L627">        return withMargin( new Insets(top, left, bottom, right) );</span>
+<span class="nc" id="L638">        return withMargin( new Insets(top, left, bottom, right) );</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

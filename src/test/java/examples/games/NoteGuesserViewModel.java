@@ -64,7 +64,7 @@ public class NoteGuesserViewModel
     }
 
     private void animateFeedbackAndThen(Runnable onEnd) {
-        UI.schedule(0.45, TimeUnit.SECONDS).goOnce(new Animation() {
+        UI.animateFor(0.45, TimeUnit.SECONDS).go(new Animation() {
             @Override
             public void run(AnimationState state) {
                 feedbackFontSize.set((int) (24 + state.pulse() * 16));

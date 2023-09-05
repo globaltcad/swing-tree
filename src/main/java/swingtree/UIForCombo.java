@@ -186,6 +186,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
      * For more information see {@link JComboBox#addActionListener(ActionListener)}.
      * <p>
      * @param action The {@link Action} that will be notified.
+     * @return This very builder instance, which allows for method chaining.
      **/
     public UIForCombo<E,C> onEnter( Action<ComponentDelegate<C, ActionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);

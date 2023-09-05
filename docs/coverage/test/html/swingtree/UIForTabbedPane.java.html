@@ -212,23 +212,23 @@ public class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAnySwing&
     }
 
     /**
-     * @param position The position to use for the tabs.
+     * @param side The position to use for the tabs.
      * @return This builder node.
      */
-    public final UIForTabbedPane&lt;P&gt; withTabPlacement( UI.Position position ) {
-<span class="fc" id="L219">        NullUtil.nullArgCheck( position, &quot;position&quot;, UI.Position.class );</span>
-<span class="fc" id="L220">        getComponent().setTabPlacement(position.forTabbedPane());</span>
+    public final UIForTabbedPane&lt;P&gt; withTabPlacementAt( UI.Side side ) {
+<span class="fc" id="L219">        NullUtil.nullArgCheck(side, &quot;side&quot;, UI.Side.class );</span>
+<span class="fc" id="L220">        getComponent().setTabPlacement(side.forTabbedPane());</span>
 <span class="fc" id="L221">        return this;</span>
     }
 
     /**
-     * @param position The position property to use for the tabs.
+     * @param side The position property to use for the tabs.
      * @return This builder node.
      */
-    public final UIForTabbedPane&lt;P&gt; withTabPlacement( Val&lt;UI.Position&gt; position ) {
-<span class="nc" id="L229">        NullUtil.nullArgCheck(position, &quot;position&quot;, Var.class);</span>
-<span class="nc" id="L230">        _onShow( position, v -&gt; withTabPlacement(position.orElseThrow()) );</span>
-<span class="nc" id="L231">        return withTabPlacement(position.get());</span>
+    public final UIForTabbedPane&lt;P&gt; withTabPlacementAt( Val&lt;UI.Side&gt; side ) {
+<span class="nc" id="L229">        NullUtil.nullArgCheck(side, &quot;side&quot;, Var.class);</span>
+<span class="nc" id="L230">        _onShow( side, v -&gt; withTabPlacementAt(side.orElseThrow()) );</span>
+<span class="nc" id="L231">        return withTabPlacementAt(side.get());</span>
     }
 
     /**
