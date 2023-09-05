@@ -4663,23 +4663,24 @@ public final class UI
      *
      *     appThread.start();
      * }</pre>
-     * Note that if the <code>Runnable.run</code> method throws an
-     * uncaught exception
-     * (on the event dispatching thread) it's caught and rethrown, as
-     * an <code>InvocationTargetException</code>, on the caller's thread.
+     * Note that contrary to the {@link SwingUtilities#invokeAndWait(Runnable)} method,
+     * this method does not throw an exception if it is called from the
+     * event dispatching thread. Instead, it just executes the runnable
+     * immediately.
      *
      * @param runnable the instance of {@code Runnable}
-     * @exception  InterruptedException if we're interrupted while waiting for
-     *             the event dispatching thread to finish executing
-     *             <code>doRun.run()</code>
-     * @exception  InvocationTargetException  if an exception is thrown
-     *             while running <code>doRun</code>
-     *
      * @see #run
      */
-    public static void runNow( Runnable runnable ) throws InterruptedException, InvocationTargetException {
+    public static void runNow( Runnable runnable ) {
         NullUtil.nullArgCheck(runnable, "runnable", Runnable.class);
-        SwingUtilities.invokeAndWait(runnable);
+        try {
+            if ( !UI.thisIsUIThread() )
+                SwingUtilities.invokeAndWait(runnable);
+            else
+                runnable.run();
+        } catch ( Exception e ) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -4712,7 +4713,7 @@ public final class UI
      * }</pre>
      *
      */
-    public static <T> T runAndGet( Supplier<T> supplier ) throws InterruptedException, InvocationTargetException {
+    public static <T> T runAndGet( Supplier<T> supplier ) {
         NullUtil.nullArgCheck(supplier, "callable", Supplier.class);
         T[] ref = (T[]) new Object[1];
         runNow( () -> ref[0] = supplier.get() );
@@ -4725,11 +4726,8 @@ public final class UI
      *  until the UI thread has finished executing all of its pending events.
      *  This method should only be called from the application thread
      *  and not from the UI thread.
-     *
-     * @throws InterruptedException if the current thread is interrupted
-     * @throws InvocationTargetException if the UI thread throws an exception
      */
-    public static void sync() throws InterruptedException, InvocationTargetException {
+    public static void sync() {
         runNow( () -> {/*
             This is a no-op, but it forces the event dispatching thread to
             process all pending events before returning.
