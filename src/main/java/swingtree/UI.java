@@ -20,7 +20,7 @@ import swingtree.components.JSplitButton;
 import swingtree.dialogs.ConfirmAnswer;
 import swingtree.dialogs.ConfirmDialogBuilder;
 import swingtree.dialogs.MessageDialogBuilder;
-import swingtree.layout.LayoutAttr;
+import swingtree.layout.LayoutConstraint;
 import swingtree.style.*;
 import swingtree.threading.EventProcessor;
 
@@ -31,7 +31,6 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
@@ -827,8 +826,8 @@ public final class UI extends UILayoutConstants
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code attr} is {@code null}.
      */
-    public static UIForPanel<JPanel> panel( LayoutAttr attr ) {
-        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
+    public static UIForPanel<JPanel> panel( LayoutConstraint attr ) {
+        NullUtil.nullArgCheck(attr, "attr", LayoutConstraint.class);
         return panel(attr.toString());
     }
 
@@ -843,8 +842,8 @@ public final class UI extends UILayoutConstants
      * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      */
-    public static UIForPanel<JPanel> panel( LayoutAttr attr, String colConstraints ) {
-        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
+    public static UIForPanel<JPanel> panel(LayoutConstraint attr, String colConstraints ) {
+        NullUtil.nullArgCheck(attr, "attr", LayoutConstraint.class);
         NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
         return of((JPanel)new Panel()).withLayout(attr, colConstraints);
     }
@@ -857,13 +856,13 @@ public final class UI extends UILayoutConstants
      *      UI.of(new JPanel(new MigLayout(attr, colConstraints, rowConstraints)))
      *  }</pre>
      *  <br>
-     * @param attr The layout attributes in the form of a {@link LayoutAttr} constants.
+     * @param attr The layout attributes in the form of a {@link LayoutConstraint} constants.
      * @param colConstraints The column constraints.
      * @param rowConstraints The row constraints.
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      */
-    public static UIForPanel<JPanel> panel( LayoutAttr attr, String colConstraints, String rowConstraints ) {
-        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
+    public static UIForPanel<JPanel> panel(LayoutConstraint attr, String colConstraints, String rowConstraints ) {
+        NullUtil.nullArgCheck(attr, "attr", LayoutConstraint.class);
         NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
         NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class);
         return of((JPanel) new Panel()).withLayout(attr, colConstraints, rowConstraints);
@@ -946,7 +945,7 @@ public final class UI extends UILayoutConstants
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code attr} is {@code null}.
      */
-    public static UIForPanel<JPanel> panel( Val<LayoutAttr> attr ) {
+    public static UIForPanel<JPanel> panel( Val<LayoutConstraint> attr ) {
         NullUtil.nullArgCheck(attr, "attr", Val.class);
         NullUtil.nullPropertyCheck(attr, "attr", "Null is not a valid layout attribute.");
         return panel(attr.get().toString()).withLayout(attr);
@@ -1109,7 +1108,7 @@ public final class UI extends UILayoutConstants
      *  transparent {@link JPanel} without any insets
      *  and a {@link MigLayout} constructed using the provided constraints.
      *  <br>
-     *  This method allows you to pass a {@link LayoutAttr} constants as the layout attributes,
+     *  This method allows you to pass a {@link LayoutConstraint} constants as the layout attributes,
      *  which is an instance typically chosen from the {@link UI} class constants
      *  like for example {@link UI#FILL}, {@link UI#FILL_X}, {@link UI#FILL_Y}... <br>
      *  A typical usage example would be: <br>
@@ -1126,8 +1125,8 @@ public final class UI extends UILayoutConstants
      * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code attr} is {@code null}.
      */
-    public static UIForBox<JBox> box( LayoutAttr attr ) {
-        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
+    public static UIForBox<JBox> box( LayoutConstraint attr ) {
+        NullUtil.nullArgCheck(attr, "attr", LayoutConstraint.class);
         return box(attr.toString());
     }
 
@@ -1138,7 +1137,7 @@ public final class UI extends UILayoutConstants
      *  This is conceptually the same as a
      *  transparent {@link JPanel} without any insets
      *  and a {@link MigLayout} constructed using the provided constraints. <br>
-     *  This method allows you to pass a {@link LayoutAttr} constants as the layout attributes,
+     *  This method allows you to pass a {@link LayoutConstraint} constants as the layout attributes,
      *  which is an instance typically chosen from the {@link UI} class constants
      *  like for example {@link UI#FILL}, {@link UI#FILL_X}, {@link UI#FILL_Y}... <br>
      *  A typical usage example would be: <br>
@@ -1157,8 +1156,8 @@ public final class UI extends UILayoutConstants
      * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
      * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
      */
-    public static UIForBox<JBox> box( LayoutAttr attr, String colConstraints ) {
-        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
+    public static UIForBox<JBox> box(LayoutConstraint attr, String colConstraints ) {
+        NullUtil.nullArgCheck(attr, "attr", LayoutConstraint.class);
         NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
         return box(attr.toString(), colConstraints);
     }
@@ -1172,13 +1171,13 @@ public final class UI extends UILayoutConstants
      *      UI.of(new JBox(new MigLayout(attr, colConstraints, rowConstraints)))
      *  }</pre>
      *  <br>
-     * @param attr The layout attributes in the form of a {@link LayoutAttr} constants.
+     * @param attr The layout attributes in the form of a {@link LayoutConstraint} constants.
      * @param colConstraints The column constraints.
      * @param rowConstraints The row constraints.
      * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
      */
-    public static UIForBox<JBox> box( LayoutAttr attr, String colConstraints, String rowConstraints ) {
-        NullUtil.nullArgCheck(attr, "attr", LayoutAttr.class);
+    public static UIForBox<JBox> box(LayoutConstraint attr, String colConstraints, String rowConstraints ) {
+        NullUtil.nullArgCheck(attr, "attr", LayoutConstraint.class);
         NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
         NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class);
         return box(attr.toString(), colConstraints, rowConstraints);
@@ -1209,7 +1208,7 @@ public final class UI extends UILayoutConstants
      *      UI.of(new JBox(new MigLayout(attr, colConstraints)))
      *  }</pre>
      *  <br>
-     * @param attr The layout attributes in the form of a {@link LayoutAttr} constants.
+     * @param attr The layout attributes in the form of a {@link LayoutConstraint} constants.
      * @param colConstraints The column constraints.
      * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
      */
@@ -1237,7 +1236,7 @@ public final class UI extends UILayoutConstants
      *      })
      *  }</pre>
      *  <br>
-     * @param attr The layout attributes in the form of a {@link LayoutAttr} constants.
+     * @param attr The layout attributes in the form of a {@link LayoutConstraint} constants.
      * @param colConstraints The column constraints.
      * @param rowConstraints The row constraints.
      * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
@@ -1256,7 +1255,7 @@ public final class UI extends UILayoutConstants
      *  This is conceptually the same as a
      *  transparent {@link JPanel} without any insets
      *  and a {@link MigLayout} constructed using the provided constraints.
-     *  This method allows you to dynamically determine the {@link LayoutAttr} constants
+     *  This method allows you to dynamically determine the {@link LayoutConstraint} constants
      *  of the {@link MigLayout} instance, by passing a {@link Val} property which
      *  will be observed and its value passed to the {@link MigLayout} constructor
      *  whenever it changes.
@@ -1267,7 +1266,7 @@ public final class UI extends UILayoutConstants
      * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code attr} is {@code null}.
      */
-    public static UIForBox<JBox> box( Val<LayoutAttr> attr ) {
+    public static UIForBox<JBox> box( Val<LayoutConstraint> attr ) {
         NullUtil.nullArgCheck(attr, "attr", Val.class);
         NullUtil.nullPropertyCheck(attr, "attr", "Null is not a valid layout attribute.");
         return box().withLayout(attr.view( it -> it.and("ins 0")));

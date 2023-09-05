@@ -3,6 +3,7 @@ package swingtree.api.mvvm;
 import sprouts.Val;
 import sprouts.Vals;
 import swingtree.UIForAnySwing;
+import swingtree.layout.AddConstraint;
 
 /**
  *  A provider of a view, usually a view model or a simple data model with the purpose of
@@ -14,8 +15,8 @@ import swingtree.UIForAnySwing;
  *  {@link swingtree.UIForAnySwing#add(Vals, ViewSupplier)},  <br>
  *  {@link swingtree.UIForAnySwing#add(String, Val, ViewSupplier)},  <br>
  *  {@link swingtree.UIForAnySwing#add(String, Vals, ViewSupplier)}, <br>
- *  {@link swingtree.UIForAnySwing#add(swingtree.layout.CompAttr, Val, ViewSupplier)},  <br>
- *  {@link swingtree.UIForAnySwing#add(swingtree.layout.CompAttr, Vals, ViewSupplier)}, <br>
+ *  {@link swingtree.UIForAnySwing#add(AddConstraint, Val, ViewSupplier)},  <br>
+ *  {@link swingtree.UIForAnySwing#add(AddConstraint, Vals, ViewSupplier)}, <br>
  */
 @FunctionalInterface
 public interface ViewSupplier<M>

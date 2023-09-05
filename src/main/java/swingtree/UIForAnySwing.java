@@ -14,8 +14,8 @@ import swingtree.api.Styler;
 import swingtree.api.UIVerifier;
 import swingtree.api.mvvm.ViewSupplier;
 import swingtree.input.Keyboard;
-import swingtree.layout.CompAttr;
-import swingtree.layout.LayoutAttr;
+import swingtree.layout.AddConstraint;
+import swingtree.layout.LayoutConstraint;
 import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
@@ -1461,7 +1461,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
 
     /**
      *  Creates a new {@link MigLayout} for the component wrapped by this UI builder,
-     *  based on the provided layout constraints in the form of a {@link LayoutAttr} instance,
+     *  based on the provided layout constraints in the form of a {@link LayoutConstraint} instance,
      *  which is an immutable string wrapper for the layout constraints.
      *  Instances of this are usually obtained from the {@link UI} namespace like
      *  {@link UI#FILL} or {@link UI#FILL_X}...
@@ -1469,7 +1469,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param attr Essentially an immutable string wrapper defining the mig layout.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withLayout( LayoutAttr attr ) { return withLayout(attr.toString(), null); }
+    public final I withLayout( LayoutConstraint attr ) { return withLayout(attr.toString(), null); }
 
     /**
      *  This creates a {@link MigLayout} for the component wrapped by this UI builder
@@ -1531,19 +1531,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param colConstrains The column layout for the {@link MigLayout} instance.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withLayout( LayoutAttr attr, String colConstrains ) {
+    public final I withLayout(LayoutConstraint attr, String colConstrains ) {
         return withLayout(attr.toString(), colConstrains, null);
     }
 
     /**
      *  This creates a {@link MigLayout} for the component wrapped by this UI builder.
      *
-     * @param attr The constraints for the layout in the form of a {@link LayoutAttr} instance.
+     * @param attr The constraints for the layout in the form of a {@link LayoutConstraint} instance.
      * @param colConstrains The column layout for the {@link MigLayout} instance.
      * @param rowConstraints The row layout for the {@link MigLayout} instance.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withLayout( LayoutAttr attr, String colConstrains, String rowConstraints ) {
+    public final I withLayout(LayoutConstraint attr, String colConstrains, String rowConstraints ) {
         return withLayout(attr.toString(), colConstrains, rowConstraints);
     }
 
@@ -2924,7 +2924,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param <T> The type of the {@link JComponent} which is wrapped by the provided builder.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final <T extends JComponent> I add( CompAttr attr, UIForAnySwing<?, T> builder ) {
+    public final <T extends JComponent> I add(AddConstraint attr, UIForAnySwing<?, T> builder ) {
         return this.add(attr.toString(), new UIForAnySwing[]{builder});
     }
 
@@ -2969,7 +2969,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     @SafeVarargs
-    public final <B extends UIForAnySwing<?, ?>> I add( CompAttr attr, B... builders ) {
+    public final <B extends UIForAnySwing<?, ?>> I add(AddConstraint attr, B... builders ) {
         return this.add(attr.toString(), builders);
     }
 
@@ -3034,7 +3034,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param <E> The type of the {@link JComponent} which is wrapped by the provided builder.
      */
     @SafeVarargs
-    public final <E extends JComponent> I add( CompAttr attr, E... components ) {
+    public final <E extends JComponent> I add(AddConstraint attr, E... components ) {
         return this.add(attr.toString(), components);
     }
 
@@ -3134,7 +3134,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the value held by the {@link Val} property.
      */
-    public final <M> I add( CompAttr attr, Val<M> viewable, ViewSupplier<M> viewSupplier) {
+    public final <M> I add(AddConstraint attr, Val<M> viewable, ViewSupplier<M> viewSupplier) {
         return this.add(attr.toString(), viewable, viewSupplier);
     }
 
@@ -3153,7 +3153,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the items in the {@link Vals} list.
      */
-    public final <M> I add( CompAttr attr, Vals<M> viewables, ViewSupplier<M> viewSupplier) {
+    public final <M> I add(AddConstraint attr, Vals<M> viewables, ViewSupplier<M> viewSupplier) {
         return this.add(attr.toString(), viewables, viewSupplier);
     }
 

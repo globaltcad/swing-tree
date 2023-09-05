@@ -2,7 +2,7 @@ package swingtree;
 
 import net.miginfocom.swing.MigLayout;
 import sprouts.Val;
-import swingtree.layout.LayoutAttr;
+import swingtree.layout.LayoutConstraint;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,7 +21,7 @@ public class UIForPanel<P extends JPanel> extends UIForAnySwing<UIForPanel<P>, P
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code attr} is {@code null}.
      */
-    public final UIForPanel<P> withLayout( Val<LayoutAttr> attr ) {
+    public final UIForPanel<P> withLayout( Val<LayoutConstraint> attr ) {
         NullUtil.nullArgCheck(attr, "attr", Val.class);
         NullUtil.nullPropertyCheck(attr, "attr", "Null is not a valid layout attribute.");
         _onShow(attr, it -> {
