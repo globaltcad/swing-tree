@@ -114,7 +114,234 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _this();
 	}
 
-	private <E> WindowDelegate<W, E> _createDelegate(W window, E event) {
+	/**
+	 * Adds the supplied {@link sprouts.Action} wrapped in a {@link java.awt.event.WindowListener}
+	 * to the component, to receive {@link WindowListener#windowClosing(WindowEvent)} events
+	 * which are invoked when a window is in the process of being closed.
+	 * The close operation can be overridden at this point (see {@link JFrame#DO_NOTHING_ON_CLOSE}). <br>
+	 * Note that this kind of event is typically triggered when the user clicks
+	 * the close button in the top bar of the window.
+	 *
+	 * @param onClose The {@link sprouts.Action} which should be invoked when the wrapped component is in the process of being closed.
+	 * @return This very instance, which enables builder-style method chaining.
+	 */
+	public final I onClose( sprouts.Action<WindowDelegate<W, WindowEvent>> onClose ) {
+		NullUtil.nullArgCheck(onClose, "onClose", Action.class);
+		W window = getComponent();
+		window.addWindowListener(new WindowAdapter() {
+			@Override public void windowClosing( WindowEvent e ) {
+				_doApp(()->onClose.accept(_createDelegate(window, e)));
+			}
+		});
+		return _this();
+	}
+
+	/**
+	 * Adds the supplied {@link sprouts.Action} wrapped in a {@link java.awt.event.WindowListener}
+	 * to the component, to receive {@link WindowListener#windowClosed(WindowEvent)} events
+	 * which are invoked when a window has been closed. <br>
+	 * Note that this kind of event is typically triggered when the user clicks
+	 * the close button in the top bar of the window.
+	 *
+	 * @param onClose The {@link sprouts.Action} which should be invoked when the wrapped component has been closed.
+	 * @return This very instance, which enables builder-style method chaining.
+	 */
+	public final I onClosed( sprouts.Action<WindowDelegate<W, WindowEvent>> onClose ) {
+		NullUtil.nullArgCheck(onClose, "onClose", Action.class);
+		W window = getComponent();
+		window.addWindowListener(new WindowAdapter() {
+			@Override public void windowClosed( WindowEvent e ) {
+				_doApp(()->onClose.accept(_createDelegate(window, e)));
+			}
+		});
+		return _this();
+	}
+
+	/**
+	 * Adds the supplied {@link sprouts.Action} wrapped in a {@link java.awt.event.WindowListener}
+	 * to the component, to receive {@link WindowListener#windowOpened(WindowEvent)} events
+	 * which are invoked when a window has been opened. <br>
+	 * Note that this kind of event is typically triggered when the user clicks
+	 * the close button in the top bar of the window.
+	 *
+	 * @param onOpen The {@link sprouts.Action} which should be invoked when the wrapped component has been opened.
+	 * @return This very instance, which enables builder-style method chaining.
+	 */
+	public final I onOpened( sprouts.Action<WindowDelegate<W, WindowEvent>> onOpen ) {
+		NullUtil.nullArgCheck(onOpen, "onOpen", Action.class);
+		W window = getComponent();
+		window.addWindowListener(new WindowAdapter() {
+			@Override public void windowOpened( WindowEvent e ) {
+				_doApp(()->onOpen.accept(_createDelegate(window, e)));
+			}
+		});
+		return _this();
+	}
+
+	/**
+	 * Adds the supplied {@link sprouts.Action} wrapped in a {@link java.awt.event.WindowListener}
+	 * to the component, to receive {@link WindowListener#windowIconified(WindowEvent)} events
+	 * which are invoked when a window is changed from a normal to a minimized state.
+	 * For many platforms, a minimized window is displayed as the icon
+	 * specified in the window's iconImage property.
+	 * <br>
+	 * Minification is usually triggered when the user clicks the minimize button
+	 * in the top bar of the window. But this depends on the operating system.
+	 *
+	 * @param onIconify The {@link sprouts.Action} which should be invoked when the wrapped component has been iconified.
+	 * @return This very instance, which enables builder-style method chaining.
+	 */
+	public final I onIconified( sprouts.Action<WindowDelegate<W, WindowEvent>> onIconify ) {
+		NullUtil.nullArgCheck(onIconify, "onIconify", Action.class);
+		W window = getComponent();
+		window.addWindowListener(new WindowAdapter() {
+			@Override public void windowIconified( WindowEvent e ) {
+				_doApp(()->onIconify.accept(_createDelegate(window, e)));
+			}
+		});
+		return _this();
+	}
+
+	/**
+	 * Adds the supplied {@link sprouts.Action} wrapped in a {@link java.awt.event.WindowListener}
+	 * to the component, to receive {@link WindowListener#windowDeiconified(WindowEvent)} events
+	 * which are invoked when a window is changed from a minimized
+	 * to a normal state, usually by the user restoring it from the task bar.
+	 *
+	 * @param onDeiconify The {@link sprouts.Action} which should be invoked when the wrapped component has been deiconified.
+	 * @return This very instance, which enables builder-style method chaining.
+	 */
+	public final I onDeiconified( sprouts.Action<WindowDelegate<W, WindowEvent>> onDeiconify ) {
+		NullUtil.nullArgCheck(onDeiconify, "onDeiconify", Action.class);
+		W window = getComponent();
+		window.addWindowListener(new WindowAdapter() {
+			@Override public void windowDeiconified( WindowEvent e ) {
+				_doApp(()->onDeiconify.accept(_createDelegate(window, e)));
+			}
+		});
+		return _this();
+	}
+
+	/**
+	 * Adds the supplied {@link sprouts.Action} wrapped in a {@link java.awt.event.WindowListener}
+	 * to the component, to receive {@link WindowListener#windowActivated(WindowEvent)} events
+	 * which are invoked when the Window is set to be the active Window.
+	 * Only a Frame or a Dialog can be the active Window.
+	 * The native windowing system may denote the active Window or
+	 * its children with special decorations, such as a highlighted title bar.
+	 * The active Window is always either the focused Window,
+	 * or the first Frame or Dialog that is an owner of the focused Window.
+	 * So this kind of event is usually triggered when the user makes the window active
+	 * by clicking it.
+	 *
+	 * @param onActivate The {@link sprouts.Action} which should be invoked when the wrapped component has been activated.
+	 * @return This very instance, which enables builder-style method chaining.
+	 */
+	public final I onActivated( sprouts.Action<WindowDelegate<W, WindowEvent>> onActivate ) {
+		NullUtil.nullArgCheck(onActivate, "onActivate", Action.class);
+		W window = getComponent();
+		window.addWindowListener(new WindowAdapter() {
+			@Override public void windowActivated( WindowEvent e ) {
+				_doApp(()->onActivate.accept(_createDelegate(window, e)));
+			}
+		});
+		return _this();
+	}
+
+	/**
+	 * Adds the supplied {@link sprouts.Action} wrapped in a {@link java.awt.event.WindowListener}
+	 * to the component, to receive {@link WindowListener#windowDeactivated(WindowEvent)} events
+	 * which are invoked when a Window is no longer the active Window. Only a Frame or a
+	 * Dialog can be the active Window. The native windowing system may denote
+	 * the active Window or its children with special decorations, such as a
+	 * highlighted title bar. The active Window is always either the focused
+	 * Window, or the first Frame or Dialog that is an owner of the focused
+	 * Window.
+	 * This kind of event typically occurs when the user clicks another window
+	 * in the task bar of the operating system.
+	 *
+	 * @param onDeactivate The {@link sprouts.Action} which should be invoked when the wrapped component has been deactivated.
+	 * @return This very instance, which enables builder-style method chaining.
+	 */
+	public final I onDeactivated( sprouts.Action<WindowDelegate<W, WindowEvent>> onDeactivate ) {
+		NullUtil.nullArgCheck(onDeactivate, "onDeactivate", Action.class);
+		W window = getComponent();
+		window.addWindowListener(new WindowAdapter() {
+			@Override public void windowDeactivated( WindowEvent e ) {
+				_doApp(()->onDeactivate.accept(_createDelegate(window, e)));
+			}
+		});
+		return _this();
+	}
+
+	/**
+	 * Adds the supplied {@link sprouts.Action} wrapped in a {@link java.awt.event.WindowListener}
+	 * to the component, to receive {@link WindowStateListener#windowStateChanged(WindowEvent)} events
+	 * which are invoked when a window has been changed. <br>
+	 * Note that this kind of event is typically invoked when the window is
+	 * iconified, minimized, maximized or restored.
+	 *
+	 * @param onStateChanged The {@link sprouts.Action} which should be invoked when the wrapped component has been changed.
+	 * @return This very instance, which enables builder-style method chaining.
+	 */
+	public final I onStateChanged( sprouts.Action<WindowDelegate<W, WindowEvent>> onStateChanged ) {
+		NullUtil.nullArgCheck(onStateChanged, "onStateChanged", Action.class);
+		W window = getComponent();
+		window.addWindowListener(new WindowAdapter() {
+			@Override public void windowStateChanged( WindowEvent e ) {
+				_doApp(()->onStateChanged.accept(_createDelegate(window, e)));
+			}
+		});
+		return _this();
+	}
+
+	/**
+	 * Adds the supplied {@link sprouts.Action} wrapped in a {@link java.awt.event.WindowListener}
+	 * to the component, to receive {@link WindowFocusListener#windowGainedFocus(WindowEvent)} events
+	 * which are invoked when the window is set to be gaining input focus, which means
+	 * that the Window, or one of its subcomponents, will receive keyboard
+	 * events.
+	 * This event is typically triggered when the user clicks the window.
+	 *
+	 * @param onFocusGained The {@link sprouts.Action} which should be invoked when the wrapped component has gained input focus.
+	 * @return This very instance, which enables builder-style method chaining.
+	 */
+	public final I onInputFocusGained( sprouts.Action<WindowDelegate<W, WindowEvent>> onFocusGained ) {
+		NullUtil.nullArgCheck(onFocusGained, "onFocusGained", Action.class);
+		W window = getComponent();
+		window.addWindowFocusListener(new WindowFocusListener() {
+			@Override public void windowGainedFocus( WindowEvent e ) {
+				_doApp(()->onFocusGained.accept(_createDelegate(window, e)));
+			}
+			@Override public void windowLostFocus( WindowEvent e ) {}
+		});
+		return _this();
+	}
+
+	/**
+	 * Adds the supplied {@link sprouts.Action} wrapped in a {@link java.awt.event.WindowListener}
+	 * to the component, to receive {@link WindowFocusListener#windowLostFocus(WindowEvent)} events
+	 * which are invoked when the window is set to be losing input focus, which means
+	 * that input focus is being transferred to another Window or no Window at all and
+	 * that keyboard events will no longer be delivered to the Window or any of
+	 * its subcomponents.
+	 *
+	 * @param onFocusLost The {@link sprouts.Action} which should be invoked when the wrapped component has lost input focus.
+	 * @return This very instance, which enables builder-style method chaining.
+	 */
+	public final I onInputFocusLost( sprouts.Action<WindowDelegate<W, WindowEvent>> onFocusLost ) {
+		NullUtil.nullArgCheck(onFocusLost, "onFocusLost", Action.class);
+		W window = getComponent();
+		window.addWindowFocusListener(new WindowFocusListener() {
+			@Override public void windowGainedFocus( WindowEvent e ) {}
+			@Override public void windowLostFocus( WindowEvent e ) {
+				_doApp(()->onFocusLost.accept(_createDelegate(window, e)));
+			}
+		});
+		return _this();
+	}
+
+	private <E> WindowDelegate<W, E> _createDelegate( W window, E event ) {
 		return new WindowDelegate<W, E>() {
 			@Override public W get() { return window; }
 			@Override public E getEvent() { return event; }
