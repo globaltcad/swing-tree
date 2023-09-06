@@ -1225,7 +1225,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withBorderTitled( String title ) {
-        NullUtil.nullArgCheck(title, "title", String.class);
+        NullUtil.nullArgCheck(title, "title", String.class, "Please use an empty String instead of null!");
         getComponent().setBorder(BorderFactory.createTitledBorder(title));
         return _this();
     }
@@ -1263,6 +1263,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withCursor( UI.Cursor type ) {
+        NullUtil.nullArgCheck( type, "type", UI.Cursor.class );
         getComponent().setCursor( new java.awt.Cursor( type.type ) );
         return _this();
     }
@@ -1357,6 +1358,42 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withFlowLayout() { return this.withLayout(new FlowLayout()); }
 
     /**
+     *  Use this to set a {@link FlowLayout} for the component wrapped by this builder. <br>
+     *  This is in essence a more convenient way than the alternative usage pattern involving
+     *  the {@link #peek(Peeker)} method to peek into the builder's component like so: <br>
+     *  <pre>{@code
+     *      UI.panel()
+     *      .peek( panel -> panel.setLayout(new FlowLayout(alignment.forFlowLayout())) );
+     *  }</pre>
+     *
+     * @param alignment The alignment of the layout.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withFlowLayout( UI.HorizontalAlignment alignment ) {
+        NullUtil.nullArgCheck( alignment, "alignment", UI.HorizontalAlignment.class );
+        return this.withLayout(new FlowLayout(alignment.forFlowLayout()));
+    }
+
+    /**
+     *  Use this to set a {@link FlowLayout} for the component wrapped by this builder. <br>
+     *  This is in essence a more convenient way than the alternative usage pattern involving
+     *  the {@link #peek(Peeker)} method to peek into the builder's component like so: <br>
+     *  <pre>{@code
+     *      UI.panel()
+     *      .peek( panel -> panel.setLayout(new FlowLayout(alignment.forFlowLayout(), hgap, vgap)) );
+     *  }</pre>
+     *
+     * @param alignment The alignment of the layout.
+     * @param hgap The horizontal gap between components.
+     * @param vgap The vertical gap between components.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withFlowLayout( UI.HorizontalAlignment alignment, int hgap, int vgap ) {
+        NullUtil.nullArgCheck( alignment, "alignment", UI.HorizontalAlignment.class );
+        return this.withLayout(new FlowLayout(alignment.forFlowLayout(), hgap, vgap));
+    }
+
+    /**
      *  Use this to set a {@link GridLayout} for the component wrapped by this builder. <br>
      *  This is in essence a more convenient way than the alternative usage pattern involving
      *  the {@link #peek(Peeker)} method to peek into the builder's component like so: <br>
@@ -1447,7 +1484,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param attr A string defining the layout (usually mig layout).
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withLayout( String attr ) { return withLayout(attr, null); }
+    public final I withLayout( String attr ) {
+        NullUtil.nullArgCheck( attr, "attr", String.class );
+        return withLayout(attr, "");
+    }
 
     /**
      *  Creates a new {@link MigLayout} for the component wrapped by this UI builder,
@@ -1457,7 +1497,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param attr A string defining the layout (usually mig layout).
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withLayout( LC attr ) { return withLayout(attr, (AC) null, (AC) null); }
+    public final I withLayout( LC attr ) {
+        NullUtil.nullArgCheck( attr, "attr", LC.class );
+        return withLayout(attr, (AC) null, (AC) null);
+    }
 
     /**
      *  Creates a new {@link MigLayout} for the component wrapped by this UI builder,
@@ -1469,7 +1512,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param attr Essentially an immutable string wrapper defining the mig layout.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withLayout( LayoutConstraint attr ) { return withLayout(attr.toString(), null); }
+    public final I withLayout( LayoutConstraint attr ) {
+        NullUtil.nullArgCheck( attr, "attr", LayoutConstraint.class );
+        return withLayout(attr.toString(), "");
+    }
 
     /**
      *  This creates a {@link MigLayout} for the component wrapped by this UI builder
@@ -1480,7 +1526,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withLayout( String attr, String colConstrains ) {
-        return withLayout(attr, colConstrains, null);
+        NullUtil.nullArgCheck(attr, "attr", String.class, "Please use an empty String instead of null!");
+        NullUtil.nullArgCheck(colConstrains, "colConstrains", String.class, "Please use an empty String instead of null!");
+        return withLayout(attr, colConstrains, "");
     }
 
     /**
@@ -1521,8 +1569,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withLayout( LC attr, String colConstrains, String rowConstraints ) {
-        AC parsedColConstrains = colConstrains == null ? null : ConstraintParser.parseColumnConstraints(colConstrains);
-        AC parsedRowConstrains = rowConstraints == null ? null : ConstraintParser.parseRowConstraints(rowConstraints);
+        NullUtil.nullArgCheck(attr, "attr", LC.class);
+        NullUtil.nullArgCheck(colConstrains, "colConstrains", String.class, "Please use an empty String instead of null!");
+        NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class, "Please use an empty String instead of null!");
+        AC parsedColConstrains = colConstrains.isEmpty() ? null : ConstraintParser.parseColumnConstraints(colConstrains);
+        AC parsedRowConstrains = rowConstraints.isEmpty() ? null : ConstraintParser.parseRowConstraints(rowConstraints);
         return withLayout(attr, parsedColConstrains, parsedRowConstrains);
     }
 
@@ -1531,8 +1582,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param colConstrains The column layout for the {@link MigLayout} instance.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withLayout(LayoutConstraint attr, String colConstrains ) {
-        return withLayout(attr.toString(), colConstrains, null);
+    public final I withLayout( LayoutConstraint attr, String colConstrains ) {
+        NullUtil.nullArgCheck(attr, "attr", LayoutConstraint.class);
+        NullUtil.nullArgCheck(colConstrains, "colConstrains", String.class, "Please use an empty String instead of null!");
+        return withLayout(attr.toString(), colConstrains, "");
     }
 
     /**
@@ -1543,7 +1596,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param rowConstraints The row layout for the {@link MigLayout} instance.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withLayout(LayoutConstraint attr, String colConstrains, String rowConstraints ) {
+    public final I withLayout( LayoutConstraint attr, String colConstrains, String rowConstraints ) {
+        NullUtil.nullArgCheck(attr, "attr", LayoutConstraint.class);
+        NullUtil.nullArgCheck(colConstrains, "colConstrains", String.class, "Please use an empty String instead of null!");
         return withLayout(attr.toString(), colConstrains, rowConstraints);
     }
 
@@ -1559,11 +1614,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         if (_migAlreadySet)
             throw new IllegalArgumentException("The mig layout has already been specified for this component!");
 
+        NullUtil.nullArgCheck(constraints, "constraints", String.class, "Please use an empty String instead of null!");
+        NullUtil.nullArgCheck(colConstrains, "colConstrains", String.class, "Please use an empty String instead of null!");
+        NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class, "Please use an empty String instead of null!");
+
         // We make sure the default hidemode is 2 instead of 3 (which sucks because it takes up too much space)
-        if ( constraints == null || constraints.isEmpty() )
+        if ( constraints.isEmpty() )
             constraints = "hidemode 2";
         else if ( !constraints.contains("hidemode") )
             constraints += ", hidemode 2";
+
+        constraints    = ( constraints.isEmpty() ? null : constraints );
+        colConstrains  = ( colConstrains.isEmpty() ? null : colConstrains );
+        rowConstraints = ( rowConstraints.isEmpty() ? null : rowConstraints );
 
         MigLayout migLayout = new MigLayout(constraints, colConstrains, rowConstraints);
         getComponent().setLayout(migLayout);
