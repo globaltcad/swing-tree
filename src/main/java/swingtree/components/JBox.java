@@ -109,7 +109,7 @@ public class JBox extends JComponent implements Accessible
      *
      * @return the PanelUI object that renders this component
      */
-    @Override
+    /*@Override*/
     public PanelUI getUI() { return (PanelUI) ui; }
 
 
