@@ -10,34 +10,101 @@ import java.util.Optional;
 /**
  *  This class represents the style of an image which can be drawn onto the inner
  *  area of a component.
- *  The image can be drawn onto any layer of the component, and it can be drawn
- *  in any placement onto the component. <br>
- *  The image can be scaled to fit the inner component area, and it can be repeated
- *  across the inner component area. <br>
  *  <b>Note that the inner component area is the area enclosed by the border, which
  *  is itself not part of said area!</b>
  *  <p>
- *  The following placement options are available:
- *  <ul>
- *      <li> {@link swingtree.UI.Placement#CENTER} </li>
- *      <li> {@link swingtree.UI.Placement#TOP_LEFT} </li>
- *      <li> {@link swingtree.UI.Placement#TOP_RIGHT} </li>
- *      <li> {@link swingtree.UI.Placement#BOTTOM_LEFT} </li>
- *      <li> {@link swingtree.UI.Placement#BOTTOM_RIGHT} </li>
- *      <li> {@link swingtree.UI.Placement#TOP} </li>
- *      <li> {@link swingtree.UI.Placement#BOTTOM} </li>
- *      <li> {@link swingtree.UI.Placement#LEFT} </li>
- *      <li> {@link swingtree.UI.Placement#RIGHT} </li>
- *  </ul>
+ *  The following properties with their respective purpose are available:
+ *  <br>
+ *  <ol>
+ *      <li><h3>Layer:</h3>
+ *          <p>
+ *              The layer onto which the image will be drawn.
+ *              Layers exist to determine the order in which something is drawn onto the component.
+ *              Here a list of available layers:
+ *              <ul>
+ *                  <li>{@link swingtree.UI.Layer#BACKGROUND}</li>
+ *                  <li>{@link swingtree.UI.Layer#CONTENT}   </li>
+ *                  <li>{@link swingtree.UI.Layer#BORDER}    </li>
+ *                  <li>{@link swingtree.UI.Layer#FOREGROUND}</li>
+ *              </ul>
+ *          </p>
+ *      </li>
+ *      <li><h3>Primer:</h3>
+ *          <p>
+ *              The primer color of the image style which will
+ *              be used as a filler color for the image background.
+ *              The background is the inner component area of the component.
+ *          </p>
+ *      </li>
+ *      <li><h3>Image:</h3>
+ *          <p>
+ *              The image which will be drawn onto the component,
+ *              which may be specified as an instance of {@link Image}, {@link ImageIcon}
+ *              or path to an image file (see {@link swingtree.UI#findIcon(String)}).
+ *          </p>
+ *      </li>
+ *      <li><h3>Placement:</h3>
+ *          <p>
+ *              The placement type determines where the image will be drawn onto the component.
+ *              The following placement options are available:
+ *          </p>
+ *          <ul>
+ *              <li> {@link swingtree.UI.Placement#CENTER} </li>
+ *              <li> {@link swingtree.UI.Placement#TOP_LEFT} </li>
+ *              <li> {@link swingtree.UI.Placement#TOP_RIGHT} </li>
+ *              <li> {@link swingtree.UI.Placement#BOTTOM_LEFT} </li>
+ *              <li> {@link swingtree.UI.Placement#BOTTOM_RIGHT} </li>
+ *              <li> {@link swingtree.UI.Placement#TOP} </li>
+ *              <li> {@link swingtree.UI.Placement#BOTTOM} </li>
+ *              <li> {@link swingtree.UI.Placement#LEFT} </li>
+ *              <li> {@link swingtree.UI.Placement#RIGHT} </li>
+ *          </ul>
+ *      </li>
+ *      <li><h3>Repeat:</h3>
+ *          <p>
+ *              If this flag is set to {@code true}, then the image may be painted
+ *              multiple times so that it fills up the entire inner component area.
+ *              There will not be a noticeable effect of this flag if the
+ *              image already fills out the inner component area (see {@link #autoFit(boolean)}, {@link #size(int, int)}).
+ *          </p>
+ *      </li>
+ *      <li><h3>Auto-fit:</h3>
+ *          <p>
+ *              If this flag is set to {@code true}, then the image will be stretched or shrunk
+ *              to fill the inner component area dependent on the specified width and height,
+ *              meaning that if the width was not specified explicitly through {@link #width(Integer)}
+ *              then the image will be scaled to fit the inner component width,
+ *              and if a height was not specified through {@link #height(Integer)} then
+ *              the image will be scaled to fit the inner component height. <br>
+ *              <b>Note that the inner component area is the area enclosed by the border, which
+ *              is itself not part of said area!</b>
+ *          </p>
+ *      </li>
+ *      <li><h3>Width and Height:</h3>
+ *          <p>
+ *              These properties allow you to specify the width and height of the image.
+ *              If the width or height is not specified, then the image will be drawn
+ *              with its original width or height or it will be scaled to fit the inner component area
+ *              if {@link #autoFit(boolean)} is set to {@code true}.
+ *          </p>
+ *      </li>
+ *      <li><h3>Opacity:</h3>
+ *          <p>
+ *              This property allows you to specify the opacity of the image.
+ *              The opacity must be between 0.0f and 1.0f, where 0.0f means that the image is completely transparent
+ *              and 1.0f means that the image is completely opaque.
+ *          </p>
+ *      </li>
+ *      <li><h3>Padding:</h3>
+ *          <p>
+ *              This property allows you to specify the padding of the image.
+ *              The padding is the space between the image and the inner component area.
+ *              The padding can be specified for each side of the image individually
+ *              or for all sides at once.
+ *          </p>
+ *      </li>
+ *  </ol>
  *  <p>
- *  Here a list of available layers:
- *  <ul>
- *      <li>{@link swingtree.UI.Layer#BACKGROUND}</li>
- *      <li>{@link swingtree.UI.Layer#CONTENT}</li>
- *      <li>{@link swingtree.UI.Layer#BORDER}</li>
- *      <li>{@link swingtree.UI.Layer#FOREGROUND}</li>
- *  </ul>
- *
  *  <b>Take a look at the following example:</b>
  *  <pre>{@code
  *      of(component).withStyle( it -> it
@@ -54,11 +121,14 @@ import java.util.Optional;
  *  }</pre>
  *  <p>
  *      This will draw the specified image onto the background layer of the component.
- *      The image will be drawn at the center of the inner component area, and it will
- *      not be scaled to fit the inner component area. <br>
- *      The image will be repeated across the inner component area, and the primer color
- *      will be used as a filler color for the image background. <br>
- *      The image will be padded by 12 pixels on each side.
+ *      The image will be drawn at the center of the inner component area with a padding of 12,
+ *      without being scaled to fit the inner component area, instead the size of the image
+ *      will be used. <br>
+ *      If it does not fill the entire inner component area based on its size, then
+ *      it will be repeated across said area, and the primer color
+ *      will be used as a filler color for the parts of the image which
+ *      are transparent.
+ *  </p>
  **/
 public final class ImageStyle
 {
