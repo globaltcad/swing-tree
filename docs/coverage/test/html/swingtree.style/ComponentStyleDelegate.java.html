@@ -4,7 +4,7 @@ import swingtree.UI;
 import swingtree.api.Painter;
 import swingtree.api.Peeker;
 import swingtree.api.Styler;
-import swingtree.layout.LayoutAttr;
+import swingtree.layout.LayoutConstraint;
 
 import javax.swing.*;
 import java.awt.*;
@@ -1462,7 +1462,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
 
     /**
      *  Defines the layout {@link net.miginfocom.swing.MigLayout} constraints for
-     *  this {@link JComponent} in the form of a {@link LayoutAttr}
+     *  this {@link JComponent} in the form of a {@link LayoutConstraint}
      *  (see {@link UI#FILL}, {@link UI#FILL_X}, {@link UI#FILL_Y}...). &lt;br&gt;
      *  This ultimately translates to {@link net.miginfocom.swing.MigLayout#setLayoutConstraints(Object)}
      *  on the underlying component. &lt;br&gt;
@@ -1470,10 +1470,10 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *  Note that if this property is specified, the style engine will automatically
      *  install a {@link net.miginfocom.swing.MigLayout} on the component if it does not already have one. &lt;br&gt;
      *
-     * @param constraintAttr The layout constraints as a {@link LayoutAttr}.
+     * @param constraintAttr The layout constraints as a {@link LayoutConstraint}.
      * @return A new {@link ComponentStyleDelegate} with the provided layout constraints set to be later
      */
-    public ComponentStyleDelegate&lt;C&gt; layout( LayoutAttr constraintAttr ) {
+    public ComponentStyleDelegate&lt;C&gt; layout( LayoutConstraint constraintAttr ) {
 <span class="nc" id="L1477">        return layout(constraintAttr.toString());</span>
     }
 

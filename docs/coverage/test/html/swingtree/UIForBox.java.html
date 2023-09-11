@@ -3,7 +3,7 @@
 import net.miginfocom.swing.MigLayout;
 import sprouts.Val;
 import swingtree.components.JBox;
-import swingtree.layout.LayoutAttr;
+import swingtree.layout.LayoutConstraint;
 
 import java.awt.*;
 
@@ -21,7 +21,7 @@ public class UIForBox&lt;B extends JBox&gt; extends UIForAnySwing&lt;UIForBox&lt
      * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code attr} is {@code null}.
      */
-    public final UIForBox&lt;B&gt; withLayout( Val&lt;LayoutAttr&gt; attr ) {
+    public final UIForBox&lt;B&gt; withLayout( Val&lt;LayoutConstraint&gt; attr ) {
 <span class="nc" id="L25">        NullUtil.nullArgCheck(attr, &quot;attr&quot;, Val.class);</span>
 <span class="nc" id="L26">        NullUtil.nullPropertyCheck(attr, &quot;attr&quot;, &quot;Null is not a valid layout attribute.&quot;);</span>
 <span class="nc" id="L27">        _onShow(attr, it -&gt; {</span>

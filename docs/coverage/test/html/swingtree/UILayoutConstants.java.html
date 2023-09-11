@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UILayoutConstants.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UILayoutConstants.java</span></div><h1>UILayoutConstants.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import net.miginfocom.layout.AC;
+import net.miginfocom.layout.CC;
+import net.miginfocom.layout.LC;
+import swingtree.layout.AddConstraint;
+import swingtree.layout.LayoutConstraint;
+
+/**
+ *  Essentially just a namespace for static layout constants for
+ *  the {@link net.miginfocom.swing.MigLayout} {@link java.awt.LayoutManager} type.
+ */
+public abstract class UILayoutConstants
+{
+<span class="nc" id="L15">    UILayoutConstants() { throw new UnsupportedOperationException(); }</span>
+
+    // Common Mig layout constants:
+<span class="fc" id="L18">    public static LayoutConstraint FILL   = LayoutConstraint.of(&quot;fill&quot;);</span>
+<span class="fc" id="L19">    public static LayoutConstraint FILL_X = LayoutConstraint.of(&quot;fillx&quot;);</span>
+<span class="fc" id="L20">    public static LayoutConstraint FILL_Y = LayoutConstraint.of(&quot;filly&quot;);</span>
+<span class="fc" id="L21">    public static LayoutConstraint INS(int insets) { return INSETS(insets); }</span>
+<span class="fc" id="L22">    public static LayoutConstraint INSETS(int insets) { return LayoutConstraint.of(&quot;insets &quot; + insets); }</span>
+<span class="fc" id="L23">    public static LayoutConstraint INS(int top, int left, int bottom, int right) { return INSETS(top, left, bottom, right); }</span>
+<span class="fc" id="L24">    public static LayoutConstraint INSETS(int top, int left, int bottom, int right) { return LayoutConstraint.of(&quot;insets &quot; + top + &quot; &quot; + left + &quot; &quot; + bottom + &quot; &quot; + right); }</span>
+<span class="fc" id="L25">    public static LayoutConstraint WRAP(int times) { return LayoutConstraint.of( &quot;wrap &quot; + times ); }</span>
+<span class="fc" id="L26">    public static LayoutConstraint GAP_REL(int size) { return LayoutConstraint.of( &quot;gap rel &quot; + size ); }</span>
+<span class="fc" id="L27">    public static LayoutConstraint FLOW_X   = LayoutConstraint.of(&quot;flowx&quot;);</span>
+<span class="fc" id="L28">    public static LayoutConstraint FLOW_Y   = LayoutConstraint.of(&quot;flowy&quot;);</span>
+<span class="fc" id="L29">    public static LayoutConstraint NO_GRID  = LayoutConstraint.of(&quot;nogrid&quot;);</span>
+<span class="fc" id="L30">    public static LayoutConstraint NO_CACHE = LayoutConstraint.of(&quot;nocache&quot;);</span>
+<span class="fc" id="L31">    public static LayoutConstraint DEBUG    = LayoutConstraint.of(&quot;debug&quot;);</span>
+
+<span class="fc" id="L33">    public static AddConstraint WRAP = AddConstraint.of(&quot;wrap&quot;);</span>
+<span class="fc" id="L34">    public static AddConstraint SPAN = AddConstraint.of(&quot;SPAN&quot;);</span>
+<span class="nc" id="L35">    public static AddConstraint SPAN(int times ) { return AddConstraint.of( &quot;span &quot; + times ); }</span>
+<span class="nc" id="L36">    public static AddConstraint SPAN(int xTimes, int yTimes ) { return AddConstraint.of( &quot;span &quot; + xTimes + &quot; &quot; + yTimes ); }</span>
+<span class="nc" id="L37">    public static AddConstraint SPAN_X(int times ) { return AddConstraint.of( &quot;spanx &quot; + times ); }</span>
+<span class="nc" id="L38">    public static AddConstraint SPAN_Y(int times ) { return AddConstraint.of( &quot;spany &quot; + times ); }</span>
+<span class="fc" id="L39">    public static AddConstraint GROW   = AddConstraint.of(&quot;grow&quot;);</span>
+<span class="fc" id="L40">    public static AddConstraint GROW_X = AddConstraint.of(&quot;growx&quot;);</span>
+<span class="fc" id="L41">    public static AddConstraint GROW_Y = AddConstraint.of(&quot;growy&quot;);</span>
+<span class="nc" id="L42">    public static AddConstraint GROW(int weight ) { return AddConstraint.of( &quot;grow &quot; + weight ); }</span>
+<span class="nc" id="L43">    public static AddConstraint GROW_X(int weight ) { return AddConstraint.of( &quot;growx &quot; + weight ); }</span>
+<span class="nc" id="L44">    public static AddConstraint GROW_Y(int weight ) { return AddConstraint.of( &quot;growy &quot; + weight ); }</span>
+<span class="fc" id="L45">    public static AddConstraint SHRINK   = AddConstraint.of(&quot;shrink&quot;);</span>
+<span class="fc" id="L46">    public static AddConstraint SHRINK_X = AddConstraint.of(&quot;shrinkx&quot;);</span>
+<span class="fc" id="L47">    public static AddConstraint SHRINK_Y = AddConstraint.of(&quot;shrinky&quot;);</span>
+<span class="nc" id="L48">    public static AddConstraint SHRINK(int weight )  { return AddConstraint.of(&quot;shrink &quot;+weight); }</span>
+<span class="nc" id="L49">    public static AddConstraint SHRINK_X(int weight )  { return AddConstraint.of(&quot;shrinkx &quot;+weight); }</span>
+<span class="nc" id="L50">    public static AddConstraint SHRINK_Y(int weight )  { return AddConstraint.of(&quot;shrinky &quot;+weight); }</span>
+<span class="nc" id="L51">    public static AddConstraint SHRINK_PRIO(int priority )  { return AddConstraint.of(&quot;shrinkprio &quot;+priority); }</span>
+<span class="fc" id="L52">    public static AddConstraint PUSH     = AddConstraint.of(&quot;push&quot;);</span>
+<span class="fc" id="L53">    public static AddConstraint PUSH_X   = AddConstraint.of(&quot;pushx&quot;);</span>
+<span class="fc" id="L54">    public static AddConstraint PUSH_Y   = AddConstraint.of(&quot;pushy&quot;);</span>
+<span class="nc" id="L55">    public static AddConstraint PUSH(int weight )  { return AddConstraint.of(&quot;push &quot;+weight); }</span>
+<span class="nc" id="L56">    public static AddConstraint PUSH_X(int weight ) { return AddConstraint.of(&quot;pushx &quot;+weight); }</span>
+<span class="nc" id="L57">    public static AddConstraint PUSH_Y(int weight ) { return AddConstraint.of(&quot;pushy &quot;+weight); }</span>
+<span class="nc" id="L58">    public static AddConstraint SKIP(int cells ) { return AddConstraint.of(&quot;skip &quot;+cells); }</span>
+<span class="nc" id="L59">    public static AddConstraint SPLIT(int cells ) { return AddConstraint.of(&quot;split &quot;+cells); }</span>
+<span class="fc" id="L60">    public static AddConstraint WIDTH(int min, int pref, int max ) { return AddConstraint.of(&quot;width &quot;+min+&quot;:&quot;+pref+&quot;:&quot;+max); }</span>
+<span class="nc" id="L61">    public static AddConstraint HEIGHT(int min, int pref, int max ) { return AddConstraint.of(&quot;height &quot;+min+&quot;:&quot;+pref+&quot;:&quot;+max); }</span>
+<span class="nc" id="L62">    public static AddConstraint PAD(int size ) { return PAD(size, size, size, size); }</span>
+<span class="nc" id="L63">    public static AddConstraint PAD(int top, int left, int bottom, int right ) { return AddConstraint.of(&quot;pad &quot;+top+&quot; &quot;+left+&quot; &quot;+bottom+&quot; &quot;+right); }</span>
+<span class="fc" id="L64">    public static AddConstraint ALIGN_CENTER = AddConstraint.of(&quot;align center&quot;);</span>
+<span class="fc" id="L65">    public static AddConstraint ALIGN_LEFT = AddConstraint.of(&quot;align left&quot;);</span>
+<span class="fc" id="L66">    public static AddConstraint ALIGN_RIGHT = AddConstraint.of(&quot;align right&quot;);</span>
+<span class="fc" id="L67">    public static AddConstraint ALIGN_X_CENTER = AddConstraint.of(&quot;alignx center&quot;);</span>
+<span class="fc" id="L68">    public static AddConstraint ALIGN_X_LEFT = AddConstraint.of(&quot;alignx left&quot;);</span>
+<span class="fc" id="L69">    public static AddConstraint ALIGN_X_RIGHT = AddConstraint.of(&quot;alignx right&quot;);</span>
+<span class="fc" id="L70">    public static AddConstraint ALIGN_Y_CENTER = AddConstraint.of(&quot;aligny center&quot;);</span>
+<span class="fc" id="L71">    public static AddConstraint ALIGN_Y_BOTTOM = AddConstraint.of(&quot;aligny bottom&quot;);</span>
+<span class="fc" id="L72">    public static AddConstraint ALIGN_Y_TOP = AddConstraint.of(&quot;aligny top&quot;);</span>
+<span class="nc" id="L73">    public static AddConstraint ALIGN(UI.Side pos ) { return AddConstraint.of(pos.toMigAlign()); }</span>
+<span class="fc" id="L74">    public static AddConstraint TOP = AddConstraint.of(&quot;top&quot;);</span>
+<span class="fc" id="L75">    public static AddConstraint RIGHT = AddConstraint.of(&quot;right&quot;);</span>
+<span class="fc" id="L76">    public static AddConstraint BOTTOM = AddConstraint.of(&quot;bottom&quot;);</span>
+<span class="fc" id="L77">    public static AddConstraint LEFT = AddConstraint.of(&quot;left&quot;);</span>
+<span class="fc" id="L78">    public static AddConstraint CENTER = AddConstraint.of(&quot;center&quot;);</span>
+<span class="fc" id="L79">    public static AddConstraint GAP_LEFT_PUSH = AddConstraint.of(&quot;gapleft push&quot;);</span>
+<span class="fc" id="L80">    public static AddConstraint GAP_RIGHT_PUSH = AddConstraint.of(&quot;gapright push&quot;);</span>
+<span class="fc" id="L81">    public static AddConstraint GAP_TOP_PUSH = AddConstraint.of(&quot;gaptop push&quot;);</span>
+<span class="fc" id="L82">    public static AddConstraint GAP_BOTTOM_PUSH = AddConstraint.of(&quot;gapbottom push&quot;);</span>
+<span class="fc" id="L83">    public static AddConstraint DOCK_NORTH = AddConstraint.of(&quot;dock north&quot;);</span>
+<span class="fc" id="L84">    public static AddConstraint DOCK_SOUTH = AddConstraint.of(&quot;dock south&quot;);</span>
+<span class="fc" id="L85">    public static AddConstraint DOCK_EAST  = AddConstraint.of(&quot;dock east&quot;);</span>
+<span class="fc" id="L86">    public static AddConstraint DOCK_WEST  = AddConstraint.of(&quot;dock west&quot;);</span>
+<span class="nc" id="L87">    public static AddConstraint DOCK(UI.Side pos ) { return AddConstraint.of(&quot;dock &quot; + pos.toDirectionString()); }</span>
+
+<span class="nc" id="L89">    public static LC LC() { return new LC().fill(); }</span>
+<span class="nc" id="L90">    public static AC AC() { return new AC(); }</span>
+<span class="nc" id="L91">    public static CC CC() { return new CC(); }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

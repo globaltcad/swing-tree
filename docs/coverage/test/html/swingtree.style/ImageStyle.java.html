@@ -115,7 +115,7 @@ public final class ImageStyle
      * @param image The image which will be drawn onto the component.
      * @return A new {@link ImageStyle} instance with the specified image.
      */
-<span class="fc" id="L118">    public ImageStyle image( Image image ) { return new ImageStyle(_layer, _primer, new ImageIcon(image), _placement, _repeat, _autoFit, _width, _height, _opacity, _padding); }</span>
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">    public ImageStyle image( Image image ) { return new ImageStyle(_layer, _primer, image == null ? null : new ImageIcon(image), _placement, _repeat, _autoFit, _width, _height, _opacity, _padding); }</span>
 
     /**
      *  Here you can specify the &lt;b&gt;image icon&lt;/b&gt; which will be drawn onto the component.
