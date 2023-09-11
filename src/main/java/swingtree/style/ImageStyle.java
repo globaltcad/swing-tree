@@ -7,6 +7,59 @@ import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ *  This class represents the style of an image which can be drawn onto the inner
+ *  area of a component.
+ *  The image can be drawn onto any layer of the component, and it can be drawn
+ *  in any placement onto the component. <br>
+ *  The image can be scaled to fit the inner component area, and it can be repeated
+ *  across the inner component area. <br>
+ *  <b>Note that the inner component area is the area enclosed by the border, which
+ *  is itself not part of said area!</b>
+ *  <p>
+ *  The following placement options are available:
+ *  <ul>
+ *      <li> {@link swingtree.UI.Placement#CENTER} </li>
+ *      <li> {@link swingtree.UI.Placement#TOP_LEFT} </li>
+ *      <li> {@link swingtree.UI.Placement#TOP_RIGHT} </li>
+ *      <li> {@link swingtree.UI.Placement#BOTTOM_LEFT} </li>
+ *      <li> {@link swingtree.UI.Placement#BOTTOM_RIGHT} </li>
+ *      <li> {@link swingtree.UI.Placement#TOP} </li>
+ *      <li> {@link swingtree.UI.Placement#BOTTOM} </li>
+ *      <li> {@link swingtree.UI.Placement#LEFT} </li>
+ *      <li> {@link swingtree.UI.Placement#RIGHT} </li>
+ *  </ul>
+ *  <p>
+ *  Here a list of available layers:
+ *  <ul>
+ *      <li>{@link swingtree.UI.Layer#BACKGROUND}</li>
+ *      <li>{@link swingtree.UI.Layer#CONTENT}</li>
+ *      <li>{@link swingtree.UI.Layer#BORDER}</li>
+ *      <li>{@link swingtree.UI.Layer#FOREGROUND}</li>
+ *  </ul>
+ *
+ *  <b>Take a look at the following example:</b>
+ *  <pre>{@code
+ *      of(component).withStyle( it -> it
+ *          .image( image -> image
+ *              .layer(Layer.BACKGROUND)
+ *              .image(image)
+ *              .placement(Placement.CENTER)
+ *              .autoFit(false)
+ *              .repeat(true)
+ *              .primer(Color.CYAN)
+ *              .padding(12)
+ *          )
+ *      );
+ *  }</pre>
+ *  <p>
+ *      This will draw the specified image onto the background layer of the component.
+ *      The image will be drawn at the center of the inner component area, and it will
+ *      not be scaled to fit the inner component area. <br>
+ *      The image will be repeated across the inner component area, and the primer color
+ *      will be used as a filler color for the image background. <br>
+ *      The image will be padded by 12 pixels on each side.
+ **/
 public final class ImageStyle
 {
     private static final ImageStyle _NONE = new ImageStyle(
@@ -24,6 +77,7 @@ public final class ImageStyle
 
     static ImageStyle none() { return _NONE; }
 
+
     private final UI.Layer     _layer;
     private final Color        _primer;
 
@@ -36,7 +90,8 @@ public final class ImageStyle
     private final float        _opacity;
     private final Outline      _padding;
 
-    public ImageStyle(
+
+    private ImageStyle(
         UI.Layer     layer,
         Color        primer,
         ImageIcon    image,
@@ -214,16 +269,63 @@ public final class ImageStyle
      */
     public ImageStyle height( Integer height ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _autoFit, _width, height, _opacity, _padding); }
 
+    /**
+     *  Ensures that the image has the specified width and height.
+     *
+     * @param width The width of the image.
+     * @param height The height of the image.
+     * @return A new {@link ImageStyle} instance with the specified {@code width} and {@code height}.
+     */
     public ImageStyle size( int width, int height ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _autoFit, width, height, _opacity, _padding); }
 
+    /**
+     *  This method allows you to specify the opacity of the image.
+     *  The opacity must be between 0.0f and 1.0f, where 0.0f means that the image is completely transparent
+     *  and 1.0f means that the image is completely opaque.
+     *
+     * @param opacity The opacity of the image.
+     * @return A new {@link ImageStyle} instance with the specified opacity.
+     */
     public ImageStyle opacity( float opacity ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _autoFit, _width, _height, opacity, _padding); }
 
+    /**
+     *  This method allows you to specify the padding of the image.
+     *  The padding is the space between the image and the inner component area.
+     *
+     * @param padding The padding of the image.
+     * @return A new {@link ImageStyle} instance with the specified padding.
+     */
     ImageStyle padding( Outline padding ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _autoFit, _width, _height, _opacity, padding); }
 
+    /**
+     *  This method allows you to specify the padding of the image.
+     *  The padding is the space between the image and the inner component area.
+     *
+     * @param top The top padding of the image.
+     * @param right The right padding of the image.
+     * @param bottom The bottom padding of the image.
+     * @param left The left padding of the image.
+     * @return A new {@link ImageStyle} instance with the specified padding.
+     */
     public ImageStyle padding( int top, int right, int bottom, int left ) { return padding(Outline.of(top, right, bottom, left)); }
 
+    /**
+     *  This method allows you to specify the padding of the image.
+     *  The padding is the space between the image and the inner component area.
+     *
+     * @param topBottom The top and bottom padding of the image.
+     * @param leftRight The left and right padding of the image.
+     * @return A new {@link ImageStyle} instance with the specified padding.
+     */
     public ImageStyle padding( int topBottom, int leftRight ) { return padding(Outline.of(topBottom, leftRight, topBottom, leftRight)); }
 
+    /**
+     *  This method allows you to specify the padding for all sides of the image.
+     *  The padding is the space between the image and the inner component area.
+     *
+     * @param padding The padding of the image.
+     * @return A new {@link ImageStyle} instance with the specified padding.
+     */
     public ImageStyle padding( int padding ) { return padding(Outline.of(padding, padding, padding, padding)); }
 
     ImageStyle _scale( double scaleFactor ) {
@@ -237,36 +339,36 @@ public final class ImageStyle
     public int hashCode() { return Objects.hash(_layer, _primer, _image, _placement, _repeat, _autoFit, _width, _height, _opacity, _padding); }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals( Object obj ) {
         if ( obj == null ) return false;
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
         ImageStyle rhs = (ImageStyle) obj;
-        return Objects.equals(_layer,        rhs._layer)     &&
-               Objects.equals(_primer,       rhs._primer)    &&
-               Objects.equals(_image,        rhs._image)     &&
-               Objects.equals(_placement,    rhs._placement) &&
-               Objects.equals(_repeat,       rhs._repeat)    &&
-               Objects.equals(_autoFit,      rhs._autoFit)   &&
-               Objects.equals(_width,        rhs._width)     &&
-               Objects.equals(_height,       rhs._height)    &&
-               Objects.equals(_opacity, rhs._opacity)        &&
-               Objects.equals(_padding, rhs._padding);
+        return Objects.equals(_layer,     rhs._layer)     &&
+               Objects.equals(_primer,    rhs._primer)    &&
+               Objects.equals(_image,     rhs._image)     &&
+               Objects.equals(_placement, rhs._placement) &&
+               Objects.equals(_repeat,    rhs._repeat)    &&
+               Objects.equals(_autoFit,   rhs._autoFit)   &&
+               Objects.equals(_width,     rhs._width)     &&
+               Objects.equals(_height,    rhs._height)    &&
+               Objects.equals(_opacity,   rhs._opacity)   &&
+               Objects.equals(_padding,   rhs._padding);
     }
 
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "[" +
-                    "layer="        + _layer +
-                    ", primer="     + StyleUtility.toString(_primer) +
-                    ", image="      + (_image == null ? "?" : _image.toString()) +
-                    ", placement="  + _placement +
-                    ", repeat="     + _repeat +
-                    ", autoFit="    + _autoFit +
-                    ", width="      + ( _width == null ? "?" : _width.toString() ) +
-                    ", height="     + ( _height == null ? "?" : _height.toString() ) +
-                    ", opacity="    + _opacity +
-                    ", padding="    + _padding +
+                    "layer="      + _layer                                         + ", " +
+                    "primer="     + StyleUtility.toString(_primer)                 + ", " +
+                    "image="      + ( _image  == null ? "?" : _image.toString() )  + ", " +
+                    "placement="  + _placement                                     + ", " +
+                    "repeat="     + _repeat                                        + ", " +
+                    "autoFit="    + _autoFit                                       + ", " +
+                    "width="      + ( _width  == null ? "?" : _width.toString()  ) + ", " +
+                    "height="     + ( _height == null ? "?" : _height.toString() ) + ", " +
+                    "opacity="    + _opacity                                       + ", " +
+                    "padding="    + _padding                                       +
                 "]";
     }
 }
