@@ -27,7 +27,7 @@ public final class DimensionalityStyle
     private final Integer _height;
 
 
-    public DimensionalityStyle(
+    private DimensionalityStyle(
         Integer minWidth,
         Integer minHeight,
         Integer maxWidth,

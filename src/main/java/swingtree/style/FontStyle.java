@@ -34,7 +34,7 @@ public final class FontStyle
     private final UI.HorizontalAlignment _horizontalAlignment;
     private final UI.VerticalAlignment   _verticalAlignment;
 
-    FontStyle(
+    private FontStyle(
         String name,
         int fontSize,
         float posture,

@@ -17,7 +17,7 @@ public final class LayoutStyle
     private final Float  _alignmentY;
 
 
-    LayoutStyle(
+    private LayoutStyle(
         Layout layout,
         Object constraint,
         Float alignmentX,

@@ -8,14 +8,61 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
- *  Use this class to specify a gradient style for various sub styles,
+ *  An immutable, wither-like cloner method based settings API
+ *  for specifying a gradient style as a sub-style various other styles,
  *  like for example {@link BaseStyle} or {@link BorderStyle} through the
- *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#borderGradient(String, Function)}
+ *  {@link ComponentStyleDelegate#gradient(String, Function)} or
+ *  {@link ComponentStyleDelegate#borderGradient(String, Function)}
  *  methods.
  *  <p>
  *  Note that you can use the {@link #none()} method to specify that no gradient should be used,
  *  as the instance returned by that method is a gradient without any colors, effectively
  *  making it a representation of the absence of a gradient.
+ *  <p>
+ *  The following properties with their respective purpose are available:
+ *  <br>
+ *  <ol>
+ *      <li><h3>Transition</h3>
+ *          <p>
+ *              The transition defines the direction of the gradient.
+ *              <br>
+ *              The following transitions are available:
+ *          </p>
+ *          <ul>
+ *              <li>{@link UI.Transition#TOP_LEFT_TO_BOTTOM_RIGHT}</li>
+ *              <li>{@link UI.Transition#BOTTOM_LEFT_TO_TOP_RIGHT}</li>
+ *              <li>{@link UI.Transition#TOP_RIGHT_TO_BOTTOM_LEFT}</li>
+ *              <li>{@link UI.Transition#BOTTOM_RIGHT_TO_TOP_LEFT}</li>
+ *              <li>{@link UI.Transition#TOP_TO_BOTTOM}</li>
+ *              <li>{@link UI.Transition#LEFT_TO_RIGHT}</li>
+ *              <li>{@link UI.Transition#BOTTOM_TO_TOP}</li>
+ *              <li>{@link UI.Transition#RIGHT_TO_LEFT}</li>
+ *          </ul>
+ *      </li>
+ *      <li><h3>Type</h3>
+ *          <p>
+ *              The type defines the shape of the gradient
+ *              which can be either linear or radial. <br>
+ *              So the following types are available:
+ *          </p>
+ *          <ul>
+ *              <li>{@link UI.GradientType#LINEAR}</li>
+ *              <li>{@link UI.GradientType#RADIAL}</li>
+ *          </ul>
+ *      </li>
+ *      <li><h3>Colors</h3>
+ *          <p>
+ *              An array of colors that will be used
+ *              as a basis for the gradient transition.
+ *          </p>
+ *      </li>
+ *      <li><h3>Layer</h3>
+ *          <p>
+ *              The layer defines if the gradient should be applied
+ *              to the background or the border of a component.
+ *          </p>
+ *      </li>
+ *  <ul>
  */
 public final class GradientStyle
 {
@@ -41,7 +88,7 @@ public final class GradientStyle
     private final UI.Layer        _layer;
 
 
-    public GradientStyle( UI.Transition transition, UI.GradientType type, Color[] colors, UI.Layer layer )
+    private GradientStyle( UI.Transition transition, UI.GradientType type, Color[] colors, UI.Layer layer )
     {
         _transition = Objects.requireNonNull(transition);
         _type       = Objects.requireNonNull(type);
