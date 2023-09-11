@@ -775,6 +775,7 @@ public final class UI extends UILayoutConstants
      * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code attr} is {@code null}.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public static UIForPanel<JPanel> panel( String attr ) {
         NullUtil.nullArgCheck(attr, "attr", String.class);
@@ -791,6 +792,7 @@ public final class UI extends UILayoutConstants
      * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
      * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public static UIForPanel<JPanel> panel( String attr, String colConstraints ) {
         NullUtil.nullArgCheck(attr, "attr", String.class);
@@ -810,6 +812,7 @@ public final class UI extends UILayoutConstants
      * @param colConstraints The column constraints.
      * @param rowConstraints The row constraints.
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public static UIForPanel<JPanel> panel( String attr, String colConstraints, String rowConstraints ) {
         NullUtil.nullArgCheck(attr, "attr", String.class);
@@ -825,6 +828,7 @@ public final class UI extends UILayoutConstants
      * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code attr} is {@code null}.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public static UIForPanel<JPanel> panel( LayoutConstraint attr ) {
         NullUtil.nullArgCheck(attr, "attr", LayoutConstraint.class);
@@ -841,8 +845,9 @@ public final class UI extends UILayoutConstants
      * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
      * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
-    public static UIForPanel<JPanel> panel(LayoutConstraint attr, String colConstraints ) {
+    public static UIForPanel<JPanel> panel( LayoutConstraint attr, String colConstraints ) {
         NullUtil.nullArgCheck(attr, "attr", LayoutConstraint.class);
         NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
         return of((JPanel)new Panel()).withLayout(attr, colConstraints);
@@ -860,8 +865,9 @@ public final class UI extends UILayoutConstants
      * @param colConstraints The column constraints.
      * @param rowConstraints The row constraints.
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
-    public static UIForPanel<JPanel> panel(LayoutConstraint attr, String colConstraints, String rowConstraints ) {
+    public static UIForPanel<JPanel> panel( LayoutConstraint attr, String colConstraints, String rowConstraints ) {
         NullUtil.nullArgCheck(attr, "attr", LayoutConstraint.class);
         NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
         NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class);
@@ -883,9 +889,11 @@ public final class UI extends UILayoutConstants
      *      .add(..)
      *  }</pre>
      *
-     * @param attr The layout attributes in the form of a {@link LC} instance.
+     * @param attr The constraint attributes concerning the entire {@link MigLayout}
+     *             in the form of a {@link LC} instance.
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code attr} is {@code null}.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public static UIForPanel<JPanel> panel( LC attr ) {
         NullUtil.nullArgCheck(attr, "attr", LC.class);
@@ -903,6 +911,7 @@ public final class UI extends UILayoutConstants
      * @param attr The layout attributes in the form of a {@link LC} constants.
      * @param colConstraints The column constraints in the form of a {@link String} instance.
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public static UIForPanel<JPanel> panel( LC attr, String colConstraints ) {
         NullUtil.nullArgCheck(attr, "attr", LC.class);
@@ -928,6 +937,7 @@ public final class UI extends UILayoutConstants
      * @param colConstraints The column constraints in the form of a {@link String} instance.
      * @param rowConstraints The row constraints in the form of a {@link String} instance.
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public static UIForPanel<JPanel> panel( LC attr, String colConstraints, String rowConstraints ) {
         NullUtil.nullArgCheck(attr, "attr", LC.class);
@@ -944,6 +954,7 @@ public final class UI extends UILayoutConstants
      * @param attr The layout attributes property which will be passed to the {@link MigLayout} constructor as first argument.
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code attr} is {@code null}.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public static UIForPanel<JPanel> panel( Val<LayoutConstraint> attr ) {
         NullUtil.nullArgCheck(attr, "attr", Val.class);
@@ -970,6 +981,10 @@ public final class UI extends UILayoutConstants
      *          So they will be tightly packed.
      *      </li>
      *  </ul>
+     *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
+     *  The term <i>box</i> is referring to the purpose of this component, which
+     *  is to tightly store and wrap other sub-components seamlessly...</b>
+     *  <p>
      *  This method is typically used to enable declarative UI design for custom
      *  {@link JBox} based components either within the constructor of a custom
      *  subclass, like so: <br>
@@ -1026,6 +1041,10 @@ public final class UI extends UILayoutConstants
      *          So they will be tightly packed.
      *      </li>
      *  </ul>
+     *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
+     *  The term <i>box</i> is referring to the purpose of this component, which
+     *  is to tightly store and wrap other sub-components seamlessly...</b>
+     *  <p>
      *  This factory method is especially useful for when you simply want to nest components
      *  tightly without having to worry about the layout manager or the background
      *  color covering the background of the parent component.
@@ -1048,6 +1067,7 @@ public final class UI extends UILayoutConstants
      * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
      * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code attr} is {@code null}.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public static UIForBox<JBox> box( String attr ) {
         NullUtil.nullArgCheck(attr, "attr", String.class);
@@ -1061,9 +1081,14 @@ public final class UI extends UILayoutConstants
      *  transparent {@link JPanel} without any insets
      *  and a {@link MigLayout} constructed using the provided constraints.
      *  <br>
+     *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
+     *  The term <i>box</i> is referring to the purpose of this component, which
+     *  is to tightly store and wrap other sub-components seamlessly...</b>
+     *  <p>
      * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
      * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
      * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public static UIForBox<JBox> box( String attr, String colConstraints ) {
         NullUtil.nullArgCheck(attr, "attr", String.class);
@@ -1086,10 +1111,15 @@ public final class UI extends UILayoutConstants
      *      UI.panel(attr, colConstraints, rowConstraints).makeNonOpaque()
      *  }</pre>
      *  <br>
+     *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
+     *  The term <i>box</i> is referring to the purpose of this component, which
+     *  is to tightly store and wrap other sub-components seamlessly...</b>
+     *  <p>
      * @param attr The layout attributes.
      * @param colConstraints The column constraints.
      * @param rowConstraints The row constraints.
      * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public static UIForBox<JBox> box( String attr, String colConstraints, String rowConstraints ) {
         NullUtil.nullArgCheck(attr, "attr", String.class);
@@ -1106,7 +1136,11 @@ public final class UI extends UILayoutConstants
      *  as its layout manager.
      *  This is conceptually the same as a
      *  transparent {@link JPanel} without any insets
-     *  and a {@link MigLayout} constructed using the provided constraints.
+     *  and a {@link MigLayout} constructed using the provided constraints. <br>
+     *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
+     *  The term <i>box</i> is referring to the purpose of this component, which
+     *  is to tightly store and wrap other sub-components seamlessly...</b>
+     *  <p>
      *  <br>
      *  This method allows you to pass a {@link LayoutConstraint} constants as the layout attributes,
      *  which is an instance typically chosen from the {@link UI} class constants
@@ -1124,6 +1158,7 @@ public final class UI extends UILayoutConstants
      * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
      * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code attr} is {@code null}.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public static UIForBox<JBox> box( LayoutConstraint attr ) {
         NullUtil.nullArgCheck(attr, "attr", LayoutConstraint.class);
@@ -1137,6 +1172,10 @@ public final class UI extends UILayoutConstants
      *  This is conceptually the same as a
      *  transparent {@link JPanel} without any insets
      *  and a {@link MigLayout} constructed using the provided constraints. <br>
+     *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
+     *  The term <i>box</i> is referring to the purpose of this component, which
+     *  is to tightly store and wrap other sub-components seamlessly...</b>
+     *  <p>
      *  This method allows you to pass a {@link LayoutConstraint} constants as the layout attributes,
      *  which is an instance typically chosen from the {@link UI} class constants
      *  like for example {@link UI#FILL}, {@link UI#FILL_X}, {@link UI#FILL_Y}... <br>
@@ -1155,8 +1194,9 @@ public final class UI extends UILayoutConstants
      * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
      * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
      * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
-    public static UIForBox<JBox> box(LayoutConstraint attr, String colConstraints ) {
+    public static UIForBox<JBox> box( LayoutConstraint attr, String colConstraints ) {
         NullUtil.nullArgCheck(attr, "attr", LayoutConstraint.class);
         NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
         return box(attr.toString(), colConstraints);
@@ -1171,12 +1211,17 @@ public final class UI extends UILayoutConstants
      *      UI.of(new JBox(new MigLayout(attr, colConstraints, rowConstraints)))
      *  }</pre>
      *  <br>
+     *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
+     *  The term <i>box</i> is referring to the purpose of this component, which
+     *  is to tightly store and wrap other sub-components seamlessly...</b>
+     *  <p>
      * @param attr The layout attributes in the form of a {@link LayoutConstraint} constants.
      * @param colConstraints The column constraints.
      * @param rowConstraints The row constraints.
      * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
-    public static UIForBox<JBox> box(LayoutConstraint attr, String colConstraints, String rowConstraints ) {
+    public static UIForBox<JBox> box( LayoutConstraint attr, String colConstraints, String rowConstraints ) {
         NullUtil.nullArgCheck(attr, "attr", LayoutConstraint.class);
         NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
         NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class);
@@ -1187,9 +1232,15 @@ public final class UI extends UILayoutConstants
      *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
      *  which is transparent and without any insets as well as with a {@link MigLayout}
      *  as its layout manager.
+     *  <br>
+     *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
+     *  The term <i>box</i> is referring to the purpose of this component, which
+     *  is to tightly store and wrap other sub-components seamlessly...</b>
+     *  <p>
      * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
      * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code attr} is {@code null}.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public static UIForBox<JBox> box( LC attr ) {
         NullUtil.nullArgCheck(attr, "attr", LC.class);
@@ -1203,14 +1254,20 @@ public final class UI extends UILayoutConstants
      *  This is conceptually the same as a
      *  transparent {@link JPanel} without any insets
      *  and a {@link MigLayout} constructed using the provided constraints.
-     *  This is essentially a convenience method for the following: <br>
+     *  This is essentially a convenience method which may also be expressed as: <br>
      *  <pre>{@code
      *      UI.of(new JBox(new MigLayout(attr, colConstraints)))
      *  }</pre>
      *  <br>
+     *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
+     *  The term <i>box</i> is referring to the purpose of this component, which
+     *  is to tightly store and wrap other sub-components seamlessly...</b>
+     *  <p>
+     *
      * @param attr The layout attributes in the form of a {@link LayoutConstraint} constants.
      * @param colConstraints The column constraints.
      * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public static UIForBox<JBox> box( LC attr, String colConstraints ) {
         NullUtil.nullArgCheck(attr, "attr", LC.class);
@@ -1222,7 +1279,7 @@ public final class UI extends UILayoutConstants
      *  Use this to create a builder for a {@link JBox}, conceptually the same as a
      *  transparent {@link JPanel} without any insets
      *  and a {@link MigLayout} constructed using the provided constraints.
-     *  This is essentially a convenience method for the following: <br>
+     *  This is essentially a convenience method which may also be expressed as: <br>
      *  <pre>{@code
      *      UI.of(new JBox())
      *      .peek( box -> {
@@ -1236,10 +1293,15 @@ public final class UI extends UILayoutConstants
      *      })
      *  }</pre>
      *  <br>
+     *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
+     *  The term <i>box</i> is referring to the purpose of this component, which
+     *  is to tightly store and wrap other sub-components seamlessly...</b>
+     *  <p>
      * @param attr The layout attributes in the form of a {@link LayoutConstraint} constants.
      * @param colConstraints The column constraints.
      * @param rowConstraints The row constraints.
      * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public static UIForBox<JBox> box( LC attr, String colConstraints, String rowConstraints ) {
         NullUtil.nullArgCheck(attr, "attr", LC.class);
@@ -1265,6 +1327,7 @@ public final class UI extends UILayoutConstants
      * @param attr The layout attributes property which will be passed to the {@link MigLayout} constructor as first argument.
      * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code attr} is {@code null}.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public static UIForBox<JBox> box( Val<LayoutConstraint> attr ) {
         NullUtil.nullArgCheck(attr, "attr", Val.class);

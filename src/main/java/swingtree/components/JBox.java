@@ -20,6 +20,10 @@ import java.awt.*;
  *     </li>
  *     <li> It does not have any insets by default. </li>
  * </ul>
+ *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
+ *  The term <i>box</i> is referring to the purpose of this component, which
+ *  is to tightly store and wrap other sub-components seamlessly...</b>
+ *  <p>
  *
  * @author Daniel Nepp
  */

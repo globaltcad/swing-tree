@@ -1478,11 +1478,49 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-     *  Creates a new {@link MigLayout} for the component wrapped by this UI builder,
-     *  based on the provided layout constraints in the form of a string.
+     *  This creates a {@link MigLayout} for the component wrapped by this UI builder,
+     *  based on the provided layout-constraints in the form of a simple string
+     *  which is parsed by the {@link ConstraintParser} class into {@link LC} and {@link AC} instances.
+     *  (also see {@link #withLayout(LC, AC, AC)}) <br> <br>
+     *  A typical usage pattern would be like so: <br>
+     *  <pre>{@code
+     *    UI.of(new MyCustomPanel())
+     *    .withLayout("fill wrap 2");
+     *    .add( UI.button("Name:") )
+     *    .add( UI.textArea() )
+     *    .add(...)
+     *    ...
+     *  }</pre>
+     *  In this example a new {@link MigLayout} is created which
+     *  will wrap the components in the layout grid after 2 columns
+     *  and fill the entire available space of the parent container.
+     *  <br>
+     *  Note that if not explicitly specified, the default {@code hidemode} will be set to 2, which means that
+     *  when a component is hidden, it will not take up any space and the gaps around it will
+     *  be collapsed. <br>
+     *  Here an overview of the available hidemode values:
+     *  <ul>
+     *      <li><b>0:</b><br>
+     *         Invisible components will be handled exactly as if they were visible.
+     *      </li>
+     *      <li><b>1:</b><br>
+     *          The size of the component (if invisible) will be set to 0, 0.
+     *      </li>
+     *      <li><b>2 (SwingTree default):</b><br>
+     *          The size of the component (if invisible) will be set to 0, 0 and the gaps
+     *          will also be set to 0 around it.
+     *      </li>
+     *      <li><b>3:</b><br>
+     *          Invisible components will not participate in the layout at all and it will
+     *          for instance not take up a grid cell.
+     *      </li>
+     * </ul>
      *
-     * @param attr A string defining the layout (usually mig layout).
+     * @param attr The constraints concerning the entire layout.
+     *             Passing {@code null} will result in an exception, use an empty string instead.
      * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException If any of the arguments are {@code null}.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public final I withLayout( String attr ) {
         NullUtil.nullArgCheck( attr, "attr", String.class );
@@ -1494,8 +1532,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *  based on the provided layout constraints in the form of a {@link LC} instance,
      *  which is a builder for the layout constraints.
      *
-     * @param attr A string defining the layout (usually mig layout).
+     * @param attr A string defining the constraints concerning the entire layout.
      * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException If any of the arguments are {@code null}.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public final I withLayout( LC attr ) {
         NullUtil.nullArgCheck( attr, "attr", LC.class );
@@ -1511,6 +1551,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *
      * @param attr Essentially an immutable string wrapper defining the mig layout.
      * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException If any of the arguments are {@code null}.
      */
     public final I withLayout( LayoutConstraint attr ) {
         NullUtil.nullArgCheck( attr, "attr", LayoutConstraint.class );
@@ -1521,9 +1562,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *  This creates a {@link MigLayout} for the component wrapped by this UI builder
      *  based on the provided layout constraints in the form of a string.
      *
-     * @param attr The constraints for the layout.
-     * @param colConstrains The column layout for the {@link MigLayout} instance.
+     * @param attr A string defining constraints for the entire layout.
+     * @param colConstrains The layout constraints for the columns int the {@link MigLayout} instance.
      * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException If any of the arguments are {@code null}.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public final I withLayout( String attr, String colConstrains ) {
         NullUtil.nullArgCheck(attr, "attr", String.class, "Please use an empty String instead of null!");
@@ -1539,6 +1582,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param attr The constraints for the layout, a {@link LC} instance.
      * @param colConstrains The column layout for the {@link MigLayout} instance as a {@link AC} instance.
      * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException If any of the arguments are {@code null}.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public final I withLayout( LC attr, AC colConstrains ) {
         return withLayout(attr, colConstrains, null);
@@ -1552,6 +1597,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param attr The constraints for the layout, a {@link LC} instance.
      * @param colConstrains The column layout for the {@link MigLayout} instance as a simple string.
      * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException If any of the arguments are {@code null}.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public final I withLayout( LC attr, String colConstrains ) {
         AC parsedColConstrains = colConstrains == null ? null : ConstraintParser.parseColumnConstraints(colConstrains);
@@ -1567,6 +1614,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param colConstrains The column layout for the {@link MigLayout} instance as a simple string.
      * @param rowConstraints The row layout for the {@link MigLayout} instance as a simple string.
      * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException If any of the arguments are {@code null}.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public final I withLayout( LC attr, String colConstrains, String rowConstraints ) {
         NullUtil.nullArgCheck(attr, "attr", LC.class);
@@ -1581,6 +1630,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param attr The constraints for the layout.
      * @param colConstrains The column layout for the {@link MigLayout} instance.
      * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException If any of the arguments are {@code null}.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public final I withLayout( LayoutConstraint attr, String colConstrains ) {
         NullUtil.nullArgCheck(attr, "attr", LayoutConstraint.class);
@@ -1603,15 +1654,60 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-     *  This creates a {@link MigLayout} for the component wrapped by this UI builder.
+     *  This creates a {@link MigLayout} for the component wrapped by this UI builder,
+     *  based on the provided layout-, column- and row-constraints in the form of simple strings,
+     *  which are parsed by the {@link ConstraintParser} class into {@link LC} and {@link AC} instances.
+     *  (also see {@link #withLayout(LC, AC, AC)}) <br> <br>
+     *  A typical usage pattern would be like so: <br>
+     *  <pre>{@code
+     *    UI.of(new MyCustomPanel())
+     *    .withLayout("wrap 2", "[]6[]", "[]8[]");
+     *    .add( UI.label("Name:") )
+     *    .add( UI.textField() )
+     *    .add(...)
+     *    ...
+     *  }</pre>
+     *  In this example a new {@link MigLayout} is created which
+     *  will wrap the components in the layout grid after 2 columns,
+     *  where the 2 columns are separated by a 6 pixel gap and the rows
+     *  are separated by an 8 pixel gap. <br>
+     *  <br>
+     *  Note that if not explicitly specified, the default {@code hidemode} will be set to 2, which means that
+     *  when a component is hidden, it will not take up any space and the gaps around it will
+     *  be collapsed. <br>
+     *  Here an overview of the available hidemode values:
+     *  <ul>
+     *      <li><b>0:</b><br>
+     *         Invisible components will be handled exactly as if they were visible.
+     *      </li>
+     *      <li><b>1:</b><br>
+     *          The size of the component (if invisible) will be set to 0, 0.
+     *      </li>
+     *      <li><b>2 (SwingTree default):</b><br>
+     *          The size of the component (if invisible) will be set to 0, 0 and the gaps
+     *          will also be set to 0 around it.
+     *      </li>
+     *      <li><b>3:</b><br>
+     *          Invisible components will not participate in the layout at all and it will
+     *          for instance not take up a grid cell.
+     *      </li>
+     * </ul>
      *
-     * @param constraints The constraints for the layout.
-     * @param colConstrains The column layout for the {@link MigLayout} instance.
-     * @param rowConstraints The row layout for the {@link MigLayout} instance.
+     * @param constraints The constraints concerning the entire layout.
+     *                    Passing {@code null} will result in an exception, use an empty string instead.
+     * @param colConstrains The column layout for the {@link MigLayout} instance,
+     *                      which concern the columns in the layout grid.
+     *                      Passing {@code null} will result in an exception, use an empty string instead.
+     * @param rowConstraints The row layout for the {@link MigLayout} instance,
+     *                       which concern the rows in the layout grid.
+     *                       Passing {@code null} will result in an exception, use an empty string instead.
      * @return This very instance, which enables builder-style method chaining.
+     *
+     * @throws IllegalArgumentException If any of the arguments are {@code null}.
+     * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public final I withLayout( String constraints, String colConstrains, String rowConstraints ) {
-        if (_migAlreadySet)
+        if ( _migAlreadySet )
             throw new IllegalArgumentException("The mig layout has already been specified for this component!");
 
         NullUtil.nullArgCheck(constraints, "constraints", String.class, "Please use an empty String instead of null!");
