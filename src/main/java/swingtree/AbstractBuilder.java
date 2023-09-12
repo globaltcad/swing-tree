@@ -25,8 +25,17 @@ abstract class AbstractBuilder<I, C extends Component>
     /**
      *  The component wrapped by this builder node.
      */
-    private final WeakReference<C> _component;
-    private C _componentStrongRef; // A strong reference to the component (This is only used to prevent the component from being garbage collected)
+    private final MaybeWeakReference<C> _component;
+
+    /**
+     *  A strong reference to the component (This is only used to prevent the component from being garbage collected)
+     * @param <T> The type of the component.
+     */
+    private static class MaybeWeakReference<T extends Component> extends WeakReference<T> {
+        private T _strongRef; // This is only used to prevent the component from being garbage collected
+        public MaybeWeakReference( T referent ) { super(referent); _strongRef = referent; }
+        public void detachStrongRef() { _strongRef = null; }
+    }
 
     /**
      * The thread mode determines how events are dispatched to the component.
@@ -47,8 +56,7 @@ abstract class AbstractBuilder<I, C extends Component>
      */
     public AbstractBuilder( C component ) {
         _type = (Class<C>) component.getClass();
-        _component = new WeakReference<>(component);
-        _componentStrongRef = component;
+        _component = new MaybeWeakReference<>(component);
         if ( component instanceof JComponent )
             ComponentExtension.makeSureComponentHasExtension( (JComponent) component );
     }
@@ -158,7 +166,7 @@ abstract class AbstractBuilder<I, C extends Component>
      *  part of a tree of components, and if one component is not garbage collected,
      *  then the whole tree is not garbage collected.
      */
-    protected final void _detachStrongRef() { _componentStrongRef = null; }
+    protected final void _detachStrongRef() { _component.detachStrongRef(); }
 
     /**
      *  The component wrapped by this builder node.

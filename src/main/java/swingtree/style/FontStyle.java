@@ -11,8 +11,95 @@ import java.util.*;
 import java.util.List;
 
 /**
- *  An immutable, wither-like cloner method based settings class for font styles
+ *  An immutable, wither-like method based config API for font styles
  *  that is part of the full {@link Style} configuration object.
+ *  <p>
+ *  The following properties with their respective purpose are available:
+ *  <br>
+ *  <ol>
+ *      <li><h3>Name</h3>
+ *          <p>
+ *              The name of the font, which is essentially the font family.
+ *              This will ultimately translate to {@link Font#getFamily()}.
+ *          </p>
+ *      </li>
+ *      <li><h3>Size</h3>
+ *          <p>
+ *              The size of the font in points,
+ *              which will ultimately translate to {@link Font#getSize()}.
+ *          </p>
+ *      </li>
+ *      <li><h3>Posture</h3>
+ *          <p>
+ *              The posture of the font, which is a value between 0 and 1.
+ *              <br>
+ *              A value of 0 means that the font is not italic,
+ *              while a value of 1 means that the font is "fully" italic.
+ *          </p>
+ *      </li>
+ *      <li><h3>Weight</h3>
+ *          <p>
+ *              The weight of the font (boldness, see {@link Font#BOLD}),
+ *              which is a value between 0 and 2.
+ *          </p>
+ *      </li>
+ *      <li><h3>Color</h3>
+ *          <p>
+ *              The color of the font.
+ *          </p>
+ *      </li>
+ *      <li><h3>Background Color</h3>
+ *          <p>
+ *              The background color of the font.
+ *          </p>
+ *      </li>
+ *      <li><h3>Selection Color</h3>
+ *          <p>
+ *              The selection color of the font.
+ *          </p>
+ *      </li>
+ *      <li><h3>Underlined</h3>
+ *          <p>
+ *              Whether or not the font is underlined.
+ *          </p>
+ *      </li>
+ *      <li><h3>Strike</h3>
+ *          <p>
+ *              Whether or not the font is strike through.
+ *          </p>
+ *      </li>
+ *      <li><h3>Transform</h3>
+ *          <p>
+ *              The transform of the font, which is an {@link AffineTransform} instance.
+ *          </p>
+ *      </li>
+ *      <li><h3>Paint</h3>
+ *          <p>
+ *              The paint of the font, which is a {@link Paint} instance.
+ *          </p>
+ *      </li>
+ *      <li><h3>Horizontal Alignment</h3>
+ *          <p>
+ *              The horizontal alignment of the font.
+ *          </p>
+ *      </li>
+ *      <li><h3>Vertical Alignment</h3>
+ *          <p>
+ *              The vertical alignment of the font.
+ *          </p>
+ *      </li>
+ *  </ol>
+ *  <p>
+ *  Note that you can use the {@link #none()} method to specify that no font should be used,
+ *  as the instance returned by that method is a font with a {@link Font#PLAIN} style and size 0,
+ *  effectively making it a representation of the absence of a font.
+ *  <p>
+ *  Also note that this class is immutable, which means that wither-like methods
+ *  will always return new instances of this class, leaving the original instance untouched.
+ *  <br>
+ *  This means that you can not modify a font style instance directly, but you can
+ *  easily create a modified copy of it by calling one of the wither-like methods.
+ *  <p>
  */
 public final class FontStyle
 {

@@ -7,8 +7,81 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- *  An immutable, wither-like cloner method based settings class for shadow styles
- *  that is part of the full {@link Style} configuration object.
+ *  An immutable, wither-like method chaining based config API
+ *  designed for defining shadow styles
+ *  as part of the full {@link Style} configuration object.
+ *  <p>
+ *  The following properties with their respective purpose are available:
+ *  <br>
+ *  <ol>
+ *      <li><h3>Horizontal Offset</h3>
+ *          <p>
+ *              The horizontal shadow offset, if positive the shadow will move to the right,
+ *              if negative the shadow will move to the left.
+ *          </p>
+ *      </li>
+ *      <li><h3>Vertical Offset</h3>
+ *          <p>
+ *              The vertical shadow offset, if positive the shadow will move down,
+ *              if negative the shadow will move up.
+ *          </p>
+ *      </li>
+ *      <li><h3>Blur Radius</h3>
+ *          <p>
+ *              The blur radius of the shadow, which defines the width of the blur effect.
+ *              The higher the value, the bigger the blur, so the shadow transition will be
+ *              stretched over a wider area.
+ *          </p>
+ *      </li>
+ *      <li><h3>Spread Radius</h3>
+ *          <p>
+ *              The spread radius of the shadow defines how far inwards or
+ *              outwards ({@link #isInset()}) the shadow begins.
+ *              This offsets the start of the shadow similarly to the vertical and horizontal
+ *              offsets, but instead of moving the shadow, it extends the shadow
+ *              so that it either grows or shrinks in size.
+ *              <br>
+ *              You can imagine a shadow effect as a rectangular box, where the gradients of the shadow
+ *              start at the edges of said box. The spread radius then defines the scale of the box,
+ *              so that the shadow either grows or shrinks in size.
+ *          </p>
+ *      </li>
+ *      <li><h3>Color</h3>
+ *          <p>
+ *              The color of the shadow.
+ *          </p>
+ *      </li>
+ *      <li><h3>Inset</h3>
+ *          <p>
+ *              Whether the shadow is inset or outset.
+ *              If true, the shadow is inset, otherwise it is outset.
+ *              Inset shadows go inward, starting from the inner edge of the box (and its border),
+ *              whereas outset shadows go outward, starting from the outer edge of the box's border.
+ *          </p>
+ *      </li>
+ *      <li><h3>Layer</h3>
+ *          <p>
+ *              The layer of the shadow is an enum instance which
+ *              gives the shadow effect a rank in the painting order.
+ *              So the {@link swingtree.UI.Layer#BACKGROUND} will be painted first,
+ *              followed by the {@link swingtree.UI.Layer#CONTENT} and so on...
+ *              <br>
+ *              The following layers are available:
+ *          </p>
+ *          <ul>
+ *              <li>{@link UI.Layer#BACKGROUND}</li>
+ *              <li>{@link UI.Layer#CONTENT}</li>
+ *              <li>{@link UI.Layer#BORDER}</li>
+ *              <li>{@link UI.Layer#FOREGROUND}</li>
+ *          </ul>
+ *      </li>
+ *  </ol>
+ *  <p>
+ *  Note that you can use the {@link #none()} method to specify that no shadow should be used,
+ *  as the instance returned by that method is a shadow with no offset, no blur, no spread and no color,
+ *  effectively making it a representation of the absence of a shadow.
+ *  <p>
+ *
  */
 public final class ShadowStyle
 {
@@ -168,7 +241,7 @@ public final class ShadowStyle
      *                     whereas inset shadows go inward, starting from the inner edge of the box (and its border).
      * @return A new {@link ShadowStyle} with the specified outset/inset state.
      */
-    public ShadowStyle isOutset(boolean shadowOutset) {
+    public ShadowStyle isOutset( boolean shadowOutset ) {
         return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, _color, shadowOutset, _layer);
     }
 

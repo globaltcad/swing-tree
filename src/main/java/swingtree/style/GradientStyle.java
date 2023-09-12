@@ -9,8 +9,8 @@ import java.util.function.Function;
 
 /**
  *  An immutable, wither-like cloner method based settings API
- *  for specifying a gradient style as a sub-style various other styles,
- *  like for example {@link BaseStyle} or {@link BorderStyle} through the
+ *  for specifying a gradient style as a sub-style of various other styles,
+ *  like for example {@link BaseStyle} or {@link BorderStyle} accessed through the
  *  {@link ComponentStyleDelegate#gradient(String, Function)} or
  *  {@link ComponentStyleDelegate#borderGradient(String, Function)}
  *  methods.
