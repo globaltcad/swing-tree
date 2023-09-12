@@ -8,14 +8,14 @@ import java.awt.*;
 import java.util.Objects;
 
 /**
- *    Implementations of this are layout configuration for a component,
- *    which are value objects that can be created through
+ *    An abstract representation of an immutable layout configuration for a specific component,
+ *    for which layout manager specific implementations can be instantiated through
  *    various factory methods like {@link Layout#border()}, {@link Layout#flow()}, {@link Layout#grid(int, int)}...
  *    and then supplied to the style API through {@link ComponentStyleDelegate#layout(Layout)}
  *    so that the layout can then be installed onto a component dynamically.
  *    <p>
  *    The various layout types hold necessary information
- *    and implementation logic required for installing the layout of a component
+ *    and implementation logic required for installing the layout onto a component
  *    through the {@link #installFor(JComponent)} method,
  *    which will be used by the style engine of SwingTree
  *    every time the layout object state changes compared to the previous state
@@ -23,6 +23,9 @@ import java.util.Objects;
  *    <p>
  *    You may implement this interface to create custom layout configurations
  *    for other kinds of {@link LayoutManager} implementations.
+ *    <p>
+ *    This interface also contains various implementations
+ *    for supporting the most common types of {@link LayoutManager}s.
  */
 public interface Layout
 {
@@ -146,7 +149,7 @@ public interface Layout
      * @param verticalGap The vertical gap for the layout.
      * @return A layout that installs the {@link BorderLayout} onto a component.
      */
-    static Layout border(int horizontalGap, int verticalGap ) {
+    static Layout border( int horizontalGap, int verticalGap ) {
         return new BorderLayoutInstaller( horizontalGap, verticalGap );
     }
 
@@ -295,7 +298,7 @@ public interface Layout
         @Override public int hashCode() { return Objects.hash(_constr, _rowConstr, _colConstr); }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals( Object o ) {
             if ( o == null ) return false;
             if ( o == this ) return true;
             if ( o.getClass() != getClass() ) return false;

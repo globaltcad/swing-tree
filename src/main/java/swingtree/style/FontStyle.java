@@ -45,27 +45,35 @@ import java.util.List;
  *      </li>
  *      <li><h3>Color</h3>
  *          <p>
- *              The color of the font.
+ *              The color of the font, which translates to the text property
+ *              {@link TextAttribute#FOREGROUND}.
  *          </p>
  *      </li>
  *      <li><h3>Background Color</h3>
  *          <p>
- *              The background color of the font.
+ *              The background color of the font
+ *              which translates to the text property {@link TextAttribute#BACKGROUND}.
  *          </p>
  *      </li>
  *      <li><h3>Selection Color</h3>
  *          <p>
- *              The selection color of the font.
+ *              The selection color of the font, which translates to
+ *              {@link javax.swing.text.JTextComponent#setSelectionColor(Color)}.
+ *              <br>
+ *              Note that this property is only relevant for text components,
+ *              most components do not support text selection.
  *          </p>
  *      </li>
  *      <li><h3>Underlined</h3>
  *          <p>
  *              Whether or not the font is underlined.
+ *              This will ultimately translate to {@link TextAttribute#UNDERLINE}.
  *          </p>
  *      </li>
  *      <li><h3>Strike</h3>
  *          <p>
  *              Whether or not the font is strike through.
+ *              This will ultimately translate to {@link TextAttribute#STRIKETHROUGH}.
  *          </p>
  *      </li>
  *      <li><h3>Transform</h3>
@@ -76,23 +84,37 @@ import java.util.List;
  *      <li><h3>Paint</h3>
  *          <p>
  *              The paint of the font, which is a {@link Paint} instance.
+ *              Note that specifying a custom paint will override the effects of the color property
+ *              as the color property is in essence merely a convenience property for a
+ *              paint painting across the entire font area homogeneously using the specified color.
  *          </p>
  *      </li>
  *      <li><h3>Horizontal Alignment</h3>
  *          <p>
  *              The horizontal alignment of the font.
+ *              <br>
+ *              Note that this property is not relevant for all components,
+ *              It will usually only be relevant for {@link JLabel}, {@link AbstractButton} and {@link JTextField}
+ *              types or maybe some custom components.
+ *              Not all components support horizontal alignment.
  *          </p>
  *      </li>
  *      <li><h3>Vertical Alignment</h3>
  *          <p>
  *              The vertical alignment of the font.
+ *              <br>
+ *              Note that this property is not relevant for all components,
+ *              It will usually only be relevant for {@link JLabel}, {@link AbstractButton} and {@link JTextField}
+ *              types or maybe some custom components.
+ *              Not all components support vertical alignment.
  *          </p>
  *      </li>
  *  </ol>
  *  <p>
- *  Note that you can use the {@link #none()} method to specify that no font should be used,
- *  as the instance returned by that method is a font with a {@link Font#PLAIN} style and size 0,
- *  effectively making it a representation of the absence of a font.
+ *  You can use the {@link #none()} method to specify that no font should be used,
+ *  as the instance returned by that method is a font style with an empty string as its name,
+ *  and other properties set to their default values,
+ *  effectively making it a representation of the absence of a font style.
  *  <p>
  *  Also note that this class is immutable, which means that wither-like methods
  *  will always return new instances of this class, leaving the original instance untouched.
@@ -103,7 +125,21 @@ import java.util.List;
  */
 public final class FontStyle
 {
-    private static final FontStyle _NONE = new FontStyle("", 0, 0, 0, null, null, null, false, null, null, null, null, null);
+    private static final FontStyle _NONE = new FontStyle(
+                                                        "",    // Font name (family)
+                                                        0,     // size
+                                                        0,     // posture
+                                                        0,     // weight
+                                                        null,  // color
+                                                        null,  // background color
+                                                        null,  // selection color
+                                                        null,  // is underlined
+                                                        null,  // is strike through
+                                                        null,  // transform
+                                                        null,  // paint
+                                                        null,  // horizontal alignment
+                                                        null   // vertical alignment
+                                                    );
 
     public static FontStyle none() { return _NONE; }
 
@@ -120,6 +156,7 @@ public final class FontStyle
     private final AffineTransform _transform;
     private final UI.HorizontalAlignment _horizontalAlignment;
     private final UI.VerticalAlignment   _verticalAlignment;
+
 
     private FontStyle(
         String name,
@@ -150,6 +187,7 @@ public final class FontStyle
         _horizontalAlignment = horizontalAlignment;
         _verticalAlignment   = verticalAlignment;
     }
+
 
     public String name() { return _name; }
 

@@ -15,10 +15,6 @@ import java.util.function.Function;
  *  {@link ComponentStyleDelegate#borderGradient(String, Function)}
  *  methods.
  *  <p>
- *  Note that you can use the {@link #none()} method to specify that no gradient should be used,
- *  as the instance returned by that method is a gradient without any colors, effectively
- *  making it a representation of the absence of a gradient.
- *  <p>
  *  The following properties with their respective purpose are available:
  *  <br>
  *  <ol>
@@ -63,6 +59,11 @@ import java.util.function.Function;
  *          </p>
  *      </li>
  *  <ul>
+ *  <p>
+ *  You can also use the {@link #none()} method to specify that no gradient should be used,
+ *  as the instance returned by that method is a gradient without any colors, effectively
+ *  making it a representation of the absence of a gradient style.
+ *  <p>
  */
 public final class GradientStyle
 {
