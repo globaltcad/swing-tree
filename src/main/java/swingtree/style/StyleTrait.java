@@ -157,6 +157,7 @@ public final class StyleTrait<C extends JComponent>
     }
 
     boolean isApplicableTo( JComponent component ) {
+        Objects.requireNonNull(component);
         boolean typeIsCompatible = _type.isAssignableFrom(component.getClass());
         boolean idIsCompatible = _id.isEmpty() || _id.equals(component.getName());
         boolean belongsToApplicableGroup =
@@ -193,11 +194,12 @@ public final class StyleTrait<C extends JComponent>
 
     @Override
     public String toString() {
+        String inherits = java.util.Arrays.toString(_toInherit);
         return "StyleTrait[" +
-                    "group='" + _group + '\'' +
-                    ", id='" + _id + '\'' +
-                    ", inherits=" + java.util.Arrays.toString(_toInherit) +
-                    ", type=" + _type +
+                    "group='"   + _group   + "', " +
+                    "id='"      + _id      + "', " +
+                    "inherits=" + inherits + ", "  +
+                    "type="     + _type    +
                 ']';
     }
 
@@ -207,7 +209,8 @@ public final class StyleTrait<C extends JComponent>
         int sum = 0;
         for ( String inherit : _toInherit)
             sum += inherit.hashCode();
-        return Objects.hash(_group, _id, sum, _type);
+
+        return Objects.hash( _group, _id, sum, _type );
     }
 
     @Override
@@ -216,9 +219,9 @@ public final class StyleTrait<C extends JComponent>
             return false;
 
         StyleTrait<?> that = (StyleTrait<?>) other;
-        return _group.equals(that._group) &&
-               _id.equals(that._id) &&
-               _type.equals(that._type) &&
+        return _group .equals( that._group ) &&
+               _id    .equals( that._id    ) &&
+               _type  .equals( that._type  ) &&
                 java.util.Arrays.equals(_toInherit, that._toInherit);
     }
 
