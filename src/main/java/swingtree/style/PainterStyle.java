@@ -77,7 +77,6 @@ final class PainterStyle
                 ']';
     }
 
-
     @Override
     public boolean equals(Object o) {
         if ( this == o ) return true;
@@ -86,7 +85,6 @@ final class PainterStyle
         return _painter == that._painter &&
                _layer == that._layer;
     }
-
 
     @Override
     public int hashCode() {
