@@ -7,16 +7,52 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- *  An abstract class that can be extended to create custom style sheets for
- *  your Swing application.
+ *  An abstract class that can be extended to create custom source code based
+ *  style sheets for your Swing application.
+ *  <br><br>
+ *  A style sheet object is a collection of {@link StyleTrait}s and corresponding {@link Styler} lambdas
+ *  which are used to style components in a functional manner.
+ *  Implement the {@link #configure()} method and
+ *  use the {@link #add(StyleTrait, Styler)} method to
+ *  add {@link StyleTrait}s and corresponding {@link Styler} lambdas
+ *  to the style sheet.
+ *  There are also various factory methods for creating {@link StyleTrait}s
+ *  in the form of {@link #id(String)}, {@link #group(String)}, {@link #group(Enum)}, {@link #type(Class)}.
+ *  This is designed to make your style sheet code more readable and maintainable.
+ *  <br><br>
+ *  Here an example of how this class is
+ *  typically used to create a custom style sheet:
+ *  <pre>{@code
+ *  class MyStyleSheet extends StyleSheet {
+ *    {@literal @}Override
+ *    protected void configure() {
+ *      add(group("MyButton"), it -> it
+ *        .margin(12)
+ *        .padding(16)
+ *        .backgroundColor(Color.YELLOW)
+ *      );
+ *      add(type(JLabel.class).id("Foo"), it-> it
+ *        .borderRadius(5)
+ *        .gradient("Bar", ... )
+ *      );
+ *      add(group(Group.ERROR), it -> it
+ *        .backgroundColor(Color.RED)
+ *        .borderColor(Color.YELLOW)
+ *        .borderWidth(2)
+ *      );
+ *    }
+ *  }
+ *  }</pre>
+ *  Note that the {@link #configure()} method is called once
+ *  in the constructor of the style sheet and after that the style sheet may not be modified.
  */
 public abstract class StyleSheet
 {
     private final Function<JComponent, Style> _defaultStyle;
-    private final Map<StyleTrait, List<StyleTrait>> _traitGraph = new LinkedHashMap<>();
-    private final Map<StyleTrait, Styler> _traitStylers = new LinkedHashMap<>();
-    private final List<StyleTrait> _rootTraits = new java.util.ArrayList<>();
-    private final List<List<StyleTrait>> _traitPaths = new java.util.ArrayList<>();
+    private final Map<StyleTrait<?>, List<StyleTrait<?>>> _traitGraph = new LinkedHashMap<>();
+    private final Map<StyleTrait<?>, Styler<?>> _traitStylers = new LinkedHashMap<>();
+    private final List<StyleTrait<?>> _rootTraits = new java.util.ArrayList<>();
+    private final List<List<StyleTrait<?>>> _traitPaths = new java.util.ArrayList<>();
 
     private boolean _traitGraphBuilt = false;
 
@@ -212,11 +248,11 @@ public abstract class StyleSheet
         // Now we run the starting style through the trait graph.
         // We do this by finding valid trait paths from the root traits to the leaf traits.
         int deepestValidPath = -1;
-        List<List<StyleTrait>> validTraitPaths = new java.util.ArrayList<>();
-        for (List<StyleTrait> traitPath : _traitPaths) {
+        List<List<StyleTrait<?>>> validTraitPaths = new java.util.ArrayList<>();
+        for (List<StyleTrait<?>> traitPath : _traitPaths) {
             int lastValidTrait = -1;
             for ( int i = 0; i < traitPath.size(); i++ ) {
-                StyleTrait trait = traitPath.get(i);
+                StyleTrait<?> trait = traitPath.get(i);
                 boolean valid = trait.isApplicableTo(toBeStyled);
                 if (valid) lastValidTrait = i;
             }
@@ -229,26 +265,26 @@ public abstract class StyleSheet
 
         // Now we are going to create one common path from the valid trait paths by merging them!
         // So first we add all the traits from path step 0, then 1, then 2, etc.
-        List<StyleTrait> subToSuper = new java.util.ArrayList<>(); // The final merged path.
+        List<StyleTrait<?>> subToSuper = new java.util.ArrayList<>(); // The final merged path.
         List<String> inheritedTraits = new java.util.ArrayList<>();
-        StyleTrait lastAdded = null;
+        StyleTrait<?> lastAdded = null;
         for ( int i = 0; i <= deepestValidPath; i++ ) {
-            if ( inheritedTraits.size() > 0 ) {
+            if ( !inheritedTraits.isEmpty() ) {
                 for ( String inheritedTrait : new ArrayList<>(inheritedTraits) ) {
-                    for (List<StyleTrait> validTraitPath : validTraitPaths) {
+                    for (List<StyleTrait<?>> validTraitPath : validTraitPaths) {
                         int index = validTraitPath.size() - i - 1;
                         if ( index >= 0 ) {
-                            StyleTrait current = validTraitPath.get(index);
+                            StyleTrait<?> current = validTraitPath.get(index);
                             if ( !subToSuper.contains(current) && current.group().equals(inheritedTrait) )
                                 lastAdded = _merge(current, lastAdded, subToSuper, inheritedTraits);
                         }
                     }
                 }
             }
-            for (List<StyleTrait> validTraitPath : validTraitPaths) {
+            for ( List<StyleTrait<?>> validTraitPath : validTraitPaths ) {
                 int index = validTraitPath.size() - i - 1;
                 if ( index >= 0 ) {
-                    StyleTrait trait = validTraitPath.get(index);
+                    StyleTrait<?> trait = validTraitPath.get(index);
                     if ( !subToSuper.contains(trait) )
                         lastAdded = _merge(trait, lastAdded, subToSuper, inheritedTraits);
                 }
@@ -257,18 +293,19 @@ public abstract class StyleSheet
 
         // Now we apply the valid traits to the starting style.
         for ( int i = subToSuper.size() - 1; i >= 0; i-- ) {
-            StyleTrait trait = subToSuper.get(i);
-            startingStyle = _traitStylers.get(trait).style(new ComponentStyleDelegate<>(toBeStyled, startingStyle)).style();
+            StyleTrait<?> trait = subToSuper.get(i);
+            ComponentStyleDelegate delegate = new ComponentStyleDelegate<>(toBeStyled, startingStyle);
+            startingStyle = _traitStylers.get(trait).style(delegate).style();
         }
 
         return startingStyle;
     }
 
-    private StyleTrait _merge(
-        StyleTrait currentTrait,
-        StyleTrait lastAdded,
-        List<StyleTrait> subToSuper,
-        List<String> inheritedTraits
+    private StyleTrait<?> _merge(
+        StyleTrait<?>       currentTrait,
+        StyleTrait<?>       lastAdded,
+        List<StyleTrait<?>> subToSuper,
+        List<String>        inheritedTraits
     ) {
         boolean lastIsSuper = lastAdded != null && lastAdded.group().isEmpty() && !lastAdded.thisInherits(currentTrait);
         if ( lastIsSuper )
@@ -289,8 +326,8 @@ public abstract class StyleSheet
             We compare each trait to every other trait to see if it inherits from it.
             If it does, we add the trait to the other trait's list of extension (the value in the map).
         */
-        for ( StyleTrait trait : _traitGraph.keySet() )
-            for ( StyleTrait other : _traitGraph.keySet() )
+        for ( StyleTrait<?> trait : _traitGraph.keySet() )
+            for ( StyleTrait<?> other : _traitGraph.keySet() )
                 if ( trait != other && trait.thisInherits(other) )
                     _traitGraph.get(other).add(trait);
 
@@ -301,17 +338,17 @@ public abstract class StyleSheet
 
             We do this by performing a depth-first search on the graph.
         */
-        for ( StyleTrait trait : _traitGraph.keySet() ) {
+        for ( StyleTrait<?> trait : _traitGraph.keySet() ) {
             // We create a stack onto which we will push the traits we visit and then pop them off.
-            List<StyleTrait> visited = new java.util.ArrayList<>();
+            List<StyleTrait<?>> visited = new java.util.ArrayList<>();
             // We pop the trait off the stack when we return from the recursive call.
-            _dfs(trait, visited);
+            _depthFirstSearch(trait, visited);
         }
         _findRootAndLeaveTraits();
         _traitGraphBuilt = true;
     }
 
-    private void _dfs( StyleTrait current, List<StyleTrait> visited ) {
+    private void _depthFirstSearch( StyleTrait<?> current, List<StyleTrait<?>> visited ) {
         // If the current trait is already in the visited list, then we have a cycle.
         if ( visited.contains(current) )
             throw new IllegalStateException("The style sheet contains a cycle.");
@@ -320,8 +357,8 @@ public abstract class StyleSheet
         visited.add(current);
 
         // We recursively call the dfs method on each of the current trait's extensions.
-        for ( StyleTrait extension : _traitGraph.get(current) )
-            _dfs(extension, visited);
+        for ( StyleTrait<?> extension : _traitGraph.get(current) )
+            _depthFirstSearch(extension, visited);
 
         // We remove the current trait from the visited list.
         visited.remove(current);
@@ -332,9 +369,9 @@ public abstract class StyleSheet
             We find the root traits by finding the traits, which have extensions,
             but are not referenced by any other trait as an extension.
          */
-        for ( StyleTrait trait : _traitGraph.keySet() ) {
+        for ( StyleTrait<?> trait : _traitGraph.keySet() ) {
             boolean isLeaf = true;
-            for ( StyleTrait other : _traitGraph.keySet() )
+            for ( StyleTrait<?> other : _traitGraph.keySet() )
                 if ( _traitGraph.get(other).contains(trait) ) {
                     isLeaf = false;
                     break;
@@ -348,30 +385,30 @@ public abstract class StyleSheet
         _traitPaths.addAll(_findPaths());
     }
 
-    private List<List<StyleTrait>> _findPaths() {
-        List<List<StyleTrait>> paths = new java.util.ArrayList<>();
-        for ( StyleTrait root : _rootTraits ) {
-            List<StyleTrait> stack = new java.util.ArrayList<>();
+    private List<List<StyleTrait<?>>> _findPaths() {
+        List<List<StyleTrait<?>>> paths = new java.util.ArrayList<>();
+        for ( StyleTrait<?> root : _rootTraits ) {
+            List<StyleTrait<?>> stack = new java.util.ArrayList<>();
             _traverse(root, paths, stack);
         }
         return paths;
     }
 
     private void _traverse(
-        StyleTrait current,
-        List<List<StyleTrait>> paths,
-        List<StyleTrait> stack
+        StyleTrait<?> current,
+        List<List<StyleTrait<?>>> paths,
+        List<StyleTrait<?>> stack
     ) {
         stack.add(current);
         if ( _traitGraph.get(current).isEmpty() ) {
-            List<List<StyleTrait>> newPath = Collections.singletonList(new ArrayList<>(stack));
+            List<List<StyleTrait<?>>> newPath = Collections.singletonList(new ArrayList<>(stack));
             // We remove the last trait from the stack.
             stack.remove(stack.size() - 1);
             paths.addAll(newPath);
             return;
         }
 
-        for ( StyleTrait extension : _traitGraph.get(current) )
+        for ( StyleTrait<?> extension : _traitGraph.get(current) )
             if ( extension != current )
                 _traverse(extension, paths, stack);
 
