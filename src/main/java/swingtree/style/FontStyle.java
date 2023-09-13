@@ -261,7 +261,7 @@ public final class FontStyle
                     font.getFamily(),
                     font.getSize(),
                     font.isItalic() ? 0.2f : 0f,
-                    font.isBold() ? 2f : 0f,
+                    font.isBold()   ? 2f   : 0f,
                     _color,
                     _backgroundColor,
                     _selectionColor,
@@ -409,20 +409,26 @@ public final class FontStyle
     @Override
     public String toString()
     {
+        String underline       = ( _isUnderlined        == null ? "?" : String.valueOf(_isUnderlined)   );
+        String strike          = ( _isStrike            == null ? "?" : String.valueOf(_isStrike)       );
+        String transform       = ( _transform           == null ? "?" : _transform.toString()           );
+        String paint           = ( _paint               == null ? "?" : _paint.toString()               );
+        String horizontalAlign = ( _horizontalAlignment == null ? "?" : _horizontalAlignment.toString() );
+        String verticalAlign   = ( _verticalAlignment   == null ? "?" : _verticalAlignment.toString()   );
         return "FontStyle[" +
-                    "name="            + _name + ", " +
-                    "size="            + _size + ", " +
-                    "posture="         + _posture + ", " +
-                    "weight="          + _weight + ", " +
-                    "underlined="      + (_isUnderlined == null ? "?" : _isUnderlined) + ", " +
-                    "strikeThrough="   + (_isStrike == null ? "?" : _isStrike) + ", " +
-                    "color="           + StyleUtility.toString(_color) + ", " +
-                    "backgroundColor=" + StyleUtility.toString(_backgroundColor) + ", " +
-                    "selectionColor="  + StyleUtility.toString(_selectionColor) + ", " +
-                    "transform="       + ( _transform == null ? "?" : _transform.toString() ) + ", " +
-                    "paint="           + ( _paint == null ? "?" : _paint.toString() ) + ", " +
-                    "horizontalAlignment=" + (_horizontalAlignment == null ? "?" : _horizontalAlignment.toString()) + ", " +
-                    "verticalAlignment="   + (_verticalAlignment == null ? "?" : _verticalAlignment.toString()) +
+                    "name="                + _name                                   + ", " +
+                    "size="                + _size                                   + ", " +
+                    "posture="             + _posture                                + ", " +
+                    "weight="              + _weight                                 + ", " +
+                    "underlined="          + underline                               + ", " +
+                    "strikeThrough="       + strike                                  + ", " +
+                    "color="               + StyleUtility.toString(_color)           + ", " +
+                    "backgroundColor="     + StyleUtility.toString(_backgroundColor) + ", " +
+                    "selectionColor="      + StyleUtility.toString(_selectionColor)  + ", " +
+                    "transform="           + transform                               + ", " +
+                    "paint="               + paint                                   + ", " +
+                    "horizontalAlignment=" + horizontalAlign                         + ", " +
+                    "verticalAlignment="   + verticalAlign                           +
                 "]";
     }
 }
