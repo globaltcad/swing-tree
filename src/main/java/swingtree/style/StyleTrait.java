@@ -8,7 +8,7 @@ import java.util.Objects;
 /**
  *  A {@link StyleTrait} contains a set of properties that will be used to
  *  target specific {@link JComponent}s matching said properties, so that
- *  you can associate custom {@link Styler} lambdas to them
+ *  you can associate custom {@link Styler} lambdas with them
  *  which are using the {@link ComponentStyleDelegate} API
  *  to configure the style of the component. <br>
  *  See {@link StyleSheet#add(StyleTrait, Styler)} for more information. <br>
@@ -33,7 +33,7 @@ public final class StyleTrait<C extends JComponent>
         _type      = Objects.requireNonNull(type);
         // And we check for duplicates and throw an exception if we find any.
         for ( int i = 0; i < _toInherit.length - 1; i++ )
-            if ( _toInherit[i].equals(_toInherit[i+1]) )
+            if ( _toInherit[ i ].equals( _toInherit[ i + 1 ] ) )
                 throw new IllegalArgumentException(
                         "Duplicate inheritance found in " + this + "!"
                 );
@@ -46,10 +46,9 @@ public final class StyleTrait<C extends JComponent>
 
     String id() { return _id; }
 
-    String[] inheritance() { return _toInherit; }
+    String[] toInherit() { return _toInherit; }
 
     Class<?> type() { return _type; }
-
 
     /**
      *  Creates a new {@link StyleTrait} with the same properties as this one,
@@ -159,12 +158,11 @@ public final class StyleTrait<C extends JComponent>
     boolean isApplicableTo( JComponent component ) {
         Objects.requireNonNull(component);
         boolean typeIsCompatible = _type.isAssignableFrom(component.getClass());
-        boolean idIsCompatible = _id.isEmpty() || _id.equals(component.getName());
-        boolean belongsToApplicableGroup =
-                ComponentExtension.from(component)
-                        .getStyleGroups()
-                        .stream()
-                        .anyMatch( sg -> sg.equals(_group));
+        boolean idIsCompatible   = _id.isEmpty() || _id.equals(component.getName());
+        boolean belongsToApplicableGroup = ComponentExtension.from(component)
+                                              .getStyleGroups()
+                                              .stream()
+                                              .anyMatch( sg -> sg.equals(_group));
 
         boolean nameIsCompatible = _group.isEmpty() || belongsToApplicableGroup;
         return typeIsCompatible && idIsCompatible && nameIsCompatible;
@@ -175,21 +173,21 @@ public final class StyleTrait<C extends JComponent>
         if ( !this.id().isEmpty() || !other.id().isEmpty() )
             return false;
 
-        boolean thisIsExtensionOfOther = false;
-        for ( String extension : this.inheritance() )
-            if ( extension.equals(other.group()) ) {
-                thisIsExtensionOfOther = true;
+        boolean thisGroupIsExtensionOfOther = false;
+        for ( String superGroup : this.toInherit() )
+            if ( superGroup.equals( other.group() ) ) {
+                thisGroupIsExtensionOfOther = true;
                 break;
             }
 
-        boolean thisIsSubclassOfOther = other.type().isAssignableFrom(this.type());
+        boolean thisTypeIsSubclassOfOther = other.type().isAssignableFrom(this.type());
 
-        if ( thisIsExtensionOfOther && !thisIsSubclassOfOther )
+        if ( thisGroupIsExtensionOfOther && !thisTypeIsSubclassOfOther )
             throw new IllegalArgumentException(
                     this + " is an extension of " + other + " but is not a subclass of it."
                 );
 
-        return (thisIsExtensionOfOther || other.group().isEmpty()) && thisIsSubclassOfOther;
+        return ( thisGroupIsExtensionOfOther || other.group().isEmpty() ) && thisTypeIsSubclassOfOther;
     }
 
     @Override
@@ -205,12 +203,11 @@ public final class StyleTrait<C extends JComponent>
 
     @Override
     public int hashCode() {
-        // Note that the order of the inheritance list is not important.
-        int sum = 0;
-        for ( String inherit : _toInherit)
-            sum += inherit.hashCode();
+        int hash = 7;
+        for ( String inherit : _toInherit )
+            hash = 31 * hash + inherit.hashCode();
 
-        return Objects.hash( _group, _id, sum, _type );
+        return Objects.hash( _group, _id, hash, _type );
     }
 
     @Override
