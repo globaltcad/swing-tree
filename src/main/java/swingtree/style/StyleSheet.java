@@ -48,6 +48,11 @@ import java.util.function.Function;
  */
 public abstract class StyleSheet
 {
+    private static final StyleSheet _NONE = new StyleSheet() { @Override protected void configure() {} };
+
+    public static StyleSheet none() { return _NONE; }
+
+
     private final Function<JComponent, Style> _defaultStyle;
     private final Map<StyleTrait<?>, Styler<?>> _traitStylers = new LinkedHashMap<>();
     private StyleTrait<?>[][] _traitPaths = {}; // The paths are calculated from the above map and used to apply the styles.
@@ -270,6 +275,9 @@ public abstract class StyleSheet
     Style applyTo( JComponent toBeStyled, Style startingStyle ) {
         if ( !_traitGraphBuilt )
             _buildAndSetStyleTraitPaths();
+
+        if ( _traitPaths.length == 0 )
+            return startingStyle;
 
         // Now we run the starting style through the trait graph.
         // We do this by finding valid trait paths from the root traits to the leaf traits.

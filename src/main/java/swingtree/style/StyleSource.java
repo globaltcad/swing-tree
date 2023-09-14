@@ -20,7 +20,7 @@ final class StyleSource<C extends JComponent>
         return new StyleSource<>(
                         Styler.none(),
                         new Expirable[0],
-                        SwingTree.get().getStyleSheet().orElse(null)
+                        SwingTree.get().getStyleSheet().orElse(StyleSheet.none())
                     );
     }
 
@@ -36,9 +36,9 @@ final class StyleSource<C extends JComponent>
         Expirable<Styler<C>>[] animationStylers,
         StyleSheet styleSheet
     ) {
-        _localStyler = localStyler;
-        _animationStylers = animationStylers;
-        _styleSheet = styleSheet;
+        _localStyler      = Objects.requireNonNull(localStyler);
+        _animationStylers = Objects.requireNonNull(animationStylers);
+        _styleSheet       = Objects.requireNonNull(styleSheet);
     }
 
     public boolean hasNoAnimationStylers() {
@@ -50,7 +50,7 @@ final class StyleSource<C extends JComponent>
         return new StyleSource<>(compositeStyler, _animationStylers, _styleSheet);
     }
 
-    StyleSource<C> withAnimationStyler(LifeTime lifeTime, Styler<C> animationStyler) {
+    StyleSource<C> withAnimationStyler( LifeTime lifeTime, Styler<C> animationStyler ) {
         List<Expirable<Styler<C>>> animationStylers = new ArrayList<>(Arrays.asList(_animationStylers));
         animationStylers.add(new Expirable<>(lifeTime, animationStyler));
         return new StyleSource<>(_localStyler, animationStylers.toArray(new Expirable[0]), _styleSheet);
@@ -62,7 +62,7 @@ final class StyleSource<C extends JComponent>
 
 
     Style calculateStyleFor( C owner ) {
-        Style style = _styleSheet == null ? Style.none() : _styleSheet.applyTo( owner );
+        Style style = _styleSheet.applyTo( owner );
         style = _localStyler.style(new ComponentStyleDelegate<>(owner, style)).style();
 
         // Animation styles are last: they override everything else:
