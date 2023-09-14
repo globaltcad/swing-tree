@@ -49,9 +49,8 @@ import java.util.function.Function;
 public abstract class StyleSheet
 {
     private final Function<JComponent, Style> _defaultStyle;
-    private final Map<StyleTrait<?>, List<StyleTrait<?>>> _traitGraph = new LinkedHashMap<>();
     private final Map<StyleTrait<?>, Styler<?>> _traitStylers = new LinkedHashMap<>();
-    private final List<StyleTrait<?>> _rootTraits = new java.util.ArrayList<>();
+    private final Map<StyleTrait<?>, List<StyleTrait<?>>> _traitGraph = new LinkedHashMap<>();
     private final List<List<StyleTrait<?>>> _traitPaths = new java.util.ArrayList<>();
 
     private boolean _traitGraphBuilt = false;
@@ -61,10 +60,12 @@ public abstract class StyleSheet
     }
 
     protected StyleSheet( StyleSheet parentStyleSheet ) {
-        if ( parentStyleSheet == null )
-            _defaultStyle = c -> Style.none();
-        else
-            _defaultStyle = c -> parentStyleSheet.applyTo( c, Style.none() );
+        _defaultStyle = c -> {
+                            if ( parentStyleSheet == null )
+                                return Style.none();
+                            else
+                                return parentStyleSheet.applyTo( c, Style.none() );
+                        };
 
         configure(); // The subclass will add traits to this style sheet using the add(..) method.
 
@@ -170,14 +171,18 @@ public abstract class StyleSheet
      * @param <C> The type of the components targeted by the {@link StyleTrait}.
      */
     protected <C extends JComponent> void add( StyleTrait<C> rule, Styler<C> traitStyler ) {
+        if ( _traitGraphBuilt )
+            throw new IllegalStateException(
+                    "The trait graph has already been built. " +
+                    "You cannot add more traits to a fully built style sheet."
+                );
+
         // First let's make sure the trait does not already exist.
         if ( _traitStylers.containsKey(rule) )
             throw new IllegalArgumentException("The trait " + rule.group() + " already exists in this style sheet.");
 
         // Now let's add the trait to the style sheet.
         _traitStylers.put(rule, traitStyler);
-        // And let's add the trait to the trait graph.
-        _traitGraph.put(rule, new java.util.ArrayList<>());
     }
 
     /**
@@ -322,14 +327,21 @@ public abstract class StyleSheet
     private void _buildTraitGraph() {
         if ( _traitGraphBuilt )
             throw new IllegalStateException("The trait graph has already been built.");
+
+        // Let's clear the trait graph. Just in case.
+        _traitGraph.clear();
+
         /*
+            First we need to initialize the trait graph.
             We compare each trait to every other trait to see if it inherits from it.
-            If it does, we add the trait to the other trait's list of extension (the value in the map).
+            If it does, we add the trait to the other trait's list of extensions (the value in the map).
         */
-        for ( StyleTrait<?> trait : _traitGraph.keySet() )
-            for ( StyleTrait<?> other : _traitGraph.keySet() )
-                if ( trait != other && trait.thisInherits(other) )
-                    _traitGraph.get(other).add(trait);
+        for ( StyleTrait<?> trait1 : _traitStylers.keySet() ) {
+            List<StyleTrait<?>> traits = _traitGraph.computeIfAbsent(trait1, k -> new java.util.ArrayList<>());
+            for ( StyleTrait<?> trait2 : _traitStylers.keySet() )
+                if ( trait2 != trait1 && trait2.thisInherits(trait1) )
+                    traits.add(trait2);
+        }
 
         /*
             Now we have a graph of traits that inherit from other traits.
@@ -344,7 +356,7 @@ public abstract class StyleSheet
             // We pop the trait off the stack when we return from the recursive call.
             _depthFirstSearch(trait, visited);
         }
-        _findRootAndLeaveTraits();
+        _traitPaths.addAll(_findRootAndLeaveTraits());
         _traitGraphBuilt = true;
     }
 
@@ -364,30 +376,32 @@ public abstract class StyleSheet
         visited.remove(current);
     }
 
-    private void _findRootAndLeaveTraits() {
+    private List<List<StyleTrait<?>>> _findRootAndLeaveTraits() {
         /*
             We find the root traits by finding the traits, which have extensions,
             but are not referenced by any other trait as an extension.
          */
-        for ( StyleTrait<?> trait : _traitGraph.keySet() ) {
+        List<StyleTrait<?>> rootTraits = new java.util.ArrayList<>();
+
+        for ( StyleTrait<?> trait1 : _traitGraph.keySet() ) {
             boolean isLeaf = true;
-            for ( StyleTrait<?> other : _traitGraph.keySet() )
-                if ( _traitGraph.get(other).contains(trait) ) {
+            for ( StyleTrait<?> trait2 : _traitGraph.keySet() )
+                if ( _traitGraph.get(trait2).contains(trait1) ) {
                     isLeaf = false;
                     break;
                 }
             if ( isLeaf )
-                _rootTraits.add(trait);
+                rootTraits.add(trait1);
         }
         /*
             Finally we can calculate all the possible paths from the root traits to the leaf traits.
         */
-        _traitPaths.addAll(_findPaths());
+        return _findPathsFor(rootTraits);
     }
 
-    private List<List<StyleTrait<?>>> _findPaths() {
+    private List<List<StyleTrait<?>>> _findPathsFor(List<StyleTrait<?>> traits) {
         List<List<StyleTrait<?>>> paths = new java.util.ArrayList<>();
-        for ( StyleTrait<?> root : _rootTraits ) {
+        for ( StyleTrait<?> root : traits ) {
             List<StyleTrait<?>> stack = new java.util.ArrayList<>();
             _traverse(root, paths, stack);
         }
