@@ -50,7 +50,7 @@ public abstract class StyleSheet
 {
     private final Function<JComponent, Style> _defaultStyle;
     private final Map<StyleTrait<?>, Styler<?>> _traitStylers = new LinkedHashMap<>();
-    private final List<List<StyleTrait<?>>> _traitPaths = new java.util.ArrayList<>();
+    private StyleTrait<?>[][] _traitPaths = {}; // The paths are calculated from the above map and used to apply the styles.
 
     private boolean _traitGraphBuilt = false;
 
@@ -66,9 +66,33 @@ public abstract class StyleSheet
                                 return parentStyleSheet.applyTo( c, Style.none() );
                         };
 
-        configure(); // The subclass will add traits to this style sheet using the add(..) method.
+        reconfigure();
+    }
 
-        _buildStyleTraitPaths();
+    /**
+     *  Essentially (re)initiates the style sheet by clearing all the traits and
+     *  then calling the {@link #configure()} method to add new traits to the style sheet.
+     *  Use this method if your style sheet has a more advanced meta configuration
+     *  which causes the types of traits to change dynamically.
+     *  For example, during the new configuration you may want to add
+     *  a different set of traits with different {@link Styler}s depending on the current
+     *  theme of the application.
+     */
+    public final void reconfigure() {
+        _traitGraphBuilt = false;
+        _traitPaths = new StyleTrait<?>[0][];
+        _traitStylers.clear();
+        try {
+            configure(); // The subclass will add traits to this style sheet using the add(..) method.
+        } catch ( Exception e ) {
+            e.printStackTrace();
+            /*
+                Exceptions inside a style sheet should not be fatal.
+                We just print the stack trace for debugging purposes
+                and then continue to prevent the GUI from breaking.
+            */
+        }
+        _buildAndSetStyleTraitPaths();
     }
 
     /**
@@ -247,23 +271,25 @@ public abstract class StyleSheet
      */
     Style applyTo( JComponent toBeStyled, Style startingStyle ) {
         if ( !_traitGraphBuilt )
-            throw new IllegalStateException("The trait graph has not been built yet.");
+            _buildAndSetStyleTraitPaths();
 
         // Now we run the starting style through the trait graph.
         // We do this by finding valid trait paths from the root traits to the leaf traits.
         int deepestValidPath = -1;
         List<List<StyleTrait<?>>> validTraitPaths = new java.util.ArrayList<>();
-        for ( List<StyleTrait<?>> traitPath : _traitPaths ) {
+        for ( StyleTrait<?>[] traitPath : _traitPaths ) {
             int lastValidTrait = -1;
-            for ( int i = 0; i < traitPath.size(); i++ ) {
-                StyleTrait<?> trait = traitPath.get(i);
-                boolean valid = trait.isApplicableTo(toBeStyled);
+            for ( int i = 0; i < traitPath.length; i++ ) {
+                boolean valid = traitPath[i].isApplicableTo(toBeStyled);
                 if (valid) lastValidTrait = i;
             }
-            if ( lastValidTrait >= 0 ) // We add the path up to the last valid trait to the list of valid traits.
-                validTraitPaths.add(traitPath.subList(0, lastValidTrait + 1));
+            if ( lastValidTrait >= 0 ) {
+                // We add the path up to the last valid trait to the list of valid traits.
+                // This is done by slicing the trait path array from 0 to lastValidTrait + 1.
+                validTraitPaths.add(Arrays.asList(Arrays.copyOfRange(traitPath, 0, lastValidTrait + 1)));
+            }
 
-            if (lastValidTrait > deepestValidPath)
+            if ( lastValidTrait > deepestValidPath )
                 deepestValidPath = lastValidTrait;
         }
 
@@ -329,13 +355,8 @@ public abstract class StyleSheet
      *  These paths are used to determine the order in which the styles
      *  of the traits are applied to a component.
      */
-    private void _buildStyleTraitPaths() {
-        if ( _traitGraphBuilt )
-            throw new IllegalStateException("The trait graph has already been built.");
-
-        _traitPaths.clear(); // Just in case.
-        _traitPaths.addAll(new GraphPathsBuilder().buildTraitGraphPathsFrom(_traitStylers));
-
+    private void _buildAndSetStyleTraitPaths() {
+        _traitPaths = new GraphPathsBuilder().buildTraitGraphPathsFrom(_traitStylers);
         _traitGraphBuilt = true;
     }
 
@@ -344,7 +365,7 @@ public abstract class StyleSheet
         private final Map<StyleTrait<?>, List<StyleTrait<?>>> _traitGraph = new LinkedHashMap<>();
 
 
-        private List<List<StyleTrait<?>>> buildTraitGraphPathsFrom(
+        private StyleTrait<?>[][] buildTraitGraphPathsFrom(
             Map<StyleTrait<?>, Styler<?>> _traitStylers
         ) {
             // Let's clear the trait graph. Just in case.
@@ -376,7 +397,12 @@ public abstract class StyleSheet
                 _depthFirstSearch(trait, visited);
             }
 
-            return _findRootAndLeaveTraits();
+            List<List<StyleTrait<?>>> result = _findRootAndLeaveTraits();
+            StyleTrait<?>[][] resultArray = new StyleTrait<?>[result.size()][];
+            for ( int i = 0; i < result.size(); i++ )
+                resultArray[i] = result.get(i).toArray(new StyleTrait<?>[0]);
+
+            return resultArray;
         }
 
         private void _depthFirstSearch( StyleTrait<?> current, List<StyleTrait<?>> visited ) {

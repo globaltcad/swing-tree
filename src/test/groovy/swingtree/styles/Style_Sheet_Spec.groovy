@@ -264,12 +264,19 @@ class Style_Sheet_Spec extends Specification
             thrown(IllegalArgumentException)
     }
 
-    def 'Duplicate style trait declaration will throw an exception!'()
+    def 'Duplicate style trait declarations will not throw an exception!'()
     {
         reportInfo """
-            If you try to declare a style trait more than once, then an exception will be thrown.
-            This is because it does not make sense to declare the same style trait more than once.
+            If you try to declare a style trait more than once, then no exception will be thrown
+            even though this is technically a programming error as it does not make sense 
+            to declare the same style trait more than once.
             They might contain conflicting style properties, which would be nonsensical to allow.
+            <br>
+            Instead of throwing a fatal exception, SwingTree will throw and catch an exception
+            locally inside the style sheet and then simply log the stack trace.
+            <br>
+            This is because we don't want to crash the entire application just because of a
+            dumb little style sheet error like this.
         """
         when :
             new StyleSheet() {
@@ -284,7 +291,32 @@ class Style_Sheet_Spec extends Specification
                 }
             }
         then :
-            thrown(IllegalArgumentException)
+            noExceptionThrown()
+    }
+
+    def 'Any kind of exception inside of the "configure" method of a user StyleSheet will not be fatal!'()
+    {
+        reportInfo """
+            If you throw an exception inside the `configure` method of a user style sheet,
+            then it will not be fatal.
+            <br>
+            Instead of throwing a fatal exception, SwingTree will catch the exception
+            locally inside the style sheet and then simply log the stack trace.
+            <br>
+            This is because we don't want to crash the entire application just because of a
+            dumb little style sheet error like this.
+            A Style Sheet is a very superficial thing, which is not at all critical to the
+            functionality of the application.
+        """
+        when :
+            new StyleSheet() {
+               @Override
+               protected void configure() {
+                    throw new RuntimeException("This is a test exception!");
+                }
+            }
+        then :
+            noExceptionThrown()
     }
 
     def 'A StyleSheet can be created with a default style.'()
