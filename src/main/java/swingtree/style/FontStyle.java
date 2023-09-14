@@ -123,7 +123,7 @@ import java.util.List;
  *  easily create a modified copy of it by calling one of the wither-like methods.
  *  <p>
  */
-public final class FontStyle
+final class FontStyle
 {
     private static final FontStyle _NONE = new FontStyle(
                                                         "",    // Font name (family)

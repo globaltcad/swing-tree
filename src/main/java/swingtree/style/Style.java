@@ -92,16 +92,16 @@ public final class Style
 
     public LayoutStyle layout() { return _layout; }
 
-    public Outline padding() { return _border.padding(); }
+    Outline padding() { return _border.padding(); }
 
-    public Outline margin() { return _border.margin(); }
+    Outline margin() { return _border.margin(); }
 
-    public BorderStyle border() { return _border; }
+    BorderStyle border() { return _border; }
 
-    public BaseStyle base() { return _base; }
+    BaseStyle base() { return _base; }
 
 
-    public DimensionalityStyle dimensionality() { return _dimensionality; }
+    DimensionalityStyle dimensionality() { return _dimensionality; }
 
 
     /**

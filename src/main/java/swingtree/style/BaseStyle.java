@@ -5,12 +5,12 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- *  An immutable, wither-like cloner method based settings class for basic component style
+ *  An immutable, wither-like copy method based config object for basic component style
  *  properties like background color, foundation color, foreground color and the cursor.
  *  Instances of this are part of the full {@link Style} configuration that is used to
  *  style a component in all kinds of ways.
  */
-public final class BaseStyle
+final class BaseStyle
 {
     private static final BaseStyle _NONE = new BaseStyle(
                                                      null,
@@ -19,6 +19,11 @@ public final class BaseStyle
                                                      null
                                                  );
 
+    /**
+     *  Returns the default {@link BaseStyle} which represents the absence of a base style.
+     *
+     * @return The default {@link BaseStyle}, containing no style properties.
+     */
     public static BaseStyle none() { return _NONE; }
 
     private final Color _backgroundColor;

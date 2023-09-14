@@ -54,9 +54,7 @@ public abstract class StyleSheet
 
     private boolean _traitGraphBuilt = false;
 
-    protected StyleSheet() {
-        this(null);
-    }
+    protected StyleSheet() { this(null); }
 
     protected StyleSheet( StyleSheet parentStyleSheet ) {
         _defaultStyle = c -> {
@@ -73,10 +71,10 @@ public abstract class StyleSheet
      *  Essentially (re)initiates the style sheet by clearing all the traits and
      *  then calling the {@link #configure()} method to add new traits to the style sheet.
      *  Use this method if your style sheet has a more advanced meta configuration
-     *  which causes the types of traits to change dynamically.
+     *  which requires that the {@link StyleTrait}s and {@link Styler}s of this style sheet to change dynamically.
      *  For example, during the new configuration you may want to add
      *  a different set of traits with different {@link Styler}s depending on the current
-     *  theme of the application.
+     *  theme of the application, which the user can change at runtime (don't forget to repaint the components).
      */
     public final void reconfigure() {
         _traitGraphBuilt = false;
@@ -105,7 +103,7 @@ public abstract class StyleSheet
      *  This is intended to be used in the {@link #configure()} method of the style sheet. <br>
      *  Here an example of how to use this method in the {@link #configure()} method:
      *  <pre>{@code
-     *      add(id("myButton"), it -> it.backgroundColor(Color.RED));
+     *      add(id("myButton"), it -> it.backgroundColor(Color.CYAN));
      *  }</pre>
      *
      * @param id The id/name of the component to target.
@@ -189,11 +187,11 @@ public abstract class StyleSheet
      *  }
      *  </code></pre>
      *
-     * @param rule The {@link StyleTrait} targeting the components you want to style.
+     * @param trait The {@link StyleTrait} targeting the components you want to style.
      * @param traitStyler The {@link Styler} lambda which will be applied to the components targeted by the {@link StyleTrait}.
      * @param <C> The type of the components targeted by the {@link StyleTrait}.
      */
-    protected <C extends JComponent> void add( StyleTrait<C> rule, Styler<C> traitStyler ) {
+    protected <C extends JComponent> void add( StyleTrait<C> trait, Styler<C> traitStyler ) {
         if ( _traitGraphBuilt )
             throw new IllegalStateException(
                     "The trait graph has already been built. " +
@@ -201,11 +199,11 @@ public abstract class StyleSheet
                 );
 
         // First let's make sure the trait does not already exist.
-        if ( _traitStylers.containsKey(rule) )
-            throw new IllegalArgumentException("The trait " + rule.group() + " already exists in this style sheet.");
+        if ( _traitStylers.containsKey(trait) )
+            throw new IllegalArgumentException("The trait " + trait.group() + " already exists in this style sheet.");
 
         // Finally we fulfill the purpose of this method, we add the trait to the style sheet.
-        _traitStylers.put( rule, traitStyler );
+        _traitStylers.put( trait, traitStyler );
     }
 
     /**

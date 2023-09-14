@@ -9,10 +9,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- *  An immutable, wither-like cloner method based settings container for border styles that is part of
+ *  An immutable, wither-like copy method based config container for border styles that is part of
  *  a {@link Style} configuration object.
  */
-public final class BorderStyle
+final class BorderStyle
 {
     private static final BorderStyle _NONE = new BorderStyle(
                                                 null, null, null, null,

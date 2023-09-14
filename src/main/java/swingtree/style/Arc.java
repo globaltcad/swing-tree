@@ -1,9 +1,12 @@
 package swingtree.style;
 
+import swingtree.UI;
+
 import java.awt.*;
 
 /**
- *  A value object that represents the arc width and height of a rounded rectangle corner.
+ *  A value object that represents the arc width and height of a rounded rectangle corner
+ *  as part of a component {@link Style}.
  */
 final class Arc
 {
@@ -14,9 +17,7 @@ final class Arc
      * @param arcHeight The height of the arc.
      * @return An {@link Arc} representing the 2 values.
      */
-    static Arc of( int arcWidth, int arcHeight ) {
-        return new Arc( arcWidth, arcHeight );
-    }
+    static Arc of( int arcWidth, int arcHeight ) { return new Arc( arcWidth, arcHeight ); }
 
 
     private final int _arcWidth;
@@ -39,10 +40,12 @@ final class Arc
     public int height() { return _arcHeight; }
 
     /**
-     *  Use this to scale the arc, which is usually needed for when you
+     *  Used to scale the arc, which is usually needed by the style engine
+     *  to paint DPI scaled corners and also useful for when you
      *  need to do custom painting logic which is also supposed to be
      *  high DPI screen aware, see methods like
-     *  {@link swingtree.UI#scale(int)}, {@link swingtree.UI#scale(Rectangle)}...
+     *  {@link swingtree.UI#scale(int)}, {@link swingtree.UI#scale(Rectangle)}... <br>
+     *  Also checkout {@link UI#scale()} to get the current scaling factor.
      *
      * @param scale A scaling factor by which the values of this arc are multiplied.
      * @return A new scaled {@link Arc}.
@@ -68,7 +71,7 @@ final class Arc
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
 
-        Arc rhs = (Arc) obj;
-        return _arcWidth == rhs._arcWidth && _arcHeight == rhs._arcHeight;
+        Arc other = (Arc) obj;
+        return _arcWidth == other._arcWidth && _arcHeight == other._arcHeight;
     }
 }

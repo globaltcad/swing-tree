@@ -363,7 +363,9 @@ public final class UI extends UILayoutConstants
 
     /**
      *  Use these enum instances to specify the gradient type for various sub styles,
-     *  like for example {@link BaseStyle} or {@link BorderStyle} through the
+     *  like for example the gradient style API exposed by {@link ComponentStyleDelegate#borderGradient(Function)}
+     *  or {@link ComponentStyleDelegate#gradient(Function)} methods (see {@link UIForAnySwing#withStyle(Styler)}).
+     *
      *  {@link GradientStyle#type(GradientType)} method exposed by methods like
      *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#borderGradient(String, Function)}.
      */
@@ -374,7 +376,9 @@ public final class UI extends UILayoutConstants
 
     /**
      *  Use these enum instances to specify the gradient alignment for various sub styles,
-     *  like for example {@link BaseStyle} or {@link BorderStyle} through the
+     *  like for example the gradient style API exposed by {@link ComponentStyleDelegate#borderGradient(Function)}
+     *  or {@link ComponentStyleDelegate#gradient(Function)} methods (see {@link UIForAnySwing#withStyle(Styler)}).
+     *
      *  {@link GradientStyle#transition(Transition)} method exposed by methods like
      *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#borderGradient(String, Function)}.
      */

@@ -3,7 +3,7 @@ package swingtree.style;
 import java.util.Objects;
 import java.util.Optional;
 
-public final class DimensionalityStyle
+final class DimensionalityStyle
 {
     private static final DimensionalityStyle _NONE = new DimensionalityStyle(
                                                     null, null,

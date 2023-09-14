@@ -37,7 +37,7 @@ public final class LayoutStyle
 
     public Optional<Float> alignmentY() { return Optional.ofNullable(_alignmentY); }
 
-    LayoutStyle layout(Layout installer ) { return new LayoutStyle(installer, _constraint, _alignmentX, _alignmentY); }
+    LayoutStyle layout( Layout installer ) { return new LayoutStyle(installer, _constraint, _alignmentX, _alignmentY); }
 
     LayoutStyle constraint( Object constraint ) { return new LayoutStyle(_layout, constraint, _alignmentX, _alignmentY); }
 
