@@ -2,7 +2,7 @@
 # Motivation #
 
 Here at [Global TCAD Solutions](https://www.globaltcad.com/) we 
-make extensive use of the Java's Swing library for our desktop based solutions.
+make extensive use of Java's Swing library for our desktop based solutions.
 
 Although raw Swing is a stable, tried and tested cross-platform
 desktop GUI framework, we have made the observation that it is still 
