@@ -10,12 +10,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- *  An immutable, wither like method based settings container for {@link javax.swing.JComponent} styling.
- *  The styling in SwingTree is functional, meaning that changing a property
- *  of a {@link Style} instance will return a new {@link Style} instance with the
+ *  An immutable config container with cloning based update methods designed
+ *  for functional {@link javax.swing.JComponent} styling.
+ *  The styling in SwingTree is completely functional, meaning that changing a property
+ *  of a {@link Style} instance will always return a new {@link Style} instance with the
  *  updated property.
  *  <p>
- *  Here an example showing how a {@link javax.swing.JPanel} is styled through the SwingTree
+ *  Consider the following example demonstrating how a {@link javax.swing.JPanel} is styled through the SwingTree
  *  style API, which consists of a functional {@link swingtree.api.Styler} lambda that processes a
  *  {@link ComponentStyleDelegate} instance that internally assembles a {@link Style} object:
  *  <pre>{@code
@@ -36,6 +37,13 @@ import java.util.stream.Collectors;
  *      .shadowInset(false)
  *  )
  *  }</pre>
+ *
+ *  This design is inspired by the CSS styling language and the use of immutable objects
+ *  is a key feature of the SwingTree API which makes it possible to safely compose
+ *  {@link swingtree.api.Styler} lambdas into a complex style pipeline
+ *  without having to worry about side effects.
+ *  See {@link swingtree.style.StyleSheet} for more information about
+ *  how this composition of styles is achieved in practice.
  */
 public final class Style
 {
@@ -78,16 +86,16 @@ public final class Style
         NamedStyles<ImageStyle>    images,
         NamedStyles<String>        properties
     ) {
-        _layout         = layout;
-        _border         = border;
-        _base           = base;
-        _font           = font;
-        _dimensionality = dimensionality;
-        _shadows        = shadows;
-        _painters       = painters;
-        _gradients      = gradients;
-        _images         = images;
-        _properties     = properties;
+        _layout         = Objects.requireNonNull(layout);
+        _border         = Objects.requireNonNull(border);
+        _base           = Objects.requireNonNull(base);
+        _font           = Objects.requireNonNull(font);
+        _dimensionality = Objects.requireNonNull(dimensionality);
+        _shadows        = Objects.requireNonNull(shadows);
+        _painters       = Objects.requireNonNull(painters);
+        _gradients      = Objects.requireNonNull(gradients);
+        _images         = Objects.requireNonNull(images);
+        _properties     = Objects.requireNonNull(properties);
     }
 
     public LayoutStyle layout() { return _layout; }
@@ -377,7 +385,7 @@ public final class Style
                hasEqualShadowsAs(other)        &&
                hasEqualPaintersAs(other)       &&
                hasEqualGradientsAs(other)      &&
-               hasEqualImagesAs(other)        &&
+               hasEqualImagesAs(other)         &&
                hasEqualPropertiesAs(other);
     }
 

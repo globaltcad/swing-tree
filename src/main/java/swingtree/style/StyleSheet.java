@@ -7,11 +7,14 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- *  An abstract class that can be extended to create custom source code based
- *  style sheets for your Swing application.
+ *  An abstract class intended to be extended to create custom CSS look-alike
+ *  source code based style sheets for your Swing application.
  *  <br><br>
- *  A style sheet object is a collection of {@link StyleTrait}s and corresponding {@link Styler} lambdas
- *  which are used to style components in a functional manner.
+ *  A style sheet object is in essence merely a collection of
+ *  {@link StyleTrait}s and corresponding {@link Styler} lambdas
+ *  which are used by the SwingTree style engine
+ *  to calculate component {@link Style} configurations
+ *  in a functional and side effect free manner. <br>
  *  Implement the {@link #configure()} method and
  *  use the {@link #add(StyleTrait, Styler)} method to
  *  add {@link StyleTrait}s and corresponding {@link Styler} lambdas
@@ -45,6 +48,11 @@ import java.util.function.Function;
  *  }</pre>
  *  Note that the {@link #configure()} method is called once
  *  in the constructor of the style sheet and after that the style sheet may not be modified.
+ *  <br><br>
+ *  This APIs design is inspired by the CSS styling language, and the use of immutable objects
+ *  is a key feature of the style API, which makes it possible to safely compose
+ *  {@link swingtree.api.Styler} lambdas into any kind of style inheritance hierarchy
+ *  without having to worry about side effects.
  */
 public abstract class StyleSheet
 {
@@ -377,11 +385,11 @@ public abstract class StyleSheet
             // Let's clear the trait graph. Just in case.
             _traitGraph.clear();
 
-        /*
-            First we need to initialize the trait graph.
-            We compare each trait to every other trait to see if it inherits from it.
-            If it does, we add the trait to the other trait's list of extensions (the value in the map).
-        */
+            /*
+                First we need to initialize the trait graph.
+                We compare each trait to every other trait to see if it inherits from it.
+                If it does, we add the trait to the other trait's list of extensions (the value in the map).
+            */
             for ( StyleTrait<?> trait1 : _traitStylers.keySet() ) {
                 List<StyleTrait<?>> traits = _traitGraph.computeIfAbsent(trait1, k -> new java.util.ArrayList<>());
                 for ( StyleTrait<?> trait2 : _traitStylers.keySet() )
@@ -389,13 +397,13 @@ public abstract class StyleSheet
                         traits.add(trait2);
             }
 
-        /*
-            Now we have a graph of traits that inherit from other traits.
-            We can use this graph to determine the order in which we apply the traits to a style.
-            But first we need to make sure there are no cycles in the graph.
+            /*
+                Now we have a graph of traits that inherit from other traits.
+                We can use this graph to determine the order in which we apply the traits to a style.
+                But first we need to make sure there are no cycles in the graph.
 
-            We do this by performing a depth-first search on the graph.
-        */
+                We do this by performing a depth-first search on the graph.
+            */
             for ( StyleTrait<?> trait : _traitGraph.keySet() ) {
                 // We create a stack onto which we will push the traits we visit and then pop them off.
                 List<StyleTrait<?>> visited = new java.util.ArrayList<>();
@@ -403,6 +411,7 @@ public abstract class StyleSheet
                 _depthFirstSearch(trait, visited);
             }
 
+            // We copy into a simple array and return it. Arrays are a little faster than lists.
             List<List<StyleTrait<?>>> result = _findRootAndLeaveTraits();
             StyleTrait<?>[][] resultArray = new StyleTrait<?>[result.size()][];
             for ( int i = 0; i < result.size(); i++ )
@@ -450,7 +459,7 @@ public abstract class StyleSheet
             return _findPathsFor(rootTraits);
         }
 
-        private List<List<StyleTrait<?>>> _findPathsFor(List<StyleTrait<?>> traits) {
+        private List<List<StyleTrait<?>>> _findPathsFor( List<StyleTrait<?>> traits ) {
             List<List<StyleTrait<?>>> paths = new java.util.ArrayList<>();
             for ( StyleTrait<?> root : traits ) {
                 List<StyleTrait<?>> stack = new java.util.ArrayList<>();

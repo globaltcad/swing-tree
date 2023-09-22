@@ -17,7 +17,7 @@ import java.util.*;
 final class StyleSource<C extends JComponent>
 {
     static <C extends JComponent> StyleSource<C> create() {
-        return new StyleSource<>(
+        return new StyleSource<C>(
                         Styler.none(),
                         new Expirable[0],
                         SwingTree.get().getStyleSheet().orElse(StyleSheet.none())

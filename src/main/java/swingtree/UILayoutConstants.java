@@ -86,6 +86,10 @@ public abstract class UILayoutConstants
     public static AddConstraint DOCK_WEST  = AddConstraint.of("dock west");
     public static AddConstraint DOCK(UI.Side pos ) { return AddConstraint.of("dock " + pos.toDirectionString()); }
 
+    /**
+     *  A factory method for creating a {@link net.miginfocom.layout.LC} instance.
+     * @return A {@link net.miginfocom.layout.LC} instance.
+     */
     public static LC LC() { return new LC().fill(); }
     public static AC AC() { return new AC(); }
     public static CC CC() { return new CC(); }

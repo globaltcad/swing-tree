@@ -142,13 +142,16 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *          UI.button("Click me").group("A")
      *          .onClick(it -> {...})
      *      );
-     *  }</pre>
+     *  }</pre><br>
+     *  <b>It is advised to use the {@link #group(Enum[])} method
+     *  instead of this method, as the usage of enums for modelling
+     *  group tags offers much better compile time type safety!</b>
      *
-     * @param groupNames The names of the style groups to which this component should be added.
+     * @param groupTags The names of the style groups to which this component should be added.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I group( String... groupNames ) {
-        ComponentExtension.from(getComponent()).setStyleGroups(groupNames);
+    public final I group( String... groupTags ) {
+        ComponentExtension.from(getComponent()).setStyleGroups(groupTags);
         return _this();
     }
 
@@ -184,19 +187,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *      );
      *  }</pre>
      *
-     * @param groupName The enum based style group to which this component should be added.
+     * @param groupTags The enum based style group to which this component should be added.
      * @return This very instance, which enables builder-style method chaining.
      * @param <E> The enum type.
      */
     @SafeVarargs
-    public final <E extends Enum<E>> I group( E... groupName ) {
-        String[] names = new String[groupName.length];
-        for ( int i = 0; i < groupName.length; i++ ) {
-            E group = groupName[i];
-            Objects.requireNonNull(group);
-            names[i] = group.getClass().getSimpleName() + "." + group.name();
-        }
-        return group(names);
+    public final <E extends Enum<E>> I group( E... groupTags ) {
+        ComponentExtension.from(getComponent()).setStyleGroups(groupTags);
+        return _this();
     }
 
     /**

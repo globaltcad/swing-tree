@@ -69,6 +69,12 @@ public final class ComponentExtension<C extends JComponent>
         calculateApplyAndInstallStyle(false);
     }
 
+    /**
+     *  Calculates a new {@link Style} object based on the {@link Styler} lambdas associated
+     *  with the component...
+     *
+     * @return A new immutable {@link Style} configuration.
+     */
     public Style calculateStyle() {
         return _styleSource.calculateStyleFor(_owner);
     }
@@ -78,24 +84,59 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     public void calculateApplyAndInstallStyle( boolean force ) {
-        installStyle(_calculateAndApplyStyle(force));
+        _installStylePainterFor( _calculateAndApplyStyle(force) );
     }
 
     public void applyAndInstallStyle( Style style, boolean force ) {
-        installStyle(applyStyleToComponentState(style, force));
+        _installStylePainterFor( applyStyleToComponentState(style, force) );
     }
 
-    public void installStyle( Style style ) {
+    private void _installStylePainterFor( Style style ) {
         _stylePainter = StylePainter.none(); // We reset the style painter so that the style is applied again!
         _stylePainter = _stylePainter.update(style);
     }
 
-    public void setStyleGroups( String... styleName ) {
-        Objects.requireNonNull(styleName);
+    /**
+     *   This method is used by {@link swingtree.UIForAnySwing#group(String...)} to attach
+     *   so called <i>group tags</i> to a component. <br>
+     *   They are used by the SwingTree style engine to apply
+     *   styles with the same tags, which
+     *   is conceptually similar to CSS classes. <br>
+     *   <b>It is advised to use the {@link #setStyleGroups(Enum[])} method
+     *   instead of this method, as the usage of enums for modelling
+     *   group tags offers much better compile time type safety!</b>
+     *
+     * @param groupTags An array of group tags.
+     */
+    public void setStyleGroups( String... groupTags ) {
+        Objects.requireNonNull(groupTags);
         if ( !_styleGroups.isEmpty() )
             throw new IllegalStateException("Style groups already specified!");
 
-        _styleGroups.addAll( java.util.Arrays.asList(styleName) );
+        _styleGroups.addAll( java.util.Arrays.asList(groupTags) );
+    }
+
+    /**
+     *   This method is used by {@link swingtree.UIForAnySwing#group(String...)}
+     *   to attach so called <i>group tags</i> to a component. <br>
+     *   They are used by the SwingTree style engine to apply
+     *   styles with the same tags, which
+     *   is conceptually similar to CSS classes. <br>
+     *   It is advised to use this method over the {@link #setStyleGroups(String[])}
+     *   method, as the usage of enums for modelling
+     *   group tags offers much better compile time type safety!
+     *
+     * @param groupTags An array of group tags.
+     */
+    @SafeVarargs
+    public final <E extends Enum<E>> void setStyleGroups( E... groupTags ) {
+        String[] stringTags = new String[groupTags.length];
+        for ( int i = 0; i < groupTags.length; i++ ) {
+            E group = groupTags[i];
+            Objects.requireNonNull(group);
+            stringTags[i] = group.getClass().getSimpleName() + "." + group.name();
+        }
+        setStyleGroups(stringTags);
     }
 
     public List<String> getStyleGroups() { return Collections.unmodifiableList(_styleGroups); }
