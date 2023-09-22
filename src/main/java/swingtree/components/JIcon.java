@@ -61,7 +61,7 @@ public class JIcon extends JLabel
 
     @Override
     public void updateUI() {
-        ComponentExtension.from(this).updateUI();
+        ComponentExtension.from(this).installCustomUIIfPossible();
         /*
             The JIcon is a SwingTree native component type, so it also
             enjoys the perks of having a SwingTree based look and feel!

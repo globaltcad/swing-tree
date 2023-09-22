@@ -1915,7 +1915,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
 
     public final I withStyle( Styler<C> styler ) {
         NullUtil.nullArgCheck(styler, "styler", Function.class);
-        ComponentExtension.from(getComponent()).addStyling(styler);
+        ComponentExtension.from(getComponent()).addStyler( styler);
         return _this();
     }
 

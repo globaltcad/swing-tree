@@ -42,59 +42,24 @@ public final class ComponentExtension<C extends JComponent>
 
     public static void makeSureComponentHasExtension( JComponent comp ) { from(comp); }
 
+
     private final C _owner;
 
+    private final List<String> _styleGroups = new ArrayList<>(0);
     private final List<Expirable<Painter>> _animationPainters = new ArrayList<>(0);
 
-    private final List<String> _styleGroups = new ArrayList<>(0);
 
     private StylePainter<C> _stylePainter = StylePainter.none();
-
-    private DynamicLaF _laf = DynamicLaF.none();
-
-    private StyleSource<C> _styleSource = StyleSource.create();
+    private DynamicLaF     _dynamicLaF    = DynamicLaF.none();
+    private StyleSource<C> _styleSource   = StyleSource.create();
 
     private Color _initialBackgroundColor = null;
 
 
     private ComponentExtension( C owner ) { _owner = Objects.requireNonNull(owner); }
 
+
     C getOwner() { return _owner; }
-
-    Shape getMainClip() { return _stylePainter.getMainClip(); }
-
-    public void addStyling( Styler<C> styler ) {
-        Objects.requireNonNull(styler);
-        _styleSource = _styleSource.withLocalStyler(styler, _owner);
-        calculateApplyAndInstallStyle(false);
-    }
-
-    /**
-     *  Calculates a new {@link Style} object based on the {@link Styler} lambdas associated
-     *  with the component...
-     *
-     * @return A new immutable {@link Style} configuration.
-     */
-    public Style calculateStyle() {
-        return _styleSource.calculateStyleFor(_owner);
-    }
-
-    private Style _calculateAndApplyStyle(boolean force) {
-        return applyStyleToComponentState(calculateStyle(), force);
-    }
-
-    public void calculateApplyAndInstallStyle( boolean force ) {
-        _installStylePainterFor( _calculateAndApplyStyle(force) );
-    }
-
-    public void applyAndInstallStyle( Style style, boolean force ) {
-        _installStylePainterFor( applyStyleToComponentState(style, force) );
-    }
-
-    private void _installStylePainterFor( Style style ) {
-        _stylePainter = StylePainter.none(); // We reset the style painter so that the style is applied again!
-        _stylePainter = _stylePainter.update(style);
-    }
 
     /**
      *   This method is used by {@link swingtree.UIForAnySwing#group(String...)} to attach
@@ -139,41 +104,170 @@ public final class ComponentExtension<C extends JComponent>
         setStyleGroups(stringTags);
     }
 
+    /**
+     * @return The group tags associated with the component
+     *         in the form of an unmodifiable list of {@link String}s.
+     */
     public List<String> getStyleGroups() { return Collections.unmodifiableList(_styleGroups); }
 
+    /**
+     * @return The current {@link Style} configuration of the component
+     *         which is calculated based on the {@link Styler} lambdas
+     *         associated with the component.
+     */
     public Style getStyle() { return _stylePainter.getStyle(); }
 
+    /**
+     *  Removes all animations from the component.
+     *  This includes both {@link Painter} based animations
+     *  as well as {@link Styler} based animations.
+     */
     public void clearAnimations() {
         _animationPainters.clear();
         _styleSource = _styleSource.withoutAnimationStylers();
     }
 
+    /**
+     *  Use this to add a {@link Painter} based animation to the component.
+     *
+     * @param state The {@link AnimationState} which defines when the animation is active.
+     * @param painter The {@link Painter} which defines how the animation is rendered.
+     */
     public void addAnimationPainter( AnimationState state, swingtree.api.Painter painter ) {
         _animationPainters.add(new Expirable<>(Objects.requireNonNull(state.lifetime()), Objects.requireNonNull(painter)));
         _installCustomBorderBasedStyleAndAnimationRenderer();
     }
 
+    /**
+     *  Use this to add a {@link Styler} based animation to the component.
+     *
+     * @param state The {@link AnimationState} which defines when the animation is active.
+     * @param styler The {@link Styler} which defines how the style of the component is changed during the animation.
+     */
     public void addAnimationStyler( AnimationState state, Styler<C> styler ) {
         _styleSource = _styleSource.withAnimationStyler(state.lifetime(), styler);
         _installCustomBorderBasedStyleAndAnimationRenderer();
     }
 
-    public void updateUI() { _laf.updateUIFor(_owner); }
+    /**
+     *  SwingTree overrides the default Swing look and feel
+     *  to enable custom styling and animation capabilities.
+     *  This method is used to install the custom look and feel
+     *  for the component, if possible.
+     */
+    public void installCustomUIIfPossible() { _dynamicLaF.installCustomUIFor(_owner); }
 
-    void establishStyleAndBeginPainting( Graphics g ) {
-        Style style = _calculateAndApplyStyle(false);
-        _stylePainter = _stylePainter.beginPaintingWith( style, g );
-    }
-
+    /**
+     *  This method is used to paint the background style of the component
+     *  using the provided {@link Graphics} object.
+     *  The method is designed for components for which SwingTree could not install a custom UI,
+     *  and it is intended to be used by custom {@link JComponent#paint(Graphics)}
+     *  overrides, before calling the super implementation.
+     *
+     * @param g The {@link Graphics} object to use for rendering.
+     */
     public void paintBackgroundStyle( Graphics g )
     {
-        if ( _laf.customLookAndFeelIsInstalled() )
+        if ( _dynamicLaF.customLookAndFeelIsInstalled() )
             return; // We render through the custom installed UI!
 
         if ( _componentIsDeclaredInUI(_owner) )
             _paintBackground(g);
         else
             _stylePainter = _stylePainter.endPainting(); // custom style rendering unfortunately not possible for this component :/
+    }
+
+    /**
+     *  This method is used to paint the foreground style of the component
+     *  using the provided {@link Graphics2D} object.
+     *
+     * @param g2d The {@link Graphics2D} object to use for rendering.
+     */
+    public void paintForegroundStyle( Graphics2D g2d )
+    {
+        establishStyleAndBeginPainting(g2d);
+
+        // We remember if antialiasing was enabled before we render:
+        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
+        // Reset antialiasing to its previous state:
+        if ( StylePainter.DO_ANTIALIASING() )
+            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+
+        // We remember the clip:
+        Shape formerClip = g2d.getClip();
+
+        _stylePainter.paintForegroundStyle(g2d, _owner);
+
+        // We restore the clip:
+        if ( g2d.getClip() != formerClip )
+            g2d.setClip(formerClip);
+
+        // Reset antialiasing to its previous state:
+        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
+    }
+
+    Shape getMainClip() { return _stylePainter.getMainClip(); }
+
+    /**
+     *  Adds a {@link Styler} to the component.
+     *  The styler will be used to calculate the style of the component.
+     *
+     * @param styler The styler to add.
+     */
+    public void addStyler( Styler<C> styler ) {
+        Objects.requireNonNull(styler);
+        _styleSource = _styleSource.withLocalStyler(styler, _owner);
+        calculateApplyAndInstallStyle(false);
+    }
+
+    /**
+     *  Calculates a new {@link Style} object based on the {@link Styler} lambdas associated
+     *  with the component...
+     *
+     * @return A new immutable {@link Style} configuration.
+     */
+    public Style calculateStyle() {
+        return _styleSource.calculateStyleFor(_owner);
+    }
+
+    /**
+     *  Calculates a new {@link Style} object based on the {@link Styler} lambdas associated
+     *  with the component and then applies it to the component after which
+     *  a new {@link StylePainter} is installed for the component.
+     *  If the calculated style is the same as the current style, nothing happens
+     *  except in case the <code>force</code> parameter is set to <code>true</code>.
+     *
+     * @param force If set to <code>true</code>, the style will be applied even if it is the same as the current style.
+     */
+    public void calculateApplyAndInstallStyle( boolean force ) {
+        _installStylePainterFor( _calculateAndApplyStyle(force) );
+    }
+
+    /**
+     *  Applies the given {@link Style} to the component after which
+     *  a new {@link StylePainter} is installed for the component.
+     *  If the given style is the same as the current style, nothing happens
+     *  except in case the <code>force</code> parameter is set to <code>true</code>.
+     *
+     * @param style The style to apply.
+     * @param force If set to <code>true</code>, the style will be applied even if it is the same as the current style.
+     */
+    public void applyAndInstallStyle( Style style, boolean force ) {
+        _installStylePainterFor( _applyStyleToComponentState(style, force) );
+    }
+
+    void establishStyleAndBeginPainting( Graphics g ) {
+        Style style = _calculateAndApplyStyle(false);
+        _stylePainter = _stylePainter.beginPaintingWith( style, g );
+    }
+
+    private Style _calculateAndApplyStyle(boolean force) {
+        return _applyStyleToComponentState(calculateStyle(), force);
+    }
+
+    private void _installStylePainterFor( Style style ) {
+        _stylePainter = StylePainter.none(); // We reset the style painter so that the style is applied again!
+        _stylePainter = _stylePainter.update(style);
     }
 
     void _paintBackground(Graphics g)
@@ -186,11 +280,11 @@ public final class ComponentExtension<C extends JComponent>
         _stylePainter.renderBackgroundStyle( (Graphics2D) g, _owner );
     }
 
-    void paintBorderStyle( Graphics2D g2d, JComponent component ) {
+    void _paintBorderStyle( Graphics2D g2d, JComponent component ) {
         _stylePainter.paintBorderStyle(g2d, component);
     }
 
-    public void _renderAnimations( Graphics2D g2d )
+    void _renderAnimations( Graphics2D g2d )
     {
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
@@ -216,30 +310,7 @@ public final class ComponentExtension<C extends JComponent>
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    public void paintForegroundStyle( Graphics2D g2d )
-    {
-        establishStyleAndBeginPainting(g2d);
-
-        // We remember if antialiasing was enabled before we render:
-        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
-        // Reset antialiasing to its previous state:
-        if ( StylePainter.DO_ANTIALIASING() )
-            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
-
-        // We remember the clip:
-        Shape formerClip = g2d.getClip();
-
-        _stylePainter.paintForegroundStyle(g2d, _owner);
-
-        // We restore the clip:
-        if ( g2d.getClip() != formerClip )
-            g2d.setClip(formerClip);
-
-        // Reset antialiasing to its previous state:
-        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
-    }
-
-    public Style applyStyleToComponentState( Style style, boolean force )
+    private Style _applyStyleToComponentState( Style style, boolean force )
     {
         _styleSource = _styleSource.withoutExpiredAnimationStylers(); // Clean up expired animation stylers!
 
@@ -269,7 +340,7 @@ public final class ComponentExtension<C extends JComponent>
             styleCanBeRenderedThroughBorder = false;
 
         if ( isNotStyled || onlyDimensionalityIsStyled ) {
-            _laf = _laf._uninstallCustomLaF(_owner);
+            _dynamicLaF = _dynamicLaF._uninstallCustomLaF(_owner);
             if ( _styleSource.hasNoAnimationStylers() && _animationPainters.isEmpty() )
                 _uninstallCustomBorderBasedStyleAndAnimationRenderer();
             if ( _initialBackgroundColor != null ) {
@@ -427,7 +498,7 @@ public final class ComponentExtension<C extends JComponent>
         if ( !onlyDimensionalityIsStyled ) {
             _installCustomBorderBasedStyleAndAnimationRenderer();
             if ( !styleCanBeRenderedThroughBorder )
-                _laf = _laf.establishLookAndFeelFor(style, _owner);
+                _dynamicLaF = _dynamicLaF.establishLookAndFeelFor(style, _owner);
         }
 
         if ( style.hasCustomForegroundPainters() )

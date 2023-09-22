@@ -217,7 +217,7 @@ class DynamicLaF
         return new DynamicLaF(styleLaF, _formerLaF);
     }
 
-    public void updateUIFor( JComponent owner )
+    void installCustomUIFor(JComponent owner )
     {
         if ( owner instanceof JBox )
             ((JBox)owner).setUI(new DynamicLaF.PanelStyler() {
