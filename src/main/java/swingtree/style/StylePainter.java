@@ -1,12 +1,16 @@
 package swingtree.style;
 
 import swingtree.UI;
+import swingtree.animation.LifeTime;
 import swingtree.api.Painter;
 
-import javax.swing.*;
+import javax.swing.JComponent;
 import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -18,7 +22,7 @@ import java.util.function.Function;
  */
 final class StylePainter<C extends JComponent>
 {
-    private static final StylePainter<?> _NONE = new StylePainter<>(Style.none(), null, false);
+    private static final StylePainter<?> _NONE = new StylePainter<>(Style.none(), null, false, new Expirable[0]);
 
     public static <C extends JComponent> StylePainter<C> none() { return (StylePainter<C>) _NONE; }
 
@@ -30,35 +34,71 @@ final class StylePainter<C extends JComponent>
     private final Style _style;
     private final Shape _mainClip;
     private final boolean _mainClipEstablished;
+    private final Expirable<Painter>[] _animationPainters;
 
 
     // Cached Area object representing the inner component area:
     private Area _baseArea = null;
 
 
-    private StylePainter( Style style, Shape mainClip, boolean mainClipEstablished ) {
-        _style = Objects.requireNonNull(style);
-        _mainClip = mainClip;
+    private StylePainter(
+        Style style,
+        Shape mainClip,
+        boolean mainClipEstablished,
+        Expirable<Painter>[] animationPainters
+    ) {
+        _style               = Objects.requireNonNull(style);
+        _mainClip            = mainClip;
         _mainClipEstablished = mainClipEstablished;
+        _animationPainters   = Objects.requireNonNull(animationPainters);
     }
 
     StylePainter<C> beginPaintingWith( Style style, Graphics g ) {
-        if ( Style.none().equals(style) ) return none();
+        if ( Style.none().equals(style) ) return reset();
         if ( !_mainClipEstablished ) {
             Shape mainClip = g.getClip();
             boolean mainClipEstablished = true;
-            return new StylePainter<>( style, mainClip, mainClipEstablished);
+            return new StylePainter<>( style, mainClip, mainClipEstablished, _animationPainters);
         }
-        return new StylePainter<>( style, _mainClip, _mainClipEstablished);
+        return new StylePainter<>( style, _mainClip, _mainClipEstablished, _animationPainters);
     }
 
     StylePainter<C> endPainting() {
-        return new StylePainter<>( _style, null, false);
+        return new StylePainter<>( _style, null, false, _animationPainters);
     }
 
     StylePainter<C> update( Style style ) {
-        if ( Style.none().equals(style) ) return none();
-        return new StylePainter<>( style, _mainClip, _mainClipEstablished);
+        if ( Style.none().equals(style) ) return reset();
+        return new StylePainter<>( style, _mainClip, _mainClipEstablished, _animationPainters);
+    }
+
+    StylePainter<C> reset() {
+        StylePainter<C> reset = none();
+        if ( _animationPainters.length > 0 )
+            reset = new StylePainter<>(
+                            reset._style,
+                            reset._mainClip,
+                            reset._mainClipEstablished,
+                            _animationPainters
+                        );
+
+        return reset;
+    }
+
+    StylePainter<C> withAnimationPainter( LifeTime lifeTime, Painter animationPainter ) {
+        java.util.List<Expirable<Painter>> animationPainters = new ArrayList<>(Arrays.asList(_animationPainters));
+        animationPainters.add(new Expirable<>(lifeTime, animationPainter));
+        return new StylePainter<>(_style, _mainClip, _mainClipEstablished, animationPainters.toArray(new Expirable[0]));
+    }
+
+    StylePainter<C> withoutAnimationPainters() {
+        return new StylePainter<>(_style, _mainClip, _mainClipEstablished, new Expirable[0]);
+    }
+
+    StylePainter<C> withoutExpiredAnimationPainters() {
+        List<Expirable<Painter>> animationPainters = new ArrayList<>(Arrays.asList(_animationPainters));
+        animationPainters.removeIf(Expirable::isExpired);
+        return new StylePainter<>(_style, _mainClip, _mainClipEstablished, animationPainters.toArray(new Expirable[0]));
     }
 
     public Style getStyle() { return _style; }
@@ -1195,4 +1235,33 @@ final class StylePainter<C extends JComponent>
             }
         });
     }
+
+    boolean hasNoPainters() {
+        return _animationPainters.length == 0;
+    }
+
+    void renderAnimations(Graphics2D g2d )
+    {
+        // We remember if antialiasing was enabled before we render:
+        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
+
+        // We enable antialiasing:
+        if ( StylePainter.DO_ANTIALIASING() )
+            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+
+        // Animations are last: they are rendered on top of everything else:
+        for ( Expirable<Painter> expirablePainter : _animationPainters )
+            if ( !expirablePainter.isExpired() ) {
+                try {
+                    expirablePainter.get().paint(g2d);
+                } catch ( Exception e ) {
+                    e.printStackTrace();
+                    // An exception inside a painter should not prevent everything else from being painted!
+                }
+            }
+
+        // Reset antialiasing to its previous state:
+        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
+    }
+
 }

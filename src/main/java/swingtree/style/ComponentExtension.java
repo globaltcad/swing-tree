@@ -46,7 +46,6 @@ public final class ComponentExtension<C extends JComponent>
     private final C _owner;
 
     private final List<String> _styleGroups = new ArrayList<>(0);
-    private final List<Expirable<Painter>> _animationPainters = new ArrayList<>(0);
 
 
     private StylePainter<C> _stylePainter = StylePainter.none();
@@ -123,8 +122,8 @@ public final class ComponentExtension<C extends JComponent>
      *  as well as {@link Styler} based animations.
      */
     public void clearAnimations() {
-        _animationPainters.clear();
-        _styleSource = _styleSource.withoutAnimationStylers();
+        _stylePainter = _stylePainter.withoutAnimationPainters();
+        _styleSource  = _styleSource.withoutAnimationStylers();
     }
 
     /**
@@ -134,7 +133,7 @@ public final class ComponentExtension<C extends JComponent>
      * @param painter The {@link Painter} which defines how the animation is rendered.
      */
     public void addAnimationPainter( AnimationState state, swingtree.api.Painter painter ) {
-        _animationPainters.add(new Expirable<>(Objects.requireNonNull(state.lifetime()), Objects.requireNonNull(painter)));
+        _stylePainter = _stylePainter.withAnimationPainter(state.lifetime(), Objects.requireNonNull(painter));
         _installCustomBorderBasedStyleAndAnimationRenderer();
     }
 
@@ -261,12 +260,12 @@ public final class ComponentExtension<C extends JComponent>
         _stylePainter = _stylePainter.beginPaintingWith( style, g );
     }
 
-    private Style _calculateAndApplyStyle(boolean force) {
+    private Style _calculateAndApplyStyle( boolean force ) {
         return _applyStyleToComponentState(calculateStyle(), force);
     }
 
     private void _installStylePainterFor( Style style ) {
-        _stylePainter = StylePainter.none(); // We reset the style painter so that the style is applied again!
+        _stylePainter = _stylePainter.reset(); // We reset the style painter so that the style is applied again!
         _stylePainter = _stylePainter.update(style);
     }
 
@@ -286,28 +285,8 @@ public final class ComponentExtension<C extends JComponent>
 
     void _renderAnimations( Graphics2D g2d )
     {
-        // We remember if antialiasing was enabled before we render:
-        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
-
-        // We enable antialiasing:
-        if ( StylePainter.DO_ANTIALIASING() )
-            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
-
-        // Animations are last: they are rendered on top of everything else:
-        for ( Expirable<Painter> expirablePainter : new ArrayList<>(_animationPainters) )
-            if ( expirablePainter.isExpired() )
-                _animationPainters.remove(expirablePainter);
-            else {
-                try {
-                    expirablePainter.get().paint(g2d);
-                } catch ( Exception e ) {
-                    e.printStackTrace();
-                    // An exception inside a painter should not prevent everything else from being painted!
-                }
-            }
-
-        // Reset antialiasing to its previous state:
-        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
+        _stylePainter.renderAnimations(g2d);
+        _stylePainter = _stylePainter.withoutExpiredAnimationPainters();
     }
 
     private Style _applyStyleToComponentState( Style style, boolean force )
@@ -341,7 +320,7 @@ public final class ComponentExtension<C extends JComponent>
 
         if ( isNotStyled || onlyDimensionalityIsStyled ) {
             _dynamicLaF = _dynamicLaF._uninstallCustomLaF(_owner);
-            if ( _styleSource.hasNoAnimationStylers() && _animationPainters.isEmpty() )
+            if ( _styleSource.hasNoAnimationStylers() && _stylePainter.hasNoPainters() )
                 _uninstallCustomBorderBasedStyleAndAnimationRenderer();
             if ( _initialBackgroundColor != null ) {
                 _owner.setBackground(_initialBackgroundColor);
