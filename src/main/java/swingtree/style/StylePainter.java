@@ -246,12 +246,12 @@ final class StylePainter<C extends JComponent>
         }
 
         // The background box is calculated from the margins and border radius:
-        int left      = Math.max(_style.margin().left().orElse(0), 0)   + insLeft  ;
-        int top       = Math.max(_style.margin().top().orElse(0), 0)    + insTop   ;
-        int right     = Math.max(_style.margin().right().orElse(0), 0)  + insRight ;
-        int bottom    = Math.max(_style.margin().bottom().orElse(0), 0) + insBottom;
-        int width     = comp.getWidth() ;
-        int height    = comp.getHeight();
+        int left   = Math.max(_style.margin().left().orElse(0), 0)   + insLeft  ;
+        int top    = Math.max(_style.margin().top().orElse(0), 0)    + insTop   ;
+        int right  = Math.max(_style.margin().right().orElse(0), 0)  + insRight ;
+        int bottom = Math.max(_style.margin().bottom().orElse(0), 0) + insBottom;
+        int width  = comp.getWidth() ;
+        int height = comp.getHeight();
 
         boolean insAllTheSame = insTop == insLeft && insLeft == insBottom && insBottom == insRight;
 
@@ -437,10 +437,10 @@ final class StylePainter<C extends JComponent>
         int topBorderWidth    = style.border().widths().top().orElse(0);
         int rightBorderWidth  = style.border().widths().right().orElse(0);
         int bottomBorderWidth = style.border().widths().bottom().orElse(0);
-        int left      = Math.max(style.margin().left().orElse(0),   0) + ( shadow.isInset() ? leftBorderWidth   : 0 );
-        int top       = Math.max(style.margin().top().orElse(0),    0) + ( shadow.isInset() ? topBorderWidth    : 0 );
-        int right     = Math.max(style.margin().right().orElse(0),  0) + ( shadow.isInset() ? rightBorderWidth  : 0 );
-        int bottom    = Math.max(style.margin().bottom().orElse(0), 0) + ( shadow.isInset() ? bottomBorderWidth : 0 );
+        int left   = Math.max(style.margin().left().orElse(0),   0) + ( shadow.isInset() ? leftBorderWidth   : 0 );
+        int top    = Math.max(style.margin().top().orElse(0),    0) + ( shadow.isInset() ? topBorderWidth    : 0 );
+        int right  = Math.max(style.margin().right().orElse(0),  0) + ( shadow.isInset() ? rightBorderWidth  : 0 );
+        int bottom = Math.max(style.margin().bottom().orElse(0), 0) + ( shadow.isInset() ? bottomBorderWidth : 0 );
         int topLeftRadius     = Math.max(style.border().topLeftRadius(), 0);
         int topRightRadius    = Math.max(style.border().topRightRadius(), 0);
         int bottomRightRadius = Math.max(style.border().bottomRightRadius(), 0);
