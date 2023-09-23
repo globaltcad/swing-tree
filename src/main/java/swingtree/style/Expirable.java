@@ -2,6 +2,8 @@ package swingtree.style;
 
 import swingtree.animation.LifeTime;
 
+import java.util.Objects;
+
 /**
  *  A wrapper class for a payload that has a lifetime which
  *  is used to determine if the payload is expired or not.
@@ -13,8 +15,8 @@ class Expirable<B>
 
 
     Expirable( LifeTime lifetime, B payload ) {
-        _lifetime = lifetime;
-        _value = payload;
+        _lifetime = Objects.requireNonNull(lifetime);
+        _value    = Objects.requireNonNull(payload);
     }
 
     /**
