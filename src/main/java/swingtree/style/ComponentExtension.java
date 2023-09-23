@@ -49,8 +49,8 @@ public final class ComponentExtension<C extends JComponent>
 
 
     private StylePainter<C> _stylePainter = StylePainter.none();
-    private DynamicLaF     _dynamicLaF    = DynamicLaF.none();
-    private StyleSource<C> _styleSource   = StyleSource.create();
+    private DynamicLaF      _dynamicLaF   = DynamicLaF.none();
+    private StyleSource<C>  _styleSource  = StyleSource.create();
 
     private Color _initialBackgroundColor = null;
 
@@ -74,10 +74,14 @@ public final class ComponentExtension<C extends JComponent>
      */
     public void setStyleGroups( String... groupTags ) {
         Objects.requireNonNull(groupTags);
-        if ( !_styleGroups.isEmpty() )
-            throw new IllegalStateException("Style groups already specified!");
+        boolean alreadyHasGroupTags = !_styleGroups.isEmpty();
+        if ( alreadyHasGroupTags )
+            _styleGroups.clear();
 
         _styleGroups.addAll( java.util.Arrays.asList(groupTags) );
+
+        if ( alreadyHasGroupTags )
+            calculateApplyAndInstallStyle(false);
     }
 
     /**

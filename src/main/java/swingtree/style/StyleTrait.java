@@ -26,29 +26,29 @@ public final class StyleTrait<C extends JComponent>
     private final String[] _toInherit;
     private final Class<C> _type;
 
-    private StyleTrait( String name, String id, String[] inherits, Class<C> type ) {
-        _group     = Objects.requireNonNull(name);
+    private StyleTrait( String id, String groupTag, String[] inherits, Class<C> type ) {
         _id        = Objects.requireNonNull(id);
+        _group     = Objects.requireNonNull(groupTag);
         _toInherit = Objects.requireNonNull(inherits).clone();
         _type      = Objects.requireNonNull(type);
         // And we check for duplicates and throw an exception if we find any.
         for ( int i = 0; i < _toInherit.length - 1; i++ )
             if ( _toInherit[ i ].equals( _toInherit[ i + 1 ] ) )
                 throw new IllegalArgumentException(
-                        "Duplicate inheritance found in " + this + "!"
-                );
+                            "Duplicate inheritance found in " + this + "!"
+                        );
     }
 
-    StyleTrait() { this( "", "", new String[0], (Class<C>) JComponent.class); }
+    StyleTrait() { this( "", "", new String[0], (Class<C>) JComponent.class ); }
 
 
-    String group() { return _group; }
+    String group()       { return _group;     }
 
-    String id() { return _id; }
+    String id()          { return _id;        }
 
     String[] toInherit() { return _toInherit; }
 
-    Class<?> type() { return _type; }
+    Class<?> type()      { return _type;      }
 
     /**
      *  Creates a new {@link StyleTrait} with the same properties as this one,
@@ -63,7 +63,7 @@ public final class StyleTrait<C extends JComponent>
      * @return A new {@link StyleTrait} with the same properties as this one,
      *         but with the given group name.
      */
-    public StyleTrait<C> group( String group ) { return new StyleTrait<>(group, _id, _toInherit, _type); }
+    public StyleTrait<C> group( String group ) { return new StyleTrait<>(_id, group, _toInherit, _type); }
 
     /**
      *  Creates a new {@link StyleTrait} with the same properties as this one,
@@ -74,10 +74,7 @@ public final class StyleTrait<C extends JComponent>
      * @return A new {@link StyleTrait} with the same properties as this one,
      *         but with the given group name.
      */
-    public <E extends Enum<E>> StyleTrait<C> group( E group ) {
-        Objects.requireNonNull(group);
-        return group(StyleUtility.toString(group));
-    }
+    public <E extends Enum<E>> StyleTrait<C> group( E group ) { return group(StyleUtility.toString(Objects.requireNonNull(group))); }
 
     /**
      *  Creates a new {@link StyleTrait} with the same properties as this one,
@@ -92,7 +89,7 @@ public final class StyleTrait<C extends JComponent>
      * @return A new {@link StyleTrait} with the same properties as this one,
      *         but with the given id.
      */
-    public StyleTrait<C> id( String id ) { return new StyleTrait<>(_group, id, _toInherit, _type); }
+    public StyleTrait<C> id( String id ) { return new StyleTrait<>(id, _group, _toInherit, _type); }
 
     /**
      *  Creates a new {@link StyleTrait} with the same properties as this one,
@@ -103,10 +100,7 @@ public final class StyleTrait<C extends JComponent>
      * @return A new {@link StyleTrait} with the same properties as this one,
      *         but with the given id.
      */
-    public <E extends Enum<E>> StyleTrait<C> id( E id ) {
-        Objects.requireNonNull(id);
-        return id(StyleUtility.toString(id));
-    }
+    public <E extends Enum<E>> StyleTrait<C> id( E id ) { return id(StyleUtility.toString(Objects.requireNonNull(id))); }
 
     /**
      *  Creates a new {@link StyleTrait} with the same properties as this one,
@@ -121,7 +115,7 @@ public final class StyleTrait<C extends JComponent>
      * @return A new {@link StyleTrait} with the same properties as this one,
      *         but with the given groups to inherit from.
      */
-    public StyleTrait<C> inherits( String... superGroups ) { return new StyleTrait<>(_group, _id, superGroups, _type ); }
+    public StyleTrait<C> inherits( String... superGroups ) { return new StyleTrait<>(_id, _group, superGroups, _type ); }
 
     /**
      *  Creates a new {@link StyleTrait} with the same properties as this one,
@@ -134,6 +128,7 @@ public final class StyleTrait<C extends JComponent>
      */
     @SafeVarargs
     public final <E extends Enum<E>> StyleTrait<C> inherits( E... superGroups ) {
+        Objects.requireNonNull(superGroups);
         String[] superGroupNames = new String[superGroups.length];
         for ( int i = 0; i < superGroups.length; i++ ) {
             E superGroup = Objects.requireNonNull(superGroups[i]);
@@ -151,9 +146,7 @@ public final class StyleTrait<C extends JComponent>
      * @return A new {@link StyleTrait} with the same properties as this one,
      *         but with the given type.
      */
-    public <T extends C> StyleTrait<T> type( Class<T> type ) {
-        return new StyleTrait<>(_group, _id, _toInherit, type );
-    }
+    public <T extends C> StyleTrait<T> type( Class<T> type ) { return new StyleTrait<>(_id, _group, _toInherit, type ); }
 
     boolean isApplicableTo( JComponent component ) {
         Objects.requireNonNull(component);
@@ -194,8 +187,8 @@ public final class StyleTrait<C extends JComponent>
     public String toString() {
         String inherits = java.util.Arrays.toString(_toInherit);
         return "StyleTrait[" +
-                    "group='"   + _group   + "', " +
                     "id='"      + _id      + "', " +
+                    "group='"   + _group   + "', " +
                     "inherits=" + inherits + ", "  +
                     "type="     + _type    +
                 ']';
@@ -207,7 +200,7 @@ public final class StyleTrait<C extends JComponent>
         for ( String inherit : _toInherit )
             hash = 31 * hash + inherit.hashCode();
 
-        return Objects.hash( _group, _id, hash, _type );
+        return Objects.hash( _id, _group, hash, _type );
     }
 
     @Override
@@ -216,8 +209,8 @@ public final class StyleTrait<C extends JComponent>
             return false;
 
         StyleTrait<?> that = (StyleTrait<?>) other;
-        return _group .equals( that._group ) &&
-               _id    .equals( that._id    ) &&
+        return _id    .equals( that._id    ) &&
+               _group .equals( that._group ) &&
                _type  .equals( that._type  ) &&
                 java.util.Arrays.equals(_toInherit, that._toInherit);
     }
