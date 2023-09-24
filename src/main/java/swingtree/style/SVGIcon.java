@@ -4,6 +4,7 @@ import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.parser.SVGLoader;
+import org.slf4j.Logger;
 import swingtree.UI;
 
 import javax.swing.ImageIcon;
@@ -22,6 +23,8 @@ import java.util.Optional;
  */
 public class SVGIcon extends ImageIcon
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(SVGIcon.class);
+
     /**
      *  This enum is used to specify how the SVG image should be scaled to fit the
      *  dimensions of the component that it is being rendered into
@@ -54,7 +57,7 @@ public class SVGIcon extends ImageIcon
             SVGLoader loader = new SVGLoader();
             tempSVGDocument = loader.load(svgUrl);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to load SVG document from URL: " + svgUrl, e);
         }
         this.svgDocument = tempSVGDocument;
     }

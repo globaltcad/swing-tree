@@ -29,4 +29,6 @@ class Expirable<B>
      *  @return The payload of this instance.
      **/
     B get() { return _value; }
+
+    LifeTime getLifeTime() { return _lifetime; }
 }

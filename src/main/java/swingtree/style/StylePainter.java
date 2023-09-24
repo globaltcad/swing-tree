@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.slf4j.Logger;
 import swingtree.UI;
 import swingtree.animation.LifeTime;
 import swingtree.api.Painter;
@@ -22,6 +23,8 @@ import java.util.function.Function;
  */
 final class StylePainter<C extends JComponent>
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(StylePainter.class);
+
     private static final StylePainter<?> _NONE = new StylePainter<>(Style.none(), new Expirable[0], null, false);
 
     public static <C extends JComponent> StylePainter<C> none() { return (StylePainter<C>) _NONE; }
@@ -174,21 +177,25 @@ final class StylePainter<C extends JComponent>
             });
 
         // 4. Painters, which are provided by the user and can be anything
-        _style.painters(layer).forEach(backgroundPainter -> {
+        _style.painters(layer).forEach( backgroundPainter -> {
             if ( backgroundPainter == Painter.none() ) return;
             g2d.setClip(_getBaseArea(comp));
             AffineTransform oldTransform = new AffineTransform(g2d.getTransform());
             try {
                 backgroundPainter.paint(g2d);
             } catch ( Exception e ) {
-                e.printStackTrace();
+                log.error(
+                    "An exception occurred while executing painter '" + backgroundPainter + "' " +
+                    "on layer '" + layer + "' of component '" + comp + "'!",
+                    e
+                );
                 /*
                     If exceptions happen in user provided painters, we don't want to
                     mess up the rendering of the rest of the component, so we catch them here!
 
-                    Ideally this would be logged in the logging framework of a user of the SwingTree
-                    library, but we don't know which logging framework that is, so we just print
-                    the stack trace to the console so that developers can see what went wrong.
+                    Ideally this would be logged by a user of the SwingTree
+                    library, but we don't know which logging framework that is, so we just
+                    use the SLF4J API to give the user a choice.
 
                     Hi there! If you are reading this, you are probably a developer using the SwingTree
                     library, thank you for using it! Good luck finding out what went wrong! :)
@@ -1255,7 +1262,11 @@ final class StylePainter<C extends JComponent>
                 try {
                     expirablePainter.get().paint(g2d);
                 } catch ( Exception e ) {
-                    e.printStackTrace();
+                    log.error(
+                        "Exception while painting animation '" + expirablePainter.get() + "' " +
+                        "with lifetime " + expirablePainter.getLifeTime()+ ".",
+                        e
+                    );
                     // An exception inside a painter should not prevent everything else from being painted!
                 }
             }

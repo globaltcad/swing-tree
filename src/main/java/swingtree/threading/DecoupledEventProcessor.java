@@ -1,5 +1,6 @@
 package swingtree.threading;
 
+import org.slf4j.Logger;
 import swingtree.UI;
 
 import java.util.concurrent.BlockingQueue;
@@ -10,6 +11,8 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public final class DecoupledEventProcessor implements EventProcessor
 {
+	private static final Logger log = org.slf4j.LoggerFactory.getLogger(DecoupledEventProcessor.class);
+
 	private static final DecoupledEventProcessor _INSTANCE = new DecoupledEventProcessor();
 
 	static DecoupledEventProcessor INSTANCE() { return _INSTANCE; }
@@ -25,7 +28,7 @@ public final class DecoupledEventProcessor implements EventProcessor
 		try {
 			rendererQueue.put(task);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Failed to register application event!", e);
 		}
 	}
 
@@ -49,7 +52,7 @@ public final class DecoupledEventProcessor implements EventProcessor
 				// wait for the task to be processed. The wait is released by the notifyAll() call in the task.
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Failed to register and run application event!", e);
 		}
 	}
 
@@ -63,7 +66,7 @@ public final class DecoupledEventProcessor implements EventProcessor
 		try {
 			UI.runNow(runnable);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Failed to register and run UI event!", e);
 		}
 	}
 
@@ -81,7 +84,7 @@ public final class DecoupledEventProcessor implements EventProcessor
 				if (rethrow)
 					throw e;
 				else
-					e.printStackTrace();
+					log.error("An exception occurred while processing an event!", e);
 			}
 		}
 	}
@@ -102,7 +105,7 @@ public final class DecoupledEventProcessor implements EventProcessor
 		try {
 			this.join(false);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			log.error("The application event processing queue was interrupted!", e);
 		}
 	}
 
@@ -140,7 +143,7 @@ public final class DecoupledEventProcessor implements EventProcessor
 			try {
 				this.rendererQueue.take().run();
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.error("An exception occurred while processing an event!", e);
 			}
 		}
 	}

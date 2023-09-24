@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.slf4j.Logger;
 import swingtree.api.Styler;
 
 import javax.swing.JComponent;
@@ -56,6 +57,8 @@ import java.util.function.Function;
  */
 public abstract class StyleSheet
 {
+    protected final Logger log = org.slf4j.LoggerFactory.getLogger(getClass());
+
     private static final StyleSheet _NONE = new StyleSheet() { @Override protected void configure() {} };
 
     public static StyleSheet none() { return _NONE; }
@@ -96,10 +99,13 @@ public abstract class StyleSheet
         try {
             configure(); // The subclass will add traits to this style sheet using the add(..) method.
         } catch ( Exception e ) {
-            e.printStackTrace();
+            log.error(
+                "An exception occurred while configuring style sheet " + getClass().getSimpleName() + "!",
+                e
+            );
             /*
                 Exceptions inside a style sheet should not be fatal.
-                We just print the stack trace for debugging purposes
+                We just log the stack trace for debugging purposes
                 and then continue to prevent the GUI from breaking.
             */
         }

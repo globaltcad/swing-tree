@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.slf4j.Logger;
 import swingtree.UI;
 
 import javax.swing.*;
@@ -125,6 +126,8 @@ import java.util.List;
  */
 final class FontStyle
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(FontStyle.class);
+
     private static final FontStyle _NONE = new FontStyle(
                                                         "",    // Font name (family)
                                                         0,     // size
@@ -253,7 +256,7 @@ final class FontStyle
             paint = (Paint) attributeMap.get(TextAttribute.FOREGROUND);
             transform = (AffineTransform) attributeMap.get(TextAttribute.TRANSFORM);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.warn("Failed to extract font attributes from font: " + font, e);
         }
 
         Objects.requireNonNull(font);

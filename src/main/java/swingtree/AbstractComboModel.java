@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.slf4j.Logger;
 import sprouts.Var;
 
 import javax.swing.*;
@@ -18,6 +19,8 @@ import java.util.Objects;
  */
 abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 {
+	private static final Logger log = org.slf4j.LoggerFactory.getLogger(AbstractComboModel.class);
+
 	protected int _selectedIndex = -1;
 	final Var<E> _selectedItem;
 	protected java.util.List<ListDataListener> listeners = new ArrayList<>();
@@ -79,14 +82,18 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 					new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, getSize())
 				);
 		} catch ( Exception e ) {
-			e.printStackTrace();
+			log.error("An exception occurred while firing combo box model listeners!", e);
 		}
     }
 
     void doQuietly( Runnable task ) {
     	boolean alreadyWithinQuietTask = !_acceptsEditorChanges;
 		_acceptsEditorChanges = false;
-		try { task.run(); } catch ( Exception e ) { e.printStackTrace(); }
+		try {
+			task.run();
+		} catch ( Exception e ) {
+			log.error("An exception occurred while running a combo box model task!", e);
+		}
 		if ( !alreadyWithinQuietTask )
 			_acceptsEditorChanges = true;
     }
@@ -110,7 +117,7 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 				boolean stateChanged = _selectedItem.orElseNull() != e;
 				_selectedItem.act(e);
 				if ( stateChanged )
-					doQuietly( ()-> fireListeners() );
+					doQuietly(this::fireListeners);
 
 			} catch (Exception ignored) {
 				// It looks like conversion was not successful

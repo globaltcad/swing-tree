@@ -1,5 +1,7 @@
 package swingtree.threading;
 
+import org.slf4j.Logger;
+
 import java.util.function.Supplier;
 
 /**
@@ -23,11 +25,14 @@ import java.util.function.Supplier;
  */
 final class LenientAWTEventProcessor extends BasicSingleThreadedEventProcessor
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(LenientAWTEventProcessor.class);
+
     @Override protected void _tryRunning( Runnable runnable ) {
         try {
             runnable.run();
         } catch (Exception e) {
-            e.printStackTrace(); // If a user wants better logging, they can implement their own EventProcessor.
+            // If a user wants better logging, they can do it through SLF4J or implement their own EventProcessor.
+            log.error("An exception occurred while running a task in the UI thread!", e);
         }
     }
 }

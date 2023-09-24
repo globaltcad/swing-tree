@@ -1,5 +1,6 @@
 package swingtree.dialogs;
 
+import org.slf4j.Logger;
 import swingtree.UI;
 
 import javax.swing.Icon;
@@ -20,6 +21,8 @@ import java.util.Objects;
  */
 public final class ConfirmDialogBuilder
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ConfirmDialogBuilder.class);
+
     private static final ConfirmDialogBuilder _QUESTION = type(JOptionPane.QUESTION_MESSAGE).title("Confirm");
     private static final ConfirmDialogBuilder _INFO     = type(JOptionPane.INFORMATION_MESSAGE).title("Info");
     private static final ConfirmDialogBuilder _WARN     = type(JOptionPane.WARNING_MESSAGE).title("Warning");
@@ -183,7 +186,7 @@ public final class ConfirmDialogBuilder
                         ));
             });
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to show confirm dialog, returning 'CANCEL' as dialog result!", e);
             return ConfirmAnswer.CANCEL;
         }
     }

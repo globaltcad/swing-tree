@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.slf4j.Logger;
 import swingtree.UI;
 import swingtree.api.Painter;
 import swingtree.api.Peeker;
@@ -26,6 +27,8 @@ import java.util.function.Function;
  */
 public final class ComponentStyleDelegate<C extends JComponent>
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ComponentStyleDelegate.class);
+
     private final C _component;
     private final Style _style;
 
@@ -59,7 +62,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         try {
             peeker.accept(_component);
         } catch( Exception e ) {
-            e.printStackTrace();
+            log.error("Peeker threw an exception: " + e.getMessage(), e);
             // We don't want to crash the application if the peeker throws an exception.
         }
         return this;

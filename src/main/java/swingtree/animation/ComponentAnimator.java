@@ -1,7 +1,9 @@
 package swingtree.animation;
 
-import javax.swing.*;
-import java.awt.*;
+import org.slf4j.Logger;
+
+import javax.swing.JComponent;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
@@ -13,6 +15,8 @@ import java.util.concurrent.TimeUnit;
  */
 class ComponentAnimator
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ComponentAnimator.class);
+
     private final WeakReference<Component> _compRef;
     private final LifeTime      _lifeTime;
     private final RunCondition _condition;
@@ -62,15 +66,15 @@ class ComponentAnimator
         try {
             shouldContinue = _condition.shouldContinue(state);
         } catch ( Exception e ) {
-            e.printStackTrace();
+            log.error("An exception occurred while checking if an animation should continue!", e);
             /*
                  If exceptions happen in user provided animation stop conditions,
                  then we don't want to mess up the rest of the animation logic, so we catch
                  any exceptions right here!
 
                  Ideally this would be logged in the logging framework of a user of the SwingTree
-                 library, but we don't know which logging framework that is, so we just print
-                 the stack trace to the console so that developers can see what went wrong.
+                 library, but we don't know which logging framework that is, so we just log
+                 the error through SLF4J so that developers can see what went wrong through their logging framework...
 
                  Hi there! If you are reading this, you are probably a developer using the SwingTree
                  library, thank you for using it! Good luck finding out what went wrong! :)
@@ -86,15 +90,15 @@ class ComponentAnimator
             try {
                 _animation.finish(state); // An animation may want to do something when it is finished (e.g. reset the component to its original state).
             } catch ( Exception e ) {
-                e.printStackTrace();
+                log.error("An exception occurred while executing the finish procedure of an animation!", e);
                 /*
                      If exceptions happen in the finishing procedure of animations provided by the user,
                      then we don't want to mess up the execution of the rest of the animations,
                      so we catch any exceptions right here!
 
                      Ideally this would be logged in the logging framework of a user of the SwingTree
-                     library, but we don't know which logging framework that is, so we just print
-                     the stack trace to the console so that developers can see what went wrong.
+                     library, but we don't know which logging framework that is, so we just log
+                     the error to SLF4J so that developers can see what went wrong in their own logs.
 
                      Hi there! If you are reading this, you are probably a developer using the SwingTree
                      library, thank you for using it! Good luck finding out what went wrong! :)
@@ -106,15 +110,15 @@ class ComponentAnimator
         try {
             _animation.run(state);
         } catch ( Exception e ) {
-            e.printStackTrace();
+            log.error("An exception occurred while executing an animation!", e);
             /*
                  If exceptions happen in the animations provided by the user,
                  then we don't want to mess up the execution of the rest of the animations,
                  so we catch any exceptions right here!
 
                  Ideally this would be logged in the logging framework of a user of the SwingTree
-                 library, but we don't know which logging framework that is, so we just print
-                 the stack trace to the console so that developers can see what went wrong.
+                 library, but we don't know which logging framework that is, so we just log
+                 the error to SLF4J so that developers can see what went wrong in their own logs.
 
                  Hi there! If you are reading this, you are probably a developer using the SwingTree
                  library, thank you for using it! Good luck finding out what went wrong! :)

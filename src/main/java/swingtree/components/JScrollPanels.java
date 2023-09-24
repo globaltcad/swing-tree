@@ -1,6 +1,7 @@
 package swingtree.components;
 
 import net.miginfocom.swing.MigLayout;
+import org.slf4j.Logger;
 import swingtree.UI;
 import swingtree.api.mvvm.EntryViewModel;
 import swingtree.api.mvvm.ViewSupplier;
@@ -47,6 +48,8 @@ import java.util.stream.IntStream;
  */
 public class JScrollPanels extends JScrollPane
 {
+	private static final Logger log = org.slf4j.LoggerFactory.getLogger(JScrollPanels.class);
+
 	/**
 	 * 	Constructs a new {@link JScrollPanels} instance with the provided alignment and size.
 	 * 	@param align The alignment of the entries inside this {@link JScrollPanels} instance.
@@ -494,7 +497,7 @@ public class JScrollPanels extends JScrollPane
 				try {
 					_lastState = _provider.apply(isHighlighted);
 				} catch (Exception e) {
-					e.printStackTrace();
+					log.error("Failed to create view for entry: " + this, e);
 				}
 				this.setBackground( isHighlighted ? HIGHLIGHT : LOW_LIGHT );
 				this.add(_lastState, "grow");

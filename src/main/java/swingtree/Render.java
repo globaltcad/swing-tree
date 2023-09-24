@@ -1,5 +1,7 @@
 package swingtree;
 
+import org.slf4j.Logger;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -14,7 +16,9 @@ import java.util.function.*;
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
  */
-public final class Render<C extends JComponent,E> {
+public final class Render<C extends JComponent,E>
+{
+	private static final Logger log = org.slf4j.LoggerFactory.getLogger(Render.class);
 
 	private final Class<C> _componentType;
 	private final Supplier<Border> _borderSupplier;
@@ -313,7 +317,7 @@ public final class Render<C extends JComponent,E> {
 					try {
 						renderer.accept(cell, (Graphics2D) g);
 					} catch (Exception e) {
-						e.printStackTrace();
+						log.error("An exception occurred while rendering a cell!", e);
 					}
 				}
 			}) );

@@ -3,7 +3,7 @@ package swingtree.api;
 import swingtree.style.ComponentStyleDelegate;
 import swingtree.style.Style;
 
-import javax.swing.*;
+import javax.swing.JComponent;
 import java.util.Objects;
 
 /**
