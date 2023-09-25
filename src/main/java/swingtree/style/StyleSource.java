@@ -80,16 +80,14 @@ final class StyleSource<C extends JComponent>
                 try {
                     style = expirableStyler.get().style(new ComponentStyleDelegate<>(owner, style)).style();
                 } catch ( Exception e ) {
-                    log.error("An exception occurred while applying an animation styler!", e);
+                    log.warn("An exception occurred while applying an animation styler!", e);
                     /*
                          If any exceptions happen in a Styler implementation provided by a user,
                          then we don't want to prevent the other Stylers from doing their job,
                          which is why we catch any exceptions immediately!
 
-                         Ideally this would be logged by the user of the SwingTree
-                         library, but we don't know which logging framework they use, so we log
-                         the stack trace to the SLF4J API so that developers can see what went wrong
-                         in their own logs.
+				         We log as warning because exceptions during
+				         styling are not a big deal!
 
                          Hi there! If you are reading this, you are probably a developer using the SwingTree
                          library, thank you for using it! Good luck finding out what went wrong! :)

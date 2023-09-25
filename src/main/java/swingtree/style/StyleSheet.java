@@ -99,7 +99,7 @@ public abstract class StyleSheet
         try {
             configure(); // The subclass will add traits to this style sheet using the add(..) method.
         } catch ( Exception e ) {
-            log.error(
+            log.warn(
                 "An exception occurred while configuring style sheet " + getClass().getSimpleName() + "!",
                 e
             );
@@ -107,6 +107,9 @@ public abstract class StyleSheet
                 Exceptions inside a style sheet should not be fatal.
                 We just log the stack trace for debugging purposes
                 and then continue to prevent the GUI from breaking.
+
+				We log as warning because exceptions during styling
+				are usually rather harmless!
             */
         }
         _buildAndSetStyleTraitPaths();

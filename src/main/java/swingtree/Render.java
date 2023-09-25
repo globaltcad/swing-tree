@@ -317,7 +317,11 @@ public final class Render<C extends JComponent,E>
 					try {
 						renderer.accept(cell, (Graphics2D) g);
 					} catch (Exception e) {
-						log.error("An exception occurred while rendering a cell!", e);
+						log.warn("An exception occurred while rendering a cell!", e);
+					    /*
+					        We log as warning because exceptions during rendering are not considered
+					        as harmful as elsewhere!
+					    */
 					}
 				}
 			}) );

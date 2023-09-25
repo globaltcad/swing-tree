@@ -184,7 +184,7 @@ final class StylePainter<C extends JComponent>
             try {
                 backgroundPainter.paint(g2d);
             } catch ( Exception e ) {
-                log.error(
+                log.warn(
                     "An exception occurred while executing painter '" + backgroundPainter + "' " +
                     "on layer '" + layer + "' of component '" + comp + "'!",
                     e
@@ -193,9 +193,8 @@ final class StylePainter<C extends JComponent>
                     If exceptions happen in user provided painters, we don't want to
                     mess up the rendering of the rest of the component, so we catch them here!
 
-                    Ideally this would be logged by a user of the SwingTree
-                    library, but we don't know which logging framework that is, so we just
-                    use the SLF4J API to give the user a choice.
+				    We log as warning because exceptions during rendering are not considered
+				    as harmful as elsewhere!
 
                     Hi there! If you are reading this, you are probably a developer using the SwingTree
                     library, thank you for using it! Good luck finding out what went wrong! :)
@@ -1262,12 +1261,15 @@ final class StylePainter<C extends JComponent>
                 try {
                     expirablePainter.get().paint(g2d);
                 } catch ( Exception e ) {
-                    log.error(
+                    log.warn(
                         "Exception while painting animation '" + expirablePainter.get() + "' " +
                         "with lifetime " + expirablePainter.getLifeTime()+ ".",
                         e
                     );
                     // An exception inside a painter should not prevent everything else from being painted!
+                    // Note that we log as warning because exceptions during rendering are not considered
+                    // as harmful as elsewhere!
+
                 }
             }
 
