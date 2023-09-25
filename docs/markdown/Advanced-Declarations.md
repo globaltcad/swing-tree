@@ -1,13 +1,18 @@
 
 # Advanced UI Declarations #
 
-The problem with declarative code is that it is often not as
-adaptive as imperative code. And this might be a reason why you could
-be sceptical about using SwingTree for your UIs.
+A common problem with declarative code is that it is often not as
+dynamic and adaptive as imperative code. 
+This is due to the fact that the declarations that this
+kind of code consists of are lacking 
+the same level of high control flow granularity
+as the statements in imperative code.
+So there is reason to be sceptical about a 
+purely declarative approach.
 
-But fear not, the SwingTree API is designed to be just as flexible
-as imperative code by exposing a set of useful methods for 
-creating and manipulating UIs more dynamically.
+But fear not, the SwingTree API is designed in a way that conveniently
+allows you to switch from declarative to imperative code
+in case you need the extra amount of control.
 
 ## Unwrapping Components ##
 
