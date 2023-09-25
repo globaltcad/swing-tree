@@ -5326,8 +5326,8 @@ public final class UI extends UILayoutConstants
      * @param <E> The type parameter defining the concrete enum type.
      */
     public static <E extends Enum<E>> void select( String title, String message, Icon icon, Var<E> selected ) {
-        Objects.requireNonNull( message );
-        Objects.requireNonNull( title );
+        Objects.requireNonNull( message  );
+        Objects.requireNonNull( title    );
         Objects.requireNonNull( selected );
         E[] options = selected.type().getEnumConstants();
         String[] asStr = new String[options.length];

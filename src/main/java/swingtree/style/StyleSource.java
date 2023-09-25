@@ -11,7 +11,9 @@ import java.util.*;
 
 /**
  *  A style source is a container for a local styler, animation stylers and a style sheet
- *  which are all used to calculate the final style of a component.
+ *  which are all used to calculate the final {@link Style} configuration of a component. <br>
+ *  This object can be thought of as a function of lambdas that takes a {@link JComponent}
+ *  and returns a {@link Style} object. <br>
  *
  * @param <C> The type of the component that is being styled, animated or sized in a particular way...
  */

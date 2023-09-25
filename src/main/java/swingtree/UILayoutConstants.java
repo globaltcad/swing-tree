@@ -8,7 +8,68 @@ import swingtree.layout.LayoutConstraint;
 
 /**
  *  Essentially just a namespace for static layout constants for
- *  the {@link net.miginfocom.swing.MigLayout} {@link java.awt.LayoutManager} type.
+ *  the {@link net.miginfocom.swing.MigLayout} {@link java.awt.LayoutManager} type. <br>
+ *  This class is not intended to be instantiated! <br>
+ *  <br>
+ *  The constants as well as static factory methods in this class
+ *  are intended to be used like this:
+ *  <pre>{@code
+ * panel(FILL.and(WRAP(2)))
+ * .withPrefSize(500, 300)
+ * .add(GROW,
+ *   panel(FILL_X.and(WRAP(2)),"[shrink][grow]")
+ *   .add(label("Username"))
+ *   .add(GROW_X,
+ *     textField(vm.username())
+ *   )
+ *   .add(SHRINK_X, label("Password"))
+ *   .add(GROW_X,
+ *     passwordField(vm.password())
+ *   )
+ * )
+ * .add(GROW,
+ *   panel(FILL_X.and(WRAP(2)),"[shrink][grow]")
+ *   .add(label("Email"))
+ *   .add(GROW_X,
+ *     textField(vm.email())
+ *   )
+ *   .add(SHRINK_X, label("Gender"))
+ *   .add(GROW_X,
+ *     comboBox(vm.gender())
+ *   )
+ * )
+ * .add(GROW_X,
+ *   panel(FILL_X.and(WRAP(1)))
+ *   .add(GROW_X,
+ *     checkBox("I accept!", vm.termsAccepted())
+ *   )
+ *   .add(GROW_X,
+ *     button("Register")
+ *     .onClick( it -> vm.register() )
+ *   )
+ * )
+ * .add(GROW_X,
+ *   panel(FILL_X.and(WRAP(1)))
+ *   .withBorderTitled("Feedback")
+ *   .add(GROW_X,
+ *     boldLabel(
+ *       vm.feedback()
+ *     )
+ *     .withForeground(vm.feedbackColor())
+ *   )
+ * )
+ * .add(GROW_X.and(SPAN), button("RESET").onClick( it -> vm.reset() ));
+ * }</pre>
+ *
+ *  In this little example form we can see how the constants are used to
+ *  create a form with a grid layout. <br>
+ *  The {@link #FILL} constant is used to make the panels fill the entire
+ *  width of the parent panel. <br>
+ *  The {@link #WRAP(int)} constant is used to make the panels wrap after
+ *  n components have been added to them. <br>
+ *  The {@link #GROW} constant is used to make the panels grow vertically
+ *  to fill the entire height of the parent panel. <br>
+ *  ... and so on. <br>
  */
 public abstract class UILayoutConstants
 {
@@ -90,7 +151,7 @@ public abstract class UILayoutConstants
      *  A factory method for creating a {@link net.miginfocom.layout.LC} instance.
      * @return A {@link net.miginfocom.layout.LC} instance.
      */
-    public static LC LC() { return new LC().fill(); }
+    public static LC LC() { return new LC(); }
     public static AC AC() { return new AC(); }
     public static CC CC() { return new CC(); }
 }
