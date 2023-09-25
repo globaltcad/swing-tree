@@ -76,6 +76,42 @@ Swing Tree combines this to give you a quasi XML-based UI framework
 with compile time type safety, turing completeness and all the
 other good stuff that comes with Java (or any other JVM language you prefer).
 
+*"But wait"*, I hear you say:
+"*how do I even access the GUI components if they are hidden away behind the SwingTree API?!?*"
+
+Don't worry, you can access the actual components in SwingTree
+by using the `peek` method, which exposes the underlying component
+anywhere you want in the builder API of SwingTree.
+
+So in the above example this would look something like this:
+
+```java
+UI.show(
+    UI.panel("wrap 1")
+    .add(UI.label("Welcome to Swing-Tree!"))
+    .add(
+        UI.panel("wrap 2")
+        .add(UI.label("Enter name:"))
+        .add(UI.textField("John Doe"))
+        .add(UI.label("Enter age:"))
+        .add(UI.textField("42"))
+        .peek( p -> {
+            if ( someCondition )
+                p.setBackground(Color.YELLOW)
+            if ( someOtherCondition )
+                ... // Some other procedural stuff    
+        })
+    )
+    .add(UI.button("Click to Swing!"))
+ );
+```
+
+As you can see here, we can easily modify the underlying `JPanel`
+instance, even though it is actually nested inside another outer panel!
+
+For more details with respect to declarative UI building
+check out the [advanced declarations tutorial](Advanced-Declarations.md).
+
 ## Growing Branches ##
 
 The next important step to building Swing UIs with Swing-Tree is
