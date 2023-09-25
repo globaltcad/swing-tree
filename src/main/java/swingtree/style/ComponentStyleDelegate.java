@@ -12,6 +12,7 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -64,6 +65,53 @@ public final class ComponentStyleDelegate<C extends JComponent>
         } catch( Exception e ) {
             log.error("Peeker threw an exception: " + e.getMessage(), e);
             // We don't want to crash the application if the peeker throws an exception.
+        }
+        return this;
+    }
+
+    /**
+     *   Allows you to apply styles based on a condition.
+     *   So if the first argument, the condition, is true,
+     *   then it causes the supplied {@link Styler} to
+     *   update the style, if however the condition is false,
+     *   then the styler will simply be ignored
+     *   and the style will not be updated.
+     *   <br>
+     *   Here a simple usage example:
+     *   <pre>{@code
+     *       UI.panel().withStyle( it -> it
+     *          .border(3, Color.BLACK)
+     *          .borderRadius(24)
+     *          .applyIf(it.component().isEnabled(), it2 -> it2
+     *              .borderColor(Color.LIGHT_GRAY)
+     *              .backgroundColor(Color.CYAN)
+     *          )
+     *          .margin(3)
+     *          .padding(4)
+     *       );
+     *   }</pre>
+     *   This is conceptually similar to {@link swingtree.UIForAnySwing#applyIf(boolean, Consumer)}
+     *   with the difference that it is based on a {@link Styler} instead of a consumer,
+     *   as the style API is based on immutable types whose updated results must be returned
+     *   by the conditional scope.
+     *
+     * @param condition The condition determining if the provided {@code styler} should be executed.
+     * @param styler A supplier for
+     * @return This instance if the condition is false, or the supplied {@code styler} threw an exception,
+     *         a new style delegate updated according to the {@code styler}.
+     */
+    public ComponentStyleDelegate<C> applyIf(
+        boolean condition,
+        Styler<C> styler
+    ) {
+        if ( !condition )
+            return this;
+
+        try {
+            return styler.style(this);
+        } catch( Exception e ) {
+            log.error("Conditional styler threw an exception: " + e.getMessage(), e);
+            // We don't want to crash the application if the conditional styler throws an exception.
         }
         return this;
     }

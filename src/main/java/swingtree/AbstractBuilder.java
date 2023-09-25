@@ -235,7 +235,7 @@ abstract class AbstractBuilder<I, C extends Component>
      *  lambda which continues the building process if the previous boolean is true.
      *  This builder instance will simply be supplied to the provided consumer lambda.
      *  Inside the second lambda, one can then continue building the UI while also not
-     *  breaking the benefits of nesting and method chaining provided by this class...
+     *  breaking the benefits of nesting and method chaining provided by this builder...
      *  <p>
      *  This is in essence a more advanced version of {@link #apply(Consumer)}.
      *  <br>
