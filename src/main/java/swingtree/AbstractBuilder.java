@@ -269,15 +269,43 @@ abstract class AbstractBuilder<I, C extends Component>
 
 
     /**
-     *  Use this to build or not build UI, based on a provided {@link Optional} representing a consumer
-     *  lambda which continues the building process if is is present within the optional.
-     *  This builder will simply be supplied to the provided consumer lambda.
-     *  Inside the second lambda, one can then continue building the UI while also not
-     *  breaking the benefits of nesting and method chaining provided by this class...
+     *  Allows you to build declarative UI conditionally,
+     *  meaning that the UI is only built if the provided {@link Optional} value is present.
      *  <p>
-     *  This is in essence a more advanced version of {@link #applyIf(boolean, Consumer)}
-     *  and {@link #apply(Consumer)}.
-     *  <br>
+     *  Consider the following example:
+     *  <pre>{@code
+     * // In your view model:
+     * public Optional<MySubModel> getM() {
+     *   return Optional.ofNullable(this.model);
+     * }
+     *
+     * // In your view:
+     * UI.panel()
+     * .add(UI.label("Maybe Sub Model:"))
+     * .applyIfPresent(vm.getM().map(m->ui->ui
+     *   .add(UI.label("Hello Sub Model!"))
+     *   .add(UI.label("A:")
+     *   .add(UI.textField(m.getA()))
+     *   .add(UI.label("B:"))
+     *   .add(UI.textField(m.getB()))
+     *   // ...
+     * ))
+     * .add(UI.label("Some other stuff..."));
+     * }</pre>
+     *
+     * The {@code applyIfPresent} method takes an {@code Optional<Consumer<I>>} as parameter,
+     * where {@code I} is the type of the UI builder.
+     * This allows you to map the optional value to a consumer which is only executed if the value is present.
+     * If the optional value is present, the consumer is executed with the
+     * current UI builder as a parameter, which allows you to continue building the UI as usual.
+     * <br>
+     * The {@code m->ui->ui} may look a bit confusing at first, but it is simply a lambda expression
+     * which takes the optional value and returns a consumer ({@code ui->ui...}) which takes the UI builder
+     * as a parameter.
+     * <br>
+     * This is in essence a more advanced {@code Optional} centric version of {@link #applyIf(boolean, Consumer)}
+     * and {@link #apply(Consumer)}.
+     * <br>
      *
      * @param building An optional consumer lambda which simply consumes this builder node.
      * @return This very instance, which enables builder-style method chaining.
@@ -291,7 +319,7 @@ abstract class AbstractBuilder<I, C extends Component>
 
     /**
      *  Use this to continue building UI inside a provided lambda
-     *  if you need to introduce some procedural code in between
+     *  if you need to introduce some imperative code in between
      *  the building process. <br>
      *  This is especially useful for when you need to build UI based on loops.
      *  The current builder instance will simply be supplied to the provided {@link Consumer} lambda.
