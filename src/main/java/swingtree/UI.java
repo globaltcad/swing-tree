@@ -3938,6 +3938,19 @@ public final class UI extends UILayoutConstants
 
     /**
      *  Use this to create a builder for a new {@link JToggleButton} instance with
+     *  the icon found at the path provided by the supplied {@link IconDeclaration} displayed on top of it.
+     *  Note that the icon will be cached by the {@link JToggleButton} instance, so that it will not be reloaded.
+     *
+     * @param icon The icon which should be displayed on the toggle button.
+     * @return A builder instance for the provided {@link JToggleButton}, which enables fluent method chaining.
+     */
+    public static UIForToggleButton<JToggleButton> toggleButton( IconDeclaration icon ) {
+        NullUtil.nullArgCheck(icon, "icon", IconDeclaration.class);
+        return toggleButton().withIcon(icon);
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JToggleButton} instance with
      *  the provided {@link Icon} displayed on it and the provided boolean property
      *  dynamically determining whether the toggle button is selected or not.
      *

@@ -1,6 +1,7 @@
 package swingtree.common
 
 import swingtree.SwingTree
+import swingtree.api.IconDeclaration
 import swingtree.components.JSplitButton
 import swingtree.threading.EventProcessor
 import swingtree.UI
@@ -49,16 +50,20 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.label((Val<String>)null)},
                     {UI.label(300,200,null)},
                     {UI.label((Icon)null)},
+                    {UI.label((IconDeclaration)null)},
                     {UI.html((String)null)},
                     {UI.html((Val<String>)null)},
                     {UI.labelWithIcon((Val<Icon>)null)},
-                    {UI.button(null, null,null)},
+                    {UI.button((Icon)null,(Icon)null,(Icon)null)},
+                    {UI.button((IconDeclaration)null,(IconDeclaration)null,(IconDeclaration)null)},
                     {UI.button().onClick(null)},
                     {UI.button().onChange(null)},
                     {UI.button((Icon)null)},
+                    {UI.button((IconDeclaration)null)},
                     {UI.button((Val<String>)null)},
                     {UI.buttonWithIcon((Val<Icon>)null)},
                     {UI.button((Icon)null,(Icon)null)},
+                    {UI.button((IconDeclaration)null,(IconDeclaration)null)},
                     {UI.button(0,0, (ImageIcon)null, (ImageIcon)null)},
                     {UI.button("").isSelectedIf((Var)null)},
                     {UI.toggleButton((String)null)},
@@ -67,6 +72,7 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.toggleButton((String)null, (Var<Boolean>)null)},
                     {UI.toggleButton((Val<String>)null, (Var<Boolean>)null)},
                     {UI.toggleButton((Icon)null)},
+                    {UI.toggleButton((IconDeclaration)null)},
                     {UI.toggleButtonWithIcon((Val<Icon>)null)},
                     {UI.toggleButtonWithIcon((Val<Icon>)null, (Var<Boolean>)null)},
                     {UI.of((SwingBuilder)null)},
