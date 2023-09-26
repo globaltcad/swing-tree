@@ -6,10 +6,7 @@ import sprouts.Event;
 import sprouts.*;
 import swingtree.animation.Animator;
 import swingtree.animation.LifeTime;
-import swingtree.api.Buildable;
-import swingtree.api.MenuBuilder;
-import swingtree.api.Styler;
-import swingtree.api.SwingBuilder;
+import swingtree.api.*;
 import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
@@ -1498,6 +1495,30 @@ public final class UI extends UILayoutConstants
         return button().peek( it -> it.setIcon(icon) );
     }
 
+    /**
+     *  Use this to create a builder for the {@link JButton} UI component
+     *  with an icon displayed on top.
+     *  The icon is determined based on the provided {@link IconDeclaration}
+     *  instance which is conceptually merely a resource path to the icon.
+     *
+     * @param icon The desired icon to be displayed on top of the button.
+     * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
+     */
+    public static UIForButton<JButton> button( IconDeclaration icon ) {
+        NullUtil.nullArgCheck(icon, "icon", IconDeclaration.class);
+        return icon.find().map(UI::button).orElseGet(UI::button);
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JButton} UI component
+     *  with an icon displayed on top which should be scaled to the provided dimensions.
+     *  This is in essence a convenience method for {@code UI.of(new JButton()).peek( it -> it.setIcon(icon) )}.
+     *
+     * @param width The width the icon should be scaled to.
+     * @param height The height the icon should be scaled to.
+     * @param icon The icon to be displayed on top of the button.
+     * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
+     */
     public static UIForButton<JButton> button( int width, int height, ImageIcon icon ) {
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
         if ( width != icon.getIconWidth() || height != icon.getIconHeight() ) {
@@ -1514,6 +1535,22 @@ public final class UI extends UILayoutConstants
         }
         ImageIcon finalIcon = icon;
         return button().peek(it -> it.setIcon(finalIcon) );
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JButton} UI component
+     *  with an icon displayed on top which should be scaled to the provided dimensions.
+     *  The icon is determined based on the provided {@link IconDeclaration}
+     *  instance which is conceptually merely a resource path to the icon.
+     *
+     * @param width The width the icon should be scaled to.
+     * @param height The height the icon should be scaled to.
+     * @param icon The desired icon to be displayed on top of the button.
+     * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
+     */
+    public static UIForButton<JButton> button( int width, int height, IconDeclaration icon ) {
+        NullUtil.nullArgCheck(icon, "icon", IconDeclaration.class);
+        return icon.find().map( it -> button(width, height, it) ).orElseGet( UI::button );
     }
 
     /**
@@ -1546,6 +1583,24 @@ public final class UI extends UILayoutConstants
 
     /**
      *  Use this to create a builder for the {@link JButton} UI component
+     *  with a default icon as well as a hover icon displayed on top.
+     *  The icons are determined based on the provided {@link IconDeclaration}
+     *  instances which is conceptually merely a resource paths to the icons.
+     *
+     * @param icon The default icon to be displayed on top of the button.
+     * @param onHover The hover icon to be displayed on top of the button.
+     * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
+     */
+    public static UIForButton<JButton> button( IconDeclaration icon, IconDeclaration onHover ) {
+        NullUtil.nullArgCheck(icon, "icon", IconDeclaration.class);
+        NullUtil.nullArgCheck(onHover, "onHover", IconDeclaration.class);
+        return icon.find()
+                   .flatMap( it -> onHover.find().map( it2 -> button(it, it2) ) )
+                   .orElseGet( UI::button );
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JButton} UI component
      *  with a default icon as well as a hover icon displayed on top
      *  which should both be scaled to the provided dimensions.
      *
@@ -1574,6 +1629,27 @@ public final class UI extends UILayoutConstants
 
     /**
      *  Use this to create a builder for the {@link JButton} UI component
+     *  with a default icon as well as a hover icon displayed on top
+     *  which should both be scaled to the provided dimensions.
+     *  The icons are determined based on the provided {@link IconDeclaration}
+     *  instances which is conceptually merely a resource paths to the icons.
+     *
+     * @param width The width the icons should be scaled to.
+     * @param height The height the icons should be scaled to.
+     * @param icon The default icon to be displayed on top of the button.
+     * @param onHover The hover icon to be displayed on top of the button.
+     * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
+     */
+    public static UIForButton<JButton> button( int width, int height, IconDeclaration icon, IconDeclaration onHover ) {
+        NullUtil.nullArgCheck(icon, "icon", IconDeclaration.class);
+        NullUtil.nullArgCheck(onHover, "onHover", IconDeclaration.class);
+        return icon.find()
+                   .flatMap( it -> onHover.find().map( it2 -> button(width, height, it, it2) ) )
+                   .orElseGet( UI::button );
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JButton} UI component
      *  with a default, an on-hover and an on-press icon displayed on top.
      *  This is in essence a convenience method for:
      *  <pre>{@code 
@@ -1596,6 +1672,26 @@ public final class UI extends UILayoutConstants
         return button().peek(it -> it.setIcon(icon) )
                 .peek(it -> it.setRolloverIcon(onHover) )
                 .peek(it -> it.setPressedIcon(onPress) );
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JButton} UI component
+     *  with a default, an on-hover and an on-press icon displayed on top.
+     *  The icons are determined based on the provided {@link IconDeclaration}
+     *  instances which is conceptually merely a resource paths to the icons.
+     *
+     * @param icon The default icon to be displayed on top of the button.
+     * @param onHover The hover icon to be displayed on top of the button.
+     * @param onPress The pressed icon to be displayed on top of the button.
+     * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
+     */
+    public static UIForButton<JButton> button( IconDeclaration icon, IconDeclaration onHover, IconDeclaration onPress ) {
+        NullUtil.nullArgCheck(icon, "icon", IconDeclaration.class);
+        NullUtil.nullArgCheck(onHover, "onHover", IconDeclaration.class);
+        NullUtil.nullArgCheck(onPress, "onPress", IconDeclaration.class);
+        return icon.find()
+                   .flatMap( it -> onHover.find().flatMap( it2 -> onPress.find().map( it3 -> button(it, it2, it3) ) ) )
+                   .orElseGet( UI::button );
     }
 
     /**
@@ -3299,6 +3395,22 @@ public final class UI extends UILayoutConstants
     }
 
     /**
+     *  Use this to create a UI builder for a text-less label containing and displaying an icon.
+     *  The icon is specified by a {@link IconDeclaration} which
+     *  is essentially just a path to an icon resource.
+     *  If the icon cannot be found, the label will be empty.
+     *  Note that loaded icons are cached, so if you load the same icon multiple times,
+     *  the same icon instance will be used (see {@link SwingTree#getIconCache()}).
+     *
+     * @param icon The icon which should be placed into a {@link JLabel}.
+     * @return A builder instance for the label, which enables fluent method chaining.
+     */
+    public static UIForLabel<JLabel> label( IconDeclaration icon ) {
+        NullUtil.nullArgCheck(icon, "icon", IconDeclaration.class);
+        return icon.find().map( UI::label ).orElseGet( () -> label("") );
+    }
+
+    /**
      *  Use this to create a UI builder for a text-less label containing and displaying an icon dynamically.
      *
      * @param icon The icon property which should dynamically provide a desired icon for the {@link JLabel}.
@@ -3332,6 +3444,24 @@ public final class UI extends UILayoutConstants
         Image scaled = icon.getImage().getScaledInstance(width, height, scaleHint);
         return of((JLabel) new Label())
                 .withIcon(new ImageIcon(scaled));
+    }
+
+    /**
+     *  Use this to create a UI builder for a text-less label containing and displaying an icon.
+     *  The icon is specified by a {@link IconDeclaration} which
+     *  is essentially just a path to an icon resource.
+     *  If the icon cannot be found, the label will be empty.
+     *  Note that loaded icons are cached, so if you load the same icon multiple times,
+     *  the same icon instance will be used (see {@link SwingTree#getIconCache()}).
+     *
+     * @param width The width of the icon when displayed on the label.
+     * @param height The height of the icon when displayed on the label.
+     * @param icon The icon which should be placed into a {@link JLabel}.
+     * @return A builder instance for the label, which enables fluent method chaining.
+     */
+    public static UIForLabel<JLabel> label( int width, int height, IconDeclaration icon ) {
+        NullUtil.nullArgCheck(icon, "icon", IconDeclaration.class);
+        return icon.find().map( i -> label(width, height, i) ).orElseGet( () -> label("") );
     }
 
     /**
@@ -3409,6 +3539,20 @@ public final class UI extends UILayoutConstants
     }
 
     /**
+     *  Creates a builder node wrapping a new {@link JIcon} instance with the icon found at the
+     *  path provided by the supplied {@link IconDeclaration} displayed on it.
+     *  Note that the icon will be cached by the {@link JIcon} instance, so that it will not be reloaded.
+     *
+     * @param icon The icon which should be displayed on the {@link JIcon}.
+     * @return A builder instance for the icon, which enables fluent method chaining.
+     * @throws IllegalArgumentException If the provided icon is null.
+     */
+    public static UIForIcon<JIcon> icon( IconDeclaration icon ) {
+        NullUtil.nullArgCheck(icon, "icon", IconDeclaration.class);
+        return of(new JIcon(icon));
+    }
+
+    /**
      *  Creates a builder node wrapping a new {@link JIcon} instance with the
      *  provided icon scaled to the provided width and height.
      *
@@ -3431,6 +3575,23 @@ public final class UI extends UILayoutConstants
 
         Image scaled = ((ImageIcon) icon).getImage().getScaledInstance(width, height, scaleHint);
         return of(new JIcon(new ImageIcon(scaled)));
+    }
+
+    /**
+     *  Creates a builder node wrapping a new {@link JIcon} instance with the icon found at the
+     *  path defined by the supplied {@link IconDeclaration} displayed on it and scaled to the
+     *  provided width and height.
+     *  Note that the icon will be cached by the {@link JIcon} instance, so that it will not be reloaded.
+     *
+     * @param width The width of the icon when displayed on the {@link JIcon}.
+     * @param height The height of the icon when displayed on the {@link JIcon}.
+     * @param icon The icon which should be placed into a {@link JIcon} for display.
+     * @return A builder instance for the icon, which enables fluent method chaining.
+     * @throws IllegalArgumentException If the provided icon is null.
+     */
+    public static UIForIcon<JIcon> icon( int width, int height, IconDeclaration icon ) {
+        NullUtil.nullArgCheck(icon, "icon", IconDeclaration.class);
+        return icon.find().map( i -> icon(width, height, i) ).orElseGet( () -> icon("") );
     }
 
     /**

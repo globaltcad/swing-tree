@@ -1,6 +1,7 @@
 package swingtree.style;
 
 import swingtree.UI;
+import swingtree.api.IconDeclaration;
 
 import javax.swing.ImageIcon;
 import java.awt.*;
@@ -250,6 +251,17 @@ public final class ImageStyle
      * @return A new {@link ImageStyle} instance with the specified image.
      */
     public ImageStyle image( ImageIcon image ) { return new ImageStyle(_layer, _primer, image, _placement, _repeat, _autoFit, _width, _height, _opacity, _padding); }
+
+    /**
+     *  Here you can specify the <b>path to the image in the form of an {@link IconDeclaration}</b>
+     *  for which the icon will be loaded and drawn onto the component.
+     *  If the icon could not be found, then the image will not be drawn.
+     *  The path is relative to the classpath or may be an absolute path.
+     *
+     * @param image The path to the (icon) image in the form of an {@link IconDeclaration}.
+     * @return A new {@link ImageStyle} instance with the specified image.
+     */
+    public ImageStyle image( IconDeclaration image ) { return image.find().map(this::image).orElse(this); }
 
     /**
      *  Here you can specify the <b>placement</b> of the image onto the component.

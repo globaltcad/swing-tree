@@ -3,11 +3,13 @@ package swingtree;
 import sprouts.Action;
 import sprouts.Val;
 import sprouts.Var;
+import swingtree.api.IconDeclaration;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -167,6 +169,19 @@ public final class Tab
         if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
         if ( _icon != null ) throw new IllegalArgumentException("Icon already specified!");
         return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, Val.of(icon), _tip, _onSelected, _onMouseClick);
+    }
+
+    /**
+     *  Determines the icon to be displayed in the tab header based on a {@link IconDeclaration},
+     *  which is essentially just a path to the icon which should be displayed in the tab header.
+     *  If the icon resource is not found, then no icon will be displayed.
+     *
+     * @param icon The icon declaration, essentially just a path to the icon which should be displayed in the tab header.
+     * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
+     */
+    public final Tab withIcon( IconDeclaration icon ) {
+        Objects.requireNonNull(icon);
+        return icon.find().map( it -> withIcon(it) ).orElse(this);
     }
 
     /**

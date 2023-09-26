@@ -2,6 +2,7 @@ package swingtree.components;
 
 import swingtree.SwingTree;
 import swingtree.UI;
+import swingtree.api.IconDeclaration;
 import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
@@ -20,6 +21,10 @@ public class JIcon extends JLabel
     public JIcon(String path) {
         super(_getFromCacheOrLoadFrom(path));
         updateUI();
+    }
+
+    public JIcon(IconDeclaration declaration) {
+        super(_getFromCacheOrLoadFrom(declaration.path()));
     }
 
     public JIcon(Icon icon) {

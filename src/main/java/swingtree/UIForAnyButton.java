@@ -3,6 +3,7 @@ package swingtree;
 import sprouts.Action;
 import sprouts.Val;
 import sprouts.Var;
+import swingtree.api.IconDeclaration;
 
 import javax.swing.*;
 import java.awt.*;
@@ -72,6 +73,20 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public I withIcon( Icon icon ) {
         NullUtil.nullArgCheck(icon,"icon",Icon.class);
         getComponent().setIcon(icon);
+        return _this();
+    }
+
+    /**
+     *  Use this to specify the icon for the wrapped button type.
+     *  The icon is determined based on the provided {@link IconDeclaration}
+     *  instance which is conceptually merely a resource path to the icon.
+     *
+     * @param icon The desired icon to be displayed on top of the button.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withIcon( IconDeclaration icon ) {
+        NullUtil.nullArgCheck(icon,"icon", IconDeclaration.class);
+        icon.find().ifPresent( i -> getComponent().setIcon(i) );
         return _this();
     }
 
