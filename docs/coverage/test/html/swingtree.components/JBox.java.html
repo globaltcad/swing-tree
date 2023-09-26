@@ -101,7 +101,7 @@ public class JBox extends JComponent implements Accessible
      */
     @Override
     public void updateUI() {
-<span class="fc" id="L104">        ComponentExtension.from(this).updateUI();</span>
+<span class="fc" id="L104">        ComponentExtension.from(this).installCustomUIIfPossible();</span>
         /*
             The JBox is a SwingTree native type, so it also
             enjoys the perks of having a SwingTree look and feel!

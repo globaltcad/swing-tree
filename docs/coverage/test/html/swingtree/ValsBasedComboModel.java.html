@@ -7,13 +7,13 @@ class ValsBasedComboModel&lt;E&gt; extends AbstractComboModel&lt;E&gt;
 {
     private final Vals&lt;E&gt; _items;
 
-    ValsBasedComboModel(Vals&lt;E&gt; items) {
+    ValsBasedComboModel( Vals&lt;E&gt; items ) {
 <span class="nc" id="L11">        super(Var.ofNullable(_findCommonType(items), null));</span>
 <span class="nc" id="L12">        _items = items;</span>
 <span class="nc" id="L13">        _selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
 <span class="nc" id="L14">    }</span>
 
-    ValsBasedComboModel(Var&lt;E&gt; var, Vals&lt;E&gt; items) {
+    ValsBasedComboModel( Var&lt;E&gt; var, Vals&lt;E&gt; items ) {
 <span class="nc" id="L17">        super(var);</span>
 <span class="nc" id="L18">        _items = items;</span>
 <span class="nc" id="L19">        _selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
@@ -23,12 +23,12 @@ class ValsBasedComboModel&lt;E&gt; extends AbstractComboModel&lt;E&gt;
 
 <span class="nc" id="L24">    @Override public E getElementAt( int index ) { return _items.at(index).orElseNull(); }</span>
 
-    @Override public AbstractComboModel&lt;E&gt; withVar(Var&lt;E&gt; newVar) {
+    @Override public AbstractComboModel&lt;E&gt; withVar( Var&lt;E&gt; newVar ) {
 <span class="nc" id="L27">        return new ValsBasedComboModel&lt;&gt;(newVar, _items);</span>
     }
 
     @Override
-    protected void setAt(int index, E element) {
+    protected void setAt( int index, E element ) {
         /*
             Vals are immutable, so we can't modify them.
             So we'll just ignore it.

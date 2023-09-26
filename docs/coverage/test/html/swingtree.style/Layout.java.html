@@ -8,14 +8,14 @@ import java.awt.*;
 import java.util.Objects;
 
 /**
- *    Implementations of this are layout configuration for a component,
- *    which are value objects that can be created through
+ *    An abstract representation of an immutable layout configuration for a specific component,
+ *    for which layout manager specific implementations can be instantiated through
  *    various factory methods like {@link Layout#border()}, {@link Layout#flow()}, {@link Layout#grid(int, int)}...
  *    and then supplied to the style API through {@link ComponentStyleDelegate#layout(Layout)}
  *    so that the layout can then be installed onto a component dynamically.
  *    &lt;p&gt;
  *    The various layout types hold necessary information
- *    and implementation logic required for installing the layout of a component
+ *    and implementation logic required for installing the layout onto a component
  *    through the {@link #installFor(JComponent)} method,
  *    which will be used by the style engine of SwingTree
  *    every time the layout object state changes compared to the previous state
@@ -23,6 +23,9 @@ import java.util.Objects;
  *    &lt;p&gt;
  *    You may implement this interface to create custom layout configurations
  *    for other kinds of {@link LayoutManager} implementations.
+ *    &lt;p&gt;
+ *    This interface also contains various implementations
+ *    for supporting the most common types of {@link LayoutManager}s.
  */
 public interface Layout
 {
@@ -48,12 +51,12 @@ public interface Layout
     /**
      * @return A layout that does nothing, i.e. it does not install any layout for a component.
      */
-<span class="fc" id="L51">    static Layout unspecific() { return StyleUtility.UNSPECIFIC_LAYOUT_CONSTANT; }</span>
+<span class="fc" id="L54">    static Layout unspecific() { return StyleUtility.UNSPECIFIC_LAYOUT_CONSTANT; }</span>
 
     /**
      * @return A layout that removes any existing layout from a component.
      */
-<span class="fc" id="L56">    static Layout none() { return StyleUtility.NONE_LAYOUT_CONSTANT; }</span>
+<span class="fc" id="L59">    static Layout none() { return StyleUtility.NONE_LAYOUT_CONSTANT; }</span>
 
     /**
      * @param constr The layout constraints for the layout.
@@ -66,7 +69,7 @@ public interface Layout
         String colConstr,
         String rowConstr
     ) {
-<span class="fc" id="L69">        return new ForMigLayout( constr, colConstr, rowConstr );</span>
+<span class="fc" id="L72">        return new ForMigLayout( constr, colConstr, rowConstr );</span>
     }
 
     /**
@@ -78,7 +81,7 @@ public interface Layout
         String constr,
         String rowConstr
     ) {
-<span class="nc" id="L81">        return new ForMigLayout( constr, &quot;&quot;, rowConstr );</span>
+<span class="nc" id="L84">        return new ForMigLayout( constr, &quot;&quot;, rowConstr );</span>
     }
 
     /**
@@ -86,7 +89,7 @@ public interface Layout
      * @return A layout that uses the MigLayout.
      */
     static Layout mig( String constr ) {
-<span class="nc" id="L89">        return new ForMigLayout( constr, &quot;&quot;, &quot;&quot; );</span>
+<span class="nc" id="L92">        return new ForMigLayout( constr, &quot;&quot;, &quot;&quot; );</span>
     }
 
     /**
@@ -106,7 +109,7 @@ public interface Layout
      * @return A layout that installs the {@link FlowLayout} onto a component.
      */
     static Layout flow( UI.HorizontalAlignment align, int hgap, int vgap ) {
-<span class="nc" id="L109">        return new ForFlowLayout( align, hgap, vgap );</span>
+<span class="nc" id="L112">        return new ForFlowLayout( align, hgap, vgap );</span>
     }
 
     /**
@@ -124,7 +127,7 @@ public interface Layout
      * @return A layout that installs the {@link FlowLayout} onto a component.
      */
     static Layout flow( UI.HorizontalAlignment align ) {
-<span class="nc" id="L127">        return new ForFlowLayout( align, 5, 5 );</span>
+<span class="nc" id="L130">        return new ForFlowLayout( align, 5, 5 );</span>
     }
 
     /**
@@ -135,7 +138,7 @@ public interface Layout
      * @return A layout that installs the {@link FlowLayout} onto a component.
      */
     static Layout flow() {
-<span class="fc" id="L138">        return new ForFlowLayout( UI.HorizontalAlignment.CENTER, 5, 5 );</span>
+<span class="fc" id="L141">        return new ForFlowLayout( UI.HorizontalAlignment.CENTER, 5, 5 );</span>
     }
 
     /**
@@ -146,8 +149,8 @@ public interface Layout
      * @param verticalGap The vertical gap for the layout.
      * @return A layout that installs the {@link BorderLayout} onto a component.
      */
-    static Layout border(int horizontalGap, int verticalGap ) {
-<span class="nc" id="L150">        return new BorderLayoutInstaller( horizontalGap, verticalGap );</span>
+    static Layout border( int horizontalGap, int verticalGap ) {
+<span class="nc" id="L153">        return new BorderLayoutInstaller( horizontalGap, verticalGap );</span>
     }
 
     /**
@@ -158,7 +161,7 @@ public interface Layout
      * @return A layout that installs the {@link BorderLayout} onto a component.
      */
     static Layout border() {
-<span class="fc" id="L161">        return new BorderLayoutInstaller( 0, 0 );</span>
+<span class="fc" id="L164">        return new BorderLayoutInstaller( 0, 0 );</span>
     }
 
     /**
@@ -172,7 +175,7 @@ public interface Layout
      * @return A layout that installs the {@link GridLayout} onto a component.
      */
     static Layout grid( int rows, int cols, int horizontalGap, int verticalGap ) {
-<span class="nc" id="L175">        return new GridLayoutInstaller( rows, cols, horizontalGap, verticalGap );</span>
+<span class="nc" id="L178">        return new GridLayoutInstaller( rows, cols, horizontalGap, verticalGap );</span>
     }
 
     /**
@@ -185,7 +188,7 @@ public interface Layout
      * @return A layout that installs the {@link GridLayout} onto a component.
      */
     static Layout grid( int rows, int cols ) {
-<span class="nc" id="L188">        return new GridLayoutInstaller( rows, cols, 0, 0 );</span>
+<span class="nc" id="L191">        return new GridLayoutInstaller( rows, cols, 0, 0 );</span>
     }
 
     /**
@@ -204,7 +207,7 @@ public interface Layout
      * @return A layout that installs the {@link BoxLayout} onto a component.
      */
     static Layout box( UI.Axis axis ) {
-<span class="nc" id="L207">        return new ForBoxLayout( axis.forBoxLayout() );</span>
+<span class="nc" id="L210">        return new ForBoxLayout( axis.forBoxLayout() );</span>
     }
 
     /**
@@ -214,336 +217,391 @@ public interface Layout
      * @return A layout that installs the default {@link BoxLayout} onto a component.
      */
     static Layout box() {
-<span class="nc" id="L217">        return new ForBoxLayout( BoxLayout.X_AXIS );</span>
+<span class="nc" id="L220">        return new ForBoxLayout( BoxLayout.X_AXIS );</span>
     }
 
-
-    class Unspecific implements Layout
+    /**
+     *  The {@link Unspecific} layout is a layout that represents the lack
+     *  of a specific layout being set for a component.
+     *  Note that this does not represent the absence of a {@link LayoutManager}
+     *  for a component, but rather the absence of it being specified.
+     *  This means that whatever layout is currently installed for a component
+     *  will be left as is, and no other layout will be installed for the component.
+     *  &lt;p&gt;
+     *  Note that this is different from the {@link None} layout,
+     *  which represents the absence of a {@link LayoutManager}
+     *  for a component (i.e. it removes any existing layout from the component and sets it to {@code null}).
+     */
+    final class Unspecific implements Layout
     {
-<span class="fc" id="L223">        Unspecific(){}</span>
+<span class="fc" id="L237">        Unspecific() {}</span>
 
-<span class="fc" id="L225">        @Override public int hashCode() { return 0; }</span>
+<span class="fc" id="L239">        @Override public int hashCode() { return 0; }</span>
+
+        @Override
+        public boolean equals( Object o ) {
+<span class="pc bpc" id="L243" title="1 of 2 branches missed.">            if ( o == null ) return false;</span>
+<span class="pc bpc" id="L244" title="1 of 2 branches missed.">            if ( o == this ) return true;</span>
+<span class="pc bpc" id="L245" title="1 of 2 branches missed.">            return o.getClass() == getClass();</span>
+        }
+
+<span class="fc" id="L248">        @Override public String toString() { return getClass().getSimpleName() + &quot;[]&quot;; }</span>
+
+        /**
+         *  Does nothing.
+         * @param component The component to install the layout for.
+         */
+<span class="fc" id="L254">        @Override public void installFor( JComponent component ) { /* Do nothing. */ }</span>
+    }
+
+    /**
+     *  The {@link None} layout is a layout that represents the absence
+     *  of a {@link LayoutManager} for a component.
+     *  This means that whatever layout is currently installed for a component
+     *  will be removed, and {@code null} will be set as the layout for the component.
+     *  &lt;p&gt;
+     *  Note that this is different from the {@link Unspecific} layout,
+     *  which does not represent the absence of a {@link LayoutManager}
+     *  for a component, but rather the absence of it being specified.
+     */
+    final class None implements Layout
+    {
+<span class="fc" id="L269">        None(){}</span>
+
+<span class="nc" id="L271">        @Override public int hashCode() { return 0; }</span>
 
         @Override
         public boolean equals(Object o) {
-<span class="pc bpc" id="L229" title="1 of 2 branches missed.">            if ( o == null ) return false;</span>
-<span class="pc bpc" id="L230" title="1 of 2 branches missed.">            if ( o == this ) return true;</span>
-<span class="pc bpc" id="L231" title="1 of 2 branches missed.">            return o.getClass() == getClass();</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">            if ( o == null ) return false;</span>
+<span class="nc bnc" id="L276" title="All 2 branches missed.">            if ( o == this ) return true;</span>
+<span class="nc bnc" id="L277" title="All 2 branches missed.">            return o.getClass() == getClass();</span>
         }
 
-<span class="fc" id="L234">        @Override public String toString() { return getClass().getSimpleName() + &quot;[]&quot;; }</span>
-
-        @Override
-        public void installFor( JComponent component ) {
-            // Do nothing.
-<span class="fc" id="L239">        }</span>
-    }
-
-    class None implements Layout
-    {
-<span class="fc" id="L244">        None(){}</span>
-
-<span class="nc" id="L246">        @Override public int hashCode() { return 0; }</span>
-
-        @Override
-        public boolean equals(Object o) {
-<span class="nc bnc" id="L250" title="All 2 branches missed.">            if ( o == null ) return false;</span>
-<span class="nc bnc" id="L251" title="All 2 branches missed.">            if ( o == this ) return true;</span>
-<span class="nc bnc" id="L252" title="All 2 branches missed.">            return o.getClass() == getClass();</span>
-        }
-
-<span class="nc" id="L255">        @Override public String toString() { return getClass().getSimpleName() + &quot;[]&quot;; }</span>
+<span class="nc" id="L280">        @Override public String toString() { return getClass().getSimpleName() + &quot;[]&quot;; }</span>
 
         @Override
         public void installFor( JComponent component ) {
             // Contrary to the 'Unspecific' layout, this layout
             // will remove any existing layout from the component:
-<span class="fc" id="L261">            component.setLayout(null);</span>
-<span class="fc" id="L262">        }</span>
+<span class="fc" id="L286">            component.setLayout(null);</span>
+<span class="fc" id="L287">        }</span>
     }
 
-    class ForMigLayout implements Layout
+    /**
+     *  The {@link ForMigLayout} layout is a layout that represents
+     *  a {@link MigLayout} layout configuration for a component. &lt;br&gt;
+     *  Whenever this layout configuration changes,
+     *  it will create and re-install a new {@link MigLayout} onto the component
+     *  based on the new configuration,
+     *  which are the constraints, column constraints and row constraints.
+     */
+    final class ForMigLayout implements Layout
     {
         private final String _constr;
         private final String _colConstr;
         private final String _rowConstr;
 
 
-<span class="fc" id="L272">        ForMigLayout( String constr, String colConstr, String rowConstr ) {</span>
-<span class="fc" id="L273">            _constr          = Objects.requireNonNull(constr);</span>
-<span class="fc" id="L274">            _colConstr       = Objects.requireNonNull(colConstr);</span>
-<span class="fc" id="L275">            _rowConstr       = Objects.requireNonNull(rowConstr);</span>
-<span class="fc" id="L276">        }</span>
+<span class="fc" id="L305">        ForMigLayout( String constr, String colConstr, String rowConstr ) {</span>
+<span class="fc" id="L306">            _constr    = Objects.requireNonNull(constr);</span>
+<span class="fc" id="L307">            _colConstr = Objects.requireNonNull(colConstr);</span>
+<span class="fc" id="L308">            _rowConstr = Objects.requireNonNull(rowConstr);</span>
+<span class="fc" id="L309">        }</span>
 
-        ForMigLayout withConstraint( String constr ) {
-<span class="nc" id="L279">            return new ForMigLayout( constr, _colConstr, _rowConstr );</span>
-        }
+<span class="nc" id="L311">        ForMigLayout withConstraint( String constr ) { return new ForMigLayout( constr, _colConstr, _rowConstr ); }</span>
 
-        ForMigLayout withRowConstraint( String rowConstr ) {
-<span class="nc" id="L283">            return new ForMigLayout( _constr, _colConstr, rowConstr );</span>
-        }
+<span class="nc" id="L313">        ForMigLayout withRowConstraint( String rowConstr ) { return new ForMigLayout( _constr, _colConstr, rowConstr ); }</span>
 
-        ForMigLayout withColumnConstraint( String colConstr ) {
-<span class="nc" id="L287">            return new ForMigLayout( _constr, colConstr, _rowConstr );</span>
-        }
+<span class="nc" id="L315">        ForMigLayout withColumnConstraint( String colConstr ) { return new ForMigLayout( _constr, colConstr, _rowConstr ); }</span>
 
-        ForMigLayout withComponentConstraint( String componentConstr ) {
-<span class="nc" id="L291">            return new ForMigLayout( _constr, _colConstr, _rowConstr );</span>
-        }
+<span class="nc" id="L317">        ForMigLayout withComponentConstraint( String componentConstr ) { return new ForMigLayout( _constr, _colConstr, _rowConstr ); }</span>
 
-
-<span class="nc" id="L295">        @Override public int hashCode() { return Objects.hash(_constr, _rowConstr, _colConstr); }</span>
-
-        @Override
-        public boolean equals(Object o) {
-<span class="nc bnc" id="L299" title="All 2 branches missed.">            if ( o == null ) return false;</span>
-<span class="nc bnc" id="L300" title="All 2 branches missed.">            if ( o == this ) return true;</span>
-<span class="nc bnc" id="L301" title="All 2 branches missed.">            if ( o.getClass() != getClass() ) return false;</span>
-<span class="nc" id="L302">            ForMigLayout other = (ForMigLayout) o;</span>
-<span class="nc bnc" id="L303" title="All 2 branches missed.">            return _constr.equals( other._constr) &amp;&amp;</span>
-<span class="nc bnc" id="L304" title="All 2 branches missed.">                   _rowConstr.equals( other._rowConstr) &amp;&amp;</span>
-<span class="nc bnc" id="L305" title="All 2 branches missed.">                   _colConstr.equals( other._colConstr);</span>
-        }
-
-        @Override
-        public void installFor( JComponent component ) {
-<span class="fc" id="L310">            ComponentExtension&lt;?&gt; extension = ComponentExtension.from(component);</span>
-<span class="fc" id="L311">            Style style = extension.getStyle();</span>
-<span class="pc bpc" id="L312" title="1 of 2 branches missed.">            if ( style.layout().constraint().isPresent() ) {</span>
-                // We ensure that the parent layout has the correct component constraints for the component:
-<span class="nc bnc" id="L314" title="All 2 branches missed.">                LayoutManager parentLayout = ( component.getParent() == null ? null : component.getParent().getLayout() );</span>
-<span class="nc bnc" id="L315" title="All 2 branches missed.">                if ( parentLayout instanceof MigLayout) {</span>
-<span class="nc" id="L316">                    MigLayout migLayout = (MigLayout) parentLayout;</span>
-<span class="nc" id="L317">                    Object componentConstraints = style.layout().constraint().get();</span>
-<span class="nc" id="L318">                    Object currentComponentConstraints = migLayout.getComponentConstraints(component);</span>
-                    //     ^ can be a String or a CC object, we want to compare it to the new constraints:
-<span class="nc bnc" id="L320" title="All 2 branches missed.">                    if ( !componentConstraints.equals(currentComponentConstraints) ) {</span>
-<span class="nc" id="L321">                        migLayout.setComponentConstraints(component, componentConstraints);</span>
-<span class="nc" id="L322">                        component.getParent().revalidate();</span>
-                    }
-                }
-            }
-<span class="pc bpc" id="L326" title="5 of 6 branches missed.">            if ( !_constr.isEmpty() || !_colConstr.isEmpty() || !_rowConstr.isEmpty() ) {</span>
-                // We ensure that the parent layout has the correct layout constraints for the component:
-<span class="fc" id="L328">                LayoutManager currentLayout = component.getLayout();</span>
-<span class="pc bpc" id="L329" title="1 of 2 branches missed.">                if ( !(currentLayout instanceof MigLayout) ) {</span>
-                    // We need to replace the current layout with a MigLayout:
-<span class="nc" id="L331">                    MigLayout newLayout = new MigLayout(_constr, _colConstr, _rowConstr);</span>
-<span class="nc" id="L332">                    component.setLayout(newLayout);</span>
-<span class="nc" id="L333">                    return;</span>
-                }
-<span class="fc" id="L335">                MigLayout migLayout = (MigLayout) currentLayout;</span>
-<span class="fc" id="L336">                String layoutConstraints = _constr;</span>
-<span class="fc" id="L337">                String columnConstraints = _colConstr;</span>
-<span class="fc" id="L338">                String rowConstraints    = _rowConstr;</span>
-
-<span class="fc" id="L340">                Object currentLayoutConstraints = migLayout.getLayoutConstraints();</span>
-<span class="fc" id="L341">                Object currentColumnConstraints = migLayout.getColumnConstraints();</span>
-<span class="fc" id="L342">                Object currentRowConstraints    = migLayout.getRowConstraints();</span>
-
-<span class="pc bpc" id="L344" title="1 of 2 branches missed.">                boolean layoutConstraintsChanged = !layoutConstraints.equals(currentLayoutConstraints);</span>
-<span class="pc bpc" id="L345" title="1 of 2 branches missed.">                boolean columnConstraintsChanged = !columnConstraints.equals(currentColumnConstraints);</span>
-<span class="pc bpc" id="L346" title="1 of 2 branches missed.">                boolean rowConstraintsChanged    = !rowConstraints.equals(currentRowConstraints);</span>
-
-<span class="pc bpc" id="L348" title="5 of 6 branches missed.">                if ( layoutConstraintsChanged || columnConstraintsChanged || rowConstraintsChanged ) {</span>
-<span class="fc" id="L349">                    migLayout.setLayoutConstraints(layoutConstraints);</span>
-<span class="fc" id="L350">                    migLayout.setColumnConstraints(columnConstraints);</span>
-<span class="fc" id="L351">                    migLayout.setRowConstraints(rowConstraints);</span>
-<span class="fc" id="L352">                    component.revalidate();</span>
-                }
-            }
-<span class="fc" id="L355">        }</span>
-    }
-
-    class ForFlowLayout implements Layout
-    {
-        private final int align;
-        private final int hgap;
-        private final int vgap;
-
-<span class="fc" id="L364">        ForFlowLayout( UI.HorizontalAlignment align, int hgap, int vgap ) {</span>
-<span class="fc" id="L365">            this.align = align.forFlowLayout();</span>
-<span class="fc" id="L366">            this.hgap  = hgap;</span>
-<span class="fc" id="L367">            this.vgap  = vgap;</span>
-<span class="fc" id="L368">        }</span>
-
-<span class="nc" id="L370">        @Override public int hashCode() { return Objects.hash( align, hgap, vgap ); }</span>
+<span class="nc" id="L319">        @Override public int hashCode() { return Objects.hash(_constr, _rowConstr, _colConstr); }</span>
 
         @Override
         public boolean equals( Object o ) {
-<span class="nc bnc" id="L374" title="All 2 branches missed.">            if ( o == null ) return false;</span>
-<span class="nc bnc" id="L375" title="All 2 branches missed.">            if ( o == this ) return true;</span>
-<span class="nc bnc" id="L376" title="All 2 branches missed.">            if ( o.getClass() != getClass() ) return false;</span>
-<span class="nc" id="L377">            ForFlowLayout other = (ForFlowLayout) o;</span>
-<span class="nc bnc" id="L378" title="All 6 branches missed.">            return align == other.align &amp;&amp; hgap == other.hgap &amp;&amp; vgap == other.vgap;</span>
+<span class="nc bnc" id="L323" title="All 2 branches missed.">            if ( o == null ) return false;</span>
+<span class="nc bnc" id="L324" title="All 2 branches missed.">            if ( o == this ) return true;</span>
+<span class="nc bnc" id="L325" title="All 2 branches missed.">            if ( o.getClass() != getClass() ) return false;</span>
+<span class="nc" id="L326">            ForMigLayout other = (ForMigLayout) o;</span>
+<span class="nc bnc" id="L327" title="All 2 branches missed.">            return _constr.equals( other._constr) &amp;&amp;</span>
+<span class="nc bnc" id="L328" title="All 2 branches missed.">                   _rowConstr.equals( other._rowConstr) &amp;&amp;</span>
+<span class="nc bnc" id="L329" title="All 2 branches missed.">                   _colConstr.equals( other._colConstr);</span>
         }
 
         @Override
         public void installFor( JComponent component ) {
-<span class="fc" id="L383">            LayoutManager currentLayout = component.getLayout();</span>
-<span class="pc bpc" id="L384" title="1 of 2 branches missed.">            if ( !(currentLayout instanceof FlowLayout) ) {</span>
+<span class="fc" id="L334">            ComponentExtension&lt;?&gt; extension = ComponentExtension.from(component);</span>
+<span class="fc" id="L335">            Style style = extension.getStyle();</span>
+<span class="pc bpc" id="L336" title="1 of 2 branches missed.">            if ( style.layout().constraint().isPresent() ) {</span>
+                // We ensure that the parent layout has the correct component constraints for the component:
+<span class="nc bnc" id="L338" title="All 2 branches missed.">                LayoutManager parentLayout = ( component.getParent() == null ? null : component.getParent().getLayout() );</span>
+<span class="nc bnc" id="L339" title="All 2 branches missed.">                if ( parentLayout instanceof MigLayout) {</span>
+<span class="nc" id="L340">                    MigLayout migLayout = (MigLayout) parentLayout;</span>
+<span class="nc" id="L341">                    Object componentConstraints = style.layout().constraint().get();</span>
+<span class="nc" id="L342">                    Object currentComponentConstraints = migLayout.getComponentConstraints(component);</span>
+                    //     ^ can be a String or a CC object, we want to compare it to the new constraints:
+<span class="nc bnc" id="L344" title="All 2 branches missed.">                    if ( !componentConstraints.equals(currentComponentConstraints) ) {</span>
+<span class="nc" id="L345">                        migLayout.setComponentConstraints(component, componentConstraints);</span>
+<span class="nc" id="L346">                        component.getParent().revalidate();</span>
+                    }
+                }
+            }
+<span class="pc bpc" id="L350" title="5 of 6 branches missed.">            if ( !_constr.isEmpty() || !_colConstr.isEmpty() || !_rowConstr.isEmpty() ) {</span>
+                // We ensure that the parent layout has the correct layout constraints for the component:
+<span class="fc" id="L352">                LayoutManager currentLayout = component.getLayout();</span>
+<span class="pc bpc" id="L353" title="1 of 2 branches missed.">                if ( !( currentLayout instanceof MigLayout ) ) {</span>
+                    // We need to replace the current layout with a MigLayout:
+<span class="nc" id="L355">                    MigLayout newLayout = new MigLayout( _constr, _colConstr, _rowConstr );</span>
+<span class="nc" id="L356">                    component.setLayout(newLayout);</span>
+<span class="nc" id="L357">                    return;</span>
+                }
+<span class="fc" id="L359">                MigLayout migLayout = (MigLayout) currentLayout;</span>
+<span class="fc" id="L360">                String layoutConstraints = _constr;</span>
+<span class="fc" id="L361">                String columnConstraints = _colConstr;</span>
+<span class="fc" id="L362">                String rowConstraints    = _rowConstr;</span>
+
+<span class="fc" id="L364">                Object currentLayoutConstraints = migLayout.getLayoutConstraints();</span>
+<span class="fc" id="L365">                Object currentColumnConstraints = migLayout.getColumnConstraints();</span>
+<span class="fc" id="L366">                Object currentRowConstraints    = migLayout.getRowConstraints();</span>
+
+<span class="pc bpc" id="L368" title="1 of 2 branches missed.">                boolean layoutConstraintsChanged = !layoutConstraints.equals(currentLayoutConstraints);</span>
+<span class="pc bpc" id="L369" title="1 of 2 branches missed.">                boolean columnConstraintsChanged = !columnConstraints.equals(currentColumnConstraints);</span>
+<span class="pc bpc" id="L370" title="1 of 2 branches missed.">                boolean rowConstraintsChanged    = !rowConstraints.equals(currentRowConstraints);</span>
+
+<span class="pc bpc" id="L372" title="5 of 6 branches missed.">                if ( layoutConstraintsChanged || columnConstraintsChanged || rowConstraintsChanged ) {</span>
+<span class="fc" id="L373">                    migLayout.setLayoutConstraints(layoutConstraints);</span>
+<span class="fc" id="L374">                    migLayout.setColumnConstraints(columnConstraints);</span>
+<span class="fc" id="L375">                    migLayout.setRowConstraints(rowConstraints);</span>
+<span class="fc" id="L376">                    component.revalidate();</span>
+                }
+            }
+<span class="fc" id="L379">        }</span>
+    }
+
+    /**
+     *  The {@link ForFlowLayout} layout is a layout that represents
+     *  a {@link FlowLayout} layout configuration for a component. &lt;br&gt;
+     *  Whenever this layout configuration changes,
+     *  it will create and re-install a new {@link FlowLayout} onto the component
+     *  based on the new configuration,
+     *  which are the alignment, horizontal gap and vertical gap.
+     */
+    final class ForFlowLayout implements Layout
+    {
+        private final int _align;
+        private final int _hgap;
+        private final int _vgap;
+
+<span class="fc" id="L396">        ForFlowLayout( UI.HorizontalAlignment align, int hgap, int vgap ) {</span>
+<span class="fc" id="L397">            _align = align.forFlowLayout();</span>
+<span class="fc" id="L398">            _hgap  = hgap;</span>
+<span class="fc" id="L399">            _vgap  = vgap;</span>
+<span class="fc" id="L400">        }</span>
+
+<span class="nc" id="L402">        @Override public int hashCode() { return Objects.hash( _align, _hgap, _vgap  ); }</span>
+
+        @Override
+        public boolean equals( Object o ) {
+<span class="nc bnc" id="L406" title="All 2 branches missed.">            if ( o == null ) return false;</span>
+<span class="nc bnc" id="L407" title="All 2 branches missed.">            if ( o == this ) return true;</span>
+<span class="nc bnc" id="L408" title="All 2 branches missed.">            if ( o.getClass() != getClass() ) return false;</span>
+<span class="nc" id="L409">            ForFlowLayout other = (ForFlowLayout) o;</span>
+<span class="nc bnc" id="L410" title="All 6 branches missed.">            return _align == other._align &amp;&amp; _hgap == other._hgap &amp;&amp; _vgap == other._vgap;</span>
+        }
+
+        @Override
+        public void installFor( JComponent component ) {
+<span class="fc" id="L415">            LayoutManager currentLayout = component.getLayout();</span>
+<span class="pc bpc" id="L416" title="1 of 2 branches missed.">            if ( !( currentLayout instanceof FlowLayout ) ) {</span>
                 // We need to replace the current layout with a FlowLayout:
-<span class="fc" id="L386">                FlowLayout newLayout = new FlowLayout( align, hgap, vgap );</span>
-<span class="fc" id="L387">                component.setLayout(newLayout);</span>
-<span class="fc" id="L388">                return;</span>
+<span class="fc" id="L418">                FlowLayout newLayout = new FlowLayout(_align, _hgap, _vgap);</span>
+<span class="fc" id="L419">                component.setLayout(newLayout);</span>
+<span class="fc" id="L420">                return;</span>
             }
-<span class="nc" id="L390">            FlowLayout flowLayout = (FlowLayout) currentLayout;</span>
-<span class="nc" id="L391">            int alignment = align;</span>
-<span class="nc" id="L392">            int horizontalGap = hgap;</span>
-<span class="nc" id="L393">            int verticalGap   = vgap;</span>
+<span class="nc" id="L422">            FlowLayout flowLayout = (FlowLayout) currentLayout;</span>
+<span class="nc" id="L423">            int alignment     = _align;</span>
+<span class="nc" id="L424">            int horizontalGap = _hgap;</span>
+<span class="nc" id="L425">            int verticalGap   = _vgap;</span>
 
-<span class="nc bnc" id="L395" title="All 2 branches missed.">            boolean alignmentChanged     = alignment != flowLayout.getAlignment();</span>
-<span class="nc bnc" id="L396" title="All 2 branches missed.">            boolean horizontalGapChanged = horizontalGap != flowLayout.getHgap();</span>
-<span class="nc bnc" id="L397" title="All 2 branches missed.">            boolean verticalGapChanged   = verticalGap   != flowLayout.getVgap();</span>
+<span class="nc bnc" id="L427" title="All 2 branches missed.">            boolean alignmentChanged     = alignment != flowLayout.getAlignment();</span>
+<span class="nc bnc" id="L428" title="All 2 branches missed.">            boolean horizontalGapChanged = horizontalGap != flowLayout.getHgap();</span>
+<span class="nc bnc" id="L429" title="All 2 branches missed.">            boolean verticalGapChanged   = verticalGap   != flowLayout.getVgap();</span>
 
-<span class="nc bnc" id="L399" title="All 6 branches missed.">            if ( alignmentChanged || horizontalGapChanged || verticalGapChanged ) {</span>
-<span class="nc" id="L400">                flowLayout.setAlignment(alignment);</span>
-<span class="nc" id="L401">                flowLayout.setHgap(horizontalGap);</span>
-<span class="nc" id="L402">                flowLayout.setVgap(verticalGap);</span>
-<span class="nc" id="L403">                component.revalidate();</span>
+<span class="nc bnc" id="L431" title="All 6 branches missed.">            if ( alignmentChanged || horizontalGapChanged || verticalGapChanged ) {</span>
+<span class="nc" id="L432">                flowLayout.setAlignment(alignment);</span>
+<span class="nc" id="L433">                flowLayout.setHgap(horizontalGap);</span>
+<span class="nc" id="L434">                flowLayout.setVgap(verticalGap);</span>
+<span class="nc" id="L435">                component.revalidate();</span>
             }
-<span class="nc" id="L405">        }</span>
+<span class="nc" id="L437">        }</span>
     }
 
-    class BorderLayoutInstaller implements Layout
+    /**
+     *  The {@link BorderLayoutInstaller} layout is a layout that represents
+     *  a {@link BorderLayout} layout configuration for a component,
+     *  which consists of the horizontal gap and vertical gap. &lt;br&gt;
+     *  Whenever this layout configuration changes,
+     *  it will create and re-install a new {@link BorderLayout} onto the component
+     *  based on the new configuration.
+     */
+    final class BorderLayoutInstaller implements Layout
     {
-        private final int hgap;
-        private final int vgap;
+        private final int _hgap;
+        private final int _vgap;
 
-<span class="fc" id="L413">        BorderLayoutInstaller( int hgap, int vgap ) {</span>
-<span class="fc" id="L414">            this.hgap = hgap;</span>
-<span class="fc" id="L415">            this.vgap = vgap;</span>
-<span class="fc" id="L416">        }</span>
+<span class="fc" id="L453">        BorderLayoutInstaller( int hgap, int vgap ) {</span>
+<span class="fc" id="L454">            _hgap = hgap;</span>
+<span class="fc" id="L455">            _vgap = vgap;</span>
+<span class="fc" id="L456">        }</span>
 
-<span class="nc" id="L418">        @Override public int hashCode() { return Objects.hash( hgap, vgap ); }</span>
+<span class="nc" id="L458">        @Override public int hashCode() { return Objects.hash(_hgap, _vgap); }</span>
 
         @Override
-        public boolean equals(Object o) {
-<span class="nc bnc" id="L422" title="All 2 branches missed.">            if ( o == null ) return false;</span>
-<span class="nc bnc" id="L423" title="All 2 branches missed.">            if ( o == this ) return true;</span>
-<span class="nc bnc" id="L424" title="All 2 branches missed.">            if ( o.getClass() != getClass() ) return false;</span>
-<span class="nc" id="L425">            BorderLayoutInstaller other = (BorderLayoutInstaller) o;</span>
-<span class="nc bnc" id="L426" title="All 4 branches missed.">            return hgap == other.hgap &amp;&amp; vgap == other.vgap;</span>
+        public boolean equals( Object o ) {
+<span class="nc bnc" id="L462" title="All 2 branches missed.">            if ( o == null ) return false;</span>
+<span class="nc bnc" id="L463" title="All 2 branches missed.">            if ( o == this ) return true;</span>
+<span class="nc bnc" id="L464" title="All 2 branches missed.">            if ( o.getClass() != getClass() ) return false;</span>
+<span class="nc" id="L465">            BorderLayoutInstaller other = (BorderLayoutInstaller) o;</span>
+<span class="nc bnc" id="L466" title="All 4 branches missed.">            return _hgap == other._hgap &amp;&amp; _vgap == other._vgap;</span>
         }
 
         @Override
         public void installFor( JComponent component ) {
-<span class="fc" id="L431">            LayoutManager currentLayout = component.getLayout();</span>
-<span class="pc bpc" id="L432" title="1 of 2 branches missed.">            if ( !(currentLayout instanceof BorderLayout) ) {</span>
+<span class="fc" id="L471">            LayoutManager currentLayout = component.getLayout();</span>
+<span class="pc bpc" id="L472" title="1 of 2 branches missed.">            if ( !(currentLayout instanceof BorderLayout) ) {</span>
                 // We need to replace the current layout with a BorderLayout:
-<span class="fc" id="L434">                BorderLayout newLayout = new BorderLayout( hgap, vgap );</span>
-<span class="fc" id="L435">                component.setLayout(newLayout);</span>
-<span class="fc" id="L436">                return;</span>
+<span class="fc" id="L474">                BorderLayout newLayout = new BorderLayout(_hgap, _vgap);</span>
+<span class="fc" id="L475">                component.setLayout(newLayout);</span>
+<span class="fc" id="L476">                return;</span>
             }
-<span class="nc" id="L438">            BorderLayout borderLayout = (BorderLayout) currentLayout;</span>
-<span class="nc" id="L439">            int horizontalGap = hgap;</span>
-<span class="nc" id="L440">            int verticalGap   = vgap;</span>
+<span class="nc" id="L478">            BorderLayout borderLayout = (BorderLayout) currentLayout;</span>
+<span class="nc" id="L479">            int horizontalGap = _hgap;</span>
+<span class="nc" id="L480">            int verticalGap   = _vgap;</span>
 
-<span class="nc bnc" id="L442" title="All 2 branches missed.">            boolean horizontalGapChanged = horizontalGap != borderLayout.getHgap();</span>
-<span class="nc bnc" id="L443" title="All 2 branches missed.">            boolean verticalGapChanged   = verticalGap   != borderLayout.getVgap();</span>
+<span class="nc bnc" id="L482" title="All 2 branches missed.">            boolean horizontalGapChanged = horizontalGap != borderLayout.getHgap();</span>
+<span class="nc bnc" id="L483" title="All 2 branches missed.">            boolean verticalGapChanged   = verticalGap   != borderLayout.getVgap();</span>
 
-<span class="nc bnc" id="L445" title="All 4 branches missed.">            if ( horizontalGapChanged || verticalGapChanged ) {</span>
-<span class="nc" id="L446">                borderLayout.setHgap(horizontalGap);</span>
-<span class="nc" id="L447">                borderLayout.setVgap(verticalGap);</span>
-<span class="nc" id="L448">                component.revalidate();</span>
+<span class="nc bnc" id="L485" title="All 4 branches missed.">            if ( horizontalGapChanged || verticalGapChanged ) {</span>
+<span class="nc" id="L486">                borderLayout.setHgap(horizontalGap);</span>
+<span class="nc" id="L487">                borderLayout.setVgap(verticalGap);</span>
+<span class="nc" id="L488">                component.revalidate();</span>
             }
-<span class="nc" id="L450">        }</span>
+<span class="nc" id="L490">        }</span>
     }
 
-    class GridLayoutInstaller implements Layout
+    /**
+     *  The {@link GridLayoutInstaller} layout is a layout that represents
+     *  a {@link GridLayout} layout configuration for a component,
+     *  which consists of the number of rows, number of columns, horizontal gap and vertical gap. &lt;br&gt;
+     *  Whenever this layout configuration changes,
+     *  it will create and re-install a new {@link GridLayout} onto the component
+     *  based on the new configuration.
+     */
+    final class GridLayoutInstaller implements Layout
     {
-        private final int rows;
-        private final int cols;
-        private final int hgap;
-        private final int vgap;
+        private final int _rows;
+        private final int _cols;
+        private final int _hgap;
+        private final int _vgap;
 
-<span class="nc" id="L460">        GridLayoutInstaller( int rows, int cols, int hgap, int vgap ) {</span>
-<span class="nc" id="L461">            this.rows = rows;</span>
-<span class="nc" id="L462">            this.cols = cols;</span>
-<span class="nc" id="L463">            this.hgap = hgap;</span>
-<span class="nc" id="L464">            this.vgap = vgap;</span>
-<span class="nc" id="L465">        }</span>
+<span class="nc" id="L508">        GridLayoutInstaller( int rows, int cols, int hgap, int vgap ) {</span>
+<span class="nc" id="L509">            _rows = rows;</span>
+<span class="nc" id="L510">            _cols = cols;</span>
+<span class="nc" id="L511">            _hgap = hgap;</span>
+<span class="nc" id="L512">            _vgap = vgap;</span>
+<span class="nc" id="L513">        }</span>
 
-<span class="nc" id="L467">        @Override public int hashCode() { return Objects.hash( rows, cols, hgap, vgap ); }</span>
+<span class="nc" id="L515">        @Override public int hashCode() { return Objects.hash(_rows, _cols, _hgap, _vgap); }</span>
 
         @Override
         public boolean equals(Object o) {
-<span class="nc bnc" id="L471" title="All 2 branches missed.">            if ( o == null ) return false;</span>
-<span class="nc bnc" id="L472" title="All 2 branches missed.">            if ( o == this ) return true;</span>
-<span class="nc bnc" id="L473" title="All 2 branches missed.">            if ( o.getClass() != getClass() ) return false;</span>
-<span class="nc" id="L474">            GridLayoutInstaller other = (GridLayoutInstaller) o;</span>
-<span class="nc bnc" id="L475" title="All 8 branches missed.">            return rows == other.rows &amp;&amp; cols == other.cols &amp;&amp; hgap == other.hgap &amp;&amp; vgap == other.vgap;</span>
+<span class="nc bnc" id="L519" title="All 2 branches missed.">            if ( o == null ) return false;</span>
+<span class="nc bnc" id="L520" title="All 2 branches missed.">            if ( o == this ) return true;</span>
+<span class="nc bnc" id="L521" title="All 2 branches missed.">            if ( o.getClass() != getClass() ) return false;</span>
+<span class="nc" id="L522">            GridLayoutInstaller other = (GridLayoutInstaller) o;</span>
+<span class="nc bnc" id="L523" title="All 8 branches missed.">            return _rows == other._rows &amp;&amp; _cols == other._cols &amp;&amp; _hgap == other._hgap &amp;&amp; _vgap == other._vgap;</span>
         }
 
         @Override
         public void installFor( JComponent component ) {
-<span class="nc" id="L480">            LayoutManager currentLayout = component.getLayout();</span>
-<span class="nc bnc" id="L481" title="All 2 branches missed.">            if ( !(currentLayout instanceof GridLayout) ) {</span>
+<span class="nc" id="L528">            LayoutManager currentLayout = component.getLayout();</span>
+<span class="nc bnc" id="L529" title="All 2 branches missed.">            if ( !(currentLayout instanceof GridLayout) ) {</span>
                 // We need to replace the current layout with a GridLayout:
-<span class="nc" id="L483">                GridLayout newLayout = new GridLayout( rows, cols, hgap, vgap );</span>
-<span class="nc" id="L484">                component.setLayout(newLayout);</span>
-<span class="nc" id="L485">                return;</span>
+<span class="nc" id="L531">                GridLayout newLayout = new GridLayout(_rows, _cols, _hgap, _vgap);</span>
+<span class="nc" id="L532">                component.setLayout(newLayout);</span>
+<span class="nc" id="L533">                return;</span>
             }
-<span class="nc" id="L487">            GridLayout gridLayout = (GridLayout) currentLayout;</span>
-<span class="nc" id="L488">            int rows = this.rows;</span>
-<span class="nc" id="L489">            int cols = this.cols;</span>
-<span class="nc" id="L490">            int horizontalGap = hgap;</span>
-<span class="nc" id="L491">            int verticalGap   = vgap;</span>
+<span class="nc" id="L535">            GridLayout gridLayout = (GridLayout) currentLayout;</span>
+<span class="nc" id="L536">            int rows          = _rows;</span>
+<span class="nc" id="L537">            int cols          = _cols;</span>
+<span class="nc" id="L538">            int horizontalGap = _hgap;</span>
+<span class="nc" id="L539">            int verticalGap   = _vgap;</span>
 
-<span class="nc bnc" id="L493" title="All 2 branches missed.">            boolean rowsChanged = rows != gridLayout.getRows();</span>
-<span class="nc bnc" id="L494" title="All 2 branches missed.">            boolean colsChanged = cols != gridLayout.getColumns();</span>
-<span class="nc bnc" id="L495" title="All 2 branches missed.">            boolean horizontalGapChanged = horizontalGap != gridLayout.getHgap();</span>
-<span class="nc bnc" id="L496" title="All 2 branches missed.">            boolean verticalGapChanged   = verticalGap   != gridLayout.getVgap();</span>
+<span class="nc bnc" id="L541" title="All 2 branches missed.">            boolean rowsChanged = rows != gridLayout.getRows();</span>
+<span class="nc bnc" id="L542" title="All 2 branches missed.">            boolean colsChanged = cols != gridLayout.getColumns();</span>
+<span class="nc bnc" id="L543" title="All 2 branches missed.">            boolean horizontalGapChanged = horizontalGap != gridLayout.getHgap();</span>
+<span class="nc bnc" id="L544" title="All 2 branches missed.">            boolean verticalGapChanged   = verticalGap   != gridLayout.getVgap();</span>
 
-<span class="nc bnc" id="L498" title="All 8 branches missed.">            if ( rowsChanged || colsChanged || horizontalGapChanged || verticalGapChanged ) {</span>
-<span class="nc" id="L499">                gridLayout.setRows(rows);</span>
-<span class="nc" id="L500">                gridLayout.setColumns(cols);</span>
-<span class="nc" id="L501">                gridLayout.setHgap(horizontalGap);</span>
-<span class="nc" id="L502">                gridLayout.setVgap(verticalGap);</span>
-<span class="nc" id="L503">                component.revalidate();</span>
+<span class="nc bnc" id="L546" title="All 8 branches missed.">            if ( rowsChanged || colsChanged || horizontalGapChanged || verticalGapChanged ) {</span>
+<span class="nc" id="L547">                gridLayout.setRows(rows);</span>
+<span class="nc" id="L548">                gridLayout.setColumns(cols);</span>
+<span class="nc" id="L549">                gridLayout.setHgap(horizontalGap);</span>
+<span class="nc" id="L550">                gridLayout.setVgap(verticalGap);</span>
+<span class="nc" id="L551">                component.revalidate();</span>
             }
-<span class="nc" id="L505">        }</span>
+<span class="nc" id="L553">        }</span>
     }
 
-    class ForBoxLayout implements Layout
+    /**
+     *  The {@link ForBoxLayout} layout is a layout that represents
+     *  a {@link BoxLayout} layout configuration for a component,
+     *  which consists of the axis. &lt;br&gt;
+     *  The axis determines whether the layout will be a horizontal or vertical
+     *  {@link BoxLayout}. &lt;br&gt;
+     *  Whenever this layout configuration object changes,
+     *  it will create and re-install a new {@link BoxLayout} onto the component
+     *  based on the new configuration.
+     */
+    final class ForBoxLayout implements Layout
     {
-        private final int axis;
+        private final int _axis;
 
-<span class="nc" id="L512">        ForBoxLayout( int axis ) { this.axis = axis; }</span>
+<span class="nc" id="L570">        ForBoxLayout( int axis ) { _axis = axis; }</span>
 
-<span class="nc" id="L514">        @Override public int hashCode() { return Objects.hash( axis ); }</span>
+<span class="nc" id="L572">        @Override public int hashCode() { return Objects.hash(_axis); }</span>
 
         @Override
-        public boolean equals(Object o) {
-<span class="nc bnc" id="L518" title="All 2 branches missed.">            if ( o == null ) return false;</span>
-<span class="nc bnc" id="L519" title="All 2 branches missed.">            if ( o == this ) return true;</span>
-<span class="nc bnc" id="L520" title="All 2 branches missed.">            if ( o.getClass() != getClass() ) return false;</span>
-<span class="nc" id="L521">            ForBoxLayout other = (ForBoxLayout) o;</span>
-<span class="nc bnc" id="L522" title="All 2 branches missed.">            return axis == other.axis;</span>
+        public boolean equals( Object o ) {
+<span class="nc bnc" id="L576" title="All 2 branches missed.">            if ( o == null ) return false;</span>
+<span class="nc bnc" id="L577" title="All 2 branches missed.">            if ( o == this ) return true;</span>
+<span class="nc bnc" id="L578" title="All 2 branches missed.">            if ( o.getClass() != getClass() ) return false;</span>
+<span class="nc" id="L579">            ForBoxLayout other = (ForBoxLayout) o;</span>
+<span class="nc bnc" id="L580" title="All 2 branches missed.">            return _axis == other._axis;</span>
         }
 
         @Override
         public void installFor( JComponent component ) {
-<span class="nc" id="L527">            LayoutManager currentLayout = component.getLayout();</span>
-<span class="nc bnc" id="L528" title="All 2 branches missed.">            if ( !(currentLayout instanceof BoxLayout) ) {</span>
+<span class="nc" id="L585">            LayoutManager currentLayout = component.getLayout();</span>
+<span class="nc bnc" id="L586" title="All 2 branches missed.">            if ( !( currentLayout instanceof BoxLayout ) ) {</span>
                 // We need to replace the current layout with a BoxLayout:
-<span class="nc" id="L530">                BoxLayout newLayout = new BoxLayout( component, axis );</span>
-<span class="nc" id="L531">                component.setLayout(newLayout);</span>
-<span class="nc" id="L532">                return;</span>
+<span class="nc" id="L588">                BoxLayout newLayout = new BoxLayout( component, _axis);</span>
+<span class="nc" id="L589">                component.setLayout(newLayout);</span>
+<span class="nc" id="L590">                return;</span>
             }
-<span class="nc" id="L534">            BoxLayout boxLayout = (BoxLayout) currentLayout;</span>
-<span class="nc" id="L535">            int axis = this.axis;</span>
+<span class="nc" id="L592">            BoxLayout boxLayout = (BoxLayout) currentLayout;</span>
+<span class="nc" id="L593">            int axis = _axis;</span>
 
-<span class="nc bnc" id="L537" title="All 2 branches missed.">            boolean axisChanged = axis != boxLayout.getAxis();</span>
+<span class="nc bnc" id="L595" title="All 2 branches missed.">            boolean axisChanged = axis != boxLayout.getAxis();</span>
 
-<span class="nc bnc" id="L539" title="All 2 branches missed.">            if ( axisChanged ) {</span>
+<span class="nc bnc" id="L597" title="All 2 branches missed.">            if ( axisChanged ) {</span>
                 // The BoxLayout does not have a 'setAxis' method!
                 // Instead, we need to create and install a new BoxLayout with the new axis:
-<span class="nc" id="L542">                BoxLayout newLayout = new BoxLayout( component, axis );</span>
-<span class="nc" id="L543">                component.setLayout(newLayout);</span>
-<span class="nc" id="L544">                component.revalidate();</span>
+<span class="nc" id="L600">                BoxLayout newLayout = new BoxLayout( component, axis );</span>
+<span class="nc" id="L601">                component.setLayout(newLayout);</span>
+<span class="nc" id="L602">                component.revalidate();</span>
             }
-<span class="nc" id="L546">        }</span>
+<span class="nc" id="L604">        }</span>
     }
 
 }

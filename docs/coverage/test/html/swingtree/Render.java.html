@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Render.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">Render.java</span></div><h1>Render.java</h1><pre class="source lang-java linenums">package swingtree;
 
+import org.slf4j.Logger;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -14,28 +16,30 @@ import java.util.function.*;
  * 	&lt;b&gt;Please take a look at the &lt;a href=&quot;https://globaltcad.github.io/swing-tree/&quot;&gt;living swing-tree documentation&lt;/a&gt;
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.&lt;/b&gt;
  */
-public final class Render&lt;C extends JComponent,E&gt; {
+public final class Render&lt;C extends JComponent,E&gt;
+{
+<span class="fc" id="L21">	private static final Logger log = org.slf4j.LoggerFactory.getLogger(Render.class);</span>
 
 	private final Class&lt;C&gt; _componentType;
 	private final Supplier&lt;Border&gt; _borderSupplier;
 
 	static &lt;E&gt; Render&lt;JList&lt;E&gt;,E&gt; forList(Class&lt;E&gt; elementType, Supplier&lt;Border&gt; borderSupplier) {
-<span class="fc" id="L23">		Render r = new Render&lt;&gt;(JList.class, elementType, borderSupplier);</span>
-<span class="fc" id="L24">		return (Render&lt;JList&lt;E&gt;,E&gt;) r;</span>
+<span class="fc" id="L27">		Render r = new Render&lt;&gt;(JList.class, elementType, borderSupplier);</span>
+<span class="fc" id="L28">		return (Render&lt;JList&lt;E&gt;,E&gt;) r;</span>
 	}
 	static &lt;E&gt; Render&lt;JComboBox&lt;E&gt;,E&gt; forCombo(Class&lt;E&gt; elementType, Supplier&lt;Border&gt; borderSupplier) {
-<span class="fc" id="L27">		Render r = new Render&lt;&gt;(JComboBox.class, elementType, borderSupplier);</span>
-<span class="fc" id="L28">		return (Render&lt;JComboBox&lt;E&gt;,E&gt;) r;</span>
+<span class="fc" id="L31">		Render r = new Render&lt;&gt;(JComboBox.class, elementType, borderSupplier);</span>
+<span class="fc" id="L32">		return (Render&lt;JComboBox&lt;E&gt;,E&gt;) r;</span>
 	}
 	static &lt;E&gt; Render&lt;JTable,E&gt; forTable(Class&lt;E&gt; elementType, Supplier&lt;Border&gt; borderSupplier) {
-<span class="fc" id="L31">		Render r = new Render&lt;&gt;(JTable.class, elementType, borderSupplier);</span>
-<span class="fc" id="L32">		return (Render&lt;JTable,E&gt;) r;</span>
+<span class="fc" id="L35">		Render r = new Render&lt;&gt;(JTable.class, elementType, borderSupplier);</span>
+<span class="fc" id="L36">		return (Render&lt;JTable,E&gt;) r;</span>
 	}
 
-<span class="fc" id="L35">	private Render(Class&lt;C&gt; componentType, Class&lt;E&gt; elementType, Supplier&lt;Border&gt; borderSupplier) {</span>
-<span class="fc" id="L36">		_componentType = componentType;</span>
-<span class="fc" id="L37">		_borderSupplier = borderSupplier;</span>
-<span class="fc" id="L38">	}</span>
+<span class="fc" id="L39">	private Render(Class&lt;C&gt; componentType, Class&lt;E&gt; elementType, Supplier&lt;Border&gt; borderSupplier) {</span>
+<span class="fc" id="L40">		_componentType = componentType;</span>
+<span class="fc" id="L41">		_borderSupplier = borderSupplier;</span>
+<span class="fc" id="L42">	}</span>
 
 	/**
 	 * 	Use this to specify which type of values should have custom rendering.
@@ -46,8 +50,8 @@ public final class Render&lt;C extends JComponent,E&gt; {
 	 * @return The {@link As} builder API step which expects you to provide a lambda for customizing how a cell is rendered.
 	 */
 	public &lt;T extends E&gt; As&lt;C,E,T&gt; when( Class&lt;T&gt; valueType ) {
-<span class="fc" id="L49">		NullUtil.nullArgCheck(valueType, &quot;valueType&quot;, Class.class);</span>
-<span class="fc" id="L50">		return when( valueType, cell -&gt; true );</span>
+<span class="fc" id="L53">		NullUtil.nullArgCheck(valueType, &quot;valueType&quot;, Class.class);</span>
+<span class="fc" id="L54">		return when( valueType, cell -&gt; true );</span>
 	}
 
 	/**
@@ -63,13 +67,13 @@ public final class Render&lt;C extends JComponent,E&gt; {
 			Class&lt;T&gt; valueType,
 			Predicate&lt;Cell&lt;C,T&gt;&gt; valueValidator
 	) {
-<span class="fc" id="L66">		NullUtil.nullArgCheck(valueType, &quot;valueType&quot;, Class.class);</span>
-<span class="fc" id="L67">		NullUtil.nullArgCheck(valueValidator, &quot;valueValidator&quot;, Predicate.class);</span>
-<span class="fc" id="L68">		return new As&lt;C,E,T&gt;() {</span>
+<span class="fc" id="L70">		NullUtil.nullArgCheck(valueType, &quot;valueType&quot;, Class.class);</span>
+<span class="fc" id="L71">		NullUtil.nullArgCheck(valueValidator, &quot;valueValidator&quot;, Predicate.class);</span>
+<span class="fc" id="L72">		return new As&lt;C,E,T&gt;() {</span>
 			@Override
 			public Builder&lt;C,E&gt; as(Cell.Interpreter&lt;C,T&gt; valueInterpreter) {
-<span class="fc" id="L71">				NullUtil.nullArgCheck(valueInterpreter, &quot;valueInterpreter&quot;, Cell.Interpreter.class);</span>
-<span class="fc" id="L72">				return new Builder(_componentType,valueType, valueValidator, valueInterpreter, _borderSupplier);</span>
+<span class="fc" id="L75">				NullUtil.nullArgCheck(valueInterpreter, &quot;valueInterpreter&quot;, Cell.Interpreter.class);</span>
+<span class="fc" id="L76">				return new Builder(_componentType,valueType, valueValidator, valueInterpreter, _borderSupplier);</span>
 			}
 		};
 	}
@@ -87,7 +91,7 @@ public final class Render&lt;C extends JComponent,E&gt; {
 	{
 		C           getComponent();
 		Optional&lt;V&gt; value();
-<span class="fc" id="L90">		default Optional&lt;String&gt; valueAsString() { return value().map(Object::toString); }</span>
+<span class="fc" id="L94">		default Optional&lt;String&gt; valueAsString() { return value().map(Object::toString); }</span>
 		boolean 	isSelected();
 		boolean 	hasFocus();
 		int     	getRow();
@@ -97,14 +101,14 @@ public final class Render&lt;C extends JComponent,E&gt; {
 		void        setToolTip(String toolTip);
 		void        setDefaultRenderValue(Object newValue);
 		default void setRenderer(Consumer&lt;Graphics2D&gt; painter) {
-<span class="nc" id="L100">			setRenderer(new Component() {</span>
+<span class="nc" id="L104">			setRenderer(new Component() {</span>
 				@Override
 				public void paint(Graphics g) {
-<span class="nc" id="L103">					super.paint(g);</span>
-<span class="nc" id="L104">					painter.accept((Graphics2D) g);</span>
-<span class="nc" id="L105">				}</span>
+<span class="nc" id="L107">					super.paint(g);</span>
+<span class="nc" id="L108">					painter.accept((Graphics2D) g);</span>
+<span class="nc" id="L109">				}</span>
 			});
-<span class="nc" id="L107">		}</span>
+<span class="nc" id="L111">		}</span>
 
 		/**
 		 * 	An interface for interpreting the value of a {@link Cell} and
@@ -178,7 +182,7 @@ public final class Render&lt;C extends JComponent,E&gt; {
 		 * @return The builder API allowing method chaining.
 		 */
 		default Builder&lt;C, E&gt; asComponent( Function&lt;Cell&lt;C,T&gt;, Component&gt; renderer ) {
-<span class="nc" id="L181">			return this.as( cell -&gt; cell.setRenderer(renderer.apply(cell)) );</span>
+<span class="nc" id="L185">			return this.as( cell -&gt; cell.setRenderer(renderer.apply(cell)) );</span>
 		}
 
 		/**
@@ -193,105 +197,105 @@ public final class Render&lt;C extends JComponent,E&gt; {
 		 * @return The builder API allowing method chaining.
 		 */
 		default Builder&lt;C, E&gt; asText( Function&lt;Cell&lt;C,T&gt;, String&gt; renderer ) {
-<span class="fc" id="L196">			return this.as( cell -&gt; {</span>
-<span class="fc" id="L197">				JLabel l = new JLabel(renderer.apply(cell));</span>
-<span class="fc" id="L198">				l.setOpaque(true);</span>
+<span class="fc" id="L200">			return this.as( cell -&gt; {</span>
+<span class="fc" id="L201">				JLabel l = new JLabel(renderer.apply(cell));</span>
+<span class="fc" id="L202">				l.setOpaque(true);</span>
 
-<span class="fc" id="L200">				Color bg = null;</span>
-<span class="fc" id="L201">				Color fg = null;</span>
+<span class="fc" id="L204">				Color bg = null;</span>
+<span class="fc" id="L205">				Color fg = null;</span>
 
-<span class="fc bfc" id="L203" title="All 2 branches covered.">				if ( cell.getComponent() instanceof JList ) {</span>
-<span class="fc" id="L204">					JList&lt;?&gt; jList = (JList&lt;?&gt;) cell.getComponent();</span>
-<span class="fc" id="L205">					bg = jList.getSelectionBackground();</span>
-<span class="fc" id="L206">					fg = jList.getSelectionForeground();</span>
-<span class="pc bpc" id="L207" title="1 of 2 branches missed.">					if ( bg == null )</span>
-<span class="nc" id="L208">						bg = UIManager.getColor(&quot;List.selectionBackground&quot;);</span>
-<span class="pc bpc" id="L209" title="1 of 2 branches missed.">					if ( fg == null )</span>
-<span class="nc" id="L210">						fg = UIManager.getColor(&quot;List.selectionForeground&quot;);</span>
+<span class="fc bfc" id="L207" title="All 2 branches covered.">				if ( cell.getComponent() instanceof JList ) {</span>
+<span class="fc" id="L208">					JList&lt;?&gt; jList = (JList&lt;?&gt;) cell.getComponent();</span>
+<span class="fc" id="L209">					bg = jList.getSelectionBackground();</span>
+<span class="fc" id="L210">					fg = jList.getSelectionForeground();</span>
+<span class="pc bpc" id="L211" title="1 of 2 branches missed.">					if ( bg == null )</span>
+<span class="nc" id="L212">						bg = UIManager.getColor(&quot;List.selectionBackground&quot;);</span>
+<span class="pc bpc" id="L213" title="1 of 2 branches missed.">					if ( fg == null )</span>
+<span class="nc" id="L214">						fg = UIManager.getColor(&quot;List.selectionForeground&quot;);</span>
 				}
 
-<span class="pc bpc" id="L213" title="1 of 2 branches missed.">				if ( cell.getComponent() instanceof JTable ) {</span>
-<span class="nc" id="L214">					JTable jTable = (JTable) cell.getComponent();</span>
-<span class="nc" id="L215">					bg = jTable.getSelectionBackground();</span>
-<span class="nc" id="L216">					fg = jTable.getSelectionForeground();</span>
-<span class="nc bnc" id="L217" title="All 2 branches missed.">					if ( bg == null )</span>
-<span class="nc" id="L218">						bg = UIManager.getColor(&quot;Table.selectionBackground&quot;);</span>
-<span class="nc bnc" id="L219" title="All 2 branches missed.">					if ( fg == null )</span>
-<span class="nc" id="L220">						fg = UIManager.getColor(&quot;Table.selectionForeground&quot;);</span>
+<span class="pc bpc" id="L217" title="1 of 2 branches missed.">				if ( cell.getComponent() instanceof JTable ) {</span>
+<span class="nc" id="L218">					JTable jTable = (JTable) cell.getComponent();</span>
+<span class="nc" id="L219">					bg = jTable.getSelectionBackground();</span>
+<span class="nc" id="L220">					fg = jTable.getSelectionForeground();</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">					if ( bg == null )</span>
+<span class="nc" id="L222">						bg = UIManager.getColor(&quot;Table.selectionBackground&quot;);</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">					if ( fg == null )</span>
+<span class="nc" id="L224">						fg = UIManager.getColor(&quot;Table.selectionForeground&quot;);</span>
 				}
 
-<span class="pc bpc" id="L223" title="1 of 4 branches missed.">				if ( bg == null &amp;&amp; cell.getComponent() != null )</span>
-<span class="nc" id="L224">					bg = cell.getComponent().getBackground();</span>
-<span class="pc bpc" id="L225" title="1 of 4 branches missed.">				if ( fg == null &amp;&amp; cell.getComponent() != null )</span>
-<span class="nc" id="L226">					fg = cell.getComponent().getForeground();</span>
+<span class="pc bpc" id="L227" title="1 of 4 branches missed.">				if ( bg == null &amp;&amp; cell.getComponent() != null )</span>
+<span class="nc" id="L228">					bg = cell.getComponent().getBackground();</span>
+<span class="pc bpc" id="L229" title="1 of 4 branches missed.">				if ( fg == null &amp;&amp; cell.getComponent() != null )</span>
+<span class="nc" id="L230">					fg = cell.getComponent().getForeground();</span>
 
-<span class="fc bfc" id="L228" title="All 2 branches covered.">				if ( bg == null )</span>
-<span class="fc" id="L229">					bg = UIManager.getColor( &quot;ComboBox.selectionBackground&quot; );</span>
-<span class="fc bfc" id="L230" title="All 2 branches covered.">				if ( fg == null )</span>
-<span class="fc" id="L231">					fg = UIManager.getColor( &quot;ComboBox.selectionForeground&quot; );</span>
+<span class="fc bfc" id="L232" title="All 2 branches covered.">				if ( bg == null )</span>
+<span class="fc" id="L233">					bg = UIManager.getColor( &quot;ComboBox.selectionBackground&quot; );</span>
+<span class="fc bfc" id="L234" title="All 2 branches covered.">				if ( fg == null )</span>
+<span class="fc" id="L235">					fg = UIManager.getColor( &quot;ComboBox.selectionForeground&quot; );</span>
 
-<span class="pc bpc" id="L233" title="1 of 2 branches missed.">				if ( bg == null )</span>
-<span class="nc" id="L234">					bg = UIManager.getColor( &quot;List.dropCellBackground&quot; );</span>
-<span class="pc bpc" id="L235" title="1 of 2 branches missed.">				if ( fg == null )</span>
-<span class="nc" id="L236">					fg = UIManager.getColor( &quot;List.dropCellForeground&quot; );</span>
+<span class="pc bpc" id="L237" title="1 of 2 branches missed.">				if ( bg == null )</span>
+<span class="nc" id="L238">					bg = UIManager.getColor( &quot;List.dropCellBackground&quot; );</span>
+<span class="pc bpc" id="L239" title="1 of 2 branches missed.">				if ( fg == null )</span>
+<span class="nc" id="L240">					fg = UIManager.getColor( &quot;List.dropCellForeground&quot; );</span>
 
-<span class="pc bpc" id="L238" title="1 of 2 branches missed.">				if ( bg == null )</span>
-<span class="nc" id="L239">					bg = UIManager.getColor( &quot;ComboBox.background&quot; );</span>
-<span class="pc bpc" id="L240" title="1 of 2 branches missed.">				if ( fg == null )</span>
-<span class="nc" id="L241">					fg = UIManager.getColor( &quot;ComboBox.foreground&quot; );</span>
+<span class="pc bpc" id="L242" title="1 of 2 branches missed.">				if ( bg == null )</span>
+<span class="nc" id="L243">					bg = UIManager.getColor( &quot;ComboBox.background&quot; );</span>
+<span class="pc bpc" id="L244" title="1 of 2 branches missed.">				if ( fg == null )</span>
+<span class="nc" id="L245">					fg = UIManager.getColor( &quot;ComboBox.foreground&quot; );</span>
 
 				// Lastly we make sure the color is a user color, not a LaF color:
-<span class="pc bpc" id="L244" title="1 of 2 branches missed.">				if ( bg != null ) // This is because of a weired JDK bug it seems!</span>
-<span class="fc" id="L245">					bg = new Color( bg.getRGB() );</span>
-<span class="pc bpc" id="L246" title="1 of 2 branches missed.">				if ( fg != null )</span>
-<span class="fc" id="L247">					fg = new Color( fg.getRGB() );</span>
+<span class="pc bpc" id="L248" title="1 of 2 branches missed.">				if ( bg != null ) // This is because of a weired JDK bug it seems!</span>
+<span class="fc" id="L249">					bg = new Color( bg.getRGB() );</span>
+<span class="pc bpc" id="L250" title="1 of 2 branches missed.">				if ( fg != null )</span>
+<span class="fc" id="L251">					fg = new Color( fg.getRGB() );</span>
 
-<span class="pc bpc" id="L249" title="1 of 2 branches missed.">				if (cell.isSelected()) {</span>
-<span class="nc bnc" id="L250" title="All 2 branches missed.">					if ( bg != null ) l.setBackground( bg );</span>
-<span class="nc bnc" id="L251" title="All 2 branches missed.">					if ( fg != null ) l.setForeground( fg );</span>
+<span class="pc bpc" id="L253" title="1 of 2 branches missed.">				if (cell.isSelected()) {</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">					if ( bg != null ) l.setBackground( bg );</span>
+<span class="nc bnc" id="L255" title="All 2 branches missed.">					if ( fg != null ) l.setForeground( fg );</span>
 				}
 				else {
-<span class="fc" id="L254">					Color normalBg = Color.WHITE;</span>
-<span class="fc bfc" id="L255" title="All 2 branches covered.">					if (  cell.getComponent() != null )</span>
-<span class="fc" id="L256">						normalBg = cell.getComponent().getBackground();</span>
+<span class="fc" id="L258">					Color normalBg = Color.WHITE;</span>
+<span class="fc bfc" id="L259" title="All 2 branches covered.">					if (  cell.getComponent() != null )</span>
+<span class="fc" id="L260">						normalBg = cell.getComponent().getBackground();</span>
 
 					// We need to make sure the color is a user color, not a LaF color:
-<span class="pc bpc" id="L259" title="1 of 2 branches missed.">					if ( normalBg != null )</span>
-<span class="fc" id="L260">						normalBg = new Color( normalBg.getRGB() ); // This is because of a weired JDK bug it seems!</span>
+<span class="pc bpc" id="L263" title="1 of 2 branches missed.">					if ( normalBg != null )</span>
+<span class="fc" id="L264">						normalBg = new Color( normalBg.getRGB() ); // This is because of a weired JDK bug it seems!</span>
 
-<span class="fc bfc" id="L262" title="All 2 branches covered.">					if ( cell.getRow() % 2 == 1 ) {</span>
+<span class="fc bfc" id="L266" title="All 2 branches covered.">					if ( cell.getRow() % 2 == 1 ) {</span>
 						// We determine if the base color is more bright or dark,
 						// and then we set the foreground color accordingly
-<span class="fc" id="L265">						double brightness = (0.299 * normalBg.getRed() + 0.587 * normalBg.getGreen() + 0.114 * normalBg.getBlue()) / 255;</span>
-<span class="pc bpc" id="L266" title="1 of 2 branches missed.">						if ( brightness &lt; 0.5 )</span>
-<span class="nc" id="L267">							normalBg = brighter(normalBg);</span>
+<span class="fc" id="L269">						double brightness = (0.299 * normalBg.getRed() + 0.587 * normalBg.getGreen() + 0.114 * normalBg.getBlue()) / 255;</span>
+<span class="pc bpc" id="L270" title="1 of 2 branches missed.">						if ( brightness &lt; 0.5 )</span>
+<span class="nc" id="L271">							normalBg = brighter(normalBg);</span>
 						else
-<span class="fc" id="L269">							normalBg = darker(normalBg);</span>
+<span class="fc" id="L273">							normalBg = darker(normalBg);</span>
 					}
-<span class="pc bpc" id="L271" title="1 of 2 branches missed.">					if ( bg != null ) l.setBackground( normalBg );</span>
-<span class="pc bpc" id="L272" title="1 of 4 branches missed.">					if ( fg != null &amp;&amp; cell.getComponent() != null )</span>
-<span class="fc" id="L273">						l.setForeground( cell.getComponent().getForeground() );</span>
+<span class="pc bpc" id="L275" title="1 of 2 branches missed.">					if ( bg != null ) l.setBackground( normalBg );</span>
+<span class="pc bpc" id="L276" title="1 of 4 branches missed.">					if ( fg != null &amp;&amp; cell.getComponent() != null )</span>
+<span class="fc" id="L277">						l.setForeground( cell.getComponent().getForeground() );</span>
 				}
 
 				// TODO:
 				//l.setEnabled(cell.getComponent().isEnabled());
 				//l.setFont(cell.getComponent().getFont());
 
-<span class="fc" id="L280">				Border border = null;</span>
-<span class="pc bpc" id="L281" title="1 of 2 branches missed.">				if ( cell.hasFocus() ) {</span>
-<span class="nc bnc" id="L282" title="All 2 branches missed.">					if ( cell.isSelected() )</span>
-<span class="nc" id="L283">						border = UIManager.getBorder( &quot;List.focusSelectedCellHighlightBorder&quot; );</span>
+<span class="fc" id="L284">				Border border = null;</span>
+<span class="pc bpc" id="L285" title="1 of 2 branches missed.">				if ( cell.hasFocus() ) {</span>
+<span class="nc bnc" id="L286" title="All 2 branches missed.">					if ( cell.isSelected() )</span>
+<span class="nc" id="L287">						border = UIManager.getBorder( &quot;List.focusSelectedCellHighlightBorder&quot; );</span>
 
-<span class="nc bnc" id="L285" title="All 2 branches missed.">					if ( border == null )</span>
-<span class="nc" id="L286">						border = UIManager.getBorder( &quot;List.focusCellHighlightBorder&quot; );</span>
+<span class="nc bnc" id="L289" title="All 2 branches missed.">					if ( border == null )</span>
+<span class="nc" id="L290">						border = UIManager.getBorder( &quot;List.focusCellHighlightBorder&quot; );</span>
 				}
 				else
-<span class="fc" id="L289">					border = UIManager.getBorder( &quot;List.cellNoFocusBorder&quot; );</span>
+<span class="fc" id="L293">					border = UIManager.getBorder( &quot;List.cellNoFocusBorder&quot; );</span>
 
-<span class="pc bpc" id="L291" title="1 of 2 branches missed.">				if ( border != null ) l.setBorder(border);</span>
+<span class="pc bpc" id="L295" title="1 of 2 branches missed.">				if ( border != null ) l.setBorder(border);</span>
 
-<span class="fc" id="L293">				cell.setRenderer(l);</span>
-<span class="fc" id="L294">			});</span>
+<span class="fc" id="L297">				cell.setRenderer(l);</span>
+<span class="fc" id="L298">			});</span>
 		}
 
 		/**
@@ -308,14 +312,18 @@ public final class Render&lt;C extends JComponent,E&gt; {
 		 * @return The builder API allowing method chaining.
 		 */
 		default Builder&lt;C, E&gt; render( BiConsumer&lt;Cell&lt;C,T&gt;, Graphics2D&gt; renderer ) {
-<span class="nc" id="L311">			return this.as( cell -&gt; cell.setRenderer(new JComponent(){</span>
+<span class="nc" id="L315">			return this.as( cell -&gt; cell.setRenderer(new JComponent(){</span>
 				@Override public void paintComponent(Graphics g) {
 					try {
-<span class="nc" id="L314">						renderer.accept(cell, (Graphics2D) g);</span>
-<span class="nc" id="L315">					} catch (Exception e) {</span>
-<span class="nc" id="L316">						e.printStackTrace();</span>
-<span class="nc" id="L317">					}</span>
-<span class="nc" id="L318">				}</span>
+<span class="nc" id="L318">						renderer.accept(cell, (Graphics2D) g);</span>
+<span class="nc" id="L319">					} catch (Exception e) {</span>
+<span class="nc" id="L320">						log.warn(&quot;An exception occurred while rendering a cell!&quot;, e);</span>
+					    /*
+					        We log as warning because exceptions during rendering are not considered
+					        as harmful as elsewhere!
+					    */
+<span class="nc" id="L325">					}</span>
+<span class="nc" id="L326">				}</span>
 			}) );
 		}
 
@@ -332,7 +340,7 @@ public final class Render&lt;C extends JComponent,E&gt; {
 
 		private final Class&lt;C&gt; _componentType;
 		private final Supplier&lt;Border&gt; _border;
-<span class="fc" id="L335">		private final Map&lt;Class&lt;?&gt;, java.util.List&lt;Consumer&lt;Cell&lt;C,?&gt;&gt;&gt;&gt; _rendererLookup = new LinkedHashMap&lt;&gt;(16);</span>
+<span class="fc" id="L343">		private final Map&lt;Class&lt;?&gt;, java.util.List&lt;Consumer&lt;Cell&lt;C,?&gt;&gt;&gt;&gt; _rendererLookup = new LinkedHashMap&lt;&gt;(16);</span>
 
 		public Builder(
 				Class&lt;C&gt; componentType,
@@ -340,14 +348,14 @@ public final class Render&lt;C extends JComponent,E&gt; {
 				Predicate&lt;Cell&lt;C,E&gt;&gt; valueValidator,
 				Cell.Interpreter&lt;C, E&gt; valueInterpreter,
 				Supplier&lt;Border&gt; border
-<span class="fc" id="L343">		) {</span>
-<span class="fc" id="L344">			NullUtil.nullArgCheck(valueType, &quot;valueType&quot;, Class.class);</span>
-<span class="fc" id="L345">			NullUtil.nullArgCheck(valueValidator, &quot;valueValidator&quot;, Predicate.class);</span>
-<span class="fc" id="L346">			NullUtil.nullArgCheck(valueInterpreter, &quot;valueInterpreter&quot;, Cell.Interpreter.class);</span>
-<span class="fc" id="L347">			_componentType = componentType;</span>
-<span class="fc" id="L348">			_border = border;</span>
-<span class="fc" id="L349">			when(valueType, valueValidator).as(valueInterpreter);</span>
-<span class="fc" id="L350">		}</span>
+<span class="fc" id="L351">		) {</span>
+<span class="fc" id="L352">			NullUtil.nullArgCheck(valueType, &quot;valueType&quot;, Class.class);</span>
+<span class="fc" id="L353">			NullUtil.nullArgCheck(valueValidator, &quot;valueValidator&quot;, Predicate.class);</span>
+<span class="fc" id="L354">			NullUtil.nullArgCheck(valueInterpreter, &quot;valueInterpreter&quot;, Cell.Interpreter.class);</span>
+<span class="fc" id="L355">			_componentType = componentType;</span>
+<span class="fc" id="L356">			_border = border;</span>
+<span class="fc" id="L357">			when(valueType, valueValidator).as(valueInterpreter);</span>
+<span class="fc" id="L358">		}</span>
 
 		/**
 		 * 	Use this to specify which type of values should have custom rendering.
@@ -358,22 +366,22 @@ public final class Render&lt;C extends JComponent,E&gt; {
 		 * @return The {@link As} builder API step which expects you to provide a lambda for customizing how a cell is rendered.
 		 */
 		public &lt;T extends E&gt; As&lt;C,E,T&gt; when( Class&lt;T&gt; valueType ) {
-<span class="fc" id="L361">			NullUtil.nullArgCheck(valueType, &quot;valueType&quot;, Class.class);</span>
-<span class="fc" id="L362">			return when( valueType, cell -&gt; true );</span>
+<span class="fc" id="L369">			NullUtil.nullArgCheck(valueType, &quot;valueType&quot;, Class.class);</span>
+<span class="fc" id="L370">			return when( valueType, cell -&gt; true );</span>
 		}
 
 		public &lt;T extends E&gt; As&lt;C,E,T&gt; when(
 				Class&lt;T&gt; valueType,
 				Predicate&lt;Cell&lt;C,T&gt;&gt; valueValidator
 		) {
-<span class="fc" id="L369">			NullUtil.nullArgCheck(valueType, &quot;valueType&quot;, Class.class);</span>
-<span class="fc" id="L370">			NullUtil.nullArgCheck(valueValidator, &quot;valueValidator&quot;, Predicate.class);</span>
-<span class="fc" id="L371">			return new As&lt;C,E,T&gt;() {</span>
+<span class="fc" id="L377">			NullUtil.nullArgCheck(valueType, &quot;valueType&quot;, Class.class);</span>
+<span class="fc" id="L378">			NullUtil.nullArgCheck(valueValidator, &quot;valueValidator&quot;, Predicate.class);</span>
+<span class="fc" id="L379">			return new As&lt;C,E,T&gt;() {</span>
 				@Override
 				public Builder&lt;C,E&gt; as( Cell.Interpreter&lt;C,T&gt; valueInterpreter ) {
-<span class="fc" id="L374">					NullUtil.nullArgCheck(valueInterpreter, &quot;valueInterpreter&quot;, Cell.Interpreter.class);</span>
-<span class="fc" id="L375">					_store(valueType, valueValidator, valueInterpreter);</span>
-<span class="fc" id="L376">					return Builder.this;</span>
+<span class="fc" id="L382">					NullUtil.nullArgCheck(valueInterpreter, &quot;valueInterpreter&quot;, Cell.Interpreter.class);</span>
+<span class="fc" id="L383">					_store(valueType, valueValidator, valueInterpreter);</span>
+<span class="fc" id="L384">					return Builder.this;</span>
 				}
 			};
 		}
@@ -383,17 +391,17 @@ public final class Render&lt;C extends JComponent,E&gt; {
 			Predicate predicate,
 			Cell.Interpreter valueInterpreter
 		) {
-<span class="fc" id="L386">			NullUtil.nullArgCheck(valueType, &quot;valueType&quot;, Class.class);</span>
-<span class="fc" id="L387">			NullUtil.nullArgCheck(predicate, &quot;predicate&quot;, Predicate.class);</span>
-<span class="fc" id="L388">			NullUtil.nullArgCheck(valueInterpreter, &quot;valueInterpreter&quot;, Cell.Interpreter.class);</span>
-<span class="fc" id="L389">			List&lt;Consumer&lt;Cell&lt;C,?&gt;&gt;&gt; found = _rendererLookup.computeIfAbsent(valueType, k -&gt; new ArrayList&lt;&gt;());</span>
-<span class="fc" id="L390">			found.add( cell -&gt; {</span>
-<span class="pc bpc" id="L391" title="1 of 2 branches missed.">				if ( predicate.test(cell) )</span>
-<span class="fc" id="L392">					valueInterpreter.interpret(cell);</span>
-<span class="fc" id="L393">			});</span>
-<span class="fc" id="L394">		}</span>
+<span class="fc" id="L394">			NullUtil.nullArgCheck(valueType, &quot;valueType&quot;, Class.class);</span>
+<span class="fc" id="L395">			NullUtil.nullArgCheck(predicate, &quot;predicate&quot;, Predicate.class);</span>
+<span class="fc" id="L396">			NullUtil.nullArgCheck(valueInterpreter, &quot;valueInterpreter&quot;, Cell.Interpreter.class);</span>
+<span class="fc" id="L397">			List&lt;Consumer&lt;Cell&lt;C,?&gt;&gt;&gt; found = _rendererLookup.computeIfAbsent(valueType, k -&gt; new ArrayList&lt;&gt;());</span>
+<span class="fc" id="L398">			found.add( cell -&gt; {</span>
+<span class="pc bpc" id="L399" title="1 of 2 branches missed.">				if ( predicate.test(cell) )</span>
+<span class="fc" id="L400">					valueInterpreter.interpret(cell);</span>
+<span class="fc" id="L401">			});</span>
+<span class="fc" id="L402">		}</span>
 
-<span class="fc" id="L396">		private class SimpleTableCellRenderer extends DefaultTableCellRenderer</span>
+<span class="fc" id="L404">		private class SimpleTableCellRenderer extends DefaultTableCellRenderer</span>
 		{
 			@Override
 			public Component getTableCellRendererComponent(
@@ -404,51 +412,51 @@ public final class Render&lt;C extends JComponent,E&gt; {
 					final int row,
 					int column
 			) {
-<span class="fc" id="L407">				List&lt;Consumer&lt;Cell&lt;C,?&gt;&gt;&gt; interpreter = _find(value, _rendererLookup);</span>
-<span class="pc bpc" id="L408" title="1 of 2 branches missed.">				if ( interpreter.isEmpty() )</span>
-<span class="nc" id="L409">					return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);</span>
+<span class="fc" id="L415">				List&lt;Consumer&lt;Cell&lt;C,?&gt;&gt;&gt; interpreter = _find(value, _rendererLookup);</span>
+<span class="pc bpc" id="L416" title="1 of 2 branches missed.">				if ( interpreter.isEmpty() )</span>
+<span class="nc" id="L417">					return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);</span>
 				else {
-<span class="fc" id="L411">					Component[] componentRef = new Component[1];</span>
-<span class="fc" id="L412">					Object[] defaultValueRef = new Object[1];</span>
-<span class="fc" id="L413">					List&lt;String&gt; toolTips = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L414">					Cell&lt;JTable,Object&gt; cell = new Cell&lt;JTable,Object&gt;() {</span>
-<span class="fc" id="L415">						@Override public JTable getComponent() {return table;}</span>
-<span class="fc" id="L416">						@Override public Optional&lt;Object&gt; value() { return Optional.ofNullable(value); }</span>
-<span class="fc" id="L417">						@Override public boolean isSelected() {return isSelected;}</span>
-<span class="fc" id="L418">						@Override public boolean hasFocus() {return hasFocus;}</span>
-<span class="fc" id="L419">						@Override public int getRow() {return row;}</span>
-<span class="nc" id="L420">						@Override public int getColumn() {return column;}</span>
-<span class="nc" id="L421">						@Override public Component getRenderer() {return SimpleTableCellRenderer.super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);}</span>
-<span class="fc" id="L422">						@Override public void setRenderer(Component component) {componentRef[0] = component;}</span>
-<span class="nc" id="L423">						@Override public void setToolTip(String toolTip) { toolTips.add(toolTip);}</span>
+<span class="fc" id="L419">					Component[] componentRef = new Component[1];</span>
+<span class="fc" id="L420">					Object[] defaultValueRef = new Object[1];</span>
+<span class="fc" id="L421">					List&lt;String&gt; toolTips = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L422">					Cell&lt;JTable,Object&gt; cell = new Cell&lt;JTable,Object&gt;() {</span>
+<span class="fc" id="L423">						@Override public JTable getComponent() {return table;}</span>
+<span class="fc" id="L424">						@Override public Optional&lt;Object&gt; value() { return Optional.ofNullable(value); }</span>
+<span class="fc" id="L425">						@Override public boolean isSelected() {return isSelected;}</span>
+<span class="fc" id="L426">						@Override public boolean hasFocus() {return hasFocus;}</span>
+<span class="fc" id="L427">						@Override public int getRow() {return row;}</span>
+<span class="nc" id="L428">						@Override public int getColumn() {return column;}</span>
+<span class="nc" id="L429">						@Override public Component getRenderer() {return SimpleTableCellRenderer.super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);}</span>
+<span class="fc" id="L430">						@Override public void setRenderer(Component component) {componentRef[0] = component;}</span>
+<span class="nc" id="L431">						@Override public void setToolTip(String toolTip) { toolTips.add(toolTip);}</span>
 
-<span class="nc" id="L425">						@Override public void setDefaultRenderValue(Object newValue) {defaultValueRef[0] = newValue;}</span>
+<span class="nc" id="L433">						@Override public void setDefaultRenderValue(Object newValue) {defaultValueRef[0] = newValue;}</span>
 					};
-<span class="fc" id="L427">					interpreter.forEach(consumer -&gt; consumer.accept((Cell&lt;C,?&gt;)cell) );</span>
+<span class="fc" id="L435">					interpreter.forEach(consumer -&gt; consumer.accept((Cell&lt;C,?&gt;)cell) );</span>
 					Component choice;
-<span class="pc bpc" id="L429" title="1 of 2 branches missed.">					if ( componentRef[0] != null )</span>
-<span class="fc" id="L430">						choice = componentRef[0];</span>
-<span class="nc bnc" id="L431" title="All 2 branches missed.">					else if ( defaultValueRef[0] != null )</span>
-<span class="nc" id="L432">						choice = super.getTableCellRendererComponent(table, defaultValueRef[0], isSelected, hasFocus, row, column);</span>
+<span class="pc bpc" id="L437" title="1 of 2 branches missed.">					if ( componentRef[0] != null )</span>
+<span class="fc" id="L438">						choice = componentRef[0];</span>
+<span class="nc bnc" id="L439" title="All 2 branches missed.">					else if ( defaultValueRef[0] != null )</span>
+<span class="nc" id="L440">						choice = super.getTableCellRendererComponent(table, defaultValueRef[0], isSelected, hasFocus, row, column);</span>
 					else
-<span class="nc" id="L434">						choice = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);</span>
+<span class="nc" id="L442">						choice = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);</span>
 
-<span class="pc bpc" id="L436" title="3 of 4 branches missed.">					if ( !toolTips.isEmpty() &amp;&amp; choice instanceof JComponent )</span>
-<span class="nc" id="L437">						((JComponent)choice).setToolTipText(String.join(&quot;; &quot;, toolTips));</span>
+<span class="pc bpc" id="L444" title="3 of 4 branches missed.">					if ( !toolTips.isEmpty() &amp;&amp; choice instanceof JComponent )</span>
+<span class="nc" id="L445">						((JComponent)choice).setToolTipText(String.join(&quot;; &quot;, toolTips));</span>
 
-<span class="fc" id="L439">					return choice;</span>
+<span class="fc" id="L447">					return choice;</span>
 				}
 			}
 
 			@Override
 			public Border getBorder() {
-<span class="nc bnc" id="L445" title="All 2 branches missed.">				if ( _border != null ) return _border.get();</span>
+<span class="nc bnc" id="L453" title="All 2 branches missed.">				if ( _border != null ) return _border.get();</span>
 				else
-<span class="nc" id="L447">					return super.getBorder();</span>
+<span class="nc" id="L455">					return super.getBorder();</span>
 			}
 		}
 
-<span class="fc" id="L451">		private class SimpleListCellRenderer&lt;T&gt; extends DefaultListCellRenderer {</span>
+<span class="fc" id="L459">		private class SimpleListCellRenderer&lt;T&gt; extends DefaultListCellRenderer {</span>
 			@Override
 			public Component getListCellRendererComponent(
 					JList list,
@@ -457,82 +465,82 @@ public final class Render&lt;C extends JComponent,E&gt; {
 					boolean isSelected,
 					boolean hasFocus
 			) {
-<span class="fc" id="L460">				List&lt;Consumer&lt;Cell&lt;C,?&gt;&gt;&gt; interpreter = _find(value, _rendererLookup);</span>
-<span class="pc bpc" id="L461" title="1 of 2 branches missed.">				if ( interpreter.isEmpty() )</span>
-<span class="nc" id="L462">					return super.getListCellRendererComponent(list, value, row, isSelected, hasFocus);</span>
+<span class="fc" id="L468">				List&lt;Consumer&lt;Cell&lt;C,?&gt;&gt;&gt; interpreter = _find(value, _rendererLookup);</span>
+<span class="pc bpc" id="L469" title="1 of 2 branches missed.">				if ( interpreter.isEmpty() )</span>
+<span class="nc" id="L470">					return super.getListCellRendererComponent(list, value, row, isSelected, hasFocus);</span>
 				else {
-<span class="fc" id="L464">					Component[] componentRef = new Component[1];</span>
-<span class="fc" id="L465">					Object[] defaultValueRef = new Object[1];</span>
-<span class="fc" id="L466">					List&lt;String&gt; toolTips = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L467">					Cell&lt;JList&lt;T&gt;,Object&gt; cell = new Cell&lt;JList&lt;T&gt;, Object&gt;() {</span>
-<span class="fc" id="L468">						@Override public JList&lt;T&gt; getComponent() {return list;}</span>
-<span class="fc" id="L469">						@Override public Optional&lt;Object&gt; value() { return Optional.ofNullable(value); }</span>
-<span class="fc" id="L470">						@Override public boolean isSelected() {return isSelected;}</span>
-<span class="fc" id="L471">						@Override public boolean hasFocus() {return hasFocus;}</span>
-<span class="fc" id="L472">						@Override public int getRow() {return row;}</span>
-<span class="nc" id="L473">						@Override public int getColumn() {return 0;}</span>
-<span class="nc" id="L474">						@Override public Component getRenderer() {return SimpleListCellRenderer.super.getListCellRendererComponent(list, value, row, isSelected, hasFocus);}</span>
-<span class="fc" id="L475">						@Override public void setRenderer(Component component) {componentRef[0] = component;}</span>
-<span class="nc" id="L476">						@Override public void setToolTip(String toolTip) { toolTips.add(toolTip);}</span>
-<span class="nc" id="L477">						@Override public void setDefaultRenderValue(Object newValue) {defaultValueRef[0] = newValue;}</span>
+<span class="fc" id="L472">					Component[] componentRef = new Component[1];</span>
+<span class="fc" id="L473">					Object[] defaultValueRef = new Object[1];</span>
+<span class="fc" id="L474">					List&lt;String&gt; toolTips = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L475">					Cell&lt;JList&lt;T&gt;,Object&gt; cell = new Cell&lt;JList&lt;T&gt;, Object&gt;() {</span>
+<span class="fc" id="L476">						@Override public JList&lt;T&gt; getComponent() {return list;}</span>
+<span class="fc" id="L477">						@Override public Optional&lt;Object&gt; value() { return Optional.ofNullable(value); }</span>
+<span class="fc" id="L478">						@Override public boolean isSelected() {return isSelected;}</span>
+<span class="fc" id="L479">						@Override public boolean hasFocus() {return hasFocus;}</span>
+<span class="fc" id="L480">						@Override public int getRow() {return row;}</span>
+<span class="nc" id="L481">						@Override public int getColumn() {return 0;}</span>
+<span class="nc" id="L482">						@Override public Component getRenderer() {return SimpleListCellRenderer.super.getListCellRendererComponent(list, value, row, isSelected, hasFocus);}</span>
+<span class="fc" id="L483">						@Override public void setRenderer(Component component) {componentRef[0] = component;}</span>
+<span class="nc" id="L484">						@Override public void setToolTip(String toolTip) { toolTips.add(toolTip);}</span>
+<span class="nc" id="L485">						@Override public void setDefaultRenderValue(Object newValue) {defaultValueRef[0] = newValue;}</span>
 					};
-<span class="fc" id="L479">					interpreter.forEach(consumer -&gt; consumer.accept((Cell&lt;C,?&gt;)cell) );</span>
+<span class="fc" id="L487">					interpreter.forEach(consumer -&gt; consumer.accept((Cell&lt;C,?&gt;)cell) );</span>
 					Component choice;
-<span class="pc bpc" id="L481" title="1 of 2 branches missed.">					if ( componentRef[0] != null )</span>
-<span class="fc" id="L482">						choice = componentRef[0];</span>
-<span class="nc bnc" id="L483" title="All 2 branches missed.">					else if ( defaultValueRef[0] != null )</span>
-<span class="nc" id="L484">						choice = super.getListCellRendererComponent(list, defaultValueRef[0], row, isSelected, hasFocus);</span>
+<span class="pc bpc" id="L489" title="1 of 2 branches missed.">					if ( componentRef[0] != null )</span>
+<span class="fc" id="L490">						choice = componentRef[0];</span>
+<span class="nc bnc" id="L491" title="All 2 branches missed.">					else if ( defaultValueRef[0] != null )</span>
+<span class="nc" id="L492">						choice = super.getListCellRendererComponent(list, defaultValueRef[0], row, isSelected, hasFocus);</span>
 					else
-<span class="nc" id="L486">						choice = super.getListCellRendererComponent(list, value, row, isSelected, hasFocus);</span>
+<span class="nc" id="L494">						choice = super.getListCellRendererComponent(list, value, row, isSelected, hasFocus);</span>
 
-<span class="pc bpc" id="L488" title="3 of 4 branches missed.">					if ( !toolTips.isEmpty() &amp;&amp; choice instanceof JComponent )</span>
-<span class="nc" id="L489">						((JComponent)choice).setToolTipText(String.join(&quot;; &quot;, toolTips));</span>
+<span class="pc bpc" id="L496" title="3 of 4 branches missed.">					if ( !toolTips.isEmpty() &amp;&amp; choice instanceof JComponent )</span>
+<span class="nc" id="L497">						((JComponent)choice).setToolTipText(String.join(&quot;; &quot;, toolTips));</span>
 
-<span class="fc" id="L491">					return choice;</span>
+<span class="fc" id="L499">					return choice;</span>
 				}
 			}
 			@Override
 			public Border getBorder() {
-<span class="nc bnc" id="L496" title="All 2 branches missed.">				if ( _border != null ) return _border.get();</span>
+<span class="nc bnc" id="L504" title="All 2 branches missed.">				if ( _border != null ) return _border.get();</span>
 				else
-<span class="nc" id="L498">					return super.getBorder();</span>
+<span class="nc" id="L506">					return super.getBorder();</span>
 			}
 		}
 
 		private static &lt;C extends JComponent&gt; List&lt;Consumer&lt;Cell&lt;C,?&gt;&gt;&gt; _find(
 				Object value, Map&lt;Class&lt;?&gt;, java.util.List&lt;Consumer&lt;Cell&lt;C,?&gt;&gt;&gt;&gt; rendererLookup
 		) {
-<span class="pc bpc" id="L505" title="1 of 2 branches missed.">			Class&lt;?&gt; type = ( value == null ? Object.class : value.getClass() );</span>
-<span class="fc" id="L506">			List&lt;Consumer&lt;Cell&lt;C,?&gt;&gt;&gt; cellRenderer = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L507" title="All 2 branches covered.">			for (Map.Entry&lt;Class&lt;?&gt;, List&lt;Consumer&lt;Cell&lt;C,?&gt;&gt;&gt;&gt; e : rendererLookup.entrySet()) {</span>
-<span class="pc bpc" id="L508" title="1 of 2 branches missed.">				if ( e.getKey().isAssignableFrom(type) )</span>
-<span class="fc" id="L509">					cellRenderer.addAll(e.getValue());</span>
-<span class="fc" id="L510">			}</span>
-<span class="fc" id="L511">			return cellRenderer;</span>
+<span class="pc bpc" id="L513" title="1 of 2 branches missed.">			Class&lt;?&gt; type = ( value == null ? Object.class : value.getClass() );</span>
+<span class="fc" id="L514">			List&lt;Consumer&lt;Cell&lt;C,?&gt;&gt;&gt; cellRenderer = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L515" title="All 2 branches covered.">			for (Map.Entry&lt;Class&lt;?&gt;, List&lt;Consumer&lt;Cell&lt;C,?&gt;&gt;&gt;&gt; e : rendererLookup.entrySet()) {</span>
+<span class="pc bpc" id="L516" title="1 of 2 branches missed.">				if ( e.getKey().isAssignableFrom(type) )</span>
+<span class="fc" id="L517">					cellRenderer.addAll(e.getValue());</span>
+<span class="fc" id="L518">			}</span>
+<span class="fc" id="L519">			return cellRenderer;</span>
 		}
 
 		DefaultTableCellRenderer getForTable() {
-<span class="pc bpc" id="L515" title="1 of 2 branches missed.">			if ( JTable.class.isAssignableFrom(_componentType) )</span>
-<span class="fc" id="L516">				return new SimpleTableCellRenderer();</span>
+<span class="pc bpc" id="L523" title="1 of 2 branches missed.">			if ( JTable.class.isAssignableFrom(_componentType) )</span>
+<span class="fc" id="L524">				return new SimpleTableCellRenderer();</span>
 			else
-<span class="nc" id="L518">				throw new IllegalArgumentException(&quot;Renderer was set up to be used for a JTable!&quot;);</span>
+<span class="nc" id="L526">				throw new IllegalArgumentException(&quot;Renderer was set up to be used for a JTable!&quot;);</span>
 		}
 
 		ListCellRenderer&lt;E&gt; getForList() {
-<span class="pc bpc" id="L522" title="1 of 2 branches missed.">			if ( JList.class.isAssignableFrom(_componentType) )</span>
-<span class="fc" id="L523">				return (ListCellRenderer&lt;E&gt;) new SimpleListCellRenderer&lt;Object&gt;();</span>
+<span class="pc bpc" id="L530" title="1 of 2 branches missed.">			if ( JList.class.isAssignableFrom(_componentType) )</span>
+<span class="fc" id="L531">				return (ListCellRenderer&lt;E&gt;) new SimpleListCellRenderer&lt;Object&gt;();</span>
 			else
-<span class="nc" id="L525">				throw new IllegalArgumentException(</span>
-<span class="nc" id="L526">						&quot;Renderer was set up to be used for a JList! (not &quot;+ _componentType.getSimpleName()+&quot;)&quot;</span>
+<span class="nc" id="L533">				throw new IllegalArgumentException(</span>
+<span class="nc" id="L534">						&quot;Renderer was set up to be used for a JList! (not &quot;+ _componentType.getSimpleName()+&quot;)&quot;</span>
 					);
 		}
 
 		ListCellRenderer&lt;E&gt; getForCombo() {
-<span class="pc bpc" id="L531" title="1 of 2 branches missed.">			if ( JComboBox.class.isAssignableFrom(_componentType) )</span>
-<span class="fc" id="L532">				return (ListCellRenderer&lt;E&gt;) new SimpleListCellRenderer&lt;Object&gt;();</span>
+<span class="pc bpc" id="L539" title="1 of 2 branches missed.">			if ( JComboBox.class.isAssignableFrom(_componentType) )</span>
+<span class="fc" id="L540">				return (ListCellRenderer&lt;E&gt;) new SimpleListCellRenderer&lt;Object&gt;();</span>
 			else
-<span class="nc" id="L534">				throw new IllegalArgumentException(</span>
-<span class="nc" id="L535">						&quot;Renderer was set up to be used for a JComboBox! (not &quot;+ _componentType.getSimpleName()+&quot;)&quot;</span>
+<span class="nc" id="L542">				throw new IllegalArgumentException(</span>
+<span class="nc" id="L543">						&quot;Renderer was set up to be used for a JComboBox! (not &quot;+ _componentType.getSimpleName()+&quot;)&quot;</span>
 					);
 		}
 
@@ -541,32 +549,32 @@ public final class Render&lt;C extends JComponent,E&gt; {
 
 
 	private static Color darker( Color c ) {
-<span class="fc" id="L544">		final double PERCENTAGE = (242*3.0)/(255*3.0);</span>
-<span class="fc" id="L545">		return new Color(</span>
-<span class="fc" id="L546">				(int)(c.getRed()*PERCENTAGE),</span>
-<span class="fc" id="L547">				(int)(c.getGreen()*PERCENTAGE),</span>
-<span class="fc" id="L548">				(int)(c.getBlue()*PERCENTAGE)</span>
+<span class="fc" id="L552">		final double PERCENTAGE = (242*3.0)/(255*3.0);</span>
+<span class="fc" id="L553">		return new Color(</span>
+<span class="fc" id="L554">				(int)(c.getRed()*PERCENTAGE),</span>
+<span class="fc" id="L555">				(int)(c.getGreen()*PERCENTAGE),</span>
+<span class="fc" id="L556">				(int)(c.getBlue()*PERCENTAGE)</span>
 		);
 	}
 
 	private static Color brighter( Color c ) {
-<span class="nc" id="L553">		final double FACTOR = (242*3.0)/(255*3.0);</span>
-<span class="nc" id="L554">		int r = c.getRed();</span>
-<span class="nc" id="L555">		int g = c.getGreen();</span>
-<span class="nc" id="L556">		int b = c.getBlue();</span>
-<span class="nc" id="L557">		int alpha = c.getAlpha();</span>
+<span class="nc" id="L561">		final double FACTOR = (242*3.0)/(255*3.0);</span>
+<span class="nc" id="L562">		int r = c.getRed();</span>
+<span class="nc" id="L563">		int g = c.getGreen();</span>
+<span class="nc" id="L564">		int b = c.getBlue();</span>
+<span class="nc" id="L565">		int alpha = c.getAlpha();</span>
 
-<span class="nc" id="L559">		int i = (int)(1.0/(1.0-FACTOR));</span>
-<span class="nc bnc" id="L560" title="All 6 branches missed.">		if ( r == 0 &amp;&amp; g == 0 &amp;&amp; b == 0) {</span>
-<span class="nc" id="L561">			return new Color(i, i, i, alpha);</span>
+<span class="nc" id="L567">		int i = (int)(1.0/(1.0-FACTOR));</span>
+<span class="nc bnc" id="L568" title="All 6 branches missed.">		if ( r == 0 &amp;&amp; g == 0 &amp;&amp; b == 0) {</span>
+<span class="nc" id="L569">			return new Color(i, i, i, alpha);</span>
 		}
-<span class="nc bnc" id="L563" title="All 4 branches missed.">		if ( r &gt; 0 &amp;&amp; r &lt; i ) r = i;</span>
-<span class="nc bnc" id="L564" title="All 4 branches missed.">		if ( g &gt; 0 &amp;&amp; g &lt; i ) g = i;</span>
-<span class="nc bnc" id="L565" title="All 4 branches missed.">		if ( b &gt; 0 &amp;&amp; b &lt; i ) b = i;</span>
+<span class="nc bnc" id="L571" title="All 4 branches missed.">		if ( r &gt; 0 &amp;&amp; r &lt; i ) r = i;</span>
+<span class="nc bnc" id="L572" title="All 4 branches missed.">		if ( g &gt; 0 &amp;&amp; g &lt; i ) g = i;</span>
+<span class="nc bnc" id="L573" title="All 4 branches missed.">		if ( b &gt; 0 &amp;&amp; b &lt; i ) b = i;</span>
 
-<span class="nc" id="L567">		return new Color(Math.min((int)(r/FACTOR), 255),</span>
-<span class="nc" id="L568">				Math.min((int)(g/FACTOR), 255),</span>
-<span class="nc" id="L569">				Math.min((int)(b/FACTOR), 255),</span>
+<span class="nc" id="L575">		return new Color(Math.min((int)(r/FACTOR), 255),</span>
+<span class="nc" id="L576">				Math.min((int)(g/FACTOR), 255),</span>
+<span class="nc" id="L577">				Math.min((int)(b/FACTOR), 255),</span>
 				alpha);
 	}
 

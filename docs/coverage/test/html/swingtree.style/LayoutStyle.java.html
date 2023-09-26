@@ -17,7 +17,7 @@ public final class LayoutStyle
     private final Float  _alignmentY;
 
 
-    LayoutStyle(
+    private LayoutStyle(
         Layout layout,
         Object constraint,
         Float alignmentX,
@@ -37,7 +37,7 @@ public final class LayoutStyle
 
 <span class="fc" id="L38">    public Optional&lt;Float&gt; alignmentY() { return Optional.ofNullable(_alignmentY); }</span>
 
-<span class="fc" id="L40">    LayoutStyle layout(Layout installer ) { return new LayoutStyle(installer, _constraint, _alignmentX, _alignmentY); }</span>
+<span class="fc" id="L40">    LayoutStyle layout( Layout installer ) { return new LayoutStyle(installer, _constraint, _alignmentX, _alignmentY); }</span>
 
 <span class="fc" id="L42">    LayoutStyle constraint( Object constraint ) { return new LayoutStyle(_layout, constraint, _alignmentX, _alignmentY); }</span>
 

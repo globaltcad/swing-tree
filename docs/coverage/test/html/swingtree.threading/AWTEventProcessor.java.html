@@ -1,33 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AWTEventProcessor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.threading</a> &gt; <span class="el_source">AWTEventProcessor.java</span></div><h1>AWTEventProcessor.java</h1><pre class="source lang-java linenums">package swingtree.threading;
 
+import org.slf4j.Logger;
 import swingtree.UI;
 
-<span class="fc" id="L5">final class AWTEventProcessor extends BasicSingleThreadedEventProcessor</span>
+<span class="fc" id="L6">final class AWTEventProcessor extends BasicSingleThreadedEventProcessor</span>
 {
+<span class="fc" id="L8">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(AWTEventProcessor.class);</span>
+
     @Override protected void _tryRunning( Runnable runnable ) {
         try {
-<span class="fc" id="L9">            _checkIfThreadIsCorrect();</span>
-<span class="fc" id="L10">        } catch (Exception e) {</span>
-<span class="fc" id="L11">            e.printStackTrace(); // If a user wants better logging, they can implement their own EventProcessor.</span>
-<span class="fc" id="L12">        }</span>
+<span class="fc" id="L12">            _checkIfThreadIsCorrect();</span>
+<span class="fc" id="L13">        } catch (Exception e) {</span>
+            // If a user wants better logging, they can do it through SLF4J or implement their own EventProcessor.
+<span class="fc" id="L15">            log.error(&quot;The current thread is not the UI thread!&quot;, e);</span>
+<span class="fc" id="L16">        }</span>
         try {
-<span class="fc" id="L14">            runnable.run();</span>
-<span class="nc" id="L15">        } catch (Exception e) {</span>
-<span class="nc" id="L16">            e.printStackTrace(); // If a user wants better logging, they can implement their own EventProcessor.</span>
-<span class="fc" id="L17">        }</span>
-<span class="fc" id="L18">    }</span>
+<span class="fc" id="L18">            runnable.run();</span>
+<span class="nc" id="L19">        } catch (Exception e) {</span>
+            // If a user wants better logging, they can do it through SLF4J or implement their own EventProcessor.
+<span class="nc" id="L21">            log.error(&quot;An exception occurred while running a task in the UI thread!&quot;, e);</span>
+<span class="fc" id="L22">        }</span>
+<span class="fc" id="L23">    }</span>
 
     private void _checkIfThreadIsCorrect() {
-<span class="fc bfc" id="L21" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() ) {</span>
-<span class="fc" id="L22">            Thread currentThread = Thread.currentThread();</span>
-<span class="fc" id="L23">            String threadName    = currentThread.getName();</span>
-<span class="fc" id="L24">            String problem       = &quot;The current thread is not the UI thread!&quot;;</span>
-<span class="fc" id="L25">            String requirement   = &quot;The current event processor is the '&quot; + AWTEventProcessor.class.getSimpleName() + &quot;' which &quot; +</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() ) {</span>
+<span class="fc" id="L27">            Thread currentThread = Thread.currentThread();</span>
+<span class="fc" id="L28">            String threadName    = currentThread.getName();</span>
+<span class="fc" id="L29">            String problem       = &quot;The current thread is not the UI thread!&quot;;</span>
+<span class="fc" id="L30">            String requirement   = &quot;The current event processor is the '&quot; + AWTEventProcessor.class.getSimpleName() + &quot;' which &quot; +</span>
                                    &quot;only supports running tasks in the UI thread.  The current thread however is '&quot; + threadName + &quot;' which &quot; +
                                    &quot;is not the UI thread (the AWT thread).&quot;;
 
-<span class="fc" id="L29">            throw new RuntimeException( problem + &quot;  &quot; + requirement );</span>
+<span class="fc" id="L34">            throw new RuntimeException( problem + &quot;  &quot; + requirement );</span>
         }
-<span class="fc" id="L31">    }</span>
+<span class="fc" id="L36">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Arc.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">Arc.java</span></div><h1>Arc.java</h1><pre class="source lang-java linenums">package swingtree.style;
 
+import swingtree.UI;
+
 import java.awt.*;
 
 /**
- *  A value object that represents the arc width and height of a rounded rectangle corner.
+ *  A value object that represents the arc width and height of a rounded rectangle corner
+ *  as part of a component {@link Style}.
  */
 final class Arc
 {
@@ -14,62 +17,62 @@ final class Arc
      * @param arcHeight The height of the arc.
      * @return An {@link Arc} representing the 2 values.
      */
-    static Arc of( int arcWidth, int arcHeight ) {
-<span class="fc" id="L18">        return new Arc( arcWidth, arcHeight );</span>
-    }
+<span class="fc" id="L20">    static Arc of( int arcWidth, int arcHeight ) { return new Arc( arcWidth, arcHeight ); }</span>
 
 
     private final int _arcWidth;
     private final int _arcHeight;
 
 
-<span class="fc" id="L26">    private Arc( int arcWidth, int arcHeight ) {</span>
-<span class="fc" id="L27">        _arcWidth  = arcWidth;</span>
-<span class="fc" id="L28">        _arcHeight = arcHeight;</span>
-<span class="fc" id="L29">    }</span>
+<span class="fc" id="L27">    private Arc( int arcWidth, int arcHeight ) {</span>
+<span class="fc" id="L28">        _arcWidth  = arcWidth;</span>
+<span class="fc" id="L29">        _arcHeight = arcHeight;</span>
+<span class="fc" id="L30">    }</span>
 
     /**
      * @return The width of the arc.
      */
-<span class="fc" id="L34">    public int width() { return _arcWidth; }</span>
+<span class="fc" id="L35">    public int width() { return _arcWidth; }</span>
 
     /**
      * @return The height of the arc.
      */
-<span class="fc" id="L39">    public int height() { return _arcHeight; }</span>
+<span class="fc" id="L40">    public int height() { return _arcHeight; }</span>
 
     /**
-     *  Use this to scale the arc, which is usually needed for when you
+     *  Used to scale the arc, which is usually needed by the style engine
+     *  to paint DPI scaled corners and also useful for when you
      *  need to do custom painting logic which is also supposed to be
      *  high DPI screen aware, see methods like
-     *  {@link swingtree.UI#scale(int)}, {@link swingtree.UI#scale(Rectangle)}...
+     *  {@link swingtree.UI#scale(int)}, {@link swingtree.UI#scale(Rectangle)}... &lt;br&gt;
+     *  Also checkout {@link UI#scale()} to get the current scaling factor.
      *
      * @param scale A scaling factor by which the values of this arc are multiplied.
      * @return A new scaled {@link Arc}.
      */
     Arc scale( double scale ) {
-<span class="nc" id="L51">        return Arc.of(</span>
-<span class="nc" id="L52">                    (int) Math.round( _arcWidth  * scale ),</span>
-<span class="nc" id="L53">                    (int) Math.round( _arcHeight * scale )</span>
+<span class="nc" id="L54">        return Arc.of(</span>
+<span class="nc" id="L55">                    (int) Math.round( _arcWidth  * scale ),</span>
+<span class="nc" id="L56">                    (int) Math.round( _arcHeight * scale )</span>
                 );
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L59">        int hash = 7;</span>
-<span class="fc" id="L60">        hash = 31 * hash + _arcWidth;</span>
-<span class="fc" id="L61">        hash = 31 * hash + _arcHeight;</span>
-<span class="fc" id="L62">        return hash;</span>
+<span class="fc" id="L62">        int hash = 7;</span>
+<span class="fc" id="L63">        hash = 31 * hash + _arcWidth;</span>
+<span class="fc" id="L64">        hash = 31 * hash + _arcHeight;</span>
+<span class="fc" id="L65">        return hash;</span>
     }
 
     @Override
     public boolean equals( Object obj ) {
-<span class="fc bfc" id="L67" title="All 2 branches covered.">        if ( obj == null ) return false;</span>
-<span class="pc bpc" id="L68" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
-<span class="pc bpc" id="L69" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        if ( obj == null ) return false;</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
 
-<span class="fc" id="L71">        Arc rhs = (Arc) obj;</span>
-<span class="pc bpc" id="L72" title="2 of 4 branches missed.">        return _arcWidth == rhs._arcWidth &amp;&amp; _arcHeight == rhs._arcHeight;</span>
+<span class="fc" id="L74">        Arc other = (Arc) obj;</span>
+<span class="pc bpc" id="L75" title="2 of 4 branches missed.">        return _arcWidth == other._arcWidth &amp;&amp; _arcHeight == other._arcHeight;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

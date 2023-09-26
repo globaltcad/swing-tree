@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IconDeclaration.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.api</a> &gt; <span class="el_source">IconDeclaration.java</span></div><h1>IconDeclaration.java</h1><pre class="source lang-java linenums">package swingtree.api;
+
+import swingtree.UI;
+
+import javax.swing.ImageIcon;
+import java.util.Optional;
+
+/**
+ *  Primarily designed to be implemented by an {@link Enum} type
+ *  that declares a set of icon paths so that the enum instances
+ *  can be used to identify and load
+ *  (cached) icons across your application.
+ *  &lt;p&gt;
+ *  Here an example of how to use this interface:
+ *  &lt;pre&gt;{@code
+ * public enum Icons implements IconDeclaration
+ * {
+ *     ADD(&quot;icons/add.png&quot;),
+ *     REMOVE(&quot;icons/remove.png&quot;),
+ *     EDIT(&quot;icons/edit.png&quot;),
+ *     SAVE(&quot;icons/save.png&quot;),
+ *     CANCEL(&quot;icons/cancel.png&quot;),
+ *     REFRESH(&quot;icons/refresh.png&quot;);
+ *     // ...
+ *
+ *     private final String path;
+ *
+ *     Icons(String path) { this.path = path; }
+ *
+ *     @Override public String path() {
+ *         return path;
+ *     }
+ * }
+ * }&lt;/pre&gt;
+ *
+ *  You may then use the enum instances
+ *  in the SwingTree API like this
+ *  just like you would use the {@link ImageIcon} class:
+ *  &lt;pre&gt;{@code
+ *  UI.button(Icons.ADD)
+ *  .onClick( it -&gt; vm.add() )
+ *  }&lt;/pre&gt;
+ *
+ *  The reason why enums should be used instead of Strings is
+ *  so that you have some more compile time safety in your application!
+ *  When it comes to resource loading Strings are brittle because they
+ *  are susceptible to typos and refactoring.
+ */
+public interface IconDeclaration
+{
+    /**
+     * @return The path to the icon resource, which is relative
+     *         to the classpath or may be an absolute path.
+     */
+    String path();
+
+    /**
+     * @return An {@link Optional} that contains the {@link ImageIcon}
+     *         if the icon resource was found, otherwise an empty {@link Optional}.
+     */
+<span class="nc" id="L61">    default Optional&lt;ImageIcon&gt; find() { return UI.findIcon(path()); }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

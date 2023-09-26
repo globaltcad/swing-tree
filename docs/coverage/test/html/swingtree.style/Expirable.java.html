@@ -2,19 +2,34 @@
 
 import swingtree.animation.LifeTime;
 
+import java.util.Objects;
+
+/**
+ *  A wrapper class for a payload that has a lifetime which
+ *  is used to determine if the payload is expired or not.
+ **/
 class Expirable&lt;B&gt;
 {
     private final LifeTime _lifetime;
     private final B _value;
 
 
-<span class="fc" id="L11">    Expirable( LifeTime lifetime, B payload ) {</span>
-<span class="fc" id="L12">        _lifetime = lifetime;</span>
-<span class="fc" id="L13">        _value = payload;</span>
-<span class="fc" id="L14">    }</span>
+<span class="fc" id="L17">    Expirable( LifeTime lifetime, B payload ) {</span>
+<span class="fc" id="L18">        _lifetime = Objects.requireNonNull(lifetime);</span>
+<span class="fc" id="L19">        _value    = Objects.requireNonNull(payload);</span>
+<span class="fc" id="L20">    }</span>
 
-<span class="fc" id="L16">    boolean isExpired() { return _lifetime.isExpired(); }</span>
+    /**
+     *  @return True if the lifetime of this instance is expired,
+     *          false otherwise.
+     **/
+<span class="fc" id="L26">    boolean isExpired() { return _lifetime.isExpired(); }</span>
 
-<span class="fc" id="L18">    B get() { return _value; }</span>
+    /**
+     *  @return The payload of this instance.
+     **/
+<span class="fc" id="L31">    B get() { return _value; }</span>
+
+<span class="nc" id="L33">    LifeTime getLifeTime() { return _lifetime; }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

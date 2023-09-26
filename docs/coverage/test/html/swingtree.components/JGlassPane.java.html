@@ -82,7 +82,7 @@ public class JGlassPane extends JPanel implements AWTEventListener
      */
     @Override
     public void updateUI() {
-<span class="nc" id="L85">        ComponentExtension.from(this).updateUI();</span>
+<span class="nc" id="L85">        ComponentExtension.from(this).installCustomUIIfPossible();</span>
         /*
             The JGlassPane is a SwingTree native type, so it also
             enjoys the perks of having a SwingTree based look and feel!

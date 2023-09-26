@@ -108,7 +108,7 @@ final class StyleAndAnimationBorder&lt;C extends JComponent&gt; implements Borde
      */
     private void _paintBorderAndBorderLayerStyles( Graphics2D g ) {
         try {
-<span class="fc" id="L111">            _compExt.paintBorderStyle( g, _compExt.getOwner() );</span>
+<span class="fc" id="L111">            _compExt._paintBorderStyle( g, _compExt.getOwner() );</span>
 <span class="nc" id="L112">        } catch ( Exception ex ) {</span>
 <span class="nc" id="L113">            ex.printStackTrace();</span>
             /*

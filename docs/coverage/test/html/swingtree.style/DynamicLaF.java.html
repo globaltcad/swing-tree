@@ -217,7 +217,7 @@ class DynamicLaF
 <span class="fc" id="L217">        return new DynamicLaF(styleLaF, _formerLaF);</span>
     }
 
-    public void updateUIFor( JComponent owner )
+    void installCustomUIFor(JComponent owner )
     {
 <span class="fc bfc" id="L222" title="All 2 branches covered.">        if ( owner instanceof JBox )</span>
 <span class="fc" id="L223">            ((JBox)owner).setUI(new DynamicLaF.PanelStyler() {</span>
