@@ -95,6 +95,7 @@ public final class ComponentExtension<C extends JComponent>
      *   group tags offers much better compile time type safety!
      *
      * @param groupTags An array of group tags.
+     * @param <E> The type of the enum.
      */
     @SafeVarargs
     public final <E extends Enum<E>> void setStyleGroups( E... groupTags ) {

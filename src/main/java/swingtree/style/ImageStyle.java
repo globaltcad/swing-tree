@@ -18,37 +18,29 @@ import java.util.Optional;
  *  <br>
  *  <ol>
  *      <li><h3>Layer:</h3>
- *          <p>
- *              The layer onto which the image will be drawn.
- *              Layers exist to determine the order in which something is drawn onto the component.
- *              Here a list of available layers:
- *              <ul>
- *                  <li>{@link swingtree.UI.Layer#BACKGROUND}</li>
- *                  <li>{@link swingtree.UI.Layer#CONTENT}   </li>
- *                  <li>{@link swingtree.UI.Layer#BORDER}    </li>
- *                  <li>{@link swingtree.UI.Layer#FOREGROUND}</li>
- *              </ul>
- *          </p>
+ *          The layer onto which the image will be drawn.
+ *          Layers exist to determine the order in which something is drawn onto the component.
+ *          Here a list of available layers:
+ *          <ul>
+ *              <li>{@link swingtree.UI.Layer#BACKGROUND}</li>
+ *              <li>{@link swingtree.UI.Layer#CONTENT}   </li>
+ *              <li>{@link swingtree.UI.Layer#BORDER}    </li>
+ *              <li>{@link swingtree.UI.Layer#FOREGROUND}</li>
+ *          </ul>
  *      </li>
  *      <li><h3>Primer:</h3>
- *          <p>
- *              The primer color of the image style which will
- *              be used as a filler color for the image background.
- *              The background is the inner component area of the component.
- *          </p>
+ *          The primer color of the image style which will
+ *          be used as a filler color for the image background.
+ *          The background is the inner component area of the component.
  *      </li>
  *      <li><h3>Image:</h3>
- *          <p>
- *              The image which will be drawn onto the component,
- *              which may be specified as an instance of {@link Image}, {@link ImageIcon}
- *              or path to an image file (see {@link swingtree.UI#findIcon(String)}).
- *          </p>
+ *          The image which will be drawn onto the component,
+ *          which may be specified as an instance of {@link Image}, {@link ImageIcon}
+ *          or path to an image file (see {@link swingtree.UI#findIcon(String)}).
  *      </li>
  *      <li><h3>Placement:</h3>
- *          <p>
- *              The placement type determines where the image will be drawn onto the component.
- *              The following placement options are available:
- *          </p>
+ *          The placement type determines where the image will be drawn onto the component.
+ *          The following placement options are available:
  *          <ul>
  *              <li> {@link swingtree.UI.Placement#CENTER} </li>
  *              <li> {@link swingtree.UI.Placement#TOP_LEFT} </li>
@@ -62,47 +54,37 @@ import java.util.Optional;
  *          </ul>
  *      </li>
  *      <li><h3>Repeat:</h3>
- *          <p>
- *              If this flag is set to {@code true}, then the image may be painted
- *              multiple times so that it fills up the entire inner component area.
- *              There will not be a noticeable effect of this flag if the
- *              image already fills out the inner component area (see {@link #autoFit(boolean)}, {@link #size(int, int)}).
- *          </p>
+ *          If this flag is set to {@code true}, then the image may be painted
+ *          multiple times so that it fills up the entire inner component area.
+ *          There will not be a noticeable effect of this flag if the
+ *          image already fills out the inner component area (see {@link #autoFit(boolean)}, {@link #size(int, int)}).
  *      </li>
  *      <li><h3>Auto-fit:</h3>
- *          <p>
- *              If this flag is set to {@code true}, then the image will be stretched or shrunk
- *              to fill the inner component area dependent on the specified width and height,
- *              meaning that if the width was not specified explicitly through {@link #width(Integer)}
- *              then the image will be scaled to fit the inner component width,
- *              and if a height was not specified through {@link #height(Integer)} then
- *              the image will be scaled to fit the inner component height. <br>
- *              <b>Note that the inner component area is the area enclosed by the border, which
- *              is itself not part of said area!</b>
- *          </p>
+ *          If this flag is set to {@code true}, then the image will be stretched or shrunk
+ *          to fill the inner component area dependent on the specified width and height,
+ *          meaning that if the width was not specified explicitly through {@link #width(Integer)}
+ *          then the image will be scaled to fit the inner component width,
+ *          and if a height was not specified through {@link #height(Integer)} then
+ *          the image will be scaled to fit the inner component height. <br>
+ *          <b>Note that the inner component area is the area enclosed by the border, which
+ *          is itself not part of said area!</b>
  *      </li>
  *      <li><h3>Width and Height:</h3>
- *          <p>
- *              These properties allow you to specify the width and height of the image.
- *              If the width or height is not specified, then the image will be drawn
- *              with its original width or height or it will be scaled to fit the inner component area
- *              if {@link #autoFit(boolean)} is set to {@code true}.
- *          </p>
+ *          These properties allow you to specify the width and height of the image.
+ *          If the width or height is not specified, then the image will be drawn
+ *          with its original width or height or it will be scaled to fit the inner component area
+ *          if {@link #autoFit(boolean)} is set to {@code true}.
  *      </li>
  *      <li><h3>Opacity:</h3>
- *          <p>
- *              This property allows you to specify the opacity of the image.
- *              The opacity must be between 0.0f and 1.0f, where 0.0f means that the image is completely transparent
- *              and 1.0f means that the image is completely opaque.
- *          </p>
+ *          This property allows you to specify the opacity of the image.
+ *          The opacity must be between 0.0f and 1.0f, where 0.0f means that the image is completely transparent
+ *          and 1.0f means that the image is completely opaque.
  *      </li>
  *      <li><h3>Padding:</h3>
- *          <p>
- *              This property allows you to specify the padding of the image.
- *              The padding is the space between the image and the inner component area.
- *              The padding can be specified for each side of the image individually
- *              or for all sides at once.
- *          </p>
+ *          This property allows you to specify the padding of the image.
+ *          The padding is the space between the image and the inner component area.
+ *          The padding can be specified for each side of the image individually
+ *          or for all sides at once.
  *      </li>
  *  </ol>
  *  <p>

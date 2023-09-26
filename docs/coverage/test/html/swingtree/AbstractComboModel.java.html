@@ -237,12 +237,12 @@ abstract class AbstractComboModel&lt;E&gt; implements ComboBoxModel&lt;E&gt;
 		// Uff! Still nothing?!? Ok let's be creative, maybe we can try to use the constructor:
 		try {
 <span class="fc" id="L239">			return type.getConstructor(String.class).newInstance(o);</span>
-<span class="fc" id="L240">		} catch ( Exception e ) {</span>
+<span class="nc" id="L240">		} catch ( Exception e ) {</span>
 			// We failed to instantiate the class... Quite a pity, but at this point, who cares?
 		}
 
 		// What else is there? We don't know, so we just return the old value:
-<span class="fc" id="L245">		return _selectedItem.orElseNull();</span>
+<span class="nc" id="L245">		return _selectedItem.orElseNull();</span>
 	}
 
 	protected int _indexOf( Object anItem ) {

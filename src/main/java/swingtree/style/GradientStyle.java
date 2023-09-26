@@ -17,13 +17,11 @@ import java.util.function.Function;
  *  <p>
  *  The following properties with their respective purpose are available:
  *  <br>
- *  <ol>
+ *  <ul>
  *      <li><h3>Transition</h3>
- *          <p>
- *              The transition defines the direction of the gradient.
- *              <br>
- *              The following transitions are available:
- *          </p>
+ *          The transition defines the direction of the gradient.
+ *          <br>
+ *          The following transitions are available:
  *          <ul>
  *              <li>{@link UI.Transition#TOP_LEFT_TO_BOTTOM_RIGHT}</li>
  *              <li>{@link UI.Transition#BOTTOM_LEFT_TO_TOP_RIGHT}</li>
@@ -36,34 +34,27 @@ import java.util.function.Function;
  *          </ul>
  *      </li>
  *      <li><h3>Type</h3>
- *          <p>
- *              The type defines the shape of the gradient
- *              which can be either linear or radial. <br>
- *              So the following types are available:
- *          </p>
+ *          The type defines the shape of the gradient
+ *          which can be either linear or radial. <br>
+ *          So the following types are available:
  *          <ul>
  *              <li>{@link UI.GradientType#LINEAR}</li>
  *              <li>{@link UI.GradientType#RADIAL}</li>
  *          </ul>
  *      </li>
  *      <li><h3>Colors</h3>
- *          <p>
- *              An array of colors that will be used
- *              as a basis for the gradient transition.
- *          </p>
+ *          An array of colors that will be used
+ *          as a basis for the gradient transition.
  *      </li>
  *      <li><h3>Layer</h3>
- *          <p>
- *              The layer defines if the gradient should be applied
- *              to the background or the border of a component.
- *          </p>
+ *          The layer defines if the gradient should be applied
+ *          to the background or the border of a component.
  *      </li>
- *  <ul>
+ *  </ul>
  *  <p>
  *  You can also use the {@link #none()} method to specify that no gradient should be used,
  *  as the instance returned by that method is a gradient without any colors, effectively
  *  making it a representation of the absence of a gradient style.
- *  <p>
  */
 public final class GradientStyle
 {

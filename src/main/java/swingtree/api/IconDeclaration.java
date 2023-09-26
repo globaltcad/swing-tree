@@ -27,7 +27,7 @@ import java.util.Optional;
  *
  *     Icons(String path) { this.path = path; }
  *
- *     @Override public String path() {
+ *     {@literal @}Override public String path() {
  *         return path;
  *     }
  * }

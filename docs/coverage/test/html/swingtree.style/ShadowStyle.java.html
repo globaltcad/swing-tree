@@ -80,17 +80,15 @@ import java.util.Optional;
  *  Note that you can use the {@link #none()} method to specify that no shadow should be used,
  *  as the instance returned by that method is a shadow with no offset, no blur, no spread and no color,
  *  effectively making it a representation of the absence of a shadow.
- *  &lt;p&gt;
- *
  */
 public final class ShadowStyle
 {
-<span class="fc" id="L88">    private static final ShadowStyle _NONE = new ShadowStyle(</span>
+<span class="fc" id="L86">    private static final ShadowStyle _NONE = new ShadowStyle(</span>
                                                     0,0,0,0,
                                                     null, true, UI.Layer.CONTENT
                                                 );
 
-<span class="fc" id="L93">    public static ShadowStyle none() { return _NONE; }</span>
+<span class="fc" id="L91">    public static ShadowStyle none() { return _NONE; }</span>
 
     private final int     _horizontalOffset;
     private final int     _verticalOffset;
@@ -109,31 +107,31 @@ public final class ShadowStyle
         Color   shadowColor,
         boolean isOutset,
         UI.Layer layer
-<span class="fc" id="L112">    ) {</span>
-<span class="fc" id="L113">        _horizontalOffset = horizontalShadowOffset;</span>
-<span class="fc" id="L114">        _verticalOffset   = verticalShadowOffset;</span>
-<span class="fc" id="L115">        _blurRadius       = shadowBlurRadius;</span>
-<span class="fc" id="L116">        _spreadRadius     = shadowSpreadRadius;</span>
-<span class="fc" id="L117">        _color            = shadowColor;</span>
-<span class="fc" id="L118">        _isOutset         = isOutset;</span>
-<span class="fc" id="L119">        _layer            = layer;</span>
-<span class="fc" id="L120">    }</span>
+<span class="fc" id="L110">    ) {</span>
+<span class="fc" id="L111">        _horizontalOffset = horizontalShadowOffset;</span>
+<span class="fc" id="L112">        _verticalOffset   = verticalShadowOffset;</span>
+<span class="fc" id="L113">        _blurRadius       = shadowBlurRadius;</span>
+<span class="fc" id="L114">        _spreadRadius     = shadowSpreadRadius;</span>
+<span class="fc" id="L115">        _color            = shadowColor;</span>
+<span class="fc" id="L116">        _isOutset         = isOutset;</span>
+<span class="fc" id="L117">        _layer            = layer;</span>
+<span class="fc" id="L118">    }</span>
 
-<span class="fc" id="L122">    public int horizontalOffset() { return _horizontalOffset; }</span>
+<span class="fc" id="L120">    public int horizontalOffset() { return _horizontalOffset; }</span>
 
-<span class="fc" id="L124">    public int verticalOffset() { return _verticalOffset; }</span>
+<span class="fc" id="L122">    public int verticalOffset() { return _verticalOffset; }</span>
 
-<span class="fc" id="L126">    public int blurRadius() { return _blurRadius; }</span>
+<span class="fc" id="L124">    public int blurRadius() { return _blurRadius; }</span>
 
-<span class="fc" id="L128">    public int spreadRadius() { return _spreadRadius; }</span>
+<span class="fc" id="L126">    public int spreadRadius() { return _spreadRadius; }</span>
 
-<span class="fc" id="L130">    public Optional&lt;Color&gt; color() { return Optional.ofNullable(_color); }</span>
+<span class="fc" id="L128">    public Optional&lt;Color&gt; color() { return Optional.ofNullable(_color); }</span>
 
-<span class="fc" id="L132">    public boolean isOutset() { return _isOutset; }</span>
+<span class="fc" id="L130">    public boolean isOutset() { return _isOutset; }</span>
 
-<span class="fc bfc" id="L134" title="All 2 branches covered.">    public boolean isInset() { return !_isOutset; }</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">    public boolean isInset() { return !_isOutset; }</span>
 
-<span class="fc" id="L136">    public UI.Layer layer() { return _layer; }</span>
+<span class="fc" id="L134">    public UI.Layer layer() { return _layer; }</span>
 
     /**
      * @param horizontalShadowOffset The horizontal shadow offset, if positive the shadow will move to the right,
@@ -141,7 +139,7 @@ public final class ShadowStyle
      * @return A new {@link ShadowStyle} with the specified horizontal shadow offset.
      */
     public ShadowStyle horizontalOffset( int horizontalShadowOffset ) {
-<span class="fc" id="L144">        return new ShadowStyle(horizontalShadowOffset, _verticalOffset, _blurRadius, _spreadRadius, _color, _isOutset, _layer);</span>
+<span class="fc" id="L142">        return new ShadowStyle(horizontalShadowOffset, _verticalOffset, _blurRadius, _spreadRadius, _color, _isOutset, _layer);</span>
     }
 
     /**
@@ -150,7 +148,7 @@ public final class ShadowStyle
      * @return A new {@link ShadowStyle} with the specified vertical shadow offset.
      */
     public ShadowStyle verticalOffset( int verticalShadowOffset ) {
-<span class="fc" id="L153">        return new ShadowStyle(_horizontalOffset, verticalShadowOffset, _blurRadius, _spreadRadius, _color, _isOutset, _layer);</span>
+<span class="fc" id="L151">        return new ShadowStyle(_horizontalOffset, verticalShadowOffset, _blurRadius, _spreadRadius, _color, _isOutset, _layer);</span>
     }
 
     /**
@@ -161,7 +159,7 @@ public final class ShadowStyle
      * @return A new {@link ShadowStyle} with the specified horizontal and vertical shadow offsets.
      */
     public ShadowStyle offset( int horizontalShadowOffset, int verticalShadowOffset ) {
-<span class="nc" id="L164">        return new ShadowStyle(horizontalShadowOffset, verticalShadowOffset, _blurRadius, _spreadRadius, _color, _isOutset, _layer);</span>
+<span class="nc" id="L162">        return new ShadowStyle(horizontalShadowOffset, verticalShadowOffset, _blurRadius, _spreadRadius, _color, _isOutset, _layer);</span>
     }
 
     /**
@@ -172,7 +170,7 @@ public final class ShadowStyle
      * @return A new {@link ShadowStyle} with the specified horizontal and vertical shadow offsets.
      */
     public ShadowStyle offset( int shadowOffset ) {
-<span class="fc" id="L175">        return new ShadowStyle(shadowOffset, shadowOffset, _blurRadius, _spreadRadius, _color, _isOutset, _layer);</span>
+<span class="fc" id="L173">        return new ShadowStyle(shadowOffset, shadowOffset, _blurRadius, _spreadRadius, _color, _isOutset, _layer);</span>
     }
 
     /**
@@ -182,7 +180,7 @@ public final class ShadowStyle
      * @return A new {@link ShadowStyle} with the specified blur radius.
      */
     public ShadowStyle blurRadius( int shadowBlurRadius ) {
-<span class="fc" id="L185">        return new ShadowStyle(_horizontalOffset, _verticalOffset, shadowBlurRadius, _spreadRadius, _color, _isOutset, _layer);</span>
+<span class="fc" id="L183">        return new ShadowStyle(_horizontalOffset, _verticalOffset, shadowBlurRadius, _spreadRadius, _color, _isOutset, _layer);</span>
     }
 
     /**
@@ -194,7 +192,7 @@ public final class ShadowStyle
      * @return A new {@link ShadowStyle} with the specified spread radius.
      */
     public ShadowStyle spreadRadius( int shadowSpreadRadius ) {
-<span class="fc" id="L197">        return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, shadowSpreadRadius, _color, _isOutset, _layer);</span>
+<span class="fc" id="L195">        return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, shadowSpreadRadius, _color, _isOutset, _layer);</span>
     }
 
     /**
@@ -202,7 +200,7 @@ public final class ShadowStyle
      * @return A new {@link ShadowStyle} with the specified color.
      */
     public ShadowStyle color( Color shadowColor ) {
-<span class="fc" id="L205">        return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, shadowColor, _isOutset, _layer);</span>
+<span class="fc" id="L203">        return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, shadowColor, _isOutset, _layer);</span>
     }
 
     /**
@@ -220,7 +218,7 @@ public final class ShadowStyle
      * @return A new {@link ShadowStyle} with the specified color.
      */
     public ShadowStyle color( String shadowColor ) {
-<span class="nc" id="L223">        return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, StyleUtility.toColor(shadowColor), _isOutset, _layer);</span>
+<span class="nc" id="L221">        return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, StyleUtility.toColor(shadowColor), _isOutset, _layer);</span>
     }
 
     /**
@@ -231,7 +229,7 @@ public final class ShadowStyle
      * @return A new {@link ShadowStyle} with the specified inset/outset state.
      */
     public ShadowStyle isInset( boolean shadowInset ) {
-<span class="fc bfc" id="L234" title="All 2 branches covered.">        return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, _color, !shadowInset, _layer);</span>
+<span class="fc bfc" id="L232" title="All 2 branches covered.">        return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, _color, !shadowInset, _layer);</span>
     }
 
     /**
@@ -242,7 +240,7 @@ public final class ShadowStyle
      * @return A new {@link ShadowStyle} with the specified outset/inset state.
      */
     public ShadowStyle isOutset( boolean shadowOutset ) {
-<span class="nc" id="L245">        return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, _color, shadowOutset, _layer);</span>
+<span class="nc" id="L243">        return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, _color, shadowOutset, _layer);</span>
     }
 
     /**
@@ -250,53 +248,53 @@ public final class ShadowStyle
      * @return A new {@link ShadowStyle} with the specified layer.
      */
     public ShadowStyle layer( UI.Layer shadowLayer ) {
-<span class="fc" id="L253">        return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, _color, _isOutset, shadowLayer);</span>
+<span class="fc" id="L251">        return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, _color, _isOutset, shadowLayer);</span>
     }
 
     ShadowStyle _scale( double scaleFactor ) {
-<span class="fc" id="L257">        return new ShadowStyle((int) Math.round(_horizontalOffset * scaleFactor),</span>
-<span class="fc" id="L258">                               (int) Math.round(_verticalOffset   * scaleFactor),</span>
-<span class="fc" id="L259">                               (int) Math.round(_blurRadius       * scaleFactor),</span>
-<span class="fc" id="L260">                               (int) Math.round(_spreadRadius     * scaleFactor),</span>
+<span class="fc" id="L255">        return new ShadowStyle((int) Math.round(_horizontalOffset * scaleFactor),</span>
+<span class="fc" id="L256">                               (int) Math.round(_verticalOffset   * scaleFactor),</span>
+<span class="fc" id="L257">                               (int) Math.round(_blurRadius       * scaleFactor),</span>
+<span class="fc" id="L258">                               (int) Math.round(_spreadRadius     * scaleFactor),</span>
                                _color, _isOutset, _layer);
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L266">        int hash = 7;</span>
-<span class="fc" id="L267">        hash = 31 * hash + _horizontalOffset;</span>
-<span class="fc" id="L268">        hash = 31 * hash + _verticalOffset;</span>
-<span class="fc" id="L269">        hash = 31 * hash + _blurRadius;</span>
-<span class="fc" id="L270">        hash = 31 * hash + _spreadRadius;</span>
-<span class="fc" id="L271">        hash = 31 * hash + Objects.hashCode(_color);</span>
-<span class="pc bpc" id="L272" title="1 of 2 branches missed.">        hash = 31 * hash + (_isOutset ? 1 : 0);</span>
-<span class="fc" id="L273">        hash = 31 * hash + _layer.hashCode();</span>
-<span class="fc" id="L274">        return hash;</span>
+<span class="fc" id="L264">        int hash = 7;</span>
+<span class="fc" id="L265">        hash = 31 * hash + _horizontalOffset;</span>
+<span class="fc" id="L266">        hash = 31 * hash + _verticalOffset;</span>
+<span class="fc" id="L267">        hash = 31 * hash + _blurRadius;</span>
+<span class="fc" id="L268">        hash = 31 * hash + _spreadRadius;</span>
+<span class="fc" id="L269">        hash = 31 * hash + Objects.hashCode(_color);</span>
+<span class="pc bpc" id="L270" title="1 of 2 branches missed.">        hash = 31 * hash + (_isOutset ? 1 : 0);</span>
+<span class="fc" id="L271">        hash = 31 * hash + _layer.hashCode();</span>
+<span class="fc" id="L272">        return hash;</span>
     }
 
     @Override
     public boolean equals(Object obj) {
-<span class="pc bpc" id="L279" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
-<span class="pc bpc" id="L280" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
-<span class="pc bpc" id="L281" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
-<span class="fc" id="L282">        ShadowStyle rhs = (ShadowStyle) obj;</span>
-<span class="pc bpc" id="L283" title="1 of 8 branches missed.">        return _horizontalOffset == rhs._horizontalOffset &amp;&amp;</span>
+<span class="pc bpc" id="L277" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="pc bpc" id="L278" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L279" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L280">        ShadowStyle rhs = (ShadowStyle) obj;</span>
+<span class="pc bpc" id="L281" title="1 of 8 branches missed.">        return _horizontalOffset == rhs._horizontalOffset &amp;&amp;</span>
                _verticalOffset   == rhs._verticalOffset   &amp;&amp;
                _blurRadius       == rhs._blurRadius       &amp;&amp;
                _spreadRadius     == rhs._spreadRadius     &amp;&amp;
-<span class="pc bpc" id="L287" title="2 of 4 branches missed.">               Objects.equals(_color, rhs._color)         &amp;&amp;</span>
+<span class="pc bpc" id="L285" title="2 of 4 branches missed.">               Objects.equals(_color, rhs._color)         &amp;&amp;</span>
                _isOutset         == rhs._isOutset         &amp;&amp;
-<span class="pc bpc" id="L289" title="1 of 2 branches missed.">               _layer.equals(rhs._layer);</span>
+<span class="pc bpc" id="L287" title="1 of 2 branches missed.">               _layer.equals(rhs._layer);</span>
     }
 
     @Override
     public String toString() {
-<span class="fc" id="L294">        return &quot;ShadowStyle[&quot; +</span>
+<span class="fc" id="L292">        return &quot;ShadowStyle[&quot; +</span>
                     &quot;horizontalOffset=&quot; + _horizontalOffset + &quot;, &quot; +
                     &quot;verticalOffset=&quot;   + _verticalOffset   + &quot;, &quot; +
                     &quot;blurRadius=&quot;       + _blurRadius       + &quot;, &quot; +
                     &quot;spreadRadius=&quot;     + _spreadRadius     + &quot;, &quot; +
-<span class="pc bpc" id="L299" title="1 of 2 branches missed.">                    &quot;color=&quot;            + StyleUtility.toString(_color) + &quot;, &quot; +</span>
+<span class="pc bpc" id="L297" title="1 of 2 branches missed.">                    &quot;color=&quot;            + StyleUtility.toString(_color) + &quot;, &quot; +</span>
                     &quot;isInset=&quot;          + !_isOutset + &quot;, &quot; +
                     &quot;layer=&quot;            + _layer +
                 &quot;]&quot;;

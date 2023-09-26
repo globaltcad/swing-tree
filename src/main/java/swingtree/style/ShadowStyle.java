@@ -80,8 +80,6 @@ import java.util.Optional;
  *  Note that you can use the {@link #none()} method to specify that no shadow should be used,
  *  as the instance returned by that method is a shadow with no offset, no blur, no spread and no color,
  *  effectively making it a representation of the absence of a shadow.
- *  <p>
- *
  */
 public final class ShadowStyle
 {

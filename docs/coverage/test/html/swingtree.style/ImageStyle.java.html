@@ -18,37 +18,29 @@ import java.util.Optional;
  *  &lt;br&gt;
  *  &lt;ol&gt;
  *      &lt;li&gt;&lt;h3&gt;Layer:&lt;/h3&gt;
- *          &lt;p&gt;
- *              The layer onto which the image will be drawn.
- *              Layers exist to determine the order in which something is drawn onto the component.
- *              Here a list of available layers:
- *              &lt;ul&gt;
- *                  &lt;li&gt;{@link swingtree.UI.Layer#BACKGROUND}&lt;/li&gt;
- *                  &lt;li&gt;{@link swingtree.UI.Layer#CONTENT}   &lt;/li&gt;
- *                  &lt;li&gt;{@link swingtree.UI.Layer#BORDER}    &lt;/li&gt;
- *                  &lt;li&gt;{@link swingtree.UI.Layer#FOREGROUND}&lt;/li&gt;
- *              &lt;/ul&gt;
- *          &lt;/p&gt;
+ *          The layer onto which the image will be drawn.
+ *          Layers exist to determine the order in which something is drawn onto the component.
+ *          Here a list of available layers:
+ *          &lt;ul&gt;
+ *              &lt;li&gt;{@link swingtree.UI.Layer#BACKGROUND}&lt;/li&gt;
+ *              &lt;li&gt;{@link swingtree.UI.Layer#CONTENT}   &lt;/li&gt;
+ *              &lt;li&gt;{@link swingtree.UI.Layer#BORDER}    &lt;/li&gt;
+ *              &lt;li&gt;{@link swingtree.UI.Layer#FOREGROUND}&lt;/li&gt;
+ *          &lt;/ul&gt;
  *      &lt;/li&gt;
  *      &lt;li&gt;&lt;h3&gt;Primer:&lt;/h3&gt;
- *          &lt;p&gt;
- *              The primer color of the image style which will
- *              be used as a filler color for the image background.
- *              The background is the inner component area of the component.
- *          &lt;/p&gt;
+ *          The primer color of the image style which will
+ *          be used as a filler color for the image background.
+ *          The background is the inner component area of the component.
  *      &lt;/li&gt;
  *      &lt;li&gt;&lt;h3&gt;Image:&lt;/h3&gt;
- *          &lt;p&gt;
- *              The image which will be drawn onto the component,
- *              which may be specified as an instance of {@link Image}, {@link ImageIcon}
- *              or path to an image file (see {@link swingtree.UI#findIcon(String)}).
- *          &lt;/p&gt;
+ *          The image which will be drawn onto the component,
+ *          which may be specified as an instance of {@link Image}, {@link ImageIcon}
+ *          or path to an image file (see {@link swingtree.UI#findIcon(String)}).
  *      &lt;/li&gt;
  *      &lt;li&gt;&lt;h3&gt;Placement:&lt;/h3&gt;
- *          &lt;p&gt;
- *              The placement type determines where the image will be drawn onto the component.
- *              The following placement options are available:
- *          &lt;/p&gt;
+ *          The placement type determines where the image will be drawn onto the component.
+ *          The following placement options are available:
  *          &lt;ul&gt;
  *              &lt;li&gt; {@link swingtree.UI.Placement#CENTER} &lt;/li&gt;
  *              &lt;li&gt; {@link swingtree.UI.Placement#TOP_LEFT} &lt;/li&gt;
@@ -62,47 +54,37 @@ import java.util.Optional;
  *          &lt;/ul&gt;
  *      &lt;/li&gt;
  *      &lt;li&gt;&lt;h3&gt;Repeat:&lt;/h3&gt;
- *          &lt;p&gt;
- *              If this flag is set to {@code true}, then the image may be painted
- *              multiple times so that it fills up the entire inner component area.
- *              There will not be a noticeable effect of this flag if the
- *              image already fills out the inner component area (see {@link #autoFit(boolean)}, {@link #size(int, int)}).
- *          &lt;/p&gt;
+ *          If this flag is set to {@code true}, then the image may be painted
+ *          multiple times so that it fills up the entire inner component area.
+ *          There will not be a noticeable effect of this flag if the
+ *          image already fills out the inner component area (see {@link #autoFit(boolean)}, {@link #size(int, int)}).
  *      &lt;/li&gt;
  *      &lt;li&gt;&lt;h3&gt;Auto-fit:&lt;/h3&gt;
- *          &lt;p&gt;
- *              If this flag is set to {@code true}, then the image will be stretched or shrunk
- *              to fill the inner component area dependent on the specified width and height,
- *              meaning that if the width was not specified explicitly through {@link #width(Integer)}
- *              then the image will be scaled to fit the inner component width,
- *              and if a height was not specified through {@link #height(Integer)} then
- *              the image will be scaled to fit the inner component height. &lt;br&gt;
- *              &lt;b&gt;Note that the inner component area is the area enclosed by the border, which
- *              is itself not part of said area!&lt;/b&gt;
- *          &lt;/p&gt;
+ *          If this flag is set to {@code true}, then the image will be stretched or shrunk
+ *          to fill the inner component area dependent on the specified width and height,
+ *          meaning that if the width was not specified explicitly through {@link #width(Integer)}
+ *          then the image will be scaled to fit the inner component width,
+ *          and if a height was not specified through {@link #height(Integer)} then
+ *          the image will be scaled to fit the inner component height. &lt;br&gt;
+ *          &lt;b&gt;Note that the inner component area is the area enclosed by the border, which
+ *          is itself not part of said area!&lt;/b&gt;
  *      &lt;/li&gt;
  *      &lt;li&gt;&lt;h3&gt;Width and Height:&lt;/h3&gt;
- *          &lt;p&gt;
- *              These properties allow you to specify the width and height of the image.
- *              If the width or height is not specified, then the image will be drawn
- *              with its original width or height or it will be scaled to fit the inner component area
- *              if {@link #autoFit(boolean)} is set to {@code true}.
- *          &lt;/p&gt;
+ *          These properties allow you to specify the width and height of the image.
+ *          If the width or height is not specified, then the image will be drawn
+ *          with its original width or height or it will be scaled to fit the inner component area
+ *          if {@link #autoFit(boolean)} is set to {@code true}.
  *      &lt;/li&gt;
  *      &lt;li&gt;&lt;h3&gt;Opacity:&lt;/h3&gt;
- *          &lt;p&gt;
- *              This property allows you to specify the opacity of the image.
- *              The opacity must be between 0.0f and 1.0f, where 0.0f means that the image is completely transparent
- *              and 1.0f means that the image is completely opaque.
- *          &lt;/p&gt;
+ *          This property allows you to specify the opacity of the image.
+ *          The opacity must be between 0.0f and 1.0f, where 0.0f means that the image is completely transparent
+ *          and 1.0f means that the image is completely opaque.
  *      &lt;/li&gt;
  *      &lt;li&gt;&lt;h3&gt;Padding:&lt;/h3&gt;
- *          &lt;p&gt;
- *              This property allows you to specify the padding of the image.
- *              The padding is the space between the image and the inner component area.
- *              The padding can be specified for each side of the image individually
- *              or for all sides at once.
- *          &lt;/p&gt;
+ *          This property allows you to specify the padding of the image.
+ *          The padding is the space between the image and the inner component area.
+ *          The padding can be specified for each side of the image individually
+ *          or for all sides at once.
  *      &lt;/li&gt;
  *  &lt;/ol&gt;
  *  &lt;p&gt;
@@ -133,7 +115,7 @@ import java.util.Optional;
  **/
 public final class ImageStyle
 {
-<span class="fc" id="L136">    private static final ImageStyle _NONE = new ImageStyle(</span>
+<span class="fc" id="L118">    private static final ImageStyle _NONE = new ImageStyle(</span>
                                                 UI.Layer.BACKGROUND,
                                                 null,
                                                 null,
@@ -143,10 +125,10 @@ public final class ImageStyle
                                                 null,
                                                 null,
                                                 1.0f,
-<span class="fc" id="L146">                                                Outline.none()</span>
+<span class="fc" id="L128">                                                Outline.none()</span>
                                             );
 
-<span class="fc" id="L149">    static ImageStyle none() { return _NONE; }</span>
+<span class="fc" id="L131">    static ImageStyle none() { return _NONE; }</span>
 
 
     private final UI.Layer     _layer;
@@ -173,40 +155,40 @@ public final class ImageStyle
         Integer      height,
         float        opacity,
         Outline      padding
-<span class="fc" id="L176">    ) {</span>
-<span class="fc" id="L177">        _layer     = Objects.requireNonNull(layer);</span>
-<span class="fc" id="L178">        _primer    = primer;</span>
-<span class="fc" id="L179">        _image     = image;</span>
-<span class="fc" id="L180">        _placement = Objects.requireNonNull(placement);</span>
-<span class="fc" id="L181">        _repeat    = repeat;</span>
-<span class="fc" id="L182">        _autoFit   = autoFit;</span>
-<span class="fc" id="L183">        _width     = width;</span>
-<span class="fc" id="L184">        _height    = height;</span>
-<span class="fc" id="L185">        _opacity   = opacity;</span>
-<span class="fc" id="L186">        _padding   = Objects.requireNonNull(padding);</span>
-<span class="pc bpc" id="L187" title="2 of 4 branches missed.">        if ( _opacity &lt; 0.0f || _opacity &gt; 1.0f )</span>
-<span class="nc" id="L188">            throw new IllegalArgumentException(&quot;transparency must be between 0.0f and 1.0f&quot;);</span>
-<span class="fc" id="L189">    }</span>
+<span class="fc" id="L158">    ) {</span>
+<span class="fc" id="L159">        _layer     = Objects.requireNonNull(layer);</span>
+<span class="fc" id="L160">        _primer    = primer;</span>
+<span class="fc" id="L161">        _image     = image;</span>
+<span class="fc" id="L162">        _placement = Objects.requireNonNull(placement);</span>
+<span class="fc" id="L163">        _repeat    = repeat;</span>
+<span class="fc" id="L164">        _autoFit   = autoFit;</span>
+<span class="fc" id="L165">        _width     = width;</span>
+<span class="fc" id="L166">        _height    = height;</span>
+<span class="fc" id="L167">        _opacity   = opacity;</span>
+<span class="fc" id="L168">        _padding   = Objects.requireNonNull(padding);</span>
+<span class="pc bpc" id="L169" title="2 of 4 branches missed.">        if ( _opacity &lt; 0.0f || _opacity &gt; 1.0f )</span>
+<span class="nc" id="L170">            throw new IllegalArgumentException(&quot;transparency must be between 0.0f and 1.0f&quot;);</span>
+<span class="fc" id="L171">    }</span>
 
-<span class="fc" id="L191">    public UI.Layer layer() { return _layer; }</span>
+<span class="fc" id="L173">    public UI.Layer layer() { return _layer; }</span>
 
-<span class="fc" id="L193">    public Optional&lt;Color&gt; primer() { return Optional.ofNullable(_primer); }</span>
+<span class="fc" id="L175">    public Optional&lt;Color&gt; primer() { return Optional.ofNullable(_primer); }</span>
 
-<span class="fc" id="L195">    public Optional&lt;ImageIcon&gt; image() { return Optional.ofNullable(_image); }</span>
+<span class="fc" id="L177">    public Optional&lt;ImageIcon&gt; image() { return Optional.ofNullable(_image); }</span>
 
-<span class="fc" id="L197">    public UI.Placement placement() { return _placement; }</span>
+<span class="fc" id="L179">    public UI.Placement placement() { return _placement; }</span>
 
-<span class="fc" id="L199">    public boolean repeat() { return _repeat; }</span>
+<span class="fc" id="L181">    public boolean repeat() { return _repeat; }</span>
 
-<span class="fc" id="L201">    public boolean autoFit() { return _autoFit; }</span>
+<span class="fc" id="L183">    public boolean autoFit() { return _autoFit; }</span>
 
-<span class="fc" id="L203">    public Optional&lt;Integer&gt; width() { return Optional.ofNullable(_width); }</span>
+<span class="fc" id="L185">    public Optional&lt;Integer&gt; width() { return Optional.ofNullable(_width); }</span>
 
-<span class="fc" id="L205">    public Optional&lt;Integer&gt; height() { return Optional.ofNullable(_height); }</span>
+<span class="fc" id="L187">    public Optional&lt;Integer&gt; height() { return Optional.ofNullable(_height); }</span>
 
-<span class="fc" id="L207">    public float opacity() { return _opacity; }</span>
+<span class="fc" id="L189">    public float opacity() { return _opacity; }</span>
 
-<span class="fc" id="L209">    public Outline padding() { return _padding; }</span>
+<span class="fc" id="L191">    public Outline padding() { return _padding; }</span>
 
     /**
      *  This method allows you to specify the layer onto which the image will be drawn.
@@ -222,7 +204,7 @@ public final class ImageStyle
      * @param layer The layer onto which the image will be drawn.
      * @return A new {@link ImageStyle} instance with the specified layer.
      */
-<span class="fc" id="L225">    public ImageStyle layer( UI.Layer layer ) { return new ImageStyle(layer, _primer, _image, _placement, _repeat, _autoFit, _width, _height, _opacity, _padding); }</span>
+<span class="fc" id="L207">    public ImageStyle layer( UI.Layer layer ) { return new ImageStyle(layer, _primer, _image, _placement, _repeat, _autoFit, _width, _height, _opacity, _padding); }</span>
 
     /**
      *  Here you can specify the &lt;b&gt;primer color of the image style&lt;/b&gt; which will be used
@@ -232,7 +214,7 @@ public final class ImageStyle
      * @param color The primer color of the image style.
      * @return A new {@link ImageStyle} instance with the specified primer color.
      */
-<span class="fc" id="L235">    public ImageStyle primer( Color color ) { return new ImageStyle(_layer, color, _image, _placement, _repeat, _autoFit, _width, _height, _opacity, _padding); }</span>
+<span class="fc" id="L217">    public ImageStyle primer( Color color ) { return new ImageStyle(_layer, color, _image, _placement, _repeat, _autoFit, _width, _height, _opacity, _padding); }</span>
 
     /**
      *  Here you can specify the &lt;b&gt;image&lt;/b&gt; which will be drawn onto the component.
@@ -241,7 +223,7 @@ public final class ImageStyle
      * @param image The image which will be drawn onto the component.
      * @return A new {@link ImageStyle} instance with the specified image.
      */
-<span class="pc bpc" id="L244" title="1 of 2 branches missed.">    public ImageStyle image( Image image ) { return new ImageStyle(_layer, _primer, image == null ? null : new ImageIcon(image), _placement, _repeat, _autoFit, _width, _height, _opacity, _padding); }</span>
+<span class="pc bpc" id="L226" title="1 of 2 branches missed.">    public ImageStyle image( Image image ) { return new ImageStyle(_layer, _primer, image == null ? null : new ImageIcon(image), _placement, _repeat, _autoFit, _width, _height, _opacity, _padding); }</span>
 
     /**
      *  Here you can specify the &lt;b&gt;image icon&lt;/b&gt; which will be drawn onto the component.
@@ -250,7 +232,7 @@ public final class ImageStyle
      * @param image The image icon which will be drawn onto the component.
      * @return A new {@link ImageStyle} instance with the specified image.
      */
-<span class="nc" id="L253">    public ImageStyle image( ImageIcon image ) { return new ImageStyle(_layer, _primer, image, _placement, _repeat, _autoFit, _width, _height, _opacity, _padding); }</span>
+<span class="nc" id="L235">    public ImageStyle image( ImageIcon image ) { return new ImageStyle(_layer, _primer, image, _placement, _repeat, _autoFit, _width, _height, _opacity, _padding); }</span>
 
     /**
      *  Here you can specify the &lt;b&gt;path to the image in the form of an {@link IconDeclaration}&lt;/b&gt;
@@ -261,7 +243,7 @@ public final class ImageStyle
      * @param image The path to the (icon) image in the form of an {@link IconDeclaration}.
      * @return A new {@link ImageStyle} instance with the specified image.
      */
-<span class="nc" id="L264">    public ImageStyle image( IconDeclaration image ) { return image.find().map(this::image).orElse(this); }</span>
+<span class="nc" id="L246">    public ImageStyle image( IconDeclaration image ) { return image.find().map(this::image).orElse(this); }</span>
 
     /**
      *  Here you can specify the &lt;b&gt;placement&lt;/b&gt; of the image onto the component.
@@ -305,7 +287,7 @@ public final class ImageStyle
      * @param placement The placement of the image onto the component.
      * @return A new {@link ImageStyle} instance with the specified placement.
      */
-<span class="fc" id="L308">    public ImageStyle placement( UI.Placement placement ) { return new ImageStyle(_layer, _primer, _image, placement, _repeat, _autoFit, _width, _height, _opacity, _padding); }</span>
+<span class="fc" id="L290">    public ImageStyle placement( UI.Placement placement ) { return new ImageStyle(_layer, _primer, _image, placement, _repeat, _autoFit, _width, _height, _opacity, _padding); }</span>
 
     /**
      *  If this flag is set to {@code true}, then the image may be painted
@@ -316,7 +298,7 @@ public final class ImageStyle
      * @param repeat Weather the image should be painted repeatedly across the inner component area.
      * @return A new {@link ImageStyle} instance with the specified {@code repeat} flag value.
      */
-<span class="fc" id="L319">    public ImageStyle repeat( boolean repeat ) { return new ImageStyle(_layer, _primer, _image, _placement, repeat, _autoFit, _width, _height, _opacity, _padding); }</span>
+<span class="fc" id="L301">    public ImageStyle repeat( boolean repeat ) { return new ImageStyle(_layer, _primer, _image, _placement, repeat, _autoFit, _width, _height, _opacity, _padding); }</span>
 
     /**
      *  If this flag is set to {@code true}, then the image will be stretched or shrunk
@@ -333,7 +315,7 @@ public final class ImageStyle
      *                otherwise the image will not be scaled to fit the inner component area.
      * @return A new {@link ImageStyle} instance with the specified {@code autoFit} flag value.
      */
-<span class="fc" id="L336">    public ImageStyle autoFit( boolean autoFit ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, autoFit, _width, _height, _opacity, _padding); }</span>
+<span class="fc" id="L318">    public ImageStyle autoFit( boolean autoFit ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, autoFit, _width, _height, _opacity, _padding); }</span>
 
     /**
      *  Ensures that the image has the specified width.
@@ -341,7 +323,7 @@ public final class ImageStyle
      * @param width The width of the image.
      * @return A new {@link ImageStyle} instance with the specified {@code width}.
      */
-<span class="fc" id="L344">    public ImageStyle width( Integer width ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _autoFit, width, _height, _opacity, _padding); }</span>
+<span class="fc" id="L326">    public ImageStyle width( Integer width ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _autoFit, width, _height, _opacity, _padding); }</span>
 
     /**
      *  Ensures that the image has the specified height.
@@ -349,7 +331,7 @@ public final class ImageStyle
      * @param height The height of the image.
      * @return A new {@link ImageStyle} instance with the specified {@code heiht}.
      */
-<span class="fc" id="L352">    public ImageStyle height( Integer height ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _autoFit, _width, height, _opacity, _padding); }</span>
+<span class="fc" id="L334">    public ImageStyle height( Integer height ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _autoFit, _width, height, _opacity, _padding); }</span>
 
     /**
      *  Ensures that the image has the specified width and height.
@@ -358,7 +340,7 @@ public final class ImageStyle
      * @param height The height of the image.
      * @return A new {@link ImageStyle} instance with the specified {@code width} and {@code height}.
      */
-<span class="fc" id="L361">    public ImageStyle size( int width, int height ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _autoFit, width, height, _opacity, _padding); }</span>
+<span class="fc" id="L343">    public ImageStyle size( int width, int height ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _autoFit, width, height, _opacity, _padding); }</span>
 
     /**
      *  This method allows you to specify the opacity of the image.
@@ -368,7 +350,7 @@ public final class ImageStyle
      * @param opacity The opacity of the image.
      * @return A new {@link ImageStyle} instance with the specified opacity.
      */
-<span class="fc" id="L371">    public ImageStyle opacity( float opacity ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _autoFit, _width, _height, opacity, _padding); }</span>
+<span class="fc" id="L353">    public ImageStyle opacity( float opacity ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _autoFit, _width, _height, opacity, _padding); }</span>
 
     /**
      *  This method allows you to specify the padding of the image.
@@ -377,7 +359,7 @@ public final class ImageStyle
      * @param padding The padding of the image.
      * @return A new {@link ImageStyle} instance with the specified padding.
      */
-<span class="fc" id="L380">    ImageStyle padding( Outline padding ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _autoFit, _width, _height, _opacity, padding); }</span>
+<span class="fc" id="L362">    ImageStyle padding( Outline padding ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _autoFit, _width, _height, _opacity, padding); }</span>
 
     /**
      *  This method allows you to specify the padding of the image.
@@ -389,7 +371,7 @@ public final class ImageStyle
      * @param left The left padding of the image.
      * @return A new {@link ImageStyle} instance with the specified padding.
      */
-<span class="nc" id="L392">    public ImageStyle padding( int top, int right, int bottom, int left ) { return padding(Outline.of(top, right, bottom, left)); }</span>
+<span class="nc" id="L374">    public ImageStyle padding( int top, int right, int bottom, int left ) { return padding(Outline.of(top, right, bottom, left)); }</span>
 
     /**
      *  This method allows you to specify the padding of the image.
@@ -399,7 +381,7 @@ public final class ImageStyle
      * @param leftRight The left and right padding of the image.
      * @return A new {@link ImageStyle} instance with the specified padding.
      */
-<span class="nc" id="L402">    public ImageStyle padding( int topBottom, int leftRight ) { return padding(Outline.of(topBottom, leftRight, topBottom, leftRight)); }</span>
+<span class="nc" id="L384">    public ImageStyle padding( int topBottom, int leftRight ) { return padding(Outline.of(topBottom, leftRight, topBottom, leftRight)); }</span>
 
     /**
      *  This method allows you to specify the padding for all sides of the image.
@@ -408,47 +390,47 @@ public final class ImageStyle
      * @param padding The padding of the image.
      * @return A new {@link ImageStyle} instance with the specified padding.
      */
-<span class="fc" id="L411">    public ImageStyle padding( int padding ) { return padding(Outline.of(padding, padding, padding, padding)); }</span>
+<span class="fc" id="L393">    public ImageStyle padding( int padding ) { return padding(Outline.of(padding, padding, padding, padding)); }</span>
 
     ImageStyle _scale( double scaleFactor ) {
-<span class="pc bpc" id="L414" title="1 of 4 branches missed.">        if ( _width == null &amp;&amp; _height == null ) return this;</span>
-<span class="pc bpc" id="L415" title="1 of 2 branches missed.">        Integer width  = _width  == null ? null : (int) Math.round(_width  * scaleFactor);</span>
-<span class="pc bpc" id="L416" title="1 of 2 branches missed.">        Integer height = _height == null ? null : (int) Math.round(_height * scaleFactor);</span>
-<span class="fc" id="L417">        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _autoFit, width, height, _opacity, _padding.scale(scaleFactor));</span>
+<span class="pc bpc" id="L396" title="1 of 4 branches missed.">        if ( _width == null &amp;&amp; _height == null ) return this;</span>
+<span class="pc bpc" id="L397" title="1 of 2 branches missed.">        Integer width  = _width  == null ? null : (int) Math.round(_width  * scaleFactor);</span>
+<span class="pc bpc" id="L398" title="1 of 2 branches missed.">        Integer height = _height == null ? null : (int) Math.round(_height * scaleFactor);</span>
+<span class="fc" id="L399">        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _autoFit, width, height, _opacity, _padding.scale(scaleFactor));</span>
     }
 
     @Override
-<span class="fc" id="L421">    public int hashCode() { return Objects.hash(_layer, _primer, _image, _placement, _repeat, _autoFit, _width, _height, _opacity, _padding); }</span>
+<span class="fc" id="L403">    public int hashCode() { return Objects.hash(_layer, _primer, _image, _placement, _repeat, _autoFit, _width, _height, _opacity, _padding); }</span>
 
     @Override
     public boolean equals( Object obj ) {
-<span class="pc bpc" id="L425" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
-<span class="fc bfc" id="L426" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
-<span class="pc bpc" id="L427" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
-<span class="fc" id="L428">        ImageStyle rhs = (ImageStyle) obj;</span>
-<span class="fc bfc" id="L429" title="All 2 branches covered.">        return Objects.equals(_layer,     rhs._layer)     &amp;&amp;</span>
-<span class="fc bfc" id="L430" title="All 2 branches covered.">               Objects.equals(_primer,    rhs._primer)    &amp;&amp;</span>
-<span class="fc bfc" id="L431" title="All 2 branches covered.">               Objects.equals(_image,     rhs._image)     &amp;&amp;</span>
-<span class="pc bpc" id="L432" title="1 of 2 branches missed.">               Objects.equals(_placement, rhs._placement) &amp;&amp;</span>
-<span class="pc bpc" id="L433" title="1 of 2 branches missed.">               Objects.equals(_repeat,    rhs._repeat)    &amp;&amp;</span>
-<span class="pc bpc" id="L434" title="1 of 2 branches missed.">               Objects.equals(_autoFit,   rhs._autoFit)   &amp;&amp;</span>
-<span class="pc bpc" id="L435" title="1 of 2 branches missed.">               Objects.equals(_width,     rhs._width)     &amp;&amp;</span>
-<span class="pc bpc" id="L436" title="1 of 2 branches missed.">               Objects.equals(_height,    rhs._height)    &amp;&amp;</span>
-<span class="pc bpc" id="L437" title="1 of 2 branches missed.">               Objects.equals(_opacity,   rhs._opacity)   &amp;&amp;</span>
-<span class="pc bpc" id="L438" title="1 of 2 branches missed.">               Objects.equals(_padding,   rhs._padding);</span>
+<span class="pc bpc" id="L407" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="fc bfc" id="L408" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L409" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L410">        ImageStyle rhs = (ImageStyle) obj;</span>
+<span class="fc bfc" id="L411" title="All 2 branches covered.">        return Objects.equals(_layer,     rhs._layer)     &amp;&amp;</span>
+<span class="fc bfc" id="L412" title="All 2 branches covered.">               Objects.equals(_primer,    rhs._primer)    &amp;&amp;</span>
+<span class="fc bfc" id="L413" title="All 2 branches covered.">               Objects.equals(_image,     rhs._image)     &amp;&amp;</span>
+<span class="pc bpc" id="L414" title="1 of 2 branches missed.">               Objects.equals(_placement, rhs._placement) &amp;&amp;</span>
+<span class="pc bpc" id="L415" title="1 of 2 branches missed.">               Objects.equals(_repeat,    rhs._repeat)    &amp;&amp;</span>
+<span class="pc bpc" id="L416" title="1 of 2 branches missed.">               Objects.equals(_autoFit,   rhs._autoFit)   &amp;&amp;</span>
+<span class="pc bpc" id="L417" title="1 of 2 branches missed.">               Objects.equals(_width,     rhs._width)     &amp;&amp;</span>
+<span class="pc bpc" id="L418" title="1 of 2 branches missed.">               Objects.equals(_height,    rhs._height)    &amp;&amp;</span>
+<span class="pc bpc" id="L419" title="1 of 2 branches missed.">               Objects.equals(_opacity,   rhs._opacity)   &amp;&amp;</span>
+<span class="pc bpc" id="L420" title="1 of 2 branches missed.">               Objects.equals(_padding,   rhs._padding);</span>
     }
 
     @Override
     public String toString() {
-<span class="fc" id="L443">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="fc" id="L425">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
                     &quot;layer=&quot;      + _layer                                         + &quot;, &quot; +
-<span class="fc" id="L445">                    &quot;primer=&quot;     + StyleUtility.toString(_primer)                 + &quot;, &quot; +</span>
-<span class="pc bpc" id="L446" title="1 of 2 branches missed.">                    &quot;image=&quot;      + ( _image  == null ? &quot;?&quot; : _image.toString() )  + &quot;, &quot; +</span>
+<span class="fc" id="L427">                    &quot;primer=&quot;     + StyleUtility.toString(_primer)                 + &quot;, &quot; +</span>
+<span class="pc bpc" id="L428" title="1 of 2 branches missed.">                    &quot;image=&quot;      + ( _image  == null ? &quot;?&quot; : _image.toString() )  + &quot;, &quot; +</span>
                     &quot;placement=&quot;  + _placement                                     + &quot;, &quot; +
                     &quot;repeat=&quot;     + _repeat                                        + &quot;, &quot; +
                     &quot;autoFit=&quot;    + _autoFit                                       + &quot;, &quot; +
-<span class="pc bpc" id="L450" title="1 of 2 branches missed.">                    &quot;width=&quot;      + ( _width  == null ? &quot;?&quot; : _width.toString()  ) + &quot;, &quot; +</span>
-<span class="pc bpc" id="L451" title="1 of 2 branches missed.">                    &quot;height=&quot;     + ( _height == null ? &quot;?&quot; : _height.toString() ) + &quot;, &quot; +</span>
+<span class="pc bpc" id="L432" title="1 of 2 branches missed.">                    &quot;width=&quot;      + ( _width  == null ? &quot;?&quot; : _width.toString()  ) + &quot;, &quot; +</span>
+<span class="pc bpc" id="L433" title="1 of 2 branches missed.">                    &quot;height=&quot;     + ( _height == null ? &quot;?&quot; : _height.toString() ) + &quot;, &quot; +</span>
                     &quot;opacity=&quot;    + _opacity                                       + &quot;, &quot; +
                     &quot;padding=&quot;    + _padding                                       +
                 &quot;]&quot;;
