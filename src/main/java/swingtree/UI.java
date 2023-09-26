@@ -649,9 +649,14 @@ public final class UI extends UILayoutConstants
     }
 
     /**
-     * Loads an icon from the classpath or from a file.
+     * Loads an icon from the resource folder, the classpath, a local file
+     * or from cache if it has already been loaded.
+     * If no icon could be found, an empty optional is returned.
+     * <br><br>
+     * Also, checkout {@link SwingTree#getIconCache()} to see where the icons are cached.
+     *
      * @param path The path to the icon. It can be a classpath resource or a file path.
-     * @return The icon.
+     * @return An optional containing the icon if it could be found, an empty optional otherwise.
      */
     public static Optional<ImageIcon> findIcon( String path ) {
         Map<String, ImageIcon> cache = SwingTree.get().getIconCache();
