@@ -691,7 +691,14 @@ public final class UI extends UILayoutConstants
         if ( path.endsWith(".svg") )
             return new SVGIcon(url);
         else
-            return new ImageIcon(url);
+            return new ImageIcon(Toolkit.getDefaultToolkit().createImage(url), url.toExternalForm());
+        /*
+            Not that we explicitly use the "createImage" method of the toolkit here.
+            This is because otherwise the image might get cached inside the toolkit,
+            which is in the way of our own caching mechanism.
+            (The internal caching of the toolkit is somewhat limited and we have no control over it,
+            which is why we use our own cache.)
+        */
     }
 
     private UI(){ super(); } // This is a static API
@@ -2150,6 +2157,28 @@ public final class UI extends UILayoutConstants
     }
 
     /**
+     *  Use this factory method to create a {@link JMenuItem} with the
+     *  provided text and default icon based on the provided {@link IconDeclaration}. <br>
+     *  Here an example demonstrating the usage of this method: <br>
+     *  <pre>{@code
+     *    UI.menuItem("Hello", Icons.MY_ICON)
+     *    .withTip("I give info!")
+     *    .onClick( it -> {...} )
+     *  }</pre>
+     *
+     * @param text The text which should be displayed on the wrapped {@link JMenuItem}.
+     * @param icon The icon which should be displayed on the wrapped {@link JMenuItem}.
+     * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
+     */
+    public static UIForMenuItem<JMenuItem> menuItem( String text, IconDeclaration icon ) {
+        NullUtil.nullArgCheck(text, "text", String.class);
+        NullUtil.nullArgCheck(icon, "icon", IconDeclaration.class);
+        return new UIForMenuItem<>((JMenuItem) new MenuItem())
+                    .withText(text)
+                    .withIcon(icon);
+    }
+
+    /**
      * @param text The text property which should be displayed on the wrapped {@link JMenuItem} dynamically.
      * @param icon The icon which should be displayed on the wrapped {@link JMenuItem}.
      * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
@@ -2157,6 +2186,19 @@ public final class UI extends UILayoutConstants
     public static UIForMenuItem<JMenuItem> menuItem( Val<String> text, Icon icon ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
+        return new UIForMenuItem<>((JMenuItem) new MenuItem())
+                    .withText(text)
+                    .withIcon(icon);
+    }
+
+    /**
+     * @param text The text property which should be displayed on the wrapped {@link JMenuItem} dynamically.
+     * @param icon The icon which should be displayed on the wrapped {@link JMenuItem}.
+     * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
+     */
+    public static UIForMenuItem<JMenuItem> menuItem( Val<String> text, IconDeclaration icon ) {
+        NullUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullArgCheck(icon, "icon", IconDeclaration.class);
         return new UIForMenuItem<>((JMenuItem) new MenuItem())
                     .withText(text)
                     .withIcon(icon);
