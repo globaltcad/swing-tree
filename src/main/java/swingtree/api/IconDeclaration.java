@@ -2,6 +2,7 @@ package swingtree.api;
 
 import swingtree.UI;
 
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import java.util.Optional;
 
@@ -45,6 +46,21 @@ import java.util.Optional;
  *  so that you have some more compile time safety in your application!
  *  When it comes to resource loading Strings are brittle because they
  *  are susceptible to typos and refactoring.
+ *  <p>
+ *  Instances of this class are intended to be used as part of a view model
+ *  instead of using the {@link Icon} or {@link ImageIcon} classes directly.
+ *  <p>
+ *  The reason for this is the fact that traditional Swing icons
+ *  are often heavyweight objects whose loading may or may not succeed, and so they are
+ *  not suitable for direct use in a property as part of your view model.
+ *  Instead, you should use this {@link IconDeclaration} interface, which is a
+ *  lightweight value object that merely models the resource location of the icon
+ *  even if it is not yet loaded or even does not exist at all.
+ *  <p>
+ *  Not only does this make your view model more robust, but it also allows you
+ *  to write unit tests much more easily, because you can now create instances
+ *  where the icon may not be available at all, yet you can still test the
+ *  behavior of your view model.
  */
 public interface IconDeclaration
 {

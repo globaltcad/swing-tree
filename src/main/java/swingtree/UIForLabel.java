@@ -1,6 +1,7 @@
 package swingtree;
 
 import sprouts.Val;
+import swingtree.api.IconDeclaration;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,6 +10,7 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Objects;
 
 /**
  *  A swing tree builder node for {@link JLabel} instances.
@@ -361,17 +363,51 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
     }
 
     /**
+     *  Use this to set the icon for the wrapped {@link JLabel}
+     *  based on the provided {@link IconDeclaration}.
+     *  <p>
+     *  An {@link IconDeclaration} should be preferred over the {@link Icon} class
+     *  as part of a view model, because it is a lightweight value object that merely
+     *  models the resource location of the icon even if it is not yet loaded or even
+     *  does not exist at all.
+     *
+     * @param icon The {@link IconDeclaration} which should be displayed on the label.
+     * @return This very builder to allow for method chaining.
+     */
+    public UIForLabel<L> withIcon( IconDeclaration icon ) {
+        Objects.requireNonNull(icon,"icon");
+        icon.find().ifPresent( i -> getComponent().setIcon(i) );
+        return this;
+    }
+
+    /**
      *  Use this to dynamically set the icon property for the wrapped {@link JLabel}.
      *  When the icon wrapped by the provided property changes,
      *  then so does the icon of this label.
+     *  <p>
+     *  But note that you may not use the {@link Icon} or {@link ImageIcon} classes directly,
+     *  instead <b>you must use implementations of the {@link IconDeclaration} interface</b>,
+     *  which merely models the resource location of the icon, but does not load
+     *  the whole icon itself.
+     *  <p>
+     *  The reason for this distinction is the fact that traditional Swing icons
+     *  are heavy objects whose loading may or may not succeed, and so they are
+     *  not suitable for direct use in a property as part of your view model.
+     *  Instead, you should use the {@link IconDeclaration} interface, which is a
+     *  lightweight value object that merely models the resource location of the icon
+     *  even if it is not yet loaded or even does not exist at all.
+     *  <p>
+     *  This is especially useful in case of unit tests for you view model,
+     *  where the icon may not be available at all, but you still want to test
+     *  the behaviour of your view model.
      *
      * @param icon The {@link Icon} property which should be displayed on the label.
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code icon} is {@code null}.
      */
-    public UIForLabel<L> withIcon( Val<Icon> icon ) {
+    public UIForLabel<L> withIcon( Val<IconDeclaration> icon ) {
         NullUtil.nullArgCheck(icon,"icon",Val.class);
-        _onShow( icon, i -> getComponent().setIcon(i) );
+        _onShow( icon, d -> d.find().ifPresent( i -> getComponent().setIcon(i) ) );
         return withIcon(icon.orElseNull());
     }
 

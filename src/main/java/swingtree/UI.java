@@ -1563,13 +1563,28 @@ public final class UI extends UILayoutConstants
     /**
      *  Use this to create a builder for the {@link JButton} UI component
      *  with a dynamically displayed icon on top.
-     *  This is in essence a convenience method for {@code UI.of(new JButton()).withIcon(icon) )}.
+     *  <p>
+     *  Note that you may not use the {@link Icon} or {@link ImageIcon} classes directly,
+     *  instead <b>you must use implementations of the {@link IconDeclaration} interface</b>,
+     *  which merely models the resource location of the icon, but does not load
+     *  the whole icon itself.
+     *  <p>
+     *  The reason for this distinction is the fact that traditional Swing icons
+     *  are heavy objects whose loading may or may not succeed, and so they are
+     *  not suitable for direct use in a property as part of your view model.
+     *  Instead, you should use the {@link IconDeclaration} interface, which is a
+     *  lightweight value object that merely models the resource location of the icon
+     *  even if it is not yet loaded or even does not exist at all.
+     *  <p>
+     *  This is especially useful in case of unit tests for you view model,
+     *  where the icon may not be available at all, but you still want to test
+     *  the behaviour of your view model.
      *
      * @param icon The icon property whose value ought to be displayed on top of the button.
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
-    public static UIForButton<JButton> buttonWithIcon( Val<Icon> icon ) {
-        NullUtil.nullArgCheck(icon, "icon", Icon.class);
+    public static UIForButton<JButton> buttonWithIcon( Val<IconDeclaration> icon ) {
+        NullUtil.nullArgCheck(icon, "icon", Val.class);
         NullUtil.nullPropertyCheck(icon, "icon");
         return button().withIcon(icon);
     }
@@ -2205,22 +2220,63 @@ public final class UI extends UILayoutConstants
     }
 
     /**
+     *  Allows you to create a menu item with an icon property bound to it.
+     *  So when the property state changes to a different icon, then so does the
+     *  icon displayed on top of the menu item.
+     *  <p>
+     *  But note that you may not use the {@link Icon} or {@link ImageIcon} classes directly,
+     *  instead <b>you must use implementations of the {@link IconDeclaration} interface</b>,
+     *  which merely models the resource location of the icon, but does not load
+     *  the whole icon itself.
+     *  <p>
+     *  The reason for this distinction is the fact that traditional Swing icons
+     *  are heavy objects whose loading may or may not succeed, and so they are
+     *  not suitable for direct use in a property as part of your view model.
+     *  Instead, you should use the {@link IconDeclaration} interface, which is a
+     *  lightweight value object that merely models the resource location of the icon
+     *  even if it is not yet loaded or even does not exist at all.
+     *  <p>
+     *  This is especially useful in case of unit tests for you view model,
+     *  where the icon may not be available at all, but you still want to test
+     *  the behaviour of your view model.
+     *
      * @param text The text which should be displayed on the wrapped {@link JMenuItem}.
      * @param icon The icon which should be displayed on the wrapped {@link JMenuItem}.
      * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
      */
-    public static UIForMenuItem<JMenuItem> menuItem( String text, Val<Icon> icon ) {
+    public static UIForMenuItem<JMenuItem> menuItem( String text, Val<IconDeclaration> icon ) {
         NullUtil.nullArgCheck(text, "text", String.class);
         NullUtil.nullArgCheck(icon, "icon", Val.class);
         return new UIForMenuItem<>((JMenuItem) new MenuItem()).withText(text).withIcon(icon);
     }
 
     /**
+     *  Allows you to create a menu item with a text property and
+     *  an icon property bound to it.
+     *  So when the text or con property state changes to a different text or icon, then so does the
+     *  text and/or icon displayed on top of the menu item.
+     *  <p>
+     *  But note that you may not use the {@link Icon} or {@link ImageIcon} classes directly,
+     *  instead <b>you must use implementations of the {@link IconDeclaration} interface</b>,
+     *  which merely models the resource location of the icon, but does not load
+     *  the whole icon itself.
+     *  <p>
+     *  The reason for this distinction is the fact that traditional Swing icons
+     *  are heavy objects whose loading may or may not succeed, and so they are
+     *  not suitable for direct use in a property as part of your view model.
+     *  Instead, you should use the {@link IconDeclaration} interface, which is a
+     *  lightweight value object that merely models the resource location of the icon
+     *  even if it is not yet loaded or even does not exist at all.
+     *  <p>
+     *  This is especially useful in case of unit tests for you view model,
+     *  where the icon may not be available at all, but you still want to test
+     *  the behaviour of your view model.
+     *
      * @param text The text property which should be displayed on the wrapped {@link JMenuItem} dynamically.
      * @param icon The icon which should be displayed on the wrapped {@link JMenuItem}.
      * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
      */
-    public static UIForMenuItem<JMenuItem> menuItem( Val<String> text, Val<Icon> icon ) {
+    public static UIForMenuItem<JMenuItem> menuItem( Val<String> text, Val<IconDeclaration> icon ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullArgCheck(icon, "icon", Val.class);
         return new UIForMenuItem<>((JMenuItem) new MenuItem()).withText(text).withIcon(icon);
@@ -3454,11 +3510,27 @@ public final class UI extends UILayoutConstants
 
     /**
      *  Use this to create a UI builder for a text-less label containing and displaying an icon dynamically.
+     *  <p>
+     *  But note that you may not use the {@link Icon} or {@link ImageIcon} classes directly,
+     *  instead <b>you must use implementations of the {@link IconDeclaration} interface</b>,
+     *  which merely models the resource location of the icon, but does not load
+     *  the whole icon itself.
+     *  <p>
+     *  The reason for this distinction is the fact that traditional Swing icons
+     *  are heavy objects whose loading may or may not succeed, and so they are
+     *  not suitable for direct use in a property as part of your view model.
+     *  Instead, you should use the {@link IconDeclaration} interface, which is a
+     *  lightweight value object that merely models the resource location of the icon
+     *  even if it is not yet loaded or even does not exist at all.
+     *  <p>
+     *  This is especially useful in case of unit tests for you view model,
+     *  where the icon may not be available at all, but you still want to test
+     *  the behaviour of your view model.
      *
      * @param icon The icon property which should dynamically provide a desired icon for the {@link JLabel}.
      * @return A builder instance for the label, which enables fluent method chaining.
      */
-    public static UIForLabel<JLabel> labelWithIcon( Val<Icon> icon ) {
+    public static UIForLabel<JLabel> labelWithIcon( Val<IconDeclaration> icon ) {
         NullUtil.nullArgCheck(icon, "icon", Val.class);
         NullUtil.nullPropertyCheck(icon, "icon", "Null icons are not allowed!");
         return of((JLabel) new Label()).withIcon(icon);
@@ -4010,12 +4082,30 @@ public final class UI extends UILayoutConstants
 
     /**
      *  Use this to create a builder for a new {@link JToggleButton} instance where
-     *  the provided {@link Icon} property dynamically displays its value on the toggle button.
+     *  the provided {@link IconDeclaration} based property dynamically
+     *  displays the targeted image on the toggle button.
+     *  <p>
+     *  Note that you may not use the {@link Icon} or {@link ImageIcon} classes directly,
+     *  instead <b>you must use implementations of the {@link IconDeclaration} interface</b>,
+     *  which merely models the resource location of the icon, but does not load
+     *  the whole icon itself.
+     *  <p>
+     *  The reason for this distinction is the fact that traditional Swing icons
+     *  are heavy objects whose loading may or may not succeed, and so they are
+     *  not suitable for direct use in a property as part of your view model.
+     *  Instead, you should use the {@link IconDeclaration} interface, which is a
+     *  lightweight value object that merely models the resource location of the icon
+     *  even if it is not yet loaded or even does not exist at all.
+     *  <p>
+     *  This is especially useful in case of unit tests for you view model,
+     *  where the icon may not be available at all, but you still want to test
+     *  the behaviour of your view model.
+     *
      *
      * @param icon The icon property which should be bound to the toggle button.
      * @return A builder instance for the provided {@link JToggleButton}, which enables fluent method chaining.
      */
-    public static UIForToggleButton<JToggleButton> toggleButtonWithIcon( Val<Icon> icon ) {
+    public static UIForToggleButton<JToggleButton> toggleButtonWithIcon( Val<IconDeclaration> icon ) {
         NullUtil.nullArgCheck(icon, "icon", Val.class);
         NullUtil.nullPropertyCheck(icon, "icon", "The icon of a toggle button may not be modelled using null!");
         return of(new JToggleButton())
@@ -4025,14 +4115,30 @@ public final class UI extends UILayoutConstants
 
     /**
      *  Use this to create a builder for a new {@link JToggleButton} instance where
-     *  the provided {@link Icon} property dynamically displays its value on the toggle button
+     *  the provided {@link IconDeclaration} property dynamically displays its targeted icon on the toggle button
      *  and the provided boolean property dynamically determines whether the toggle button is selected or not.
+     *  <p>
+     *  But note that you may not use the {@link Icon} or {@link ImageIcon} classes directly,
+     *  instead <b>you must use implementations of the {@link IconDeclaration} interface</b>,
+     *  which merely models the resource location of the icon, but does not load
+     *  the whole icon itself.
+     *  <p>
+     *  The reason for this distinction is the fact that traditional Swing icons
+     *  are heavy objects whose loading may or may not succeed, and so they are
+     *  not suitable for direct use in a property as part of your view model.
+     *  Instead, you should use the {@link IconDeclaration} interface, which is a
+     *  lightweight value object that merely models the resource location of the icon
+     *  even if it is not yet loaded or even does not exist at all.
+     *  <p>
+     *  This is especially useful in case of unit tests for you view model,
+     *  where the icon may not be available at all, but you still want to test
+     *  the behaviour of your view model.
      *
      * @param icon The icon property which should be bound to the toggle button.
      * @param isToggled The boolean property which should be bound to the toggle button and determines whether it is selected or not.
      * @return A builder instance for the provided {@link JToggleButton}, which enables fluent method chaining.
      */
-    public static UIForToggleButton<JToggleButton> toggleButtonWithIcon( Val<Icon> icon, Var<Boolean> isToggled ) {
+    public static UIForToggleButton<JToggleButton> toggleButtonWithIcon( Val<IconDeclaration> icon, Var<Boolean> isToggled ) {
         NullUtil.nullArgCheck(icon, "icon", Val.class);
         NullUtil.nullPropertyCheck(icon, "icon", "The icon of a toggle button may not be modelled using null!");
         NullUtil.nullPropertyCheck(isToggled, "isToggled", "The selection state of a toggle button may not be modelled using null!");

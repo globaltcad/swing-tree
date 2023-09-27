@@ -185,14 +185,35 @@ public final class Tab
     }
 
     /**
-     * @param icon The icon property which should be displayed in the tab header.
+     *  Allows you to dynamically model the icon displayed on the tab through a property bound
+     *  to this tab.
+     *  <p>
+     *  Note that you may not use the {@link Icon} or {@link ImageIcon} classes directly
+     *  as a value for your property,
+     *  instead <b>you must use implementations of the {@link IconDeclaration} interface</b>,
+     *  which merely models the resource location of the icon, but does not load
+     *  the whole icon itself.
+     *  <p>
+     *  The reason for this distinction is the fact that traditional Swing icons
+     *  are heavy objects whose loading may or may not succeed, and so they are
+     *  not suitable for direct use in a property as part of your view model.
+     *  Instead, you should use the {@link IconDeclaration} interface, which is a
+     *  lightweight value object that merely models the resource location of the icon
+     *  even if it is not yet loaded or even does not exist at all.
+     *  <p>
+     *  This is especially useful in case of unit tests for you view model,
+     *  where the icon may not be available at all, but you still want to test
+     *  the behaviour of your view model.
+     *
+     * @param iconDeclaration The icon property which should be displayed in the tab header.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
-    public final Tab withIcon( Val<Icon> icon ) {
-        NullUtil.nullArgCheck(icon,"icon",Val.class);
+    public final Tab withIcon( Val<IconDeclaration> iconDeclaration ) {
+        NullUtil.nullArgCheck(iconDeclaration,"icon",Val.class);
         if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
         if ( _icon != null ) throw new IllegalArgumentException("Icon already specified!");
-        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, icon, _tip, _onSelected, _onMouseClick);
+        Val<Icon> asIcon = iconDeclaration.viewAs( Icon.class, it -> it.find().orElse(null) );
+        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, asIcon, _tip, _onSelected, _onMouseClick);
     }
 
     /**

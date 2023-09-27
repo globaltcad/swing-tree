@@ -94,15 +94,31 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  Use this to dynamically set the icon property for the wrapped button type.
      *  When the icon wrapped by the provided property changes,
      *  then so does the icon displayed on this button.
+     *  <p>
+     *  But note that you may not use the {@link Icon} or {@link ImageIcon} classes directly,
+     *  instead <b>you must use implementations of the {@link IconDeclaration} interface</b>,
+     *  which merely models the resource location of the icon, but does not load
+     *  the whole icon itself.
+     *  <p>
+     *  The reason for this distinction is the fact that traditional Swing icons
+     *  are heavy objects whose loading may or may not succeed, and so they are
+     *  not suitable for direct use in a property as part of your view model.
+     *  Instead, you should use the {@link IconDeclaration} interface, which is a
+     *  lightweight value object that merely models the resource location of the icon
+     *  even if it is not yet loaded or even does not exist at all.
+     *  <p>
+     *  This is especially useful in case of unit tests for you view model,
+     *  where the icon may not be available at all, but you still want to test
+     *  the behaviour of your view model.
      *
      * @param icon The {@link Icon} property which should be displayed on the button.
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code icon} is {@code null}.
      */
-    public I withIcon( Val<Icon> icon ) {
+    public I withIcon( Val<IconDeclaration> icon ) {
         NullUtil.nullArgCheck(icon, "icon", Val.class);
         NullUtil.nullPropertyCheck(icon, "icon");
-        _onShow( icon, i -> getComponent().setIcon(i) );
+        _onShow( icon, declaration -> declaration.find().ifPresent( i -> getComponent().setIcon(i) ) );
         return withIcon(icon.orElseThrow());
     }
 

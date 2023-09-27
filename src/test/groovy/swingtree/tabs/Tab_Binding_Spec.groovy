@@ -1,6 +1,7 @@
 package swingtree.tabs
 
 import swingtree.SwingTree
+import swingtree.api.IconDeclaration
 import swingtree.threading.EventProcessor
 import swingtree.UI
 import sprouts.Var
@@ -119,21 +120,37 @@ class Tab_Binding_Spec extends Specification
     {
         reportInfo """
             You can bind an icon property to the icon of a tab.
+            But note that you may not use the `Icon` or `ImageIcon` classes directly,
+            instead you must use implementations of the `IconDeclaration` interface,
+            which merely models the resource location of the icon.
+            
+            The reason for this distinction is the fact that traditional Swing icons
+            are heavy objects whose loading may or may not succeed, and so they are
+            not suitable for direct use in a property as part of your view model.
+            Instead, you should use the `IconDeclaration` interface, which is a
+            lightweight value object that merely models the resource location of the icon
+            even if it is not yet loaded or even does not exist at all.
+            
+            This is especially useful in case of unit tests for you view model,
+            where the icon may not be available at all, but you still want to test
+            the behaviour of your view model.
         """
-        given : 'An icon property and a tabbed pane UI node.'
-            var icon = Var.of(UI.findIcon("swing.png").orElse(null))
+        given : 'We create an `IconDeclaration`, which is essentially just a resource location value object.'
+            IconDeclaration iconDeclaration = ()->"swing.png"
+        and : 'An icon property and a tabbed pane UI node.'
+            var icon = Var.of(iconDeclaration)
             def tabbedPane =
                 UI.tabbedPane(UI.Side.TOP)
                 .add(UI.tab("Tab 1").withIcon(icon))
                 .get(JTabbedPane)
 
         when : 'We change the icon.'
-            var newIcon = UI.findIcon("seed.png").orElse(null)
+            IconDeclaration newIcon = () -> "seed.png"
             icon.set(newIcon)
             UI.sync()
 
         then : 'The icon of the tab is updated.'
-            tabbedPane.getIconAt(0) == newIcon
+            tabbedPane.getIconAt(0) == newIcon.find().get()
     }
 
     def 'Properties allow you to enable or disable individual tabs.'()

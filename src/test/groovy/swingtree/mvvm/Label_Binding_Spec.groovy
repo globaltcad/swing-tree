@@ -2,6 +2,7 @@ package swingtree.mvvm
 
 
 import swingtree.SwingTree
+import swingtree.api.IconDeclaration
 import swingtree.threading.EventProcessor
 import swingtree.UI
 import sprouts.Val
@@ -285,12 +286,30 @@ class Label_Binding_Spec extends Specification
     {
         reportInfo """
             Not only should a view model contain state relevant for modelling the
-            text displayed on a label,
-            but it should also model state defining how the UI component should
-            behave and look like depending on your business logic.
+            text displayed on a label, but it should also model what may be depicted on
+            the label, for example an icon.
+            Therefore you can also bind an icon to a label through a property.
+            
+            But note that you may not use the `Icon` or `ImageIcon` classes directly,
+            instead you must use implementations of the `IconDeclaration` interface,
+            which merely models the resource location of the icon, but does not load
+            the whole icon itself.
+            
+            The reason for this distinction is the fact that traditional Swing icons
+            are heavy objects whose loading may or may not succeed, and so they are
+            not suitable for direct use in a property as part of your view model.
+            Instead, you should use the `IconDeclaration` interface, which is a
+            lightweight value object that merely models the resource location of the icon
+            even if it is not yet loaded or even does not exist at all.
+            
+            This is especially useful in case of unit tests for you view model,
+            where the icon may not be available at all, but you still want to test
+            the behaviour of your view model.
         """
-        given : 'We create a simple swing-tree property for modelling the size.'
-            Val<Icon> icon = Var.of(UI.findIcon("img/seed.png").orElse(null))
+        given : 'We create an `IconDeclaration`, which is essentially just a resource location value object.'
+            IconDeclaration iconDeclaration = ()->"img/seed.png"
+        and : 'We create a simple swing-tree property for modelling the icon declaration.'
+            Val<IconDeclaration> icon = Var.of(iconDeclaration)
             var originalIcon = icon.orElseThrow()
 
         when : 'We create and bind to a label UI node...'
@@ -300,17 +319,17 @@ class Label_Binding_Spec extends Specification
 
         then : 'The label should be updated when the property changes.'
             ui.component.icon != null
-            ui.component.icon === originalIcon
+            ui.component.icon === originalIcon.find().get()
             ui.component.icon.iconHeight == 512
             ui.component.icon.iconWidth == 512
 
         when : 'We change the items of the properties...'
-            icon.set(UI.findIcon("img/swing.png").orElse(null))
+            icon.set((IconDeclaration)()->"img/swing.png")
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
         then : 'The label should be a different one.'
             ui.component.icon != null
-            ui.component.icon !== originalIcon
+            ui.component.icon !== originalIcon.find().get()
             ui.component.icon.iconHeight == 512
             ui.component.icon.iconWidth == 512
     }
