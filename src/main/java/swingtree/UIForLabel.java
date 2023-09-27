@@ -289,7 +289,7 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
-    public UIForLabel<L> withImageRelative( UI.HorizontalAlignment horizontalAlign ) {
+    public UIForLabel<L> withHorizontalTextPosition( UI.HorizontalAlignment horizontalAlign ) {
         NullUtil.nullArgCheck( horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class );
         getComponent().setHorizontalTextPosition(horizontalAlign.forSwing());
         return this;
@@ -304,11 +304,11 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
-    public UIForLabel<L> withImageRelativeHorizontalAlignment( Val<UI.HorizontalAlignment> horizontalAlign ) {
+    public UIForLabel<L> withHorizontalTextPosition( Val<UI.HorizontalAlignment> horizontalAlign ) {
         NullUtil.nullArgCheck( horizontalAlign, "horizontalAlign", Val.class );
         NullUtil.nullPropertyCheck( horizontalAlign, "horizontalAlign", "Null is not a valid alignment." );
         _onShow( horizontalAlign, v -> getComponent().setHorizontalTextPosition(v.forSwing()) );
-        return withImageRelative(horizontalAlign.orElseThrow());
+        return withHorizontalTextPosition(horizontalAlign.orElseThrow());
     }
 
     /**
@@ -323,7 +323,7 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
-    public UIForLabel<L> withImageRelative( UI.VerticalAlignment verticalAlign ) {
+    public UIForLabel<L> withVerticalTextPosition( UI.VerticalAlignment verticalAlign ) {
         NullUtil.nullArgCheck( verticalAlign, "verticalAlign", UI.VerticalAlignment.class );
         getComponent().setVerticalTextPosition(verticalAlign.forSwing());
         return this;
@@ -338,11 +338,30 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
-    public UIForLabel<L> withImageRelativeVerticalAlignment( Val<UI.VerticalAlignment> verticalAlign ) {
+    public UIForLabel<L> withVerticalTextPosition( Val<UI.VerticalAlignment> verticalAlign ) {
         NullUtil.nullArgCheck( verticalAlign, "verticalAlign", Val.class );
         NullUtil.nullPropertyCheck( verticalAlign, "verticalAlign", "Null is not a valid alignment." );
         _onShow( verticalAlign, v -> getComponent().setVerticalTextPosition(v.forSwing()) );
-        return withImageRelative(verticalAlign.orElseThrow());
+        return withVerticalTextPosition(verticalAlign.orElseThrow());
+    }
+
+    /**
+     *  Use this to set the horizontal and vertical position of the label's text, relative to its image.
+     *  This is a convenience method to avoid peeking into this builder like so:
+     *  <pre>{@code
+     *     UI.label("Something")
+     *         .peek( label -> label.setHorizontalTextPosition(...); label.setVerticalTextPosition(...) );
+     *  }</pre>
+     *
+     * @param alignment The alignment which should be applied to the text of the underlying component.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code alignment} is {@code null}.
+     */
+    public UIForLabel<L> withTextPosition( UI.Alignment alignment ) {
+        NullUtil.nullArgCheck( alignment, "alignment", UI.Alignment.class );
+        getComponent().setHorizontalTextPosition(alignment.getHorizontal().forSwing());
+        getComponent().setVerticalTextPosition(alignment.getVertical().forSwing());
+        return this;
     }
 
     /**

@@ -98,6 +98,21 @@ class Panel_Spec extends Specification
             ui.component.layout instanceof MigLayout
     }
 
+    def 'Panels can be nested using the `add(..) method.'()
+    {
+        given : 'We create a panel of panels:'
+            def ui =
+                    UI.panel()
+                    .add(UI.panel())
+                    .add(UI.panel())
+                    .add(UI.panel())
+
+        expect : 'The panel has 3 children.'
+            ui.component.components.size() == 3
+        and : 'All children are JPanels.'
+            ui.component.components.every { it instanceof JPanel }
+    }
+
     def 'The dimensions of a panel can be bound to a property.'( float uiScale )
     {
         given : """

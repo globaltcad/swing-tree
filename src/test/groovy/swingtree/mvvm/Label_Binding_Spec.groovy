@@ -11,7 +11,6 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 
-import javax.swing.Icon
 import javax.swing.SwingConstants
 import java.awt.Color
 import java.awt.Dimension
@@ -238,8 +237,8 @@ class Label_Binding_Spec extends Specification
         when : 'We create and bind to a label UI node...'
             var ui =
                     UI.label("")
-                    .withImageRelativeHorizontalAlignment(horizontal)
-                    .withImageRelativeVerticalAlignment(vertical)
+                    .withHorizontalTextPosition(horizontal)
+                    .withVerticalTextPosition(vertical)
 
         then : 'The label should be updated when the property changes.'
             ui.component.horizontalTextPosition == SwingConstants.LEFT
@@ -333,5 +332,4 @@ class Label_Binding_Spec extends Specification
             ui.component.icon.iconHeight == 512
             ui.component.icon.iconWidth == 512
     }
-
 }
