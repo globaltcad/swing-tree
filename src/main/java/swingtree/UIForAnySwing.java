@@ -3015,6 +3015,46 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
+     *   Use this method to attach a component {@link Action} to a custom
+     *   {@link Noticeable} event.
+     *   The {@link Action} will be invoked whenever the {@link Noticeable} event
+     *   is fired. <br>
+     *   A typical usage would be to pass a view model {@link sprouts.Event}
+     *   to this method, for which the {@link Action} will be invoked
+     *   so that it can update the UI component wrapped by this builder accordingly. <br>
+     *   Here an example:
+     *   <pre>{@code
+     *   UI.label("I have a color animation!")
+     *   .on(viewModel.someEvent(), it ->
+     *     it.animateFor(3, TimeUnit.SECONDS, state -> {
+     *       double r = state.progress();
+     *       double g = 1 - state.progress();
+     *       double b = state.pulse();
+     *       it.setBackgroundColor(r, g, b);
+     *     })
+     *   )
+     *   }</pre>
+     *   The {@link Action} is passed a {@link ComponentDelegate} instance
+     *   which exposes the wrapped component, the {@link Noticeable} event
+     *   and a nice API for accessing sibling components, dispatching animations
+     *   and even querying the rest of the UI tree. <br>
+     *
+     * @param noticeableEvent The {@link Noticeable} event to which the {@link Action} should be attached.
+     * @param action The {@link Action} which should be invoked when the {@link Noticeable} event is fired.
+     * @return This very instance, which enables builder-style method chaining.
+     * @param <E> The type of the {@link Noticeable} event.
+     */
+    public final <E extends Noticeable> I on( E noticeableEvent, Action<ComponentDelegate<C, E>> action ) {
+        NullUtil.nullArgCheck(noticeableEvent, "noticeableEvent", Noticeable.class);
+        NullUtil.nullArgCheck(action, "action", Action.class);
+        C component = getComponent();
+        noticeableEvent.subscribe( () -> {
+            action.accept(new ComponentDelegate<>(component, noticeableEvent, () -> getSiblinghood()));
+        });
+        return _this();
+    }
+
+    /**
      *  Use this to register periodic update actions which should be called
      *  based on the provided {@code delay}! <br>
      *  The following example produces a label which will display the current date.
