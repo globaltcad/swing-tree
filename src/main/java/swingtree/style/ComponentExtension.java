@@ -114,6 +114,12 @@ public final class ComponentExtension<C extends JComponent>
      */
     public List<String> getStyleGroups() { return Collections.unmodifiableList(_styleGroups); }
 
+    public boolean belongsToGroup( String group ) { return _styleGroups.contains(group); }
+
+    public boolean belongsToGroup( Enum<?> group ) {
+        return belongsToGroup(group.getClass().getSimpleName() + "." + group.name());
+    }
+
     /**
      * @return The current {@link Style} configuration of the component
      *         which is calculated based on the {@link Styler} lambdas

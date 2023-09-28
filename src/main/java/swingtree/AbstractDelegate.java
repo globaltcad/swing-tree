@@ -10,8 +10,12 @@ import swingtree.api.Styler;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  *  Extensions of this class delegate a component
@@ -864,7 +868,8 @@ abstract class AbstractDelegate<C extends JComponent>
     }
 
     /**
-     *  Use this to query the UI tree and find any {@link JComponent}.
+     *  Use this to query the UI tree and find any {@link JComponent}
+     *  of a particular type and id (the name of the component).
      *
      * @param type The {@link JComponent} type which should be found in the swing tree.
      * @param id The ide of the {@link JComponent} which should be found in the swing tree.
@@ -872,7 +877,77 @@ abstract class AbstractDelegate<C extends JComponent>
      * @param <T> The type parameter of the component which should be found.
      */
     public final <T extends JComponent> OptionalUI<T> find( Class<T> type, String id ) {
-        return _query.find(type, id);
+        return this.find(type, c -> Objects.equals(c.getName(), id));
+    }
+
+    /**
+     *  Use this to query the UI tree and find any {@link JComponent}
+     *  of a particular type and id (the name of the component).
+     *
+     * @param type The {@link JComponent} type which should be found in the swing tree.
+     * @param id The ide of the {@link JComponent} which should be found in the swing tree.
+     * @return An {@link Optional} instance which may or may not contain the requested component.
+     * @param <T> The type parameter of the component which should be found.
+     */
+    public final <T extends JComponent> OptionalUI<T> find( Class<T> type, Enum<?> id ) {
+        return this.find(type, id.getClass().getSimpleName() + "." + id.name());
+    }
+
+    /**
+     *  Use this to query the UI tree and find any {@link JComponent}
+     *  based on a specific type and a predicate which is used to test
+     *  if a particular component in the tree is the one you are looking for.
+     *
+     * @param type The {@link JComponent} type which should be found in the swing tree.
+     * @param predicate The predicate which should be used to test the {@link JComponent}.
+     * @return An {@link Optional} instance which may or may not contain the requested component.
+     * @param <T> The type parameter of the component which should be found.
+     */
+    public final <T extends JComponent> OptionalUI<T> find( Class<T> type, Predicate<T> predicate ) {
+        return _query.find(type, predicate)
+                .findFirst()
+                .map(OptionalUI::ofNullable)
+                .orElse(OptionalUI.empty());
+    }
+
+    /**
+     *  Use this to query the UI tree and find all {@link JComponent}s
+     *  based on a specific type and a predicate which is used to test
+     *  if a particular component in the tree is the one you are looking for.
+     *
+     * @param type The {@link JComponent} type which should be found in the swing tree.
+     * @param predicate The predicate which should be used to test the {@link JComponent}.
+     * @return A list of {@link JComponent} instances which match the given type and predicate.
+     * @param <T> The type parameter of the component which should be found.
+     */
+    public final <T extends JComponent> List<T> findAll( Class<T> type, Predicate<T> predicate ) {
+        return _query.find(type, predicate).collect(Collectors.toList());
+    }
+
+    /**
+     *  Use this to query the UI tree and find all {@link JComponent}s
+     *  of a particular type and also that belong to a particular style group.
+     *
+     * @param type The {@link JComponent} type which should be found in the swing tree.
+     * @param group The style group which should be used to test the {@link JComponent}.
+     * @return A list of {@link JComponent} instances which match the given type and predicate.
+     * @param <T> The type parameter of the component which should be found.
+     */
+    public final <T extends JComponent> List<T> findAllByGroup( Class<T> type, String group ) {
+        return this.findAll(type, c -> ComponentExtension.from(c).belongsToGroup(group));
+    }
+
+    /**
+     *  Use this to query the UI tree and find all {@link JComponent}s
+     *  of a particular type and also that belong to a particular style group.
+     *
+     * @param type The {@link JComponent} type which should be found in the swing tree.
+     * @param group The style group which should be used to test the {@link JComponent}.
+     * @return A list of {@link JComponent} instances which match the given type and predicate.
+     * @param <T> The type parameter of the component which should be found.
+     */
+    public final <T extends JComponent> List<T> findAllByGroup( Class<T> type, Enum<?> group ) {
+        return this.findAll(type, c -> ComponentExtension.from(c).belongsToGroup(group));
     }
 
     /**
