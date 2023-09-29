@@ -1,5 +1,7 @@
 package swingtree.events
 
+import sprouts.Event
+import sprouts.Var
 import swingtree.SwingTree
 import swingtree.threading.EventProcessor
 import swingtree.UI
@@ -406,6 +408,80 @@ class Event_Handling_Spec extends Specification
 
         then : 'The handlers are triggered in the correct order.'
             trace == ["1", "2", "3", "4", "5", "6", "7"]
+    }
+
+    def 'Turn your view model `Event`s into custom component events.'()
+    {
+        reportInfo """
+            Although there are many different types of events for which you can register
+            event handlers, there are cases where you may want to create your own custom events
+            for which you can register component event handlers.
+            This is what the `on(Noticeable, Action<Noticeable>)` method is for.
+            
+            The most common use case for this concerns the most basic implementation
+            of the `Noticeable` interface, the `Event` type, 
+            which is designed to be used as a custom event in your view model
+            for which your view is supposed to produce some kind of effect when it is triggered,
+            like an animation or a sound effect or something like that.
+        """
+
+        given : 'A list where handlers are going to leave a trace.'
+            var trace = []
+
+        and : 'An `Event` instance that is going to be triggered.'
+            var event = Event.create()
+
+        and : 'A little example UI consisting of a panel with a text field:'
+            var ui =
+                    UI.panel("fill, insets 3", "[grow][shrink]")
+                    .add("grow",
+                        UI.textField("I am a text field")
+                        .on(event, it -> trace.add("1"))
+                    )
+
+        when : 'The event is triggered.'
+            event.fire()
+
+        then : 'The handler is triggered.'
+            trace == ["1"]
+    }
+
+    def 'Turn your view model properties into custom component events.'()
+    {
+        reportInfo """
+            Although the regular SwingTree API exposes a wide variety of different types of events 
+            for which you can register component specific event handlers, 
+            there are cases where you may want to create your own custom events
+            for which you can register component event handlers.
+            This is what the `on(Noticeable, Action<Noticeable>)` method is for.
+            
+            A common use case for this concerns are the `Val` and `Var` property types
+            which also implement the `Noticeable` interface, making them suitable
+            for use as custom component events in your view.
+            Properties are designed to be used for modelling the state of your view model
+            and when they change, your view is supposed to produce some kind of effect,
+            like an animation or a sound effect or something similar.
+        """
+
+        given : 'A list where handlers are going to leave a trace.'
+            var trace = []
+
+        and : 'A property that is going to be triggered.'
+            var property = Var.of("I am a text field")
+
+        and : 'A little example UI consisting of a panel with a text field:'
+            var ui =
+                    UI.panel("fill, insets 3", "[grow][shrink]")
+                    .add("grow",
+                        UI.textField(property)
+                        .on(property, it -> trace.add(it.event.get()))
+                    )
+
+        when : 'The property is triggered.'
+            property.set("I am a different text field")
+
+        then : 'The handler is triggered and the trace contains the new value.'
+            trace == ["I am a different text field"]
     }
 
 }
