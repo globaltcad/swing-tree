@@ -3018,7 +3018,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *   Use this method to attach a component {@link Action} to a custom
      *   {@link Noticeable} event.
      *   The {@link Action} will be invoked whenever the {@link Noticeable} event
-     *   is fired. <br>
+     *   is fired by whatever thread it is fired on. <br>
+     *   <br>
      *   A typical usage would be to pass a view model {@link sprouts.Event}
      *   to this method, for which the {@link Action} will be invoked
      *   so that it can update the UI component wrapped by this builder accordingly. <br>
@@ -3052,6 +3053,50 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
             action.accept(new ComponentDelegate<>(component, noticeableEvent, () -> getSiblinghood()));
         });
         return _this();
+    }
+
+    /**
+     *  Use this to register a {@link Noticeable} event handler which will be called
+     *  on the UI thread when the {@link Noticeable} event is fired and irrespective of
+     *  what thread the {@link Noticeable} event is fired on.
+     *  <br><br>
+     *  This method is a convenience method for {@link #on(Noticeable, Action)}.
+     *  <br><br>
+     *  The following example produces a label which will display the current date.
+     *  <pre>{@code
+     *      UI.label("")
+     *      .onView( viewModel.someEvent(), it -> ..some UI update.. )
+     *  }</pre>
+     *
+     * @param noticeableEvent The {@link Noticeable} event to which the {@link Action} should be attached.
+     * @param action The {@link Action} which is invoked by the UI thread after the {@link Noticeable} event was fired.
+     * @return This very instance, which enables builder-style method chaining.
+     * @param <E> The type of the {@link Noticeable} event.
+     */
+    public final <E extends Noticeable> I onView( E noticeableEvent, Action<ComponentDelegate<C, E>> action ) {
+        return this.on(noticeableEvent, it -> _doUI(() -> action.accept(it)));
+    }
+
+    /**
+     *  Use this to register a {@link Noticeable} event handler which will be called
+     *  on the application thread when the {@link Noticeable} event is fired and irrespective of
+     *  what thread the {@link Noticeable} event is fired on.
+     *  <br><br>
+     *  This method is a convenience method for {@link #on(Noticeable, Action)}.
+     *  <br><br>
+     *  The following example produces a label which will display the current date.
+     *  <pre>{@code
+     *      UI.label("")
+     *      .onApp(CustomSystemEvent.create(), it -> ..some App update.. )
+     *  }</pre>
+     *
+     * @param noticeableEvent The {@link Noticeable} event to which the {@link Action} should be attached.
+     * @param action The {@link Action} which is invoked by the application thread after the {@link Noticeable} event was fired.
+     * @return This very instance, which enables builder-style method chaining.
+     * @param <E> The type of the {@link Noticeable} event.
+     */
+    public final <E extends Noticeable> I onApp( E noticeableEvent, Action<ComponentDelegate<C, E>> action ) {
+        return this.on(noticeableEvent, it -> _doApp(() -> action.accept(it)));
     }
 
     /**

@@ -5375,7 +5375,7 @@ public final class UI extends UILayoutConstants
      *  This is a convenience method for {@link Animator#animateFor(LifeTime)}. <br>
      *  A typical usage would be:
      *  <pre>{@code
-     *    UI.animate( 100, TimeUnit.MILLISECONDS )
+     *    UI.animateFor( 100, TimeUnit.MILLISECONDS )
      *       .until( it -> it.progress() >= 0.75 && someOtherCondition() )
      *       .go( it -> {
      *          // do something

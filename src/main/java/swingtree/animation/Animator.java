@@ -26,7 +26,7 @@ import java.util.function.Predicate;
  *   <pre>{@code
  *       panel()
  *       .onMouseClick( it -> {
- *           it.animate( 100, TimeUnit.MILLISECONDS )
+ *           it.animateFor( 100, TimeUnit.MILLISECONDS )
  *           .goOnce( state -> {
  *               int width = (int) (100 * state.progress());
  *               it.getComponent().setSize( width, 100 );
