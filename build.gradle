@@ -15,7 +15,7 @@ plugins {
 
 String GROUP_ID = "io.github.globaltcad"
 String PROJECT  = "swing-tree"
-String VERSION  = "0.8.1"
+String VERSION  = "0.9.0"
 
 group GROUP_ID
 version VERSION

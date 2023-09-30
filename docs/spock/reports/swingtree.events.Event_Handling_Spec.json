@@ -281,16 +281,16 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Although there are many different types of events for which you can register\n            event handlers, there are cases where you may want to create your own custom events\n            for which you can register component event handlers.\n            This is what the `on(Observable, Action<Observable>)` method is for.\n\n            The most common use case for this concerns the most basic implementation\n            of the `Observable` interface, the `Event` type, \n            which is designed to be used as a custom event in your view model\n            for which your view is supposed to produce some kind of effect when it is triggered,\n            like an animation or a sound effect or something like that.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Although there are many different types of events for which you can register\n            event handlers, there are cases where you may want to create your own custom events\n            for which you can register component event handlers.\n            This is what the `on(Observable, Action<Observable>)` method is for.\n\n            A common use case for this are events which are user input or system\n            input events. If you want view model events to have an effect on your view\n            when they are triggered, you can use the `onView(Observable, Action)` method,\n            which executes the given action on the EDT.\n\n            Here we demonstrate this using the `Observable` interface.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A list where handlers are going to leave a trace.","code":["var trace = []"]},
 
-        {"kind":"and","text":"An `Event` instance that is going to be triggered.","code":["var event = Event.create()"]},
+        {"kind":"and","text":"An `Observable` instance that is going to be triggered.","code":["var observable = Event.create() // An event is also an observable"]},
 
-        {"kind":"and","text":"A little example UI consisting of a panel with a text field:","code":["var ui =","        UI.panel(\"fill, insets 3\", \"[grow][shrink]\")","        .add(\"grow\",","            UI.textField(\"I am a text field\")","            .on(event, it -> trace.add(\"1\"))","        )"]},
+        {"kind":"and","text":"A little example UI consisting of a panel with a text field:","code":["var ui =","        UI.panel(\"fill, insets 3\", \"[grow][shrink]\")","        .add(\"grow\",","            UI.textField(\"I am a text field\")","            .on(observable, it -> trace.add(\"1\"))","        )"]},
 
-        {"kind":"when","text":"The event is triggered.","code":["event.fire()"]},
+        {"kind":"when","text":"The observable is triggered.","code":["observable.fire()"]},
 
         {"kind":"then","text":"The handler is triggered.","code":["trace == [\"1\"]"]}
       ],
@@ -302,14 +302,14 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Although the regular SwingTree API exposes a wide variety of different types of events \n            for which you can register component specific event handlers, \n            there are cases where you may want to create your own custom events\n            for which you can register component event handlers.\n            This is what the `on(Observable, Action<Observable>)` method is for.\n\n            A common use case for this concerns are the `Val` and `Var` property types\n            which also implement the `Observable` interface, making them suitable\n            for use as custom component events in your view.\n            Properties are designed to be used for modelling the state of your view model\n            and when they change, your view is supposed to produce some kind of effect,\n            like an animation or a sound effect or something similar.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Although the regular SwingTree API exposes a wide variety of different types of events \n            for which you can register component specific event handlers, \n            there are cases where you may want to create your own custom events\n            for which you can register component event handlers.\n            This is what the `onView(Observable, Action)` method is for.\n\n            A common use case for this concerns are the `Val` and `Var` property types\n            which also implement the `Observable` interface, making them suitable\n            for use as custom component events in your view.\n            Properties are designed to be used for modelling the state of your view model\n            and when they change, your view is supposed to produce some kind of effect,\n            like an animation or a sound effect or something similar.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A list where handlers are going to leave a trace.","code":["var trace = []"]},
 
         {"kind":"and","text":"A property that is going to be triggered.","code":["var property = Var.of(\"I am a text field\")"]},
 
-        {"kind":"and","text":"A little example UI consisting of a panel with a text field:","code":["var ui =","        UI.panel(\"fill, insets 3\", \"[grow][shrink]\")","        .add(\"grow\",","            UI.textField(property)","            .on(property, it -> trace.add(it.event.get()))","        )"]},
+        {"kind":"and","text":"A little example UI consisting of a panel with a text field:","code":["var ui =","        UI.panel(\"fill, insets 3\", \"[grow][shrink]\")","        .add(\"grow\",","            UI.textField(property)","            .onView(property, it -> trace.add(it.event.get()))","        )"]},
 
         {"kind":"when","text":"The property is triggered.","code":["property.set(\"I am a different text field\")"]},
 

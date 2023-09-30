@@ -3038,7 +3038,7 @@ public abstract class UIForAnySwing&lt;I, C extends JComponent&gt; extends Abstr
      * @param &lt;E&gt; The type of the {@link Observable} event.
      */
     public final &lt;E extends Observable&gt; I onView( E noticeableEvent, Action&lt;ComponentDelegate&lt;C, E&gt;&gt; action ) {
-<span class="nc" id="L3041">        return this.on(noticeableEvent, it -&gt; _doUI(() -&gt; action.accept(it)));</span>
+<span class="fc" id="L3041">        return this.on(noticeableEvent, it -&gt; _doUI(() -&gt; action.accept(it)));</span>
     }
 
     /**
