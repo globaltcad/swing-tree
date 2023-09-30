@@ -2,7 +2,7 @@ package swingtree.splitbutton
 
 import swingtree.SwingTree
 import swingtree.components.JSplitButton
-import sprouts.Occurrence
+import sprouts.Event
 import sprouts.Observer
 import sprouts.Var
 import swingtree.threading.EventProcessor
@@ -315,7 +315,7 @@ class JSplitButton_Examples_Spec extends Specification
         given : 'A Colour enum based property and an event.'
             var tracker = []
             var selection = Var.of(Colour.B).onAct({tracker << "#"})
-            var event = Occurrence.of((Observer){tracker << "!"})
+            var event = Event.of((Observer){tracker << "!"})
         and : 'We create a UI builder node for the enum states.'
             var ui = UI.splitButton(selection, event)
         expect : 'It wraps a JSplitButton.'

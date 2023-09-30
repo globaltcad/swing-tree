@@ -18,8 +18,8 @@ which are notified when something happens.
 As such, the `Observable` is a very generic type that may be implemented
 by anything resembling the observer pattern.
 
-The most common and basic type of `Observable` is the `Occurrence` type,
-which is a trigger-able event which you can instantiate using `Occurrence.create()`.
+The most common and basic type of `Observable` is the `Event` type,
+which is a trigger-able event which you can instantiate using `Event.create()`.
 But there are other types of `Observable`s as well, such as the `Val` and `Var`
 properties, which are wrapper types used for modelling the state of your view models.
 ([Click here](Advanced-MVVM.md) for more information about MVVM in SwingTree)
@@ -42,7 +42,7 @@ Whenever the event is triggered, the action is executed by the GUI thread.
 
 But enough type theory, let's see some examples.
 Let's say your view model consists of a `Var` property called `name`
-as well as an `Occurrence` called `receivedLike`
+as well as an `Event` called `receivedLike`
 and both of these are exposed as part of the view model API
 through the `getName` and `getReceivedLike` methods respectively
 the view for said model might look like this:

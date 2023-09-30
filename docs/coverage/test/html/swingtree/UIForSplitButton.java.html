@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForSplitButton.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForSplitButton.java</span></div><h1>UIForSplitButton.java</h1><pre class="source lang-java linenums">package swingtree;
 
 import sprouts.Action;
-import sprouts.Occurrence;
+import sprouts.Event;
 import sprouts.Var;
 import swingtree.components.JSplitButton;
 
@@ -61,21 +61,21 @@ public class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForAnyButt
     /**
      *  Use this to build {@link JSplitButton}s where the selectable options
      *  are represented by an {@link Enum} type, and the click event is
-     *  handles by an {@link Occurrence} instance.
+     *  handles by an {@link Event} instance.
      *
      * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
      *                  This will be updated when the user selects a new value.
-     * @param clickEvent The {@link sprouts.Occurrence} which will be fired when the user clicks on the button.
+     * @param clickEvent The {@link sprouts.Event} which will be fired when the user clicks on the button.
      * @return A UI builder instance wrapping a {@link JSplitButton}.
      * @param &lt;E&gt; The {@link Enum} type defining the selectable options.
      */
-    public &lt;E extends Enum&lt;E&gt;&gt; UIForSplitButton&lt;B&gt; withSelection( Var&lt;E&gt; selection, Occurrence clickEvent ) {
+    public &lt;E extends Enum&lt;E&gt;&gt; UIForSplitButton&lt;B&gt; withSelection( Var&lt;E&gt; selection, Event clickEvent ) {
 <span class="fc" id="L73">        NullUtil.nullArgCheck(selection, &quot;selection&quot;, Var.class);</span>
-<span class="fc" id="L74">        NullUtil.nullArgCheck(clickEvent, &quot;clickEvent&quot;, Occurrence.class);</span>
+<span class="fc" id="L74">        NullUtil.nullArgCheck(clickEvent, &quot;clickEvent&quot;, Event.class);</span>
 <span class="fc bfc" id="L75" title="All 2 branches covered.">        for ( E e : selection.type().getEnumConstants() )</span>
 <span class="fc" id="L76">            this.add(</span>
 <span class="fc" id="L77">                UI.splitItem(e.toString())</span>
-<span class="fc" id="L78">                .onButtonClick( it -&gt; clickEvent.trigger() )</span>
+<span class="fc" id="L78">                .onButtonClick( it -&gt; clickEvent.fire() )</span>
 <span class="fc" id="L79">                .onSelection( it -&gt; {</span>
 <span class="fc" id="L80">                    it.selectOnlyCurrentItem();</span>
 <span class="fc" id="L81">                    it.setButtonText(e.toString());</span>

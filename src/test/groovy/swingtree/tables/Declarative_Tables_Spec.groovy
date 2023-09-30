@@ -4,7 +4,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
-import sprouts.Occurrence
+import sprouts.Event
 import swingtree.SwingTree
 import swingtree.threading.EventProcessor
 import swingtree.UI
@@ -71,7 +71,7 @@ class Declarative_Tables_Spec extends Specification
             ui.component.getValueAt(2, 1) == "z"
     }
 
-    def 'We can pass an `Occurrence` to the table model to trigger updates.'()
+    def 'We can pass an `Event` to the table model to trigger updates.'()
     {
         reportInfo """
             Note that in this example we use a lambda based table model
@@ -82,7 +82,7 @@ class Declarative_Tables_Spec extends Specification
 
         given : 'We have an update event and some data.'
             var data = [1, 2, 3, 4]
-            var update = Occurrence.create()
+            var update = Event.create()
         and : 'We create a table with a lambda based table model.'
             var ui =
                     UI.table().withModel(
@@ -104,7 +104,7 @@ class Declarative_Tables_Spec extends Specification
             ui.get(JTable).getValueAt(3, 0) == 4
         when : 'We update the data.'
             data = [5, 6, 7, 8]
-            update.trigger()
+            update.fire()
             UI.sync() // sync with the EDT
         then : 'The table has the correct data.'
             ui.get(JTable).getValueAt(0, 0) == 5
@@ -113,14 +113,14 @@ class Declarative_Tables_Spec extends Specification
             ui.get(JTable).getValueAt(3, 0) == 8
     }
 
-    def 'We need to attach an update `Occurrence` to our table when the table data is list based and its data changes.'()
+    def 'We need to attach an update `Event` to our table when the table data is list based and its data changes.'()
     {
         reportInfo """
-            Use the Occurrence class in your view model to define an event you can fire when you modify the data
+            Use the Event class in your view model to define an event you can fire when you modify the data
             of your table. The event will be used to update the table UI  if you register it with the table UI.
         """
         given : 'A simple event and some data.'
-            var event = Occurrence.create()
+            var event = Event.create()
             var data = [[1, 2, 3], [7, 8, 9]]
 
         and : 'A simple table UI with a nested list based data table model.'
@@ -128,7 +128,7 @@ class Declarative_Tables_Spec extends Specification
                         UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data })
                         .updateTableOn(event)
         when : 'We fire the event.'
-            event.trigger()
+            event.fire()
         then : 'The table UI is updated.'
             ui.component.getRowCount() == 2
             ui.component.getValueAt(0, 0) == 1

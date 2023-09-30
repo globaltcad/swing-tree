@@ -12,7 +12,7 @@ Take a look at the following example:
 ```java
 var header = new String[]{"X", "Y", "Z"};
 var data = new int[][]{...}; // or any other type of data
-var dataChanged = Occurrence.create();
+var dataChanged = Event.create();
 
 // ...
 

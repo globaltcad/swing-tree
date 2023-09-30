@@ -1,6 +1,6 @@
 package swingtree.events
 
-import sprouts.Occurrence
+import sprouts.Event
 import sprouts.Var
 import swingtree.SwingTree
 import swingtree.threading.EventProcessor
@@ -428,8 +428,8 @@ class Event_Handling_Spec extends Specification
         given : 'A list where handlers are going to leave a trace.'
             var trace = []
 
-        and : 'An `Occurrence` instance that is going to be triggered.'
-            var event = Occurrence.create()
+        and : 'An `Event` instance that is going to be triggered.'
+            var event = Event.create()
 
         and : 'A little example UI consisting of a panel with a text field:'
             var ui =
@@ -440,7 +440,7 @@ class Event_Handling_Spec extends Specification
                     )
 
         when : 'The event is triggered.'
-            event.trigger()
+            event.fire()
 
         then : 'The handler is triggered.'
             trace == ["1"]

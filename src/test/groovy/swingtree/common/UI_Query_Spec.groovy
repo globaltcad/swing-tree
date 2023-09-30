@@ -3,7 +3,7 @@ package swingtree.common
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
-import sprouts.Occurrence
+import sprouts.Event
 import swingtree.SwingTree
 import swingtree.UI
 import swingtree.threading.EventProcessor
@@ -100,7 +100,7 @@ class UI_Query_Spec extends Specification
             var traceC = []
             var traceD = []
 		and : 'We create a custom event which we will use th query the tree.'
-            var event = Occurrence.create()
+            var event = Event.create()
         and :
             var ui =
 		        UI.panel("fill", "[][grow]")
@@ -158,7 +158,7 @@ class UI_Query_Spec extends Specification
                 })
 
         when : 'We fire the event and query the tree for components with the group tag "A".'
-            event.trigger()
+            event.fire()
 
         then : 'We get the correct components.'
             traceA == ["First Name", "Here is a text field:", "Label C", "...here the UI comes to an end..."]

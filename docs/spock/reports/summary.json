@@ -1,7 +1,7 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Sat Sep 30 14:10:27 CEST 2023",
+  "created": "Sat Sep 30 17:09:47 CEST 2023",
   "statistics":{
     "runs":"40",
     "passed":"40",
@@ -404,7 +404,7 @@
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"A map can be used as a data source for tables.","extraInfo":[]},{"id":"We can create a column major table based on a list of lists as a data model.","extraInfo":[]},{"id":"We can pass an `Occurrence` to the table model to trigger updates.","extraInfo":[]},{"id":"We need to attach an update `Occurrence` to our table when the table data is list based and its data changes.","extraInfo":[]}],
+      "executedFeatures":[{"id":"A map can be used as a data source for tables.","extraInfo":[]},{"id":"We can create a column major table based on a list of lists as a data model.","extraInfo":[]},{"id":"We can pass an `Event` to the table model to trigger updates.","extraInfo":[]},{"id":"We need to attach an update `Event` to our table when the table data is list based and its data changes.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.tabs.Tab_Binding_Spec",

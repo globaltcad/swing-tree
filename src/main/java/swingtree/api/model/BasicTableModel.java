@@ -1,7 +1,7 @@
 package swingtree.api.model;
 
 import sprouts.Observable;
-import sprouts.Occurrence;
+import sprouts.Event;
 import swingtree.UI;
 import swingtree.api.Buildable;
 
@@ -187,7 +187,7 @@ public interface BasicTableModel extends TableModel
          */
         public Builder updateOn( Observable updateEvent ) {
             if ( updateEvent == null ) throw new IllegalArgumentException("updateEvent cannot be null");
-            if ( this.noticeableEvent != null ) throw new IllegalStateException(Occurrence.class.getSimpleName()+" already set");
+            if ( this.noticeableEvent != null ) throw new IllegalStateException(Event.class.getSimpleName()+" already set");
             this.noticeableEvent = updateEvent;
             return this;
         }

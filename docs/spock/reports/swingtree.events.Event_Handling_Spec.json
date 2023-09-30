@@ -286,11 +286,11 @@
       "blocks":[
         {"kind":"given","text":"A list where handlers are going to leave a trace.","code":["var trace = []"]},
 
-        {"kind":"and","text":"An `Occurrence` instance that is going to be triggered.","code":["var event = Occurrence.create()"]},
+        {"kind":"and","text":"An `Event` instance that is going to be triggered.","code":["var event = Event.create()"]},
 
         {"kind":"and","text":"A little example UI consisting of a panel with a text field:","code":["var ui =","        UI.panel(\"fill, insets 3\", \"[grow][shrink]\")","        .add(\"grow\",","            UI.textField(\"I am a text field\")","            .on(event, it -> trace.add(\"1\"))","        )"]},
 
-        {"kind":"when","text":"The event is triggered.","code":["event.trigger()"]},
+        {"kind":"when","text":"The event is triggered.","code":["event.fire()"]},
 
         {"kind":"then","text":"The handler is triggered.","code":["trace == [\"1\"]"]}
       ],
