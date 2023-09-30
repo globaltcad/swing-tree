@@ -346,6 +346,8 @@ schedule animations, and much much more!
 
 Just keep reading and you will see what I mean! :)
 
+(For more information about advanced event handling, [click here](./Advanced-Event-Handling.md))
+
 ## Blooming Flowers ##
 
 <img src="../img/tutorial/blooming-flowers.png" style = "float: right; width: 30%; margin: 2em; -webkit-box-shadow: 0px 0px 18px -2px rgba(0,0,0,0.75); -moz-box-shadow: 0px 0px 18px -2px rgba(0,0,0,0.75); box-shadow: 0px 0px 18px -2px rgba(0,0,0,0.75);">

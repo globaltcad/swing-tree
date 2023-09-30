@@ -11,17 +11,17 @@ is all about.
 
 Advanced event handling requires custom events
 which are all based on one fundamental type, the `Observable` interface.
-This interface is called noticeable because it is merely
-a thing that allows for the registration of listeners
+A classic representation of the observer pattern.
+It defines a thing that allows for the registration of `Observer`s
 which are notified when something happens.
 
 As such, the `Observable` is a very generic type that may be implemented
-by anything even remotely resembling the observer pattern.
+by anything resembling the observer pattern.
 
 The most common and basic type of `Observable` is the `Occurrence` type,
-which is a trigger-able event for which you can instantiate using `Occurrence.create()`.
-But there are other types of `Observable` as well, such as the `Val` and `Var`
-properties, which are observable properties used as part of your view models.
+which is a trigger-able event which you can instantiate using `Occurrence.create()`.
+But there are other types of `Observable`s as well, such as the `Val` and `Var`
+properties, which are wrapper types used for modelling the state of your view models.
 ([Click here](Advanced-MVVM.md) for more information about MVVM in SwingTree)
 
 ## View Events ##
@@ -106,5 +106,16 @@ This example is a little bit different from the previous one,
 as the `on` method is not intended to be used for view model events.
 Instead, it is intended to be used for any other type of event
 like for example custom user input events, like a custom touch event.
+
+Consider the following example:
+```java
+UI.panel().withPrefSize(100, 100)
+.on(CustomEventSystem.touchGesture(), it -> ..some App update.. )
+```
+In this example we use an imaginary `CustomEventSystem` to register a touch gesture event handler
+which will be called on the application thread when the touch gesture event is fired.
+Although neither Swing nor SwingTree have a touch gesture event system, this example illustrates
+how one could easily integrate such a custom event system into the SwingTree UI tree.
+
 
 
