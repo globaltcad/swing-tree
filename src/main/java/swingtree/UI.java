@@ -3423,7 +3423,7 @@ public final class UI extends UILayoutConstants
 
     /**
      *  Use this to create a builder for the {@link JLabel} UI component.
-     *  This is in essence a convenience method for {@code UI.of(new JLabel(text, alignment)}.
+     *  This is in essence a convenience method for {@code UI.of(new JLabel(text, alignment))}.
      *
      * @param text The text which should be displayed on the label.
      * @param alignment The horizontal alignment of the text.

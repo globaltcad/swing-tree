@@ -3015,57 +3015,21 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-     *   Use this method to attach a component {@link Action} to a custom
-     *   {@link Noticeable} event.
-     *   The {@link Action} will be invoked whenever the {@link Noticeable} event
-     *   is fired by whatever thread it is fired on. <br>
-     *   <br>
-     *   A typical usage would be to pass a view model {@link sprouts.Event}
-     *   to this method, for which the {@link Action} will be invoked
-     *   so that it can update the UI component wrapped by this builder accordingly. <br>
-     *   Here an example:
-     *   <pre>{@code
-     *   UI.label("I have a color animation!")
-     *   .on(viewModel.someEvent(), it ->
-     *     it.animateFor(3, TimeUnit.SECONDS, state -> {
-     *       double r = state.progress();
-     *       double g = 1 - state.progress();
-     *       double b = state.pulse();
-     *       it.setBackgroundColor(r, g, b);
-     *     })
-     *   )
-     *   }</pre>
-     *   The {@link Action} is passed a {@link ComponentDelegate} instance
-     *   which exposes the wrapped component, the {@link Noticeable} event
-     *   and a nice API for accessing sibling components, dispatching animations
-     *   and even querying the rest of the UI tree. <br>
-     *
-     * @param noticeableEvent The {@link Noticeable} event to which the {@link Action} should be attached.
-     * @param action The {@link Action} which should be invoked when the {@link Noticeable} event is fired.
-     * @return This very instance, which enables builder-style method chaining.
-     * @param <E> The type of the {@link Noticeable} event.
-     */
-    public final <E extends Noticeable> I on( E noticeableEvent, Action<ComponentDelegate<C, E>> action ) {
-        NullUtil.nullArgCheck(noticeableEvent, "noticeableEvent", Noticeable.class);
-        NullUtil.nullArgCheck(action, "action", Action.class);
-        C component = getComponent();
-        noticeableEvent.subscribe( () -> {
-            action.accept(new ComponentDelegate<>(component, noticeableEvent, () -> getSiblinghood()));
-        });
-        return _this();
-    }
-
-    /**
      *  Use this to register a {@link Noticeable} event handler which will be called
      *  on the UI thread when the {@link Noticeable} event is fired and irrespective of
      *  what thread the {@link Noticeable} event is fired on.
      *  <br><br>
-     *  This method is a convenience method for {@link #on(Noticeable, Action)}.
-     *  <br><br>
-     *  The following example produces a label which will display the current date.
+     *  Here an example:
      *  <pre>{@code
-     *      UI.label("")
-     *      .onView( viewModel.someEvent(), it -> ..some UI update.. )
+     *  UI.label("I have a color animation!")
+     *  .on(viewModel.someEvent(), it ->
+     *    it.animateFor(3, TimeUnit.SECONDS, state -> {
+     *      double r = state.progress();
+     *      double g = 1 - state.progress();
+     *      double b = state.pulse();
+     *      it.setBackgroundColor(r, g, b);
+     *    })
+     *  )
      *  }</pre>
      *
      * @param noticeableEvent The {@link Noticeable} event to which the {@link Action} should be attached.
@@ -3078,25 +3042,65 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-     *  Use this to register a {@link Noticeable} event handler which will be called
-     *  on the application thread when the {@link Noticeable} event is fired and irrespective of
-     *  what thread the {@link Noticeable} event is fired on.
+     *  Use this to attach a component {@link Action} event handler to a functionally supplied
+     *  {@link Noticeable} event.
+     *  The action is executed on the application thread when the {@link Noticeable} event is fired and
+     *  irrespective of the thread that {@link Noticeable} fired the event.
      *  <br><br>
-     *  This method is a convenience method for {@link #on(Noticeable, Action)}.
-     *  <br><br>
-     *  The following example produces a label which will display the current date.
+     *  Consider the following example:
      *  <pre>{@code
      *      UI.label("")
-     *      .onApp(CustomSystemEvent.create(), it -> ..some App update.. )
+     *      .on(CustomEventSystem.touchGesture(), it -> ..some App update.. )
      *  }</pre>
+     *  In this example we use an imaginary {@code CustomEventSystem} to register a touch gesture event handler
+     *  which will be called on the application thread when the touch gesture event is fired.
+     *  Although neither Swing nor SwingTree have a touch gesture event system, this example illustrates
+     *  how one could easily integrate a custom event system into the SwingTree UI tree.
      *
      * @param noticeableEvent The {@link Noticeable} event to which the {@link Action} should be attached.
      * @param action The {@link Action} which is invoked by the application thread after the {@link Noticeable} event was fired.
      * @return This very instance, which enables builder-style method chaining.
      * @param <E> The type of the {@link Noticeable} event.
      */
-    public final <E extends Noticeable> I onApp( E noticeableEvent, Action<ComponentDelegate<C, E>> action ) {
-        return this.on(noticeableEvent, it -> _doApp(() -> action.accept(it)));
+    public final <E extends Noticeable> I on( E noticeableEvent, Action<ComponentDelegate<C, E>> action ) {
+        NullUtil.nullArgCheck(noticeableEvent, "noticeableEvent", Noticeable.class);
+        NullUtil.nullArgCheck(action, "action", Action.class);
+        C component = getComponent();
+        noticeableEvent.subscribe( () -> {
+            _doApp(() -> action.accept(new ComponentDelegate<>(component, noticeableEvent, ()->getSiblinghood())));
+        });
+        return _this();
+    }
+
+    /**
+     *  This is a logical extension of the {@link #on(Noticeable, Action)} method.
+     *  Use this to attach a component {@link Action} event handler to a functionally supplied
+     *  {@link Noticeable} event.
+     *  The handler will be called on the application thread when the {@link Noticeable} event
+     *  is fired and irrespective of the thread that fired the {@link Noticeable} event.
+     *  <br><br>
+     *  Consider the following example:
+     *  <pre>{@code
+     *      UI.label("")
+     *      .on(c -> CustomEventSystem.touchGesture(c), it -> ..some App update.. )
+     *  }</pre>
+     *  Which may also be written as:
+     *  <pre>{@code
+     *    UI.label("")
+     *    .on(CustomEventSystem::touchGesture, it -> ..some App update.. )
+     * }</pre>
+     *  In this example we use an imaginary {@code CustomEventSystem} to register a component specific
+     *  touch gesture event handler which will be called on the application thread when the touch gesture event is fired.
+     *  Although neither Swing nor SwingTree have a touch gesture event system, this example illustrates
+     *  how one could easily integrate a custom event system into the SwingTree UI tree.
+     *
+     * @param noticeableEvent The {@link Noticeable} event to which the {@link Action} should be attached.
+     * @param action The {@link Action} which is invoked by the application thread after the {@link Noticeable} event was fired.
+     * @return This very instance, which enables builder-style method chaining.
+     * @param <E> The type of the {@link Noticeable} event.
+     */
+    public final <E extends Noticeable> I on( Function<C, E> noticeableEvent, Action<ComponentDelegate<C, E>> action ) {
+        return this.on(noticeableEvent.apply(getComponent()), action);
     }
 
     /**
@@ -3105,7 +3109,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *  The following example produces a label which will display the current date.
      *  <pre>{@code
      *      UI.label("")
-     *          .doUpdates( 100, it -> it.getComponent().setText(new Date().toString()) )
+     *      .doUpdates( 100, it -> it.getComponent().setText(new Date().toString()) )
      *  }</pre>
      *
      * @param delay The delay in milliseconds between calling the provided {@link Action}.

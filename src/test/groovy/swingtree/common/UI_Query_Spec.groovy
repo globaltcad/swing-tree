@@ -99,6 +99,7 @@ class UI_Query_Spec extends Specification
             var traceB = []
             var traceC = []
             var traceD = []
+		and : 'We create a custom event which we will use th query the tree.'
             var Event event = Event.create()
         and :
             var ui =
