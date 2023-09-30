@@ -165,7 +165,7 @@
       "blocks":[
         {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<UI.HorizontalAlignment> horizontal = Var.of(UI.HorizontalAlignment.LEFT)","Val<UI.VerticalAlignment> vertical = Var.of(UI.VerticalAlignment.TOP)"]},
 
-        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withImageRelativeHorizontalAlignment(horizontal)","        .withImageRelativeVerticalAlignment(vertical)"]},
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withHorizontalTextPosition(horizontal)","        .withVerticalTextPosition(vertical)"]},
 
         {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.horizontalTextPosition == SwingConstants.LEFT","ui.component.verticalTextPosition == SwingConstants.TOP"]},
 
@@ -206,20 +206,22 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label, but it should also model what may be depicted on\n            the label, for example an icon.\n            Therefore you can also bind an icon to a label through a property.\n\n            But note that you may not use the `Icon` or `ImageIcon` classes directly,\n            instead you must use implementations of the `IconDeclaration` interface,\n            which merely models the resource location of the icon, but does not load\n            the whole icon itself.\n\n            The reason for this distinction is the fact that traditional Swing icons\n            are heavy objects whose loading may or may not succeed, and so they are\n            not suitable for direct use in a property as part of your view model.\n            Instead, you should use the `IconDeclaration` interface, which is a\n            lightweight value object that merely models the resource location of the icon\n            even if it is not yet loaded or even does not exist at all.\n\n            This is especially useful in case of unit tests for you view model,\n            where the icon may not be available at all, but you still want to test\n            the behaviour of your view model.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Icon> icon = Var.of(UI.findIcon(\"img/seed.png\").orElse(null))","var originalIcon = icon.orElseThrow()"]},
+        {"kind":"given","text":"We create an `IconDeclaration`, which is essentially just a resource location value object.","code":["IconDeclaration iconDeclaration = ()->\"img/seed.png\""]},
+
+        {"kind":"and","text":"We create a simple swing-tree property for modelling the icon declaration.","code":["Val<IconDeclaration> icon = Var.of(iconDeclaration)","var originalIcon = icon.orElseThrow()"]},
 
         {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withIcon(icon)"]},
 
-        {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.icon != null","ui.component.icon === originalIcon","ui.component.icon.iconHeight == 512","ui.component.icon.iconWidth == 512"]},
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["ui.component.icon != null","ui.component.icon === originalIcon.find().get()","ui.component.icon.iconHeight == 512","ui.component.icon.iconWidth == 512"]},
 
-        {"kind":"when","text":"We change the items of the properties...","code":["icon.set(UI.findIcon(\"img/swing.png\").orElse(null))"]},
+        {"kind":"when","text":"We change the items of the properties...","code":["icon.set((IconDeclaration)()->\"img/swing.png\")"]},
 
         {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 
-        {"kind":"then","text":"The label should be a different one.","code":["ui.component.icon != null","ui.component.icon !== originalIcon","ui.component.icon.iconHeight == 512","ui.component.icon.iconWidth == 512"]}
+        {"kind":"then","text":"The label should be a different one.","code":["ui.component.icon != null","ui.component.icon !== originalIcon.find().get()","ui.component.icon.iconHeight == 512","ui.component.icon.iconWidth == 512"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

@@ -44,14 +44,14 @@
     },
   
     {
-      "id":"We can pass an Event to the table model to trigger updates.",
+      "id":"We can pass an `Occurrence` to the table model to trigger updates.",
       "result":"PASS",
       "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            Note that in this example we use a lambda based table model\n            through the `UI.tableModel()` factory method. This is a convenient\n            way to create a table model without having to implement the TableModel\n            interface yourself.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We have an update event and some data.","code":["var data = [1, 2, 3, 4]","var update = Event.create()"]},
+        {"kind":"given","text":"We have an update event and some data.","code":["var data = [1, 2, 3, 4]","var update = Occurrence.create()"]},
 
         {"kind":"and","text":"We create a table with a lambda based table model.","code":["var ui =","        UI.table().withModel(","            UI.tableModel()","            .colName( {[\"X\", \"Y\", \"Z\"][it]})","            .colCount({3})","            .rowCount({data.size()})","            .getter({ r, c ->data[r]})","            .updateOn(update)","        )"]},
 
@@ -59,7 +59,7 @@
 
         {"kind":"and","text":"The table has the correct data.","code":["ui.get(JTable).getValueAt(0, 0) == 1","ui.get(JTable).getValueAt(1, 0) == 2","ui.get(JTable).getValueAt(2, 0) == 3","ui.get(JTable).getValueAt(3, 0) == 4"]},
 
-        {"kind":"when","text":"We update the data.","code":["data = [5, 6, 7, 8]","update.fire()","UI.sync() // sync with the EDT"]},
+        {"kind":"when","text":"We update the data.","code":["data = [5, 6, 7, 8]","update.trigger()","UI.sync() // sync with the EDT"]},
 
         {"kind":"then","text":"The table has the correct data.","code":["ui.get(JTable).getValueAt(0, 0) == 5","ui.get(JTable).getValueAt(1, 0) == 6","ui.get(JTable).getValueAt(2, 0) == 7","ui.get(JTable).getValueAt(3, 0) == 8"]}
       ],
@@ -67,18 +67,18 @@
     },
   
     {
-      "id":"We need to attach a update Event to our table when the table data is list based and its data changes.",
+      "id":"We need to attach an update `Occurrence` to our table when the table data is list based and its data changes.",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Use the Event class in your view model to define an event you can fire when you modify the data\n            of your table. The event will be used to update the table UI  if you register it with the table UI.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Use the Occurrence class in your view model to define an event you can fire when you modify the data\n            of your table. The event will be used to update the table UI  if you register it with the table UI.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A simple event and some data.","code":["var event = Event.create()","var data = [[1, 2, 3], [7, 8, 9]]"]},
+        {"kind":"given","text":"A simple event and some data.","code":["var event = Occurrence.create()","var data = [[1, 2, 3], [7, 8, 9]]"]},
 
         {"kind":"and","text":"A simple table UI with a nested list based data table model.","code":["var ui =","            UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data })","            .updateTableOn(event)"]},
 
-        {"kind":"when","text":"We fire the event.","code":["event.fire()"]},
+        {"kind":"when","text":"We fire the event.","code":["event.trigger()"]},
 
         {"kind":"then","text":"The table UI is updated.","code":["ui.component.getRowCount() == 2","ui.component.getValueAt(0, 0) == 1","ui.component.getValueAt(0, 1) == 2","ui.component.getValueAt(0, 2) == 3","ui.component.getValueAt(1, 0) == 7","ui.component.getValueAt(1, 1) == 8","ui.component.getValueAt(1, 2) == 9"]}
       ],

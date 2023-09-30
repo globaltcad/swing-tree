@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForTable.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForTable.java</span></div><h1>UIForTable.java</h1><pre class="source lang-java linenums">package swingtree;
 
-import sprouts.Event;
+import sprouts.Occurrence;
 import swingtree.api.Buildable;
 import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
@@ -154,7 +154,7 @@ public class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;UIForTa
      *  &lt;p&gt;
      *      &lt;b&gt;Please note that when the data of the provided data source changes (i.e. when the data source
      *      is a {@link List} and the list is modified), the table model will not be updated automatically!
-     *      Use {@link #updateTableOn(Event)} to bind an update {@link Event} to the table model.&lt;/b&gt;
+     *      Use {@link #updateTableOn(sprouts.Occurrence)} to bind an update {@link sprouts.Occurrence} to the table model.&lt;/b&gt;
      *
      * @param mode An enum which configures the layout as well as modifiability of the table in a readable fashion.
      * @param dataSource The {@link TableListDataSource} returning a list matrix which will be used to populate the table.
@@ -213,7 +213,7 @@ public class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;UIForTa
      *  &lt;p&gt;
      *      &lt;b&gt;Please note that when the data of the provided data source changes (i.e. when the data source
      *      is a {@link Map} which gets modified), the table model will not be updated automatically!
-     *      Use {@link #updateTableOn(Event)} to bind an update {@link Event} to the table model.&lt;/b&gt;
+     *      Use {@link #updateTableOn(sprouts.Occurrence)} to bind an update {@link sprouts.Occurrence} to the table model.&lt;/b&gt;
      *
      * @param mode An enum which configures the modifiability of the table in a readable fashion.
      * @param dataSource The {@link TableMapDataSource} returning a column major map based matrix which will be used to populate the table.
@@ -226,16 +226,16 @@ public class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;UIForTa
     }
 
     /**
-     *  Use this to bind an {@link sprouts.Event} to the {@link TableModel} of this table
+     *  Use this to bind an {@link sprouts.Occurrence} to the {@link TableModel} of this table
      *  which will trigger the {@link AbstractTableModel#fireTableDataChanged()} method.
      *  This is useful if you want to update the table when the data source changes.
      *
-     * @param event The event to be bound.
+     * @param occurrence The occurrence to be bound.
      * @return This builder node, for chaining.
      */
-    public final UIForTable&lt;T&gt; updateTableOn( Event event ) {
-<span class="fc" id="L237">        NullUtil.nullArgCheck(event, &quot;event&quot;, Event.class);</span>
-<span class="fc" id="L238">        event.subscribe(()-&gt;</span>
+    public final UIForTable&lt;T&gt; updateTableOn( Occurrence occurrence ) {
+<span class="fc" id="L237">        NullUtil.nullArgCheck(occurrence, &quot;occurrence&quot;, Occurrence.class);</span>
+<span class="fc" id="L238">        occurrence.subscribe(()-&gt;</span>
 <span class="fc" id="L239">            _doUI(()-&gt;{</span>
 <span class="fc" id="L240">                TableModel model = getComponent().getModel();</span>
 <span class="pc bpc" id="L241" title="1 of 2 branches missed.">                if ( model instanceof AbstractTableModel ) {</span>

@@ -2,7 +2,6 @@ package swingtree;
 
 import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
-import sprouts.Event;
 import sprouts.*;
 import swingtree.animation.Animator;
 import swingtree.animation.LifeTime;
@@ -1776,11 +1775,11 @@ public final class UI extends UILayoutConstants
      *
      * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
      *                  This will be updated when the user selects a new value.
-     * @param clickEvent The {@link Event} which will be fired when the user clicks on the button.
+     * @param clickEvent The {@link Occurrence} which will be fired when the user clicks on the button.
      * @return A UI builder instance wrapping a {@link JSplitButton}.
      * @param <E> The type of the {@link Enum} representing the selectable options.
      */
-    public static <E extends Enum<E>> UIForSplitButton<JSplitButton> splitButton( Var<E> selection, Event clickEvent ) {
+    public static <E extends Enum<E>> UIForSplitButton<JSplitButton> splitButton( Var<E> selection, Occurrence clickEvent ) {
         return splitButton("").withSelection(selection, clickEvent);
     }
 

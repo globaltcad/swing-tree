@@ -10,17 +10,17 @@ is all about.
 ## Custom Events ##
 
 Advanced event handling requires custom events
-which are all based on one fundamental type, the `Noticeable` interface.
+which are all based on one fundamental type, the `Observable` interface.
 This interface is called noticeable because it is merely
 a thing that allows for the registration of listeners
 which are notified when something happens.
 
-As such, the `Noticeable` is a very generic type that may be implemented
+As such, the `Observable` is a very generic type that may be implemented
 by anything even remotely resembling the observer pattern.
 
-The most common and basic type of `Noticeable` is the `Event` type,
-which is a trigger-able event for which you can instantiate using `Event.create()`.
-But there are other types of `Noticeable` as well, such as the `Val` and `Var`
+The most common and basic type of `Observable` is the `Occurrence` type,
+which is a trigger-able event for which you can instantiate using `Occurrence.create()`.
+But there are other types of `Observable` as well, such as the `Val` and `Var`
 properties, which are observable properties used as part of your view models.
 ([Click here](Advanced-MVVM.md) for more information about MVVM in SwingTree)
 
@@ -31,10 +31,10 @@ GUI thread instead of the application thread.
 This is what the `onView` method is for.
 It has the following signature:
 
-`<E extends Noticeable> I onView(E event, Action<ComponentDelegate<C, E>> action)`
+`<E extends Observable> I onView(E event, Action<ComponentDelegate<C, E>> action)`
 
 The `onView` method allows you to attach a component `Action` (event handler) to
-a custom event type, a subtype of the formerly mentioned `Noticeable` interface.
+a custom event type, a subtype of the formerly mentioned `Observable` interface.
 Whenever the event is triggered, the action is executed by the GUI thread.
 
 > You may be confused by the `I` type, but this is just a type variable
@@ -42,7 +42,7 @@ Whenever the event is triggered, the action is executed by the GUI thread.
 
 But enough type theory, let's see some examples.
 Let's say your view model consists of a `Var` property called `name`
-as well as an `Event` called `receivedLike`
+as well as an `Occurrence` called `receivedLike`
 and both of these are exposed as part of the view model API
 through the `getName` and `getReceivedLike` methods respectively
 the view for said model might look like this:
@@ -88,14 +88,14 @@ application thread instead of the GUI thread.
 This is what the `on` method is for.
 Take a look at it's signature:
 
-`<E extends Noticeable> I on(E event, Action<ComponentDelegate<C, E>> action)`
+`<E extends Observable> I on(E event, Action<ComponentDelegate<C, E>> action)`
 
 As you might have already guessed, the `on` method is virtually identical
 to the `onView` method, except that the event handler is executed by the
 application thread instead of the GUI thread.
 
 It, too, allows you to attach a component `Action` (event handler) to
-a custom event type, a subtype of the formerly mentioned `Noticeable` interface.
+a custom event type, a subtype of the formerly mentioned `Observable` interface.
 Whenever the event is triggered, the action is executed by the application thread.
 
 > Again, note that the `I` type is merely defining the type of

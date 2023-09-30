@@ -12,7 +12,7 @@ Take a look at the following example:
 ```java
 var header = new String[]{"X", "Y", "Z"};
 var data = new int[][]{...}; // or any other type of data
-var dataChanged = Event.create();
+var dataChanged = Occurrence.create();
 
 // ...
 
@@ -27,7 +27,7 @@ UI.table().withModel(
 //...
 
 // update the data displayed in the table:
-dataChanged.fire();
+dataChanged.trigger();
 ```
 
 SwingTree does not require you to implement

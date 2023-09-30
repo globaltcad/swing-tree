@@ -1,6 +1,6 @@
 package examples.games;
 
-import sprouts.Event;
+import sprouts.Occurrence;
 import sprouts.Val;
 import sprouts.Var;
 import swingtree.UI;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class SymbolGuesserViewModel
 {
-    private final Event repaint = Event.create();
+    private final Occurrence repaint = Occurrence.create();
     private final Var<String> feedback = Var.of("Choose:");
     private final Var<Color>  feedbackColor = Var.of(Color.BLACK);
     private final Var<Integer> feedbackFontSize = Var.of(24);
@@ -28,7 +28,7 @@ public class SymbolGuesserViewModel
 
     private final List<Alphabet> alphabets = new ArrayList<>();
 
-    public Event getRepaintEvent() { return repaint; }
+    public Occurrence getRepaintEvent() { return repaint; }
 
     public Var<String> feedback() { return feedback; }
 
@@ -241,7 +241,7 @@ public class SymbolGuesserViewModel
         feedback.set( "Choose:" );
         feedbackColor.set( Color.BLACK );
         currentSymbol.set( randomSymbol );
-        repaint.fire();
+        repaint.trigger();
     }
 
     private void enableSymbols() {

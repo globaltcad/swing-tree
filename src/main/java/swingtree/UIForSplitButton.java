@@ -1,11 +1,13 @@
 package swingtree;
 
-import swingtree.components.JSplitButton;
 import sprouts.Action;
-import sprouts.Event;
+import sprouts.Occurrence;
 import sprouts.Var;
+import swingtree.components.JSplitButton;
 
-import javax.swing.*;
+import javax.swing.AbstractButton;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import java.awt.event.ActionEvent;
@@ -59,21 +61,21 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
     /**
      *  Use this to build {@link JSplitButton}s where the selectable options
      *  are represented by an {@link Enum} type, and the click event is
-     *  handles by an {@link Event} instance.
+     *  handles by an {@link Occurrence} instance.
      *
      * @param selection The {@link Var} which holds the currently selected {@link Enum} value.
      *                  This will be updated when the user selects a new value.
-     * @param clickEvent The {@link Event} which will be fired when the user clicks on the button.
+     * @param clickEvent The {@link sprouts.Occurrence} which will be fired when the user clicks on the button.
      * @return A UI builder instance wrapping a {@link JSplitButton}.
      * @param <E> The {@link Enum} type defining the selectable options.
      */
-    public <E extends Enum<E>> UIForSplitButton<B> withSelection( Var<E> selection, Event clickEvent ) {
+    public <E extends Enum<E>> UIForSplitButton<B> withSelection( Var<E> selection, Occurrence clickEvent ) {
         NullUtil.nullArgCheck(selection, "selection", Var.class);
-        NullUtil.nullArgCheck(clickEvent, "clickEvent", Event.class);
+        NullUtil.nullArgCheck(clickEvent, "clickEvent", Occurrence.class);
         for ( E e : selection.type().getEnumConstants() )
             this.add(
                 UI.splitItem(e.toString())
-                .onButtonClick( it -> clickEvent.fire() )
+                .onButtonClick( it -> clickEvent.trigger() )
                 .onSelection( it -> {
                     it.selectOnlyCurrentItem();
                     it.setButtonText(e.toString());

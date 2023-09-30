@@ -1,20 +1,20 @@
 package examples.games;
 
-import sprouts.Event;
+import sprouts.Occurrence;
 import sprouts.Val;
 import sprouts.Var;
 import swingtree.UI;
 import swingtree.animation.Animation;
 import swingtree.animation.AnimationState;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class NoteGuesserViewModel
 {
-    private final Event repaint = Event.create();
+    private final Occurrence repaint = Occurrence.create();
     private final Var<String> feedback = Var.of("Choose:");
     private final Var<Color>  feedbackColor = Var.of(Color.BLACK);
     private final Var<Integer> feedbackFontSize = Var.of(24);
@@ -24,7 +24,7 @@ public class NoteGuesserViewModel
     private final Var<Integer> score = Var.of(0);
     private final Val<Integer> level = score.view( s -> s / 10 );
 
-    public Event getRepaintEvent() { return repaint; }
+    public Occurrence getRepaintEvent() { return repaint; }
 
     public Var<String> feedback() { return feedback; }
 
@@ -113,7 +113,7 @@ public class NoteGuesserViewModel
         feedback.set( "Choose:" );
         feedbackColor.set( Color.BLACK );
         currentNoteIndex.set( newNi );
-        repaint.fire();
+        repaint.trigger();
     }
 
     public String noteNameOf( int ni ) {

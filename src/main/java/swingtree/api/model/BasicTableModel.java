@@ -1,7 +1,7 @@
 package swingtree.api.model;
 
-import sprouts.Event;
-import sprouts.Noticeable;
+import sprouts.Observable;
+import sprouts.Occurrence;
 import swingtree.UI;
 import swingtree.api.Buildable;
 
@@ -87,7 +87,7 @@ public interface BasicTableModel extends TableModel
         private ColumnClass columnClass;
         private CellEditable cellEditable;
         private ColumnName columnName;
-        private Noticeable noticeableEvent;
+        private Observable noticeableEvent;
 
          /**
           *  Use this to define the lambda which dynamically determines the row count of the table model.
@@ -185,9 +185,9 @@ public interface BasicTableModel extends TableModel
          * @param updateEvent The event which will be fired when the table model is updated.
          * @return This builder instance.
          */
-        public Builder updateOn( Noticeable updateEvent ) {
+        public Builder updateOn( Observable updateEvent ) {
             if ( updateEvent == null ) throw new IllegalArgumentException("updateEvent cannot be null");
-            if ( this.noticeableEvent != null ) throw new IllegalStateException(Event.class.getSimpleName()+" already set");
+            if ( this.noticeableEvent != null ) throw new IllegalStateException(Occurrence.class.getSimpleName()+" already set");
             this.noticeableEvent = updateEvent;
             return this;
         }

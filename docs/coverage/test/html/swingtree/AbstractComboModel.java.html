@@ -175,12 +175,12 @@ abstract class AbstractComboModel&lt;E&gt; implements ComboBoxModel&lt;E&gt;
 <span class="pc bpc" id="L175" title="1 of 6 branches missed.">			if ( o.equals(&quot;true&quot;) || o.equals(&quot;yes&quot;) || o.equals(&quot;1&quot;) )</span>
 <span class="fc" id="L176">				return (E) Boolean.TRUE;</span>
 
-<span class="pc bpc" id="L178" title="3 of 6 branches missed.">			if ( o.equals(&quot;false&quot;) || o.equals(&quot;no&quot;) || o.equals(&quot;0&quot;) )</span>
+<span class="pc bpc" id="L178" title="1 of 6 branches missed.">			if ( o.equals(&quot;false&quot;) || o.equals(&quot;no&quot;) || o.equals(&quot;0&quot;) )</span>
 <span class="fc" id="L179">				return (E) Boolean.FALSE;</span>
 
 			// We failed to parse the boolean... the input is invalid!
 			// So we cannot update the model, and simply return the old value:
-<span class="nc" id="L183">			return _selectedItem.orElseNull();</span>
+<span class="fc" id="L183">			return _selectedItem.orElseNull();</span>
 		}
 		// Ok maybe it's an enum?
 <span class="pc bpc" id="L186" title="1 of 2 branches missed.">		if ( type.isEnum() ) {</span>

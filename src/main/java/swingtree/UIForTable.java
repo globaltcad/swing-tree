@@ -1,6 +1,6 @@
 package swingtree;
 
-import sprouts.Event;
+import sprouts.Occurrence;
 import swingtree.api.Buildable;
 import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
@@ -154,7 +154,7 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
      *  <p>
      *      <b>Please note that when the data of the provided data source changes (i.e. when the data source
      *      is a {@link List} and the list is modified), the table model will not be updated automatically!
-     *      Use {@link #updateTableOn(Event)} to bind an update {@link Event} to the table model.</b>
+     *      Use {@link #updateTableOn(sprouts.Occurrence)} to bind an update {@link sprouts.Occurrence} to the table model.</b>
      *
      * @param mode An enum which configures the layout as well as modifiability of the table in a readable fashion.
      * @param dataSource The {@link TableListDataSource} returning a list matrix which will be used to populate the table.
@@ -213,7 +213,7 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
      *  <p>
      *      <b>Please note that when the data of the provided data source changes (i.e. when the data source
      *      is a {@link Map} which gets modified), the table model will not be updated automatically!
-     *      Use {@link #updateTableOn(Event)} to bind an update {@link Event} to the table model.</b>
+     *      Use {@link #updateTableOn(sprouts.Occurrence)} to bind an update {@link sprouts.Occurrence} to the table model.</b>
      *
      * @param mode An enum which configures the modifiability of the table in a readable fashion.
      * @param dataSource The {@link TableMapDataSource} returning a column major map based matrix which will be used to populate the table.
@@ -226,16 +226,16 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
     }
 
     /**
-     *  Use this to bind an {@link sprouts.Event} to the {@link TableModel} of this table
+     *  Use this to bind an {@link sprouts.Occurrence} to the {@link TableModel} of this table
      *  which will trigger the {@link AbstractTableModel#fireTableDataChanged()} method.
      *  This is useful if you want to update the table when the data source changes.
      *
-     * @param event The event to be bound.
+     * @param occurrence The occurrence to be bound.
      * @return This builder node, for chaining.
      */
-    public final UIForTable<T> updateTableOn( Event event ) {
-        NullUtil.nullArgCheck(event, "event", Event.class);
-        event.subscribe(()->
+    public final UIForTable<T> updateTableOn( Occurrence occurrence ) {
+        NullUtil.nullArgCheck(occurrence, "occurrence", Occurrence.class);
+        occurrence.subscribe(()->
             _doUI(()->{
                 TableModel model = getComponent().getModel();
                 if ( model instanceof AbstractTableModel ) {

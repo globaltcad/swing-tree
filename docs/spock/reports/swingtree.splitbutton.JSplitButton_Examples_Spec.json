@@ -224,7 +224,7 @@
       "tags":{},"see":[],"extraInfo":["\n                For this example we use the following enum declaration:\n                ```\n                    enum Colour { \n                        RED, GREEN, BLUE;\n                        @Override String toString() {  \n                            switch (this) {\n                                case RED: return \"Red\"\n                                case GREEN: return \"Green\"\n                                case BLUE: return \"Blue\"\n                            }\n                            return \"?\"\n                        }\n                    }\n                ```\n            "]
       },
       "blocks":[
-        {"kind":"given","text":"A Colour enum based property and an event.","code":["var tracker = []","var selection = Var.of(Colour.B).onAct({tracker << \"#\"})","var event = Event.of((Listener){tracker << \"!\"})"]},
+        {"kind":"given","text":"A Colour enum based property and an event.","code":["var tracker = []","var selection = Var.of(Colour.B).onAct({tracker << \"#\"})","var event = Occurrence.of((Observer){tracker << \"!\"})"]},
 
         {"kind":"and","text":"We create a UI builder node for the enum states.","code":["var ui = UI.splitButton(selection, event)"]},
 

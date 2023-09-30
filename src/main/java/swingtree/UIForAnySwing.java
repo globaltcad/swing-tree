@@ -60,14 +60,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public UIForAnySwing( C component ) { super(component); }
 
     /**
-     *  This method exposes a concise way to bind a {@link Noticeable} (usually a sprouts.Event to the
+     *  This method exposes a concise way to bind a {@link Observable} (usually a sprouts.Event to the
      *  {@link JComponent#repaint()} method of the component wrapped by this {@link UI}!
      *  This means that the component will be repainted whenever the event is fired.
      *  <p>
      * @param noticeable The event to which the repaint method of the component will be bound.
      * @return The JComponent type which will be wrapped by this builder node.
      */
-    public final I withRepaintIf( Noticeable noticeable ) {
+    public final I withRepaintIf( Observable noticeable ) {
         noticeable.subscribe( () -> _doUI( () -> getComponent().repaint() ) );
         return _this();
     }
@@ -3015,9 +3015,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-     *  Use this to register a {@link Noticeable} event handler which will be called
-     *  on the UI thread when the {@link Noticeable} event is fired and irrespective of
-     *  what thread the {@link Noticeable} event is fired on.
+     *  Use this to register a {@link Observable} event handler which will be called
+     *  on the UI thread when the {@link Observable} event is fired and irrespective of
+     *  what thread the {@link Observable} event is fired on.
      *  <br><br>
      *  Here an example:
      *  <pre>{@code
@@ -3032,20 +3032,20 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *  )
      *  }</pre>
      *
-     * @param noticeableEvent The {@link Noticeable} event to which the {@link Action} should be attached.
-     * @param action The {@link Action} which is invoked by the UI thread after the {@link Noticeable} event was fired.
+     * @param noticeableEvent The {@link Observable} event to which the {@link Action} should be attached.
+     * @param action The {@link Action} which is invoked by the UI thread after the {@link Observable} event was fired.
      * @return This very instance, which enables builder-style method chaining.
-     * @param <E> The type of the {@link Noticeable} event.
+     * @param <E> The type of the {@link Observable} event.
      */
-    public final <E extends Noticeable> I onView( E noticeableEvent, Action<ComponentDelegate<C, E>> action ) {
+    public final <E extends Observable> I onView( E noticeableEvent, Action<ComponentDelegate<C, E>> action ) {
         return this.on(noticeableEvent, it -> _doUI(() -> action.accept(it)));
     }
 
     /**
      *  Use this to attach a component {@link Action} event handler to a functionally supplied
-     *  {@link Noticeable} event.
-     *  The action is executed on the application thread when the {@link Noticeable} event is fired and
-     *  irrespective of the thread that {@link Noticeable} fired the event.
+     *  {@link Observable} event.
+     *  The action is executed on the application thread when the {@link Observable} event is fired and
+     *  irrespective of the thread that {@link Observable} fired the event.
      *  <br><br>
      *  Consider the following example:
      *  <pre>{@code
@@ -3057,13 +3057,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *  Although neither Swing nor SwingTree have a touch gesture event system, this example illustrates
      *  how one could easily integrate a custom event system into the SwingTree UI tree.
      *
-     * @param noticeableEvent The {@link Noticeable} event to which the {@link Action} should be attached.
-     * @param action The {@link Action} which is invoked by the application thread after the {@link Noticeable} event was fired.
+     * @param noticeableEvent The {@link Observable} event to which the {@link Action} should be attached.
+     * @param action The {@link Action} which is invoked by the application thread after the {@link Observable} event was fired.
      * @return This very instance, which enables builder-style method chaining.
-     * @param <E> The type of the {@link Noticeable} event.
+     * @param <E> The type of the {@link Observable} event.
      */
-    public final <E extends Noticeable> I on( E noticeableEvent, Action<ComponentDelegate<C, E>> action ) {
-        NullUtil.nullArgCheck(noticeableEvent, "noticeableEvent", Noticeable.class);
+    public final <E extends Observable> I on( E noticeableEvent, Action<ComponentDelegate<C, E>> action ) {
+        NullUtil.nullArgCheck(noticeableEvent, "noticeableEvent", Observable.class);
         NullUtil.nullArgCheck(action, "action", Action.class);
         C component = getComponent();
         noticeableEvent.subscribe( () -> {
@@ -3073,11 +3073,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-     *  This is a logical extension of the {@link #on(Noticeable, Action)} method.
+     *  This is a logical extension of the {@link #on(Observable, Action)} method.
      *  Use this to attach a component {@link Action} event handler to a functionally supplied
-     *  {@link Noticeable} event.
-     *  The handler will be called on the application thread when the {@link Noticeable} event
-     *  is fired and irrespective of the thread that fired the {@link Noticeable} event.
+     *  {@link Observable} event.
+     *  The handler will be called on the application thread when the {@link Observable} event
+     *  is fired and irrespective of the thread that fired the {@link Observable} event.
      *  <br><br>
      *  Consider the following example:
      *  <pre>{@code
@@ -3094,12 +3094,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *  Although neither Swing nor SwingTree have a touch gesture event system, this example illustrates
      *  how one could easily integrate a custom event system into the SwingTree UI tree.
      *
-     * @param noticeableEvent The {@link Noticeable} event to which the {@link Action} should be attached.
-     * @param action The {@link Action} which is invoked by the application thread after the {@link Noticeable} event was fired.
+     * @param noticeableEvent The {@link Observable} event to which the {@link Action} should be attached.
+     * @param action The {@link Action} which is invoked by the application thread after the {@link Observable} event was fired.
      * @return This very instance, which enables builder-style method chaining.
-     * @param <E> The type of the {@link Noticeable} event.
+     * @param <E> The type of the {@link Observable} event.
      */
-    public final <E extends Noticeable> I on( Function<C, E> noticeableEvent, Action<ComponentDelegate<C, E>> action ) {
+    public final <E extends Observable> I on( Function<C, E> noticeableEvent, Action<ComponentDelegate<C, E>> action ) {
         return this.on(noticeableEvent.apply(getComponent()), action);
     }
 

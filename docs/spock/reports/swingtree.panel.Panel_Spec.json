@@ -4,7 +4,7 @@
   "narrative":"Just like in regular Swing, the JPanel is the most basic \n    yet most important type of component in Swing-Tree\n    and you can create one using the `UI.panel()` factory method. \n    Don't hesitate to use as the main tool for grouping and structuring\n    your UI, just like you would use the 'div' tag in HTML.",
   "subjects":["swingtree.UIForPanel"],
   "statistics":{
-    "runs":"6",
+    "runs":"7",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -96,6 +96,23 @@
         {"kind":"given","text":"We create a panel...","code":["def ui = UI.panel()"]},
 
         {"kind":"expect","text":"The panel has a MigLayout.","code":["ui.component.layout instanceof MigLayout"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Panels can be nested using the `add(..) method.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a panel of panels:","code":["def ui =","        UI.panel()","        .add(UI.panel())","        .add(UI.panel())","        .add(UI.panel())"]},
+
+        {"kind":"expect","text":"The panel has 3 children.","code":["ui.component.components.size() == 3"]},
+
+        {"kind":"and","text":"All children are JPanels.","code":["ui.component.components.every { it instanceof JPanel }"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
