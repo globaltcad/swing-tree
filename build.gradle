@@ -82,9 +82,8 @@ check.dependsOn jacocoTestReport
 task deploy() {
     dependsOn 'clean'
     dependsOn 'jar'
-    dependsOn 'javadoc'
-    dependsOn 'check'
     dependsOn 'releaseJDocs'
+    dependsOn 'check'
 }
 /*
     2:
@@ -94,7 +93,7 @@ task deploy() {
 */
 
 task releaseJDocs(type: Copy) {
-    // must run after javadoc task
+    dependsOn 'javadoc'
     from "$rootDir/build/docs/javadoc"
     into "$rootDir/docs/jdocs"
 }
