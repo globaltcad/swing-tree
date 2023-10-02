@@ -177,10 +177,6 @@
 
 /*---*/
 
-.FloatsUp {
-    z-index : 100;
-}
-
 /*Main css Formating:*/
 body {
     background-color: #7eb35e;
@@ -297,6 +293,7 @@ input              { font-family: "Roboto",sans-serif; }
     margin-left: 0;
     left: 0;
     top: 0;
+    z-index: 1
 }
 
 #navi img {
