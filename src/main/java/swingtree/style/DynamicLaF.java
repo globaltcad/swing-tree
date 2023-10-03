@@ -331,8 +331,23 @@ class DynamicLaF
 
     private static void _paintComponentThroughFormerIU(ComponentUI formerUI, Graphics g, JComponent c) {
         try {
-            if ( formerUI != null )
-                formerUI.update(g, c);
+            if ( formerUI != null ) {
+                Style style = ComponentExtension.from(c).getStyle();
+                boolean hasMargin = style.margin().isPositive();
+                boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();
+                if ( !hasMargin && !hasBorderRadius )
+                    formerUI.update(g, c);
+                else {
+                    Shape oldClip = g.getClip();
+                    Shape newClip = ComponentExtension.from(c).getInnerComponentArea();
+                    if ( newClip != null && newClip != oldClip )
+                        g.setClip(newClip);
+
+                    formerUI.update(g, c);
+
+                    g.setClip(oldClip);
+                }
+            }
         } catch ( Exception ex ) {
             ex.printStackTrace();
         }

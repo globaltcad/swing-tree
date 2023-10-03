@@ -108,7 +108,7 @@ final class StylePainter<C extends JComponent>
 
     Shape getMainClip() { return _mainClip; }
 
-    private Area _getBaseArea(JComponent comp)
+    Area _getBaseArea(JComponent comp)
     {
         if ( _baseArea == null )
             _baseArea = _calculateBaseArea(0, 0, 0, 0, comp);

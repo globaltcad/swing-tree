@@ -331,12 +331,27 @@ class DynamicLaF
 
     private static void _paintComponentThroughFormerIU(ComponentUI formerUI, Graphics g, JComponent c) {
         try {
-<span class="pc bpc" id="L334" title="1 of 2 branches missed.">            if ( formerUI != null )</span>
-<span class="fc" id="L335">                formerUI.update(g, c);</span>
-<span class="nc" id="L336">        } catch ( Exception ex ) {</span>
-<span class="nc" id="L337">            ex.printStackTrace();</span>
-<span class="fc" id="L338">        }</span>
-<span class="fc" id="L339">    }</span>
+<span class="pc bpc" id="L334" title="1 of 2 branches missed.">            if ( formerUI != null ) {</span>
+<span class="fc" id="L335">                Style style = ComponentExtension.from(c).getStyle();</span>
+<span class="fc" id="L336">                boolean hasMargin = style.margin().isPositive();</span>
+<span class="fc" id="L337">                boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();</span>
+<span class="fc bfc" id="L338" title="All 4 branches covered.">                if ( !hasMargin &amp;&amp; !hasBorderRadius )</span>
+<span class="fc" id="L339">                    formerUI.update(g, c);</span>
+                else {
+<span class="fc" id="L341">                    Shape oldClip = g.getClip();</span>
+<span class="fc" id="L342">                    Shape newClip = ComponentExtension.from(c).getInnerComponentArea();</span>
+<span class="pc bpc" id="L343" title="2 of 4 branches missed.">                    if ( newClip != null &amp;&amp; newClip != oldClip )</span>
+<span class="fc" id="L344">                        g.setClip(newClip);</span>
+
+<span class="fc" id="L346">                    formerUI.update(g, c);</span>
+
+<span class="fc" id="L348">                    g.setClip(oldClip);</span>
+                }
+            }
+<span class="nc" id="L351">        } catch ( Exception ex ) {</span>
+<span class="nc" id="L352">            ex.printStackTrace();</span>
+<span class="fc" id="L353">        }</span>
+<span class="fc" id="L354">    }</span>
 
     /**
      *  Determines whether the given point, in the parent's coordinate space, is within this component.
@@ -350,16 +365,16 @@ class DynamicLaF
      */
     private static boolean _contains(JComponent c, int x, int y, Supplier&lt;Boolean&gt; superContains)
     {
-<span class="nc" id="L353">        Border border = c.getBorder();</span>
-<span class="nc bnc" id="L354" title="All 2 branches missed.">        if ( border instanceof StyleAndAnimationBorder ) {</span>
-<span class="nc" id="L355">            StyleAndAnimationBorder&lt;?&gt; b = (StyleAndAnimationBorder&lt;?&gt;) border;</span>
-<span class="nc" id="L356">            Insets margins = b.getMarginInsets();</span>
-<span class="nc" id="L357">            int width  = c.getWidth();</span>
-<span class="nc" id="L358">            int height = c.getHeight();</span>
-<span class="nc bnc" id="L359" title="All 8 branches missed.">            boolean isInside = (x &gt;= margins.left) &amp;&amp; (x &lt; width - margins.right) &amp;&amp; (y &gt;= margins.top) &amp;&amp; (y &lt; height - margins.bottom);</span>
+<span class="nc" id="L368">        Border border = c.getBorder();</span>
+<span class="nc bnc" id="L369" title="All 2 branches missed.">        if ( border instanceof StyleAndAnimationBorder ) {</span>
+<span class="nc" id="L370">            StyleAndAnimationBorder&lt;?&gt; b = (StyleAndAnimationBorder&lt;?&gt;) border;</span>
+<span class="nc" id="L371">            Insets margins = b.getMarginInsets();</span>
+<span class="nc" id="L372">            int width  = c.getWidth();</span>
+<span class="nc" id="L373">            int height = c.getHeight();</span>
+<span class="nc bnc" id="L374" title="All 8 branches missed.">            boolean isInside = (x &gt;= margins.left) &amp;&amp; (x &lt; width - margins.right) &amp;&amp; (y &gt;= margins.top) &amp;&amp; (y &lt; height - margins.bottom);</span>
 
-<span class="nc bnc" id="L361" title="All 2 branches missed.">            if ( isInside )</span>
-<span class="nc" id="L362">                return true;</span>
+<span class="nc bnc" id="L376" title="All 2 branches missed.">            if ( isInside )</span>
+<span class="nc" id="L377">                return true;</span>
             else
             {/*
                 You might be thinking that we should return false here, but that would be wrong in certain cases!
@@ -368,21 +383,21 @@ class DynamicLaF
                 So, if there are negative paddings, we loop through the subcomponents and see if any of
                 them contains the point.                                                                               */
 
-<span class="nc" id="L371">                Insets padding = b.getPaddingInsets();</span>
+<span class="nc" id="L386">                Insets padding = b.getPaddingInsets();</span>
 
-<span class="nc bnc" id="L373" title="All 8 branches missed.">                if ( padding.top &lt; 0 || padding.left &lt; 0 || padding.bottom &lt; 0 || padding.right &lt; 0 )</span>
-<span class="nc bnc" id="L374" title="All 2 branches missed.">                    for ( Component child : c.getComponents() ) {</span>
-<span class="nc bnc" id="L375" title="All 2 branches missed.">                        if ( child instanceof JComponent ) {</span>
-<span class="nc" id="L376">                            JComponent jc = (JComponent) child;</span>
-<span class="nc bnc" id="L377" title="All 2 branches missed.">                            if ( jc.contains(x, y) )</span>
-<span class="nc" id="L378">                                return true;</span>
+<span class="nc bnc" id="L388" title="All 8 branches missed.">                if ( padding.top &lt; 0 || padding.left &lt; 0 || padding.bottom &lt; 0 || padding.right &lt; 0 )</span>
+<span class="nc bnc" id="L389" title="All 2 branches missed.">                    for ( Component child : c.getComponents() ) {</span>
+<span class="nc bnc" id="L390" title="All 2 branches missed.">                        if ( child instanceof JComponent ) {</span>
+<span class="nc" id="L391">                            JComponent jc = (JComponent) child;</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">                            if ( jc.contains(x, y) )</span>
+<span class="nc" id="L393">                                return true;</span>
                         }
                     }
                 else
-<span class="nc" id="L382">                    return false;</span>
+<span class="nc" id="L397">                    return false;</span>
             }
         }
-<span class="nc" id="L385">        return superContains.get();</span>
+<span class="nc" id="L400">        return superContains.get();</span>
     }
 
 }

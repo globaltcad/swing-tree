@@ -218,6 +218,8 @@ public final class ComponentExtension<C extends JComponent>
 
     Shape getMainClip() { return _stylePainter.getMainClip(); }
 
+    Shape getInnerComponentArea() { return _stylePainter._getBaseArea(_owner); }
+
     /**
      *  Adds a {@link Styler} to the component.
      *  The styler will be used to calculate the style of the component.
@@ -327,6 +329,9 @@ public final class ComponentExtension<C extends JComponent>
                                                    );
 
         if ( _owner instanceof JTextField && style.margin().isPositive() )
+            styleCanBeRenderedThroughBorder = false;
+
+        if ( _owner instanceof AbstractButton && style.margin().isPositive() )
             styleCanBeRenderedThroughBorder = false;
 
         if ( isNotStyled || onlyDimensionalityIsStyled ) {

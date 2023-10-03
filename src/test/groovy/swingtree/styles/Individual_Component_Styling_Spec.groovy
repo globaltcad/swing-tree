@@ -55,13 +55,15 @@ class Individual_Component_Styling_Spec extends Specification
             Styling in SwingTree is fully functional, which means 
             that the `Style` settings objects are all immutable. 
             They are not modified in place, but instead transformed
-            by so called "styler" lambdas.
+            by so called "`Styler` lambdas".
             Not only does this architecture make it easy to compose, reuse and share
-            styles, but it also makes it possible to have a extensive style
-            hierarchy without the need for very complex code.
-            In practice, this means that your styler lambdas become part
-            of a compositional tree of styler all the other lambdas, which is then applied to
-            the components of the component tree in every repaint.
+            styles, but it also makes it possible to have an extensive hierarchy of
+            styles without the need for complicated code at all.
+            In practice, this means that your styles become part
+            of a compositional tree of `Styler` lambdas.
+            The fact that they are lambdas makes it possible to
+            evaluate the styles every repaint so that they can then applied to
+            the components of the component tree completely dynamically.
             How cool is that? :)
         """
         given : """
@@ -1425,6 +1427,63 @@ class Individual_Component_Styling_Spec extends Specification
 
         where :
             uiScale << [3]
+    }
+
+    def 'Create a button with a SVG icon based toggle mode.'(
+        float uiScale
+    ) {
+        reportInfo """
+            Creating heavily customized components in a way which prefers composition over inheritance
+            is one of the main goals of SwingTree and this little example demonstrates this very 
+            nicely using 2 buttons, a regular button and a toggle button nested inside.
+            <br>
+            Here you can see an example of a text field with a custom icon and a button:
+            ${Utility.linkSnapshot('components/nested-buttons.png')}
+
+            As you can see, the resulting button looks nothing like the default button
+            and we did not need to extend any Swing class to achieve this.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
+        and : 'Now we create a button UI with a custom styler lambda and a button.'
+            var hopper = UI.findIcon("img/hopper.svg")
+            var ui =
+                    UI.button("Click").withLayout("fill, ins 0")
+                    .withPrefSize(160, 80)
+                    .withSize(160, 80)
+                    .withStyle( it -> it
+                        .fontSize(16)
+                        .fontAlignment(UI.HorizontalAlignment.LEFT)
+                        .paddingLeft(10)
+                        .margin(15)
+                        .border(3, "orange")
+                    )
+                    .add("right",
+                        UI.toggleButton(hopper.get())
+                        .withStyle( it -> it
+                            .prefWidth((int)it.parent().map(Container::getSize).map(d -> d.height).orElse(80)-40)
+                            .prefHeight((int)it.parent().map(Container::getSize).map(d -> d.height).orElse(80)-40)
+                            .margin(5)
+                            .padding(5)
+                            .cursor(UI.Cursor.HAND)
+                            .border(2, "gray")
+                            .borderRadius(15)
+                        )
+                    );
+
+        expect : 'The image is as expected.'
+            Utility.similarityBetween(ui.getComponent(), "components/nested-buttons.png", 99.5) > 99.5
+
+        where :
+            uiScale << [1]
     }
 
     def 'You can use the style API to configure client properties for components.'()

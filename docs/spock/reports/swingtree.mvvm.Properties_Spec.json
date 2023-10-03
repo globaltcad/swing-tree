@@ -1,7 +1,7 @@
 {
   "className":"swingtree.mvvm.Properties_Spec",
   "title":"Properties",
-  "narrative":"Properties are a powerful tool to model the state \n    as well as business logic of your UI without actually depending on it.\n    This is especially useful for testing your UIs logic.\n    Therefore properties are a root concept in the Swing-Tree library.\n    The decoupling between your UI and the UIs state and logic \n    is achieved by binding properties to UI components.\n    This specification shows you how to model UI state \n    and business logic using properties \n    and how to bind them to UI components.",
+  "narrative":"Properties are a powerful tool to model the state \n    as well as business logic of your UI without actually depending on it.\n    This is especially useful for testing your UIs logic.\n    Therefore properties are a root concept in the Swing-Tree library.\n    The decoupling between your UI and the UIs state and logic \n    is achieved by binding properties to UI components.\n    This specification shows you how to model UI state \n    and business logic using properties \n    and how to bind them to UI components.\n\n    (For more information about the raw properties themselves\n    check out their [repository](https://github.com/globaltcad/sprouts))",
   "subjects":["sprouts.Val","sprouts.Var"],
   "statistics":{
     "runs":"18",
@@ -33,7 +33,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Binding goes both ways, so when the property changes state through the \"set\" method\n            it will update the UI\n            using the \"show()\" method on the property (which you can also call manually for UI updates), \n            and when the UI is changed by the user, it will update the property for us\n            and trigger the property action (if present).\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Binding goes both ways, so when the property changes state through the `set(T)` method\n            it will update the UI\n            using the `fireSet()` method on the property (which you can also call manually for UI updates), \n            and when the UI is changed by the user, it will update the property for us\n            and trigger the property action (if present).\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A simple boolean property modelling a toggle state.","code":["boolean userDidToggle = false","Val<Boolean> toggled = Var.of(false)","                            .onAct({userDidToggle = true})"]},
@@ -87,7 +87,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Note that bound Swing-Tree properties have side effects\n            when their state is changed through the \"set\" method, or\n            they are deliberately triggered to execute their side effects.\n            using the \"show()\" method.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Note that bound Swing-Tree properties have side effects\n            when their state is changed through the \"set\" method, or\n            they are deliberately triggered to execute their side effects.\n            using the `fireSet()` method.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a mutable property...","code":["Var<String> mutable = Var.of(\"Tempeh\")"]},
@@ -229,7 +229,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Note that the \"act\" method is used by the view to change the value of the original property.\n            It is conceptually similar to the \"set\" method with the simple difference\n            that it represents a user action.\n            Irrespective as to how the value of the original property is changed,\n            the views will be updated.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Note that the \"act\" method is used by the view to change the value of the original property.\n            It is conceptually similar to the `set(T)` method with the simple difference\n            that it represents a user action.\n            Irrespective as to how the value of the original property is changed,\n            the views will be updated.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a property...","code":["Var<String> food = Var.of(\"Animal Crossing\")"]},
@@ -307,22 +307,22 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Unfortunately Swing does not allow us to implement models for all types of UI components.\n            A JButton for example does not have a model that we can use to bind to a property.\n            Instead Swing-Tree has to perform precise updates to the UI components without\n            triggering any events.\n            Therefore the UI uses the \"act(T)\" method to change the property state and triggers the\n            action of the property. On the contrary the \"set(T)\" method is used to change the state\n            of a property without triggering the action, but it will trigger the \"onSet\" actions / listeners\n            of the property. This is so that the UI can update itself when the user changes the\n            state of a property.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Unfortunately Swing does not allow us to implement models for all types of UI components.\n            A `JSplitPane` for example does not have a model that we can use to bind to a property.\n            Instead Swing-Tree uses property change listeners and component events \n            to synchronize the state of both UI and view model.\n            The problem with this approach is that it may lead to feedback loops.\n            To prevent his problem there are 2 type of property mutations and events.\n            The UI uses the `act(T)` method to change the property state, this then triggers the\n            `onAct(..)` actions of the property. On the contrary the `set(T)` method on the other hand\n            is used to change the state and then trigger the `onSet` actions / listeners\n            of the property. So if you want to change the state of a property from the UI\n            use the `act(T)` method, if you want to change the state of a property from the view model\n            use the `set(T)` method.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A simple property with a view and model actions.","code":["var showListener = []","var modelListener = []","var property = Var.of(\":)\")","                    .onAct(it ->{","                        modelListener << it.orElseThrow()","                    })","property.onSet(it -> showListener << it.orElseNull() )"]},
+        {"kind":"given","text":"A simple property with a view and model actions.","code":["var uiListener = []","var modelListener = []","var property = Var.of(\":)\")","                    .onAct(it ->{","                        modelListener << it.orElseThrow()","                    })","property.onSet(it -> uiListener << it.orElseNull() )"]},
 
-        {"kind":"when","text":"We change the state of the property using the \"set(T)\" method.","code":["property.set(\":(\")"]},
+        {"kind":"when","text":"We change the state of the property using the `set(T)` method.","code":["property.set(\":(\")"]},
 
         {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 
-        {"kind":"then","text":"The \"onSet\" actions are triggered.","code":["showListener == [\":(\"]"]},
+        {"kind":"then","text":"The `onSet(..)` actions are triggered.","code":["uiListener == [\":(\"]"]},
 
         {"kind":"and","text":"The view model actions are not triggered.","code":["modelListener == []"]},
 
-        {"kind":"when","text":"We change the state of the property using the \"act(T)\" method.","code":["property.act(\":|\")"]},
+        {"kind":"when","text":"We change the state of the property using the `act(T)` method.","code":["property.act(\":|\")"]},
 
-        {"kind":"then","text":"The \"onSet\" actions are NOT triggered, because the \"act\" method performs an \"act on your view model\"!","code":["showListener == [\":(\"]"]},
+        {"kind":"then","text":"The \"onSet\" actions are NOT triggered, because the `act(T)` method performs an \"act on your view model\"!","code":["uiListener == [\":(\"]"]},
 
         {"kind":"and","text":"The view model actions are triggered.","code":["modelListener == [\":|\"]"]}
       ],
@@ -330,11 +330,11 @@
     },
   
     {
-      "id":"A property constructed using the \"of\" factory method, does not allow null items.",
+      "id":"A property constructed using the `of(T)` factory method, does not allow null items.",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The \"of\" factory method is used to create a property that does not allow null items.\n            If you try to set an item to null, the property will throw an exception.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The `of(T)`  factory method is used to create a property that does not allow null items.\n            If you try to set an item to null, the property will throw an exception.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A property constructed using the \"of\" factory method.","code":["var property = Var.of(\"Hello World\")"]},
@@ -366,7 +366,7 @@
     },
   
     {
-      "id":"A property can be converted to an Optional.",
+      "id":"A property can be converted to an `Optional`.",
       "result":"PASS",
       "duration":"?",
       "iterations":{
