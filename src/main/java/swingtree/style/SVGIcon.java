@@ -29,18 +29,22 @@ public class SVGIcon extends ImageIcon
 
     private final SVGDocument _svgDocument;
 
-    private int _width;
-    private int _height;
+    private final int _width;
+    private final int _height;
 
-    private UI.FitComponent _fitComponent;
+    private final UI.FitComponent _fitComponent;
 
+
+    private SVGIcon( SVGDocument svgDocument, int width, int height, UI.FitComponent fitComponent ) {
+        super();
+        _svgDocument = svgDocument;
+        _width = width;
+        _height = height;
+        _fitComponent = fitComponent;
+    }
 
     public SVGIcon( SVGIcon icon ) {
-        super();
-        _svgDocument  = icon._svgDocument;
-        _width        = icon._width;
-        _height       = icon._height;
-        _fitComponent = icon._fitComponent;
+        this(icon._svgDocument, icon._width, icon._height, icon._fitComponent);
     }
 
     public SVGIcon( URL svgUrl, int width, int height, UI.FitComponent fitComponent ) {
@@ -74,14 +78,14 @@ public class SVGIcon extends ImageIcon
     @Override
     public int getIconWidth() { return _width; }
 
-    public void setIconWidth( int width ) { _width = width; }
+    public SVGIcon withIconWidth( int width ) { return new SVGIcon(_svgDocument, width, _height, _fitComponent); }
 
     @Override
     public int getIconHeight() { return _height; }
 
-    public void setIconHeight( int height ) { _height = height; }
+    public SVGIcon withIconHeight( int height ) { return new SVGIcon(_svgDocument, _width, height, _fitComponent); }
 
-    public void setFitComponent( UI.FitComponent fit ) { _fitComponent = fit; }
+    public SVGIcon withFitComponent( UI.FitComponent fit ) { return new SVGIcon(_svgDocument, _width, _height, fit); }
 
     public UI.FitComponent getFitComponent() { return _fitComponent; }
 

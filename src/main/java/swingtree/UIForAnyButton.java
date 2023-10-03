@@ -93,8 +93,8 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         if ( icon instanceof SVGIcon )
         {
             SVGIcon svgIcon = (SVGIcon) icon;
-            svgIcon.setIconWidth(width);
-            svgIcon.setIconHeight(height);
+            svgIcon = svgIcon.withIconWidth(width);
+            icon    = svgIcon.withIconHeight(height);
         }
         else if ( width != icon.getIconWidth() || height != icon.getIconHeight() )
         {
@@ -124,8 +124,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         if ( icon instanceof SVGIcon )
         {
             SVGIcon svgIcon = (SVGIcon) icon;
-            svgIcon.setFitComponent(fitComponent);
-            return withIcon(icon);
+            return withIcon(svgIcon.withFitComponent(fitComponent));
         }
         else
         {
@@ -133,7 +132,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                 JComponent c = getComponent();
                 int width  = c.getWidth();
                 int height = c.getHeight();
-                width  = Math.max(width, c.getMinimumSize().width);
+                width  = Math.max(width,  c.getMinimumSize().width);
                 height = Math.max(height, c.getMinimumSize().height);
                 if ( width > 0 && height > 0 )
                     withIcon(width, height, icon);
