@@ -25,6 +25,9 @@ import java.util.function.Consumer
     and business logic using properties 
     and how to bind them to UI components.
     
+    (For more information about the raw properties themselves
+    check out their [repository](https://github.com/globaltcad/sprouts))
+    
 ''')
 @Subject([Val, Var])
 class Properties_Spec extends Specification
@@ -46,9 +49,9 @@ class Properties_Spec extends Specification
     def 'They can be bound to the UI by passing them to a builder node.'()
     {
         reportInfo """
-            Binding goes both ways, so when the property changes state through the "set" method
+            Binding goes both ways, so when the property changes state through the `set(T)` method
             it will update the UI
-            using the "show()" method on the property (which you can also call manually for UI updates), 
+            using the `fireSet()` method on the property (which you can also call manually for UI updates), 
             and when the UI is changed by the user, it will update the property for us
             and trigger the property action (if present).
         """
@@ -112,7 +115,7 @@ class Properties_Spec extends Specification
             Note that bound Swing-Tree properties have side effects
             when their state is changed through the "set" method, or
             they are deliberately triggered to execute their side effects.
-            using the "show()" method.
+            using the `fireSet()` method.
             This is important to allow you to decide yourself when
             the state of a property is "ready" for display in the UI.
         """
@@ -258,7 +261,7 @@ class Properties_Spec extends Specification
     {
         reportInfo """
             Note that the "act" method is used by the view to change the value of the original property.
-            It is conceptually similar to the "set" method with the simple difference
+            It is conceptually similar to the `set(T)` method with the simple difference
             that it represents a user action.
             Irrespective as to how the value of the original property is changed,
             the views will be updated.
@@ -339,45 +342,48 @@ class Properties_Spec extends Specification
     {
         reportInfo """
             Unfortunately Swing does not allow us to implement models for all types of UI components.
-            A JButton for example does not have a model that we can use to bind to a property.
-            Instead Swing-Tree has to perform precise updates to the UI components without
-            triggering any events.
-            Therefore the UI uses the "act(T)" method to change the property state and triggers the
-            action of the property. On the contrary the "set(T)" method is used to change the state
-            of a property without triggering the action, but it will trigger the "onSet" actions / listeners
-            of the property. This is so that the UI can update itself when the user changes the
-            state of a property.
+            A `JSplitPane` for example does not have a model that we can use to bind to a property.
+            Instead Swing-Tree uses property change listeners and component events 
+            to synchronize the state of both UI and view model.
+            The problem with this approach is that it may lead to feedback loops.
+            To prevent his problem there are 2 type of property mutations and events.
+            The UI uses the `act(T)` method to change the property state, this then triggers the
+            `onAct(..)` actions of the property. On the contrary the `set(T)` method on the other hand
+            is used to change the state and then trigger the `onSet` actions / listeners
+            of the property. So if you want to change the state of a property from the UI
+            use the `act(T)` method, if you want to change the state of a property from the view model
+            use the `set(T)` method.
         """
         given : 'A simple property with a view and model actions.'
-            var showListener = []
+            var uiListener = []
             var modelListener = []
             var property = Var.of(":)")
                                 .onAct(it ->{
                                     modelListener << it.orElseThrow()
                                 })
-            property.onSet(it -> showListener << it.orElseNull() )
+            property.onSet(it -> uiListener << it.orElseNull() )
 
-        when : 'We change the state of the property using the "set(T)" method.'
+        when : 'We change the state of the property using the `set(T)` method.'
             property.set(":(")
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
-        then : 'The "onSet" actions are triggered.'
-            showListener == [":("]
+        then : 'The `onSet(..)` actions are triggered.'
+            uiListener == [":("]
         and : 'The view model actions are not triggered.'
             modelListener == []
 
-        when : 'We change the state of the property using the "act(T)" method.'
+        when : 'We change the state of the property using the `act(T)` method.'
             property.act(":|")
-        then : 'The "onSet" actions are NOT triggered, because the "act" method performs an "act on your view model"!'
-            showListener == [":("]
+        then : 'The "onSet" actions are NOT triggered, because the `act(T)` method performs an "act on your view model"!'
+            uiListener == [":("]
         and : 'The view model actions are triggered.'
             modelListener == [":|"]
     }
 
-    def 'A property constructed using the "of" factory method, does not allow null items.'()
+    def 'A property constructed using the `of(T)` factory method, does not allow null items.'()
     {
         reportInfo """
-            The "of" factory method is used to create a property that does not allow null items.
+            The `of(T)`  factory method is used to create a property that does not allow null items.
             If you try to set an item to null, the property will throw an exception.
         """
         given : 'A property constructed using the "of" factory method.'
@@ -418,7 +424,7 @@ class Properties_Spec extends Specification
 
     }
 
-    def 'A property can be converted to an Optional.'()
+    def 'A property can be converted to an `Optional`.'()
     {
         reportInfo """
             A property can be converted to an Optional using the "toOptional()" method.
