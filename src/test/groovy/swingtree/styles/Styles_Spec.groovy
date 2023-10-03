@@ -152,7 +152,7 @@ class Styles_Spec extends Specification
                                             "image=?, " +
                                             "placement=CENTER, " +
                                             "repeat=false, " +
-                                            "autoFit=false, " +
+                                            "fitComponent=NO, " +
                                             "width=?, " +
                                             "height=?, " +
                                             "opacity=1.0, " +

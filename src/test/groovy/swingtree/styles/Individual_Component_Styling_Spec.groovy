@@ -1,7 +1,6 @@
 package swingtree.styles
 
 import com.formdev.flatlaf.FlatLightLaf
-import examples.FancyTextField
 import net.miginfocom.swing.MigLayout
 import spock.lang.Narrative
 import spock.lang.Specification
@@ -13,7 +12,6 @@ import swingtree.UI
 
 import utility.Utility
 
-import javax.imageio.ImageIO
 import javax.swing.*
 import javax.swing.border.TitledBorder
 import java.awt.*
