@@ -5787,16 +5787,35 @@ public final class UI extends UILayoutConstants
     }
 
     /**
-     *  This enum is used to specify how the SVG image should be scaled to fit the
-     *  dimensions of the component that it is being rendered into
+     *  This enum is used to specify how an image or icon (usually a {@link SVGIcon})
+     *  should be scaled to fit the
+     *  dimensions of the component that it is being rendered into, like for example
      *  using the {@link SVGIcon#paintIcon(Component, Graphics, int, int, int, int)} method.
      */
     public enum FitComponent {
+        /**
+         *  Fit the image or icon to the width of the component.
+         */
         WIDTH,
+        /**
+         *  Fit the image or icon to the height of the component.
+         */
         HEIGHT,
+        /**
+         *  Fit the image or icon to the width and height of the component.
+         */
         WIDTH_AND_HEIGHT,
+        /**
+         *  Fit the image to the largest dimension of the component.
+         */
         MAX_DIM,
+        /**
+         *  Fit the image to the smallest dimension of the component.
+         */
         MIN_DIM,
+        /**
+         *  Do not fit the image to the component.
+         */
         NO
     }
 

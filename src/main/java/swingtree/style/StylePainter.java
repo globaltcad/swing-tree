@@ -1157,8 +1157,40 @@ final class StylePainter<C extends JComponent>
             int imgWidth           = style.width().orElse(imageIcon.getIconWidth());
             int imgHeight          = style.height().orElse(imageIcon.getIconHeight());
             if ( style.fitMode() != UI.FitComponent.NO ) {
-                imgWidth  = style.width().orElse(componentWidth);
-                imgHeight = style.height().orElse(componentHeight);
+                if ( imageIcon instanceof SVGIcon ) {
+                    imgWidth = style.width().orElse(componentWidth);
+                    imgHeight = style.height().orElse(componentHeight);
+                } else {
+                    if ( style.fitMode() == UI.FitComponent.WIDTH_AND_HEIGHT ) {
+                        imgWidth = style.width().orElse(componentWidth);
+                        imgHeight = style.height().orElse(componentHeight);
+                    }
+                    if ( style.fitMode() == UI.FitComponent.WIDTH )
+                        imgWidth = style.width().orElse(componentWidth);
+                    if ( style.fitMode() == UI.FitComponent.HEIGHT )
+                        imgHeight = style.height().orElse(componentHeight);
+
+                    if ( style.fitMode() == UI.FitComponent.MAX_DIM ) {
+                        if ( componentWidth > componentHeight ) {
+                            imgWidth = style.width().orElse(componentWidth);
+                        } else if ( componentWidth < componentHeight ) {
+                            imgHeight = style.height().orElse(componentHeight);
+                        } else {
+                            imgWidth  = style.width().orElse(componentWidth);
+                            imgHeight = style.height().orElse(componentHeight);
+                        }
+                    }
+                    if ( style.fitMode() == UI.FitComponent.MIN_DIM ) {
+                        if ( componentWidth < componentHeight ) {
+                            imgWidth = style.width().orElse(componentWidth);
+                        } else if ( componentWidth > componentHeight ) {
+                            imgHeight = style.height().orElse(componentHeight);
+                        } else {
+                            imgWidth  = style.width().orElse(componentWidth);
+                            imgHeight = style.height().orElse(componentHeight);
+                        }
+                    }
+                }
             }
             if ( imgWidth  < 0 ) imgWidth  = componentWidth;
             if ( imgHeight < 0 ) imgHeight = componentHeight;
@@ -1206,7 +1238,8 @@ final class StylePainter<C extends JComponent>
             if ( !repeat && imageIcon instanceof SVGIcon ) {
                 SVGIcon svgIcon = ((SVGIcon) imageIcon).withFitComponent(style.fitMode());
                 svgIcon.paintIcon(component, g2d, x, y, imgWidth, imgHeight);
-            } else
+            }
+            else
             {
                 Image image;
                 if ( imageIcon instanceof SVGIcon ) {
