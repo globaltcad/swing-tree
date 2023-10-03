@@ -23,7 +23,7 @@ import java.util.Optional;
  *   A specialized {@link ImageIcon} subclass that allows you to use SVG based icon images in your UI.
  *   This in essence just a wrapper around the JSVG library, which renders SVG images into Java2D graphics API.
  */
-public class SVGIcon extends ImageIcon
+public final class SVGIcon extends ImageIcon
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(SVGIcon.class);
 
@@ -37,9 +37,9 @@ public class SVGIcon extends ImageIcon
 
     private SVGIcon( SVGDocument svgDocument, int width, int height, UI.FitComponent fitComponent ) {
         super();
-        _svgDocument = svgDocument;
-        _width = width;
-        _height = height;
+        _svgDocument  = svgDocument;
+        _width        = width;
+        _height       = height;
         _fitComponent = fitComponent;
     }
 
@@ -49,8 +49,8 @@ public class SVGIcon extends ImageIcon
 
     public SVGIcon( URL svgUrl, int width, int height, UI.FitComponent fitComponent ) {
         super();
-        _width = width;
-        _height = height;
+        _width        = width;
+        _height       = height;
         _fitComponent = fitComponent;
 
         SVGDocument tempSVGDocument = null;
@@ -60,7 +60,7 @@ public class SVGIcon extends ImageIcon
         } catch (Exception e) {
             log.error("Failed to load SVG document from URL: " + svgUrl, e);
         }
-        this._svgDocument = tempSVGDocument;
+        _svgDocument = tempSVGDocument;
     }
 
     public SVGIcon( URL svgUrl, int width, int height ) {
@@ -75,20 +75,58 @@ public class SVGIcon extends ImageIcon
 
     public SVGIcon( URL svgUrl ) { this(svgUrl, -1, -1); }
 
+
+    /**
+     * @return The width of the icon, or -1 if the icon should be rendered according
+     *         to the width of a given component or the width of the SVG document itself.
+     */
     @Override
     public int getIconWidth() { return _width; }
 
+    /**
+     * @return A new {@link SVGIcon} with the given width.
+     *        If the width is -1, the icon will be rendered according to the width of a given component
+     *        or the width of the SVG document itself.
+     */
     public SVGIcon withIconWidth( int width ) { return new SVGIcon(_svgDocument, width, _height, _fitComponent); }
 
+    /**
+     * @return A new {@link SVGIcon} with the given width and height.
+     *        If the width or height is -1, the icon will be rendered according to the width or height of a given component
+     *        or the width or height of the SVG document itself.
+     */
     @Override
     public int getIconHeight() { return _height; }
 
+    /**
+     * @return A new {@link SVGIcon} with the given height.
+     *        If the height is -1, the icon will be rendered according to the height of a given component
+     *        or the height of the SVG document itself.
+     */
     public SVGIcon withIconHeight( int height ) { return new SVGIcon(_svgDocument, _width, height, _fitComponent); }
 
-    public SVGIcon withFitComponent( UI.FitComponent fit ) { return new SVGIcon(_svgDocument, _width, _height, fit); }
+    /**
+     * @return A new {@link SVGIcon} with the given width and height.
+     *        If the width or height is -1, the icon will be rendered according to the width or height of a given component
+     *        or the width or height of the SVG document itself.
+     */
+    public SVGIcon withIconSize( int width, int height ) { return new SVGIcon(_svgDocument, width, height, _fitComponent); }
 
+    /**
+     * @return The {@link UI.FitComponent} that determines if and how the icon should be fitted into a
+     *         any given component (see {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)}).
+     */
     public UI.FitComponent getFitComponent() { return _fitComponent; }
 
+    /**
+     * @return A new {@link SVGIcon} with the given {@link UI.FitComponent} policy.
+     */
+    public SVGIcon withFitComponent( UI.FitComponent fit ) { return new SVGIcon(_svgDocument, _width, _height, fit); }
+
+    /**
+     *  Creates a new {@link Image} from the SVG document.
+     * @return A new {@link Image} where the SVG document has been rendered into.
+     */
     @Override
     public Image getImage() {
         // We create a new buffered image, render into it, and then return it.
@@ -103,11 +141,21 @@ public class SVGIcon extends ImageIcon
         return image;
     }
 
+    /**
+     *  We don't support this. An SVG document is not really an image, it's a vector graphic.
+     *  Extending {@link ImageIcon} is just for compatibility reasons...
+     */
     @Override
     public void setImage( Image image ) {
         // We don't support this.
     }
 
+    /**
+     * @param c The component to render the icon into.
+     * @param g the graphics context
+     * @param x the X coordinate of the icon's top-left corner
+     * @param y the Y coordinate of the icon's top-left corner
+     */
     @Override
     public void paintIcon( java.awt.Component c, java.awt.Graphics g, int x, int y )
     {
@@ -165,6 +213,9 @@ public class SVGIcon extends ImageIcon
         int width,
         int height
     ) {
+        if ( _svgDocument == null )
+            return;
+
         width  = ( width  < 0 ? getIconWidth()  : width  );
         height = ( height < 0 ? getIconHeight() : height );
 
@@ -261,7 +312,5 @@ public class SVGIcon extends ImageIcon
 
         if ( doAntiAliasing && !wasAntiAliasing )
             g2d.setRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_OFF );
-
     }
-
 }
