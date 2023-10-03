@@ -40,13 +40,21 @@ public class SVGIcon extends ImageIcon
         MIN_DIM
     }
 
-    private final SVGDocument svgDocument;
+    private final SVGDocument _svgDocument;
 
     private int _width;
     private int _height;
 
     private FitComponent _fitComponent;
 
+
+    public SVGIcon( SVGIcon icon ) {
+        super();
+        _svgDocument  = icon._svgDocument;
+        _width        = icon._width;
+        _height       = icon._height;
+        _fitComponent = icon._fitComponent;
+    }
 
     public SVGIcon( URL svgUrl, int width, int height, FitComponent fitComponent ) {
         super();
@@ -61,7 +69,7 @@ public class SVGIcon extends ImageIcon
         } catch (Exception e) {
             log.error("Failed to load SVG document from URL: " + svgUrl, e);
         }
-        this.svgDocument = tempSVGDocument;
+        this._svgDocument = tempSVGDocument;
     }
 
     public SVGIcon( URL svgUrl, int width, int height ) {
@@ -75,7 +83,6 @@ public class SVGIcon extends ImageIcon
     public SVGIcon( String path ) { this(path, -1, -1); }
 
     public SVGIcon( URL svgUrl ) { this(svgUrl, -1, -1); }
-
 
     @Override
     public int getIconWidth() { return _width; }
@@ -95,8 +102,8 @@ public class SVGIcon extends ImageIcon
     public Image getImage() {
         // We create a new buffered image, render into it, and then return it.
         BufferedImage image = new BufferedImage(getIconWidth(), getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-        if ( svgDocument != null )
-            svgDocument.render(
+        if ( _svgDocument != null )
+            _svgDocument.render(
                     null,
                     image.createGraphics(),
                     new ViewBox(0, 0, getIconWidth(), getIconHeight())
@@ -113,7 +120,7 @@ public class SVGIcon extends ImageIcon
     @Override
     public void paintIcon( java.awt.Component c, java.awt.Graphics g, int x, int y )
     {
-        if ( svgDocument == null )
+        if ( _svgDocument == null )
             return;
 
         Insets insets = Optional.ofNullable( c instanceof JComponent ? ((JComponent)c).getBorder() : null )
@@ -172,7 +179,7 @@ public class SVGIcon extends ImageIcon
 
         Graphics2D g2d = (Graphics2D) g.create();
 
-        FloatSize svgSize = svgDocument.size();
+        FloatSize svgSize = _svgDocument.size();
         float svgRefWidth  = ( svgSize.width  > svgSize.height ? 1f : svgSize.width  / svgSize.height );
         float svgRefHeight = ( svgSize.height > svgSize.width  ? 1f : svgSize.height / svgSize.width  );
         float imgRefWidth  = (     width      >=   height      ? 1f :  (float) width /   height       );
@@ -248,9 +255,9 @@ public class SVGIcon extends ImageIcon
         try {
             // We also have to scale x and y, this is because the SVGDocument does not
             // account for the scale of the transform with respect to the view box!
-            svgDocument.render((JComponent) c, g2d, viewBox);
+            _svgDocument.render((JComponent) c, g2d, viewBox);
         } catch (Exception e) {
-            log.warn("Failed to render SVG document: " + svgDocument, e);
+            log.warn("Failed to render SVG document: " + _svgDocument, e);
         }
 
         g2d.setTransform(oldTransform);

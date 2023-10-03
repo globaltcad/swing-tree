@@ -662,6 +662,16 @@ public final class UI extends UILayoutConstants
             icon = _loadIcon(path);
             cache.put(path, icon);
         }
+        if ( icon instanceof SVGIcon ) {
+            SVGIcon svgIcon = (SVGIcon) icon;
+            icon = new SVGIcon(svgIcon);
+            /*
+                Note that the SVGIcon is actually mutable in the sense that it can be
+                reconfigured to display the SVG image in different modes and sizes.
+                This is why we create a copy of it here with the same underlying
+                SVG image renderer!
+            */
+        }
         return Optional.ofNullable(icon);
     }
 
