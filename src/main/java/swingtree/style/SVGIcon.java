@@ -9,6 +9,8 @@ import swingtree.UI;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.border.Border;
+import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Insets;
@@ -115,16 +117,19 @@ public class SVGIcon extends ImageIcon
             return;
 
         Insets insets = Optional.ofNullable( c instanceof JComponent ? ((JComponent)c).getBorder() : null )
-                                .map( b -> b.getBorderInsets(c) )
+                                .map( b -> {
+                                    try {
+                                        return _determineInsetsForBorder(b, c);
+                                    } catch (Exception e) {
+                                        return new Insets(0,0,0,0);
+                                    }
+                                })
                                 .orElse(new Insets(0,0,0,0));
         x = insets.left;
         y = insets.top;
 
-        int width  = _width;
-        int height = _height;
-
-        width  = width  < 0 ? c.getWidth()  : width;
-        height = height < 0 ? c.getHeight() : height;
+        int width  = c.getWidth();
+        int height = c.getHeight();
 
         width  = width  - insets.right  - insets.left;
         height = height - insets.bottom - insets.top;
@@ -132,20 +137,46 @@ public class SVGIcon extends ImageIcon
         paintIcon( c, g, x, y, width, height );
     }
 
-    public void paintIcon( java.awt.Component c, java.awt.Graphics g, int x, int y, int width, int height )
+    private Insets _determineInsetsForBorder( Border b, Component c )
     {
-        Graphics2D g2d = (Graphics2D) g.create();
-        boolean doAntiAliasing  = UI.scale() < 1.5;
-        boolean wasAntiAliasing = g2d.getRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING ) == java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-        if (doAntiAliasing && !wasAntiAliasing) {
-            g2d.setRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON );
+        if ( b == null )
+            return new Insets(0,0,0,0);
+
+        if ( b instanceof StyleAndAnimationBorder )
+            return ((StyleAndAnimationBorder<?>)b).getFullPaddingInsets();
+
+        // Compound border
+        if ( b instanceof javax.swing.border.CompoundBorder ) {
+            javax.swing.border.CompoundBorder cb = (javax.swing.border.CompoundBorder) b;
+            return cb.getOutsideBorder().getBorderInsets(c);
         }
+
+        try {
+            return b.getBorderInsets(c);
+        } catch (Exception e) {
+            // Ignore
+        }
+        return new Insets(0,0,0,0);
+    }
+
+    public void paintIcon(
+        java.awt.Component c,
+        java.awt.Graphics g,
+        int x,
+        int y,
+        int width,
+        int height
+    ) {
+        width  = ( width  < 0 ? getIconWidth()  : width  );
+        height = ( height < 0 ? getIconHeight() : height );
+
+        Graphics2D g2d = (Graphics2D) g.create();
 
         FloatSize svgSize = svgDocument.size();
         float svgRefWidth  = ( svgSize.width  > svgSize.height ? 1f : svgSize.width  / svgSize.height );
         float svgRefHeight = ( svgSize.height > svgSize.width  ? 1f : svgSize.height / svgSize.width  );
-        float imgRefWidth  = (     width      >    height      ? 1f :  (float) width /   height       );
-        float imgRefHeight = (     height     >    width       ? 1f : (float) height /   width        );
+        float imgRefWidth  = (     width      >=   height      ? 1f :  (float) width /   height       );
+        float imgRefHeight = (     height     >=   width       ? 1f : (float) height /   width        );
 
         float scaleX = imgRefWidth  / svgRefWidth;
         float scaleY = imgRefHeight / svgRefHeight;
@@ -193,21 +224,40 @@ public class SVGIcon extends ImageIcon
         else
             viewBox = new ViewBox(boxX, boxY, boxWidth, boxHeight);
 
+        // Let's check if the view box exists:
+        if ( viewBox.width <= 0 || viewBox.height <= 0 )
+            return;
+
+        // Also let's check if the view box has valid values:
+        if ( Float.isNaN(viewBox.x) || Float.isNaN(viewBox.y) || Float.isNaN(viewBox.width) || Float.isNaN(viewBox.height) )
+            return;
+
+        // Now onto the actual rendering:
+
+        boolean doAntiAliasing  = UI.scale() < 1.5;
+        boolean wasAntiAliasing = g2d.getRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING ) == java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+        if ( doAntiAliasing && !wasAntiAliasing )
+            g2d.setRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON );
+
         AffineTransform oldTransform = g2d.getTransform();
         AffineTransform newTransform = new AffineTransform(oldTransform);
         newTransform.scale(scaleX, scaleY);
 
         g2d.setTransform(newTransform);
 
-        // We also have to scale x and y, this is because the SVGDocument does not
-        // account for the scale of the transform with respect to the view box!
-        svgDocument.render( (JComponent) c, g2d, viewBox );
+        try {
+            // We also have to scale x and y, this is because the SVGDocument does not
+            // account for the scale of the transform with respect to the view box!
+            svgDocument.render((JComponent) c, g2d, viewBox);
+        } catch (Exception e) {
+            log.warn("Failed to render SVG document: " + svgDocument, e);
+        }
 
         g2d.setTransform(oldTransform);
 
-        if (doAntiAliasing && !wasAntiAliasing) {
+        if ( doAntiAliasing && !wasAntiAliasing )
             g2d.setRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_OFF );
-        }
+
     }
 
 }
