@@ -1509,7 +1509,21 @@ public final class UI extends UILayoutConstants
      */
     public static UIForButton<JButton> button( Icon icon ) {
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
-        return button().peek( it -> it.setIcon(icon) );
+        return button().withIcon(icon);
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JButton} UI component
+     *  with an icon displayed on top.
+     *
+     * @param icon The icon to be displayed on top of the button.
+     * @param fit The fit mode of the icon.
+     * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
+     */
+    public static UIForButton<JButton> button( ImageIcon icon, FitComponent fit ) {
+        NullUtil.nullArgCheck(icon, "icon", Icon.class);
+        NullUtil.nullArgCheck(fit, "fit", FitComponent.class);
+        return button().withIcon(icon, fit);
     }
 
     /**
@@ -4047,6 +4061,12 @@ public final class UI extends UILayoutConstants
         return toggleButton().withIcon(icon);
     }
 
+    public static UIForToggleButton<JToggleButton> toggleButton( ImageIcon icon, FitComponent fit ) {
+        NullUtil.nullArgCheck(icon, "icon", Icon.class);
+        NullUtil.nullArgCheck(fit, "fit", FitComponent.class);
+        return toggleButton().withIcon(icon, fit);
+    }
+
     /**
      *  Use this to create a builder for the {@link JToggleButton} UI component
      *  with an icon displayed on it scaled according to the provided width and height.
@@ -5774,6 +5794,20 @@ public final class UI extends UILayoutConstants
         Objects.requireNonNull( eventProcessor );
         Objects.requireNonNull( uiSupplier );
         show(title, frame -> use(eventProcessor, () -> uiSupplier.apply(frame)));
+    }
+
+    /**
+     *  This enum is used to specify how the SVG image should be scaled to fit the
+     *  dimensions of the component that it is being rendered into
+     *  using the {@link SVGIcon#paintIcon(Component, Graphics, int, int, int, int)} method.
+     */
+    public enum FitComponent {
+        WIDTH,
+        HEIGHT,
+        WIDTH_AND_HEIGHT,
+        MAX_DIM,
+        MIN_DIM,
+        NO
     }
 
     /**

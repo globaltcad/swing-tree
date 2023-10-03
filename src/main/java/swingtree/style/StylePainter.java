@@ -1205,7 +1205,7 @@ final class StylePainter<C extends JComponent>
             imgHeight -= padding.top().orElse(0)  + padding.bottom().orElse(0);
             if ( !repeat && imageIcon instanceof SVGIcon ) {
                 SVGIcon svgIcon = (SVGIcon) imageIcon;
-                svgIcon.setFitComponent(SVGIcon.FitComponent.WIDTH_AND_HEIGHT);
+                svgIcon.setFitComponent(UI.FitComponent.WIDTH_AND_HEIGHT);
                 svgIcon.paintIcon(component, g2d, x, y, imgWidth, imgHeight);
             } else
             {

@@ -27,25 +27,12 @@ public class SVGIcon extends ImageIcon
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(SVGIcon.class);
 
-    /**
-     *  This enum is used to specify how the SVG image should be scaled to fit the
-     *  dimensions of the component that it is being rendered into
-     *  using the {@link SVGIcon#paintIcon(java.awt.Component, java.awt.Graphics, int, int, int, int)} method.
-     */
-    public enum FitComponent {
-        WIDTH,
-        HEIGHT,
-        WIDTH_AND_HEIGHT,
-        MAX_DIM,
-        MIN_DIM
-    }
-
     private final SVGDocument _svgDocument;
 
     private int _width;
     private int _height;
 
-    private FitComponent _fitComponent;
+    private UI.FitComponent _fitComponent;
 
 
     public SVGIcon( SVGIcon icon ) {
@@ -56,7 +43,7 @@ public class SVGIcon extends ImageIcon
         _fitComponent = icon._fitComponent;
     }
 
-    public SVGIcon( URL svgUrl, int width, int height, FitComponent fitComponent ) {
+    public SVGIcon( URL svgUrl, int width, int height, UI.FitComponent fitComponent ) {
         super();
         _width = width;
         _height = height;
@@ -73,7 +60,7 @@ public class SVGIcon extends ImageIcon
     }
 
     public SVGIcon( URL svgUrl, int width, int height ) {
-        this(svgUrl, width, height, FitComponent.MIN_DIM);
+        this(svgUrl, width, height, UI.FitComponent.MIN_DIM);
     }
 
     public SVGIcon( String path, int width, int height ) {
@@ -94,9 +81,9 @@ public class SVGIcon extends ImageIcon
 
     public void setIconHeight( int height ) { _height = height; }
 
-    public void setFitComponent( FitComponent fit ) { _fitComponent = fit; }
+    public void setFitComponent( UI.FitComponent fit ) { _fitComponent = fit; }
 
-    public FitComponent getFitComponent() { return _fitComponent; }
+    public UI.FitComponent getFitComponent() { return _fitComponent; }
 
     @Override
     public Image getImage() {
@@ -167,10 +154,10 @@ public class SVGIcon extends ImageIcon
     }
 
     public void paintIcon(
-        java.awt.Component c,
-        java.awt.Graphics g,
-        int x,
-        int y,
+        final java.awt.Component c,
+        final java.awt.Graphics g,
+        final int x,
+        final int y,
         int width,
         int height
     ) {
@@ -188,17 +175,17 @@ public class SVGIcon extends ImageIcon
         float scaleX = imgRefWidth  / svgRefWidth;
         float scaleY = imgRefHeight / svgRefHeight;
 
-        if ( _fitComponent == FitComponent.MIN_DIM || _fitComponent == FitComponent.MAX_DIM ) {
+        if ( _fitComponent == UI.FitComponent.MIN_DIM || _fitComponent == UI.FitComponent.MAX_DIM ) {
             if ( width < height )
                 scaleX = 1f;
             if ( height < width )
                 scaleY = 1f;
         }
 
-        if ( _fitComponent == FitComponent.WIDTH )
+        if ( _fitComponent == UI.FitComponent.WIDTH )
             scaleX = 1f;
 
-        if ( _fitComponent == FitComponent.HEIGHT )
+        if ( _fitComponent == UI.FitComponent.HEIGHT )
             scaleY = 1f;
 
         ViewBox viewBox = new ViewBox(x, y, width, height);
@@ -206,7 +193,7 @@ public class SVGIcon extends ImageIcon
         float boxY      = viewBox.y  / scaleY;
         float boxWidth  = viewBox.width  / scaleX;
         float boxHeight = viewBox.height / scaleY;
-        if ( _fitComponent == FitComponent.MAX_DIM ) {
+        if ( _fitComponent == UI.FitComponent.MAX_DIM ) {
             // We now want to make sure that the
             if ( boxWidth < boxHeight ) {
                 // We find the scale factor of the heights between the two rectangles:
@@ -230,6 +217,12 @@ public class SVGIcon extends ImageIcon
         }
         else
             viewBox = new ViewBox(boxX, boxY, boxWidth, boxHeight);
+
+        if ( _fitComponent == UI.FitComponent.NO ) {
+            width = _width >= 0 ? _width : (int) svgSize.width;
+            height = _height >= 0 ? _height : (int) svgSize.height;
+            viewBox = new ViewBox(x, y, width, height);
+        }
 
         // Let's check if the view box exists:
         if ( viewBox.width <= 0 || viewBox.height <= 0 )

@@ -80,6 +80,9 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     }
 
     /**
+     *  Takes the provided {@link Icon} and scales it to the provided width and height
+     *  before displaying it on the wrapped button type.
+     *
      * @param width The width of the icon.
      * @param height The height of the icon.
      * @param icon The {@link Icon} which should be scaled and displayed on the button.
@@ -107,6 +110,35 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
             icon = new ImageIcon(icon.getImage().getScaledInstance(width, height, scaleHint));
         }
         getComponent().setIcon(icon);
+        return _this();
+    }
+
+    /**
+     * @param icon The {@link SVGIcon} which should be displayed on the button.
+     * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withIcon( ImageIcon icon, UI.FitComponent fitComponent ) {
+        NullUtil.nullArgCheck(icon,"svgIcon", ImageIcon.class);
+        NullUtil.nullArgCheck(fitComponent,"fitComponent", UI.FitComponent.class);
+        if ( icon instanceof SVGIcon )
+        {
+            SVGIcon svgIcon = (SVGIcon) icon;
+            svgIcon.setFitComponent(fitComponent);
+            return withIcon(icon);
+        }
+        else
+        {
+            UI.runLater(()->{
+                JComponent c = getComponent();
+                int width  = c.getWidth();
+                int height = c.getHeight();
+                width  = Math.max(width, c.getMinimumSize().width);
+                height = Math.max(height, c.getMinimumSize().height);
+                if ( width > 0 && height > 0 )
+                    withIcon(width, height, icon);
+            });
+        }
         return _this();
     }
 
