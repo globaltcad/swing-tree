@@ -52,6 +52,11 @@ public final class ComponentStyleDelegate<C extends JComponent>
     public C component() { return _component; }
 
     /**
+     * @return An optional parent {@link Container} of the {@link JComponent} this {@link ComponentStyleDelegate} is for.
+     */
+    public Optional<Container> parent() { return Optional.ofNullable(_component.getParent()); }
+
+    /**
      *  Use this to peek at the {@link JComponent} of this {@link ComponentStyleDelegate}
      *  to perform some style-related component specific actions on it
      *  which are otherwise not found in the {@link ComponentStyleDelegate} API.
