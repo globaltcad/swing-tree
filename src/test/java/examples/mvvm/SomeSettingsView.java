@@ -5,6 +5,7 @@ import swingtree.UI;
 
 import javax.swing.*;
 import java.awt.Color;
+import java.awt.Insets;
 
 import static swingtree.UI.*;
 
@@ -17,6 +18,8 @@ public class SomeSettingsView extends Panel
 {
     public SomeSettingsView(SomeSettingsViewModel vm) {
         // We use the nimbus look and feel for this example, but you can use any look and feel you want.
+        // We set the "ToggleButton.contentMargins":
+        UIManager.put("ToggleButton.contentMargins", new Insets(5,5,5,5));
         setupNimbusLookAndFeel();
         of(this).withLayout(FILL.and(WRAP(1)))
         .add(label("Use this to configure something..."))
@@ -45,7 +48,7 @@ public class SomeSettingsView extends Panel
             .add(GROW, checkBox("Flipped", vm.flipped()))
         )
         .add(GROW_X,
-            panel(FILL.and(WRAP(3))).withStyle( it -> it.borderRadius(24) )
+            panel(FILL.and(WRAP(4))).withStyle( it -> it.borderRadius(24) )
             .add(SHRINK, label("Speed:"))
             .add(GROW.and(PUSH),
                 numericTextField(vm.speed(), vm.speedIsValid()).id("speed-text-field")
@@ -54,6 +57,9 @@ public class SomeSettingsView extends Panel
                 )
             )
             .add(SHRINK.and(ALIGN_LEFT),label("m/s"))
+            .add(GROW.and(ALIGN_RIGHT),
+                toggleButton(20,20, UI.findIcon("img/hopper.svg").get())
+            )
         )
         .add(GROW_X, button("Apply").onClick(it->vm.apply()));
     }
