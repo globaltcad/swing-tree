@@ -328,12 +328,6 @@ public final class ComponentExtension<C extends JComponent>
                                                        (styleReport.noImages      || styleReport.allImagesAreBorderImages)
                                                    );
 
-        if ( _owner instanceof JTextField && style.margin().isPositive() )
-            styleCanBeRenderedThroughBorder = false;
-
-        if ( _owner instanceof AbstractButton && style.margin().isPositive() )
-            styleCanBeRenderedThroughBorder = false;
-
         if ( isNotStyled || onlyDimensionalityIsStyled ) {
             _dynamicLaF = _dynamicLaF._uninstallCustomLaF(_owner);
             if ( _styleSource.hasNoAnimationStylers() && _stylePainter.hasNoPainters() )

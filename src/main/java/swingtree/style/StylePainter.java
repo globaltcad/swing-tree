@@ -147,6 +147,8 @@ final class StylePainter<C extends JComponent>
 
         if ( _baseArea != null )
             g2d.setClip(_getBaseArea(comp));
+        else if ( _style.margin().isPositive() )
+            g2d.setClip(_getBaseArea(comp));
     }
 
     private void _paintStylesOn( UI.Layer layer, Graphics2D g2d , JComponent comp ) {
