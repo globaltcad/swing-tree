@@ -2,7 +2,8 @@ package swingtree.style;
 
 import swingtree.api.Styler;
 
-import javax.swing.*;
+import javax.swing.AbstractButton;
+import javax.swing.JComponent;
 import javax.swing.border.Border;
 import java.awt.*;
 
@@ -29,6 +30,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     private Insets _insets;
     private final Insets _marginInsets = new Insets(0, 0, 0, 0);
     private final Insets _paddingInsets = new Insets(0, 0, 0, 0);
+    private final Insets _fullPaddingInsets = new Insets(0, 0, 0, 0);
 
 
     StyleAndAnimationBorder( ComponentExtension<C> compExt, Border formerBorder ) {
@@ -49,6 +51,8 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     Insets getMarginInsets() { return _marginInsets; }
 
     Insets getPaddingInsets() { return _paddingInsets; }
+
+    Insets getFullPaddingInsets() { return _fullPaddingInsets; }
 
     @Override
     public void paintBorder( Component c, Graphics g, int x, int y, int width, int height )
@@ -130,6 +134,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     {
         _calculateMarginInsets(style);
         _calculatePaddingInsets(style);
+        _calculateFullPaddingInsets(style);
         _calculateBorderInsets(style,
                 _formerBorder == null
                     ? new Insets(0, 0, 0, 0)
@@ -208,6 +213,14 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         _paddingInsets.left   = style.padding().top().orElse(0);
         _paddingInsets.right  = style.padding().right().orElse(0);
         _paddingInsets.bottom = style.padding().bottom().orElse(0);
+    }
+
+    private void _calculateFullPaddingInsets( Style style )
+    {
+        _fullPaddingInsets.top    = style.padding().left().orElse(0)   + style.margin().left().orElse(0);
+        _fullPaddingInsets.left   = style.padding().top().orElse(0)    + style.margin().top().orElse(0);
+        _fullPaddingInsets.right  = style.padding().right().orElse(0)  + style.margin().right().orElse(0);
+        _fullPaddingInsets.bottom = style.padding().bottom().orElse(0) + style.margin().bottom().orElse(0);
     }
 
 }
