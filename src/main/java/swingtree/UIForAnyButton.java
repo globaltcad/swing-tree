@@ -4,9 +4,12 @@ import sprouts.Action;
 import sprouts.Val;
 import sprouts.Var;
 import swingtree.api.IconDeclaration;
+import swingtree.style.SVGIcon;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Font;
+import java.awt.Image;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -72,6 +75,37 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public I withIcon( Icon icon ) {
         NullUtil.nullArgCheck(icon,"icon",Icon.class);
+        getComponent().setIcon(icon);
+        return _this();
+    }
+
+    /**
+     * @param width The width of the icon.
+     * @param height The height of the icon.
+     * @param icon The {@link Icon} which should be scaled and displayed on the button.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withIcon( int width, int height, ImageIcon icon ) {
+        NullUtil.nullArgCheck(icon,"icon",Icon.class);
+        if ( icon instanceof SVGIcon )
+        {
+            SVGIcon svgIcon = (SVGIcon) icon;
+            svgIcon.setIconWidth(width);
+            svgIcon.setIconHeight(height);
+        }
+        else if ( width != icon.getIconWidth() || height != icon.getIconHeight() )
+        {
+            float scale = SwingTree.get().getUIScale().getUserScaleFactor();
+
+            int scaleHint = Image.SCALE_SMOOTH;
+            if (scale > 1.5f)
+                scaleHint = Image.SCALE_FAST;
+
+            width = (int) (width * scale);
+            height = (int) (height * scale);
+
+            icon = new ImageIcon(icon.getImage().getScaledInstance(width, height, scaleHint));
+        }
         getComponent().setIcon(icon);
         return _this();
     }

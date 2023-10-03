@@ -2,8 +2,8 @@ package swingtree;
 
 import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
-import sprouts.*;
 import sprouts.Event;
+import sprouts.*;
 import swingtree.animation.Animator;
 import swingtree.animation.LifeTime;
 import swingtree.api.*;
@@ -1528,20 +1528,7 @@ public final class UI extends UILayoutConstants
      */
     public static UIForButton<JButton> button( int width, int height, ImageIcon icon ) {
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
-        if ( width != icon.getIconWidth() || height != icon.getIconHeight() ) {
-            float scale = SwingTree.get().getUIScale().getUserScaleFactor();
-
-            int scaleHint = Image.SCALE_SMOOTH;
-            if (scale > 1.5f)
-                scaleHint = Image.SCALE_FAST;
-
-            width = (int) (width * scale);
-            height = (int) (height * scale);
-
-            icon = new ImageIcon(icon.getImage().getScaledInstance(width, height, scaleHint));
-        }
-        ImageIcon finalIcon = icon;
-        return button().peek(it -> it.setIcon(finalIcon) );
+        return button().withIcon(width, height, icon);
     }
 
     /**
@@ -4048,6 +4035,20 @@ public final class UI extends UILayoutConstants
     public static UIForToggleButton<JToggleButton> toggleButton( Icon icon ) {
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
         return toggleButton().withIcon(icon);
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JToggleButton} UI component
+     *  with an icon displayed on it scaled according to the provided width and height.
+     *
+     * @param width The width the icon should be scaled to.
+     * @param height The height the icon should be scaled to.
+     * @param icon The icon to be displayed on top of the button.
+     * @return A builder instance for a {@link JToggleButton}, which enables fluent method chaining.
+     */
+    public static UIForToggleButton<JToggleButton> toggleButton( int width, int height, ImageIcon icon ) {
+        NullUtil.nullArgCheck(icon, "icon", Icon.class);
+        return toggleButton().withIcon(width, height, icon);
     }
 
     /**
