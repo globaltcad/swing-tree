@@ -1157,7 +1157,7 @@ final class StylePainter<C extends JComponent>
             int imgWidth           = style.width().orElse(imageIcon.getIconWidth());
             int imgHeight          = style.height().orElse(imageIcon.getIconHeight());
             if ( style.fitMode() != UI.FitComponent.NO ) {
-                if ( imageIcon instanceof SVGIcon ) {
+                if ( imageIcon instanceof SvgIcon) {
                     imgWidth = style.width().orElse(componentWidth);
                     imgHeight = style.height().orElse(componentHeight);
                 } else {
@@ -1235,15 +1235,15 @@ final class StylePainter<C extends JComponent>
             y += padding.top().orElse(0);
             imgWidth  -= padding.left().orElse(0) + padding.right().orElse(0);
             imgHeight -= padding.top().orElse(0)  + padding.bottom().orElse(0);
-            if ( !repeat && imageIcon instanceof SVGIcon ) {
-                SVGIcon svgIcon = ((SVGIcon) imageIcon).withFitComponent(style.fitMode());
+            if ( !repeat && imageIcon instanceof SvgIcon) {
+                SvgIcon svgIcon = ((SvgIcon) imageIcon).withFitComponent(style.fitMode());
                 svgIcon.paintIcon(component, g2d, x, y, imgWidth, imgHeight);
             }
             else
             {
                 Image image;
-                if ( imageIcon instanceof SVGIcon ) {
-                    SVGIcon svgIcon = (SVGIcon) imageIcon;
+                if ( imageIcon instanceof SvgIcon) {
+                    SvgIcon svgIcon = (SvgIcon) imageIcon;
                     svgIcon = svgIcon.withIconWidth(imgWidth);
                     svgIcon = svgIcon.withIconHeight(imgHeight);
                     image   = svgIcon.getImage(); // This will render the SVGIcon with the new size

@@ -365,8 +365,8 @@ public final class ComponentExtension<C extends JComponent>
 
         UI.FitComponent fit = style.base().fit();
         style.base().icon().ifPresent( icon -> {
-            if ( icon instanceof SVGIcon ) {
-                SVGIcon svgIcon = (SVGIcon) icon;
+            if ( icon instanceof SvgIcon) {
+                SvgIcon svgIcon = (SvgIcon) icon;
                 icon = svgIcon.withFitComponent(fit);
             }
             if ( _owner instanceof AbstractButton ) {

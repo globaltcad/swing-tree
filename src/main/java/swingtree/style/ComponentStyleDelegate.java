@@ -582,7 +582,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  and {@link swingtree.components.JIcon}.
      *
      * @param icon The icon in the form of an {@link ImageIcon}.
-     * @param fit The fit mode for the icon (mostly intended for {@link SVGIcon}).
+     * @param fit The fit mode for the icon (mostly intended for {@link SvgIcon}).
      * @return A new {@link ComponentStyleDelegate} with the provided icon.
      */
     public ComponentStyleDelegate<C> icon( ImageIcon icon, UI.FitComponent fit ) {
@@ -612,7 +612,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  and {@link swingtree.components.JIcon}.
      *
      * @param icon The icon declaration, which will be resolved to an {@link ImageIcon}.
-     * @param fit The fit mode for the icon (mostly intended for {@link SVGIcon}).
+     * @param fit The fit mode for the icon (mostly intended for {@link SvgIcon}).
      * @return A new {@link ComponentStyleDelegate} with the provided icon.
      */
     public ComponentStyleDelegate<C> icon( IconDeclaration icon, UI.FitComponent fit ) {

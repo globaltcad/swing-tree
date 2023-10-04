@@ -689,7 +689,7 @@ public final class UI extends UILayoutConstants
                 }
         }
         if ( path.endsWith(".svg") )
-            return new SVGIcon(url);
+            return new SvgIcon(url);
         else
             return new ImageIcon(Toolkit.getDefaultToolkit().createImage(url), url.toExternalForm());
         /*
@@ -5809,10 +5809,10 @@ public final class UI extends UILayoutConstants
     }
 
     /**
-     *  This enum is used to specify how an image or icon (usually a {@link SVGIcon})
+     *  This enum is used to specify how an image or icon (usually a {@link SvgIcon})
      *  should be scaled to fit the
      *  dimensions of the component that it is being rendered into, like for example
-     *  using the {@link SVGIcon#paintIcon(Component, Graphics, int, int, int, int)} method.
+     *  using the {@link SvgIcon#paintIcon(Component, Graphics, int, int, int, int)} method.
      */
     public enum FitComponent {
         /**
