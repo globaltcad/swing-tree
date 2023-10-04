@@ -1532,6 +1532,22 @@ public final class UI extends UILayoutConstants
 
     /**
      *  Use this to create a builder for the {@link JButton} UI component
+     *  with an icon displayed on top.
+     *  The icon is determined based on the provided {@link IconDeclaration}
+     *  instance which is conceptually merely a resource path to the icon.
+     *
+     * @param icon The desired icon to be displayed on top of the button.
+     * @param fit The fit mode of the icon.
+     * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
+     */
+    public static UIForButton<JButton> button( IconDeclaration icon, FitComponent fit ) {
+        NullUtil.nullArgCheck(icon, "icon", IconDeclaration.class);
+        NullUtil.nullArgCheck(fit, "fit", FitComponent.class);
+        return icon.find().map( it -> button(it, fit) ).orElseGet( UI::button );
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JButton} UI component
      *  with an icon displayed on top which should be scaled to the provided dimensions.
      *  This is in essence a convenience method for {@code UI.of(new JButton()).peek( it -> it.setIcon(icon) )}.
      *
@@ -4082,6 +4098,12 @@ public final class UI extends UILayoutConstants
     public static UIForToggleButton<JToggleButton> toggleButton( IconDeclaration icon ) {
         NullUtil.nullArgCheck(icon, "icon", IconDeclaration.class);
         return toggleButton().withIcon(icon);
+    }
+
+    public static UIForToggleButton<JToggleButton> toggleButton( IconDeclaration icon, FitComponent fit ) {
+        NullUtil.nullArgCheck(icon, "icon", IconDeclaration.class);
+        NullUtil.nullArgCheck(fit, "fit", FitComponent.class);
+        return toggleButton().withIcon(icon, fit);
     }
 
     /**

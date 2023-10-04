@@ -141,6 +141,13 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         return _this();
     }
 
+    public I withIcon( IconDeclaration icon, UI.FitComponent fitComponent ) {
+        NullUtil.nullArgCheck(icon,"icon", IconDeclaration.class);
+        NullUtil.nullArgCheck(fitComponent,"fitComponent", UI.FitComponent.class);
+        icon.find().ifPresent( i -> withIcon(i, fitComponent) );
+        return _this();
+    }
+
     /**
      *  Use this to specify the icon for the wrapped button type.
      *  The icon is determined based on the provided {@link IconDeclaration}
