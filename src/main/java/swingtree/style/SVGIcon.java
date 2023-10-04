@@ -17,6 +17,7 @@ import java.awt.Insets;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.net.URL;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -121,7 +122,12 @@ public final class SVGIcon extends ImageIcon
     /**
      * @return A new {@link SVGIcon} with the given {@link UI.FitComponent} policy.
      */
-    public SVGIcon withFitComponent( UI.FitComponent fit ) { return new SVGIcon(_svgDocument, _width, _height, fit); }
+    public SVGIcon withFitComponent( UI.FitComponent fit ) {
+        Objects.requireNonNull(fit);
+        if ( fit == _fitComponent )
+            return this;
+        return new SVGIcon(_svgDocument, _width, _height, fit);
+    }
 
     /**
      *  Creates a new {@link Image} from the SVG document.
@@ -312,5 +318,20 @@ public final class SVGIcon extends ImageIcon
 
         if ( doAntiAliasing && !wasAntiAliasing )
             g2d.setRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_OFF );
+    }
+
+    @Override
+    public int hashCode() { return Objects.hash(_svgDocument, _width, _height, _fitComponent); }
+
+    @Override
+    public boolean equals( Object obj ) {
+        if ( obj == null ) return false;
+        if ( obj == this ) return true;
+        if ( obj.getClass() != getClass() ) return false;
+        SVGIcon rhs = (SVGIcon) obj;
+        return Objects.equals(_svgDocument,  rhs._svgDocument) &&
+               Objects.equals(_width,        rhs._width) &&
+               Objects.equals(_height,       rhs._height) &&
+               Objects.equals(_fitComponent, rhs._fitComponent);
     }
 }
